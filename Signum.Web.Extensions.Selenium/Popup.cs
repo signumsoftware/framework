@@ -49,7 +49,9 @@ namespace Signum.Web.Selenium
                 }
                 catch (ElementNotVisibleException)
                 {
-                    
+                }
+                catch (NoSuchElementException)
+                {
                 }
 
                 Selenium.WaitElementNotVisible(PopupLocator);
@@ -194,6 +196,11 @@ namespace Signum.Web.Selenium
         public By ContainerLocator()
         {
             return By.CssSelector("#{0}_panelPopup".FormatWith(Prefix));
+        }
+
+        public string GetTitle()
+        {
+            return Selenium.FindElement(ContainerLocator().CombineCss(" span.sf-entity-title")).Text;
         }
 
         public void CloseDiscardChanges()

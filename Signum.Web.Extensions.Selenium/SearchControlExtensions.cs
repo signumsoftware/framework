@@ -14,13 +14,13 @@ namespace Signum.Web.Selenium
     {
         public static SearchPopupProxy AdministerExcelReports(this SearchControlProxy sc)
         {
-            sc.Selenium.FindElement(sc.MenuOptionLocator("qbReportAdminister")).Click();
+            sc.Selenium.FindElement(sc.MenuOptionLocator("qbReportAdminister")).ButtonClick();
             return new SearchPopupProxy(sc.Selenium, sc.PrefixUnderscore + "New");
         }
 
         public static PopupControl<ExcelReportEntity> CreateExcelReport(this SearchControlProxy sc)
         {
-            sc.Selenium.FindElement(sc.MenuOptionLocator("qbReportCreate")).Click();
+            sc.Selenium.FindElement(sc.MenuOptionLocator("qbReportCreate")).ButtonClick();
             return new PopupControl<ExcelReportEntity>(sc.Selenium, sc.PrefixUnderscore + "New");
         }
 
@@ -31,14 +31,14 @@ namespace Signum.Web.Selenium
 
         public static NormalPage<UserQueryEntity> NewUserQuery(this SearchControlProxy sc)
         {
-            sc.Selenium.FindElement(sc.MenuOptionLocator("qbUserQueryNew")).Click();
+            sc.Selenium.FindElement(sc.MenuOptionLocator("qbUserQueryNew")).ButtonClick();
 
             return new NormalPage<UserQueryEntity>(sc.Selenium).WaitLoaded(); 
         }
 
         public static NormalPage<UserQueryEntity> EditUserQuery(this SearchControlProxy sc)
         {
-            sc.Selenium.FindElement(sc.MenuOptionLocator("qbUserQueryEdit")).Click();
+            sc.Selenium.FindElement(sc.MenuOptionLocator("qbUserQueryEdit")).ButtonClick();
 
             return new NormalPage<UserQueryEntity>(sc.Selenium).WaitLoaded();
         }
@@ -50,7 +50,7 @@ namespace Signum.Web.Selenium
 
         public static void UserQueryLocatorClick(this SearchControlProxy sc, string title)
         {
-            sc.Selenium.FindElement(sc.UserQueryLocator(title)).Click();
+            sc.Selenium.FindElement(sc.UserQueryLocator(title)).ButtonClick();
             sc.Selenium.WaitElementPresent(sc.MenuOptionLocator("qbUserQueryEdit"));
         }
     }

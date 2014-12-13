@@ -14,6 +14,7 @@ namespace Signum.Web.Selenium
         public bool IsNew { get; private set; }
         public PrimaryKey? IdOrNull { get; private set; }
         public Type EntityType { get; private set; }
+        public string EntityTypeString { get; private set; }
         public long? Ticks { get; private set; }
 
         public static RuntimeInfoProxy FromFormValue(string formValue)
@@ -24,10 +25,11 @@ namespace Signum.Web.Selenium
 
             string entityTypeString = parts[0];
 
-            Type type = string.IsNullOrEmpty(entityTypeString) ? null : TypeLogic.GetType(entityTypeString);
+            Type type = string.IsNullOrEmpty(entityTypeString) ? null : TypeLogic.NameToType.TryGetC(entityTypeString);
 
             return new RuntimeInfoProxy
             {
+                EntityTypeString = entityTypeString,
                 EntityType = type,
                 IdOrNull = (parts[1].HasText()) ? PrimaryKey.Parse(parts[1], type) : (PrimaryKey?)null,
                 IsNew = parts[2] == "n",

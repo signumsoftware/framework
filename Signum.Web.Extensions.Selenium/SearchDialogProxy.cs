@@ -196,7 +196,7 @@ namespace Signum.Web.Selenium
 
         public void WaitInitialSearchCompleted()
         {
-            WaitSearchCompleted("null");
+            WaitSearchCompleted((string)null);
         }
 
         void WaitSearchCompleted(string counter)
@@ -497,7 +497,7 @@ namespace Signum.Web.Selenium
 
         public By RowLocator(Lite<IEntity> lite)
         {
-            return  By.CssSelector("{0}[data-entity='{1}']".FormatWith(RowsLocator, lite.Key()));
+            return RowsLocator.CombineCss("[data-entity='{0}']".FormatWith(lite.Key()));
         }
 
         public By CellLocator(int rowIndex, string token)
@@ -641,10 +641,12 @@ namespace Signum.Web.Selenium
 
             EntityContextMenuProxy ctx = new EntityContextMenuProxy(this, isContext: true);
 
-            Selenium.WaitElementVisible(ctx.EntityContextMenuLocator.CombineCss(":not(:has(.sf-tm-selected-loading))"));
+            ctx.WaitNotLoading();
 
             return ctx;
         }
+
+     
 
         public EntityContextMenuProxy SelectedClick()
         {
@@ -652,7 +654,7 @@ namespace Signum.Web.Selenium
 
             EntityContextMenuProxy ctx = new EntityContextMenuProxy(this, isContext: false);
 
-            Selenium.WaitElementVisible(ctx.EntityContextMenuLocator.CombineCss(":not(:has(.sf-tm-selected-loading))"));
+            ctx.WaitNotLoading();
 
             return ctx;
         }
@@ -664,7 +666,7 @@ namespace Signum.Web.Selenium
 
         public Lite<Entity> EntityInIndex(int index)
         {
-            var result = (string)Selenium.ExecuteScript("return $('{0}').data('entity')".FormatWith(RowLocator(index).CssSelector().RemoveStart(3)));
+            var result = (string)Selenium.ExecuteScript("return $('{0}').data('entity')".FormatWith(RowLocator(index).CssSelector()));
 
             return Lite.Parse(result);
         }
@@ -686,9 +688,9 @@ namespace Signum.Web.Selenium
             return " span.sf-header-sort." + (orderType == OrderType.Ascending ? "asc" : "desc");
         }
 
-        public bool IsElementInCell(int rowIndex, string token, string selector)
+        public bool IsElementInCell(int rowIndex, string token, By locator)
         {
-            return Selenium.IsElementPresent(CellLocator(rowIndex, token).CombineCss(" " + selector));
+            return Selenium.FindElement(CellLocator(rowIndex, token)).FindElements(locator).Any();
         }
 
         public void EditColumnName(string token, string newName)
@@ -700,11 +702,11 @@ namespace Signum.Web.Selenium
             using (var popup = new Popup(Selenium, this.PrefixUnderscore + "newName"))
             {
                 Selenium.WaitElementPresent(popup.PopupLocator);
-                Selenium.FindElement(popup.PopupLocator.CombineCss(" input:text")).SafeSendKeys(newName);
+                Selenium.FindElement(popup.PopupLocator.CombineCss(" input[type=text]")).SafeSendKeys(newName);
                 popup.OkWaitClosed();
             }
 
-            Selenium.WaitElementPresent(headerSelector.CombineCss(":contains('{0}')".FormatWith(newName)));
+            Selenium.Wait(() => Selenium.FindElement(headerSelector).FindElements(By.CssSelector("span")).Any(s => s.Text == newName));
         }
     }
 
@@ -833,6 +835,13 @@ namespace Signum.Web.Selenium
             MenuClick(itemId);
             var result = new NormalPage<T>(this.resultTable.Selenium).WaitLoaded();
             return result;
+        }
+
+        public void WaitNotLoading()
+        {
+            this.resultTable.Selenium.Wait(() =>
+                this.resultTable.Selenium.FindElement(this.EntityContextMenuLocator)
+                    .FindElements(By.CssSelector("li")).Any(a => !a.FindElements(By.CssSelector(".sf-tm-selected-loading")).Any()));
         }
     }
 

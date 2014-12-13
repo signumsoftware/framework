@@ -315,7 +315,14 @@ namespace Signum.Web.Selenium
 
         public NormalPage<T> WaitLoaded()
         {
-            this.Selenium.Wait(() => this.RuntimeInfo().EntityType == typeof(T));
+            this.Selenium.Wait(() => { var ri = this.RuntimeInfo(); return ri != null && ri.EntityType == typeof(T); });
+
+            return this;
+        }
+
+        public NormalPage<T> WaitLoadedAndId()
+        {
+            this.Selenium.Wait(() => {var ri = this.RuntimeInfo(); return ri != null && ri.EntityType == typeof(T) && ri.IdOrNull.HasValue;});
 
             return this;
         }
@@ -327,7 +334,12 @@ namespace Signum.Web.Selenium
 
         public RuntimeInfoProxy RuntimeInfo()
         {
-            return RuntimeInfoProxy.FromFormValue((string)Selenium.ExecuteScript("return $('#sfRuntimeInfo').val()"));
+            var ri = (string)Selenium.ExecuteScript("return $('#sfRuntimeInfo').val()");
+
+            if (ri == null)
+                return null;
+
+            return RuntimeInfoProxy.FromFormValue(ri);
         }
 
         public T RetrieveEntity()

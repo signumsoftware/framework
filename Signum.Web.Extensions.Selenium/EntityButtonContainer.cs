@@ -73,11 +73,9 @@ namespace Signum.Web.Selenium
         {
             var button = container.Selenium.FindElement(container.ButtonLocator(idButton));
 
-            if(!button.Enabled)
-                throw new InvalidOperationException("Button {0} is not enabled".FormatWith(idButton));
-
-            button.Click();
+            button.ButtonClick();
         }
+
 
         public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
               where T : Entity
@@ -102,7 +100,7 @@ namespace Signum.Web.Selenium
               where T : Entity
         {
             container.OperationClick(symbol);
-            container.WaitLoaded();
+            container.WaitLoadedAndId();
         }
 
         public static SearchPageProxy DeleteSubmit<T>(this IEntityButtonContainer<T> container, DeleteSymbol<T> symbol)

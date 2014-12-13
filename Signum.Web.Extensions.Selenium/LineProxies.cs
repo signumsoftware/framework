@@ -77,15 +77,18 @@ namespace Signum.Web.Selenium
                     if (element != null && element.TagName == "input" && element.GetAttribute("type") == "checkbox")
                     {
                         element.SetChecked(bool.Parse(value));
+                        return;
                     }
                     else if (element.GetParent().HasClass("input-group", "date"))
                     {
-                        Selenium.ExecuteScript("$('div.input-group.date>#{0}').parent().datepicker('setDate', '{1}')".FormatWith(Prefix, value));
+                        Selenium.ExecuteScript("$('div.input-group.date>#{0}').parent().datepicker('setDate', '{1}')".FormatWith(Prefix, value)); 
+                        return;
                     }
-                    if (element.FindElements(By.CssSelector("div.date")).Any() && element.FindElements(By.CssSelector("div.tie")).Any())
+                    else if (element.FindElements(By.CssSelector("div.date")).Any() && element.FindElements(By.CssSelector("div.time")).Any())
                     {
                         Selenium.ExecuteScript("$('#{0} > div.date').datepicker('setDate', '{1}')".FormatWith(Prefix, value.TryBefore(" ")));
                         Selenium.ExecuteScript("$('#{0} > div.time').timepicker('setTime', '{1}')".FormatWith(Prefix, value.TryAfter(" ")));
+                        return;
                     }
                 }
 
@@ -93,6 +96,7 @@ namespace Signum.Web.Selenium
                 if (byName != null)
                 {
                     byName.SafeSendKeys(value);
+                    return;
                 }
                 else
                     throw new InvalidOperationException("Element {0} not found".FormatWith(Prefix));
@@ -798,7 +802,7 @@ namespace Signum.Web.Selenium
         public void SetPath(string path)
         {
             Selenium.WaitElementVisible(By.CssSelector("#{0}_DivNew .sf-file-drop".FormatWith(Prefix)));
-            Selenium.FindElement(By.CssSelector("#{0}_sfFile".FormatWith(Prefix))).SafeSendKeys(path);
+            Selenium.FindElement(By.CssSelector("#{0}_sfFile".FormatWith(Prefix))).SendKeys(path);
             //Selenium.FireEvent("{0}_sfFile".FormatWith(Prefix), "change");
             Selenium.Wait(() =>
                 Selenium.IsElementVisible(By.CssSelector("#{0}_sfLink".FormatWith(Prefix))) ||

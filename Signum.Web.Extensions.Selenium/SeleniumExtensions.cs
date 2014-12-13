@@ -39,7 +39,8 @@ namespace Signum.Web.Selenium
                     Timeout = timeout ?? DefaultTimeout,
                     PollingInterval = DefaultPoolingInterval
                 };
-                wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+
+                wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(NoAlertPresentException));
                 
                 return wait.Until(_ => condition());
             }
@@ -85,7 +86,6 @@ namespace Signum.Web.Selenium
             if (selenium.IsElementPresent(locator))
                 throw new InvalidOperationException("{0} is found".FormatWith(locator));
         }
-
 
         public static IWebElement WaitElementVisible(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
@@ -161,7 +161,9 @@ namespace Signum.Web.Selenium
 
         public static void ConsumeAlert(this RemoteWebDriver selenium)
         {
-            selenium.Wait(() => selenium.SwitchTo().Alert()).Accept();
+            var alert = selenium.Wait(() => selenium.SwitchTo().Alert());
+            
+            alert.Accept();
         }
 
         public static string CssSelector(this By by)
@@ -181,6 +183,11 @@ namespace Signum.Web.Selenium
         public static By CombineCss(this By by, string cssSelectorSuffix)
         {
             return By.CssSelector(by.CssSelector() + cssSelectorSuffix);
+        }
+
+        public static bool ContainsText(this IWebElement element, string text)
+        {
+            return element.Text.Contains(text) || element.FindElements(By.XPath("descendant::*[contains(text(), '" + text + "')]")).Any();
         }
 
         public static SelectElement SelectElement(this IWebElement element)
@@ -222,14 +229,13 @@ namespace Signum.Web.Selenium
         public static void ContextClick(this IWebElement element)
         {
             Actions builder = new Actions(element.GetDriver());
-            //use ContextClick method to open context menu of e1
-            builder.MoveToElement(element).ContextClick(element).Build().Perform();
+            builder.MoveToElement(element, 2, 2).ContextClick().Build().Perform();
         }
 
         public static void DoubleClick(this IWebElement element)
         {
-            //Astronautical architects turn back to Houston...
-            element.GetDriver().Mouse.DoubleClick(((ILocatable)element).Coordinates);
+            Actions builder = new Actions(element.GetDriver());
+            builder.MoveToElement(element, 2, 2).DoubleClick().Build().Perform();
         }
 
         public static void SafeSendKeys(this IWebElement element, string text)
@@ -239,6 +245,21 @@ namespace Signum.Web.Selenium
             element.SendKeys(text);
             Thread.Sleep(0);
             element.GetDriver().Wait(() => element.GetAttribute("value") == text);
+        }
+
+        public static void ButtonClick(this IWebElement button)
+        {
+            if (!button.Enabled)
+                throw new InvalidOperationException("Button is not enabled");
+
+            if (!button.Displayed)
+            {
+                var menu = button.FindElement(By.XPath("ancestor::*[contains(@class,'dropdown-menu')]"));
+                var superButton = menu.GetParent().FindElement(By.CssSelector("a[data-toggle='dropdown']"));
+                superButton.Click();
+            }
+
+            button.Click();
         }
     }
 }

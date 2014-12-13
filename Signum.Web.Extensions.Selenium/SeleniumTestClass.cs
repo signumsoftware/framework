@@ -125,7 +125,7 @@ namespace Signum.Web.Selenium
         public virtual void Login(string username, string password)
         {
             selenium.Url = Url("Auth/Login");
-            selenium.WaitElementPresent(By.CssSelector(".sf-login"));
+            selenium.WaitElementPresent(By.Id("login"));
 
             var currentUser = GetCurrentUser();
             if (currentUser == username)

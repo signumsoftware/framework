@@ -48,7 +48,7 @@ namespace Signum.Web.Selenium
         public void DataTab()
         {
             Selenium.FindElement(DataTabLocator).Click();
-            Selenium.WaitElementPresent(Results.ResultTableLocator);
+            Selenium.WaitElementVisible(Results.ResultTableLocator);
         }
 
         public By ChartTabLocator
@@ -59,7 +59,7 @@ namespace Signum.Web.Selenium
         public void ChartTab()
         {
             Selenium.FindElement(ChartTabLocator).Click();
-            Selenium.WaitElementPresent(ChartContianerLocator);
+            Selenium.WaitElementVisible(ChartContianerLocator);
         }
 
         public By ChartContianerLocator
@@ -79,19 +79,19 @@ namespace Signum.Web.Selenium
 
         public NormalPage<UserChartEntity> NewUserChart()
         {
-            Selenium.FindElement(MenuOptionLocator("tmUserCharts", "qbUserChartNew")).Click();
+            Selenium.FindElement(MenuOptionLocator("tmUserCharts", "qbUserChartNew")).ButtonClick();
             return new NormalPage<UserChartEntity>(Selenium).WaitLoaded(); 
         }
 
         public void SelectUserChart(string userChartName)
         {
-            Selenium.FindElement(MenuOptionLocatorByAttr("tmUserCharts", "title=" + userChartName)).Click();
+            Selenium.FindElement(MenuOptionLocatorByAttr("tmUserCharts", "title=" + userChartName)).ButtonClick();
             this.WaitLoaded();
         }
 
         public NormalPage<UserChartEntity> EditUserChart()
         {
-            Selenium.FindElement(MenuOptionLocator("tmUserCharts", "qbUserChartEdit"));
+            Selenium.FindElement(MenuOptionLocator("tmUserCharts", "qbUserChartEdit")).ButtonClick();
             return new NormalPage<UserChartEntity>(Selenium).WaitLoaded(); 
         }
 

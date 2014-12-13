@@ -32,11 +32,11 @@ namespace Signum.Web.Selenium
 
         public static void QuickLinkClick(this IWidgetContainer container, string name)
         {
-            container.Selenium.FindElement(By.CssSelector("{0} .sf-quicklinks".FormatWith(container.WidgetContainerLocator())));
+            container.Selenium.FindElement(container.WidgetContainerLocator().CombineCss(" .sf-quicklinks"));
 
-            By quickLinkSelector = By.CssSelector("{0} ul li.sf-quick-link[data-name='{1}'] > a".FormatWith(container.WidgetContainerLocator(), name));
+            By quickLinkSelector = container.WidgetContainerLocator().CombineCss(" ul li.sf-quick-link[data-name='{0}'] > a".FormatWith(name));
             container.Selenium.WaitElementPresent(quickLinkSelector);
-            container.Selenium.FindElement(quickLinkSelector).Click();
+            container.Selenium.FindElement(quickLinkSelector).ButtonClick();
         }
 
         public static SearchPopupProxy QuickLinkClickSearch(this IWidgetContainer container, string name)
@@ -77,7 +77,7 @@ namespace Signum.Web.Selenium
 
         public static int NotesCount(this IWidgetContainer container)
         {
-            string str = (string)container.Selenium.ExecuteScript("return $('{0} .sf-notes-toggler .sf-widget-count').html()".FormatWith(container.WidgetContainerLocator().CssSelector().RemoveStart(3)));
+            string str = (string)container.Selenium.ExecuteScript("return $('{0} .sf-notes-toggler .sf-widget-count').html()".FormatWith(container.WidgetContainerLocator().CssSelector()));
 
             return int.Parse(str); 
         }
@@ -98,7 +98,7 @@ namespace Signum.Web.Selenium
 
         public static SearchPopupProxy AlertsViewClick(this IWidgetContainer container, AlertCurrentState state)
         {
-            container.Selenium.FindElement(By.CssSelector("{0} .sf-alerts-toggler".FormatWith(container.WidgetContainerLocator()))).Click();
+            container.Selenium.FindElement(container.WidgetContainerLocator().CombineCss(" .sf-alerts-toggler")).Click();
 
             By viewSelector = container.WidgetContainerLocator().CombineCss(" .sf-alert-view .{0}.sf-alert-count-label".FormatWith(GetCssClass(state)));
 
@@ -137,7 +137,7 @@ namespace Signum.Web.Selenium
         public static int AlertCount(this IWidgetContainer container, AlertCurrentState state)
         {
             var result = (string)container.Selenium.ExecuteScript("return $('{0} span.sf-widget-count.{1}').html()".FormatWith(
-                container.WidgetContainerLocator().CssSelector().RemoveStart(3),
+                container.WidgetContainerLocator().CssSelector(),
                 GetCssClass(state)));
 
             return int.Parse(result);
