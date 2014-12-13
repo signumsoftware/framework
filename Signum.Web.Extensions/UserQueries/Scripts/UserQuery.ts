@@ -29,9 +29,6 @@ export function deleteUserQuery(options: Operations.EntityOperationOptions, urlR
 
     options.avoidReturnRedirect = true;
 
-    if (!Operations.confirmIfNecessary(options))
-        return;
-
     Operations.deleteDefault(options).then(() => {
         if (!options.prefix)
             window.location.href = urlRedirect;
