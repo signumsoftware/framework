@@ -82,15 +82,13 @@ public class ExceptionEntity : Entity
 If in our application we have particularly long controller names, we could override the database size like this: 
 
 ```C#
-sb.Schema.Settings.OverrideAttributes((ExceptionEntity ua) => ua.User, 
-    new SqlDbTypeAttribute{ Size = 200 });
+sb.Schema.Settings.FieldAttributes((ExceptionEntity ua) => ua.User).Add(new SqlDbTypeAttribute{ Size = 200 });
 ```
 
 And if we are using **Authorization module** we can implement `IUserEntity User` property with `UserEntity` type. 
 
 ```C#
-sb.Schema.Settings.OverrideAttributes((ExceptionEntity ua) => ua.User, 
-    new ImplementedByAttribute(typeof(UserEntity)));
+sb.Schema.Settings.FieldAttributes((ExceptionEntity ua) => ua.User).Add(new ImplementedByAttribute(typeof(UserEntity)));
 ```
 
 Some things to remember: 
