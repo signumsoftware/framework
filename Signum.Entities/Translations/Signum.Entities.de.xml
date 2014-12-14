@@ -31,7 +31,7 @@
     <Member Name="NoOne2" Description="Kein (2)" />
     <Member Name="NoOne3" Description="Kein (3)" />
   </Type>
-  <Type Name="ColorDN" Description="Farbe">
+  <Type Name="ColorEntity" Description="Farbe">
     <Member Name="Argb" Description="Argb" />
   </Type>
   <Type Name="ColumnOptionsMode" Description="Spaltenoptionenmodus">
@@ -54,7 +54,7 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="korrupt" />
   </Type>
-  <Type Name="DeleteLogParametersDN" Description="Lösch log Parameter">
+  <Type Name="DeleteLogParametersEntity" Description="Lösch log Parameter">
     <Member Name="ChunkSize" Description="Chunk-Größe" />
     <Member Name="DateLimit" Description="Enddatum" />
     <Member Name="DeleteLogsWithMoreThan" Description="Löschen logs mit mehr als" />
@@ -90,7 +90,7 @@
     <Member Name="AttemptToSet0InLockedEntity1" Description="Versuch, {0} in gesperrter Entität {1} festzulegen" />
   </Type>
   <Type Name="EnumEntity`1" />
-  <Type Name="ExceptionDN" Description="Ausnahme" PluralDescription="Ausnahmen">
+  <Type Name="ExceptionEntity" Description="Ausnahme" PluralDescription="Ausnahmen">
     <Member Name="ActionName" Description="Aktionsname" />
     <Member Name="ApplicationName" Description="Anwendungsname" />
     <Member Name="ControllerName" Description="Controllername" />
@@ -139,7 +139,7 @@
   <Type Name="ImmutableEntity" Description="Unveränderlich Entität">
     <Member Name="AllowChange" Description="Änderungen erlauben" />
   </Type>
-  <Type Name="IUserDN" />
+  <Type Name="IUserEntity" />
   <Type Name="JavascriptMessage">
     <Member Name="addFilter" Description="Filter hinzufügen" />
     <Member Name="cancel" Description="Abbrechen" />
@@ -213,7 +213,7 @@
     <Member Name="ThereAreChangesContinue" Description="Es gibt neue Änderungen, die verloren gehen.&#xD;&#xA;&#xD;&#xA;Weiter?" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
   </Type>
-  <Type Name="OperationLogDN" Description="Operation anmelden" PluralDescription="Operationen anmelden">
+  <Type Name="OperationLogEntity" Description="Operation anmelden" PluralDescription="Operationen anmelden">
     <Member Name="Duration" Description="Dauer" />
     <Member Name="End" Description="Ende" />
     <Member Name="Exception" Description="Ausnahme" />
@@ -341,7 +341,7 @@
     <Member Name="NNone" Description="- n: Keine" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
   </Type>
-  <Type Name="TypeDN" Description="Typ">
+  <Type Name="TypeEntity" Description="Typ">
     <Member Name="ClassName" Description="Klasse-Name" />
     <Member Name="CleanName" Description="Clean Name" />
     <Member Name="FullClassName" Description="Full Class Name" />

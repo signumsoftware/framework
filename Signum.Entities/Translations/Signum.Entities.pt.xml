@@ -3,7 +3,7 @@
   <Type Name="">
     <Member Name="0IsNotAValidIdentifier" Description="'{0}' não é um identificador válido" />
   </Type>
-  <Type Name="AlertDN" Description="Alertar">
+  <Type Name="AlertEntity" Description="Alertar">
     <Member Name="AlertDate" Description="Data de alerta" />
     <Member Name="Attended" Description="Participou" />
     <Member Name="CheckDate" Description="Data de verificação" />
@@ -39,7 +39,7 @@
     <Member Name="Any" Description="Qualquer" />
     <Member Name="Element" Description="Elemento" />
   </Type>
-  <Type Name="ColorDN" Description="Cor">
+  <Type Name="ColorEntity" Description="Cor">
     <Member Name="Hex" Description="Hex" />
   </Type>
   <Type Name="ComparisonType">
@@ -138,7 +138,7 @@
     <Member Name="ViewForType0IsNotAllowed" Description="Ver para o tipo {0} não é permitido" />
   </Type>
   <Type Name="NotAuthorizedToRetrieve01" Description="Não autorizado a recuperar {0} {1}" />
-  <Type Name="NoteDN" Description="Nota">
+  <Type Name="NoteEntity" Description="Nota">
     <Member Name="Target" Description="Destino" />
     <Member Name="Text" Description="Texto" />
   </Type>
@@ -203,7 +203,7 @@
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INÍCIO DA SINCRONIZAÇÃO SCRIPT GERADO EM {0}" />
   </Type>
   <Type Name="Token0NotCompatibleWith1" Description="Token {0} não compatível com {1}" />
-  <Type Name="TypeDN" Description="Tipo">
+  <Type Name="TypeEntity" Description="Tipo">
     <Member Name="ClassName" Description="Class Name" />
     <Member Name="CleanName" Description="Clean Name" />
     <Member Name="FriendlyName" Description="Friendly Name" />

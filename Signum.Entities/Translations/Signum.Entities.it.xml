@@ -31,7 +31,7 @@
     <Member Name="NoOne2" Description="Nessuno (2)" />
     <Member Name="NoOne3" Description="Nessuno (3)" />
   </Type>
-  <Type Name="ColorDN" Description="Colore">
+  <Type Name="ColorEntity" Description="Colore">
     <Member Name="Argb" Description="ARGB" />
   </Type>
   <Type Name="ColumnOptionsMode" Description="Modalità opzioni colonna,Opzioni di colonna">
@@ -85,7 +85,7 @@
     <Member Name="AttemptToSet0InLockedEntity1" Description="Tentativo di impostare {0} in {1} entità bloccato,Tentativo di impostare {0} in {1} nell'entità bloccata" />
   </Type>
   <Type Name="EnumEntity`1" />
-  <Type Name="ExceptionDN" Description="Eccezione" PluralDescription="Eccezioni">
+  <Type Name="ExceptionEntity" Description="Eccezione" PluralDescription="Eccezioni">
     <Member Name="ActionName" Description="Nome dell'azione" />
     <Member Name="ApplicationName" Description="Nome dell'applicazione" />
     <Member Name="ControllerName" Description="Nome del controller" />
@@ -134,7 +134,7 @@
   <Type Name="ImmutableEntity" Description="Entità immutabile">
     <Member Name="AllowChange" Description="Consentire modifiche" />
   </Type>
-  <Type Name="IUserDN" />
+  <Type Name="IUserEntity" />
   <Type Name="JavascriptMessage">
     <Member Name="addFilter" Description="Aggiungi filtro" />
     <Member Name="cancel" Description="Annulla" />
@@ -209,7 +209,7 @@
     <Member Name="ThereAreChangesContinue" Description="Ci sono nuovi cambiamenti che andranno persi.&#xD;&#xA;&#xD;&#xA;Continuare?" />
     <Member Name="ThereAreErrors" Description="Ci sono Errori" />
   </Type>
-  <Type Name="OperationLogDN" Description="Log di funzionamento,Registro dell'operazione" PluralDescription="Registri dell'operazione">
+  <Type Name="OperationLogEntity" Description="Log di funzionamento,Registro dell'operazione" PluralDescription="Registri dell'operazione">
     <Member Name="Duration" Description="Durata" />
     <Member Name="End" Description="Fine" />
     <Member Name="Exception" Description="Eccezione" />
@@ -337,7 +337,7 @@
     <Member Name="NNone" Description="- n: nessuno" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INIZIO DELLO SCRIPT DI SINCRONIZZAZIONE GENERATO SU {0}" />
   </Type>
-  <Type Name="TypeDN" Description="Tipo">
+  <Type Name="TypeEntity" Description="Tipo">
     <Member Name="ClassName" Description="Class Name" />
     <Member Name="CleanName" Description="Clean Name" />
     <Member Name="FullClassName" Description="Full Class Name" />
