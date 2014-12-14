@@ -65,6 +65,39 @@ namespace Signum.Engine.Word
                 WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
                    .Where(et => et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
                    .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
+
+                Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
+            }
+        }
+
+        static string ValidateTemplate(WordTemplateEntity template, PropertyInfo pi)
+        {
+            if (template.Template == null)
+                return null;
+
+            using (template.DisableAuthorization ? ExecutionMode.Global() : null)
+            {
+                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(template.Query.ToQueryName());
+
+                using (var memory = new MemoryStream())
+                {
+                    memory.WriteAllBytes(template.Template.Retrieve().BinaryFile);
+
+                    using (WordprocessingDocument document = WordprocessingDocument.Open(memory, true))
+                    {
+                        Dump(document, "0.Original.txt");
+
+                        var parser = new WordTemplateParser(document, qd, template.SystemWordTemplate.ToType());
+                        parser.ParseDocument(); Dump(document, "1.Match.txt");
+                        parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
+                        parser.AssertClean();
+
+                        if (parser.Errors.IsEmpty())
+                            return null;
+
+                        return parser.Errors.ToString(e => e.Message, "\r\n");
+                    }
+                }
             }
         }
 
@@ -81,11 +114,12 @@ namespace Signum.Engine.Word
         {
             WordTemplateEntity template = WordTemplatesLazy.Value.GetOrThrow(liteTemplate, "Word report template {0} not in cache".FormatWith(liteTemplate));
 
+            if (systemWordTemplate != null && template.SystemWordTemplate.FullClassName != systemWordTemplate.GetType().FullName)
+                throw new ArgumentException("systemWordTemplate should be a {0} instead of {1}".FormatWith(template.SystemWordTemplate.FullClassName, systemWordTemplate.GetType().FullName));
+
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
-                object queryName = template.Query.ToQueryName();
-
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(template.Query.ToQueryName());
 
                  using (var memory = new MemoryStream())
                  {
@@ -95,7 +129,7 @@ namespace Signum.Engine.Word
                      {
                          Dump(document, "0.Original.txt");
 
-                         var parser = new WordTemplateParser(document, qd, systemWordTemplate.Try(swt => swt.GetType()));
+                         var parser = new WordTemplateParser(document, qd, template.SystemWordTemplate.ToType());
                          parser.ParseDocument(); Dump(document, "1.Match.txt");
                          parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                          parser.AssertClean();

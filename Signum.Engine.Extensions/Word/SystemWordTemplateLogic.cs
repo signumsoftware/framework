@@ -60,8 +60,8 @@ namespace Signum.Engine.Word
 
         static ResetLazy<Dictionary<Lite<SystemWordTemplateEntity>, List<WordTemplateEntity>>> SystemWordTemplateToWordTemplates;
         static Dictionary<Type, SystemWordTemplateInfo> systemWordReports = new Dictionary<Type, SystemWordTemplateInfo>();
-        static ResetLazy<Dictionary<Type, SystemWordTemplateEntity>> systemWordReportToEntity;
-        static ResetLazy<Dictionary<SystemWordTemplateEntity, Type>> systemWordReportToType;
+        public static ResetLazy<Dictionary<Type, SystemWordTemplateEntity>> TypeToSystemWordTemplate;
+        public static ResetLazy<Dictionary<SystemWordTemplateEntity, Type>> SystemWordTemplateToType;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -92,7 +92,7 @@ namespace Signum.Engine.Word
                     .GroupToDictionary(pair => pair.swe.ToLite(), pair => pair.et),
                     new InvalidateWith(typeof(SystemWordTemplateEntity), typeof(WordTemplateEntity)));
 
-                systemWordReportToEntity = sb.GlobalLazy(() =>
+                TypeToSystemWordTemplate = sb.GlobalLazy(() =>
                 {
                     var dbSystemWordReports = Database.RetrieveAll<SystemWordTemplateEntity>();
                     return EnumerableExtensions.JoinStrict(
@@ -100,14 +100,14 @@ namespace Signum.Engine.Word
                         (swr, type) => KVP.Create(type, swr), "caching EmailTemplates. Consider synchronize").ToDictionary();
                 }, new InvalidateWith(typeof(SystemWordTemplateEntity)));
 
-                systemWordReportToType = sb.GlobalLazy(() => systemWordReportToEntity.Value.Inverse(),
+                SystemWordTemplateToType = sb.GlobalLazy(() => TypeToSystemWordTemplate.Value.Inverse(),
                     new InvalidateWith(typeof(SystemWordTemplateEntity)));
             }
         }
 
         internal static WordTemplateEntity CreateDefaultTemplate(SystemWordTemplateEntity systemWordReport)
         {
-            SystemWordTemplateInfo info = systemWordReports.GetOrThrow(systemWordReportToType.Value.GetOrThrow(systemWordReport));
+            SystemWordTemplateInfo info = systemWordReports.GetOrThrow(SystemWordTemplateToType.Value.GetOrThrow(systemWordReport));
 
             WordTemplateEntity template = info.DefaultTemplateConstructor();
 
@@ -120,6 +120,8 @@ namespace Signum.Engine.Word
 
             return template;
         }
+
+     
 
         static SqlPreCommand Schema_Generating()
         {
@@ -195,6 +197,14 @@ namespace Signum.Engine.Word
             }
 
             throw new InvalidOperationException("Unknown queryName from {0}, set the argument queryName in RegisterSystemEmail".FormatWith(model.TypeName()));
+        }
+
+        public static Type ToType(this SystemWordTemplateEntity systemWordTemplate)
+        {
+            if (systemWordTemplate == null)
+                return null;
+
+            return SystemWordTemplateToType.Value.GetOrThrow(systemWordTemplate);
         }
     }
 }

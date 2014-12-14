@@ -27,7 +27,7 @@ namespace Signum.Engine.Word
 {
     public class WordTemplateParser
     {
-        List<Error> Errors = new List<Error>();
+        public List<Error> Errors = new List<Error>();
         QueryDescription queryDescription;
         ScopedDictionary<string, ParsedToken> variables = new ScopedDictionary<string, ParsedToken>(null);
         public readonly Type SystemWordTemplateType;
@@ -40,69 +40,110 @@ namespace Signum.Engine.Word
             this.document = document;
         }
 
+
+
         public void ParseDocument()
         {  
             var paragraphs = document.MainDocumentPart.Document.Descendants<Paragraph>();
 
             foreach (var par in paragraphs)
             {
-                List<RunInfo> runs =
-                    (from r in par.ChildElements.OfType<Run>()
-                     select new RunInfo
-                     {
-                         Text = r.ChildElements.OfType<Text>().SingleOrDefault().Try(t => t.Text) ?? "",
-                         Run = r,
-                     }).ToList();
-
-                string text = runs.Select(r => r.Text).ToString("");
+                string text = par.ChildElements.OfType<Run>().ToString(r => GetText(r), "");
 
                 IEnumerable<Match> matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
 
                 if (matches.Any())
                 {
-                    int currentPosition = 0;
-                    foreach (var item in runs)
-                    {
-                        item.Index = currentPosition;
-                        item.Lenght = item.Text.Length;
-                        currentPosition += item.Lenght;
-                    }
+                    List<ElementInfo> infos = GetElementInfos(par.ChildElements);
+
+                    par.RemoveAllChildren();
+
+                    var stack = new Stack<ElementInfo>(infos.AsEnumerable().Reverse());
 
                     foreach (var m in matches)
                     {
-                        int firstChar = m.Index;
-                        int lastChar = m.Index + m.Length - 1;
-                        RunInfo first = runs.Single(r => r.Contains(firstChar));
-                        RunInfo last = runs.Single(r => r.Contains(lastChar));
+                        var interval = new Interval<int>(m.Index, m.Index + m.Length);
 
-                        int firstIndex = par.ChildElements.IndexOf(first.Run);
-                        int lastIndex = par.ChildElements.IndexOf(last.Run);
+                        //  [Before][Start][Ignore][Ignore][End]...[Remaining]
+                        //              [        Match       ]
 
-                        var selectedRuns = par.ChildElements.Where((r, i) => firstIndex <= i && i <= lastIndex).ToList();
-
-                        foreach (var item in selectedRuns)
-                            item.Remove();
-
-
-                        var index = firstIndex;
-                        if (first.Index < m.Index)
+                        ElementInfo start = stack.Pop(); //Start
+                        while (start.Interval.Max <= interval.Min) //Before
                         {
-                            Run firstRunPart = new Run { RunProperties = first.Run.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
-                            firstRunPart.AppendChild(new Text { Text = first.Text.Substring(0, m.Index - first.Index) });
-                            par.InsertAt(firstRunPart, index++);
+                            par.Append(start.Element);
+                            start = stack.Pop();
+                        }
+                        
+                        Run startRun = (Run)start.Element;
+
+                        if (start.Interval.Min < interval.Min)
+                        {
+                            Run firstRunPart = new Run { RunProperties = startRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
+                            firstRunPart.AppendChild(new Text { Text = start.Text.Substring(0, m.Index - start.Interval.Min) });
+                            par.Append(firstRunPart);
                         }
 
-                        par.InsertAt(new MatchNode(m){ RunProperties = first.Run.RunProperties.TryDo(r => r.Remove()) }, index++);
+                        par.Append(new MatchNode(m) { RunProperties = startRun.RunProperties.TryDo(r => r.Remove()) });
 
-                        if (lastChar + 1 < last.Index + last.Lenght)
+                        ElementInfo end = start;
+                        while (end.Interval.Max < interval.Max) //Ignore
+                            end = stack.Pop();
+
+                        if (interval.Max < end.Interval.Max) //End
                         {
-                            Run lastRunPart = new Run { RunProperties = last.Run.RunProperties.TryDo(r=>r.Remove()) };
-                            lastRunPart.AppendChild(new Text { Text = last.Text.Substring(lastChar + 1 - last.Index) });
-                            par.InsertAt(lastRunPart, index++);
+                            Run endRun = (Run)end.Element;
+
+                            var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
+                            Run endRunPart = new Run { RunProperties = endRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
+                            endRunPart.AppendChild(new Text { Text = textPart });
+
+                            stack.Push(new ElementInfo
+                            {
+                                Element = endRunPart,
+                                Text = textPart,
+                                Interval = new Interval<int>(interval.Max, end.Interval.Max)
+                            });
                         }
+                    }
+
+                    while (!stack.IsEmpty()) //Remaining
+                    {
+                        var pop = stack.Pop();
+                        par.Append(pop.Element);
                     }
                 }
             }
+        }
+
+        private static List<ElementInfo> GetElementInfos(IEnumerable<OpenXmlElement> childrens)
+        {
+            var infos = childrens.Select(c => new ElementInfo { Element = c, Text = c is Run ? GetText((Run)c) : null }).ToList();
+
+            int currentPosition = 0;
+            foreach (ElementInfo ri in infos)
+            {
+                ri.Interval = new Interval<int>(currentPosition, currentPosition + (ri.Text == null ? 0 : ri.Text.Length));
+                currentPosition = ri.Interval.Max;
+            }
+
+            return infos;
+        }
+
+        class ElementInfo
+        {
+            public string Text;
+            public OpenXmlElement Element;
+            public Interval<int> Interval;
+
+            public override string ToString()
+            {
+                return Interval + " " + Element.LocalName + (Text == null ? null : (": '" + Text + "'"));
+            }
+        }
+
+        private static string GetText(Run r)
+        {
+            return r.ChildElements.OfType<Text>().SingleOrDefault().Try(t => t.Text) ?? "";
         }
         
         Stack<BlockContainerNode> stack = new Stack<BlockContainerNode>();
@@ -348,25 +389,8 @@ namespace Signum.Engine.Word
         }
     }
 
-    class RunInfo
-    {
-        public string Text;
-        public Run Run;
-        public int Index;
-        public int Lenght;
 
-        internal bool Contains(int index)
-        {
-            return Index <= index && index < Index + Lenght;
-        }
-
-        public override string ToString()
-        {
-            return Text;
-        }
-    }
-
-    struct Error
+    public struct Error
     {
         public Error(bool isFatal, string message)
         {

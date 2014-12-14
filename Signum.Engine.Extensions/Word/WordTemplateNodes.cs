@@ -169,7 +169,7 @@ namespace Signum.Engine.Word
 
         public override void WriteTo(System.Xml.XmlWriter xmlWriter)
         {
-            var tempText = new Text(Token.QueryToken.FullKey());
+            var tempText = new Text(Token.QueryToken.Try(q => q.FullKey()) ?? "Error!");
 
             this.AppendChild(tempText);
             base.WriteTo(xmlWriter);
