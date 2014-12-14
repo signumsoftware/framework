@@ -45,7 +45,7 @@ namespace Signum.Web.Auth
             return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
         });
 
-        public static string GetNewPassword(MappingContext<string> ctx, string newPasswordKey, string newPasswordBisKey)
+        public static byte[] GetNewPassword(MappingContext<byte[]> ctx, string newPasswordKey, string newPasswordBisKey)
         {
             string newPassword = ctx.Parent.Inputs[newPasswordKey];
             if (string.IsNullOrEmpty(newPassword))

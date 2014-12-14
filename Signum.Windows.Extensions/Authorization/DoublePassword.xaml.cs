@@ -22,10 +22,10 @@ namespace Signum.Windows.Authorization
     public partial class DoublePassword : UserControl
     {
         public static readonly DependencyProperty PasswordHashProperty =
-            DependencyProperty.Register("PasswordHash", typeof(string), typeof(DoublePassword), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (o, e) => ((DoublePassword)o).PasswordChanged(e)));
-        public string PasswordHash
+            DependencyProperty.Register("PasswordHash", typeof(byte[]), typeof(DoublePassword), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (o, e) => ((DoublePassword)o).PasswordChanged(e)));
+        public byte[] PasswordHash
         {
-            get { return (string)GetValue(PasswordHashProperty); }
+            get { return (byte[])GetValue(PasswordHashProperty); }
             set { SetValue(PasswordHashProperty, value); }
         }
 
@@ -67,7 +67,7 @@ namespace Signum.Windows.Authorization
 
             Error = null;
 
-            string hash = Security.EncodePassword(password.Password);
+            byte[] hash = Security.EncodePassword(password.Password);
 
             PasswordHash = hash;
 

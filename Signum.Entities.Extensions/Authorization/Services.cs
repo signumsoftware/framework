@@ -14,13 +14,13 @@ namespace Signum.Services
     public interface ILoginServer
     {
         [OperationContract, NetDataContract]
-        void Login(string username, string passwordHash);
+        void Login(string username, byte[] passwordHash);
 
         [OperationContract, NetDataContract]
-        void LoginChagePassword(string username, string passwordHash, string newPasswordHash);
+        void LoginChagePassword(string username, byte[] passwordHash, byte[] newPasswordHash);
 
         [OperationContract, NetDataContract]
-        void ChagePassword(Lite<UserEntity> user, string passwordHash, string newPasswordHash);
+        void ChagePassword(Lite<UserEntity> user, byte[] passwordHash, byte[] newPasswordHash);
 
         [OperationContract, NetDataContract]
         UserEntity GetCurrentUser();

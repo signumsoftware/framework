@@ -77,7 +77,7 @@ namespace Signum.Web.Auth
             var context = this.ExtractEntity<SetPasswordModel>(passPrefix).ApplyChanges(this, passPrefix);
 
             UserEntity user = this.ExtractLite<UserEntity>()
-                .ExecuteLite(UserOperation.SetPassword, context.Value.Password);
+                .ExecuteLite(UserOperation.SetPassword, context.Value.PasswordHash);
 
             return this.DefaultExecuteResult(user);
         }

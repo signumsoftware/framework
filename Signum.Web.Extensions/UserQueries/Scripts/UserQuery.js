@@ -21,9 +21,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     function deleteUserQuery(options, urlRedirect) {
         options.avoidReturnRedirect = true;
 
-        if (!Operations.confirmIfNecessary(options))
-            return;
-
         Operations.deleteDefault(options).then(function () {
             if (!options.prefix)
                 window.location.href = urlRedirect;

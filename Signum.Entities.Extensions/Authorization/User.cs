@@ -44,10 +44,10 @@ namespace Signum.Entities.Authorization
             set { SetToStr(ref userName, value); }
         }
 
-        [NotNullable]
-        string passwordHash;
+        [NotNullable, SqlDbType(Size=128)]
+        byte[] passwordHash;
         [NotNullValidator]
-        public string PasswordHash
+        public byte[] PasswordHash
         {
             get { return passwordHash; }
             set
