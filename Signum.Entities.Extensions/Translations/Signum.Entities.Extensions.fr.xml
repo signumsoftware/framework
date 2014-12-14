@@ -101,7 +101,7 @@
     <Member Name="AdminRules" Description="Administrer règles" />
   </Type>
   <Type Name="BelongsToAnotherKindOkLinqProvider" Description="{0} appartient à un autre fournisseur Linq" />
-  <Type Name="CalendarDN" Description="Calendrier">
+  <Type Name="CalendarEntity" Description="Calendrier">
     <Member Name="Holidays" Description="Vacances" />
     <Member Name="Name" Description="Nom" />
   </Type>
@@ -129,7 +129,7 @@
     <Member Name="TypeTypeValue" Description="Type Type valeur" />
     <Member Name="TypeValue" Description="Type de valeur" />
   </Type>
-  <Type Name="ChartTokenDN" Description="Graphique Token">
+  <Type Name="ChartTokenEntity" Description="Graphique Token">
     <Member Name="Aggregate" Description="Agrégat" />
     <Member Name="DisplayName" Description="Nom d'affichage" />
     <Member Name="Format" Description="Format" />
@@ -156,7 +156,7 @@
     <Member Name="TotalBars" Description="Total Bars" />
     <Member Name="TotalColumns" Description="Totales des colonnes" />
   </Type>
-  <Type Name="CompositeReportDN" Description="Rapport composite">
+  <Type Name="CompositeReportEntity" Description="Rapport composite">
     <Member Name="ExcelReports" Description="Rapports" />
     <Member Name="Name" Description="Nom" />
   </Type>
@@ -164,7 +164,7 @@
     <Member Name="f" Description="Construit un nouveau {0}" />
     <Member Name="m" Description="Construit un nouveau {0}" />
   </Type>
-  <Type Name="DashboardDN" Description="Panneau de commande">
+  <Type Name="DashboardEntity" Description="Panneau de commande">
     <Member Name="DisplayName" Description="Nom d'affichage" />
     <Member Name="HomePage" Description="Page d'accueil" />
     <Member Name="NumberOfColumns" Description="Nombre de colonnes" />
@@ -175,10 +175,10 @@
     <Member Name="Part0IsInColumn1ButPanelHasOnly2Columns" Description="Partie {0} est dans la colonne {1} mais le panneau à uniquement {2} colonnes" />
     <Member Name="Part0IsInColumn1WhichAlreadyHasOtherParts" Description="Partie {0} se trouve dans la colonne {1}  ligne {2} qui dispose déjà d'autres parties" />
     <Member Name="Rows0DontHaveAnyParts" Description="Il n'y a pas toutes les parties en rangées {{{0}}}" />
-    <Member Name="CountSearchControlPartDN" Description="Liste de compteur" />
+    <Member Name="CountSearchControlPartEntity" Description="Liste de compteur" />
     <Member Name="CountUserQueryElement" Description="Compteur" />
   </Type>
-  <Type Name="CountSearchControlPartDN">
+  <Type Name="CountSearchControlPartEntity">
     <Member Name="UserQueries" Description="Requêtes utilisateur" />
   </Type>
   <Type Name="CountUserQueryElement">
@@ -187,8 +187,8 @@
   </Type>
   <Type Name="Create" Description="Créer" />
   <Type Name="CurrentPassword" Description="Mot de passe actuel" />
-  <Type Name="CustomTaskDN" Description="Tâche paramétrable" />
-  <Type Name="CustomTaskExecutionDN" Description="Execution de Tâche paramétré">
+  <Type Name="CustomTaskEntity" Description="Tâche paramétrable" />
+  <Type Name="CustomTaskExecutionEntity" Description="Execution de Tâche paramétré">
     <Member Name="CustomTask" Description="Tâche paramétrable" />
     <Member Name="EndTime" Description="Heur de fin" />
     <Member Name="Exception" Description="Exception" />
@@ -198,14 +198,14 @@
   <Type Name="CustomTaskOperation">
     <Member Name="Execute" Description="Nouvelle execution" />
   </Type>
-  <Type Name="DateSpanDN" Description="Date Span">
+  <Type Name="DateSpanEntity" Description="Date Span">
     <Member Name="Days" Description="Jours" />
     <Member Name="Months" Description="Mois" />
     <Member Name="Years" Description="Années" />
   </Type>
   <Type Name="Delete" Description="Supprimer" />
   <Type Name="Deleted" Description="(Supprimé)" />
-  <Type Name="DeploymentLogDN" Description="Journal de déploiement">
+  <Type Name="DeploymentLogEntity" Description="Journal de déploiement">
     <Member Name="CreationDate" Description="Date de création" />
     <Member Name="DatabaseName" Description="Database Name" />
     <Member Name="DataSourceName" Description="Data Source Name" />
@@ -214,7 +214,7 @@
     <Member Name="Version" Description="Version" />
   </Type>
   <Type Name="EmailIsNotValid" Description="L'email est différent de l'email stockée" />
-  <Type Name="EmailMessageDN" Description="Message d'email">
+  <Type Name="EmailMessageEntity" Description="Message d'email">
     <Member Name="Body" Description="Corps" />
     <Member Name="Exception" Description="Exception" />
     <Member Name="FechaCreacion" Description="Date de création" />
@@ -230,7 +230,7 @@
   <Type Name="EmailOperations">
     <Member Name="ReSendEmails" Description="Renvoyer les emails" />
   </Type>
-  <Type Name="EmailPackageDN" Description="Paquet d'email">
+  <Type Name="EmailPackageEntity" Description="Paquet d'email">
     <Member Name="Name" Description="Nom" />
     <Member Name="NumErrors" Description="Nombre d'erreurs" />
     <Member Name="NumLines" Description="Nombre de lignes" />
@@ -242,23 +242,23 @@
     <Member Name="Sent" Description="Envoyé" />
     <Member Name="SentError" Description="Erreur envoyé" />
   </Type>
-  <Type Name="EmailTemplateDN" Description="Modèle d'email">
+  <Type Name="EmailTemplateEntity" Description="Modèle d'email">
     <Member Name="FriendlyName" Description="Nom descriptif" />
     <Member Name="FullClassName" Description="Full Class Name" />
   </Type>
-  <Type Name="EmbeddedFileDN" Description="Fichier incorporé">
+  <Type Name="EmbeddedFileEntity" Description="Fichier incorporé">
     <Member Name="BinaryFile" Description="Fichier binaire" />
     <Member Name="FileName" Description="Nom de fichier" />
     <Member Name="FullWebPath" Description="Chemin complet de Web" />
   </Type>
-  <Type Name="EntityGroupDN" Description="Groupe de l'entité" />
+  <Type Name="EntityGroupEntity" Description="Groupe de l'entité" />
   <Type Name="EntityGroupsAscx">
     <Member Name="All" Description="Tous" />
     <Member Name="In" Description="Dedans" />
     <Member Name="None" Description="Aucun" />
     <Member Name="Out" Description="Dehors" />
   </Type>
-  <Type Name="EnumDN">
+  <Type Name="EnumEntity">
     <Member Name="Key" Description="Clé" />
     <Member Name="Name" Description="Nom" />
   </Type>
@@ -271,7 +271,7 @@
     <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="Le modèle Excel possède une colonne {0} n'est pas présent dans le moteur de recherche" />
     <Member Name="ThereAreNoResultsToWrite" Description="Il n'y a pas de réusltast à écrire" />
   </Type>
-  <Type Name="ExcelReportDN" Description="Rapport Excel">
+  <Type Name="ExcelReportEntity" Description="Rapport Excel">
     <Member Name="Deleted" Description="Effacé" />
     <Member Name="DisplayName" Description="Afficher le nom" />
     <Member Name="File" Description="Fichier" />
@@ -281,8 +281,8 @@
   <Type Name="ExpressionShouldBeSomeKindOfAggregate" Description="Expression doit être une sorte d'agrégat" />
   <Type Name="ExpressionShouldHaveAContinousAmountOfValues" Description="Expression devrait avoir une quantité continu de valeurs" />
   <Type Name="ExpressionShouldHaveADiscreteAmountOfValues" Description="Expression devrait avoir une quantité discrète de valeurs" />
-  <Type Name="FacadeMethodDN" Description="Méthode de façade" />
-  <Type Name="FileDN" Description="Fichier">
+  <Type Name="FacadeMethodEntity" Description="Méthode de façade" />
+  <Type Name="FileEntity" Description="Fichier">
     <Member Name="BinaryFile" Description="Fichier binaire" />
     <Member Name="FileName" Description="Nom de fichier" />
     <Member Name="FullWebPath" Description="Chemin complet de Web" />
@@ -291,7 +291,7 @@
   <Type Name="FileMessage">
     <Member Name="ErrorSavingFile" Description="Erreur en sauvegardant l'archive" />
   </Type>
-  <Type Name="FilePathDN" Description="Chemin d'accès du fichier">
+  <Type Name="FilePathEntity" Description="Chemin d'accès du fichier">
     <Member Name="BinaryFile" Description="Fichier binaire" />
     <Member Name="FileLength" Description="Longueur du fichier" />
     <Member Name="FileLengthString" Description="Longueur de fichier" />
@@ -303,7 +303,7 @@
     <Member Name="Repository" Description="Dépôt" />
     <Member Name="Sufix" Description="Sufixe" />
   </Type>
-  <Type Name="FileRepositoryDN" Description="Dépôt de fichier">
+  <Type Name="FileRepositoryEntity" Description="Dépôt de fichier">
     <Member Name="Active" Description="Activé" />
     <Member Name="FileTypes" Description="Types de fichiers" />
     <Member Name="FullPhysicalPrefix" Description="Préfixe physique" />
@@ -311,7 +311,7 @@
     <Member Name="PhysicalPrefix" Description="Prefixe physique" />
     <Member Name="WebPrefix" Description="Prefixe de web" />
   </Type>
-  <Type Name="FileTypeDN" Description="Type de fichier" />
+  <Type Name="FileTypeEntity" Description="Type de fichier" />
   <Type Name="From0OfThe1">
     <Member Name="f" Description="à partir de {0} de la {1}" />
     <Member Name="m" Description="à partir de {0} de {1}" />
@@ -354,11 +354,11 @@
     <Member Name="ValueLike0" Description="valeur comme {0}" />
     <Member Name="YourVersion" Description="votre version" />
   </Type>
-  <Type Name="HolidayDN" Description="Vacances">
+  <Type Name="HolidayEntity" Description="Vacances">
     <Member Name="Date" Description="Date" />
     <Member Name="Name" Description="Nom" />
   </Type>
-  <Type Name="HourMinuteDN" Description="Heure et minutes">
+  <Type Name="HourMinuteEntity" Description="Heure et minutes">
     <Member Name="Hour" Description="Heure" />
     <Member Name="Minute" Description="Minute" />
   </Type>
@@ -370,10 +370,10 @@
     <Member Name="Label" Description="Étiquette" />
     <Member Name="Link" Description="Lien" />
   </Type>
-  <Type Name="LinkListPartDN" Description="Lien liste partie">
+  <Type Name="LinkListPartEntity" Description="Lien liste partie">
     <Member Name="Links" Description="Liens" />
   </Type>
-  <Type Name="LogOperationDN" Description="Journal de l'opération">
+  <Type Name="LogOperationEntity" Description="Journal de l'opération">
     <Member Name="End" Description="Fin" />
     <Member Name="Exception" Description="Exception" />
     <Member Name="Operation" Description="Opération" />
@@ -397,17 +397,17 @@
     <Member Name="m" Description="du {0}" />
   </Type>
   <Type Name="Operation0IsNotAuthorized" Description="Opération {0} n'est pas autorisée" />
-  <Type Name="OperationDN" Description="Opération" />
+  <Type Name="OperationEntity" Description="Opération" />
   <Type Name="OperationsAscx">
     <Member Name="Deny" Description="Nier" />
   </Type>
-  <Type Name="PackageDN" Description="Paquet">
+  <Type Name="PackageEntity" Description="Paquet">
     <Member Name="Name" Description="Nom" />
     <Member Name="NumErrors" Description="Num Erreurs" />
     <Member Name="NumLines" Description="Num Lines" />
     <Member Name="Operation" Description="Operation" />
   </Type>
-  <Type Name="PackageLineDN" Description="Line de Paquet">
+  <Type Name="PackageLineEntity" Description="Line de Paquet">
     <Member Name="Exception" Description="Exception" />
     <Member Name="FinishTime" Description="Heure de fin" />
     <Member Name="Package" Description="Paquet" />
@@ -424,11 +424,11 @@
   <Type Name="PasswordHasBeenSent" Description="Le mot de passe a été envoyé à l'adresse donnée {0}" />
   <Type Name="PasswordMustHave0orMoreCharacters" Description="Le mot de passe doit avoir {0} caractères ou plus" />
   <Type Name="PasswordReseted" Description="Votre mot de passe a été rétablit" />
-  <Type Name="PermissionDN" Description="Autorisation" />
+  <Type Name="PermissionEntity" Description="Autorisation" />
   <Type Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Confirmer que vous désirez supprimer l'entité du système" />
   <Type Name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" Description="Veuillez confirmer que vous souhaitez exécuter l'opération {0} à l'entité {1} ({2}-{3})" />
-  <Type Name="ProcessDN" Description="Processus" />
-  <Type Name="ProcessExecutionDN" Description="Exécution de processus">
+  <Type Name="ProcessEntity" Description="Processus" />
+  <Type Name="ProcessExecutionEntity" Description="Exécution de processus">
     <Member Name="CancelationDate" Description="Date d'annulation" />
     <Member Name="CreationDate" Description="Date de création" />
     <Member Name="Exception" Description="Exception" />
@@ -475,44 +475,44 @@
   </Type>
   <Type Name="Property0DoesNotExistInType1" Description="La propriété {0} n'existe pas dans le type {1}" />
   <Type Name="Property0HasNoValue" Description="La propriété {0} n'a aucune valeur" />
-  <Type Name="PropertyDN" Description="Propriété">
+  <Type Name="PropertyEntity" Description="Propriété">
     <Member Name="Path" Description="Chemin d'accès" />
     <Member Name="Route" Description="Itinéraire" />
     <Member Name="Type" Description="Type" />
   </Type>
-  <Type Name="QueryColumnDN" Description="Colonne de requête">
+  <Type Name="QueryColumnEntity" Description="Colonne de requête">
     <Member Name="DisplayName" Description="Nom" />
   </Type>
-  <Type Name="QueryDN" Description="Recherche">
+  <Type Name="QueryEntity" Description="Recherche">
     <Member Name="DisplayName" Description="Nom affiché" />
     <Member Name="Key" Description="Touche" />
   </Type>
-  <Type Name="QueryFilterDN" Description="Filtre de requête">
+  <Type Name="QueryFilterEntity" Description="Filtre de requête">
     <Member Name="Operation" Description="Opération" />
     <Member Name="Value" Description="Valeur" />
     <Member Name="ValueString" Description="Chaîne de valeur" />
   </Type>
   <Type Name="QueryOf0Connecting1" Description="Requête de {0} qui concerne {1}" />
-  <Type Name="QueryOrderDN" Description="Ordre de requête">
+  <Type Name="QueryOrderEntity" Description="Ordre de requête">
     <Member Name="Index" Description="Index" />
     <Member Name="OrderType" Description="Type d'ordre" />
   </Type>
-  <Type Name="QueryTokenDN">
+  <Type Name="QueryTokenEntity">
     <Member Name="Token" Description="Jeton" />
   </Type>
-  <Type Name="ResetPasswordRequestDN" Description="Demande de nouveau mot de passe">
+  <Type Name="ResetPasswordRequestEntity" Description="Demande de nouveau mot de passe">
     <Member Name="Code" Description="Code" />
     <Member Name="RequestDate" Description="Date de la demande" />
     <Member Name="User" Description="Utilisateur" />
   </Type>
-  <Type Name="RoleDN" Description="Role">
+  <Type Name="RoleEntity" Description="Role">
     <Member Name="Name" Description="Nom" />
     <Member Name="Roles" Description="Roles" />
   </Type>
   <Type Name="RoleQueries">
     <Member Name="ReferedBy" Description="Référé par" />
   </Type>
-  <Type Name="ScheduledTaskDN" Description="Tâches planifiées">
+  <Type Name="ScheduledTaskEntity" Description="Tâches planifiées">
     <Member Name="NextDate" Description="Prochaine date" />
     <Member Name="Rule" Description="Règle" />
     <Member Name="Suspended" Description="Suspendu" />
@@ -521,10 +521,10 @@
   <Type Name="SchedulerMessage">
     <Member Name="Holidayhavetobenullwhennocalendarisset" Description="Les vacances doivent être nulles quand aucun calendrier n'est défini" />
     <Member Name="Holidayhavetobetrueorfalsewhenacalendarisset" Description="Les vancances doivent être vraies ou fausses quand le calendrier est défini" />
-    <Member Name="ScheduleRuleDailyDN" Description="Journalier" />
+    <Member Name="ScheduleRuleDailyEntity" Description="Journalier" />
     <Member Name="Everydayat" Description="Chaque jour à " />
     <Member Name="StartingOn" Description="Débute à" />
-    <Member Name="ScheduleRuleWeekDaysDN" Description="Jours de la semaine" />
+    <Member Name="ScheduleRuleWeekDaysEntity" Description="Jours de la semaine" />
     <Member Name="AndHoliday" Description="et vacances" />
     <Member Name="At" Description="à" />
     <Member Name="ButHoliday" Description="sauf vacances" />
@@ -544,10 +544,10 @@
     <Member Name="Tuesday" Description="Mardi" />
     <Member Name="W" Description="Me" />
     <Member Name="Wednesday" Description="Mercredi" />
-    <Member Name="ScheduleRuleWeeklyDN" Description="Hebdomadaire" />
+    <Member Name="ScheduleRuleWeeklyEntity" Description="Hebdomadaire" />
     <Member Name="DayOfTheWeek" Description="Jour de la semaine" />
   </Type>
-  <Type Name="ScheduleRuleDayDN">
+  <Type Name="ScheduleRuleDayEntity">
     <Member Name="Hour" Description="Heure" />
     <Member Name="Minute" Description="Minute" />
   </Type>
@@ -565,13 +565,13 @@
   <Type Name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" Description="Le mot de passe doit avoir entre 7 et 15 caractères, chacun d'entre eux étant un numéro 0-9 ou une lettre" />
   <Type Name="ThereAreATotalOf0Errors" Description="Il y a un total de {0} erreurs" />
   <Type Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="Aucun utilisateur n'est enregistré avec cette adresse email" />
-  <Type Name="UserChartDN" Description="Graphique utilisateur">
+  <Type Name="UserChartEntity" Description="Graphique utilisateur">
     <Member Name="DisplayName" Description="Nom d'affichage" />
     <Member Name="Filters" Description="Filtres" />
     <Member Name="Query" Description="Requête" />
     <Member Name="Related" Description="Liées" />
   </Type>
-  <Type Name="UserDN" Description="Utilisateur">
+  <Type Name="UserEntity" Description="Utilisateur">
     <Member Name="AnulationDate" Description="Date de Anulation" />
     <Member Name="CultureInfo" Description="Info de la culture" />
     <Member Name="Email" Description="Email" />
@@ -590,7 +590,7 @@
     <Member Name="Save" Description="Sauvegarder" />
     <Member Name="SaveNew" Description="Sauvegarder" />
   </Type>
-  <Type Name="UserQueryDN" Description="Recherche de l'utilisateur">
+  <Type Name="UserQueryEntity" Description="Recherche de l'utilisateur">
     <Member Name="Columns" Description="Colonne" />
     <Member Name="ColumnsMode" Description="Mode de colonnes" />
     <Member Name="DisplayName" Description="Afficher le nom" />
@@ -604,7 +604,7 @@
     <Member Name="Created" Description="Créé" />
     <Member Name="Disabled" Description="Handicapés" />
   </Type>
-  <Type Name="UserTicketDN" Description="Utilisateur ticket">
+  <Type Name="UserTicketEntity" Description="Utilisateur ticket">
     <Member Name="ConnectionDate" Description="Date de connexion" />
     <Member Name="Device" Description="Dispositif" />
     <Member Name="Ticket" Description="Billet" />

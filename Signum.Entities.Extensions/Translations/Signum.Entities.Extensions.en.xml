@@ -142,7 +142,7 @@
     <Member Name="Part0IsInColumn1WhichAlreadyHasOtherParts" Description="Part {0} is in column {1} of row {2} which already has other parts" />
     <Member Name="Rows0DontHaveAnyParts" Description="There are not any parts in rows {0}" />
     <Member Name="TitleMustBeSpecifiedFor0" Description="Title must be specified for {0}" />
-    <Member Name="CountSearchControlPartDN" Description="Counter list" />
+    <Member Name="CountSearchControlPartEntity" Description="Counter list" />
     <Member Name="CountUserQueryElement" Description="Counter" />
   </Type>
   <Type Name="DisconnectedMessage">
@@ -247,12 +247,12 @@
     <Member Name="Each0MinutesFrom1" Description="Each {0} minutes from {1}" />
     <Member Name="Holidayhavetobenullwhennocalendarisset" Description="Holiday have to be null when no calendar is set" />
     <Member Name="Holidayhavetobetrueorfalsewhenacalendarisset" Description="Holiday have to be true or false when a calendar is set" />
-    <Member Name="ScheduleRuleDailyDN" Description="Dialy" />
+    <Member Name="ScheduleRuleDailyEntity" Description="Dialy" />
     <Member Name="Everydayat" Description="Every day at " />
     <Member Name="StartingOn" Description="Starting On" />
-    <Member Name="ScheduleRuleHourlyDN" Description="Each X Hours" />
-    <Member Name="ScheduleRuleMinutelyDN" Description="Each X Minutes" />
-    <Member Name="ScheduleRuleWeekDaysDN" Description="Days of week" />
+    <Member Name="ScheduleRuleHourlyEntity" Description="Each X Hours" />
+    <Member Name="ScheduleRuleMinutelyEntity" Description="Each X Minutes" />
+    <Member Name="ScheduleRuleWeekDaysEntity" Description="Days of week" />
     <Member Name="AndHoliday" Description="and holidays" />
     <Member Name="At" Description="at" />
     <Member Name="ButHoliday" Description="but holidays" />
@@ -272,7 +272,7 @@
     <Member Name="Tuesday" Description="Tuesday" />
     <Member Name="W" Description="W" />
     <Member Name="Wednesday" Description="Wednesday" />
-    <Member Name="ScheduleRuleWeeklyDN" Description="Weekly" />
+    <Member Name="ScheduleRuleWeeklyEntity" Description="Weekly" />
     <Member Name="DayOfTheWeek" Description="Day of the week" />
   </Type>
   <Type Name="SmsMessage">
