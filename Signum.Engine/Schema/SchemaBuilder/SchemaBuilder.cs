@@ -522,7 +522,8 @@ namespace Signum.Engine.Maps
                 IsLite = route.Type.IsLite(),
                 ReferenceTable = referenceTable,
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
-                AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null
+                AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null,
+                Default = Settings.FieldAttribute<SqlDbTypeAttribute>(route).Try(a => a.Default)
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
