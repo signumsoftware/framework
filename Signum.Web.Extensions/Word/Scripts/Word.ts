@@ -90,14 +90,37 @@ function changeButtonState($button: JQuery, disablingMessage?: string) {
     }
 }
 
-//export function createMailFromTemplate(options: Operations.EntityOperationOptions, event : MouseEvent, findOptions: Finder.FindOptions, url: string) {
-//    Finder.find(findOptions).then(entity => {
-//        if (entity == null)
-//            return;
+export function createWordReportFromTemplate(options: Operations.EntityOperationOptions, event: MouseEvent, findOptions: Finder.FindOptions, url: string, contextual: boolean) {
+    Finder.find(findOptions).then(entity => {
+        if (entity == null)
+            return;
 
-//        Operations.constructFromDefault($.extend({
-//            keys: entity.runtimeInfo.key(),
-//            controllerUrl: url
-//        }, options), event);
-//    });
-//}
+        Entities.EntityValue
+
+        options.requestExtraJsonData = { keys: entity.runtimeInfo.key() };
+
+        options.controllerUrl = url;
+
+        if (contextual)
+            return Operations.constructFromDefaultContextual(options, event);
+        else
+            return Operations.constructFromDefault(options, event);
+    });
+}
+
+export function createWordReportFromEntity(options: Operations.EntityOperationOptions, event: MouseEvent, title: string, chooserOptions: Navigator.ChooserOption[] , url: string, contextual: boolean) {
+    Navigator.chooser(options.prefix + "_choose", title, chooserOptions).then(opt => {
+        if (opt == null)
+            return;
+
+        options.requestExtraJsonData = { keys: opt.value };
+
+        options.controllerUrl = url;
+
+        if (contextual)
+            return Operations.constructFromDefaultContextual(options, event);
+        else
+            return Operations.constructFromDefault(options, event);
+    });
+}
+

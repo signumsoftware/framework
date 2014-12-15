@@ -51,10 +51,10 @@ namespace Signum.Engine.Word
 
                 TemplatesByType = sb.GlobalLazy(() =>
                 {
-                    var list = Database.Query<WordTemplateEntity>().Select(r => KVP.Create(r.Query.ToQueryName(), r.ToLite())).ToList();
+                    var list = Database.Query<WordTemplateEntity>().Select(r => KVP.Create(r.Query, r.ToLite())).ToList();
 
                     return (from kvp in list
-                            let imp = dqm.GetEntityImplementations(kvp.Key)
+                            let imp = dqm.GetEntityImplementations(kvp.Key.ToQueryName())
                             where !imp.IsByAll
                             from t in imp.Types
                             group kvp.Value by t into g
@@ -63,7 +63,6 @@ namespace Signum.Engine.Word
                 }, new InvalidateWith(typeof(WordTemplateEntity)));
 
                 WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
-                   .Where(et => et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
                    .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
 
                 Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;

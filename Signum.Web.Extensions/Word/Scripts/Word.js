@@ -1,5 +1,5 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder"], function(require, exports, Finder) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Entities, Finder, Operations, Navigator) {
     function initReplacements() {
         var self = this;
 
@@ -86,15 +86,41 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder"], fun
             $button.unbind('click');
         }
     }
+
+    function createWordReportFromTemplate(options, event, findOptions, url, contextual) {
+        Finder.find(findOptions).then(function (entity) {
+            if (entity == null)
+                return;
+
+            Entities.EntityValue;
+
+            options.requestExtraJsonData = { keys: entity.runtimeInfo.key() };
+
+            options.controllerUrl = url;
+
+            if (contextual)
+                return Operations.constructFromDefaultContextual(options, event);
+            else
+                return Operations.constructFromDefault(options, event);
+        });
+    }
+    exports.createWordReportFromTemplate = createWordReportFromTemplate;
+
+    function createWordReportFromEntity(options, event, title, chooserOptions, url, contextual) {
+        Navigator.chooser(options.prefix + "_choose", title, chooserOptions).then(function (opt) {
+            if (opt == null)
+                return;
+
+            options.requestExtraJsonData = { keys: opt.value };
+
+            options.controllerUrl = url;
+
+            if (contextual)
+                return Operations.constructFromDefaultContextual(options, event);
+            else
+                return Operations.constructFromDefault(options, event);
+        });
+    }
+    exports.createWordReportFromEntity = createWordReportFromEntity;
 });
-//export function createMailFromTemplate(options: Operations.EntityOperationOptions, event : MouseEvent, findOptions: Finder.FindOptions, url: string) {
-//    Finder.find(findOptions).then(entity => {
-//        if (entity == null)
-//            return;
-//        Operations.constructFromDefault($.extend({
-//            keys: entity.runtimeInfo.key(),
-//            controllerUrl: url
-//        }, options), event);
-//    });
-//}
 //# sourceMappingURL=Word.js.map

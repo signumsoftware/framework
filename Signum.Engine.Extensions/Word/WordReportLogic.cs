@@ -74,7 +74,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        private static WordReportLogEntity CreateReport(Lite<WordTemplateEntity> template, Lite<Entity> entity, ISystemWordTemplate systemTemplate = null)
+        public static WordReportLogEntity CreateReport(Lite<WordTemplateEntity> template, Lite<Entity> entity, ISystemWordTemplate systemTemplate = null)
         {
             WordReportLogEntity log = new WordReportLogEntity
             {
@@ -92,11 +92,12 @@ namespace Signum.Engine.Word
 
                     var bytes = template.CreateWordReport(entity.RetrieveAndForget(), systemTemplate);
 
-                    FilePathEntity file = new FilePathEntity(templateEntity.FileType , "report.docx", bytes);
+                    FilePathEntity file = new FilePathEntity(templateEntity.FileType, "report.docx", bytes).Save();
 
                     log.Target = entity;
+                    log.Report = file.ToLite();
                     log.End = TimeZoneManager.Now;
-
+                    
                     using (ExecutionMode.Global())
                         log.Save();
 

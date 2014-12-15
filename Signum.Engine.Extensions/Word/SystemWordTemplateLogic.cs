@@ -13,6 +13,8 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Signum.Engine.Isolation;
+using Signum.Entities.Isolation;
 
 namespace Signum.Engine.Word
 {
@@ -58,7 +60,7 @@ namespace Signum.Engine.Word
             public object QueryName;
         }
 
-        static ResetLazy<Dictionary<Lite<SystemWordTemplateEntity>, List<WordTemplateEntity>>> SystemWordTemplateToWordTemplates;
+        static ResetLazy<Dictionary<Lite<SystemWordTemplateEntity>, List<Lite<WordTemplateEntity>>>> SystemWordTemplateToWordTemplates;
         static Dictionary<Type, SystemWordTemplateInfo> systemWordReports = new Dictionary<Type, SystemWordTemplateInfo>();
         public static ResetLazy<Dictionary<Type, SystemWordTemplateEntity>> TypeToSystemWordTemplate;
         public static ResetLazy<Dictionary<SystemWordTemplateEntity, Type>> SystemWordTemplateToType;
@@ -88,7 +90,7 @@ namespace Signum.Engine.Word
                     from et in Database.Query<WordTemplateEntity>()
                     where et.SystemWordTemplate != null
                         && (et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
-                    select new { swe = et.SystemWordTemplate, et })
+                    select new { swe = et.SystemWordTemplate, et = et.ToLite() })
                     .GroupToDictionary(pair => pair.swe.ToLite(), pair => pair.et),
                     new InvalidateWith(typeof(SystemWordTemplateEntity), typeof(WordTemplateEntity)));
 
@@ -121,7 +123,18 @@ namespace Signum.Engine.Word
             return template;
         }
 
-     
+
+        public static WordReportLogEntity CreateTeplate(this ISystemWordTemplate systemWordTemplate)
+        {
+            SystemWordTemplateEntity system = TypeToSystemWordTemplate.Value.GetOrThrow(systemWordTemplate.GetType());
+
+            Lite<WordTemplateEntity> template = (from lite in SystemWordTemplateToWordTemplates.Value.GetOrThrow(system.ToLite())
+                                                 let e = WordTemplateLogic.WordTemplatesLazy.Value.GetOrThrow(lite)
+                                                 where e.IsActiveNow() && systemWordTemplate.UntypedEntity.TryIsolation().Is(e.TryIsolation())
+                                                 select lite).SingleEx();
+
+            return WordReportLogic.CreateReport(template, systemWordTemplate.UntypedEntity.ToLiteFat(), systemWordTemplate); 
+        }
 
         static SqlPreCommand Schema_Generating()
         {

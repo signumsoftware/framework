@@ -1,11 +1,11 @@
 ﻿using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
-using Signum.Engine.Mailing;
+using Signum.Engine.Word;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Entities.Mailing;
+using Signum.Entities.Word;
 using Signum.Utilities;
 using Signum.Web.Controllers;
 using System;
@@ -33,14 +33,25 @@ namespace Signum.Web.Word
         }
 
         [HttpPost]
-        public ActionResult CreateWordReportFromTemplateAndEntity()
+        public ActionResult CreateWordReportFromEntity()
         {
-            var entity = Lite.Parse(Request["keys"]).Retrieve();
+            var template = Lite.Parse<WordTemplateEntity>(Request["keys"]);
 
-            var emailMessage = this.ExtractEntity<EmailTemplateEntity>()
-                .ConstructFrom(EmailMessageOperation.CreateMailFromTemplate, entity);
+            var word = this.ExtractEntity<Entity>()
+                .ConstructFrom(WordReportLogOperation.CreateWordReportFromEntity, template);
 
-            return this.DefaultConstructResult(emailMessage);
+            return this.DefaultConstructResult(word);
+        }
+
+        [HttpPost]
+        public ActionResult CreateWordReportFromTemplate()
+        {
+            var entity = Lite.Parse<Entity>(Request["keys"]);
+
+            var word = this.ExtractEntity<WordTemplateEntity>()
+                .ConstructFrom(WordReportLogOperation.CreateWordReportFromTemplate, entity);
+
+            return this.DefaultConstructResult(word);
         }
     }
 }
