@@ -633,12 +633,20 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                    SqlDbType == other.SqlDbType
                 && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
                 && Nullable == other.Nullable
-                && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / 2 || other.Size.Value == int.MaxValue && Length == -1)
+                && (other.Size == null || other.Size.Value == Precission || other.Size.Value == Length / BytesPerChar(other.SqlDbType) || other.Size.Value == int.MaxValue && Length == -1)
                 && (other.Scale == null || other.Scale.Value == Scale)
                 && Identity == other.Identity
                 && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey);
 
             return result;
+        }
+
+        int BytesPerChar(System.Data.SqlDbType sqlDbType)
+        {
+            if (sqlDbType == System.Data.SqlDbType.NChar || sqlDbType == System.Data.SqlDbType.NText || sqlDbType == System.Data.SqlDbType.NVarChar)
+                return 2;
+
+            return 1;
         }
 
         public bool DefaultEquals(IColumn other)

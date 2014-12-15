@@ -366,7 +366,7 @@ FROM {1} as [table]".FormatWith(
 
             var tn = tableName.OnDatabase(null);
 
-            string varName = "Constraint_" + tn.ToString().Replace(".", "_") + "_" + columnName;
+            string varName = "Constraint_" + tableName.Name + "_" + columnName;
 
             string command = @"
 DECLARE @sql nvarchar(max)
@@ -390,7 +390,7 @@ EXEC DB.dbo.sp_executesql @sql"
 
             var tn = tableName.OnDatabase(null);
 
-            string varName = "PrimaryKey_Constraint_" + tn.ToString().Replace(".", "_");
+            string varName = "PrimaryKey_Constraint_" + tn.Name;
 
             string command = @"
 DECLARE @sql nvarchar(max)

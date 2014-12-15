@@ -8,13 +8,13 @@ namespace Signum.Services
 {
     public static class Security
     {
-        public static Func<string, string> EncodePassword = (string originalPassword) => MD5Hash(originalPassword);
+        public static Func<string, byte[]> EncodePassword = (string originalPassword) => MD5Hash(originalPassword);
 
-        public static string MD5Hash(string saltedPassword)
+        public static byte[] MD5Hash(string saltedPassword)
         {
             byte[] originalBytes = ASCIIEncoding.Default.GetBytes(saltedPassword);
             byte[] encodedBytes = new MD5CryptoServiceProvider().ComputeHash(originalBytes);
-            return BitConverter.ToString(encodedBytes);
+            return encodedBytes;
         }
 
         public static string GetSHA1(string str)
