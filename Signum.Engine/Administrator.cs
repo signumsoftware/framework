@@ -9,7 +9,6 @@ using System.Data;
 using System.Collections.Generic;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.SchemaInfoTables;
-using System.Data.SqlServerCe;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Reflection;

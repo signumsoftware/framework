@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
-using System.Data.SqlServerCe;
 using System.Collections.Concurrent;
 using System.Reflection;
 
