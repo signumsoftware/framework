@@ -363,8 +363,6 @@ namespace Signum.Entities.Mailing
         TheTemplateIsAlreadyActive,
         [Description("The template is already inactive")]
         TheTemplateIsAlreadyInactive,
-        [Description("Type {0} does not have a property with name {1}")]
-        Type0DoesNotHaveAPropertyWithName1,
         [Description("SystemEmail should be set to access model {0}")]
         SystemEmailShouldBeSetToAccessModel0,
         NewCulture,

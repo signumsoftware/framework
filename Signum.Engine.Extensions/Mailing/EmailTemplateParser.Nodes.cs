@@ -252,28 +252,14 @@ namespace Signum.Engine.Mailing
 
                 this.fieldOrPropertyChain = fieldOrPropertyChain;
 
-                members = new List<MemberInfo>();
-                var type = systemEmail;
-                foreach (var field in fieldOrPropertyChain.Split('.'))
-                {
-                    var info = (MemberInfo)type.GetField(field, flags) ??
-                               (MemberInfo)type.GetProperty(field, flags);
+                string error;
+                this.members = ParsedModel.GetMembers(systemEmail, fieldOrPropertyChain, out error);
 
-                    if (info == null)
-                    {
-                        walker.AddError(false, EmailTemplateMessage.Type0DoesNotHaveAPropertyWithName1.NiceToString().FormatWith(type.Name, field));
-                        members = null;
-                        break;
-                    }
-
-                    members.Add(info);
-
-                    type = info.ReturningType();
-                }
+                if (error.HasText())
+                    walker.AddError(false, error);
             }
 
-            public const BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-
+            
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
                 if (p.SystemEmail == null)
@@ -317,34 +303,11 @@ namespace Signum.Engine.Mailing
             {
                 if (members != null)
                 {
-                    members = GetNewModel(sc.ModelType, fieldOrPropertyChain, sc.Replacements, sc.StringDistance);
+                    members = sc.GetMembers( GetNewModel( sc.ModelType, fieldOrPropertyChain, sc.Replacements, sc.StringDistance);
 
                     if (members != null)
                         fieldOrPropertyChain = members.ToString(a => a.Name, ".");
                 }
-            }
-
-            internal static List<MemberInfo> GetNewModel(Type type, string fieldOrPropertyChain, Replacements replacements, StringDistance sd)
-            {
-                List<MemberInfo> fields = new List<MemberInfo>();
-
-                foreach (var field in fieldOrPropertyChain.Split('.'))
-                {
-                    var allMembers = type.GetFields(flags).Cast<MemberInfo>().Concat(type.GetProperties(flags)).ToDictionary(a => a.Name);
-                    
-                    string s = replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), sd);
-
-                    if (s == null)
-                        return null;
-
-                    var member = allMembers.GetOrThrow(s);
-
-                    fields.Add(member);
-
-                    type = member.ReturningType();
-                }
-
-                return fields;
             }
         }
 

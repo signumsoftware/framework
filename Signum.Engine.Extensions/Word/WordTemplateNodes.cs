@@ -78,6 +78,8 @@ namespace Signum.Engine.Word
         }
 
         public abstract override OpenXmlElement CloneNode(bool deep);
+
+        abstract void Synchronize(SyncronizationContext sc);
     }
 
     public class TokenNode : BaseNode

@@ -17,6 +17,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Engine.UserAssets;
+using Signum.Engine.Templating;
 
 namespace Signum.Engine.Word
 {
@@ -152,6 +154,89 @@ namespace Signum.Engine.Word
             string fullFileName = Path.Combine(DumpFileFolder, fileName);
 
             File.WriteAllText(fullFileName, document.MainDocumentPart.Document.NiceToString());
+        }
+
+        static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
+        {
+            StringDistance sd = new StringDistance();
+
+            var emailTemplates = Database.Query<WordTemplateEntity>().ToList();
+
+            var table = Schema.Current.Table(typeof(WordTemplateEntity));
+
+            SqlPreCommand cmd = emailTemplates.Select(uq => SynchronizeWordTemplate(replacements, table, uq, sd)).Combine(Spacing.Double);
+
+            return cmd;
+        }
+
+        internal static SqlPreCommand SynchronizeWordTemplate(Replacements replacements, Table table, WordTemplateEntity template, StringDistance sd)
+        {
+            try
+            {
+                var queryName = QueryLogic.ToQueryName(template.Query.Key);
+
+                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+
+                Console.Clear();
+
+                SafeConsole.WriteLineColor(ConsoleColor.White, "WordTemplate: " + template.Name);
+                Console.WriteLine(" Query: " + template.Query.Key);
+
+             
+                SyncronizationContext sc = new SyncronizationContext
+                {
+                    ModelType = template.SystemWordTemplate.ToType(),
+                    QueryDescription = qd,
+                    Replacements = replacements,
+                    StringDistance = sd,
+                    IsClean = false,
+                };
+
+                try
+                {
+                    using (var memory = new MemoryStream())
+                    {
+                        memory.WriteAllBytes(template.Template.Retrieve().BinaryFile);
+
+                        using (WordprocessingDocument document = WordprocessingDocument.Open(memory, true))
+                        {
+                            Dump(document, "0.Original.txt");
+
+                            var parser = new WordTemplateParser(document, qd, template.SystemWordTemplate.ToType());
+                            parser.ParseDocument(); Dump(document, "1.Match.txt");
+                            parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
+                            parser.AssertClean();
+
+
+                            foreach (var node in document.MainDocumentPart.Document.Descendants<BaseNode>())
+	                        {
+                                node.Synchronize(sc);
+	                        }
+
+                        }
+                    }
+
+                    return table.UpdateSqlSync(template, includeCollections: true);
+                }
+                catch (TemplateSyncException ex)
+                {
+                    if (ex.Result == FixTokenResult.SkipEntity)
+                        return null;
+
+                    if (ex.Result == FixTokenResult.DeleteEntity)
+                        return table.DeleteSqlSync(template);
+
+                    throw new InvalidOperationException("Unexcpected {0}".FormatWith(ex.Result));
+                }
+                finally
+                {
+                    Console.Clear();
+                }
+            }
+            catch (Exception e)
+            {
+                return new SqlPreCommandSimple("-- Exception in {0}: {1}".FormatWith(template.BaseToString(), e.Message));
+            }
         }
     }
 }

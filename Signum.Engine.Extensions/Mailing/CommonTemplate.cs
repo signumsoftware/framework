@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Signum.Engine.UserAssets;
 
 namespace Signum.Engine.Templating
 {
@@ -179,4 +180,152 @@ namespace Signum.Engine.Templating
                 newVars.Add(Variable, this);
         }
     }
+
+    public static class ParsedModel
+    {
+        public const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+
+
+        public static List<MemberInfo> GetMembers(Type modelType, string fieldOrPropertyChain, out string error)
+        {
+            error = null;
+            var members = new List<MemberInfo>();
+            var type = modelType;
+            foreach (var field in fieldOrPropertyChain.Split('.'))
+            {
+                var info = (MemberInfo)type.GetField(field, Flags) ??
+                           (MemberInfo)type.GetProperty(field, Flags);
+
+                if (info == null)
+                {
+                    error = "Type {0} does not have a property with name {1}".FormatWith(type.Name, field);
+                    return null;
+                }
+
+                members.Add(info);
+
+                type = info.ReturningType();
+            }
+
+            return members;
+        }
+    }
+
+    public class SyncronizationContext
+    {
+        public ScopedDictionary<string, ParsedToken> Variables;
+        public Type ModelType;
+        public Replacements Replacements;
+        public StringDistance StringDistance;
+        public QueryDescription QueryDescription;
+
+        internal void SynchronizeToken(ParsedToken parsedToken, string remainingText)
+        {
+            if (parsedToken.QueryToken != null)
+            {
+                SafeConsole.WriteColor(parsedToken.QueryToken != null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + parsedToken.QueryToken.FullKey());
+                Console.WriteLine(" " + remainingText);
+            }
+            else
+            {
+                string tokenString = parsedToken.String;
+
+                if (tokenString.StartsWith("$"))
+                {
+                    string v = tokenString.TryBefore('.') ?? tokenString;
+
+                    ParsedToken part;
+                    if (!Variables.TryGetValue(v, out part))
+                        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' not found!".FormatWith(v));
+
+                    if (part != null && part.QueryToken == null)
+                        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not fixed yet! currently: '{1}'".FormatWith(v, part.String));
+
+                    var after = tokenString.TryAfter('.');
+
+                    tokenString =
+                        (part == null ? "Unknown" :
+                        part.QueryToken == null ? part.String :
+                        part.QueryToken.FullKey()) + (after == null ? null : ("." + after));
+                }
+
+                SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
+                Console.WriteLine(" " + remainingText);
+
+                QueryToken token;
+                FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false);
+                switch (result)
+                {
+                    case FixTokenResult.Nothing:
+                    case FixTokenResult.Fix:
+                        parsedToken.QueryToken = token;
+                        parsedToken.String = token.FullKey();
+                        break;
+                    case FixTokenResult.SkipEntity:
+                    case FixTokenResult.RemoveToken:
+                        throw new TemplateSyncException(result);
+                }
+            }
+        }
+
+        public void SynchronizeValue(ParsedToken Token, ref string value, bool isList)
+        {
+            string val = value;
+            FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, Token.QueryToken.Type, ref val, allowRemoveToken: false, isList: isList);
+            switch (result)
+            {
+                case FixTokenResult.Fix:
+                case FixTokenResult.Nothing:
+                    value = val;
+                    break;
+                case FixTokenResult.SkipEntity:
+                case FixTokenResult.RemoveToken:
+                    throw new TemplateSyncException(result);
+            }
+        }
+
+
+        internal List<MemberInfo> GetMembers(string fieldOrPropertyChain)
+        {
+            List<MemberInfo> fields = new List<MemberInfo>();
+
+            foreach (var field in fieldOrPropertyChain.Split('.'))
+            {
+                var allMembers = type.GetFields(ParsedModel.Flags).Cast<MemberInfo>().Concat(type.GetProperties(flags)).ToDictionary(a => a.Name);
+
+                string s = replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), sd);
+
+                if (s == null)
+                    return null;
+
+                var member = allMembers.GetOrThrow(s);
+
+                fields.Add(member);
+
+                type = member.ReturningType();
+            }
+
+            return fields;
+        }
+
+        public IDisposable NewScope()
+        {
+            Variables = new ScopedDictionary<string, ParsedToken>(Variables);
+
+            return new Disposable(() => Variables = Variables.Previous);
+        }
+
+        public bool IsClean { get; set; }
+    }
+
+    public class TemplateSyncException : Exception
+    {
+        public FixTokenResult Result;
+
+        public TemplateSyncException(FixTokenResult result)
+        {
+            this.Result = result;
+        }
+    }
+
 }
