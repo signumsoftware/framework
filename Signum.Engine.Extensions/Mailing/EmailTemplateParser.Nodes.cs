@@ -217,8 +217,8 @@ namespace Signum.Engine.Mailing
                 var text = globalFunc(new GlobalVarContext { Entity = p.Entity, Culture = p.CultureInfo, IsHtml = p.IsHtml, SystemEmail = p.SystemEmail, });
                 if (text is IHtmlString)
                     p.StringBuilder.Append(((IHtmlString)text).ToHtmlString());
-
-                p.StringBuilder.Append(p.IsHtml ? HttpUtility.HtmlEncode(text) : text);
+                else
+                    p.StringBuilder.Append(p.IsHtml ? HttpUtility.HtmlEncode(text) : text);
             }
 
             public override void FillQueryTokens(List<QueryToken> list)
@@ -303,7 +303,7 @@ namespace Signum.Engine.Mailing
             {
                 if (members != null)
                 {
-                    members = sc.GetMembers( GetNewModel( sc.ModelType, fieldOrPropertyChain, sc.Replacements, sc.StringDistance);
+                    members = sc.GetMembers(fieldOrPropertyChain);
 
                     if (members != null)
                         fieldOrPropertyChain = members.ToString(a => a.Name, ".");

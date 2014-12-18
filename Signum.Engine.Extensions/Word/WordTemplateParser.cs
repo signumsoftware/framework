@@ -27,6 +27,9 @@ namespace Signum.Engine.Word
 {
     public class WordTemplateParser
     {
+        public static Dictionary<string, Func<GlobalVarContext, object>> GlobalVariables = new Dictionary<string, Func<GlobalVarContext, object>>();
+
+
         public List<Error> Errors = new List<Error>();
         QueryDescription queryDescription;
         ScopedDictionary<string, ParsedToken> variables = new ScopedDictionary<string, ParsedToken>(null);

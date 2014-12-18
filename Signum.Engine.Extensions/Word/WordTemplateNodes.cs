@@ -18,6 +18,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Globalization;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Word
 {
@@ -72,6 +74,8 @@ namespace Signum.Engine.Word
 
         internal protected abstract void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows);
 
+        internal protected abstract void RenderTemplate(ScopedDictionary<string, ParsedToken> variables);
+
         public override string ToString()
         {
             return this.GetType().Name;
@@ -79,7 +83,7 @@ namespace Signum.Engine.Word
 
         public abstract override OpenXmlElement CloneNode(bool deep);
 
-        abstract void Synchronize(SyncronizationContext sc);
+        public abstract void Synchronize(SyncronizationContext sc);
     }
 
     public class TokenNode : BaseNode
@@ -169,6 +173,13 @@ namespace Signum.Engine.Word
             this.Parent.ReplaceChild(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(text)), this);
         }
 
+        protected internal override void RenderTemplate(ScopedDictionary<string, ParsedToken> variables)
+        {
+            var str = (IsRaw ? "@raw" : "@") + this.Token.ToString(variables, Format.HasText() ? (":" + Format) : null);
+
+            this.Parent.ReplaceChild(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(str)), this);
+        }
+
         public override void WriteTo(System.Xml.XmlWriter xmlWriter)
         {
             var tempText = new Text(Token.QueryToken.Try(q => q.FullKey()) ?? "Error!");
@@ -181,6 +192,13 @@ namespace Signum.Engine.Word
         public override OpenXmlElement CloneNode(bool deep)
         {
             return new TokenNode(this);
+        }
+
+        public override void Synchronize(SyncronizationContext sc)
+        {
+            sc.SynchronizeToken(Token, IsRaw ? "@raw[]" : "@[]");
+
+            Token.Declare(sc.Variables);
         }
     }
 
@@ -196,9 +214,19 @@ namespace Signum.Engine.Word
             this.Token = token;
         }
 
-        public DeclareNode(DeclareNode original) : base(original)
+        public DeclareNode(DeclareNode original)
+            : base(original)
         {
             this.Token = original.Token;
+        }
+
+        public override void WriteTo(System.Xml.XmlWriter xmlWriter)
+        {
+            var tempText = new Text(Token.QueryToken.Try(q => q.FullKey()) ?? "Error!");
+
+            this.AppendChild(tempText);
+            base.WriteTo(xmlWriter);
+            this.RemoveChild(tempText);
         }
 
         public override void FillTokens(List<QueryToken> tokens)
@@ -213,6 +241,22 @@ namespace Signum.Engine.Word
         protected internal override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
         {
             this.Remove();
+        }
+
+        protected internal override void RenderTemplate(ScopedDictionary<string, ParsedToken> variables)
+        {
+            string str = "@declare" + Token.ToString(variables, null);
+
+            this.Parent.ReplaceChild(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(str)), this);
+
+            Token.Declare(variables);
+        }
+
+        public override void Synchronize(SyncronizationContext sc)
+        {
+            sc.SynchronizeToken(Token, "@declare");
+
+            Token.Declare(sc.Variables);
         }
     }
 
@@ -296,7 +340,90 @@ namespace Signum.Engine.Word
 
             return ((FieldInfo)member).GetValue(systemEmail);
         }
+
+        protected internal override void RenderTemplate(ScopedDictionary<string, ParsedToken> variables)
+        {
+            string str = "@model[{0}]".FormatWith(this.members == null ? fieldOrPropertyChain : members.ToString(a => a.Name, "."));
+
+            this.Parent.ReplaceChild(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(str)), this);
+        }
+
+        public override void Synchronize(SyncronizationContext sc)
+        {
+            if (members != null)
+            {
+                members = sc.GetMembers(fieldOrPropertyChain);
+
+                if (members != null)
+                    fieldOrPropertyChain = members.ToString(a => a.Name, ".");
+            }
+        }
     }
+
+    public class GlobalVarContext
+    {
+        public IEntity Entity;
+        public CultureInfo Culture;
+        public ISystemWordTemplate SystemWordTemplate;
+    }
+
+    public class GlobalNode : BaseNode
+    {
+        Func<GlobalVarContext, object> globalFunc;
+        string globalKey;
+        internal GlobalNode(string globalKey, WordTemplateParser walker)
+        {
+            this.globalKey = globalKey;
+            this.globalFunc = WordTemplateParser.GlobalVariables.TryGet(globalKey, null);
+            if (globalFunc == null)
+                walker.AddError(false, "The global key {0} was not found".FormatWith(globalKey));
+        }
+
+        public GlobalNode(GlobalNode original)
+            : base(original)
+        {
+            this.globalFunc = original.globalFunc;
+            this.globalKey = original.globalKey;
+        }
+
+        public override OpenXmlElement CloneNode(bool deep)
+        {
+            return new GlobalNode(this);
+        }
+
+        public override void WriteTo(System.Xml.XmlWriter xmlWriter)
+        {
+            var tempText = new Text(globalKey);
+
+            this.AppendChild(tempText);
+            base.WriteTo(xmlWriter);
+            this.RemoveChild(tempText);
+        }
+
+        public override void FillTokens(List<QueryToken> tokens)
+        {
+        }
+
+        internal protected override void RenderNode(WordTemplateParameters p, IEnumerable<ResultRow> rows)
+        {
+            object text = globalFunc(new GlobalVarContext { Entity = p.Entity, Culture = p.CultureInfo, SystemWordTemplate = p.SystemWordTemplate });
+            
+            this.Parent.ReplaceChild(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(text.TryToString())), this);
+        }
+
+        protected internal override void RenderTemplate(ScopedDictionary<string, ParsedToken> variables)
+        {
+            string str = "@global[{0}]".FormatWith(this.globalKey);
+
+            this.Parent.ReplaceChild(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(str)), this);
+        }
+
+        public override void Synchronize(SyncronizationContext sc)
+        {
+            globalKey = sc.Replacements.SelectInteractive(globalKey, WordTemplateParser.GlobalVariables.Keys, "EmailTemplate Globals", sc.StringDistance) ?? globalKey;
+        }
+    }
+
 
     public class BlockNode : BaseNode
     {
@@ -334,6 +461,22 @@ namespace Signum.Engine.Word
                 parent.InsertAt(item, index++);
             }   
         }
+
+        protected internal override void RenderTemplate(ScopedDictionary<string, ParsedToken> variables)
+        {
+            foreach (var item in this.Descendants<BaseNode>().ToList())
+            {
+                item.RenderTemplate(variables);
+            }
+        }
+
+        public override void Synchronize(SyncronizationContext sc)
+        {
+            foreach (var item in this.Descendants<BaseNode>().ToList())
+            {
+                item.Synchronize(sc);
+            }
+        }
     }
 
     public abstract class BlockContainerNode : BaseNode
@@ -358,42 +501,20 @@ namespace Signum.Engine.Word
 
         protected internal abstract void ReplaceBlock();
 
-        protected OpenXmlElementPair NormalizeSiblings(OpenXmlElementPair tuple)
+        protected void NormalizeInterval(ref MatchNodePair first, ref MatchNodePair last)
         {
-            if (tuple.First == tuple.Last)
+            if (first.MatchNode == last.MatchNode)
                 throw new ArgumentException("first and last are the same node");
 
-            var chainFirst = ((OpenXmlElement)tuple.First).Follow(a => a.Parent).Reverse().ToList();
-            var chainLast = ((OpenXmlElement)tuple.Last).Follow(a => a.Parent).Reverse().ToList();
+            var chainFirst = ((OpenXmlElement)first.MatchNode).Follow(a => a.Parent).Reverse().ToList();
+            var chainLast = ((OpenXmlElement)last.MatchNode).Follow(a => a.Parent).Reverse().ToList();
 
-            var result = chainFirst.Zip(chainLast, (f, i) => new OpenXmlElementPair(f, i)).First(a => a.First != a.Last);
-            AssertNotImportant(chainFirst, result.First);
-            AssertNotImportant(chainLast, result.Last);
+            var result = chainFirst.Zip(chainLast, (f, l) => new { f, l }).First(a => a.f != a.l);
+            AssertNotImportant(chainFirst, result.f);
+            AssertNotImportant(chainLast, result.l);
 
-            return result;
-        }
-
-        public struct OpenXmlElementPair
-        {
-            public readonly OpenXmlElement First;
-            public readonly OpenXmlElement Last;
-
-            public OpenXmlElementPair(OpenXmlElement first, OpenXmlElement last)
-            {
-                this.First = first;
-                this.Last = last;
-            }
-
-            public OpenXmlElement CommonParent
-            {
-                get
-                {
-                    if (First.Parent != Last.Parent)
-                        throw new InvalidOperationException("Parents do not match");
-
-                    return First.Parent;
-                }
-            }
+            first.AscendantNode = result.f;
+            last.AscendantNode = result.l;
         }
 
         private void AssertNotImportant(List<OpenXmlElement> chain, OpenXmlElement openXmlElement)
@@ -417,15 +538,15 @@ namespace Signum.Engine.Word
             return c is Run || c is Paragraph;
         }
 
-        protected static List<OpenXmlElement> NodesBetween(OpenXmlElementPair pair)
+        protected static List<OpenXmlElement> NodesBetween(MatchNodePair first, MatchNodePair last)
         {
-            var parent = pair.CommonParent;
+            var parent = first.CommonParent(last);
 
-            int indexFirst = parent.ChildElements.IndexOf(pair.First);
+            int indexFirst = parent.ChildElements.IndexOf(first.AscendantNode);
             if (indexFirst == -1)
                 throw new InvalidOperationException("Element not found");
 
-            int indexLast = parent.ChildElements.IndexOf(pair.Last);
+            int indexLast = parent.ChildElements.IndexOf(last.AscendantNode);
             if (indexLast == -1)
                 throw new InvalidOperationException("Element not found");
 
@@ -480,7 +601,7 @@ namespace Signum.Engine.Word
 
         protected internal override void ReplaceBlock()
         {
-            OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(ForeachToken, EndForeachToken));
+            MatchNodePairInterval pair = this.NormalizeInterval(ForeachToken, EndForeachToken);
 
             this.ForeachBlock = new BlockNode();
             MoveTo(NodesBetween(pair), this.ForeachBlock);
@@ -527,6 +648,56 @@ namespace Signum.Engine.Word
                 tuple.Item1.RenderNode(p, tuple.Item2);
             }
         }
+
+        protected internal override void RenderTemplate(ScopedDictionary<string, ParsedToken> variables)
+        {
+            var parent = this.Parent;
+            int index = parent.ChildElements.IndexOf(this);
+
+            this.Parent.ReplaceChild(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(str)), this);
+
+            sb.Append("@foreach");
+            Token.ToString(sb, variables, null);
+            {
+                var newVars = new ScopedDictionary<string, ParsedToken>(variables);
+                Token.Declare(newVars);
+                Block.ToString(sb, newVars);
+            }
+
+            sb.Append("@endforeach");
+        }
+
+        public override void Synchronize(SyncronizationContext sc)
+        {
+            sc.SynchronizeToken(Token, "@foreach[]");
+
+            using (sc.NewScope())
+            {
+                Token.Declare(sc.Variables);
+
+                this.ForeachBlock.Synchronize(sc);
+            }
+        }
+    }
+
+    public struct MatchNodePair
+    {
+        public MatchNodePair(MatchNode matchNode, OpenXmlElement ascendantNode)
+        {
+            this.MatchNode = matchNode;
+            this.AscendantNode = ascendantNode;
+        }
+
+        public MatchNode MatchNode;
+        public OpenXmlElement AscendantNode;
+
+        public OpenXmlElement CommonParent(MatchNodePair other)
+        {
+            if (this.AscendantNode.Parent != other.AscendantNode.Parent)
+                throw new InvalidOperationException("Parents do not match");
+
+            return this.AscendantNode;
+        }
     }
 
     public class AnyNode : BlockContainerNode
@@ -535,9 +706,9 @@ namespace Signum.Engine.Word
         public readonly FilterOperation? Operation;
         public string Value;
 
-        public MatchNode AnyToken;
-        public MatchNode NotAnyToken;
-        public MatchNode EndAnyToken;
+        public MatchNodePair AnyToken;
+        public MatchNodePair NotAnyToken;
+        public MatchNodePair EndAnyToken;
 
         public BlockNode AnyBlock;
         public BlockNode NotAnyBlock;
@@ -608,7 +779,7 @@ namespace Signum.Engine.Word
         {
             if (this.NotAnyToken == null)
             {
-                OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(AnyToken, EndAnyToken));
+                MatchNodePairInterval pair = this.NormalizeInterval(new MatchNodePairInterval(AnyToken, EndAnyToken));
 
                 this.AnyBlock = new BlockNode();
                 MoveTo(NodesBetween(pair), this.AnyBlock);
@@ -618,8 +789,8 @@ namespace Signum.Engine.Word
             }
             else
             {
-                OpenXmlElementPair pairAny = this.NormalizeSiblings(new OpenXmlElementPair(AnyToken, NotAnyToken));
-                OpenXmlElementPair pairNotAny = this.NormalizeSiblings(new OpenXmlElementPair(NotAnyToken, EndAnyToken));
+                MatchNodePairInterval pairAny = this.NormalizeInterval(new MatchNodePairInterval(AnyToken, NotAnyToken));
+                MatchNodePairInterval pairNotAny = this.NormalizeInterval(new MatchNodePairInterval(NotAnyToken, EndAnyToken));
 
                 if (pairAny.Last != pairNotAny.First)
                     throw new InvalidOperationException("Unbalanced tokens");
@@ -691,6 +862,31 @@ namespace Signum.Engine.Word
                 return filtered;
             }
         }
+
+        public override void Synchronize(SyncronizationContext sc)
+        {
+            sc.SynchronizeToken(Token, "@any[]");
+
+            if (Operation != null)
+                sc.SynchronizeValue(Token, ref Value, Operation == FilterOperation.IsIn);
+
+            using (sc.NewScope())
+            {
+                Token.Declare(sc.Variables);
+
+                AnyBlock.Synchronize(sc);
+            }
+
+            if (NotAnyBlock != null)
+            {
+                using (sc.NewScope())
+                {
+                    Token.Declare(sc.Variables);
+
+                    NotAnyBlock.Synchronize(sc);
+                }
+            }
+        }
     }
 
     public class IfNode : BlockContainerNode
@@ -752,7 +948,7 @@ namespace Signum.Engine.Word
         {
             if (this.ElseToken == null)
             {
-                OpenXmlElementPair pair = this.NormalizeSiblings(new OpenXmlElementPair(IfToken, EndIfToken));
+                MatchNodePairInterval pair = this.NormalizeInterval(new MatchNodePairInterval(IfToken, EndIfToken));
 
                 this.IfBlock = new BlockNode();
                 MoveTo(NodesBetween(pair), this.IfBlock);
@@ -762,8 +958,8 @@ namespace Signum.Engine.Word
             }
             else
             {
-                OpenXmlElementPair pairAny = this.NormalizeSiblings(new OpenXmlElementPair(IfToken, ElseToken));
-                OpenXmlElementPair pairNotAny = this.NormalizeSiblings(new OpenXmlElementPair(ElseToken, EndIfToken));
+                MatchNodePairInterval pairAny = this.NormalizeInterval(new MatchNodePairInterval(IfToken, ElseToken));
+                MatchNodePairInterval pairNotAny = this.NormalizeInterval(new MatchNodePairInterval(ElseToken, EndIfToken));
 
                 if (pairAny.Last != pairNotAny.First)
                     throw new InvalidOperationException("Unbalanced tokens");
@@ -835,6 +1031,31 @@ namespace Signum.Engine.Word
                 var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
 
                 return lambda();
+            }
+        }
+
+        public override void Synchronize(SyncronizationContext sc)
+        {
+            sc.SynchronizeToken(Token, "@if[]");
+
+            if (Operation != null)
+                sc.SynchronizeValue(Token, ref Value, Operation == FilterOperation.IsIn);
+
+            using (sc.NewScope())
+            {
+                Token.Declare(sc.Variables);
+
+                IfBlock.Synchronize(sc);
+            }
+
+            if (ElseBlock != null)
+            {
+                using (sc.NewScope())
+                {
+                    Token.Declare(sc.Variables);
+
+                    ElseBlock.Synchronize(sc);
+                }
             }
         }
     }

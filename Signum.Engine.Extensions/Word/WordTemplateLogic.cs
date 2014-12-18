@@ -213,6 +213,8 @@ namespace Signum.Engine.Word
                                 node.Synchronize(sc);
 	                        }
 
+
+
                         }
                     }
 

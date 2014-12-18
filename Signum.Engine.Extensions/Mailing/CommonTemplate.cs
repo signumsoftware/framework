@@ -156,6 +156,13 @@ namespace Signum.Engine.Templating
                 sb.Append(" as " + Variable);
         }
 
+        internal string ToString(ScopedDictionary<string, ParsedToken> variables, string afterToken)
+        {
+            StringBuilder sb = new StringBuilder();
+            ToString(sb, variables, afterToken);
+            return sb.ToString();
+        }
+
         string SimplifyToken(ScopedDictionary<string, ParsedToken> variables, string token)
         {
             var variable = (from kvp in variables
@@ -219,6 +226,8 @@ namespace Signum.Engine.Templating
         public StringDistance StringDistance;
         public QueryDescription QueryDescription;
 
+        public bool IsClean;
+
         internal void SynchronizeToken(ParsedToken parsedToken, string remainingText)
         {
             if (parsedToken.QueryToken != null)
@@ -258,6 +267,7 @@ namespace Signum.Engine.Templating
                 {
                     case FixTokenResult.Nothing:
                     case FixTokenResult.Fix:
+                        this.IsClean = false;
                         parsedToken.QueryToken = token;
                         parsedToken.String = token.FullKey();
                         break;
@@ -289,11 +299,12 @@ namespace Signum.Engine.Templating
         {
             List<MemberInfo> fields = new List<MemberInfo>();
 
+            Type type = this.ModelType;
             foreach (var field in fieldOrPropertyChain.Split('.'))
             {
-                var allMembers = type.GetFields(ParsedModel.Flags).Cast<MemberInfo>().Concat(type.GetProperties(flags)).ToDictionary(a => a.Name);
+                var allMembers = type.GetFields(ParsedModel.Flags).Cast<MemberInfo>().Concat(type.GetProperties(ParsedModel.Flags)).ToDictionary(a => a.Name);
 
-                string s = replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), sd);
+                string s = this.Replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), this.StringDistance);
 
                 if (s == null)
                     return null;
@@ -314,8 +325,6 @@ namespace Signum.Engine.Templating
 
             return new Disposable(() => Variables = Variables.Previous);
         }
-
-        public bool IsClean { get; set; }
     }
 
     public class TemplateSyncException : Exception
