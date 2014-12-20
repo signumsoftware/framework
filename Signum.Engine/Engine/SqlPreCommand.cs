@@ -176,6 +176,9 @@ namespace Signum.Engine
             if (value.GetType().IsEnum)
                 return Convert.ToInt32(value).ToString();
 
+            if (value is byte[])
+                return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
+
             return value.ToString();
         }
 
