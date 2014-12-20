@@ -301,7 +301,7 @@ namespace Signum.Engine.Mailing
 
             public override void Synchronize(SyncronizationContext sc)
             {
-                if (members != null)
+                if (members == null)
                 {
                     members = sc.GetMembers(fieldOrPropertyChain);
 

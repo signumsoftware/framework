@@ -226,7 +226,7 @@ namespace Signum.Engine.Templating
         public StringDistance StringDistance;
         public QueryDescription QueryDescription;
 
-        public bool IsClean;
+        public bool HasChanges;
 
         internal void SynchronizeToken(ParsedToken parsedToken, string remainingText)
         {
@@ -267,7 +267,7 @@ namespace Signum.Engine.Templating
                 {
                     case FixTokenResult.Nothing:
                     case FixTokenResult.Fix:
-                        this.IsClean = false;
+                        this.HasChanges = true;
                         parsedToken.QueryToken = token;
                         parsedToken.String = token.FullKey();
                         break;

@@ -213,14 +213,14 @@ namespace Signum.Engine.Word
                             if (!filter.Success)
                             {
                                 t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
-                                any = new AnyNode(t, this) { AnyToken = matchNode };
+                                any = new AnyNode(t, this) { AnyToken = new MatchNodePair(matchNode) };
                             }
                             else
                             {
                                 t = TryParseToken(filter.Groups["token"].Value, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
                                 var comparer = filter.Groups["comparer"].Value;
                                 var value = filter.Groups["value"].Value;
-                                any = new AnyNode(t, comparer, value, this) { AnyToken = matchNode };
+                                any = new AnyNode(t, comparer, value, this) { AnyToken = new MatchNodePair(matchNode) };
                             }
 
                             PushBlock(any);
@@ -231,13 +231,13 @@ namespace Signum.Engine.Word
                     case "notany":
                         {
                             var an = PeekBlock<AnyNode>();
-                            an.NotAnyToken = matchNode;
+                            an.NotAnyToken = new MatchNodePair(matchNode);
                             break;
                         }
                     case "endany":
                         {
                             var an = PopBlock<AnyNode>();
-                            an.EndAnyToken = matchNode;
+                            an.EndAnyToken = new MatchNodePair(matchNode);
 
                             an.ReplaceBlock(); 
 
@@ -251,14 +251,14 @@ namespace Signum.Engine.Word
                             if (!filter.Success)
                             {
                                 t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
-                                ifn = new IfNode(t, this) { IfToken = matchNode };
+                                ifn = new IfNode(t, this) { IfToken = new MatchNodePair(matchNode) };
                             }
                             else
                             {
                                 t = TryParseToken(filter.Groups["token"].Value, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
                                 var comparer = filter.Groups["comparer"].Value;
                                 var value = filter.Groups["value"].Value;
-                                ifn = new IfNode(t, comparer, value, this) { IfToken = matchNode };
+                                ifn = new IfNode(t, comparer, value, this) { IfToken = new MatchNodePair(matchNode) };
                             }
 
                             PushBlock(ifn);
@@ -270,14 +270,14 @@ namespace Signum.Engine.Word
                     case "else":
                         {
                             var an = PeekBlock<IfNode>();
-                            an.ElseToken = matchNode;
+                            an.ElseToken = new MatchNodePair(matchNode);
 
                             break;
                         }
                     case "endif":
                         {
                             var ifn = PopBlock<IfNode>();
-                            ifn.EndIfToken = matchNode;
+                            ifn.EndIfToken = new MatchNodePair(matchNode);
 
                             ifn.ReplaceBlock();
 
@@ -286,7 +286,7 @@ namespace Signum.Engine.Word
                     case "foreach":
                         {
                             var t = TryParseToken(token, dec, SubTokensOptions.CanElement);
-                            var fn = new ForeachNode(t) { ForeachToken = matchNode };
+                            var fn = new ForeachNode(t) { ForeachToken = new MatchNodePair(matchNode) };
                             stack.Push(fn);
                             
                             DeclareVariable(t);
@@ -295,7 +295,7 @@ namespace Signum.Engine.Word
                     case "endforeach":
                         {
                             var fn = PopBlock<ForeachNode>();
-                            fn.EndForeachToken = matchNode;
+                            fn.EndForeachToken = new MatchNodePair(matchNode);
 
                             fn.ReplaceBlock();
                             break;
@@ -403,18 +403,5 @@ namespace Signum.Engine.Word
 
         public string Message;
         public bool IsFatal;
-    }
-
-    public static class OpenXmlElementExtensions
-    {
-        public static string NiceToString(this OpenXmlElement element)
-        {
-            using (var sw = new StringWriter())
-            using (var xtw = new XmlTextWriter(sw) { Formatting = Formatting.Indented })
-            {
-                element.WriteTo(xtw);
-                return sw.ToString();
-            }
-        }
     }
 }

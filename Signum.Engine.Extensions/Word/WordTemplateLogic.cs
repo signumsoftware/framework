@@ -19,6 +19,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Signum.Engine.UserAssets;
 using Signum.Engine.Templating;
+using Signum.Entities.Files;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Word
 {
@@ -66,6 +68,8 @@ namespace Signum.Engine.Word
 
                 WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
                    .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
+
+                Schema.Current.Synchronizing += Schema_Synchronize_Tokens;
 
                 Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
             }
@@ -158,18 +162,19 @@ namespace Signum.Engine.Word
 
         static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
         {
+            if (!SafeConsole.Ask("Synchronize WordTemplates?"))
+                return null;
+
             StringDistance sd = new StringDistance();
 
             var emailTemplates = Database.Query<WordTemplateEntity>().ToList();
 
-            var table = Schema.Current.Table(typeof(WordTemplateEntity));
-
-            SqlPreCommand cmd = emailTemplates.Select(uq => SynchronizeWordTemplate(replacements, table, uq, sd)).Combine(Spacing.Double);
+            SqlPreCommand cmd = emailTemplates.Select(uq => SynchronizeWordTemplate(replacements, uq, sd)).Combine(Spacing.Double);
 
             return cmd;
         }
 
-        internal static SqlPreCommand SynchronizeWordTemplate(Replacements replacements, Table table, WordTemplateEntity template, StringDistance sd)
+        internal static SqlPreCommand SynchronizeWordTemplate(Replacements replacements, WordTemplateEntity template, StringDistance sd)
         {
             try
             {
@@ -182,21 +187,13 @@ namespace Signum.Engine.Word
                 SafeConsole.WriteLineColor(ConsoleColor.White, "WordTemplate: " + template.Name);
                 Console.WriteLine(" Query: " + template.Query.Key);
 
-             
-                SyncronizationContext sc = new SyncronizationContext
-                {
-                    ModelType = template.SystemWordTemplate.ToType(),
-                    QueryDescription = qd,
-                    Replacements = replacements,
-                    StringDistance = sd,
-                    IsClean = false,
-                };
+                var file = template.Template.Retrieve();
 
                 try
                 {
                     using (var memory = new MemoryStream())
                     {
-                        memory.WriteAllBytes(template.Template.Retrieve().BinaryFile);
+                        memory.WriteAllBytes(file.BinaryFile);
 
                         using (WordprocessingDocument document = WordprocessingDocument.Open(memory, true))
                         {
@@ -207,18 +204,39 @@ namespace Signum.Engine.Word
                             parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                             parser.AssertClean();
 
+                            SyncronizationContext sc = new SyncronizationContext
+                            {
+                                ModelType = template.SystemWordTemplate.ToType(),
+                                QueryDescription = qd,
+                                Replacements = replacements,
+                                StringDistance = sd,
+                                HasChanges = false,
+                                Variables = new ScopedDictionary<string,ParsedToken>(null),
+                            };
 
-                            foreach (var node in document.MainDocumentPart.Document.Descendants<BaseNode>())
+                            foreach (var node in document.MainDocumentPart.Document.Descendants<BaseNode>().ToList())
 	                        {
                                 node.Synchronize(sc);
 	                        }
 
+                            if (!sc.HasChanges)
+                                return null;
 
+                            Dump(document, "3.Synchronized.txt");
+                            var variables = new ScopedDictionary<string, ParsedToken>(null);
+                            foreach (var node in document.MainDocumentPart.Document.Descendants<BaseNode>().ToList())
+                            {
+                                node.RenderTemplate(variables);
+                            }
 
+                            Dump(document, "4.Rendered.txt");
                         }
-                    }
 
-                    return table.UpdateSqlSync(template, includeCollections: true);
+                        file.AllowChange = true;
+                        file.BinaryFile = memory.ToArray();
+
+                        return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate: " + template.Name);
+                    }                 
                 }
                 catch (TemplateSyncException ex)
                 {
@@ -226,7 +244,10 @@ namespace Signum.Engine.Word
                         return null;
 
                     if (ex.Result == FixTokenResult.DeleteEntity)
-                        return table.DeleteSqlSync(template);
+                        return SqlPreCommandConcat.Combine(Spacing.Simple,
+                            Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(template),
+                            Schema.Current.Table<FileEntity>().DeleteSqlSync(file));
+
 
                     throw new InvalidOperationException("Unexcpected {0}".FormatWith(ex.Result));
                 }
