@@ -641,7 +641,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             return result;
         }
 
-        int BytesPerChar(System.Data.SqlDbType sqlDbType)
+        public static int BytesPerChar(System.Data.SqlDbType sqlDbType)
         {
             if (sqlDbType == System.Data.SqlDbType.NChar || sqlDbType == System.Data.SqlDbType.NText || sqlDbType == System.Data.SqlDbType.NVarChar)
                 return 2;

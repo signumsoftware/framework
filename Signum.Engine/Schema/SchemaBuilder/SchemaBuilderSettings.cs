@@ -150,12 +150,12 @@ namespace Signum.Engine.Maps
             if(propertyRoute.PropertyRouteType == PropertyRouteType.Root || propertyRoute.PropertyRouteType == PropertyRouteType.LiteEntity)
                 throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
 
-            return FieldAttributes(propertyRoute).OfType<A>().FirstOrDefault();
+            return (A)FieldAttributes(propertyRoute).FirstOrDefault(a => a.GetType() == typeof(A));
         }
 
         public A TypeAttribute<A>(Type entityType) where A : Attribute
         {
-            return TypeAttributes(entityType).OfType<A>().FirstOrDefault();
+            return (A)TypeAttributes(entityType).FirstOrDefault(a => a.GetType() == typeof(A));
         }
 
         internal bool IsNullable(PropertyRoute propertyRoute, bool forceNull)

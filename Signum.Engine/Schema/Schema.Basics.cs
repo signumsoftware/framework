@@ -725,7 +725,7 @@ namespace Signum.Engine.Maps
 
         public bool IsLite { get; internal set; }
         public bool AvoidExpandOnRetrieving { get; set; }
-        public string Default { get { return null; } }
+        public string Default { get; set; }
 
         public FieldReference(Type fieldType) : base(fieldType) { }
 
@@ -950,7 +950,7 @@ namespace Signum.Engine.Maps
         public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
         public Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
         public bool AvoidForeignKey { get; set; }
-        public string Default { get { return null; } }
+        public string Default { get; set; }
     }
 
     public partial class ImplementationStringColumn : IColumn
@@ -967,7 +967,7 @@ namespace Signum.Engine.Maps
         public SqlDbType SqlDbType { get { return SqlDbType.NVarChar; } }
         public Type Type { get { return typeof(string); } }
         public bool AvoidForeignKey { get { return false; } }
-        public string Default { get { return null; } }
+        public string Default { get; set; }
     }
 
     public partial class FieldMList : Field, IFieldFinder
