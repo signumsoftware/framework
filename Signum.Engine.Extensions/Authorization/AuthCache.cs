@@ -325,7 +325,7 @@ namespace Signum.Entities.Authorization
             Func<string, R> toResource, Func<string, A> parseAllowed)
         {
             var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
-            var should = element.Element(rootName).Elements("Role").ToDictionary(x => roles[x.Attribute("Name").Value]);
+            var should = element.Element(rootName).Elements("Role").ToDictionary(x => roles.GetOrThrow(x.Attribute("Name").Value));
 
             Table table = Schema.Current.Table(typeof(RT));
             
