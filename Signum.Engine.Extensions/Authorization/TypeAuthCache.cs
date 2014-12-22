@@ -188,28 +188,31 @@ namespace Signum.Entities.Authorization
 
         internal void SetRules(BaseRulePack<TypeAllowedRule> rules)
         {
-            var current = Database.Query<RuleTypeEntity>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
-            var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
+            using (AuthLogic.Disable())
+            {
+                var current = Database.Query<RuleTypeEntity>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
+                var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
-            Synchronizer.Synchronize(should, current,
-                (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(),
-                (type, pr) => pr.Delete(),
-                (type, ar, pr) =>
-                {
-                    pr.Allowed = ar.Allowed.Fallback;
-
-                    var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionEntity
+                Synchronizer.Synchronize(should, current,
+                    (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(),
+                    (type, pr) => pr.Delete(),
+                    (type, ar, pr) =>
                     {
-                        Allowed = a.Allowed,
-                        Condition = a.TypeCondition,
-                    }).ToMList();
+                        pr.Allowed = ar.Allowed.Fallback;
 
-                    if (!pr.Conditions.SequenceEqual(shouldConditions))
-                        pr.Conditions = shouldConditions;
+                        var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionEntity
+                        {
+                            Allowed = a.Allowed,
+                            Condition = a.TypeCondition,
+                        }).ToMList();
 
-                    if (pr.IsGraphModified)
-                        pr.Save();
-                });
+                        if (!pr.Conditions.SequenceEqual(shouldConditions))
+                            pr.Conditions = shouldConditions;
+
+                        if (pr.IsGraphModified)
+                            pr.Save();
+                    });
+            }
         }
 
         internal TypeAllowedAndConditions GetAllowed(Lite<RoleEntity> role, Type key)
