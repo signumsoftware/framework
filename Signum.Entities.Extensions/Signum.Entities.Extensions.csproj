@@ -116,6 +116,7 @@
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
     <Compile Include="Mailing\SystemEmail.cs" />
+    <Compile Include="Migrations\Migration.cs" />
     <Compile Include="Scheduler\ScheduledTaskLogEntity.cs" />
     <Compile Include="Scheduler\ApplicationEventLog.cs" />
     <Compile Include="SMS\SMSConfigurationEntity.cs" />
