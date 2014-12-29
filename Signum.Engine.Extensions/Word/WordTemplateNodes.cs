@@ -89,18 +89,15 @@ namespace Signum.Engine.Word
 
     public class TokenNode : BaseNode
     {
-        public readonly bool IsRaw;
-
         public readonly ParsedToken Token;
         public readonly QueryToken EntityToken;
         public readonly string Format;
         public readonly PropertyRoute Route;
 
-        internal TokenNode(ParsedToken token, string format, bool isRaw, WordTemplateParser parser)
+        internal TokenNode(ParsedToken token, string format, WordTemplateParser parser)
         {
             this.Token = token;
             this.Format = format;
-            this.IsRaw = isRaw;
 
             if (token.QueryToken != null && IsTranslateInstanceCanditate(token.QueryToken))
             {
@@ -113,7 +110,6 @@ namespace Signum.Engine.Word
 
         internal TokenNode(TokenNode original) : base(original)
         {
-            this.IsRaw = original.IsRaw;
             this.Token = original.Token;
             this.EntityToken = original.EntityToken;
             this.Format = original.Format;
@@ -176,7 +172,7 @@ namespace Signum.Engine.Word
 
         protected internal override void RenderTemplate(ScopedDictionary<string, ParsedToken> variables)
         {
-            var str = (IsRaw ? "@raw" : "@") + this.Token.ToString(variables, Format.HasText() ? (":" + Format) : null);
+            var str = "@" + this.Token.ToString(variables, Format.HasText() ? (":" + Format) : null);
 
             this.ReplaceBy(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(str)));
         }
@@ -197,7 +193,7 @@ namespace Signum.Engine.Word
 
         public override void Synchronize(SyncronizationContext sc)
         {
-            sc.SynchronizeToken(Token, IsRaw ? "@raw" : "@");
+            sc.SynchronizeToken(Token, "@");
 
             Token.Declare(sc.Variables);
         }

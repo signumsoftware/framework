@@ -166,7 +166,6 @@ namespace Signum.Engine.Word
                 switch (keyword)
                 {
                     case "":
-                    case "raw":
                         var tok = TemplateUtils.TokenFormatRegex.Match(token);
                         if (!tok.Success)
                             Errors.Add(new Error(true, "{0} has invalid format".FormatWith(token)));
@@ -175,9 +174,8 @@ namespace Signum.Engine.Word
                             var t = TryParseToken(tok.Groups["token"].Value, dec, SubTokensOptions.CanElement);
 
                             var format = tok.Groups["format"].Value;
-                            var isRaw = keyword.Contains("raw");
 
-                            matchNode.Parent.ReplaceChild(new TokenNode(t, format, isRaw, this)
+                            matchNode.Parent.ReplaceChild(new TokenNode(t, format, this)
                             {
                                 RunProperties = matchNode.RunProperties.TryDo(d => d.Remove())
                             }, matchNode);
