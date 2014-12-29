@@ -388,10 +388,13 @@ namespace Signum.Engine.Maps
         }
 
 
-        public Action Initializing;
+        public event Action Initializing;
 
         public void Initialize()
         {
+            if (SchemaCompleted != null)
+                throw new InvalidOperationException("OnSchemaCompleted has to be call at the end of the Start method"); 
+
             if (Initializing == null)
                 return;
 
@@ -400,6 +403,20 @@ namespace Signum.Engine.Maps
                     item();
 
             Initializing = null;
+        }
+
+        public event Action SchemaCompleted;
+
+        public void OnSchemaCompleted()
+        {
+            if (SchemaCompleted == null)
+                return;
+
+            using (ExecutionMode.Global())
+                foreach (var item in SchemaCompleted.GetInvocationListTyped())
+                    item();
+
+            SchemaCompleted = null;
         }
 
         #endregion

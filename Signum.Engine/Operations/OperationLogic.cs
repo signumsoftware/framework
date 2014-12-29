@@ -150,7 +150,7 @@ namespace Signum.Engine.Operations
                 sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Operation_PreDeleteSqlSync);
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(Type_PreDeleteSqlSync);
 
-                sb.Schema.Initializing += OperationLogic_Initializing;
+                sb.Schema.SchemaCompleted += OperationLogic_Initializing;
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }

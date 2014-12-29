@@ -750,56 +750,6 @@ namespace Signum.Engine.Maps
         }
         #endregion
 
-
-        List<WhenIncludedPair> whens = new List<WhenIncludedPair>();
-
-        public void WhenIncluded<T1>(Action action)
-            where T1 : Entity
-        {
-            WhenIncluded(new[] { typeof(T1) }, action);
-        }
-
-        public void WhenIncluded<T1, T2>(Action action)
-            where T1 : Entity
-            where T2 : Entity
-        {
-            WhenIncluded(new[] { typeof(T1), typeof(T2) }, action);
-        }
-
-        public void WhenIncluded<T1, T2, T3>(Action action)
-            where T1 : Entity
-            where T2 : Entity
-            where T3 : Entity
-        {
-            WhenIncluded(new[] { typeof(T1), typeof(T2), typeof(T3) }, action);
-        }
-
-        public void WhenIncluded(Type[] types, Action action)
-        {
-            whens.Add(new WhenIncludedPair
-            {
-                Action = action,
-                RegisteredTypes = types ?? new Type[0],
-            });
-        }
-
-        public void ExecuteWhenIncluded()
-        {
-            foreach (var item in whens)
-            {
-                if (item.RegisteredTypes.All(t => Schema.Tables.ContainsKey(t)))
-                    item.Action();
-            }
-
-            whens = null;
-        }
-
-        class WhenIncludedPair
-        {
-            public Action Action;
-            public Type[] RegisteredTypes;
-        }
-
         GlobalLazyManager GlobalLazyManager = new GlobalLazyManager();
 
         public void SwitchGlobalLazyManager(GlobalLazyManager manager)

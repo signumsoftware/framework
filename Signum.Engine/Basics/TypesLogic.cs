@@ -49,7 +49,7 @@ namespace Signum.Engine.Basics
             {
                 Schema current = Schema.Current;
 
-                current.Initializing += () =>
+                current.SchemaCompleted += () =>
                 {
                     var attributes = current.Tables.Keys.Select(t => KVP.Create(t, t.GetCustomAttribute<EntityKindAttribute>(true))).ToList();
 
