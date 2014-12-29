@@ -629,7 +629,7 @@ namespace Signum.Engine.Authorization
                 rule.Conditions.Select(c => new TypeConditionRule(c.Condition, c.Allowed)).ToReadOnly());
         }
 
-        static SqlPreCommand Schema_Synchronizing(Replacements arg)
+        static SqlPreCommand Schema_Synchronizing(Replacements rep)
         {
             var conds = (from rt in Database.Query<RuleTypeEntity>()
                          from c in rt.Conditions
@@ -639,10 +639,11 @@ namespace Signum.Engine.Authorization
                 .Where(c => !TypeConditionLogic.IsDefined(c.Key.Resource.ToType(), c.Key.Condition))
                 .ToList();
 
-            return errors.Select(a => Administrator.UnsafeDeletePreCommand(Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
-                .Where(mle => mle.Element.Condition.Is(a.Key.Condition) && mle.Parent.Resource.Is(a.Key.Resource)))
-                .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.Condition, a.Key.Resource, a.ToString(", "))))
-                .Combine(Spacing.Double);
+            using (rep.WithReplacedDatabaseName())
+                return errors.Select(a => Administrator.UnsafeDeletePreCommand(Database.MListQuery((RuleTypeEntity rt) => rt.Conditions)
+                    .Where(mle => mle.Element.Condition.Is(a.Key.Condition) && mle.Parent.Resource.Is(a.Key.Resource)))
+                    .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.Condition, a.Key.Resource, a.ToString(", "))))
+                    .Combine(Spacing.Double);
         }
     }
 }

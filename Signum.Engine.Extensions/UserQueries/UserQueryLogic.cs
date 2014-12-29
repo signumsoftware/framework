@@ -266,7 +266,8 @@ namespace Signum.Engine.UserQueries
 
                 Console.Clear();
 
-                return table.UpdateSqlSync(uq, includeCollections: true);
+                using (replacements.WithReplacedDatabaseName())
+                    return table.UpdateSqlSync(uq, includeCollections: true);
             }
             catch (Exception e)
             {

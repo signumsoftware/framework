@@ -170,9 +170,12 @@ namespace Signum.Engine.Chart
 
             var table = Schema.Current.Table(typeof(UserChartEntity));
 
-            SqlPreCommand cmd = list.Select(uq => ProcessUserChart(replacements, table, uq)).Combine(Spacing.Double);
+            using (replacements.WithReplacedDatabaseName())
+            {
+                SqlPreCommand cmd = list.Select(uq => ProcessUserChart(replacements, table, uq)).Combine(Spacing.Double);
 
-            return cmd;
+                return cmd;
+            }
         }
 
         static SqlPreCommand ProcessUserChart(Replacements replacements, Table table, UserChartEntity uc)

@@ -383,7 +383,8 @@ namespace Signum.Engine.Mailing
                         item.Text = Synchronize(item.Text, sc);
                     }
 
-                    return table.UpdateSqlSync(et, includeCollections: true);
+                    using (replacements.WithReplacedDatabaseName())
+                        return table.UpdateSqlSync(et, includeCollections: true);
                 }
                 catch (TemplateSyncException ex)
                 {

@@ -64,9 +64,9 @@ namespace Signum.Engine.Help
                 var dic = Database.Query<NamespaceHelpEntity>().Where(n => n.Culture == ci.ToCultureInfoEntity()).ToDictionary(a => a.Name);
 
                 return namespaces.ToDictionary(gr => gr.Key, gr => new NamespaceHelp(gr.Key, ci, dic.TryGetC(gr.Key), gr.ToArray()));
-            })); 
+            }));
         }
-      
+
         public static NamespaceHelp GetNamespaceHelp(string @namespace)
         {
             return CachedNamespacesHelp().GetOrThrow(@namespace).Do(a => a.AssertAllowed());
@@ -173,10 +173,10 @@ namespace Signum.Engine.Help
             if (Schema.Current.ForceCultureInfo != null && dic.ContainsKey(Schema.Current.ForceCultureInfo.Name))
                 return Schema.Current.ForceCultureInfo;
 
-            throw new InvalidOperationException("No compatible CultureInfo found in the database for {0}".FormatWith(ci.Name)); 
+            throw new InvalidOperationException("No compatible CultureInfo found in the database for {0}".FormatWith(ci.Name));
         }
 
-        
+
 
         public static List<Type> AllTypes()
         {
@@ -201,7 +201,7 @@ namespace Signum.Engine.Help
                 sb.Include<OperationHelpEntity>();
 
                 sb.AddUniqueIndex((EntityHelpEntity e) => new { e.Type, e.Culture });
-                sb.AddUniqueIndexMList((EntityHelpEntity e) => e.Properties, mle=>new { mle.Parent, mle.Element.Property });
+                sb.AddUniqueIndexMList((EntityHelpEntity e) => e.Properties, mle => new { mle.Parent, mle.Element.Property });
                 sb.AddUniqueIndex((NamespaceHelpEntity e) => new { e.Name, e.Culture });
                 sb.AddUniqueIndex((AppendixHelpEntity e) => new { Name = e.UniqueName, e.Culture });
                 sb.AddUniqueIndex((QueryHelpEntity e) => new { e.Query, e.Culture });
@@ -346,7 +346,7 @@ namespace Signum.Engine.Help
             SyncData data = new SyncData
             {
                 Namespaces = AllTypes().Select(a => a.Namespace).ToHashSet(),
-                Appendices = Database.Query<AppendixHelpEntity>().Select(a=>a.UniqueName).ToHashSet(),
+                Appendices = Database.Query<AppendixHelpEntity>().Select(a => a.UniqueName).ToHashSet(),
                 StringDistance = new StringDistance()
             };
 
@@ -423,12 +423,13 @@ namespace Signum.Engine.Help
 
             var replace = replacements.TryGetC(QueryLogic.QueriesKey);
 
-            return dic.Select(qh =>
-            {
-                qh.Description = SynchronizeContent(qh.Description, replacements, data);
+            using (replacements.WithReplacedDatabaseName())
+                return dic.Select(qh =>
+                {
+                    qh.Description = SynchronizeContent(qh.Description, replacements, data);
 
-                return table.UpdateSqlSync(qh);
-            }).Combine(Spacing.Simple);
+                    return table.UpdateSqlSync(qh);
+                }).Combine(Spacing.Simple);
         }
 
         static SqlPreCommand SynchronizeTypes(Replacements replacements, SyncData data)
@@ -438,29 +439,30 @@ namespace Signum.Engine.Help
             if (dic.IsEmpty())
                 return null;
 
-            var typesByTableName = Schema.Current.Tables.ToDictionary(kvp=>kvp.Value.Name.Name, kvp=>kvp.Key);
+            var typesByTableName = Schema.Current.Tables.ToDictionary(kvp => kvp.Value.Name.Name, kvp => kvp.Key);
 
             var replace = replacements.TryGetC(Replacements.KeyTables);
 
             var table = Schema.Current.Table<EntityHelpEntity>();
 
-            return dic.Select(eh =>
-            {
-                Type type = typesByTableName.TryGetC(replace.TryGetC(eh.Type.TableName) ?? eh.Type.TableName);
+            using (replacements.WithReplacedDatabaseName())
+                return dic.Select(eh =>
+                {
+                    Type type = typesByTableName.TryGetC(replace.TryGetC(eh.Type.TableName) ?? eh.Type.TableName);
 
-                if (type == null)
-                    return null; //PreDeleteSqlSync
+                    if (type == null)
+                        return null; //PreDeleteSqlSync
 
-                var repProperties = replacements.TryGetC(PropertyRouteLogic.PropertiesFor.FormatWith(type.FullName));
-                var routes = PropertyRoute.GenerateRoutes(type).ToDictionary(pr => { var ps = pr.PropertyString(); return repProperties.TryGetC(ps) ?? ps; });
-                eh.Properties.RemoveAll(p => !routes.ContainsKey(p.Property.Path));
-                foreach (var prop in eh.Properties)
-                    prop.Description = SynchronizeContent(prop.Description, replacements, data);
+                    var repProperties = replacements.TryGetC(PropertyRouteLogic.PropertiesFor.FormatWith(type.FullName));
+                    var routes = PropertyRoute.GenerateRoutes(type).ToDictionary(pr => { var ps = pr.PropertyString(); return repProperties.TryGetC(ps) ?? ps; });
+                    eh.Properties.RemoveAll(p => !routes.ContainsKey(p.Property.Path));
+                    foreach (var prop in eh.Properties)
+                        prop.Description = SynchronizeContent(prop.Description, replacements, data);
 
-                eh.Description = SynchronizeContent(eh.Description, replacements, data);
+                    eh.Description = SynchronizeContent(eh.Description, replacements, data);
 
-                return table.UpdateSqlSync(eh);
-            }).Combine(Spacing.Simple);
+                    return table.UpdateSqlSync(eh);
+                }).Combine(Spacing.Simple);
         }
 
         static SqlPreCommand SynchronizeNamespace(Replacements replacements, SyncData data)
@@ -473,20 +475,21 @@ namespace Signum.Engine.Help
             var current = entities.Select(a => a.Name).ToHashSet();
 
             replacements.AskForReplacements(current, data.Namespaces, "namespaces");
-                  
+
             var table = Schema.Current.Table<NamespaceHelpEntity>();
 
-            return entities.Select(e =>
-            {
-                e.Name = replacements.TryGetC("namespaces").TryGetC(e.Name) ?? e.Name;
+            using (replacements.WithReplacedDatabaseName())
+                return entities.Select(e =>
+                {
+                    e.Name = replacements.TryGetC("namespaces").TryGetC(e.Name) ?? e.Name;
 
-                if (!data.Namespaces.Contains(e.Name))
-                    return table.DeleteSqlSync(e);
+                    if (!data.Namespaces.Contains(e.Name))
+                        return table.DeleteSqlSync(e);
 
-                e.Description = SynchronizeContent(e.Description, replacements, data);
+                    e.Description = SynchronizeContent(e.Description, replacements, data);
 
-                return table.UpdateSqlSync(e);
-            }).Combine(Spacing.Simple); 
+                    return table.UpdateSqlSync(e);
+                }).Combine(Spacing.Simple);
         }
 
         static SqlPreCommand SynchronizeAppendix(Replacements replacements, SyncData data)
@@ -498,15 +501,16 @@ namespace Signum.Engine.Help
 
             var table = Schema.Current.Table<AppendixHelpEntity>();
 
-            return entities.Select(e =>
-            {
-                e.Description = SynchronizeContent(e.Description, replacements, data);
+            using (replacements.WithReplacedDatabaseName())
+                return entities.Select(e =>
+                {
+                    e.Description = SynchronizeContent(e.Description, replacements, data);
 
-                return table.UpdateSqlSync(e);
-            }).Combine(Spacing.Simple); 
+                    return table.UpdateSqlSync(e);
+                }).Combine(Spacing.Simple);
         }
 
-    
+
 
 
         static Lazy<XmlSchemaSet> Schemas = new Lazy<XmlSchemaSet>(() =>
@@ -519,7 +523,7 @@ namespace Signum.Engine.Help
 
         internal static XDocument LoadAndValidate(string fileName)
         {
-            var document = XDocument.Load(fileName); 
+            var document = XDocument.Load(fileName);
 
             List<Tuple<XmlSchemaException, string>> exceptions = new List<Tuple<XmlSchemaException, string>>();
 
@@ -531,7 +535,7 @@ namespace Signum.Engine.Help
 
             return document;
         }
-        
+
         public static readonly Regex HelpLinkRegex = new Regex(@"^(?<letter>[^:]+):(?<link>[^\|]*)(\|(?<text>.*))?$");
 
         static string SynchronizeContent(string content, Replacements r, SyncData data)
@@ -588,7 +592,7 @@ namespace Signum.Engine.Help
                         }
                     case WikiFormat.OperationLink:
                         {
-                            string operation = r.SelectInteractive(link,  SymbolLogic<OperationSymbol>.AllUniqueKeys(), "Operation", data.StringDistance);
+                            string operation = r.SelectInteractive(link, SymbolLogic<OperationSymbol>.AllUniqueKeys(), "Operation", data.StringDistance);
 
                             if (operation == null)
                                 return Link(letter + "-error", link, text);
@@ -627,7 +631,7 @@ namespace Signum.Engine.Help
             if (text.HasText())
                 return "[{0}:{1}|{2}]".FormatWith(letter, link, text);
             else
-                return "[{0}:{1}]".FormatWith(letter, link); 
+                return "[{0}:{1}]".FormatWith(letter, link);
         }
 
         public static EntityHelpService GetEntityHelpService(Type type)
@@ -645,7 +649,7 @@ namespace Signum.Engine.Help
 
                 Properties = entity.Properties.Where(o => o.Value.IsAllowed() == null).ToDictionary(kvp => kvp.Key,
                     kvp => GetHelpToolTipInfo(kvp.Value.PropertyInfo.NiceName(), kvp.Value.Info, kvp.Value.UserDescription, HelpUrls.PropertyUrl(kvp.Value.PropertyRoute))),
-            }; 
+            };
         }
 
         public static QueryHelpService GetQueryHelpService(object queryName)
@@ -660,9 +664,9 @@ namespace Signum.Engine.Help
 
                 Info = GetHelpToolTipInfo(QueryUtils.GetNiceName(queryName), entity.Info, entity.UserDescription, url),
 
-                Columns = entity.Columns.Where(a=>a.Value.IsAllowed() == null).ToDictionary(kvp => kvp.Key, kvp => 
+                Columns = entity.Columns.Where(a => a.Value.IsAllowed() == null).ToDictionary(kvp => kvp.Key, kvp =>
                     GetHelpToolTipInfo(kvp.Value.NiceName, kvp.Value.Info, kvp.Value.UserDescription, url)),
-            }; 
+            };
         }
 
         public static Dictionary<PropertyRoute, HelpToolTipInfo> GetPropertyRoutesService(List<PropertyRoute> routes)

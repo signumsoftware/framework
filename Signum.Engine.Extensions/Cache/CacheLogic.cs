@@ -184,11 +184,13 @@ namespace Signum.Engine.Cache
 
         public static SqlPreCommand Synchronize(Replacements replacements)
         {
-            if(ExecutionMode.IsSynchronizeSchemaOnly || !WithSqlDependency)
+            if(replacements.SchemaOnly || !WithSqlDependency)
                 return null;
 
             SqlConnector connector = (SqlConnector)Connector.Current;
             List<SqlPreCommand> commands = new List<SqlPreCommand>();
+
+            string mainDatabaseName = Connector.Current.DatabaseName();
 
             int index = 0; 
             foreach (var database in Schema.Current.DatabaseNames())
@@ -198,6 +200,7 @@ namespace Signum.Engine.Cache
                 using (Connector.Override(sub))
                 {
                     string databaseName = sub.DatabaseName();
+                    string replacedDatabaseName = replacements.ReplaceDatabaseName.HasText() ? databaseName.Replace(mainDatabaseName, replacements.ReplaceDatabaseName) : databaseName;
 
                     if (!IsLocalDB)
                     {
@@ -212,7 +215,7 @@ namespace Signum.Engine.Cache
 
 
                         if (currentUser != serverPrincipalName)
-                            commands.Add(new SqlPreCommandSimple("ALTER AUTHORIZATION ON DATABASE::{0} TO [{2}]".FormatWith(databaseName, serverPrincipalName, currentUser)));
+                            commands.Add(new SqlPreCommandSimple("ALTER AUTHORIZATION ON DATABASE::{0} TO [{2}]".FormatWith(replacedDatabaseName, serverPrincipalName, currentUser)));
 
 
                         var databasePrincipalName = (from db in Database.View<SysDatabases>()
@@ -221,7 +224,7 @@ namespace Signum.Engine.Cache
                                                      select dpl.name).Single();
 
                         if (!databasePrincipalName.HasText() || databasePrincipalName != "dbo")
-                            commands.Add(new SqlPreCommandSimple("ALTER AUTHORIZATION ON DATABASE::{0} TO [{2}]".FormatWith(databaseName, databasePrincipalName.DefaultText("Unknown"), currentUser)));
+                            commands.Add(new SqlPreCommandSimple("ALTER AUTHORIZATION ON DATABASE::{0} TO [{2}]".FormatWith(replacedDatabaseName, databasePrincipalName.DefaultText("Unknown"), currentUser)));
                     }
 
                     var enabled = Database.View<SysDatabases>().Where(db => db.name == databaseName).Select(a => a.is_broker_enabled).Single();
@@ -230,8 +233,8 @@ namespace Signum.Engine.Cache
                     {
                         commands.Add(SchemaSynchronizer.DisconnectUsers(databaseName, "spid" + (index++)));
 
-                        commands.Add(new SqlPreCommandSimple("ALTER DATABASE {0} SET ENABLE_BROKER".FormatWith(databaseName)));
-                        commands.Add(new SqlPreCommandSimple("--ALTER DATABASE {0} SET NEW_BROKER".FormatWith(databaseName)));
+                        commands.Add(new SqlPreCommandSimple("ALTER DATABASE {0} SET ENABLE_BROKER".FormatWith(replacedDatabaseName)));
+                        commands.Add(new SqlPreCommandSimple("--ALTER DATABASE {0} SET NEW_BROKER".FormatWith(replacedDatabaseName)));
                     }
                 }
             }

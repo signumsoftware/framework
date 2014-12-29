@@ -170,16 +170,17 @@ namespace Signum.Engine.Word
 
             Dictionary<string, SystemWordTemplateEntity> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
 
-            return Synchronizer.SynchronizeScript(should, current,
-                (tn, s) => table.InsertSqlSync(s),
-                (tn, c) => table.DeleteSqlSync(c),
-                (tn, s, c) =>
-                {
-                    var oldClassName = c.FullClassName;
-                    c.FullClassName = s.FullClassName;
-                    return table.UpdateSqlSync(c, comment: oldClassName);
-                },
-                Spacing.Double);
+            using (replacements.WithReplacedDatabaseName())
+                return Synchronizer.SynchronizeScript(should, current,
+                    (tn, s) => table.InsertSqlSync(s),
+                    (tn, c) => table.DeleteSqlSync(c),
+                    (tn, s, c) =>
+                    {
+                        var oldClassName = c.FullClassName;
+                        c.FullClassName = s.FullClassName;
+                        return table.UpdateSqlSync(c, comment: oldClassName);
+                    },
+                    Spacing.Double);
         }
 
         public static void RegisterSystemWordReport<T>(Func<WordTemplateEntity> defaultTemplateConstructor, object queryName = null)
