@@ -12,7 +12,7 @@ namespace Signum.Entities.Omnibox
     {
         public int AutoCompleteLimit = 5;
 
-        Regex regex = new Regex(@"^I((?<id>N)|(?<toStr>S))?$", RegexOptions.ExplicitCapture);
+        Regex regex = new Regex(@"^I((?<id>N)|(?<id>G)|(?<toStr>S))?$", RegexOptions.ExplicitCapture);
 
         public override IEnumerable<EntityOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {
@@ -32,7 +32,7 @@ namespace Signum.Entities.Omnibox
             {
                 yield break;
             }
-            else if (tokens[1].Type == OmniboxTokenType.Number)
+            else if (tokens[1].Type == OmniboxTokenType.Number || tokens[1].Type == OmniboxTokenType.Guid)
             {
                 foreach (var match in matches.OrderBy(ma => ma.Distance))
                 {

@@ -30,7 +30,7 @@ namespace Signum.Entities.Omnibox
             }).ToList();
         }
          
-        Regex regex = new Regex(@"^I(?<filter>(?<token>I(\.I)*)(\.|((?<op>=)(?<val>[ENSI])?))?)*$", RegexOptions.ExplicitCapture);
+        Regex regex = new Regex(@"^I(?<filter>(?<token>I(\.I)*)(\.|((?<op>=)(?<val>[ENSIG])?))?)*$", RegexOptions.ExplicitCapture);
        
         public override IEnumerable<DynamicQueryOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {   
@@ -297,7 +297,13 @@ namespace Signum.Entities.Omnibox
                     }
                     break;
                 case FilterType.Guid:
-                    if (omniboxToken.Type == OmniboxTokenType.String)
+                    if (omniboxToken.Type == OmniboxTokenType.Guid)
+                    {
+                        Guid result;
+                        if (Guid.TryParse(omniboxToken.Value, out result))
+                            return new[] { new ValueTuple { Value = result, Match = null } };
+                    }
+                    else if (omniboxToken.Type == OmniboxTokenType.String)
                     {
                         var str = OmniboxUtils.CleanCommas(omniboxToken.Value);
                         Guid result;

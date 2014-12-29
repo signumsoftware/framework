@@ -69,8 +69,10 @@
                 </td>
             </tr>
             foreach (var iter2 in iter.Value.OrderBy(a => a.Value.Resource.CleanName).Iterate())
-            {
+            {   
                 var item = iter2.Value;
+                var type = item.Value.Resource.ToType();
+                var attr = EntityKindCache.GetAttribute(type);
             <tr class="sf-auth-type" data-ns="@iter.Value.Key" @Html.Raw(item.Value.AvailableConditions.Any() ? ("data-type=\"" + item.Value.Resource.ClassName + "\"") : "")>
                 <td>
                     <div class="sf-auth-tree @(iter.IsLast ? "sf-auth-blank" : "sf-auth-line")">
@@ -86,7 +88,7 @@
                         
                         <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".FormatWith(ac.Key, ac.NiceToString()), ",")" />
                     }
-                    <span class="sf-auth-label">@item.Value.Resource.ToType().NiceName()</span>
+                    <span class="sf-auth-label">@type.NiceName()</span> <small>@attr.EntityKind/@attr.EntityData</small>
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".FormatWith(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";"))))
                 </td>

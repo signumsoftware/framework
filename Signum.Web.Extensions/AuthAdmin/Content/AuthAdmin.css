@@ -72,6 +72,10 @@
     vertical-align: top;
 }
 
+    .sf-auth-rules small {
+        color:#bbb
+    }
+
 .sf-auth-chooser
 {
     display: block;
