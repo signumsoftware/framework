@@ -73,7 +73,7 @@ namespace Signum.Utilities
             Console.Write(question);
             do
             {
-                var userAnswer = Console.ReadLine().ToLower();
+                var userAnswer = Console.ReadLine();
 
                 string error = stringValidator(userAnswer); 
                 if (error == null)
@@ -82,7 +82,6 @@ namespace Signum.Utilities
                 Console.Write(error);
             } while (true);
         }
-
 
         public static bool Ask(string question)
         {
