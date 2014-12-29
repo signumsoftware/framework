@@ -49,7 +49,6 @@ namespace Signum.Engine.Mailing
                 sb.Include<EmailTemplateEntity>();       
 
                 EmailTemplatesLazy = sb.GlobalLazy(() => Database.Query<EmailTemplateEntity>()
-                    .Where(et => et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
                     .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(EmailTemplateEntity)));
 
                 SystemEmailLogic.Start(sb, dqm);
