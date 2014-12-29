@@ -77,12 +77,15 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            var result = Name.SqlEscape();
+            var options = ObjectName.CurrentOptions;
+
+            var name = !options.DatabaseNameReplacement.HasText() ? Name.SqlEscape():
+                ("[" + Name.Replace(Connector.Current.DatabaseName(), options.DatabaseNameReplacement) + "]");
 
             if (Server == null)
-                return result;
+                return name;
 
-            return Server.ToString() + "." + result;
+            return Server.ToString() + "." + name;
         }
 
         public bool Equals(DatabaseName other)
@@ -267,7 +270,7 @@ namespace Signum.Engine.Maps
     public struct ObjectNameOptions
     {
         public bool IncludeDboSchema;
-        public DatabaseName OverrideDatabaseNameOnSystemQueries;
+        public string DatabaseNameReplacement;
         public bool AvoidDatabaseName;
     }
 }

@@ -218,19 +218,6 @@ namespace Signum.Engine.Maps
             return u;
         }
 
-        static bool IsString(SqlDbType sqlDbType)
-        {
-            switch (sqlDbType)
-            {
-                case SqlDbType.NText:
-                case SqlDbType.NVarChar:
-                case SqlDbType.Text:
-                case SqlDbType.VarChar:
-                    return true;
-            }
-
-            return false;
-        }
 
         public static string IsNull(Field field, bool equals)
         {
@@ -242,7 +229,7 @@ namespace Signum.Engine.Maps
 
                 string result = isNull.FormatWith(col.Name.SqlEscape());
 
-                if (!IsString(col.SqlDbType))
+                if (!SqlBuilder.IsString(col.SqlDbType))
                     return result;
 
                 return result + (equals ? " OR " : " AND ") + (col.Name.SqlEscape() + (equals ? " == " : " <> ") + "''");

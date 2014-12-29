@@ -95,9 +95,19 @@ namespace Signum.Engine
             return Schema.Current.GenerationScipt();
         }
 
-        public static SqlPreCommand TotalSynchronizeScript(bool interactive = true)
+        public static SqlPreCommand TotalSynchronizeScript(bool interactive = true, bool schemaOnly = false)
         {
-            return Schema.Current.SynchronizationScript(Connector.Current.DatabaseName(), interactive);
+            var command = Schema.Current.SynchronizationScript(interactive, schemaOnly);
+
+            if (command == null)
+                return null;
+
+            return SqlPreCommand.Combine(Spacing.Double,
+                new SqlPreCommandSimple(SynchronizerMessage.StartOfSyncScriptGeneratedOn0.NiceToString().FormatWith(DateTime.Now)),
+
+                new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
+                command,
+                new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
         }
 
 

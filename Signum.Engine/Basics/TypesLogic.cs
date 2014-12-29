@@ -94,20 +94,21 @@ namespace Signum.Engine.Basics
             Dictionary<string, TypeEntity> current = replacements.ApplyReplacementsToOldCleaning(
                 Administrator.TryRetrieveAll<TypeEntity>(replacements).ToDictionary(c => c.TableName, "tableName in database"), Replacements.KeyTables);
 
-            return Synchronizer.SynchronizeScript(
-                should, 
-                current, 
-                (tn, s) => table.InsertSqlSync(s), 
-                (tn, c) => table.DeleteSqlSync(c), 
-                (tn, s, c) =>
-                {
-                    var originalName = c.FullClassName;
+            using (replacements.WithReplacedDatabaseName())
+                return Synchronizer.SynchronizeScript(
+                    should,
+                    current,
+                    (tn, s) => table.InsertSqlSync(s),
+                    (tn, c) => table.DeleteSqlSync(c),
+                    (tn, s, c) =>
+                    {
+                        var originalName = c.FullClassName;
 
-                    c.FullClassName = s.FullClassName;
-                    c.TableName = s.TableName;
-                    c.CleanName = s.CleanName;
-                    return table.UpdateSqlSync(c, comment: originalName);
-                }, Spacing.Double);
+                        c.FullClassName = s.FullClassName;
+                        c.TableName = s.TableName;
+                        c.CleanName = s.CleanName;
+                        return table.UpdateSqlSync(c, comment: originalName);
+                    }, Spacing.Double);
         }
 
         static Dictionary<string, O> ApplyReplacementsToOldCleaning<O>(this Replacements replacements, Dictionary<string, O> oldDictionary, string replacementsKey)
