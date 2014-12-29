@@ -45,8 +45,10 @@ namespace Signum.Engine.Migrations
         {
             if (Directory.Exists(@"..\..\Migrations"))
                 Migrations(@"..\..\Migrations");
-            else
+            else if (Directory.Exists(@"Migrations"))
                 Migrations("Migrations");
+            else
+                Migrations(@"..\..\Migrations");
         }
 
         public static void Migrations(string migrationDirectory)
@@ -59,7 +61,7 @@ namespace Signum.Engine.Migrations
 
                 if (!Prompt(graph, migrationDirectory))
                     return;
-        }
+            }
         }
 
         private static DirectedGraph<MigrationInfo> CreateMigrationChain(Dictionary<string, MigrationInfo> dictionary)
@@ -109,11 +111,13 @@ namespace Signum.Engine.Migrations
 
         private static Dictionary<string, MigrationInfo> ReadMigrationsDirectory(string migrationDirectory)
         {
+            Console.WriteLine();
             Console.WriteLine("Reading migrations from: " + migrationDirectory);
 
             Regex regex = new Regex("(?<version>[^_-]+)(-(?<from>[^_]+))(_(?<comment>.+))?.sql");
 
-            var matches = Directory.EnumerateFiles(migrationDirectory, "*.sql").Select(fileName => new { fileName, match = regex.Match(Path.GetFileName(fileName)) }).ToList();
+            var matches = (!Directory.Exists(migrationDirectory) ? Enumerable.Empty<string>() : Directory.EnumerateFiles(migrationDirectory, "*.sql"))
+                .Select(fileName => new { fileName, match = regex.Match(Path.GetFileName(fileName)) }).ToList();
 
             var errors = matches.Where(a => !a.match.Success);
 
@@ -195,7 +199,10 @@ namespace Signum.Engine.Migrations
                 }
                 else
                 {
-                    string fileName = GetFileName(child);
+                    string fileName = NewMigrationFileName(child);
+
+                    if (!Directory.Exists(migrationDirectory))
+                        Directory.CreateDirectory(migrationDirectory);
 
                     File.WriteAllText(Path.Combine(migrationDirectory, fileName), script.ToString());
 
@@ -219,7 +226,6 @@ namespace Signum.Engine.Migrations
                         Draw(migrationsInOrder, childrens, item);
 
                         Execute(item);
-
                     }
 
                     return true;
@@ -329,6 +335,9 @@ namespace Signum.Engine.Migrations
 
                 declared[mi.TrackNumber.Value] = !mi.IsLast;
             }
+
+            Console.WriteLine();
+
             return multiChildren;
         }
 
@@ -355,13 +364,13 @@ namespace Signum.Engine.Migrations
             doc.Save(csproj);
         }
 
-        private static string GetFileName(MigrationInfo child)
+        private static string NewMigrationFileName(MigrationInfo child)
         {
             var parent = child != null ? child.Version : Genesis;
 
             string fileName = "{0}-{1}".FormatWith(DateTime.Now.ToString("yyyy.MM.dd.HH.mm"), parent);
 
-            string comment = SafeConsole.AskString("Comment for the new Migration?", stringValidator: s => null);
+            string comment = SafeConsole.AskString("Comment for the new Migration? ", stringValidator: s => null);
 
             if (comment.HasText())
                 fileName += "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment);
