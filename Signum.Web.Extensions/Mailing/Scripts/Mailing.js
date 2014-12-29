@@ -262,10 +262,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
             if (entity == null)
                 return;
 
-            Operations.constructFromDefault($.extend({
-                keys: entity.runtimeInfo.key(),
-                controllerUrl: url
-            }, options), event);
+            options.requestExtraJsonData = { keys: entity.runtimeInfo.key() };
+            options.controllerUrl = url;
+
+            Operations.constructFromDefault(options, event);
         });
     }
     exports.createMailFromTemplate = createMailFromTemplate;
