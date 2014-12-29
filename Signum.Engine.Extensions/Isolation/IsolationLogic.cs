@@ -59,7 +59,7 @@ namespace Signum.Engine.Isolation
                 }.Register();
 
                 sb.Schema.EntityEventsGlobal.PreSaving += EntityEventsGlobal_PreSaving;
-                sb.Schema.Initializing += AssertIsolationStrategies;
+                sb.Schema.SchemaCompleted += AssertIsolationStrategies;
                 OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 
                 Isolations = sb.GlobalLazy(() => Database.RetrieveAllLite<IsolationEntity>(),

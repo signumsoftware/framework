@@ -73,7 +73,7 @@ namespace Signum.Engine.Translation
                         }).ToDictionary())
                         , new InvalidateWith(typeof(TranslatedInstanceEntity)));
 
-                sb.Schema.Initializing += () =>
+                sb.Schema.SchemaCompleted += () =>
                 {
                     var s = Schema.Current;
 
