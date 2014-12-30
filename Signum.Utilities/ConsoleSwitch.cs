@@ -121,15 +121,15 @@ namespace Signum.Utilities
             }
         }
 
-        public V[] ChooseMultiple()
+        public V[] ChooseMultiple(params K[] autoSelect)
         {
-            return ChooseMultiple(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString());
+            return ChooseMultiple(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString(), autoSelect);
         }
 
 
-        public V[] ChooseMultiple(string endMessage)
+        public V[] ChooseMultiple(string endMessage, params K[] autoSelect)
         {
-            var array = ChooseMultipleWithDescription(endMessage);
+            var array = ChooseMultipleWithDescription(endMessage, autoSelect);
 
             if (array == null)
                 return null;
@@ -138,13 +138,16 @@ namespace Signum.Utilities
 
         }
 
-        public WithDescription<V>[] ChooseMultipleWithDescription()
+        public WithDescription<V>[] ChooseMultipleWithDescription(params K[] autoSelect)
         {
-            return ChooseMultipleWithDescription(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString());
+            return ChooseMultipleWithDescription(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString(), autoSelect);
         }
 
-        public WithDescription<V>[] ChooseMultipleWithDescription(string endMessage)
+        public WithDescription<V>[] ChooseMultipleWithDescription(string endMessage, params K[] autoSelect)
         {
+            if (autoSelect != null)
+                return autoSelect.Select(a => dictionary.GetOrThrow(a.ToString(), ConsoleMessage.NoOptionWithKey0Found.NiceToString())).ToArray();
+
         retry:
             try
             {
