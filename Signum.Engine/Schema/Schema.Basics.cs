@@ -80,12 +80,12 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            var tableName = "columns in table " + this.Name;
+            var errorSuffix = "columns in table " + this.Name.Name;
 
-            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name, tableName);
+            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name, errorSuffix);
 
             if (Mixins != null)
-                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name, tableName), tableName);
+                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name, errorSuffix), errorSuffix);
 
             SetFullMListGetter();
 
@@ -359,7 +359,7 @@ namespace Signum.Engine.Maps
         bool PrimaryKey { get; }
         bool IdentityBehaviour { get; }
         bool Identity { get; }
-        string Default { get; }
+        string Default { get; set; }
         int? Size { get; }
         int? Scale { get; }
         Table ReferenceTable { get; }
@@ -520,7 +520,7 @@ namespace Signum.Engine.Maps
             public Table ReferenceTable { get { return null; } }
             Type IColumn.Type { get { return typeof(bool); } }
             public bool AvoidForeignKey { get { return false; } }
-            public string Default { get { return null; } }
+            public string Default { get; set; }
         }
 
         public EmbeddedHasValueColumn HasValue { get; set; }

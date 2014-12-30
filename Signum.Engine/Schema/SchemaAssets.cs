@@ -82,14 +82,15 @@ namespace Signum.Engine.Maps
                 }
             }).ToDictionary();
 
-            return Synchronizer.SynchronizeScript(
-                Views,
-                oldView,
-                (name, newView) => newView.CreateView(),
-                null,
-                (name, newDef, oldDef) =>
-                    Clean(newDef.CreateView().Sql) == Clean(oldDef) ? null : newDef.AlterView(),
-                Spacing.Double);
+            using (replacements.WithReplacedDatabaseName())
+                return Synchronizer.SynchronizeScript(
+                    Views,
+                    oldView,
+                    (name, newView) => newView.CreateView(),
+                    null,
+                    (name, newDef, oldDef) =>
+                        Clean(newDef.CreateView().Sql) == Clean(oldDef) ? null : newDef.AlterView(),
+                    Spacing.Double);
         }
         #endregion
 

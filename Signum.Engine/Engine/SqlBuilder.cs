@@ -50,13 +50,10 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column)
         {
-            string defaulltComment = column.Default == null && !column.Nullable && !column.Identity ? 
-                " -- DEFAULT(" + (IsNumber(column.SqlDbType) ? "0" : " ") + ")" : "";
-
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}{2}".FormatWith(table.Name, CreateField(column), defaulltComment));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateField(column)));
         }
 
-        private static bool IsNumber(SqlDbType sqlDbType)
+        public static bool IsNumber(SqlDbType sqlDbType)
         {
             switch (sqlDbType)
             {
@@ -70,6 +67,34 @@ namespace Signum.Engine
                 case SqlDbType.TinyInt:
                 case SqlDbType.SmallInt:
                 case SqlDbType.SmallMoney:
+                    return true;
+            }
+
+            return false;
+        }
+
+
+        public static bool IsString(SqlDbType sqlDbType)
+        {
+            switch (sqlDbType)
+            {
+                case SqlDbType.NText:
+                case SqlDbType.NVarChar:
+                case SqlDbType.Text:
+                case SqlDbType.VarChar:
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsDate(SqlDbType sqlDbType)
+        {
+            switch (sqlDbType)
+            {
+                case SqlDbType.DateTime:
+                case SqlDbType.DateTime2:
+                case SqlDbType.DateTimeOffset:
                     return true;
             }
 
@@ -420,6 +445,8 @@ EXEC DB.dbo.sp_executesql @sql"
             return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlEscape() + "." + s.StatsName.SqlEscape(), ",\r\n"));
         }
 
-     
+
+
+      
     }
 }

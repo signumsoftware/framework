@@ -130,11 +130,11 @@ namespace Signum.Engine
         {
             string toFind = "+" + catalogPostfix;
 
-            string result = connectionString.TryBefore("+" + catalogPostfix).TryAfterLast("=");
+            string result = connectionString.TryBefore(toFind).TryAfterLast("=");
             if (result == null)
                 return null;
 
-            connectionString = connectionString.Replace("+" + catalogPostfix, ""); // Remove toFind 
+            connectionString = connectionString.Replace(toFind, ""); // Remove toFind 
 
             return result + catalogPostfix;
         }

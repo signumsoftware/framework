@@ -162,7 +162,17 @@ namespace Signum.Engine
             return "Enums:" + tableName;
         }
 
-        public bool Interactive = true; 
+        public bool Interactive = true;
+        public bool SchemaOnly = false;
+        public string ReplaceDatabaseName = null;
+
+        public IDisposable WithReplacedDatabaseName()
+        {
+            if(ReplaceDatabaseName == null)
+                return null;
+
+            return ObjectName.OverrideOptions(new ObjectNameOptions { DatabaseNameReplacement = ReplaceDatabaseName });
+        }
 
         public string Apply(string replacementsKey, string textToReplace)
         {
@@ -337,5 +347,6 @@ namespace Signum.Engine
             public readonly string OldValue;
             public readonly string NewValue;
         }
+
     }
 }

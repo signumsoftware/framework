@@ -331,7 +331,7 @@ namespace Signum.Engine.Maps
         }
 
         public event Func<Replacements, SqlPreCommand> Synchronizing;
-        internal SqlPreCommand SynchronizationScript(string databaseName, bool interactive = true)
+        public SqlPreCommand SynchronizationScript(bool interactive = true, bool schemaOnly = false, string replaceDatabaseName = null)
         {
             if (Synchronizing == null)
                 return null;
@@ -339,7 +339,7 @@ namespace Signum.Engine.Maps
             using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
             using (ExecutionMode.Global())
             {
-                Replacements replacements = new Replacements() { Interactive = interactive };
+                Replacements replacements = new Replacements() { Interactive = interactive, ReplaceDatabaseName = replaceDatabaseName, SchemaOnly = schemaOnly  };
                 SqlPreCommand command = Synchronizing
                     .GetInvocationListTyped()
                     .Select(e =>
@@ -355,19 +355,7 @@ namespace Signum.Engine.Maps
                     })
                     .Combine(Spacing.Triple);
 
-                if (command == null)
-                    return null;
-
-                var replacementsComment = replacements.Interactive ? null : replacements.Select(r =>
-                    SqlPreCommandConcat.Combine(Spacing.Double, new SqlPreCommandSimple("-- Replacements on {0}".FormatWith(r.Key)),
-                        r.Value.Select(a => new SqlPreCommandSimple("--   {0} -> {1}".FormatWith(a.Key, a.Value))).Combine(Spacing.Simple)));
-
-                return SqlPreCommand.Combine(Spacing.Double,
-                    new SqlPreCommandSimple(SynchronizerMessage.StartOfSyncScriptGeneratedOn0.NiceToString().FormatWith(DateTime.Now)),
-
-                    new SqlPreCommandSimple("use {0}".FormatWith(databaseName)),
-                    command,
-                    new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
+                return command;
             }
         }
 
@@ -388,10 +376,13 @@ namespace Signum.Engine.Maps
         }
 
 
-        public Action Initializing;
+        public event Action Initializing;
 
         public void Initialize()
         {
+            if (SchemaCompleted != null)
+                throw new InvalidOperationException("OnSchemaCompleted has to be call at the end of the Start method"); 
+
             if (Initializing == null)
                 return;
 
@@ -400,6 +391,20 @@ namespace Signum.Engine.Maps
                     item();
 
             Initializing = null;
+        }
+
+        public event Action SchemaCompleted;
+
+        public void OnSchemaCompleted()
+        {
+            if (SchemaCompleted == null)
+                return;
+
+            using (ExecutionMode.Global())
+                foreach (var item in SchemaCompleted.GetInvocationListTyped())
+                    item();
+
+            SchemaCompleted = null;
         }
 
         #endregion

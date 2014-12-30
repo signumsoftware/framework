@@ -34,7 +34,7 @@ namespace Signum.Engine.Extensions.Basics
             {
                 sb.Include<T>();
 
-                sb.Schema.Initializing += () => lazy.Load();
+                sb.Schema.SchemaCompleted += () => lazy.Load();
                 sb.Schema.Synchronizing += Schema_Synchronizing;
                 sb.Schema.Generating += Schema_Generating;
 
@@ -85,18 +85,19 @@ namespace Signum.Engine.Extensions.Basics
             List<T> current = AvoidCache().Using(_ => Administrator.TryRetrieveAll<T>(replacements));
             IEnumerable<T> should = CreateSemiSymbols();
 
-            return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
-                should.ToDictionary(s => s.Key),
-                current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key),
-                (k, s) => table.InsertSqlSync(s),
-                (k, c) => table.DeleteSqlSync(c),
-                (k, s, c) =>
-                {
-                    var originalName = c.Key;
-                    c.Key = s.Key;
-                    c.Name = s.Name;
-                    return table.UpdateSqlSync(c, comment: originalName);
-                }, Spacing.Double);
+            using (replacements.WithReplacedDatabaseName())
+                return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
+                    should.ToDictionary(s => s.Key),
+                    current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key),
+                    (k, s) => table.InsertSqlSync(s),
+                    (k, c) => table.DeleteSqlSync(c),
+                    (k, s, c) =>
+                    {
+                        var originalName = c.Key;
+                        c.Key = s.Key;
+                        c.Name = s.Name;
+                        return table.UpdateSqlSync(c, comment: originalName);
+                    }, Spacing.Double);
         }
 
         static Dictionary<string, T> AssertStarted()
