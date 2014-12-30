@@ -336,7 +336,7 @@
     <Member Name="Key" Description="Schlüssel" />
   </Type>
   <Type Name="SynchronizerMessage">
-    <Member Name="_0HasBeenRenamedIn1" Description="Wurde &quot;{0}&quot; in {1} umbenannt?" />
+    <Member Name="_0HasBeenRenamedIn1" Description="Wurde {0} in {1} umbenannt?" />
     <Member Name="EndOfSyncScript" Description="--- ENDE DES SYNCHRONISIERUNGSSKRIPTS" />
     <Member Name="NNone" Description="- n: Keine" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
