@@ -55,6 +55,12 @@ namespace Signum.Engine.Basics
 
                     var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".FormatWith(a.Key.Name), "\r\n");
 
+                    if (errors.HasText())
+                        throw new InvalidOperationException(errors);
+                };
+
+                current.Initializing += () =>
+                {
                     current.typeCachesLazy.Load();
                 };
 
