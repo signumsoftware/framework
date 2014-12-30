@@ -9,8 +9,9 @@ using Signum.Utilities;
 namespace Signum.Entities.Migrations
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
-    public class MigrationEntity : Entity
+    public class SqlMigrationEntity : Entity
     {
+        [UniqueIndex]
         string versionNumber;
         public string VersionNumber
         {
@@ -18,14 +19,7 @@ namespace Signum.Entities.Migrations
             set { Set(ref versionNumber, value); }
         }
 
-        DateTime executionDate;
-        public DateTime ExecutionDate
-        {
-            get { return executionDate; }
-            set { SetToStr(ref executionDate, value); }
-        }
-
-        static Expression<Func<MigrationEntity, string>> ToStringExpression = e => e.VersionNumber;
+        static Expression<Func<SqlMigrationEntity, string>> ToStringExpression = e => e.VersionNumber;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
