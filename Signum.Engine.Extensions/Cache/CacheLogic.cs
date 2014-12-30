@@ -230,13 +230,13 @@ namespace Signum.Engine.Cache
 
                         try
                         {
-                            if (ex.Message.Contains("SQL Server Service Broker"))
+                        if (ex.Message.Contains("SQL Server Service Broker"))
                             {
                                 EnableOrCreateBrocker(databaseName);
 
                                 SqlDependency.Start(sub.ConnectionString);
-                            }
-                        }
+                    }
+                }
                         catch (Exception)
                         {
                             throw EnableBlockerException(databaseName);
@@ -330,11 +330,11 @@ ALTER DATABASE {0} SET NEW_BROKER".FormatWith(database));
                 ee.CacheController = this;
                 ee.Saving += ident =>
             {
-                if (ident.IsGraphModified)
-                {
-                    DisableAndInvalidate(withUpdates: !ident.IsNew);
-                }
-            };
+                    if (ident.IsGraphModified)
+            {
+                        DisableAndInvalidate(withUpdates: !ident.IsNew);
+            }
+                };
                 ee.PreUnsafeDelete += query => DisableAndInvalidate(withUpdates: false); ;
                 ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidate(withUpdates: true); ;
                 ee.PreUnsafeInsert += (query, constructor, entityQuery) => { DisableAndInvalidate(withUpdates: constructor.Body.Type.IsInstantiationOf(typeof(MListElement<,>))); return constructor; };
@@ -351,16 +351,16 @@ ALTER DATABASE {0} SET NEW_BROKER".FormatWith(database));
             {
                 if (!withUpdates)
                 {
-                    DisableTypeInTransaction(typeof(T));
-                }
-                else
-                {
-                    DisableAllConnectedTypesInTransaction(typeof(T));
-                }
+                        DisableTypeInTransaction(typeof(T));
+                    }
+                    else
+                    {
+                        DisableAllConnectedTypesInTransaction(typeof(T));
+                    }
 
-                Transaction.PostRealCommit -= Transaction_PostRealCommit;
-                Transaction.PostRealCommit += Transaction_PostRealCommit;
-            }
+                    Transaction.PostRealCommit -= Transaction_PostRealCommit;
+                    Transaction.PostRealCommit += Transaction_PostRealCommit;
+                }
 
             void Transaction_PostRealCommit(Dictionary<string, object> obj)
             {
@@ -491,7 +491,7 @@ ALTER DATABASE {0} SET NEW_BROKER".FormatWith(database));
             }
         }
 
-
+      
         public static Dictionary<Type, EntityData> EntityDataOverrides = new Dictionary<Type, EntityData>();
 
         public static void OverrideEntityData<T>(EntityData data)
@@ -691,7 +691,7 @@ ALTER DATABASE {0} SET NEW_BROKER".FormatWith(database));
             }
         }
 
-
+      
     }
 
     internal interface ICacheLogicController : ICacheController

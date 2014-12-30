@@ -123,19 +123,20 @@ namespace Signum.Engine.Basics
 
             Table table = Schema.Current.Table<QueryEntity>();
 
-            return Synchronizer.SynchronizeScriptReplacing(
-                replacements,
-                QueriesKey,
-                should.ToDictionary(a => a.Key, "query in memory"),
-                current.ToDictionary(a => a.Key, "query in database"),
-                (n, s)=>table.InsertSqlSync(s),
-                (n, c) => table.DeleteSqlSync(c),
-                (fn, s, c) =>
-                {
-                    c.Key = s.Key;
-                    c.Name = s.Name;
-                    return table.UpdateSqlSync(c);
-                }, Spacing.Double);
+            using (replacements.WithReplacedDatabaseName())
+                return Synchronizer.SynchronizeScriptReplacing(
+                    replacements,
+                    QueriesKey,
+                    should.ToDictionary(a => a.Key, "query in memory"),
+                    current.ToDictionary(a => a.Key, "query in database"),
+                    (n, s) => table.InsertSqlSync(s),
+                    (n, c) => table.DeleteSqlSync(c),
+                    (fn, s, c) =>
+                    {
+                        c.Key = s.Key;
+                        c.Name = s.Name;
+                        return table.UpdateSqlSync(c);
+                    }, Spacing.Double);
         }
 
         public static QueryEntity GetQueryEntity(object queryName)

@@ -98,7 +98,7 @@ namespace Signum.Engine.Disconnected
                 MachineGraph.Register();
 
 
-                sb.Schema.Initializing += AssertDisconnectedStrategies;
+                sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
 
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
 

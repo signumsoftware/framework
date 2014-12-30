@@ -141,9 +141,8 @@ namespace Signum.Engine.Disconnected
                             using (Connector.Override(newDatabase))
                             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                             using (ExecutionMode.DisableCache())
-                            using (ExecutionMode.SynchronizeSchemaOnly())
                             {
-                                var script = Administrator.TotalSynchronizeScript(interactive: false);
+                                var script = Administrator.TotalSynchronizeScript(interactive: false, schemaOnly: true);
 
                                 if (script != null)
                                 {

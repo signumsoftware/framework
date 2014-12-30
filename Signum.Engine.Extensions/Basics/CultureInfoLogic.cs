@@ -72,13 +72,14 @@ namespace Signum.Engine.Basics
             }
         }
 
-        static SqlPreCommand Schema_Synchronizing(Replacements arg)
+        static SqlPreCommand Schema_Synchronizing(Replacements rep)
         {
             var cis = Database.Query<CultureInfoEntity>().ToList();
 
             var table = Schema.Current.Table(typeof(CultureInfoEntity));
 
-            return cis.Select(c => table.UpdateSqlSync(c)).Combine(Spacing.Double);
+            using (rep.WithReplacedDatabaseName())
+                return cis.Select(c => table.UpdateSqlSync(c)).Combine(Spacing.Double);
         }
 
         public static CultureInfoEntity ToCultureInfoEntity(this CultureInfo ci)

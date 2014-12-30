@@ -235,7 +235,8 @@ namespace Signum.Engine.Word
                         file.AllowChange = true;
                         file.BinaryFile = memory.ToArray();
 
-                        return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate: " + template.Name);
+                        using (replacements.WithReplacedDatabaseName())
+                            return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate: " + template.Name);
                     }                 
                 }
                 catch (TemplateSyncException ex)

@@ -35,29 +35,30 @@ namespace Signum.Engine.Basics
         }
 
         public const string PropertiesFor = "Properties For:{0}";
-        static SqlPreCommand SyncronizeProperties(Replacements replacements)
+        static SqlPreCommand SyncronizeProperties(Replacements rep)
         {
-            var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(replacements).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
+            var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
 
-            var should = TypeLogic.TryDNToType(replacements).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
+            var should = TypeLogic.TryDNToType(rep).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
 
             Table table = Schema.Current.Table<PropertyRouteEntity>();
 
-            return Synchronizer.SynchronizeScript(should, current,
-                null,
-                null,
-                (fullName, dicShould, dicCurr) =>
-                    Synchronizer.SynchronizeScriptReplacing(replacements, PropertiesFor.FormatWith(fullName),
-                    dicShould,
-                    dicCurr,
+            using (rep.WithReplacedDatabaseName())
+                return Synchronizer.SynchronizeScript(should, current,
                     null,
-                    (path, c) => table.DeleteSqlSync(c),
-                    (path, s, c) =>
-                    {
-                        c.Path = s.Path;
-                        return table.UpdateSqlSync(c);
-                    }, Spacing.Simple),
-                Spacing.Double);
+                    null,
+                    (fullName, dicShould, dicCurr) =>
+                        Synchronizer.SynchronizeScriptReplacing(rep, PropertiesFor.FormatWith(fullName),
+                        dicShould,
+                        dicCurr,
+                        null,
+                        (path, c) => table.DeleteSqlSync(c),
+                        (path, s, c) =>
+                        {
+                            c.Path = s.Path;
+                            return table.UpdateSqlSync(c);
+                        }, Spacing.Simple),
+                    Spacing.Double);
         }
 
         public static List<PropertyRouteEntity> RetrieveOrGenerateProperties(TypeEntity typeEntity)
