@@ -18,7 +18,7 @@ namespace Signum.Engine
     public static class SqlBuilder
     {
         #region Create Tables
-        public static SqlPreCommand CreateTableSql(ITable t)
+        public static SqlPreCommandSimple CreateTableSql(ITable t)
         {
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".FormatWith(
                 t.Name, 
