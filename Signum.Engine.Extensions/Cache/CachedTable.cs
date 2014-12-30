@@ -204,7 +204,7 @@ namespace Signum.Engine.Cache
 
             rows = new ResetLazy<Dictionary<PrimaryKey, object>>(() =>
             {
-                CacheLogic.OnStart();
+                CacheLogic.AssertSqlDependencyStarted();
 
                 var connector = (SqlConnector)Connector.Current;
                 Table table = connector.Schema.Table(typeof(T));
@@ -375,7 +375,7 @@ namespace Signum.Engine.Cache
 
             relationalRows = new ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>>(() =>
             {
-                CacheLogic.OnStart();
+                CacheLogic.AssertSqlDependencyStarted();
 
                 var connector = (SqlConnector)Connector.Current;
 
@@ -509,7 +509,7 @@ namespace Signum.Engine.Cache
 
             toStrings = new ResetLazy<Dictionary<PrimaryKey, string>>(() =>
             {
-                CacheLogic.OnStart();
+                CacheLogic.AssertSqlDependencyStarted();
 
                 var connector = (SqlConnector)Connector.Current;
 
