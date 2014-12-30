@@ -44,7 +44,7 @@ namespace Signum.Engine.Exceptions
                     IndexName = m.Groups["index"].Value;
                     Values = m.Groups["value"].Value;
 
-                    Table = cachedTables.GetOrAdd(TableName, tn=>Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToStringDbo() == tn));
+                    Table = cachedTables.GetOrAdd(TableName, tn => Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToString() == tn));
 
                     if(Table != null)
                     {

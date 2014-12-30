@@ -201,17 +201,6 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            if (Schema == null || Schema.IsDefault())
-                return Name.SqlEscape();
-
-            return Schema.ToString() + "." + Name.SqlEscape();
-        }
-
-        public string ToStringDbo()
-        {
-            if (Schema == null)
-                return Name.SqlEscape();
-
             return Schema.ToString() + "." + Name.SqlEscape();
         }
 
@@ -229,7 +218,7 @@ namespace Signum.Engine.Maps
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() ^ (Schema == null ? 0 : Schema.GetHashCode());
+            return Name.GetHashCode() ^ Schema.GetHashCode();
         }
 
         internal static ObjectName Parse(string name)
@@ -266,7 +255,6 @@ namespace Signum.Engine.Maps
 
     public struct ObjectNameOptions
     {
-        public bool IncludeDboSchema;
         public DatabaseName OverrideDatabaseNameOnSystemQueries;
         public bool AvoidDatabaseName;
     }
