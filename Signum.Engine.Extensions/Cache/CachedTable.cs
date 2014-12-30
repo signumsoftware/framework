@@ -171,7 +171,7 @@ namespace Signum.Engine.Cache
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
                     Table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ",\r\n"),
-                    table.Name.ToStringDbo(),
+                    table.Name.ToString(),
                     ctr.currentAlias.Name.SqlEscape());
 
                 ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias.Name.SqlEscape() + ".Id\r\n" + remainingJoins;
@@ -336,7 +336,7 @@ namespace Signum.Engine.Cache
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
                     ctr.table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ",\r\n"),
-                    table.Name.ToStringDbo(),
+                    table.Name.ToString(),
                     ctr.currentAlias.Name.SqlEscape());
 
                 ctr.remainingJoins = lastPartialJoin + ctr.currentAlias.Name.SqlEscape() + "." + table.BackReference.Name.SqlEscape() + "\r\n" + remainingJoins;
@@ -490,7 +490,7 @@ namespace Signum.Engine.Cache
             {
                 string select = "SELECT {0}\r\nFROM {1} {2}\r\n".FormatWith(
                     columns.ToString(c => currentAlias.Name.SqlEscape() + "." + c.Name.SqlEscape(), ", "),
-                    table.Name.ToStringDbo(),
+                    table.Name.ToString(),
                     currentAlias.Name.SqlEscape());
 
                 select += lastPartialJoin + currentAlias.Name.SqlEscape() + "." + table.PrimaryKey.Name.SqlEscape() + "\r\n" + remainingJoins;
