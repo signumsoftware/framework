@@ -257,20 +257,18 @@ namespace Signum.Entities
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        static long temporalIdCounter = 0;
-
+        
         #region Temporal ID
         [Ignore]
-        internal int temporalId;
+        internal Guid temporalId = Guid.NewGuid();
 
         internal ModifiableEntity()
         {
-            temporalId = unchecked((int)Interlocked.Increment(ref temporalIdCounter));
         }
 
         public override int GetHashCode()
         {
-            return GetType().FullName.GetHashCode() ^ temporalId;
+            return GetType().FullName.GetHashCode() ^ temporalId.GetHashCode();
         }
         #endregion
 
