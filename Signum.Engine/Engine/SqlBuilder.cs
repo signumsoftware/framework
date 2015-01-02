@@ -433,8 +433,10 @@ EXEC DB.dbo.sp_executesql @sql"
 
         public static SqlPreCommandSimple AddDefaultConstraint(ObjectName tableName, string columnName, string definition)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT DF_{0}_{1} DEFAULT {2} FOR {1}"
-                .FormatWith(tableName, columnName, definition));
+            string constraintName = "DF_{0}_{1}".FormatWith(tableName.Name, columnName);
+
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} DEFAULT {2} FOR {3}"
+                .FormatWith(tableName, constraintName, definition, columnName));
         }
 
         internal static SqlPreCommand DropStatistics(string tn, List<DiffStats> list)
