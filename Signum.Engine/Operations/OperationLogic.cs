@@ -635,7 +635,6 @@ namespace Signum.Engine.Operations
 
         internal static IEnumerable<Graph<E, S>.IGraphOperation> GraphOperations<E, S>()
             where E : Entity
-            where S : struct
         {
             return operations.OverridenValues.SelectMany(d => d.Values).OfType<Graph<E, S>.IGraphOperation>();
         }

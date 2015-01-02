@@ -25,8 +25,9 @@ namespace Signum.Engine.Operations
 
     public class Graph<T, S>
         where T : Entity
-        where S : struct
     {
+        
+
         public interface IGraphOperation : IOperation
         {
         }
@@ -43,11 +44,11 @@ namespace Signum.Engine.Operations
 
         public class Construct : Graph<T>.Construct, IGraphToStateOperation
         {
-            S? toState;
+            Box<S> toState;
             public S ToState
             {
                 get { return toState.Value; }
-                set { toState = value; }
+                set { toState = new Box<S>(value); }
             }
 
             public Construct(ConstructSymbol<T>.Simple symbol)
@@ -78,11 +79,11 @@ namespace Signum.Engine.Operations
         public class ConstructFrom<F> : Graph<T>.ConstructFrom<F>, IGraphToStateOperation
             where F : class, IEntity
         {
-            S? toState;
+            Box<S> toState;
             public S ToState
             {
                 get { return toState.Value; }
-                set { toState = value; }
+                set { toState = new Box<S>(value); }
             }
 
             public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
@@ -114,11 +115,11 @@ namespace Signum.Engine.Operations
         public class ConstructFromMany<F> : Graph<T>.ConstructFromMany<F>, IGraphToStateOperation
             where F : class, IEntity
         {
-            S? toState;
+            Box<S> toState;
             public S ToState
             {
                 get { return toState.Value; }
-                set { toState = value; }
+                set { toState = new Box<S>(value); }
             }
 
             public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
@@ -148,11 +149,11 @@ namespace Signum.Engine.Operations
 
         public class Execute : Graph<T>.Execute, IGraphToStateOperation, IGraphFromStatesOperation, IEntityOperation
         {
-            S? toState;
+            Box<S> toState;
             public S ToState
             {
                 get { return toState.Value; }
-                set { toState = value; }
+                set { toState = new Box<S>(value); }
             }
             
             public List<S> FromStates { get; private set; }
@@ -336,5 +337,15 @@ namespace Signum.Engine.Operations
             if (!state.Equals(operation.ToState))
                 throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".FormatWith(operation.OperationSymbol, operation.ToState, state));
         }
+    }
+
+    internal class Box<T>
+    {
+        public Box(T value)
+        {
+            this.Value = value;
+        }
+
+        public readonly T Value;
     }
 }

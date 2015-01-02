@@ -115,7 +115,7 @@ namespace Signum.Entities.Reflection
         static string CloneAttack(DirectedGraph<Modifiable> graph)
         {
             var problems = (from m in graph.OfType<Entity>()
-                            group m by new { Type = m.GetType(), Id = (m as Entity).Try(ident => (object)ident.IdOrNull) ?? -m.temporalId } into g
+                            group m by new { Type = m.GetType(), Id = (m as Entity).Try(ident => (object)ident.IdOrNull) ?? (object)m.temporalId } into g
                             where g.Count() > 1 && g.Count(m => m.Modified == ModifiedState.SelfModified) > 0
                             select g).ToList();
 
