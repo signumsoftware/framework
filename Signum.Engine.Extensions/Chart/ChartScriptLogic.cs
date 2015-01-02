@@ -93,11 +93,11 @@ namespace Signum.Engine.Chart
 
             if (answer.ToLower() == "e")
             {
-                ExportAllScripts(folderName);
+                ExportChartScripts(folderName);
             }
             else if (answer.ToLower() == "i")
             {
-                ImportAllScripts(folderName);
+                ImportChartScripts(folderName);
             }
         }
 
@@ -119,7 +119,7 @@ namespace Signum.Engine.Chart
             throw new InvalidOperationException("Default ChartScripts folder not found");
         }
 
-        public static void ExportAllScripts(string folderName)
+        public static void ExportChartScripts(string folderName)
         {
             if (!Directory.Exists(folderName))
                 Directory.CreateDirectory(folderName);
@@ -162,7 +162,12 @@ namespace Signum.Engine.Chart
             public bool ForceAll;
         }
 
-        public static void ImportAllScripts(string folderName)
+        public static void ImportChartScripts()
+        {
+            ImportChartScripts(GetDefaultFolderName());
+        }
+
+        public static void ImportChartScripts(string folderName)
         {
             var files = Directory.GetFiles(folderName, "*.xml").ToDictionary(Path.GetFileNameWithoutExtension);
 
