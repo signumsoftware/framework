@@ -274,7 +274,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (!liteKey) {
             var items = Finder.SearchControl.getSelectedItems(options.prefix);
             liteKey = items.map(function (i) {
-                return i.key();
+                return i.runtimeInfo.key();
             });
         }
 
