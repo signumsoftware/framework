@@ -14,6 +14,7 @@ using Signum.Engine.Basics;
 using System.Globalization;
 using Signum.Engine.Translation;
 
+
 namespace Signum.Engine.Authorization
 {
     public static class ResetPasswordRequestLogic
@@ -57,9 +58,12 @@ namespace Signum.Engine.Authorization
             using (AuthLogic.Disable())
             {
                 //Remove old previous requests
-                Database.Query<ResetPasswordRequestEntity>()
-                    .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
-                    .UnsafeDelete();
+                Database.Query<ResetPasswordRequestDN>()
+                .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
+                .UnsafeUpdate()
+                .Set(e => e.Lapsed, e => true)
+                .Execute();
+
 
                 return new ResetPasswordRequestEntity()
                 {
