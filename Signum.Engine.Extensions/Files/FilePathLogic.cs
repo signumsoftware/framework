@@ -104,8 +104,7 @@ namespace Signum.Engine.Files
                         r.PhysicalPrefix,
                         r.WebPrefix
                     });
-
-
+                
 
                 dqm.RegisterQuery(typeof(FileTypeSymbol), () =>
                     from f in Database.Query<FileTypeSymbol>()
@@ -126,13 +125,8 @@ namespace Signum.Engine.Files
                     Lite = false,
                     Execute = (fr, _) => { }
                 }.Register();
-
-
-
-
             }
         }
-
 
         public static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
         {
@@ -149,8 +143,6 @@ namespace Signum.Engine.Files
                 }
             };
         }
-
-
 
         static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
 

@@ -20,9 +20,8 @@ namespace Signum.Entities.ViewLog
             set { Set(ref target, value); }
         }
 
-        [NotNullable]
-        Lite<IUserEntity> user;
-        [NotNullValidator]
+       
+        Lite<IUserDN> user;       
         public Lite<IUserEntity> User
         {
             get { return user; }
