@@ -342,12 +342,12 @@ FROM {1} as [table]".FormatWith(
 
         public static SqlPreCommandSimple SetSingleUser(string databaseName)
         {
-            return new SqlPreCommandSimple("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;".Formato(databaseName));
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;".FormatWith(databaseName));
         }
 
         public static SqlPreCommandSimple SetMultiUser(string databaseName)
         {
-            return new SqlPreCommandSimple("ALTER DATABASE {0} SET MULTI_USER;".Formato(databaseName));
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET MULTI_USER;".FormatWith(databaseName));
         }
 
         public static SqlPreCommandSimple SetSnapshotIsolation(string databaseName, bool value)

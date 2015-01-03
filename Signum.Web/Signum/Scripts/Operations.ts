@@ -273,7 +273,7 @@ export function constructFromManyRequestData(options: OperationOptions, newPrefi
 
     if (!liteKey) {
         var items = Finder.SearchControl.getSelectedItems(options.prefix);
-        liteKey = items.map(i=> i.runtimeInfo.key());
+        liteKey = items.map(i=> i.key());
     }
 
     result["liteKeys"] = liteKey.join(",");

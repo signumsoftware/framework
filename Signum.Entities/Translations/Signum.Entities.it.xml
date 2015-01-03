@@ -54,7 +54,7 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Corrompere" />
   </Type>
-  <Type Name="DeleteLogParametersDN" Description="Parametri di eliminazione del registro">
+  <Type Name="DeleteLogParametersEntity" Description="Parametri di eliminazione del registro">
     <Member Name="ChunkSize" Description="Dimensione del blocco" />
     <Member Name="DateLimit" Description="Data limite" />
     <Member Name="DeleteLogsWithMoreThan" Description="Eliminare i registri con più di" />
