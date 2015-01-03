@@ -13,6 +13,7 @@ using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Isolation;
+using Signum.Engine.Isolation;
 
 namespace Signum.Engine.Mailing
 {
@@ -180,7 +181,7 @@ namespace Signum.Engine.Mailing
             var list = (from type in systemEmails.Keys
                         select new SystemEmailEntity
                         {
-                             ullClassName = type.FullName
+                             FullClassName = type.FullName
                         }).ToList();
             return list;
         }
@@ -212,7 +213,7 @@ namespace Signum.Engine.Mailing
             if (systemEmail.UntypedEntity == null)
                 throw new InvalidOperationException("Entity property not set on SystemEmail");
 
-            using (IsolationEntity.TryOverride(systemEmail.UntypedEntity.TryIsolation())
+            using (IsolationEntity.Override(systemEmail.UntypedEntity.TryIsolation()))
             {
                 var systemEmailEntity = ToSystemEmailEntity(systemEmail.GetType());
                 var template = GetDefaultTemplate(systemEmailEntity);
@@ -223,10 +224,10 @@ namespace Signum.Engine.Mailing
 
         private static EmailTemplateEntity GetDefaultTemplate(SystemEmailEntity systemEmailEntity)
         {
-            var list = SystemEmailsToEmailTemplates.Value.TryGetC(systemEmailDN.ToLite()); 
+            var list = SystemEmailsToEmailTemplates.Value.TryGetC(systemEmailEntity.ToLite()); 
 
 			if(IsolationLogic.GetStrategy(typeof(EmailTemplateEntity)) == IsolationStrategy.Isolated && IsolationEntity.Current != null)
-				list = list.Where(e => e.Isolation().Is(IsolationDN.Current)).ToList();
+				list = list.Where(e => e.Isolation().Is(IsolationEntity.Current)).ToList();
 
             if (list.IsNullOrEmpty())
             {

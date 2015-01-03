@@ -20,8 +20,8 @@ namespace Signum.Entities.ViewLog
             set { Set(ref target, value); }
         }
 
-       
-        Lite<IUserDN> user;       
+
+        Lite<IUserEntity> user;       
         public Lite<IUserEntity> User
         {
             get { return user; }
