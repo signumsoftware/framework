@@ -975,4 +975,19 @@
         </Setter>
     </Style>
 
+    <Style TargetType="ToolTip">
+        <Style.Triggers>
+            <Trigger Property="Content"
+                 Value="{x:Static sys:String.Empty}">
+                <Setter Property="Visibility"
+                    Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Content"
+                 Value="{x:Null}">
+                <Setter Property="Visibility"
+                    Value="Collapsed" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

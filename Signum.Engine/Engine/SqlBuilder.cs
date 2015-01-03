@@ -340,6 +340,16 @@ FROM {1} as [table]".FormatWith(
                 tableName, value ? "ON" : "OFF"));
         }
 
+        public static SqlPreCommandSimple SetSingleUser(string databaseName)
+        {
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;".Formato(databaseName));
+        }
+
+        public static SqlPreCommandSimple SetMultiUser(string databaseName)
+        {
+            return new SqlPreCommandSimple("ALTER DATABASE {0} SET MULTI_USER;".Formato(databaseName));
+        }
+
         public static SqlPreCommandSimple SetSnapshotIsolation(string databaseName, bool value)
         {
             return new SqlPreCommandSimple("ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION {1}".FormatWith(databaseName, value ? "ON" : "OFF"));
@@ -447,7 +457,7 @@ EXEC DB.dbo.sp_executesql @sql"
             return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlEscape() + "." + s.StatsName.SqlEscape(), ",\r\n"));
         }
 
-
+     
 
       
     }
