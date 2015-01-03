@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -108,7 +108,7 @@ namespace Signum.Entities.DynamicQuery
         public override string NiceName()
         {
             if (!CollectionElementType.IsElement())
-                throw new InvalidOperationException("NiceName not supported for {0}".Formato(CollectionElementType));
+                throw new InvalidOperationException("NiceName not supported for {0}".FormatWith(CollectionElementType));
 
             Type parentElement = elementType.CleanType();
 
@@ -155,7 +155,7 @@ namespace Signum.Entities.DynamicQuery
             if (elements.IsEmpty())
                 return null;
 
-            return ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.NiceToString().Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
+            return ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.NiceToString().FormatWith(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
         }
 
         public override string TypeColor

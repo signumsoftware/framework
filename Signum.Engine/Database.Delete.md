@@ -1,4 +1,4 @@
-# Database.Delete
+﻿# Database.Delete
 
 `Database` class has a some overloads for deleting entities. All of this methods are just shortcuts for calling `UnsafeDelete` in the LINQ provider, that does the real work.
 
@@ -27,7 +27,7 @@ As usual, this overloads take the run-time type of the argument, not the static 
 Example: 
 
 ```C#
-new UserDN().Save().Delete(); //I'm feeling productive...
+new UserEntity().Save().Delete(); //I'm feeling productive...
 ```
 
 

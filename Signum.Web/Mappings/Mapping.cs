@@ -1,4 +1,4 @@
-#region usings
+﻿#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,7 +68,7 @@ namespace Signum.Web
                     return TimeSpan.Parse(ctx.Input);
             });
             MappingRepository<SqlHierarchyId>.Mapping = GetValue(ctx => SqlHierarchyId.Parse(ctx.Input));
-            MappingRepository<ColorDN>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorDN.FromRGBHex(ctx.Input) : null);
+            MappingRepository<ColorEntity>.Mapping = GetValue(ctx => ctx.Input.HasText() ? ColorEntity.FromRGBHex(ctx.Input) : null);
 
             MappingRepository<bool?>.Mapping = GetValueNullable(ctx => ParseHtmlBool(ctx.Input));
             MappingRepository<byte?>.Mapping = GetValueNullable(ctx => byte.Parse(ctx.Input));
@@ -207,7 +207,7 @@ namespace Signum.Web
             if (Reflector.IsMList(typeof(T)))
                 return (Mapping<T>)giForMList.GetInvoker(typeof(T).ElementType())();
 
-            return ctx => { throw new InvalidOperationException("No mapping implemented for {0}".Formato(typeof(T).TypeName())); };
+            return ctx => { throw new InvalidOperationException("No mapping implemented for {0}".FormatWith(typeof(T).TypeName())); };
         }
 
         static Mapping<T> GetValue<T>(Func<MappingContext, T> parse)
@@ -223,7 +223,7 @@ namespace Signum.Web
                 }
                 catch (FormatException)
                 {
-                    return ctx.None(ctx.PropertyValidator != null ? ValidationMessage._0HasAnInvalidFormat.NiceToString().Formato(ctx.PropertyValidator.PropertyInfo.NiceName()) : ValidationMessage.InvalidFormat.NiceToString());
+                    return ctx.None(ctx.PropertyValidator != null ? ValidationMessage._0HasAnInvalidFormat.NiceToString().FormatWith(ctx.PropertyValidator.PropertyInfo.NiceName()) : ValidationMessage.InvalidFormat.NiceToString());
                 }
             };
         }
@@ -245,7 +245,7 @@ namespace Signum.Web
                 }
                 catch (FormatException)
                 {
-                    return ctx.None(ctx.PropertyValidator != null ? ValidationMessage._0HasAnInvalidFormat.NiceToString().Formato(ctx.PropertyValidator.PropertyInfo.NiceName()) : ValidationMessage.InvalidFormat.NiceToString());
+                    return ctx.None(ctx.PropertyValidator != null ? ValidationMessage._0HasAnInvalidFormat.NiceToString().FormatWith(ctx.PropertyValidator.PropertyInfo.NiceName()) : ValidationMessage.InvalidFormat.NiceToString());
                 }
             };
         }
@@ -314,7 +314,7 @@ namespace Signum.Web
 
         public override T GetValue(MappingContext<T> ctx)
         {
-            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "AutoEntityMapping<{0}>".Formato(typeof(T).TypeName())))
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "AutoEntityMapping<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 if (ctx.Empty())
                     return ctx.None();
@@ -361,7 +361,7 @@ namespace Signum.Web
         {
             if (AllowedMappings != null && !AllowedMappings.ContainsKey(typeof(R)))
             {
-                return (R)(object)ctx.None(ValidationMessage.Type0NotAllowed.NiceToString().Formato(typeof(R)));
+                return (R)(object)ctx.None(ValidationMessage.Type0NotAllowed.NiceToString().FormatWith(typeof(R)));
             }
 
             Mapping<R> mapping = (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
@@ -429,7 +429,7 @@ namespace Signum.Web
                     e is UnauthorizedAccessException ? e.Message :
                     ValidationMessage.NotPossibleToaAssign0.NiceToString();
 
-                ctx.Error.Add(error.Formato(PropertyValidator.PropertyInfo.NiceName()));
+                ctx.Error.Add(error.FormatWith(PropertyValidator.PropertyInfo.NiceName()));
             }
 
             if (!ctx.Empty())
@@ -541,7 +541,7 @@ namespace Signum.Web
 
         public override T GetValue(MappingContext<T> ctx)
         {
-            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "EntityMapping<{0}>".Formato(typeof(T).TypeName())))
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "EntityMapping<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 if (ctx.Empty())
                     return ctx.None();
@@ -647,7 +647,7 @@ namespace Signum.Web
             var prop = (IPropertyMapping<T, P>)properties.SingleOrDefaultEx(p => ReflectionTools.PropertyEquals(p.PropertyValidator.PropertyInfo, pi) && p.MixinType == mixin);
 
             if (prop != null)
-                throw new InvalidOperationException("{0} already registered".Formato(pi.Name));
+                throw new InvalidOperationException("{0} already registered".FormatWith(pi.Name));
 
             properties.Add(NewProperty(pi, mixin));
 
@@ -745,7 +745,7 @@ namespace Signum.Web
                 mixin = mce.Method.GetGenericArguments()[0];
 
                 if (!MixinDeclarations.GetMixinDeclarations(typeof(T)).Contains(mixin))
-                    throw new ArgumentException("The mixin {0} used in lambda 'property' is not registered".Formato(mixin.TypeName()));
+                    throw new ArgumentException("The mixin {0} used in lambda 'property' is not registered".FormatWith(mixin.TypeName()));
 
                 return pi;
             }
@@ -773,7 +773,7 @@ namespace Signum.Web
 
         public Lite<S> GetValue(MappingContext<Lite<S>> ctx)
         {
-            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "LiteMapping<{0}>".Formato(typeof(S).TypeName())))
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "LiteMapping<{0}>".FormatWith(typeof(S).TypeName())))
             {
                 if (ctx.Empty())
                     return ctx.None();
@@ -818,12 +818,12 @@ namespace Signum.Web
 
         public Lite<S> TryModifyEntity(MappingContext<Lite<S>> ctx, Lite<S> lite)
         {
-            //commented out because of Lite<FileDN/FilePathDN>
+            //commented out because of Lite<FileEntity/FilePathEntity>
             if (AvoidEntityMapping || !EntityHasChanges(ctx))
                 return lite; // If form does not contains changes to the entity
 
             if (EntityMapping == null)
-                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".Formato(lite.TryToString()));
+                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".FormatWith(lite.TryToString()));
 
             var sc = new SubContext<S>(ctx.Prefix, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = lite.Retrieve() };
             sc.Value = EntityMapping(sc);
@@ -895,7 +895,7 @@ namespace Signum.Web
 
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
-            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "MListMapping<{0}>".Formato(typeof(S).TypeName())))
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "MListMapping<{0}>".FormatWith(typeof(S).TypeName())))
             {
                 if (ctx.Empty())
                     return ctx.None();
@@ -1013,7 +1013,7 @@ namespace Signum.Web
 
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
-            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "MListCorrelatedMapping<{0}>".Formato(typeof(S).TypeName())))
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "MListCorrelatedMapping<{0}>".FormatWith(typeof(S).TypeName())))
             {
                 MList<S> list = ctx.Value;
                 int i = 0;
@@ -1086,7 +1086,7 @@ namespace Signum.Web
 
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
-            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "MListDictionaryMapping<{0}>".Formato(typeof(S).TypeName())))
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "MListDictionaryMapping<{0}>".FormatWith(typeof(S).TypeName())))
             {
                 if (ctx.Empty())
                     return ctx.None();

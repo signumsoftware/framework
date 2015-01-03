@@ -86,7 +86,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Basics\Exception.cs" />
-    <Compile Include="Basics\IUserDN.cs" />
+    <Compile Include="Basics\IUserEntity.cs" />
     <Compile Include="Basics\Operation.cs" />
     <Compile Include="Basics\OperationLog.cs" />
     <Compile Include="Basics\SemiSymbol.cs" />

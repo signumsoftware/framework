@@ -40,12 +40,12 @@ namespace Signum.Engine.Maps
 
             public SqlPreCommandSimple CreateView()
             {
-                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".Formato(Name) + Definition) { GoBefore = true };
+                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".FormatWith(Name) + Definition) { GoBefore = true };
             }
 
             public SqlPreCommandSimple AlterView()
             {
-                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".Formato(Name) + Definition) { GoBefore = true };
+                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".FormatWith(Name) + Definition) { GoBefore = true };
             } 
         }
 
@@ -82,14 +82,15 @@ namespace Signum.Engine.Maps
                 }
             }).ToDictionary();
 
-            return Synchronizer.SynchronizeScript(
-                Views,
-                oldView,
-                (name, newView) => newView.CreateView(),
-                null,
-                (name, newDef, oldDef) =>
-                    Clean(newDef.CreateView().Sql) == Clean(oldDef) ? null : newDef.AlterView(),
-                Spacing.Double);
+            using (replacements.WithReplacedDatabaseName())
+                return Synchronizer.SynchronizeScript(
+                    Views,
+                    oldView,
+                    (name, newView) => newView.CreateView(),
+                    null,
+                    (name, newDef, oldDef) =>
+                        Clean(newDef.CreateView().Sql) == Clean(oldDef) ? null : newDef.AlterView(),
+                    Spacing.Double);
         }
         #endregion
 
@@ -162,12 +163,12 @@ namespace Signum.Engine.Maps
 
             public SqlPreCommandSimple CreateSql()
             {
-                return new SqlPreCommandSimple("CREATE {0} {1} ".Formato(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true };
+                return new SqlPreCommandSimple("CREATE {0} {1} ".FormatWith(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true };
             }
 
             public SqlPreCommandSimple AlterSql()
             {
-                return new SqlPreCommandSimple("ALTER {0} {1} ".Formato(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true };
+                return new SqlPreCommandSimple("ALTER {0} {1} ".FormatWith(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true };
             }
         }
         #endregion

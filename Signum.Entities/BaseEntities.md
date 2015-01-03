@@ -1,4 +1,4 @@
-# Base Entities
+﻿# Base Entities
 
 Signum Framework provides a clear hierarchy of classes that serve as base classes for your own entities: 
 
@@ -40,9 +40,9 @@ In the current implementation, this class adds nothing over ModifiableEntity. In
 
 On the database, embedded fields are stored in the parent entity table. Let's see an example: 
 
-* If a `PersonDN` class has an `EmbeddedEntity` of type `AddressDN` with name `HomeAddress`. 
-* And `AddressDN` has a field `Street`.
-* Then `PersonDN` table will have a column with name `HomeAddress_Street`. 
+* If a `PersonEntity` class has an `EmbeddedEntity` of type `AddressEntity` with name `HomeAddress`. 
+* And `AddressEntity` has a field `Street`.
+* Then `PersonEntity` table will have a column with name `HomeAddress_Street`. 
 
 Since `EmbeddedEntity` is a classes (reference types), by default they are nullable in the database as well, in order to reduce type-mismatch. This behavior is implemented adding a `HasValue` column and forcing nullability to the remaining embedded fields. 
 
@@ -91,7 +91,7 @@ Apart from these features, it implements the `IEntity` interface, which is just 
 This interface is only implemented by `Entity` class and should be inherited by any interface that will be used by Polymorphic Foreign Key. For example: 
 
 ```C#
-public interface IProcessDataDN : IEntity
+public interface IProcessDataEntity : IEntity
 {
 }
 ```

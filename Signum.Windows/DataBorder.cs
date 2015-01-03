@@ -59,7 +59,7 @@ namespace Signum.Windows
                     if (es == null)
                         Child = new TextBox
                         {
-                            Text = "No EntitySettings for {0}".Formato(newValue.GetType()),
+                            Text = "No EntitySettings for {0}".FormatWith(newValue.GetType()),
                             Foreground = Brushes.Red,
                             FontWeight = FontWeights.Bold
                         };

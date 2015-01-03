@@ -67,7 +67,7 @@ namespace Signum.Utilities.Reflection
                 case 7: return type.GetProperty("Rest");
             }
 
-            throw new ArgumentException("Property with index {0} not found on {1}".Formato(index, type.GetType()));
+            throw new ArgumentException("Property with index {0} not found on {1}".FormatWith(index, type.GetType()));
         }
 
         public static Type TupleChainType(IEnumerable<Type> tupleElementTypes)

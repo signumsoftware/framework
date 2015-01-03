@@ -1,4 +1,4 @@
-# ExpressionExtensions
+﻿# ExpressionExtensions
 
 ### CompileAndStore
 
@@ -24,9 +24,9 @@ public static T Evaluate<A0, A1, A2, A3, T>(this Expression<Func<A0, A1, A2, A3,
 ```
 
 ```C#
-static Expression<Func<Entity, IQueryable<NoteDN>>> NotesExpression =
-    ident => Database.Query<NoteDN>().Where(n => n.Target.RefersTo(ident));
-public static IQueryable<NoteDN> Notes(this Entity ident)
+static Expression<Func<Entity, IQueryable<NoteEntity>>> NotesExpression =
+    ident => Database.Query<NoteEntity>().Where(n => n.Target.RefersTo(ident));
+public static IQueryable<NoteEntity> Notes(this Entity ident)
 {
     return NotesExpression.Evaluate(ident);
 }
@@ -38,7 +38,7 @@ This method can also be used in database queries to apply expressions, in this c
 
 Expression<Func<int, int>> dup = n => n  * 2; 
 
-Database.Query<PersonDN>()
+Database.Query<PersonEntity>()
     .Where(p=>dup.Evaluate(p.Id) == 2 || dup.Evaluate(p.Id) == 4)
     .First();
 ```

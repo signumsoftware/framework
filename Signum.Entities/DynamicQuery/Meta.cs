@@ -46,7 +46,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return "CleanMeta({0})".Formato(PropertyRoutes.ToString(", "));
+            return "CleanMeta({0})".FormatWith(PropertyRoutes.ToString(", "));
         }
 
     }
@@ -75,7 +75,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return "DirtyMeta({0})".Formato(CleanMetas.ToString(", "));
+            return "DirtyMeta({0})".FormatWith(CleanMetas.ToString(", "));
         }
     }
 }

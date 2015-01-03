@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
-    public class OperationLogDN : Entity
+    public class OperationLogEntity : Entity
     {
         [ImplementedByAll]
         Lite<IEntity> target;
@@ -34,9 +34,9 @@ namespace Signum.Entities.Basics
             set { SetToStr(ref operation, value); }
         }
 
-        Lite<IUserDN> user;
+        Lite<IUserEntity> user;
         [NotNullValidator]
-        public Lite<IUserDN> User
+        public Lite<IUserEntity> User
         {
             get { return user; }
             set { SetToStr(ref user, value); }
@@ -57,15 +57,15 @@ namespace Signum.Entities.Basics
         }
 
 
-        static Expression<Func<OperationLogDN, double?>> DurationExpression =
+        static Expression<Func<OperationLogEntity, double?>> DurationExpression =
             log => (double?)(log.End - log.Start).Value.TotalMilliseconds;
         public double? Duration
         {
             get { return end == null ? null : DurationExpression.Evaluate(this); }
         }
 
-        Lite<ExceptionDN> exception;
-        public Lite<ExceptionDN> Exception
+        Lite<ExceptionEntity> exception;
+        public Lite<ExceptionEntity> Exception
         {
             get { return exception; }
             set { Set(ref exception, value); }
@@ -73,7 +73,7 @@ namespace Signum.Entities.Basics
 
         public override string ToString()
         {
-            return "{0} {1} {2:d}".Formato(operation, user, start);
+            return "{0} {1} {2:d}".FormatWith(operation, user, start);
         }
 
         public void SetTarget(IEntity target)

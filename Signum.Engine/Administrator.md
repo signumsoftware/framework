@@ -1,4 +1,4 @@
-# Administrator
+﻿# Administrator
 
 Administrator class is the main facade for making modifications to create the database schema, synchronize it, or do administrative operations or abuses of the system that belong to load applications, not to typical production code.
 
@@ -59,7 +59,7 @@ public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyP
 Example: 
 
 ```C#
-BugDN bug = new BugDN().SetReadonly(b => b.CreationDate, DateTime.Now);
+BugEntity bug = new BugEntity().SetReadonly(b => b.CreationDate, DateTime.Now);
 ```
 
 ## SetId
@@ -74,7 +74,7 @@ public static T SetId<T>(this T ident, int? id)
 Example: 
 
 ```C#
-BugDN bug = new BugDN().SetId(10);
+BugEntity bug = new BugEntity().SetId(10);
 ```
 
 
@@ -119,9 +119,9 @@ public static T SetNotModifiedGraph<T>(this T ident, int id)  where T : Entity
 Example: 
 
 ```C#
-new NoteDN()
+new NoteEntity()
 {
-   Target = new BugDN().SetNotModifiedGraph(1); // refers to BugDN 1 without retrieving it
+   Target = new BugEntity().SetNotModifiedGraph(1); // refers to BugEntity 1 without retrieving it
 }.Save();
 ```
 
@@ -181,7 +181,7 @@ public static IDisposable PrepareTableForBatchLoadScope(ITable table,
 Example: 
 
 ```C#
-using(Administrator.PrepareTableForBatchLoadScope<BugDN>()) //Disables FKs and Indexes
+using(Administrator.PrepareTableForBatchLoadScope<BugEntity>()) //Disables FKs and Indexes
 {
 
    //Load one zillion bugs here

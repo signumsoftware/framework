@@ -64,13 +64,13 @@ namespace Signum.Entities
         public static void Register(Type mainEntity, Type mixinEntity)
         {
             if (!typeof(Entity).IsAssignableFrom(mainEntity))
-                throw new InvalidOperationException("{0} is not a {1}".Formato(mainEntity.Name, typeof(Entity).Name));
+                throw new InvalidOperationException("{0} is not a {1}".FormatWith(mainEntity.Name, typeof(Entity).Name));
 
             if (mainEntity.IsAbstract)
-                throw new InvalidOperationException("{0} is abstract".Formato(mainEntity.Name));
+                throw new InvalidOperationException("{0} is abstract".FormatWith(mainEntity.Name));
 
             if (!typeof(MixinEntity).IsAssignableFrom(mixinEntity))
-                throw new InvalidOperationException("{0} is not a {1}".Formato(mixinEntity.Name, typeof(MixinEntity).Name));
+                throw new InvalidOperationException("{0} is not a {1}".FormatWith(mixinEntity.Name, typeof(MixinEntity).Name));
 
             AssertNotIncluded(mainEntity); 
 
@@ -95,7 +95,7 @@ namespace Signum.Entities
 
                 if (constructors.Length != 1)
                     throw new InvalidOperationException("{0} should have just one non-public construtor with parameters (Entity mainEntity, MixinEntity next)"
-                        .Formato(mixinEntity.Name));
+                        .FormatWith(mixinEntity.Name));
 
                 var ci = constructors.Single();
 
@@ -136,7 +136,7 @@ namespace Signum.Entities
         public static void AssertDeclared(Type mainEntity, Type mixinType)
         {
             if (!IsDeclared(mainEntity, mixinType))
-                throw new InvalidOperationException("Mixin {0} is not registered for {1}. Consider writing MixinDeclarations.Register<{1}, {0}>() at the beginning of Starter.Start".Formato(mixinType.TypeName(), mainEntity.TypeName())); 
+                throw new InvalidOperationException("Mixin {0} is not registered for {1}. Consider writing MixinDeclarations.Register<{1}, {0}>() at the beginning of Starter.Start".FormatWith(mixinType.TypeName(), mainEntity.TypeName())); 
         }
 
         internal static MixinEntity CreateMixins(Entity mainEntity)

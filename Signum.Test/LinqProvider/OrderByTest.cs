@@ -35,79 +35,79 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void OrderByString()
         {
-            var songsAlbum = Database.Query<AlbumDN>().Select(a => a.Name).OrderBy(n => n).ToList();
+            var songsAlbum = Database.Query<AlbumEntity>().Select(a => a.Name).OrderBy(n => n).ToList();
         }
 
         [TestMethod]
         public void OrderByIntDescending()
         {
-            var songsAlbum = Database.Query<AlbumDN>().OrderByDescending(a => a.Year).ToList();
+            var songsAlbum = Database.Query<AlbumEntity>().OrderByDescending(a => a.Year).ToList();
         }
 
         [TestMethod]
         public void OrderByGetType()
         {
-            var songsAlbum = Database.Query<AlbumDN>().OrderBy(a => a.Author.GetType()).ToList();
+            var songsAlbum = Database.Query<AlbumEntity>().OrderBy(a => a.Author.GetType()).ToList();
         }
 
         [TestMethod]
         public void OrderByFirst()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).FirstEx();
+            var songsAlbum = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).FirstEx();
         }
 
         [TestMethod]
         public void OrderByReverse()
         {
-            var artists = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Reverse().Select(a => a.Name);
+            var artists = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Reverse().Select(a => a.Name);
         }
 
         [TestMethod]
         public void OrderByLast()
         {
-            var michael = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Last();
+            var michael = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Last();
         }
 
         [TestMethod]
         public void OrderByThenByReverseLast()
         {
-            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).ThenBy(a=>a.Name).Reverse().Last();
+            var michael = Database.Query<ArtistEntity>().OrderByDescending(a => a.Dead).ThenBy(a=>a.Name).Reverse().Last();
         }
 
         [TestMethod]
         public void OrderByTakeReverse()
         {
-            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).Take(2).Reverse().FirstEx(); //reverse ignored
+            var michael = Database.Query<ArtistEntity>().OrderByDescending(a => a.Dead).Take(2).Reverse().FirstEx(); //reverse ignored
         }
 
         [TestMethod]
         public void OrderByTakeOrderBy()
         {
-            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).Take(2).OrderBy(a=>a.Name).FirstEx();
+            var michael = Database.Query<ArtistEntity>().OrderByDescending(a => a.Dead).Take(2).OrderBy(a=>a.Name).FirstEx();
         }
 
         [TestMethod]
         public void OrderByTop()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Take(3);
+            var songsAlbum = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Take(3);
         }
 
         [TestMethod]
         public void OrderByNotLast()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Where(a => a.Id != 0).ToList();
+            var songsAlbum = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Where(a => a.Id != 0).ToList();
         }
 
         [TestMethod]
         public void OrderByDistinct()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).Distinct().ToList();
+            var songsAlbum = Database.Query<ArtistEntity>().OrderBy(a => a.Dead).Distinct().ToList();
         }
 
         [TestMethod]
         public void OrderByGroupBy()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead)
+            var songsAlbum = Database.Query<ArtistEntity>().OrderBy(a => a.Dead)
                 .GroupBy(a => a.Sex, (s, gr) => new { Sex = s, Count = gr.Count() }).ToList();
         }
 
@@ -116,36 +116,36 @@ namespace Signum.Test.LinqProvider
         public void OrderByIgnore()
         {
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumDN>().Where(a => a.Songs.OrderBy(s => s.Name).Count() > 1).Select(a => a.Id).ToList();
+                Database.Query<AlbumEntity>().Where(a => a.Songs.OrderBy(s => s.Name).Count() > 1).Select(a => a.Id).ToList();
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumDN>().Where(a => a.Songs.OrderBy(s => s.Name).Sum(s => s.Name.Length) > 1).Select(a => a.Id).ToList();
+                Database.Query<AlbumEntity>().Where(a => a.Songs.OrderBy(s => s.Name).Sum(s => s.Name.Length) > 1).Select(a => a.Id).ToList();
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumDN>().Where(a => a.Songs.OrderBy(s => s.Name).Any(s => s.Name.StartsWith("a"))).Select(a => a.Id).ToList();
+                Database.Query<AlbumEntity>().Where(a => a.Songs.OrderBy(s => s.Name).Any(s => s.Name.StartsWith("a"))).Select(a => a.Id).ToList();
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumDN>().Where(a => a.Songs.OrderBy(s => s.Name).All(s => s.Name.StartsWith("a"))).Select(a => a.Id).ToList();
+                Database.Query<AlbumEntity>().Where(a => a.Songs.OrderBy(s => s.Name).All(s => s.Name.StartsWith("a"))).Select(a => a.Id).ToList();
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumDN>().Where(a => a.Songs.OrderBy(s => s.Name).Contains(null)).Select(a => a.Id).ToList();
+                Database.Query<AlbumEntity>().Where(a => a.Songs.OrderBy(s => s.Name).Contains(null)).Select(a => a.Id).ToList();
 
 
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumDN>().OrderBy(a => a.Name).Count();
+                Database.Query<AlbumEntity>().OrderBy(a => a.Name).Count();
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumDN>().OrderBy(a => a.Name).Sum(s => s.Name.Length);
+                Database.Query<AlbumEntity>().OrderBy(a => a.Name).Sum(s => s.Name.Length);
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumDN>().OrderBy(a => a.Name).Any(s => s.Name.StartsWith("a"));
+                Database.Query<AlbumEntity>().OrderBy(a => a.Name).Any(s => s.Name.StartsWith("a"));
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumDN>().OrderBy(a => a.Name).All(s => s.Name.StartsWith("a"));
+                Database.Query<AlbumEntity>().OrderBy(a => a.Name).All(s => s.Name.StartsWith("a"));
 
             using (AsserNoQueryWith("ORDER"))
-                Database.Query<AlbumDN>().OrderBy(a => a.Name).Contains(null);
+                Database.Query<AlbumEntity>().OrderBy(a => a.Name).Contains(null);
         }
 
 

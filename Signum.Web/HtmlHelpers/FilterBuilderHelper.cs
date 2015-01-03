@@ -169,7 +169,7 @@ namespace Signum.Web
                 return ValueLineHelper.ValueLine(helper, vl);
             }
             
-            throw new InvalidOperationException("Invalid filter for type {0}".Formato(filterOption.Token.Type.Name));
+            throw new InvalidOperationException("Invalid filter for type {0}".FormatWith(filterOption.Token.Type.Name));
         }
 
        

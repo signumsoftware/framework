@@ -25,7 +25,7 @@ namespace Signum.Utilities
             var conflicts = newInterfacesValues.Where(a => a.Value != null);
 
             if (conflicts.Count() > 1)
-                throw new InvalidOperationException("Ambiguity for type {0} between interfaces {1}".Formato(currentValue.Key.Name, newInterfacesValues.CommaAnd(t => t.Key.Name)));
+                throw new InvalidOperationException("Ambiguity for type {0} between interfaces {1}".FormatWith(currentValue.Key.Name, newInterfacesValues.CommaAnd(t => t.Key.Name)));
 
             return conflicts.Select(a => a.Value).SingleOrDefaultEx();
         }
@@ -68,7 +68,7 @@ namespace Signum.Utilities
                 var types = interfaces.Where(a => a.Value.ContainsKey(item)).Select(a => new { a.Key, Value = a.Value[item] }).ToList();
 
                 if (types.Count > 1)
-                    throw new InvalidOperationException("Ambiguity for key {0} in type {0} between interfaces {1}".Formato(item, currentValue.Key.Name, types.CommaAnd(t => t.Key.Name)));
+                    throw new InvalidOperationException("Ambiguity for key {0} in type {0} between interfaces {1}".FormatWith(item, currentValue.Key.Name, types.CommaAnd(t => t.Key.Name)));
 
                 newDictionary[item] = types.SingleEx().Value;
             }
@@ -95,7 +95,7 @@ namespace Signum.Utilities
         void AssertAllowed(Type type)
         {
             if (!IsAllowed(type))
-                throw new InvalidOperationException("{0} is not a {1}".Formato(type.Name, minimumType.Name));
+                throw new InvalidOperationException("{0} is not a {1}".FormatWith(type.Name, minimumType.Name));
         }
 
         public Polymorphic(PolymorphicMerger<T> merger = null, Type minimumType = null)
@@ -124,7 +124,7 @@ namespace Signum.Utilities
             var result = TryGetValue(type);
 
             if (result == null)
-                throw new InvalidOperationException("No value defined for type {0}".Formato(type));
+                throw new InvalidOperationException("No value defined for type {0}".FormatWith(type));
 
             return result;
         }

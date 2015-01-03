@@ -87,7 +87,7 @@ namespace Signum.Entities
                 if(this.OldIndex != null)
                     pre += " Ix: " + this.OldIndex;
 
-                return "({0}) {1}".Formato(pre, Value);
+                return "({0}) {1}".FormatWith(pre, Value);
             }
 
             private RowIdValue(SerializationInfo info, StreamingContext ctxt)
@@ -192,7 +192,7 @@ namespace Signum.Entities
         void AssertNotSealed()
         {
             if (Modified == ModifiedState.Sealed)
-                throw new InvalidOperationException("The instance {0} is sealed and can not be modified".Formato(this));
+                throw new InvalidOperationException("The instance {0} is sealed and can not be modified".FormatWith(this));
         }
 
         public T this[int index]
@@ -555,7 +555,7 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return "{0}{{ Count = {1} }}".Formato(GetType().TypeName(), Count);
+            return "{0}{{ Count = {1} }}".FormatWith(GetType().TypeName(), Count);
         }
 
         #region IList Members
@@ -637,7 +637,7 @@ namespace Signum.Entities
             var prev = this.innerList[index]; 
 
             if(prev.RowId.HasValue)
-                throw new InvalidOperationException("Index {0} already as RowId".Formato(index));
+                throw new InvalidOperationException("Index {0} already as RowId".FormatWith(index));
 
             this.innerList[index] = new RowIdValue(prev.Value, rowId, null);
         }

@@ -62,7 +62,7 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            return "TypeSubContext<{0}>".Formato(Type.Name);
+            return "TypeSubContext<{0}>".FormatWith(Type.Name);
         }
     }
 
@@ -90,14 +90,14 @@ namespace Signum.Web
 
         protected override Expression VisitParameter(ParameterExpression p)
         {
-            return replacements.GetOrThrow(p, "TypeSubContext can not be created: {0}".Formato(p.ToString()));
+            return replacements.GetOrThrow(p, "TypeSubContext can not be created: {0}".FormatWith(p.ToString()));
         }
 
         static TypeContextExpression Cast(Expression expression)
         {
             var result = expression as TypeContextExpression;
             if (result == null)
-                throw new InvalidOperationException("TypeSubContext can not be created: {0}".Formato(expression == null ? null : expression.ToString()));
+                throw new InvalidOperationException("TypeSubContext can not be created: {0}".FormatWith(expression == null ? null : expression.ToString()));
             return result;
         }
 
@@ -106,7 +106,7 @@ namespace Signum.Web
             var tce = Cast(Visit(me.Expression));
 
             if (tce.Value == null)
-                throw new InvalidOperationException("Impossible to access member {0} of null reference".Formato(me.Member.Name)); 
+                throw new InvalidOperationException("Impossible to access member {0} of null reference".FormatWith(me.Member.Name)); 
 
             if (tce.Type.IsLite() && (me.Member.Name == "EntityOrNull" || me.Member.Name == "Entity"))
             {
@@ -148,7 +148,7 @@ namespace Signum.Web
 
         static readonly PropertyInfo piEntity = ReflectionTools.GetPropertyInfo((Lite<IEntity> lite) => lite.Entity);
         
-        static readonly MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
+        static readonly MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeEntity> l) => l.Retrieve()).GetGenericMethodDefinition();
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {

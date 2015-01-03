@@ -254,7 +254,7 @@ WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
 
                     return gr.Where(g => g != best)
                         .Select(g => SqlBuilder.DropIndex(t.Key, g.index))
-                        .PreAnd(new SqlPreCommandSimple("-- DUPLICATIONS OF {0}".Formato(best.index))).Combine(Spacing.Simple);
+                        .PreAnd(new SqlPreCommandSimple("-- DUPLICATIONS OF {0}".FormatWith(best.index))).Combine(Spacing.Simple);
                 })
             ).Combine(Spacing.Double);
 
@@ -262,7 +262,7 @@ WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
                 return null;
 
             return SqlPreCommand.Combine(Spacing.Double,
-                 new SqlPreCommandSimple("use {0}".Formato(Connector.Current.DatabaseName())),
+                 new SqlPreCommandSimple("use {0}".FormatWith(Connector.Current.DatabaseName())),
                  result);
         }
     }

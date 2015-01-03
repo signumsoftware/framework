@@ -35,7 +35,7 @@ namespace Signum.Engine.CodeGeneration
             string projectFolder = GetProjectFolder();
 
             if (!Directory.Exists(projectFolder))
-                throw new InvalidOperationException("{0} not found. Override GetProjectFolder".Formato(projectFolder));
+                throw new InvalidOperationException("{0} not found. Override GetProjectFolder".FormatWith(projectFolder));
 
             bool? overwriteFiles = null;
 
@@ -47,7 +47,7 @@ namespace Signum.Engine.CodeGeneration
                     string fullFileName = Path.Combine(projectFolder, GetClientFileName(mod));
                     FileTools.CreateParentDirectory(fullFileName);
 
-                    if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fullFileName)))
+                    if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fullFileName)))
                         File.WriteAllText(fullFileName, str);
                 }
 
@@ -56,7 +56,7 @@ namespace Signum.Engine.CodeGeneration
                 {
                     string fullFileName = Path.Combine(projectFolder, GetTypeScriptFileName(mod));
                     FileTools.CreateParentDirectory(fullFileName);
-                    if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fullFileName)))
+                    if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fullFileName)))
                         File.WriteAllText(fullFileName, tsStr);
                 }
 
@@ -67,7 +67,7 @@ namespace Signum.Engine.CodeGeneration
                     {
                         string fullFileName = Path.Combine(projectFolder, GetViewFileName(mod, t));
                         FileTools.CreateParentDirectory(fullFileName);
-                        if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fullFileName)))
+                        if (!File.Exists(fullFileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fullFileName)))
                             File.WriteAllText(fullFileName, viewStr);
                     }
                 }
@@ -108,7 +108,7 @@ namespace Signum.Engine.CodeGeneration
         {
             StringBuilder sb = new StringBuilder();
             foreach (var item in GetClienUsingNamespaces(mod))
-                sb.AppendLine("using {0};".Formato(item));
+                sb.AppendLine("using {0};".FormatWith(item));
 
             sb.AppendLine();
             sb.AppendLine("namespace " + GetClientNamespace(mod));
@@ -137,12 +137,12 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetJsModule(Module mod)
         {
-            return "public static JsModule {0}Module = new JsModule(\"{0}\");".Formato(mod.ModuleName);
+            return "public static JsModule {0}Module = new JsModule(\"{0}\");".FormatWith(mod.ModuleName);
         }
 
         protected virtual string GetViewPrefix(Module mod)
         {
-           return "public static string ViewPrefix = \"~/Views/{0}/{{0}}.cshtml\";".Formato(mod.ModuleName);
+           return "public static string ViewPrefix = \"~/Views/{0}/{{0}}.cshtml\";".FormatWith(mod.ModuleName);
         }
 
         protected virtual string GetClientNamespace(Module mod)
@@ -216,7 +216,7 @@ namespace Signum.Engine.CodeGeneration
         {
             var v = GetVarName(type);
 
-            return "new {0}<{1}>() {{ PartialViewName = {2} => ViewPrefix.Formato(\"{3}\") }},".Formato(
+            return "new {0}<{1}>() {{ PartialViewName = {2} => ViewPrefix.FormatWith(\"{3}\") }},".FormatWith(
                 type.IsEmbeddedEntity() ? "EmbeddedEntitySettings" : "EntitySettings",
                 type.Name, v, GetViewName(type));
         }
@@ -283,13 +283,13 @@ namespace Signum.Engine.CodeGeneration
         {
             StringBuilder sb = new StringBuilder();
             foreach (var item in GetViewUsingNamespaces(type))
-                sb.AppendLine("@using {0};".Formato(item));
+                sb.AppendLine("@using {0};".FormatWith(item));
 
             var v = GetVarName(type);
             var vc = v + "c"; 
 
             sb.AppendLine();
-            sb.AppendLine("@using (var {0} = Html.TypeContext<{1}>())".Formato(vc, type.Name));
+            sb.AppendLine("@using (var {0} = Html.TypeContext<{1}>())".FormatWith(vc, type.Name));
             sb.AppendLine("{");
 
             foreach (var pi in GetProperties(type))
@@ -326,19 +326,19 @@ namespace Signum.Engine.CodeGeneration
             var elementType = pi.PropertyType.ElementType().CleanType();
 
             if (!(elementType.IsLite() || elementType.IsModifiableEntity()))
-                return "//{0} not supported\r\n".Formato(pi.PropertyType.TypeName());
+                return "//{0} not supported\r\n".FormatWith(pi.PropertyType.TypeName());
 
             var eka = elementType.GetCustomAttribute<EntityKindAttribute>();
 
             if (elementType.IsEmbeddedEntity() || (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart))
-                return "@Html.EntityRepeater({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);
+                return "@Html.EntityRepeater({0}, {1} => {1}.{2})\r\n".FormatWith(vc, v, pi.Name);
 
-            return "@Html.EntityStrip({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);
+            return "@Html.EntityStrip({0}, {1} => {1}.{2})\r\n".FormatWith(vc, v, pi.Name);
         }
 
         protected virtual string WriteEmbeddedProperty(PropertyInfo pi, string v, string vc)
         {
-            return "@Html.EntityDetail({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);   
+            return "@Html.EntityDetail({0}, {1} => {1}.{2})\r\n".FormatWith(vc, v, pi.Name);   
         }
 
         protected virtual string WriteEntityProperty(PropertyInfo pi, string v, string vc)
@@ -348,15 +348,15 @@ namespace Signum.Engine.CodeGeneration
             var eka = type.GetCustomAttribute<EntityKindAttribute>();
 
             if (eka == null)
-                throw new InvalidOperationException("'{0}' does not have EntityKindAttribute".Formato(type.Name));
+                throw new InvalidOperationException("'{0}' does not have EntityKindAttribute".FormatWith(type.Name));
 
             if (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart)
-                return "@Html.EntityDetail({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);
+                return "@Html.EntityDetail({0}, {1} => {1}.{2})\r\n".FormatWith(vc, v, pi.Name);
 
             if (eka.IsLowPopulation)
-                return "@Html.EntityCombo({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);
+                return "@Html.EntityCombo({0}, {1} => {1}.{2})\r\n".FormatWith(vc, v, pi.Name);
 
-            return "@Html.EntityLine({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);
+            return "@Html.EntityLine({0}, {1} => {1}.{2})\r\n".FormatWith(vc, v, pi.Name);
         }
 
 
@@ -364,7 +364,7 @@ namespace Signum.Engine.CodeGeneration
         {
             type = type.UnNullify();
 
-            if (type.IsEnum || type == typeof(TimeSpan) || type == typeof(ColorDN))
+            if (type.IsEnum || type == typeof(TimeSpan) || type == typeof(ColorEntity))
                 return true;
 
             TypeCode tc = Type.GetTypeCode(type);
@@ -376,7 +376,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteValueLine(PropertyInfo pi, string v, string vc)
         {
-            return "@Html.ValueLine({0}, {1} => {1}.{2})\r\n".Formato(vc, v, pi.Name);
+            return "@Html.ValueLine({0}, {1} => {1}.{2})\r\n".FormatWith(vc, v, pi.Name);
         }
 
         protected virtual IEnumerable<PropertyInfo> GetProperties(Type type)

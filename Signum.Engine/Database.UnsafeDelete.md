@@ -1,4 +1,4 @@
-## Database.UnsafeDelete
+﻿## Database.UnsafeDelete
 
 `UnsafeDelete` extension method let you create efficient low-level `DELETE` statements without retrieving the entities and removing them one by one. 
 
@@ -10,7 +10,7 @@ public static int UnsafeDelete<T>(this IQueryable<T> query)
 `UnsafeDelete` takes an arbitrary `IQueryable<T>` of entities and returns the number of rows affected. That means that queries like this can be written: 
 
 ```C#
-int deleted = Database.Query<BugDN>()
+int deleted = Database.Query<BugEntity>()
               .Where(b=>b.Description.StartWith("A"))
               .Take(10)
               .UnsafeDelete();
@@ -22,13 +22,13 @@ That will be translated to:
 DELETE BugDNComments
 FROM (
   (SELECT TOP (@p0) bdn.Id
-  FROM BugDN AS bdn
+  FROM BugEntity AS bdn
   WHERE bdn.Description LIKE (@p1 + '%'))
 ) AS s2
 WHERE (BugDNComments.idParent = s2.Id);
 
-DELETE BugDN
-FROM BugDN AS bdn
+DELETE BugEntity
+FROM BugEntity AS bdn
 WHERE bdn.Description LIKE (@p1 + '%');
 
 SELECT @@rowcount
@@ -53,7 +53,7 @@ public static int UnsafeDeleteMList<E, V>(this IQueryable<MListElement<E, V>> ml
 Example using also `MListElements` extension method:
 
 ```C#
-int deleted = Database.Query<BugDN>()
+int deleted = Database.Query<BugEntity>()
 	  .Where(b => b.Description.StartsWith("A"))
 	  .Take(10)
 	  .SelectMany(b => b.MListElements(bug => bug.Comments))
@@ -68,7 +68,7 @@ FROM (
   (SELECT s4.Id
   FROM (
     (SELECT TOP (@p0) bdn.Id
-    FROM BugDN AS bdn
+    FROM BugEntity AS bdn
     WHERE bdn.Description LIKE (@p1 + '%'))
   ) AS s2
   CROSS APPLY (

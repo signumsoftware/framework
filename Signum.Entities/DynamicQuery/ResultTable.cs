@@ -138,7 +138,7 @@ namespace Signum.Entities.DynamicQuery
                 case TypeCode.DateTime: return str => DateTime.ParseExact(str, "O", CultureInfo.InvariantCulture); 
             }
 
-            throw new InvalidOperationException("Impossible to deserialize a ResultColumn of {0}".Formato(column.Type));
+            throw new InvalidOperationException("Impossible to deserialize a ResultColumn of {0}".FormatWith(column.Type));
         }
 
         Func<object, string> GetValueSerializer()
@@ -195,7 +195,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var lite = ((Lite<Entity>)obj);
 
-            return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : TypeDN.GetCleanName(lite.EntityType)) + ";" + lite.ToString();
+            return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : TypeEntity.GetCleanName(lite.EntityType)) + ";" + lite.ToString();
         }
 
         static object DeserializeLite(string str, Type defaultEntityType)
@@ -208,7 +208,7 @@ namespace Signum.Entities.DynamicQuery
 
             string toStr = tmp.After(';');
 
-            Type type = string.IsNullOrEmpty(typeStr) ? defaultEntityType : TypeDN.TryGetType(typeStr);
+            Type type = string.IsNullOrEmpty(typeStr) ? defaultEntityType : TypeEntity.TryGetType(typeStr);
 
             return Lite.Create(type, PrimaryKey.Parse(idStr, type), toStr);
         }

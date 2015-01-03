@@ -74,23 +74,24 @@ namespace Signum.Engine
             List<T> current = AvoidCache().Using(_ => Administrator.TryRetrieveAll<T>(replacements));
             IEnumerable<T> should = getSymbols();
 
-            return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
-                should.ToDictionary(s => s.Key),
-                current.ToDictionary(c => c.Key),
-                (k, s) => table.InsertSqlSync(s),
-                (k, c) => table.DeleteSqlSync(c),
-                (k, s, c) =>
-                {
-                    var originalName = c.Key;
-                    c.Key = s.Key;
-                    return table.UpdateSqlSync(c, comment: originalName);
-                }, Spacing.Double);
+            using (replacements.WithReplacedDatabaseName())
+                return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
+                    should.ToDictionary(s => s.Key),
+                    current.ToDictionary(c => c.Key),
+                    (k, s) => table.InsertSqlSync(s),
+                    (k, c) => table.DeleteSqlSync(c),
+                    (k, s, c) =>
+                    {
+                        var originalName = c.Key;
+                        c.Key = s.Key;
+                        return table.UpdateSqlSync(c, comment: originalName);
+                    }, Spacing.Double);
         }
 
         static Dictionary<string, T> AssertStarted()
         {
             if (lazy == null)
-                throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".Formato(typeof(SymbolLogic<T>).TypeName()));
+                throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".FormatWith(typeof(SymbolLogic<T>).TypeName()));
 
             return lazy.Value;
         }

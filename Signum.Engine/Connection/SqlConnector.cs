@@ -324,7 +324,7 @@ namespace Signum.Engine
 
                 if (mins.Any())
                 {
-                    return new ArgumentOutOfRangeException("{0} {1} not initialized and equal to DateTime.MinValue".Formato(
+                    return new ArgumentOutOfRangeException("{0} {1} not initialized and equal to DateTime.MinValue".FormatWith(
                         mins.CommaAnd(a => a.ParameterName),
                         mins.Count() == 1 ? "is" : "are"), ex);
                 }
@@ -436,18 +436,18 @@ namespace Signum.Engine
             return new[]
             {
                 this.Version == SqlServerVersion.SqlServer2005 ?  
-                    new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)):
+                    new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".FormatWith(schemaName)):
                     new []
                     {
-                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".Formato(schemaName)),
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".FormatWith(schemaName)),
                         new[]{
                             new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
                             new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
                             new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
                         }.Combine(Spacing.Simple).PlainSqlCommand(),
-                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".Formato(schemaName)),                  
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".FormatWith(schemaName)),                  
                     }.Combine(Spacing.Simple),
-                new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
+                new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".FormatWith(schemaName))
             }.Combine(Spacing.Simple);
         }
 

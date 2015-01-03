@@ -22,7 +22,7 @@
         <Literal>
           <ID>entityName</ID>
           <ToolTip>Name of the main entity</ToolTip>
-          <Default>FooDN</Default>
+          <Default>Foo</Default>
         </Literal>
         <Literal>
           <ID>entityParam</ID>
@@ -31,8 +31,8 @@
         </Literal>
       </Declarations>
       <Code Language="csharp">
-        <![CDATA[dqm.RegisterQuery(typeof($entityName$), () =>
-                    from $entityParam$ in Database.Query<$entityName$>()
+        <![CDATA[dqm.RegisterQuery(typeof($entityName$Entity), () =>
+                    from $entityParam$ in Database.Query<$entityName$Entity>()
                     select new
                     {
                         Entity = $entityParam$,

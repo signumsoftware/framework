@@ -1,4 +1,4 @@
-# PropertyRoute
+﻿# PropertyRoute
 
 A `PropertyRoute` is a sequence of `PropertyInfo`, starting from a `System.Type` of an root entity (a `Entity` or a `ModelEntity`) that ultimately refers unambiguously to a logical database column. 
 
@@ -10,11 +10,11 @@ A `PropertyRoute` is an important concept to authorize properties, and override 
 
 There are just a few different types of property routes, defined by `PropertyRouteType` enum:
 
-* **Root:** Where the root starts. i.e: `"(OrderDN)"` 
-* **FieldOrProperty:** The last part has a `PropertyInfo` or `FieldInfo`.This is the only **complete** type of a `PropertyRoute`. i.e: `"(OrderDN).CancellationDate"`. 
-* **Mixin:** Partial route accessing a Mixin. Like `"(OrderDN)[CorruptMixin]"` 
-* **LiteEntity:** Partial route accessing the property `Entity` of a `Lite<T>`. Like `"(OrderDN).Employee.Entity"`.
-* **MListItems:** Partial route accessing the indexer of a `Lite<T>`. Like `"(OrderDN).Details[0]"`.
+* **Root:** Where the root starts. i.e: `"(OrderEntity)"` 
+* **FieldOrProperty:** The last part has a `PropertyInfo` or `FieldInfo`.This is the only **complete** type of a `PropertyRoute`. i.e: `"(OrderEntity).CancellationDate"`. 
+* **Mixin:** Partial route accessing a Mixin. Like `"(OrderEntity)[CorruptMixin]"` 
+* **LiteEntity:** Partial route accessing the property `Entity` of a `Lite<T>`. Like `"(OrderEntity).Employee.Entity"`.
+* **MListItems:** Partial route accessing the indexer of a `Lite<T>`. Like `"(OrderEntity).Details[0]"`.
 
 ### Members
 
@@ -41,7 +41,7 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
 ```C#
 public class PropertyRoute
 {
-    public override string ToString() //returns '(OrderDN).Details[0].SubTotalPrice'
+    public override string ToString() //returns '(OrderEntity).Details[0].SubTotalPrice'
     public string PropertyString() //returns just: 'Details[0].SubTotalPrice'
     public static PropertyRoute Parse(Type rootType, string propertyString) //parses a propertyString given the rootType
 }

@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]
-    public class TypeDN : Entity
+    public class TypeEntity : Entity
     {
         [NotNullable, UniqueIndex]
         string fullClassName;
@@ -34,7 +34,7 @@ namespace Signum.Entities.Basics
             set { Set(ref tableName, value); }
         }
 
-        static Expression<Func<TypeDN, string>> ToStringExpression = e => e.CleanName;
+        static Expression<Func<TypeEntity, string>> ToStringExpression = e => e.CleanName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -58,34 +58,34 @@ namespace Signum.Entities.Basics
             get { return FullClassName.Substring(FullClassName.LastIndexOf('.') + 1); }
         }
 
-        public static Func<Type, TypeDN> ToTypeDNFunc = t => { throw new InvalidOperationException("Lite.ToTypeDNFunc is not set"); };
-        public static Func<TypeDN, Type> ToTypeFunc = t => { throw new InvalidOperationException("Lite.ToTypeFunc is not set"); };
+        public static Func<Type, TypeEntity> ToTypeDNFunc = t => { throw new InvalidOperationException("Lite.ToTypeDNFunc is not set"); };
+        public static Func<TypeEntity, Type> ToTypeFunc = t => { throw new InvalidOperationException("Lite.ToTypeFunc is not set"); };
         public static Func<string, Type> TryGetType = s => { throw new InvalidOperationException("Lite.TryGetType is not set"); };
         public static Func<Type, string> GetCleanName = s => { throw new InvalidOperationException("Lite.GetCleanName is not set"); };
 
         public static void SetTypeNameCallbacks(Func<Type, string> getCleanName, Func<string, Type> tryGetType)
         {
-            TypeDN.GetCleanName = getCleanName;
-            TypeDN.TryGetType = tryGetType;
+            TypeEntity.GetCleanName = getCleanName;
+            TypeEntity.TryGetType = tryGetType;
         }
 
-        public static void SetTypeDNCallbacks(Func<Type, TypeDN> toTypeDN, Func<TypeDN, Type> toType)
+        public static void SetTypeDNCallbacks(Func<Type, TypeEntity> toTypeEntity, Func<TypeEntity, Type> toType)
         {
-            TypeDN.ToTypeDNFunc = toTypeDN;
-            TypeDN.ToTypeFunc = toType;
+            TypeEntity.ToTypeDNFunc = toTypeEntity;
+            TypeEntity.ToTypeFunc = toType;
         }
     }
 
     public static class TypeDNExtensions
     {
-        public static Type ToType(this TypeDN type)
+        public static Type ToType(this TypeEntity type)
         {
-            return TypeDN.ToTypeFunc(type);
+            return TypeEntity.ToTypeFunc(type);
         }
 
-        public static TypeDN ToTypeDN(this Type type)
+        public static TypeEntity ToTypeEntity(this Type type)
         {
-            return TypeDN.ToTypeDNFunc(type);
+            return TypeEntity.ToTypeDNFunc(type);
         }
     }
 }

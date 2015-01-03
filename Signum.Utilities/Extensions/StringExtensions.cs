@@ -68,12 +68,12 @@ namespace Signum.Utilities
 
         static InvalidOperationException NotFound(string str, char separator)
         {
-            return new InvalidOperationException("Separator '{0}' not found in '{1}'".Formato(separator, str));
+            return new InvalidOperationException("Separator '{0}' not found in '{1}'".FormatWith(separator, str));
         }
 
         static InvalidOperationException NotFound(string str, string separator)
         {
-            return new InvalidOperationException("Separator '{0}' not found in '{1}'".Formato(separator, str));
+            return new InvalidOperationException("Separator '{0}' not found in '{1}'".FormatWith(separator, str));
         }
 
         public static string Before(this string str, char separator)
@@ -323,7 +323,7 @@ namespace Signum.Utilities
         public static string Start(this string str, int numChars)
         {
             if (numChars > str.Length)
-                throw new InvalidOperationException("String '{0}' is too short".Formato(str));
+                throw new InvalidOperationException("String '{0}' is too short".FormatWith(str));
 
             return str.Substring(0, numChars);
         }
@@ -342,7 +342,7 @@ namespace Signum.Utilities
         public static string End(this string str, int numChars)
         {
             if (numChars > str.Length)
-                throw new InvalidOperationException("String '{0}' is too short".Formato(str));
+                throw new InvalidOperationException("String '{0}' is too short".FormatWith(str));
 
             return str.Substring(str.Length - numChars, numChars);
         }
@@ -361,7 +361,7 @@ namespace Signum.Utilities
         public static string RemoveStart(this string str, int numChars)
         {
             if (numChars > str.Length)
-                throw new InvalidOperationException("String '{0}' is too short".Formato(str));
+                throw new InvalidOperationException("String '{0}' is too short".FormatWith(str));
 
             return str.Substring(numChars);
         }
@@ -377,7 +377,7 @@ namespace Signum.Utilities
         public static string RemoveEnd(this string str, int numChars)
         {
             if (numChars > str.Length)
-                throw new InvalidOperationException("String '{0}' is too short".Formato(str));
+                throw new InvalidOperationException("String '{0}' is too short".FormatWith(str));
 
             return str.Substring(0, str.Length - numChars);
         }
@@ -492,27 +492,27 @@ namespace Signum.Utilities
             return sb.ToString();
         }
 
-        public static string Formato(string format, object arg0)
+        public static string FormatWith(string format, object arg0)
         {
             return string.Format(format, arg0);
         }
 
-        public static string Formato(string format, object arg0, object arg1)
+        public static string FormatWith(string format, object arg0, object arg1)
         {
             return string.Format(format, arg0, arg1);
         }
 
-        public static string Formato(string format, object arg0, object arg1, object arg2)
+        public static string FormatWith(string format, object arg0, object arg1, object arg2)
         {
             return string.Format(format, arg0, arg1, arg2);
         }
 
-        public static string Formato(this string pattern, params object[] parameters)
+        public static string FormatWith(this string pattern, params object[] parameters)
         {
             return string.Format(pattern, parameters);
         }
 
-        public static string Formato(this string format, IFormatProvider provider, params object[] args)
+        public static string FormatWith(this string format, IFormatProvider provider, params object[] args)
         {
             return string.Format(provider, format, args);
         }
@@ -654,7 +654,7 @@ namespace Signum.Utilities
             for (i = 0; i < magnitudes.Length && valor >= 1024; i++)
                 valor /= 1024.0;
 
-            return "{0:#,###.00} {1}".Formato(valor, (useAbbreviations ? abbreviations : magnitudes)[i]);
+            return "{0:#,###.00} {1}".FormatWith(valor, (useAbbreviations ? abbreviations : magnitudes)[i]);
         }
 
 

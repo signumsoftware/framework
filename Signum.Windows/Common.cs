@@ -318,7 +318,7 @@ namespace Signum.Windows
             PropertyRoute parentContext = GetPropertyRoute(fe.Parent ?? fe);
 
             if (parentContext == null)
-                throw new InvalidOperationException("Route attached property can not be set with null PropertyRoute: '{0}'".Formato(route));
+                throw new InvalidOperationException("Route attached property can not be set with null PropertyRoute: '{0}'".FormatWith(route));
 
             var context = ContinueRouteExtension.Continue(parentContext, route); 
 
@@ -707,7 +707,7 @@ namespace Signum.Windows
             if (ident != null)
             {
                 if (ident.IsNew)
-                    return "{0};New".Formato(Server.ServerTypes[ident.GetType()].CleanName);
+                    return "{0};New".FormatWith(Server.ServerTypes[ident.GetType()].CleanName);
 
                 return ident.ToLite().Key();
             }
@@ -716,7 +716,7 @@ namespace Signum.Windows
             if (lite != null)
             {
                 if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
-                    return "{0};New".Formato(Server.ServerTypes[lite.EntityType].CleanName);
+                    return "{0};New".FormatWith(Server.ServerTypes[lite.EntityType].CleanName);
 
                 return lite.Key();
             }

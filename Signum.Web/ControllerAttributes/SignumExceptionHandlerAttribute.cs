@@ -36,8 +36,8 @@ namespace Signum.Web
                 exLog.UrlReferer = req.UrlReferrer.TryToString();
                 exLog.UserHostAddress = req.UserHostAddress;
                 exLog.UserHostName = req.UserHostName;
-                exLog.QueryString = ExceptionDN.Dump(req.QueryString);
-                exLog.Form = ExceptionDN.Dump(req.Form);
+                exLog.QueryString = ExceptionEntity.Dump(req.QueryString);
+                exLog.Form = ExceptionEntity.Dump(req.Form);
                 exLog.Session = ses == null ? "[No Session]" : ses.Cast<string>().ToString(key => key + ": " + ses[key].Dump(), "\r\n");
             });
         };
@@ -58,7 +58,7 @@ namespace Signum.Web
                 context.Response.ContentType = "text/html";
                 return new ViewResult
                 {
-                    ViewName = NavigationManager.ViewPrefix.Formato("Error"),
+                    ViewName = NavigationManager.ViewPrefix.FormatWith("Error"),
                     ViewData = new ViewDataDictionary<HandleErrorInfo>(model)
                     {
                         {ViewDataKeys.Title, model.Exception.Message}

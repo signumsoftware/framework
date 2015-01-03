@@ -25,7 +25,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(GetType().Name, QueryName);
+            return "{0} {1}".FormatWith(GetType().Name, QueryName);
         }
     }
 

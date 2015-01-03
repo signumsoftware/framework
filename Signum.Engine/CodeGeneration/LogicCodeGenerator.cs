@@ -34,7 +34,7 @@ namespace Signum.Engine.CodeGeneration
             string projectFolder = GetProjectFolder();
 
             if (!Directory.Exists(projectFolder))
-                throw new InvalidOperationException("{0} not found. Override GetProjectFolder".Formato(projectFolder));
+                throw new InvalidOperationException("{0} not found. Override GetProjectFolder".FormatWith(projectFolder));
 
             bool? overwriteFiles = null;
 
@@ -46,7 +46,7 @@ namespace Signum.Engine.CodeGeneration
 
                 FileTools.CreateParentDirectory(fileName);
 
-                if (!File.Exists(fileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".Formato(fileName)))
+                if (!File.Exists(fileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fileName)))
                 {
                     File.WriteAllText(fileName, str);
                 }
@@ -88,7 +88,7 @@ namespace Signum.Engine.CodeGeneration
 
             StringBuilder sb = new StringBuilder();
             foreach (var item in GetUsingNamespaces(mod, expression))
-                sb.AppendLine("using {0};".Formato(item));
+                sb.AppendLine("using {0};".FormatWith(item));
 
             sb.AppendLine();
             sb.AppendLine("namespace " + GetNamespace(mod));
@@ -230,15 +230,15 @@ namespace Signum.Engine.CodeGeneration
             var v = GetVariableName(type);
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("dqm.RegisterQuery(typeof({0}), () =>".Formato(typeName));
-            sb.AppendLine("    from {0} in Database.Query<{1}>()".Formato(v, typeName));
+            sb.AppendLine("dqm.RegisterQuery(typeof({0}), () =>".FormatWith(typeName));
+            sb.AppendLine("    from {0} in Database.Query<{1}>()".FormatWith(v, typeName));
             sb.AppendLine("    select new");
             sb.AppendLine("    {");
-            sb.AppendLine("        Entity = {0},".Formato(v));
-            sb.AppendLine("        {0}.Id,".Formato(v));
+            sb.AppendLine("        Entity = {0},".FormatWith(v));
+            sb.AppendLine("        {0}.Id,".FormatWith(v));
             foreach (var prop in GetQueryProperties(type))
 	        {
-                sb.AppendLine("        {0}.{1},".Formato(v, prop.Name));
+                sb.AppendLine("        {0}.{1},".FormatWith(v, prop.Name));
 	        }
             sb.AppendLine("    });");
 
@@ -415,14 +415,14 @@ namespace Signum.Engine.CodeGeneration
             var v = GetVariableName(type);
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("new Graph<{0}>.Execute({1})".Formato(type.TypeName(), oper.Symbol.ToString()));
+            sb.AppendLine("new Graph<{0}>.Execute({1})".FormatWith(type.TypeName(), oper.Symbol.ToString()));
             sb.AppendLine("{");
             if (IsSave(oper))
             {
                 sb.AppendLine("    AllowsNew = true,");
                 sb.AppendLine("    Lite = false,");
             }
-            sb.AppendLine("    Execute = ({0}, _) => {{ }}".Formato(v));
+            sb.AppendLine("    Execute = ({0}, _) => {{ }}".FormatWith(v));
             sb.AppendLine("}.Register();");
             return sb.ToString();
         }
@@ -439,9 +439,9 @@ namespace Signum.Engine.CodeGeneration
             string v = GetVariableName(type);
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("new Graph<{0}>.Delete({1})".Formato(type.TypeName(), oper.Symbol.ToString()));
+            sb.AppendLine("new Graph<{0}>.Delete({1})".FormatWith(type.TypeName(), oper.Symbol.ToString()));
             sb.AppendLine("{");
-            sb.AppendLine("    Delete = ({0}, _) => {0}.Delete()".Formato(v));
+            sb.AppendLine("    Delete = ({0}, _) => {0}.Delete()".FormatWith(v));
             sb.AppendLine("}.Register();");
             return sb.ToString();
         }
@@ -456,9 +456,9 @@ namespace Signum.Engine.CodeGeneration
             Type type = oper.GetType().GetGenericArguments().Single();
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("new Graph<{0}>.Construct({1})".Formato(type.TypeName(), oper.Symbol.ToString()));
+            sb.AppendLine("new Graph<{0}>.Construct({1})".FormatWith(type.TypeName(), oper.Symbol.ToString()));
             sb.AppendLine("{");
-            sb.AppendLine("    Construct = (_) => new {0}".Formato(type.TypeName()));
+            sb.AppendLine("    Construct = (_) => new {0}".FormatWith(type.TypeName()));
             sb.AppendLine("    {");
             sb.AppendLine("    }");
             sb.AppendLine("}.Register();");
@@ -470,9 +470,9 @@ namespace Signum.Engine.CodeGeneration
             List<Type> type = oper.GetType().GetGenericArguments().ToList();
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("new Graph<{0}>.ConstructFrom<{1}>({2})".Formato(type[0].TypeName(), type[1].TypeName(), oper.Symbol.ToString()));
+            sb.AppendLine("new Graph<{0}>.ConstructFrom<{1}>({2})".FormatWith(type[0].TypeName(), type[1].TypeName(), oper.Symbol.ToString()));
             sb.AppendLine("{");
-            sb.AppendLine("    Construct = ({0}, _) => new {1} {{ }}".Formato(GetVariableName(type[0]), type[1].TypeName()));
+            sb.AppendLine("    Construct = ({0}, _) => new {1} {{ }}".FormatWith(GetVariableName(type[0]), type[1].TypeName()));
             sb.AppendLine("    {");
             sb.AppendLine("    }");
             sb.AppendLine("}.Register();");
@@ -484,9 +484,9 @@ namespace Signum.Engine.CodeGeneration
             List<Type> type = oper.GetType().GetGenericArguments().ToList();
 
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("new Graph<{0}>.ConstructFromMany<{1}>({2})".Formato(type[0].TypeName(), type[1].TypeName(), oper.Symbol.ToString()));
+            sb.AppendLine("new Graph<{0}>.ConstructFromMany<{1}>({2})".FormatWith(type[0].TypeName(), type[1].TypeName(), oper.Symbol.ToString()));
             sb.AppendLine("{");
-            sb.AppendLine("    Construct = ({0}s, _) => new {1}".Formato(GetVariableName(type[0]), type[1].TypeName()));
+            sb.AppendLine("    Construct = ({0}s, _) => new {1}".FormatWith(GetVariableName(type[0]), type[1].TypeName()));
             sb.AppendLine("    {");
             sb.AppendLine("    }");
             sb.AppendLine("}.Register();");
@@ -495,7 +495,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual IEnumerable<IOperationSymbolContainer> GetOperationsSymbols(Type type)
         {
-            string name = type.FullName.RemoveSuffix("DN") + "Operation";
+            string name = type.FullName.RemoveSuffix("Entity") + "Operation";
 
             var operType = type.Assembly.GetType(name);
 

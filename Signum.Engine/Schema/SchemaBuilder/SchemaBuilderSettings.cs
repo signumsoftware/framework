@@ -66,7 +66,6 @@ namespace Signum.Engine.Maps
         {
             {SqlDbType.NVarChar, 200}, 
             {SqlDbType.VarChar, 200}, 
-            {SqlDbType.Image, 8000}, 
             {SqlDbType.VarBinary, int.MaxValue}, 
             {SqlDbType.Binary, 8000}, 
             {SqlDbType.Char, 1}, 
@@ -102,7 +101,7 @@ namespace Signum.Engine.Maps
                         return new AttributeCollection(AttributeTargets.Field, propertyRoute.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToList(),
                             () => AssertNotIncluded(propertyRoute.RootType));
                     default:
-                        throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(propertyRoute.PropertyRouteType));
+                        throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
                 }
             });
         }
@@ -115,10 +114,10 @@ namespace Signum.Engine.Maps
         public AttributeCollection TypeAttributes(Type entityType)
         {
             if (!typeof(Entity).IsAssignableFrom(entityType) && !typeof(IView).IsAssignableFrom(entityType))
-                throw new InvalidOperationException("{0} is not an Entity or View".Formato(entityType.Name));
+                throw new InvalidOperationException("{0} is not an Entity or View".FormatWith(entityType.Name));
 
             if (entityType.IsAbstract)
-                throw new InvalidOperationException("{0} is abstract");
+                throw new InvalidOperationException("{0} is abstract".FormatWith(entityType.Name));
 
             return TypeAttributesCache.GetOrCreate(entityType, () =>
             {
@@ -143,20 +142,20 @@ namespace Signum.Engine.Maps
             var pr = PropertyRoute.Construct<T, S>(propertyRoute);
 
             if (FieldAttribute<IgnoreAttribute>(pr) != null)
-                throw new InvalidOperationException("In order to {0} you need to OverrideAttributes for {1} to remove IgnoreAttribute".Formato(errorContext, pr));
+                throw new InvalidOperationException("In order to {0} you need to override the attributes for {1} by using SchemaBuilderSettings.FieldAttributes to remove IgnoreAttribute".FormatWith(errorContext, pr));
         }
 
         public A FieldAttribute<A>(PropertyRoute propertyRoute) where A : Attribute
         {
             if(propertyRoute.PropertyRouteType == PropertyRouteType.Root || propertyRoute.PropertyRouteType == PropertyRouteType.LiteEntity)
-                throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(propertyRoute.PropertyRouteType));
+                throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
 
-            return FieldAttributes(propertyRoute).OfType<A>().FirstOrDefault();
+            return (A)FieldAttributes(propertyRoute).FirstOrDefault(a => a.GetType() == typeof(A));
         }
 
         public A TypeAttribute<A>(Type entityType) where A : Attribute
         {
-            return TypeAttributes(entityType).OfType<A>().FirstOrDefault();
+            return (A)TypeAttributes(entityType).FirstOrDefault(a => a.GetType() == typeof(A));
         }
 
         internal bool IsNullable(PropertyRoute propertyRoute, bool forceNull)
@@ -186,7 +185,7 @@ namespace Signum.Engine.Maps
             Implementations imp = GetImplementations(propRoute);
 
             if (imp.IsByAll || !imp.Types.Contains(typeToImplement))
-                throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".Formato(propRoute, typeToImplement.Name));
+                throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".FormatWith(propRoute, typeToImplement.Name));
         }
 
         public Implementations GetImplementations<T>(Expression<Func<T, object>> propertyRoute) where T : Entity
@@ -198,7 +197,7 @@ namespace Signum.Engine.Maps
         {
             var cleanType = propertyRoute.Type.CleanType();  
             if (!propertyRoute.Type.CleanType().IsIEntity())
-                throw new InvalidOperationException("{0} is not a {1}".Formato(propertyRoute, typeof(IEntity).Name));
+                throw new InvalidOperationException("{0} is not a {1}".FormatWith(propertyRoute, typeof(IEntity).Name));
 
             return Implementations.FromAttributes(cleanType, propertyRoute,
                 FieldAttribute<ImplementedByAttribute>(propertyRoute),
@@ -305,7 +304,7 @@ namespace Signum.Engine.Maps
             var au = item.GetType().GetCustomAttribute<AttributeUsageAttribute>();
             
             if(au == null ||(au.ValidOn & Targets) == 0)
-             throw new InvalidOperationException("The attributes is not compatible with targets {0}: {1}".Formato(Targets, au.Try(_=>_.ValidOn)));
+             throw new InvalidOperationException("The attributes is not compatible with targets {0}: {1}".FormatWith(Targets, au.Try(_=>_.ValidOn)));
 
             base.InsertItem(index, item);
         }

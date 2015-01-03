@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -121,15 +121,15 @@ namespace Signum.Utilities
             }
         }
 
-        public V[] ChooseMultiple()
+        public V[] ChooseMultiple(string[] args = null)
         {
-            return ChooseMultiple(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString());
+            return ChooseMultiple(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString(), args);
         }
 
 
-        public V[] ChooseMultiple(string endMessage)
+        public V[] ChooseMultiple(string endMessage, string[] args = null)
         {
-            var array = ChooseMultipleWithDescription(endMessage);
+            var array = ChooseMultipleWithDescription(endMessage, args);
 
             if (array == null)
                 return null;
@@ -138,13 +138,16 @@ namespace Signum.Utilities
 
         }
 
-        public WithDescription<V>[] ChooseMultipleWithDescription()
+        public WithDescription<V>[] ChooseMultipleWithDescription(string[] args = null)
         {
-            return ChooseMultipleWithDescription(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString());
+            return ChooseMultipleWithDescription(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString(), args);
         }
 
-        public WithDescription<V>[] ChooseMultipleWithDescription(string endMessage)
+        public WithDescription<V>[] ChooseMultipleWithDescription(string endMessage, string[] args = null)
         {
+            if (args != null)
+                return args.ToString(" ").Split(',').SelectMany(GetValuesRange).ToArray();
+
         retry:
             try
             {
@@ -199,7 +202,7 @@ namespace Signum.Utilities
         {
             int index = dictionary.Keys.IndexOf(value);
             if (index == -1)
-                throw new KeyNotFoundException(ConsoleMessage.NoOptionWithKey0Found.NiceToString().Formato(value));
+                throw new KeyNotFoundException(ConsoleMessage.NoOptionWithKey0Found.NiceToString().FormatWith(value));
 
             return index;
         }

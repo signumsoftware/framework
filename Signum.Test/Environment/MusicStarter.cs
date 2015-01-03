@@ -50,10 +50,10 @@ namespace Signum.Test.Environment
 
             sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version;
 
-            sb.Schema.Settings.FieldAttributes((OperationLogDN ol) => ol.User).Add(new ImplementedByAttribute());
-            sb.Schema.Settings.FieldAttributes((ExceptionDN e) => e.User).Add(new ImplementedByAttribute());
+            sb.Schema.Settings.FieldAttributes((OperationLogEntity ol) => ol.User).Add(new ImplementedByAttribute());
+            sb.Schema.Settings.FieldAttributes((ExceptionEntity e) => e.User).Add(new ImplementedByAttribute());
 
-            Validator.PropertyValidator((OperationLogDN e) => e.User).Validators.Clear();
+            Validator.PropertyValidator((OperationLogEntity e) => e.User).Validators.Clear();
             
             TypeLogic.Start(sb, dqm);
 

@@ -207,7 +207,7 @@ namespace Signum.Web
             if (s.StartsWith("\""))
             {
                 if (!s.EndsWith("\""))
-                    throw new FormatException("Value starts by quotes but not ends with quotes".Formato(s));
+                    throw new FormatException("Value starts by quotes but not ends with quotes".FormatWith(s));
 
                 return s.Substring(1, s.Length - 2).Replace("\"\"", "\"");
             }

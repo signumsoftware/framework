@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -236,7 +236,7 @@ namespace Signum.Windows
         private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
         {
             if (IsLoaded)
-                throw new InvalidProgramException("You can not change {0} property once loaded".Formato(e.Property));
+                throw new InvalidProgramException("You can not change {0} property once loaded".FormatWith(e.Property));
         }
 
         private void SimpleFilterBuilderChanged(DependencyPropertyChangedEventArgs e)
@@ -328,7 +328,7 @@ namespace Signum.Windows
 
             entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
             if (entityColumn == null)
-                throw new InvalidOperationException("Entity Column not found on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
+                throw new InvalidOperationException("Entity Column not found on {0}".FormatWith(QueryUtils.GetQueryUniqueKey(QueryName)));
         }
 
         ColumnDescription entityColumn;
@@ -404,7 +404,7 @@ namespace Signum.Windows
 
             btCreate.ToolTip = SearchMessage.CreateNew0_G.NiceToString()
                 .ForGenderAndNumber(entityColumn.Implementations.Value.Types.FirstOrDefault().Try(t => t.GetGender()) ?? 'm')
-                .Formato(entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
+                .FormatWith(entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
 
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
                 Navigate = Implementations.IsByAll ? true :
@@ -628,7 +628,7 @@ namespace Signum.Windows
 
         DataTemplate CreateDataTemplate(ResultColumn c)
         {
-            Binding b = new Binding("[{0}]".Formato(c.Index)) { Mode = BindingMode.OneTime };
+            Binding b = new Binding("[{0}]".FormatWith(c.Index)) { Mode = BindingMode.OneTime };
             DataTemplate dt = Settings.GetFormatter(c.Column)(b);
             return dt;
         }
@@ -756,7 +756,7 @@ namespace Signum.Windows
 
                     if (!rc.Column.Token.Equals(header.RequestColumn.Token))
                         throw new InvalidOperationException("The token in the ResultColumn ({0}) does not match with the token in the GridView ({1})"
-                            .Formato(rc.Column.Token.FullKey(), header.RequestColumn.Token.FullKey()));
+                            .FormatWith(rc.Column.Token.FullKey(), header.RequestColumn.Token.FullKey()));
 
                     if (header.ResultColumn == null || header.ResultColumn.Index != rc.Index)
                         gvc.CellTemplate = CreateDataTemplate(rc);

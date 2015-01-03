@@ -1,4 +1,4 @@
-# Operations
+﻿# Operations
 
 Signum Framework provides an standardized way of writing your business logic to manipulate the entities, called Operations. 
 
@@ -14,7 +14,7 @@ By using operations, instead of plain methods, to Create / Modify / Delete your 
 
 * **Preconditions**: Some operations have a precondition that returns an string with the error and is asserted before executing the operation. More important, the precondition is also evaluated when the automatic buttons are shown, disabling and adding a tool-tip to the operation buttons that do not satisfy the precondition.
 
-* **Automatic logging**: Every time an operation is executed, an `OperationLogDN` is saved in the database indicting the entity, operation, user, start and end time and possible exception. Even more, sing DiffLog module also a dump of the initial and final state of the entity is saved. 
+* **Automatic logging**: Every time an operation is executed, an `OperationLogEntity` is saved in the database indicting the entity, operation, user, start and end time and possible exception. Even more, sing DiffLog module also a dump of the initial and final state of the entity is saved. 
 
 * **Inheritance support**: If you have complex hierarchies of entities, you can have polymorphic behavior using operations as well, even if they are defined outside of the entity, because internally they are implemented using `Polymorphic<T>`.      
 
@@ -53,32 +53,32 @@ public class OperationSymbol : Symbol
 }
 ```
 
-But we don't use raw `OperationSymbol` for Operations, instead we pass strongly-typed containers that give information to the compiler about the type of the operation (`Construct`, `ConstructFrom`, `ConstructFromMany`, `Execute`, `Delete`...) and the entity type (`BugDN`, `EmployeeDN`, ...).
+But we don't use raw `OperationSymbol` for Operations, instead we pass strongly-typed containers that give information to the compiler about the type of the operation (`Construct`, `ConstructFrom`, `ConstructFromMany`, `Execute`, `Delete`...) and the entity type (`BugEntity`, `EmployeeEntity`, ...).
 
 Example for `Execute` and `Delete`: 
 
 ```C#
 public static class AlbumOperation
 {
-    public static readonly ExecuteSymbol<OrderDN> SaveNew = OperationSymbol.Execute<OrderDN>();
-    public static readonly ExecuteSymbol<OrderDN> Save = OperationSymbol.Execute<OrderDN>();
-    public static readonly ExecuteSymbol<OrderDN> Ship = OperationSymbol.Execute<OrderDN>();
-    public static readonly ExecuteSymbol<OrderDN> Cancel = OperationSymbol.Execute<OrderDN>();
+    public static readonly ExecuteSymbol<OrderEntity> SaveNew = OperationSymbol.Execute<OrderEntity>();
+    public static readonly ExecuteSymbol<OrderEntity> Save = OperationSymbol.Execute<OrderEntity>();
+    public static readonly ExecuteSymbol<OrderEntity> Ship = OperationSymbol.Execute<OrderEntity>();
+    public static readonly ExecuteSymbol<OrderEntity> Cancel = OperationSymbol.Execute<OrderEntity>();
 
-    public static readonly DeleteSymbol<OrderDN> Delete = OperationSymbol.Delete<OrderDN>();
+    public static readonly DeleteSymbol<OrderEntity> Delete = OperationSymbol.Delete<OrderEntity>();
 }
 ```
 
-> Notice how we can not create `ExecuteSymbol` or `DeleteSymbol` directly using `new` and instead we use factory methods defined in `OperationSymbol` class. The reason is because they are declared as an `interface` in order to be contravariant, so an `ExecuteSymbol<AnimalDN>` can be assigned in an `ExecuteSymbol<DogDN>` variable.
+> Notice how we can not create `ExecuteSymbol` or `DeleteSymbol` directly using `new` and instead we use factory methods defined in `OperationSymbol` class. The reason is because they are declared as an `interface` in order to be contravariant, so an `ExecuteSymbol<AnimalEntity>` can be assigned in an `ExecuteSymbol<DogEntity>` variable.
 
 Declaring `Construct`, `ConstructFrom` and `ConstructFromMany` is a bit more complex, example:  
 
 ```C#
 public static class AlbumOperation
 {
-    public static readonly ConstructSymbol<OrderDN>.Simple Create = OperationSymbol.Construct<OrderDN>.Simple();
-    public static readonly ConstructSymbol<OrderDN>.From<CustomerDN> CreateOrderFromCustomer = OperationSymbol.Construct<OrderDN>.From<CustomerDN>();
-    public static readonly ConstructSymbol<OrderDN>.FromMany<ProductDN> CreateOrderFromProducts = OperationSymbol.Construct<OrderDN>.FromMany<ProductDN>();
+    public static readonly ConstructSymbol<OrderEntity>.Simple Create = OperationSymbol.Construct<OrderEntity>.Simple();
+    public static readonly ConstructSymbol<OrderEntity>.From<CustomerEntity> CreateOrderFromCustomer = OperationSymbol.Construct<OrderEntity>.From<CustomerEntity>();
+    public static readonly ConstructSymbol<OrderEntity>.FromMany<ProductEntity> CreateOrderFromProducts = OperationSymbol.Construct<OrderEntity>.FromMany<ProductEntity>();
 }
 ```
 
@@ -105,7 +105,7 @@ public static class OperationLogic
 Simple example in `OrderLogic.Start` instantiating inner classes directly: 
 
 ```C#
-new Graph<OrderDN>.Execute(OrderOperation.Save)
+new Graph<OrderEntity>.Execute(OrderOperation.Save)
 {
     Lite = false,
     Execute = (o, _) =>
@@ -113,7 +113,7 @@ new Graph<OrderDN>.Execute(OrderOperation.Save)
     }
 }.Register();
 
-new Graph<OrderDN>.Delete(OrderOperation.Delete)
+new Graph<OrderEntity>.Delete(OrderOperation.Delete)
 {
     Delete = (o, args) =>
     {
@@ -122,10 +122,10 @@ new Graph<OrderDN>.Delete(OrderOperation.Delete)
 }.Register();
 ```
 
-But since they are inner classes, we can also create a `OrderGraph` class, inheriting from `Graph<OrderDN>`, and group all the operations for the same type together.
+But since they are inner classes, we can also create a `OrderGraph` class, inheriting from `Graph<OrderEntity>`, and group all the operations for the same type together.
 
 ```C#
-public class OrderGraph : Graph<OrderDN>
+public class OrderGraph : Graph<OrderEntity>
 {   
     public static void Register()
     { 
@@ -151,7 +151,7 @@ public class OrderGraph : Graph<OrderDN>
 OrderGraph.Register();
 ```
 
-Assuming that `OrderDN` has a `State` property with the following values: 
+Assuming that `OrderEntity` has a `State` property with the following values: 
 
 ```C#
 public enum OrderState
@@ -167,7 +167,7 @@ public enum OrderState
 Grouping all the operations make even more sense when using `Graph<T, S>` to model state machines, and setting `GetState` at the beginning.  
 
 ```C#
-public class OrderGraph : Graph<OrderDN, OrderState>
+public class OrderGraph : Graph<OrderEntity, OrderState>
 {   
     public static void Register()
     { 
@@ -219,7 +219,7 @@ And, only for `Graph<T, S>`:
 Example implementing some `Execute` operations:
 
 ```C#
-public class OrderGraph : Graph<OrderDN, OrderState>
+public class OrderGraph : Graph<OrderEntity, OrderState>
 {   
     public static void Register()
     { 
@@ -269,7 +269,7 @@ public class OrderGraph : Graph<OrderDN, OrderState>
 Example invoking the operatons using `OperationLogic.Execute` extension method: 
 
 ```C#
-var order = new OrderDN().Execute(OrderOperation.SaveNew);  //Entity is new but works because AllowsNew = true
+var order = new OrderEntity().Execute(OrderOperation.SaveNew);  //Entity is new but works because AllowsNew = true
 oder.Customer = customer
 order.Execute(OrderOperation.Save); //Entity is dirty but works because Lite = false
 order.ToLite().Execute(OrderOperation.Ship); //Entity will be retrieved from the database
@@ -289,7 +289,7 @@ And, only for `Graph<T, S>`:
 * **FromStates:** The states of the entity from which can be deleted. 
 
 ```C#
-public class OrderGraph : Graph<OrderDN, OrderState>
+public class OrderGraph : Graph<OrderEntity, OrderState>
 {   
     public static void Register()
     { 
@@ -334,7 +334,7 @@ And, only for `Graph<T, S>`:
 * **ToState:** the state the entity should be at the end of the construction.
 
 ```C#
-public class OrderGraph : Graph<OrderDN, OrderState>
+public class OrderGraph : Graph<OrderEntity, OrderState>
 {   
     public static void Register()
     { 
@@ -342,10 +342,10 @@ public class OrderGraph : Graph<OrderDN, OrderState>
         new Construct(OrderOperation.Create)
         {
             ToState = OrderState.New,
-            Construct = (_) => new OrderDN
+            Construct = (_) => new OrderEntity
             {
                 State = OrderState.New,
-                Employee = EmployeeDN.Current.ToLite(),
+                Employee = EmployeeEntity.Current.ToLite(),
                 RequiredDate = DateTime.Now.AddDays(3),
             }
         }.Register();
@@ -357,7 +357,7 @@ public class OrderGraph : Graph<OrderDN, OrderState>
 Manual invocation using `OperationLogic.Construct`:
 
 ```C#
-OrderDN order = OperationLogic.Construct(OrderOperation.Create); //Type inferred from OrderOperation.Create 
+OrderEntity order = OperationLogic.Construct(OrderOperation.Create); //Type inferred from OrderOperation.Create 
 ```
 
 ### ConstructFrom
@@ -374,19 +374,19 @@ And, only for `Graph<T, S>`:
 * **ToState:** the state the entity should be at the end of the construction.
 
 ```C#
-public class OrderGraph : Graph<OrderDN, OrderState>
+public class OrderGraph : Graph<OrderEntity, OrderState>
 {   
     public static void Register()
     { 
         ...
-        new ConstructFrom<CustomerDN>(OrderOperation.CreateOrderFromCustomer)
+        new ConstructFrom<CustomerEntity>(OrderOperation.CreateOrderFromCustomer)
         {
             ToState = OrderState.New,
-            Construct = (c, _) => new OrderDN
+            Construct = (c, _) => new OrderEntity
             {
                 State = OrderState.New,
                 Customer = c,
-                Employee = EmployeeDN.Current.ToLite(),
+                Employee = EmployeeEntity.Current.ToLite(),
                 ShipAddress = c.Address,
                 RequiredDate = DateTime.Now.AddDays(3),
             }
@@ -400,7 +400,7 @@ Manual invocation using `OperationLogic.ConstructFrom` extension method:
 
 ```C#
 //Type inferred from OrderOperation.CreateOrderFromCustomer 
-OrderDN order = customer.ConstructFrom(OrderOperation.CreateOrderFromCustomer); 
+OrderEntity order = customer.ConstructFrom(OrderOperation.CreateOrderFromCustomer); 
 ```
 
 ### ConstructFromMany
@@ -416,26 +416,26 @@ And, only for `Graph<T, S>`:
 * **ToState:** the state the entity should be at the end of the construction.
 
 ```C#
-public class OrderGraph : Graph<OrderDN, OrderState>
+public class OrderGraph : Graph<OrderEntity, OrderState>
 {   
     public static void Register()
     { 
         ...
-        new ConstructFromMany<ProductDN>(OrderOperation.CreateOrderFromProducts)
+        new ConstructFromMany<ProductEntity>(OrderOperation.CreateOrderFromProducts)
         {
             ToState = OrderState.New,
             Construct = (prods, _) =>
             {
-                var dic = Database.Query<ProductDN>()
+                var dic = Database.Query<ProductEntity>()
                     .Where(p => prods.Contains(p.ToLite()))
-                    .Select(p => new KeyValuePair<Lite<ProductDN>, decimal>(p.ToLite(), p.UnitPrice)).ToDictionary();
+                    .Select(p => new KeyValuePair<Lite<ProductEntity>, decimal>(p.ToLite(), p.UnitPrice)).ToDictionary();
 
-                return new OrderDN
+                return new OrderEntity
                 {
                     State = OrderState.New,
-                    Employee = EmployeeDN.Current.ToLite(),
+                    Employee = EmployeeEntity.Current.ToLite(),
                     RequiredDate = DateTime.Now.AddDays(3),
-                    Details = prods.Select(p => new OrderDetailsDN
+                    Details = prods.Select(p => new OrderDetailsEntity
                     {
                         Product = p,
                         UnitPrice = dic[p],
@@ -453,7 +453,7 @@ Manual invocation using `OperationLogic.ConstructFromMany` method:
 
 ```C#
 //Type inferred from OrderOperation.CreateOrderFromProducts 
-OrderDN order = OperationLogic.ConstructFromMany(OrderOperation.CreateOrderFromProducts, products); 
+OrderEntity order = OperationLogic.ConstructFromMany(OrderOperation.CreateOrderFromProducts, products); 
 ```
 
 ## Extra parameters
@@ -512,14 +512,14 @@ So, if you declare the property just once:
 ```C#
 public static class AnimalOperation
 {
-    public static readonly ExecuteSymbol<AnimalDN> Eat = OperationSymbol.Execute<AnimalDN>();   
+    public static readonly ExecuteSymbol<AnimalEntity> Eat = OperationSymbol.Execute<AnimalEntity>();   
 }
 ``` 
 
 And implement it in two different ways: 
 
 ```C#
-new Graph<AnimalDN>.Execute(AnimalOperation.Eat)
+new Graph<AnimalEntity>.Execute(AnimalOperation.Eat)
 {
     Lite = false,
     Execute = (o, _) =>
@@ -528,7 +528,7 @@ new Graph<AnimalDN>.Execute(AnimalOperation.Eat)
     }
 }.Register();
 
-new Graph<LionDN>.Execute(AnimalOperation.Eat)
+new Graph<LionEntity>.Execute(AnimalOperation.Eat)
 {
     Lite = false,
     Execute = (lion, _) =>
@@ -541,7 +541,7 @@ new Graph<LionDN>.Execute(AnimalOperation.Eat)
 Then if we execute: 
 
 ```C#
-AnimalDN a = Rand() ? myDog : myLion; 
+AnimalEntity a = Rand() ? myDog : myLion; 
 
 a.Execute(AnimalOperation.Eat);
 ```
@@ -571,7 +571,7 @@ new Execute(OrderOperation.Ship)
 Or you can get the current definition and replace just some parts like the `Execute` function: 
 
 ```C#
-OperationLogic.FindExecute<OrderDN>(OrderOperation.Ship)
+OperationLogic.FindExecute<OrderEntity>(OrderOperation.Ship)
     .OverrideExecute(baseExecute => (o, args) =>
     {
         baseExecute(o, args);
@@ -582,7 +582,7 @@ OperationLogic.FindExecute<OrderDN>(OrderOperation.Ship)
 Or the `CanExecute`: 
 
 ```C#
-OperationLogic.FindExecute<OrderDN>(OrderOperation.Ship)
+OperationLogic.FindExecute<OrderEntity>(OrderOperation.Ship)
      .OverrideCanExecute(baseCanExecute => o =>
      {
          return baseCanExecute(o) ?? "add some preconditions here"
@@ -596,6 +596,6 @@ While Operations (like most of the framework) promotes C# as the modeling tool a
 Example:
 
 ```C#
-Graph<OrderDN, OrderState>.ToDGML()
-Graph<OrderDN, OrderState>.ToDirectedGraph()
+Graph<OrderEntity, OrderState>.ToDGML()
+Graph<OrderEntity, OrderState>.ToDirectedGraph()
 ```

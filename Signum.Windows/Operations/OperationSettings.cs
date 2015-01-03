@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +31,7 @@ namespace Signum.Windows.Operations
 
         public override string ToString()
         {
-            return "{0}({1})".Formato(this.GetType().TypeName(), OperationSymbol.Key);
+            return "{0}({1})".FormatWith(this.GetType().TypeName(), OperationSymbol.Key);
         }
     }
 

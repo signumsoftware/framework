@@ -170,7 +170,7 @@ namespace Signum.Windows
 
         public virtual string SearchTitle(object queryName)
         {
-            return SearchMessage.FinderOf0.NiceToString().Formato(QueryUtils.GetNiceName(queryName));
+            return SearchMessage.FinderOf0.NiceToString().FormatWith(QueryUtils.GetNiceName(queryName));
         }
 
         public virtual Lite<Entity> Find(FindOptions options)
@@ -289,10 +289,10 @@ namespace Signum.Windows
         {
             QuerySettings qs = QuerySettings.TryGetC(queryName);
             if (qs == null)
-                throw new InvalidOperationException(SearchMessage.Query0NotRegistered.NiceToString().Formato(queryName));
+                throw new InvalidOperationException(SearchMessage.Query0NotRegistered.NiceToString().FormatWith(queryName));
 
             if (!OnIsFindable(queryName))
-                throw new UnauthorizedAccessException(SearchMessage.Query0NotAllowed.NiceToString().Formato(queryName));
+                throw new UnauthorizedAccessException(SearchMessage.Query0NotAllowed.NiceToString().FormatWith(queryName));
         }
 
     }

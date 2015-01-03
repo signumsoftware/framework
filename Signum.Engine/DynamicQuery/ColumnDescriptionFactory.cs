@@ -37,7 +37,7 @@ namespace Signum.Engine.DynamicQuery
                     string errors = value.Value.Types.Where(t => !ct.IsAssignableFrom(t)).ToString(a => a.Name, ", ");
 
                     if (errors.Any())
-                        throw new InvalidOperationException("Column {0} Implenentations should be assignable to {1}: {2}".Formato(Name, ct.Name, errors));
+                        throw new InvalidOperationException("Column {0} Implenentations should be assignable to {1}: {2}".FormatWith(Name, ct.Name, errors));
                 }
 
                 implementations = value;
@@ -102,7 +102,7 @@ namespace Signum.Engine.DynamicQuery
             Meta = meta;
 
             //if (Type.IsIEntity())
-            //    throw new InvalidOperationException("The Type of column {0} is a subtype of IEntity, use a Lite instead".Formato(mi.MemberName()));
+            //    throw new InvalidOperationException("The Type of column {0} is a subtype of IEntity, use a Lite instead".FormatWith(mi.MemberName()));
 
             if (IsEntity && !Type.CleanType().IsIEntity())
                 throw new InvalidOperationException("Entity must be a Lite or an IEntity");
@@ -174,7 +174,7 @@ namespace Signum.Engine.DynamicQuery
         { 
             if(propertyRoutes.IsNullOrEmpty())
                 throw new InvalidOperationException("Impossible to determine the underlying type of the PrimaryKey of column {0} if PropertyRoutes is not set"
-                    .Formato(this.Name));
+                    .FormatWith(this.Name));
 
             return propertyRoutes.Select(a => PrimaryKey.Type(a.RootType)).Distinct().SingleEx();
         }

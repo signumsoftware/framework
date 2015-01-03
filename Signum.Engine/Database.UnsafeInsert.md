@@ -1,4 +1,4 @@
-## Database.UnsafeInsert
+﻿## Database.UnsafeInsert
 
 `UnsafeInsert` extension method let you create efficient low-level `INSERT` statements without creating the entities and inserting them one by one. 
 
@@ -16,8 +16,8 @@ public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T
 Example: 
 
 ```C#
-int inserted = Database.Query<ProjectDN>()
-              .UnsafeInsert(p => new BugDN
+int inserted = Database.Query<ProjectEntity>()
+              .UnsafeInsert(p => new BugEntity
               {
                    Description = "Initial bug of " + p.Name,
                    Start = DateTime.Now,
@@ -34,14 +34,14 @@ int inserted = Database.Query<ProjectDN>()
 Will be translated to: 
 
 ```SQL
-INSERT INTO BugDN(Description, Start, [End], idFixer, 
+INSERT INTO BugEntity(Description, Start, [End], idFixer, 
 idDiscoverer_Customer, idDiscoverer_Developer, idStatus, idProject, 
 Ticks)
 SELECT ('Initial bug of ' + ISNULL(s0.Name, '')), convert(datetime, '2014-08-26T11:38:19', 126), NULL, NULL, 
 NULL, NULL, 0, s0.Id, 
 0 FROM (
   (SELECT pdn.Name, pdn.Id
-  FROM ProjectDN AS pdn)
+  FROM ProjectEntity AS pdn)
 ) AS s0;
 
 SELECT @@rowcount
@@ -51,8 +51,8 @@ This API requires you to set every single required field, because *the initial v
 
 
 ```C#
-int inserted = Database.Query<ProjectDN>()
-             .UnsafeInsert(p => new BugDN
+int inserted = Database.Query<ProjectEntity>()
+             .UnsafeInsert(p => new BugEntity
              {
                  Description = "Initial bug of " + p.Name,
                  Start = DateTime.Now,
@@ -89,8 +89,8 @@ idWriter_Customer, idWriter_Developer)
 SELECT s2.Id, 1, (ISNULL((ISNULL(('Coment of ' + ISNULL(s2.Name, '')), '') + ' in '), '') + ISNULL(s2.Description, '')), convert(datetime, '2014-08-26T13:07:50', 126), 
 NULL, s2.Id1 FROM (
   (SELECT bdn.Id, ddn.Name, bdn.Description, ddn.Id AS Id1
-  FROM DeveloperDN AS ddn
-  CROSS JOIN BugDN AS bdn)
+  FROM DeveloperEntity AS ddn
+  CROSS JOIN BugEntity AS bdn)
 ) AS s2;
 SELECT @@rowcount
 ```

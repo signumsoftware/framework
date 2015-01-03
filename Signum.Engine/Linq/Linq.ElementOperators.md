@@ -1,4 +1,4 @@
-# LINQ Element Operators
+﻿# LINQ Element Operators
 
 Element operators is the name that Microsoft gives to this group of LINQ methods: `First`, `FirstOrDefault`, `Single` and `SingleOrDefault`. 
 
@@ -18,14 +18,14 @@ The behavior of this methods in-memory is clear:
 Example: 
 
 ```C#
-List<ProjectDN> projects = //...
+List<ProjectEntity> projects = //...
 project.Single();
 ```
 
 And `LINQ to Signum` also does exactly that **if the query ends in one of this operators**. Example:
 
 ```C#
-Database.Query<ProjectDN>().Single(); //Throws EXCEPTION if 0 or N elements
+Database.Query<ProjectEntity>().Single(); //Throws EXCEPTION if 0 or N elements
 ```
 
 The problem come if the operator is in the middle of a LINQ to Signum query: 
@@ -36,18 +36,18 @@ The problem come if the operator is in the middle of a LINQ to Signum query:
 In the middle of a LINQ to Signum query there's no easy way to throw an exception, for example: 
 
 ```C#
-from b in Database.Query<BugDN>()
+from b in Database.Query<BugEntity>()
 let c = b.Comments.Single()
 select new { b.Description, c.Text }; 
 ```
 
-This query is going to be translated to some SQL, but makes no sense in SQL to throw exceptions for a particular `BugDN` with more/less than just one comment. 
+This query is going to be translated to some SQL, but makes no sense in SQL to throw exceptions for a particular `BugEntity` with more/less than just one comment. 
 
 One alternative that we consider was to translate the four operators to the behavior of `FirsOrDefault` when in-database, using `OUTER APPLY` and `TOP(1)`: 
 
 ```SQL
 SELECT bdn.Description, s2.Text
-FROM BugDN AS bdn
+FROM BugEntity AS bdn
 OUTER APPLY (
   (SELECT TOP (1) bdnc.Text
   FROM BugDNComments AS bdnc
@@ -72,7 +72,7 @@ So what we did instead is to re-interpret the behavior of the four operators, re
 So when you write:
 
 ```C#
-from b in Database.Query<BugDN>()
+from b in Database.Query<BugEntity>()
 let c = b.Comments.Single()
 select new { b.Description, c.Text }; 
 ```
@@ -81,7 +81,7 @@ It will be translated to:
  
 ```SQL
 SELECT bdn.Description, s1.Text
-FROM BugDN AS bdn
+FROM BugEntity AS bdn
 CROSS APPLY (
   (SELECT bdnc.Text
   FROM BugDNComments AS bdnc
@@ -105,24 +105,24 @@ Avoid using `Single` if you're writing an [`expressionMethod`](../Signum.Utiliti
 
 Example:
 
-Imagine we have an inverted relationship between `BodyDN` and `HeadDN`. The `HeadDN` refers to the `BodyDN` with his `Body` column, that has a `UniqueIndex`. This looks like a sensible `expressionMethod`: 
+Imagine we have an inverted relationship between `BodyEntity` and `HeadEntity`. The `HeadEntity` refers to the `BodyEntity` with his `Body` column, that has a `UniqueIndex`. This looks like a sensible `expressionMethod`: 
 
 ```C#
-static Expression<Func<BodyDN, HeadDN>> HeadExpression = 
-    p => Database.Query<HeadDN>().Single(h=>h.Body == b); 
-public static HeadDN Head(this BodyDN b)
+static Expression<Func<BodyEntity, HeadEntity>> HeadExpression = 
+    p => Database.Query<HeadEntity>().Single(h=>h.Body == b); 
+public static HeadEntity Head(this BodyEntity b)
 {
     return HeadExpression.Evaluate(b);
 }
 ```
 
- * We can use `SingleOrDefault` instead of `FirstOrDefault` because we know that there not be two `HeadDN` pointing to the same `Body` (thanks to the `UniqueIndex` in `HeadDN.Body`).
- * If we are sure that there will always be a `HeadDN` for each `BodyDN`, we could be tempted to use `Single` instead of `SingleOrDefault`, but **avoid this in expression** because you have no control of `BodyDN b` being `null`. 
+ * We can use `SingleOrDefault` instead of `FirstOrDefault` because we know that there not be two `HeadEntity` pointing to the same `Body` (thanks to the `UniqueIndex` in `HeadEntity.Body`).
+ * If we are sure that there will always be a `HeadEntity` for each `BodyEntity`, we could be tempted to use `Single` instead of `SingleOrDefault`, but **avoid this in expression** because you have no control of `BodyEntity b` being `null`. 
  
-Imagine that a `CarDN` has an optional `BodyDN Driver` property and someone writes this query: 
+Imagine that a `CarEntity` has an optional `BodyEntity Driver` property and someone writes this query: 
 
 ```C#
-Database.Query<CarDN>().Select(c => c.Driver.Head()).ToList();
+Database.Query<CarEntity>().Select(c => c.Driver.Head()).ToList();
 ```
 
 The writer of this query doesn't know the implementation of `Head`, and will expect this query to return `null` for the parked cars without driver, but if we implement `Head` using `Single`, the **parked cars will disappear!**

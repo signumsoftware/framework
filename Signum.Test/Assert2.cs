@@ -23,7 +23,7 @@ namespace Signum.Test
                 return;
             }
 
-            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(E).Name));
+            throw new AssertFailedException("No {0} has been thrown".FormatWith(typeof(E).Name));
         }
 
         public static void Throws<E>(string messageToContain, Action action)
@@ -36,12 +36,12 @@ namespace Signum.Test
             catch (E ex)
             {
                 if(!ex.Message.Contains(messageToContain))
-                    throw new AssertFailedException("No {0} has been thrown with message {0}".Formato(typeof(E).Name, ex.Message));
+                    throw new AssertFailedException("No {0} has been thrown with message {0}".FormatWith(typeof(E).Name, ex.Message));
 
                 return;
             }
 
-            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(E).Name));
+            throw new AssertFailedException("No {0} has been thrown".FormatWith(typeof(E).Name));
         }
 
         public static void Throws<E>(Func<E, bool> exceptionCondition, Action action)
@@ -54,12 +54,12 @@ namespace Signum.Test
             catch (E ex)
             {
                 if (!exceptionCondition(ex))
-                    throw new AssertFailedException("No {0} has been thrown that satisfies the condition".Formato(typeof(E).Name));
+                    throw new AssertFailedException("No {0} has been thrown that satisfies the condition".FormatWith(typeof(E).Name));
 
                 return;
             }
 
-            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(E).Name));
+            throw new AssertFailedException("No {0} has been thrown".FormatWith(typeof(E).Name));
         }
 
         public static void AssertAll<T>(this IEnumerable<T> collection, Expression<Func<T, bool>> predicate)
@@ -69,7 +69,7 @@ namespace Signum.Test
             foreach (var item in collection)
             {
                 if (!func(item))
-                    Assert.Fail("'{0}' fails on '{1}'".Formato(item, predicate.ToString())); 
+                    Assert.Fail("'{0}' fails on '{1}'".FormatWith(item, predicate.ToString())); 
             }
         }
 
@@ -80,7 +80,7 @@ namespace Signum.Test
             string notFound = elements.Where(a => !hs.Contains(a)).CommaAnd();
 
             if (notFound.HasText())
-                Assert.Fail("{0} not found".Formato(notFound)); 
+                Assert.Fail("{0} not found".FormatWith(notFound)); 
         }
 
         public static void AssertNotContains<T>(this IEnumerable<T> collection, params T[] elements)
@@ -90,7 +90,7 @@ namespace Signum.Test
             string found = elements.Where(a => hs.Contains(a)).CommaAnd();
 
             if (found.HasText())
-                Assert.Fail("{0}  found".Formato(found));
+                Assert.Fail("{0}  found".FormatWith(found));
         }
 
         public static void AssertExactly<T>(this IEnumerable<T> collection, params T[] elements)
@@ -101,13 +101,13 @@ namespace Signum.Test
             string exceeded = hs.Where(a => !elements.Contains(a)).CommaAnd(); ;
 
             if (notFound.HasText() && exceeded.HasText())
-                Assert.Fail("{0} not found and {1} exceeded".Formato(notFound, exceeded));
+                Assert.Fail("{0} not found and {1} exceeded".FormatWith(notFound, exceeded));
 
             if(notFound.HasText())
-                Assert.Fail("{0} not found".Formato(notFound));
+                Assert.Fail("{0} not found".FormatWith(notFound));
 
             if (exceeded.HasText())
-                Assert.Fail("{0} exceeded".Formato(exceeded));
+                Assert.Fail("{0} exceeded".FormatWith(exceeded));
 
         }
 

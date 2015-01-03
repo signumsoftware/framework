@@ -28,7 +28,7 @@ namespace Signum.Engine
             where T : class, IEntity
         {
             using (new EntityCache())
-            using (HeavyProfiler.Log("DBSave", () => "SaveList<{0}>".Formato(typeof(T).TypeName())))
+            using (HeavyProfiler.Log("DBSave", () => "SaveList<{0}>".FormatWith(typeof(T).TypeName())))
             using (Transaction tr = new Transaction())
             {
                 Saver.Save(entities.Cast<Entity>().ToArray());
@@ -58,7 +58,7 @@ namespace Signum.Engine
             try
             {
                 using (new EntityCache())
-                using (HeavyProfiler.Log("DBSave", () => "Save<{0}>".Formato(typeof(T).TypeName())))
+                using (HeavyProfiler.Log("DBSave", () => "Save<{0}>".FormatWith(typeof(T).TypeName())))
                 using (Transaction tr = new Transaction())
                 {
                     Saver.Save((Entity)(IEntity)entity);
@@ -174,7 +174,7 @@ namespace Signum.Engine
         public static Lite<T> RetrieveLite<T>(PrimaryKey id)
             where T : Entity
         {
-            using (HeavyProfiler.Log("DBRetrieve", () => "Lite<{0}>".Formato(typeof(T).TypeName())))
+            using (HeavyProfiler.Log("DBRetrieve", () => "Lite<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 try
                 {
@@ -221,7 +221,7 @@ namespace Signum.Engine
         {
             try
             {
-                using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".Formato(typeof(T).TypeName())))
+                using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".FormatWith(typeof(T).TypeName())))
                 {
                     var cc = GetCacheController<T>();
                     if (cc != null && GetFilterQuery<T>() == null)
@@ -285,7 +285,7 @@ namespace Signum.Engine
         {
             try
             {
-                using (HeavyProfiler.Log("DBRetrieve", () => "All {0}".Formato(typeof(T).TypeName())))
+                using (HeavyProfiler.Log("DBRetrieve", () => "All {0}".FormatWith(typeof(T).TypeName())))
                 {
                     var cc = GetCacheController<T>();
                     if (cc != null)
@@ -317,7 +317,7 @@ namespace Signum.Engine
             }
         }
 
-        static readonly GenericInvoker<Func<IList>> giRetrieveAll = new GenericInvoker<Func<IList>>(() => RetrieveAll<TypeDN>());
+        static readonly GenericInvoker<Func<IList>> giRetrieveAll = new GenericInvoker<Func<IList>>(() => RetrieveAll<TypeEntity>());
         public static List<Entity> RetrieveAll(Type type)
         {
             if (type == null)
@@ -327,13 +327,13 @@ namespace Signum.Engine
             return list.Cast<Entity>().ToList();
         }
 
-        static readonly GenericInvoker<Func<IList>> giRetrieveAllLite = new GenericInvoker<Func<IList>>(() => Database.RetrieveAllLite<TypeDN>());
+        static readonly GenericInvoker<Func<IList>> giRetrieveAllLite = new GenericInvoker<Func<IList>>(() => Database.RetrieveAllLite<TypeEntity>());
         public static List<Lite<T>> RetrieveAllLite<T>()
             where T : Entity
         {
             try
             {
-                using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".Formato(typeof(T).TypeName())))
+                using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".FormatWith(typeof(T).TypeName())))
                 {
                     var cc = GetCacheController<T>();
                     if (cc != null && GetFilterQuery<T>() == null)
@@ -365,7 +365,7 @@ namespace Signum.Engine
         public static List<T> RetrieveList<T>(List<PrimaryKey> ids)
             where T : Entity
         {
-            using (HeavyProfiler.Log("DBRetrieve", () => "List<{0}>".Formato(typeof(T).TypeName())))
+            using (HeavyProfiler.Log("DBRetrieve", () => "List<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 if (ids == null)
                     throw new ArgumentNullException("ids");
@@ -442,7 +442,7 @@ namespace Signum.Engine
         public static List<Lite<T>> RetrieveListLite<T>(List<PrimaryKey> ids)
             where T : Entity
         {
-            using (HeavyProfiler.Log("DBRetrieve", () => "List<Lite<{0}>>".Formato(typeof(T).TypeName())))
+            using (HeavyProfiler.Log("DBRetrieve", () => "List<Lite<{0}>>".FormatWith(typeof(T).TypeName())))
             {
                 if (ids == null)
                     throw new ArgumentNullException("ids");
@@ -552,7 +552,7 @@ namespace Signum.Engine
             var areNew = collection.Where(a => a.IsNew);
             if (areNew.Any())
                 throw new InvalidOperationException("The following entities are new:\r\n" +
-                    areNew.ToString(a => "\t{0}".Formato(a), "\r\n"));
+                    areNew.ToString(a => "\t{0}".FormatWith(a), "\r\n"));
 
             var groups = collection.GroupBy(a => a.GetType(), a => a.Id).ToList();
 
@@ -573,7 +573,7 @@ namespace Signum.Engine
             var areNew = collection.Where(a => a.IdOrNull == null);
             if (areNew.Any())
                 throw new InvalidOperationException("The following entities are new:\r\n" +
-                    areNew.ToString(a => "\t{0}".Formato(a), "\r\n"));
+                    areNew.ToString(a => "\t{0}".FormatWith(a), "\r\n"));
 
 
             var groups = collection.GroupBy(a => a.EntityType, a => a.Id).ToList();
@@ -604,7 +604,7 @@ namespace Signum.Engine
             if (ids == null)
                 throw new ArgumentNullException("ids");
 
-            using (HeavyProfiler.Log("DBDelete", () => "List<{0}>".Formato(typeof(T).TypeName())))
+            using (HeavyProfiler.Log("DBDelete", () => "List<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 using (Transaction tr = new Transaction())
                 {
@@ -1056,7 +1056,7 @@ namespace Signum.Engine
                 return query.Select(lambda);
             }
 
-            throw new InvalidOperationException("Impossible to convert {0} to {1}".Formato(
+            throw new InvalidOperationException("Impossible to convert {0} to {1}".FormatWith(
                 typeof(IQueryable<T>).TypeName(), typeof(IQueryable<E>).TypeName()));
         }
     }

@@ -31,7 +31,7 @@
     <Member Name="NoOne2" Description="Ninguno (2)" />
     <Member Name="NoOne3" Description="Ninguno (3)" />
   </Type>
-  <Type Name="ColorDN" Description="Color">
+  <Type Name="ColorEntity" Description="Color">
     <Member Name="Argb" Description="Argb" />
   </Type>
   <Type Name="ColumnOptionsMode" Description="Modo de las columnas">
@@ -54,7 +54,7 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Corrupto" />
   </Type>
-  <Type Name="DeleteLogParametersDN" Description="Parámetros para eliminar registro">
+  <Type Name="DeleteLogParametersEntity" Description="Parámetros eliminación de registros">
     <Member Name="ChunkSize" Description="Tamaño" />
     <Member Name="DateLimit" Description="Fecha límite" />
     <Member Name="DeleteLogsWithMoreThan" Description="Eliminar registros con más de" />
@@ -90,7 +90,7 @@
     <Member Name="AttemptToSet0InLockedEntity1" Description="Intento de establecer {0} en entidad bloqueada {1}" />
   </Type>
   <Type Name="EnumEntity`1" />
-  <Type Name="ExceptionDN" Description="Excepción">
+  <Type Name="ExceptionEntity" Description="Excepción">
     <Member Name="ActionName" Description="Nombre de la acción" />
     <Member Name="ApplicationName" Description="Nombre de la aplicación" />
     <Member Name="ControllerName" Description="Nombre del controlador" />
@@ -139,7 +139,7 @@
   <Type Name="ImmutableEntity" Description="Entidad inmutable">
     <Member Name="AllowChange" Description="Permitir cambios" />
   </Type>
-  <Type Name="IUserDN" />
+  <Type Name="IUserEntity" />
   <Type Name="JavascriptMessage">
     <Member Name="addFilter" Description="Añadir filtro" />
     <Member Name="cancel" Description="Cancelar" />
@@ -213,7 +213,7 @@
     <Member Name="ThereAreChangesContinue" Description="Existen cambios no guardados y se perderán.&#xD;&#xA;&#xD;&#xA;&#x9;¿Continuamos?" />
     <Member Name="ThereAreErrors" Description="Hay errores" />
   </Type>
-  <Type Name="OperationLogDN" Description="Registro de operación">
+  <Type Name="OperationLogEntity" Description="Registro de operación">
     <Member Name="Duration" Description="Duración" />
     <Member Name="End" Description="Final" />
     <Member Name="Exception" Description="Excepción" />
@@ -341,7 +341,7 @@
     <Member Name="NNone" Description="- n: Ninguno" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INICIO DEL SCRIPT DE SINCRONIZACIÓN GENERADO EL {0}" />
   </Type>
-  <Type Name="TypeDN" Description="Tipo">
+  <Type Name="TypeEntity" Description="Tipo">
     <Member Name="ClassName" Description="Class Name" />
     <Member Name="CleanName" Description="Clean Name" />
     <Member Name="FullClassName" Description="Full Class Name" />

@@ -213,7 +213,7 @@ namespace Signum.Windows
                     FilterOptions = options.FilterOptions,
                 }, count =>
                 {
-                    Label = "{0} ({1})".Formato(Label, count);
+                    Label = "{0} ({1})".FormatWith(Label, count);
                 }, () => { });
             }
         }
@@ -281,7 +281,7 @@ namespace Signum.Windows
 
             if (lite == null)
             {
-                MessageBox.Show(QuickLinkMessage.No0Found.NiceToString().ForGenderAndNumber(typeof(T).GetGender()).Formato(typeof(T).NiceName()));
+                MessageBox.Show(QuickLinkMessage.No0Found.NiceToString().ForGenderAndNumber(typeof(T).GetGender()).FormatWith(typeof(T).NiceName()));
                 return;
             }
 

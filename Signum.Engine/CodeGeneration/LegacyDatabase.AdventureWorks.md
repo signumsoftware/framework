@@ -1,4 +1,4 @@
-# Legacy Databases
+﻿# Legacy Databases
 
 ## History
 > For year we have been designing the framework with a radical code-first approach. This has allow us to  see business software development from a different perspective than any other framework, archive grate levels or re-utilization, and reducing redundancy by using succinct API and run-time intelligence. 
@@ -71,15 +71,15 @@ Both lines not included!
 
 Also replace the lines 
 ```C#
-sb.Schema.Settings.OverrideAttributes((ExceptionDN ua) => ua.User, new ImplementedByAttribute(typeof(UserDN)));
-sb.Schema.Settings.OverrideAttributes((OperationLogDN ua) => ua.User, new ImplementedByAttribute(typeof(UserDN)));
+sb.Schema.Settings.OverrideAttributes((ExceptionEntity ua) => ua.User, new ImplementedByAttribute(typeof(UserEntity)));
+sb.Schema.Settings.OverrideAttributes((OperationLogEntity ua) => ua.User, new ImplementedByAttribute(typeof(UserEntity)));
 ````
 
 By 
 
 ```C#
-sb.Schema.Settings.OverrideAttributes((ExceptionDN ua) => ua.User, new ImplementedByAttribute(/*typeof(UserDN)*/));
-sb.Schema.Settings.OverrideAttributes((OperationLogDN ua) => ua.User, new ImplementedByAttribute(/*typeof(UserDN)*/));
+sb.Schema.Settings.OverrideAttributes((ExceptionEntity ua) => ua.User, new ImplementedByAttribute(/*typeof(UserEntity)*/));
+sb.Schema.Settings.OverrideAttributes((OperationLogEntity ua) => ua.User, new ImplementedByAttribute(/*typeof(UserEntity)*/));
 ````
 
 ### Step 5: Adapting the legacy Schema
@@ -284,7 +284,7 @@ Generating the logic will be more straight forward. If we run `[G]enerate` -> `[
 
         public static IEnumerable<Module> GroupByNamespace(List<Type> candidates, string baseNamespace)
         {
-            var result = candidates.Where(a => a != typeof(ApplicationConfigurationDN)).GroupBy(a => a.Namespace).Select(gr => new Module
+            var result = candidates.Where(a => a != typeof(ApplicationConfigurationEntity)).GroupBy(a => a.Namespace).Select(gr => new Module
             {
                 ModuleName = gr.Key == baseNamespace ? "Internals" :
                              gr.Key.RemoveStart(baseNamespace.Length + 1),
@@ -335,7 +335,7 @@ If everything has gone all right, the application now should contain all the inf
 The generated script should contains the necessary modifications to adapt the database to the requirements of Signum Framework. While the script looks long, the modifications are pretty harmless: 
 
 1. Set Snapshot isolation as the default.
-2. Create some mandatory tables, like `TypeDN`, `OperationSymbol`, `OperationLogDN` and `ExceptionDN`.
+2. Create some mandatory tables, like `TypeEntity`, `OperationSymbol`, `OperationLogEntity` and `ExceptionEntity`.
 3. On the tables that have been converted to an `MList` drop `ModifiedDate`, alongside with his default constraint.
 4. Drop the multi-column primary key constraints and add the new `Id INT IDENTITY NOT NULL PRIMARY KEY`, finally creating a multi-column unique index in the table. 
 5. For the tables which primary key has been spited in a primary key and a foreign key, the new column is created with a `-- DEFAULT (0)` constraint indicating us that we need to add values. Lets replace `-- DEFAULT` by `DEFAULT` and include the following script before the foreign keys are created:
@@ -350,7 +350,7 @@ The generated script should contains the necessary modifications to adapt the da
   ```
 
 6. Many foreign keys and indexes are renamed to follow the conventions of Signum Framework.
-7. All the necessary `TypeDN` are created.
+7. All the necessary `TypeEntity` are created.
 8. If cache module has been started, it will enable the notification broker. 
 9. All the necessary `OperationSymbol` are created.
    
@@ -369,7 +369,7 @@ AdventureWorks has evolved to SignumAdventureWorks, now is free to grow wings an
 
 **Note:** Import Export AuthRules wont work till you define your roles and export them.  
 
-Synchronize one more time and now that we have the `CultureInfoDN` registered, the  `EmailTemplateDN` for the remember password will be created.
+Synchronize one more time and now that we have the `CultureInfoEntity` registered, the  `EmailTemplateEntity` for the remember password will be created.
 
 Your application is growing fast! 
 
@@ -384,9 +384,9 @@ public static void LoadUsers()
 {
 	using (Transaction tr = new Transaction())
 	{
-		RoleDN role = new RoleDN { MergeStrategy = MergeStrategy.Intersection, Name = "SuperUser" }.Save();
+		RoleEntity role = new RoleEntity { MergeStrategy = MergeStrategy.Intersection, Name = "SuperUser" }.Save();
 
-		new UserDN
+		new UserEntity
 		{
 			UserName = "su",
 			PasswordHash = Security.EncodePassword("su"),
@@ -394,7 +394,7 @@ public static void LoadUsers()
 			State = UserState.Saved,
 		}.Save();
 
-		new UserDN
+		new UserEntity
 		{
 			UserName = "System",
 			PasswordHash = Security.EncodePassword("System"),

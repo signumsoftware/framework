@@ -1,4 +1,4 @@
-#region usings
+﻿#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -211,7 +211,7 @@ namespace Signum.Web.Operations
                 var result = settings as OS;
 
                 if (result == null)
-                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), operation.Key, typeof(OS).TypeName()));
+                    throw new InvalidOperationException("{0}({1}) should be a {2}".FormatWith(settings.GetType().TypeName(), operation.Key, typeof(OS).TypeName()));
 
                 return result;
             }
@@ -342,7 +342,7 @@ namespace Signum.Web.Operations
                 case OperationType.ConstructorFrom:
                     return JsModule.Operations["constructFromDefault"](ctx.Options(), JsFunction.Event);
                 default:
-                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".FormatWith(
                         ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
             }
         }
@@ -522,7 +522,7 @@ namespace Signum.Web.Operations
                 case OperationType.ConstructorFrom:
                     return JsModule.Operations["constructFromDefaultContextual"](ctx.Options(), JsFunction.Event);
                 default:
-                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".FormatWith(ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
             }
         }
 

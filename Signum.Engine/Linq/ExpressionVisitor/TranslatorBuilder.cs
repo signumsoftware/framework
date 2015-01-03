@@ -185,10 +185,10 @@ namespace Signum.Engine.Linq
            
             static FieldInfo fiId = ReflectionTools.GetFieldInfo((Entity i) => i.id);
 
-            static MethodInfo miCached = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<TypeDN>(null, null)).GetGenericMethodDefinition();
-            static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<TypeDN>(null)).GetGenericMethodDefinition();
-            static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeDN>(null, null)).GetGenericMethodDefinition();
-            static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<TypeDN>(null)).GetGenericMethodDefinition();
+            static MethodInfo miCached = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<TypeEntity>(null, null)).GetGenericMethodDefinition();
+            static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<TypeEntity>(null)).GetGenericMethodDefinition();
+            static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeEntity>(null, null)).GetGenericMethodDefinition();
+            static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<TypeEntity>(null)).GetGenericMethodDefinition();
             static MethodInfo miEmbeddedPostRetrieving = ReflectionTools.GetMethodInfo((IRetriever r) => r.EmbeddedPostRetrieving<EmbeddedEntity>(null)).GetGenericMethodDefinition();
 
             Scope scope; 
@@ -263,7 +263,7 @@ namespace Signum.Engine.Linq
 
             protected internal override MixinEntityExpression VisitMixinEntity(MixinEntityExpression me)
             {
-                throw new InvalidOperationException("Impossible to retrieve MixinEntity {0} without their main entity".Formato(me.Type.Name)); 
+                throw new InvalidOperationException("Impossible to retrieve MixinEntity {0} without their main entity".FormatWith(me.Type.Name)); 
             }
 
             protected internal override Expression VisitEntity(EntityExpression fieldInit)
@@ -559,7 +559,7 @@ namespace Signum.Engine.Linq
         public Expression GetColumnExpression(Expression row, Alias alias, string name, Type type)
         {
             if (alias != Alias)
-                throw new InvalidOperationException("alias '{0}' not found".Formato(alias));
+                throw new InvalidOperationException("alias '{0}' not found".FormatWith(alias));
 
             int position = Positions.GetOrThrow(name, "column name '{0}' not found in alias '" + alias + "'");
 
@@ -581,7 +581,7 @@ namespace Signum.Engine.Linq
             Expression call = Expression.Call(row, mi, Expression.Constant(cProj.Token), cProj.OuterKey);
 
             if (cProj.Projection.UniqueFunction != null)
-                throw new InvalidOperationException("Eager ChildProyection with UniqueFunction '{0}' not expected at this stage".Formato(cProj.Projection.UniqueFunction));
+                throw new InvalidOperationException("Eager ChildProyection with UniqueFunction '{0}' not expected at this stage".FormatWith(cProj.Projection.UniqueFunction));
 
             return call;
         }
@@ -592,10 +592,10 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("Not IsLazyMList not expected at this stage");
 
             if (!cProj.Type.IsMList())
-                throw new InvalidOperationException("Lazy ChildProyection of type '{0}' instead of MList".Formato(cProj.Type.TypeName()));
+                throw new InvalidOperationException("Lazy ChildProyection of type '{0}' instead of MList".FormatWith(cProj.Type.TypeName()));
 
             if (cProj.Projection.UniqueFunction != null)
-                throw new InvalidOperationException("Lazy ChildProyection with UniqueFunction '{0}'".Formato(cProj.Projection.UniqueFunction));
+                throw new InvalidOperationException("Lazy ChildProyection with UniqueFunction '{0}'".FormatWith(cProj.Projection.UniqueFunction));
 
             MethodInfo mi = miLookupRequest.MakeGenericMethod(cProj.OuterKey.Type, cProj.Type.ElementType());
 

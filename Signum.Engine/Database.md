@@ -1,4 +1,4 @@
-# Database
+﻿# Database
 
 `Database` is the main facade of Signum Engine for normal operations with entities, like [saving](Database.Save.md), [retrieving](Database.Retrieve.md) or [deleting](Database.Delete.md) particular entities, or write complex queries to [retrieving](Database.Query.md), [update](Database.UnsafeUpdate.md), [delete](Database.UnsafeDelete.md) or [insert](Database.UnsafeInsert.md) many entities at the same time.
 
@@ -12,11 +12,11 @@ Three things that make `Database` class different to many other ORM:
 
 Let's start with an example. 
 
-Suppose you have a very simplistic UserDN entity like this one: 
+Suppose you have a very simplistic UserEntity entity like this one: 
 
 ```C#
 [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-public class UserDN : Entity
+public class UserEntity : Entity
 {
     [UniqueIndex] 
     string userName;
@@ -46,7 +46,7 @@ private static void ChangePassword(string userName, string oldPasswordHash, stri
 {
     using (Transaction tr = new Transaction())
     {
-        UserDN user = Database.Query<UserDN>().Single(a => a.UserName == userName);
+        UserEntity user = Database.Query<UserEntity>().Single(a => a.UserName == userName);
         if (user.PasswordHash != oldPasswordHash)
            throw new ApplicationException("Incorrect password");
         user.PasswordHash = newPasswordHash;

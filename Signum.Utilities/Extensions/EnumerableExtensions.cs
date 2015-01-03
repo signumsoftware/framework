@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,7 +58,7 @@ namespace Signum.Utilities
                 if (predicate(item))
                 {
                     if (found)
-                        throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+                        throw new InvalidOperationException("Sequence contains more than one {0}".FormatWith(typeof(T).TypeName()));
 
                     result = item;
                     found = true;
@@ -68,7 +68,7 @@ namespace Signum.Utilities
             if (found)
                 return result;
 
-            throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+            throw new InvalidOperationException("Sequence contains no {0}".FormatWith(typeof(T).TypeName()));
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
@@ -86,7 +86,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+                    throw new InvalidOperationException("Sequence contains no {0}".FormatWith(typeof(T).TypeName()));
 
                 T current = enumerator.Current;
 
@@ -94,14 +94,14 @@ namespace Signum.Utilities
                     return current;
             }
 
-            throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+            throw new InvalidOperationException("Sequence contains more than one {0}".FormatWith(typeof(T).TypeName()));
         }
 
         public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> elementName, bool forEndUser = false)
         {
             return collection.SingleEx(
-                () => forEndUser ? CollectionMessage.No0Found.NiceToString(elementName()) : "Sequence contains no {0}".Formato(elementName()),
-                () => forEndUser ? CollectionMessage.MoreThanOne0Found.NiceToString(elementName()) : "Sequence contains more than one {0}".Formato(elementName()),
+                () => forEndUser ? CollectionMessage.No0Found.NiceToString(elementName()) : "Sequence contains no {0}".FormatWith(elementName()),
+                () => forEndUser ? CollectionMessage.MoreThanOne0Found.NiceToString(elementName()) : "Sequence contains more than one {0}".FormatWith(elementName()),
                 forEndUser);
         }
 
@@ -148,7 +148,7 @@ namespace Signum.Utilities
                 if (predicate(item))
                 {
                     if (found)
-                        throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+                        throw new InvalidOperationException("Sequence contains more than one {0}".FormatWith(typeof(T).TypeName()));
 
                     result = item;
                     found = true;
@@ -180,7 +180,7 @@ namespace Signum.Utilities
                     return current;
             }
 
-            throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
+            throw new InvalidOperationException("Sequence contains more than one {0}".FormatWith(typeof(T).TypeName()));
         }
 
         public static T SingleOrDefaultEx<T>(this IEnumerable<T> collection, Func<string> errorMoreThanOne, bool forEndUser = false)
@@ -217,7 +217,7 @@ namespace Signum.Utilities
                     return item;
             }
 
-            throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+            throw new InvalidOperationException("Sequence contains no {0}".FormatWith(typeof(T).TypeName()));
         }
 
         [MethodExpander(typeof(UniqueExExpander))]
@@ -234,7 +234,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+                    throw new InvalidOperationException("Sequence contains no {0}".FormatWith(typeof(T).TypeName()));
 
                 return enumerator.Current;
             }
@@ -274,7 +274,7 @@ namespace Signum.Utilities
             using (IEnumerator<T> enumerator = collection.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
-                    throw new InvalidOperationException("Sequence contains no {0}".Formato(typeof(T).TypeName()));
+                    throw new InvalidOperationException("Sequence contains no {0}".FormatWith(typeof(T).TypeName()));
 
                 T current = enumerator.Current;
 
@@ -1099,12 +1099,12 @@ namespace Signum.Utilities
 
             if (extra.Count != 0)
                 if (missing.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Missing: {2}".Formato(action, extra.ToString(", "), missing.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Missing: {2}".FormatWith(action, extra.ToString(", "), missing.ToString(", ")));
                 else
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, extra.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".FormatWith(action, extra.ToString(", ")));
             else
                 if (missing.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Missing: {1}".Formato(action, missing.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Missing: {1}".FormatWith(action, missing.ToString(", ")));
 
             return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }

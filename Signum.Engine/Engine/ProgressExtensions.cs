@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -195,7 +195,7 @@ namespace Signum.Engine
             {
                 return (color, str, parameters) =>
                 {
-                    string f = parameters == null ? str : str.Formato(parameters);
+                    string f = parameters == null ? str : str.FormatWith(parameters);
                     lock (logStreamWriter)
                         logStreamWriter.WriteLine(f);
                     lock (SafeConsole.SyncKey)

@@ -37,8 +37,8 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNested()
         {
-            var neasted = (from l in Database.Query<LabelDN>()
-                           select (from a in Database.Query<AlbumDN>()
+            var neasted = (from l in Database.Query<LabelEntity>()
+                           select (from a in Database.Query<AlbumEntity>()
                                    where a.Label == l
                                    select  a.ToLite()).ToList()).ToList();
         }
@@ -46,8 +46,8 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedIB()
         {
-            var neasted = (from b in Database.Query<BandDN>()
-                           select (from a in Database.Query<AlbumDN>()
+            var neasted = (from b in Database.Query<BandEntity>()
+                           select (from a in Database.Query<AlbumEntity>()
                                    where a.Author == b
                                    select a.ToLite()).ToList()).ToList();
         }
@@ -55,8 +55,8 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNullableLookupColumns()
         {
-            var neasted = (from l in Database.Query<LabelDN>()
-                           join o in Database.Query<LabelDN>().DefaultIfEmpty() on l.Owner.Entity equals o
+            var neasted = (from l in Database.Query<LabelEntity>()
+                           join o in Database.Query<LabelEntity>().DefaultIfEmpty() on l.Owner.Entity equals o
                            group l.ToLite() by o.ToLite() into g
                            select new
                            {
@@ -70,7 +70,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteGroupBy()
         {
-            var neasted = (from l in Database.Query<LabelDN>()
+            var neasted = (from l in Database.Query<LabelEntity>()
                            group l.ToLite() by l.Owner into g
                            select new
                            {
@@ -84,8 +84,8 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedIBPlus()
         {
-            var neasted = (from l in Database.Query<LabelDN>()
-                           select (from a in Database.Query<AlbumDN>()
+            var neasted = (from l in Database.Query<LabelEntity>()
+                           select (from a in Database.Query<AlbumEntity>()
                                    where a.Label == l
                                    select new { Label = l.ToLite(), Author = a.Author.ToLite(), Album = a.ToLite() }).ToList()).ToList();
         }
@@ -93,11 +93,11 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedNonKey()
         {
-            var neasted = (from a in Database.Query<AlbumDN>()
+            var neasted = (from a in Database.Query<AlbumEntity>()
                            select new
                                {
                                    Alumum = a.ToLite(),
-                                   Friends = (from b in Database.Query<AlbumDN>()
+                                   Friends = (from b in Database.Query<AlbumEntity>()
                                               where a.Label == b.Label
                                               select b.ToLite()).ToList()
                                }).ToList();
@@ -106,8 +106,8 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedContanins()
         {
-            var neasted = (from a in Database.Query<ArtistDN>()
-                           select (from b in Database.Query<BandDN>()
+            var neasted = (from a in Database.Query<ArtistEntity>()
+                           select (from b in Database.Query<BandEntity>()
                                    where b.Members.Contains(a)
                                    select b.ToLite()).ToList()).ToList();
         }
@@ -115,19 +115,19 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedIndePendent1()
         {
-            var neasted = (from a in Database.Query<LabelDN>()
-                           select (from n in Database.Query<NoteWithDateDN>()
+            var neasted = (from a in Database.Query<LabelEntity>()
+                           select (from n in Database.Query<NoteWithDateEntity>()
                                    select n.ToLite()).ToList()).ToList();
         }
 
         [TestMethod]
         public void SelecteNestedIndePendent2()
         {
-            var neasted = (from a in Database.Query<LabelDN>()
+            var neasted = (from a in Database.Query<LabelEntity>()
                            select new
                            {
                                Label = a.ToLite(),
-                               Notes = (from n in Database.Query<NoteWithDateDN>()
+                               Notes = (from n in Database.Query<NoteWithDateEntity>()
                                         select n.ToLite()).ToList()
                            }).ToList();
         }
@@ -135,8 +135,8 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedSemiIndePendent()
         {
-            var neasted = (from a in Database.Query<LabelDN>()
-                           select (from n in Database.Query<NoteWithDateDN>()
+            var neasted = (from a in Database.Query<LabelEntity>()
+                           select (from n in Database.Query<NoteWithDateEntity>()
                                    select new
                                    {
                                        Note = n.ToLite(),
@@ -147,12 +147,12 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedOuterOrder()
         {
-            var neasted = (from l in Database.Query<LabelDN>()
+            var neasted = (from l in Database.Query<LabelEntity>()
                            orderby l.Name
                            select new
                            {
                                Label = l.ToLite(),
-                               Notes = (from a in Database.Query<AlbumDN>()
+                               Notes = (from a in Database.Query<AlbumEntity>()
                                         where a.Label == l
                                         select a.ToLite()).ToList()
                            }).ToList();
@@ -161,12 +161,12 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedOuterOrderTake()
         {
-            var neasted = (from l in Database.Query<LabelDN>()
+            var neasted = (from l in Database.Query<LabelEntity>()
                            orderby l.Name
                            select new
                            {
                                Label = l.ToLite(),
-                               Notes = (from a in Database.Query<AlbumDN>()
+                               Notes = (from a in Database.Query<AlbumEntity>()
                                         where a.Label == l
                                         select a.ToLite()).ToList()
                            }).Take(10).ToList();
@@ -175,11 +175,11 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedInnerOrder()
         {
-            var neasted = (from l in Database.Query<LabelDN>()                           
+            var neasted = (from l in Database.Query<LabelEntity>()                           
                            select new
                            {
                                Label = l.ToLite(),
-                               Notes = (from a in Database.Query<AlbumDN>()
+                               Notes = (from a in Database.Query<AlbumEntity>()
                                         where a.Label == l
                                         orderby a.Name
                                         select a.ToLite()).ToList()
@@ -189,11 +189,11 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteNestedInnerOrderTake()
         {
-            var neasted = (from l in Database.Query<LabelDN>()                           
+            var neasted = (from l in Database.Query<LabelEntity>()                           
                            select new
                            {
                                Label = l.ToLite(),
-                               Notes = (from a in Database.Query<AlbumDN>()
+                               Notes = (from a in Database.Query<AlbumEntity>()
                                         where a.Label == l
                                         orderby a.Name
                                         select a.ToLite()).Take(10).ToList()
@@ -203,19 +203,19 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteDoubleNested()
         {
-            var neasted = (from l in Database.Query<LabelDN>()
-                           select (from a in Database.Query<AlbumDN>()
+            var neasted = (from l in Database.Query<LabelEntity>()
+                           select (from a in Database.Query<AlbumEntity>()
                                    where a.Label == l
                                    select (from s in a.Songs
-                                           select "{0} - {1} - {2}".Formato(l.Name, a.Name, s.Name)).ToList()).ToList()).ToList();
+                                           select "{0} - {1} - {2}".FormatWith(l.Name, a.Name, s.Name)).ToList()).ToList()).ToList();
         }
 
         [TestMethod]
         public void SelecteNestedDoubleOrder()
         {
-            var neasted = (from l in Database.Query<LabelDN>()
+            var neasted = (from l in Database.Query<LabelEntity>()
                            orderby l.Name
-                           select (from a in Database.Query<AlbumDN>()
+                           select (from a in Database.Query<AlbumEntity>()
                                    where a.Label == l
                                    orderby a.Name
                                    select a.Name).ToList()).ToList();
@@ -225,13 +225,13 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelecteDoubleNestedDoubleOrder()
         {
-            var neasted = (from l in Database.Query<LabelDN>()
+            var neasted = (from l in Database.Query<LabelEntity>()
                            orderby l.Name
-                           select (from a in Database.Query<AlbumDN>()
+                           select (from a in Database.Query<AlbumEntity>()
                                    where a.Label == l
                                    orderby a.Name
                                    select (from s in a.Songs
-                                           select "{0} - {1} - {2}".Formato(l.Name, a.Name, s.Name)).ToList()).ToList()).ToList();
+                                           select "{0} - {1} - {2}".FormatWith(l.Name, a.Name, s.Name)).ToList()).ToList()).ToList();
         }
 
 
@@ -239,7 +239,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectContainsInt()
         {
-            var result = (from b in Database.Query<BandDN>()
+            var result = (from b in Database.Query<BandEntity>()
                           where b.Members.Select(a => a.Id).Contains(1)
                           select b.ToLite()).ToList();
         }
@@ -247,7 +247,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectContainsEnum()
         {
-            var result = (from b in Database.Query<BandDN>()
+            var result = (from b in Database.Query<BandEntity>()
                           where b.Members.Select(a => a.Sex).Contains(Sex.Female)
                           select b.ToLite()).ToList();
         }
@@ -256,8 +256,8 @@ namespace Signum.Test.LinqProvider
         //[TestMethod]
         //public void SelecteNestedAsQueryable()
         //{
-        //    var neasted = (from l in Database.Query<LabelDN>()
-        //                   select (from a in Database.Query<AlbumDN>()
+        //    var neasted = (from l in Database.Query<LabelEntity>()
+        //                   select (from a in Database.Query<AlbumEntity>()
         //                           where a.Label == l
         //                           select a.ToLite())).ToList();
         //}
@@ -265,8 +265,8 @@ namespace Signum.Test.LinqProvider
         //[TestMethod]
         //public void SelecteNestedAsQueryableAnonymous()
         //{
-        //    var neasted = (from l in Database.Query<LabelDN>()
-        //                   select new { Elements = (from a in Database.Query<AlbumDN>()
+        //    var neasted = (from l in Database.Query<LabelEntity>()
+        //                   select new { Elements = (from a in Database.Query<AlbumEntity>()
         //                           where a.Label == l
         //                           select a.ToLite())} ).ToList();
         //}

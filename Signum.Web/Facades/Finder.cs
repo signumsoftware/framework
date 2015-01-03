@@ -108,12 +108,12 @@ namespace Signum.Web
 
         public Func<bool> AllowChangeColumns = () => true;
         
-        public string SearchPopupControlView = ViewPrefix.Formato("SearchPopupControl");
-        public string SearchPageView = ViewPrefix.Formato("SearchPage");
-        public string SearchControlView = ViewPrefix.Formato("SearchControl");
-        public string SearchResultsView = ViewPrefix.Formato("SearchResults");
-        public string FilterBuilderView = ViewPrefix.Formato("FilterBuilder");
-        public string PaginationSelectorView = ViewPrefix.Formato("PaginationSelector");
+        public string SearchPopupControlView = ViewPrefix.FormatWith("SearchPopupControl");
+        public string SearchPageView = ViewPrefix.FormatWith("SearchPage");
+        public string SearchControlView = ViewPrefix.FormatWith("SearchControl");
+        public string SearchResultsView = ViewPrefix.FormatWith("SearchResults");
+        public string FilterBuilderView = ViewPrefix.FormatWith("FilterBuilder");
+        public string PaginationSelectorView = ViewPrefix.FormatWith("PaginationSelector");
 
         public Dictionary<object, QuerySettings> QuerySettings { get; set; }
         protected Dictionary<string, object> WebQueryNames { get; private set; }
@@ -155,7 +155,7 @@ namespace Signum.Web
         protected internal virtual ViewResult SearchPage(ControllerBase controller, FindOptions findOptions)
         {
             if (!Finder.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(SearchMessage.Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
+                throw new UnauthorizedAccessException(SearchMessage.Query0IsNotAllowed.NiceToString().FormatWith(findOptions.QueryName));
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
@@ -256,7 +256,7 @@ namespace Signum.Web
         protected internal virtual PartialViewResult SearchPopup(ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
         {
             if (!Finder.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
+                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().FormatWith(findOptions.QueryName));
 
             var desc =  DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
@@ -283,7 +283,7 @@ namespace Signum.Web
         protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, bool showFooter, Context context)
         {
             if (!Finder.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
+                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().FormatWith(request.QueryName));
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             

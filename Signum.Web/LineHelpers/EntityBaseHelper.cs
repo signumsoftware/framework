@@ -1,4 +1,4 @@
-#region usings
+﻿#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -121,7 +121,7 @@ namespace Signum.Web
 
         public static MvcHtmlString EmbeddedTemplate(EntityBase entityBase, MvcHtmlString template, string defaultString)
         {
-            return MvcHtmlString.Create("<script type=\"template\" id=\"{0}\" data-toString=\"{2}\">{1}</script>".Formato(
+            return MvcHtmlString.Create("<script type=\"template\" id=\"{0}\" data-toString=\"{2}\">{1}</script>".FormatWith(
                                 entityBase.Compose(EntityBaseKeys.Template),
                                 regex.Replace(template.ToHtmlString(), m => m.Value + "X"),
                                 defaultString));
@@ -197,7 +197,7 @@ namespace Signum.Web
             return new HtmlTag(elementType, itemContext.Compose("btnView"))
                 .Class(btn ? "btn btn-default" : null)
                 .Class("sf-line-button sf-view")
-                .Attr("onclick", entityListBase.SFControlThen("viewItem_click('{0}')".Formato(itemContext.Prefix)))
+                .Attr("onclick", entityListBase.SFControlThen("viewItem_click('{0}')".FormatWith(itemContext.Prefix)))
                 .Attr("title", EntityControlMessage.View.NiceToString())
                 .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-arrow-right"));
         }
@@ -265,7 +265,7 @@ namespace Signum.Web
             return new HtmlTag(elementType, itemContext.Compose("btnRemove"))
                   .Class(btn ? "btn btn-default" : null)
                   .Class("sf-line-button sf-remove")
-                  .Attr("onclick", entityListBase.SFControlThen("removeItem_click('{0}')".Formato(itemContext.Prefix)))
+                  .Attr("onclick", entityListBase.SFControlThen("removeItem_click('{0}')".FormatWith(itemContext.Prefix)))
                   .Attr("title", EntityControlMessage.Remove.NiceToString())
                   .InnerHtml(new HtmlTag("span").Class("glyphicon glyphicon-remove"));
         }
@@ -289,7 +289,7 @@ namespace Signum.Web
             return new HtmlTag(elementType, itemContext.Compose("btnUp"))
                 .Class(btn ? "btn btn-default" : null)
                 .Class("sf-line-button move-up")
-                .Attr("onclick", entityListBase.SFControlThen("moveUp('{0}')".Formato(itemContext.Prefix)))
+                .Attr("onclick", entityListBase.SFControlThen("moveUp('{0}')".FormatWith(itemContext.Prefix)))
                 .Attr("title", JavascriptMessage.moveUp.NiceToString())
                 .InnerHtml(new HtmlTag("span").Class("glyphicon " + (isVertical ? "glyphicon-chevron-up" : "glyphicon-chevron-left")));
         }
@@ -314,7 +314,7 @@ namespace Signum.Web
             return new HtmlTag(elementType, itemContext.Compose("btnDown"))
              .Class(btn ? "btn btn-default" : null)
              .Class("sf-line-button move-down")
-             .Attr("onclick", entityListBase.SFControlThen("moveDown('{0}')".Formato(itemContext.Prefix)))
+             .Attr("onclick", entityListBase.SFControlThen("moveDown('{0}')".FormatWith(itemContext.Prefix)))
              .Attr("title", JavascriptMessage.moveDown.NiceToString())
              .InnerHtml(new HtmlTag("span").Class("glyphicon " + (isVertical ? "glyphicon-chevron-down" : "glyphicon-chevron-right")));
         }

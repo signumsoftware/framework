@@ -57,12 +57,12 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            var constructor = "new {0}{1}({2})".Formato(Type.TypeName(), AvoidExpandOnRetrieving ? "?": "",
+            var constructor = "new {0}{1}({2})".FormatWith(Type.TypeName(), AvoidExpandOnRetrieving ? "?": "",
                 ExternalId.ToString());
 
             return constructor +
                 (Bindings == null ? null : ("\r\n{\r\n " + Bindings.ToString(",\r\n ").Indent(4) + "\r\n}")) +
-                (Mixins == null ? null : ("\r\n" + Mixins.ToString(m => ".Mixin({0})".Formato(m), "\r\n")));
+                (Mixins == null ? null : ("\r\n" + Mixins.ToString(m => ".Mixin({0})".FormatWith(m), "\r\n")));
         }
 
         public Expression GetBinding(FieldInfo fi)
@@ -70,7 +70,7 @@ namespace Signum.Engine.Linq
             if (Bindings == null)
                 throw new InvalidOperationException("EntityInitiExpression not completed");
 
-            FieldBinding binding = Bindings.Where(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo)).SingleEx(() => "field '{0}' in {1} (field Ignored?)".Formato(fi.Name, this.Type.TypeName()));
+            FieldBinding binding = Bindings.Where(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo)).SingleEx(() => "field '{0}' in {1} (field Ignored?)".FormatWith(fi.Name, this.Type.TypeName()));
             
             return binding.Binding;
         }
@@ -113,7 +113,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            string constructor = "new {0}".Formato(Type.TypeName());
+            string constructor = "new {0}".FormatWith(Type.TypeName());
 
             string bindings = Bindings.Try(b => b.ToString(",\r\n ")) ?? "";
 
@@ -156,7 +156,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            string constructor = "new {0}".Formato(Type.TypeName());
+            string constructor = "new {0}".FormatWith(Type.TypeName());
 
             string bindings = Bindings.Try(b => b.ToString(",\r\n ")) ?? "";
 
@@ -185,7 +185,7 @@ namespace Signum.Engine.Linq
                 ft = ft.Nullify();
 
             if (!ft.IsAssignableFrom(binding.Type))
-                throw new ArgumentException("Type of expression is {0} but type of field is {1}".Formato(binding.Type.TypeName(), fieldInfo.FieldType.TypeName()));
+                throw new ArgumentException("Type of expression is {0} but type of field is {1}".FormatWith(binding.Type.TypeName(), fieldInfo.FieldType.TypeName()));
             
             this.FieldInfo = fieldInfo;
             this.Binding = binding;
@@ -193,7 +193,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "{0} = {1}".Formato(FieldInfo.Name, Binding.ToString());
+            return "{0} = {1}".FormatWith(FieldInfo.Name, Binding.ToString());
         }
     }
 
@@ -212,8 +212,8 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "ImplementedBy({0}){{\r\n{1}\r\n}}".Formato(Strategy,
-                Implementations.ToString(kvp => "{0} ->  {1}".Formato(kvp.Key.TypeName(), kvp.Value.ToString()), "\r\n").Indent(4)
+            return "ImplementedBy({0}){{\r\n{1}\r\n}}".FormatWith(Strategy,
+                Implementations.ToString(kvp => "{0} ->  {1}".FormatWith(kvp.Key.TypeName(), kvp.Value.ToString()), "\r\n").Indent(4)
                 );
         }
 
@@ -246,7 +246,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "ImplementedByAll{{ ID = {0}, Type = {1} }}".Formato(Id, TypeId);
+            return "ImplementedByAll{{ ID = {0}, Type = {1} }}".FormatWith(Id, TypeId);
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -266,7 +266,7 @@ namespace Signum.Engine.Linq
             Type cleanType = Lite.Extract(type);
 
             if (cleanType != reference.Type)
-                throw new ArgumentException("The type {0} is not the Lite version of {1}".Formato(type.TypeName(), reference.Type.TypeName()));
+                throw new ArgumentException("The type {0} is not the Lite version of {1}".FormatWith(type.TypeName(), reference.Type.TypeName()));
 
             this.Reference = reference;
 
@@ -275,7 +275,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "({0}).ToLite({1})".Formato(Reference.ToString(), CustomToStr == null ? null : ("customToStr: " + CustomToStr.ToString()));
+            return "({0}).ToLite({1})".FormatWith(Reference.ToString(), CustomToStr == null ? null : ("customToStr: " + CustomToStr.ToString()));
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -307,7 +307,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "new Lite<{0}>({1},{2},{3})".Formato(Type.CleanType().TypeName(), TypeId.ToString(), Id.ToString(), ToStr.ToString());
+            return "new Lite<{0}>({1},{2},{3})".FormatWith(Type.CleanType().TypeName(), TypeId.ToString(), Id.ToString(), ToStr.ToString());
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -336,7 +336,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "TypeFie({0};{1})".Formato(TypeValue.TypeName(), ExternalId.ToString());
+            return "TypeFie({0};{1})".FormatWith(TypeValue.TypeName(), ExternalId.ToString());
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -360,7 +360,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "TypeIb({0})".Formato(TypeImplementations.ToString(kvp => "{0}({1})".Formato(kvp.Key.TypeName(), kvp.Value.ToString()), " | "));
+            return "TypeIb({0})".FormatWith(TypeImplementations.ToString(kvp => "{0}({1})".FormatWith(kvp.Key.TypeName(), kvp.Value.ToString()), " | "));
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -384,7 +384,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "TypeIba({0})".Formato(TypeColumn.ToString());
+            return "TypeIba({0})".FormatWith(TypeColumn.ToString());
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -407,7 +407,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "new MList({0},{1})".Formato(TableMList.Name, BackID);
+            return "new MList({0},{1})".FormatWith(TableMList.Name, BackID);
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -431,7 +431,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "new MList({0})".Formato(Projection.ToString());
+            return "new MList({0})".FormatWith(Projection.ToString());
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -461,7 +461,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "MListElement({0})\r\n{{\r\nParent={1},\r\nOrder={2},\r\nElement={3}}})".Formato(
+            return "MListElement({0})\r\n{{\r\nParent={1},\r\nOrder={2},\r\nElement={3}}})".FormatWith(
                 RowId.ToString(), 
                 Parent.ToString(), 
                 Order == null ? Order.ToString() : null, 

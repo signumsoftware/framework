@@ -9,13 +9,13 @@ namespace Signum.Utilities
     {
         public static T GetArg<T>(this IEnumerable<object> args)
         {
-            return args.OfTypeOrEmpty<T>().SingleEx(() => "{0} in the argument list".Formato(typeof(T))); ;
+            return args.OfTypeOrEmpty<T>().SingleEx(() => "{0} in the argument list".FormatWith(typeof(T))); ;
         }
 
         public static T TryGetArgC<T>(this IEnumerable<object> args) where T : class
         {
             return args.OfTypeOrEmpty<T>().SingleOrDefaultEx(
-                () => "There are more than one {0} in the argument list".Formato(typeof(T)));
+                () => "There are more than one {0} in the argument list".FormatWith(typeof(T)));
         }
 
         public static T? TryGetArgS<T>(this IEnumerable<object> args) where T : struct
@@ -25,7 +25,7 @@ namespace Signum.Utilities
             if (casted.IsEmpty())
                 return null;
 
-            return casted.SingleEx(() => "{0} in the argument list".Formato(typeof(T)));
+            return casted.SingleEx(() => "{0} in the argument list".FormatWith(typeof(T)));
         }
 
         static IEnumerable<T> OfTypeOrEmpty<T>(this IEnumerable<object> args)

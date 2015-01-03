@@ -46,7 +46,7 @@ namespace Signum.Entities
             PropertyInfo pi = this.GetType().GetProperty(automaticPropertyName, flags) ?? this.GetType().GetInterfaces().Select(i => i.GetProperty(automaticPropertyName, flags)).NotNull().FirstOrDefault();
 
             if (pi == null)
-                throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".Formato(automaticPropertyName, this.GetType().TypeName()));
+                throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".FormatWith(automaticPropertyName, this.GetType().TypeName()));
 
             if (value is IMListPrivate && !((IMListPrivate)value).IsNew && !object.ReferenceEquals(value, field))
                 throw new InvalidOperationException("Only MList<T> with IsNew = true can be assigned to an entity");
@@ -257,20 +257,18 @@ namespace Signum.Entities
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        static long temporalIdCounter = 0;
-
+        
         #region Temporal ID
         [Ignore]
-        internal int temporalId;
+        internal Guid temporalId = Guid.NewGuid();
 
         internal ModifiableEntity()
         {
-            temporalId = unchecked((int)Interlocked.Increment(ref temporalIdCounter));
         }
 
         public override int GetHashCode()
         {
-            return GetType().FullName.GetHashCode() ^ temporalId;
+            return GetType().FullName.GetHashCode() ^ temporalId.GetHashCode();
         }
         #endregion
 

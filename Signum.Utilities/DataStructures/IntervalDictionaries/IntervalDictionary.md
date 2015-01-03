@@ -1,4 +1,4 @@
-# IntervalDictionary
+﻿# IntervalDictionary
 
 `IntervalDictionary` allows you to create a dictionary that has `Intervals` as keys instead of values. Internally, an IntervalDictionary is implemented with a `SortedList` of intervals, but only some methods are provided to keep the consistency.
 
@@ -65,7 +65,7 @@ var interval = new IntervalDictionary<decimal, string>
 };
 
 new decimal[]{0,0.5m,1,2,3,4,5,7,9,11.5m,15,20,30,45,65,70,80,90}
-.ToConsole(a => "When I was a {0} years old {1}...".Formato(a, interval[a]));
+.ToConsole(a => "When I was a {0} years old {1}...".FormatWith(a, interval[a]));
 
 //Writes:
 //When I was a 0 years old baby...

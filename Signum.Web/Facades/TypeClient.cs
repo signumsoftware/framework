@@ -24,14 +24,14 @@ namespace Signum.Web
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<TypeDN>() { PartialViewName = e => NavigationManager.ViewPrefix.Formato("TypeView") });
+                Navigator.AddSetting(new EntitySettings<TypeEntity>() { PartialViewName = e => NavigationManager.ViewPrefix.FormatWith("TypeView") });
             }
         }
 
-        public static IEnumerable<TypeDN> ViewableServerTypes()
+        public static IEnumerable<TypeEntity> ViewableServerTypes()
         {
             return from t in Navigator.Manager.EntitySettings.Keys
-                   let tdn = TypeLogic.TypeToDN.TryGetC(t)
+                   let tdn = TypeLogic.TypeToEntity.TryGetC(t)
                    where tdn != null && Navigator.IsViewable(t, null)
                    select tdn;
         }

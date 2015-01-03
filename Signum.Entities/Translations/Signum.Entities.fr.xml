@@ -3,7 +3,7 @@
   <Type Name="">
     <Member Name="0IsNotAValidIdentifier" Description="'{0}' n'est pas un identifiant valide" />
   </Type>
-  <Type Name="AlertDN" Description="Alerte">
+  <Type Name="AlertEntity" Description="Alerte">
     <Member Name="AlertDate" Description="Date d'alerte" />
     <Member Name="CheckDate" Description="Date vérification" />
     <Member Name="Entity" Description="Entité" />
@@ -23,7 +23,7 @@
   </Type>
   <Type Name="CannotInsertDuplicatedFields0On1Table" Description="Ne peut pas insérer valeurs dupliquées sur le champ {0} de la table {1}" />
   <Type Name="Checked" Description="Vérifié" />
-  <Type Name="ColorDN" Description="Couleur">
+  <Type Name="ColorEntity" Description="Couleur">
     <Member Name="Hex" Description="Hex" />
   </Type>
   <Type Name="ComparisonType">
@@ -123,7 +123,7 @@
     <Member Name="ViewForType0IsNotAllowed" Description="Affichage pour le type {0} n'est pas autorisé" />
   </Type>
   <Type Name="NotAuthorizedToRetrieve01" Description="Pas autorisé à récupérer {0} {1}" />
-  <Type Name="NoteDN" Description="Note">
+  <Type Name="NoteEntity" Description="Note">
     <Member Name="Target" Description="Cible" />
     <Member Name="Text" Description="Texte" />
   </Type>
@@ -186,7 +186,7 @@
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- DÉBUT DE SCRIPT DE SYNCHRONISATION GÉNÉRÉ SUR {0}" />
   </Type>
   <Type Name="Token0NotCompatibleWith1" Description="saisie {0} n'est pas compatible {1}" />
-  <Type Name="TypeDN" Description="Type">
+  <Type Name="TypeEntity" Description="Type">
     <Member Name="ClassName" Description="Class Name" />
     <Member Name="CleanName" Description="Clean Name" />
     <Member Name="FriendlyName" Description="Friendly Name" />

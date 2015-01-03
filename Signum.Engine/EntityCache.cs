@@ -35,7 +35,7 @@ namespace Signum.Engine
                 else if (ident != ie)
                 {
                     //Odd but allowed
-                    //throw new InvalidOperationException("There's a different instance of the same entity with Type '{0}' and Id '{1}'".Formato(ie.GetType().Name, ie.id));
+                    //throw new InvalidOperationException("There's a different instance of the same entity with Type '{0}' and Id '{1}'".FormatWith(ie.GetType().Name, ie.id));
                 }
             }
 
@@ -257,7 +257,7 @@ namespace Signum.Engine
 
         public override string ToString()
         {
-            return "[{0},{1}]".Formato(this.Type.Name, this.Id);
+            return "[{0},{1}]".FormatWith(this.Type.Name, this.Id);
         }
 
         public bool Equals(IdentityTuple other)

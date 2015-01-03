@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +31,7 @@ namespace Signum.Windows.Operations
             {
                 Manager = operationManager;
 
-                Navigator.AddSetting(new EntitySettings<OperationLogDN>() { View = e => new OperationLog() });
+                Navigator.AddSetting(new EntitySettings<OperationLogEntity>() { View = e => new OperationLog() });
 
                 Navigator.Manager.GetButtonBarElementGlobal += Manager.ButtonBar_GetButtonBarElement;
                 Navigator.Manager.IsCreable += Manager_IsCreable;
@@ -43,8 +43,8 @@ namespace Signum.Windows.Operations
 
                 LinksClient.RegisterEntityLinks<Entity>((entity, control) => new[]
                 { 
-                    entity.GetType() == typeof(OperationLogDN) ? null : 
-                        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
+                    entity.GetType() == typeof(OperationLogEntity) ? null : 
+                        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogEntity), "Target", entity)
                         {
                             OrderOptions = { new OrderOption("Start") }
                         }){ IsShy = true}
@@ -146,7 +146,7 @@ namespace Signum.Windows.Operations
                 var result = settings as OS;
 
                 if (result == null)
-                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), operation.Key, typeof(OS).TypeName()));
+                    throw new InvalidOperationException("{0}({1}) should be a {2}".FormatWith(settings.GetType().TypeName(), operation.Key, typeof(OS).TypeName()));
 
                 return result;
             }

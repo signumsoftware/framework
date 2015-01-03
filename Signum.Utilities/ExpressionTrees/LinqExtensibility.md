@@ -1,4 +1,4 @@
-
+﻿
 # LINQ Extensibility
 
 Signum.Utilities contains a model to allow you expand **LINQ to Signum** provider, or any other `IQueryable` provider like **Linq to SQL** or **LINQ to Entities**. This way you can teach the Linq Provider to translate your own methods or properties to -presumably- SQL. 
@@ -15,7 +15,7 @@ Many of the ideas and code of this extensibility model are integrated in Signum 
 Imagine you have an entity like this
 
 ```C#
-public class PersonDN
+public class PersonEntity
 {
     string county;
     public string Country
@@ -32,7 +32,7 @@ public class PersonDN
 
 
 (...)
-Database.Query<PersonDN>().Where(p=>p.IsAmerican)...; 
+Database.Query<PersonEntity>().Where(p=>p.IsAmerican)...; 
 ```
 
 In this case, our Linq provider could use Country property (because is able to find country field), but the implementation of IsAmerican is **completely opaque for the provider** and if you use it in a DB query will complaint about it. 
@@ -40,7 +40,7 @@ In this case, our Linq provider could use Country property (because is able to f
 In order to enable this property on queries you need to indicate the equivalent expression tree. You can easily do that like this: 
 
 ```C#
-public class PersonDN
+public class PersonEntity
 {
     string country;
     public string Country
@@ -49,7 +49,7 @@ public class PersonDN
        set { ... }
     }
 
-    static Expression<Func<PersonDN,bool>> IsAmericanExpression = p=>p.Country == "USA"; 
+    static Expression<Func<PersonEntity,bool>> IsAmericanExpression = p=>p.Country == "USA"; 
     public bool IsAmerican
     { 
        get { return IsAmericanExpression.Evaluate(this); }        
@@ -60,11 +60,11 @@ public class PersonDN
 Just by providing a static field with the same name of the member with `Expression` at the end, the expansion system will replace the query at runtime by something like this: 
 
 ```C#
-Database.Query<PersonDN>().Where(p=>p.Country == "USA")...; 
+Database.Query<PersonEntity>().Where(p=>p.Country == "USA")...; 
 ```
 
 Some important things to mention: 
-* Since the `IsAmerican` property is an instance property, we have to pass a `PersonDN` as the first argument of our expression. If the property would be `static` you could save the `PersonDN` parameter. 
+* Since the `IsAmerican` property is an instance property, we have to pass a `PersonEntity` as the first argument of our expression. If the property would be `static` you could save the `PersonEntity` parameter. 
 * Is a good practice to keep the `static` expression `private`, so it won't clutter your IntelliSense. 
 * As you see, we have also changed the implementation, and we are calling Evaluate... over an expression tree!!. When evaluated in memory, ExpresionExtensions.Evaluate extension method compiles, caches, and evaluates the expression. By doing this you don't need to replicate the definition of 'IsAmerican' twice, one in the member definition (IL) and other in the static expression.    
 
@@ -73,7 +73,7 @@ This also works for static / instance methods. Let's see an example, making IsAm
 ```C#
 public static class PersonLogic
 {
-   public static bool IsAmerican(this PersonDN person)
+   public static bool IsAmerican(this PersonEntity person)
    {
        return person.Country == "USA";
    }
@@ -85,15 +85,15 @@ Could be replaced by
 ```C#
 public static class PersonLogic
 {
-   static Expression<Func<PersonDN,bool>> IsAmericanExpression = p => p.Country == "USA"; 
-   public static bool IsAmerican(this PersonDN person)
+   static Expression<Func<PersonEntity,bool>> IsAmericanExpression = p => p.Country == "USA"; 
+   public static bool IsAmerican(this PersonEntity person)
    {
        return IsAmericanExpression.Invoke(person);
    }
 }
 ```
 
-Now it's an static extension method, so no need to pass `PersonLogic` as the first parameter. On the other side, you need to create the expression with the same number of parameters (out and ref not supported). In this case, the first parameter is a `PersonDN`, coincidentally the expression is just the same that in the first example. 
+Now it's an static extension method, so no need to pass `PersonLogic` as the first parameter. On the other side, you need to create the expression with the same number of parameters (out and ref not supported). In this case, the first parameter is a `PersonEntity`, coincidentally the expression is just the same that in the first example. 
 
 **This technique is the simplest and the preferred one when the expression will be the same for any set of parameters.**
   
@@ -108,7 +108,7 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
 {
    (...)
    dqm.RegisterQuery(PeopleQueries.NotMarried, ()=>
-     from p in Database.Query<PersonDN>()
+     from p in Database.Query<PersonEntity>()
      where p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced
      select new 
      {
@@ -119,7 +119,7 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
      });
 
     dqm.RegisterQuery(PeopleQueries.NotMarriedAlive, ()=>
-     from p in Database.Query<PersonDN>()
+     from p in Database.Query<PersonEntity>()
      where (p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced) && p.Alive
      select new 
      {
@@ -138,10 +138,10 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
 {
    (...)
 
-   Expression<Func<PersonDN,bool>> notMarried = p => p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced;
+   Expression<Func<PersonEntity,bool>> notMarried = p => p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced;
 
     dqm.RegisterQuery(PeopleQueries.NotMarried, ()=>
-       from p in Database.Query<PersonDN>()
+       from p in Database.Query<PersonEntity>()
        where notMarried.Evaluate(p) 
        select new 
        {
@@ -152,7 +152,7 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
        });
 
     dqm.RegisterQuery(PeopleQueries.NotMarriedAlive, ()=>
-        from p in Database.Query<PersonDN>()
+        from p in Database.Query<PersonEntity>()
         where notMarried.Evaluate(p)  && p.Alive
         select new 
         {
@@ -169,7 +169,7 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
 In order to factor out the select expression we will need to do something like that: 
 
 ```C#
-Expression<Func<PersonDN, ¿?>> selector = p=> new 
+Expression<Func<PersonEntity, ¿?>> selector = p=> new 
      {
          Entity = p.ToLite(),
          p.Id,
@@ -183,7 +183,7 @@ We need to tell the compiler about the `Expression` so it can create an expressi
 Unfortunately, there's no way we can write an anonymous type... neither it's possible to partially infer a type in C# like this: 
   
 ```C#
-Expression<Func<PersonDN, var>> selector = (...)
+Expression<Func<PersonEntity, var>> selector = (...)
 ```
 
 > **Note:** Maybe if they whould have [choose 'auto' instead of 'var' as the keyword](http://stackoverflow.com/questions/1263527/better-word-for-inferring-variables-other-than-var-c/1263553#1263553) we could see this in some future versions, but with 'var'... I don't see this happening.
@@ -217,8 +217,8 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
 {
    (...)
 
-   Expression<Func<PersonDN,bool>> notMarried = p => p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced;
-   var selector = Linq.Expr((PersonDN p)=>new 
+   Expression<Func<PersonEntity,bool>> notMarried = p => p.State == MaritalStatus.Single || p.State == MaritalStatus.Divorced;
+   var selector = Linq.Expr((PersonEntity p)=>new 
      {
          Entity = p.ToLite(),
          p.Id,
@@ -227,12 +227,12 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
      });
  
    dqm[PeopleQueries.NotMarried] = 
-     from p in Database.Query<PersonDN>()
+     from p in Database.Query<PersonEntity>()
      where notMarried.Evaluate(p)
      select selector.Evaluate(p)
 
     dqm[PeopleQueries.NotMarriedAlive] = 
-     from p in Database.Query<PersonDN>()
+     from p in Database.Query<PersonEntity>()
      where notMarried.Evaluate(p) && p.Alive
      select selector.Evaluate(p)
 }
@@ -242,12 +242,12 @@ public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
 
 ```C#
 dqm.RegisterQuery(PeopleQueries.NotMarried, ()=>
-    Database.Query<PersonDN>() 
+    Database.Query<PersonEntity>() 
     .Where(notMarried)
     .Select(selector);
 
 dqm.RegisterQuery(PeopleQueries.NotMarriedAlive, ()=>
-    Database.Query<PersonDN>()
+    Database.Query<PersonEntity>()
     .Where(p=>notMarried.Evaluate(p) && p.Alive) //Here Evaluate is really necessary
     .Select(selector);
 ```

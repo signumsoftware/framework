@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +21,7 @@ namespace Signum.Entities.DynamicQuery
 
             return
                 queryName is Type ? ((Type)queryName).FullName :
-                queryName is Enum ? "{0}.{1}".Formato(queryName.GetType().Name, queryName.ToString()) :
+                queryName is Enum ? "{0}.{1}".FormatWith(queryName.GetType().Name, queryName.ToString()) :
                 queryName.ToString();
         }
 
@@ -54,7 +54,7 @@ namespace Signum.Entities.DynamicQuery
             FilterType? filterType = TryGetFilterType(type);
 
             if(filterType == null)
-                throw new NotSupportedException("Type {0} not supported".Formato(type));
+                throw new NotSupportedException("Type {0} not supported".FormatWith(type));
 
             return filterType.Value;
         }
@@ -322,14 +322,14 @@ namespace Signum.Entities.DynamicQuery
             QueryToken result = SubToken(null, qd, options, firstPart);
 
             if (result == null)
-                throw new FormatException("Column {0} not found on query {1}".Formato(firstPart, QueryUtils.GetCleanName(qd.QueryName)));
+                throw new FormatException("Column {0} not found on query {1}".FormatWith(firstPart, QueryUtils.GetCleanName(qd.QueryName)));
 
             foreach (var part in parts.Skip(1))
             {
                 var newResult = SubToken(result, qd, options, part);
 
                 if (newResult == null)
-                    throw new FormatException("Token with key '{0}' not found on {1} of query {2}".Formato(part, result.FullKey(), QueryUtils.GetCleanName(qd.QueryName)));
+                    throw new FormatException("Token with key '{0}' not found on {1} of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetCleanName(qd.QueryName)));
 
                 result = newResult;
             }
@@ -357,7 +357,7 @@ namespace Signum.Entities.DynamicQuery
                 return "You can not add collections as columns";
 
             if (token.HasAllOrAny())
-                return "Columns can not contain '{0}', '{1}', {2} or {3}".Formato(
+                return "Columns can not contain '{0}', '{1}', {2} or {3}".FormatWith(
                     CollectionElementType.All.NiceToString(), 
                     CollectionElementType.Any.NiceToString(),
                     CollectionElementType.NoOne.NiceToString(),
@@ -372,10 +372,10 @@ namespace Signum.Entities.DynamicQuery
                 return "No column selected"; 
 
             if (token.Type.IsEmbeddedEntity())
-                return "{0} can not be ordered".Formato(token.Type.NicePluralName());
+                return "{0} can not be ordered".FormatWith(token.Type.NicePluralName());
 
             if (token.HasAllOrAny())
-                return "Columns can not contain '{0}', '{1}', {2} or {3}".Formato(
+                return "Columns can not contain '{0}', '{1}', {2} or {3}".FormatWith(
                     CollectionElementType.All.NiceToString(),
                     CollectionElementType.Any.NiceToString(),
                     CollectionElementType.NoOne.NiceToString(),
@@ -494,7 +494,7 @@ namespace Signum.Entities.DynamicQuery
                 case FilterOperation.NotEndsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miEndsWith, right));
                 case FilterOperation.NotLike: return Expression.Not(Expression.Call(miLike, Fix(left, inMemory), right));
                 default:
-                    throw new InvalidOperationException("Unknown operation {0}".Formato(operation));
+                    throw new InvalidOperationException("Unknown operation {0}".FormatWith(operation));
             }
         }
 

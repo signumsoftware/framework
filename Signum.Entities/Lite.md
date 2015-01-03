@@ -1,4 +1,4 @@
-# Lite\<T>
+﻿# Lite\<T>
 
 Every Persistence Framework has to deal with laziness in some way. Linq to SQL and Entity Framework, for example, follow a run-time laziness approach, meaning that you can define at run-time if a relationship is lazy or not.
 
@@ -11,8 +11,8 @@ This is mandatory because Signum Entities are meant to be easy `Serializable`, s
 Given that lites are an important decision when designing your entities, hiding it in the property getter/setter is not a good idea because you will make your entities dependent on the engine. 
 
 ```C#
- Lite<PersonDN> person;
- public PersonDN Person
+ Lite<PersonEntity> person;
+ public PersonEntity Person
  {
     get { return person.Retrieve(); }  //Don't do this!!
     set { Set(ref person, value.ToLite()); } //Don't do this!!
@@ -62,7 +62,7 @@ Internally, a `Lite<T>` basically contains:
 * The `ToString` of the referred entity.
 
 This means that `Lite<T>` are a perfect identity card for entities and much better than passing `Ids` around becaus: 
-* They are strongly typed (so no risk of confusing an `Id` of `OrderDN` with an `Id` of `OrderLineDN`)
+* They are strongly typed (so no risk of confusing an `Id` of `OrderEntity` with an `Id` of `OrderLineEntity`)
 * They carry a cached `ToString` of the entity, simplifying debugging and allowing them to be shown in the user interface in ComboBoxes, AutoCompletes, or Search Control columns. 
 * They are more convinient to use using `ToLite` and `Retrieve` extension methods. 
 
@@ -86,25 +86,25 @@ If you paid attention to the `Lite<T>` definition above you'll realize that.... 
 Thanks to lite covariance you can do this: 
 
 ```C#
-//Returns a GiraffeDN, but can be assigned to AnimalDN variable
-AnimalDN animal = Database.Retrieve<GiraffeDN>(3); 
+//Returns a GiraffeEntity, but can be assigned to AnimalEntity variable
+AnimalEntity animal = Database.Retrieve<GiraffeEntity>(3); 
 
 
-//Returns a Lite<GiraffeDN>, but can be assigned to Lite<AnimalDN> variable
-Lite<AnimalDN> animalLite = Database.RetrieveLite<GiraffeDN>(3);
+//Returns a Lite<GiraffeEntity>, but can be assigned to Lite<AnimalEntity> variable
+Lite<AnimalEntity> animalLite = Database.RetrieveLite<GiraffeEntity>(3);
 ```
 
 Also you can test the object as you expected
 
 ```C#
-animalLite is Lite<GiraffeDN>
-animalLite.EntityType == typeof(GiraffeDN)
+animalLite is Lite<GiraffeEntity>
+animalLite.EntityType == typeof(GiraffeEntity)
 ```
 But if you use GetType() you'll find the trick, the internal `LiteImp<T>` class
 
 ```C#
-animalLite.GetType() == typeof(Lite<GiraffeDN>) 
-//False, actually returns typeof(LiteImp<GiraffeDN>))
+animalLite.GetType() == typeof(Lite<GiraffeEntity>) 
+//False, actually returns typeof(LiteImp<GiraffeEntity>))
 ```
 
 Also, be careful when comparing lites and references because **unfortunately it compiles**. 

@@ -1,10 +1,10 @@
-# Field Attributes
+﻿# Field Attributes
 
 We should have it clear now that in Signum Framework, entities rule. The database just reflects the structure of your entities and there's not a lot of room for customization. 
 
 There are, however, some situations where you have to enrich your entities with database-related information, like **Indexes**, specifying **Scale** and **Precision** for numbers, or use **different database types**. 
 
-We use .Net Attributes over the entity **fields** to specify this information, but you can use [OverrideAttributes](../Signum.Engine/Schema/Schema.md) to override this information for entities that are not in your control. 
+We use .Net Attributes over the entity **fields** to specify this information, but you can use [FieldAttributes](../Signum.Engine/Schema/Schema.md) to override this information for entities that are not in your control. 
 
 Also note that if the attribute is set on a `MList<T>` field, it will be used by the MListTable or element column instead. 
 
@@ -106,7 +106,7 @@ Additionally, `SqlDbType` has a `Default` property to create a default constrain
 
 ```C#
 [ColumnName("DepartmentID")]
-Lite<DepartmentDN> department;
+Lite<DepartmentEntity> department;
 ```
 
 Note that when applied to a field inside an embedded entity, the name will still be concatenated to the field name of the embedded entity itself. In order to override this you'll need to manipulate the generated `Schema` object directly. 
@@ -132,7 +132,7 @@ Example:
 ```C#
 [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
 [PrimaryKey(typeof(Guid))]
-public class NoteWithDateDN : Entity
+public class NoteWithDateEntity : Entity
 {
   ...
 }

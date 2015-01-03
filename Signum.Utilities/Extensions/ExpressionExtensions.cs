@@ -42,7 +42,7 @@ namespace Signum.Utilities
 Because a similar expression has already been cached: 
 {1}
 This limitation tries to avoid running out of memory caching freshly generated expressions. 
-Use this method only with constant expressions stored in static fields.".Formato(exp.ToString(), already.ToString());
+Use this method only with constant expressions stored in static fields.".FormatWith(exp.ToString(), already.ToString());
         }
 
         /// <summary>

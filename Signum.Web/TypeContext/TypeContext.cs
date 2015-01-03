@@ -293,7 +293,7 @@ namespace Signum.Web
             if (type.IsEntity())
                 return new RuntimeInfo((Entity)this.UntypedValue);
 
-            throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, Entity or EmbeddedEntity".Formato(type));
+            throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, Entity or EmbeddedEntity".FormatWith(type));
         }
 
         internal abstract TypeContext Clone(object newValue);
@@ -301,7 +301,7 @@ namespace Signum.Web
         internal static void AssertId(string id)
         {
             if (!Regex.IsMatch(id, @"^[A-Za-z][A-Za-z0-9-_]*$"))
-                throw new InvalidOperationException("'{0}' is not a valid HTML id".Formato(id));
+                throw new InvalidOperationException("'{0}' is not a valid HTML id".FormatWith(id));
         }
     }
     #endregion

@@ -1,4 +1,4 @@
-# Introduction to Signum.Entities
+﻿# Introduction to Signum.Entities
 
 Signum Entities is the assembly that contains the base entities and attributes for modeling your entities. 
 
@@ -50,7 +50,7 @@ People prefer to see the utility of things from the very beginning and follow a 
 
 ```C#
 [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-public class ComputerDN : Entity
+public class ComputerEntity : Entity
 {
     [NotNullable, SqlDbType(Size = 12), UniqueIndex]
     string serialNumber;
@@ -61,21 +61,21 @@ public class ComputerDN : Entity
         set { Set(ref serialNumber, value); }
     }
 
-    ProcessorDN processor;
-    public ProcessorDN Processor
+    ProcessorEntity processor;
+    public ProcessorEntity Processor
     {
         get { return processor; }
         set { Set(ref processor, value); }
     }
 
-    Lite<ComputerBrandDN> brand;
-    public Lite<ComputerBrandDN> Brand
+    Lite<ComputerBrandEntity> brand;
+    public Lite<ComputerBrandEntity> Brand
     {
         get { return brand; }
         set { Set(ref brand, value); }
     }
 
-    [ImplementedBy(typeof(HardDiskDN), typeof(SolidStateDriveDN))]
+    [ImplementedBy(typeof(HardDiskEntity), typeof(SolidStateDriveEntity))]
     IDrive drive;
     public IDrive Drive
     {
@@ -83,8 +83,8 @@ public class ComputerDN : Entity
         set { Set(ref drive, value); }
     }
 
-    MList<MemoryModuleDN> memoryModules;
-    public MList<MemoryModuleDN> MemoryModules
+    MList<MemoryModuleEntity> memoryModules;
+    public MList<MemoryModuleEntity> MemoryModules
     {
         get { return memoryModules; }
         set { Set(ref memoryModules, value); }
@@ -97,7 +97,7 @@ public class ComputerDN : Entity
         set { Set(ref computerState, value); }
     }
 
-    static Expression<Func<ComputerDN, string>> ToStringExpression = e => e.SerialNumber;
+    static Expression<Func<ComputerEntity, string>> ToStringExpression = e => e.SerialNumber;
     public override string ToString()
     {
         return ToStringExpression.Evaluate(this);
@@ -127,9 +127,9 @@ Some things to notice:
 
 * The property `SerialNumber` has a `StringLengthValidatorAttribute` to enforce that the string is non null and between 10 and 12 characters. See more about [Validation](Valiation.md).
 
-* The `Processor` field and property have the type `ProcessorDN`. A foreign key to the `ProcessorDN`'s table will be created in the database. 
+* The `Processor` field and property have the type `ProcessorEntity`. A foreign key to the `ProcessorEntity`'s table will be created in the database. 
 
-* Since `ComputerBrandDN` is a heavy entity, the developer uses a `Lite<T>` to make the association to it. Take a look at [Lite](Lite.md).
+* Since `ComputerBrandEntity` is a heavy entity, the developer uses a `Lite<T>` to make the association to it. Take a look at [Lite](Lite.md).
 
 * There are two kinds of drives, `HardDisk` and `SolidStateDrive`, each one will have its' own table. By using `ImplementedByAttribute` you get a polymorphic foreign key. See more about this in [Inheritance](Inheritance.md). 
 
@@ -144,7 +144,7 @@ Some things to notice:
 Let's see now how this entity will be represented in the database. 
 
 ```SQL
-CREATE TABLE ComputerDN(
+CREATE TABLE ComputerEntity(
   Id INT IDENTITY NOT NULL PRIMARY KEY,
   Ticks BIGINT NOT NULL,
   SerialNumber NVARCHAR(12) NOT NULL,
@@ -155,47 +155,47 @@ CREATE TABLE ComputerDN(
   idComputerState INT NOT NULL
 )
 
-CREATE UNIQUE INDEX UIX_SerialNumber ON ComputerDN(SerialNumber)
-CREATE INDEX IX_idProcessor ON ComputerDN(idProcessor)
-CREATE INDEX IX_idBrand ON ComputerDN(idBrand)
-CREATE INDEX IX_idDrive_HardDisk ON ComputerDN(idDrive_HardDisk)
-CREATE INDEX IX_idDrive_SolidStateDrive ON ComputerDN(idDrive_SolidStateDrive)
-CREATE INDEX IX_idComputerState ON ComputerDN(idComputerState)
+CREATE UNIQUE INDEX UIX_SerialNumber ON ComputerEntity(SerialNumber)
+CREATE INDEX IX_idProcessor ON ComputerEntity(idProcessor)
+CREATE INDEX IX_idBrand ON ComputerEntity(idBrand)
+CREATE INDEX IX_idDrive_HardDisk ON ComputerEntity(idDrive_HardDisk)
+CREATE INDEX IX_idDrive_SolidStateDrive ON ComputerEntity(idDrive_SolidStateDrive)
+CREATE INDEX IX_idComputerState ON ComputerEntity(idComputerState)
 
-ALTER TABLE ComputerDN ADD CONSTRAINT FK_ComputerDN_idProcessor FOREIGN KEY (idProcessor) REFERENCES ProcessorDN(Id)
-ALTER TABLE ComputerDN ADD CONSTRAINT FK_ComputerDN_idBrand FOREIGN KEY (idBrand) REFERENCES ComputerBrandDN(Id)
-ALTER TABLE ComputerDN ADD CONSTRAINT FK_ComputerDN_idDrive_HardDisk FOREIGN KEY (idDrive_HardDisk) REFERENCES HardDiskDN(Id)
-ALTER TABLE ComputerDN ADD CONSTRAINT FK_ComputerDN_idDrive_SolidStateDrive FOREIGN KEY (idDrive_SolidStateDrive) REFERENCES SolidStateDriveDN(Id)
-ALTER TABLE ComputerDN ADD CONSTRAINT FK_ComputerDN_idComputerState FOREIGN KEY (idComputerState) REFERENCES ComputerState(Id)
+ALTER TABLE ComputerEntity ADD CONSTRAINT FK_ComputerDN_idProcessor FOREIGN KEY (idProcessor) REFERENCES ProcessorEntity(Id)
+ALTER TABLE ComputerEntity ADD CONSTRAINT FK_ComputerDN_idBrand FOREIGN KEY (idBrand) REFERENCES ComputerBrandEntity(Id)
+ALTER TABLE ComputerEntity ADD CONSTRAINT FK_ComputerDN_idDrive_HardDisk FOREIGN KEY (idDrive_HardDisk) REFERENCES HardDiskEntity(Id)
+ALTER TABLE ComputerEntity ADD CONSTRAINT FK_ComputerDN_idDrive_SolidStateDrive FOREIGN KEY (idDrive_SolidStateDrive) REFERENCES SolidStateDriveEntity(Id)
+ALTER TABLE ComputerEntity ADD CONSTRAINT FK_ComputerDN_idComputerState FOREIGN KEY (idComputerState) REFERENCES ComputerState(Id)
 
 ```
 
-As you can see, the table `ComputerDN` is quite similar to the entity itself, but there are some interesting differences:
+As you can see, the table `ComputerEntity` is quite similar to the entity itself, but there are some interesting differences:
 * As any `Entity`, it has a auto-numeric primary key with name `Id`. 
 * In this case we don't have the `ToStr` column because we used `ToStringExpression`. 
 * `Ticks` field is inherited from `Entity` to control concurrency.
 * `SerialNumber` is `NOT NULL` and has length 12, determined by the field attributes. 
-* `idProcessor` is a foreign keys to `ProcessorDN`. Is nullable because is a reference type and the framework tries to reduce type mismatch. 
-* Similarly, `idBrand` is a foreign key to `ComputerBrandDN`. `Lite<T>` has no effect at the database level.
+* `idProcessor` is a foreign keys to `ProcessorEntity`. Is nullable because is a reference type and the framework tries to reduce type mismatch. 
+* Similarly, `idBrand` is a foreign key to `ComputerBrandEntity`. `Lite<T>` has no effect at the database level.
 * The field `drive` is represented in to columns:  `idDrive_HardDisk` and `idDrive_SolidStateDrive`, following the directives of `ImplmentedByAttribute`. See more about Inheritance. 
-* There's no column to represent the `memoryModules` because is a `MList<MemoryModuleDN>`, instead a table is created: 
+* There's no column to represent the `memoryModules` because is a `MList<MemoryModuleEntity>`, instead a table is created: 
 
 ```SQL
 
 CREATE TABLE ComputerDNMemoryModule(
   Id INT IDENTITY NOT NULL PRIMARY KEY,
   idParent INT NOT NULL,
-  idMemoryModuleDN INT NULL
+  idMemoryModuleEntity INT NULL
 )
 
 CREATE INDEX IX_idParent ON ComputerDNMemoryModules(idParent)
-CREATE INDEX IX_idMemoryModuleDN ON ComputerDNMemoryModules(idMemoryModuleDN)
+CREATE INDEX IX_idMemoryModuleEntity ON ComputerDNMemoryModules(idMemoryModuleEntity)
 
-ALTER TABLE ComputerDNMemoryModules ADD CONSTRAINT FK_ComputerDNMemoryModules_idParent FOREIGN KEY (idParent) REFERENCES ComputerDN(Id)
-ALTER TABLE ComputerDNMemoryModules ADD CONSTRAINT FK_ComputerDNMemoryModules_idMemoryModuleDN FOREIGN KEY (idMemoryModuleDN) REFERENCES MemoryModuleDN(Id)
+ALTER TABLE ComputerDNMemoryModules ADD CONSTRAINT FK_ComputerDNMemoryModules_idParent FOREIGN KEY (idParent) REFERENCES ComputerEntity(Id)
+ALTER TABLE ComputerDNMemoryModules ADD CONSTRAINT FK_ComputerDNMemoryModules_idMemoryModuleEntity FOREIGN KEY (idMemoryModuleEntity) REFERENCES MemoryModuleEntity(Id)
 
 ```
-Notice how this table contains an auto-numeric primary key `Id`, a `idParent` referencing the computer, and a reference to `MemoryModuleDN` table because `MemoryModuleDN` inherits from `Entity`. 
+Notice how this table contains an auto-numeric primary key `Id`, a `idParent` referencing the computer, and a reference to `MemoryModuleEntity` table because `MemoryModuleEntity` inherits from `Entity`. 
 
 * Finally, look how `computerState` is also a foreign key, but is `NOT NULL` because enums are value types. The framework even creates the table and inserts the enum values, keeping the Ids in sync with the enum numeric values. 
 

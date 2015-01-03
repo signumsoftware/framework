@@ -13,7 +13,7 @@ using Signum.Engine.Maps;
 namespace Signum.Test.Environment
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin)), PrimaryKey(typeof(Guid))]
-    public class NoteWithDateDN : Entity
+    public class NoteWithDateEntity : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
         string text;
@@ -49,7 +49,7 @@ namespace Signum.Test.Environment
 
         public override string ToString()
         {
-            return "{0} -> {1}".Formato(creationTime, text);
+            return "{0} -> {1}".FormatWith(creationTime, text);
         }
     }
 
@@ -59,9 +59,9 @@ namespace Signum.Test.Environment
         ColaboratorsMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         [NotNullable]
-        MList<ArtistDN> colaborators = new MList<ArtistDN>();
+        MList<ArtistEntity> colaborators = new MList<ArtistEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<ArtistDN> Colaborators
+        public MList<ArtistEntity> Colaborators
         {
             get { return colaborators; }
             set { Set(ref colaborators, value); }
@@ -70,15 +70,15 @@ namespace Signum.Test.Environment
 
     public static class NoteWithDateOperation
     {
-        public static readonly ExecuteSymbol<NoteWithDateDN> Save = OperationSymbol.Execute<NoteWithDateDN>();
+        public static readonly ExecuteSymbol<NoteWithDateEntity> Save = OperationSymbol.Execute<NoteWithDateEntity>();
     }
 
     [DescriptionOptions(DescriptionOptions.All)]
-    public interface IAuthorDN : IEntity
+    public interface IAuthorEntity : IEntity
     {
         string Name { get; }
 
-        AwardDN LastAward { get; }
+        AwardEntity LastAward { get; }
 
         string FullName { get; }
 
@@ -86,7 +86,7 @@ namespace Signum.Test.Environment
     }
 
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
-    public class ArtistDN : Entity, IAuthorDN
+    public class ArtistEntity : Entity, IAuthorEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
         string name;
@@ -119,21 +119,21 @@ namespace Signum.Test.Environment
         }
 
 
-        static Expression<Func<ArtistDN, bool>> IsMaleExpression = a => a.Sex == Sex.Male;
+        static Expression<Func<ArtistEntity, bool>> IsMaleExpression = a => a.Sex == Sex.Male;
         public bool IsMale
         {
             get { return Sex == Sex.Male; }
         }
 
         [ImplementedByAll]
-        AwardDN lastAward;
-        public AwardDN LastAward
+        AwardEntity lastAward;
+        public AwardEntity LastAward
         {
             get { return lastAward; }
             set { Set(ref lastAward, value); }
         }
 
-        static Expression<Func<ArtistDN, IEnumerable<Lite<Entity>>>> FriendsCovariantExpression =
+        static Expression<Func<ArtistEntity, IEnumerable<Lite<Entity>>>> FriendsCovariantExpression =
             a => a.Friends;
         public IEnumerable<Lite<Entity>> FriendsCovariant()
         {
@@ -141,28 +141,28 @@ namespace Signum.Test.Environment
         }
 
         //[NotNullable] Do not add Nullable for testing purposes
-        MList<Lite<ArtistDN>> friends = new MList<Lite<ArtistDN>>();
-        public MList<Lite<ArtistDN>> Friends
+        MList<Lite<ArtistEntity>> friends = new MList<Lite<ArtistEntity>>();
+        public MList<Lite<ArtistEntity>> Friends
         {
             get { return friends; }
             set { Set(ref friends, value); }
         }
 
-        static Expression<Func<ArtistDN, string>> FullNameExpression =
+        static Expression<Func<ArtistEntity, string>> FullNameExpression =
              a => a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female");
         public string FullName
         {
             get { return FullNameExpression.Evaluate(this); }
         }
 
-        static Expression<Func<ArtistDN, bool>> LonelyExpression =
+        static Expression<Func<ArtistEntity, bool>> LonelyExpression =
             a => !a.Friends.Any();
         public bool Lonely()
         {
             return LonelyExpression.Evaluate(this);
         }
 
-        static Expression<Func<ArtistDN, string>> ToStringExpression = a => a.name;
+        static Expression<Func<ArtistEntity, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -171,8 +171,8 @@ namespace Signum.Test.Environment
 
     public static class ArtistOperation
     {
-        public static readonly ExecuteSymbol<ArtistDN> Save = OperationSymbol.Execute<ArtistDN>();
-        public static readonly ExecuteSymbol<ArtistDN> AssignPersonalAward = OperationSymbol.Execute<ArtistDN>();
+        public static readonly ExecuteSymbol<ArtistEntity> Save = OperationSymbol.Execute<ArtistEntity>();
+        public static readonly ExecuteSymbol<ArtistEntity> AssignPersonalAward = OperationSymbol.Execute<ArtistEntity>();
     }
 
     [Flags]
@@ -189,7 +189,7 @@ namespace Signum.Test.Environment
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class BandDN : Entity, IAuthorDN
+    public class BandEntity : Entity, IAuthorEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -201,44 +201,44 @@ namespace Signum.Test.Environment
         }
 
         [NotNullable]
-        MList<ArtistDN> members = new MList<ArtistDN>();
-        public MList<ArtistDN> Members
+        MList<ArtistEntity> members = new MList<ArtistEntity>();
+        public MList<ArtistEntity> Members
         {
             get { return members; }
             set { Set(ref members, value); }
         }
 
-        [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
-        AwardDN lastAward;
-        public AwardDN LastAward
+        [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]
+        AwardEntity lastAward;
+        public AwardEntity LastAward
         {
             get { return lastAward; }
             set { Set(ref lastAward, value); }
         }
 
-        [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN)), NotNullable]
-        MList<AwardDN> otherAwards = new MList<AwardDN>();
-        public MList<AwardDN> OtherAwards
+        [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity)), NotNullable]
+        MList<AwardEntity> otherAwards = new MList<AwardEntity>();
+        public MList<AwardEntity> OtherAwards
         {
             get { return otherAwards; }
             set { Set(ref otherAwards, value); }
         }
 
-        static Expression<Func<BandDN, string>> FullNameExpression =
+        static Expression<Func<BandEntity, string>> FullNameExpression =
             b => b.Name + " (" + b.Members.Count + " members)";
         public string FullName
         {
             get { return FullNameExpression.Evaluate(this); }
         }
 
-        static Expression<Func<BandDN, bool>> LonelyExpression =
+        static Expression<Func<BandEntity, bool>> LonelyExpression =
             b => !b.Members.Any();
         public bool Lonely()
         {
             return LonelyExpression.Evaluate(this);
         }
 
-        static Expression<Func<BandDN, string>> ToStringExpression = a => a.name;
+        static Expression<Func<BandEntity, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -247,11 +247,11 @@ namespace Signum.Test.Environment
 
     public static class BandOperation
     {
-        public static readonly ExecuteSymbol<BandDN> Save = OperationSymbol.Execute<BandDN>();
+        public static readonly ExecuteSymbol<BandEntity> Save = OperationSymbol.Execute<BandEntity>();
     }
 
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), PrimaryKey(typeof(long))]
-    public abstract class AwardDN : Entity
+    public abstract class AwardEntity : Entity
     {
         int year;
         public int Year
@@ -279,7 +279,7 @@ namespace Signum.Test.Environment
 
     public static class AwardOperation
     {
-        public static readonly ExecuteSymbol<AwardDN> Save = OperationSymbol.Execute<AwardDN>();
+        public static readonly ExecuteSymbol<AwardEntity> Save = OperationSymbol.Execute<AwardEntity>();
     }
 
     public enum AwardResult
@@ -289,23 +289,23 @@ namespace Signum.Test.Environment
     }
 
     [Serializable]
-    public class GrammyAwardDN : AwardDN
+    public class GrammyAwardEntity : AwardEntity
     {
     }
 
     [Serializable]
-    public class AmericanMusicAwardDN : AwardDN
+    public class AmericanMusicAwardEntity : AwardEntity
     {
     }
 
     [Serializable]
-    public class PersonalAwardDN : AwardDN
+    public class PersonalAwardEntity : AwardEntity
     {
     }
 
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class LabelDN : Entity
+    public class LabelEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -316,15 +316,15 @@ namespace Signum.Test.Environment
             set { SetToStr(ref name, value); }
         }
 
-        CountryDN country;
-        public CountryDN Country
+        CountryEntity country;
+        public CountryEntity Country
         {
             get { return country; }
             set { Set(ref country, value); }
         }
 
-        Lite<LabelDN> owner;
-        public Lite<LabelDN> Owner
+        Lite<LabelEntity> owner;
+        public Lite<LabelEntity> Owner
         {
             get { return owner; }
             set { Set(ref owner, value); }
@@ -338,7 +338,7 @@ namespace Signum.Test.Environment
             set { Set(ref node, value); }
         }
 
-        static Expression<Func<LabelDN, string>> ToStringExpression = a => a.name;
+        static Expression<Func<LabelEntity, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -347,11 +347,11 @@ namespace Signum.Test.Environment
 
     public static class LabelOperation
     {
-        public static readonly ExecuteSymbol<LabelDN> Save = OperationSymbol.Execute<LabelDN>();
+        public static readonly ExecuteSymbol<LabelEntity> Save = OperationSymbol.Execute<LabelEntity>();
     }
 
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class CountryDN : Entity
+    public class CountryEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -369,7 +369,7 @@ namespace Signum.Test.Environment
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class AlbumDN : Entity, ISecretContainer
+    public class AlbumEntity : Entity, ISecretContainer
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -388,32 +388,32 @@ namespace Signum.Test.Environment
             set { Set(ref year, value); }
         }
 
-        [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
-        IAuthorDN author;
+        [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
+        IAuthorEntity author;
         [NotNullValidator]
-        public IAuthorDN Author
+        public IAuthorEntity Author
         {
             get { return author; }
             set { Set(ref author, value); }
         }
 
         [NotNullable, PreserveOrder]
-        MList<SongDN> songs = new MList<SongDN>();
-        public MList<SongDN> Songs
+        MList<SongEntity> songs = new MList<SongEntity>();
+        public MList<SongEntity> Songs
         {
             get { return songs; }
             set { Set(ref songs, value); }
         }
 
-        SongDN bonusTrack;
-        public SongDN BonusTrack
+        SongEntity bonusTrack;
+        public SongEntity BonusTrack
         {
             get { return bonusTrack; }
             set { Set(ref bonusTrack, value); }
         }
 
-        LabelDN label;
-        public LabelDN Label
+        LabelEntity label;
+        public LabelEntity Label
         {
             get { return label; }
             set { Set(ref label, value); }
@@ -433,7 +433,7 @@ namespace Signum.Test.Environment
             set { Set(ref secret, value); }
         }
 
-        static Expression<Func<AlbumDN, string>> ToStringExpression = a => a.name;
+        static Expression<Func<AlbumEntity, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -454,17 +454,17 @@ namespace Signum.Test.Environment
 
     public static class AlbumOperation
     {
-        public static readonly ExecuteSymbol<AlbumDN> Save = OperationSymbol.Execute<AlbumDN>();
-        public static readonly ExecuteSymbol<AlbumDN> Modify = OperationSymbol.Execute<AlbumDN>();
-        public static readonly ConstructSymbol<AlbumDN>.From<BandDN> CreateAlbumFromBand = OperationSymbol.Construct<AlbumDN>.From<BandDN>();
-        public static readonly DeleteSymbol<AlbumDN> Delete = OperationSymbol.Delete<AlbumDN>();
-        public static readonly ConstructSymbol<AlbumDN>.From<AlbumDN> Clone = OperationSymbol.Construct<AlbumDN>.From<AlbumDN>();
-        public static readonly ConstructSymbol<AlbumDN>.FromMany<AlbumDN> CreateGreatestHitsAlbum = OperationSymbol.Construct<AlbumDN>.FromMany<AlbumDN>();
-        public static readonly ConstructSymbol<AlbumDN>.FromMany<AlbumDN> CreateEmptyGreatestHitsAlbum = OperationSymbol.Construct<AlbumDN>.FromMany<AlbumDN>();
+        public static readonly ExecuteSymbol<AlbumEntity> Save = OperationSymbol.Execute<AlbumEntity>();
+        public static readonly ExecuteSymbol<AlbumEntity> Modify = OperationSymbol.Execute<AlbumEntity>();
+        public static readonly ConstructSymbol<AlbumEntity>.From<BandEntity> CreateAlbumFromBand = OperationSymbol.Construct<AlbumEntity>.From<BandEntity>();
+        public static readonly DeleteSymbol<AlbumEntity> Delete = OperationSymbol.Delete<AlbumEntity>();
+        public static readonly ConstructSymbol<AlbumEntity>.From<AlbumEntity> Clone = OperationSymbol.Construct<AlbumEntity>.From<AlbumEntity>();
+        public static readonly ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateGreatestHitsAlbum = OperationSymbol.Construct<AlbumEntity>.FromMany<AlbumEntity>();
+        public static readonly ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateEmptyGreatestHitsAlbum = OperationSymbol.Construct<AlbumEntity>.FromMany<AlbumEntity>();
     }
 
     [Serializable]
-    public class SongDN : EmbeddedEntity
+    public class SongEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
         string name;
@@ -500,7 +500,7 @@ namespace Signum.Test.Environment
             set { Set(ref index, value); }
         }
 
-        static Expression<Func<SongDN, string>> ToStringExpression = a => a.name;
+        static Expression<Func<SongEntity, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -508,19 +508,19 @@ namespace Signum.Test.Environment
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class AwardNominationDN : Entity
+    public class AwardNominationEntity : Entity
     {
-        [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]
-        Lite<IAuthorDN> author;
-        public Lite<IAuthorDN> Author
+        [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
+        Lite<IAuthorEntity> author;
+        public Lite<IAuthorEntity> Author
         {
             get { return author; }
             set { Set(ref author, value); }
         }
 
-        [ImplementedBy(typeof(GrammyAwardDN), typeof(PersonalAwardDN), typeof(AmericanMusicAwardDN))]
-        Lite<AwardDN> award;
-        public Lite<AwardDN> Award
+        [ImplementedBy(typeof(GrammyAwardEntity), typeof(PersonalAwardEntity), typeof(AmericanMusicAwardEntity))]
+        Lite<AwardEntity> award;
+        public Lite<AwardEntity> Award
         {
             get { return award; }
             set { Set(ref award, value); }
@@ -535,10 +535,10 @@ namespace Signum.Test.Environment
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class ConfigDN : Entity
+    public class ConfigEntity : Entity
     {
-        EmbeddedConfigDN embeddedConfig;
-        public EmbeddedConfigDN EmbeddedConfig
+        EmbeddedConfigEntity embeddedConfig;
+        public EmbeddedConfigEntity EmbeddedConfig
         {
             get { return embeddedConfig; }
             set { Set(ref embeddedConfig, value); }
@@ -547,15 +547,15 @@ namespace Signum.Test.Environment
 
     public static class ConfigOperation
     {
-        public static readonly ExecuteSymbol<ConfigDN> Save = OperationSymbol.Execute<ConfigDN>();
+        public static readonly ExecuteSymbol<ConfigEntity> Save = OperationSymbol.Execute<ConfigEntity>();
     }
 
-    public class EmbeddedConfigDN : EmbeddedEntity
+    public class EmbeddedConfigEntity : EmbeddedEntity
     {
         [NotNullable]
-        MList<Lite<GrammyAwardDN>> awards = new MList<Lite<GrammyAwardDN>>();
+        MList<Lite<GrammyAwardEntity>> awards = new MList<Lite<GrammyAwardEntity>>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<Lite<GrammyAwardDN>> Awards
+        public MList<Lite<GrammyAwardEntity>> Awards
         {
             get { return awards; }
             set { Set(ref awards, value); }

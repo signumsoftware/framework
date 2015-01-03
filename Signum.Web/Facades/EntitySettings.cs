@@ -66,7 +66,7 @@ namespace Signum.Web
         public override string OnPartialViewName(ModifiableEntity entity)
         {
             if (PartialViewName == null)
-                throw new InvalidOperationException("PartialViewName not set for {0}".Formato(GetType().TypeName()));
+                throw new InvalidOperationException("PartialViewName not set for {0}".FormatWith(GetType().TypeName()));
 
             return PartialViewName((T)entity);
         }
@@ -204,7 +204,7 @@ namespace Signum.Web
         public override string OnPartialViewName(ModifiableEntity entity)
         {
             if (PartialViewName == null)
-                throw new InvalidOperationException("PartialViewName not set for {0}".Formato(GetType().TypeName()));
+                throw new InvalidOperationException("PartialViewName not set for {0}".FormatWith(GetType().TypeName()));
 
             return PartialViewName((T)entity);
         }

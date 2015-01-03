@@ -1,4 +1,4 @@
-# Transaction
+﻿# Transaction
 
 Transaction class is the most common class using scope pattern, is used to handle transactions in a clean and easy nestable way. 
 
@@ -14,13 +14,13 @@ Imagine we have some code like this:
 ```C#
 private static void FixBugs()
 {
-   var wrongBugs = from b in Database.Query<BugDN>()
+   var wrongBugs = from b in Database.Query<BugEntity>()
                    where b.Status == Status.Fixed && !b.End.HasValue
                    select b.ToLite();
    
    foreach (var lazyBug in wrongBugs)
    {
-      BugDN bug = lazyBug.Retrieve(); 
+      BugEntity bug = lazyBug.Retrieve(); 
       bug.Description += "- Fix it!";
       bug.Save(); 
    }
@@ -30,7 +30,7 @@ private static void FixBugs()
 This simple code contains a lot of intensive work with the database: the query, retrieving each Bug, and saving it. Currently all of these are independent operations, so we could have some problems: 
 
 * If some exception is thrown in the middle of the process we end up having some bugs fixed and some remaing. This could have some problems, like duplicating - Fix It! for some bugs once you r-run the process.
-* It could take some time from the time the query gets executed, to the moment the BugDN is actually retrieved (we are using lazy objects). Someone could have modified the Bug in the meantime. 
+* It could take some time from the time the query gets executed, to the moment the BugEntity is actually retrieved (we are using lazy objects). Someone could have modified the Bug in the meantime. 
 
 In Signum Engine, every atomic operation, like retrieving an object, executing a query, or saving an object graph is transactional without you having to do anything.
 
@@ -43,13 +43,13 @@ private static void FixBugs()
 {
     using (Transaction tr = new Transaction())
     {
-        var wrongBugs = from b in Database.Query<BugDN>()
+        var wrongBugs = from b in Database.Query<BugEntity>()
                         where b.Status == Status.Fixed && !b.End.HasValue
                         select b.ToLazy();
 
         foreach (var lazyBug in wrongBugs)
         {
-            BugDN bug = lazyBug.Retrieve();
+            BugEntity bug = lazyBug.Retrieve();
             bug.End = bug.Start.AddDays(7);
             bug.Save();
         }
@@ -124,7 +124,7 @@ Once inside a `ForceNew` transaction, you won't be able to see changes not commi
 ```C#
 using(Transaction tr1 = new Transaction())
 {
-   ProjectDN proj = new ProjectDN { Name = "New project" }.Save();
+   ProjectEntity proj = new ProjectEntity { Name = "New project" }.Save();
 
    using(Transaction tr2 = Transaction.ForceNew()) //Independent transaction
    {
@@ -147,7 +147,7 @@ Usually to test long-running processes and rollback the changes.
 ```C#
 using(Transaction tr1 = Transaction.Test())
 {
-   ProjectDN proj = new ProjectDN { Name = "New project" }.Save();
+   ProjectEntity proj = new ProjectEntity { Name = "New project" }.Save();
 
    using(Transaction tr2 = Transaction.ForceNew()) //silent transaction
    {
@@ -168,7 +168,7 @@ Uses `SqlTransaction.Save` and `SqlTransaction.Rollback` to create and rollback 
 ```C#
 using(Transaction tr1 = Transaction.Test())
 {
-   ProjectDN proj = new ProjectDN { Name = "New project" }.Save();
+   ProjectEntity proj = new ProjectEntity { Name = "New project" }.Save();
    try
    {
       using(Transaction tr2 = Transaction.NamedSavePoint("Risky")) //named transaction
@@ -196,11 +196,11 @@ Special type of transaction to avoid creating `SqlTransactions` for any neasted 
 using(Transaction tr1 = Transaction.None())
 {
    // The 3 necessary INSERT commands will not be embedded in the same transaction
-   BugDN proj = new BugDN
+   BugEntity proj = new BugEntity
    { 
       Description = "New Bug",
-      Fixer = new DeveloperDN { Name = "New Developer"  }
-      Project = new ProjectDN { Name = "New project"  }
+      Fixer = new DeveloperEntity { Name = "New Developer"  }
+      Project = new ProjectEntity { Name = "New project"  }
    }.Save(); 
   
    tr1.Commit();
@@ -218,13 +218,13 @@ int OpenResult()
 {
    using(Transaction tr = new Transaction())
    { 
-      Database.Query<BugDN>()
+      Database.Query<BugEntity>()
       .Where(b => b.Status == Status.Open && b.Start < DateTime.Today.AddMonth(-6))
       .UnsafeUpdate()
       .Set(b =>b.Status, b => Status.Rejected)
       .Execute();
 
-      return Database.Query<BugDN>().Count(b=> b.Status == Status.Open);  //UPS!! Commit unreachable
+      return Database.Query<BugEntity>().Count(b=> b.Status == Status.Open);  //UPS!! Commit unreachable
 
       tr.Commit()
    }
@@ -238,13 +238,13 @@ int OpenResult()
 {
    using(Transaction tr = new Transaction())
    { 
-      Database.Query<BugDN>()
+      Database.Query<BugEntity>()
       .Where(b => b.Status == Status.Open && b.Start < DateTime.Today.AddMonth(-6))
       .UnsafeUpdate()
       .Set(b =>b.Status, b => Status.Rejected)
       .Execute();
 
-      return tr.Commit(Database.Query<BugDN>().Count(b=> b.Status == Status.Open));
+      return tr.Commit(Database.Query<BugEntity>().Count(b=> b.Status == Status.Open));
    }
 }
 ```

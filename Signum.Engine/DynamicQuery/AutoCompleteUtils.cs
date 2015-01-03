@@ -137,7 +137,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         static GenericInvoker<Func<PrimaryKey, Lite<Entity>>> miLiteById =
-            new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => LiteById<TypeDN>(id));
+            new GenericInvoker<Func<PrimaryKey, Lite<Entity>>>(id => LiteById<TypeEntity>(id));
         static Lite<Entity> LiteById<T>(PrimaryKey id)
             where T : Entity
         {
@@ -145,7 +145,7 @@ namespace Signum.Engine.DynamicQuery
         }
 
         static GenericInvoker<Func<string[], int, List<Lite<Entity>>>> miLiteContaining =
-            new GenericInvoker<Func<string[], int, List<Lite<Entity>>>>((parts, c) => LiteContaining<TypeDN>(parts, c));
+            new GenericInvoker<Func<string[], int, List<Lite<Entity>>>>((parts, c) => LiteContaining<TypeEntity>(parts, c));
         static List<Lite<Entity>> LiteContaining<T>(string[] parts, int count)
             where T : Entity
         {

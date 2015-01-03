@@ -237,7 +237,7 @@ namespace Signum.Utilities
             if (s.StartsWith("\""))
             {
                 if (!s.EndsWith("\""))
-                    throw new FormatException("Cell starts by quotes but not ends with quotes".Formato(s));
+                    throw new FormatException("Cell starts by quotes but not ends with quotes".FormatWith(s));
 
                 string str = s.Substring(1, s.Length - 2).Replace("\"\"", "\"");
 
@@ -245,7 +245,7 @@ namespace Signum.Utilities
             }
 
             if (s.Contains("\""))
-                throw new FormatException("Cell has quotes ina unexpected position".Formato(s));
+                throw new FormatException("Cell has quotes ina unexpected position".FormatWith(s));
 
             return s;
         }

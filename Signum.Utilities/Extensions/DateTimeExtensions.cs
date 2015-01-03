@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -251,7 +251,7 @@ namespace Signum.Utilities
             int datediff = (date.Date - currentdate).Days;
 
             if (-7 <= datediff && datediff <= -2)
-                return DateTimeMessage.DateLast.NiceToString().Formato(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
+                return DateTimeMessage.DateLast.NiceToString().FormatWith(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
 
             if (datediff == -1)
                 return DateTimeMessage.Yesterday.NiceToString();
@@ -263,7 +263,7 @@ namespace Signum.Utilities
                 return DateTimeMessage.Tomorrow.NiceToString();
 
             if (2 <= datediff && datediff <= 7)
-                return DateTimeMessage.DateThis.NiceToString().Formato(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
+                return DateTimeMessage.DateThis.NiceToString().FormatWith(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
 
             if (date.Year == currentdate.Year)
             {
@@ -291,15 +291,15 @@ namespace Signum.Utilities
 
             int months = Math.Abs(ts.Days) / 30;
             if (months > 0)
-                return resource.Formato((months == 1 ? DateTimeMessage._0Month.NiceToString() : DateTimeMessage._0Months.NiceToString()).Formato(Math.Abs(months))).ToLower();
+                return resource.FormatWith((months == 1 ? DateTimeMessage._0Month.NiceToString() : DateTimeMessage._0Months.NiceToString()).FormatWith(Math.Abs(months))).ToLower();
             if (Math.Abs(ts.Days) > 0)
-                return resource.Formato((ts.Days == 1 ? DateTimeMessage._0Day.NiceToString() : DateTimeMessage._0Days.NiceToString()).Formato(Math.Abs(ts.Days))).ToLower();
+                return resource.FormatWith((ts.Days == 1 ? DateTimeMessage._0Day.NiceToString() : DateTimeMessage._0Days.NiceToString()).FormatWith(Math.Abs(ts.Days))).ToLower();
             if (Math.Abs(ts.Hours) > 0)
-                return resource.Formato((ts.Hours == 1 ? DateTimeMessage._0Hour.NiceToString() : DateTimeMessage._0Hours.NiceToString()).Formato(Math.Abs(ts.Hours))).ToLower();
+                return resource.FormatWith((ts.Hours == 1 ? DateTimeMessage._0Hour.NiceToString() : DateTimeMessage._0Hours.NiceToString()).FormatWith(Math.Abs(ts.Hours))).ToLower();
             if (Math.Abs(ts.Minutes) > 0)
-                return resource.Formato((ts.Minutes == 1 ? DateTimeMessage._0Minute.NiceToString() : DateTimeMessage._0Minutes.NiceToString()).Formato(Math.Abs(ts.Minutes))).ToLower();
+                return resource.FormatWith((ts.Minutes == 1 ? DateTimeMessage._0Minute.NiceToString() : DateTimeMessage._0Minutes.NiceToString()).FormatWith(Math.Abs(ts.Minutes))).ToLower();
 
-            return resource.Formato((ts.Seconds == 1 ? DateTimeMessage._0Second.NiceToString() : DateTimeMessage._0Seconds.NiceToString()).Formato(Math.Abs(ts.Seconds))).ToLower();
+            return resource.FormatWith((ts.Seconds == 1 ? DateTimeMessage._0Second.NiceToString() : DateTimeMessage._0Seconds.NiceToString()).FormatWith(Math.Abs(ts.Seconds))).ToLower();
         }
         
 
@@ -403,17 +403,17 @@ namespace Signum.Utilities
         {
             string result= ", ".Combine(
                          Years == 0 ? null :
-                         Years == 1 ? DateTimeMessage._0Year.NiceToString().Formato(Years) :
-                                     DateTimeMessage._0Years.NiceToString().Formato(Years),
+                         Years == 1 ? DateTimeMessage._0Year.NiceToString().FormatWith(Years) :
+                                     DateTimeMessage._0Years.NiceToString().FormatWith(Years),
                          Months == 0 ? null :
-                         Months == 1 ? DateTimeMessage._0Month.NiceToString().Formato(Months) :
-                                      DateTimeMessage._0Months.NiceToString().Formato(Months),
+                         Months == 1 ? DateTimeMessage._0Month.NiceToString().FormatWith(Months) :
+                                      DateTimeMessage._0Months.NiceToString().FormatWith(Months),
                          Days == 0 ? null :
-                         Days == 1 ? DateTimeMessage._0Day.NiceToString().Formato(Days) :
-                                    DateTimeMessage._0Days.NiceToString().Formato(Days));
+                         Days == 1 ? DateTimeMessage._0Day.NiceToString().FormatWith(Days) :
+                                    DateTimeMessage._0Days.NiceToString().FormatWith(Days));
 
             if (string.IsNullOrEmpty(result))
-                result = DateTimeMessage._0Day.NiceToString().Formato(0);
+                result = DateTimeMessage._0Day.NiceToString().FormatWith(0);
 
             return result;
 

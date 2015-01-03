@@ -1,4 +1,4 @@
-# Statics class
+﻿# Statics class
 
 This class contains methods to create **thread and session static variables**. 
 
@@ -120,8 +120,8 @@ Example:
 
 public static class UserHolder
 {
-    public static readonly SessionVariable<IUserDN> CurrentUserVariable = Statics.SessionVariable<IUserDN>("user");
-    public static IUserDN Current
+    public static readonly SessionVariable<IUserEntity> CurrentUserVariable = Statics.SessionVariable<IUserEntity>("user");
+    public static IUserEntity Current
     {
         get { return CurrentUserVariable.Value; }
         set { CurrentUserVariable.Value = value; }
@@ -130,14 +130,14 @@ public static class UserHolder
 ```
 
 ```C#
-UserHolder.Current = Database.Retrieve<UserDN>(1);
+UserHolder.Current = Database.Retrieve<UserEntity>(1);
 //...
 Console.WriteLine(UserHolder.Current);
 ```
 
 ### ValueFactory
 
-Session variables also contain an optional `ValueFactory` property that will be called the first time the value is accessed to generate the initial value. You can use other Session variables (like `UserDN.Current`) to calculate your own value. In this sense, `SessionVariable<T>` steal some behavior from `Lazy<T>`.   
+Session variables also contain an optional `ValueFactory` property that will be called the first time the value is accessed to generate the initial value. You can use other Session variables (like `UserEntity.Current`) to calculate your own value. In this sense, `SessionVariable<T>` steal some behavior from `Lazy<T>`.   
 
 ### ISessionFactory
 

@@ -36,7 +36,7 @@
 			</Declarations>
 			<Code Language="csharp">
 				<![CDATA[[Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class $entityName$DN: Entity
+    public class $entityName$Entity: Entity
     {
         [NotNullable, SqlDbType( Size = 100), UniqueIndex]
         string $name$;
@@ -50,7 +50,7 @@
         $end$
 
 
-        static Expression<Func<$entityName$DN, string>> ToStringExpression = e => e.$name$;
+        static Expression<Func<$entityName$Entity, string>> ToStringExpression = e => e.$name$;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -59,7 +59,7 @@
     
     public static class $entityName$Operation
     {
-        public static readonly ExecuteSymbol<$entityName$DN> Save = OperationSymbol.Execute<$entityName$DN>();
+        public static readonly ExecuteSymbol<$entityName$Entity> Save = OperationSymbol.Execute<$entityName$Entity>();
     }]]>
 			</Code>
 		</Snippet>

@@ -33,10 +33,10 @@ namespace Signum.Engine
                 foreach (var type in types)
                 {
                     if (type.IsAbstract)
-                        throw new InvalidOperationException("Impossible to invalidate using {0} because is abstract".Formato(type));
+                        throw new InvalidOperationException("Impossible to invalidate using {0} because is abstract".FormatWith(type));
 
                     if (!Reflector.IsEntity(type))
-                        throw new InvalidOperationException("Impossible to invalidate using {0} because is not and Entity".Formato(type));
+                        throw new InvalidOperationException("Impossible to invalidate using {0} because is not and Entity".FormatWith(type));
                 }
 
 

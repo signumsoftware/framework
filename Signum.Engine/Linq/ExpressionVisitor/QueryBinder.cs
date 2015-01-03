@@ -140,7 +140,7 @@ namespace Signum.Engine.Linq
                 var ib = expression as ImplementedByExpression;
 
                 if (ib == null)
-                    throw new InvalidOperationException("Method {0} is only meant to be used on {1}".Formato(m.Method.Name, typeof(ImplementedByExpression).Name));
+                    throw new InvalidOperationException("Method {0} is only meant to be used on {1}".FormatWith(m.Method.Name, typeof(ImplementedByExpression).Name));
 
                 CombineStrategy strategy = GetStrategy(m.Method);
 
@@ -186,7 +186,7 @@ namespace Signum.Engine.Linq
             if (methodInfo.IsInstantiationOf(miSplitUnion))
                 return CombineStrategy.Union;
 
-            throw new InvalidOperationException("Method {0} not expected".Formato(methodInfo.Name));
+            throw new InvalidOperationException("Method {0} not expected".FormatWith(methodInfo.Name));
         }
 
         private Expression MapVisitExpand(LambdaExpression lambda, ProjectionExpression projection)
@@ -870,7 +870,7 @@ namespace Signum.Engine.Linq
             Type type = value.GetType();
 
             if (!type.IsInstantiationOf(typeof(SignumTable<>)) && !type.IsInstantiationOf(typeof(Query<>)))
-                throw new InvalidOperationException("{0} belongs to another kind of Linq Provider".Formato(type.TypeName()));
+                throw new InvalidOperationException("{0} belongs to another kind of Linq Provider".FormatWith(type.TypeName()));
 
             return true;
         }
@@ -1077,7 +1077,7 @@ namespace Signum.Engine.Linq
                     .Mixins
                     .EmptyIfNull()
                     .Where(mx => mx.Type == mixinType)
-                    .SingleEx(() => "{0} on {1}".Formato(mixinType.Name, source.Type.Name));
+                    .SingleEx(() => "{0} on {1}".FormatWith(mixinType.Name, source.Type.Name));
 
                 return result;
             }
@@ -1174,7 +1174,7 @@ namespace Signum.Engine.Linq
                         else
                         {
                             if (nex.Members == null)
-                                throw new InvalidOperationException("Impossible to bind '{0}' on '{1}'".Formato(m.Member.Name, nex.Constructor.ConstructorSignature()));
+                                throw new InvalidOperationException("Impossible to bind '{0}' on '{1}'".FormatWith(m.Member.Name, nex.Constructor.ConstructorSignature()));
 
                             PropertyInfo pi = (PropertyInfo)m.Member;
                             return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
@@ -1194,7 +1194,7 @@ namespace Signum.Engine.Linq
                                         FieldInfo fi = m.Member as FieldInfo ?? Reflector.TryFindFieldInfo(ee.Type, (PropertyInfo)m.Member);
 
                                         if (fi == null)
-                                            throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, ee.Type.TypeName()));
+                                            throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".FormatWith(m.Member.Name, ee.Type.TypeName()));
 
                                         if (fi != null && fi.FieldEquals((Entity ie) => ie.id))
                                             return ee.ExternalId.UnNullify();
@@ -1212,7 +1212,7 @@ namespace Signum.Engine.Linq
                                         FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(eee.Type, (PropertyInfo)m.Member);
 
                                         if (fi == null)
-                                            throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, eee.Type.TypeName()));
+                                            throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".FormatWith(m.Member.Name, eee.Type.TypeName()));
 
                                         Expression result = eee.GetBinding(fi);
 
@@ -1232,7 +1232,7 @@ namespace Signum.Engine.Linq
                                         FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(mee.Type, (PropertyInfo)m.Member);
 
                                         if (fi == null)
-                                            throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, mee.Type.TypeName()));
+                                            throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".FormatWith(m.Member.Name, mee.Type.TypeName()));
 
                                         Expression result = mee.GetBinding(fi);
 
@@ -1256,7 +1256,7 @@ namespace Signum.Engine.Linq
                                         if (pi.Name == "EntityType")
                                             return GetEntityType(liteRef.Reference);
 
-                                        throw new InvalidOperationException("The member {0} of Lite is not accessible on queries".Formato(m.Member));
+                                        throw new InvalidOperationException("The member {0} of Lite is not accessible on queries".FormatWith(m.Member));
                                     }
                                 case DbExpressionType.ImplementedBy:
                                     {
@@ -1272,7 +1272,7 @@ namespace Signum.Engine.Linq
                                         if (fi != null && fi.FieldEquals((Entity ie) => ie.id))
                                             return new PrimaryKeyStringExpression(iba.Id, iba.TypeId).UnNullify();
 
-                                        throw new InvalidOperationException("The member {0} of ImplementedByAll is not accesible on queries".Formato(m.Member));
+                                        throw new InvalidOperationException("The member {0} of ImplementedByAll is not accesible on queries".FormatWith(m.Member));
                                     }
                                 case DbExpressionType.MListElement:
                                     {
@@ -1282,10 +1282,10 @@ namespace Signum.Engine.Linq
                                         {
                                             case "RowId": return mle.RowId.UnNullify();
                                             case "Parent": return mle.Parent;
-                                            case "Order": return mle.Order.ThrowIfNull(() => "{0} has no {1}".Formato(mle.Table.Name, m.Member.Name));
+                                            case "Order": return mle.Order.ThrowIfNull(() => "{0} has no {1}".FormatWith(mle.Table.Name, m.Member.Name));
                                             case "Element": return mle.Element;
                                             default:
-                                                throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".Formato(m.Member));
+                                                throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member));
                                         }
                                     }
                             }
@@ -1448,7 +1448,7 @@ namespace Signum.Engine.Linq
 
             if (expressions.Any(e => e.Value is TypeImplementedByAllExpression || e.Value is TypeImplementedByExpression || e.Value is TypeEntityExpression))
             {
-                var typeId = CombineImplementations(strategy, expressions.SelectDictionary(exp => ExtractTypeId(exp).Value), PrimaryKey.Type(typeof(TypeDN)).Nullify());
+                var typeId = CombineImplementations(strategy, expressions.SelectDictionary(exp => ExtractTypeId(exp).Value), PrimaryKey.Type(typeof(TypeEntity)).Nullify());
 
                 return new TypeImplementedByAllExpression(new PrimaryKeyExpression(typeId));
             }
@@ -1491,13 +1491,13 @@ namespace Signum.Engine.Linq
             }
 
             if (!Schema.Current.Settings.IsDbType(returnType.UnNullify()))
-                throw new InvalidOperationException("Impossible to CombineImplementations of {0}".Formato(returnType.TypeName()));
+                throw new InvalidOperationException("Impossible to CombineImplementations of {0}".FormatWith(returnType.TypeName()));
 
 
             return strategy.CombineValues(expressions, returnType);
         }
 
-        static ConstantExpression NullTypeId = Expression.Constant(null, PrimaryKey.Type(typeof(TypeDN)).Nullify());
+        static ConstantExpression NullTypeId = Expression.Constant(null, PrimaryKey.Type(typeof(TypeEntity)).Nullify());
 
         internal static PrimaryKeyExpression ExtractTypeId(Expression exp)
         {
@@ -1528,7 +1528,7 @@ namespace Signum.Engine.Linq
                     TypeConstant(imp.Key).Nullify(), acum)));
             }
 
-            throw new InvalidOperationException("Impossible to extract TypeId from {0}".Formato(exp.ToString()));
+            throw new InvalidOperationException("Impossible to extract TypeId from {0}".FormatWith(exp.ToString()));
         }
 
         protected override Expression VisitInvocation(InvocationExpression iv)
@@ -1557,7 +1557,7 @@ namespace Signum.Engine.Linq
             if (operand is LiteReferenceExpression)
             {
                 if (!type.IsLite())
-                    throw new InvalidCastException("Impossible the type {0} (non-lite) with the expression {1}".Formato(type.TypeName(), b.Expression.ToString()));
+                    throw new InvalidCastException("Impossible the type {0} (non-lite) with the expression {1}".FormatWith(type.TypeName(), b.Expression.ToString()));
 
                 operand = ((LiteReferenceExpression)(operand)).Reference;
                 type = type.CleanType();
@@ -1656,7 +1656,7 @@ namespace Signum.Engine.Linq
                 return operand;
 
             if (operand.Type.IsLite() != uType.IsLite())
-                throw new InvalidCastException("Impossible to convert {0} to {1}".Formato(operand.Type.TypeName(), uType.TypeName()));
+                throw new InvalidCastException("Impossible to convert {0} to {1}".FormatWith(operand.Type.TypeName(), uType.TypeName()));
 
             if (operand is EntityExpression)
             {
@@ -1706,7 +1706,7 @@ namespace Signum.Engine.Linq
                 LiteReferenceExpression lite = (LiteReferenceExpression)operand;
 
                 if (!uType.IsLite())
-                    throw new InvalidCastException("Impossible to convert an expression of type {0} to {1}".Formato(lite.Type.TypeName(), uType.TypeName()));
+                    throw new InvalidCastException("Impossible to convert an expression of type {0} to {1}".FormatWith(lite.Type.TypeName(), uType.TypeName()));
 
                 Expression entity = EntityCasting(lite.Reference, Lite.Extract(uType));
 
@@ -1739,7 +1739,7 @@ namespace Signum.Engine.Linq
                 {
                     //if (left is ProjectionExpression && !((ProjectionExpression)left).IsOneCell  ||
                     //    right is ProjectionExpression && !((ProjectionExpression)right).IsOneCell)
-                    //    throw new InvalidOperationException("Comparing {0} and {1} is not valid in SQL".Formato(b.Left.ToString(), b.Right.ToString())); 
+                    //    throw new InvalidOperationException("Comparing {0} and {1} is not valid in SQL".FormatWith(b.Left.ToString(), b.Right.ToString())); 
 
                     if (left.Type.IsNullable() == right.Type.IsNullable())
                         return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
@@ -1778,7 +1778,7 @@ namespace Signum.Engine.Linq
                 commands.Add(new DeleteExpression(mlee.Table, pr.Select, SmartEqualizer.EqualNullable(id, mlee.RowId)));
             }
             else
-                throw new InvalidOperationException("Delete not supported for {0}".Formato(pr.Projector.GetType().TypeName()));
+                throw new InvalidOperationException("Delete not supported for {0}".FormatWith(pr.Projector.GetType().TypeName()));
 
             commands.Add(new SelectRowCountExpression());
 
@@ -1825,7 +1825,7 @@ namespace Signum.Engine.Linq
                     catch (CurrentSourceNotFoundException e)
                     {
                         throw new InvalidOperationException("The expression '{0}' can not be used as a propertyExpression. Consider using UnsafeUpdatePart"
-                            .Formato(setter.PropertyExpression.ToString()),
+                            .FormatWith(setter.PropertyExpression.ToString()),
                             e);
                     }
 
@@ -1860,7 +1860,7 @@ namespace Signum.Engine.Linq
                 table = mlee.Table;
             }
             else
-                throw new InvalidOperationException("Update not supported for {0}".Formato(entity.GetType().TypeName()));
+                throw new InvalidOperationException("Update not supported for {0}".FormatWith(entity.GetType().TypeName()));
 
             var result = new CommandAggregateExpression(new CommandExpression[]
             { 
@@ -2043,7 +2043,7 @@ namespace Signum.Engine.Linq
                 };
             }
 
-            throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".Formato(colExpression.Type.TypeName(), expression.ToString()));
+            throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".FormatWith(colExpression.Type.TypeName(), expression.ToString()));
         }
 
 
@@ -2052,7 +2052,7 @@ namespace Signum.Engine.Linq
             var col = column as ColumnExpression;
 
             if (col == null)
-                throw new InvalidOperationException("{0} does not represent a column".Formato(column.ToString()));
+                throw new InvalidOperationException("{0} does not represent a column".FormatWith(column.ToString()));
 
             return new ColumnAssignment(col.Name, DbExpressionNominator.FullNominate(expression));
         }
@@ -2259,7 +2259,7 @@ namespace Signum.Engine.Linq
             if (expression.IsNull())
                 return new PrimaryKeyExpression(Expression.Constant(null, PrimaryKey.Type(expression.Type).Nullify()));
 
-            throw new NotSupportedException("Id for {0}".Formato(expression.ToString()));
+            throw new NotSupportedException("Id for {0}".FormatWith(expression.ToString()));
         }
 
         public Expression GetIdString(Expression expression)
@@ -2301,7 +2301,7 @@ namespace Signum.Engine.Linq
             if (expression.IsNull())
                 return Expression.Constant(null, typeof(string));
 
-            throw new NotSupportedException("Id for {0}".Formato(expression.ToString()));
+            throw new NotSupportedException("Id for {0}".FormatWith(expression.ToString()));
         }
 
         public Expression GetEntityType(Expression expression)
@@ -2346,7 +2346,7 @@ namespace Signum.Engine.Linq
             if (expression.IsNull())
                 return new TypeImplementedByExpression(new Dictionary<Type, PrimaryKeyExpression>());
 
-            throw new NotSupportedException("Id for {0}".Formato(expression.ToString()));
+            throw new NotSupportedException("Id for {0}".FormatWith(expression.ToString()));
         }
 
         private static Expression Condition(Expression test, Expression ifTrue, Expression ifFalse)
@@ -2947,7 +2947,7 @@ namespace Signum.Engine.Linq
                     new SqlCastExpression(typeof(string), ee.ExternalId.Value),
                     new TypeImplementedByAllExpression(new PrimaryKeyExpression(
                         Expression.Condition(Expression.Equal(ee.ExternalId.Value.Nullify(), new SqlConstantExpression(null, ee.ExternalId.ValueType.Nullify())),
-                        new SqlConstantExpression(null, PrimaryKey.Type(typeof(TypeDN)).Nullify()),
+                        new SqlConstantExpression(null, PrimaryKey.Type(typeof(TypeEntity)).Nullify()),
                         QueryBinder.TypeConstant(ee.Type).Nullify()))));
 
             if (colExpression is ImplementedByExpression)
@@ -2970,7 +2970,7 @@ namespace Signum.Engine.Linq
                     new PrimaryKeyExpression(QueryBinder.Coalesce(ib.Implementations.Values.Select(a => a.ExternalId.ValueType.Nullify()).Distinct().SingleEx(), ib.Implementations.Select(e => e.Value.ExternalId))),
                     new TypeImplementedByAllExpression(new PrimaryKeyExpression(
                      ib.Implementations.Select(imp => new When(imp.Value.ExternalId.NotEqualsNulll(), QueryBinder.TypeConstant(imp.Key))).ToList()
-                     .ToCondition(PrimaryKey.Type(typeof(TypeDN)).Nullify()))));
+                     .ToCondition(PrimaryKey.Type(typeof(TypeEntity)).Nullify()))));
             }
 
             if (colExpression is ImplementedByExpression)
@@ -3030,7 +3030,7 @@ namespace Signum.Engine.Linq
             if (colExpression is EntityExpression)
             {
                 if (!id.IsNull() && type != colExpression.Type)
-                    throw new InvalidOperationException("Impossible to convert {0} to {1}".Formato(type.TypeName(), colExpression.Type.TypeName()));
+                    throw new InvalidOperationException("Impossible to convert {0} to {1}".FormatWith(type.TypeName(), colExpression.Type.TypeName()));
 
                 return new EntityExpression(colExpression.Type, new PrimaryKeyExpression(id), null, null, null, false);
             }
@@ -3039,7 +3039,7 @@ namespace Signum.Engine.Linq
                 return new ImplementedByAllExpression(colExpression.Type,
                     new SqlCastExpression(typeof(string), id),
                     new TypeImplementedByAllExpression(new PrimaryKeyExpression(id.IsNull() ?
-                        Expression.Constant(null, PrimaryKey.Type(typeof(TypeDN)).Nullify()) :
+                        Expression.Constant(null, PrimaryKey.Type(typeof(TypeEntity)).Nullify()) :
                         QueryBinder.TypeConstant(type).Nullify())));
 
             if (colExpression is ImplementedByExpression)

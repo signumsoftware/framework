@@ -70,7 +70,7 @@ namespace Signum.Entities
             PropertyValidator<T> result = (PropertyValidator<T>)dic.TryGetC(pi.Name);
 
             if (result == null)
-                throw new InvalidOperationException("{0} is not defined in {1}, try calling OverridePropertyValidator".Formato(pi.PropertyName(), typeof(T).TypeName()));
+                throw new InvalidOperationException("{0} is not defined in {1}, try calling OverridePropertyValidator".FormatWith(pi.PropertyName(), typeof(T).TypeName()));
 
             return result;
         }

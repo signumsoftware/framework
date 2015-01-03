@@ -1,4 +1,4 @@
-# Finder class
+﻿# Finder class
 
 The main responsibilities of `Finder` class in the server-side is to return the `ActionResults` that are necessary to open a `SearchPage`, `SearchPopup` or the `SearchResults` after making the database query. 
 
@@ -110,7 +110,7 @@ public class QuerySettings
 Example: 
 
 ```C#
-QuerySettings.RegisterPropertyFormat<CategoryDN>(c => c.IndentedName, new CellFormatter((helper, value) =>
+QuerySettings.RegisterPropertyFormat<CategoryEntity>(c => c.IndentedName, new CellFormatter((helper, value) =>
                     new HtmlTag("pre").Class("gray").SetInnerText(value.ToString())));
 ```
 

@@ -32,9 +32,9 @@ namespace Signum.Test.LinqProvider
             Connector.CurrentLogger = new DebugTextWriter();
         }
 
-        private static ArtistDN GetFemale()
+        private static ArtistEntity GetFemale()
         {
-            return Database.Query<ArtistDN>().Where(a => a.Sex == Sex.Female).Single();
+            return Database.Query<ArtistEntity>().Where(a => a.Sex == Sex.Female).Single();
         }
 
         [TestMethod]
@@ -80,9 +80,9 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            var list = Database.Query<ArtistDN>().Where(a=>a.Sex != female.InDB().Select(a2 => a2.Sex).Single()).ToList();
+            var list = Database.Query<ArtistEntity>().Where(a=>a.Sex != female.InDB().Select(a2 => a2.Sex).Single()).ToList();
             Assert.IsTrue(list.Count > 0);
-            list = Database.Query<ArtistDN>().Where(a => a.Sex != female.ToLite().InDB().Select(a2 => a2.Sex).Single()).ToList();
+            list = Database.Query<ArtistEntity>().Where(a => a.Sex != female.ToLite().InDB().Select(a2 => a2.Sex).Single()).ToList();
             Assert.IsTrue(list.Count > 0);
         }
 
@@ -91,9 +91,9 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            var list = Database.Query<ArtistDN>().Where(a =>female.InDB().Select(a2 => a2.Friends).Single().Contains(a.ToLite())).ToList();
+            var list = Database.Query<ArtistEntity>().Where(a =>female.InDB().Select(a2 => a2.Friends).Single().Contains(a.ToLite())).ToList();
             Assert.IsTrue(list.Count > 0);
-            list = Database.Query<ArtistDN>().Where(a => female.ToLite().InDB().Select(a2 => a2.Friends).Single().Contains(a.ToLite())).ToList();
+            list = Database.Query<ArtistEntity>().Where(a => female.ToLite().InDB().Select(a2 => a2.Friends).Single().Contains(a.ToLite())).ToList();
             Assert.IsTrue(list.Count > 0);
         }
 
@@ -102,9 +102,9 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            var list = Database.Query<ArtistDN>().Where(a => a.Sex != female.InDBEntity(a2 => a2.Sex)).ToList();
+            var list = Database.Query<ArtistEntity>().Where(a => a.Sex != female.InDBEntity(a2 => a2.Sex)).ToList();
             Assert.IsTrue(list.Count > 0);
-            list = Database.Query<ArtistDN>().Where(a => a.Sex != female.ToLite().InDB(a2 => a2.Sex)).ToList();
+            list = Database.Query<ArtistEntity>().Where(a => a.Sex != female.ToLite().InDB(a2 => a2.Sex)).ToList();
             Assert.IsTrue(list.Count > 0);
         }
 
@@ -113,16 +113,16 @@ namespace Signum.Test.LinqProvider
         {
             var female = GetFemale();
 
-            var list = Database.Query<ArtistDN>().Where(a => female.InDBEntity(a2 => a2.Friends).Contains(a.ToLite())).ToList();
+            var list = Database.Query<ArtistEntity>().Where(a => female.InDBEntity(a2 => a2.Friends).Contains(a.ToLite())).ToList();
             Assert.IsTrue(list.Count > 0);
-            list = Database.Query<ArtistDN>().Where(a => female.ToLite().InDB(a2 => a2.Friends).Contains(a.ToLite())).ToList();
+            list = Database.Query<ArtistEntity>().Where(a => female.ToLite().InDB(a2 => a2.Friends).Contains(a.ToLite())).ToList();
             Assert.IsTrue(list.Count > 0);
         }
 
         [TestMethod]
         public void SelectManyInDB()
         {
-            var artistsInBands = (from b in Database.Query<BandDN>()
+            var artistsInBands = (from b in Database.Query<BandEntity>()
                                   from a in b.Members
                                   select new
                                   {

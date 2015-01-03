@@ -1,4 +1,4 @@
-# Validation
+﻿# Validation
 
 Frequently, the type system is not rich enough to express all the restrictions you need on your data, then you have to add checking of your data at runtime. In a typical application these restrictions are written in three different places: 
 
@@ -38,7 +38,7 @@ Validators are just attributes with some parameters that you can place in your *
 
 ```C#
 [Serializable]
-public class MyEntityDN: Entity
+public class MyEntityEntity: Entity
 {
   [StringLengthValidator(Min=3, Max=3), StringCaseValidator(Case.Uppercase)]
   public string Name
@@ -116,12 +116,12 @@ Validators for `TimeSpan` properties
 ```
 
 
-### TypeDN Validators
+### TypeEntity Validators
 
-Validators for `TypeDN` properties
+Validators for `TypeEntity` properties
 
 ```C#
-[IsAssignableToValidatorAttribute(typeof(ProductDN))] //To allow only TypeDN assignable to one particular type
+[IsAssignableToValidatorAttribute(typeof(ProductEntity))] //To allow only TypeEntity assignable to one particular type
 ```
 
 ### ErrorMessage
@@ -196,7 +196,7 @@ You could test this imperatively using `PropertyValidation` method. Let's see an
 
 ```C#
 [Serializable]
-public class OrderDN : Entity
+public class OrderEntity : Entity
 {
     DateTime? paidOn;
     public DateTime? PaidOn
@@ -224,17 +224,17 @@ public class OrderDN : Entity
         if (pi.Is(() => ShipDate))
         {
             if (ShipDate.HasValue && State != State.Shipped)
-                return "ShipDate has to be null if the state is {0}".Formato(State);
+                return "ShipDate has to be null if the state is {0}".FormatWith(State);
             else if (!ShipDate.HasValue && State == State.Shipped)
-                return "ShipDate needs a value if the state is {0}".Formato(State); 
+                return "ShipDate needs a value if the state is {0}".FormatWith(State); 
         }
 
         if (pi.Is(() => PaidOn))
         {
             if (PaidOn.HasValue && State != State.Ordered)
-                return "PaidOn has to be null if the state is {0}".Formato(State);
+                return "PaidOn has to be null if the state is {0}".FormatWith(State);
             else if (!PaidOn.HasValue && (State == State.Shipped || State == State.Paid))
-                return "PaidOn needs a value if the state is {0}".Formato(State);
+                return "PaidOn needs a value if the state is {0}".FormatWith(State);
         }
 
         return null;
@@ -262,7 +262,7 @@ protected override string PropertyValidation(PropertyInfo pi)
     return stateValidator.Validate(this, pi);
 }
 
-static StateValidator<OrderDN, State> stateValidator = new StateValidator<OrderDN, State>(
+static StateValidator<OrderEntity, State> stateValidator = new StateValidator<OrderEntity, State>(
    e => e.State,        e => e.PaidOn,    e => e.ShipDate){
    {State.Ordered,       false,            false          },
    {State.Paid,          true,             false          },
@@ -316,11 +316,11 @@ Subscribe and unsubscribe the event manually could be a little cumbersome. This 
 
 
 ```C#
-public class ParentEntityDN: Entity
+public class ParentEntityEntity: Entity
 {
     [ValidateChildPropertyAttribute]
-    EntityDN entity;
-    public EntityDN Entity
+    EntityEntity entity;
+    public EntityEntity Entity
     {
        get{ return entity; }
        set{ Set(ref entity, value, ()=>Entity);}
@@ -346,7 +346,7 @@ A much more convenient way of including imperative validations for entities that
 
 
 ```C#
-Validator.PropertyValidator((MyEntityDN d) => d.Name).StaticPropertyValidation += (e, pi, value)=>
+Validator.PropertyValidator((MyEntityEntity d) => d.Name).StaticPropertyValidation += (e, pi, value)=>
 {
    if(e.Name == "AAA") //or (string)value == "AAA"
       return "AAA is an special name and can not be used"; 
@@ -367,7 +367,7 @@ Another way of extending validations for all the entities of a given class is mo
 Let's see how to remove the `Uppercase` constraint and add a new `Lowercase` one. 
 
 ```C#
-var list = Validator.PropertyValidator((MyEntityDN d) => d.Name).Validators;
+var list = Validator.PropertyValidator((MyEntityEntity d) => d.Name).Validators;
 list.RemoveAll(va=>va is StringCaseValidatorAttribute);
 list.Add(new StringCaseValidatorAttribute(Case.Lowercase))
 ```
@@ -393,7 +393,7 @@ public class PropertyValidator<T>
 You can even disable on particular `ValidatorAttrbute` using `IsApplicableValidator<V>` method: 
 
 ```C#
-Validator.PropertyValidator((NoteWithDateDN n) => n.Text)
+Validator.PropertyValidator((NoteWithDateEntity n) => n.Text)
     .IsApplicableValidator<StringLengthValidatorAttribute>(n => n.Text != null && !n.Text.StartWidth("A")); 
 ```
 
@@ -451,7 +451,7 @@ Also, you can use `Entity.IdentifiableIntegrityCheck`, that does the same thing 
 As we have seen, using `PropertyValidation` you can make a property validation dependent of another property like this: 
 
 ```C#
-public class PersonDN : Entity
+public class PersonEntity : Entity
 {
     string name;
     public string Name
@@ -556,7 +556,7 @@ Here you have an example of a full corruptness-enabled entity
 
 ```C#
 [Mixin(typeof(CorrupMixin))]
-public class PersonDN : Entity
+public class PersonEntity : Entity
 {
     string name;
     [StringLengthValidator(AllowNulls = false)]
@@ -579,9 +579,9 @@ public class PersonDN : Entity
             return "Nobody was named Neo before The Matrix"; 
     }
 
-    static PersonDN()
+    static PersonEntity()
     {
-        Validator.PropertyValidator((PersonDN n) => n.Name)
+        Validator.PropertyValidator((PersonEntity n) => n.Name)
             .IsApplicableValidator<StringLengthValidator>(n => Corruption.Strict); 
     }
 }

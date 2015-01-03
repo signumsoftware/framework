@@ -189,13 +189,13 @@ namespace Signum.Utilities.ExpressionTrees
 
             int prevIndex = precedence.IndexOf(nodeType);
             if (prevIndex == -1)
-                throw new NotImplementedException("Not supported {0}".Formato(nodeType));
+                throw new NotImplementedException("Not supported {0}".FormatWith(nodeType));
             int newIndex = precedence.IndexOf(exp.NodeType);
             if (newIndex == -1)
-                throw new NotImplementedException("Not supported {0}".Formato(exp.NodeType));
+                throw new NotImplementedException("Not supported {0}".FormatWith(exp.NodeType));
 
             if (prevIndex < newIndex)
-                return "({0})".Formato(result);
+                return "({0})".FormatWith(result);
             else return result; 
         }
 
@@ -216,15 +216,15 @@ namespace Signum.Utilities.ExpressionTrees
         string VisitUnary(UnaryExpression u)
         {
             if (u.NodeType == ExpressionType.TypeAs)
-                return "{0} as {1}".Formato(Visit(u.Operand, u.NodeType), u.Type.Name);
+                return "{0} as {1}".FormatWith(Visit(u.Operand, u.NodeType), u.Type.Name);
             else
                 return unarySymbol.GetOrThrow(u.NodeType, "The node type {0} is not supported in unary expressions")
-                    .Formato(Visit(u.Operand, u.NodeType));
+                    .FormatWith(Visit(u.Operand, u.NodeType));
         }
 
         string VisitTypeIs(TypeBinaryExpression b)
         {
-            return "{0} is {1}".Formato(Visit(b.Expression, b.NodeType), b.TypeOperand.TypeName());
+            return "{0} is {1}".FormatWith(Visit(b.Expression, b.NodeType), b.TypeOperand.TypeName());
         }
 
         Dictionary<ExpressionType, string> binarySymbol = new Dictionary<ExpressionType, string>
@@ -257,12 +257,12 @@ namespace Signum.Utilities.ExpressionTrees
         string VisitBinary(BinaryExpression b)
         {
             return binarySymbol.GetOrThrow(b.NodeType, "The node type {0} is not supported as a binary expression")
-                .Formato(Visit(b.Left, b.NodeType), Visit(b.Right, b.NodeType));
+                .FormatWith(Visit(b.Left, b.NodeType), Visit(b.Right, b.NodeType));
         }
 
         string VisitConditional(ConditionalExpression c)
         {
-            return "{0} ? {1} : {2}".Formato(Visit(c.Test, c.NodeType), Visit(c.IfTrue, c.NodeType), Visit(c.IfFalse, c.NodeType));
+            return "{0} ? {1} : {2}".FormatWith(Visit(c.Test, c.NodeType), Visit(c.IfTrue, c.NodeType), Visit(c.IfFalse, c.NodeType));
         }
 
         string VisitMemberAccess(MemberExpression m, bool literal)
@@ -280,7 +280,7 @@ namespace Signum.Utilities.ExpressionTrees
                     return CSharpRenderer.Value(value, value.Try(v=>v.GetType()), ImportedNamespaces);
             }
             else
-                return "{0}.{1}".Formato(Visit(m.Expression, m.NodeType), m.Member.Name);
+                return "{0}.{1}".FormatWith(Visit(m.Expression, m.NodeType), m.Member.Name);
         }
 
         string VisitConstant(ConstantExpression c, bool literal)
@@ -311,9 +311,9 @@ namespace Signum.Utilities.ExpressionTrees
             if (collection.Count == 0)
                 return "{ }";
             if(collapse)
-                return "{{ {0} }}".Formato(collection.ToString(func, ", "));
+                return "{{ {0} }}".FormatWith(collection.ToString(func, ", "));
 
-            return "\r\n{{\r\n{0}\r\n}}".Formato(collection.ToString(func, ",\r\n").Indent(IdentationSpaces));
+            return "\r\n{{\r\n{0}\r\n}}".FormatWith(collection.ToString(func, ",\r\n").Indent(IdentationSpaces));
         }
         #endregion
         
@@ -325,13 +325,13 @@ namespace Signum.Utilities.ExpressionTrees
                 case MemberBindingType.Assignment:
                     return VisitMemberAssignment((MemberAssignment)binding);
                 default:
-                    throw new NotSupportedException("Unexpected {0}".Formato(binding.BindingType));
+                    throw new NotSupportedException("Unexpected {0}".FormatWith(binding.BindingType));
             }
         }
 
         string VisitMemberAssignment(MemberAssignment assignment)
         {
-            return "{0} = {1}".Formato(assignment.Member.Name, VisitReal(assignment.Expression));
+            return "{0} = {1}".FormatWith(assignment.Member.Name, VisitReal(assignment.Expression));
         }
 
         string VisitElementInitializer(ElementInit initializer)
@@ -350,7 +350,7 @@ namespace Signum.Utilities.ExpressionTrees
             string newExpr = Visit(init.NewExpression, init.NodeType);
             if (newExpr.EndsWith("()"))
                 newExpr = newExpr.RemoveEnd(2);
-            return @"{0} {1}".Formato(newExpr, Block(init.Bindings, VisitBinding, collapse));
+            return @"{0} {1}".FormatWith(newExpr, Block(init.Bindings, VisitBinding, collapse));
         }
 
         string VisitListInit(ListInitExpression init, bool collapse)
@@ -358,17 +358,17 @@ namespace Signum.Utilities.ExpressionTrees
             string newExpr = Visit(init.NewExpression, init.NodeType);
             if (newExpr.EndsWith("()"))
                 newExpr = newExpr.RemoveEnd(2);
-            return @"{0} {1}".Formato(newExpr, Block(init.Initializers, VisitElementInitializer, collapse));
+            return @"{0} {1}".FormatWith(newExpr, Block(init.Initializers, VisitElementInitializer, collapse));
         }
 
         string VisitInvocation(InvocationExpression iv)
         {
-            return "{0}({1})".Formato(Visit(iv.Expression, iv.NodeType), Line(iv.Arguments, VisitReal));
+            return "{0}({1})".FormatWith(Visit(iv.Expression, iv.NodeType), Line(iv.Arguments, VisitReal));
         }
 
         string VisitMethodCall(MethodCallExpression m)
         {
-            return "{0}.{1}({2})".Formato(
+            return "{0}.{1}({2})".FormatWith(
                 m.Object != null ? Visit(m.Object, m.NodeType) : m.Method.DeclaringType.TypeName(),
                 m.Method.MethodName(),
                 Line(m.Arguments, VisitReal));
@@ -376,7 +376,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         string VisitNew(NewExpression nex)
         {
-            return "new {0}({1})".Formato(nex.Type.TypeName(), Line(nex.Arguments, VisitReal));
+            return "new {0}({1})".FormatWith(nex.Type.TypeName(), Line(nex.Arguments, VisitReal));
         }
 
         string VisitNewArray(NewArrayExpression na, bool collapse)
@@ -384,9 +384,9 @@ namespace Signum.Utilities.ExpressionTrees
             string arrayType = na.Type.GetElementType().Name;
 
             if (na.NodeType == ExpressionType.NewArrayBounds)
-                return "new {0}[{1}]".Formato(arrayType, VisitReal(na.Expressions.SingleEx()));
+                return "new {0}[{1}]".FormatWith(arrayType, VisitReal(na.Expressions.SingleEx()));
             else
-                return "new {0}[] {1}".Formato(arrayType, Block(na.Expressions, VisitReal, collapse));
+                return "new {0}[] {1}".FormatWith(arrayType, Block(na.Expressions, VisitReal, collapse));
         } 
         #endregion
 
@@ -394,9 +394,9 @@ namespace Signum.Utilities.ExpressionTrees
         {
             string body = Visit(lambda.Body, lambda.NodeType);
             if (lambda.Parameters.Count == 1)
-                return "{0} => {1}".Formato(Visit(lambda.Parameters.SingleEx(), lambda.NodeType), body);
+                return "{0} => {1}".FormatWith(Visit(lambda.Parameters.SingleEx(), lambda.NodeType), body);
             else
-                return "({0}) => {1}".Formato(lambda.Parameters.ToString(p => Visit(p, lambda.NodeType), ","), body);
+                return "({0}) => {1}".FormatWith(lambda.Parameters.ToString(p => Visit(p, lambda.NodeType), ","), body);
         }
     }
 }

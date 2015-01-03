@@ -57,7 +57,7 @@ Example:
 Dictionary<string,List<Planet>> planetsByColor = planets.GroupToDictionary(a=>a.Color);
 
 //Print results:
-Console.WriteLine(planetsByColor.ToString(kvp => "{0}: {1}".Formato(kvp.Key, kvp.Value.ToString(", ")), "\r\n")); 
+Console.WriteLine(planetsByColor.ToString(kvp => "{0}: {1}".FormatWith(kvp.Key, kvp.Value.ToString(", ")), "\r\n")); 
 
 //Writes...
 //Gray: Mercury (Gray)
@@ -84,7 +84,7 @@ Example:
 Dictionary<string,List<Planet>> planetsByColor = planets.GroupToDictionaryDescending(a=>a.Color);
 
 //Print results:
-Console.WriteLine(planetsByColor.ToString(kvp => "{0}: {1}".Formato(kvp.Key, kvp.Value.ToString(", ")), "\r\n")); 
+Console.WriteLine(planetsByColor.ToString(kvp => "{0}: {1}".FormatWith(kvp.Key, kvp.Value.ToString(", ")), "\r\n")); 
 
 //Writes...
 //Blue: Earth (Blue), Uranus (Blue), Neptune (Blue)

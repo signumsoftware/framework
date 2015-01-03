@@ -28,7 +28,7 @@ namespace Signum.Entities
         public static Implementations GetImplementations(PropertyRoute route)
         {
             if (!typeof(ModelEntity).IsAssignableFrom(route.RootType))
-                throw new InvalidOperationException("Route {0} is not rooted on a {1}".Formato(route, typeof(ModifiableEntity).Name));
+                throw new InvalidOperationException("Route {0} is not rooted on a {1}".FormatWith(route, typeof(ModifiableEntity).Name));
 
             PropertyRoute fieldRoute = route;
             if (fieldRoute.PropertyRouteType == PropertyRouteType.LiteEntity)

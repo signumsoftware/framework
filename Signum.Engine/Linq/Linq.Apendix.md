@@ -1,10 +1,10 @@
-LINQ Apendix
+﻿LINQ Apendix
 
 Here are the entity classes used as the Data Model. Just usual Signum Entities. 
 
 ```C#
 [Serializable]
-public class BugDN : Entity
+public class BugEntity : Entity
 {
     string description;
     public string Description
@@ -48,23 +48,23 @@ public class BugDN : Entity
         set { Set(ref discoverer, value); }
     }
 
-    DeveloperDN fixer;
-    public DeveloperDN Fixer
+    DeveloperEntity fixer;
+    public DeveloperEntity Fixer
     {
         get { return fixer; }
         set { Set(ref fixer, value); }
     }
 
-    Lazy<ProjectDN> project;
+    Lazy<ProjectEntity> project;
     [NotNullValidator]
-    public Lazy<ProjectDN> Project
+    public Lazy<ProjectEntity> Project
     {
         get { return project; }
         set { Set(ref project, value); }
     }
 
-    MList<CommentDN> comments;
-    public MList<CommentDN> Comments
+    MList<CommentEntity> comments;
+    public MList<CommentEntity> Comments
     {
         get { return comments; }
         set { Set(ref comments, value); }
@@ -81,7 +81,7 @@ public class BugDN : Entity
         Notify(() => Hours);
     }
 
-    static Expression<Func<BugDN, string>> ToStringExpression = e => e.Description;
+    static Expression<Func<BugEntity, string>> ToStringExpression = e => e.Description;
     public override string ToString()
     {
         return ToStringExpression.Evaluate(this);
@@ -90,7 +90,7 @@ public class BugDN : Entity
 
 
 [Serializable]
-public class CommentDN : EmbeddedEntity
+public class CommentEntity : EmbeddedEntity
 {
     string text;
     public string Text
@@ -115,7 +115,7 @@ public class CommentDN : EmbeddedEntity
 
     public override string ToString()
     {
-        return "{0}: {1}".Formato(writer, text);
+        return "{0}: {1}".FormatWith(writer, text);
     }
 }
 
@@ -129,7 +129,7 @@ public enum Status
 
 
 [Serializable]
-public class ProjectDN : Entity
+public class ProjectEntity : Entity
 {
     string name;
     public string Name
@@ -152,7 +152,7 @@ public class ProjectDN : Entity
 }
 
 
-[ImplementedBy(typeof(CustomerDN), typeof(DeveloperDN))]
+[ImplementedBy(typeof(CustomerEntity), typeof(DeveloperEntity))]
 public interface IBugDiscoverer: IEntity
 {
     public string Name { get; }
@@ -160,7 +160,7 @@ public interface IBugDiscoverer: IEntity
 
 
 [Serializable]
-public class DeveloperDN : Entity, IBugDiscoverer
+public class DeveloperEntity : Entity, IBugDiscoverer
 {
     string name;
     public string Name
@@ -169,7 +169,7 @@ public class DeveloperDN : Entity, IBugDiscoverer
         set { Set(ref name, value); }
     }
 
-    static Expression<Func<DeveloperDN, string>> ToStringExpression = e => e.Name;
+    static Expression<Func<DeveloperEntity, string>> ToStringExpression = e => e.Name;
     public override string ToString()
     {
         return ToStringExpression.Evaluate(this);
@@ -178,7 +178,7 @@ public class DeveloperDN : Entity, IBugDiscoverer
 
 
 [Serializable]
-public class CustomerDN : Entity, IBugDiscoverer
+public class CustomerEntity : Entity, IBugDiscoverer
 {
     string name;
     public string Name
@@ -187,7 +187,7 @@ public class CustomerDN : Entity, IBugDiscoverer
         set { Set(ref name, value); }
     }
 
-    static Expression<Func<CustomerDN, string>> ToStringExpression = e => e.Name;
+    static Expression<Func<CustomerEntity, string>> ToStringExpression = e => e.Name;
     public override string ToString()
     {
         return ToStringExpression.Evaluate(this);

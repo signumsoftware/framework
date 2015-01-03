@@ -301,7 +301,7 @@ namespace Signum.Engine.Linq
                 else if (exp2 is TypeImplementedByAllExpression) return TypeIbaIbaEquals((TypeImplementedByAllExpression)exp1, (TypeImplementedByAllExpression)exp2);
             }
 
-            throw new InvalidOperationException("Impossible to resolve '{0}' equals '{1}'".Formato(exp1.ToString(), exp2.ToString()));
+            throw new InvalidOperationException("Impossible to resolve '{0}' equals '{1}'".FormatWith(exp1.ToString(), exp2.ToString()));
         }
 
       
@@ -438,7 +438,7 @@ namespace Signum.Engine.Linq
                 return InPrimaryKey(typeIba.TypeColumn, ids);
             }
 
-            throw new InvalidOperationException("Impossible to resolve '{0}' in '{1}'".Formato(typeExpr.ToString(), collection.ToString(t=>t.TypeName(), ", ")));
+            throw new InvalidOperationException("Impossible to resolve '{0}' in '{1}'".FormatWith(typeExpr.ToString(), collection.ToString(t=>t.TypeName(), ", ")));
         }
 
         public static Expression In(Expression element, object[] values)
@@ -504,7 +504,7 @@ namespace Signum.Engine.Linq
                     EqualNullable(new PrimaryKeyExpression(QueryBinder.TypeConstant(kvp.Key).Nullify()), iba.TypeId.TypeColumn),
                     InPrimaryKey(iba.Id, kvp.Value))).AggregateOr();
 
-            throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".Formato(newItem.Type.Name));
+            throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".FormatWith(newItem.Type.Name));
         }
 
       
@@ -514,7 +514,7 @@ namespace Signum.Engine.Linq
             if ( e1.Type.IsLite() || e2.Type.IsLite())
             {
                 if (!e1.Type.IsLite() && !e1.IsNull() || !e2.Type.IsLite() && !e2.IsNull())
-                    throw new InvalidOperationException("Imposible to compare expressions of type {0} == {1}".Formato(e1.Type.TypeName(), e2.Type.TypeName()));
+                    throw new InvalidOperationException("Imposible to compare expressions of type {0} == {1}".FormatWith(e1.Type.TypeName(), e2.Type.TypeName()));
 
                 return PolymorphicEqual(GetEntity(e1), GetEntity(e2)); //Conditional and Coalesce could be inside
             }
@@ -547,7 +547,7 @@ namespace Signum.Engine.Linq
 
             var liteExp = exp as LiteReferenceExpression;
             if (liteExp == null)
-                throw new InvalidCastException("Impossible to convert expression to Lite: {0}".Formato(exp.ToString()));
+                throw new InvalidCastException("Impossible to convert expression to Lite: {0}".FormatWith(exp.ToString()));
 
             return liteExp.Reference; 
         }

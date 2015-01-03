@@ -359,7 +359,7 @@ WriteAttribute("id", Tuple.Create(" id=\"", 3090), Tuple.Create("\"", 3127)
 WriteAttribute("title", Tuple.Create(" title=\"", 3128), Tuple.Create("\"", 3289)
             
             #line 60 "..\..\Signum\Views\SearchControl.cshtml"
-                                             , Tuple.Create(Tuple.Create("", 3136), Tuple.Create<System.Object, System.Int32>(SearchMessage.CreateNew0_G.NiceToString().ForGenderAndNumber().Formato(implementations.IsByAll ? "?" : implementations.Types.CommaOr(a => a.NiceName()))
+                                             , Tuple.Create(Tuple.Create("", 3136), Tuple.Create<System.Object, System.Int32>(SearchMessage.CreateNew0_G.NiceToString().ForGenderAndNumber().FormatWith(implementations.IsByAll ? "?" : implementations.Types.CommaOr(a => a.NiceName()))
             
             #line default
             #line hidden

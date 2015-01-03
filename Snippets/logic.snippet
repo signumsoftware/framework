@@ -38,9 +38,9 @@
 			<Code Language="csharp">
 				<![CDATA[public static class $entityName$Logic
     {
-        static Expression<Func<$entityName$DN, int>> $methodName$Expression = 
+        static Expression<Func<$entityName$Entity, int>> $methodName$Expression = 
             $entityParam$ => $end$; 
-        public static int $methodName$(this $entityName$DN $entityParam$)
+        public static int $methodName$(this $entityName$Entity $entityParam$)
         {
             return $methodName$Expression.Evaluate($entityParam$);
         }
@@ -49,10 +49,10 @@
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<$entityName$DN>();
+                sb.Include<$entityName$Entity>();
 
-                dqm.RegisterQuery(typeof($entityName$DN), ()=>
-                    from $entityParam$ in Database.Query<$entityName$DN>()
+                dqm.RegisterQuery(typeof($entityName$Entity), ()=>
+                    from $entityParam$ in Database.Query<$entityName$Entity>()
                     select new
                     {
                         Entity = $entityParam$,
@@ -60,9 +60,9 @@
                         //More fields
                     });
 
-                dqm.RegisterExpression(($entityName$DN $entityParam$) => $entityParam$.$methodName$());
+                dqm.RegisterExpression(($entityName$Entity $entityParam$) => $entityParam$.$methodName$());
                 
-                new Graph<$entityName$DN>.Execute($entityName$Operation.Save)
+                new Graph<$entityName$Entity>.Execute($entityName$Operation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
