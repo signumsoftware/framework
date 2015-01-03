@@ -333,6 +333,8 @@ namespace Signum.Engine.Maps
         public event Func<Replacements, SqlPreCommand> Synchronizing;
         public SqlPreCommand SynchronizationScript(bool interactive = true, bool schemaOnly = false, string replaceDatabaseName = null)
         {
+            OnBeforeDatabaseAccess();
+
             if (Synchronizing == null)
                 return null;
 
@@ -362,6 +364,8 @@ namespace Signum.Engine.Maps
         public event Func<SqlPreCommand> Generating;
         internal SqlPreCommand GenerationScipt()
         {
+            OnBeforeDatabaseAccess();
+
             if (Generating == null)
                 return null;
 
@@ -376,22 +380,6 @@ namespace Signum.Engine.Maps
         }
 
 
-        public event Action Initializing;
-
-        public void Initialize()
-        {
-            if (SchemaCompleted != null)
-                throw new InvalidOperationException("OnSchemaCompleted has to be call at the end of the Start method"); 
-
-            if (Initializing == null)
-                return;
-
-            using (ExecutionMode.Global())
-                foreach (var item in Initializing.GetInvocationListTyped())
-                    item();
-
-            Initializing = null;
-        }
 
         public event Action SchemaCompleted;
 
@@ -405,6 +393,40 @@ namespace Signum.Engine.Maps
                     item();
 
             SchemaCompleted = null;
+        }
+
+
+        public event Action BeforeDatabaseAccess;
+
+        public void OnBeforeDatabaseAccess()
+        {
+            if (SchemaCompleted != null)
+                throw new InvalidOperationException("OnSchemaCompleted has to be call at the end of the Start method");
+
+            if (BeforeDatabaseAccess == null)
+                return;
+
+            using (ExecutionMode.Global())
+                foreach (var item in BeforeDatabaseAccess.GetInvocationListTyped())
+                    item();
+
+            BeforeDatabaseAccess = null;
+        }
+
+        public event Action Initializing;
+
+        public void Initialize()
+        {
+            OnBeforeDatabaseAccess();
+
+            if (Initializing == null)
+                return;
+
+            using (ExecutionMode.Global())
+                foreach (var item in Initializing.GetInvocationListTyped())
+                    item();
+
+            Initializing = null;
         }
 
         #endregion
