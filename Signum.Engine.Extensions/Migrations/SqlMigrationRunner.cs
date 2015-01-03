@@ -147,8 +147,6 @@ namespace Signum.Engine.Migrations
                 if (autoRun || !SafeConsole.Ask("Create new migration?"))
                     return false;
 
-                CacheLogic.StartSqlDependencyAndEnableBrocker();
-
                 var script = Schema.Current.SynchronizationScript(interactive: true, replaceDatabaseName: DatabaseNameReplacement);
 
                 if (script == null)
