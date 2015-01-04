@@ -395,6 +395,14 @@ namespace Signum.Engine.Maps
             SchemaCompleted = null;
         }
 
+        public void WhenIncluded<T>(Action action) where T: Entity
+        {
+            SchemaCompleted += () =>
+            {
+                if (this.Tables.ContainsKey(typeof(T)))
+                    action();
+            };
+        }
 
         public event Action BeforeDatabaseAccess;
 
