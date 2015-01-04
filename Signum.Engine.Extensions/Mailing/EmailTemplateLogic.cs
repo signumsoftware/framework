@@ -102,6 +102,20 @@ namespace Signum.Engine.Mailing
             return emailTemplates;
         }
 
+        public static EmailTemplateEntity ParseData(this EmailTemplateEntity emailTemplate)
+        {
+            if (!emailTemplate.IsNew || emailTemplate.queryName == null)
+                throw new InvalidOperationException("emailTemplate should be new and have queryName");
+
+            emailTemplate.Query = QueryLogic.GetQueryEntity(emailTemplate.queryName);
+
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(emailTemplate.queryName);
+
+            emailTemplate.ParseData(description);
+
+            return emailTemplate;
+        }
+
         static void EmailTemplateLogic_Retrieved(EmailTemplateEntity emailTemplate)
         {
             using (emailTemplate.DisableAuthorization ? ExecutionMode.Global() : null)

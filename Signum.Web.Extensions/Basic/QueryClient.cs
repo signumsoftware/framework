@@ -19,8 +19,6 @@ namespace Signum.Web.Basic
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.RegisterArea(typeof(QueryClient));
-
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<QueryEntity> 

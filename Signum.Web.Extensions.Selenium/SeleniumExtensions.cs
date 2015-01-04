@@ -59,7 +59,7 @@ namespace Signum.Web.Selenium
 
         public static IWebElement WaitElementPresent(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
-            return selenium.Wait(() => selenium.FindElement(locator),
+            return selenium.Wait(() => selenium.FindElements(locator).FirstOrDefault(),
                 actionDescription ?? (Func<string>)(() => "{0} to be present".FormatWith(locator)), timeout);
         }
 
@@ -88,7 +88,7 @@ namespace Signum.Web.Selenium
 
         public static IWebElement WaitElementVisible(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
-            return selenium.Wait(() => { var result = selenium.FindElement(locator); return result.Displayed ? result : null; },
+            return selenium.Wait(() => selenium.FindElements(locator).FirstOrDefault(a => a.Displayed),
                 actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout);
         }
 

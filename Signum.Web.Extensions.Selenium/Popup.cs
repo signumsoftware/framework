@@ -26,6 +26,14 @@ namespace Signum.Web.Selenium
             this.WaitVisible();
         }
 
+        private By BackdropLocator
+        {
+            get
+            {
+                return By.XPath("//*[@id='" + PopupId(this.Prefix) + "']/following-sibling::div[@class='modal-backdrop fade in']");
+            }
+        }
+
         public By PopupLocator
         {
             get { return By.CssSelector("#{0}_panelPopup".FormatWith(Prefix)); }
@@ -38,22 +46,24 @@ namespace Signum.Web.Selenium
 
         public bool AvoidClose { get; set; }
 
-        [DebuggerStepThrough]
         public virtual void Dispose()
         {
             if (!AvoidClose)
             {
                 try
                 {
-                    Selenium.FindElement(CloseButtonLocator).Click();
+                    var button = Selenium.FindElements(CloseButtonLocator).SingleOrDefaultEx();
+                    if (button != null && button.Displayed)
+                        button.Click();
                 }
                 catch (ElementNotVisibleException)
                 {
                 }
-                catch (NoSuchElementException)
+                catch (StaleElementReferenceException)
                 {
                 }
 
+                Selenium.WaitElementNotVisible(BackdropLocator);
                 Selenium.WaitElementNotVisible(PopupLocator);
             }
 
