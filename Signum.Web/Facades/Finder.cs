@@ -118,14 +118,12 @@ namespace Signum.Web
         public Dictionary<object, QuerySettings> QuerySettings { get; set; }
         protected Dictionary<string, object> WebQueryNames { get; private set; }
 
-       
-
         public FinderManager()
         {
             QuerySettings = new Dictionary<object, QuerySettings>();
         }
 
-         public event Action Initializing;
+        public event Action Initializing;
         public bool Initialized { get; private set; }
 
         internal void Initialize()
@@ -244,7 +242,9 @@ namespace Signum.Web
             {
                 var orderType = entityColumn.Implementations.Value.Types.All(t => EntityKindCache.GetEntityData(t) == EntityData.Master) ? OrderType.Ascending : OrderType.Descending;
 
-                var column = description.Columns.SingleOrDefaultEx(c => c.Name == "Id");
+                var settings = Finder.QuerySettings(description.QueryName);
+                
+                var column = description.Columns.SingleOrDefaultEx(c => c.Name == settings.DefaultOrderColumn);
 
                 if (column != null)
                 {

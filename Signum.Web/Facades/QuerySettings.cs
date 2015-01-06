@@ -22,10 +22,13 @@ namespace Signum.Web
 
         public bool IsFindable { get; set; }
 
+        public string DefaultOrderColumn { get; set; }
+
         public QuerySettings(object queryName)
         {
             this.QueryName = queryName;
             this.IsFindable = true;
+            this.DefaultOrderColumn = "Id";
         }
 
         public static List<FormatterRule> FormatRules { get; set; }
