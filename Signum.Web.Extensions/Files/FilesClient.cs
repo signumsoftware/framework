@@ -30,6 +30,10 @@ namespace Signum.Web.Files
 
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Files/Scripts/Files");
 
+        public delegate F FileConstructor<out F>(string fileName, byte[] content, string fileType, string extraData) where F : class, IFile;
+
+        public static Dictionary<Type, FileConstructor<IFile>> FileConstructors = new Dictionary<Type,FileConstructor<IFile>>();
+
         public static void Start(bool filePath, bool file, bool embeddedFile)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -47,6 +51,14 @@ namespace Signum.Web.Files
 
                 if (filePath)
                 {
+                    RegisterFileConstructor<FilePathEntity>((fileName, content, fileType, extraData) =>
+                    {
+                        if (!fileType.HasText())
+                            throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".FormatWith(fileName));
+
+                        return new FilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType)) { FileName = fileName, BinaryFile = content }.Save();
+                    });
+
                     Navigator.AddSettings(new List<EntitySettings>
                     {
                         new EntitySettings<FileRepositoryEntity>{ PartialViewName = e => ViewPrefix.FormatWith("FileRepository")},
@@ -99,6 +111,11 @@ namespace Signum.Web.Files
 
                 if (file)
                 {
+                    RegisterFileConstructor<FileEntity>((fileName, content, fileType, extraData) =>
+                    {
+                        return new FileEntity { FileName = fileName, BinaryFile = content }.Save();
+                    });
+
                     var es = new EntitySettings<FileEntity>();
                     Navigator.AddSetting(es);
 
@@ -144,6 +161,11 @@ namespace Signum.Web.Files
 
                 if (embeddedFile)
                 {
+                    RegisterFileConstructor<EmbeddedFileEntity>((fileName, content, fileType, extraData) =>
+                    {
+                        return new EmbeddedFileEntity { FileName = fileName, BinaryFile = content };
+                    });
+
                     var es = new EmbeddedEntitySettings<EmbeddedFileEntity>();
                     Navigator.AddSetting(es);
 
@@ -197,6 +219,11 @@ namespace Signum.Web.Files
 
         }
 
+        public static void RegisterFileConstructor<T>(FileConstructor<T> file) where T: class, IFile 
+        {
+            FileConstructors.Add(typeof(T), file);
+        }
+
         private static HttpPostedFileBase GetHttpRequestFile(MappingContext ctx)
         {
             string fileKey = TypeContextUtilities.Compose(ctx.Prefix, FileLineKeys.File);
@@ -225,6 +252,10 @@ namespace Signum.Web.Files
             return null;
         }
 
+        public static IFile ConstructFile(Type type, string fileName, byte[] bytes, string fileType, string extraData)
+        {
+            return FileConstructors.GetOrThrow(type)(fileName, bytes, fileType, extraData);
+        }
     }
 
 }

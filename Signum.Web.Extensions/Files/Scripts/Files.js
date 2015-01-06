@@ -71,6 +71,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             xhr.setRequestHeader("X-Prefix", this.options.prefix);
             xhr.setRequestHeader("X-" + this.options.prefix.child(Entities.Keys.runtimeInfo), Entities.RuntimeInfo.getFromPrefix(this.options.prefix).toString());
             xhr.setRequestHeader("X-sfFileType", this.options.fileType);
+            xhr.setRequestHeader("X-sfExtraData", this.options.extraData);
             xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
             var extraParams = {};
@@ -85,9 +86,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var self = this;
             xhr.onload = function (e) {
-                var result = JSON.parse(xhr.responseText);
+                try  {
+                    var result = JSON.parse(xhr.responseText);
 
-                self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
+                    self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
+                } catch (ex) {
+                    self.onUploadFailed();
+                }
             };
 
             xhr.onerror = function (e) {
@@ -134,6 +139,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $divNew.after($clonedDivNew).appendTo($fileForm); //if not attached to our DOM first there are problems with filename
 
             $("<input type='hidden' name='" + this.options.prefix + "_sfFileType' value='" + this.options.fileType + "'/>").appendTo($fileForm);
+            $("<input type='hidden' name='" + this.options.prefix + "_sfExtraData' value='" + this.options.extraData + "'/>").appendTo($fileForm);
 
             var extraParams = {};
             SF.addAjaxExtraParameters(extraParams);
@@ -151,9 +157,20 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $fileForm.submit().remove();
         };
 
+        FileLine.prototype.bla = function () {
+            alert("here I am!");
+        };
+
         FileLine.prototype.createTargetIframe = function () {
+            var _this = this;
             var name = this.options.prefix.child("frame");
-            return $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>").appendTo($("body"));
+            var result = $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'>" + "</iframe > ").appendTo($("body"));
+
+            result[0].contentWindow.onerror = function (e) {
+                return _this.onUploadFailed();
+            };
+
+            return result;
         };
 
         FileLine.prototype.setEntitySpecific = function (entityValue, itemPrefix) {
@@ -175,6 +192,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.setEntity(new Entities.EntityValue(Entities.RuntimeInfo.parse(runtimeInfo), fileName, link));
 
             this.prefix.child(Entities.Keys.entityState).tryGet().val(entityState);
+
+            this.prefix.child("frame").tryGet().remove();
+        };
+
+        FileLine.prototype.onUploadFailed = function () {
+            this.setEntity(null);
+
+            this.prefix.child(Entities.Keys.entityState).tryGet().val(null);
 
             this.prefix.child("frame").tryGet().remove();
         };
