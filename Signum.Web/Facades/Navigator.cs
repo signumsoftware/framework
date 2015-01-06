@@ -79,7 +79,7 @@ namespace Signum.Web
 
         public static JsonNetResult JsonNet(this ControllerBase controller, object data, JsonSerializerSettings settings = null)
         {
-            var result = new JsonNetResult { Data = data };
+            var result = new JsonNetResult(data);
 
             if (settings != null)
                 result.SerializerSettings = settings;
@@ -858,14 +858,11 @@ namespace Signum.Web
 
         public static JsonNetResult RedirectAjax(string url)
         {
-            return new JsonNetResult
+            return new JsonNetResult(new
             {
-                Data = new
-                {
-                    result = JsonResultType.url.ToString(),
-                    url = url
-                }
-            };
+                result = JsonResultType.url.ToString(),
+                url = url
+            });
         }
 
         public static JsonNetResult ToJsonModelState(this ModelStateDictionary dictionary)
@@ -904,6 +901,12 @@ namespace Signum.Web
 
         public JsonNetResult()
         {
+            SerializerSettings = new JsonSerializerSettings();
+        }
+
+        public JsonNetResult(object data)
+        {
+            Data = data;
             SerializerSettings = new JsonSerializerSettings();
         }
 
