@@ -224,7 +224,7 @@ namespace Signum.Web.Auth
             using (AuthLogic.Disable())
             {
                 TempData["ResetPasswordRequest"] = Database.Query<ResetPasswordRequestEntity>()
-                  .Where(r => r.User.Email == email && r.Code == code)
+                  .Where(r => r.User.Email == email && r.Code == code && !r.Lapsed)
                   .SingleOrDefaultEx(() => AuthMessage.TheConfirmationCodeThatYouHaveJustSentIsInvalid.NiceToString());
             }
 

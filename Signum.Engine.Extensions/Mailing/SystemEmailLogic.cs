@@ -12,6 +12,8 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Isolation;
+using Signum.Engine.Isolation;
 
 namespace Signum.Engine.Mailing
 {
@@ -65,14 +67,14 @@ namespace Signum.Engine.Mailing
         class SystemEmailInfo
         {
             public Func<EmailTemplateEntity> DefaultTemplateConstructor;
-            public object QueryName; 
+            public object QueryName;
         }
 
         static ResetLazy<Dictionary<Lite<SystemEmailEntity>, List<EmailTemplateEntity>>> SystemEmailsToEmailTemplates;
         static Dictionary<Type, SystemEmailInfo> systemEmails = new Dictionary<Type, SystemEmailInfo>();
         static ResetLazy<Dictionary<Type, SystemEmailEntity>> systemEmailToEntity;
         static ResetLazy<Dictionary<SystemEmailEntity, Type>> systemEmailToType;
-     
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -153,7 +155,7 @@ namespace Signum.Engine.Mailing
         public static void RegisterSystemEmail(Type model, Func<EmailTemplateEntity> defaultTemplateConstructor, object queryName = null)
         {
             if (defaultTemplateConstructor == null)
-                throw new ArgumentNullException("defaultTemplateConstructor"); 
+                throw new ArgumentNullException("defaultTemplateConstructor");
 
             systemEmails[model] = new SystemEmailInfo
             {
@@ -166,7 +168,7 @@ namespace Signum.Engine.Mailing
         {
             var baseType = model.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemEmail<>)));
 
-            if(baseType != null)
+            if (baseType != null)
             {
                 return baseType.GetGenericArguments()[0];
             }
@@ -177,10 +179,10 @@ namespace Signum.Engine.Mailing
         internal static List<SystemEmailEntity> GenerateTemplates()
         {
             var list = (from type in systemEmails.Keys
-                         select new SystemEmailEntity
-                         {
+                        select new SystemEmailEntity
+                        {
                              FullClassName = type.FullName
-                         }).ToList();
+                        }).ToList();
             return list;
         }
 
@@ -207,20 +209,27 @@ namespace Signum.Engine.Mailing
 
         public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this ISystemEmail systemEmail)
         {
+
             if (systemEmail.UntypedEntity == null)
                 throw new InvalidOperationException("Entity property not set on SystemEmail");
 
-            var systemEmailEntity = ToSystemEmailEntity(systemEmail.GetType());
-            var template = GetDefaultTemplate(systemEmailEntity);
+            using (IsolationEntity.Override(systemEmail.UntypedEntity.TryIsolation()))
+            {
+                var systemEmailEntity = ToSystemEmailEntity(systemEmail.GetType());
+                var template = GetDefaultTemplate(systemEmailEntity);
 
-            return EmailTemplateLogic.CreateEmailMessage(template.ToLite(), systemEmail.UntypedEntity, systemEmail);
+                return EmailTemplateLogic.CreateEmailMessage(template.ToLite(), systemEmail.UntypedEntity, systemEmail);
+            }
         }
 
         private static EmailTemplateEntity GetDefaultTemplate(SystemEmailEntity systemEmailEntity)
         {
             var list = SystemEmailsToEmailTemplates.Value.TryGetC(systemEmailEntity.ToLite()); 
 
-            if(list.IsNullOrEmpty())
+			if(IsolationLogic.GetStrategy(typeof(EmailTemplateEntity)) == IsolationStrategy.Isolated && IsolationEntity.Current != null)
+				list = list.Where(e => e.Isolation().Is(IsolationEntity.Current)).ToList();
+
+            if (list.IsNullOrEmpty())
             {
                 using (Transaction tr = Transaction.ForceNew())
                 {

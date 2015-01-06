@@ -113,7 +113,7 @@ namespace Signum.Web.Selenium
 
         public virtual void Logout()
         {
-            selenium.FindElement(By.CssSelector("a[href$='Auth/Logout']")).Click();
+            selenium.FindElement(By.CssSelector("a[href$='Auth/Logout']")).ButtonClick();
             selenium.Wait(() => GetCurrentUser() == null);
 
             selenium.Url = Url("Auth/Login");

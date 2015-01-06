@@ -62,6 +62,8 @@ namespace Signum.Engine.Cache
                     throw new InvalidOperationException("Sql Dependency is not supported by the current connection");
 
                 WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
+
+                sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
             }
         }
 
@@ -230,13 +232,13 @@ namespace Signum.Engine.Cache
 
                         try
                         {
-                        if (ex.Message.Contains("SQL Server Service Broker"))
+                            if (ex.Message.Contains("SQL Server Service Broker"))
                             {
                                 EnableOrCreateBrocker(databaseName);
 
                                 SqlDependency.Start(sub.ConnectionString);
-                    }
-                }
+                            }
+                        }
                         catch (Exception)
                         {
                             throw EnableBlockerException(databaseName);
@@ -250,7 +252,7 @@ namespace Signum.Engine.Cache
             }
         }
 
-        private static void EnableOrCreateBrocker(string databaseName)
+        static void EnableOrCreateBrocker(string databaseName)
         {
             try
             {

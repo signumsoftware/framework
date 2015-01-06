@@ -11,6 +11,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Entities;
 using Signum.Utilities;
 using System.IO;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Authorization
 {
@@ -43,7 +44,15 @@ namespace Signum.Engine.Authorization
                     });
 
                 dqm.RegisterExpression((UserEntity u) => u.UserTickets(), () => typeof(UserTicketEntity).NicePluralName());
+
+                sb.Schema.EntityEvents<UserEntity>().Saving += UserTicketLogic_Saving; 
             }
+        }
+
+        static void UserTicketLogic_Saving(UserEntity user)
+        {
+            if (!user.IsNew && user.IsGraphModified & user.InDBEntity(u => u.PasswordHash != user.PasswordHash))
+                user.UserTickets().UnsafeDelete();
         }
 
         static Expression<Func<UserEntity, IQueryable<UserTicketEntity>>> UserTicketsExpression =

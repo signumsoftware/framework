@@ -30,5 +30,12 @@ namespace Signum.Entities.Authorization
             get { return requestDate; }
             set { Set(ref requestDate, value); }
         }
+
+        bool lapsed;
+        public bool Lapsed
+        {
+            get { return lapsed; }
+            set { Set(ref lapsed, value); }
+        }
     }
 }

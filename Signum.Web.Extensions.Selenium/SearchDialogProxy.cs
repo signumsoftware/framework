@@ -27,6 +27,9 @@ namespace Signum.Web.Selenium
 
         public void SelectLite(Lite<IEntity> lite)
         {
+            if (!this.SearchControl.FiltersVisible)
+                this.SearchControl.ToggleFilters(true);
+
             this.SearchControl.Filters.AddFilter("Id", FilterOperation.EqualTo, lite.Id);
 
             this.SearchControl.Search();
@@ -336,6 +339,11 @@ namespace Signum.Web.Selenium
         public By MenuOptionLocatorByAttr(string optionLocator)
         {
             return By.CssSelector("#{0}sfSearchControl a[{1}]".FormatWith(PrefixUnderscore, optionLocator));
+        }
+
+        public bool FiltersVisible
+        {
+            get { return this.Selenium.IsElementVisible(this.FiltersPanelLocator); }
         }
     }
 
