@@ -28,10 +28,10 @@ namespace Signum.Engine.UserAssets
 
             Func<string, string> rep = str =>
             {
-                if (Replacements.AutoRepacement == null)
+                if (Replacements.AutoReplacement == null)
                     return null;
 
-                Replacements.Selection? sel = Replacements.AutoRepacement(str, null);
+                Replacements.Selection? sel = Replacements.AutoReplacement(str, null);
 
                 if (sel == null || sel.Value.NewValue == null)
                     return null;
@@ -92,9 +92,9 @@ namespace Signum.Engine.UserAssets
                     }
 
 
-                    if (Replacements.AutoRepacement != null)
+                    if (Replacements.AutoReplacement != null)
                     {
-                        Replacements.Selection? sel = Replacements.AutoRepacement(part, result.SubTokens(qd, options).Select(a => a.Key).ToList());
+                        Replacements.Selection? sel = Replacements.AutoReplacement(part, result.SubTokens(qd, options).Select(a => a.Key).ToList());
 
                         if (sel != null && sel.Value.NewValue != null)
                         {
@@ -199,9 +199,9 @@ namespace Signum.Engine.UserAssets
                 }
             }
 
-            if (Replacements.AutoRepacement != null)
+            if (Replacements.AutoReplacement != null)
             {
-                Replacements.Selection? sel = Replacements.AutoRepacement(valueString, null);
+                Replacements.Selection? sel = Replacements.AutoReplacement(valueString, null);
 
                 if (sel != null && sel.Value.NewValue != null)
                 {
@@ -242,9 +242,9 @@ namespace Signum.Engine.UserAssets
         {
             return replacements.GetOrCreate("cleanNames").GetOrCreate(type, () =>
             {
-                if (Replacements.AutoRepacement != null)
+                if (Replacements.AutoReplacement != null)
                 {
-                    Replacements.Selection? sel = Replacements.AutoRepacement(type, null);
+                    Replacements.Selection? sel = Replacements.AutoReplacement(type, null);
 
                     if (sel != null && sel.Value.NewValue != null)
                         return sel.Value.NewValue;
