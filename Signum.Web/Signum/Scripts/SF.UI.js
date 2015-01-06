@@ -1,5 +1,4 @@
-﻿/// <reference path="SF.ts"/>
-/// <reference path="../Headers/bootstrap/bootstrap.d.ts"/>
+﻿/// <reference path="../Headers/bootstrap/bootstrap.d.ts"/>
 /// <reference path="../Headers/bootstrap/bootstrap.datepicker.d.ts"/>
 /// <reference path="../Headers/bootstrap/bootstrap.timepicker.d.ts"/>
 
@@ -170,6 +169,23 @@ var SF;
         element.closest(".sf-main-control").addClass("sf-changed");
     }
     SF.setHasChanges = setHasChanges;
+
+    function getDateTime(dateTimePickerId) {
+        var date = dateTimePickerId.child("Date").get();
+        var time = dateTimePickerId.child("Time").get();
+
+        return date.val() + " " + time.val();
+    }
+    SF.getDateTime = getDateTime;
+
+    function setDateTime(dateTimePickerId, value) {
+        var date = dateTimePickerId.child("Date").get();
+        var time = dateTimePickerId.child("Time").get();
+
+        date.val(SF.isEmpty(value) ? "" : value.before(" "));
+        time.val(SF.isEmpty(value) ? "" : value.after(" "));
+    }
+    SF.setDateTime = setDateTime;
 })(SF || (SF = {}));
 
 $(function () {

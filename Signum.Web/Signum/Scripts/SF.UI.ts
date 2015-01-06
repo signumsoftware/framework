@@ -1,5 +1,4 @@
-﻿/// <reference path="SF.ts"/>
-/// <reference path="../Headers/bootstrap/bootstrap.d.ts"/>
+﻿/// <reference path="../Headers/bootstrap/bootstrap.d.ts"/>
 /// <reference path="../Headers/bootstrap/bootstrap.datepicker.d.ts"/>
 /// <reference path="../Headers/bootstrap/bootstrap.timepicker.d.ts"/>
 
@@ -174,6 +173,25 @@ module SF {
 
         element.closest(".sf-main-control").addClass("sf-changed");
     }
+
+    export function getDateTime(dateTimePickerId: string): string {
+        var date = dateTimePickerId.child("Date").get();
+        var time = dateTimePickerId.child("Time").get();
+
+        return date.val() + " " + time.val();
+    }
+
+    export function setDateTime(dateTimePickerId: string, value: string): void {
+
+        var date = dateTimePickerId.child("Date").get();
+        var time = dateTimePickerId.child("Time").get();
+
+        date.val(SF.isEmpty(value) ? "" : value.before(" "));
+        time.val(SF.isEmpty(value) ? "" : value.after(" "));
+    }
+
+
+
 }
 
 
@@ -369,5 +387,4 @@ once("dateTimePickerSync", () => {
         });
     });
 });
-
 
