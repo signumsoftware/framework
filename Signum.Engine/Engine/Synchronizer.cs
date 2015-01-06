@@ -272,18 +272,18 @@ namespace Signum.Engine
             return sel.NewValue;
         }
 
-        public static Func<string, List<string>, Selection?> AutoRepacement; 
+        public static Func<string, List<string>, Selection?> AutoReplacement; 
 
         private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
         {
-            if (AutoRepacement != null)
+            if (AutoReplacement != null)
             {
-                Selection? selection = AutoRepacement(oldValue, newValues);
+                Selection? selection = AutoReplacement(oldValue, newValues);
                 if (selection != null)
                 {
                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "AutoReplacement:");
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "\tOLD " + selection.Value.OldValue);
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkGreen, "\tNEW " + selection.Value.NewValue);
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, " OLD " + selection.Value.OldValue);
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkGreen, " NEW " + selection.Value.NewValue);
                     return selection.Value;
                 }
             }
