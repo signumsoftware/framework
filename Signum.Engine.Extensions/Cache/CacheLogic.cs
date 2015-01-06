@@ -213,8 +213,12 @@ namespace Signum.Engine.Cache
 
                     foreach (var s in staleServices)
                     {
-                        new SqlPreCommandSimple("DROP SERVICE [{0}]".FormatWith(s)).ExecuteNonQuery();
-                        new SqlPreCommandSimple("DROP QUEUE [{0}]".FormatWith(s)).ExecuteNonQuery();
+                        try
+                        {
+                            new SqlPreCommandSimple("DROP SERVICE [{0}]".FormatWith(s)).ExecuteNonQuery();
+                            new SqlPreCommandSimple("DROP QUEUE [{0}]".FormatWith(s)).ExecuteNonQuery();
+                        }
+                        catch { }
                     }
                 }
 
