@@ -306,6 +306,11 @@ namespace Signum.Web
 
             return new MvcHtmlString(JsonConvert.SerializeObject(value, settings));
         }
+
+        public static MvcHtmlString Lambda(this HtmlHelper html, Func<object, HelperResult> lambda)
+        {
+            return MvcHtmlString.Create(lambda(null).ToHtmlString());
+        }
     }
 }
 
