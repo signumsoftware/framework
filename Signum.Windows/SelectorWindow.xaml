@@ -18,7 +18,7 @@
             <ItemsControl x:Name="itemsControl" ItemsSource="{Binding Elements, ElementName=win}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <ToggleButton Checked="ToggleButton_Checked" Padding="3" AutomationProperties.Name="{Binding Element}">
+                        <ToggleButton Checked="ToggleButton_Checked" Padding="3" AutomationProperties.Name="{Binding Element}" ToolTip="{Binding ToolTipText}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Source="{Binding Image}" VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding Text}" FontSize="12" Margin="10,0" VerticalAlignment="Center"/>

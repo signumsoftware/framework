@@ -281,7 +281,9 @@ namespace Signum.Engine
                 Selection? selection = AutoRepacement(oldValue, newValues);
                 if (selection != null)
                 {
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "AutoReplacement: {0} -> {1}", selection.Value.OldValue, selection.Value.NewValue);
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "AutoReplacement:");
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "\tOLD " + selection.Value.OldValue);
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkGreen, "\tNEW " + selection.Value.NewValue);
                     return selection.Value;
                 }
             }
