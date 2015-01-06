@@ -76,7 +76,7 @@ namespace Signum.Web
                 sb.AddLine(entityStrip.ConstructorScript(JsModule.Lines, "EntityStrip"));
             }
 
-            return helper.FormGroup(entityStrip, entityStrip.Prefix, entityStrip.LabelText, sb.ToHtml());
+            return helper.FormGroup(entityStrip, entityStrip.Prefix, entityStrip.LabelHtml ?? entityStrip.LabelText.FormatHtml(), sb.ToHtml());
         }
 
         private static MvcHtmlString InternalStripElement<T>(this HtmlHelper helper, TypeElementContext<T> itemTC, EntityStrip entityStrip)

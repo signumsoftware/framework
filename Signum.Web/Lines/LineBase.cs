@@ -21,6 +21,7 @@ namespace Signum.Web
             this.untypedValue = untypedValue; 
         }
 
+        public MvcHtmlString LabelHtml { get; set; }
         public string LabelText { get; set; }
 
         public readonly RouteValueDictionary LabelHtmlProps = new RouteValueDictionary();
