@@ -292,7 +292,7 @@ namespace Signum.Web
         {
             var encoded = HttpUtility.HtmlEncode(text);
 
-            if (values == null)
+            if (values == null || values.Length == 0)
                 return new MvcHtmlString(encoded);
 
             return new MvcHtmlString(string.Format(encoded,
