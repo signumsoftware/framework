@@ -84,6 +84,9 @@ namespace Signum.Engine.Migrations
                 }
                 catch (MigrationException)
                 {
+                    if (autoRun)
+                        throw;
+
                     return true;
                 }
             }
@@ -154,11 +157,6 @@ namespace Signum.Engine.Migrations
 
         }
 
-        [Serializable]
-        class MigrationException : Exception
-        {
-            public MigrationException() { }
-        }
 
         public IEnumerator<CSharpMigrationRunner.MigrationInfo> GetEnumerator()
         {

@@ -335,11 +335,5 @@ namespace Signum.Engine.Migrations
             }
 
         }
-
-        [Serializable]
-        class MigrationException : Exception
-        {
-            public MigrationException() { }
-        }
     }
 }
