@@ -243,10 +243,25 @@ namespace Signum.Engine.Cache
                                 SqlDependency.Start(sub.ConnectionString);
                             }
                         }
-                        catch (Exception)
+                        catch (Exception e)
                         {
-                            throw EnableBlockerException(databaseName);
+                            throw new InvalidOperationException(@"CacheLogic requires SQL Server Service Broker to be activated. Execute: 
+ALTER DATABASE {0} SET ENABLE_BROKER
+If you have problems, try first: 
+ALTER DATABASE {0} SET NEW_BROKER".FormatWith(database), e);
                         }
+                    }
+                    catch (SqlException e)
+                    {
+                        if (e.Number == 2797)
+                        {
+                            string currentUser = (string)Executor.ExecuteDataTable("SELECT CURRENT_USER").Rows[0][0];
+
+                            Executor.ExecuteNonQuery("ALTER USER [{0}]  WITH DEFAULT_SCHEMA = dbo;".FormatWith(currentUser));
+
+                            SqlDependency.Start(sub.ConnectionString);
+                        }
+                        else throw e;
                     }
                 }
 
@@ -293,14 +308,6 @@ namespace Signum.Engine.Cache
             AppDomain.CurrentDomain.DomainUnload += (o, a) => Shutdown();
 
             registered = true;
-        }
-
-        private static InvalidOperationException EnableBlockerException(string database)
-        {
-            return new InvalidOperationException(@"CacheLogic requires SQL Server Service Broker to be activated. Execute: 
-ALTER DATABASE {0} SET ENABLE_BROKER
-If you have problems, try first: 
-ALTER DATABASE {0} SET NEW_BROKER".FormatWith(database));
         }
 
         public static void Shutdown()
