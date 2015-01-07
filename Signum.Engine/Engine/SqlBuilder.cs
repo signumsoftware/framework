@@ -403,13 +403,13 @@ FROM {1} as [table]".FormatWith(
 
             string varName = "Constraint_" + tableName.Name + "_" + columnName;
 
-            string command = @"
-DECLARE @sql nvarchar(max)
+            string command = @"DECLARE @sql nvarchar(max)
 SELECT  @sql = 'ALTER TABLE {Table} DROP CONSTRAINT [' + dc.name  + '];' 
 FROM DB.sys.default_constraints dc
 JOIN DB.sys.columns c ON dc.parent_object_id = c.object_id AND dc.parent_column_id = c.column_id
 WHERE c.object_id = OBJECT_ID('{FullTable}') AND c.name = '{Column}'
-EXEC DB.dbo.sp_executesql @sql"
+EXEC DB.dbo.sp_executesql @sql
+"
                 .Replace("DB.", db == null ? null : (db.ToString() + "."))
                 .Replace("@sql", "@" + varName)
                 .Replace("{FullTable}", tableName.ToString())
