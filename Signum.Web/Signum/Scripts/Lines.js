@@ -113,7 +113,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.updateButtonsDisplay();
             this.notifyChanges(true);
             if (!SF.isEmpty(this.entityChanged)) {
-                this.entityChanged();
+                this.entityChanged(entityValue, itemPrefix);
             }
         };
 
@@ -592,7 +592,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.updateButtonsDisplay();
             this.notifyChanges(true);
             if (!SF.isEmpty(this.entityChanged)) {
-                this.entityChanged();
+                this.entityChanged(entityValue, itemPrefix);
             }
         };
 
@@ -637,7 +637,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.updateButtonsDisplay();
             this.notifyChanges(true);
             if (!SF.isEmpty(this.entityChanged)) {
-                this.entityChanged();
+                this.entityChanged(entityValue, itemPrefix);
             }
         };
 
@@ -651,7 +651,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.updateButtonsDisplay();
             this.notifyChanges(true);
             if (!SF.isEmpty(this.entityChanged)) {
-                this.entityChanged();
+                this.entityChanged(null, itemPrefix);
             }
         };
 

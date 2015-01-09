@@ -30,7 +30,7 @@ export class EntityBase {
     shownButton: JQuery;
     autoCompleter: EntityAutocompleter;
 
-    entityChanged: () => void;
+    entityChanged: (entityValue: Entities.EntityValue, itemPrefix?: string) => void;
     removing: (prefix: string) => Promise<boolean>;
     creating: (prefix: string) => Promise<Entities.EntityValue>;
     finding: (prefix: string) => Promise<Entities.EntityValue>;
@@ -157,7 +157,7 @@ export class EntityBase {
         this.updateButtonsDisplay();
         this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
-            this.entityChanged();
+            this.entityChanged(entityValue, itemPrefix);
         }
     }
 
@@ -645,7 +645,7 @@ export class EntityListBase extends EntityBase {
         this.updateButtonsDisplay();
         this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
-            this.entityChanged();
+            this.entityChanged(entityValue, itemPrefix);
         }
     }
 
@@ -684,7 +684,7 @@ export class EntityListBase extends EntityBase {
         this.updateButtonsDisplay();
         this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
-            this.entityChanged();
+            this.entityChanged(entityValue, itemPrefix);
         }
     }
 
@@ -698,7 +698,7 @@ export class EntityListBase extends EntityBase {
         this.updateButtonsDisplay();
         this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
-            this.entityChanged();
+            this.entityChanged(null, itemPrefix);
         }
     }
 
