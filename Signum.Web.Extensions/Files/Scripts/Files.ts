@@ -172,15 +172,9 @@ export class FileLine extends Lines.EntityBase {
         $fileForm.submit().remove();
     }
 
-    bla() {
-        alert("here I am!");
-    }
-
     createTargetIframe() {
         var name = this.options.prefix.child("frame");
-        var result = $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'>" +
-        //"<script>windows.parent.$('" + this.options.prefix+ "').SFControl().then(function(e){ e.bla();});<script>" +
-            "</iframe > ")
+        var result = $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>")
             .appendTo($("body"));
 
         (<any>result[0]).contentWindow.onerror = e=> this.onUploadFailed();

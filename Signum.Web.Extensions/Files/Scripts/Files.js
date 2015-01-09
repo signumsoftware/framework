@@ -157,14 +157,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $fileForm.submit().remove();
         };
 
-        FileLine.prototype.bla = function () {
-            alert("here I am!");
-        };
-
         FileLine.prototype.createTargetIframe = function () {
             var _this = this;
             var name = this.options.prefix.child("frame");
-            var result = $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'>" + "</iframe > ").appendTo($("body"));
+            var result = $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>").appendTo($("body"));
 
             result[0].contentWindow.onerror = function (e) {
                 return _this.onUploadFailed();
