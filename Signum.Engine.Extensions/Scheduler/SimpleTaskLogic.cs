@@ -14,7 +14,6 @@ using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using Signum.Entities.Authorization;
 using System.Linq.Expressions;
-using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Scheduler
 {

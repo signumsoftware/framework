@@ -16,7 +16,6 @@ using Signum.Entities.DynamicQuery;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Net.Mail;
-using Signum.Engine.Exceptions;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Templating;
 

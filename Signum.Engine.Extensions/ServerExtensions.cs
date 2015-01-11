@@ -21,7 +21,6 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Entities.SMS;
 using Signum.Engine.Chart;
-using Signum.Engine.Exceptions;
 using System.IO;
 using System.Xml;
 using Signum.Engine.Profiler;

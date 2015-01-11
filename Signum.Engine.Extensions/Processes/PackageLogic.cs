@@ -12,7 +12,6 @@ using Signum.Entities.Scheduler;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
-using Signum.Engine.Exceptions;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;

@@ -18,7 +18,6 @@ using Signum.Entities.Chart;
 using Signum.Entities.Basics;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
-using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Dashboard
 {

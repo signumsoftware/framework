@@ -16,7 +16,6 @@ using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
-using Signum.Engine.Exceptions;
 using System.Data.SqlClient;
 
 namespace Signum.Engine.Authorization

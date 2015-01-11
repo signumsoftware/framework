@@ -17,7 +17,6 @@ using Signum.Utilities;
 using Signum.Engine.UserAssets;
 using Signum.Entities.UserAssets;
 using Signum.Engine.ViewLog;
-using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.UserQueries
 {

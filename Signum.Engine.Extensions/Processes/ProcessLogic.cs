@@ -22,7 +22,6 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Signum.Engine.Scheduler;
 using System.Linq.Expressions;
-using Signum.Engine.Exceptions;
 using System.IO;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Cache;

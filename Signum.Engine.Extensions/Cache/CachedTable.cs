@@ -15,7 +15,6 @@ using System.Data.SqlClient;
 using Signum.Engine.Basics;
 using System.Diagnostics;
 using System.Threading;
-using Signum.Engine.Exceptions;
 using Signum.Utilities.ExpressionTrees;
 using System.Data;
 using Signum.Entities.Reflection;
