@@ -276,23 +276,31 @@ namespace Signum.Entities
         [HiddenProperty]
         public string Error
         {
-            get { return IntegrityCheck(); }
+            get { return IntegrityCheck().Try(a => a.Values.ToString("\r\n")); }
         }
 
-        public string IntegrityCheck()
+        public Dictionary<string, string> IntegrityCheck()
         {
             using (var log = HeavyProfiler.LogNoStackTrace("IntegrityCheck"))
             {
                 var validators = Validator.GetPropertyValidators(GetType());
 
-                return validators.Values.Select(pv =>
-                {
-                    var result = pv.PropertyCheck(this);
-                    if (result == null)
-                        return null;
+                Dictionary<string, string> result = null;
 
-                    return result; // place breakpoint here
-                }).NotNull().ToString("\r\n").DefaultText(null);
+                foreach (var pv in validators.Values)
+                {
+                    var error = pv.PropertyCheck(this);
+
+                    if (error != null)
+                    {
+                        if (result == null)
+                            result = new Dictionary<string, string>();
+
+                        result.Add(pv.PropertyInfo.Name, error);
+                    }
+                }
+
+                return result;
             }
         }
 
@@ -334,16 +342,10 @@ namespace Signum.Entities
             Validator.PropertyValidator(property).StaticPropertyValidation += validate;
         }
 
-        public string FullIntegrityCheck()
+        public Dictionary<Guid, Dictionary<string, string>> FullIntegrityCheck()
         {
             var graph = GraphExplorer.FromRoot(this);
-            return GraphExplorer.FullIntegrityCheck(graph, withIndependentEmbeddedEntities: !(this is Entity));
-        }
-
-        public Dictionary<ModifiableEntity, string> FullIntegrityCheckDictionary()
-        {
-            var graph = GraphExplorer.FromRoot(this);
-            return GraphExplorer.IntegrityDictionary(graph);
+            return GraphExplorer.FullIntegrityCheck(graph);
         }
 
         protected static string NicePropertyName<R>(Expression<Func<R>> property)
@@ -366,6 +368,29 @@ namespace Signum.Entities
         }
 
         #endregion
+
+
+        [Ignore]
+        internal Dictionary<string, string> temporalErrors;
+        internal void SetErrors(Dictionary<string, string> errors)
+        {
+            NotifyTemporalErrors();
+
+            this.temporalErrors = errors;
+
+            NotifyTemporalErrors();
+        }
+
+        private void NotifyTemporalErrors()
+        {
+            if (temporalErrors != null)
+            {
+                foreach (var e in temporalErrors.Keys)
+                    NotifyPrivate(e);
+
+                NotifyError();
+            }
+        }
     }
 
     //Based on: http://blogs.msdn.com/b/jaredpar/archive/2010/02/19/flattening-class-hierarchies-when-debugging-c.aspx

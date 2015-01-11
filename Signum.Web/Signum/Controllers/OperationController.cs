@@ -16,6 +16,7 @@ using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
 using Signum.Web.Operations;
+using Signum.Entities.Reflection;
 #endregion
 
 namespace Signum.Web.Controllers
@@ -35,13 +36,21 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidate();
                 entity = (Entity)context.UntypedValue;
 
                 if (context.HasErrors())
                     return context.ToJsonModelState();
 
-                entity = OperationLogic.ServiceExecute(entity, operationSymbol);
+                try
+                {
+                    entity = OperationLogic.ServiceExecute(entity, operationSymbol);
+                }
+                catch (IntegrityCheckException e)
+                {
+                    context.ImportErrors(e.Errors);
+                    return context.ToJsonModelState();
+                }
             }
 
            return this.DefaultExecuteResult(entity);
@@ -62,10 +71,19 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidate();
+
                 Entity entity = (Entity)context.UntypedValue;
 
-                OperationLogic.ServiceDelete(entity, operationSymbol, null);
+                try
+                {
+                    OperationLogic.ServiceDelete(entity, operationSymbol, null);
+                }
+                catch (IntegrityCheckException e)
+                {
+                    context.ImportErrors(e.Errors);
+                    return context.ToJsonModelState();
+                }
 
                 return this.DefaultDelete(entity.GetType());
             }
@@ -84,13 +102,22 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidate();
+
                 entity = (Entity)context.UntypedValue;
 
                 if (context.HasErrors())
                     return context.ToJsonModelState();
 
-                entity = OperationLogic.ServiceConstructFrom(entity, operationSymbol);
+                try
+                {
+                    entity = OperationLogic.ServiceConstructFrom(entity, operationSymbol);
+                }
+                catch (IntegrityCheckException e)
+                {
+                    context.ImportErrors(e.Errors);
+                    return context.ToJsonModelState();
+                }
             }
 
             return this.DefaultConstructResult(entity);

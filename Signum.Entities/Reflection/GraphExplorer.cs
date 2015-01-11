@@ -10,6 +10,8 @@ using System.Linq;
 using System.Xml.Linq;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
+using System.Runtime.Serialization;
+using System.ServiceModel;
 
 namespace Signum.Entities.Reflection
 {
@@ -63,56 +65,45 @@ namespace Signum.Entities.Reflection
             return DirectedGraph<Modifiable>.Generate(roots.Cast<Modifiable>(), ModifyInspector.IdentifiableExplore, ReferenceEqualityComparer<Modifiable>.Default);
         }
 
-        public static Dictionary<ModifiableEntity, string> IntegrityDictionary(DirectedGraph<Modifiable> graph)
+        public static Dictionary<K, V> ToDictionaryOrNull<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> nullableValueSelector) where V : class
         {
-            var result = graph.OfType<ModifiableEntity>().Select(m => new { m, Error = m.IntegrityCheck() })
-                .Where(p => p.Error.HasText()).ToDictionary(a => a.m, a => a.Error);
+            Dictionary<K, V> result = null;
+
+            foreach (var item in collection)
+            {
+                var val = nullableValueSelector(item);
+
+                if (val != null)
+                {
+                    if (result == null)
+                        result = new Dictionary<K, V>();
+
+                    result.Add(keySelector(item), val);
+                }
+            }
 
             return result;
         }
 
-        public static string IdentifiableIntegrityCheck(DirectedGraph<Modifiable> graph)
+        public static Dictionary<Guid, Dictionary<string, string>> IdentifiableIntegrityCheck(DirectedGraph<Modifiable> graph)
         {
-            return graph.OfType<ModifiableEntity>().Select(m => m.IntegrityCheck()).Where(e => e.HasText()).ToString("\r\n");
+            return graph.OfType<ModifiableEntity>().ToDictionaryOrNull(a=>a.temporalId, a=>a.IntegrityCheck());
         }
 
-        public static string FullIntegrityCheck(DirectedGraph<Modifiable> graph, bool withIndependentEmbeddedEntities)
+        public static Dictionary<Guid, Dictionary<string, string>> FullIntegrityCheck(DirectedGraph<Modifiable> graph)
         {
-            string cloneAttack = CloneAttack(graph);
+            AssertCloneAttack(graph);
 
-            if (cloneAttack != null)
-                return cloneAttack;
+            DirectedGraph<Modifiable> identGraph = DirectedGraph<Modifiable>.Generate(graph.Where(a => a is Entity), graph.RelatedTo);
 
-            if (withIndependentEmbeddedEntities == false)
-            {
-                return (from ident in graph.OfType<Entity>()
-                        let error = ident.IdentifiableIntegrityCheck()
-                        where error.HasText()
-                        select new { ident, error })
-                        .ToString(p => "{0}:\r\n{1}".FormatWith(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
-            }
-            else
-            {
-                DirectedGraph<Modifiable> identGraph = DirectedGraph<Modifiable>.Generate(graph.Where(a => a is Entity), graph.RelatedTo);
+            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.IdentifiableIntegrityCheck()).Where(errors => errors != null).SelectMany(errors => errors);
 
-                string errors = (from ident in identGraph.OfType<Entity>()
-                                 let error = ident.IdentifiableIntegrityCheck()
-                                 where error.HasText()
-                                 select new { ident, error })
-                                 .ToString(p => "{0}:\r\n{1}".FormatWith(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
+            var modErros = graph.Except(identGraph).OfType<ModifiableEntity>().Select(a => KVP.Create(a.temporalId, a.IntegrityCheck())); 
 
-                string embeddedErrors = (from emb in graph.Except(identGraph).OfType<ModifiableEntity>()
-                                         let error = emb.IntegrityCheck()
-                                         where error.HasText()
-                                         select new { emb, error })
-                                        .ToString(p => "{0}:\r\n{1}".FormatWith(p.emb.GetType().Name, p.error.Indent(2)), "\r\n");
-
-                return "\r\n".CombineIfNotEmpty(errors, embeddedErrors);
-            }
-
+            return identErrors.Concat(modErros).ToDictionaryOrNull(a=>a.Key, a=>a.Value); 
         }
 
-        static string CloneAttack(DirectedGraph<Modifiable> graph)
+        static void AssertCloneAttack(DirectedGraph<Modifiable> graph)
         {
             var problems = (from m in graph.OfType<Entity>()
                             group m by new { Type = m.GetType(), Id = (m as Entity).Try(ident => (object)ident.IdOrNull) ?? (object)m.temporalId } into g
@@ -120,17 +111,27 @@ namespace Signum.Entities.Reflection
                             select g).ToList();
 
             if (problems.Count == 0)
-                return null;
+                return;
 
-            return "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".FormatWith(
+
+            throw new InvalidOperationException(
+            "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".FormatWith(
                 p.Count(),
                 p.Key,
-                p.ToString(m => "  {0}{1}".FormatWith(m.Modified, m), "\r\n")), "\r\n\r\n");
+                p.ToString(m => "  {0}{1}".FormatWith(m.Modified, m), "\r\n")), "\r\n\r\n"));
         }
 
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
         {
-            return PreSaving(recreate, (Modifiable m, ref bool graphModified) => m.PreSaving(ref graphModified));
+            return PreSaving(recreate, (Modifiable m, ref bool graphModified) => 
+            {
+                ModifiableEntity me = m as ModifiableEntity;
+
+                if (me != null)
+                    me.SetErrors(null);
+
+                m.PreSaving(ref graphModified);
+            });
         }
 
         public delegate void ModifyEntityEventHandler(Modifiable m, ref bool graphModified);
@@ -301,5 +302,53 @@ namespace Signum.Entities.Reflection
         {
             return GraphExplorer.FromRoot(mod).Any(a => a.Modified == ModifiedState.SelfModified);
         }
+
+        public static void SetValidationErrors(DirectedGraph<Modifiable> directedGraph, IntegrityCheckException e)
+        {
+            SetValidationErrors(directedGraph, e.Errors);
+        }
+
+        public static void SetValidationErrors(DirectedGraph<Modifiable> directedGraph, Dictionary<Guid, Dictionary<string, string>> dictionary)
+        {
+            foreach (var mod in directedGraph.OfType<ModifiableEntity>())
+            {
+                var dic = dictionary.TryGetC(mod.temporalId);
+
+                if (dic != null)
+                    mod.SetErrors(dic);
+            }
+        }
     }
+
+    [Serializable]
+    public class IntegrityCheckException : Exception
+    {
+        public Dictionary<Guid, Dictionary<string, string>> Errors
+        {
+            get { return (Dictionary<Guid, Dictionary<string, string>>)this.Data["integrityErrors"]; }
+            set { this.Data["integrityErrors"] = value; }
+        }
+
+        public IntegrityCheckException(Dictionary<Guid, Dictionary<string, string>> errors)
+        {
+            if (errors == null)
+                throw new ArgumentNullException("errors");
+
+            this.Errors = errors;
+        }
+        protected IntegrityCheckException(
+          SerializationInfo info,
+          StreamingContext context)
+            : base(info, context) { }
+
+        public override string Message
+        {
+            get
+            {
+                return Errors.Values.SelectMany(a => a.Values).ToString("\r\n");
+            }
+        }
+    }
+
+
 }

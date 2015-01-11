@@ -197,6 +197,9 @@ namespace Signum.Entities
                 }
             }
 
+            if (entity.temporalErrors != null)
+                return entity.temporalErrors.TryGetC(PropertyInfo.Name);
+
             return null;
         }
 

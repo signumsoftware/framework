@@ -662,6 +662,11 @@ namespace Signum.Engine.Maps
         {
             DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity), (Modifiable m, ref bool graphModified) =>
             {
+                ModifiableEntity me = m as ModifiableEntity;
+
+                if (me != null)
+                    me.SetErrors(null);
+
                 m.PreSaving(ref graphModified);
 
                 Entity ident = m as Entity;
@@ -670,9 +675,9 @@ namespace Signum.Engine.Maps
                     Schema.Current.OnPreSaving(ident, ref graphModified);
             });
 
-            string error = GraphExplorer.FullIntegrityCheck(modifiables, withIndependentEmbeddedEntities: false);
-            if (error.HasText())
-                throw new ApplicationException(error);
+            var error = GraphExplorer.FullIntegrityCheck(modifiables);
+            if (error != null)
+                throw new IntegrityCheckException(error);
 
             GraphExplorer.PropagateModifications(modifiables.Inverse());
         }

@@ -32,6 +32,11 @@ namespace Signum.Engine
                 Schema schema = Schema.Current;
                 DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(() => GraphExplorer.FromRoots(entities), (Modifiable m, ref bool graphModified) =>
                 {
+                    ModifiableEntity me = m as ModifiableEntity;
+
+                    if (me != null)
+                        me.SetErrors(null);
+
                     m.PreSaving(ref graphModified);
 
                     Entity ident = m as Entity;
@@ -45,9 +50,9 @@ namespace Signum.Engine
 
                 log.Switch("Integrity");
 
-                string error = GraphExplorer.FullIntegrityCheck(modifiables, withIndependentEmbeddedEntities: false);
-                if (error.HasText())
-                    throw new ApplicationException(error);
+                var error = GraphExplorer.FullIntegrityCheck(modifiables);
+                if (error != null)
+                    throw new IntegrityCheckException(error);
 
                 log.Switch("Graph");
 
