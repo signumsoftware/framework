@@ -17,6 +17,7 @@ export interface FileLineOptions extends Lines.EntityBaseOptions {
     dragAndDrop?: boolean;
     download: DownloadBehaviour;
     fileType: string;
+    extraData: string;
 }
 
 export interface FileAsyncUploadResult {
@@ -49,8 +50,8 @@ export class FileLine extends Lines.EntityBase {
         if (window.File && window.FileList && window.FileReader && new XMLHttpRequest().upload) {
             var self = this;
             var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("drag a file here")
-                .on("dragover", function (e) { FileLine.fileDropHover(e, true); })
-                .on("dragleave", function (e) { FileLine.fileDropHover(e, false); })
+                .on("dragover", (e) => { FileLine.fileDropHover(e, true); })
+                .on("dragleave", (e) => { FileLine.fileDropHover(e, false); })
                 .appendTo($div);
             $fileDrop[0].addEventListener("drop", function (e) {
                 FileLine.fileDropHover(e, false);
@@ -79,6 +80,7 @@ export class FileLine extends Lines.EntityBase {
         xhr.setRequestHeader("X-Prefix", this.options.prefix);
         xhr.setRequestHeader("X-" + this.options.prefix.child(Entities.Keys.runtimeInfo), Entities.RuntimeInfo.getFromPrefix(this.options.prefix).toString());
         xhr.setRequestHeader("X-sfFileType", this.options.fileType);
+        xhr.setRequestHeader("X-sfExtraData", this.options.extraData);
         xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
         var extraParams: FormObject = {};
@@ -92,13 +94,19 @@ export class FileLine extends Lines.EntityBase {
         }
 
         var self = this;
-        xhr.onload = function (e) {
-            var result = <FileAsyncUploadResult>JSON.parse(xhr.responseText);
+        xhr.onload = (e) => {
+            try {
+                var result = <FileAsyncUploadResult>JSON.parse(xhr.responseText);
 
-            self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
+                self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
+            }
+            catch (ex)
+            {
+                self.onUploadFailed();
+            }
         };
 
-        xhr.onerror = function (e) {
+        xhr.onerror = (e) => {
             SF.log("Error " + xhr.statusText);
         };
 
@@ -146,6 +154,7 @@ export class FileLine extends Lines.EntityBase {
         $divNew.after($clonedDivNew).appendTo($fileForm); //if not attached to our DOM first there are problems with filename
 
         $("<input type='hidden' name='" + this.options.prefix + "_sfFileType' value='" + this.options.fileType + "'/>").appendTo($fileForm);
+        $("<input type='hidden' name='" + this.options.prefix + "_sfExtraData' value='" + this.options.extraData + "'/>").appendTo($fileForm);
 
         var extraParams: FormObject = {};
         SF.addAjaxExtraParameters(extraParams);
@@ -165,8 +174,12 @@ export class FileLine extends Lines.EntityBase {
 
     createTargetIframe() {
         var name = this.options.prefix.child("frame");
-        return $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>")
+        var result = $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>")
             .appendTo($("body"));
+
+        (<any>result[0]).contentWindow.onerror = e=> this.onUploadFailed();
+
+        return result;
     }
 
     setEntitySpecific(entityValue: Entities.EntityValue, itemPrefix?: string) {
@@ -190,6 +203,14 @@ export class FileLine extends Lines.EntityBase {
         this.setEntity(new Entities.EntityValue(Entities.RuntimeInfo.parse(runtimeInfo), fileName, link));
 
         this.prefix.child(Entities.Keys.entityState).tryGet().val(entityState);
+
+        this.prefix.child("frame").tryGet().remove();
+    }
+
+    onUploadFailed() {
+        this.setEntity(null);
+
+        this.prefix.child(Entities.Keys.entityState).tryGet().val(null);
 
         this.prefix.child("frame").tryGet().remove();
     }

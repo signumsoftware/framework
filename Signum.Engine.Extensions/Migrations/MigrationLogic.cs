@@ -73,4 +73,10 @@ namespace Signum.Engine.Migrations
             }
         }
     }
+
+    [Serializable]
+    public class MigrationException : Exception
+    {
+        public MigrationException() { }
+    }
 }

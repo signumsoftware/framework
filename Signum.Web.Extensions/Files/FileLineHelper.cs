@@ -116,7 +116,7 @@ namespace Signum.Web.Files
 
                     sbg.AddLine(helper.FormGroup(fileLine,
                         fileLine.Download == DownloadBehaviour.None ? fileLine.Compose(EntityBaseKeys.Link) : fileLine.Compose(EntityBaseKeys.ToStr),
-                        fileLine.LabelText, sb.ToHtml()));
+                        fileLine.LabelHtml ?? fileLine.LabelText.FormatHtml(), sb.ToHtml()));
                 }
 
                 using (sbg.SurroundLine(new HtmlTag("div", fileLine.Compose("DivNew"))
@@ -132,7 +132,7 @@ namespace Signum.Web.Files
 
                     sbg.AddLine(helper.FormGroup(fileLine,
                         fileLine.Compose(FileLineKeys.File),
-                        fileLine.LabelText, sb.ToHtml()));
+                        fileLine.LabelHtml ?? fileLine.LabelText.FormatHtml(), sb.ToHtml()));
                 }
 
                 sbg.AddLine(fileLine.ConstructorScript(FilesClient.Module, "FileLine"));
