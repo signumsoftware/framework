@@ -8,7 +8,6 @@ using System.Data;
 using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
-using Signum.Engine.Exceptions;
 using System.Data.SqlTypes;
 using System.Reflection;
 using Signum.Utilities.Reflection;

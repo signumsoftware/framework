@@ -6,7 +6,6 @@ using Signum.Entities;
 using Signum.Engine;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Engine.Exceptions;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities.Reflection;

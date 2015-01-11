@@ -9,7 +9,6 @@ using System.IO;
 using System.Data.SqlClient;
 using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
-using Signum.Engine.Exceptions;
 using Signum.Engine.DynamicQuery;
 using System.Data.Common;
 using System.Linq.Expressions;

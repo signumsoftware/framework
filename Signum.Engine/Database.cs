@@ -11,7 +11,6 @@ using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Reflection;
-using Signum.Engine.Exceptions;
 using System.Collections;
 using Signum.Utilities.Reflection;
 using System.Threading;
