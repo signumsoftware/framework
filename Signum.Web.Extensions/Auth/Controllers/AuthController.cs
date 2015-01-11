@@ -51,7 +51,7 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SaveNewUser()
         {
-            var context = this.ExtractEntity<UserEntity>().ApplyChanges(this, UserMapping.NewUser).ValidateGlobal();
+            var context = this.ExtractEntity<UserEntity>().ApplyChanges(this, UserMapping.NewUser).Validate();
 
             if (context.HasErrors())
                 return context.ToJsonModelState();
@@ -110,7 +110,7 @@ namespace Signum.Web.Auth
                     using (AuthLogic.Disable())
                         user = AuthLogic.RetrieveUser(username);
 
-                    var context = user.ApplyChanges(this, UserMapping.ChangePasswordOld, "").ValidateGlobal();
+                    var context = user.ApplyChanges(this, UserMapping.ChangePasswordOld, "").Validate();
 
                     if (context.HasErrors())
                     {
@@ -129,7 +129,7 @@ namespace Signum.Web.Auth
                 }
                 else
                 {
-                    var context = UserEntity.Current.ApplyChanges(this, UserMapping.ChangePasswordOld, "").ValidateGlobal();
+                    var context = UserEntity.Current.ApplyChanges(this, UserMapping.ChangePasswordOld, "").Validate();
                     if (context.HasErrors())
                     {
                         ModelState.FromContext(context);
@@ -253,7 +253,7 @@ namespace Signum.Web.Auth
 
                 var user = request.User;
 
-                var context = user.ApplyChanges(this, UserMapping.ChangePassword, "").ValidateGlobal();
+                var context = user.ApplyChanges(this, UserMapping.ChangePassword, "").Validate();
 
                 if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
                     !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())

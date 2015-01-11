@@ -17,6 +17,7 @@ using Signum.Entities.Basics;
 using System.Reflection;
 using System.Data.Common;
 using Signum.Engine.Cache;
+using Signum.Entities.Reflection;
 
 namespace Signum.Entities.Authorization
 {
@@ -149,9 +150,9 @@ namespace Signum.Entities.Authorization
 
                 var rules = Database.Query<RuleTypeEntity>().ToList();
 
-                string errors = rules.Select(a=>a.IntegrityCheck()).Where(StringExtensions.HasText).ToString("\r\n");
-                if (errors.HasText())
-                    throw new InvalidOperationException(errors); 
+                var errors = GraphExplorer.FullIntegrityCheck(GraphExplorer.FromRoots(rules));
+                if (errors != null)
+                    throw new IntegrityCheckException(errors); 
 
                 Dictionary<Lite<RoleEntity>, Dictionary<Type, TypeAllowedAndConditions>> realRules =
                    rules.AgGroupToDictionary(ru => ru.Role, gr => gr

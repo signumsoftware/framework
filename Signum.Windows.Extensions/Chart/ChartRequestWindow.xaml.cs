@@ -170,9 +170,9 @@ namespace Signum.Windows.Chart
         {
             GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(Request));
 
-            string errors = Request.FullIntegrityCheck();
+            var errors = Request.FullIntegrityCheck();
 
-            if (string.IsNullOrEmpty(errors))
+            if (errors == null)
                 return false;
 
             MessageBox.Show(Window.GetWindow(this), "There are errors in the chart settings:\r\n" + errors, "Errors in the chart", MessageBoxButton.OK, MessageBoxImage.Stop);

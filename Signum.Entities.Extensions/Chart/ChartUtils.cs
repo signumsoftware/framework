@@ -105,7 +105,7 @@ namespace Signum.Entities.Chart
                     chart.Columns[i].SetDefaultParameters();
              
                 if (!result)
-                    result = chart.Columns[i].IntegrityCheck().HasText();
+                    result = chart.Columns[i].IntegrityCheck() != null;
             }
 
             if (chart.Columns.Count > chartScript.Columns.Count)

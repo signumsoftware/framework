@@ -112,7 +112,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public ActionResult Draw(string prefix)
         {
-            var requestCtx = this.ExtractChartRequestCtx(null).ValidateGlobal();
+            var requestCtx = this.ExtractChartRequestCtx(null).Validate();
 
             if (requestCtx.HasErrors())
                 return requestCtx.ToJsonModelState();
@@ -213,7 +213,7 @@ namespace Signum.Web.Chart
         [HttpPost]
         public JsonNetResult Validate()
         {
-            var requestCtx = this.ExtractChartRequestCtx(null).ValidateGlobal();
+            var requestCtx = this.ExtractChartRequestCtx(null).Validate();
 
             return requestCtx.ToJsonModelState();
         }

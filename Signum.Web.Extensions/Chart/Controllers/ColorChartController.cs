@@ -24,7 +24,7 @@ namespace Signum.Web.Chart
         {
             Type type = Navigator.ResolveType(typeName);
 
-            var ctx = ChartColorLogic.GetPalette(type).ApplyChanges(this).ValidateGlobal();
+            var ctx = ChartColorLogic.GetPalette(type).ApplyChanges(this).Validate();
 
             if (ctx.HasErrors())
                 return ctx.ToJsonModelState();
