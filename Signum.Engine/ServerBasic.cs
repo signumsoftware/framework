@@ -15,6 +15,7 @@ using Signum.Engine.Linq;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using System.ServiceModel.Channels;
+using Signum.Entities.Reflection;
 
 namespace Signum.Services
 {
@@ -46,7 +47,8 @@ namespace Signum.Services
                     el.ActionName = mi.Name;
                     el.QueryString = description;
                 });
-                throw new FaultException(e.Message);
+
+                throw;
             }
             finally
             {
