@@ -748,12 +748,12 @@ namespace Signum.Entities
 
         Dictionary<S, bool?[]> dictionary = new Dictionary<S, bool?[]>();
 
-        public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] properties)
+        public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] propertyGetters)
         {
             this.getState = getState;
-            this.properties = properties.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
-            this.propertyNames = properties.Select(pi => pi.Name).ToArray();
-            this.getters = properties.Select(p => p.Compile()).ToArray();
+            this.properties = propertyGetters.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
+            this.propertyNames = this.properties.Select(pi => pi.Name).ToArray();
+            this.getters = propertyGetters.Select(p => p.Compile()).ToArray();
         }
 
         public void Add(S state, params bool?[] necessary)
