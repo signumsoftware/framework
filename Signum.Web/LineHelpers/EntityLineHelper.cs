@@ -82,7 +82,7 @@ namespace Signum.Web
                 sb.AddLine(entityLine.ConstructorScript(JsModule.Lines, "EntityLine"));
             }
 
-            return helper.FormGroup(entityLine, entityLine.Prefix, entityLine.LabelText, sb.ToHtml());
+            return helper.FormGroup(entityLine, entityLine.Prefix, entityLine.LabelHtml ?? entityLine.LabelText.FormatHtml(), sb.ToHtml());
         }
 
         private static MvcHtmlString LinkOrSpan(HtmlHelper helper, EntityLine entityLine)

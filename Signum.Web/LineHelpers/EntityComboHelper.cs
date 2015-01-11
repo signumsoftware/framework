@@ -82,7 +82,7 @@ namespace Signum.Web
                 sb.AddLine(entityCombo.ConstructorScript(JsModule.Lines, "EntityCombo"));
             }
 
-            return helper.FormGroup(entityCombo, entityCombo.Prefix, entityCombo.LabelText, sb.ToHtml());
+            return helper.FormGroup(entityCombo, entityCombo.Prefix, entityCombo.LabelHtml ?? entityCombo.LabelText.FormatHtml(), sb.ToHtml());
         }
 
         private static MvcHtmlString DropDownList(HtmlHelper helper, EntityCombo entityCombo)

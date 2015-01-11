@@ -78,12 +78,22 @@ namespace Signum.Web
 
         public static MvcHtmlString FormGroup(this HtmlHelper html, Context context, string controlId, string label, Func<object, HelperResult> value)
         {
+            return html.FormGroup(context, controlId, label.FormatHtml(), value);
+        }
+
+        public static MvcHtmlString FormGroup(this HtmlHelper html, Context context, string controlId, MvcHtmlString label, Func<object, HelperResult> value)
+        {
             StringWriter writer = new StringWriter();
             value(null).WriteTo(writer);
             return FormGroup(html, context, controlId, label, MvcHtmlString.Create(writer.ToString()));
         }
 
         public static MvcHtmlString FormGroup(this HtmlHelper html, Context context, string controlId, string label, MvcHtmlString value)
+        {
+            return html.FormGroup(context, controlId, label.FormatHtml(), value);
+        }
+
+        public static MvcHtmlString FormGroup(this HtmlHelper html, Context context, string controlId, MvcHtmlString label, MvcHtmlString value)
         {
             if (context.FormGroupStyle == FormGroupStyle.None)
                 return value;
@@ -95,7 +105,7 @@ namespace Signum.Web
             HtmlStringBuilder sb = new HtmlStringBuilder();
             using (sb.SurroundLine(new HtmlTag("div").Class("form-group").Class(formSize).Attrs(form)))
             {
-                var lbl = new HtmlTag("label").Attr("for", controlId).SetInnerText(label);
+                var lbl = new HtmlTag("label").Attr("for", controlId).InnerHtml(label);
 
                 if (context.FormGroupStyle == FormGroupStyle.SrOnly)
                     lbl.Class("sr-only");
@@ -282,7 +292,7 @@ namespace Signum.Web
         {
             var encoded = HttpUtility.HtmlEncode(text);
 
-            if (values == null)
+            if (values == null || values.Length == 0)
                 return new MvcHtmlString(encoded);
 
             return new MvcHtmlString(string.Format(encoded,
@@ -295,6 +305,11 @@ namespace Signum.Web
                 settings = new JsonSerializerSettings() { Converters = { new LiteJavaScriptConverter() } };
 
             return new MvcHtmlString(JsonConvert.SerializeObject(value, settings));
+        }
+
+        public static MvcHtmlString Lambda(this HtmlHelper html, Func<object, HelperResult> lambda)
+        {
+            return MvcHtmlString.Create(lambda(null).ToHtmlString());
         }
     }
 }

@@ -171,7 +171,7 @@ namespace Signum.Web
             if (newToStringLink != null)
                 result.Add(EntityBaseKeys.Link, newToStringLink);
 
-            return new JsonNetResult { Data = result };
+            return new JsonNetResult(result);
         }
 
         public MappingContext<T> TryFindParent<T>()

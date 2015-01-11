@@ -72,7 +72,7 @@ namespace Signum.Web
                 sb.AddLine(listDetail.ConstructorScript(JsModule.Lines, "EntityListDetail"));
             }
 
-            var formGroup = helper.FormGroup(listDetail, listDetail.Prefix, listDetail.LabelText, sb.ToHtml());
+            var formGroup = helper.FormGroup(listDetail, listDetail.Prefix, listDetail.LabelHtml ?? listDetail.LabelText.FormatHtml(), sb.ToHtml());
 
             if (listDetail.DetailDiv != listDetail.Compose(EntityBaseKeys.Detail))
                 return formGroup;

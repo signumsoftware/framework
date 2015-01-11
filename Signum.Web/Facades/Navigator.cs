@@ -79,7 +79,7 @@ namespace Signum.Web
 
         public static JsonNetResult JsonNet(this ControllerBase controller, object data, JsonSerializerSettings settings = null)
         {
-            var result = new JsonNetResult { Data = data };
+            var result = new JsonNetResult(data);
 
             if (settings != null)
                 result.SerializerSettings = settings;
@@ -276,6 +276,11 @@ namespace Signum.Web
         public static bool IsCreable(Type type, bool isSearch = false)
         {
             return Manager.OnIsCreable(type, isSearch);
+        }
+
+        public static bool IsFindable(Type type)
+        {
+            return Manager.OnIsFindable(type);
         }
 
         public static bool IsReadOnly(Type type)
@@ -674,6 +679,27 @@ namespace Signum.Web
             return true;
         }
 
+        public event Func<Type, bool> IsFindable;
+
+        internal protected virtual bool OnIsFindable(Type type)
+        {
+            if(!Finder.IsFindable(type))
+                return false;
+
+            EntitySettings es = EntitySettings.TryGetC(type);
+            if (es != null && !es.OnIsFindable())
+                return false;
+
+            if (IsFindable != null)
+                foreach (var isCreable in IsFindable.GetInvocationListTyped())
+                {
+                    if (!isCreable(type))
+                        return false;
+                }
+
+            return true;
+        }
+
         public event Func<Type, ModifiableEntity, bool> IsReadOnly;
 
         internal protected virtual bool OnIsReadOnly(Type type, ModifiableEntity entity)
@@ -858,14 +884,11 @@ namespace Signum.Web
 
         public static JsonNetResult RedirectAjax(string url)
         {
-            return new JsonNetResult
+            return new JsonNetResult(new
             {
-                Data = new
-                {
-                    result = JsonResultType.url.ToString(),
-                    url = url
-                }
-            };
+                result = JsonResultType.url.ToString(),
+                url = url
+            });
         }
 
         public static JsonNetResult ToJsonModelState(this ModelStateDictionary dictionary)
@@ -904,6 +927,12 @@ namespace Signum.Web
 
         public JsonNetResult()
         {
+            SerializerSettings = new JsonSerializerSettings();
+        }
+
+        public JsonNetResult(object data)
+        {
+            Data = data;
             SerializerSettings = new JsonSerializerSettings();
         }
 

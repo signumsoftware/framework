@@ -72,7 +72,7 @@ namespace Signum.Web
                 sb.AddLine(entityList.ConstructorScript(JsModule.Lines, "EntityList"));
             }
 
-            return helper.FormGroup(entityList, entityList.Prefix, entityList.LabelText, sb.ToHtml());
+            return helper.FormGroup(entityList, entityList.Prefix, entityList.LabelHtml ?? entityList.LabelText.FormatHtml(), sb.ToHtml());
         }
 
         static MvcHtmlString InternalListElement<T>(this HtmlHelper helper, HtmlStringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList)

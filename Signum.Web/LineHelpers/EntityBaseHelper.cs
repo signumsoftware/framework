@@ -154,12 +154,7 @@ namespace Signum.Web
             eb.Find &=
                 cleanType.IsEmbeddedEntity() ? false :
                 eb.Implementations.Value.IsByAll ? false :
-                eb.Implementations.Value.Types.Any(t => Finder.IsFindable(t));
-        }
-
-        internal static MvcHtmlString ListLabel(HtmlHelper helper, LineBase baseLine)
-        {
-            return new HtmlTag("label").Attr("for", baseLine.Prefix).SetInnerText(baseLine.LabelText).ToHtml();
+                eb.Implementations.Value.Types.Any(t => Navigator.IsFindable(t));
         }
     }
 

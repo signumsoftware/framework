@@ -43,7 +43,7 @@ namespace Signum.Web
                 using (sb.SurroundLine(new HtmlTag("legend")))
                 using (sb.SurroundLine(new HtmlTag("div", entityDetail.Compose("header"))))
                 {
-                    sb.AddLine(new HtmlTag("span").SetInnerText(entityDetail.LabelText).ToHtml());
+                    sb.AddLine(new HtmlTag("span").InnerHtml(entityDetail.LabelHtml ?? entityDetail.LabelText.FormatHtml()).ToHtml());
 
                     using (sb.SurroundLine(new HtmlTag("span", entityDetail.Compose("shownButton")).Class("pull-right")))
                     {
