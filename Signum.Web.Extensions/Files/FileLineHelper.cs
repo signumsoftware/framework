@@ -55,7 +55,7 @@ namespace Signum.Web.Files
 
             EntityBaseHelper.ConfigureEntityBase(fl, fl.Type.CleanType());
 
-            fl.Download = (context.Type.IsIEntity() || context.Type.IsLite()) ? DownloadBehaviour.View : DownloadBehaviour.None;
+            fl.Download = FilesClient.DownloadUrlConstructors.ContainsKey(context.Type.CleanType()) ? DownloadBehaviour.View : DownloadBehaviour.None;
 
             Common.FireCommonTasks(fl);
 
@@ -94,7 +94,7 @@ namespace Signum.Web.Files
                         {
                             sb.AddLine(helper.Href(fileLine.Compose(EntityBaseKeys.Link),
                                 value.Try(f => f.FileName),
-                                hasEntity ? FilesClient.GetDownloadPath(value) : null,
+                                hasEntity ? FilesClient.GetDownloadUrl(value) : null,
                                 "Download",
                                 "form-control",
                                 fileLine.Download == DownloadBehaviour.View ? null :
