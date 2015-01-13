@@ -68,9 +68,6 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            if (IdOrNull != null && IsNew)
-                throw new ArgumentException("Invalid RuntimeInfo parameters: IdOrNull={0} and IsNew=true".FormatWith(IdOrNull));
-
             if (EntityType != null && EntityType.IsLite())
                 throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
 
