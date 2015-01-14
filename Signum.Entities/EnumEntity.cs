@@ -5,6 +5,9 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
+using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
+using System.Reflection;
 
 namespace Signum.Entities
 {
@@ -18,6 +21,7 @@ namespace Signum.Entities
             Modified = ModifiedState.Clean;
         }
 
+        [MethodExpander(typeof(FromEnumMethodExpander))]
         public static EnumEntity<T> FromEnum(T t)
         {
             return new EnumEntity<T>()
@@ -56,7 +60,7 @@ namespace Signum.Entities
 
     public static class EnumEntity
     {
-        public static Entity FromEnum(Enum value)
+        public static Entity FromEnumUntyped(Enum value)
         {
             if (value == null) return null;
 
@@ -92,7 +96,7 @@ namespace Signum.Entities
 
         public static IEnumerable<Entity> GetEntities(Type enumType)
         {
-            return GetValues(enumType).Select(a => FromEnum(a));
+            return GetValues(enumType).Select(a => FromEnumUntyped(a));
         }
 
         public static Type Generate(Type enumType)
@@ -107,5 +111,27 @@ namespace Signum.Entities
             return null;
         }
 
+    }
+
+    class FromEnumMethodExpander : IMethodExpander
+    {
+        internal static MethodInfo miQuery;
+        static readonly MethodInfo miSingle = ReflectionTools.GetMethodInfo(() => Enumerable.Single<int>(null, i => true)).GetGenericMethodDefinition();
+
+        public Expression Expand(Expression instance, Expression[] arguments, System.Reflection.MethodInfo mi)
+        {
+            var type = mi.DeclaringType;
+            var query = Expression.Call(null, miQuery.MakeGenericMethod(mi.DeclaringType));
+
+            var param = Expression.Parameter(mi.DeclaringType);
+            var filter = Expression.Lambda(Expression.Equal(
+                Expression.Convert(Expression.Property(param, "Id"), typeof(int)),
+                Expression.Convert(arguments.Single(), typeof(int))),
+                param);
+
+            var result = Expression.Call(miSingle.MakeGenericMethod(type), query, filter);
+
+            return result;
+        }
     }
 }
