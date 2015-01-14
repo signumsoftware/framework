@@ -11,10 +11,10 @@ namespace Signum.Web
 {
     public class EntityButtonContext
     {
-        public UrlHelper Url { get; internal set; }
-        public ControllerContext ControllerContext { get; internal set; }
-        public string PartialViewName { get; internal set; }
-        public string Prefix{ get; internal set; }
+        public UrlHelper Url { get; set; }
+        public ControllerContext ControllerContext { get; set; }
+        public string PartialViewName { get; set; }
+        public string Prefix{ get; set; }
         public ViewMode ViewMode { get; set; }
         public bool ShowOperations { get; set; }
     }
