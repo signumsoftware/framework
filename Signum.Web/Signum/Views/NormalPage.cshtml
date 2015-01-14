@@ -10,11 +10,7 @@
         {
             ViewBag.Title = Model.UntypedValue.TryToString();
         }
-
-        @if (string.IsNullOrEmpty(ViewBag.Title))
-        {
-            ViewBag.Title = Model.UntypedValue.TryToString();
-        }
+        
         @{ Html.RenderPartial(Navigator.Manager.NormalControlView);}
     </div>
 }
