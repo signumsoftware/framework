@@ -46,10 +46,10 @@ export class FileLine extends Lines.EntityBase {
         this.prefix.child("sfFile").get().on("change", ev=> this.onChanged(ev)); 
     }
 
-    static initDragDrop($div: JQuery, onDropped: (e: DragEvent) => void) {
+    static initDragDrop($div: JQuery, onDropped: (e: DragEvent) => void, message? : string) {
         if (window.File && window.FileList && window.FileReader && new XMLHttpRequest().upload) {
             var self = this;
-            var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("drag a file here")
+            var $fileDrop = $("<div></div>").addClass("sf-file-drop").html(message || "drag a file here")
                 .on("dragover", (e) => { FileLine.fileDropHover(e, true); })
                 .on("dragleave", (e) => { FileLine.fileDropHover(e, false); })
                 .appendTo($div);

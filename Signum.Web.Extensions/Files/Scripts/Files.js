@@ -36,10 +36,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
         };
 
-        FileLine.initDragDrop = function ($div, onDropped) {
+        FileLine.initDragDrop = function ($div, onDropped, message) {
             if (window.File && window.FileList && window.FileReader && new XMLHttpRequest().upload) {
                 var self = this;
-                var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("drag a file here").on("dragover", function (e) {
+                var $fileDrop = $("<div></div>").addClass("sf-file-drop").html(message || "drag a file here").on("dragover", function (e) {
                     FileLine.fileDropHover(e, true);
                 }).on("dragleave", function (e) {
                     FileLine.fileDropHover(e, false);
