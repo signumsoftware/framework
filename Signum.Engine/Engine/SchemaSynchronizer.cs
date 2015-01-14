@@ -132,7 +132,7 @@ namespace Signum.Engine
                          null,
                          (cn, colDb) => colDb.ForeignKey != null ? SqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeignKey.Name) : null,
                          (cn, colModel, colDb) => colDb.ForeignKey == null ? null :
-                             colModel.ReferenceTable == null || !colModel.ReferenceTable.Name.Equals(ChangeName(colDb.ForeignKey.TargetTable)) ?
+                             colModel.ReferenceTable == null || colModel.AvoidForeignKey || !colModel.ReferenceTable.Name.Equals(ChangeName(colDb.ForeignKey.TargetTable)) ?
                              SqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeignKey.Name) :
                              null, Spacing.Simple),
                         dif.MultiForeignKeys.Select(fk => SqlBuilder.AlterTableDropConstraint(dif.Name, fk.Name)).Combine(Spacing.Simple)),
@@ -182,12 +182,12 @@ namespace Signum.Engine
                      (tn, tab, dif) => Synchronizer.SynchronizeScript(
                          tab.Columns,
                          dif.Columns,
-                         (cn, colModel) => colModel.ReferenceTable == null ? null :
+                         (cn, colModel) => colModel.ReferenceTable == null || colModel.AvoidForeignKey ? null :
                              SqlBuilder.AlterTableAddConstraintForeignKey(tab, colModel.Name, colModel.ReferenceTable),
                          null,
                          (cn, colModel, coldb) =>
                          {
-                             if (colModel.ReferenceTable == null)
+                             if (colModel.ReferenceTable == null || colModel.AvoidForeignKey)
                                  return null;
 
                              if (coldb.ForeignKey == null || !colModel.ReferenceTable.Name.Equals(ChangeName(coldb.ForeignKey.TargetTable)))
@@ -310,7 +310,7 @@ namespace Signum.Engine
 
         private static SqlPreCommandSimple UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName)
         {
-            if (difCol.ForeignKey == null || tabCol.ReferenceTable == null)
+            if (difCol.ForeignKey == null || tabCol.ReferenceTable == null || tabCol.AvoidForeignKey)
                 return null;
 
             ObjectName oldFk = changeName(difCol.ForeignKey.TargetTable);

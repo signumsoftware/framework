@@ -142,7 +142,8 @@ namespace Signum.Engine
         public static SqlPreCommand AlterTableForeignKeys(ITable t)
         {
             return t.Columns.Values.Select(c =>
-                c.ReferenceTable == null ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t, c.Name, c.ReferenceTable)).Combine(Spacing.Simple);
+                (c.ReferenceTable == null || c.AvoidForeignKey) ? null : SqlBuilder.AlterTableAddConstraintForeignKey(t, c.Name, c.ReferenceTable))
+                .Combine(Spacing.Simple);
         }
 
         public static SqlPreCommand CreateAllIndices(ITable t)
