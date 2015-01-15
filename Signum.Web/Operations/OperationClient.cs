@@ -100,11 +100,12 @@ namespace Signum.Web.Operations
 
             var request = controller.ControllerContext.HttpContext.Request;
 
-            if (request[ViewDataKeys.AvoidReturnView].HasText())
-                return new ContentResult();
 
             if (prefix.HasText())
             {
+                if (request[ViewDataKeys.AvoidReturnView].HasText())
+                    return new ContentResult();
+
                 if (request[ViewDataKeys.ViewMode] == ViewMode.View.ToString())
                     return controller.PopupView(entity, new PopupViewOptions(prefix));
                 else
@@ -118,6 +119,9 @@ namespace Signum.Web.Operations
                     if (!request.UrlReferrer.AbsolutePath.Contains(newUrl) && !request[ViewDataKeys.AvoidReturnRedirect].HasText())
                         return controller.RedirectHttpOrAjax(newUrl);
                 }
+
+                if (request[ViewDataKeys.AvoidReturnView].HasText())
+                    return new ContentResult();
 
                 if (request.IsAjaxRequest())
                     return Navigator.NormalControl(controller, entity);
@@ -140,9 +144,6 @@ namespace Signum.Web.Operations
         {
             var request = controller.ControllerContext.HttpContext.Request;
 
-            if (request[ViewDataKeys.AvoidReturnView].HasText())
-                return new ContentResult();
-
             if (newPrefix == null)
                 newPrefix = request["newPrefix"];
 
@@ -151,12 +152,18 @@ namespace Signum.Web.Operations
 
             if (newPrefix.HasText())
             {
+                if (request[ViewDataKeys.AvoidReturnView].HasText())
+                    return new ContentResult();
+
                 return controller.PopupNavigate(entity, new PopupNavigateOptions(newPrefix));
             }
             else //NormalWindow
             {
                 if (!entity.IsNew && !request[ViewDataKeys.AvoidReturnRedirect].HasText())
                     return controller.RedirectHttpOrAjax(Navigator.NavigateRoute(entity));
+
+                if (request[ViewDataKeys.AvoidReturnView].HasText())
+                    return new ContentResult();
 
                 if (request.IsAjaxRequest())
                     return Navigator.NormalControl(controller, entity);
