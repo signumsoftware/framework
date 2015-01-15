@@ -325,7 +325,7 @@ namespace Signum.Test
         {
             using (Transaction tr = new Transaction())
             {
-                var max = Database.Query<NoteWithDateDN>().Max(a => a.Id);
+                var max = Database.Query<NoteWithDateDN>().Select(a => a.Id).ToList().Max();
 
                 var list = Database.Query<AlbumDN>().Select(a => new NoteWithDateDN
                 {
