@@ -30,9 +30,7 @@ namespace Signum.Web.Files
 
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Files/Scripts/Files");
 
-        public delegate F FileConstructor<out F>(string fileName, byte[] content, string fileType, string extraData) where F : class, IFile;
-
-        public static Dictionary<Type, FileConstructor<IFile>> FileConstructors = new Dictionary<Type,FileConstructor<IFile>>();
+       
 
         public static void Start(bool filePath, bool file, bool embeddedFile)
         {
@@ -46,17 +44,28 @@ namespace Signum.Web.Files
                 {
                     { "uploadFile", url=>url.Action<FileController>(fc => fc.Upload()) },
                     { "uploadDroppedFile", url=>url.Action<FileController>(fc => fc.UploadDropped()) },
-                    { "downloadFile", url=>url.Action("Download", "File") },
                 });  
 
                 if (filePath)
                 {
-                    RegisterFileConstructor<FilePathEntity>((fileName, content, fileType, extraData) =>
+                    RegisterFileConstructor<FilePathEntity>(data =>
                     {
-                        if (!fileType.HasText())
-                            throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".FormatWith(fileName));
+                        if (!data.FileName.HasText())
+                            throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".FormatWith(data.FileName));
 
-                        return new FilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType)) { FileName = fileName, BinaryFile = content }.Save();
+                        return new FilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(data.FileType)) { FileName = data.FileName, BinaryFile = data.Content }.Save();
+                    });
+
+                    RegisterDownloadUrlConstructor<FilePathEntity>(fp =>
+                    {
+                        return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo(fp).ToString()));
+                    });
+
+                    RegisterFileDownloadResult<FilePathEntity>(ri =>
+                    {
+                        FilePathEntity fp = (FilePathEntity)ri.ToLite().Retrieve();
+
+                        return new FilePathResult(fp.FullPhysicalPath, MimeType.FromFileName(fp.FullPhysicalPath)) { FileDownloadName = fp.FileName };
                     });
 
                     Navigator.AddSettings(new List<EntitySettings>
@@ -96,10 +105,7 @@ namespace Signum.Web.Files
                             }
                             else
                                 return baseMapping(ctx);
-                             
                         }
-
-                      
                     };
 
                     es.MappingMain = es.MappingLine;
@@ -111,10 +117,23 @@ namespace Signum.Web.Files
 
                 if (file)
                 {
-                    RegisterFileConstructor<FileEntity>((fileName, content, fileType, extraData) =>
+                    RegisterFileConstructor<FileEntity>(data =>
                     {
-                        return new FileEntity { FileName = fileName, BinaryFile = content }.Save();
+                        return new FileEntity { FileName = data.FileName, BinaryFile = data.Content }.Save();
                     });
+
+                    RegisterDownloadUrlConstructor<FileEntity>(fp =>
+                    {
+                        return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo(fp).ToString()));
+                    });
+
+                    RegisterFileDownloadResult<FileEntity>(ri =>
+                    {
+                        FileEntity f = (FileEntity)ri.ToLite().Retrieve();
+
+                        return new StaticContentResult(f.BinaryFile, f.FileName);
+                    });
+
 
                     var es = new EntitySettings<FileEntity>();
                     Navigator.AddSetting(es);
@@ -148,8 +167,6 @@ namespace Signum.Web.Files
                             else
                                 return baseMapping(ctx);
                         }
-
-                        
                     };
 
                     FileLogic.DownloadFileUrl = DownloadFileUrl;
@@ -161,9 +178,9 @@ namespace Signum.Web.Files
 
                 if (embeddedFile)
                 {
-                    RegisterFileConstructor<EmbeddedFileEntity>((fileName, content, fileType, extraData) =>
+                    RegisterFileConstructor<EmbeddedFileEntity>(data =>
                     {
-                        return new EmbeddedFileEntity { FileName = fileName, BinaryFile = content };
+                        return new EmbeddedFileEntity { FileName = data.FileName, BinaryFile = data.Content };
                     });
 
                     var es = new EmbeddedEntitySettings<EmbeddedFileEntity>();
@@ -219,18 +236,12 @@ namespace Signum.Web.Files
 
         }
 
-        public static void RegisterFileConstructor<T>(FileConstructor<T> file) where T: class, IFile 
-        {
-            FileConstructors.Add(typeof(T), file);
-        }
-
-        private static HttpPostedFileBase GetHttpRequestFile(MappingContext ctx)
+        public static HttpPostedFileBase GetHttpRequestFile(MappingContext ctx)
         {
             string fileKey = TypeContextUtilities.Compose(ctx.Prefix, FileLineKeys.File);
             HttpPostedFileBase hpf = ctx.Controller.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
             return hpf;
         }
-
 
         static string DownloadFileUrl(Lite<FileEntity> file)
         {
@@ -240,22 +251,63 @@ namespace Signum.Web.Files
             return RouteHelper.New().Action((FileController fc) => fc.Download( new RuntimeInfo(file).ToString())); 
         }
 
-        public static string GetDownloadPath(IFile file)
+      
+
+
+        public static Dictionary<Type, Func<UploadedFileData, IFile>> FileConstructors = new Dictionary<Type, Func<UploadedFileData, IFile>>();
+
+        public static void RegisterFileConstructor<T>(Func<UploadedFileData, T> fileConstructor) where T : class, IFile
+        {
+            FileConstructors.Add(typeof(T), fileConstructor);
+        }
+
+        public static IFile ConstructFile(Type type, UploadedFileData data)
+        {
+            return FileConstructors.GetOrThrow(type)(data);
+        }
+
+
+
+        public static Dictionary<Type, Func<IFile, string>> DownloadUrlConstructors = new Dictionary<Type, Func<IFile, string>>();
+
+        public static void RegisterDownloadUrlConstructor<T>(Func<T, string> fileUrlConstructor) where T : class, IFile
+        {
+            DownloadUrlConstructors.Add(typeof(T), file => fileUrlConstructor((T)file));
+        }
+
+        public static string GetDownloadUrl(IFile file)
         {
             var webPath = file.FullWebPath;
             if (webPath.HasText())
                 return RouteHelper.New().Content(webPath);
 
-            if (file is FilePathEntity || file is FileEntity)
-                return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo((Entity)file).ToString()));
+            var ctor = DownloadUrlConstructors.TryGetC(file.GetType());
 
-            return null;
+            if (ctor == null)
+                return null;
+
+            return ctor(file);
         }
 
-        public static IFile ConstructFile(Type type, string fileName, byte[] bytes, string fileType, string extraData)
+
+        public static Dictionary<Type, Func<RuntimeInfo, ActionResult>> FileDownloadResult = new Dictionary<Type, Func<RuntimeInfo, ActionResult>>();
+
+        public static void RegisterFileDownloadResult<T>(Func<RuntimeInfo, ActionResult> fileDownloader) where T : class, IFile
         {
-            return FileConstructors.GetOrThrow(type)(fileName, bytes, fileType, extraData);
+            FileDownloadResult.Add(typeof(T), fileDownloader);
+        }
+
+        public static ActionResult DownloadFileResult(RuntimeInfo runtimeInfo)
+        {
+            return FileDownloadResult.GetOrThrow(runtimeInfo.EntityType)(runtimeInfo);
         }
     }
 
+    public class UploadedFileData
+    {
+        public string FileName;
+        public byte[] Content;
+        public string FileType;
+        public string ExtraData;
+    }
 }

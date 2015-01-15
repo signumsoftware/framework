@@ -227,27 +227,20 @@ namespace Signum.Engine.Cache
 
                     try
                     {
-                        SqlDependency.Start(sub.ConnectionString);
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        string databaseName = database.TryToString() ?? Connector.Current.DatabaseName();
-
                         try
                         {
+                            SqlDependency.Start(sub.ConnectionString);
+                        }
+                        catch (InvalidOperationException ex)
+                        {
+                            string databaseName = database.TryToString() ?? Connector.Current.DatabaseName();
+
                             if (ex.Message.Contains("SQL Server Service Broker"))
                             {
                                 EnableOrCreateBrocker(databaseName);
 
                                 SqlDependency.Start(sub.ConnectionString);
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            throw new InvalidOperationException(@"CacheLogic requires SQL Server Service Broker to be activated. Execute: 
-ALTER DATABASE {0} SET ENABLE_BROKER
-If you have problems, try first: 
-ALTER DATABASE {0} SET NEW_BROKER".FormatWith(database), e);
                         }
                     }
                     catch (SqlException e)

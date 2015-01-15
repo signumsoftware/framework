@@ -45,7 +45,7 @@ namespace Signum.Web.Files
             string fileType = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.FileType)];
             string extraData = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.ExtraData)];
 
-            IFile file = FilesClient.ConstructFile(info.EntityType, fileName, bytes, fileType, extraData);
+            IFile file = FilesClient.ConstructFile(info.EntityType, new UploadedFileData { FileName = fileName, Content = bytes, FileType = fileType, ExtraData = extraData });
 
             StringBuilder sb = new StringBuilder();
             //Use plain javascript not to have to add also the reference to jquery in the result iframe
@@ -55,7 +55,7 @@ namespace Signum.Web.Files
             sb.AppendLine("window.parent.$.data(window.parent.document.getElementById('{0}'), 'SF-control').onUploaded('{1}', '{2}', '{3}', '{4}')".FormatWith(
                 prefix,
                 file.FileName,
-                FilesClient.GetDownloadPath(file),
+                FilesClient.GetDownloadUrl(file),
                 ri.ToString(),
                 info.EntityType.IsEmbeddedEntity() ? Navigator.Manager.SerializeEntity((EmbeddedEntity)file) : null));
             sb.AppendLine("</script>");
@@ -66,7 +66,6 @@ namespace Signum.Web.Files
 
         public JsonNetResult UploadDropped()
         {
-
             string prefix = Request.Headers["X-Prefix"];
 
             RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Headers["X-" + TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
@@ -76,14 +75,14 @@ namespace Signum.Web.Files
             string fileType = (string)Request.Headers["X-" + FileLineKeys.FileType];
             string extraData = (string)Request.Headers["X-" + FileLineKeys.ExtraData];
 
-            IFile file = FilesClient.ConstructFile(info.EntityType, fileName, bytes, fileType, extraData);
+            IFile file = FilesClient.ConstructFile(info.EntityType, new UploadedFileData { FileName = fileName, Content = bytes, FileType = fileType, ExtraData = extraData });
 
             RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IEntity)file);
             
             return this.JsonNet(new
             {
                 file.FileName,
-                FullWebPath = FilesClient.GetDownloadPath(file),
+                FullWebPath = FilesClient.GetDownloadUrl(file),
                 RuntimeInfo = ri.ToString(),
                 EntityState = info.EntityType.IsEmbeddedEntity() ? Navigator.Manager.SerializeEntity((EmbeddedEntity)file) : null,
             }); 
@@ -96,18 +95,7 @@ namespace Signum.Web.Files
 
             RuntimeInfo ri = RuntimeInfo.FromFormValue(file);
 
-            if (ri.EntityType == typeof(FilePathEntity))
-            {
-                FilePathEntity fp = Database.Retrieve<FilePathEntity>(ri.IdOrNull.Value);
-
-                return File(fp.FullPhysicalPath, MimeType.FromFileName(fp.FullPhysicalPath), fp.FileName);
-            }
-            else
-            {
-                FileEntity f = Database.Retrieve<FileEntity>(ri.IdOrNull.Value);
-
-                return new StaticContentResult(f.BinaryFile, f.FileName);
-            }
+            return FilesClient.DownloadFileResult(ri);
         }
     }
 }
