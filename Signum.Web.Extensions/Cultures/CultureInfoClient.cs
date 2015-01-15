@@ -13,7 +13,7 @@ namespace Signum.Web.Cultures
 {
     public static class CultureInfoClient
     {
-        public static string ViewPrefix = "~/basic/Views/{0}.cshtml";
+        public static string ViewPrefix = "~/Cultures/Views/{0}.cshtml";
 
         public static void Start()
         {
