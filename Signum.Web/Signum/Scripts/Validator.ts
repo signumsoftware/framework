@@ -257,7 +257,6 @@ export function entityIsValid(validationOptions: ValidationOptions): Promise<voi
             return;
 
         SF.Notify.error(lang.signum.error, 2000);
-        alert(lang.signum.popupErrorsStop);
         throw result;
     });
 }
