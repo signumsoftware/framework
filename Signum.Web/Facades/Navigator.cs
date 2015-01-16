@@ -490,7 +490,7 @@ namespace Signum.Web
             };
         }
 
-        private void FillViewDataForViewing(ControllerBase controller, IRootEntity rootEntity, NavigateOptions options)
+        public void FillViewDataForViewing(ControllerBase controller, IRootEntity rootEntity, NavigateOptions options)
         {
             TypeContext tc = TypeContextUtilities.UntypedNew(rootEntity, "");
             controller.ViewData.Model = tc;
