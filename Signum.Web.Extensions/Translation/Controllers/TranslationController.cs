@@ -185,7 +185,7 @@ namespace Signum.Web.Translation.Controllers
             var target = reference.Extract(targetCulture); 
             DictionaryByTypeName(target); //To avoid finding duplicated types on save
             int totalTypes;
-            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList(), true, out totalTypes);
+            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList(), false, out totalTypes);
 
             ViewBag.TotalTypes = totalTypes;
             ViewBag.Culture = targetCulture;

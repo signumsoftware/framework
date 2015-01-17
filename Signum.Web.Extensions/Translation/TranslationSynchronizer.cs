@@ -10,7 +10,7 @@ namespace Signum.Web.Translation
 {
     public static class TranslationSynchronizer
     {
-        public static int MaxTotalSyncCharacters = 500;
+        public static int MaxTotalSyncCharacters = 800;
 
         public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, bool translatedOnly, out int totalTypes)
         {
