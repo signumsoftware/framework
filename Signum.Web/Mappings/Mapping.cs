@@ -555,8 +555,6 @@ namespace Signum.Web
 
                 SetValueProperties(ctx);
 
-                RecursiveValidation(ctx);
-
                 return val;
             }
         }
@@ -566,17 +564,6 @@ namespace Signum.Web
             foreach (IPropertyMapping<T> item in properties)
             {
                 item.SetProperty(ctx);
-            }
-        }
-
-        public virtual void RecursiveValidation(MappingContext<T> ctx)
-        {
-            ModifiableEntity entity = ctx.Value;
-            foreach (MappingContext childCtx in ctx.Children())
-            {
-                string error = childCtx.PropertyValidator.PropertyCheck(entity);
-                if (error.HasText())
-                    childCtx.Error.AddRange(error.Lines());
             }
         }
 

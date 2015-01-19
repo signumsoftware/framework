@@ -60,11 +60,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
-    <OutputPath>bin\Partial\</OutputPath>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -131,6 +126,7 @@
     <Compile Include="Reflection\GraphExplorer.cs" />
     <Compile Include="Reflection\Reflector.cs" />
     <Compile Include="Reflection\StringHashEncoder.cs" />
+    <Compile Include="Services\ExceptionMarshalling.cs" />
     <Compile Include="Services\IOperationServer.cs" />
     <Compile Include="Basics\Symbol.cs" />
     <Compile Include="TimeZoneManager.cs" />

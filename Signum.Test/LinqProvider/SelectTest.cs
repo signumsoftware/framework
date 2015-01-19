@@ -150,6 +150,14 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectConditionalToLiteNull()
+        {
+            var list = (from l in Database.Query<LabelEntity>()
+                        let owner = (l.Owner == null ? null : l.Owner).Entity
+                        select owner.ToLite(owner.Name)).ToList();
+        }
+
+        [TestMethod]
         public void SelectConditionalGetType()
         {
             var list = (from l in Database.Query<LabelEntity>()

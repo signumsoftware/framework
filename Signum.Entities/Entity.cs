@@ -101,7 +101,7 @@ namespace Signum.Entities
             return false;
         }
 
-        public virtual string IdentifiableIntegrityCheck()
+        public virtual Dictionary<Guid, Dictionary<string, string>> IdentifiableIntegrityCheck()
         {
             using (Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
             {
@@ -109,7 +109,7 @@ namespace Signum.Entities
             }
         }
 
-        internal virtual string IdentifiableIntegrityCheckBase()
+        internal virtual Dictionary<Guid, Dictionary<string, string>> IdentifiableIntegrityCheckBase()
         {
             using (HeavyProfiler.LogNoStackTrace("IdentifiableIntegrityCheck", () => GetType().Name))
                 return GraphExplorer.IdentifiableIntegrityCheck(GraphExplorer.FromRootIdentifiable(this));
@@ -189,6 +189,10 @@ namespace Signum.Entities
             }
         }
 
+        public void SetGraphErrors(IntegrityCheckException ex)
+        {
+            GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(this), ex);
+        }
        
     }
 

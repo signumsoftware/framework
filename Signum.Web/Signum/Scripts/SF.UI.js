@@ -376,6 +376,21 @@ once("ajaxError", function () {
 
 once("dateTimePickerSync", function () {
     $(function () {
+        $(document).on("paste", 'div.date-time div.date input', function (e) {
+            setTimeout(function () {
+                var dateTime = $(e.currentTarget).val();
+
+                var hour = dateTime.tryAfterLast(" ");
+                var date = dateTime.tryBeforeLast(" ");
+
+                if (hour && date) {
+                    var timePicker = $(e.currentTarget).closest("div.date-time").find("div.time");
+                    timePicker.timepicker("setTime", hour);
+                    $(e.currentTarget).val(date.tryAfterLast(" ") || date);
+                }
+            }, 100);
+        });
+
         $(document).on("changeDate clearDate", 'div.date-time div.date', function (e) {
             var time = $(this).closest("div.date-time").find("div.time");
 

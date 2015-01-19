@@ -12,7 +12,7 @@ using Signum.Entities.Reflection;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace Signum.Engine.Exceptions
+namespace Signum.Engine
 {
     [Serializable]
     public class UniqueKeyException : ApplicationException

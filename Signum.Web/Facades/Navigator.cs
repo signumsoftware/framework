@@ -278,6 +278,11 @@ namespace Signum.Web
             return Manager.OnIsCreable(type, isSearch);
         }
 
+        public static bool IsFindable(Type type)
+        {
+            return Manager.OnIsFindable(type);
+        }
+
         public static bool IsReadOnly(Type type)
         {
             return Manager.OnIsReadOnly(type, null);
@@ -485,7 +490,7 @@ namespace Signum.Web
             };
         }
 
-        private void FillViewDataForViewing(ControllerBase controller, IRootEntity rootEntity, NavigateOptions options)
+        public void FillViewDataForViewing(ControllerBase controller, IRootEntity rootEntity, NavigateOptions options)
         {
             TypeContext tc = TypeContextUtilities.UntypedNew(rootEntity, "");
             controller.ViewData.Model = tc;
@@ -666,6 +671,27 @@ namespace Signum.Web
 
             if (IsCreable != null)
                 foreach (var isCreable in IsCreable.GetInvocationListTyped())
+                {
+                    if (!isCreable(type))
+                        return false;
+                }
+
+            return true;
+        }
+
+        public event Func<Type, bool> IsFindable;
+
+        internal protected virtual bool OnIsFindable(Type type)
+        {
+            if(!Finder.IsFindable(type))
+                return false;
+
+            EntitySettings es = EntitySettings.TryGetC(type);
+            if (es != null && !es.OnIsFindable())
+                return false;
+
+            if (IsFindable != null)
+                foreach (var isCreable in IsFindable.GetInvocationListTyped())
                 {
                     if (!isCreable(type))
                         return false;

@@ -37,6 +37,7 @@ namespace Signum.Engine.Maps
                 t => schema.TypeToName.GetOrThrow(t, "Type {0} not found in the schema"),
                 cleanName => schema.NameToType.TryGetC(cleanName));
 
+            FromEnumMethodExpander.miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition();
             Include<TypeEntity>();
             Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
             {

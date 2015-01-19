@@ -18,7 +18,7 @@ namespace Signum.Web.Controllers
             
             PropertyRoute route = (rootType.HasText() || propertyRoute.HasText()) ? PropertyRoute.Parse(TypeLogic.GetType(rootType), propertyRoute) : PropertyRoute.Root(mod.GetType());
 
-            MappingContext context = mod.UntypedApplyChanges(this, route: route).UntypedValidateGlobal();
+            MappingContext context = mod.UntypedApplyChanges(this, route: route).UntypedValidate();
 
             IEntity ident = context.UntypedValue as IEntity;
             string newLink = ident != null && ident.IdOrNull != null ? Navigator.NavigateRoute(ident) : null;

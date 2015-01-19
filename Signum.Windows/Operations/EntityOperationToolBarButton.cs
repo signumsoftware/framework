@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using Signum.Entities.Reflection;
 
 namespace Signum.Windows.Operations
 {
@@ -148,9 +149,18 @@ namespace Signum.Windows.Operations
                     {
                         if (eoc.ConfirmMessage())
                         {
-                            IEntity newIdent = Server.Return((IOperationServer s) => s.ExecuteOperation(ident, eoc.OperationInfo.OperationSymbol, null));
-                            if (eoc.OperationInfo.Returns)
-                                eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                            try
+                            {
+
+                                IEntity newIdent = Server.Return((IOperationServer s) => s.ExecuteOperation(ident, eoc.OperationInfo.OperationSymbol, null));
+                                if (eoc.OperationInfo.Returns)
+                                    eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                            }
+                            catch (IntegrityCheckException e)
+                            {
+                                GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(ident), e);
+                                throw e;
+                            }
                         }
                     }
                 }
@@ -164,14 +174,29 @@ namespace Signum.Windows.Operations
 
                     IEntity result = (Entity)new ConstructorContext(eoc.EntityControl, eoc.OperationInfo).SurroundConstructUntyped(eoc.OperationInfo.ReturnType, ctx =>
                     {
-                        var entity = eoc.OperationInfo.Lite.Value ?
-                            Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null)) :
-                            Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
+                        Entity r;
 
-                        if (entity == null)
+                        if (eoc.OperationInfo.Lite.Value)
+                        {
+                            r = Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null));
+                        }
+                        else
+                        {
+                            try
+                            {
+                                r = Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
+                            }
+                            catch (IntegrityCheckException e)
+                            {
+                                GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(ident), e);
+                                throw e;
+                            }
+                        }
+
+                        if (r == null)
                             MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().FormatWith(eoc.OperationInfo.OperationSymbol.NiceToString()));
 
-                        return entity;
+                        return r;
                     });
 
                     if (result != null)

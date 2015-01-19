@@ -319,6 +319,7 @@ namespace Signum.Engine.DynamicQuery
         public PropertyRoute ForcePropertyRoute;
         public string ForceFormat;
         public string ForceUnit;
+        public Func<string> ForceIsAllowed;
 
 
         internal readonly LambdaExpression Lambda;
@@ -360,6 +361,8 @@ namespace Signum.Engine.DynamicQuery
                     result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
                 }
 
+                result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
+
                 if (ForcePropertyRoute != null)
                     result.PropertyRoute = ForcePropertyRoute;
 
@@ -371,8 +374,9 @@ namespace Signum.Engine.DynamicQuery
 
                 if (ForceUnit != null)
                     result.Unit = ForceUnit;
-              
-                result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
+
+                if (ForceIsAllowed != null)
+                    result.IsAllowed = ForceIsAllowed;
 
                 return result;
             });

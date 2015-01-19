@@ -32,17 +32,15 @@ namespace Signum.Web.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchPage.cshtml")]
-    public partial class SearchPage : System.Web.Mvc.WebViewPage<dynamic>
+    public partial class SearchPage : System.Web.Mvc.WebViewPage<Context>
     {
         public SearchPage()
         {
         }
         public override void Execute()
         {
-WriteLiteral("\r\n");
-
             
-            #line 2 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 3 "..\..\Signum\Views\SearchPage.cshtml"
  using (Html.BeginForm())
 {
 
@@ -60,7 +58,7 @@ WriteLiteral(" class=\"sf-entity-title\"");
 WriteLiteral(">");
 
             
-            #line 6 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 7 "..\..\Signum\Views\SearchPage.cshtml"
                                       Write(ViewBag.Title);
 
             
@@ -68,14 +66,14 @@ WriteLiteral(">");
             #line hidden
 WriteLiteral("</span>\r\n            <a");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 157), Tuple.Create("\"", 192)
+WriteAttribute("id", Tuple.Create(" id=\"", 173), Tuple.Create("\"", 208)
             
-            #line 7 "..\..\Signum\Views\SearchPage.cshtml"
-, Tuple.Create(Tuple.Create("", 162), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfFullScreen")
+            #line 8 "..\..\Signum\Views\SearchPage.cshtml"
+, Tuple.Create(Tuple.Create("", 178), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfFullScreen")
             
             #line default
             #line hidden
-, 162), false)
+, 178), false)
 );
 
 WriteLiteral(" class=\"sf-popup-fullscreen\"");
@@ -91,7 +89,7 @@ WriteLiteral("></span>\r\n            </a>\r\n        </h2>\r\n");
 WriteLiteral("        ");
 
             
-            #line 11 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 12 "..\..\Signum\Views\SearchPage.cshtml"
    Write(Html.ValidationSummaryAjax());
 
             
@@ -100,13 +98,13 @@ WriteLiteral("        ");
 WriteLiteral("\r\n");
 
             
-            #line 12 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 13 "..\..\Signum\Views\SearchPage.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 13 "..\..\Signum\Views\SearchPage.cshtml"
            ViewData[ViewDataKeys.AvoidFullScreenButton] = true; 
             
             #line default
@@ -116,7 +114,7 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 13 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 14 "..\..\Signum\Views\SearchPage.cshtml"
    Write(Html.Partial(Finder.Manager.SearchControlView));
 
             
@@ -127,7 +125,7 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 14 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 15 "..\..\Signum\Views\SearchPage.cshtml"
    Write(Html.AntiForgeryToken());
 
             
@@ -136,7 +134,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 16 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 17 "..\..\Signum\Views\SearchPage.cshtml"
 }
             
             #line default

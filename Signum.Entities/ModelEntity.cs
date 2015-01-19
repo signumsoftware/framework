@@ -43,13 +43,5 @@ namespace Signum.Entities
                 fieldRoute.FieldInfo.GetCustomAttribute<ImplementedByAttribute>(),
                 fieldRoute.FieldInfo.GetCustomAttribute<ImplementedByAllAttribute>());
         }
-
-        public void AssertIntegrityCheck()
-        {
-            string error = this.IntegrityCheck();
-
-            if (error.HasText())
-                throw new ApplicationException(error);
-        }
     }
 }

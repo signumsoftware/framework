@@ -24,8 +24,8 @@ namespace Signum.Entities
 
             if (Corrupt)
             {
-                string integrity = MainEntity.IdentifiableIntegrityCheckBase(); // So, no corruption allowed
-                if (string.IsNullOrEmpty(integrity))
+                var integrity = MainEntity.IdentifiableIntegrityCheckBase(); // So, no corruption allowed
+                if (integrity == null)
                 {
                     this.Corrupt = false;
                     if (!MainEntity.IsNew)
@@ -57,9 +57,9 @@ namespace Signum.Entities
             return new Disposable(() => allowed.Value = true);
         }
 
-        public static event Action<Entity, string> SaveCorrupted;
+        public static event Action<Entity, Dictionary<Guid, Dictionary<string, string>>> SaveCorrupted;
 
-        public static void OnSaveCorrupted(Entity corruptEntity, string integrity)
+        public static void OnSaveCorrupted(Entity corruptEntity, Dictionary<Guid, Dictionary<string, string>> integrity)
         {
             if (SaveCorrupted != null)
                 SaveCorrupted(corruptEntity, integrity);

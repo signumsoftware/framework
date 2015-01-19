@@ -1140,6 +1140,11 @@ namespace Signum.Engine.Linq
                 return result;
             }
 
+            if(source.IsNull())
+            {
+                return Expression.Constant(null, m.Type.Nullify()).TryConvert(m.Type);
+            }
+
             if (source is ProjectionExpression)
             {
                 ProjectionExpression proj = ((ProjectionExpression)source);

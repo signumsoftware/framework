@@ -181,6 +181,8 @@ namespace Signum.Web.Operations
         {
             return giCreate.GetInvoker(type)(symbol);
         }
+
+        public BootstrapStyle? Style { get; set; }
     }
 
     public class ContextualOperationSettings<T> : ContextualOperationSettingsBase where T : class, IEntity
@@ -308,6 +310,7 @@ namespace Signum.Web.Operations
 
     public abstract class EntityOperationSettingsBase : OperationSettings
     {
+        public BootstrapStyle? Style { get; set; } 
         public double Order { get; set; }
 
         public abstract ContextualOperationSettingsBase ContextualUntyped { get; }
@@ -333,7 +336,7 @@ namespace Signum.Web.Operations
             return giCreate.GetInvoker(type)(symbol);
         }
 
-        public static Func<OperationInfo, BootstrapStyle> Style { get; set; }
+        public static Func<OperationInfo, BootstrapStyle> AutoStyleFunction { get; set; }
     }
 
     public class EntityOperationSettings<T> : EntityOperationSettingsBase where T : class, IEntity
@@ -357,7 +360,7 @@ namespace Signum.Web.Operations
 
         static EntityOperationSettings()
         {
-            Style = oi => oi.OperationType == OperationType.Delete ? BootstrapStyle.Danger :
+            AutoStyleFunction = oi => oi.OperationType == OperationType.Delete ? BootstrapStyle.Danger :
                 oi.OperationType == OperationType.Execute && oi.OperationSymbol.Key.EndsWith(".Save") ? BootstrapStyle.Primary :
                 BootstrapStyle.Default;
         }

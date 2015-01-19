@@ -63,7 +63,6 @@ namespace Signum.Test.Environment
             MusicLogic.Start(sb, dqm);
 
             sb.Schema.OnSchemaCompleted();
-
         }
     }
 }
