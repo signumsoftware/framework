@@ -801,7 +801,6 @@ namespace Signum.Web.Selenium
 
         public void SetPath(string path)
         {
-            Selenium.WaitElementVisible(By.CssSelector("#{0}_DivNew .sf-file-drop".FormatWith(Prefix)));
             Selenium.FindElement(By.CssSelector("#{0}_sfFile".FormatWith(Prefix))).SendKeys(path);
             //Selenium.FireEvent("{0}_sfFile".FormatWith(Prefix), "change");
             Selenium.Wait(() =>
