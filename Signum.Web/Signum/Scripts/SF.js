@@ -58,7 +58,7 @@ var SF;
         $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
             var originalSuccess = options.success;
 
-            var getRredirectUrl = function (ajaxResult) {
+            var getRedirectUrl = function (ajaxResult) {
                 if (SF.isEmpty(ajaxResult))
                     return null;
 
@@ -77,11 +77,10 @@ var SF;
             options.success = function (result, text, xhr) {
                 //if (!options.avoidRedirect && jqXHR.status == 302)
                 //    location.href = jqXHR.getResponseHeader("Location");
-                var url = getRredirectUrl(result);
+                var url = getRedirectUrl(result);
                 if (!SF.isEmpty(url))
                     location.href = url;
-
-                if (originalSuccess)
+                else if (originalSuccess)
                     originalSuccess(result, text, xhr);
             };
         });
