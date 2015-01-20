@@ -74,7 +74,6 @@ namespace Signum.Utilities
         [MethodExpander(typeof(UniqueExExpander))]
         public static T SingleEx<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
-
             return query.Where(predicate).SingleEx();
         }
 
