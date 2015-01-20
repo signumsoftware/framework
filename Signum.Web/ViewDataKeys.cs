@@ -29,6 +29,7 @@ namespace Signum.Web
         public const string Results = "sfResults";
         public const string MultipliedMessage = "sfMultipliedMessage";
         public const string Formatters = "sfFormatters";
+        public const string EntityFormatter = "sfEntityFormatter";
         public const string TabId = "sfTabId";
         public const string PartialViewName = "sfPartialViewName";
         public const string EntityState = "sfEntityState";

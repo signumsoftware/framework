@@ -305,6 +305,7 @@ namespace Signum.Web
 
             QuerySettings settings = QuerySettings[request.QueryName];
             controller.ViewData[ViewDataKeys.Formatters] = queryResult.Columns.Select((c, i)=>new {c,i}).ToDictionary(c=>c.i, c =>settings.GetFormatter(c.c.Column));
+            controller.ViewData[ViewDataKeys.EntityFormatter] = settings.EntityFormatter;
 
             return new PartialViewResult
             {

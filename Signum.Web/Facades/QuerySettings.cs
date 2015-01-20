@@ -43,6 +43,8 @@ namespace Signum.Web
             set { formatters = value; }
         }
 
+        public EntityFormatter EntityFormatter { get; set; }
+
 
         static QuerySettings()
         {
@@ -163,15 +165,17 @@ namespace Signum.Web
 
     public class EntityFormatterRule
     {
-        public Func<HtmlHelper, Lite<IEntity>, MvcHtmlString> Formatter { get; set; }
+        public EntityFormatter Formatter { get; set; }
         public Func<Lite<IEntity>, bool> IsApplyable { get; set; }
 
-        public EntityFormatterRule(Func<Lite<IEntity>, bool> isApplyable, Func<HtmlHelper, Lite<IEntity>, MvcHtmlString> formatter)
+        public EntityFormatterRule(Func<Lite<IEntity>, bool> isApplyable, EntityFormatter formatter)
         {
             Formatter = formatter;
             IsApplyable = isApplyable;
         }
     }
+
+    public delegate MvcHtmlString EntityFormatter(HtmlHelper html, Lite<IEntity> lite);
 
     public class CellFormatter
     {
