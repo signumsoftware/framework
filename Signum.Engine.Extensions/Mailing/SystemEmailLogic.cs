@@ -46,7 +46,10 @@ namespace Signum.Engine.Mailing
             get { return Entity; }
         }
 
-        public abstract List<EmailOwnerRecipientData> GetRecipients();
+        public virtual List<EmailOwnerRecipientData> GetRecipients()
+        {
+            return new List<EmailOwnerRecipientData>();
+        }
 
         protected static List<EmailOwnerRecipientData> SendTo(EmailOwnerData ownerData)
         {
