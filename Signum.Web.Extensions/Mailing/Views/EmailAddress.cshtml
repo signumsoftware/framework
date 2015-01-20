@@ -5,14 +5,14 @@
     sc.PlaceholderLabels = true;
     sc.FormGroupStyle = FormGroupStyle.SrOnly;
     <div class="row form-vertical">
-        <div class="col-sm-4 col-sm-offset-1">
+        <div class="col-sm-4 col-sm-offset-2">
              @Html.EntityLine(sc, ea => ea.EmailOwner)
         </div>
          <div class="col-sm-3">
-                @Html.ValueLine(sc, c => c.EmailAddress)
+                @Html.ValueLine(sc, c => c.EmailAddress, vl=> vl.ValueHtmlProps.Remove("size"))
          </div>
          <div class="col-sm-3">
-               @Html.ValueLine(sc, c => c.DisplayName, vl => vl.ValueHtmlProps.Add("style", "width:250px"))
+               @Html.ValueLine(sc, c => c.DisplayName)
          </div>
     </div>
 }
