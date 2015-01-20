@@ -129,6 +129,7 @@ namespace Signum.Web.Chart
 
             ViewData[ViewDataKeys.Navigate] = IsNavigableEntity(request.QueryName);
             ViewData[ViewDataKeys.Formatters] = resultTable.Columns.Select((c, i) => new { c, i }).ToDictionary(c => c.i, c => querySettings.GetFormatter(c.c.Column));
+            ViewData[ViewDataKeys.EntityFormatter] = querySettings.EntityFormatter;
 
             return PartialView(ChartClient.ChartResultsView, new TypeContext<ChartRequest>(request, this.Prefix()));
         }
