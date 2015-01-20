@@ -6,6 +6,13 @@ input[type=radio]
     height: 16px;
 }
 
+label input[type=checkbox],
+label input[type=radio] 
+{
+    margin:0;
+    vertical-align: middle;
+}
+
 input[type=checkbox].form-control
 {
     margin-top: 9px;
