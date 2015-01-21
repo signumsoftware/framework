@@ -227,26 +227,27 @@ namespace Signum.Engine.Mailing
 
         private static EmailTemplateEntity GetDefaultTemplate(SystemEmailEntity systemEmailEntity)
         {
-            var list = SystemEmailsToEmailTemplates.Value.TryGetC(systemEmailEntity.ToLite()); 
+            var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: false);
 
-			if(IsolationLogic.GetStrategy(typeof(EmailTemplateEntity)) == IsolationStrategy.Isolated && IsolationEntity.Current != null)
-				list = list.Where(e => e.Isolation().Is(IsolationEntity.Current)).ToList();
+            var templates = SystemEmailsToEmailTemplates.Value.TryGetC(systemEmailEntity.ToLite()).EmptyIfNull();
 
-            if (list.IsNullOrEmpty())
+            templates = templates.Where(isAllowed);
+
+            if (templates.IsNullOrEmpty())
             {
+                using (ExecutionMode.Global())
+                using (OperationLogic.AllowSave<EmailTemplateEntity>())
                 using (Transaction tr = Transaction.ForceNew())
                 {
                     var template = CreateDefaultTemplate(systemEmailEntity);
 
-                    using (ExecutionMode.Global())
-                    using (OperationLogic.AllowSave<EmailTemplateEntity>())
-                        template.Save();
+                    template.Save();
 
                     return tr.Commit(template);
                 }
             }
 
-            return list.Where(t => t.IsActiveNow()).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".FormatWith(systemEmailEntity));
+            return templates.Where(t => t.IsActiveNow()).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".FormatWith(systemEmailEntity));
         }
 
         internal static EmailTemplateEntity CreateDefaultTemplate(SystemEmailEntity systemEmail)
