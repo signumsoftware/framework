@@ -245,10 +245,13 @@ namespace Signum.Engine
             if (!temporalDefault)
                 return SqlBuilder.AlterTableAddColumn(table, column);
 
+            string defaultValue = SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name), stringValidator: str => null); ;
+            if (defaultValue == "null")
+                return SqlBuilder.AlterTableAddColumn(table, column);
+
             try
             {
-                column.Default = SafeConsole.AskString("Default value for '{0}.{1}'? (or press enter) ".FormatWith(table.Name.Name, column.Name),
-                    stringValidator: str => null);
+                column.Default = defaultValue;
 
                 if (column.Default.HasText() && SqlBuilder.IsString(column.SqlDbType) && !column.Default.Contains("'"))
                     column.Default = "'" + column.Default + "'";
