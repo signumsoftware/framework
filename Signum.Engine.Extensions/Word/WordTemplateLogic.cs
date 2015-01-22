@@ -37,12 +37,11 @@ namespace Signum.Engine.Word
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                sb.Include<WordTemplateEntity>();
                 SystemWordTemplateLogic.Start(sb, dqm);
 
                 SymbolLogic<WordTransformerSymbol>.Start(sb, () => Transformers.Keys.ToHashSet());
                 SymbolLogic<WordConverterSymbol>.Start(sb, () => Converters.Keys.ToHashSet());
-
-                sb.Include<WordTemplateEntity>();
 
                 dqm.RegisterQuery(typeof(WordTemplateEntity), ()=>
                     from e in Database.Query<WordTemplateEntity>()
@@ -52,6 +51,22 @@ namespace Signum.Engine.Word
                         e.Id,
                         e.Query,
                         e.Template.Entity.FileName
+                    });
+
+                dqm.RegisterQuery(typeof(WordTransformerSymbol), () =>
+                    from f in Database.Query<WordTransformerSymbol>()
+                    select new
+                    {
+                        Entity = f,
+                        f.Key
+                    });
+
+                dqm.RegisterQuery(typeof(WordConverterSymbol), () =>
+                    from f in Database.Query<WordConverterSymbol>()
+                    select new
+                    {
+                        Entity = f,
+                        f.Key
                     });
 
                 new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.Save)
