@@ -31,29 +31,5 @@ namespace Signum.Web.Word
 
             return Content(combo.ToHtmlString());
         }
-
-        [HttpPost]
-        public ActionResult CreateWordReportFromEntity()
-        {
-            Lite<WordTemplateEntity> templateLite = Lite.Parse<WordTemplateEntity>(Request["keys"]);
-
-            WordTemplateEntity template = templateLite.GetFromCache();
-
-            byte[] bytes = template.CreateReport(this.ExtractEntity<Entity>());
-
-            return File(bytes, template.FileNameFormat);
-        }
-
-        [HttpPost]
-        public ActionResult CreateWordReportFromTemplate()
-        {
-            var entity = Lite.Parse<Entity>(Request["keys"]).Retrieve();
-
-            var template = this.ExtractEntity<WordTemplateEntity>();
-
-            byte[] bytes = template.CreateReport(entity);
-
-            return File(bytes, template.FileNameFormat);
-        }
     }
 }

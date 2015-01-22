@@ -49,52 +49,7 @@ namespace Signum.Web.Word
                     new EntitySettings<WordTemplateEntity>{ PartialViewName = e => ViewPrefix.FormatWith("WordTemplate")},              
                     new EntitySettings<SystemWordTemplateEntity>{ },
                 });
-
-                Create button and widget
-                OperationClient.AddSetting(new EntityOperationSettings<Entity>(WordReportLogOperation.CreateWordReportFromEntity)
-                {
-                    IsVisible = ctx => HasTemplates(ctx.Entity.GetType()),
-                    Click = ctx => CreateReportFromEntity(ctx.Options(), ctx.Entity.GetType(), ctx.Url, contextual: false),
-                    Contextual =
-                    {
-                        IsVisible = ctx => HasTemplates(ctx.Entities.Single().EntityType),
-                        Click = ctx => CreateReportFromEntity(ctx.Options(), ctx.Entities.Single().EntityType, ctx.Url, contextual: true),
-                    }
-                });
-
-                OperationClient.AddSetting(new EntityOperationSettings<WordTemplateEntity>(WordReportLogOperation.CreateWordReportFromTemplate)
-                {
-                    Click = ctx => CreateReportFromTemplate(ctx.Options(), ctx.Entity.Query, ctx.Url, contextual: false),
-                    Contextual =
-                    {
-                        Click = ctx => CreateReportFromTemplate(ctx.Options(), ctx.Entities.Single().InDB(a => a.Query), ctx.Url, contextual: true),
-                    }
-                //});
             }
-        }
-
-        private static JsFunction CreateReportFromTemplate(JsOperationOptions options, QueryEntity query, UrlHelper urlHelper, bool contextual)
-        {
-            return Module["createWordReportFromTemplate"](options, JsFunction.Event,
-                new FindOptions(query.ToQueryName()).ToJS(options.prefix, "selectEntity"),
-               urlHelper.Action((WordController c) => c.CreateWordReportFromTemplate()), contextual);
-        }
-
-        private static JsFunction CreateReportFromEntity(JsOperationOptions options, Type type, UrlHelper urlHelper, bool contextual)
-        {
-            var templates = from lite in WordTemplateLogic.TemplatesByType.Value.GetOrThrow(type.ToTypeEntity())
-                            where WordTemplateLogic.WordTemplatesLazy.Value.GetOrThrow(lite).SystemWordTemplate != null
-                            select lite;
-
-            return Module["createWordReportFromEntity"](options, JsFunction.Event,
-                WordTemplateMessage.ChooseAReportTemplate.NiceToString(),
-                templates.Select(a => a.ToChooserOption()).ToList(),
-                urlHelper.Action((WordController c) => c.CreateWordReportFromEntity()), contextual);
-        }
-
-        private static bool HasTemplates(Type type)
-        {
-            return WordTemplateLogic.TemplatesByType.Value.ContainsKey(type.ToTypeEntity());
         }
 
         public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd, SubTokensOptions options)
