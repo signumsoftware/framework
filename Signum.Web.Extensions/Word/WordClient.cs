@@ -46,10 +46,11 @@ namespace Signum.Web.Word
                 Navigator.RegisterArea(typeof(WordClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<WordTemplateEntity>{ PartialViewName = e => ViewPrefix.FormatWith("WordTemplate")},
-                    new EntitySettings<WordReportLogEntity>{ PartialViewName = e => ViewPrefix.FormatWith("WordReportLog")},
+                    new EntitySettings<WordTemplateEntity>{ PartialViewName = e => ViewPrefix.FormatWith("WordTemplate")},              
+                    new EntitySettings<SystemWordTemplateEntity>{ },
                 });
 
+                Create button and widget
                 OperationClient.AddSetting(new EntityOperationSettings<Entity>(WordReportLogOperation.CreateWordReportFromEntity)
                 {
                     IsVisible = ctx => HasTemplates(ctx.Entity.GetType()),
@@ -68,9 +69,7 @@ namespace Signum.Web.Word
                     {
                         Click = ctx => CreateReportFromTemplate(ctx.Options(), ctx.Entities.Single().InDB(a => a.Query), ctx.Url, contextual: true),
                     }
-                });
-
-                LinksClient.RegisterEntityLinks<Entity>((ident, ctx) => HasTemplates(ident.EntityType) ? new[] { new QuickLinkExplore(typeof(WordReportLogEntity), "Target", ident) } : null);
+                //});
             }
         }
 
@@ -83,9 +82,13 @@ namespace Signum.Web.Word
 
         private static JsFunction CreateReportFromEntity(JsOperationOptions options, Type type, UrlHelper urlHelper, bool contextual)
         {
+            var templates = from lite in WordTemplateLogic.TemplatesByType.Value.GetOrThrow(type.ToTypeEntity())
+                            where WordTemplateLogic.WordTemplatesLazy.Value.GetOrThrow(lite).SystemWordTemplate != null
+                            select lite;
+
             return Module["createWordReportFromEntity"](options, JsFunction.Event,
                 WordTemplateMessage.ChooseAReportTemplate.NiceToString(),
-                WordTemplateLogic.TemplatesByType.Value.GetOrThrow(type.ToTypeEntity()).Select(a => a.ToChooserOption()).ToList(),
+                templates.Select(a => a.ToChooserOption()).ToList(),
                 urlHelper.Action((WordController c) => c.CreateWordReportFromEntity()), contextual);
         }
 

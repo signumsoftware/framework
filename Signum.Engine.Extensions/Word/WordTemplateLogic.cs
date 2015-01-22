@@ -28,12 +28,20 @@ namespace Signum.Engine.Word
     {
         public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy;
 
-        public static ResetLazy<Dictionary<TypeEntity, List<Lite<WordTemplateEntity>>>> TemplatesByType; 
+        public static ResetLazy<Dictionary<TypeEntity, List<Lite<WordTemplateEntity>>>> TemplatesByType;
+
+        public static Dictionary<WordTransformerSymbol, Action<WordTemplateEntity, WordprocessingDocument>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordTemplateEntity, WordprocessingDocument>>();
+        public static Dictionary<WordConverterSymbol, Func<WordTemplateEntity, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordTemplateEntity, byte[], byte[]>>(); 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                SystemWordTemplateLogic.Start(sb, dqm);
+
+                SymbolLogic<WordTransformerSymbol>.Start(sb, () => Transformers.Keys.ToHashSet());
+                SymbolLogic<WordConverterSymbol>.Start(sb, () => Converters.Keys.ToHashSet());
+
                 sb.Include<WordTemplateEntity>();
 
                 dqm.RegisterQuery(typeof(WordTemplateEntity), ()=>
@@ -75,6 +83,16 @@ namespace Signum.Engine.Word
             }
         }
 
+        public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordTemplateEntity, WordprocessingDocument> transformer)
+        {
+            Transformers.Add(transformerSymbol, transformer);
+        }
+
+        public static void RegisterConverter(WordConverterSymbol converterSymbol, Func<WordTemplateEntity, byte[], byte[]> converter)
+        {
+            Converters.Add(converterSymbol, converter);
+        }
+
         static string ValidateTemplate(WordTemplateEntity template, PropertyInfo pi)
         {
             if (template.Template == null)
@@ -106,18 +124,22 @@ namespace Signum.Engine.Word
             }
         }
 
-        private static WordTemplateEntity GetTemplate(Lite<WordTemplateEntity> word)
-        {
-            var result = WordTemplatesLazy.Value.GetOrThrow(word);
-            result.Template.Retrieve();
-            return result; 
-        }
-
         public static string DumpFileFolder;
 
-        public static byte[] CreateWordReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity, ISystemWordTemplate systemWordTemplate = null)
+        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity, ISystemWordTemplate systemWordTemplate = null)
+        {
+            return liteTemplate.GetFromCache().CreateReport(entity, systemWordTemplate);
+        }
+
+        public static WordTemplateEntity GetFromCache(this Lite<WordTemplateEntity> liteTemplate)
         {
             WordTemplateEntity template = WordTemplatesLazy.Value.GetOrThrow(liteTemplate, "Word report template {0} not in cache".FormatWith(liteTemplate));
+
+            return template;
+        }
+
+        public static byte[] CreateReport(this WordTemplateEntity template, Entity entity, ISystemWordTemplate systemWordTemplate = null)
+        {
 
             if (systemWordTemplate != null && template.SystemWordTemplate.FullClassName != systemWordTemplate.GetType().FullName)
                 throw new ArgumentException("systemWordTemplate should be a {0} instead of {1}".FormatWith(template.SystemWordTemplate.FullClassName, systemWordTemplate.GetType().FullName));
@@ -143,9 +165,17 @@ namespace Signum.Engine.Word
                          renderer.MakeQuery();
                          renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
                          renderer.AssertClean();
+
+                         if (template.WordTransformer != null)
+                             Transformers.GetOrThrow(template.WordTransformer)(template, document);
                      }
 
-                     return memory.ToArray();
+                     var array = memory.ToArray();
+
+                     if (template.WordConverter != null)
+                         array = Converters.GetOrThrow(template.WordConverter)(template, array);
+
+                     return array;
                  }
             }
         }

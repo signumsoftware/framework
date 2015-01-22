@@ -35,23 +35,25 @@ namespace Signum.Web.Word
         [HttpPost]
         public ActionResult CreateWordReportFromEntity()
         {
-            var template = Lite.Parse<WordTemplateEntity>(Request["keys"]);
+            Lite<WordTemplateEntity> templateLite = Lite.Parse<WordTemplateEntity>(Request["keys"]);
 
-            var word = this.ExtractEntity<Entity>()
-                .ConstructFrom(WordReportLogOperation.CreateWordReportFromEntity, template);
+            WordTemplateEntity template = templateLite.GetFromCache();
 
-            return this.DefaultConstructResult(word);
+            byte[] bytes = template.CreateReport(this.ExtractEntity<Entity>());
+
+            return File(bytes, template.FileNameFormat);
         }
 
         [HttpPost]
         public ActionResult CreateWordReportFromTemplate()
         {
-            var entity = Lite.Parse<Entity>(Request["keys"]);
+            var entity = Lite.Parse<Entity>(Request["keys"]).Retrieve();
 
-            var word = this.ExtractEntity<WordTemplateEntity>()
-                .ConstructFrom(WordReportLogOperation.CreateWordReportFromTemplate, entity);
+            var template = this.ExtractEntity<WordTemplateEntity>();
 
-            return this.DefaultConstructResult(word);
+            byte[] bytes = template.CreateReport(entity);
+
+            return File(bytes, template.FileNameFormat);
         }
     }
 }

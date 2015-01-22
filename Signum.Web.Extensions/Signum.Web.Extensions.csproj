@@ -989,11 +989,6 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Word\Controllers\WordController.cs" />
-    <Compile Include="Word\Views\WordReportLog.generated.cs">
-      <DependentUpon>WordReportLog.cshtml</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Word\Views\WordTemplate.generated.cs">
       <DependentUpon>WordTemplate.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -1018,10 +1013,6 @@
     <Content Include="Word\Views\WordTemplate.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>WordTemplate.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Word\Views\WordReportLog.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>WordReportLog.generated.cs</LastGenOutput>
     </Content>
     <TypeScriptCompile Include="Alerts\Scripts\Alerts.ts" />
     <EmbeddedResource Include="Alerts\Scripts\Alerts.js">

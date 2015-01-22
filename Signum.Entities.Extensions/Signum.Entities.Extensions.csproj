@@ -186,7 +186,6 @@
     <Compile Include="SMS\SMSMessage.cs" />
     <Compile Include="SMS\SMSTemplate.cs" />
     <Compile Include="SMS\SMSPackages.cs" />
-    <Compile Include="Word\WordReportLog.cs" />
     <Compile Include="Word\WordTemplate.cs" />
     <Compile Include="Word\SystemWordTemplate.cs" />
   </ItemGroup>
