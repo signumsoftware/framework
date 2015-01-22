@@ -579,6 +579,9 @@ namespace Signum.Engine.Cache
 
         public static CacheType GetCacheType(Type type)
         {
+            if(!type.IsEntity())
+                throw new ArgumentException("type should be an Entity");
+
             ICacheLogicController controller;
             if (!controllers.TryGetValue(type, out controller))
                 return CacheType.None;
