@@ -226,7 +226,7 @@ namespace Signum.Web
                     {
                         dic.Remove(pv.PropertyInfo.Name);
 
-                        child.Error.Add(error);
+                        child.Error.AddRange(error.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
                     }
                 }
 
