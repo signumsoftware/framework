@@ -637,7 +637,7 @@ namespace Signum.Engine.Cache
                 if (field is FieldPrimaryKey || field is FieldValue || field is FieldTicks)
                     return (IColumn)field;
 
-                throw new InvalidOperationException("{0} not supported".FormatWith(field.GetType()));
+                throw new InvalidOperationException("{0} not supported when caching the ToString for a Lite of a transacional entity ({1})".FormatWith(field.GetType().TypeName(), this.table.Type.TypeName()));
             }
         }
     }
