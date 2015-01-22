@@ -172,7 +172,16 @@ namespace Signum.Engine
                 if (tableReplacements != null)
                     replacements[Replacements.KeyTablesInverse] = tableReplacements.Inverse();
 
-                SqlPreCommand syncEnums = SynchronizeEnumsScript(replacements);
+                SqlPreCommand syncEnums;
+
+                try
+                {
+                    syncEnums = SynchronizeEnumsScript(replacements);
+                }
+                catch(Exception e)
+                {
+                    syncEnums = new SqlPreCommandSimple("-- Exception synchronizing enums: " + e.Message);
+                }
 
                 SqlPreCommand addForeingKeys = Synchronizer.SynchronizeScript(
                      model,
