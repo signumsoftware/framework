@@ -30,8 +30,8 @@ namespace Signum.Engine.Word
 
         public static ResetLazy<Dictionary<TypeEntity, List<Lite<WordTemplateEntity>>>> TemplatesByType;
 
-        public static Dictionary<WordTransformerSymbol, Action<WordTemplateEntity, WordprocessingDocument>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordTemplateEntity, WordprocessingDocument>>();
-        public static Dictionary<WordConverterSymbol, Func<WordTemplateEntity, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordTemplateEntity, byte[], byte[]>>(); 
+        public static Dictionary<WordTransformerSymbol, Action<WordTemplateEntity, Entity, WordprocessingDocument>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordTemplateEntity, Entity, WordprocessingDocument>>();
+        public static Dictionary<WordConverterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]>>(); 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -98,12 +98,12 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordTemplateEntity, WordprocessingDocument> transformer)
+        public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordTemplateEntity, Entity, WordprocessingDocument> transformer)
         {
             Transformers.Add(transformerSymbol, transformer);
         }
 
-        public static void RegisterConverter(WordConverterSymbol converterSymbol, Func<WordTemplateEntity, byte[], byte[]> converter)
+        public static void RegisterConverter(WordConverterSymbol converterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]> converter)
         {
             Converters.Add(converterSymbol, converter);
         }
@@ -182,13 +182,13 @@ namespace Signum.Engine.Word
                          renderer.AssertClean();
 
                          if (template.WordTransformer != null)
-                             Transformers.GetOrThrow(template.WordTransformer)(template, document);
+                             Transformers.GetOrThrow(template.WordTransformer)(template, entity, document);
                      }
 
                      var array = memory.ToArray();
 
                      if (template.WordConverter != null)
-                         array = Converters.GetOrThrow(template.WordConverter)(template, array);
+                         array = Converters.GetOrThrow(template.WordConverter)(template, entity, array);
 
                      return array;
                  }
@@ -199,6 +199,9 @@ namespace Signum.Engine.Word
         {
             if (DumpFileFolder == null)
                 return;
+
+            if (!Directory.Exists(DumpFileFolder))
+                Directory.CreateDirectory(DumpFileFolder);
 
             string fullFileName = Path.Combine(DumpFileFolder, fileName);
 
