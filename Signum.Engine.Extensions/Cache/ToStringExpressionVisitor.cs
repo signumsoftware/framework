@@ -118,8 +118,7 @@ namespace Signum.Engine.Cache
                 return Expression.Convert(constructor.GetTupleProperty((IColumn)field), field.FieldType);
 
             if (field is IFieldReference)
-            {
-                var nullRef = Expression.Constant(null, field.FieldType);
+            {   
                 bool isLite = ((IFieldReference)field).IsLite;
 
                 if (field is FieldReference)
@@ -134,7 +133,7 @@ namespace Signum.Engine.Cache
                 if (field is FieldImplementedBy)
                 {
                     var ib = (FieldImplementedBy)field;
-
+                    var nullRef = Expression.Constant(null, field.FieldType);
                     var call = ib.ImplementationColumns.Aggregate((Expression)nullRef, (acum, kvp) =>
                     {
                         IColumn column = (IColumn)kvp.Value;
