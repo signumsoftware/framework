@@ -105,7 +105,6 @@ namespace Signum.Engine.Files
                         r.WebPrefix
                     });
                 
-
                 dqm.RegisterQuery(typeof(FileTypeSymbol), () =>
                     from f in Database.Query<FileTypeSymbol>()
                     select new
@@ -174,7 +173,7 @@ namespace Signum.Engine.Files
             {
                 using (new EntityCache(EntityCacheType.ForceNew))
                 {
-                    FileTypeAlgorithm alg = FileTypes[fp.FileType];
+                    FileTypeAlgorithm alg = FileTypes.GetOrThrow(fp.FileType);
                     string sufix = alg.CalculateSufix(fp);
                     if (!sufix.HasText())
                         throw new InvalidOperationException("Sufix not set");

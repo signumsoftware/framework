@@ -115,6 +115,9 @@ namespace Signum.Engine.Mailing
                         (systemEmail, type) => KVP.Create(type, systemEmail), "caching EmailTemplates. Consider synchronize").ToDictionary();
                 }, new InvalidateWith(typeof(SystemEmailEntity)));
 
+
+                sb.Schema.Initializing += () => systemEmailToEntity.Load();
+
                 systemEmailToType = sb.GlobalLazy(() => systemEmailToEntity.Value.Inverse(),
                     new InvalidateWith(typeof(SystemEmailEntity)));
             }

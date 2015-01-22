@@ -17,15 +17,6 @@ using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Mailing
 {
-    public static class EmailTemplateOperation
-    {
-        public static readonly ConstructSymbol<EmailTemplateEntity>.From<SystemEmailEntity> CreateEmailTemplateFromSystemEmail = OperationSymbol.Construct<EmailTemplateEntity>.From<SystemEmailEntity>();
-        public static readonly ConstructSymbol<EmailTemplateEntity>.Simple Create = OperationSymbol.Construct<EmailTemplateEntity>.Simple();
-        public static readonly ExecuteSymbol<EmailTemplateEntity> Save = OperationSymbol.Execute<EmailTemplateEntity>();
-        public static readonly ExecuteSymbol<EmailTemplateEntity> Enable = OperationSymbol.Execute<EmailTemplateEntity>();
-        public static readonly ExecuteSymbol<EmailTemplateEntity> Disable = OperationSymbol.Execute<EmailTemplateEntity>();
-    }
-
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class EmailTemplateEntity : Entity
     {
@@ -345,6 +336,15 @@ namespace Signum.Entities.Mailing
         {
             return cultureInfo.TryToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
         }
+    }
+
+    public static class EmailTemplateOperation
+    {
+        public static readonly ConstructSymbol<EmailTemplateEntity>.From<SystemEmailEntity> CreateEmailTemplateFromSystemEmail = OperationSymbol.Construct<EmailTemplateEntity>.From<SystemEmailEntity>();
+        public static readonly ConstructSymbol<EmailTemplateEntity>.Simple Create = OperationSymbol.Construct<EmailTemplateEntity>.Simple();
+        public static readonly ExecuteSymbol<EmailTemplateEntity> Save = OperationSymbol.Execute<EmailTemplateEntity>();
+        public static readonly ExecuteSymbol<EmailTemplateEntity> Enable = OperationSymbol.Execute<EmailTemplateEntity>();
+        public static readonly ExecuteSymbol<EmailTemplateEntity> Disable = OperationSymbol.Execute<EmailTemplateEntity>();
     }
 
     public enum EmailTemplateMessage
