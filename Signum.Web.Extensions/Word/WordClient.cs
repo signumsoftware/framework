@@ -46,52 +46,10 @@ namespace Signum.Web.Word
                 Navigator.RegisterArea(typeof(WordClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<WordTemplateEntity>{ PartialViewName = e => ViewPrefix.FormatWith("WordTemplate")},
-                    new EntitySettings<WordReportLogEntity>{ PartialViewName = e => ViewPrefix.FormatWith("WordReportLog")},
+                    new EntitySettings<WordTemplateEntity>{ PartialViewName = e => ViewPrefix.FormatWith("WordTemplate")},              
+                    new EntitySettings<SystemWordTemplateEntity>{ },
                 });
-
-                OperationClient.AddSetting(new EntityOperationSettings<Entity>(WordReportLogOperation.CreateWordReportFromEntity)
-                {
-                    IsVisible = ctx => HasTemplates(ctx.Entity.GetType()),
-                    Click = ctx => CreateReportFromEntity(ctx.Options(), ctx.Entity.GetType(), ctx.Url, contextual: false),
-                    Contextual =
-                    {
-                        IsVisible = ctx => HasTemplates(ctx.Entities.Single().EntityType),
-                        Click = ctx => CreateReportFromEntity(ctx.Options(), ctx.Entities.Single().EntityType, ctx.Url, contextual: true),
-                    }
-                });
-
-                OperationClient.AddSetting(new EntityOperationSettings<WordTemplateEntity>(WordReportLogOperation.CreateWordReportFromTemplate)
-                {
-                    Click = ctx => CreateReportFromTemplate(ctx.Options(), ctx.Entity.Query, ctx.Url, contextual: false),
-                    Contextual =
-                    {
-                        Click = ctx => CreateReportFromTemplate(ctx.Options(), ctx.Entities.Single().InDB(a => a.Query), ctx.Url, contextual: true),
-                    }
-                });
-
-                LinksClient.RegisterEntityLinks<Entity>((ident, ctx) => HasTemplates(ident.EntityType) ? new[] { new QuickLinkExplore(typeof(WordReportLogEntity), "Target", ident) } : null);
             }
-        }
-
-        private static JsFunction CreateReportFromTemplate(JsOperationOptions options, QueryEntity query, UrlHelper urlHelper, bool contextual)
-        {
-            return Module["createWordReportFromTemplate"](options, JsFunction.Event,
-                new FindOptions(query.ToQueryName()).ToJS(options.prefix, "selectEntity"),
-               urlHelper.Action((WordController c) => c.CreateWordReportFromTemplate()), contextual);
-        }
-
-        private static JsFunction CreateReportFromEntity(JsOperationOptions options, Type type, UrlHelper urlHelper, bool contextual)
-        {
-            return Module["createWordReportFromEntity"](options, JsFunction.Event,
-                WordTemplateMessage.ChooseAReportTemplate.NiceToString(),
-                WordTemplateLogic.TemplatesByType.Value.GetOrThrow(type.ToTypeEntity()).Select(a => a.ToChooserOption()).ToList(),
-                urlHelper.Action((WordController c) => c.CreateWordReportFromEntity()), contextual);
-        }
-
-        private static bool HasTemplates(Type type)
-        {
-            return WordTemplateLogic.TemplatesByType.Value.ContainsKey(type.ToTypeEntity());
         }
 
         public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd, SubTokensOptions options)

@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Presentation;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
@@ -117,8 +118,7 @@ namespace Signum.Engine.Cache
                 return Expression.Convert(constructor.GetTupleProperty((IColumn)field), field.FieldType);
 
             if (field is IFieldReference)
-            {
-                var nullRef = Expression.Constant(null, field.FieldType);
+            {   
                 bool isLite = ((IFieldReference)field).IsLite;
 
                 if (field is FieldReference)
@@ -127,13 +127,13 @@ namespace Signum.Engine.Cache
 
                     Expression id = CachedTableConstructor.WrapPrimaryKey(constructor.GetTupleProperty(column));
 
-                    return GetEntity(isLite, column, field.FieldType,  constructor);
+                    return GetEntity(isLite, column, field.FieldType.CleanType(),  constructor);
                 }
 
                 if (field is FieldImplementedBy)
                 {
                     var ib = (FieldImplementedBy)field;
-
+                    var nullRef = Expression.Constant(null, field.FieldType);
                     var call = ib.ImplementationColumns.Aggregate((Expression)nullRef, (acum, kvp) =>
                     {
                         IColumn column = (IColumn)kvp.Value;
@@ -171,21 +171,28 @@ namespace Signum.Engine.Cache
             throw new InvalidOperationException("Unexpected {0}".FormatWith(field.GetType().Name));
         }
 
-        private Expression GetEntity(bool isLite, IColumn column, Type type, CachedTableConstructor constructor)
+        private Expression GetEntity(bool isLite, IColumn column, Type entityType, CachedTableConstructor constructor)
         {
             Expression id = constructor.GetTupleProperty(column);
 
             var pk = CachedTableConstructor.WrapPrimaryKey(id.UnNullify());
 
-            CachedTableConstructor typeConstructor = CacheLogic.GetCacheType(type) == CacheType.Cached ?
-                CacheLogic.GetCachedTable(type).Constructor :
+            CachedTableConstructor typeConstructor = CacheLogic.GetCacheType(entityType) == CacheType.Cached ?
+                CacheLogic.GetCachedTable(entityType).Constructor :
                 constructor.cachedTable.SubTables.SingleEx(a => a.ParentColumn == column).Constructor;
 
-            return new CachedEntityExpression(pk, type, typeConstructor, null);
+            return new CachedEntityExpression(pk, entityType, typeConstructor, null);
         }
+
+        static readonly MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
+            if (node.Method.Name == "TryToString")
+            {
+                node = Expression.Call(node.Arguments.SingleEx(), miToString);
+            }
+
             var obj = base.Visit(node.Object);
 
             var args = base.Visit(node.Arguments);

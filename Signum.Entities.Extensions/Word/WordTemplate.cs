@@ -1,12 +1,15 @@
-﻿using Signum.Entities.Basics;
+﻿using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 using Signum.Entities.Files;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -93,11 +96,27 @@ namespace Signum.Entities.Word
             set { Set(ref template, value); }
         }
 
-        FileTypeSymbol fileType = WordReportFileType.DefaultWordReport;
-        public FileTypeSymbol FileType
+        [NotNullable, SqlDbType(Size = 100)]
+        string fileNameFormat;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string FileNameFormat
         {
-            get { return fileType; }
-            set { Set(ref fileType, value); }
+            get { return fileNameFormat; }
+            set { Set(ref fileNameFormat, value); }
+        }
+
+        WordTransformerSymbol wordTransformer;
+        public WordTransformerSymbol WordTransformer
+        {
+            get { return wordTransformer; }
+            set { Set(ref wordTransformer, value); }
+        }
+
+        WordConverterSymbol wordConverter;
+        public WordConverterSymbol WordConverter
+        {
+            get { return wordConverter; }
+            set { Set(ref wordConverter, value); }
         }
 
         static Expression<Func<WordTemplateEntity, string>> ToStringExpression = e => e.Name;
@@ -122,12 +141,6 @@ namespace Signum.Entities.Word
         public static readonly ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate = OperationSymbol.Construct<WordTemplateEntity>.From<SystemWordTemplateEntity>();
     }
 
-    public static class WordReportFileType
-    {
-        public static readonly FileTypeSymbol DefaultWordReport = new FileTypeSymbol(); 
-        
-    }
-
     public enum WordTemplateMessage
     {
         [Description("Model should be set to use model {0}")]
@@ -137,4 +150,32 @@ namespace Signum.Entities.Word
         ChooseAReportTemplate,
     }
 
+    [Serializable]
+    public class WordTransformerSymbol : Symbol
+    {
+        private WordTransformerSymbol() { }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public WordTransformerSymbol([CallerMemberName]string memberName = null) :
+            base(new StackFrame(1, false), memberName)
+        {
+        }
+    }
+
+    [Serializable]
+    public class WordConverterSymbol : Symbol
+    {
+        private WordConverterSymbol() { }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public WordConverterSymbol([CallerMemberName]string memberName = null) :
+            base(new StackFrame(1, false), memberName)
+        {
+        }
+    }
+
+    public static class WordTemplatePermission
+    {
+        public static readonly PermissionSymbol GenerateReport = new PermissionSymbol();
+    }
 }

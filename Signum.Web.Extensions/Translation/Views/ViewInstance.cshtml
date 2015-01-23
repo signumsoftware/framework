@@ -40,7 +40,7 @@
         @Html.Hidden("type")
         @Html.Hidden("culture")
         @Html.TextBox("filter", filter);
-        
+
         <input type="hidden" name="searchPressed" value="true" />
         <input type="submit" value="@TranslationMessage.Search.NiceToString()" />
     }
@@ -52,95 +52,96 @@
 }
 else if (Model.IsEmpty())
 {
-    <strong>@TranslationMessage.NoResultsFound.NiceToString()</strong>  
+    <strong>@TranslationMessage.NoResultsFound.NiceToString()</strong>
 }
 else
 {
     using (Html.BeginForm((TranslatedInstanceController c) => c.SaveView(Signum.Engine.Basics.TypeLogic.GetCleanName(type), culture == null ? null : culture.Name, filter)))
     {
-    <table id="results" style="width: 100%; margin: 0px" class="st">
-        @foreach (var instance in master.Keys.Where(li => master.GetOrThrow(li).HasText()).Where(filtered).GroupBy(a => a.Instance).OrderBy(a => a.Key.Id))
-        { 
-            <thead>
-                <tr>
-                    <th class="leftCell">@TranslationMessage.Instance.NiceToString()</th>
-                    <th class="titleCell">@Html.Href(Navigator.NavigateRoute(instance.Key), instance.Key.ToString())</th>
-                </tr>
-            </thead>
-
-            foreach (LocalizedInstanceKey key in instance.OrderBy(a => a.Route.ToString()))
+        <table id="results" style="width: 100%; margin: 0px" class="st">
+            @foreach (var instance in master.Keys.Where(li => master.GetOrThrow(li).HasText()).Where(filtered).GroupBy(a => a.Instance).OrderBy(a => a.Key.Id))
             {
-                var propertyString = key.Route.PropertyString().Replace("/", "[" + key.RowId + "].");
-            <tr>
-                <th class="leftCell">@TranslationMessage.Property.NiceToString()
-                </th>
-                <th>@propertyString</th>
-            </tr>
-            
-                foreach (var ci in cultures)
+                <thead>
+                    <tr>
+                        <th class="leftCell">@TranslationMessage.Instance.NiceToString()</th>
+                        <th class="titleCell">@Html.Href(Navigator.NavigateRoute(instance.Key), instance.Key.ToString())</th>
+                    </tr>
+                </thead>
+
+                foreach (LocalizedInstanceKey key in instance.OrderBy(a => a.Route.ToString()))
                 {
-                    var formName = ci.Name + "#" + key.Instance.Key() + "#" + propertyString;
+                    var propertyString = key.Route.PropertyString().Replace("/", "[" + key.RowId + "].");
+                    <tr>
+                        <th class="leftCell">
+                            @TranslationMessage.Property.NiceToString()
+                    </th>
+                    <th>@propertyString</th>
+                </tr>
 
-                    if (ci.Name == TranslatedInstanceLogic.DefaultCulture.Name)
+                    foreach (var ci in cultures)
                     {
-            <tr>
-                <td class="leftCell"><em>@TranslatedInstanceLogic.DefaultCulture</em></td>
-                <td class="monospaceCell">
-                    @if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
-                    {
-                        <pre>@master[key]</pre>
-                    }
-                    else
-                    {
-                        @master[key]
-                    }
-                    @Html.TextArea(formName, master[key], new { style = "display:none" })
-                </td>
-            </tr>
-                    }
-                    else
-                    {
-                        TranslatedInstanceEntity trans = Model.TryGetC(ci).TryGetC(key);
+                        var formName = ci.Name + "#" + key.Instance.Key() + "#" + propertyString;
 
-                        if (trans != null && editCulture(ci))
+                        if (ci.Name == TranslatedInstanceLogic.DefaultCulture.Name)
                         {
-            <tr>
-                <td class="leftCell">@ci.Name Diff</td>
-                <td class="monospaceCell">
-                    <pre>@Signum.Web.Translation.TranslationClient.Diff(trans.OriginalText, trans.TranslatedText)</pre>
-                </td>
-            </tr>
-                                
+                            <tr>
+                                <td class="leftCell"><em>@TranslatedInstanceLogic.DefaultCulture</em></td>
+                                <td class="monospaceCell">
+                                    @if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
+                                    {
+                                        <pre>@master[key]</pre>
+                                    }
+                                    else
+                                    {
+                                        @master[key]
+                                    }
+                                    @Html.TextArea(formName, master[key], new { style = "display:none" })
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            TranslatedInstanceEntity trans = Model.TryGetC(ci).TryGetC(key);
+
+                            if (trans != null && editCulture(ci))
+                            {
+                                <tr>
+                                    <td class="leftCell">@ci.Name Diff</td>
+                                    <td class="monospaceCell">
+                                        <pre>@Signum.Web.Translation.TranslationClient.Diff(trans.OriginalText, trans.TranslatedText)</pre>
+                                    </td>
+                                </tr>
+
+                            }
+
+
+                            if (trans != null || editCulture(ci))
+                            {
+                                <tr>
+                                    <td class="leftCell">@ci.Name</td>
+                                    <td class="monospaceCell">
+                                        @if (editCulture(ci))
+                                        {
+                                            @Html.TextArea(formName, trans.Try(t => t.TranslatedText), new { style = "width:90%;" })
+                                        }
+                                        else if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
+                                        {
+                                            <pre>@trans.TranslatedText</pre>
+                                        }
+                                        else
+                                        {
+                                            @trans.TranslatedText
+                                        }
+                                    </td>
+                                </tr>
+                            }
                         }
 
-
-                        if (trans != null || editCulture(ci))
-                        {   
-            <tr>
-                <td class="leftCell">@ci.Name</td>
-                <td class="monospaceCell">
-                    @if (editCulture(ci))
-                    {
-                        @Html.TextArea(formName, trans.Try(t => t.TranslatedText), new { style = "width:90%;height:16px" })
                     }
-                    else if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
-                    {
-                        <pre>@trans.TranslatedText</pre>
-                    }
-                    else
-                    {
-                        @trans.TranslatedText
-                    }
-                </td>
-            </tr>
-                        }
-                    }
-
                 }
             }
-        }
-    </table>
-    <input type="submit" value="@TranslationMessage.Save.NiceToString()" />
+        </table>
+        <input type="submit" value="@TranslationMessage.Save.NiceToString()" />
     }
 }
 

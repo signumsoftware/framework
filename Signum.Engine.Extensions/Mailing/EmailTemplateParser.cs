@@ -371,7 +371,8 @@ namespace Signum.Engine.Mailing
                      ModelType = et.SystemEmail.ToType(),
                      QueryDescription = qd,
                      Replacements = replacements, 
-                     StringDistance = sd
+                     StringDistance = sd,
+                     Variables = new ScopedDictionary<string,ParsedToken>(null)
                 };
 
                 try

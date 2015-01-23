@@ -337,7 +337,12 @@ namespace Signum.Engine.Mailing
         public virtual void Send(EmailMessageEntity email)
         {
             if (!EmailLogic.Configuration.SendEmails)
+            {
+                email.State = EmailMessageState.Sent;
+                email.Sent = TimeZoneManager.Now;
+                email.Save();
                 return;
+            }
 
             using (OperationLogic.AllowSave<EmailMessageEntity>())
             {

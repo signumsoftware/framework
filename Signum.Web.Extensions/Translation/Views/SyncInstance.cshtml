@@ -17,8 +17,6 @@
     {
         ViewBag.Title = ViewBag.Title + " [{0}/{1}]".FormatWith(Model.Instances.Count, totalInstances);
     }
-
-
 }
 
 @Html.ScriptsJs("~/Translation/resources/" + CultureInfo.CurrentCulture.Name + ".js")

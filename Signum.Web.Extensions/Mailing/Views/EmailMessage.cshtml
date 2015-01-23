@@ -20,63 +20,72 @@
 
             tabs.Tab("sfEmailMessage", typeof(EmailMessageEntity).NiceName(), @<text>
 
+                <fieldset>
+                    <legend>Properties</legend>
+                    <div class="row">
+                        <div class="col-sm-5">
+                            @using (var sc = e.SubContext())
+                            {
+                                sc.LabelColumns = new BsColumn(4);
 
-            <div class="row">
-                <div class="repeater-inline form-inline col-sm-8">
+                                @Html.ValueLine(sc, f => f.State)
+                                @Html.ValueLine(sc, f => f.Sent)
+                                @Html.ValueLine(sc, f => f.BodyHash)
+                            }
+                        </div>
+                        <div class="col-sm-7">
+                            @Html.EntityLine(e, f => f.Template)
+                            @Html.EntityLine(e, f => f.Package)
+                            @Html.EntityLine(e, f => f.Exception)
+                        </div>
+                    </div>
+                </fieldset>
+
+
+                <div class=" form-inline repeater-inline">
                     @Html.EntityDetail(e, f => f.From)
                     @Html.EntityRepeater(e, f => f.Recipients)
                     @Html.EntityRepeater(e, f => f.Attachments)
                 </div>
-                <div class="col-sm-4">
-                    <fieldset>
-                        <legend>Properties</legend>
-                        @Html.ValueLine(e, f => f.State)
-                        @Html.ValueLine(e, f => f.Sent)
-                        @Html.EntityLine(e, f => f.Exception)
-                        @Html.EntityLine(e, f => f.Template)
-                        @Html.EntityLine(e, f => f.Package)
-                        @Html.ValueLine(e, f => f.IsBodyHtml)
-                        @Html.ValueLine(e, f => f.BodyHash)
-                    </fieldset>
-                </div>
-            </div>
 
-            @Html.EntityLine(e, f => f.Target)
-            @Html.ValueLine(e, f => f.Subject)
-            @if (e.Value.State == EmailMessageState.Created)
-            {
-                @Html.ValueLine(e, f => f.Body, vl =>
-           {
-               vl.ValueLineType = ValueLineType.TextArea;
-               vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
-           })
+                @{e.LabelColumns = new BsColumn(1);}
 
-<script>
-    $(function () {
-        @(MailingClient.Module["initHtmlEditor"](e.Compose("Body")))
-    });
-                </script>
-            }
-            else
-            {
-                var body = MailingClient.GetWebMailBody(e.Value.Body, new WebMailOptions
+                @Html.EntityLine(e, f => f.Target)
+                @Html.ValueLine(e, f => f.Subject)
+                @Html.ValueLine(e, f => f.IsBodyHtml, vl => vl.InlineCheckbox = true)
+                @if (e.Value.State == EmailMessageState.Created)
                 {
-                    Attachments = e.Value.Attachments,
-                    UntrustedImage = null,
-                    Url = Url,
-                });
-<h3>@EmailMessageMessage.Message.NiceToString():</h3>
-<div>
+                    @Html.ValueLine(e, f => f.Body, vl =>
+               {
+                   vl.ValueLineType = ValueLineType.TextArea;
+                   vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
+               })
+
+                    <script>
+                        $(function () {
+                            @(MailingClient.Module["initHtmlEditor"](e.Compose("Body")))
+                        });
+                    </script>
+                }
+                else
+                {
+                    var body = MailingClient.GetWebMailBody(e.Value.Body, new WebMailOptions
+                    {
+                        Attachments = e.Value.Attachments,
+                        UntrustedImage = null,
+                        Url = Url,
+                    });
+                    <div>
                         @if (e.Value.IsBodyHtml)
-                        {            
-<iframe id="@e.Compose("iframe")" style="width:90%">
+                        {
+                            <iframe id="@e.Compose("iframe")" style="width:100%">
                                 @Html.Raw(body)
                             </iframe>
-<script>
-    $(function () {
-        var iframe = $("@e.Compose("iframe")");
-        @(MailingClient.Module["activateIFrame"](new Newtonsoft.Json.Linq.JRaw("iframe")))
-    });
+                            <script>
+                                $(function () {
+                                    var iframe = $("@e.Compose("iframe")");
+                                    @(MailingClient.Module["activateIFrame"](new Newtonsoft.Json.Linq.JRaw("iframe")))
+                                });
                             </script>
                         }
                         else
@@ -85,30 +94,28 @@
                             @Html.Raw(HttpUtility.HtmlEncode(e.Value.Body))
                         </pre>
                         }
-            </div>
-            }
+                    </div>
+                }
             </text>);
-
-
 
             if (e.Value.Mixins.OfType<EmailReceptionMixin>().Any() && e.Value.Mixin<EmailReceptionMixin>().ReceptionInfo != null)
             {
                 using (var ri = e.SubContext(f => f.Mixin<EmailReceptionMixin>().ReceptionInfo))
                 {
                     tabs.Tab("sfEmailReceptionInfo", ri.PropertyRoute.PropertyInfo.NiceName(), @<text>
-            <fieldset>
-                <legend>Properties</legend>
+                        <fieldset>
+                            <legend>Properties</legend>
 
-                @Html.EntityLine(ri, f => f.Reception)
-                @Html.ValueLine(ri, f => f.UniqueId)
-                @Html.ValueLine(ri, f => f.SentDate)
-                @Html.ValueLine(ri, f => f.ReceivedDate)
-                @Html.ValueLine(ri, f => f.DeletionDate)
+                            @Html.EntityLine(ri, f => f.Reception)
+                            @Html.ValueLine(ri, f => f.UniqueId)
+                            @Html.ValueLine(ri, f => f.SentDate)
+                            @Html.ValueLine(ri, f => f.ReceivedDate)
+                            @Html.ValueLine(ri, f => f.DeletionDate)
 
-            </fieldset>
+                        </fieldset>
 
-            <pre>@ri.Value.RawContent</pre>
-            </text>);
+                        <pre>@ri.Value.RawContent</pre>
+                    </text>);
                 }
             }
         }
