@@ -21,6 +21,7 @@ using Signum.Engine.UserAssets;
 using Signum.Engine.Templating;
 using Signum.Entities.Files;
 using Signum.Utilities.DataStructures;
+using DocumentFormat.OpenXml;
 
 namespace Signum.Engine.Word
 {
@@ -203,9 +204,12 @@ namespace Signum.Engine.Word
             if (!Directory.Exists(DumpFileFolder))
                 Directory.CreateDirectory(DumpFileFolder);
 
-            string fullFileName = Path.Combine(DumpFileFolder, fileName);
+            foreach (var part in RecursiveParts(document).Where(p => p.RootElement != null))
+            {
+                string fullFileName = Path.Combine(DumpFileFolder, part.Uri.ToString().Replace("/", "_") + "." + fileName);
 
-            File.WriteAllText(fullFileName, document.MainDocumentPart.Document.NiceToString());
+                File.WriteAllText(fullFileName, part.RootElement.NiceToString());
+            }
         }
 
         static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
@@ -262,19 +266,26 @@ namespace Signum.Engine.Word
                                 Variables = new ScopedDictionary<string,ParsedToken>(null),
                             };
 
-                            foreach (var node in document.MainDocumentPart.Document.Descendants<BaseNode>().ToList())
-	                        {
-                                node.Synchronize(sc);
-	                        }
+
+                            foreach (var root in document.RecursivePartsRootElements())
+                            {
+                                foreach (var node in root.Descendants<BaseNode>().ToList())
+                                {
+                                    node.Synchronize(sc);
+                                }
+                            }
 
                             if (!sc.HasChanges)
                                 return null;
 
                             Dump(document, "3.Synchronized.txt");
                             var variables = new ScopedDictionary<string, ParsedToken>(null);
-                            foreach (var node in document.MainDocumentPart.Document.Descendants<BaseNode>().ToList())
+                            foreach (var root in document.RecursivePartsRootElements())
                             {
-                                node.RenderTemplate(variables);
+                                foreach (var node in root.Descendants<BaseNode>().ToList())
+                                {
+                                    node.RenderTemplate(variables);
+                                }
                             }
 
                             Dump(document, "4.Rendered.txt");
@@ -309,6 +320,24 @@ namespace Signum.Engine.Word
             {
                 return new SqlPreCommandSimple("-- Exception in {0}: {1}".FormatWith(template.BaseToString(), e.Message));
             }
+        }
+
+        internal static IEnumerable<OpenXmlPartRootElement> RecursivePartsRootElements(this WordprocessingDocument document)
+        {
+            return RecursiveParts(document).Select(p => p.RootElement).NotNull();
+        }
+
+        private static IEnumerable<OpenXmlPart> RecursiveParts(this OpenXmlPartContainer container)
+        {
+            List<OpenXmlPart> result = new List<OpenXmlPart>();
+
+            foreach (var item in container.Parts)
+            {
+                result.Add(item.OpenXmlPart);
+                result.AddRange(RecursiveParts(item.OpenXmlPart));
+            }
+
+            return result;
         }
     }
 }

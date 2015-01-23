@@ -35,10 +35,16 @@ namespace Signum.Engine.Word
         internal void MakeQuery()
         {
             List<QueryToken> tokens = new List<QueryToken>();
-            foreach (var item in document.MainDocumentPart.Document.Descendants<BaseNode>())
+
+            foreach (var root in document.RecursivePartsRootElements())
             {
-                item.FillTokens(tokens);
+                foreach (var item in root.Descendants<BaseNode>())
+                {
+                    item.FillTokens(tokens);
+                }
             }
+
+         
 
             var columns = tokens.NotNull().Distinct().Select(qt => new Signum.Entities.DynamicQuery.Column(qt, null)).ToList();
 
@@ -67,20 +73,26 @@ namespace Signum.Engine.Word
                 SystemWordTemplate = systemWordTemplate
             };
 
-            var nodes = document.MainDocumentPart.Document.Descendants<BaseNode>().ToList();
-
-            foreach (var item in nodes)
+            foreach (var root in document.RecursivePartsRootElements())
             {
-                item.RenderNode(parameters, this.table.Rows);
-            }
+                var list = root.Descendants<BaseNode>().ToList(); //eager
+
+                foreach (var node in list)
+                {
+                    node.RenderNode(parameters, this.table.Rows);
+                }
+            }           
         }
 
         public void AssertClean()
         {
-            var list = this.document.MainDocumentPart.Document.Descendants<BaseNode>().ToList();
+            foreach (var root in this.document.RecursivePartsRootElements())
+            {
+                var list = root.Descendants<BaseNode>().ToList();
 
-            if (list.Any())
-                throw new InvalidOperationException("{0} unexpected BaseNode instances found: {1}".FormatWith(list.Count, list.ToString(l => l.LocalName, ", ")));
+                if (list.Any())
+                    throw new InvalidOperationException("{0} unexpected BaseNode instances found: {1}".FormatWith(list.Count, list.ToString(l => l.LocalName, ", ")));
+            }
         }
     }
 }
