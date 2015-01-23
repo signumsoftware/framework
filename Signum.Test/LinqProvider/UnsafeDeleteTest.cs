@@ -56,6 +56,17 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
         [TestMethod]
+        public void DeleteChunks()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<AlbumEntity>().UnsafeDeleteChunks(2);
+
+                //tr.Commit();
+            }
+        }
+
+        [TestMethod]
         public void DeleteJoin()
         {
             using (Transaction tr = new Transaction())
@@ -109,7 +120,6 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 Database.DeleteList(list);
                 //tr.Commit();
             }
-
         }
     }
 }
