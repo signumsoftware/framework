@@ -21,6 +21,8 @@ namespace Signum.Entities.DynamicQuery
         QueryToken token;
         public QueryToken Token { get { return token; } }
 
+        public bool IsVisible = true;
+
         public Column(QueryToken token, string displayName)
         {
             this.token = token;

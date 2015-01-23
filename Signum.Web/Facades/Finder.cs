@@ -9,6 +9,7 @@ using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Engine;
 
 namespace Signum.Web
 {
@@ -285,15 +286,27 @@ namespace Signum.Web
             if (!Finder.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().FormatWith(request.QueryName));
 
+            QuerySettings settings = QuerySettings[request.QueryName];
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+
+            if(settings.HiddenColumns != null)
+            {
+                if (settings.HiddenColumns.Any(a => a.Token == null))
+                    using (ExecutionMode.Global())
+                        ColumnOption.SetColumnTokens(settings.HiddenColumns, qd, canAggregate: false);
+
+                request.Columns.AddRange(settings.HiddenColumns.Select(c => c.ToColumn(qd, isVisible: false)));
+            }
+
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
-            
+
             controller.ViewData.Model = context;
 
             controller.ViewData[ViewDataKeys.AllowSelection] = allowSelection;
             controller.ViewData[ViewDataKeys.Navigate] = navigate;
             controller.ViewData[ViewDataKeys.ShowFooter] = showFooter;
 
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
+          
             controller.ViewData[ViewDataKeys.QueryDescription] = qd;
 
             Type entitiesType = Lite.Extract(qd.Columns.SingleEx(a => a.IsEntity).Type);
@@ -302,10 +315,11 @@ namespace Signum.Web
                 controller.ViewData[ViewDataKeys.MultipliedMessage] = message;
 
             controller.ViewData[ViewDataKeys.Results] = queryResult;
+            controller.ViewData[ViewDataKeys.QueryRequest] = request;
 
-            QuerySettings settings = QuerySettings[request.QueryName];
             controller.ViewData[ViewDataKeys.Formatters] = queryResult.Columns.Select((c, i)=>new {c,i}).ToDictionary(c=>c.i, c =>settings.GetFormatter(c.c.Column));
             controller.ViewData[ViewDataKeys.EntityFormatter] = settings.EntityFormatter;
+            controller.ViewData[ViewDataKeys.RowAttributes] = settings.RowAttributes;
 
             return new PartialViewResult
             {

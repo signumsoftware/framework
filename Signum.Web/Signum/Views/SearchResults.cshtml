@@ -9,7 +9,8 @@
     Implementations implementations = entityColumn.Implementations.Value;
     bool navigable = (bool)ViewData[ViewDataKeys.Navigate] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsNavigable(t, null, isSearch: true)));
     bool allowSelection = (bool)ViewData[ViewDataKeys.AllowSelection];
-
+    RowAttributes rowAttributes = (RowAttributes)ViewData[ViewDataKeys.RowAttributes];
+    QueryRequest queryRequest = (QueryRequest)ViewData[ViewDataKeys.QueryRequest];
     ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
     Dictionary<int, CellFormatter> formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
     EntityFormatter entityFormatter = (EntityFormatter)ViewData[ViewDataKeys.EntityFormatter];
@@ -32,7 +33,7 @@
 @foreach (var row in queryResult.Rows)
 {
     Lite<IEntity> entityField = row.Entity;
-    <tr data-entity="@entityField.Key()">
+    <tr data-entity="@entityField.Key()" @(rowAttributes == null ? null : rowAttributes(Html, row))>
         @if (allowSelection)
         {
             <td style="text-align:center">@Html.CheckBox(
@@ -47,7 +48,7 @@
         {
             <td>@((entityFormatter ?? QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter)(Html, entityField))</td>
         }
-        @foreach (var col in queryResult.Columns)
+        @foreach (var col in queryResult.Columns.Where(a=>a.Column.IsVisible))
         {
             var value = row[col];
             var ft = formatters[col.Index];

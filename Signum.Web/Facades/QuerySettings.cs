@@ -44,7 +44,8 @@ namespace Signum.Web
         }
 
         public EntityFormatter EntityFormatter { get; set; }
-
+        public RowAttributes RowAttributes { get; set; }
+        public List<ColumnOption> HiddenColumns { get; set; }
 
         static QuerySettings()
         {
@@ -176,6 +177,7 @@ namespace Signum.Web
     }
 
     public delegate MvcHtmlString EntityFormatter(HtmlHelper html, Lite<IEntity> lite);
+    public delegate MvcHtmlString RowAttributes(HtmlHelper html, ResultRow row);
 
     public class CellFormatter
     {

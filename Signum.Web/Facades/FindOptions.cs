@@ -485,9 +485,9 @@ namespace Signum.Web
         public string ColumnName { get; set; }
         public string DisplayName { get; set; }
 
-        public Column ToColumn(QueryDescription qd)
+        public Column ToColumn(QueryDescription qd, bool isVisible = true)
         {
-            return new Column(Token, DisplayName.DefaultText(Token.NiceName()));
+            return new Column(Token, DisplayName.DefaultText(Token.NiceName())) { IsVisible = isVisible };
         }
 
         public override string ToString()
