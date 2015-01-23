@@ -25,7 +25,7 @@
         @Html.Hidden("assembly")
         @Html.Hidden("culture")
         @Html.TextBox("filter", (string)ViewBag.Filter);
-        
+
         <input type="hidden" name="searchPressed" value="true" />
         <input type="submit" value="@TranslationMessage.Search.NiceToString()" />
     }
@@ -45,132 +45,141 @@ else
 
     if (types.IsEmpty())
     {
-    <strong>@TranslationMessage.NoResultsFound.NiceToString()</strong>
+        <strong>@TranslationMessage.NoResultsFound.NiceToString()</strong>
     }
     else
     {
 
         using (Html.BeginForm((TranslationController tc) => tc.SaveView(assembly.GetName().Name, culture == null ? null : culture.Name, filter)))
         {
-                
-    <table id="results" style="width: 100%; margin: 0px" class="st" pluralAndGender="@Url.Action((TranslationController tc) => tc.PluralAndGender())">
-        @foreach (var defaultLocType in types)
-        {
-            bool hasDescription = defaultLocType.Options.IsSet(DescriptionOptions.Description);
 
-            bool hasPlural = defaultLocType.Options.IsSet(DescriptionOptions.PluralDescription);
-
-            bool hasGenderOption = defaultLocType.Options.IsSet(DescriptionOptions.Gender);
-
-            bool hasMembers = defaultLocType.Options.IsSet(DescriptionOptions.Members);  
-                  
-            <thead>
-                <tr>
-                    <th class="leftCell">@TranslationMessage.Type.NiceToString()</th>
-                    <th colspan="4" class="titleCell">@defaultLocType.Type.Name (@("/".Combine(hasDescription ? "Singular" : null, hasPlural ? "Plural" : null, hasGenderOption ? "Gender" : null, hasMembers ? "Members" : null)))</th>
-                </tr>
-            </thead>
-            
-            if (defaultLocType.Options.IsSet(DescriptionOptions.Description))
-            {
-                foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type])
-                    .Where(lt => editCulture(lt.Assembly.Culture) || lt.Description.HasText())
-                    .Where(lt => all || lt.ContainsDescription(filter)))
+            <table id="results" style="width: 100%; margin: 0px" class="st" pluralandgender="@Url.Action((TranslationController tc) => tc.PluralAndGender())">
+                @foreach (var defaultLocType in types)
                 {
-                    bool hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(locType.Assembly.Culture);
+                    bool hasDescription = defaultLocType.Options.IsSet(DescriptionOptions.Description);
 
-            <tr>
-                <th class="leftCell">@locType.Assembly.Culture.Name</th>
-                <th class="smallCell monospaceCell">
-                    @if (hasGender)
+                    bool hasPlural = defaultLocType.Options.IsSet(DescriptionOptions.PluralDescription);
+
+                    bool hasGenderOption = defaultLocType.Options.IsSet(DescriptionOptions.Gender);
+
+                    bool hasMembers = defaultLocType.Options.IsSet(DescriptionOptions.Members);
+
+                    <thead>
+                        <tr>
+                            <th class="leftCell">@TranslationMessage.Type.NiceToString()</th>
+                            <th colspan="4" class="titleCell">@defaultLocType.Type.Name (@("/".Combine(hasDescription ? "Singular" : null, hasPlural ? "Plural" : null, hasGenderOption ? "Gender" : null, hasMembers ? "Members" : null)))</th>
+                        </tr>
+                    </thead>
+
+                    if (defaultLocType.Options.IsSet(DescriptionOptions.Description))
                     {
-                        if (editCulture(locType.Assembly.Culture))
+                        foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type])
+                            .Where(lt => editCulture(lt.Assembly.Culture) || lt.Description.HasText())
+                            .Where(lt => all || lt.ContainsDescription(filter)))
                         {
-                            var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName);
+                            bool hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(locType.Assembly.Culture);
 
-                            var list = gd.Try(a => a.Pronoms).EmptyIfNull()
-                             .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
+                            <tr>
+                                <th class="leftCell">@locType.Assembly.Culture.Name</th>
+                                <th class="smallCell monospaceCell">
+                                    @if (hasGender)
+                                    {
+                                        if (editCulture(locType.Assembly.Culture))
+                                        {
+                                            var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName);
 
-                            if (locType.Gender == null)
+                                            var list = gd.Try(a => a.Pronoms).EmptyIfNull()
+                                             .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
+
+                                            if (locType.Gender == null)
+                                            {
+                                                list.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
+                                            }
+                                            @Html.DropDownList(locKey(locType) + ".Gender", list);
+                                        }
+                                        else
+                                        {
+                                            @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "-")
+                                        }
+                                    }
+                                </th>
+                                <th class="monospaceCell">
+                                    @if (editCulture(locType.Assembly.Culture))
+                                    {
+                                        @Html.TextArea(locKey(locType) + ".Description", locType.Description, new { style = "width:90%;" })
+                                    }
+                                    else
+                                    {
+                                        @locType.Description
+                                    }
+                                </th>
+                                <th class="smallCell">
+                                    @if (hasPlural && hasGender)
+                                    {
+                                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-")
+                                    }
+                                </th>
+                                <th class="monospaceCell">
+                                    @if (hasPlural)
+                                    {
+                                        if (editCulture(locType.Assembly.Culture))
+                                        {
+                                            @Html.TextArea(locKey(locType) + ".PluralDescription", locType.PluralDescription, new { style = "width:90%;" })
+                                        }
+                                        else
+                                        {
+                                            @locType.PluralDescription
+                                        }
+                                    }
+                                </th>
+                            </tr>
+                        }
+                    }
+
+
+                    if (defaultLocType.Options.IsSet(DescriptionOptions.Members))
+                    {
+                        foreach (string key in defaultLocType.Members.Keys.Where(k => all || k.Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
+                            Model.Values.Select(la => la.Types[defaultLocType.Type]).Any(t => t.Members.ContainsKey(k) && t.Members[k].Contains(filter, StringComparison.InvariantCultureIgnoreCase))))
+                        {
+                            <tr>
+                                <th class="leftCell">
+                                    @TranslationMessage.Member.NiceToString()
+                            </th>
+                            <th colspan="4">
+                                @(key)
+                        </th>
+                    </tr>
+
+                            foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt => editCulture(lt.Assembly.Culture) || lt.Members.ContainsKey(key)))
                             {
-                                list.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
+                                <tr>
+                                    <td class="leftCell">@locType.Assembly.Culture.Name</td>
+                                    <td colspan="4" class="monospaceCell">
+
+                                        @if (editCulture(locType.Assembly.Culture))
+                                        {
+                                            @Html.TextArea(locKey(locType) + ".Member." + key, locType.Members.TryGetC(key), new { style = "width:90%;" })
+                                        }
+                                        else
+                                        {
+                                            @locType.Members.TryGetC(key)
+                                        }
+                                    </td>
+                                </tr>
                             }
-                        @Html.DropDownList(locKey(locType) + ".Gender", list);
                         }
-                        else
-                        {
-                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "-")
-                        }
-                    }
-                </th>
-                <th class="monospaceCell">
-                    @if (editCulture(locType.Assembly.Culture))
-                    {
-                        @Html.TextArea(locKey(locType) + ".Description", locType.Description, new { style = "width:90%;height:16px" })
-                    }
-                    else
-                    {
-                        @locType.Description   
-                    }
-                </th>
-                <th class="smallCell">
-                    @if (hasPlural && hasGender)
-                    {
-                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-")
-                    }
-                </th>
-                <th class="monospaceCell">
-                    @if (hasPlural)
-                    {
-                        if (editCulture(locType.Assembly.Culture))
-                        {
-                        @Html.TextArea(locKey(locType) + ".PluralDescription", locType.PluralDescription, new { style = "width:90%;height:16px" })   
-                        }
-                        else
-                        {    
-                        @locType.PluralDescription
-                        }
-                    }
-                </th>
-            </tr>
-                }
-            }
-
-
-            if (defaultLocType.Options.IsSet(DescriptionOptions.Members))
-            {
-                foreach (string key in defaultLocType.Members.Keys.Where(k => all || k.Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
-                    Model.Values.Select(la => la.Types[defaultLocType.Type]).Any(t => t.Members.ContainsKey(k) && t.Members[k].Contains(filter, StringComparison.InvariantCultureIgnoreCase))))
-                {
-            <tr>
-                <th class="leftCell">@TranslationMessage.Member.NiceToString()
-                </th>
-                <th colspan="4">@(key)
-                </th>
-            </tr>
-            
-                    foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt => editCulture(lt.Assembly.Culture) || lt.Members.ContainsKey(key)))
-                    {
-            <tr>
-                <td class="leftCell">@locType.Assembly.Culture.Name</td>
-                <td colspan="4" class="monospaceCell">
-
-                    @if (editCulture(locType.Assembly.Culture))
-                    {
-                        @Html.TextArea(locKey(locType) + ".Member." + key, locType.Members.TryGetC(key), new { style = "width:90%;height:16px" })
-                    }
-                    else
-                    {
-                        @locType.Members.TryGetC(key)
-                    }
-                </td>
-            </tr>
                     }
                 }
-            }
-        }
-    </table>
-    <input type="submit" value="@TranslationMessage.Save.NiceToString()" />
+            </table>
+            <input type="submit" value="@TranslationMessage.Save.NiceToString()" />
         }
     }
 }
+
+<script>
+    $(function () {
+        @(Signum.Web.Translation.TranslationClient.Module["fixTextAreas"]())
+    });
+</script>
+
