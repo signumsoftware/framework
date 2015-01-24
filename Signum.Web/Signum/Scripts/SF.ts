@@ -161,7 +161,7 @@ module SF {
                 } catch (e) { }
             }
             return Cookies.read(key);
-        };
+        }
 
         export function setItem(key: string, value: string, days?: number) {
             if (isSupported) {
@@ -171,12 +171,7 @@ module SF {
                 } catch (e) { }
             } else
                 Cookies.create(key, value, days ? days : 30);
-        };
-
-        return {
-            getItem: getItem,
-            setItem: setItem
-        };
+        }
     }
 
     export function hiddenInput(id: string, value: any) {

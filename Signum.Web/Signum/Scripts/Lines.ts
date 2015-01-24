@@ -739,12 +739,12 @@ export class EntityListBase extends EntityBase {
         }
     }
 
-    freeReservedPrefix(itemPrefix : string) {
+    freeReservedPrefix(itemPrefix: string): void {
         var index = this.reservedPrefixes.indexOf(itemPrefix);
         if (index == -1)
             throw Error("itemPrefix not reserved: " + itemPrefix);
 
-        return this.reservedPrefixes.splice(index, 1);
+        this.reservedPrefixes.splice(index, 1);
     }
 
     getLastPosIndex(): number {
@@ -1186,7 +1186,7 @@ export class EntityRepeater extends EntityListBase {
 
                         return promise.then(
                             ev=> { this.addEntity(ev, itemPrefix); this.freeReservedPrefix(itemPrefix); return itemPrefix; },
-                            error => this.freeReservedPrefix(itemPrefix));
+                            error => { this.freeReservedPrefix(itemPrefix); return null; });
                     }))
                     .then(result => result.join(","));
             });

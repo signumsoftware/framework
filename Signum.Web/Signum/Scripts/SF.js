@@ -150,7 +150,6 @@ var SF;
             return Cookies.read(key);
         }
         LocalStorage.getItem = getItem;
-        ;
 
         function setItem(key, value, days) {
             if (isSupported) {
@@ -163,12 +162,6 @@ var SF;
                 Cookies.create(key, value, days ? days : 30);
         }
         LocalStorage.setItem = setItem;
-        ;
-
-        return {
-            getItem: getItem,
-            setItem: setItem
-        };
     })(SF.LocalStorage || (SF.LocalStorage = {}));
     var LocalStorage = SF.LocalStorage;
 

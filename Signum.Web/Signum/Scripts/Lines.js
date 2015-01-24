@@ -698,7 +698,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (index == -1)
                 throw Error("itemPrefix not reserved: " + itemPrefix);
 
-            return this.reservedPrefixes.splice(index, 1);
+            this.reservedPrefixes.splice(index, 1);
         };
 
         EntityListBase.prototype.getLastPosIndex = function () {
@@ -1155,7 +1155,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                         _this.freeReservedPrefix(itemPrefix);
                         return itemPrefix;
                     }, function (error) {
-                        return _this.freeReservedPrefix(itemPrefix);
+                        _this.freeReservedPrefix(itemPrefix);
+                        return null;
                     });
                 })).then(function (result) {
                     return result.join(",");

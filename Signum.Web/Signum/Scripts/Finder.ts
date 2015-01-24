@@ -1030,7 +1030,7 @@ export class FilterBuilder {
         }).join(";");
     }
 
-    encodeValue($filter: JQuery, index: string) {
+    encodeValue($filter: JQuery, index: string): any {
         var filterValuePrefix = this.prefix.child("value").child(index);
 
         var eleme = filterValuePrefix.get();
