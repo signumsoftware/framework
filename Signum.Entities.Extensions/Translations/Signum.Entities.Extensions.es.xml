@@ -296,6 +296,10 @@
     <Member Name="Label" Description="Etiqueta" />
     <Member Name="UserQuery" Description="Consulta de usuario" />
   </Type>
+  <Type Name="CSharpMigrationEntity" Description="Migración CSharp">
+    <Member Name="ExecutionDate" Description="Fecha de ejecución" />
+    <Member Name="UniqueName" Description="Nombre único" />
+  </Type>
   <Type Name="CultureInfoEntity" Description="Información de la cultura">
     <Member Name="EnglishName" Description="Nombre en inglés" />
     <Member Name="Name" Description="Nombre" />
@@ -594,7 +598,6 @@
     <Member Name="TokenAndEmailAddressCanNotBeSetAtTheSameTime" Description="No pueden establecerse a la vez Token y correo electrónico" />
     <Member Name="TokenMustBeA0" Description="Token debe ser un {0}" />
     <Member Name="TokenOrEmailAddressMustBeSet" Description="Debe establecerse Token o correo electrónico" />
-    <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Tipo {0} no tiene una propiedad con nombre {1}" />
   </Type>
   <Type Name="EmailTemplateMessageEntity" Description="Mensaje plantilla email">
     <Member Name="CultureInfo" Description="Cultura" />
@@ -1149,6 +1152,7 @@
   </Type>
   <Type Name="ResetPasswordRequestEntity" Description="Solicitud nueva contraseña">
     <Member Name="Code" Description="Código" />
+    <Member Name="Lapsed" Description="Caducado" />
     <Member Name="RequestDate" Description="Fecha de solicitud" />
     <Member Name="User" Description="Usuario" />
   </Type>
@@ -1373,6 +1377,9 @@
   </Type>
   <Type Name="SmtpConfigurationOperation">
     <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="SqlMigrationEntity" Description="Migración SQL">
+    <Member Name="VersionNumber" Description="Número de versión" />
   </Type>
   <Type Name="SystemEmailEntity" Description="Email del sistema">
     <Member Name="FullClassName" Description="Nombre completo de clase " />
@@ -1655,6 +1662,7 @@
     <Member Name="Template" Description="Plantilla" />
   </Type>
   <Type Name="WordTemplateMessage">
+    <Member Name="ChooseAReportTemplate" Description="Seleccione una plantilla de informe" />
     <Member Name="ModelShouldBeSetToUseModel0" Description="Modelo debe establecerse para usar el modelo {0}" />
     <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Tipo {0} no tiene una propiedad con el nombre {1}" />
   </Type>
