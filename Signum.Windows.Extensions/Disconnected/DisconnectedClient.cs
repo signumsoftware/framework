@@ -17,6 +17,7 @@ using Signum.Utilities.DataStructures;
 using Signum.Windows.Operations;
 using Signum.Entities.Disconnected;
 using Signum.Windows.Authorization;
+using Signum.Entities.Reflection;
 
 namespace Signum.Windows.Disconnected
 {
@@ -49,13 +50,16 @@ namespace Signum.Windows.Disconnected
                 UpdateCache();
 
                 Navigator.Manager.IsReadOnly += (type, entity) => entity is Entity && !Editable((Entity)entity, type);
-
+                
                 Navigator.Manager.IsCreable += type =>
                 {
-                    if (Server.OfflineMode)
-                        return strategies[type].Upload != Upload.None;
-                    else
+                    if (!type.IsEntity())
                         return true;
+
+                    if (!Server.OfflineMode)
+                        return true;
+
+                    return strategies[type].Upload != Upload.None;
                 }; 
 
                 Lite<DisconnectedMachineEntity> current = null; 

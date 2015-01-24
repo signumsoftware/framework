@@ -188,9 +188,39 @@ namespace Signum.Engine.Disconnected
             if (errors.HasText())
                 throw new InvalidOperationException("Ticks is mandatory for this Disconnected strategy. Tables: \r\n" + errors.Indent(4));
 
+            foreach (var item in strategies.Where(kvp => kvp.Value.Upload != Upload.None).Select(a => a.Key))
+            {
+                giRegisterPreUnsafeInsert.GetInvoker(item)();
+            }
+
             ExportManager.Initialize();
             ImportManager.Initialize();
         }
+
+
+        static readonly GenericInvoker<Action> giRegisterPreUnsafeInsert = new GenericInvoker<Action>(() => Register_PreUnsafeInsert<Entity>());
+        static void Register_PreUnsafeInsert<T>() where T : Entity
+        {
+            Schema.Current.EntityEvents<T>().PreUnsafeInsert += (IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery) =>
+            {
+                if (constructor.Body.Type == typeof(T))
+                {
+                    var newBody = Expression.Call(
+                      miSetMixin.MakeGenericMethod(typeof(T), typeof(DisconnectedCreatedMixin), typeof(bool)),
+                      constructor.Body,
+                      Expression.Quote(disconnectedCreated),
+                      Expression.Constant(DisconnectedLogic.OfflineMode));
+
+                    return Expression.Lambda(newBody, constructor.Parameters);
+                }
+
+                return constructor; //MListTable
+            };
+        }
+
+        static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((DisconnectedCreatedMixin m) => m.DisconnectedCreated, true)).GetGenericMethodDefinition();
+        static Expression<Func<DisconnectedCreatedMixin, bool>> disconnectedCreated = (DisconnectedCreatedMixin m) => m.DisconnectedCreated;
+
 
         public static DisconnectedStrategy<T> Register<T>(Download download, Upload upload) where T : Entity
         {
