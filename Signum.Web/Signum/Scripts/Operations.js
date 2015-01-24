@@ -48,6 +48,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         options = $.extend({
             controllerUrl: SF.Urls.operationExecute,
             avoidReturnView: true,
+            avoidReturnRedirect: true,
             isLite: true
         }, options);
 
