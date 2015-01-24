@@ -214,7 +214,7 @@ namespace Signum.Engine.Word
 
         static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
         {
-            if (!Database.Query<WordTemplateEntity>().Any() || !SafeConsole.Ask("Synchronize WordTemplates?"))
+            if (!Database.Query<WordTemplateEntity>().Any() || !replacements.Interactive || !SafeConsole.Ask("Synchronize WordTemplates?"))
                 return null;
 
             StringDistance sd = new StringDistance();
