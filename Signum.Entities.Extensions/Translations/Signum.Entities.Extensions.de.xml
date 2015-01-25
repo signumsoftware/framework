@@ -643,10 +643,15 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="ExcelMessage">
+    <Member Name="Administer" Description="Verwalten" />
+    <Member Name="CreateNew" Description="Neu erstellen" />
     <Member Name="Data" Description="Daten" />
     <Member Name="Download" Description="Download" />
+    <Member Name="Excel2007Spreadsheet" Description="Microsoft Office Excel 2007 Spreadsheet (*.xlsx)|*.xlsx" />
     <Member Name="ExcelReport" Description="Excel-Bericht" />
     <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="Die Excel-Vorlage muss eine xlsx-Erweiterung haben, und die Aktuelle hat eine {0}-Erweiterung" />
+    <Member Name="FindLocationFoExcelReport" Description="Speicherort für Excel-Bericht finden" />
+    <Member Name="Reports" Description="Berichte" />
     <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="Die Excel-Vorlage hat eine Spalte {0}, die nicht in der Suche vorhanden ist" />
     <Member Name="ThereAreNoResultsToWrite" Description="Es gibt keine Ergebnisse für den Bericht zu exportieren" />
   </Type>
@@ -655,7 +660,10 @@
     <Member Name="File" Description="Datei" />
     <Member Name="Query" Description="Abfrage" />
   </Type>
-  <Type Name="ExcelReportOperation" />
+  <Type Name="ExcelReportOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="FileEntity" Description="Datei">
     <Member Name="BinaryFile" Description="Binärdatei" />
     <Member Name="FileName" Description="Dateiname" />
@@ -799,8 +807,14 @@
     <Member Name="UnderlineText" Description="Text unterstreichen" />
     <Member Name="UnorderedListItem" Description="Ungeordnetes Listenelement" />
   </Type>
-  <Type Name="HolidayCalendarEntity" />
-  <Type Name="HolidayCalendarOperation" />
+  <Type Name="HolidayCalendarEntity" Description="Ferienkalender" Gender="m">
+    <Member Name="Holidays" Description="Urlaub" />
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="HolidayCalendarOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="HolidayEntity" Description="Feiertag">
     <Member Name="Date" Description="Datum" />
     <Member Name="Name" Description="Name" />
@@ -847,8 +861,16 @@
     <Member Name="Intersection" Description="Schnittmenge" />
     <Member Name="Union" Description="Vereinigungsmenge" />
   </Type>
-  <Type Name="MessageLengthExceeded" />
-  <Type Name="MultipleSMSModel" />
+  <Type Name="MessageLengthExceeded" Description="Nachrichtenlänge überschritten">
+    <Member Name="Allowed" Description="Erlaubt" />
+    <Member Name="NotAllowed" Description="Nicht erlaubt" />
+    <Member Name="TextPruning" Description="Text beschneiden" />
+  </Type>
+  <Type Name="MultipleSMSModel" Description="Mehrere SMS">
+    <Member Name="Certified" Description="Zertifiziert" />
+    <Member Name="From" Description="Von" />
+    <Member Name="Message" Description="Nachricht" />
+  </Type>
   <Type Name="NamespaceHelpEntity" Description="Namespacehilfe" PluralDescription="Namespacehilfen" Gender="f">
     <Member Name="Culture" Description="Kultur" />
     <Member Name="Description" Description="Beschreibung" />
@@ -1073,7 +1095,11 @@
     <Member Name="Suspended" Description="Ausgesetzt" />
     <Member Name="Suspending" Description="Aussetzen" />
   </Type>
-  <Type Name="ProfilerPermission" />
+  <Type Name="ProfilerPermission">
+    <Member Name="OverrideSessionTimeout" Description="Session-Timeout überschreiben" />
+    <Member Name="ViewHeavyProfiler" Description="Heavy Profiler anzeigen" />
+    <Member Name="ViewTimeTracker" Description="Zeiterfassung anzeigen" />
+  </Type>
   <Type Name="PropertyAllowed">
     <Member Name="Modify" Description="Ändern" />
     <Member Name="None" Description="Keine" />
@@ -1091,6 +1117,7 @@
   <Type Name="PropertyRulePack" Description="Eigenschaftsregelpack" />
   <Type Name="QueryColumnEntity" Description="Abfrage-Spalte">
     <Member Name="DisplayName" Description="Angezeigter Name" />
+    <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="QueryColumnHelpEntity" Description="Abfrage Spaltenhilfe">
     <Member Name="ColumnName" Description="Spaltenname" />
@@ -1102,6 +1129,7 @@
   </Type>
   <Type Name="QueryFilterEntity" Description="Abfragefilter">
     <Member Name="Operation" Description="Betrieb" />
+    <Member Name="Token" Description="Token" />
     <Member Name="ValueString" Description="Wert String" />
   </Type>
   <Type Name="QueryHelpEntity" Description="Abfragehilfe">
@@ -1116,6 +1144,7 @@
   </Type>
   <Type Name="QueryOrderEntity" Description="Abfragereihenfolge">
     <Member Name="OrderType" Description="Reihenfolgentyp" />
+    <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="QueryRulePack" Description="Abfrageregelpack" />
   <Type Name="QueryTokenEntity" Description="Abfrage Token">
@@ -1156,6 +1185,8 @@
     <Member Name="Conditions" Description="Bedingungen" />
   </Type>
   <Type Name="ScheduledTaskEntity" Description="Geplante Aufgabe">
+    <Member Name="ApplicationName" Description="Anwendungsname" />
+    <Member Name="MachineName" Description="Computername" />
     <Member Name="Rule" Description="Regel" />
     <Member Name="Suspended" Description="Ausgesetzt" />
     <Member Name="Task" Description="Geplante Aufgabe" />
@@ -1172,19 +1203,69 @@
     <Member Name="Task" Description="Aufgabe" />
     <Member Name="User" Description="Benutzer" />
   </Type>
-  <Type Name="ScheduledTaskOperation" />
+  <Type Name="ScheduledTaskOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="SchedulerMessage">
+    <Member Name="_0IsNotMultiple1" Description="{0} ist kein Vielfaches von {1}" />
+    <Member Name="Each0Hours" Description="Alle {0} Stunden" />
+    <Member Name="Each0Minutes" Description="Alle {0} Minuten" />
+    <Member Name="ScheduleRuleDailyDN_Everydayat" Description="Jeden Tag um " />
     <Member Name="ScheduleRuleDailyEntity" Description="Täglich" />
+    <Member Name="ScheduleRuleDayDN_StartingOn" Description="Beginnend am" />
+    <Member Name="ScheduleRuleHourlyEntity" Description="Alle X Stunden" />
+    <Member Name="ScheduleRuleMinutelyEntity" Description="Alle X Minuten" />
+    <Member Name="ScheduleRuleWeekDaysDN_AndHoliday" Description="und an Feiertagen" />
+    <Member Name="ScheduleRuleWeekDaysDN_At" Description="an" />
+    <Member Name="ScheduleRuleWeekDaysDN_ButHoliday" Description="aber Feiertage" />
+    <Member Name="ScheduleRuleWeekDaysDN_Calendar" Description="Kalender" />
+    <Member Name="ScheduleRuleWeekDaysDN_F" Description="F" />
+    <Member Name="ScheduleRuleWeekDaysDN_Friday" Description="Freitag" />
+    <Member Name="ScheduleRuleWeekDaysDN_Holiday" Description="Feiertag" />
+    <Member Name="ScheduleRuleWeekDaysDN_M" Description="M" />
+    <Member Name="ScheduleRuleWeekDaysDN_Monday" Description="Montag" />
+    <Member Name="ScheduleRuleWeekDaysDN_S" Description="So" />
+    <Member Name="ScheduleRuleWeekDaysDN_Sa" Description="Sa" />
+    <Member Name="ScheduleRuleWeekDaysDN_Saturday" Description="Samstag" />
+    <Member Name="ScheduleRuleWeekDaysDN_Sunday" Description="Sonntag" />
+    <Member Name="ScheduleRuleWeekDaysDN_T" Description="Di" />
+    <Member Name="ScheduleRuleWeekDaysDN_Th" Description="Do" />
+    <Member Name="ScheduleRuleWeekDaysDN_Thursday" Description="Donnerstag" />
+    <Member Name="ScheduleRuleWeekDaysDN_Tuesday" Description="Dienstag" />
+    <Member Name="ScheduleRuleWeekDaysDN_W" Description="M" />
+    <Member Name="ScheduleRuleWeekDaysDN_Wednesday" Description="Mittwoch" />
     <Member Name="ScheduleRuleWeekDaysEntity" Description="Tage der Woche" />
+    <Member Name="ScheduleRuleWeeklyDN_DayOfTheWeek" Description="Tag der Woche" />
     <Member Name="ScheduleRuleWeeklyEntity" Description="wöchentlich" />
   </Type>
-  <Type Name="SchedulerPermission" />
-  <Type Name="ScheduleRuleDailyEntity" />
-  <Type Name="ScheduleRuleDayEntity" />
-  <Type Name="ScheduleRuleHourlyEntity" />
-  <Type Name="ScheduleRuleMinutelyEntity" />
-  <Type Name="ScheduleRuleWeekDaysEntity" />
-  <Type Name="ScheduleRuleWeeklyEntity" />
+  <Type Name="SchedulerPermission">
+    <Member Name="ViewSchedulerPanel" Description="Schedulersteuerung anzeigen" />
+  </Type>
+  <Type Name="ScheduleRuleDailyEntity" Description="Schedule-Regel täglich" PluralDescription="Schedule-Regeln täglich" Gender="f" />
+  <Type Name="ScheduleRuleDayEntity" Description="Schedule-Regel täglich" PluralDescription="Schedule-Regeln täglich" Gender="f">
+    <Member Name="StartingOn" Description="Beginnend am" />
+  </Type>
+  <Type Name="ScheduleRuleHourlyEntity" Description="Schedule-Regel stündlich" PluralDescription="Schedule-Regeln stündlich" Gender="f">
+    <Member Name="EachHours" Description="Jede Stunden" />
+  </Type>
+  <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich" PluralDescription="Schedule-Regeln minütlich" Gender="f">
+    <Member Name="EachMinutes" Description="Alle Minuten" />
+  </Type>
+  <Type Name="ScheduleRuleWeekDaysEntity" Description="Schedule-Regel Wochentage" PluralDescription="Schedule-Regeln Wochentage">
+    <Member Name="Calendar" Description="Kalender" />
+    <Member Name="Friday" Description="Freitag" />
+    <Member Name="Holiday" Description="Feiertag" />
+    <Member Name="Monday" Description="Montag" />
+    <Member Name="Saturday" Description="Samstag" />
+    <Member Name="Sunday" Description="Sonntag" />
+    <Member Name="Thursday" Description="Donnerstag" />
+    <Member Name="Tuesday" Description="Dienstag" />
+    <Member Name="Wednesday" Description="Mittwoch" />
+  </Type>
+  <Type Name="ScheduleRuleWeeklyEntity" Description="Schedule-Regel wöchentlich" PluralDescription="Schedule-Regeln wöchentlich" Gender="f">
+    <Member Name="DayOfTheWeek" Description="Tag der Woche" />
+  </Type>
   <Type Name="SessionLogEntity" Description="Sitzungsprotokoll" PluralDescription="Sitzungsprotokolle" Gender="n">
     <Member Name="Duration" Description="Dauer" />
     <Member Name="SessionEnd" Description="Sitzungsende" />
@@ -1197,22 +1278,91 @@
   <Type Name="SessionLogPermission">
     <Member Name="TrackSession" Description="Sitzungskontrolle" />
   </Type>
-  <Type Name="SimpleTaskSymbol" />
+  <Type Name="SimpleTaskSymbol" Description="Einfache Aufgabe" PluralDescription="Einfache Aufgaben" Gender="f" />
   <Type Name="SMSConfigurationEntity" Description="SMS-Konfiguration">
     <Member Name="DefaultCulture" Description="Standardkultur" />
   </Type>
-  <Type Name="SmsMessage" />
-  <Type Name="SMSMessageEntity" />
-  <Type Name="SMSMessageOperation" />
-  <Type Name="SMSMessageProcess" />
-  <Type Name="SMSMessageState" />
-  <Type Name="SMSPackageEntity" />
-  <Type Name="SMSSendPackageEntity" />
-  <Type Name="SMSTemplateEntity" />
-  <Type Name="SMSTemplateMessage" />
-  <Type Name="SMSTemplateMessageEntity" />
-  <Type Name="SMSTemplateOperation" />
-  <Type Name="SMSUpdatePackageEntity" />
+  <Type Name="SmsMessage">
+    <Member Name="Insert" Description="Einfügen" />
+    <Member Name="Language" Description="Sprache" />
+    <Member Name="Message" Description="Nachricht" />
+    <Member Name="RemainingCharacters" Description="Verbleibende Zeichen" />
+    <Member Name="RemoveNonValidCharacters" Description="Ungültige Zeichen entfernen" />
+    <Member Name="Replacements" Description="Ersatz" />
+    <Member Name="StatusCanNotBeUpdatedForNonSentMessages" Description="Status kann für nicht gesendete Nachrichten nicht aktualisiert werden" />
+    <Member Name="TheTemplateMustBeActiveToConstructSMSMessages" Description="Die Vorlage muss aktiv zum Erstellen von SMS-Nachrichten sein" />
+    <Member Name="TheTextForTheSMSMessageExceedsTheLengthLimit" Description="Der Text für die SMS-Nachricht überschreitet die zugelassene Länge" />
+  </Type>
+  <Type Name="SMSMessageEntity" Description="SMS-Nachricht" PluralDescription="SMS-Nachrichten" Gender="f">
+    <Member Name="Certified" Description="Zertifiziert" />
+    <Member Name="DestinationNumber" Description="Zielrufnummer" />
+    <Member Name="EditableMessage" Description="Bearbeitbare Nachricht" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="From" Description="Von" />
+    <Member Name="Message" Description="Nachricht" />
+    <Member Name="MessageID" Description="Nachrichten-ID" />
+    <Member Name="Referred" Description="Verbunden" />
+    <Member Name="SendDate" Description="Sendedatum" />
+    <Member Name="SendPackage" Description="Paket senden" />
+    <Member Name="State" Description="Status" />
+    <Member Name="Template" Description="Vorlage" />
+    <Member Name="UpdatePackage" Description="Update-Paket" />
+    <Member Name="UpdatePackageProcessed" Description="Update-Paket verarbeitet" />
+  </Type>
+  <Type Name="SMSMessageOperation">
+    <Member Name="CreateSMSFromEntity" Description="SMS aus Entität erstellen" />
+    <Member Name="CreateSMSFromSMSTemplate" Description="SMS aus SMS-Vorlage erstellen" />
+    <Member Name="CreateSMSWithTemplateFromEntity" Description="SMS mit Vorlage aus Entität erstellen" />
+    <Member Name="CreateUpdateStatusPackage" Description="Status-Update-Paket erstellen" />
+    <Member Name="Send" Description="Senden" />
+    <Member Name="SendSMSMessages" Description="SMS-Nachrichten senden" />
+    <Member Name="SendSMSMessagesFromTemplate" Description="SMS-Nachrichten aus Vorlage senden" />
+    <Member Name="UpdateStatus" Description="Update Status" />
+  </Type>
+  <Type Name="SMSMessageProcess">
+    <Member Name="Send" Description="Senden" />
+    <Member Name="UpdateStatus" Description="Update Status" />
+  </Type>
+  <Type Name="SMSMessageState" Description="SMS-Nachrichtenstatus">
+    <Member Name="Created" Description="Erstellt" />
+    <Member Name="Delivered" Description="Zugestellt" />
+    <Member Name="Failed" Description="Fehlgeschlagen" />
+    <Member Name="Sent" Description="Gesendet" />
+  </Type>
+  <Type Name="SMSPackageEntity" Description="SMS-Paket" PluralDescription="SMS-Pakete" Gender="n">
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="SMSSendPackageEntity" Description="SMS-Sendepaket" PluralDescription="SMS-Sendepakete" Gender="n" />
+  <Type Name="SMSTemplateEntity" Description="SMS-Vorlage">
+    <Member Name="Active" Description="Aktiv" />
+    <Member Name="AssociatedType" Description="Assoziierter Typ" />
+    <Member Name="Certified" Description="Zertifiziert" />
+    <Member Name="EditableMessage" Description="Bearbeitbare Nachricht" />
+    <Member Name="EndDate" Description="Enddatum" />
+    <Member Name="From" Description="Von" />
+    <Member Name="MessageLengthExceeded" Description="Nachrichtenlänge überschritten" />
+    <Member Name="Messages" Description="Nachrichten" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="RemoveNoSMSCharacters" Description="Keine SMS-Zeichen entfernen" />
+    <Member Name="StartDate" Description="Startdatum" />
+  </Type>
+  <Type Name="SMSTemplateMessage">
+    <Member Name="EndDateMustBeHigherThanStartDate" Description="Enddatum muss größer als Startdatum sein" />
+    <Member Name="NewCulture" Description="Neue Kultur" />
+    <Member Name="ThereAreNoMessagesForTheTemplate" Description="Es gibt keine Nachrichten für die Vorlage" />
+    <Member Name="ThereMustBeAMessageFor0" Description="Es muss eine Nachricht für {0} geben" />
+    <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Es gibt mehr als eine Nachricht für die gleiche Sprache" />
+  </Type>
+  <Type Name="SMSTemplateMessageEntity" Description="SMS-Vorlagennachricht">
+    <Member Name="CultureInfo" Description="Kulturinfo" />
+    <Member Name="Message" Description="Nachricht" />
+    <Member Name="Template" Description="Vorlage" />
+  </Type>
+  <Type Name="SMSTemplateOperation">
+    <Member Name="Create" Description="Erstellen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="SMSUpdatePackageEntity" Description="SMS-Updatepaket" PluralDescription="SMS-Updatepakete" Gender="n" />
   <Type Name="SmtpConfigurationEntity" Description="Smtp-Konfiguration">
     <Member Name="AditionalRecipients" Description="Zusätzliche Empfänger" />
     <Member Name="ClientCertificationFiles" Description="Client-Zertifikat-Dateien" />
@@ -1234,9 +1384,18 @@
   <Type Name="SystemEmailEntity" Description="System-E-Mail" PluralDescription="System-E-Mails">
     <Member Name="FullClassName" Description="Vollständiger class name" />
   </Type>
-  <Type Name="SystemWordTemplateEntity" />
-  <Type Name="TaskMessage" />
-  <Type Name="TaskOperation" />
+  <Type Name="SystemWordTemplateEntity" Description="System-Word-Vorlage">
+    <Member Name="FullClassName" Description="Vollständige Klassenname" />
+  </Type>
+  <Type Name="TaskMessage">
+    <Member Name="Execute" Description="Ausführen" />
+    <Member Name="Executions" Description="Ausführungen" />
+    <Member Name="LastExecution" Description="Letzte Ausführung" />
+  </Type>
+  <Type Name="TaskOperation">
+    <Member Name="ExecuteAsync" Description="Async ausführen" />
+    <Member Name="ExecuteSync" Description="Sync ausführen" />
+  </Type>
   <Type Name="TemplateTokenMessage">
     <Member Name="NoColumnSelected" Description="Keine Spalte ausgewählt" />
     <Member Name="YouCannotAddBlocksWithAllOrAny" Description="Sie können keine Blöcke mit &quot;Alle&quot; oder &quot;Keine&quot; hinzufügen" />
@@ -1411,17 +1570,43 @@
     <Member Name="Columns" Description="Spalten" />
     <Member Name="ColumnsMode" Description="Spalten-Modus" />
     <Member Name="DisplayName" Description="Angezeigter Name" />
+    <Member Name="ElementsPerPage" Description="Elemente pro Seite" />
+    <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Filters" Description="Filter" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Orders" Description="Reihenfolge" />
+    <Member Name="Owner" Description="Eigentümer" />
+    <Member Name="PaginationMode" Description="Paginierungsmodus" />
     <Member Name="Query" Description="Abfrage" />
+    <Member Name="ShouldHaveElements" Description="Sollte Elemente haben" />
+    <Member Name="WithoutFilters" Description="Ohne Filter" />
   </Type>
-  <Type Name="UserQueryMessage" />
-  <Type Name="UserQueryOperation" />
+  <Type Name="UserQueryMessage">
+    <Member Name="_0IsNotFilterable" Description="{0} ist nicht filterbar" />
+    <Member Name="_0ShouldBeEmptyIf1IsSet" Description="{0} sollte leer sein, wenn {1} angegeben ist" />
+    <Member Name="_0ShouldBeNullIf1Is2" Description="{0} sollte null sein, wenn {1} &quot;{2}&quot; ist" />
+    <Member Name="_0ShouldBeSetIf1Is2" Description="{0} sollte angegeben werden, wenn {1} &quot;{2}&quot; ist" />
+    <Member Name="AreYouSureToRemove0" Description="Sind Sie sicher, dass Sie &quot;{0}&quot; entfernen möchten?" />
+    <Member Name="Edit" Description="Bearbeiten" />
+    <Member Name="MyQueries" Description="Meine Abfragen" />
+    <Member Name="RemoveUserQuery" Description="Benutzerabfrage entfernen?" />
+    <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="Der Filtervorgang {0} ist nicht kompatibel mit {1}" />
+    <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um aktuelle Entität Filtern" />
+    <Member Name="UserQueries_CreateNew" Description="Erstellen" />
+    <Member Name="UserQueries_Edit" Description="Bearbeiten" />
+    <Member Name="UserQueries_UserQueries" Description="Benutzerabfragen" />
+  </Type>
+  <Type Name="UserQueryOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrageteil" PluralDescription="Benutzerabfrageteile" Gender="n">
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>
-  <Type Name="UserQueryPermission" />
+  <Type Name="UserQueryPermission">
+    <Member Name="ViewUserQuery" Description="Benutzer-Abfrage anzeigen" />
+  </Type>
   <Type Name="UserState" Description="Benutzerstatus">
     <Member Name="Disabled" Description="Behinderte" />
     <Member Name="New" Description="Neu" />
@@ -1447,10 +1632,32 @@
   <Type Name="WebImage" Description="Webbild">
     <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
   </Type>
-  <Type Name="WordConverterSymbol" />
-  <Type Name="WordTemplateEntity" />
-  <Type Name="WordTemplateMessage" />
-  <Type Name="WordTemplateOperation" />
-  <Type Name="WordTemplatePermission" />
-  <Type Name="WordTransformerSymbol" />
+  <Type Name="WordConverterSymbol" Description="Word-Konverter" Gender="m" />
+  <Type Name="WordTemplateEntity" Description="Word-Vorlage">
+    <Member Name="Active" Description="Aktiv" />
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />
+    <Member Name="EndDate" Description="Enddatum" />
+    <Member Name="FileNameFormat" Description="Dateinamenformat" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Query" Description="Abfrage" />
+    <Member Name="StartDate" Description="Startdatum" />
+    <Member Name="SystemWordTemplate" Description="System-Word-Vorlage" />
+    <Member Name="Template" Description="Vorlage" />
+    <Member Name="WordConverter" Description="Word-Konverter" />
+    <Member Name="WordTransformer" Description="Word-Transformator" />
+  </Type>
+  <Type Name="WordTemplateMessage">
+    <Member Name="ChooseAReportTemplate" Description="Wählen Sie eine Berichtsvorlage" />
+    <Member Name="ModelShouldBeSetToUseModel0" Description="Modell sollte angegeben werden, um Modell {0} zu benutzen" />
+    <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Typ {0} verfügt nicht über eine Eigenschaft mit dem Namen {1}" />
+  </Type>
+  <Type Name="WordTemplateOperation">
+    <Member Name="CreateWordTemplateFromSystemWordTemplate" Description="Word-Vorlage aus System-Word-Vorlage erstellen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="WordTemplatePermission">
+    <Member Name="GenerateReport" Description="Bericht generieren" />
+  </Type>
+  <Type Name="WordTransformerSymbol" Description="Word-Transformator" PluralDescription="Word-Transformatoren" />
 </Translations>

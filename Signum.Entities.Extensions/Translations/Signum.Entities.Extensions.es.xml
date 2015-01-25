@@ -1632,34 +1632,20 @@
   <Type Name="WebImage" Description="Imagen web">
     <Member Name="FullWebPath" Description="Ruta web completa" />
   </Type>
-  <Type Name="WordReportFileType">
-    <Member Name="DefaultWordReport" Description="Informe Word por defecto" />
-  </Type>
-  <Type Name="WordReportLogEntity" Description="Registro informe Word">
-    <Member Name="Duration" Description="Duración" />
-    <Member Name="End" Description="Final" />
-    <Member Name="Exception" Description="Excepción" />
-    <Member Name="Report" Description="Informe" />
-    <Member Name="Start" Description="Inicio" />
-    <Member Name="Target" Description="Destino" />
-    <Member Name="Template" Description="Plantilla" />
-    <Member Name="User" Description="Usuario" />
-  </Type>
-  <Type Name="WordReportLogOperation">
-    <Member Name="CreateWordReportFromEntity" Description="Crear informe Word desde entidad" />
-    <Member Name="CreateWordReportFromTemplate" Description="Crear informe Word desde plantilla" />
-  </Type>
+  <Type Name="WordConverterSymbol" Description="Convertidor Word" />
   <Type Name="WordTemplateEntity" Description="Plantilla Word">
     <Member Name="Active" Description="Activo" />
     <Member Name="Culture" Description="Cultura" />
     <Member Name="DisableAuthorization" Description="Desactivar autorización" />
     <Member Name="EndDate" Description="Fecha de finalización" />
-    <Member Name="FileType" Description="Tipo de archivo" />
+    <Member Name="FileNameFormat" Description="Formato nombre de archivo" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="Query" Description="Consulta" />
     <Member Name="StartDate" Description="Fecha de inicio" />
     <Member Name="SystemWordTemplate" Description="Plantilla Word del sistema" />
     <Member Name="Template" Description="Plantilla" />
+    <Member Name="WordConverter" Description="Convertidor Word" />
+    <Member Name="WordTransformer" Description="Transformador Word" />
   </Type>
   <Type Name="WordTemplateMessage">
     <Member Name="ChooseAReportTemplate" Description="Seleccione una plantilla de informe" />
@@ -1670,4 +1656,8 @@
     <Member Name="CreateWordTemplateFromSystemWordTemplate" Description="Crear plantilla Word desde plantilla Word del sistema" />
     <Member Name="Save" Description="Guardar" />
   </Type>
+  <Type Name="WordTemplatePermission">
+    <Member Name="GenerateReport" Description="Generar informe" />
+  </Type>
+  <Type Name="WordTransformerSymbol" Description="Transformador Word" />
 </Translations>
