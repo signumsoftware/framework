@@ -122,6 +122,14 @@ namespace Signum.Windows
             set { SetValue(ShowFilterButtonProperty, value); }
         }
 
+        public static readonly DependencyProperty ShowFindButtonProperty =
+            DependencyProperty.Register("ShowFindButton", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
+        public bool ShowFindButton
+        {
+            get { return (bool)GetValue(ShowFindButtonProperty); }
+            set { SetValue(ShowFindButtonProperty, value); }
+        }
+
         public static readonly DependencyProperty ShowHeaderProperty =
             DependencyProperty.Register("ShowHeader", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
         public bool ShowHeader
@@ -279,6 +287,8 @@ namespace Signum.Windows
         private void UpdateVisibility()
         {
             btCreate.Visibility = Create && EntityType != null ? Visibility.Visible : Visibility.Collapsed;
+            btSearch.Visibility = ShowFindButton ? Visibility.Visible : Visibility.Collapsed;
+
             UpdateViewSelection();
         }
 
