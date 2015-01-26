@@ -397,7 +397,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             this.visible(this.prefix.child(Entities.Keys.link).tryGet(), entityValue != null);
             this.visible(this.prefix.get().find("ul.typeahead.dropdown-menu"), entityValue == null);
-            this.visible(this.prefix.child(Entities.Keys.toStr).tryGet(), entityValue == null);
+
+            var toStr = this.prefix.child(Entities.Keys.toStr).tryGet();
+            if (toStr != null && toStr.is(":focus")) {
+                var tabables = toStr.closest("form").find("*[tabindex != '-1']:visible");
+                var index = tabables.index(toStr);
+                tabables.eq(index + 1).focus(); // Is there a better way?
+            }
+            this.visible(toStr, entityValue == null);
         };
 
         EntityLine.prototype.visible = function (element, visible) {
