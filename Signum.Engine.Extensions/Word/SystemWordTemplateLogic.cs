@@ -127,19 +127,19 @@ namespace Signum.Engine.Word
         }
 
 
-        public static byte[] CreateReport(this ISystemWordTemplate systemWordTemplate)
+        public static byte[] CreateReport(this ISystemWordTemplate systemWordTemplate, bool avoidConversion = false)
         {
             WordTemplateEntity rubish;
-            return systemWordTemplate.CreateReport(out rubish);
+            return systemWordTemplate.CreateReport(out rubish, avoidConversion);
         }
 
-        public static byte[] CreateReport(this ISystemWordTemplate systemWordTemplate, out WordTemplateEntity template)
+        public static byte[] CreateReport(this ISystemWordTemplate systemWordTemplate, out WordTemplateEntity template, bool avoidConversion = false)
         {
             SystemWordTemplateEntity system = TypeToSystemWordTemplate.Value.GetOrThrow(systemWordTemplate.GetType());
 
             template = GetDefaultTemplate(system);
 
-            return WordTemplateLogic.CreateReport(template.ToLite(), systemWordTemplate.UntypedEntity, systemWordTemplate); 
+            return WordTemplateLogic.CreateReport(template.ToLite(), systemWordTemplate.UntypedEntity, systemWordTemplate, avoidConversion); 
         }
 
         public static WordTemplateEntity GetDefaultTemplate(SystemWordTemplateEntity systemWordTemplate)

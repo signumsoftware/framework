@@ -142,9 +142,9 @@ namespace Signum.Engine.Word
 
         public static string DumpFileFolder;
 
-        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity, ISystemWordTemplate systemWordTemplate = null)
+        public static byte[] CreateReport(this Lite<WordTemplateEntity> liteTemplate, Entity entity, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
-            return liteTemplate.GetFromCache().CreateReport(entity, systemWordTemplate);
+            return liteTemplate.GetFromCache().CreateReport(entity, systemWordTemplate, avoidConversion);
         }
 
         public static WordTemplateEntity GetFromCache(this Lite<WordTemplateEntity> liteTemplate)
@@ -154,7 +154,7 @@ namespace Signum.Engine.Word
             return template;
         }
 
-        public static byte[] CreateReport(this WordTemplateEntity template, Entity entity, ISystemWordTemplate systemWordTemplate = null)
+        public static byte[] CreateReport(this WordTemplateEntity template, Entity entity, ISystemWordTemplate systemWordTemplate = null, bool avoidConversion = false)
         {
 
             if (systemWordTemplate != null && template.SystemWordTemplate.FullClassName != systemWordTemplate.GetType().FullName)
@@ -188,7 +188,7 @@ namespace Signum.Engine.Word
 
                      var array = memory.ToArray();
 
-                     if (template.WordConverter != null)
+                     if (!avoidConversion && template.WordConverter != null)
                          array = Converters.GetOrThrow(template.WordConverter)(template, entity, array);
 
                      return array;
@@ -322,12 +322,12 @@ namespace Signum.Engine.Word
             }
         }
 
-        internal static IEnumerable<OpenXmlPartRootElement> RecursivePartsRootElements(this WordprocessingDocument document)
+        public static IEnumerable<OpenXmlPartRootElement> RecursivePartsRootElements(this WordprocessingDocument document)
         {
             return RecursiveParts(document).Select(p => p.RootElement).NotNull();
         }
 
-        private static IEnumerable<OpenXmlPart> RecursiveParts(this OpenXmlPartContainer container)
+        public static IEnumerable<OpenXmlPart> RecursiveParts(this OpenXmlPartContainer container)
         {
             List<OpenXmlPart> result = new List<OpenXmlPart>();
 
