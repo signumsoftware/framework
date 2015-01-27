@@ -37,6 +37,8 @@ namespace Signum.Web.AuthAdmin
                 else
                     Navigator.AddSetting(new EntitySettings<UserEntity> { PartialViewName = _ => ViewPrefix.FormatWith("User") });
 
+                Navigator.EntitySettings<UserEntity>().MappingMain.AsEntityMapping().RemoveProperty(a => a.PasswordHash);
+
                 if (Navigator.Manager.EntitySettings.ContainsKey(typeof(RoleEntity)))
                     Navigator.EntitySettings<RoleEntity>().PartialViewName = _ => ViewPrefix.FormatWith("Role");
                 else
