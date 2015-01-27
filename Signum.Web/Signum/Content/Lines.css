@@ -191,6 +191,10 @@ ul.sf-strip-vertical>li>.form-control
     vertical-align: middle;
 }
 
+label.sf-checkbox-element {
+    display: block;
+}
+
 /*Tabs*/
 ul.nav-tabs
 {
