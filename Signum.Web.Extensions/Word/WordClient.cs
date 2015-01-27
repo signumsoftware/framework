@@ -48,6 +48,8 @@ namespace Signum.Web.Word
                 {
                     new EntitySettings<WordTemplateEntity>{ PartialViewName = e => ViewPrefix.FormatWith("WordTemplate")},              
                     new EntitySettings<SystemWordTemplateEntity>{ },
+                    new EntitySettings<WordTransformerSymbol>{ },
+                    new EntitySettings<WordConverterSymbol>{ },
                 });
             }
         }
