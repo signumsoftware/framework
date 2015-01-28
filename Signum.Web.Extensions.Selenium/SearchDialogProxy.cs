@@ -509,14 +509,27 @@ namespace Signum.Web.Selenium
 
         public By CellLocator(int rowIndex, string token)
         {
+            var index = GetColumnIndex(token);
+
+            return RowLocator(rowIndex).CombineCss("> td:nth-child({0})".FormatWith(index + 1));
+        }
+
+        public By CellLocator(Lite<IEntity> lite, string token)
+        {
+            var index = GetColumnIndex(token);
+
+            return RowLocator(lite).CombineCss("> td:nth-child({0})".FormatWith(index + 1));
+        }
+
+        private int GetColumnIndex(string token)
+        {
             var tokens = this.GetColumnTokens();
 
             var index = tokens.IndexOf(token);
 
             if (index == -1)
                 throw new InvalidOperationException("Token {0} not found between {1}".FormatWith(token, tokens.CommaAnd()));
-
-            return RowLocator(rowIndex).CombineCss("> td:nth-child({0})".FormatWith(index + 1));
+            return index;
         }
 
         public By RowSelectorLocator(int rowIndex)
