@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -21,7 +20,6 @@ using Signum.Engine.Basics;
 using Signum.Web.Operations;
 using Signum.Entities.Excel;
 using Signum.Engine.Excel;
-#endregion
 
 namespace Signum.Web.Excel
 {

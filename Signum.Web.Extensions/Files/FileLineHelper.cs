@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +14,6 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Engine;
 using Signum.Web.PortableAreas;
-#endregion
 
 namespace Signum.Web.Files
 {

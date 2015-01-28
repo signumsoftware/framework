@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +20,6 @@ using Signum.Engine.DynamicQuery;
 using Signum.Web.Basic;
 using Signum.Engine.Maps;
 using Signum.Web.Cultures;
-#endregion
 
 
 namespace Signum.Web.SMS

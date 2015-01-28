@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -25,7 +24,6 @@ using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
 using Signum.Web.Operations;
 using Signum.Entities.UserAssets;
-#endregion
 
 namespace Signum.Web.UserQueries
 {

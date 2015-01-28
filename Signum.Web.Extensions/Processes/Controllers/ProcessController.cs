@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -18,7 +17,6 @@ using Signum.Entities.Processes;
 using Signum.Engine.Processes;
 using Signum.Engine.Authorization;
 using Signum.Web.Operations;
-#endregion
 
 namespace Signum.Web.Processes
 {

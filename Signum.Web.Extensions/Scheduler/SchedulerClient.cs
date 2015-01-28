@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +16,6 @@ using Signum.Entities.Scheduler;
 using Signum.Entities.Files;
 using Signum.Web.Omnibox;
 using Signum.Engine.Authorization;
-#endregion
 
 namespace Signum.Web.Scheduler
 {

@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -23,7 +22,6 @@ using Signum.Engine.Operations;
 using Signum.Engine.SMS;
 using Signum.Entities.Processes;
 using Signum.Web.Operations;
-#endregion
 
 namespace Signum.Web.SMS
 {

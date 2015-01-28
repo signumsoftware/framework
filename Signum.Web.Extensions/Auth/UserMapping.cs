@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +11,6 @@ using Signum.Engine;
 using System.Web.Mvc;
 using Signum.Entities.Authorization;
 using Signum.Services;
-#endregion
 
 namespace Signum.Web.Auth
 {

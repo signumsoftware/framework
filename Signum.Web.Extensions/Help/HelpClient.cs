@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +22,6 @@ using Signum.Entities.Basics;
 using Signum.Web.Omnibox;
 using Signum.Entities.Omnibox;
 using Signum.Entities.Help;
-#endregion
 
 namespace Signum.Web.Help
 {

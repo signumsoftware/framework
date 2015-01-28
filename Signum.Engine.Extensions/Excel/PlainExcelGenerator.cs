@@ -1,4 +1,3 @@
-#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +16,6 @@ using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Excel;
 using System.Reflection;
-#endregion
 
 namespace Signum.Engine.Excel
 {
