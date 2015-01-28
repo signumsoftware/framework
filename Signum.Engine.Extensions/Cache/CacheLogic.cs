@@ -185,7 +185,7 @@ namespace Signum.Engine.Cache
                 return;
 
             if (!started)
-                throw new InvalidOperationException("call CacheLogic.StartSqlDependencyAndEnableBrocker before any database access");
+                throw new InvalidOperationException("call Schema.Current.OnBeforeDatabaseAccess() or Schema.Current.Initialize()  before any database access");
         }
 
 
