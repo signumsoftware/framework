@@ -65,7 +65,7 @@ namespace Signum.Engine.DynamicQuery
                 PrimaryKey id;
                 if (!PrimaryKey.TryParse(subString, t, out id))
                 {
-                    var parts = subString.Trim('\'', '"').Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
 
                     results.AddRange(miLiteContaining.GetInvoker(t)(parts, count - results.Count));
 
@@ -97,7 +97,7 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim('\'', '"').Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ');
 
                 results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
                     .OrderBy(a => a.ToString().Length)
@@ -126,7 +126,7 @@ namespace Signum.Engine.DynamicQuery
                         return results;
                 }
 
-                var parts = subString.Trim('\'', '"').Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                var parts = subString.Trim('\'', '"').SplitNoEmpty(' ' );
 
                 results.AddRange(query.Where(a =>  a.ToString().ContainsAll(parts))
                     .OrderBy(a => a.ToString().Length)

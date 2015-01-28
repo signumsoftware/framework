@@ -45,7 +45,7 @@ namespace Signum.Engine.Linq
         public Alias NextTableAlias(string tableName)
         {
             string abv = tableName.Any(char.IsUpper) ? new string(tableName.Where(c => char.IsUpper(c)).ToArray()) :
-                tableName.Any(a => a == '_') ? new string(tableName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).ToArray()) : null;
+                tableName.Any(a => a == '_') ? new string(tableName.SplitNoEmpty('_' ).Select(s => s[0]).ToArray()) : null;
             
             if (string.IsNullOrEmpty(abv))
                 abv = tableName.TryStart(3);

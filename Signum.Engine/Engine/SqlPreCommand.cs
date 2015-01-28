@@ -82,7 +82,7 @@ namespace Signum.Engine
             if (command == null)
                 return null;
 
-            return command.PlainSql().Split(new[] { "GO\r\n" }, StringSplitOptions.RemoveEmptyEntries)
+            return command.PlainSql().SplitNoEmpty("GO\r\n" )
                 .Select(s => new SqlPreCommandSimple(s))
                 .Combine(Spacing.Simple);
         }
