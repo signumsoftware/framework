@@ -47,7 +47,7 @@ namespace Signum.Engine.Authorization
                     exportAll ? QueryLogic.QueryNames.Values.ToList(): null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) => 
                 {
-                    string replacementKey = typeof(QueryEntity).Name;
+                    string replacementKey = "AuthRules:" + typeof(QueryEntity).Name;
 
                     replacements.AskForReplacements(
                         x.Element("Queries").Elements("Role").SelectMany(r => r.Elements("Query")).Select(p => p.Attribute("Resource").Value).ToHashSet(),

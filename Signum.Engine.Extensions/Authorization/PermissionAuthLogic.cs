@@ -78,7 +78,7 @@ namespace Signum.Engine.Authorization
                     exportAll ? PermissionAuthLogic.RegisteredPermission.ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
-                    string replacementKey = typeof(PermissionSymbol).Name;
+                    string replacementKey = "AuthRules:" + typeof(PermissionSymbol).Name;
 
                     replacements.AskForReplacements(
                         x.Element("Permissions").Elements("Role").SelectMany(r => r.Elements("Permission")).Select(p => p.Attribute("Resource").Value).ToHashSet(),

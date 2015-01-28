@@ -327,6 +327,8 @@ namespace Signum.Entities.Authorization
                 ));
         }
 
+        static readonly string typeReplacementKey = "AuthRules:" + typeof(TypeEntity).Name;
+        static readonly string typeConditionReplacementKey = "AuthRules:" + typeof(TypeConditionSymbol).Name;
 
         internal SqlPreCommand ImportXml(XElement element, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
         {
@@ -337,16 +339,16 @@ namespace Signum.Entities.Authorization
 
             replacements.AskForReplacements(
                 element.Element("Types").Elements("Role").SelectMany(x => x.Elements("Type")).Select(x => x.Attribute("Resource").Value).ToHashSet(),
-                TypeLogic.NameToType.Where(a => !a.Value.IsEnumEntity()).Select(a => a.Key).ToHashSet(), typeof(TypeEntity).Name);
+                TypeLogic.NameToType.Where(a => !a.Value.IsEnumEntity()).Select(a => a.Key).ToHashSet(), typeReplacementKey);
 
             replacements.AskForReplacements(
                 element.Element("Types").Elements("Role").SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).Select(x => x.Attribute("Name").Value).ToHashSet(),
                 SymbolLogic<TypeConditionSymbol>.AllUniqueKeys(),
-                typeof(TypeConditionSymbol).Name);
+                typeConditionReplacementKey);
 
             Func<string, TypeEntity> getResource = s =>
             {
-                Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeof(TypeEntity).Name, s));
+                Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeReplacementKey, s));
 
                 if (type == null)
                     return null;
@@ -415,7 +417,7 @@ namespace Signum.Entities.Authorization
         private static MList<RuleTypeConditionEntity> Conditions(XElement xr, Replacements replacements)
         {
             return (from xc in xr.Elements("Condition")
-                    let cn = SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeof(TypeConditionSymbol).Name, xc.Attribute("Name").Value))
+                    let cn = SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, xc.Attribute("Name").Value))
                     where cn != null
                     select new RuleTypeConditionEntity
                     {

@@ -47,7 +47,7 @@ namespace Signum.Engine.Authorization
                     exportAll ? OperationLogic.RegisteredOperations.ToList() : null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
-                    string replacementKey = typeof(OperationSymbol).Name;
+                    string replacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
 
                     replacements.AskForReplacements(
                         x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
