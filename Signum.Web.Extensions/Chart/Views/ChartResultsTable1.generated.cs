@@ -344,7 +344,7 @@ WriteLiteral("                                <td>");
 
             
             #line 67 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                                Write((entityFormatter ?? QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter)(Html, entityField));
+                                Write((entityFormatter ?? QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(row)).Formatter)(Html, row));
 
             
             #line default
