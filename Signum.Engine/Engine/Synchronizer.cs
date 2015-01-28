@@ -289,10 +289,7 @@ namespace Signum.Engine
             }
 
             if (!interactive)
-                return new Selection(oldValue, newValues.First());
-
-            if (Console.Out == null)
-                throw new InvalidOperationException("Impossible to synchronize without interactive Console");
+                throw new InvalidOperationException("Impossible to synchronize {0} without interactive Console".FormatWith(replacementsKey));
 
             int startingIndex = 0;
 
@@ -313,9 +310,6 @@ namespace Signum.Engine
             while (true)
             {
                 string answer = Console.ReadLine();
-
-                if (answer == null)
-                    throw new InvalidOperationException("Impossible to synchronize interactively without Console");
                 
                  answer= answer.ToLower();
 
