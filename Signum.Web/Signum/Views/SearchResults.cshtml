@@ -46,7 +46,7 @@
         }
         @if (navigable)
         {
-            <td>@((entityFormatter ?? QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter)(Html, entityField))</td>
+            <td>@((entityFormatter ?? QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(row)).Formatter)(Html, row))</td>
         }
         @foreach (var col in queryResult.Columns.Where(a=>a.Column.IsVisible))
         {

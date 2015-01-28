@@ -110,10 +110,10 @@ namespace Signum.Web
 
             EntityFormatRules = new List<EntityFormatterRule>
             {
-                new EntityFormatterRule(l => true, (h,l) => 
+                new EntityFormatterRule(row => true, (h,row) => 
                 {
-                    if (Navigator.IsNavigable(l.EntityType, null, isSearch: true ))
-                        return h.Href(Navigator.NavigateRoute(l.EntityType, l.Id), h.Encode(EntityControlMessage.View.NiceToString()));
+                    if (Navigator.IsNavigable(row.Entity.EntityType, null, isSearch: true ))
+                        return h.Href(Navigator.NavigateRoute(row.Entity), h.Encode(EntityControlMessage.View.NiceToString()));
                     else
                         return MvcHtmlString.Empty;
                 }),
@@ -167,16 +167,16 @@ namespace Signum.Web
     public class EntityFormatterRule
     {
         public EntityFormatter Formatter { get; set; }
-        public Func<Lite<IEntity>, bool> IsApplyable { get; set; }
+        public Func<ResultRow, bool> IsApplyable { get; set; }
 
-        public EntityFormatterRule(Func<Lite<IEntity>, bool> isApplyable, EntityFormatter formatter)
+        public EntityFormatterRule(Func<ResultRow, bool> isApplyable, EntityFormatter formatter)
         {
             Formatter = formatter;
             IsApplyable = isApplyable;
         }
     }
 
-    public delegate MvcHtmlString EntityFormatter(HtmlHelper html, Lite<IEntity> lite);
+    public delegate MvcHtmlString EntityFormatter(HtmlHelper html, ResultRow lite);
     public delegate MvcHtmlString RowAttributes(HtmlHelper html, ResultRow row);
 
     public class CellFormatter

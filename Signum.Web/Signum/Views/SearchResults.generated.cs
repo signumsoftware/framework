@@ -209,7 +209,7 @@ WriteLiteral("            <td>");
 
             
             #line 49 "..\..\Signum\Views\SearchResults.cshtml"
-            Write((entityFormatter ?? QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(entityField)).Formatter)(Html, entityField));
+            Write((entityFormatter ?? QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(row)).Formatter)(Html, row));
 
             
             #line default
@@ -293,14 +293,14 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <tr>\r\n        <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 2836), Tuple.Create("\"", 2859)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 2820), Tuple.Create("\"", 2843)
             
             #line 64 "..\..\Signum\Views\SearchResults.cshtml"
-, Tuple.Create(Tuple.Create("", 2846), Tuple.Create<System.Object, System.Int32>(columnsCount
+, Tuple.Create(Tuple.Create("", 2830), Tuple.Create<System.Object, System.Int32>(columnsCount
             
             #line default
             #line hidden
-, 2846), false)
+, 2830), false)
 );
 
 WriteLiteral(">");
