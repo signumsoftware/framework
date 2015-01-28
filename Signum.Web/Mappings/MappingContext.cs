@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +14,6 @@ using Signum.Utilities.DataStructures;
 using System.Web.Mvc;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
-#endregion
 
 namespace Signum.Web
 {

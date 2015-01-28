@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -17,7 +16,6 @@ using Signum.Engine.Basics;
 using Signum.Entities.Basics;
 using Signum.Web.Operations;
 using Signum.Entities.Reflection;
-#endregion
 
 namespace Signum.Web.Controllers
 {

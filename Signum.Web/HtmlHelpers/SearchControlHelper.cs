@@ -1,4 +1,3 @@
-#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +15,6 @@ using Signum.Engine;
 using Signum.Engine.DynamicQuery;
 using Signum.Web.Controllers;
 using Newtonsoft.Json.Linq;
-#endregion
 
 namespace Signum.Web
 {

@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +13,6 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
-#endregion
 
 namespace Signum.Web.Operations
 {

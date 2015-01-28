@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -22,7 +21,6 @@ using Signum.Web;
 using Microsoft.SqlServer.Types;
 using Signum.Entities.Basics;
 using System.Drawing;
-#endregion
 
 namespace Signum.Web
 {

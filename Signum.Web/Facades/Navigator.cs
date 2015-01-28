@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -36,7 +35,6 @@ using System.Runtime.Serialization;
 using Microsoft.SqlServer.Types;
 using Newtonsoft.Json;
 using System.Globalization;
-#endregion
 
 namespace Signum.Web
 {

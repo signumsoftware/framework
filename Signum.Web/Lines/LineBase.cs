@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +7,6 @@ using System.Web.Mvc.Html;
 using Signum.Utilities;
 using Signum.Entities;
 using System.Web.Routing;
-#endregion
 
 namespace Signum.Web
 {
