@@ -193,7 +193,7 @@ namespace Signum.Entities.Chart
             public static string TryParse(string valueDefinition, out EnumValueList list)
             {
                 list = new EnumValueList();
-                foreach (var item in valueDefinition.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
+                foreach (var item in valueDefinition.SplitNoEmpty('|' ))
                 {
                     EnumValue val;
                     string error = EnumValue.TryParse(item, out val);

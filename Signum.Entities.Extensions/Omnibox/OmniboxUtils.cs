@@ -92,7 +92,7 @@ namespace Signum.Entities.Omnibox
 
         public static OmniboxMatch Contains(object value, string identifier, string pattern)
         {
-            var parts = pattern.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = pattern.SplitNoEmpty(' ' );
 
             bool[] indices = null;
 

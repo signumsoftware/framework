@@ -213,7 +213,7 @@ namespace Signum.Engine.Migrations
 
                 text = text.Replace(DatabaseNameReplacement, databaseName);
 
-                var parts = text.Split(new[] { "GO\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                var parts = text.SplitNoEmpty("GO\r\n" );
 
                 int pos = 0;
 

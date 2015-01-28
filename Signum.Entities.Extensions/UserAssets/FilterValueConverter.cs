@@ -481,7 +481,7 @@ namespace Signum.Entities.UserAssets
             {
                 string after = value.Substring(CurrentEntityKey.Length).Trim();
 
-                string[] parts = after.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = after.SplitNoEmpty('.' );
 
                 result = currentEntityVariable.Value;
 

@@ -376,9 +376,9 @@ namespace Signum.Engine.Authorization
                      ExportToXml.GetInvocationListTyped().Select(a => a(exportAll)).NotNull().OrderBy(a => a.Name.ToString())));
         }
 
-        public static SqlPreCommand ImportRulesScript(XDocument doc)
+        public static SqlPreCommand ImportRulesScript(XDocument doc, bool interactive)
         {
-           Replacements replacements = new Replacements();
+            Replacements replacements = new Replacements { Interactive = interactive };
 
             Dictionary<string, Lite<RoleEntity>> rolesDic = roles.Value.ToDictionary(a => a.ToString());
             Dictionary<string, XElement> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
@@ -472,7 +472,7 @@ namespace Signum.Engine.Authorization
             {
                 Name = x.Attribute("Name").Value,
                 MergeStrategy = x.Attribute("MergeStrategy").Try(ms => ms.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union,
-                SubRoles = x.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                SubRoles = x.Attribute("Contains").Value.SplitNoEmpty(',' )
             }).ToList();
 
             var roles = roleInfos.ToDictionary(a => a.Name, a => new RoleEntity { Name = a.Name, MergeStrategy = a.MergeStrategy });
@@ -605,7 +605,7 @@ namespace Signum.Engine.Authorization
                         SqlPreCommand command;
                         try
                         {
-                             command = ImportRulesScript(doc);
+                            command = ImportRulesScript(doc, interactive: true);
                         }
                         catch (InvalidRoleGraphException ex)
                         {

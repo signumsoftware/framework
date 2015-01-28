@@ -250,7 +250,7 @@ namespace Signum.Web.Selenium
             var result = (string)lineContainer.Selenium
                 .ExecuteScript("return $('#" + lineContainer.PrefixUnderscore() + "sfGlobalValidationSummary > ul > li').toArray().map(function(e){return $(e).text()}).join('\\r\\n');");
 
-            return result.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            return result.SplitNoEmpty("\r\n" );
         }
 
         public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
