@@ -93,17 +93,25 @@ namespace Signum.Engine.Disconnected
 
                 dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Imports(), ()=>DisconnectedMessage.Imports.NiceToString());
                 dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Exports(), ()=>DisconnectedMessage.Exports.NiceToString());
-
-
+                
                 MachineGraph.Register();
-
 
                 sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
 
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
 
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+
+                Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMin).StaticPropertyValidation += (dm, pi) => ValidateSeedMin(dm, pi);
+
+
             }
+        }
+
+        private static string ValidateSeedMin(DisconnectedMachineEntity dm, PropertyInfo pi)
+        {
+            if (dm.SeedMin == 0 || dm.SeedMin <= dm.SeedMax) return "SeedMin must be greater than zero and less than SeedMax.";
+            return null;
         }
 
         class MachineGraph : Graph<DisconnectedMachineEntity, DisconnectedMachineState>
