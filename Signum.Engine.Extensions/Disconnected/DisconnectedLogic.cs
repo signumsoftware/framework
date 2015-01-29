@@ -118,7 +118,30 @@ namespace Signum.Engine.Disconnected
                     ToState = DisconnectedMachineState.Connected,
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (dm, _) => { }
+                    Execute = (dm, _) => 
+                    {
+                        // Machine should have a valid range
+                        if (dm.SeedMin == 0 || dm.SeedMin >= dm.SeedMax)
+                            throw new ApplicationException("The range for this machine is not correct");
+
+                        // Machine's Range should not have an overlap with other machines
+                        // Overlap possibilities
+                        // |----------|    |----------|
+                        //   |-------------------|
+                        //       |-----------|
+                        // |------------------------|
+                        //
+                        var conflicts = Database.Query<DisconnectedMachineEntity>().
+                                            Where(e => ((e.SeedMin  >= dm.SeedMin && e.SeedMin  < dm.SeedMax)  ||
+                                                        (dm.SeedMin >= e.SeedMin  && dm.SeedMin < e.SeedMax)   ||
+                                                        (e.SeedMax  >  dm.SeedMin && e.SeedMax  < dm.SeedMax)  ||
+                                                        (dm.SeedMax >  e.SeedMin  && dm.SeedMax < e.SeedMax))  &&
+                                                         e.Id != dm.Id).
+                                            Select(e => e.ToLite()).ToList();
+                        if (conflicts.Any())
+                            throw new ApplicationException("There's an overlap in the range for this machine with:\r\n" + conflicts.ToString(s => "Id {0} : {1}".FormatWith(s.Id, s), "\r\n"));
+
+                    }
                 }.Register();
 
                 new Execute(DisconnectedMachineOperation.UnsafeUnlock)
