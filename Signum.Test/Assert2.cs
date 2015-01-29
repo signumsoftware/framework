@@ -11,6 +11,7 @@ namespace Signum.Test
 {
     public static class Assert2
     {
+        //for MSTest
         public static void Throws<E>(Action action)
             where E : Exception
         {
@@ -114,6 +115,13 @@ namespace Signum.Test
         public static new bool Equals(object obj, object obj2)
         {
             throw new NotSupportedException("Use Assert.AreEquals instead");
+        }
+
+        //for NUnit
+        public static void AreEqual<T>(T expected, T value, string message = null)
+        {
+            if ((expected == null && value != null) || !expected.Equals(value))
+                throw new InvalidOperationException(message ?? "Expected is {0}, but value is {1}".FormatWith(expected.TryToString() ?? "null", value.TryToString() ?? "null"));
         }
     }
 }
