@@ -210,6 +210,15 @@ namespace Signum.Web.Selenium
             return new EntityListDetailProxy(lineContainer.Selenium, newPrefix, newRoute);
         }
 
+        public static EntityListCheckBoxProxy EntityListCheckBox<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+            where T : ModifiableEntity
+        {
+            string newPrefix;
+            PropertyRoute newRoute = lineContainer.GetRoute(property, out newPrefix);
+
+            return new EntityListCheckBoxProxy(lineContainer.Selenium, newPrefix, newRoute);
+        }
+
         public static bool IsImplementation(this PropertyRoute route, Type type)
         {
             if (!typeof(Entity).IsAssignableFrom(type))

@@ -791,6 +791,29 @@ namespace Signum.Web.Selenium
         }
     }
 
+    public class EntityListCheckBoxProxy : EntityBaseProxy
+    {
+        public EntityListCheckBoxProxy(RemoteWebDriver selenium, string prefix, PropertyRoute route)
+            : base(selenium, prefix, route)
+        {
+        }
+
+        public By CheckBoxLocator(Lite<Entity> lite)
+        {
+            return By.CssSelector("#" + this.Prefix + " input[value=" + RuntimeInfoProxy.FromLite(lite) + "]");
+        }
+
+        public List<Lite<Entity>> GetDataElements()
+        {
+            return Selenium.FindElements(By.CssSelector("#" + this.Prefix + " input[type=checkbox]")).Select(cb => RuntimeInfoProxy.FromFormValue(cb.GetAttribute("value")).ToLite(cb.GetParent().Text)).ToList();
+        }
+
+        public void SetChecked(Lite<Entity> lite, bool isChecked)
+        {
+            this.Selenium.FindElement(CheckBoxLocator(lite)).SetChecked(isChecked);
+        }
+    }
+
 
     public class FileLineProxy : BaseLineProxy
     {
