@@ -135,11 +135,16 @@ namespace Signum.Engine.Word
 
         public static byte[] CreateReport(this ISystemWordTemplate systemWordTemplate, out WordTemplateEntity template, bool avoidConversion = false)
         {
-            SystemWordTemplateEntity system = TypeToSystemWordTemplate.Value.GetOrThrow(systemWordTemplate.GetType());
+            SystemWordTemplateEntity system = GetSystemWordTemplate(systemWordTemplate.GetType());
 
             template = GetDefaultTemplate(system);
 
             return WordTemplateLogic.CreateReport(template.ToLite(), systemWordTemplate.UntypedEntity, systemWordTemplate, avoidConversion); 
+        }
+
+        public static SystemWordTemplateEntity GetSystemWordTemplate(Type type)
+        {
+            return TypeToSystemWordTemplate.Value.GetOrThrow(type);
         }
 
         public static WordTemplateEntity GetDefaultTemplate(SystemWordTemplateEntity systemWordTemplate)
