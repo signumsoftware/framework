@@ -129,6 +129,10 @@ namespace Signum.Engine.Linq
             {
                 return BindOrderAlsoByKeys(m.Type, m.GetArgument("source"));
             }
+            else if (m.Method.DeclaringType == typeof(Database) && (m.Method.Name == "Retrieve" || m.Method.Name == "RetrieveAndForget"))
+            {
+                throw new InvalidOperationException("{0} is not supported on queries. Consider using Lite<T>.Entity instead.".FormatWith(m.Method.MethodName()));
+            }
             else if (m.Method.DeclaringType == typeof(EnumerableExtensions) && m.Method.Name == "ToString")
             {
                 return this.BindToString(m.GetArgument("source"), m.GetArgument("separator"), m.Method);

@@ -632,6 +632,12 @@ namespace Signum.Test.LinqProvider
             var list = (from a in Database.Query<AlbumEntity>()
                         select ((ISecretContainer)a).Secret.InSql()).ToList();
         }
+        [TestMethod]
+        public void SelectRetrieve()
+        {
+            Assert2.Throws<InvalidOperationException>("not supported",
+                () => Database.Query<LabelEntity>().Select(l => l.Owner.Retrieve()).ToList());
+        }
     }
 
     public static class AuthorExtensions
