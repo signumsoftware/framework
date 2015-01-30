@@ -28,16 +28,15 @@ namespace Signum.Utilities
             str.Write(data, 0, data.Length);
         }
 
-        public static string ReadResourceStream(this Assembly assembly, string name)
+        public static string ReadResourceStream(this Assembly assembly, string name, Encoding encoding = null)
         {
             using (Stream stream = assembly.GetManifestResourceStream(name))
             {
                 if (stream == null)
                     throw new MissingManifestResourceException("{0} not found on {1}".FormatWith(name, assembly));
 
-                using (StreamReader reader = new StreamReader(stream))
+                using (StreamReader reader = encoding == null ? new StreamReader(stream) : new StreamReader(stream, encoding))
                     return reader.ReadToEnd();
-
             }
         }
 
