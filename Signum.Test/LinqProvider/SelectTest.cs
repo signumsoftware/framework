@@ -632,6 +632,19 @@ namespace Signum.Test.LinqProvider
             var list = (from a in Database.Query<AlbumEntity>()
                         select ((ISecretContainer)a).Secret.InSql()).ToList();
         }
+
+        [TestMethod]
+        public void SelectEmbedded()
+        {
+            var list = Database.Query<AlbumEntity>().SelectMany(a => a.Songs).ToList();
+        }
+
+        [TestMethod]
+        public void SelectView()
+        {
+            var list = Database.View<Signum.Engine.SchemaInfoTables.SysDatabases>().ToList();
+        }
+
         [TestMethod]
         public void SelectRetrieve()
         {

@@ -357,9 +357,16 @@ namespace Signum.Engine.Linq
 
                 embeddedBindings.Insert(0, embeddedAssign);
 
-                embeddedBindings.Add(Expression.Assign(Expression.Property(embeddedParam, piModified), peModifiableState));
+                if (typeof(EmbeddedEntity).IsAssignableFrom(eee.Type))
+                {
+                    embeddedBindings.Add(Expression.Assign(Expression.Property(embeddedParam, piModified), peModifiableState));
 
-                embeddedBindings.Add(Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(eee.Type), embeddedParam));
+                    embeddedBindings.Add(Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(eee.Type), embeddedParam));
+                }
+                else
+                {
+                    embeddedBindings.Add(embeddedParam);
+                }
 
                 var block = Expression.Block(eee.Type, new[] { embeddedParam }, embeddedBindings);
 
