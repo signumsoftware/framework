@@ -33,7 +33,7 @@ namespace Signum.Engine.Word
         List<Filter> GetFilters(QueryDescription qd);
     }
 
-    public abstract class SystemWordEmail<T> : ISystemWordTemplate
+    public abstract class SystemWordTemplate<T> : ISystemWordTemplate
        where T : Entity
     {
         public T Entity { get; set; }
@@ -239,7 +239,7 @@ namespace Signum.Engine.Word
 
         static object GetDefaultQueryName(Type model)
         {
-            var baseType = model.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemWordEmail<>)));
+            var baseType = model.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemWordTemplate<>)));
 
             if (baseType != null)
             {
