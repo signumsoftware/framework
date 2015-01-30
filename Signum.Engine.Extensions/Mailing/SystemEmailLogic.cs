@@ -200,6 +200,12 @@ namespace Signum.Engine.Mailing
                     select table.InsertSqlSync(ei)).Combine(Spacing.Simple);
         }
 
+
+        public static SystemEmailEntity GetSystemEmailEntity<T>() where T : ISystemEmail
+        {
+            return ToSystemEmailEntity(typeof(T));
+        }
+
         public static SystemEmailEntity ToSystemEmailEntity(Type type)
         {
             return systemEmailToEntity.Value.GetOrThrow(type, "The system email {0} was not registered");
@@ -215,7 +221,6 @@ namespace Signum.Engine.Mailing
 
         public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this ISystemEmail systemEmail)
         {
-
             if (systemEmail.UntypedEntity == null)
                 throw new InvalidOperationException("Entity property not set on SystemEmail");
 

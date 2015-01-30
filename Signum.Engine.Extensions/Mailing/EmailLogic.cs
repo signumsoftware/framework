@@ -74,6 +74,7 @@ namespace Signum.Engine.Mailing
                         e.Subject,
                         e.Template,
                         e.Sent,
+                        e.Target,
                         e.Package,
                         e.Exception,
                     });
