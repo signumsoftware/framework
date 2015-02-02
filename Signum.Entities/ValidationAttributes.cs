@@ -607,6 +607,28 @@ namespace Signum.Entities
         }
     }
 
+    public class DateInPastValidator : ValidatorAttribute
+    {
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            if (((DateTime)value) > TimeZoneManager.Now)
+                return ValidationMessage._0ShouldBeADateInThePast.NiceToString();
+
+            return null;
+        }
+
+        public override string HelpMessage
+        {
+            get
+            {
+                return ValidationMessage.BeInThePast.NiceToString();
+            }
+        }
+    }
+
     public class TimeSpanPrecissionValidatorAttribute : ValidatorAttribute
     {
         public DateTimePrecision Precision { get; private set; }
@@ -928,7 +950,10 @@ namespace Signum.Entities
         [Description("{0} should be null when {1} is set")]
         _0ShouldBeNullWhen1IsSet,
         [Description("{0} should be null")]
-        _0ShouldBeNull
+        _0ShouldBeNull,
+        [Description("{0} should be a date in the past")]
+        _0ShouldBeADateInThePast,
+        BeInThePast
     }
 
 
