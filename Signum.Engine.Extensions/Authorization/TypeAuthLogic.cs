@@ -82,7 +82,7 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saving(Entity ident)
         {
-            if (ident.IsGraphModified && !saveDisabled.Value)
+            if (ident.IsGraphModified && !inSave.Value)
             {
                 TypeAllowedAndConditions access = GetAllowed(ident.GetType());
 

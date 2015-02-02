@@ -32,12 +32,17 @@ namespace Signum.Engine.Authorization
             return new Disposable(() => queryFilterDisabled.Value = false);
         }
 
-        static readonly Variable<bool> saveDisabled = Statics.ThreadVariable<bool>("saveDisabled");
-        public static IDisposable DisableSave()
+        public static bool InSave
         {
-            if (saveDisabled.Value) return null;
-            saveDisabled.Value = true;
-            return new Disposable(() => saveDisabled.Value = false);
+            get { return inSave.Value; }
+        }
+
+        static readonly Variable<bool> inSave = Statics.ThreadVariable<bool>("inSave");
+        static IDisposable OnInSave()
+        {
+            if (inSave.Value) return null;
+            inSave.Value = true;
+            return new Disposable(() => inSave.Value = false);
         }
 
         const string CreatedKey = "Created";
@@ -94,37 +99,40 @@ namespace Signum.Engine.Authorization
 
         static void Transaction_PreRealCommit(Dictionary<string, object> dic)
         {
-            var modified = (List<Entity>)dic.TryGetC(ModifiedKey);
-
-            if (modified.HasItems())
+            using (OnInSave())
             {
-                var groups = modified.GroupBy(e => e.GetType(), e => e.Id);
+                var modified = (List<Entity>)dic.TryGetC(ModifiedKey);
 
-                //Assert before
-                using (Transaction tr = Transaction.ForceNew())
+                if (modified.HasItems())
                 {
+                    var groups = modified.GroupBy(e => e.GetType(), e => e.Id);
+
+                    //Assert before
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        foreach (var gr in groups)
+                            miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Modify);
+
+                        tr.Commit();
+                    }
+
+                    //Assert after
                     foreach (var gr in groups)
+                    {
                         miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Modify);
-
-                    tr.Commit();
+                    }
                 }
 
-                //Assert after
-                foreach (var gr in groups)
+                var created = (List<Entity>)Transaction.UserData.TryGetC(CreatedKey);
+
+                if (created.HasItems())
                 {
-                    miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Modify);
+                    var groups = created.GroupBy(e => e.GetType(), e => e.Id);
+
+                    //Assert after
+                    foreach (var gr in groups)
+                        miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Create);
                 }
-            }
-
-            var created = (List<Entity>)Transaction.UserData.TryGetC(CreatedKey);
-
-            if (created.HasItems())
-            {
-                var groups = created.GroupBy(e => e.GetType(), e => e.Id);
-
-                //Assert after
-                foreach (var gr in groups)
-                    miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Create);
             }
         }
 
