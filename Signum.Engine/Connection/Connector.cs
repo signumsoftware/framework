@@ -92,11 +92,11 @@ namespace Signum.Engine
 
         public abstract SqlDbType GetSqlDbType(DbParameter p);
 
-        protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand);
-        protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand);
-        protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command);
-        protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
-        protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
+        protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType);
+        protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType);
+        protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command, CommandType commandType);
+        protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
+        protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
         protected internal abstract void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options);
 
         public abstract string DatabaseName();

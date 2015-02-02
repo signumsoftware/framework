@@ -15,88 +15,65 @@ namespace Signum.Engine
 {
     public static class Executor
     {
-        public static object ExecuteScalar(string sql)
+        public static object ExecuteScalar(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
         {
-            return Connector.Current.ExecuteScalar(new SqlPreCommandSimple(sql));
+            return Connector.Current.ExecuteScalar(new SqlPreCommandSimple(sql, parameters), commandType);
         }
 
-        public static object ExecuteScalar(string sql, List<DbParameter> parameters)
+        public static object ExecuteScalar(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
         {
-            return Connector.Current.ExecuteScalar(new SqlPreCommandSimple(sql, parameters));
-        }
-
-        public static object ExecuteScalar(this SqlPreCommandSimple preCommand)
-        {
-            return Connector.Current.ExecuteScalar(preCommand);
+            return Connector.Current.ExecuteScalar(preCommand, commandType);
         }
 
 
-        public static int ExecuteNonQuery(string sql)
+        public static int ExecuteNonQuery(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
         {
-            return Connector.Current.ExecuteNonQuery(new SqlPreCommandSimple(sql));
+            return Connector.Current.ExecuteNonQuery(new SqlPreCommandSimple(sql, parameters), commandType);
         }
 
-        public static int ExecuteNonQuery(string sql, List<DbParameter> parameters)
+        public static int ExecuteNonQuery(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
         {
-            return Connector.Current.ExecuteNonQuery(new SqlPreCommandSimple(sql, parameters));
-        }
-
-        public static int ExecuteNonQuery(this SqlPreCommandSimple preCommand)
-        {
-            return Connector.Current.ExecuteNonQuery(preCommand);
-        }
-
-        public static DbDataReader UnsafeExecuteDataReader(string sql)
-        {
-            return Connector.Current.UnsafeExecuteDataReader(new SqlPreCommandSimple(sql));
-        }
-
-        public static DbDataReader UnsafeExecuteDataReader(string sql, List<DbParameter> parameters)
-        {
-            return Connector.Current.UnsafeExecuteDataReader(new SqlPreCommandSimple(sql, parameters));
-        }
-
-        public static DbDataReader UnsafeExecuteDataReader(this SqlPreCommandSimple preCommand)
-        {
-            return Connector.Current.UnsafeExecuteDataReader(preCommand);
+            return Connector.Current.ExecuteNonQuery(preCommand, commandType);
         }
 
 
-        public static DataTable ExecuteDataTable(string sql)
+        public static DbDataReader UnsafeExecuteDataReader(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
         {
-            return Connector.Current.ExecuteDataTable(new SqlPreCommandSimple(sql));
+            return Connector.Current.UnsafeExecuteDataReader(new SqlPreCommandSimple(sql, parameters), commandType);
         }
 
-        public static DataTable ExecuteDataTable(string sql, List<DbParameter> parameters)
+        public static DbDataReader UnsafeExecuteDataReader(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
         {
-            return Connector.Current.ExecuteDataTable(new SqlPreCommandSimple(sql, parameters));
+            return Connector.Current.UnsafeExecuteDataReader(preCommand, commandType);
         }
 
-        public static DataTable ExecuteDataTable(this SqlPreCommandSimple preCommand)
+
+        public static DataTable ExecuteDataTable(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
         {
-            return Connector.Current.ExecuteDataTable(preCommand);
+            return Connector.Current.ExecuteDataTable(new SqlPreCommandSimple(sql, parameters), commandType);
         }
 
-        public static DataSet ExecuteDataSet(string sql)
+        public static DataTable ExecuteDataTable(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
         {
-            return Connector.Current.ExecuteDataSet(new SqlPreCommandSimple(sql));
+            return Connector.Current.ExecuteDataTable(preCommand, commandType);
         }
 
-        public static DataSet ExecuteDataSet(string sql, List<DbParameter> parameters)
+
+        public static DataSet ExecuteDataSet(string sql, List<DbParameter> parameters = null, CommandType commandType = CommandType.Text)
         {
-            return Connector.Current.ExecuteDataSet(new SqlPreCommandSimple(sql, parameters));
+            return Connector.Current.ExecuteDataSet(new SqlPreCommandSimple(sql, parameters), commandType);
         }
 
-        public static DataSet ExecuteDataSet(this SqlPreCommandSimple preCommand)
+        public static DataSet ExecuteDataSet(this SqlPreCommandSimple preCommand, CommandType commandType = CommandType.Text)
         {
-            return Connector.Current.ExecuteDataSet(preCommand);
+            return Connector.Current.ExecuteDataSet(preCommand, commandType);
         }
 
-        public static void ExecuteLeaves(this SqlPreCommand preCommand)
+        public static void ExecuteLeaves(this SqlPreCommand preCommand, CommandType commandType = CommandType.Text)
         {
             foreach (var simple in preCommand.Leaves())
             {
-                simple.ExecuteNonQuery();
+                simple.ExecuteNonQuery(commandType);
             }
         }
 

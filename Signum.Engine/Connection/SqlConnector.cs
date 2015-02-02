@@ -84,9 +84,9 @@ namespace Signum.Engine
             return result;
         }
 
-        SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection overridenConnection)
+        SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection overridenConnection, CommandType commandType)
         {
-            SqlCommand cmd = new SqlCommand();
+            SqlCommand cmd = new SqlCommand { CommandType = commandType };
 
             int? timeout = Connector.ScopeTimeout ?? CommandTimeout;
             if (timeout.HasValue)
@@ -115,10 +115,10 @@ namespace Signum.Engine
             return cmd;
         }
 
-        protected internal override object ExecuteScalar(SqlPreCommandSimple preCommand)
+        protected internal override object ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con))
+            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
             {
                 try
@@ -141,10 +141,10 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand)
+        protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con))
+            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
             {
                 try
@@ -163,14 +163,14 @@ namespace Signum.Engine
             }
         }
 
-        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action reconect, Action<FieldReader> forEach)
+        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action reconect, Action<FieldReader> forEach, CommandType commandType)
         {
             bool reconected = false; 
             retry:
             try
             {
                 using (SqlConnection con = EnsureConnection())
-                using (SqlCommand cmd = NewCommand(preCommand, con))
+                using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
                 using (HeavyProfiler.Log("SQL-Dependency"))
                 using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
                 {
@@ -228,11 +228,11 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple preCommand)
+        protected internal override DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             try
             {
-                SqlCommand cmd = NewCommand(preCommand, null);
+                SqlCommand cmd = NewCommand(preCommand, null, commandType);
 
                 return cmd.ExecuteReader();
             }
@@ -246,10 +246,10 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override DataTable ExecuteDataTable(SqlPreCommandSimple preCommand)
+        protected internal override DataTable ExecuteDataTable(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con))
+            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
             {
                 try
@@ -271,10 +271,10 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override DataSet ExecuteDataSet(SqlPreCommandSimple preCommand)
+        protected internal override DataSet ExecuteDataSet(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con))
+            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
             {
                 try
