@@ -330,25 +330,13 @@ namespace Signum.Entities.Reflection
         }
 
         public IntegrityCheckException(Dictionary<Guid, Dictionary<string, string>> errors)
+            : base(errors.Values.SelectMany(a => a.Values).ToString("\r\n"))
         {
-            if (errors == null)
-                throw new ArgumentNullException("errors");
-
             this.Errors = errors;
         }
         protected IntegrityCheckException(
           SerializationInfo info,
           StreamingContext context)
             : base(info, context) { }
-
-        public override string Message
-        {
-            get
-            {
-                return Errors.Values.SelectMany(a => a.Values).ToString("\r\n");
-            }
-        }
     }
-
-
 }
