@@ -111,8 +111,10 @@ Lose changes?")]
     [DescriptionOptions(DescriptionOptions.Members)]
     public enum BooleanEnum
     {
-        No = 0,
-        Yes = 1,
+        [Description("No")]
+        False = 0,
+        [Description("Yes")]        
+        True = 1,
     }
 
     public enum SearchMessage

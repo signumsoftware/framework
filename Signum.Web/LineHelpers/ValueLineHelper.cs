@@ -73,8 +73,8 @@ namespace Signum.Web
         private static BooleanEnum? ToBooleanEnum(bool? value)
         {
             return value == null ? (BooleanEnum?)null :
-                value.Value ? BooleanEnum.Yes :
-                BooleanEnum.No;
+                value.Value ? BooleanEnum.True :
+                BooleanEnum.False;
         }
 
         private static MvcHtmlString InternalComboBox(HtmlHelper helper, ValueLine valueLine, Type uType, Enum value)
