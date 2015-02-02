@@ -495,11 +495,17 @@ namespace Signum.Engine.Operations
 
                         using (Transaction tr2 = Transaction.ForceNew())
                         {
-                            log.Target = entity.IsNew ? null : entity.ToLite();
-                            log.Exception = exLog.ToLite();
+                            OperationLogEntity newLog = new OperationLogEntity //Transaction chould have been rollbacked just before commiting
+                            {
+                                Operation = log.Operation,
+                                Start = log.Start,
+                                User = log.User,
+                                Target = entity.IsNew ? null : entity.ToLite(),
+                                Exception = exLog.ToLite(),
+                            };
 
                             using (ExecutionMode.Global())
-                                log.Save();
+                                newLog.Save();
 
                             tr2.Commit();
                         }
