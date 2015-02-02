@@ -252,7 +252,8 @@ ul.nav-tabs
     padding: 0px 3px;
 }
 
-.form-xs .form-control:not(textarea)
+.form-xs .form-control:not(textarea),
+.form-xs .form-control-static
 {
     height: 20px;
 }
@@ -310,7 +311,8 @@ ul.nav-tabs
     padding: 3px 6px;
 }
 
-.form-sm .form-control:not(textarea)
+.form-sm .form-control:not(textarea),
+.form-sm .form-control-static
 {
     height: 26px;
 }
@@ -361,7 +363,6 @@ ul.nav-tabs
 }
 
 /*form-inline*/
-
 .form-horizontal .form-inline .form-group
 {
     margin-right: 0px;
