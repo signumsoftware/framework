@@ -56,6 +56,29 @@ namespace Signum.Web
             var uType = valueLine.Type.UnNullify();
             Enum value = valueLine.UntypedValue as Enum;
 
+            return InternalComboBox(helper, valueLine, uType, value);
+        }
+
+        public static MvcHtmlString BooleanEnumComboBox(this HtmlHelper helper, ValueLine valueLine)
+        {
+            var uType = valueLine.Type.UnNullify();
+            if (uType != typeof(bool))
+                throw new InvalidOperationException("valueLine Type is not a boolean");
+
+            BooleanEnum? value = ToBooleanEnum((bool?)valueLine.UntypedValue);
+
+            return InternalComboBox(helper, valueLine, typeof(BooleanEnum), value);
+        }
+
+        private static BooleanEnum? ToBooleanEnum(bool? value)
+        {
+            return value == null ? (BooleanEnum?)null :
+                value.Value ? BooleanEnum.Yes :
+                BooleanEnum.No;
+        }
+
+        private static MvcHtmlString InternalComboBox(HtmlHelper helper, ValueLine valueLine, Type uType, Enum value)
+        {
             if (valueLine.ReadOnly)
             {
                 MvcHtmlString result = MvcHtmlString.Empty;
@@ -277,6 +300,9 @@ namespace Signum.Web
 
         public virtual ValueLineType GetDefaultValueLineType(Type type)
         {
+            if (type == typeof(bool?))
+                return ValueLineType.Enum;
+
             type = type.UnNullify();
 
             if (type.IsEnum)
@@ -321,7 +347,7 @@ namespace Signum.Web
             {ValueLineType.TextBox, (helper, valueLine) => helper.TextboxInLine(valueLine)},
             {ValueLineType.TextArea, (helper, valueLine) => helper.TextAreaInLine(valueLine)},
             {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
-            {ValueLineType.Enum, (helper, valueLine) => helper.EnumComboBox(valueLine)},
+            {ValueLineType.Enum, (helper, valueLine) =>  valueLine.Type.UnNullify() == typeof(bool) ? helper.BooleanEnumComboBox(valueLine):  helper.EnumComboBox(valueLine)},
             {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePicker(valueLine)},
             {ValueLineType.TimeSpan, (helper, valueLine) => helper.TimeSpanPicker(valueLine)},
             {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)},

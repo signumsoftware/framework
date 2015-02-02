@@ -103,13 +103,16 @@ Lose changes?")]
         MoveDown,
         MoveUp,
         Navigate,
-        [Description("no")]
-        No,
         NullValueNotAllowed,
         Remove,
         View,
-        [Description("yes")]
-        Yes
+    }
+
+    [DescriptionOptions(DescriptionOptions.Members)]
+    public enum BooleanEnum
+    {
+        No = 0,
+        Yes = 1,
     }
 
     public enum SearchMessage
