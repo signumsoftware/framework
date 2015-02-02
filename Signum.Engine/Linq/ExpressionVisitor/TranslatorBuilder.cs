@@ -17,6 +17,7 @@ using Signum.Engine.Maps;
 using System.Data.Common;
 using Signum.Entities.Basics;
 using System.Collections.Concurrent;
+using Signum.Entities.Internal;
 
 namespace Signum.Engine.Linq
 {  
@@ -189,7 +190,7 @@ namespace Signum.Engine.Linq
             static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<TypeEntity>(null)).GetGenericMethodDefinition();
             static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<TypeEntity>(null, null)).GetGenericMethodDefinition();
             static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<TypeEntity>(null)).GetGenericMethodDefinition();
-            static MethodInfo miEmbeddedPostRetrieving = ReflectionTools.GetMethodInfo((IRetriever r) => r.EmbeddedPostRetrieving<EmbeddedEntity>(null)).GetGenericMethodDefinition();
+            static MethodInfo miModifiablePostRetrieving = ReflectionTools.GetMethodInfo((IRetriever r) => r.ModifiablePostRetrieving<EmbeddedEntity>(null)).GetGenericMethodDefinition();
 
             Scope scope; 
         
@@ -315,12 +316,12 @@ namespace Signum.Engine.Linq
                         VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
                         Convert(Visit(b.Binding), b.FieldInfo.FieldType);
 
-                    return Expression.Assign(field, value);
+                    return (Expression)Expression.Assign(field, value);
                 }).ToList();
 
                 mixBindings.Insert(0, mixAssign);
 
-                mixBindings.Add(Expression.Assign(Expression.Property(mixParam, piModified), peModifiableState));
+                mixBindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(m.Type), mixParam));
 
                 return Expression.Block(new[] { mixParam }, mixBindings);
             }
@@ -332,10 +333,6 @@ namespace Signum.Engine.Linq
 
                 return Expression.Convert(expression, type); 
             }
-
-            static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((ModifiableEntity me) => me.Modified);
-            static Expression peModifiableState = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState));
-
 
             protected internal override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
             {
@@ -359,9 +356,7 @@ namespace Signum.Engine.Linq
 
                 if (typeof(EmbeddedEntity).IsAssignableFrom(eee.Type))
                 {
-                    embeddedBindings.Add(Expression.Assign(Expression.Property(embeddedParam, piModified), peModifiableState));
-
-                    embeddedBindings.Add(Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(eee.Type), embeddedParam));
+                    embeddedBindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(eee.Type), embeddedParam));
                 }
                 else
                 {
@@ -441,7 +436,7 @@ namespace Signum.Engine.Linq
                     Type type = ((TypeEntityExpression)typeId).TypeValue;
 
                     liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
-                        Expression.Convert(Lite.NewExpression(type, id, toStringOrNull, peModifiableState), lite.Type),
+                        Expression.Convert(Lite.NewExpression(type, id, toStringOrNull), lite.Type),
                         nothing);
                 }
                 else if (typeId is TypeImplementedByExpression)
@@ -452,41 +447,41 @@ namespace Signum.Engine.Linq
                             {
                                 var visitId = Visit(NullifyColumn(ti.Value));
                                 return Expression.Condition(Expression.NotEqual(visitId, NullId),
-                                    Expression.Convert(Lite.NewExpression(ti.Key, visitId, toStringOrNull, peModifiableState), lite.Type), acum);
+                                    Expression.Convert(Lite.NewExpression(ti.Key, visitId, toStringOrNull), lite.Type), acum);
                             });
                 }
                 else if (typeId is TypeImplementedByAllExpression)
                 {
                     TypeImplementedByAllExpression tiba = (TypeImplementedByAllExpression)typeId;
                     var tid = Visit(NullifyColumn(tiba.TypeColumn));
-                    liteConstructor = Expression.Convert(Expression.Call(miLiteCreateParse, Expression.Constant(Schema.Current), tid, id.UnNullify(), toStringOrNull, peModifiableState), lite.Type);
+                    liteConstructor = Expression.Convert(Expression.Call(miLiteCreateParse, Expression.Constant(Schema.Current), tid, id.UnNullify(), toStringOrNull), lite.Type);
                 }
                 else
                 {
                     liteConstructor = Expression.Condition(Expression.NotEqual(id.Nullify(), NullId),
-                                       Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), toStringOrNull, peModifiableState), lite.Type),
+                                       Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), toStringOrNull), lite.Type),
                                         nothing);
                 }
 
                 if (toStr != null)
-                    return liteConstructor;
+                    return Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(typeof(LiteImp)), liteConstructor.TryConvert(typeof(LiteImp))).TryConvert(liteConstructor.Type);
                 else
                     return Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(lite.Type)), liteConstructor);
             }
 
-            static MethodInfo miLiteCreateParse = ReflectionTools.GetMethodInfo(() => LiteCreateParse(null, null, null, null, ModifiedState.Clean));
+            static MethodInfo miLiteCreateParse = ReflectionTools.GetMethodInfo(() => LiteCreateParse(null, null, null, null));
 
-            static Lite<Entity> LiteCreateParse(Schema schema, PrimaryKey? typeId, string id, string toString, ModifiedState state)
+            static Lite<Entity> LiteCreateParse(Schema schema, PrimaryKey? typeId, string id, string toString)
             {
                 if (typeId == null)
                     return null;
 
                 Type type = schema.GetType(typeId.Value);
 
-                return Lite.Create(type, PrimaryKey.Parse(id, type), toString, state);
+                return Lite.Create(type, PrimaryKey.Parse(id, type), toString);
             }
 
-            static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null, ModifiedState.Clean));
+            static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
 
             protected internal override Expression VisitMListElement(MListElementExpression mle)
             {

@@ -17,7 +17,7 @@ namespace Signum.Engine
         T Request<T>(PrimaryKey? id) where T : Entity;
         T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity;
         Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity;
-        T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity;
+        T ModifiablePostRetrieving<T>(T entity) where T : Modifiable;
         IRetriever Parent { get; }
 
         ModifiedState ModifiedState { get; }
@@ -39,7 +39,7 @@ namespace Signum.Engine
         Dictionary<IdentityTuple, Entity> retrieved = new Dictionary<IdentityTuple, Entity>();
         Dictionary<Type, Dictionary<PrimaryKey, Entity>> requests;
         Dictionary<IdentityTuple, List<Lite<IEntity>>> liteRequests;
-        List<EmbeddedEntity> embeddedPostRetrieving;
+        List<Modifiable> modifiablePostRetrieving = new List<Modifiable>();
 
         bool TryGetRequest(IdentityTuple key, out Entity value)
         {
@@ -135,19 +135,17 @@ namespace Signum.Engine
             return lite;
         }
 
-        public T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity
+        public T ModifiablePostRetrieving<T>(T modifiable) where T : Modifiable
         {
-            if (embeddedPostRetrieving == null)
-                embeddedPostRetrieving = new List<EmbeddedEntity>();
+            if (modifiable != null)
+                modifiablePostRetrieving.Add(modifiable);
 
-            embeddedPostRetrieving.Add(entity);
-
-            return entity;
+            return modifiable;
         }
 
         public void Dispose()
         {
-            retry:
+        retry:
             if (requests != null)
             {
                 while (requests.Count > 0)
@@ -226,31 +224,31 @@ namespace Signum.Engine
                 }
             }
 
-
-            ModifiedState ms = ModifiedState;
-            foreach (var kvp in retrieved)
+            foreach (var entity in retrieved.Values)
             {
-                Entity entity = kvp.Value;
-
                 entity.PostRetrieving();
                 Schema.Current.OnRetrieved(entity);
-                entity.Modified = ms;
-                entity.IsNew = false;
-
                 entityCache.Add(entity);
             }
 
-            if (embeddedPostRetrieving != null)
-                foreach (var embedded in embeddedPostRetrieving)
-                {
-                    embedded.PostRetrieving();
-                }
+            foreach (var embedded in modifiablePostRetrieving)
+                embedded.PostRetrieving();
+
+            ModifiedState ms = ModifiedState;
+            foreach (var entity in retrieved.Values)
+            {
+                entity.Modified = ms;
+                entity.IsNew = false;
+            }
+
+            foreach (var embedded in modifiablePostRetrieving)
+                embedded.Modified = ms;
 
             if (liteRequests != null && liteRequests.Count > 0 ||
                 requests != null && requests.Count > 0) // PostRetrieving could retrieve as well
             {
                 retrieved.Clear();
-                if (embeddedPostRetrieving != null) embeddedPostRetrieving.Clear();
+                modifiablePostRetrieving.Clear();
                 goto retry;
             }
 
@@ -310,9 +308,9 @@ namespace Signum.Engine
             return Parent.RequestLite<T>(lite);
         }
 
-        public T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity
+        public T ModifiablePostRetrieving<T>(T entity) where T : Modifiable
         {
-            return Parent.EmbeddedPostRetrieving(entity);
+            return Parent.ModifiablePostRetrieving(entity);
         }
 
         public void Dispose()

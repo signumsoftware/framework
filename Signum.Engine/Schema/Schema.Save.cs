@@ -660,6 +660,7 @@ namespace Signum.Engine.Maps
 
         void PrepareEntitySync(Entity entity)
         {
+            Schema current = Schema.Current;
             DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity), (Modifiable m, ref bool graphModified) =>
             {
                 ModifiableEntity me = m as ModifiableEntity;
@@ -672,7 +673,7 @@ namespace Signum.Engine.Maps
                 Entity ident = m as Entity;
 
                 if (ident != null)
-                    Schema.Current.OnPreSaving(ident, ref graphModified);
+                    current.OnPreSaving(ident, ref graphModified);
             });
 
             var error = GraphExplorer.FullIntegrityCheck(modifiables);

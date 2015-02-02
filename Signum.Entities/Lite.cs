@@ -63,11 +63,7 @@ namespace Signum.Entities
             {
             }
 
-            public LiteImp(PrimaryKey id, string toStr) : this(id, toStr, ModifiedState.Clean)
-            {
-            }
-
-            public LiteImp(PrimaryKey id, string toStr, ModifiedState modified)
+            public LiteImp(PrimaryKey id, string toStr)
             {
                 if (typeof(T).IsAbstract)
                     throw new InvalidOperationException(typeof(T).Name + " is abstract");
@@ -78,7 +74,7 @@ namespace Signum.Entities
 
                 this.id = id;
                 this.toStr = toStr;
-                this.Modified = modified;
+                this.Modified = ModifiedState.Clean;
             }
 
             public LiteImp(T entity, string toStr)
@@ -286,9 +282,6 @@ namespace Signum.Entities
         static GenericInvoker<Func<PrimaryKey, string, Lite<Entity>>> giNewLite =
             new GenericInvoker<Func<PrimaryKey, string, Lite<Entity>>>((id, str) => new LiteImp<Entity>(id, str));
 
-        static GenericInvoker<Func<PrimaryKey, string, ModifiedState, Lite<Entity>>> giNewLiteModified =
-            new GenericInvoker<Func<PrimaryKey, string, ModifiedState, Lite<Entity>>>((id, str, state) => new LiteImp<Entity>(id, str, state));
-
         static GenericInvoker<Func<Entity, string, Lite<Entity>>> giNewLiteFat =
             new GenericInvoker<Func<Entity, string, Lite<Entity>>>((entity, str) => new LiteImp<Entity>(entity, str));
 
@@ -361,11 +354,6 @@ namespace Signum.Entities
         public static Lite<Entity> Create(Type type, PrimaryKey id, string toStr)
         {
             return giNewLite.GetInvoker(type)(id, toStr);
-        }
-
-        public static Lite<Entity> Create(Type type, PrimaryKey id, string toStr, ModifiedState state)
-        {
-            return giNewLiteModified.GetInvoker(type)(id, toStr, state);
         }
 
         public static Lite<T> ToLite<T>(this T entity)
@@ -531,21 +519,16 @@ namespace Signum.Entities
             return new LiteImp<T>(id, toStr);
         }
 
-        public static Lite<T> Create<T>(PrimaryKey id, string toStr, ModifiedState modified) where T : Entity
-        {
-            return new LiteImp<T>(id, toStr, modified);
-        }
-
         static ConcurrentDictionary<Type, ConstructorInfo> ciLiteConstructor = new ConcurrentDictionary<Type, ConstructorInfo>();
 
         public static ConstructorInfo LiteConstructor(Type type)
         {
-            return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(PrimaryKey), typeof(string), typeof(ModifiedState) }));
+            return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(PrimaryKey), typeof(string) }));
         }
 
-        public static NewExpression NewExpression(Type type, Expression id, Expression toString, Expression modified)
+        public static NewExpression NewExpression(Type type, Expression id, Expression toString)
         {
-            return Expression.New(Lite.LiteConstructor(type), id.UnNullify(), toString, modified);
+            return Expression.New(Lite.LiteConstructor(type), id.UnNullify(), toString);
         }
     }
 

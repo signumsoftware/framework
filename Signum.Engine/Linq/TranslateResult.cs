@@ -99,7 +99,6 @@ namespace Signum.Engine.Linq
 
                 try
                 {
-                    var ms = retriever.ModifiedState;
                     var lookUp = enumerabe.ToLookup(a => a.Key, a => a.Value);
                     foreach (var kvp in requests)
                     {
@@ -107,8 +106,7 @@ namespace Signum.Engine.Linq
 
                         ((IMListPrivate<V>)kvp.Value).InnerList.AddRange(results);
                         ((IMListPrivate<V>)kvp.Value).InnerListModified(results.Select(a => a.Value).ToList(), null);
-                        kvp.Value.PostRetrieving();
-                        kvp.Value.Modified = ms;
+                        retriever.ModifiablePostRetrieving(kvp.Value);
                     }
                 }
                 catch (Exception ex)
