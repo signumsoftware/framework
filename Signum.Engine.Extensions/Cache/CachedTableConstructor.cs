@@ -11,6 +11,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
+using Signum.Entities.Internal;
 
 namespace Signum.Engine.Cache
 {
@@ -171,15 +172,16 @@ namespace Signum.Engine.Cache
                 var fe = (FieldEmbedded)field;
 
                 Expression ctor = Expression.MemberInit(Expression.New(fe.FieldType),
-                    fe.EmbeddedFields.Values.Select(f => Expression.Bind(f.FieldInfo, MaterializeField(f.Field)))
-                    .And(Expression.Bind(piModified, retrieverModifiedState)));
+                    fe.EmbeddedFields.Values.Select(f => Expression.Bind(f.FieldInfo, MaterializeField(f.Field))));
+
+                var result = Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(ctor.Type), ctor);
 
                 if (fe.HasValue == null)
-                    return ctor;
+                    return result;
 
                 return Expression.Condition(
                     Expression.Equal(GetTupleProperty(fe.HasValue), Expression.Constant(true)),
-                    ctor,
+                    result,
                     Expression.Constant(null, field.FieldType));
             }
 
@@ -219,7 +221,9 @@ namespace Signum.Engine.Cache
                     case CacheType.Cached:
                         {
                             lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type),
-                                Lite.NewExpression(type, NewPrimaryKey(id.UnNullify()), Expression.Constant(null, typeof(string)), peModified));
+                                Lite.NewExpression(type, NewPrimaryKey(id.UnNullify()), Expression.Constant(null, typeof(string))));
+
+                            lite = Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(typeof(LiteImp)), lite.TryConvert(typeof(LiteImp))).TryConvert(lite.Type);
 
                             break;
                         }
@@ -289,12 +293,10 @@ namespace Signum.Engine.Cache
         static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<Entity>(null, null)).GetGenericMethodDefinition();
         static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<Entity>(null)).GetGenericMethodDefinition();
         static MethodInfo miComplete = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<Entity>(0, null)).GetGenericMethodDefinition();
+        static MethodInfo miModifiablePostRetrieving = ReflectionTools.GetMethodInfo((IRetriever r) => r.ModifiablePostRetrieving<EmbeddedEntity>(null)).GetGenericMethodDefinition();
 
         internal static ParameterExpression originObject = Expression.Parameter(typeof(object), "originObject");
         internal static ParameterExpression retriever = Expression.Parameter(typeof(IRetriever), "retriever");
-
-        static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified);
-        static MemberExpression retrieverModifiedState = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState));
 
 
         static MethodInfo miGetIBALite = ReflectionTools.GetMethodInfo((Schema s) => GetIBALite<Entity>(null, 1, "")).GetGenericMethodDefinition();
@@ -372,8 +374,8 @@ namespace Signum.Engine.Cache
                 mixBindings.Add(assigment);
             }
 
-            mixBindings.Add(Expression.Assign(Expression.Property(mixParam, piModified), retrieverModifiedState));
-
+            mixBindings.Add(Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(mixin.FieldType), mixParam));
+            
             var mixBlock = Expression.Block(new[] { mixParam }, mixBindings);
             return mixBlock;
         }

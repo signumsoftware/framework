@@ -18,6 +18,7 @@ using System.Threading;
 using Signum.Utilities.ExpressionTrees;
 using System.Data;
 using Signum.Entities.Reflection;
+using Signum.Entities.Internal;
 
 namespace Signum.Engine.Cache
 {
@@ -553,7 +554,7 @@ namespace Signum.Engine.Cache
         {
             Interlocked.Increment(ref hits);
 
-            return Lite.Create<T>(id, toStrings.Value[id], retriever.ModifiedState);
+            return retriever.ModifiablePostRetrieving((LiteImp<T>)Lite.Create<T>(id, toStrings.Value[id]));
         }
 
         public override int? Count
