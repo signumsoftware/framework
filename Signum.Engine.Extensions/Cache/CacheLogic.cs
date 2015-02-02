@@ -26,6 +26,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.Linq;
 using System.Linq.Expressions;
 using System.IO;
+using System.Data;
 
 namespace Signum.Engine.Cache
 {
@@ -124,7 +125,7 @@ namespace Signum.Engine.Cache
                             reader = new SimpleReader(fr, EntityCache.NewRetriever());
 
                         list.Add(projector(reader));
-                    });
+                    }, CommandType.Text);
 
             return list;
         }
@@ -133,7 +134,7 @@ namespace Signum.Engine.Cache
         {
             if (WithSqlDependency)
             {
-                connector.ExecuteDataReaderDependency(preCommand, change, StartSqlDependencyAndEnableBrocker, forEach);
+                connector.ExecuteDataReaderDependency(preCommand, change, StartSqlDependencyAndEnableBrocker, forEach, CommandType.Text);
             }
             else
             {
