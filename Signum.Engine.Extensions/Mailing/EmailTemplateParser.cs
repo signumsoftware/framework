@@ -366,20 +366,20 @@ namespace Signum.Engine.Mailing
                     }
                 }
 
-                SyncronizationContext sc = new SyncronizationContext
-                {
-                     ModelType = et.SystemEmail.ToType(),
-                     QueryDescription = qd,
-                     Replacements = replacements, 
-                     StringDistance = sd,
-                     Variables = new ScopedDictionary<string,ParsedToken>(null)
-                };
-
                 try
                 {
 
                     foreach (var item in et.Messages)
                     {
+                        SyncronizationContext sc = new SyncronizationContext
+                        {
+                            ModelType = et.SystemEmail.ToType(),
+                            QueryDescription = qd,
+                            Replacements = replacements,
+                            StringDistance = sd,
+                            Variables = new ScopedDictionary<string, ParsedToken>(null)
+                        };
+
                         item.Subject = Synchronize(item.Subject, sc);
                         item.Text = Synchronize(item.Text, sc);
                     }
