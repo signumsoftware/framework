@@ -95,7 +95,10 @@ namespace Signum.Web.Selenium
                 var byName = Selenium.TryFindElement(By.Name(Prefix));
                 if (byName != null)
                 {
-                    byName.SafeSendKeys(value);
+                    if (byName.TagName == "select")
+                        byName.SelectElement().SelectByValue(value);
+                    else
+                        byName.SafeSendKeys(value);
                     return;
                 }
                 else
