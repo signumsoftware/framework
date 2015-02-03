@@ -30,6 +30,17 @@ namespace Signum.Entities
             };
         }
 
+        [MethodExpander(typeof(FromEnumMethodExpander))]
+        public static EnumEntity<T> FromEnumNotNew(T t)
+        {
+            return new EnumEntity<T>()
+            {
+                id = new PrimaryKey(Convert.ToInt32(t)),
+                IsNew = false,
+                Modified = ModifiedState.Clean
+            };
+        }
+
         public T ToEnum()
         {
             return (T)Enum.ToObject(typeof(T), (int)Id);
