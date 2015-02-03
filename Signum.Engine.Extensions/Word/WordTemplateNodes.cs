@@ -92,8 +92,7 @@ namespace Signum.Engine.Word
         public readonly ParsedToken Token;
         public readonly QueryToken EntityToken;
         public readonly string Format;
-        public readonly PropertyRoute Route;
-
+     
         internal TokenNode(ParsedToken token, string format, WordTemplateParser parser)
         {
             this.Token = token;
@@ -360,12 +359,7 @@ namespace Signum.Engine.Word
         }
     }
 
-    public class GlobalVarContext
-    {
-        public IEntity Entity;
-        public CultureInfo Culture;
-        public ISystemWordTemplate SystemWordTemplate;
-    }
+
 
     public class GlobalNode : BaseNode
     {

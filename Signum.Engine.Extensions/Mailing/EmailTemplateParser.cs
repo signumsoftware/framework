@@ -420,13 +420,10 @@ namespace Signum.Engine.Mailing
         //}
     }
 
-    public class EmailTemplateParameters
+    public class EmailTemplateParameters : TemplateParameters
     {
         public StringBuilder StringBuilder = new StringBuilder();
         public bool IsHtml;
-        public CultureInfo CultureInfo;
-        public IEntity Entity;
         public ISystemEmail SystemEmail;
-        public Dictionary<QueryToken, ResultColumn> Columns;
     }
 }

@@ -27,9 +27,6 @@ namespace Signum.Engine.Word
 {
     public class WordTemplateParser
     {
-        public static Dictionary<string, Func<GlobalVarContext, object>> GlobalVariables = new Dictionary<string, Func<GlobalVarContext, object>>();
-
-
         public List<Error> Errors = new List<Error>();
         QueryDescription queryDescription;
         ScopedDictionary<string, ParsedToken> variables = new ScopedDictionary<string, ParsedToken>(null);
@@ -43,8 +40,6 @@ namespace Signum.Engine.Word
             this.document = document;
         }
 
-
-
         public void ParseDocument()
         {
             foreach (var p in document.RecursivePartsRootElements())
@@ -55,7 +50,7 @@ namespace Signum.Engine.Word
                 {
                     string text = par.ChildElements.OfType<Run>().ToString(r => GetText(r), "");
 
-                    IEnumerable<Match> matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
+                    var matches = TemplateUtils.KeywordsRegex.Matches(text).Cast<Match>().ToList();
 
                     if (matches.Any())
                     {
