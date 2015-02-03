@@ -180,7 +180,7 @@ namespace Signum.Engine.Mailing
                             {
                                 var t = TryParseToken(tok.Groups["token"].Value, dec, SubTokensOptions.CanElement);
 
-                                stack.Peek().Nodes.Add(new TokenNode(t, tok.Groups["format"].Value,
+                                stack.Peek().Nodes.Add(new ValueNode(t, tok.Groups["format"].Value,
                                     isRaw: keyword.Contains("raw"),
                                     walker: this));
 
@@ -425,5 +425,13 @@ namespace Signum.Engine.Mailing
         public StringBuilder StringBuilder = new StringBuilder();
         public bool IsHtml;
         public ISystemEmail SystemEmail;
+
+        public override object GetModel()
+        {
+            if (SystemEmail == null)
+                throw new ArgumentException("There is no model for the message composition");
+
+            return SystemEmail;
+        }
     }
 }

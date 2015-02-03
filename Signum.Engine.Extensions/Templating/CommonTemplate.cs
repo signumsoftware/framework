@@ -13,8 +13,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Signum.Engine.UserAssets;
 using System.Globalization;
-using Signum.Engine.Word;
-using Signum.Engine.Mailing;
 
 namespace Signum.Engine.Templating
 {
@@ -103,14 +101,13 @@ namespace Signum.Engine.Templating
             }
         }
 
-        public static Dictionary<string, Func<GlobalVarContext, object>> GlobalVariables = new Dictionary<string, Func<GlobalVarContext, object>>();
+        
     }
 
 
     public static class ParsedModel
     {
         public const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-
 
         public static List<MemberInfo> GetMembers(Type modelType, string fieldOrPropertyChain, out string error)
         {
@@ -139,7 +136,7 @@ namespace Signum.Engine.Templating
 
     public class SyncronizationContext
     {
-        public ScopedDictionary<string, ParsedToken> Variables;
+        public ScopedDictionary<string, ValueProviderBase> Variables;
         public Type ModelType;
         public Replacements Replacements;
         public StringDistance StringDistance;
@@ -162,9 +159,15 @@ namespace Signum.Engine.Templating
                 {
                     string v = tokenString.TryBefore('.') ?? tokenString;
 
-                    ParsedToken part;
-                    if (!Variables.TryGetValue(v, out part))
+                    ValueProviderBase prov;
+                    if (!Variables.TryGetValue(v, out prov))
                         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' not found!".FormatWith(v));
+
+                    var provToken = prov as TokenValueProvider;
+                    if (!(provToken is TokenValueProvider))
+                        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not a Query Token");
+
+                    var part = provToken.Try(a => a.ParsedToken); 
 
                     if (part != null && part.QueryToken == null)
                         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not fixed yet! currently: '{1}'".FormatWith(v, part.String));
@@ -197,10 +200,10 @@ namespace Signum.Engine.Templating
             }
         }
 
-        public void SynchronizeValue(ParsedToken Token, ref string value, bool isList)
+        public void SynchronizeValue(Type type, ref string value, bool isList)
         {
             string val = value;
-            FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, Token.QueryToken.Type, ref val, allowRemoveToken: false, isList: isList);
+            FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, type, ref val, allowRemoveToken: false, isList: isList);
             switch (result)
             {
                 case FixTokenResult.Fix:
@@ -214,11 +217,11 @@ namespace Signum.Engine.Templating
         }
 
 
-        internal List<MemberInfo> GetMembers(string fieldOrPropertyChain)
+        internal List<MemberInfo> GetMembers(string fieldOrPropertyChain, Type initialType)
         {
             List<MemberInfo> fields = new List<MemberInfo>();
 
-            Type type = this.ModelType;
+            Type type = initialType;
             foreach (var field in fieldOrPropertyChain.Split('.'))
             {
                 var allMembers = type.GetFields(ParsedModel.Flags).Cast<MemberInfo>().Concat(type.GetProperties(ParsedModel.Flags)).ToDictionary(a => a.Name);
@@ -240,7 +243,7 @@ namespace Signum.Engine.Templating
 
         public IDisposable NewScope()
         {
-            Variables = new ScopedDictionary<string, ParsedToken>(Variables);
+            Variables = new ScopedDictionary<string, ValueProviderBase>(Variables);
 
             return new Disposable(() => Variables = Variables.Previous);
         }

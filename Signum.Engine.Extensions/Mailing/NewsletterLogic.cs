@@ -323,17 +323,17 @@ namespace Signum.Engine.Mailing
                                 new EmailTemplateParameters
                                 {
                                     Columns = dicTokenColumn,
-                                    IsHtml = false
-                                },
-                                s.Rows);
+                                    IsHtml = false,
+                                    Rows = s.Rows
+                                });
 
                             message.Body = ((EmailTemplateParser.BlockNode)newsletter.TextParsedNode).Print(
                                 new EmailTemplateParameters
                                 {
                                     Columns = dicTokenColumn,
                                     IsHtml = true,
-                                },
-                                s.Rows);
+                                    Rows = s.Rows
+                                });
 
                             message.IsBodyHtml = true;
                             

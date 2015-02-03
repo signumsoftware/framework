@@ -72,22 +72,22 @@ namespace Signum.Engine.Mailing
                         {
                             Columns = dicTokenColumn,
                             IsHtml = false,
-                            CultureInfo = ci,
+                            Culture = ci,
                             Entity = entity,
-                            SystemEmail = systemEmail
-                        },
-                        currentRows);
+                            SystemEmail = systemEmail,
+                            Rows = currentRows
+                        });
 
                     email.Body = TextNode(message).Print(
                         new EmailTemplateParameters
                         {
                             Columns = dicTokenColumn,
                             IsHtml = template.IsBodyHtml,
-                            CultureInfo = ci,
+                            Culture = ci,
                             Entity = entity,
-                            SystemEmail = systemEmail
-                        },
-                        currentRows);
+                            SystemEmail = systemEmail,
+                            Rows = currentRows
+                        });
 
 
                     yield return email;

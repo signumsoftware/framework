@@ -151,7 +151,7 @@
     <Compile Include="Processes\ProcessRunnerLogic.cs" />
     <Compile Include="Scheduler\ApplicationEventLogLogic.cs" />
     <Compile Include="Basics\CultureInfoLogic.cs" />
-    <Compile Include="Templating\ITemplateValueProvider.cs" />
+    <Compile Include="Templating\ValueProviders.cs" />
     <Compile Include="Translation\TranslatedInstanceLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Mailing\EmailTemplateParser.cs" />
@@ -253,7 +253,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Word\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

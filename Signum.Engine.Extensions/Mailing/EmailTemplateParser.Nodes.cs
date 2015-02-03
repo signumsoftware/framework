@@ -23,22 +23,20 @@ namespace Signum.Engine.Mailing
 {
     public static partial class EmailTemplateParser
     {
-      
-
         public abstract class TextNode
         {
-            public abstract void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows);
+            public abstract void PrintList(EmailTemplateParameters p);
             public abstract void FillQueryTokens(List<QueryToken> list);
 
             public override string ToString()
             {
                 StringBuilder sb = new StringBuilder();
-                ScopedDictionary<string, ParsedToken> variables = new ScopedDictionary<string, ParsedToken>(null);
+                ScopedDictionary<string, ValueProviderBase> variables = new ScopedDictionary<string, ValueProviderBase>(null);
                 ToString(sb, variables);
                 return sb.ToString();
             }
 
-            public abstract void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables);
+            public abstract void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables);
 
             public abstract void Synchronize(SyncronizationContext sc);
         }
@@ -47,7 +45,7 @@ namespace Signum.Engine.Mailing
         {
             public string Text;
 
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            public override void PrintList(EmailTemplateParameters p)
             {
                 p.StringBuilder.Append(Text);
             }
@@ -57,7 +55,7 @@ namespace Signum.Engine.Mailing
                 return;
             }
 
-            public override void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables)
+            public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
                 sb.Append(Text);               
             }
@@ -70,17 +68,17 @@ namespace Signum.Engine.Mailing
 
         public class DeclareNode : TextNode
         {
-            public readonly ParsedToken Token;
+            public readonly ValueProviderBase ValueProvider;
 
-            internal DeclareNode(ParsedToken token, TemplateWalker walker)
+            internal DeclareNode(ValueProviderBase valueProvider, TemplateWalker walker)
             {
-                if (!token.Variable.HasText())
-                    walker.AddError(true, "declare[{0}] should end with 'as $someVariable'".FormatWith(token));
+                if (!valueProvider.Variable.HasText())
+                    walker.AddError(true, "declare[{0}] should end with 'as $someVariable'".FormatWith(valueProvider.ToString()));
 
-                this.Token = token;
+                this.ValueProvider = valueProvider;
             }
 
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            public override void PrintList(EmailTemplateParameters p)
             {
             }
 
@@ -88,226 +86,64 @@ namespace Signum.Engine.Mailing
             {
             }
 
-            public override void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables)
+            public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
                 sb.Append("@declare");
 
-                Token.ToString(sb, variables, null);
+                ValueProvider.ToString(sb, variables, null);
 
-                Token.Declare(variables);
+                ValueProvider.Declare(variables);
             }
 
             public override void Synchronize(SyncronizationContext sc)
             {
-                sc.SynchronizeToken(Token, "@declare");
+                ValueProvider.Synchronize(sc, "@declare");
 
-                Token.Declare(sc.Variables);
+                ValueProvider.Declare(sc.Variables);
             }
         }
 
-        public class TokenNode : TextNode
+        public class ValueNode : TextNode
         {
+            public readonly ValueProviderBase ValueProvider;
             public readonly bool IsRaw;
-
-            public readonly ParsedToken Token;
-            public readonly QueryToken EntityToken; 
             public readonly string Format;
-            public readonly PropertyRoute Route;
-            internal TokenNode(ParsedToken token, string format, bool isRaw, TemplateWalker walker)
+
+            internal ValueNode(ValueProviderBase valueProvider, string format, bool isRaw)
             {
-                this.Token = token;
+                this.ValueProvider = valueProvider;
                 this.Format = format;
                 this.IsRaw = isRaw;
-
-                if (token.QueryToken != null && IsTranslateInstanceCanditate(token.QueryToken))
-                {
-                    Route = token.QueryToken.GetPropertyRoute();
-                    string error = DeterminEntityToken(token.QueryToken, out EntityToken);
-                    if (error != null)
-                        walker.AddError(false, error);
-                }
             }
 
-            static bool IsTranslateInstanceCanditate(QueryToken token)
+            public override void PrintList(EmailTemplateParameters p)
             {
-                if (token.Type != typeof(string))
-                    return false;
+                var obj = ValueProvider.GetValue(p);
 
-                var pr = token.GetPropertyRoute();
-                if (pr == null)
-                    return false;
+                var text = obj is Enum ? ((Enum)obj).NiceToString() :
+                       obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
+                       obj.TryToString();
 
-                if (TranslatedInstanceLogic.RouteType(pr) == null)
-                    return false;
-
-                return true;
-            }
-
-            string DeterminEntityToken(QueryToken token, out QueryToken entityToken)
-            {
-                entityToken = token.Follow(a => a.Parent).FirstOrDefault(a => a.Type.IsLite() || a.Type.IsIEntity());
-
-                if (entityToken == null)
-                    entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), 0);
-
-                if (entityToken.Type.IsAssignableFrom(Route.RootType))
-                    return "The entity of {0} ({1}) is not compatible with the property route {2}".FormatWith(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName());
-
-                return null;
-            }
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                string text;
-                if (EntityToken != null)
-                {
-                    var entity = (Lite<Entity>)rows.DistinctSingle(p.Columns[EntityToken]);
-                    var fallback = (string)rows.DistinctSingle(p.Columns[Token.QueryToken]);
-
-                    text = entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
-                }
-                else
-                {
-                    object obj = rows.DistinctSingle(p.Columns[Token.QueryToken]);
-                    text = obj is Enum ? ((Enum)obj).NiceToString() : 
-                        obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? Token.QueryToken.Format, p.CultureInfo) :
-                        obj.TryToString();
-                }
-                p.StringBuilder.Append(p.IsHtml && !IsRaw ? HttpUtility.HtmlEncode(text) : text);
+                p.StringBuilder.Append(p.IsHtml && !IsRaw && !(obj is HtmlString )? HttpUtility.HtmlEncode(text) : text);
             }
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
-                list.Add(Token.QueryToken);
-                if (EntityToken != null)
-                    list.Add(EntityToken);
+                this.ValueProvider.FillQueryTokens(list);
             }
 
-            public override void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables)
+            public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
                 sb.Append("@");
                 if (IsRaw)
                     sb.Append("raw");
 
-                Token.ToString(sb, variables, Format.HasText() ? (":" + Format) : null);
+                ValueProvider.ToString(sb, variables, Format.HasText() ? (":" + Format) : null);
             }
 
             public override void Synchronize(SyncronizationContext sc)
             {
-                sc.SynchronizeToken(Token, IsRaw ? "@raw[]" : "@[]");
-
-                Token.Declare(sc.Variables);
-            }
-        }
-
-        public class GlobalNode : TextNode
-        {
-            Func<GlobalVarContext, object> globalFunc;
-            string globalKey;
-            internal GlobalNode(string globalKey, TemplateWalker walker)
-            {
-                this.globalKey = globalKey;
-                this.globalFunc = EmailTemplateParser.GlobalVariables.TryGet(globalKey, null);
-                if (globalFunc == null)
-                    walker.AddError(false, "The global key {0} was not found".FormatWith(globalKey));
-            }
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                var text = globalFunc(new GlobalVarContext { Entity = p.Entity, Culture = p.CultureInfo, IsHtml = p.IsHtml, SystemEmail = p.SystemEmail, });
-                if (text is IHtmlString)
-                    p.StringBuilder.Append(((IHtmlString)text).ToHtmlString());
-                else
-                    p.StringBuilder.Append(p.IsHtml ? HttpUtility.HtmlEncode(text) : text);
-            }
-
-            public override void FillQueryTokens(List<QueryToken> list)
-            {
-            }
-
-            public override void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables)
-            {
-                sb.AppendFormat("@global[{0}]", globalKey);
-            }
-
-            public override void Synchronize(SyncronizationContext sc)
-            {
-                globalKey = sc.Replacements.SelectInteractive(globalKey, GlobalVariables.Keys, "EmailTemplate Globals", sc.StringDistance) ?? globalKey;
-            }
-        }
-
-        public class ModelNode : TextNode
-        {
-            public bool IsRaw { get; set; }
-
-            string fieldOrPropertyChain; 
-            List<MemberInfo> members;
-            internal ModelNode(string fieldOrPropertyChain, Type systemEmail, TemplateWalker walker)
-            {
-                if (systemEmail == null)
-                {
-                    walker.AddError(false, EmailTemplateMessage.SystemEmailShouldBeSetToAccessModel0.NiceToString().FormatWith(fieldOrPropertyChain));
-                    return;
-                }
-
-                this.fieldOrPropertyChain = fieldOrPropertyChain;
-
-                string error;
-                this.members = ParsedModel.GetMembers(systemEmail, fieldOrPropertyChain, out error);
-
-                if (error.HasText())
-                    walker.AddError(false, error);
-            }
-
-            
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                if (p.SystemEmail == null)
-                    throw new ArgumentException("There is no system email for the message composition");
-
-                object value = p.SystemEmail;
-                foreach (var m in members)
-                {
-                    value = Getter(m, value);
-                    if (value == null)
-                        break;
-                }
-
-                if (p.IsHtml && !(value is System.Web.HtmlString) && !IsRaw)
-                    p.StringBuilder.Append(HttpUtility.HtmlEncode(value.ToString()));
-                else
-                    p.StringBuilder.Append(value.ToString());
-            }
-
-            static object Getter(MemberInfo member, object systemEmail)
-            {
-                var pi = member as PropertyInfo;
-
-                if (pi != null)
-                    return pi.GetValue(systemEmail, null);
-
-                return ((FieldInfo)member).GetValue(systemEmail);
-            }
-
-            public override void FillQueryTokens(List<QueryToken> list)
-            {
-                return;
-            }
-
-            public override void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables)
-            {
-                sb.AppendFormat("@model[{0}]", members == null ? fieldOrPropertyChain : members.ToString(a => a.Name, "."));
-            }
-
-            public override void Synchronize(SyncronizationContext sc)
-            {
-                if (members == null)
-                {
-                    members = sc.GetMembers(fieldOrPropertyChain);
-
-                    if (members != null)
-                        fieldOrPropertyChain = members.ToString(a => a.Name, ".");
-                }
+                ValueProvider.Synchronize(sc, IsRaw ? "@raw[]" : "@[]");
             }
         }
 
@@ -322,17 +158,17 @@ namespace Signum.Engine.Mailing
                 this.owner = owner;
             }
 
-            public string Print(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            public string Print(EmailTemplateParameters p)
             {
-                this.PrintList(p, rows);
+                this.PrintList(p);
                 return p.StringBuilder.ToString();
             }
 
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            public override void PrintList(EmailTemplateParameters p)
             {
                 foreach (var node in Nodes)
                 {
-                    node.PrintList(p, rows);
+                    node.PrintList(p);
                 }
             }
 
@@ -358,7 +194,7 @@ namespace Signum.Engine.Mailing
                 return "block";
             }
 
-            public override void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables)
+            public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
                 foreach (var n in Nodes)
                 {
@@ -376,40 +212,34 @@ namespace Signum.Engine.Mailing
 
         public class ForeachNode : TextNode
         {
-            public readonly ParsedToken Token;
+            public readonly ValueProviderBase ValueProvider;
 
             public readonly BlockNode Block;
 
-            public ForeachNode(ParsedToken token)
+            public ForeachNode(ValueProviderBase valueProvider)
             {
-                this.Token = token;
+                this.ValueProvider = valueProvider;
                 this.Block = new BlockNode(this);
             }
 
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            public override void PrintList(EmailTemplateParameters p)
             {
-                var groups = rows.GroupBy(r => r[p.Columns[Token.QueryToken]]).ToList();
-                if (groups.Count == 1 && groups[0].Key == null)
-                    return;
-                foreach (var group in groups)
-                {
-                    Block.PrintList(p, group);
-                }
+                ValueProvider.Foreach(p, () => Block.PrintList(p));
             }
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
-                list.Add(Token.QueryToken);
+                ValueProvider.FillQueryTokens(list);
                 Block.FillQueryTokens(list);
             }
 
-            public override void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables)
+            public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
                 sb.Append("@foreach");
-                Token.ToString(sb, variables, null);
+                ValueProvider.ToString(sb, variables, null);
                 {
-                    var newVars = new ScopedDictionary<string, ParsedToken>(variables);
-                    Token.Declare(newVars);
+                    var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
+                    ValueProvider.Declare(newVars);
                     Block.ToString(sb, newVars);
                 }
 
@@ -418,11 +248,11 @@ namespace Signum.Engine.Mailing
 
             public override void Synchronize(SyncronizationContext sc)
             {
-                sc.SynchronizeToken(Token, "@foreach[]");
+                ValueProvider.Synchronize(sc, "@foreach[]");
 
                 using (sc.NewScope())
                 {
-                    Token.Declare(sc.Variables);
+                    ValueProvider.Declare(sc.Variables);
 
                     Block.Synchronize(sc);
                 }
@@ -431,34 +261,29 @@ namespace Signum.Engine.Mailing
 
         public class AnyNode : TextNode
         {
-            public readonly ParsedToken Token;
+            public readonly TokenValueProvider ValueProvider;
             public readonly FilterOperation? Operation;
             public string Value;
 
             public readonly BlockNode AnyBlock;
             public BlockNode NotAnyBlock;
 
-            internal AnyNode(ParsedToken token, TemplateWalker walker)
+            internal AnyNode(TokenValueProvider valueProvider, TemplateWalker walker)
             {
-                if (token.QueryToken != null && token.QueryToken.HasAllOrAny())
-                    walker.AddError(false, "Any {0} can not contains Any or All");
-
+                this.ValueProvider = valueProvider;
                 AnyBlock = new BlockNode(this);
             }
 
-            internal AnyNode(ParsedToken token, string operation, string value, TemplateWalker walker)
+            internal AnyNode(TokenValueProvider valueProvider, string operation, string value, TemplateWalker walker)
             {
-                if (token.QueryToken != null && token.QueryToken.HasAllOrAny())
-                    walker.AddError(false, "Any {0} can not contains Any or All");
-
-                this.Token = token;
+                this.ValueProvider = valueProvider;
                 this.Operation = FilterValueConverter.ParseOperation(operation);
                 this.Value = value;
                 
-                if (Token.QueryToken != null)
+                if (ValueProvider.Type != null)
                 {
                     object rubish;
-                    string error = FilterValueConverter.TryParse(Value, Token.QueryToken.Type, out rubish, Operation == FilterOperation.IsIn);
+                    string error = FilterValueConverter.TryParse(Value, ValueProvider.Type, out rubish, Operation == FilterOperation.IsIn);
 
                     if (error.HasText())
                         walker.AddError(false, error);
@@ -473,44 +298,51 @@ namespace Signum.Engine.Mailing
                 return NotAnyBlock;
             }
 
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            public override void PrintList(EmailTemplateParameters p)
             {
-                var filtered = GetFiltered(p, rows);
+                var filtered = GetFiltered(p);
 
+                var prevRows = p.Rows; 
                 if (filtered.Any())
                 {
-                    AnyBlock.PrintList(p, filtered);
+                    p.Rows = filtered;
+                    AnyBlock.PrintList(p);
+                    p.Rows = prevRows;
                 }
                 else if (NotAnyBlock != null)
                 {
-                    NotAnyBlock.PrintList(p, filtered);
+                    p.Rows = filtered;
+                    NotAnyBlock.PrintList(p);
+                    p.Rows = prevRows;
                 }
             }
 
-            private IEnumerable<ResultRow> GetFiltered(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            private IEnumerable<ResultRow> GetFiltered(EmailTemplateParameters p)
             {
                 if (Operation == null)
                 {
-                    var column = p.Columns[Token.QueryToken];
+                    var column = p.Columns[ValueProvider.ParsedToken.QueryToken];
 
-                    var filtered = rows.Where(r => TemplateUtils.ToBool(r[column])).ToList();
+                    var filtered = p.Rows.Where(r => TemplateUtils.ToBool(r[column])).ToList();
 
                     return filtered;
                 }
                 else
                 {
-                    object val = FilterValueConverter.Parse(Value, Token.QueryToken.Type, Operation == FilterOperation.IsIn);
+                    var type = ValueProvider.Type;
 
-                    Expression value = Expression.Constant(val, Token.QueryToken.Type);
+                    object val = FilterValueConverter.Parse(Value, type, Operation == FilterOperation.IsIn);
 
-                    ResultColumn col = p.Columns[Token.QueryToken];
+                    Expression value = Expression.Constant(val, type);
+
+                    ResultColumn col = p.Columns[ValueProvider.ParsedToken.QueryToken];
 
                     var expression = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
 
-                    Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, Expression.Convert(expression.Body, Token.QueryToken.Type), value, inMemory: true);
+                    Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, Expression.Convert(expression.Body, type), value, inMemory: true);
                     var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, expression.Parameters).Compile();
 
-                    var filtered = rows.Where(lambda).ToList();
+                    var filtered = p.Rows.Where(lambda).ToList();
 
                     return filtered;
                 }
@@ -518,28 +350,28 @@ namespace Signum.Engine.Mailing
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
-                list.Add(Token.QueryToken);
+                ValueProvider.FillQueryTokens(list);
                 AnyBlock.FillQueryTokens(list);
                 if (NotAnyBlock != null)
                     NotAnyBlock.FillQueryTokens(list);
             }
 
 
-            public override void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables)
+            public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
                 sb.Append("@any");
-                Token.ToString(sb, variables, Operation == null ? null : FilterValueConverter.ToStringOperation(Operation.Value) + Value);
+                ValueProvider.ToString(sb, variables, Operation == null ? null : FilterValueConverter.ToStringOperation(Operation.Value) + Value);
                 {
-                    var newVars = new ScopedDictionary<string, ParsedToken>(variables);
-                    Token.Declare(newVars);
+                    var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
+                    ValueProvider.Declare(newVars);
                     AnyBlock.ToString(sb, newVars);
                 }
                 
                 if (NotAnyBlock != null)
                 {
                     sb.Append("@notany");
-                    var newVars = new ScopedDictionary<string, ParsedToken>(variables);
-                    Token.Declare(newVars);
+                    var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
+                    ValueProvider.Declare(newVars);
                     NotAnyBlock.ToString(sb, newVars);
                 }
 
@@ -548,14 +380,14 @@ namespace Signum.Engine.Mailing
 
             public override void Synchronize(SyncronizationContext sc)
             {
-                sc.SynchronizeToken(Token, "@any[]");
+                ValueProvider.Synchronize(sc, "@any[]");
 
                 if (Operation != null)
-                    sc.SynchronizeValue(Token, ref Value, Operation == FilterOperation.IsIn);
+                    sc.SynchronizeValue(ValueProvider.Type, ref Value, Operation == FilterOperation.IsIn);
 
                 using (sc.NewScope())
                 {
-                    Token.Declare(sc.Variables);
+                    ValueProvider.Declare(sc.Variables);
 
                     AnyBlock.Synchronize(sc);
                 }
@@ -564,7 +396,7 @@ namespace Signum.Engine.Mailing
                 {
                     using (sc.NewScope())
                     {
-                        Token.Declare(sc.Variables);
+                        ValueProvider.Declare(sc.Variables);
 
                         NotAnyBlock.Synchronize(sc);
                     }
@@ -574,28 +406,28 @@ namespace Signum.Engine.Mailing
 
         public class IfNode : TextNode
         {
-            public readonly ParsedToken Token;
+            public readonly ValueProviderBase ValueProvider;
             public readonly BlockNode IfBlock;
             public BlockNode ElseBlock;
             private FilterOperation? Operation;
             private string Value;
 
-            internal IfNode(ParsedToken token, TemplateWalker walker)
+            internal IfNode(ValueProviderBase valueProvider, TemplateWalker walker)
             {
-                this.Token = token;
+                this.ValueProvider = valueProvider;
                 this.IfBlock = new BlockNode(this);
             }
 
-            internal IfNode(ParsedToken token, string operation, string value, TemplateWalker walker)
+            internal IfNode(ValueProviderBase valueProvider, string operation, string value, TemplateWalker walker)
             {
-                this.Token = token;
+                this.ValueProvider = valueProvider;
                 this.Operation = FilterValueConverter.ParseOperation(operation);
                 this.Value = value;
 
-                if (Token.QueryToken != null)
+                if (this.ValueProvider.Type != null)
                 {
                     object rubish;
-                    string error = FilterValueConverter.TryParse(Value, Token.QueryToken.Type, out rubish, Operation == FilterOperation.IsIn);
+                    string error = FilterValueConverter.TryParse(Value, this.ValueProvider.Type, out rubish, Operation == FilterOperation.IsIn);
 
                     if (error.HasText())
                         walker.AddError(false, error);
@@ -613,33 +445,37 @@ namespace Signum.Engine.Mailing
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
-                list.Add(Token.QueryToken);
+                this.ValueProvider.FillQueryTokens(list);
                 IfBlock.FillQueryTokens(list);
                 if (ElseBlock != null)
                     ElseBlock.FillQueryTokens(list);
             }
 
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            public override void PrintList(EmailTemplateParameters p)
             {
-                if (GetCondition(p, rows))
+                if (GetCondition(p))
                 {
-                    IfBlock.PrintList(p, rows);
+                    IfBlock.PrintList(p);
                 }
                 else if (ElseBlock != null)
                 {
-                    ElseBlock.PrintList(p, rows);
+                    ElseBlock.PrintList(p);
                 }
             }
 
-            public bool GetCondition(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            public bool GetCondition(EmailTemplateParameters p)
             {
+                var obj = this.ValueProvider.GetValue(p);
+
                 if (this.Operation == null)
-                    return !rows.IsEmpty() && TemplateUtils.ToBool(rows.DistinctSingle(p.Columns[Token.QueryToken]));
+                    return TemplateUtils.ToBool(obj);
                 else
                 {
-                    Expression token = Expression.Constant(rows.DistinctSingle(p.Columns[Token.QueryToken]), Token.QueryToken.Type);
+                    var type = this.ValueProvider.Type;
 
-                    Expression value = Expression.Constant(FilterValueConverter.Parse(Value, Token.QueryToken.Type, Operation == FilterOperation.IsIn), Token.QueryToken.Type);
+                    Expression token = Expression.Constant(obj, type);
+
+                    Expression value = Expression.Constant(FilterValueConverter.Parse(Value, type, Operation == FilterOperation.IsIn), type);
 
                     Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, token, value, inMemory: true);
                     var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
@@ -648,21 +484,21 @@ namespace Signum.Engine.Mailing
                 }
             }
 
-            public override void ToString(StringBuilder sb, ScopedDictionary<string, ParsedToken> variables)
+            public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
             {
                 sb.Append("@if");
-                Token.ToString(sb, variables, Operation == null ? null : FilterValueConverter.ToStringOperation(Operation.Value) + Value);
+                ValueProvider.ToString(sb, variables, Operation == null ? null : FilterValueConverter.ToStringOperation(Operation.Value) + Value);
                 {
-                    var newVars = new ScopedDictionary<string, ParsedToken>(variables);
-                    Token.Declare(newVars);
+                    var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
+                    ValueProvider.Declare(newVars);
                     IfBlock.ToString(sb, newVars);
                 }
 
                 if (ElseBlock != null)
                 {
                     sb.Append("@else");
-                    var newVars = new ScopedDictionary<string, ParsedToken>(variables);
-                    Token.Declare(newVars);
+                    var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
+                    ValueProvider.Declare(newVars);
                     ElseBlock.ToString(sb, newVars);
                 }
 
@@ -672,14 +508,14 @@ namespace Signum.Engine.Mailing
 
             public override void Synchronize(SyncronizationContext sc)
             {
-                sc.SynchronizeToken(Token, "@if[]");
+                ValueProvider.Synchronize(sc, "if[]");
 
                 if (Operation != null)
-                    sc.SynchronizeValue(Token, ref Value, Operation == FilterOperation.IsIn);
+                    sc.SynchronizeValue(ValueProvider.Type, ref Value, Operation == FilterOperation.IsIn);
 
                 using (sc.NewScope())
                 {
-                    Token.Declare(sc.Variables);
+                    ValueProvider.Declare(sc.Variables);
 
                     IfBlock.Synchronize(sc);
                 }
@@ -688,7 +524,7 @@ namespace Signum.Engine.Mailing
                 {
                     using (sc.NewScope())
                     {
-                        Token.Declare(sc.Variables);
+                        ValueProvider.Declare(sc.Variables);
 
                         ElseBlock.Synchronize(sc);
                     }
