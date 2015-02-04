@@ -770,10 +770,12 @@ namespace Signum.Engine.Linq
 
             if (u.NodeType == ExpressionType.Convert && u.Type.IsNullable() && u.Type.UnNullify().IsEnum)
             {
+                var underlying = Enum.GetUnderlyingType(u.Type.UnNullify());
+
                 if (u.Operand.NodeType == ExpressionType.Convert && u.Operand.Type.IsEnum)
-                    u = Expression.Convert(Expression.Convert(((UnaryExpression)u.Operand).Operand, typeof(int?)), u.Type); //Expand nullability
-                else if (u.Operand.Type == typeof(int))
-                    u = Expression.Convert(Expression.Convert(u.Operand, typeof(int?)), u.Type); //Expand nullability
+                    u = Expression.Convert(Expression.Convert(((UnaryExpression)u.Operand).Operand, underlying.Nullify()), u.Type); //Expand nullability
+                else if (u.Operand.Type == underlying)
+                    u = Expression.Convert(Expression.Convert(u.Operand, underlying.Nullify()), u.Type); //Expand nullability
             }
 
             Expression operand = this.Visit(u.Operand);

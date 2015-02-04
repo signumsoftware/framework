@@ -229,7 +229,7 @@ namespace Signum.Engine.Maps
         {
             Type type = table.Type;
 
-            table.IdentityBehaviour = (Settings.TypeAttribute<PrimaryKeyAttribute>(type) ?? Settings.DefaultPrimaryKeyAttribute).IdentityBehaviour;
+            table.IdentityBehaviour = GetPrimaryKeyAttribute(type).IdentityBehaviour;
             table.Name = GenerateTableName(type, Settings.TypeAttribute<TableNameAttribute>(type));
             table.CleanTypeName = GenerateCleanTypeName(type);
             table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
@@ -434,7 +434,7 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateFieldPrimaryKey(Table table, PropertyRoute route, NameSequence name)
         {
-            var attr = Settings.TypeAttribute<PrimaryKeyAttribute>(table.Type) ?? Settings.DefaultPrimaryKeyAttribute;
+            var attr = GetPrimaryKeyAttribute(table.Type);
 
             PrimaryKey.PrimaryKeyType.SetDefinition(table.Type, attr.Type);
 
@@ -451,6 +451,18 @@ namespace Signum.Engine.Maps
             };
         }
 
+        private PrimaryKeyAttribute GetPrimaryKeyAttribute(Type type)
+        {
+            var attr = Settings.TypeAttribute<PrimaryKeyAttribute>(type);
+
+            if (attr != null)
+                return attr;
+
+            if (type.IsEnumEntity())
+                return new PrimaryKeyAttribute(Enum.GetUnderlyingType(type.GetGenericArguments().Single())) { Identity = false, IdentityBehaviour = false };
+
+            return Settings.DefaultPrimaryKeyAttribute;
+        }
 
         protected virtual FieldValue GenerateFieldTicks(Table table, PropertyRoute route, NameSequence name)
         {

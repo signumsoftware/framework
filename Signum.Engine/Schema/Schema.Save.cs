@@ -1327,7 +1327,7 @@ namespace Signum.Engine.Maps
     {
         protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
         {
-            trios.Add(new Table.Trio(this, Expression.Convert(value, Nullable ? typeof(int?) : typeof(int)), suffix));
+            trios.Add(new Table.Trio(this, Expression.Convert(value, this.Type), suffix));
         }
     }
 

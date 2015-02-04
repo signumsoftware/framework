@@ -12,7 +12,7 @@ using System.Reflection;
 namespace Signum.Entities
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    [PrimaryKey(typeof(int), Identity = false, IdentityBehaviour = false), TicksColumn(false)]
+    [TicksColumn(false)]
     public class EnumEntity<T> : Entity, IEquatable<EnumEntity<T>>
         where T : struct
     {
@@ -26,7 +26,7 @@ namespace Signum.Entities
         {
             return new EnumEntity<T>()
             {
-                id = new PrimaryKey(Convert.ToInt32(t)),
+                id = new PrimaryKey(EnumExtensions.GetUnderlyingValue((Enum)(object)t)),
             };
         }
 
@@ -35,7 +35,7 @@ namespace Signum.Entities
         {
             return new EnumEntity<T>()
             {
-                id = new PrimaryKey(Convert.ToInt32(t)),
+                id = new PrimaryKey(EnumExtensions.GetUnderlyingValue((Enum)(object)t)),
                 IsNew = false,
                 Modified = ModifiedState.Clean
             };
@@ -43,7 +43,7 @@ namespace Signum.Entities
 
         public T ToEnum()
         {
-            return (T)Enum.ToObject(typeof(T), (int)Id);
+            return (T)Enum.ToObject(typeof(T), Id.Object);
         }
 
         public override string ToString()
@@ -76,7 +76,7 @@ namespace Signum.Entities
             if (value == null) return null;
 
             Entity ident = (Entity)Activator.CreateInstance(Generate(value.GetType()));
-            ident.Id = new PrimaryKey(Convert.ToInt32(value));
+            ident.Id = new PrimaryKey(EnumExtensions.GetUnderlyingValue(value));
 
             return ident;
         }
@@ -134,10 +134,12 @@ namespace Signum.Entities
             var type = mi.DeclaringType;
             var query = Expression.Call(null, miQuery.MakeGenericMethod(mi.DeclaringType));
 
+            var underlyingType = Enum.GetUnderlyingType(mi.DeclaringType.GetGenericArguments().Single());
+
             var param = Expression.Parameter(mi.DeclaringType);
             var filter = Expression.Lambda(Expression.Equal(
-                Expression.Convert(Expression.Property(param, "Id"), typeof(int)),
-                Expression.Convert(arguments.Single(), typeof(int))),
+                Expression.Convert(Expression.Property(param, "Id"), underlyingType),
+                Expression.Convert(arguments.Single(), underlyingType)),
                 param);
 
             var result = Expression.Call(miSingleOrDefault.MakeGenericMethod(type), query, filter);

@@ -91,6 +91,12 @@ namespace Signum.Utilities
                 .Select(kvp => kvp.Key)
                 .SingleOrDefaultEx();
         }
+
+        public static IComparable GetUnderlyingValue(Enum value)
+        {
+            Type type = Enum.GetUnderlyingType(value.GetType());
+            return (IComparable)Convert.ChangeType(value, type);
+        }
     }
 
 
