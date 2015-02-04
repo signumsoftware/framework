@@ -188,7 +188,7 @@ namespace Signum.Engine.Mailing
                             {
                                 var t = TryParseValueProvider(type, token, dec);
 
-                                stack.Peek().Nodes.Add(new DeclareNode(t, this));
+                                stack.Peek().Nodes.Add(new DeclareNode(t, this.AddError));
 
                                 DeclareVariable(t);
                             }
@@ -215,7 +215,7 @@ namespace Signum.Engine.Mailing
                                 stack.Peek().Nodes.Add(any);
                                 PushBlock(any.AnyBlock);
 
-                                DeclareVariable(t);
+                                DeclareVariable(vp);
                                 break;
                             }
                         case "notany":
@@ -231,12 +231,12 @@ namespace Signum.Engine.Mailing
                             }
                         case "foreach":
                             {
-                                var t = TryParseToken(token, dec, SubTokensOptions.CanElement);
-                                var fn = new ForeachNode(t);
+                                ValueProviderBase vp = TryParseValueProvider(type, token, dec);
+                                var fn = new ForeachNode(vp);
                                 stack.Peek().Nodes.Add(fn);
                                 PushBlock(fn.Block);
 
-                                DeclareVariable(t);
+                                DeclareVariable(vp);
                                 break;
                             }
                         case "endforeach":
@@ -247,23 +247,23 @@ namespace Signum.Engine.Mailing
                         case "if":
                             {
                                 IfNode ifn;
-                                ParsedToken t;
+                                ValueProviderBase vp;
                                 var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
-                                    t = TryParseToken(token, dec, SubTokensOptions.CanElement);
-                                    ifn = new IfNode(t, this);
+                                    vp = TryParseValueProvider(type, token, dec);
+                                    ifn = new IfNode(vp, this);
                                 }
                                 else
                                 {
-                                    t = TryParseToken(filter.Groups["token"].Value, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
+                                    vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
                                     var comparer = filter.Groups["comparer"].Value;
                                     var value = filter.Groups["value"].Value;
-                                    ifn = new IfNode(t, comparer, value, this);
+                                    ifn = new IfNode(vp, comparer, value, this.AddError);
                                 }
                                 stack.Peek().Nodes.Add(ifn);
                                 PushBlock(ifn.IfBlock);
-                                DeclareVariable(t);
+                                DeclareVariable(vp);
                                 break;
                             }
                         case "else":
@@ -296,37 +296,7 @@ namespace Signum.Engine.Mailing
 
             public ValueProviderBase TryParseValueProvider(string type, string token, string variable)
             {
-                switch (type)
-                {
-                    case "":
-                        {
-                            ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, this.qd, variables, this.AddError);
-
-                            if (result.QueryToken != null && TranslateInstanceValueProvider.IsTranslateInstanceCanditate(result.QueryToken))
-                                return new TranslateInstanceValueProvider(result, this.AddError) { Variable = variable };
-                            else
-                                return new TokenValueProvider(result) { Variable = variable };
-                        }
-                    case "q":
-                        {
-                            ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, this.qd, variables, this.AddError);
-
-                            return new TokenValueProvider(result) { Variable = variable };
-                        }
-                    case "t":
-                        {
-                            ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, this.qd, variables, this.AddError);
-
-                            return new TranslateInstanceValueProvider(result, this.AddError) { Variable = variable };
-                        }
-                    case "m": 
-                        return new ModelValueProvider(token, modelType, this.AddError) { Variable = variable };
-                    case "g": 
-                        return new GlobalValueProvider(token, this.AddError) { Variable = variable };
-                    default:
-                        this.AddError(false, "{0} is not a recognized value provider (q:Query, t:Translate, m:Model, g:Global or just blank)");
-                        return null;
-                }
+                return ValueProviderBase.TryParse(type, token, variable, this.modelType, this.qd, this.variables, this.AddError);
             }
         }
 
@@ -395,7 +365,7 @@ namespace Signum.Engine.Mailing
                             QueryDescription = qd,
                             Replacements = replacements,
                             StringDistance = sd,
-                            Variables = new ScopedDictionary<string, ParsedToken>(null)
+                            Variables = new ScopedDictionary<string, ValueProviderBase>(null)
                         };
 
                         item.Subject = Synchronize(item.Subject, sc);
@@ -440,6 +410,10 @@ namespace Signum.Engine.Mailing
 
     public class EmailTemplateParameters : TemplateParameters
     {
+        public EmailTemplateParameters(IEntity entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows): 
+              base(entity, culture, columns, rows)
+        { }
+
         public StringBuilder StringBuilder = new StringBuilder();
         public bool IsHtml;
         public ISystemEmail SystemEmail;
@@ -447,7 +421,7 @@ namespace Signum.Engine.Mailing
         public override object GetModel()
         {
             if (SystemEmail == null)
-                throw new ArgumentException("There is no model for the message composition");
+                throw new ArgumentException("There is no SystemEmail set");
 
             return SystemEmail;
         }

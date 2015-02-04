@@ -320,19 +320,15 @@ namespace Signum.Engine.Mailing
                             message.To.Add(conf.OverrideEmailAddress.DefaultText(s.Email.Email));
 
                             message.Subject = ((EmailTemplateParser.BlockNode)newsletter.SubjectParsedNode).Print(
-                                new EmailTemplateParameters
+                                new EmailTemplateParameters(null, null, dicTokenColumn, s.Rows)
                                 {
-                                    Columns = dicTokenColumn,
                                     IsHtml = false,
-                                    Rows = s.Rows
                                 });
 
                             message.Body = ((EmailTemplateParser.BlockNode)newsletter.TextParsedNode).Print(
-                                new EmailTemplateParameters
+                                new EmailTemplateParameters(null, null, dicTokenColumn, s.Rows)
                                 {
-                                    Columns = dicTokenColumn,
                                     IsHtml = true,
-                                    Rows = s.Rows
                                 });
 
                             message.IsBodyHtml = true;

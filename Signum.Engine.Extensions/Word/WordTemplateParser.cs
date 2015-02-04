@@ -29,7 +29,7 @@ namespace Signum.Engine.Word
     {
         public List<Error> Errors = new List<Error>();
         QueryDescription queryDescription;
-        ScopedDictionary<string, ParsedToken> variables = new ScopedDictionary<string, ParsedToken>(null);
+        ScopedDictionary<string, ValueProviderBase> variables = new ScopedDictionary<string, ValueProviderBase>(null);
         public readonly Type SystemWordTemplateType;
         WordprocessingDocument document;
 
@@ -161,6 +161,7 @@ namespace Signum.Engine.Word
                 {
                     var m = matchNode.Match;
 
+                    var type = m.Groups["type"].Value;
                     var token = m.Groups["token"].Value;
                     var keyword = m.Groups["keyword"].Value;
                     var dec = m.Groups["dec"].Value;
@@ -173,60 +174,48 @@ namespace Signum.Engine.Word
                                 Errors.Add(new Error(true, "{0} has invalid format".FormatWith(token)));
                             else
                             {
-                                var t = TryParseToken(tok.Groups["token"].Value, dec, SubTokensOptions.CanElement);
+                                var vp = TryParseValueProvider(type, tok.Groups["token"].Value, dec);
 
                                 var format = tok.Groups["format"].Value;
 
-                                matchNode.Parent.ReplaceChild(new TokenNode(t, format, this)
+                                matchNode.Parent.ReplaceChild(new TokenNode(vp, format)
                                 {
                                     RunProperties = matchNode.RunProperties.TryDo(d => d.Remove())
                                 }, matchNode);
 
-                                DeclareVariable(t);
+                                DeclareVariable(vp);
                             }
                             break;
                         case "declare":
                             {
-                                var t = TryParseToken(token, dec, SubTokensOptions.CanElement);
+                                var vp = TryParseValueProvider(type, token, dec);
 
-                                matchNode.Parent.ReplaceChild(new DeclareNode(t, this), matchNode);
+                                matchNode.Parent.ReplaceChild(new DeclareNode(vp, this.AddError), matchNode);
 
-                                DeclareVariable(t);
-                            }
-                            break;
-                        case "model":
-                        case "modelraw":
-                            {
-                                var model = new ModelNode(token, walker: this)
-                                {
-                                    IsRaw = keyword == "modelraw",
-                                    RunProperties = matchNode.RunProperties.TryDo(d => d.Remove())
-                                };
-
-                                matchNode.Parent.ReplaceChild(model, matchNode);
+                                DeclareVariable(vp);
                             }
                             break;
                         case "any":
                             {
                                 AnyNode any;
-                                ParsedToken t;
+                                ValueProviderBase vp;
                                 var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
-                                    t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
-                                    any = new AnyNode(t, this) { AnyToken = new MatchNodePair(matchNode) };
+                                    vp = TryParseValueProvider(type, token, dec);
+                                    any = new AnyNode(vp) { AnyToken = new MatchNodePair(matchNode) };
                                 }
                                 else
                                 {
-                                    t = TryParseToken(filter.Groups["token"].Value, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
+                                    vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
                                     var comparer = filter.Groups["comparer"].Value;
                                     var value = filter.Groups["value"].Value;
-                                    any = new AnyNode(t, comparer, value, this) { AnyToken = new MatchNodePair(matchNode) };
+                                    any = new AnyNode(vp, comparer, value, this.AddError) { AnyToken = new MatchNodePair(matchNode) };
                                 }
 
                                 PushBlock(any);
 
-                                DeclareVariable(t);
+                                DeclareVariable(vp);
                                 break;
                             }
                         case "notany":
@@ -247,24 +236,24 @@ namespace Signum.Engine.Word
                         case "if":
                             {
                                 IfNode ifn;
-                                ParsedToken t;
+                                ValueProviderBase vp;
                                 var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
-                                    t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
-                                    ifn = new IfNode(t, this) { IfToken = new MatchNodePair(matchNode) };
+                                    vp = TryParseValueProvider(type, token, dec);
+                                    ifn = new IfNode(vp) { IfToken = new MatchNodePair(matchNode) };
                                 }
                                 else
                                 {
-                                    t = TryParseToken(filter.Groups["token"].Value, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
+                                    vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
                                     var comparer = filter.Groups["comparer"].Value;
                                     var value = filter.Groups["value"].Value;
-                                    ifn = new IfNode(t, comparer, value, this) { IfToken = new MatchNodePair(matchNode) };
+                                    ifn = new IfNode(vp, comparer, value, this.AddError) { IfToken = new MatchNodePair(matchNode) };
                                 }
 
                                 PushBlock(ifn);
 
-                                DeclareVariable(t);
+                                DeclareVariable(vp);
 
                                 break;
                             }
@@ -286,11 +275,11 @@ namespace Signum.Engine.Word
                             }
                         case "foreach":
                             {
-                                var t = TryParseToken(token, dec, SubTokensOptions.CanElement);
-                                var fn = new ForeachNode(t) { ForeachToken = new MatchNodePair(matchNode) };
+                                var vp = TryParseValueProvider(type, token, dec);
+                                var fn = new ForeachNode(vp) { ForeachToken = new MatchNodePair(matchNode) };
                                 stack.Push(fn);
 
-                                DeclareVariable(t);
+                                DeclareVariable(vp);
                                 break;
                             }
                         case "endforeach":
@@ -301,6 +290,9 @@ namespace Signum.Engine.Word
                                 fn.ReplaceBlock();
                                 break;
                             }
+                        default:
+                            AddError(false, "'{0}' is deprecated".FormatWith(keyword));
+                            break;
                     }
                 }
             }
@@ -309,7 +301,7 @@ namespace Signum.Engine.Word
         void PushBlock(BlockContainerNode node)
         {
             stack.Push(node);
-            variables = new ScopedDictionary<string, ParsedToken>(variables);
+            variables = new ScopedDictionary<string, ValueProviderBase>(variables);
         }
 
         T PopBlock<T>() where T : BlockContainerNode
@@ -348,17 +340,13 @@ namespace Signum.Engine.Word
 
 
             variables = variables.Previous;
-            variables = new ScopedDictionary<string, ParsedToken>(variables);
+            variables = new ScopedDictionary<string, ValueProviderBase>(variables);
             return (T)n;
         }
 
-        private ParsedToken TryParseToken(string tokenString, string variable, SubTokensOptions subTokensOptions)
+        public ValueProviderBase TryParseValueProvider(string type, string token, string variable)
         {
-            string error;
-            var result = ParsedToken.TryParseToken(tokenString, variable, subTokensOptions, this.queryDescription, this.variables, out error);
-            if (error != null)
-                this.Errors.Add(new Error(true, error));
-            return result;
+            return ValueProviderBase.TryParse(type, token, variable, this.SystemWordTemplateType, this.queryDescription, this.variables, this.AddError);
         }
 
 
@@ -368,15 +356,15 @@ namespace Signum.Engine.Word
         }
 
 
-        void DeclareVariable(ParsedToken token)
+        void DeclareVariable(ValueProviderBase token)
         {
             if (token.Variable.HasText())
             {
-                ParsedToken t;
+                ValueProviderBase t;
                 if (variables.TryGetValue(token.Variable, out t))
                 {
-                    if (!t.QueryToken.Equals(token.QueryToken))
-                        this.Errors.Add(new Error(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable)));
+                    if (!t.Equals(token))
+                        AddError(true, "There's already a variable '{0}' defined in this scope".FormatWith(token.Variable));
                 }
                 else
                 {

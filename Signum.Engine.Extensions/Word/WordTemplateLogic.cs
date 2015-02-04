@@ -263,7 +263,7 @@ namespace Signum.Engine.Word
                                 Replacements = replacements,
                                 StringDistance = sd,
                                 HasChanges = false,
-                                Variables = new ScopedDictionary<string,ParsedToken>(null),
+                                Variables = new ScopedDictionary<string, ValueProviderBase>(null),
                             };
 
 
@@ -279,7 +279,7 @@ namespace Signum.Engine.Word
                                 return null;
 
                             Dump(document, "3.Synchronized.txt");
-                            var variables = new ScopedDictionary<string, ParsedToken>(null);
+                            var variables = new ScopedDictionary<string, ValueProviderBase>(null);
                             foreach (var root in document.RecursivePartsRootElements())
                             {
                                 foreach (var node in root.Descendants<BaseNode>().ToList())

@@ -182,6 +182,11 @@
     <Compile Include="SMS\SMSTemplateGraph.cs" />
     <Compile Include="UserAssets\UserAssetsExporterImporter.cs" />
     <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
+    <Compile Include="Word\SystemWordTemplateLogic.cs" />
+    <Compile Include="Word\WordTemplateLogic.cs" />
+    <Compile Include="Word\WordTemplateNodes.cs" />
+    <Compile Include="Word\WordTemplateParser.cs" />
+    <Compile Include="Word\WordTemplateRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
@@ -248,9 +253,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Word\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

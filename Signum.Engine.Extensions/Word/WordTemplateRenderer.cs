@@ -65,11 +65,8 @@ namespace Signum.Engine.Word
 
         internal void RenderNodes()
         {
-            var parameters = new WordTemplateParameters
+            var parameters = new WordTemplateParameters(this.entity, this.culture, this.dicTokenColumn, this.table.Rows)
             {
-                Columns = this.dicTokenColumn,
-                CultureInfo = this.culture,
-                Entity = this.entity,
                 SystemWordTemplate = systemWordTemplate
             };
 
@@ -79,7 +76,7 @@ namespace Signum.Engine.Word
 
                 foreach (var node in list)
                 {
-                    node.RenderNode(parameters, this.table.Rows);
+                    node.RenderNode(parameters);
                 }
             }           
         }

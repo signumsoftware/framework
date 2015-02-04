@@ -15,15 +15,25 @@ using System.Reflection;
 using System.Text;
 using Signum.Engine.Isolation;
 using Signum.Entities.Isolation;
+using Signum.Engine.Templating;
 
 namespace Signum.Engine.Word
 {
-    public class WordTemplateParameters
+    public class WordTemplateParameters : TemplateParameters
     {
-        public CultureInfo CultureInfo;
-        public IEntity Entity;
+        public WordTemplateParameters(IEntity entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows) : 
+              base(entity, culture, columns, rows)
+        { }
+
         public ISystemWordTemplate SystemWordTemplate;
-        public Dictionary<QueryToken, ResultColumn> Columns;
+
+        public override object GetModel()
+        {
+            if (SystemWordTemplate == null)
+                throw new ArgumentException("There is no SystemWordTemplate set");
+
+            return SystemWordTemplate;
+        }
     }
 
     public interface ISystemWordTemplate

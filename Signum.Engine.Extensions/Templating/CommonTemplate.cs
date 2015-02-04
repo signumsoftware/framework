@@ -23,13 +23,6 @@ namespace Signum.Engine.Templating
         public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
         public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
 
-        public static bool ToBool(object obj)
-        {
-            if (obj == null || obj is bool && ((bool)obj) == false)
-                return false;
-
-            return true;
-        }
 
         public static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {

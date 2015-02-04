@@ -4,12 +4,15 @@ using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
 using Signum.Entities.Reflection;
+using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,8 +25,6 @@ namespace Signum.Engine.Templating
 
         public abstract object GetValue(TemplateParameters p);
 
-        public abstract void Foreach(TemplateParameters p, Action foreEachElement);
-
         public abstract string Format { get; }
         
         public abstract Type Type { get; }
@@ -31,6 +32,13 @@ namespace Signum.Engine.Templating
         public abstract void FillQueryTokens(List<QueryToken> list);
 
         public abstract void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables, string afterToken);
+
+        public string ToString(ScopedDictionary<string, ValueProviderBase> variables, string afterToken)
+        {
+            StringBuilder sb = new StringBuilder();
+            ToString(sb, variables, afterToken);
+            return sb.ToString();
+        }
 
         public override string ToString()
         {
@@ -41,29 +49,129 @@ namespace Signum.Engine.Templating
 
         public abstract void Synchronize(SyncronizationContext sc, string p);
 
-        public override void Declare(ScopedDictionary<string, ValueProviderBase> variables)
+        public virtual void Declare(ScopedDictionary<string, ValueProviderBase> variables)
         {
             if (Variable.HasText())
                 variables.Add(Variable, this);
+        }
+
+        public bool GetCondition(TemplateParameters p, FilterOperation? operation, string valueString)
+        {
+            var obj = this.GetValue(p);
+
+            if (operation == null)
+                return ToBool(obj);
+            else
+            {
+                var type = this.Type;
+
+                Expression token = Expression.Constant(obj, type);
+
+                Expression value = Expression.Constant(FilterValueConverter.Parse(valueString, type, operation == FilterOperation.IsIn), type);
+
+                Expression newBody = QueryUtils.GetCompareExpression(operation.Value, token, value, inMemory: true);
+                var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
+
+                return lambda();
+            }
+        }
+
+
+        protected static bool ToBool(object obj)
+        {
+            if (obj == null || obj is bool && ((bool)obj) == false)
+                return false;
+
+            return true;
+        }
+
+
+        public virtual void Foreach(TemplateParameters p, Action forEachElement)
+        {
+            var collection = (IEnumerable)this.GetValue(p);
+
+            foreach (var item in collection)
+            {
+                forEachElement();
+            }
+        }
+
+        public virtual IEnumerable<object> GetFilteredRows(TemplateParameters p, FilterOperation? operation, string stringValue)
+        {
+            var collection = (IEnumerable)this.GetValue(p);
+
+            return collection.Cast<object>();
+        }
+
+        public static ValueProviderBase TryParse(string type, string token, string variable, Type modelType, QueryDescription qd, ScopedDictionary<string, ValueProviderBase> variables, Action<bool, string> addError)
+        {
+            switch (type)
+            {
+                case "":
+                    {
+                        ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, qd, variables, addError);
+
+                        if (result.QueryToken != null && TranslateInstanceValueProvider.IsTranslateInstanceCanditate(result.QueryToken))
+                            return new TranslateInstanceValueProvider(result, false, addError) { Variable = variable };
+                        else
+                            return new TokenValueProvider(result, false) { Variable = variable };
+                    }
+                case "q":
+                    {
+                        ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, qd, variables, addError);
+
+                        return new TokenValueProvider(result, true) { Variable = variable };
+                    }
+                case "t":
+                    {
+                        ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, qd, variables, addError);
+
+                        return new TranslateInstanceValueProvider(result, true, addError) { Variable = variable };
+                    }
+                case "m":
+                    return new ModelValueProvider(token, modelType, addError) { Variable = variable };
+                case "g":
+                    return new GlobalValueProvider(token, addError) { Variable = variable };
+                default:
+                    addError(false, "{0} is not a recognized value provider (q:Query, t:Translate, m:Model, g:Global or just blank)");
+                    return null;
+            }
         }
     }
 
     public abstract class TemplateParameters
     {
-        public IEntity Entity;
-        public CultureInfo Culture;
-        public Dictionary<QueryToken, ResultColumn> Columns;
-        public IEnumerable<ResultRow> Rows;
+        public TemplateParameters(IEntity entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows)
+        {
+            this.Entity = entity;
+            this.Culture = culture;
+            this.Columns = columns;
+            this.Rows = rows;
+        }
+
+        public readonly IEntity Entity;
+        public readonly CultureInfo Culture;
+        public readonly Dictionary<QueryToken, ResultColumn> Columns;
+        public IEnumerable<ResultRow> Rows { get; private set; }
         public abstract object GetModel();
+
+        public IDisposable OverrideRows(IEnumerable<ResultRow> rows)
+        {
+            var old = this.Rows;
+            this.Rows = rows;
+            return new Disposable(() => this.Rows = old);
+        }
     }
 
     public class TokenValueProvider : ValueProviderBase
     {
         public readonly ParsedToken ParsedToken;
+        public readonly bool IsExplicit;
 
-        public TokenValueProvider (ParsedToken token)
+        public TokenValueProvider (ParsedToken token, bool isExplicit)
         {
             this.ParsedToken = token;
+            this.IsExplicit = isExplicit;
         }
 
         public override object GetValue(TemplateParameters p)
@@ -74,19 +182,17 @@ namespace Signum.Engine.Templating
             return  p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken]);
         }
 
-        public override void Foreach(TemplateParameters p, Action foreEachElement)
+        public override void Foreach(TemplateParameters p, Action forEachElement)
         {
-            var prevRows = p.Rows;
             var groups = p.Rows.GroupBy(r => r[p.Columns[ParsedToken.QueryToken]]).ToList();
             if (groups.Count == 1 && groups[0].Key == null)
                 return;
 
             foreach (var group in groups)
             {
-                p.Rows = group;
+                using (p.OverrideRows(group))
+                    forEachElement();
             }
-
-            p.Rows = prevRows;
         }
 
         public override string Format
@@ -101,7 +207,19 @@ namespace Signum.Engine.Templating
 
         public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables, string afterToken)
         {
-            ParsedToken.ToString(sb, variables, afterToken);
+            sb.Append("[");
+            if (this.IsExplicit)
+                sb.Append("q:"); 
+
+            sb.Append(this.ParsedToken.ToString(variables));
+
+            if (afterToken.HasItems())
+                sb.Append(afterToken);
+
+            sb.Append("]");
+
+            if (Variable.HasItems())
+                sb.Append(" as " + Variable);
         }
 
         public override void Synchronize(SyncronizationContext sc, string remainingText)
@@ -115,6 +233,37 @@ namespace Signum.Engine.Templating
         {
             get { return ParsedToken.QueryToken.Type; }
         }
+
+        public override IEnumerable<object> GetFilteredRows(TemplateParameters p, FilterOperation? operation, string stringValue)
+        {
+            if (operation == null)
+            {
+                var column = p.Columns[ParsedToken.QueryToken];
+
+                var filtered = p.Rows.Where(r => ToBool(r[column])).ToList();
+
+                return filtered;
+            }
+            else
+            {
+                var type = this.Type;
+
+                object val = FilterValueConverter.Parse(stringValue, type, operation == FilterOperation.IsIn);
+
+                Expression value = Expression.Constant(val, type);
+
+                ResultColumn col = p.Columns[ParsedToken.QueryToken];
+
+                var expression = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
+
+                Expression newBody = QueryUtils.GetCompareExpression(operation.Value, Expression.Convert(expression.Body, type), value, inMemory: true);
+                var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, expression.Parameters).Compile();
+
+                var filtered = p.Rows.Where(lambda).ToList();
+
+                return filtered;
+            }
+        }
     }
 
     public class TranslateInstanceValueProvider : ValueProviderBase
@@ -122,12 +271,15 @@ namespace Signum.Engine.Templating
         public readonly ParsedToken ParsedToken;
         public readonly QueryToken EntityToken;
         public readonly PropertyRoute Route;
+        public readonly bool IsExplicit;
+        
 
-        public TranslateInstanceValueProvider(ParsedToken token, Action<bool, string> addError)
+        public TranslateInstanceValueProvider(ParsedToken token, bool isExplicit, Action<bool, string> addError)
         {
             this.ParsedToken = token;
-            Route = token.QueryToken.GetPropertyRoute();
-            EntityToken = DeterminEntityToken(token.QueryToken, addError);
+            this.Route = token.QueryToken.GetPropertyRoute();
+            this.IsExplicit = isExplicit;
+            this.EntityToken = DeterminEntityToken(token.QueryToken, addError);
         }
 
         public override object GetValue(TemplateParameters p)
@@ -138,7 +290,7 @@ namespace Signum.Engine.Templating
             return entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
         }
 
-        public override void Foreach(TemplateParameters parameters, Action foreEachElement)
+        public override void Foreach(TemplateParameters parameters, Action forEachElement)
         {
             throw new NotImplementedException("{0} can not be used to foreach".FormatWith(typeof(TranslateInstanceValueProvider).Name));
         }
@@ -184,7 +336,16 @@ namespace Signum.Engine.Templating
 
         public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables, string afterToken)
         {
-            ParsedToken.ToString(sb, variables, afterToken);
+            sb.Append("[");
+            if (this.IsExplicit)
+                sb.Append("t:");
+
+            sb.Append(this.ParsedToken.ToString(variables));
+
+            if (afterToken.HasItems())
+                sb.Append(afterToken);
+
+            sb.Append("]");
 
             if (Variable.HasItems())
                 sb.Append(" as " + Variable);
@@ -245,25 +406,7 @@ namespace Signum.Engine.Templating
             return result;
         }
 
-        internal void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables, string afterToken)
-        {
-            sb.Append("[");
-            sb.Append(QueryToken == null ? String : SimplifyToken(variables, QueryToken.FullKey()));
-
-            if (afterToken.HasItems())
-                sb.Append(afterToken);
-
-            sb.Append("]");
-        }
-
-        internal string ToString(ScopedDictionary<string, ValueProviderBase> variables, string afterToken)
-        {
-            StringBuilder sb = new StringBuilder();
-            ToString(sb, variables, afterToken);
-            return sb.ToString();
-        }
-
-        string SimplifyToken(ScopedDictionary<string, ValueProviderBase> variables, string token)
+        public string SimplifyToken(ScopedDictionary<string, ValueProviderBase> variables, string token)
         {
             var pair = (from kvp in variables
                             let tp = kvp.Value as TokenValueProvider
@@ -279,6 +422,14 @@ namespace Signum.Engine.Templating
             }
 
             return token;
+        }
+
+        internal string ToString(ScopedDictionary<string, ValueProviderBase> variables)
+        {
+            if(QueryToken == null)
+                return String;
+
+            return SimplifyToken(variables, QueryToken.FullKey());
         }
     }
 
@@ -319,11 +470,6 @@ namespace Signum.Engine.Templating
                 return pi.GetValue(systemEmail, null);
 
             return ((FieldInfo)member).GetValue(systemEmail);
-        }
-
-        public override void Foreach(TemplateParameters p, Action foreEachElement)
-        {
-            throw new NotImplementedException();
         }
 
         public override string Format
@@ -421,11 +567,6 @@ namespace Signum.Engine.Templating
             }
 
             return value;
-        }
-
-        public override void Foreach(TemplateParameters p, Action foreEachElement)
-        {
-            throw new NotImplementedException();
         }
 
         public override string Format

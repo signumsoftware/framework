@@ -18,6 +18,7 @@ using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Templating;
+using System.Collections;
 
 namespace Signum.Engine.Mailing
 {
@@ -261,20 +262,20 @@ namespace Signum.Engine.Mailing
 
         public class AnyNode : TextNode
         {
-            public readonly TokenValueProvider ValueProvider;
+            public readonly ValueProviderBase ValueProvider;
             public readonly FilterOperation? Operation;
             public string Value;
 
             public readonly BlockNode AnyBlock;
             public BlockNode NotAnyBlock;
 
-            internal AnyNode(TokenValueProvider valueProvider)
+            internal AnyNode(ValueProviderBase valueProvider)
             {
                 this.ValueProvider = valueProvider;
                 AnyBlock = new BlockNode(this);
             }
 
-            internal AnyNode(TokenValueProvider valueProvider, string operation, string value, Action<bool, string> addError)
+            internal AnyNode(ValueProviderBase valueProvider, string operation, string value, Action<bool, string> addError)
             {
                 this.ValueProvider = valueProvider;
                 this.Operation = FilterValueConverter.ParseOperation(operation);
@@ -300,51 +301,18 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p)
             {
-                var filtered = GetFiltered(p);
+                var filtered = this.ValueProvider.GetFilteredRows(p, this.Operation, this.Value);
 
-                var prevRows = p.Rows; 
-                if (filtered.Any())
+                using (filtered is IEnumerable<ResultRow> ? p.OverrideRows((IEnumerable<ResultRow>)filtered) : null)
                 {
-                    p.Rows = filtered;
-                    AnyBlock.PrintList(p);
-                    p.Rows = prevRows;
-                }
-                else if (NotAnyBlock != null)
-                {
-                    p.Rows = filtered;
-                    NotAnyBlock.PrintList(p);
-                    p.Rows = prevRows;
-                }
-            }
-
-            private IEnumerable<ResultRow> GetFiltered(EmailTemplateParameters p)
-            {
-                if (Operation == null)
-                {
-                    var column = p.Columns[ValueProvider.ParsedToken.QueryToken];
-
-                    var filtered = p.Rows.Where(r => TemplateUtils.ToBool(r[column])).ToList();
-
-                    return filtered;
-                }
-                else
-                {
-                    var type = ValueProvider.Type;
-
-                    object val = FilterValueConverter.Parse(Value, type, Operation == FilterOperation.IsIn);
-
-                    Expression value = Expression.Constant(val, type);
-
-                    ResultColumn col = p.Columns[ValueProvider.ParsedToken.QueryToken];
-
-                    var expression = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
-
-                    Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, Expression.Convert(expression.Body, type), value, inMemory: true);
-                    var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, expression.Parameters).Compile();
-
-                    var filtered = p.Rows.Where(lambda).ToList();
-
-                    return filtered;
+                    if (filtered.Any())
+                    {
+                        AnyBlock.PrintList(p);
+                    }
+                    else if (NotAnyBlock != null)
+                    {
+                        NotAnyBlock.PrintList(p);
+                    }
                 }
             }
 
@@ -453,34 +421,13 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p)
             {
-                if (GetCondition(p))
+                if (ValueProvider.GetCondition(p, this.Operation, this.Value))
                 {
                     IfBlock.PrintList(p);
                 }
                 else if (ElseBlock != null)
                 {
                     ElseBlock.PrintList(p);
-                }
-            }
-
-            public bool GetCondition(EmailTemplateParameters p)
-            {
-                var obj = this.ValueProvider.GetValue(p);
-
-                if (this.Operation == null)
-                    return TemplateUtils.ToBool(obj);
-                else
-                {
-                    var type = this.ValueProvider.Type;
-
-                    Expression token = Expression.Constant(obj, type);
-
-                    Expression value = Expression.Constant(FilterValueConverter.Parse(Value, type, Operation == FilterOperation.IsIn), type);
-
-                    Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, token, value, inMemory: true);
-                    var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
-
-                    return lambda();
                 }
             }
 

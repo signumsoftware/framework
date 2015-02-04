@@ -68,25 +68,17 @@ namespace Signum.Engine.Mailing
                         throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {0} (or Default)".FormatWith(template, ci));
 
                     email.Subject = SubjectNode(message).Print(
-                        new EmailTemplateParameters
+                        new EmailTemplateParameters(entity, ci, dicTokenColumn, currentRows)
                         {
-                            Columns = dicTokenColumn,
                             IsHtml = false,
-                            Culture = ci,
-                            Entity = entity,
-                            SystemEmail = systemEmail,
-                            Rows = currentRows
+                            SystemEmail = systemEmail
                         });
 
                     email.Body = TextNode(message).Print(
-                        new EmailTemplateParameters
+                        new EmailTemplateParameters(entity, ci, dicTokenColumn, currentRows)
                         {
-                            Columns = dicTokenColumn,
                             IsHtml = template.IsBodyHtml,
-                            Culture = ci,
-                            Entity = entity,
                             SystemEmail = systemEmail,
-                            Rows = currentRows
                         });
 
 
