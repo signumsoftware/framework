@@ -41,7 +41,11 @@ namespace Signum.Engine.Templating
 
         public abstract void Synchronize(SyncronizationContext sc, string p);
 
-        public abstract void Declare(ScopedDictionary<string, ValueProviderBase> variables);
+        public override void Declare(ScopedDictionary<string, ValueProviderBase> variables)
+        {
+            if (Variable.HasText())
+                variables.Add(Variable, this);
+        }
     }
 
     public abstract class TemplateParameters
@@ -111,12 +115,6 @@ namespace Signum.Engine.Templating
         {
             get { return ParsedToken.QueryToken.Type; }
         }
-
-        public override void Declare(ScopedDictionary<string, ValueProviderBase> variables)
-        {
-            if (Variable.HasText())
-                variables.Add(Variable, this);
-        }
     }
 
     public class TranslateInstanceValueProvider : ValueProviderBase
@@ -125,11 +123,11 @@ namespace Signum.Engine.Templating
         public readonly QueryToken EntityToken;
         public readonly PropertyRoute Route;
 
-        public TranslateInstanceValueProvider(ParsedToken token, out string error)
+        public TranslateInstanceValueProvider(ParsedToken token, Action<bool, string> addError)
         {
             this.ParsedToken = token;
             Route = token.QueryToken.GetPropertyRoute();
-            EntityToken = DeterminEntityToken(token.QueryToken, out error);
+            EntityToken = DeterminEntityToken(token.QueryToken, addError);
         }
 
         public override object GetValue(TemplateParameters p)
@@ -145,17 +143,15 @@ namespace Signum.Engine.Templating
             throw new NotImplementedException("{0} can not be used to foreach".FormatWith(typeof(TranslateInstanceValueProvider).Name));
         }
 
-        QueryToken DeterminEntityToken(QueryToken token, out  string error)
+        QueryToken DeterminEntityToken(QueryToken token, Action<bool, string> addError)
         {
             var entityToken = token.Follow(a => a.Parent).FirstOrDefault(a => a.Type.IsLite() || a.Type.IsIEntity());
 
             if (entityToken == null)
                 entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), 0);
 
-            if (entityToken.Type.IsAssignableFrom(Route.RootType))
-                error = "The entity of {0} ({1}) is not compatible with the property route {2}".FormatWith(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName());
-            else
-                error = null;
+            if (!entityToken.Type.IsAssignableFrom(Route.RootType))
+                addError(false, "The entity of {0} ({1}) is not compatible with the property route {2}".FormatWith(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName()));
 
             return entityToken;
         }
@@ -205,12 +201,6 @@ namespace Signum.Engine.Templating
         {
             get { return typeof(string); }
         }
-
-        public override void Declare(ScopedDictionary<string, ValueProviderBase> variables)
-        {
-            if (Variable.HasText())
-                variables.Add(Variable, this);
-        }
     }
 
     public class ParsedToken
@@ -218,26 +208,30 @@ namespace Signum.Engine.Templating
         public string String;
         public QueryToken QueryToken;
 
-        public static ParsedToken TryParseToken(string tokenString, SubTokensOptions options, QueryDescription qd, ScopedDictionary<string, ParsedToken> variables, out string error)
+        public static ParsedToken TryParseToken(string tokenString, SubTokensOptions options, QueryDescription qd, ScopedDictionary<string, ValueProviderBase> variables, Action<bool, string> addError)
         {
-            error = null;
             ParsedToken result = new ParsedToken { String = tokenString };
 
             if (tokenString.StartsWith("$"))
             {
                 string v = tokenString.TryBefore('.') ?? tokenString;
 
-                ParsedToken token;
-
-                if (!variables.TryGetValue(v, out token))
+                ValueProviderBase vp;
+                if (!variables.TryGetValue(v, out vp))
                 {
-                    error = "Variable '{0}' is not defined at this scope".FormatWith(v);
+                    addError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
+                    return result;
+                }
+
+                if(!(vp is TokenValueProvider))
+                {
+                    addError(false, "Variable '{0}' is not a token".FormatWith(v));
                     return result;
                 }
 
                 var after = tokenString.TryAfter('.');
 
-                tokenString = token.QueryToken.FullKey() + (after == null ? null : ("." + after));
+                tokenString = ((TokenValueProvider)vp).ParsedToken.QueryToken.FullKey() + (after == null ? null : ("." + after));
             }
 
             try
@@ -246,7 +240,7 @@ namespace Signum.Engine.Templating
             }
             catch (Exception ex)
             {
-                error = ex.Message;
+                addError(false, ex.Message);
             }
             return result;
         }
@@ -293,15 +287,15 @@ namespace Signum.Engine.Templating
         string fieldOrPropertyChain;
         List<MemberInfo> Members;
 
-        public ModelValueProvider(string fieldOrPropertyChain, Type systemEmail, out string error)
+        public ModelValueProvider(string fieldOrPropertyChain, Type systemEmail, Action<bool, string> addError)
         {
             if (systemEmail == null)
             {
-                error = EmailTemplateMessage.SystemEmailShouldBeSetToAccessModel0.NiceToString().FormatWith(fieldOrPropertyChain);
+                addError(false, EmailTemplateMessage.SystemEmailShouldBeSetToAccessModel0.NiceToString().FormatWith(fieldOrPropertyChain));
                 return;
             }
 
-            this.Members = ParsedModel.GetMembers(systemEmail, fieldOrPropertyChain, out error);
+            this.Members = ParsedModel.GetMembers(systemEmail, fieldOrPropertyChain, addError);
         }
 
         public override object GetValue(TemplateParameters p)
@@ -366,11 +360,8 @@ namespace Signum.Engine.Templating
                 if (Members != null)
                     fieldOrPropertyChain = Members.ToString(a => a.Name, ".");
             }
-        }
 
-        public override void Declare(ScopedDictionary<string, ValueProviderBase> variables)
-        {
-            throw new NotImplementedException();
+            Declare(sc.Variables);
         }
     }
 
@@ -398,7 +389,7 @@ namespace Signum.Engine.Templating
         string remainingFieldsOrProperties;
         List<MemberInfo> Members;
 
-        public GlobalValueProvider(string fieldOrPropertyChain, out string error)
+        public GlobalValueProvider(string fieldOrPropertyChain, Action<bool, string> addError)
         {
             globalKey = fieldOrPropertyChain.TryBefore('.') ?? fieldOrPropertyChain;
             remainingFieldsOrProperties = fieldOrPropertyChain.TryAfter('.');
@@ -406,12 +397,10 @@ namespace Signum.Engine.Templating
             var gv = GlobalVariables.TryGetC(globalKey); 
 
             if (gv == null)
-                error = "The global key {0} was not found".FormatWith(globalKey);
-            else 
-                error = null;
+                addError(false, "The global key {0} was not found".FormatWith(globalKey));
             
             if (fieldOrPropertyChain != null && gv != null)
-                this.Members = ParsedModel.GetMembers(gv.Type, remainingFieldsOrProperties, out error);
+                this.Members = ParsedModel.GetMembers(gv.Type, remainingFieldsOrProperties, addError);
         }
 
         public override object GetValue(TemplateParameters p)
@@ -480,11 +469,8 @@ namespace Signum.Engine.Templating
                 if (Members != null)
                     remainingFieldsOrProperties = Members.ToString(a => a.Name, ".");
             }
-        }
 
-        public override void Declare(ScopedDictionary<string, ValueProviderBase> variables)
-        {
-            throw new NotImplementedException();
+            Declare(sc.Variables);
         }
     }
 }

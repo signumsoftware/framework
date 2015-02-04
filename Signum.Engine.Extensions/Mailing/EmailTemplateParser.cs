@@ -62,7 +62,7 @@ namespace Signum.Engine.Mailing
 
             BlockNode mainBlock;
             Stack<BlockNode> stack;
-            ScopedDictionary<string, ParsedToken> variables;
+            ScopedDictionary<string, ValueProviderBase> variables;
             List<Error> errors;
 
             public TemplateWalker(string text, QueryDescription qd, Type modelType)
@@ -107,7 +107,7 @@ namespace Signum.Engine.Mailing
                 errors.Add(new Error{ IsFatal = fatal, Message = message}); 
             }
 
-            void DeclareVariable(ParsedToken token)
+            void DeclareVariable(ValueProviderBase token)
             {
                 if (token.Variable.HasText())
                 {
@@ -117,8 +117,6 @@ namespace Signum.Engine.Mailing
                     variables.Add(token.Variable, token);
                 }
             }
-
-           
 
             public BlockNode PopBlock(Type type)
             {
@@ -140,7 +138,7 @@ namespace Signum.Engine.Mailing
             public void PushBlock(BlockNode block)
             {
                 stack.Push(block);
-                variables = new ScopedDictionary<string, ParsedToken>(variables); 
+                variables = new ScopedDictionary<string, ValueProviderBase>(variables); 
             }
 
             void ParseInternal()
@@ -166,6 +164,7 @@ namespace Signum.Engine.Mailing
                     {
                         stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(index, match.Index - index) });
                     }
+                    var type = match.Groups["type"].Value;
                     var token = match.Groups["token"].Value;
                     var keyword = match.Groups["keyword"].Value;
                     var dec = match.Groups["dec"].Value;
@@ -178,47 +177,39 @@ namespace Signum.Engine.Mailing
                                 AddError(true, "{0} has invalid format".FormatWith(token));
                             else
                             {
-                                var t = TryParseToken(tok.Groups["token"].Value, dec, SubTokensOptions.CanElement);
+                                var t = TryParseValueProvider(type, tok.Groups["token"].Value, dec);
 
-                                stack.Peek().Nodes.Add(new ValueNode(t, tok.Groups["format"].Value,
-                                    isRaw: keyword.Contains("raw"),
-                                    walker: this));
+                                stack.Peek().Nodes.Add(new ValueNode(t, tok.Groups["format"].Value, isRaw: keyword.Contains("raw")));
 
                                 DeclareVariable(t);
                             }
                             break;
                         case "declare":
                             {
-                                var t = TryParseToken(token, dec, SubTokensOptions.CanElement);
+                                var t = TryParseValueProvider(type, token, dec);
 
                                 stack.Peek().Nodes.Add(new DeclareNode(t, this));
 
                                 DeclareVariable(t);
                             }
                             break;
-                        case "global":
-                            stack.Peek().Nodes.Add(new GlobalNode(token, walker: this));
-                            break;
-                        case "model":
-                        case "modelraw":
-                            stack.Peek().Nodes.Add(new ModelNode(token, modelType, walker: this) { IsRaw = keyword == "modelraw" });
-                            break;
                         case "any":
                             {
                                 AnyNode any;
-                                ParsedToken t;
+                                ValueProviderBase vp;
                                 var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
-                                    t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
-                                    any = new AnyNode(t, this);
+                                    vp = TryParseValueProvider(type, token, dec);
+
+                                    any = new AnyNode(vp);
                                 }
                                 else
                                 {
-                                    t = TryParseToken(filter.Groups["token"].Value,  dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
+                                    vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
                                     var comparer = filter.Groups["comparer"].Value;
                                     var value = filter.Groups["value"].Value;
-                                    any = new AnyNode(t, comparer, value, this);
+                                    any = new AnyNode(vp, comparer, value, this.AddError);
 
                                 }
                                 stack.Peek().Nodes.Add(any);
@@ -260,7 +251,7 @@ namespace Signum.Engine.Mailing
                                 var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
                                 if (!filter.Success)
                                 {
-                                    t = TryParseToken(token, dec, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll);
+                                    t = TryParseToken(token, dec, SubTokensOptions.CanElement);
                                     ifn = new IfNode(t, this);
                                 }
                                 else
@@ -286,7 +277,8 @@ namespace Signum.Engine.Mailing
                                 PopBlock(typeof(IfNode));
                                 break;
                             }
-                        default:
+                        default :
+                            AddError(false, "'{0}' is deprecated".FormatWith(keyword));
                             break;
                     }
                     index = match.Index + match.Length;
@@ -302,13 +294,39 @@ namespace Signum.Engine.Mailing
                 stack.Pop();
             }
 
-            private ParsedToken TryParseToken(string tokenString, string variable, SubTokensOptions options)
+            public ValueProviderBase TryParseValueProvider(string type, string token, string variable)
             {
-                string error;
-                ParsedToken result = ParsedToken.TryParseToken(tokenString, variable, options, this.qd, variables, out error);
-                if (error.HasText())
-                    this.AddError(false, error);
-                return result;
+                switch (type)
+                {
+                    case "":
+                        {
+                            ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, this.qd, variables, this.AddError);
+
+                            if (result.QueryToken != null && TranslateInstanceValueProvider.IsTranslateInstanceCanditate(result.QueryToken))
+                                return new TranslateInstanceValueProvider(result, this.AddError) { Variable = variable };
+                            else
+                                return new TokenValueProvider(result) { Variable = variable };
+                        }
+                    case "q":
+                        {
+                            ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, this.qd, variables, this.AddError);
+
+                            return new TokenValueProvider(result) { Variable = variable };
+                        }
+                    case "t":
+                        {
+                            ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, this.qd, variables, this.AddError);
+
+                            return new TranslateInstanceValueProvider(result, this.AddError) { Variable = variable };
+                        }
+                    case "m": 
+                        return new ModelValueProvider(token, modelType, this.AddError) { Variable = variable };
+                    case "g": 
+                        return new GlobalValueProvider(token, this.AddError) { Variable = variable };
+                    default:
+                        this.AddError(false, "{0} is not a recognized value provider (q:Query, t:Translate, m:Model, g:Global or just blank)");
+                        return null;
+                }
             }
         }
 

@@ -18,7 +18,7 @@ namespace Signum.Engine.Templating
 {
     public static class TemplateUtils
     {
-        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|any|declare|))[\[\{](?<token>[^\]\}]+)[\]\}](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
+        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[((?<type>[\w]):)?(?<token>[^\]\}]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
         public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
         public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
@@ -109,9 +109,8 @@ namespace Signum.Engine.Templating
     {
         public const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
-        public static List<MemberInfo> GetMembers(Type modelType, string fieldOrPropertyChain, out string error)
+        public static List<MemberInfo> GetMembers(Type modelType, string fieldOrPropertyChain, Action<bool, string> addError)
         {
-            error = null;
             var members = new List<MemberInfo>();
             var type = modelType;
             foreach (var field in fieldOrPropertyChain.Split('.'))
@@ -121,7 +120,7 @@ namespace Signum.Engine.Templating
 
                 if (info == null)
                 {
-                    error = "Type {0} does not have a property with name {1}".FormatWith(type.Name, field);
+                    addError(false, "Type {0} does not have a property with name {1}".FormatWith(type.Name, field));
                     return null;
                 }
 

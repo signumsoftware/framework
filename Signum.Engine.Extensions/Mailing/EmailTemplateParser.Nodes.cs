@@ -70,10 +70,10 @@ namespace Signum.Engine.Mailing
         {
             public readonly ValueProviderBase ValueProvider;
 
-            internal DeclareNode(ValueProviderBase valueProvider, TemplateWalker walker)
+            internal DeclareNode(ValueProviderBase valueProvider, Action<bool, string> addError)
             {
                 if (!valueProvider.Variable.HasText())
-                    walker.AddError(true, "declare[{0}] should end with 'as $someVariable'".FormatWith(valueProvider.ToString()));
+                    addError(true, "declare[{0}] should end with 'as $someVariable'".FormatWith(valueProvider.ToString()));
 
                 this.ValueProvider = valueProvider;
             }
@@ -268,13 +268,13 @@ namespace Signum.Engine.Mailing
             public readonly BlockNode AnyBlock;
             public BlockNode NotAnyBlock;
 
-            internal AnyNode(TokenValueProvider valueProvider, TemplateWalker walker)
+            internal AnyNode(TokenValueProvider valueProvider)
             {
                 this.ValueProvider = valueProvider;
                 AnyBlock = new BlockNode(this);
             }
 
-            internal AnyNode(TokenValueProvider valueProvider, string operation, string value, TemplateWalker walker)
+            internal AnyNode(TokenValueProvider valueProvider, string operation, string value, Action<bool, string> addError)
             {
                 this.ValueProvider = valueProvider;
                 this.Operation = FilterValueConverter.ParseOperation(operation);
@@ -286,7 +286,7 @@ namespace Signum.Engine.Mailing
                     string error = FilterValueConverter.TryParse(Value, ValueProvider.Type, out rubish, Operation == FilterOperation.IsIn);
 
                     if (error.HasText())
-                        walker.AddError(false, error);
+                        addError(false, error);
                 }
 
                 AnyBlock = new BlockNode(this);
@@ -418,7 +418,7 @@ namespace Signum.Engine.Mailing
                 this.IfBlock = new BlockNode(this);
             }
 
-            internal IfNode(ValueProviderBase valueProvider, string operation, string value, TemplateWalker walker)
+            internal IfNode(ValueProviderBase valueProvider, string operation, string value, Action<bool, string> addError)
             {
                 this.ValueProvider = valueProvider;
                 this.Operation = FilterValueConverter.ParseOperation(operation);
@@ -430,7 +430,7 @@ namespace Signum.Engine.Mailing
                     string error = FilterValueConverter.TryParse(Value, this.ValueProvider.Type, out rubish, Operation == FilterOperation.IsIn);
 
                     if (error.HasText())
-                        walker.AddError(false, error);
+                        addError(false, error);
                 }
 
 
