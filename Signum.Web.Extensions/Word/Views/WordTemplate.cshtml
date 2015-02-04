@@ -8,55 +8,58 @@
 
 @using (var ec = Html.TypeContext<WordTemplateEntity>())
 {
-    <div class="col-sm-8">
-        @Html.ValueLine(ec, f => f.Name)
-        @Html.EntityLine(ec, f => f.Query)
-        @Html.EntityCombo(ec, f => f.SystemWordTemplate)
-        @Html.EntityCombo(ec, f => f.Culture)
-        @Html.EntityCombo(ec, f => f.WordTransformer)
-        @Html.EntityCombo(ec, f => f.WordConverter)
-        @Html.ValueLine(ec, f => f.FileNameFormat)
-        @Html.ValueLine(ec, f => f.DisableAuthorization)
-    </div>
-    if (!ec.Value.IsNew)
-    {
-        using (var sc = ec.SubContext())
+    ec.LabelColumns = new BsColumn(4);
+    <div class="row">
+        <div class="col-sm-8">
+            @Html.ValueLine(ec, f => f.Name)
+            @Html.EntityLine(ec, f => f.Query)
+            @Html.EntityCombo(ec, f => f.SystemWordTemplate)
+            @Html.EntityCombo(ec, f => f.Culture)
+            @Html.EntityCombo(ec, f => f.WordTransformer)
+            @Html.EntityCombo(ec, f => f.WordConverter)
+            @Html.ValueLine(ec, f => f.FileNameFormat)
+            @Html.ValueLine(ec, f => f.DisableAuthorization)
+        </div>
+        @if (!ec.Value.IsNew)
         {
-            sc.FormGroupStyle = FormGroupStyle.Basic;
-            <div class="col-sm-4 form-vertical">
-                <fieldset style="margin-top: -25px">
-                    <legend>Active</legend>
-                    @Html.ValueLine(sc, e => e.Active, vl => vl.InlineCheckbox = true)
-                    @Html.ValueLine(sc, e => e.StartDate)
-                    @Html.ValueLine(sc, e => e.EndDate)
-                </fieldset>
-            </div>
+            using (var sc = ec.SubContext())
+            {
+                sc.FormGroupStyle = FormGroupStyle.Basic;
+                <div class="col-sm-4 form-vertical">
+                    <fieldset style="margin-top: -25px">
+                        <legend>Active</legend>
+                        @Html.ValueLine(sc, e => e.Active, vl => vl.InlineCheckbox = true)
+                        @Html.ValueLine(sc, e => e.StartDate)
+                        @Html.ValueLine(sc, e => e.EndDate)
+                    </fieldset>
+                </div>
+            }
         }
-    }
+    </div>
 
     if (ec.Value.Query != null)
     {
-
         var ctx = new Context(ec, "tokenBuilder");
 
         var qd = DynamicQueryManager.Current.QueryDescription(ec.Value.Query.ToQueryName());
 
-        <div style="background-color:lightgray">
-            <div class="sf-word-template-container">
-                @Html.QueryTokenBuilder(null, ctx, WordClient.GetQueryTokenBuilderSettings(qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
-                <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-basic" value="@(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString())" />
-                <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-if" data-block="if" value="if" />
-                <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-foreach" data-block="foreach" value="foreach" />
-                <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-any" data-block="any" value="any" />
-            </div>
+        <div class="panel panel-default form-xs">
+            <div class="panel-heading" style="padding:5px">
+                <div class="sf-word-template-container">
+                    @Html.QueryTokenBuilder(null, ctx, WordClient.GetQueryTokenBuilderSettings(qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
+                    <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-basic" value="@(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString())" />
+                    <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-if" data-block="if" value="if" />
+                    <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-foreach" data-block="foreach" value="foreach" />
+                    <input type="button" disabled="disabled" data-prefix="@ctx.Prefix" class="btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-any" data-block="any" value="any" />
+                </div>
 
-            <script>
-                $(function () {
-                    @(WordClient.Module["initReplacements"]())
-                });
-            </script>
+                <script>
+                    $(function () {
+                        @(WordClient.Module["initReplacements"]())
+                    });
+                </script>
+            </div>
         </div>
-        <br />
         <div class="col-sm-8">
             @Html.FileLineLite(ec, e => e.Template)
         </div>
