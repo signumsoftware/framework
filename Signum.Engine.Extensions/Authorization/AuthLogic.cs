@@ -578,23 +578,12 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Console.WriteLine("You want to export (e), import (i) or sync roles (r) uthRules? (nothing to exit)".FormatWith(fileName));
+            Console.WriteLine("You want to import (i), export (e) or sync roles (r) uthRules? (nothing to exit)".FormatWith(fileName));
 
             string answer = Console.ReadLine();
 
             switch (answer.ToLower())
             {
-                case "e":
-                    {
-                        var doc = ExportRules();
-                        doc.Save(fileName);
-                        Console.WriteLine("Sucesfully exported to {0}".FormatWith(fileName));
-
-                        if (SafeConsole.Ask("Publish to Load?"))
-                            File.Copy(fileName, "../../" + Path.GetFileName(fileName), overwrite: true);
-
-                        break;
-                    }
                 case "i":
                     {
                         Console.Write("Reading {0}...".FormatWith(fileName));
@@ -621,6 +610,17 @@ namespace Signum.Engine.Authorization
                             SafeConsole.WriteLineColor(ConsoleColor.Green, "Already syncronized");
                         else
                             command.OpenSqlFileRetry();
+
+                        break;
+                    }
+                case "e":
+                    {
+                        var doc = ExportRules();
+                        doc.Save(fileName);
+                        Console.WriteLine("Sucesfully exported to {0}".FormatWith(fileName));
+
+                        if (SafeConsole.Ask("Publish to Load?"))
+                            File.Copy(fileName, "../../" + Path.GetFileName(fileName), overwrite: true);
 
                         break;
                     }
