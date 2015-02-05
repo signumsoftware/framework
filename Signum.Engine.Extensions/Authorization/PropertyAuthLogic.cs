@@ -47,8 +47,6 @@ namespace Signum.Engine.Authorization
                 {
                     Dictionary<Type, Dictionary<string, PropertyRoute>> routesDicCache = new Dictionary<Type, Dictionary<string, PropertyRoute>>();
 
-                    string replacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
-
                     var groups = x.Element("Properties").Elements("Role").SelectMany(r => r.Elements("Property")).Select(p => new PropertyPair(p.Attribute("Resource").Value))
                         .AgGroupToDictionary(a => a.Type, gr => gr.Select(pp => pp.Property).ToHashSet());
 
@@ -64,8 +62,7 @@ namespace Signum.Engine.Authorization
                         replacements.AskForReplacements(
                            item.Value,
                            dic.Keys.ToHashSet(),
-                           type.Name + " Properties");
-
+                           AuthPropertiesReplacementKey(type));
 
                         routesDicCache[type] = dic;
                     }
@@ -80,7 +77,7 @@ namespace Signum.Engine.Authorization
                         if (type == null)
                             return null;
 
-                        PropertyRoute route = routesDicCache[type].TryGetC(replacements.Apply(type.Name + " Properties", pp.Property));
+                        PropertyRoute route = routesDicCache[type].TryGetC(replacements.Apply(AuthPropertiesReplacementKey(type), pp.Property));
 
                         if (route == null)
                             return null;
@@ -97,6 +94,11 @@ namespace Signum.Engine.Authorization
                     }, EnumExtensions.ToEnum<PropertyAllowed>);
                 };
             }
+        }
+
+        private static string AuthPropertiesReplacementKey(Type type)
+        {
+            return "AuthRules:" + type.Name + " Properties";
         }
 
         struct PropertyPair
