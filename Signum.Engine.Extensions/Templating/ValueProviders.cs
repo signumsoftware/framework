@@ -409,14 +409,14 @@ namespace Signum.Engine.Templating
         public string SimplifyToken(ScopedDictionary<string, ValueProviderBase> variables, string token)
         {
             var pair = (from kvp in variables
-                            let tp = kvp.Value as TokenValueProvider
-                            where tp != null
-                            let fullKey = tp.ParsedToken.QueryToken.FullKey()
-                            where token == fullKey || token.StartsWith(fullKey + ".")
-                            orderby fullKey.Length descending
-                            select new { kvp.Key, fullKey }).FirstOrDefault();
+                        let tp = kvp.Value as TokenValueProvider
+                        where tp != null
+                        let fullKey = tp.ParsedToken.QueryToken.FullKey()
+                        where token == fullKey || token.StartsWith(fullKey + ".")
+                        orderby fullKey.Length descending
+                        select new { kvp.Key, fullKey }).FirstOrDefault();
 
-            if (pair.Key.HasText())
+            if (pair != null)
             {
                 return pair.Key + token.RemoveStart(pair.fullKey.Length);
             }
@@ -589,7 +589,7 @@ namespace Signum.Engine.Templating
             sb.Append(globalKey);
             if (remainingFieldsOrProperties.HasText())
             {
-                sb.Append(globalKey);
+                sb.Append(".");
                 sb.Append(Members == null ? remainingFieldsOrProperties : Members.ToString(a => a.Name, "."));
             }
             sb.Append(afterToken);

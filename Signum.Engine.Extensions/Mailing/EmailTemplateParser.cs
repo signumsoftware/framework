@@ -24,19 +24,8 @@ using Signum.Engine.Templating;
 
 namespace Signum.Engine.Mailing
 {
-    public class GlobalVarContext
-    {
-        public IEntity Entity;
-        public CultureInfo Culture;
-        public bool IsHtml;
-        public ISystemEmail SystemEmail;
-    }
-
     public static partial class EmailTemplateParser
     {
-        public static Dictionary<string, Func<GlobalVarContext, object>> GlobalVariables = new Dictionary<string, Func<GlobalVarContext, object>>();
-
-
         public static BlockNode Parse(string text, QueryDescription qd, Type modelType)
         {
             return new TemplateWalker(text, qd, modelType).Parse();      
@@ -45,12 +34,6 @@ namespace Signum.Engine.Mailing
         public static BlockNode TryParse(string text, QueryDescription qd, Type modelType, out string errorMessage)
         {
             return new TemplateWalker(text, qd, modelType).TryParse(out errorMessage);
-        }
-
-        struct Error
-        {
-            public string Message; 
-            public bool IsFatal; 
         }
 
         internal class TemplateWalker
@@ -63,7 +46,7 @@ namespace Signum.Engine.Mailing
             BlockNode mainBlock;
             Stack<BlockNode> stack;
             ScopedDictionary<string, ValueProviderBase> variables;
-            List<Error> errors;
+            List<TemplateError> errors;
 
             public TemplateWalker(string text, QueryDescription qd, Type modelType)
             {
@@ -104,7 +87,7 @@ namespace Signum.Engine.Mailing
 
             internal void AddError(bool fatal, string message)
             {
-                errors.Add(new Error{ IsFatal = fatal, Message = message}); 
+                errors.Add(new TemplateError(fatal, message)); 
             }
 
             void DeclareVariable(ValueProviderBase token)
@@ -145,7 +128,7 @@ namespace Signum.Engine.Mailing
             {
                 this.mainBlock = new BlockNode(null);
                 this.stack = new Stack<BlockNode>();
-                this.errors = new List<Error>(); 
+                this.errors = new List<TemplateError>(); 
                 PushBlock(mainBlock);
 
                 var matches = TemplateUtils.KeywordsRegex.Matches(text);

@@ -27,7 +27,7 @@ namespace Signum.Engine.Word
 {
     public class WordTemplateParser
     {
-        public List<Error> Errors = new List<Error>();
+        public List<TemplateError> Errors = new List<TemplateError>();
         QueryDescription queryDescription;
         ScopedDictionary<string, ValueProviderBase> variables = new ScopedDictionary<string, ValueProviderBase>(null);
         public readonly Type SystemWordTemplateType;
@@ -171,7 +171,7 @@ namespace Signum.Engine.Word
                         case "":
                             var tok = TemplateUtils.TokenFormatRegex.Match(token);
                             if (!tok.Success)
-                                Errors.Add(new Error(true, "{0} has invalid format".FormatWith(token)));
+                                Errors.Add(new TemplateError(true, "{0} has invalid format".FormatWith(token)));
                             else
                             {
                                 var vp = TryParseValueProvider(type, tok.Groups["token"].Value, dec);
@@ -352,7 +352,7 @@ namespace Signum.Engine.Word
 
         internal void AddError(bool fatal, string message)
         {
-            this.Errors.Add(new Error { IsFatal = fatal, Message = message });
+            this.Errors.Add(new TemplateError(fatal, message));
         }
 
 
@@ -383,18 +383,5 @@ namespace Signum.Engine.Word
                     throw new InvalidOperationException("{0} unexpected MatchNode instances found".FormatWith(list.Count));
             }
         }
-    }
-
-
-    public struct Error
-    {
-        public Error(bool isFatal, string message)
-        {
-            this.Message = message;
-            this.IsFatal = isFatal;
-        }
-
-        public string Message;
-        public bool IsFatal;
     }
 }

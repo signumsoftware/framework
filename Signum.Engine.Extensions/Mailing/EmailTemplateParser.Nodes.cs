@@ -99,8 +99,6 @@ namespace Signum.Engine.Mailing
             public override void Synchronize(SyncronizationContext sc)
             {
                 ValueProvider.Synchronize(sc, "@declare");
-
-                ValueProvider.Declare(sc.Variables);
             }
         }
 

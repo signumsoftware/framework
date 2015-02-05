@@ -46,7 +46,7 @@ namespace Signum.Engine.Authorization
                         Text = "<p>{0}</p>".FormatWith(AuthEmailMessage.YouRecentlyRequestedANewPassword.NiceToString()) +
                             "<p>{0} @[User.UserName]</p>".FormatWith(AuthEmailMessage.YourUsernameIs.NiceToString()) +
                             "<p>{0}</p>".FormatWith(AuthEmailMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString()) +
-                            "<p><a href=\"@model[Url]\">@model[Url]</a></p>",
+                            "<p><a href=\"@[m:Url]\">@[m:Url]</a></p>",
                         Subject = AuthEmailMessage.ResetPasswordRequestSubject.NiceToString()
                     }).ToMList()
                 });

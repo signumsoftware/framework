@@ -32,7 +32,14 @@ namespace Signum.Engine.Word
         public static ResetLazy<Dictionary<TypeEntity, List<Lite<WordTemplateEntity>>>> TemplatesByType;
 
         public static Dictionary<WordTransformerSymbol, Action<WordTemplateEntity, Entity, WordprocessingDocument>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordTemplateEntity, Entity, WordprocessingDocument>>();
-        public static Dictionary<WordConverterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]>>(); 
+        public static Dictionary<WordConverterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]>>();
+
+        static Expression<Func<SystemWordTemplateEntity, IQueryable<WordTemplateEntity>>> WordTemplatesExpression =
+            e => Database.Query<WordTemplateEntity>().Where(a => a.SystemWordTemplate == e);
+        public static IQueryable<WordTemplateEntity> WordTemplates(this SystemWordTemplateEntity e)
+        {
+            return WordTemplatesExpression.Evaluate(e);
+        }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -69,6 +76,8 @@ namespace Signum.Engine.Word
                         Entity = f,
                         f.Key
                     });
+
+                dqm.RegisterExpression((SystemWordTemplateEntity e) => e.WordTemplates(), () => typeof(WordTemplateEntity).NiceName());
 
                 new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.Save)
                 {
@@ -230,6 +239,9 @@ namespace Signum.Engine.Word
         {
             try
             {
+                if (template.Template == null)
+                    return null;
+
                 var queryName = QueryLogic.ToQueryName(template.Query.Key);
 
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
@@ -338,6 +350,16 @@ namespace Signum.Engine.Word
             }
 
             return result;
+        }
+
+        public static void GenerateDefaultTemplates()
+        {
+            var systemEmails = Database.Query<SystemWordTemplateEntity>().Where(se => !se.WordTemplates().Any(a => a.Active)).ToList();
+
+            foreach (var se in systemEmails)
+            {
+                SystemWordTemplateLogic.CreateDefaultTemplate(se).Save();
+            }
         }
     }
 }

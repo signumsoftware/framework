@@ -21,6 +21,7 @@ using Signum.Entities.Translation;
 using Signum.Engine.Translation;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
+using Signum.Engine.Templating;
 
 namespace Signum.Engine.Mailing
 {
@@ -76,7 +77,8 @@ namespace Signum.Engine.Mailing
 
                 EmailTemplateGraph.Register();
 
-                EmailTemplateParser.GlobalVariables.Add("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
+                GlobalValueProvider.RegisterGlobalVariable("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
+                GlobalValueProvider.RegisterGlobalVariable("Now", _ => TimeZoneManager.Now);
 
                 sb.Schema.Synchronizing += Schema_Synchronize_Tokens;
                 sb.Schema.Synchronizing += Schema_Syncronize_DefaultTemplates;
@@ -291,6 +293,14 @@ namespace Signum.Engine.Mailing
             }
         }
 
-     
+        public static void GenerateDefaultTemplates()
+        {
+            var systemEmails = Database.Query<SystemEmailEntity>().Where(se => !se.EmailTemplates().Any(a => a.Active)).ToList();
+
+            foreach (var se in systemEmails)
+            {
+                SystemEmailLogic.CreateDefaultTemplate(se).Save();
+            }
+        }
     }
 }

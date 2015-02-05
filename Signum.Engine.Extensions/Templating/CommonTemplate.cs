@@ -93,8 +93,23 @@ namespace Signum.Engine.Templating
                     typeof(IEquatable<>).MakeGenericType(t).IsAssignableFrom(t);
             }
         }
+    }
 
-        
+    public struct TemplateError
+    {
+        public TemplateError(bool isFatal, string message)
+        {
+            this.Message = message;
+            this.IsFatal = isFatal;
+        }
+
+        public readonly string Message;
+        public readonly bool IsFatal;
+
+        public override string ToString()
+        {
+            return (IsFatal ? "FATAL: " : "ERROR: ") + Message;
+        }
     }
 
 
