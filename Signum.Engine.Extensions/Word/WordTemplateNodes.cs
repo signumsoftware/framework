@@ -321,7 +321,20 @@ namespace Signum.Engine.Word
 
         private bool IsImportant(OpenXmlElement c)
         {
-            return c is Run || c is Paragraph;
+            if (c is Paragraph)
+                return true;
+
+            if (c is Run)
+            {
+                var text = c.ChildElements.Where(a => !(a is RunProperties)).Only() as Text;
+
+                if (text != null && string.IsNullOrWhiteSpace(text.Text))
+                    return false;
+
+                return true; 
+            }
+
+            return false;
         }
 
         protected static List<OpenXmlElement> NodesBetween(MatchNodePair first, MatchNodePair last)
