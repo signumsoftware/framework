@@ -59,9 +59,9 @@ namespace Signum.Entities.Word
             set { Set(ref active, value); }
         }
 
-        DateTime startDate = TimeZoneManager.Now.TrimToMinutes();
+        DateTime? startDate;
         [MinutesPrecissionValidator]
-        public DateTime StartDate
+        public DateTime? StartDate
         {
             get { return startDate; }
             set { Set(ref startDate, value); }
