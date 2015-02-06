@@ -283,7 +283,7 @@ namespace Signum.Engine.Word
 
         protected internal abstract void ReplaceBlock();
 
-        protected void NormalizeInterval(ref MatchNodePair first, ref MatchNodePair last)
+        protected void NormalizeInterval(ref MatchNodePair first, ref MatchNodePair last, MatchNode errorHintParent)
         {
             if (first.MatchNode == last.MatchNode)
                 throw new ArgumentException("first and last are the same node");
@@ -292,14 +292,14 @@ namespace Signum.Engine.Word
             var chainLast = ((OpenXmlElement)last.MatchNode).Follow(a => a.Parent).Reverse().ToList();
 
             var result = chainFirst.Zip(chainLast, (f, l) => new { f, l }).First(a => a.f != a.l);
-            AssertNotImportant(chainFirst, result.f);
-            AssertNotImportant(chainLast, result.l);
+            AssertNotImportant(chainFirst, result.f, errorHintParent, first.MatchNode, last.MatchNode);
+            AssertNotImportant(chainLast, result.l, errorHintParent, last.MatchNode, first.MatchNode);
 
             first.AscendantNode = result.f;
             last.AscendantNode = result.l;
         }
 
-        private void AssertNotImportant(List<OpenXmlElement> chain, OpenXmlElement openXmlElement)
+        private void AssertNotImportant(List<OpenXmlElement> chain, OpenXmlElement openXmlElement, MatchNode errorHintParent, MatchNode errorHint1, MatchNode errorHint2)
         {
             var index = chain.IndexOf(openXmlElement);
 
@@ -311,7 +311,11 @@ namespace Signum.Engine.Word
                 var important = current.ChildElements.Where(c => c != next && IsImportant(c));
 
                 if (important.Any())
-                    throw new InvalidOperationException("Some important nodes are being removed:\r\n" + important.ToString(a => a.NiceToString(), "\r\n\r\n"));
+                    throw new InvalidOperationException("Node {0} is not at the same level than {1}{2}. Important nodes could be removed close to {0}:\r\n{3}".FormatWith(
+                        errorHint1.Match,
+                        errorHint2.Match,
+                        errorHintParent != errorHint1 && errorHintParent != errorHint2 ? " in " + errorHintParent.Match : "",
+                        current.NiceToString()));
             }
         }
 
@@ -376,7 +380,7 @@ namespace Signum.Engine.Word
 
         protected internal override void ReplaceBlock()
         {
-            this.NormalizeInterval(ref ForeachToken, ref EndForeachToken);
+            this.NormalizeInterval(ref ForeachToken, ref EndForeachToken, errorHintParent: ForeachToken.MatchNode);
 
             this.ForeachBlock = new BlockNode();
             this.ForeachBlock.MoveChilds(NodesBetween(ForeachToken, EndForeachToken));
@@ -556,7 +560,7 @@ namespace Signum.Engine.Word
         {
             if (this.NotAnyToken.MatchNode == null)
             {
-                this.NormalizeInterval(ref AnyToken, ref EndAnyToken);
+                this.NormalizeInterval(ref AnyToken, ref EndAnyToken, errorHintParent: AnyToken.MatchNode);
 
                 this.AnyBlock = new BlockNode();
                 this.AnyBlock.MoveChilds(NodesBetween(AnyToken, EndAnyToken));
@@ -567,8 +571,8 @@ namespace Signum.Engine.Word
             else
             {
                 var notAnyToken = this.NotAnyToken;
-                this.NormalizeInterval(ref AnyToken, ref notAnyToken);
-                this.NormalizeInterval(ref NotAnyToken, ref EndAnyToken);
+                this.NormalizeInterval(ref AnyToken, ref notAnyToken, errorHintParent: AnyToken.MatchNode);
+                this.NormalizeInterval(ref NotAnyToken, ref EndAnyToken, errorHintParent: AnyToken.MatchNode);
 
                 if (notAnyToken.AscendantNode != NotAnyToken.AscendantNode)
                     throw new InvalidOperationException("Unbalanced tokens");
@@ -722,7 +726,7 @@ namespace Signum.Engine.Word
         {
             if (this.ElseToken.MatchNode == null)
             {
-                this.NormalizeInterval(ref IfToken, ref EndIfToken);
+                this.NormalizeInterval(ref IfToken, ref EndIfToken, errorHintParent: IfToken.MatchNode);
 
                 this.IfBlock = new BlockNode();
                 this.IfBlock.MoveChilds(NodesBetween(IfToken, EndIfToken));
@@ -733,8 +737,8 @@ namespace Signum.Engine.Word
             else
             {
                 var elseToken = ElseToken;
-                this.NormalizeInterval(ref IfToken, ref elseToken);
-                this.NormalizeInterval(ref ElseToken, ref EndIfToken);
+                this.NormalizeInterval(ref IfToken, ref elseToken, errorHintParent: IfToken.MatchNode);
+                this.NormalizeInterval(ref ElseToken, ref EndIfToken, errorHintParent: IfToken.MatchNode);
 
                 if (elseToken.AscendantNode != ElseToken.AscendantNode)
                     throw new InvalidOperationException("Unbalanced tokens");
