@@ -514,14 +514,7 @@ namespace Signum.Engine.Word
             this.Operation = FilterValueConverter.ParseOperation(operation);
             this.Value = value;
 
-            if (ValueProvider.Type != null)
-            {
-                object rubish;
-                string error = FilterValueConverter.TryParse(Value, ValueProvider.Type, out rubish, Operation == FilterOperation.IsIn);
-
-                if (error.HasText())
-                    addError(false, error);
-            }
+            ValueProvider.ValidateConditionValue(value, Operation, addError);
         }
 
         public AnyNode(AnyNode original)
@@ -702,14 +695,7 @@ namespace Signum.Engine.Word
             this.Operation = FilterValueConverter.ParseOperation(operation);
             this.Value = value;
 
-            if (ValueProvider.Type != null)
-            {
-                object rubish;
-                string error = FilterValueConverter.TryParse(Value, ValueProvider.Type, out rubish, Operation == FilterOperation.IsIn);
-
-                if (error.HasText())
-                    addError(false, error);
-            }
+            ValueProvider.ValidateConditionValue(value, Operation, addError);
         }
 
         public IfNode(IfNode original)

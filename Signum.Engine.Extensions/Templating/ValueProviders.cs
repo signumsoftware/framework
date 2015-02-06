@@ -7,6 +7,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities.UserAssets;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
+using Signum.Utilities.ExpressionTrees;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -136,6 +137,18 @@ namespace Signum.Engine.Templating
                     addError(false, "{0} is not a recognized value provider (q:Query, t:Translate, m:Model, g:Global or just blank)");
                     return null;
             }
+        }
+
+        public void ValidateConditionValue(string valueString, FilterOperation? Operation, Action<bool, string> addError)
+        {
+            if (Type == null)
+                return;
+
+            object rubish;
+            string error = FilterValueConverter.TryParse(valueString, Type, out rubish, Operation == FilterOperation.IsIn);
+            
+            if (error.HasText())
+                addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), error));
         }
     }
 

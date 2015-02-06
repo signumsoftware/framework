@@ -171,7 +171,7 @@ namespace Signum.Engine.Word
                         case "":
                             var tok = TemplateUtils.TokenFormatRegex.Match(token);
                             if (!tok.Success)
-                                Errors.Add(new TemplateError(true, "{0} has invalid format".FormatWith(token)));
+                                AddError(true, "{0} has invalid format".FormatWith(token));
                             else
                             {
                                 var vp = TryParseValueProvider(type, tok.Groups["token"].Value, dec);

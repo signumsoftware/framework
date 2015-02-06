@@ -278,15 +278,8 @@ namespace Signum.Engine.Mailing
                 this.ValueProvider = valueProvider;
                 this.Operation = FilterValueConverter.ParseOperation(operation);
                 this.Value = value;
-                
-                if (ValueProvider.Type != null)
-                {
-                    object rubish;
-                    string error = FilterValueConverter.TryParse(Value, ValueProvider.Type, out rubish, Operation == FilterOperation.IsIn);
 
-                    if (error.HasText())
-                        addError(false, error);
-                }
+                ValueProvider.ValidateConditionValue(value, Operation, addError);
 
                 AnyBlock = new BlockNode(this);
             }
@@ -390,15 +383,7 @@ namespace Signum.Engine.Mailing
                 this.Operation = FilterValueConverter.ParseOperation(operation);
                 this.Value = value;
 
-                if (this.ValueProvider.Type != null)
-                {
-                    object rubish;
-                    string error = FilterValueConverter.TryParse(Value, this.ValueProvider.Type, out rubish, Operation == FilterOperation.IsIn);
-
-                    if (error.HasText())
-                        addError(false, error);
-                }
-
+                ValueProvider.ValidateConditionValue(value, Operation, addError);
 
                 this.IfBlock = new BlockNode(this);
             }
