@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 using System.Linq.Expressions;
 using Signum.Entities.Authorization;
 using Signum.Engine.DynamicQuery;
@@ -93,19 +94,59 @@ namespace Signum.Engine.Disconnected
 
                 dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Imports(), ()=>DisconnectedMessage.Imports.NiceToString());
                 dqm.RegisterExpression((DisconnectedMachineEntity dm) => dm.Exports(), ()=>DisconnectedMessage.Exports.NiceToString());
-
-
+                
                 MachineGraph.Register();
-
 
                 sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
 
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
 
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+
+                //Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMin).StaticPropertyValidation += (dm, pi) => ValidateSeedMin(dm, pi);
+                
+                //Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMax).StaticPropertyValidation += (dm, pi) => ValidateSeedMax(dm, pi);
+
+                //Validator.PropertyValidator((DisconnectedMachineEntity d) => d).StaticPropertyValidation += (d, pi) => ValidateDisconnectedMachine(d, pi);
             }
         }
 
+        static string ValidateDisconnectedMachine(DisconnectedMachineEntity dm, PropertyInfo pi)
+        {
+            // Machine should have a valid range
+            //if (dm.SeedMin == 0 || dm.SeedMin >= dm.SeedMax)
+            //    throw new ApplicationException("The range for this machine is not correct");
+
+            // Machine's Range should not have an overlap with other machines
+            // Overlap possibilities
+            // |----------|    |----------|
+            //   |-------------------|
+            //       |-----------|
+            // |------------------------|
+            //
+            var conflicts = Database.Query<DisconnectedMachineEntity>().
+                                Where(e => ((e.SeedMin >= dm.SeedMin && e.SeedMin < dm.SeedMax) ||
+                                            (dm.SeedMin >= e.SeedMin && dm.SeedMin < e.SeedMax) ||
+                                            (e.SeedMax > dm.SeedMin && e.SeedMax < dm.SeedMax) ||
+                                            (dm.SeedMax > e.SeedMin && dm.SeedMax < e.SeedMax)) &&
+                                             e.Id != dm.Id).
+                                Select(e => e.ToLite()).ToList();
+            
+            if (conflicts.Any()) return "There's an overlap in the range for this machine with:\r\n" + conflicts.ToString(s => "Id {0} : {1}".FormatWith(s.Id, s), "\r\n");
+            return null;
+        }
+        static string ValidateSeedMin(DisconnectedMachineEntity dm, PropertyInfo pi)
+        {
+            if (dm.SeedMin == 0 || dm.SeedMin >= dm.SeedMax) return "SeedMin must be greater than zero and less than SeedMax.";
+            return null;
+        }
+
+        static string ValidateSeedMax(DisconnectedMachineEntity dm, PropertyInfo pi)
+        {
+            if (dm.SeedMax == 0 || dm.SeedMax <= dm.SeedMin) return "SeedMax must be greater than zero and greater than SeedMin.";
+            return null;
+        }
+        
         class MachineGraph : Graph<DisconnectedMachineEntity, DisconnectedMachineState>
         {
             public static void Register()
@@ -118,7 +159,10 @@ namespace Signum.Engine.Disconnected
                     ToState = DisconnectedMachineState.Connected,
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (dm, _) => { }
+                    Execute = (dm, _) => 
+                    {
+
+                    }
                 }.Register();
 
                 new Execute(DisconnectedMachineOperation.UnsafeUnlock)
