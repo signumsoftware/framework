@@ -1183,7 +1183,14 @@ namespace Signum.Engine.Linq
                         else
                         {
                             if (nex.Members == null)
-                                throw new InvalidOperationException("Impossible to bind '{0}' on '{1}'".FormatWith(m.Member.Name, nex.Constructor.ConstructorSignature()));
+                            {
+                                int index = nex.Constructor.GetParameters().IndexOf(p => p.Name.Equals(m.Member.Name, StringComparison.InvariantCultureIgnoreCase));
+
+                                if(index == null)
+                                    throw new InvalidOperationException("Impossible to bind '{0}' on '{1}'".FormatWith(m.Member.Name, nex.Constructor.ConstructorSignature()));
+
+                                return nex.Arguments[index].TryConvert(m.Member.ReturningType());
+                            }   
 
                             PropertyInfo pi = (PropertyInfo)m.Member;
                             return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
