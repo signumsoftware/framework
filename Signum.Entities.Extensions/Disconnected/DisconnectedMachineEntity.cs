@@ -6,6 +6,7 @@ using Signum.Entities.Authorization;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.ComponentModel;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Entities.Disconnected
 {
@@ -36,6 +37,7 @@ namespace Signum.Entities.Disconnected
         }
 
         int seedMin;
+        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int SeedMin
         {
             get { return seedMin; }
@@ -43,10 +45,19 @@ namespace Signum.Entities.Disconnected
         }
 
         int seedMax;
+        [NumberIsValidator(ComparisonType.GreaterThan, 0)]
         public int SeedMax
         {
             get { return seedMax; }
             set { Set(ref seedMax, value); }
+        }
+
+        static Expression<Func<DisconnectedMachineEntity, Interval<int>>> SeedIntervalExpression =
+            entity => new Interval<int>(entity.SeedMin, entity.SeedMax);
+        [HiddenProperty]
+        public Interval<int> SeedInterval
+        {
+            get { return SeedIntervalExpression.Evaluate(this); }
         }
 
         static Expression<Func<DisconnectedMachineEntity, string>> ToStringExpression = e => e.machineName;
@@ -62,6 +73,15 @@ namespace Signum.Entities.Disconnected
             get { return CurrentVariable.Value; }
             set { CurrentVariable.Value = value; }
         }
+
+        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
+        {
+            if (pi.Is(() => SeedMax) && SeedMax <= SeedMin)
+                return ValidationMessage._0ShouldBeGreaterThan1.NiceToString(pi, NicePropertyName(() => SeedMin));
+
+            return base.PropertyValidation(pi);
+        }
+
     }
 
     public enum DisconnectedMachineState
@@ -142,6 +162,8 @@ namespace Signum.Entities.Disconnected
         [Description("The {0} with Id {1} ({2}) is locked by {3}")]
         The0WithId12IsLockedBy3,
         Imports,
-        Exports
+        Exports,
+        [Description("{0} overlaps with {1}")]
+        _0OverlapsWith1
     }
 }
