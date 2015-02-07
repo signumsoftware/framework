@@ -876,7 +876,7 @@ namespace Signum.Entities
         _0HasSomeRepeatedElements0,
         [Description("{{0}} has to be {0} {1}")]
         _0HasToBe0Than1,
-        [Description("{{0}} Has to be between {0} and {1}")]
+        [Description("{{0}} has to be between {0} and {1}")]
         _0HasToBeBetween0And1,
         [Description("{0} has to be lowercase")]
         _0HasToBeLowercase,
@@ -953,7 +953,9 @@ namespace Signum.Entities
         _0ShouldBeNull,
         [Description("{0} should be a date in the past")]
         _0ShouldBeADateInThePast,
-        BeInThePast
+        BeInThePast,
+        [Description("{0} should be greater than {1}")]
+        _0ShouldBeGreaterThan1
     }
 
 
