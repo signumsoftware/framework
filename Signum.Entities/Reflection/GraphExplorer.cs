@@ -128,7 +128,7 @@ namespace Signum.Entities.Reflection
                 ModifiableEntity me = m as ModifiableEntity;
 
                 if (me != null)
-                    me.SetErrors(null);
+                    me.SetTemporalErrors(null);
 
                 m.PreSaving(ref graphModified);
             });
@@ -315,7 +315,7 @@ namespace Signum.Entities.Reflection
                 var dic = dictionary.TryGetC(mod.temporalId);
 
                 if (dic != null)
-                    mod.SetErrors(dic);
+                    mod.SetTemporalErrors(dic);
             }
         }
     }

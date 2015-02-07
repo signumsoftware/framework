@@ -35,7 +35,7 @@ namespace Signum.Engine
                     ModifiableEntity me = m as ModifiableEntity;
 
                     if (me != null)
-                        me.SetErrors(null);
+                        me.SetTemporalErrors(null);
 
                     m.PreSaving(ref graphModified);
 

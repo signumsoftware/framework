@@ -106,6 +106,7 @@ namespace Signum.Entities
 
             NotifyPrivate(pi.Name);
             NotifyPrivate("Error");
+            ClearTemporalError(pi.Name);
 
             return true;
         }
@@ -372,7 +373,7 @@ namespace Signum.Entities
 
         [Ignore]
         internal Dictionary<string, string> temporalErrors;
-        internal void SetErrors(Dictionary<string, string> errors)
+        internal void SetTemporalErrors(Dictionary<string, string> errors)
         {
             NotifyTemporalErrors();
 
@@ -381,7 +382,7 @@ namespace Signum.Entities
             NotifyTemporalErrors();
         }
 
-        private void NotifyTemporalErrors()
+        void NotifyTemporalErrors()
         {
             if (temporalErrors != null)
             {
@@ -390,6 +391,16 @@ namespace Signum.Entities
 
                 NotifyError();
             }
+        }
+
+        void ClearTemporalError(string propertyName)
+        {
+            if (this.temporalErrors == null)
+                return;
+
+            this.temporalErrors.Remove(propertyName);
+            NotifyPrivate(propertyName);
+            NotifyError();
         }
     }
 

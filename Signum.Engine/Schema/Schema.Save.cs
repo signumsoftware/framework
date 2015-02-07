@@ -666,7 +666,7 @@ namespace Signum.Engine.Maps
                 ModifiableEntity me = m as ModifiableEntity;
 
                 if (me != null)
-                    me.SetErrors(null);
+                    me.SetTemporalErrors(null);
 
                 m.PreSaving(ref graphModified);
 
