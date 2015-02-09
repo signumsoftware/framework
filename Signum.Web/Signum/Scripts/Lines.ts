@@ -86,6 +86,11 @@ export class EntityBase {
         return Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
     }
 
+    getEntityValue(): Entities.EntityValue
+    {
+        return new Entities.EntityValue(this.getRuntimeInfo(), this.getToString(), null);
+    }
+
     extractEntityHtml(itemPrefix?: string): Entities.EntityHtml {
 
         var runtimeInfo = Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
@@ -470,6 +475,7 @@ export class EntityLine extends EntityBase {
 export class EntityCombo extends EntityBase {
 
     static key_combo = "sfCombo";
+    static key_tostr = "sfToStr";
 
     combo() {
         return this.prefix.child(EntityCombo.key_combo).get();
@@ -492,6 +498,12 @@ export class EntityCombo extends EntityBase {
     }
 
     getToString(itemPrefix?: string): string {
+
+        var toStr = this.prefix.child(EntityCombo.key_tostr).tryGet();
+
+        if (toStr.length)
+            return toStr.text();
+
         return this.combo().children("option[value='" + this.combo().val() + "']").text();
     }
 
