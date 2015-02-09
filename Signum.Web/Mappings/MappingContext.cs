@@ -250,7 +250,7 @@ namespace Signum.Web
         {
         }
 
-        internal bool SupressChange;
+        public bool SupressChange;
 
         public T None()
         {
