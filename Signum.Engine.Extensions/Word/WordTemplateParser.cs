@@ -79,7 +79,7 @@ namespace Signum.Engine.Word
                             if (start.Interval.Min < interval.Min)
                             {
                                 Run firstRunPart = new Run { RunProperties = startRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
-                                firstRunPart.AppendChild(new Text { Text = start.Text.Substring(0, m.Index - start.Interval.Min) });
+                                firstRunPart.AppendChild(new Text { Text = start.Text.Substring(0, m.Index - start.Interval.Min), Space = SpaceProcessingModeValues.Preserve });
                                 par.Append(firstRunPart);
                             }
 
