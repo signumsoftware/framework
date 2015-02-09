@@ -138,7 +138,6 @@
     <Compile Include="LineHelpers\EntityStripHelper.cs" />
     <Compile Include="Lines\EntityCheckboxList.cs" />
     <Compile Include="Lines\EntityStrip.cs" />
-    <Compile Include="Lines\HourMinuteLine.cs" />
     <Compile Include="Widgets\LinksClient.cs" />
     <Compile Include="Widgets\WidgetsHelper.cs" />
     <Content Include="Signum\Content\Search.css" />
