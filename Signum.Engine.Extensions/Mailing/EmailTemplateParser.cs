@@ -261,7 +261,7 @@ namespace Signum.Engine.Mailing
                                 break;
                             }
                         default :
-                            AddError(false, "'{0}' is deprecated".FormatWith(keyword));
+                            AddError(true, "'{0}' is deprecated".FormatWith(keyword));
                             break;
                     }
                     index = match.Index + match.Length;

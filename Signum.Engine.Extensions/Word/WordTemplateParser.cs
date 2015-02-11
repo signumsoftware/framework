@@ -291,7 +291,7 @@ namespace Signum.Engine.Word
                                 break;
                             }
                         default:
-                            AddError(false, "'{0}' is deprecated".FormatWith(keyword));
+                            AddError(true, "'{0}' is deprecated".FormatWith(keyword));
                             break;
                     }
                 }
