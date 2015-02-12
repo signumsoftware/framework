@@ -1117,6 +1117,11 @@ namespace Signum.Engine.Linq
                     m.TryGetArgument("a") ?? m.TryGetArgument("d") ?? m.GetArgument("value"),
                     m.TryGetArgument("decimals") ?? m.TryGetArgument("digits") ?? new SqlConstantExpression(0));
                 case "Math.Truncate": return TrySqlFunction(null, SqlFunction.ROUND, m.Type, m.GetArgument("d"), new SqlConstantExpression(0), new SqlConstantExpression(1));
+                case "Math.Max":
+                case "Math.Min": return null; /* could be translates to something like 'case when a > b then a 
+                                               *                                             when a < b then b 
+                                               *                                             else null end 
+                                               * but looks to horrible */
                 case "LinqHints.InSql":
                     using (ForceFullNominate())
                     {
