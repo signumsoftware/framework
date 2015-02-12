@@ -666,6 +666,17 @@ namespace Signum.Web.Selenium
             return ctx;
         }
 
+        public EntityContextMenuProxy EntityContextMenu(Lite<Entity> lite)
+        {
+            Selenium.FindElement(CellLocator(lite, "Entity")).ContextClick();
+
+            EntityContextMenuProxy ctx = new EntityContextMenuProxy(this, isContext: true);
+
+            ctx.WaitNotLoading();
+
+            return ctx;
+        }
+
      
 
         public EntityContextMenuProxy SelectedClick()
