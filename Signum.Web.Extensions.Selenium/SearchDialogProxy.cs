@@ -871,8 +871,8 @@ namespace Signum.Web.Selenium
         public void WaitNotLoading()
         {
             this.resultTable.Selenium.Wait(() =>
-                this.resultTable.Selenium.FindElement(this.EntityContextMenuLocator)
-                    .FindElements(By.CssSelector("li")).Any(a => !a.FindElements(By.CssSelector(".sf-tm-selected-loading")).Any()));
+               !this.resultTable.Selenium.FindElement(this.EntityContextMenuLocator)
+                    .FindElements(By.CssSelector("li.sf-tm-selected-loading")).Any());
         }
     }
 
