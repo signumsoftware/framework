@@ -28,6 +28,7 @@ using Signum.Web.UserAssets;
 using Signum.Web.Basic;
 using Signum.Entities.Processes;
 using Signum.Web.Cultures;
+using Signum.Web.Templating;
 
 namespace Signum.Web.Mailing
 {
@@ -187,68 +188,10 @@ namespace Signum.Web.Mailing
             return new QueryTokenBuilderSettings(qd, options)
             {
                 ControllerUrl = RouteHelper.New().Action("NewSubTokensCombo", "Mailing"),
-                Decorators = MailingDecorators,
+                Decorators = TemplatingClient.TemplatingDecorators,
                 RequestExtraJSonData = null,
             };
         }
-
-        static void MailingDecorators(QueryToken qt, HtmlTag option)
-        {
-            string canIf = CanIf(qt);
-            if (canIf.HasText())
-                option.Attr("data-if", canIf);
-
-            string canForeach = CanForeach(qt);
-            if (canForeach.HasText())
-                option.Attr("data-foreach", canForeach);
-
-            string canAny = CanAny(qt);
-            if (canAny.HasText())
-                option.Attr("data-any", canAny);
-        }
-
-        static string CanIf(QueryToken token)
-        {
-            if (token == null)
-                return TemplateTokenMessage.NoColumnSelected.NiceToString();
-
-            if (token.Type != typeof(string) && token.Type != typeof(byte[]) && token.Type.ElementType() != null)
-                return TemplateTokenMessage.YouCannotAddIfBlocksOnCollectionFields.NiceToString();
-
-            if (token.HasAllOrAny())
-                return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
-
-            return null;
-        }
-
-        static string CanForeach(QueryToken token)
-        {
-            if (token == null)
-                return TemplateTokenMessage.NoColumnSelected.NiceToString();
-
-            if (token.Type != typeof(string) && token.Type != typeof(byte[]) && token.Type.ElementType() != null)
-                return TemplateTokenMessage.YouHaveToAddTheElementTokenToUseForeachOnCollectionFields.NiceToString();
-
-            if (token.Key != "Element" || token.Parent == null || token.Parent.Type.ElementType() == null)
-                return TemplateTokenMessage.YouCanOnlyAddForeachBlocksWithCollectionFields.NiceToString();
-
-            if (token.HasAllOrAny())
-                return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
-
-            return null; 
-        }
-
-        static string CanAny(QueryToken token)
-        {
-            if (token == null)
-                return TemplateTokenMessage.NoColumnSelected.NiceToString();
-
-            if (token.HasAllOrAny())
-                return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
-
-            return null;
-        }
-
 
         public static Func<string, WebMailOptions, string> TasksSetWebMailBody; 
         public static string SetWebMailBody(string body, WebMailOptions options)

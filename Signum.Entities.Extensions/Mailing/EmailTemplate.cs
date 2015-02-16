@@ -372,20 +372,6 @@ namespace Signum.Entities.Mailing
         TokenMustBeA0,
     }
 
-    public enum TemplateTokenMessage
-    { 
-        [Description("No column selected")]
-        NoColumnSelected,
-        [Description("You cannot add If blocks on collection fields")]
-        YouCannotAddIfBlocksOnCollectionFields,
-        [Description("You have to add the Element token to use Foreach on collection fields")]
-        YouHaveToAddTheElementTokenToUseForeachOnCollectionFields,
-        [Description("You can only add Foreach blocks with collection fields")]
-        YouCanOnlyAddForeachBlocksWithCollectionFields,
-        [Description("You cannot add Blocks with All or Any")]
-        YouCannotAddBlocksWithAllOrAny
-    }
-
     public enum EmailTemplateViewMessage
     { 
         [Description("Insert message content")]

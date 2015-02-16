@@ -424,6 +424,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Templating\TemplatingClient.cs" />
     <Compile Include="Translation\Controllers\TranslatedInstanceController.cs" />
     <Compile Include="Translation\Controllers\TranslationController.cs" />
     <Compile Include="Translation\TranslatedInstanceSynchronizer.cs" />

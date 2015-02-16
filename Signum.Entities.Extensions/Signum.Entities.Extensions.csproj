@@ -147,6 +147,7 @@
     <Compile Include="Files\FileRepository.cs" />
     <Compile Include="Files\IFileServer.cs" />
     <Compile Include="Mailing\EmailConfiguration.cs" />
+    <Compile Include="Templating\TemplateTokenMessage.cs" />
     <Compile Include="Translation\TranslatedInstance.cs" />
     <Compile Include="Translation\TranslationReplacement.cs" />
     <Compile Include="Translation\TranslatorUser.cs" />
