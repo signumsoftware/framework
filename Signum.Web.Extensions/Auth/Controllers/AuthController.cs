@@ -203,7 +203,7 @@ namespace Signum.Web.Auth
 
                 ResetPasswordRequestEntity rpr = ResetPasswordRequestLogic.ResetPasswordRequest(user);
                 string url = HttpContext.Request.Url.GetLeftPart(UriPartial.Authority) + Url.Action<AuthController>(ac => ac.ResetPasswordCode(email, rpr.Code));
-                new ResetPasswordRequestMail { Entity = rpr, Url = url }.SendMailAsync();
+                new ResetPasswordRequestMail(rpr, url).SendMailAsync();
             }
 
             TempData["email"] = email;

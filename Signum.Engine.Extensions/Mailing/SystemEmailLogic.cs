@@ -39,6 +39,11 @@ namespace Signum.Engine.Mailing
     public abstract class SystemEmail<T> : ISystemEmail
         where T : Entity
     {
+        public SystemEmail(T entity)
+        {
+            this.Entity = entity;
+        }
+
         public T Entity { get; set; }
 
         Entity ISystemEmail.UntypedEntity
@@ -166,11 +171,11 @@ namespace Signum.Engine.Mailing
             systemEmails[model] = new SystemEmailInfo
             {
                 DefaultTemplateConstructor = defaultTemplateConstructor,
-                QueryName = queryName ?? GetDefaultQueryName(model),
+                QueryName = queryName ?? GetEntityType(model),
             };
         }
 
-        static object GetDefaultQueryName(Type model)
+        static Type GetEntityType(Type model)
         {
             var baseType = model.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemEmail<>)));
 
@@ -297,6 +302,21 @@ namespace Signum.Engine.Mailing
                         template.Save();
                 }
             }
+        }
+
+        public static bool RequiresExtraParameters(SystemEmailEntity systemEmailEntity)
+        {
+            return GetEntityConstructor(systemEmailToType.Value.GetOrThrow(systemEmailEntity)) == null;
+        }
+
+        public static ConstructorInfo GetEntityConstructor(Type systemEmail)
+        {
+            var entityType = GetEntityType(systemEmail);
+
+            return (from ci in systemEmail.GetConstructors()
+                    let pi = ci.GetParameters().Only()
+                    where pi != null && pi.ParameterType == entityType
+                    select ci).SingleOrDefaultEx();            
         }
     }
 }

@@ -80,6 +80,14 @@ namespace Signum.Engine.Authorization
     {
         public string Url;
 
+        public ResetPasswordRequestMail(ResetPasswordRequestEntity entity) : this(entity, "http://wwww.tesurl.com") 
+        { }
+
+        public ResetPasswordRequestMail(ResetPasswordRequestEntity entity, string url) :base(entity)
+        {
+            this.Url = url;
+        }
+
         public override List<EmailOwnerRecipientData> GetRecipients()
         {
             return SendTo(Entity.User.EmailOwnerData);

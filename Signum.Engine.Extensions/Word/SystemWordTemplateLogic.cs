@@ -46,6 +46,11 @@ namespace Signum.Engine.Word
     public abstract class SystemWordTemplate<T> : ISystemWordTemplate
        where T : Entity
     {
+        public SystemWordTemplate(T entity)
+        {
+            this.Entity = entity;
+        }
+
         public T Entity { get; set; }
 
         Entity ISystemWordTemplate.UntypedEntity
@@ -243,11 +248,11 @@ namespace Signum.Engine.Word
             systemWordReports[model] = new SystemWordTemplateInfo
             {
                 DefaultTemplateConstructor = defaultTemplateConstructor,
-                QueryName = queryName ?? GetDefaultQueryName(model),
+                QueryName = queryName ?? GetEntityType(model),
             };
         }
 
-        static object GetDefaultQueryName(Type model)
+        static Type GetEntityType(Type model)
         {
             var baseType = model.Follow(a => a.BaseType).FirstOrDefault(b => b.IsInstantiationOf(typeof(SystemWordTemplate<>)));
 
@@ -265,6 +270,21 @@ namespace Signum.Engine.Word
                 return null;
 
             return SystemWordTemplateToType.Value.GetOrThrow(systemWordTemplate);
+        }
+
+        public static bool RequiresExtraParameters(SystemWordTemplateEntity systemWordTemplateEntity)
+        {
+            return GetEntityConstructor(systemWordTemplateEntity.ToType()) == null;
+        }
+
+        public static ConstructorInfo GetEntityConstructor(Type systemWordTempalte)
+        {
+            var entityType = GetEntityType(systemWordTempalte);
+
+            return (from ci in systemWordTempalte.GetConstructors()
+                    let pi = ci.GetParameters().Only()
+                    where pi != null && pi.ParameterType == entityType
+                    select ci).SingleOrDefaultEx();
         }
     }
 }

@@ -241,8 +241,8 @@ namespace Signum.Engine.Mailing
                     ToState = EmailMessageState.Created,
                     CanConstruct = et => 
                     {
-                        if (et.SystemEmail != null)
-                            return "Cannot send email because {0} is a SystemEmail ({1})".FormatWith(et, et.SystemEmail);
+                        if (et.SystemEmail != null && SystemEmailLogic.RequiresExtraParameters(et.SystemEmail))
+                            return "SystemEmail ({1}) requires extra parameters ".FormatWith(et.SystemEmail);
 
                         if (et.SendDifferentMessages)
                             return "Cannot create email becaue {0} has SendDifferentMessages set";
@@ -252,7 +252,11 @@ namespace Signum.Engine.Mailing
                     Construct = (et, args) =>
                     {
                         var entity = args.GetArg<Entity>();
-                        return et.ToLite().CreateEmailMessage(entity).Single();
+
+                        ISystemEmail systemEmail = et.SystemEmail == null ? null :
+                            (ISystemEmail)SystemEmailLogic.GetEntityConstructor(et.SystemEmail.ToType()).Invoke(new[] { entity });
+
+                        return et.ToLite().CreateEmailMessage(entity, systemEmail).Single();
                     }
                 }.Register();
 
