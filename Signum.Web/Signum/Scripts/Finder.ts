@@ -347,7 +347,7 @@ export class SearchControl {
         }
 
         if (this.options.showFooter) {
-            this.element.on("click", ".sf-search-footer ul.pagination a", e=> {
+            this.element.on("click", ".sf-search-footer ul.pagination > li:not(.disabled) > a", e=> {
                 e.preventDefault();
                 this.search(parseInt($(e.currentTarget).attr("data-page")));
             });
