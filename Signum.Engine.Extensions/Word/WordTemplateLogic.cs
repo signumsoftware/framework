@@ -86,6 +86,21 @@ namespace Signum.Engine.Word
                     Execute = (e, _) => { }
                 }.Register();
 
+                new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.CreateWordReport)
+                {
+                    CanExecute = et =>
+                    {
+                        if (et.SystemWordTemplate != null && SystemWordTemplateLogic.RequiresExtraParameters(et.SystemWordTemplate))
+                            return "SystemWordTemplate ({1}) requires extra parameters".FormatWith(et.SystemWordTemplate);
+
+                        return null;
+                    },
+                    Execute = (et, args) =>
+                    {
+                        throw new InvalidOperationException("UI-only operation");
+                    }
+                }.Register();
+
                 TemplatesByType = sb.GlobalLazy(() =>
                 {
                     var list = Database.Query<WordTemplateEntity>().Select(r => KVP.Create(r.Query, r.ToLite())).ToList();

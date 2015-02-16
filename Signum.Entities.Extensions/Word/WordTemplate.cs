@@ -97,12 +97,12 @@ namespace Signum.Entities.Word
         }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string fileNameFormat;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string FileNameFormat
+        string fileName;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
+        public string FileName
         {
-            get { return fileNameFormat; }
-            set { Set(ref fileNameFormat, value); }
+            get { return fileName; }
+            set { Set(ref fileName, value); }
         }
 
         WordTransformerSymbol wordTransformer;
@@ -137,6 +137,7 @@ namespace Signum.Entities.Word
     public static class WordTemplateOperation
     {
         public static readonly ExecuteSymbol<WordTemplateEntity> Save = OperationSymbol.Execute<WordTemplateEntity>();
+        public static readonly ExecuteSymbol<WordTemplateEntity> CreateWordReport = OperationSymbol.Execute<WordTemplateEntity>();
 
         public static readonly ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate = OperationSymbol.Construct<WordTemplateEntity>.From<SystemWordTemplateEntity>();
     }

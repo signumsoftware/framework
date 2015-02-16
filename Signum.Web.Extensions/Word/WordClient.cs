@@ -28,7 +28,8 @@ using Signum.Web.UserAssets;
 using Signum.Web.Basic;
 using Signum.Entities.Processes;
 using Signum.Web.Cultures;
-using Signum.Entities.Mailing;
+using Signum.Entities.Templating;
+using Signum.Web.Templating;
 
 namespace Signum.Web.Word
 {
@@ -50,6 +51,13 @@ namespace Signum.Web.Word
                     new EntitySettings<SystemWordTemplateEntity>{ },
                     new EntitySettings<WordTransformerSymbol>{ },
                     new EntitySettings<WordConverterSymbol>{ },
+                });
+                OperationClient.AddSetting(new EntityOperationSettings<WordTemplateEntity>(WordTemplateOperation.CreateWordReport)
+                {
+                    Group = EntityOperationGroup.None,
+                    Click = ctx => Module["createWordReportFromTemplate"](ctx.Options(), JsFunction.Event,
+                        new FindOptions(ctx.Entity.Query.ToQueryName()).ToJS(ctx.Prefix, "New"),
+                        ctx.Url.Action((WordController mc) => mc.CreateWordReport()))
                 });
             }
         }

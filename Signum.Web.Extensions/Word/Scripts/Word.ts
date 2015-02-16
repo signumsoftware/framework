@@ -95,32 +95,10 @@ export function createWordReportFromTemplate(options: Operations.EntityOperation
         if (entity == null)
             return;
 
-        Entities.EntityValue
-
         options.requestExtraJsonData = { keys: entity.runtimeInfo.key() };
 
-        options.controllerUrl = url;
-
-        if (contextual)
-            return Operations.constructFromDefaultContextual(options, event);
-        else
-            return Operations.constructFromDefault(options, event);
+        SF.submit(url,
+            contextual ? Operations.contextualRequestData(options) :
+            Operations.entityRequestData(options), $("<form method='post'></form>"));
     });
 }
-
-export function createWordReportFromEntity(options: Operations.EntityOperationOptions, event: MouseEvent, title: string, chooserOptions: Navigator.ChooserOption[] , url: string, contextual: boolean) {
-    Navigator.chooser(options.prefix + "_choose", title, chooserOptions).then(opt => {
-        if (opt == null)
-            return;
-
-        options.requestExtraJsonData = { keys: opt.value };
-
-        options.controllerUrl = url;
-
-        if (contextual)
-            return Operations.constructFromDefaultContextual(options, event);
-        else
-            return Operations.constructFromDefault(options, event);
-    });
-}
-

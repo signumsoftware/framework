@@ -14,6 +14,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Signum.Web.Operations;
+using System.IO;
 
 namespace Signum.Web.Word
 {
@@ -30,6 +31,21 @@ namespace Signum.Web.Word
                 .QueryTokenBuilderOptions(token, new Context(null, prefix), WordClient.GetQueryTokenBuilderSettings(qd, (SubTokensOptions)options));
 
             return Content(combo.ToHtmlString());
+        }
+
+        [HttpPost]
+        public FileContentResult CreateWordReport()
+        {
+            var entity = Lite.Parse(Request["keys"]).Retrieve();
+
+            var template = this.ExtractEntity<WordTemplateEntity>();
+
+            ISystemWordTemplate systemWordReport = template.SystemWordTemplate == null ? null :
+                (ISystemWordTemplate)SystemWordTemplateLogic.GetEntityConstructor(template.SystemWordTemplate.ToType()).Invoke(new[] { entity });
+
+            var bytes = template.CreateReport(entity, systemWordReport);
+
+            return File(bytes, MimeType.FromFileName(template.FileName), Path.GetFileName(template.FileName));
         }
     }
 }

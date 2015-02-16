@@ -172,7 +172,7 @@ WriteLiteral("            ");
 
             
             #line 20 "..\..\Word\Views\WordTemplate.cshtml"
-       Write(Html.ValueLine(ec, f => f.FileNameFormat));
+       Write(Html.ValueLine(ec, f => f.FileName));
 
             
             #line default
