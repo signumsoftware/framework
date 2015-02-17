@@ -1186,7 +1186,7 @@ namespace Signum.Engine.Linq
                             {
                                 int index = nex.Constructor.GetParameters().IndexOf(p => p.Name.Equals(m.Member.Name, StringComparison.InvariantCultureIgnoreCase));
 
-                                if(index == null)
+                                if(index == -1)
                                     throw new InvalidOperationException("Impossible to bind '{0}' on '{1}'".FormatWith(m.Member.Name, nex.Constructor.ConstructorSignature()));
 
                                 return nex.Arguments[index].TryConvert(m.Member.ReturningType());
