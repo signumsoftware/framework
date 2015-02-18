@@ -31,7 +31,7 @@ namespace Signum.Engine
             if (replacements == null)
                 replacements = LoadReplacements();
 
-            Match m = Regex.Match(connectionString, "(Initial Catalog|Database)=(?<databaseName>[^;]*);?", RegexOptions.IgnoreCase);
+            Match m = Regex.Match(connectionString, @"(Initial Catalog|Database)\s*=\s*(?<databaseName>[^;]*)\s*;?", RegexOptions.IgnoreCase);
 
             if (!m.Success)
                 throw new InvalidOperationException("Database name not found");
