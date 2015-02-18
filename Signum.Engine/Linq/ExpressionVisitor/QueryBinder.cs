@@ -914,7 +914,7 @@ namespace Signum.Engine.Linq
             Type returnType = mce.Method.ReturnType;
             var type = returnType.GetGenericArguments()[0];
 
-            Table table = new ViewBuilder(Schema.Current).NewView(type);
+            Table table = Schema.Current.ViewBuilder.NewView(type);
 
             Alias tableAlias = NextTableAlias(table.Name);
 

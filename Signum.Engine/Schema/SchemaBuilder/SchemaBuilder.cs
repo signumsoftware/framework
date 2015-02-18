@@ -861,7 +861,7 @@ namespace Signum.Engine.Maps
     }
 
 
-    internal class ViewBuilder : SchemaBuilder
+    public class ViewBuilder : SchemaBuilder
     {
         public ViewBuilder(Schema schema)
             : base(schema)

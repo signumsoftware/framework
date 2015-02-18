@@ -52,6 +52,8 @@ namespace Signum.Engine.Maps
 
         public SchemaAssets Assets { get; private set; }
 
+        public ViewBuilder ViewBuilder { get; set; }
+
         Dictionary<Type, Table> tables = new Dictionary<Type, Table>();
         public Dictionary<Type, Table> Tables
         {
@@ -449,6 +451,7 @@ namespace Signum.Engine.Maps
         {
             this.Settings = settings;
             this.Assets = new SchemaAssets();
+            this.ViewBuilder = new Maps.ViewBuilder(this);
 
             Generating += SchemaGenerator.SnapshotIsolation;
             Generating += SchemaGenerator.CreateSchemasScript;
