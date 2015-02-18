@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using Signum.Engine.Maps;
 using Signum.Utilities;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine
 {
@@ -30,9 +31,14 @@ namespace Signum.Engine
             if (replacements == null)
                 replacements = LoadReplacements();
 
-            string schemaName = new SqlConnection(connectionString).Database;
+            Match m = Regex.Match(connectionString, "(Initial Catalog|Database)=(?<databaseName>[^;]*);?", RegexOptions.IgnoreCase);
 
-            return replacements.TryGetC(schemaName) ?? connectionString;
+            if (!m.Success)
+                throw new InvalidOperationException("Database name not found");
+
+            string databaseName = m.Groups["databaseName"].Value;
+
+            return replacements.TryGetC(databaseName) ?? connectionString;
         }
     }
 }
