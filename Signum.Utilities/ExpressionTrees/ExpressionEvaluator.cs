@@ -56,6 +56,9 @@ namespace Signum.Utilities.ExpressionTrees
                         var conv = (UnaryExpression)expression;
                         var operand = Eval(conv.Operand);
 
+                        if(conv.Method != null)
+                            return GetExtensionMethodCaller(conv.Method)(operand);
+
                         if (operand is IConvertible)
                             return ReflectionTools.ChangeType(operand, conv.Type);
 
