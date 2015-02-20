@@ -333,7 +333,7 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
     }
 
     [AttributeUsage(AttributeTargets.Field)]
-    sealed class ViewPrimaryKeyAttribute : Attribute
+    public sealed class ViewPrimaryKeyAttribute : Attribute
     { 
     }
 
