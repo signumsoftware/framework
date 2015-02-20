@@ -394,7 +394,8 @@ ul.nav-tabs
     margin-right: 0;
 }
 
-.form-vertical .form-control
+.form-vertical .form-control,
+.form-vertical .form-control-static
 {
     display: block;
     /*width: initial;*/
