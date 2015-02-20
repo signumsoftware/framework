@@ -92,7 +92,8 @@ Lose changes?")]
 
 	Continue?")]
         ThereAreChangesContinue,
-        ThereAreErrors
+        ThereAreErrors,
+        Message
     }
 
     public enum EntityControlMessage

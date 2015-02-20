@@ -118,19 +118,19 @@ namespace Signum.Web.Controllers
                 }
             }
 
-            return this.DefaultConstructResult(entity);
+            return this.DefaultConstructResult(entity, operation: operationSymbol);
         }
 
         [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult ConstructFromMany()
         {
-            OperationSymbol operationKey = this.GetOperationKeyAssert();
+            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
 
             var lites = this.ParseLiteKeys<Entity>();
 
-            Entity entity = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, operationKey);
+            Entity entity = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, operationSymbol);
 
-            return this.DefaultConstructResult(entity);
+            return this.DefaultConstructResult(entity, operation: operationSymbol);
         }
     }
 }

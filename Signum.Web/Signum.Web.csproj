@@ -138,6 +138,12 @@
     <Compile Include="LineHelpers\EntityStripHelper.cs" />
     <Compile Include="Lines\EntityCheckboxList.cs" />
     <Compile Include="Lines\EntityStrip.cs" />
+    <Compile Include="Signum\Views\MessageBox.generated.cs">
+      <DependentUpon>MessageBox.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="MessageBoxOptions.cs" />
     <Compile Include="Widgets\LinksClient.cs" />
     <Compile Include="Widgets\WidgetsHelper.cs" />
     <Content Include="Signum\Content\Search.css" />
@@ -394,6 +400,11 @@
       <LastGenOutput>NormalPage.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
+    <Content Include="Signum\Views\MessageBox.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>MessageBox.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
+    </Content>
     <None Include="Signum\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>

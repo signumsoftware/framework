@@ -50,6 +50,7 @@ export function executeAjax(options: EntityOperationOptions): Promise<Entities.E
     return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options) })
         .then(result=> {
             Validator.assertModelStateErrors(result, options.prefix);
+            assertMessageBox(result);
             return Entities.EntityHtml.fromHtml(options.prefix, result)
         });
 }
@@ -101,8 +102,38 @@ export function constructFromAjax(options: EntityOperationOptions, newPrefix: st
     }, options);
 
     return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options, newPrefix) })
-        .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
+        .then(result=> {
+            assertMessageBox(result);
+            return Entities.EntityHtml.fromHtml(newPrefix, result);
+        });
 }
+
+export function assertMessageBox(ajaxResult) {
+
+    var mb = getMessageBoxOptions(ajaxResult);
+
+    if (mb) {
+        Navigator.openMessageBox(mb);
+        throw mb;
+    }
+}
+
+export function getMessageBoxOptions(ajaxResult): Navigator.MessageBoxOptions {
+    if (SF.isEmpty(ajaxResult))
+        return null;
+
+    if (typeof ajaxResult !== "object")
+        return null;
+
+    if (ajaxResult.result == null)
+        return null;
+
+    if (ajaxResult.result == 'messageBox')
+        return <Navigator.MessageBoxOptions>ajaxResult;
+
+    return null;
+}
+
 
 export function constructFromSubmit(options: EntityOperationOptions) : void {
     options = $.extend({
@@ -136,7 +167,10 @@ export function constructFromAjaxContextual(options: OperationOptions, newPrefix
     }, options);
 
     return SF.ajaxPost({ url: options.controllerUrl, data: contextualRequestData(options, newPrefix, runtimeInfo) })
-        .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
+        .then(result=> {
+            assertMessageBox(result);
+            return Entities.EntityHtml.fromHtml(newPrefix, result);
+        });
 }
 
 export function constructFromSubmitContextual(options: OperationOptions, runtimeInfo?: Entities.RuntimeInfo): void {
@@ -209,6 +243,9 @@ export function constructFromManyDefault(options: OperationOptions, openNewWindo
     } else {
         return constructFromManyAjax(options, getNewPrefix(options)).then(eHtml=> {
             markCells(options.prefix);
+            if (!eHtml)
+                return null;
+
             return openPopup(eHtml);
         });
     }
@@ -221,7 +258,10 @@ export function constructFromManyAjax(options: OperationOptions, newPrefix: stri
     }, options);
 
     return SF.ajaxPost({ url: options.controllerUrl, data: constructFromManyRequestData(options, newPrefix) })
-        .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
+        .then(result=> {
+            assertMessageBox(result);
+            return Entities.EntityHtml.fromHtml(newPrefix, result);
+        });
 }
 
 export function constructFromManySubmit(options: OperationOptions): void {

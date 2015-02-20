@@ -138,12 +138,21 @@ namespace Signum.Web.Operations
             return new ContentResult();
         }
 
-        public static ActionResult DefaultConstructResult(this ControllerBase controller, Entity entity, string newPrefix = null)
+        public static ActionResult DefaultConstructResult(this ControllerBase controller, Entity entity, string newPrefix = null, OperationSymbol operation = null)
         {
             var request = controller.ControllerContext.HttpContext.Request;
 
             if (newPrefix == null)
                 newPrefix = request["newPrefix"];
+
+            if (entity == null)
+            {
+                return controller.JsonNet(new MessageBoxOptions
+                {
+                    prefix = newPrefix,
+                    message = OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString(operation.Try(o=>o.NiceToString())),
+                });
+            }
 
             if (entity.Modified == ModifiedState.SelfModified)
                 controller.ViewData[ViewDataKeys.WriteEntityState] = true;

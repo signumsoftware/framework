@@ -1,0 +1,31 @@
+﻿@model Signum.Web.Context
+@{
+    ValueLineBoxOptions options = ViewBag.Options;    
+}
+
+<div id="@Model.Compose("panelPopup")" class="sf-popup-control modal fade sf-value-line-box" tabindex="-1" role="dialog" aria-labelledby="XXXX" data-prefix="@Model.Prefix">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close sf-close-button">×</button>
+                <h4>@options.title</h4>
+            </div>
+
+            <div class="modal-body">
+                <p>
+                    @options.message
+                </p>
+                @Html.ValueLine(new ValueLine(@ViewBag.type, options.value, Model, "value", null)
+                {
+                    LabelText = options.labelText,
+                    FormGroupStyle = options.labelText.HasText() ? FormGroupStyle.Basic : FormGroupStyle.None,
+                    Format = options.format,
+                    UnitText = options.unit,
+                })
+            </div>
+            <div class="modal-footer">
+                <button id="@Model.Compose("btnOk")" class="btn btn-primary sf-entity-button sf-close-button sf-ok-button">@JavascriptMessage.ok.NiceToString()</button>
+            </div>
+        </div>
+    </div>
+</div>

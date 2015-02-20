@@ -867,7 +867,8 @@ namespace Signum.Web
     public enum JsonResultType
     {
         url,
-        ModelState
+        ModelState,
+        messageBox
     }
 
     public static class JsonAction

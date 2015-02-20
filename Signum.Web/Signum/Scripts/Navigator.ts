@@ -440,6 +440,28 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
         .then(pair=> option);
 }
 
+export interface MessageBoxOptions {
+    prefix: string;
+
+    title: string;
+    message: string;
+}
+
+export function openMessageBox(options: MessageBoxOptions)
+{
+    var modalBody = $("<div>").text(options.message);
+
+    var modalDiv = createBootstrapModal({
+        titleText: options.title,
+        prefix: options.prefix,
+        body: modalBody,
+        titleClose: true,
+        footerOkId: options.prefix.child("ok")
+    });
+
+    openModal(modalDiv);
+}
+
 export interface BootstrapModalOptions {
     prefix: string;
 
