@@ -202,14 +202,14 @@ namespace Signum.Engine.Maps
             return ee.OnPreUnsafeInsert(query, constructor, entityQuery);
         }
 
-        internal void OnPreBulkInsert(Type type)
+        internal void OnPreBulkInsert(Type type, bool inMListTable)
         {
             AssertAllowed(type, inUserInterface: false);
 
             var ee = entityEvents.TryGetC(type);
 
             if (ee != null)
-                ee.OnPreBulkInsert();
+                ee.OnPreBulkInsert(inMListTable);
         }
 
         public ICacheController CacheController(Type type)

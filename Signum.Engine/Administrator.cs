@@ -517,7 +517,7 @@ namespace Signum.Engine
             var t = Schema.Current.Table<T>();
             using (Transaction tr = new Transaction())
             {
-                Schema.Current.OnPreBulkInsert(typeof(T));
+                Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
 
                 using (DisableIdentity<T>())
                 {
@@ -546,7 +546,7 @@ namespace Signum.Engine
 
             using (Transaction tr = new Transaction())
             {
-                Schema.Current.OnPreBulkInsert(typeof(T));
+                Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
 
                 Executor.BulkCopy(dt, t.Name, options);
 
@@ -593,7 +593,7 @@ namespace Signum.Engine
 
             using (Transaction tr = options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : new Transaction())
             {
-                Schema.Current.OnPreBulkInsert(typeof(E));
+                Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
 
                 Executor.BulkCopy(dt, t.Name, options);
 
