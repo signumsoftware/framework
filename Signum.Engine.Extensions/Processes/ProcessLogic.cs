@@ -312,13 +312,13 @@ namespace Signum.Engine.Processes
             }
         }
 
-        public static void ExecuteTest(this ProcessEntity p)
+        public static void ExecuteTest(this ProcessEntity p, bool writeToConsole = false)
         {
             p.QueuedDate = TimeZoneManager.Now;
             var ep = new ExecutingProcess(
                 GetProcessAlgorithm(p.Algorithm),
                 p
-            );
+            ) { WriteToConsole = writeToConsole };
 
             ep.TakeForThisMachine();
             ep.Execute();
@@ -328,7 +328,7 @@ namespace Signum.Engine.Processes
         {
             return registeredProcesses.GetOrThrow(processAlgorithm, "The process algorithm {0} is not registered");
         }
-
+        
         public static void ForEachLine<T>(this ExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action, int groupsOf = 100)
             where T : Entity, IProcessLineDataEntity, new()
         {
