@@ -42,3 +42,9 @@
 {
     overflow: hidden;    
 }
+
+.form-control.file-control {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -94,13 +94,13 @@ namespace Signum.Web.Files
                                 value.Try(f => f.FileName),
                                 hasEntity ? FilesClient.GetDownloadUrl(value) : null,
                                 "Download",
-                                "form-control",
+                                "form-control file-control",
                                 fileLine.Download == DownloadBehaviour.View ? null :
                                 new Dictionary<string, object> { { "download", value.Try(f => f.FileName) } }));
                         }
                         else
                         {
-                            sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.Try(f => f.FileName) ?? "", "form-control", null));
+                            sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.Try(f => f.FileName) ?? "", "form-control file-control", null));
                         }
 
                         if (fileLine.Type.IsEmbeddedEntity())
