@@ -345,7 +345,7 @@ namespace Signum.Engine.Cache
                 ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidate(withUpdates: true); ;
                 ee.PreUnsafeInsert += (query, constructor, entityQuery) => { DisableAndInvalidate(withUpdates: constructor.Body.Type.IsInstantiationOf(typeof(MListElement<,>))); return constructor; };
                 ee.PreUnsafeMListDelete += (mlistQuery, entityQuery) => DisableAndInvalidate(withUpdates: true);
-                ee.PreBulkInsert += () => DisableAndInvalidate(withUpdates: false);
+                ee.PreBulkInsert += inMListTable => DisableAndInvalidate(withUpdates: false);
             }
 
             public void BuildCachedTable()
