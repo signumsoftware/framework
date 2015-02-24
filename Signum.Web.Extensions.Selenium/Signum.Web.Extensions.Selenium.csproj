@@ -84,7 +84,7 @@
     <Compile Include="SeleniumExtensions.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SeleniumTestClass.cs">
+    <Compile Include="BrowserProxy.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ValidationSummaryContainer.cs">
