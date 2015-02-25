@@ -93,6 +93,9 @@ namespace Signum.Web
             var current = entityCombo.UntypedValue is IEntity ? ((IEntity)entityCombo.UntypedValue).ToLite() :
                 entityCombo.UntypedValue as Lite<IEntity>;
 
+            if (current != null && !data.Contains(current))
+                data = data.PreAnd(current);
+
             items.AddRange(
                 data.Select(lite => new SelectListItem()
                 {
