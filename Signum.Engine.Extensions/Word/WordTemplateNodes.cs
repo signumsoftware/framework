@@ -201,8 +201,6 @@ namespace Signum.Engine.Word
         public override void Synchronize(SyncronizationContext sc)
         {
             ValueProvider.Synchronize(sc, "@declare");
-
-            ValueProvider.Declare(sc.Variables);
         }
     }
 
