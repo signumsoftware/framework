@@ -76,6 +76,7 @@ namespace Signum.Web
         public ModifiableEntity Entity { get { return (ModifiableEntity)TypeContext.UntypedValue; } }
         public string Prefix { get { return TypeContext.Prefix; } }
         public string PartialViewName;
+        public UrlHelper Url;
     }
 
     public interface IEmbeddedWidget
