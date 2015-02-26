@@ -129,18 +129,19 @@ namespace Signum.Engine.Files
 
         public static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
         {
-            var list = query.Select(a => a.FullPhysicalPath).ToList();
-
-            Transaction.PostRealCommit += ud =>
+            if (!unsafeMode.Value)
             {
-                foreach (var fullPath in list)
+                var list = query.Select(a => new { a.FullPhysicalPath, a.FileType }).ToList();
+
+                Transaction.PostRealCommit += ud =>
                 {
-                    if (unsafeMode.Value)
-                        Debug.WriteLine(fullPath);
-                    else
-                        File.Delete(fullPath);
-                }
-            };
+                    foreach (var pair in list)
+                    {
+                        if (FileTypes.GetOrThrow(pair.FileType).TakesOwnership)
+                            File.Delete(pair.FullPhysicalPath);
+                    }
+                };
+            }
         }
 
         static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
@@ -174,28 +175,35 @@ namespace Signum.Engine.Files
                 using (new EntityCache(EntityCacheType.ForceNew))
                 {
                     FileTypeAlgorithm alg = FileTypes.GetOrThrow(fp.FileType);
-                    string sufix = alg.CalculateSufix(fp);
-                    if (!sufix.HasText())
-                        throw new InvalidOperationException("Sufix not set");
 
-                    do
+                    if(!alg.TakesOwnership)
                     {
-                        fp.Repository = alg.GetRepository(fp);
                         if (fp.Repository == null)
-                            throw new InvalidOperationException("Repository not set");
-                        int i = 2;
-                        fp.Sufix = sufix;
-                        while (File.Exists(fp.FullPhysicalPath) && alg.RenameOnCollision)
-                        {
-                            fp.Sufix = alg.RenameAlgorithm(sufix, i);
-                            i++;
-                        }
+                            fp.Repository = alg.GetRepository(fp);
                     }
-                    while (!SaveFile(fp));
+                    else
+                    {
+                        string sufix = alg.CalculateSufix(fp);
+                        if (!sufix.HasText())
+                            throw new InvalidOperationException("Sufix not set");
+
+                        do
+                        {
+                            fp.Repository = alg.GetRepository(fp);
+                            if (fp.Repository == null)
+                                throw new InvalidOperationException("Repository not set");
+                            int i = 2;
+                            fp.Sufix = sufix;
+                            while (File.Exists(fp.FullPhysicalPath) && alg.RenameOnCollision)
+                            {
+                                fp.Sufix = alg.RenameAlgorithm(sufix, i);
+                                i++;
+                            }
+                        }
+                        while (!SaveFile(fp));
+                    }
                 }
             }
-
-
         }
 
         const long ERROR_DISK_FULL = 112L;
@@ -270,6 +278,11 @@ namespace Signum.Engine.Files
             RenameAlgorithm = DefaultRenameAlgorithm;
             GetRepository = DefaultGetRepository;
             CalculateSufix = FileName_Sufix;
+        }
+
+        public bool TakesOwnership 
+        { 
+            get { return CalculateSufix != null; } 
         }
 
         public static readonly Func<string, int, string> DefaultRenameAlgorithm = (sufix, num) =>
