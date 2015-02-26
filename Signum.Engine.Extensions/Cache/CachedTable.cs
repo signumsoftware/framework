@@ -137,7 +137,6 @@ namespace Signum.Engine.Cache
 
         internal static readonly MethodInfo ToStringMethod = ReflectionTools.GetMethodInfo((object o) => o.ToString());
 
-
         internal abstract bool Contains(PrimaryKey primaryKey);
     }
 
@@ -309,11 +308,12 @@ namespace Signum.Engine.Cache
             get { return table; }
         }
 
+
+        internal override bool Contains(PrimaryKey primaryKey)
+        {
+            return this.rows.Value.ContainsKey(primaryKey);
+        }
     }
-
-
-   
-
 
 
     class CachedTableMList<T> : CachedTableBase
@@ -467,6 +467,11 @@ namespace Signum.Engine.Cache
         public override ITable Table
         {
             get { return table; }
+        }
+
+        internal override bool Contains(PrimaryKey primaryKey)
+        {
+            throw new InvalidOperationException("CacheMListTable does not implements contains");
         }
     }
 
@@ -657,26 +662,31 @@ namespace Signum.Engine.Cache
                 throw new InvalidOperationException("{0} not supported when caching the ToString for a Lite of a transacional entity ({1})".FormatWith(field.GetType().TypeName(), this.table.Type.TypeName()));
             }
         }
+
+        internal override bool Contains(PrimaryKey primaryKey)
+        {
+            return this.toStrings.Value.ContainsKey(primaryKey);
+        }
     }
 
     public class SemiCachedController<T> where T : Entity
     {
-        CachedTableBase table;
+        CachedTableBase cachedTable;
 
-        public SemiCachedController(CachedTableBase table)
+        public SemiCachedController(CachedTableBase cachedTable)
         {
-            this.table = table;
+            this.cachedTable = cachedTable;
 
-            CacheLogic.semiControllers.GetOrCreate(typeof(T)).Add(table);
+            CacheLogic.semiControllers.GetOrCreate(typeof(T)).Add(cachedTable);
 
             var ee = Schema.Current.EntityEvents<T>();
             ee.Saving += ident =>
             {
                 if (ident.IsGraphModified && !ident.IsNew)
                 {
-                    table.LoadAll();
+                    cachedTable.LoadAll();
 
-                    if (table.Contains(ident.Id))
+                    if (cachedTable.Contains(ident.Id))
                         DisableAndInvalidate();
                 }
             };
@@ -705,7 +715,7 @@ namespace Signum.Engine.Cache
 
         void DisableAndInvalidate()
         {
-            CacheLogic.DisableAllConnectedTypesInTransaction(typeof(T));
+            CacheLogic.DisableAllConnectedTypesInTransaction(this.cachedTable.controller.Type);
 
             Transaction.PostRealCommit -= Transaction_PostRealCommit;
             Transaction.PostRealCommit += Transaction_PostRealCommit;
@@ -713,8 +723,8 @@ namespace Signum.Engine.Cache
 
         void Transaction_PostRealCommit(Dictionary<string, object> obj)
         {
-            table.ResetAll(forceReset: false);
-            CacheLogic.NotifyInvalidateAllConnectedTypes(typeof(T));
+            cachedTable.ResetAll(forceReset: false);
+            CacheLogic.NotifyInvalidateAllConnectedTypes(this.cachedTable.controller.Type);
         }
     }
 }

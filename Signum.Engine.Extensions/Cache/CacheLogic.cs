@@ -468,6 +468,11 @@ namespace Signum.Engine.Cache
                 if (Invalidated != null)
                     Invalidated(this, CacheEventArgs.Invalidated);
             }
+
+            public Type Type
+            {
+                get { return typeof(T); }
+            }
         }
 
         internal static Dictionary<Type, List<CachedTableBase>> semiControllers = new Dictionary<Type, List<CachedTableBase>>();
@@ -762,6 +767,8 @@ namespace Signum.Engine.Cache
 
     internal interface ICacheLogicController : ICacheController
     {
+        Type Type { get; }
+
         event EventHandler<CacheEventArgs> Invalidated;
 
         CachedTableBase CachedTable { get; }
