@@ -397,6 +397,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Pop3Configuration.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\Views\SmtpNetworkDelivery.generated.cs">
+      <DependentUpon>SmtpNetworkDelivery.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Mailing\WebMailProcessor.cs" />
     <Compile Include="Scheduler\Controllers\SchedulerController.cs" />
     <Compile Include="Scheduler\Views\SchedulerPanel.generated.cs">
@@ -691,10 +696,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NewsletterDelivery.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\Views\SmtpConfiguration.View.generated.cs">
+    <Compile Include="Mailing\Views\SmtpConfiguration.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>SmtpConfiguration.View.cshtml</DependentUpon>
+      <DependentUpon>SmtpConfiguration.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1265,9 +1270,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>StatisticsTable.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Mailing\Views\SmtpConfiguration.View.cshtml">
+    <Content Include="Mailing\Views\SmtpConfiguration.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>SmtpConfiguration.View.generated.cs</LastGenOutput>
+      <LastGenOutput>SmtpConfiguration.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Mailing\Views\Newsletter.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1472,6 +1477,10 @@
     <Content Include="Files\Views\FilePath.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>FilePath.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\SmtpNetworkDelivery.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SmtpNetworkDelivery.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
