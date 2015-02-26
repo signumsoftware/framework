@@ -13,7 +13,6 @@
     @Html.ValueLine(nc, n => n.Name)
     @Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true)
 
-    @Html.EntityCombo(nc, n => n.SmtpConfig)
     @Html.ValueLine(nc, n => n.From)
     @Html.ValueLine(nc, n => n.DisplayFrom)
 

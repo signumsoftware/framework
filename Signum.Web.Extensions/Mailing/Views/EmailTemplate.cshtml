@@ -12,7 +12,6 @@
         @Html.ValueLine(ec, e => e.Name)
         @Html.EntityCombo(ec, e => e.SystemEmail)
         @Html.EntityLine(ec, e => e.Query)
-        @Html.EntityLine(ec, e => e.SmtpConfiguration)
         <div class="row">
             <div class="col-sm-4">
                 @Html.ValueLine(ec, e => e.EditableMessage, vl => vl.InlineCheckbox = true)

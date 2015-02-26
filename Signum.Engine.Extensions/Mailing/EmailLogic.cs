@@ -49,18 +49,26 @@ namespace Signum.Engine.Mailing
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEntity> getConfiguration, Func<SmtpConfigurationEntity> defaultSmtpConfiguration)
+        public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient;
+        
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEntity> getConfiguration, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration,  Func<EmailMessageEntity, SmtpClient> getSmtpClient = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
+            {   
+                if (getSmtpClient == null && getSmtpConfiguration != null)
+                    getSmtpClient = message => getSmtpConfiguration(message.Template.Try(EmailTemplateLogic.EmailTemplatesLazy.Value.GetOrThrow)).GenerateSmtpClient();
+
+                if (getSmtpClient == null)
+                    throw new ArgumentNullException("getSmtpClient");
+
                 FilePathLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
-                EmailTemplateLogic.Start(sb, dqm);
-                SmtpConfigurationLogic.Start(sb, dqm, defaultSmtpConfiguration ?? (Func<SmtpConfigurationEntity>)(() => null)); 
+                EmailLogic.GetSmtpClient = getSmtpClient;
+                EmailTemplateLogic.Start(sb, dqm, getSmtpConfiguration);
 
                 sb.Include<EmailMessageEntity>();
 
@@ -283,7 +291,6 @@ namespace Signum.Engine.Mailing
                         Body = m.Body,
                         IsBodyHtml = m.IsBodyHtml,
                         Template = m.Template,
-                        SmtpConfiguration = m.SmtpConfiguration,
                         EditableMessage = m.EditableMessage,
                         State = EmailMessageState.Created
                     }
@@ -354,8 +361,8 @@ namespace Signum.Engine.Mailing
                 try
                 {
                     MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
-
-                    CreateSmtpClient(email).Send(message);
+                    
+                    EmailLogic.GetSmtpClient(email).Send(message);
 
                     email.State = EmailMessageState.Sent;
                     email.Sent = TimeZoneManager.Now;
@@ -388,30 +395,6 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        SmtpClient CreateSmtpClient(EmailMessageEntity email)
-        {
-            if (email.SmtpConfiguration != null)
-            {
-                return email.SmtpConfiguration.Retrieve().GenerateSmtpClient();
-            }
-
-            if (email.Template != null)
-            {
-                var smtp = email.Template.InDB(t => t.SmtpConfiguration);
-                if (smtp != null)
-                    return smtp.GenerateSmtpClient();
-            }
-
-            if (SmtpConfigurationLogic.DefaultSmtpConfiguration != null)
-            {
-                var val = SmtpConfigurationLogic.DefaultSmtpConfiguration();
-                if (val != null)
-                    return val.GenerateSmtpClient();
-            }
-
-            return EmailLogic.SafeSmtpClient();
-        }
-
         public virtual void SendAsync(EmailMessageEntity email)
         {
             using (OperationLogic.AllowSave<EmailMessageEntity>())
@@ -426,7 +409,7 @@ namespace Signum.Engine.Mailing
                     }
                     else
                     {
-                        SmtpClient client = CreateSmtpClient(email);
+                        SmtpClient client = EmailLogic.GetSmtpClient(email);
 
                         MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
 

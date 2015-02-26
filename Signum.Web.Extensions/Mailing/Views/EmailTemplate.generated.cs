@@ -120,17 +120,6 @@ WriteLiteral("        ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
-
-WriteLiteral("        ");
-
-            
-            #line 15 "..\..\Mailing\Views\EmailTemplate.cshtml"
-   Write(Html.EntityLine(ec, e => e.SmtpConfiguration));
-
-            
-            #line default
-            #line hidden
 WriteLiteral("\r\n        <div");
 
 WriteLiteral(" class=\"row\"");
@@ -144,7 +133,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 18 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 17 "..\..\Mailing\Views\EmailTemplate.cshtml"
            Write(Html.ValueLine(ec, e => e.EditableMessage, vl => vl.InlineCheckbox = true));
 
             
@@ -159,7 +148,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 21 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 20 "..\..\Mailing\Views\EmailTemplate.cshtml"
            Write(Html.ValueLine(ec, e => e.DisableAuthorization, vl => vl.InlineCheckbox = true));
 
             
@@ -174,7 +163,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 24 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 23 "..\..\Mailing\Views\EmailTemplate.cshtml"
            Write(Html.ValueLine(ec, e => e.SendDifferentMessages, vl => vl.InlineCheckbox = true));
 
             
@@ -183,7 +172,7 @@ WriteLiteral("                ");
 WriteLiteral("\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
 
             
-            #line 28 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 27 "..\..\Mailing\Views\EmailTemplate.cshtml"
     
     if (!ec.Value.IsNew)
     {
@@ -206,7 +195,7 @@ WriteLiteral(">\r\n        <fieldset>\r\n            <legend>Active</legend>\r\n
 WriteLiteral("            ");
 
             
-            #line 38 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 37 "..\..\Mailing\Views\EmailTemplate.cshtml"
        Write(Html.ValueLine(sc, e => e.Active, vl => vl.InlineCheckbox = true));
 
             
@@ -217,7 +206,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 39 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 38 "..\..\Mailing\Views\EmailTemplate.cshtml"
        Write(Html.ValueLine(sc, e => e.StartDate));
 
             
@@ -228,7 +217,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 40 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 39 "..\..\Mailing\Views\EmailTemplate.cshtml"
        Write(Html.ValueLine(sc, e => e.EndDate));
 
             
@@ -237,7 +226,7 @@ WriteLiteral("            ");
 WriteLiteral("\r\n        </fieldset>\r\n    </div>\r\n");
 
             
-            #line 43 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 42 "..\..\Mailing\Views\EmailTemplate.cshtml"
         }
     }
     ec.LabelColumns = new BsColumn(2);
@@ -257,20 +246,20 @@ WriteLiteral(" style=\"clear:both\"");
 WriteLiteral("></div>\r\n");
 
             
-            #line 52 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 51 "..\..\Mailing\Views\EmailTemplate.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 52 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 51 "..\..\Mailing\Views\EmailTemplate.cshtml"
 Write(Html.EntityDetail(ec, e => e.From, el => el.PreserveViewData = true));
 
             
             #line default
             #line hidden
             
-            #line 52 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 51 "..\..\Mailing\Views\EmailTemplate.cshtml"
                                                                          
 
             
@@ -285,7 +274,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 54 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 53 "..\..\Mailing\Views\EmailTemplate.cshtml"
    Write(Html.EntityRepeater(ec, e => e.Recipients, el => el.PreserveViewData = true));
 
             
@@ -294,34 +283,34 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 56 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 55 "..\..\Mailing\Views\EmailTemplate.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 56 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 55 "..\..\Mailing\Views\EmailTemplate.cshtml"
 Write(Html.EntityLine(ec, e => e.MasterTemplate));
 
             
             #line default
             #line hidden
             
-            #line 56 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 55 "..\..\Mailing\Views\EmailTemplate.cshtml"
                                                
     
             
             #line default
             #line hidden
             
-            #line 57 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 56 "..\..\Mailing\Views\EmailTemplate.cshtml"
 Write(Html.ValueLine(ec, e => e.IsBodyHtml));
 
             
             #line default
             #line hidden
             
-            #line 57 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 56 "..\..\Mailing\Views\EmailTemplate.cshtml"
                                           
 
 
@@ -337,7 +326,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 60 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 59 "..\..\Mailing\Views\EmailTemplate.cshtml"
    Write(Html.EntityTabRepeater(ec, e => e.Messages, er =>
        {
            er.PreserveViewData = true;
@@ -349,7 +338,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n\r\n    </div>\r\n");
 
             
-            #line 66 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 65 "..\..\Mailing\Views\EmailTemplate.cshtml"
     }
 }
 
@@ -361,7 +350,7 @@ WriteLiteral("\r\n<script>\r\n    $(function () {\r\n");
 WriteLiteral("        ");
 
             
-            #line 71 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 70 "..\..\Mailing\Views\EmailTemplate.cshtml"
     Write(MailingClient.Module["initReplacements"]());
 
             

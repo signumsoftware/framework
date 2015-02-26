@@ -33,7 +33,7 @@ namespace Signum.Engine.Mailing
 
             this.queryName = QueryLogic.ToQueryName(template.Query.Key);
             this.qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            this.smtpConfig = template.SmtpConfiguration.Try(SmtpConfigurationLogic.RetrieveFromCache) ?? SmtpConfigurationLogic.DefaultSmtpConfiguration();
+            this.smtpConfig = EmailTemplateLogic.GetSmtpConfiguration == null ? null : EmailTemplateLogic.GetSmtpConfiguration(template);
         }
 
         ResultTable table;
@@ -57,7 +57,6 @@ namespace Signum.Engine.Mailing
                         IsBodyHtml = template.IsBodyHtml,
                         EditableMessage = template.EditableMessage,
                         Template = template.ToLite(),
-                        SmtpConfiguration = template.SmtpConfiguration,
                     };
 
                     CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault().ToCultureInfo();

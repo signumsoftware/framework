@@ -33,13 +33,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref state, value); }
         }
 
-        Lite<SmtpConfigurationEntity> smtpConfig = DefaultSmtpConfig();
-        public Lite<SmtpConfigurationEntity> SmtpConfig
-        {
-            get { return smtpConfig; }
-            set { Set(ref smtpConfig, value); }
-        }
-
         [NotNullable, SqlDbType(Size = 100)]
         string from;
         [EMailValidator, StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -101,7 +94,6 @@ namespace Signum.Entities.Mailing
             return ToStringExpression.Evaluate(this);
         }
 
-        public static Func<Lite<SmtpConfigurationEntity>> DefaultSmtpConfig;
 
         QueryEntity query;
         public QueryEntity Query

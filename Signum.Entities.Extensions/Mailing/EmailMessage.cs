@@ -52,13 +52,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref from, value); }
         }
 
-        Lite<SmtpConfigurationEntity> smtpConfiguration;
-        public Lite<SmtpConfigurationEntity> SmtpConfiguration
-        {
-            get { return smtpConfiguration; }
-            set { Set(ref smtpConfiguration, value); }
-        }
-
         Lite<EmailTemplateEntity> template;
         public Lite<EmailTemplateEntity> Template
         {

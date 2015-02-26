@@ -19,15 +19,12 @@ namespace Signum.Engine.Mailing
     public static class SmtpConfigurationLogic
     {
         public static ResetLazy<Dictionary<Lite<SmtpConfigurationEntity>, SmtpConfigurationEntity>> SmtpConfigCache;
-        public static Func<SmtpConfigurationEntity> DefaultSmtpConfiguration;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<SmtpConfigurationEntity> defaultSmtpConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SmtpConfigurationEntity>();
-
-                DefaultSmtpConfiguration = defaultSmtpConfiguration;
 
                 dqm.RegisterQuery(typeof(SmtpConfigurationEntity), () =>
                     from s in Database.Query<SmtpConfigurationEntity>()

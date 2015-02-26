@@ -100,13 +100,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref masterTemplate, value); }
         }
 
-        Lite<SmtpConfigurationEntity> smtpConfiguration;
-        public Lite<SmtpConfigurationEntity> SmtpConfiguration
-        {
-            get { return smtpConfiguration; }
-            set { Set(ref smtpConfiguration, value); }
-        }
-
         bool isBodyHtml = true;
         public bool IsBodyHtml
         {

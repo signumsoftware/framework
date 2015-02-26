@@ -22,6 +22,7 @@ using Signum.Engine.Translation;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
 using Signum.Engine.Templating;
+using System.Net.Mail;
 
 namespace Signum.Engine.Mailing
 {
@@ -39,13 +40,17 @@ namespace Signum.Engine.Mailing
             return EmailTemplatesExpression.Evaluate(se);
         }
         
-        public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy; 
+        public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static Func<EmailTemplateEntity, SmtpConfigurationEntity> GetSmtpConfiguration;
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 CultureInfoLogic.AssertStarted(sb);
+
+                GetSmtpConfiguration = getSmtpConfiguration;
 
                 sb.Include<EmailTemplateEntity>();       
 
@@ -216,7 +221,6 @@ namespace Signum.Engine.Mailing
                 {
                     Construct = _ => new EmailTemplateEntity 
                     { 
-                        SmtpConfiguration = SmtpConfigurationLogic.DefaultSmtpConfiguration().ToLite(),
                         MasterTemplate = EmailMasterTemplateLogic.GetDefaultMasterTemplate(),
                     }
                 }.Register();
