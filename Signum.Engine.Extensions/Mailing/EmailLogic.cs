@@ -348,16 +348,16 @@ namespace Signum.Engine.Mailing
 
         public virtual void Send(EmailMessageEntity email)
         {
-            if (!EmailLogic.Configuration.SendEmails)
-            {
-                email.State = EmailMessageState.Sent;
-                email.Sent = TimeZoneManager.Now;
-                email.Save();
-                return;
-            }
-
             using (OperationLogic.AllowSave<EmailMessageEntity>())
             {
+                if (!EmailLogic.Configuration.SendEmails)
+                {
+                    email.State = EmailMessageState.Sent;
+                    email.Sent = TimeZoneManager.Now;
+                    email.Save();
+                    return;
+                }
+
                 try
                 {
                     MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);

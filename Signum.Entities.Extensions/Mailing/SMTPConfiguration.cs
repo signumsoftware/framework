@@ -36,9 +36,9 @@ namespace Signum.Entities.Mailing
             set { Set(ref network, value); }
         }
 
-        [NotNullable, SqlDbType(Size = 300)]
+        [SqlDbType(Size = 300)]
         string pickupDirectoryLocation;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300), FileNameValidator]
         public string PickupDirectoryLocation
         {
             get { return pickupDirectoryLocation; }
