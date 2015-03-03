@@ -35,9 +35,7 @@ namespace Signum.Web.Files
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.RegisterArea(typeof(FilesClient));
-
-                FileRepositoryEntity.OverridenPhisicalCurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-
+                
                 UrlsRepository.DefaultSFUrls.AddRange(new Dictionary<string, Func<UrlHelper, string>>
                 {
                     { "uploadFile", url=>url.Action<FileController>(fc => fc.Upload()) },
@@ -68,7 +66,6 @@ namespace Signum.Web.Files
 
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<FileRepositoryEntity>{ PartialViewName = e => ViewPrefix.FormatWith("FileRepository")},
                         new EntitySettings<FilePathEntity>{ PartialViewName = e => ViewPrefix.FormatWith("FilePath")},
                         new EntitySettings<FileTypeSymbol>(),
                     });

@@ -34,7 +34,7 @@ namespace Signum.Engine.Files
         {
             return WebDownloadExpression.Evaluate(fp);
         }
-
+        
         public static Dictionary<FileTypeSymbol, FileTypeAlgorithm> FileTypes = new Dictionary<FileTypeSymbol, FileTypeAlgorithm>();
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -50,6 +50,7 @@ namespace Signum.Engine.Files
 
                 SymbolLogic<FileTypeSymbol>.Start(sb, () => FileTypes.Keys.ToHashSet());
 
+                sb.Schema.EntityEvents<FilePathEntity>().Retrieved += FilePathLogic_Retrieved;
                 sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
 
@@ -61,9 +62,8 @@ namespace Signum.Engine.Files
                         p.Id,
                         p.FileName,
                         p.FileType,
-                        p.FullPhysicalPath,
-                        p.FullWebPath,
-                        p.Repository
+                        p.FullPhysicalPath, //The whole entity is retrieved but is lightweight anyway
+                        p.FullWebPath
                     });
 
                 new Graph<FilePathEntity>.Execute(FilePathOperation.Save)
@@ -93,18 +93,6 @@ namespace Signum.Engine.Files
 
                 OperationLogic.SetProtectedSave<FilePathEntity>(false);
 
-                dqm.RegisterQuery(typeof(FileRepositoryEntity), () =>
-                    from r in Database.Query<FileRepositoryEntity>()
-                    select new
-                    {
-                        Entity = r,
-                        r.Id,
-                        r.Name,
-                        r.Active,
-                        r.PhysicalPrefix,
-                        r.WebPrefix
-                    });
-                
                 dqm.RegisterQuery(typeof(FileTypeSymbol), () =>
                     from f in Database.Query<FileTypeSymbol>()
                     select new
@@ -113,18 +101,30 @@ namespace Signum.Engine.Files
                         f.Key
                     });
 
-                sb.AddUniqueIndex<FilePathEntity>(f => new { f.Sufix, f.Repository });
+                sb.AddUniqueIndex<FilePathEntity>(f => new { f.Sufix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
 
                 dqm.RegisterExpression((FilePathEntity fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
                 dqm.RegisterExpression((FilePathEntity fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
 
-                new Graph<FileRepositoryEntity>.Execute(FileRepositoryOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (fr, _) => { }
-                }.Register();
+                sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
             }
+        }
+
+        static void Schema_SchemaCompleted()
+        {
+            var errors = (from kvp in FileTypes
+                          let error = kvp.Value.Errors()
+                          where error.HasText()
+                          select kvp.Key + ": " + error.Indent(4)).ToList();
+
+            if (errors.Any())
+                throw new InvalidOperationException("Errors in the following FileType algorithms: \r\n" +
+                    errors.ToString("\r\n").Indent(4));
+        }
+
+        static void FilePathLogic_Retrieved(FilePathEntity fp)
+        {
+            fp.prefixPair = FilePathLogic.FileTypes.GetOrThrow(fp.FileType).GetPrefixPair(fp);
         }
 
         public static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
@@ -153,21 +153,6 @@ namespace Signum.Engine.Files
             return new Disposable(() => unsafeMode.Value = false);
         }
 
-        public static FilePathEntity UnsafeLoad(FileRepositoryEntity repository, FileTypeSymbol fileType, string fullPath)
-        {
-            if (!fullPath.StartsWith(repository.FullPhysicalPrefix, StringComparison.InvariantCultureIgnoreCase))
-                throw new InvalidOperationException("The File {0} doesn't belong to the repository {1}".FormatWith(fullPath, repository.PhysicalPrefix));
-
-            return new FilePathEntity
-            {
-                FileLength = (int)new FileInfo(fullPath).Length,
-                FileType = fileType,
-                Sufix = fullPath.Substring(repository.FullPhysicalPrefix.Length).TrimStart('\\'),
-                FileName = Path.GetFileName(fullPath),
-                Repository = repository,
-            };
-        }
-
         public static void FilePath_PreSaving(FilePathEntity fp, ref bool graphModified)
         {
             if (fp.IsNew && !unsafeMode.Value)
@@ -176,41 +161,29 @@ namespace Signum.Engine.Files
                 {
                     FileTypeAlgorithm alg = FileTypes.GetOrThrow(fp.FileType);
 
-                    if(!alg.TakesOwnership)
-                    {
-                        if (fp.Repository == null)
-                            fp.Repository = alg.GetRepository(fp);
-                    }
-                    else
+                    if(alg.TakesOwnership)
                     {
                         string sufix = alg.CalculateSufix(fp);
                         if (!sufix.HasText())
                             throw new InvalidOperationException("Sufix not set");
 
-                        do
+                        fp.prefixPair = alg.GetPrefixPair(fp);
+
+                        int i = 2;
+                        fp.Sufix = sufix;
+                        while (File.Exists(fp.FullPhysicalPath) && alg.RenameOnCollision)
                         {
-                            fp.Repository = alg.GetRepository(fp);
-                            if (fp.Repository == null)
-                                throw new InvalidOperationException("Repository not set");
-                            int i = 2;
-                            fp.Sufix = sufix;
-                            while (File.Exists(fp.FullPhysicalPath) && alg.RenameOnCollision)
-                            {
-                                fp.Sufix = alg.RenameAlgorithm(sufix, i);
-                                i++;
-                            }
+                            fp.Sufix = alg.RenameAlgorithm(sufix, i);
+                            i++;
                         }
-                        while (!SaveFile(fp));
                     }
                 }
             }
         }
 
-        const long ERROR_DISK_FULL = 112L;
 
         private static bool SaveFile(FilePathEntity fp)
         {
-
             string fullPhysicalPath = null;
             try
             {
@@ -226,17 +199,7 @@ namespace Signum.Engine.Files
                 ex.Data.Add("FullPhysicalPath", fullPhysicalPath);
                 ex.Data.Add("CurrentPrincipal", System.Threading.Thread.CurrentPrincipal.Identity.Name);
 
-                int hresult = (int)ex.GetType().GetField("_HResult",
-                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(ex); // The error code is stored in just the lower 16 bits
-                if ((hresult & 0xFFFF) == ERROR_DISK_FULL)
-                {
-                    fp.Repository.Active = false;
-                    using (OperationLogic.AllowSave<FileRepositoryEntity>())
-                        Database.Save(fp.Repository);
-                    return false;
-                }
-                else
-                    throw;
+                throw;
             }
             return true;
         }
@@ -255,42 +218,30 @@ namespace Signum.Engine.Files
         {
             return File.ReadAllBytes(fp.InDB(f => f.FullPhysicalPath));
         }
-
-
     }
 
     public sealed class FileTypeAlgorithm
     {
-        public Func<FilePathEntity, FileRepositoryEntity> GetRepository { get; set; }
+        public Func<FilePathEntity, PrefixPair> GetPrefixPair { get; set; }
         public Func<FilePathEntity, string> CalculateSufix { get; set; }
 
-        bool renameOnCollision = true;
-        public bool RenameOnCollision
-        {
-            get { return renameOnCollision; }
-            set { renameOnCollision = value; }
-        }
+        public bool RenameOnCollision {get; set;}
+         public bool TakesOwnership {get; set;}
 
         public Func<string, int, string> RenameAlgorithm { get; set; }
 
         public FileTypeAlgorithm()
         {
-            RenameAlgorithm = DefaultRenameAlgorithm;
-            GetRepository = DefaultGetRepository;
+            TakesOwnership = true;
             CalculateSufix = FileName_Sufix;
-        }
 
-        public bool TakesOwnership 
-        { 
-            get { return CalculateSufix != null; } 
+            RenameOnCollision = true;        
+            RenameAlgorithm = DefaultRenameAlgorithm;
         }
 
         public static readonly Func<string, int, string> DefaultRenameAlgorithm = (sufix, num) =>
            Path.Combine(Path.GetDirectoryName(sufix),
               "{0}({1}){2}".FormatWith(Path.GetFileNameWithoutExtension(sufix), num, Path.GetExtension(sufix)));
-
-        public static readonly Func<FilePathEntity, FileRepositoryEntity> DefaultGetRepository = (FilePathEntity fp) =>
-            Database.Query<FileRepositoryEntity>().FirstOrDefault(r => r.Active && r.FileTypes.Contains(fp.FileType));
 
         public static readonly Func<FilePathEntity, string> FileName_Sufix = (FilePathEntity fp) => fp.FileName;
 
@@ -303,5 +254,24 @@ namespace Signum.Engine.Files
         public static readonly Func<FilePathEntity, string> YearMonth_Guid_Filename_Sufix = (FilePathEntity fp) => Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
         public static readonly Func<FilePathEntity, string> Isolated_YearMonth_Guid_Filename_Sufix = (FilePathEntity fp) => Path.Combine(IsolationEntity.Current.IdOrNull.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
 
+
+        public string Errors()
+        {
+            string error = null;
+
+            if (GetPrefixPair == null)
+                error = "GetPrefixPair";
+
+            if (TakesOwnership && CalculateSufix == null)
+                error = ", ".CombineIfNotEmpty(error,  "CalculateSufix");
+
+            if (RenameOnCollision && RenameAlgorithm == null)
+                error = ", ".CombineIfNotEmpty(error, "RenameAlgorithm");
+
+            if (error.HasText())
+                error += " not set";
+
+            return error;
+        }
     }
 }

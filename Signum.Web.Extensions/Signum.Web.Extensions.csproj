@@ -310,11 +310,6 @@
     </Compile>
     <Compile Include="Isolation\IsolationClient.cs" />
     <Compile Include="Isolation\IsolationWidgetHelper.cs" />
-    <Compile Include="Files\Views\FileRepository.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>FileRepository.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Files\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1380,10 +1375,6 @@
     <Content Include="Notes\Views\NoteType.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>NoteType.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Files\Views\FileRepository.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>FileRepository.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Files\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>

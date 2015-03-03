@@ -10,6 +10,8 @@ using System.Linq.Expressions;
 using System.ComponentModel;
 using System.Web;
 using Signum.Entities.Patterns;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
 namespace Signum.Entities.Files
 {
@@ -105,35 +107,45 @@ namespace Signum.Entities.Files
             internal set { Set(ref fileType, value); }
         }
 
-        [NotNullable]
-        FileRepositoryEntity repository;
-        public FileRepositoryEntity Repository
-        {
-            get { return repository; }
-            set { Set(ref repository, value); }
-        }
+        [Ignore]
+        internal PrefixPair prefixPair;
 
-        static Expression<Func<FilePathEntity, string>> FullPhysicalPathExpression = fp => Path.Combine(fp.Repository.FullPhysicalPrefix, fp.Sufix);
         public string FullPhysicalPath
         {
-            get { return Repository == null ? null : Path.Combine(Repository.FullPhysicalPrefix, Sufix); }
+            get { return prefixPair == null ? null : Path.Combine(prefixPair.PhysicalPrefix, Sufix); }
         }
 
-        static Expression<Func<FilePathEntity, string>> FullWebPathExpression = fp =>
-            fp.Repository != null && fp.Repository.WebPrefix.HasText() ?
-                fp.Repository.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(fp.Sufix.Replace("\\", "/")) :
-                null;
         public string FullWebPath
         {
-            get
-            {
-                return FullWebPathExpression.Evaluate(this);
-            }
+            get { return prefixPair == null || string.IsNullOrEmpty(prefixPair.WebPrefix) ? null : prefixPair.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Sufix.Replace("\\", "/")); }
         }
 
         public override string ToString()
         {
             return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize(true));
+        }
+    }
+
+    public class PrefixPair 
+    {
+        public PrefixPair(string physicalPrefix)
+        {
+            this.PhysicalPrefix = physicalPrefix;
+        }
+
+        public string PhysicalPrefix;
+        public string WebPrefix;
+    }
+
+    [Serializable]
+    public class FileTypeSymbol : Symbol
+    {
+        private FileTypeSymbol() { }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public FileTypeSymbol([CallerMemberName]string memberName = null) :
+            base(new StackFrame(1, false), memberName)
+        {
         }
     }
 
