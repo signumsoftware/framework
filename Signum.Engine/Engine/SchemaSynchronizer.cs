@@ -82,7 +82,6 @@ namespace Signum.Engine
 
             using (replacements.WithReplacedDatabaseName())
             {
-
                 //use database without replacements to just remove indexes
                 SqlPreCommand dropStatistics =
                     Synchronizer.SynchronizeScript(model, database,
