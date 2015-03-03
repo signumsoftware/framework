@@ -892,6 +892,8 @@ namespace Signum.Entities
         _0IsNotAllowedOnState1,
         [Description("{0} is not set")]
         _0IsNotSet,
+        [Description("{0} is set")]
+        _0IsSet,
         [Description("{0} is not a {1}")]
         _0IsNotA1_G,
         [Description("be a {0}")]
@@ -955,7 +957,7 @@ namespace Signum.Entities
         _0ShouldBeADateInThePast,
         BeInThePast,
         [Description("{0} should be greater than {1}")]
-        _0ShouldBeGreaterThan1
+        _0ShouldBeGreaterThan1,
     }
 
 
