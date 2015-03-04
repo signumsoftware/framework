@@ -204,6 +204,16 @@ namespace Signum.Web.Operations
             return operationSymbol;
         }
 
+        public static OperationInfo TryGetOperationInfo(this ControllerBase controllerType, Type type)
+        {
+            OperationSymbol operationSymbol = controllerType.TryGetOperationKeyAsset();
+
+            if (operationSymbol == null)
+                return null;
+
+            return OperationLogic.GetOperationInfo(type, operationSymbol);
+        }
+
         public static bool IsLite(this Controller controller)
         {
             return controller.Request.RequestContext.HttpContext.Request["isLite"] == "true";
@@ -427,9 +437,8 @@ namespace Signum.Web.Operations
 
         private OperationInfo GetConstructor(ConstructorContext ctx)
         {
-            var operation = ctx.Controller.TryGetOperationKeyAsset();
-
-            OperationInfo constructor = OperationInfos(ctx.Type).SingleOrDefaultEx(a => a.OperationType == OperationType.Constructor && (operation == null || a.OperationSymbol.Equals(operation)));
+            OperationInfo constructor = OperationInfos(ctx.Type).SingleOrDefaultEx(a => a.OperationType == OperationType.Constructor &&
+                (ctx.OperationInfo == null || a.OperationSymbol.Equals(ctx.OperationInfo.OperationSymbol)));
 
             if (constructor == null)
                 throw new InvalidOperationException("No Constructor operation found");
