@@ -99,7 +99,7 @@ namespace Signum.Engine.Word
                 
                 new Graph<WordTemplateEntity>.ConstructFrom<SystemWordTemplateEntity>(WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate)
                 {
-                    Construct = (se, _) => CreateDefaultTemplate(se)
+                    Construct = (se, _) => CreateDefaultTemplate(se).Save()
                 }.Register();
 
                 SystemWordTemplateToWordTemplates = sb.GlobalLazy(() => (
