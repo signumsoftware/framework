@@ -30,9 +30,15 @@ using System.Data;
 
 namespace Signum.Engine.Cache
 {
+    public interface ICacheMultiServerInvalidator
+    {
+        void SendInvalidation(string tableName);
+        event Action<string> ReceiveInvalidation;
+    }
+
     public static class CacheLogic
     {
-        public static bool CheckOwner = false;
+        public static ICacheMultiServerInvalidator CacheInvalidator; 
 
         public static bool WithSqlDependency { get; internal set; }
 
@@ -40,7 +46,7 @@ namespace Signum.Engine.Cache
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
         }
 
         /// <summary>
@@ -50,7 +56,7 @@ namespace Signum.Engine.Cache
         ///    Change Server Authentication mode and enable SA: http://msdn.microsoft.com/en-us/library/ms188670.aspx
         ///    Change Database ownership to sa: ALTER AUTHORIZATION ON DATABASE::yourDatabase TO sa
         /// </summary>
-        public static void Start(SchemaBuilder sb, bool? withSqlDependency = null)
+        public static void Start(SchemaBuilder sb, bool? withSqlDependency = null, ICacheMultiServerInvalidator cacheInvalidator = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -63,10 +69,29 @@ namespace Signum.Engine.Cache
 
                 WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
 
+                if (cacheInvalidator != null && WithSqlDependency)
+                    throw new InvalidOperationException("cacheInvalidator is only necessary if SqlDependency is not enabled");
+
+                CacheInvalidator = cacheInvalidator;
+                if(CacheInvalidator != null)
+                {
+                    CacheInvalidator.ReceiveInvalidation += CacheInvalidator_ReceiveInvalidation;
+                }
+
                 sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
             }
         }
 
+        static void CacheInvalidator_ReceiveInvalidation(string tableName)
+        {
+            Type type = TypeEntity.TryGetType(tableName);
+
+            var c = controllers.GetOrThrow(type);
+
+            c.CachedTable.ResetAll(forceReset: false);
+
+            c.NotifyInvalidated();
+        }
 
         public static TextWriter LogWriter;
         public static List<T> ToListWithInvalidation<T>(this IQueryable<T> simpleQuery, Type type, string exceptionContext, Action<SqlNotificationEventArgs> invalidation)
@@ -130,7 +155,7 @@ namespace Signum.Engine.Cache
             return list;
         }
 
-        public static void ExecuteDataReaderOpionalDependency(this SqlConnector connector, SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action<FieldReader> forEach)
+        public static void ExecuteDataReaderOptionalDependency(this SqlConnector connector, SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action<FieldReader> forEach)
         {
             if (WithSqlDependency)
             {
@@ -335,17 +360,17 @@ namespace Signum.Engine.Cache
 
                 ee.CacheController = this;
                 ee.Saving += ident =>
-            {
+                {
                     if (ident.IsGraphModified)
-            {
+                    {
                         DisableAndInvalidate(withUpdates: !ident.IsNew);
-            }
+                    }
                 };
                 ee.PreUnsafeDelete += query => DisableAndInvalidate(withUpdates: false); ;
                 ee.PreUnsafeUpdate += (update, entityQuery) => DisableAndInvalidate(withUpdates: true); ;
                 ee.PreUnsafeInsert += (query, constructor, entityQuery) => { DisableAndInvalidate(withUpdates: constructor.Body.Type.IsInstantiationOf(typeof(MListElement<,>))); return constructor; };
                 ee.PreUnsafeMListDelete += (mlistQuery, entityQuery) => DisableAndInvalidate(withUpdates: true);
-                ee.PreBulkInsert += inMListTable => DisableAndInvalidate(withUpdates: false);
+                ee.PreBulkInsert += inMListTable => DisableAndInvalidate(withUpdates: inMListTable);
             }
 
             public void BuildCachedTable()
@@ -357,16 +382,16 @@ namespace Signum.Engine.Cache
             {
                 if (!withUpdates)
                 {
-                        DisableTypeInTransaction(typeof(T));
-                    }
-                    else
-                    {
-                        DisableAllConnectedTypesInTransaction(typeof(T));
-                    }
-
-                    Transaction.PostRealCommit -= Transaction_PostRealCommit;
-                    Transaction.PostRealCommit += Transaction_PostRealCommit;
+                    DisableTypeInTransaction(typeof(T));
                 }
+                else
+                {
+                    DisableAllConnectedTypesInTransaction(typeof(T));
+                }
+
+                Transaction.PostRealCommit -= Transaction_PostRealCommit;
+                Transaction.PostRealCommit += Transaction_PostRealCommit;
+            }
 
             void Transaction_PostRealCommit(Dictionary<string, object> obj)
             {
@@ -443,9 +468,14 @@ namespace Signum.Engine.Cache
                 if (Invalidated != null)
                     Invalidated(this, CacheEventArgs.Invalidated);
             }
+
+            public Type Type
+            {
+                get { return typeof(T); }
+            }
         }
 
-
+        internal static Dictionary<Type, List<CachedTableBase>> semiControllers = new Dictionary<Type, List<CachedTableBase>>();
         static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
 
         static DirectedGraph<Type> inverseDependencies = new DirectedGraph<Type>();
@@ -477,14 +507,14 @@ namespace Signum.Engine.Cache
             return disabledTypes != null && disabledTypes.Contains(type);
         }
 
-        static void DisableTypeInTransaction(Type type)
+        internal static void DisableTypeInTransaction(Type type)
         {
             DisabledTypesDuringTransaction().Add(type);
 
             controllers[type].NotifyDisabled();
         }
 
-        static void DisableAllConnectedTypesInTransaction(Type type)
+        internal static void DisableAllConnectedTypesInTransaction(Type type)
         {
             var connected = inverseDependencies.IndirectlyRelatedTo(type, true);
 
@@ -497,7 +527,7 @@ namespace Signum.Engine.Cache
             }
         }
 
-      
+
         public static Dictionary<Type, EntityData> EntityDataOverrides = new Dictionary<Type, EntityData>();
 
         public static void OverrideEntityData<T>(EntityData data)
@@ -561,7 +591,7 @@ namespace Signum.Engine.Cache
             return controller;
         }
 
-        static void NotifyInvalidateAllConnectedTypes(Type type)
+        internal static void NotifyInvalidateAllConnectedTypes(Type type)
         {
             var connected = inverseDependencies.IndirectlyRelatedTo(type, includeInitialNode: true);
 
@@ -570,6 +600,9 @@ namespace Signum.Engine.Cache
                 var controller = controllers[stype];
                 if (controller != null)
                     controller.NotifyInvalidated();
+
+                if (CacheInvalidator != null)
+                    CacheInvalidator.SendInvalidation(TypeLogic.GetCleanName(stype));
             }
         }
 
@@ -580,7 +613,7 @@ namespace Signum.Engine.Cache
 
         public static CacheType GetCacheType(Type type)
         {
-            if(!type.IsEntity())
+            if (!type.IsEntity())
                 throw new ArgumentException("type should be an Entity");
 
             ICacheLogicController controller;
@@ -700,11 +733,42 @@ namespace Signum.Engine.Cache
             }
         }
 
-      
+
+        internal static ThreadVariable<Dictionary<Type, bool>> assumeMassiveChangesAsInvalidations = Statics.ThreadVariable<Dictionary<Type, bool>>("assumeMassiveChangesAsInvalidations");
+
+        public static IDisposable AssumeMassiveChangesAsInvalidations<T>(bool assumeInvalidations) where T : Entity
+        {
+            var dic = assumeMassiveChangesAsInvalidations.Value;
+
+            if (dic == null)
+                dic = assumeMassiveChangesAsInvalidations.Value = new Dictionary<Type, bool>();
+
+            dic.Add(typeof(T), assumeInvalidations);
+
+            return new Disposable(() =>
+            {
+                dic.Remove(typeof(T));
+
+                if (dic.IsEmpty())
+                    assumeMassiveChangesAsInvalidations.Value = null;
+            });
+        }
+
+        internal static bool IsAssumedMassiveChangeAsInvalidation<T>()
+        {
+            var asssumeAsInvalidation = CacheLogic.assumeMassiveChangesAsInvalidations.Value.TryGetS(typeof(T));
+
+            if (asssumeAsInvalidation == null)
+                throw new InvalidOperationException("Impossible to determine if the massive operation will affect the semi-cached instances of {1}. Execute CacheLogic.AssumeMassiveChangesAsInvalidations to desanbiguate.");
+
+            return asssumeAsInvalidation.Value;
+        }
     }
 
     internal interface ICacheLogicController : ICacheController
     {
+        Type Type { get; }
+
         event EventHandler<CacheEventArgs> Invalidated;
 
         CachedTableBase CachedTable { get; }
