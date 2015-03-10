@@ -18,6 +18,11 @@ input[type=checkbox].form-control
     margin-top: 9px;
 }
 
+.numeric 
+{
+    text-align:right;
+}
+
 label > input[type=checkbox]
 {
     margin: 0px;

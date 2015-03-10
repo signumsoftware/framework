@@ -180,7 +180,9 @@ namespace Signum.Web
             if (!valueLine.ReadOnly)
                 valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? 
                     "return SF.InputValidator.isDecimal(event);" : 
-                    "return SF.InputValidator.isNumber(event);");    
+                    "return SF.InputValidator.isNumber(event);");
+
+            valueLine.ValueHtmlProps.AddCssClass("numeric");
             
             return helper.TextboxInLine(valueLine);
         }
