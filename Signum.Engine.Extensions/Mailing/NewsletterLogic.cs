@@ -131,7 +131,7 @@ namespace Signum.Engine.Mailing
 
             new ConstructFrom<NewsletterEntity>(NewsletterOperation.Clone)
             {
-                ToState = NewsletterState.Created,
+                ToStates = { NewsletterState.Created },
                 Construct = (n, _) => new NewsletterEntity
                 {
                     Name = n.Name,
@@ -148,14 +148,14 @@ namespace Signum.Engine.Mailing
                 AllowsNew = true,
                 Lite = false,
                 FromStates = { NewsletterState.Created, NewsletterState.Saved },
-                ToState = NewsletterState.Saved,
+                ToStates = { NewsletterState.Saved },
                 Execute = (n, _) => n.State = NewsletterState.Saved
             }.Register();
 
             new Execute(NewsletterOperation.AddRecipients)
             {
                 FromStates = { NewsletterState.Saved },
-                ToState = NewsletterState.Saved,
+                ToStates = { NewsletterState.Saved },
                 Execute = (n, args) =>
                 {
                     var p = args.GetArg<List<Lite<IEmailOwnerEntity>>>();
@@ -173,7 +173,7 @@ namespace Signum.Engine.Mailing
             new Execute(NewsletterOperation.RemoveRecipients)
             {
                 FromStates = { NewsletterState.Saved },
-                ToState = NewsletterState.Saved,
+                ToStates = { NewsletterState.Saved },
                 Execute = (n, args) =>
                 {
                     var p = args.GetArg<List<Lite<NewsletterDeliveryEntity>>>();

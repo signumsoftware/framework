@@ -236,7 +236,7 @@ namespace Signum.Engine.Mailing
 
                 new Construct(EmailMessageOperation.CreateMail)
                 {
-                    ToState = EmailMessageState.Created,
+                    ToStates = { EmailMessageState.Created },
                     Construct = _ => new EmailMessageEntity
                     {
                         State = EmailMessageState.Created,
@@ -246,7 +246,7 @@ namespace Signum.Engine.Mailing
                 new ConstructFrom<EmailTemplateEntity>(EmailMessageOperation.CreateMailFromTemplate)
                 {
                     AllowsNew = false,
-                    ToState = EmailMessageState.Created,
+                    ToStates = { EmailMessageState.Created },
                     CanConstruct = et => 
                     {
                         if (et.SystemEmail != null && SystemEmailLogic.RequiresExtraParameters(et.SystemEmail))
@@ -274,14 +274,14 @@ namespace Signum.Engine.Mailing
                     AllowsNew = true,
                     Lite = false,
                     FromStates = { EmailMessageState.Created },
-                    ToState = EmailMessageState.Sent,
+                    ToStates = { EmailMessageState.Sent },
                     Execute = (m, _) => EmailLogic.SenderManager.Send(m)
                 }.Register();
 
                 new ConstructFrom<EmailMessageEntity>(EmailMessageOperation.ReSend)
                 {
                     AllowsNew = false,
-                    ToState = EmailMessageState.Created,
+                    ToStates = { EmailMessageState.Created },
                     Construct = (m, _) => new EmailMessageEntity
                     {
                         From = m.From.Clone(),

@@ -149,7 +149,7 @@ namespace Signum.Engine.Alerts
 
             new ConstructFrom<Entity>(AlertOperation.CreateAlertFromEntity)
             {
-                ToState = AlertState.New,
+                ToStates = { AlertState.New },
                 Construct = (a, _) => new AlertEntity
                 {
                     AlertDate = TimeZoneManager.Now,
@@ -164,7 +164,7 @@ namespace Signum.Engine.Alerts
             new Execute(AlertOperation.SaveNew)
             {
                 FromStates = { AlertState.New },
-                ToState = AlertState.Saved,
+                ToStates = { AlertState.Saved },
                 AllowsNew = true,
                 Lite = false,
                 Execute = (a, _) => { a.State = AlertState.Saved; }
@@ -173,7 +173,7 @@ namespace Signum.Engine.Alerts
             new Execute(AlertOperation.Save)
             {
                 FromStates = { AlertState.Saved },
-                ToState = AlertState.Saved,
+                ToStates = { AlertState.Saved },
                 Lite = false,
                 Execute = (a, _) => { a.State = AlertState.Saved; }
             }.Register();
@@ -181,7 +181,7 @@ namespace Signum.Engine.Alerts
             new Execute(AlertOperation.Attend)
             {
                 FromStates = { AlertState.Saved },
-                ToState = AlertState.Attended,
+                ToStates = { AlertState.Attended },
                 Execute = (a, _) =>
                 {
                     a.State = AlertState.Attended;
@@ -193,7 +193,7 @@ namespace Signum.Engine.Alerts
             new Execute(AlertOperation.Unattend)
             {
                 FromStates = { AlertState.Attended },
-                ToState = AlertState.Saved,
+                ToStates = { AlertState.Saved },
                 Execute = (a, _) =>
                 {
                     a.State = AlertState.Saved;

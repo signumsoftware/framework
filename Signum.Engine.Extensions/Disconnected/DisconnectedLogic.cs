@@ -133,7 +133,7 @@ namespace Signum.Engine.Disconnected
                 new Execute(DisconnectedMachineOperation.Save)
                 {
                     FromStates = { DisconnectedMachineState.Connected },
-                    ToState = DisconnectedMachineState.Connected,
+                    ToStates = { DisconnectedMachineState.Connected },
                     AllowsNew = true,
                     Lite = false,
                     Execute = (dm, _) => 
@@ -145,7 +145,7 @@ namespace Signum.Engine.Disconnected
                 new Execute(DisconnectedMachineOperation.UnsafeUnlock)
                 {
                     FromStates = { DisconnectedMachineState.Disconnected, DisconnectedMachineState.Faulted, DisconnectedMachineState.Fixed, DisconnectedMachineState.Connected }, //not fully disconnected
-                    ToState = DisconnectedMachineState.Connected,
+                    ToStates = { DisconnectedMachineState.Connected },
                     Execute = (dm, _) =>
                     {
                         ImportManager.UnlockTables(dm.ToLite());

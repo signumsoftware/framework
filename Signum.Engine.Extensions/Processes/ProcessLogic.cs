@@ -224,7 +224,7 @@ namespace Signum.Engine.Processes
                 new Execute(ProcessOperation.Save)
                 {
                     FromStates = { ProcessState.Created },
-                    ToState = ProcessState.Created,
+                    ToStates = { ProcessState.Created },
                     AllowsNew = true,
                     Lite = false,
                     Execute = (p, args) =>
@@ -236,7 +236,7 @@ namespace Signum.Engine.Processes
                 new Execute(ProcessOperation.Plan)
                 {
                     FromStates = { ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended },
-                    ToState = ProcessState.Planned,
+                    ToStates = { ProcessState.Planned },
                     Execute = (p, args) =>
                     {
                         p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
@@ -250,7 +250,7 @@ namespace Signum.Engine.Processes
                 new Execute(ProcessOperation.Cancel)
                 {
                     FromStates = { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended, ProcessState.Queued },
-                    ToState = ProcessState.Canceled,
+                    ToStates = { ProcessState.Canceled },
                     Execute = (p, _) =>
                     {
                         p.State = ProcessState.Canceled;
@@ -261,7 +261,7 @@ namespace Signum.Engine.Processes
                 new Execute(ProcessOperation.Execute)
                 {
                     FromStates = { ProcessState.Created, ProcessState.Planned, ProcessState.Canceled, ProcessState.Suspended },
-                    ToState = ProcessState.Queued,
+                    ToStates = { ProcessState.Queued },
                     Execute = (p, _) =>
                     {
                         p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None;
@@ -276,7 +276,7 @@ namespace Signum.Engine.Processes
                 new Execute(ProcessOperation.Suspend)
                 {
                     FromStates = { ProcessState.Executing },
-                    ToState = ProcessState.Suspending,
+                    ToStates = { ProcessState.Suspending },
                     Execute = (p, _) =>
                     {
                         p.State = ProcessState.Suspending;
@@ -287,7 +287,7 @@ namespace Signum.Engine.Processes
                 new ConstructFrom<ProcessEntity>(ProcessOperation.Retry)
                 {
                     CanConstruct = p => p.State.InState(ProcessState.Error, ProcessState.Canceled, ProcessState.Finished, ProcessState.Suspended),
-                    ToState = ProcessState.Created,
+                    ToStates = { ProcessState.Created },
                     Construct = (p, _) => p.Algorithm.Create(p.Data, p)
                 }.Register();
             }

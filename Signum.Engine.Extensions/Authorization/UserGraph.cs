@@ -21,14 +21,14 @@ namespace Signum.Engine.Authorization
 
             new Construct(UserOperation.Create)
             {
-                ToState = UserState.New,
+                ToStates = { UserState.New },
                 Construct = args => new UserEntity { State = UserState.New }
             }.Register();
 
             new Execute(UserOperation.SaveNew)
             {
                 FromStates = { UserState.New },
-                ToState = UserState.Saved,
+                ToStates = { UserState.Saved },
                 Execute = (u, _) => { u.State = UserState.Saved; },
                 AllowsNew = true,
                 Lite = false
@@ -37,7 +37,7 @@ namespace Signum.Engine.Authorization
             new Execute(UserOperation.Save)
             {
                 FromStates = { UserState.Saved },
-                ToState = UserState.Saved,
+                ToStates = { UserState.Saved },
                 Execute = (u, _) => { },
                 Lite = false
             }.Register();
@@ -45,7 +45,7 @@ namespace Signum.Engine.Authorization
             new Execute(UserOperation.Disable)
             {
                 FromStates = { UserState.Saved },
-                ToState = UserState.Disabled,
+                ToStates = { UserState.Disabled },
                 Execute = (u, _) =>
                 {
                     Thread.Sleep(500);
@@ -59,7 +59,7 @@ namespace Signum.Engine.Authorization
             new Execute(UserOperation.Enable)
             {
                 FromStates = { UserState.Disabled },
-                ToState = UserState.Saved,
+                ToStates = { UserState.Saved },
                 Execute = (u, _) =>
                 {
                     Thread.Sleep(500);

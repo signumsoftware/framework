@@ -548,7 +548,7 @@ namespace Signum.Engine.SMS
             new ConstructFrom<SMSTemplateEntity>(SMSMessageOperation.CreateSMSFromSMSTemplate)
             {
                 CanConstruct = t => !t.Active ? SmsMessage.TheTemplateMustBeActiveToConstructSMSMessages.NiceToString() : null,
-                ToState = SMSMessageState.Created,
+                ToStates = { SMSMessageState.Created },
                 Construct = (t, args) =>
                 {
                     var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
@@ -572,7 +572,7 @@ namespace Signum.Engine.SMS
                 AllowsNew = true,
                 Lite = false,
                 FromStates = { SMSMessageState.Created },
-                ToState = SMSMessageState.Sent,
+                ToStates = { SMSMessageState.Sent },
                 Execute = (m, _) =>
                 {
                     try
