@@ -138,6 +138,34 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static double TotalMonths(this DateTime start, DateTime end)
+        {
+            int wholeMonths = start.MonthsTo(end);
+
+            double result = wholeMonths;
+
+            DateTime limit = start.AddMonths(wholeMonths);
+            DateTime limitMonthStart = limit.MonthStart();
+            DateTime nextMonthStart = limitMonthStart.AddMonths(1);
+
+            if(nextMonthStart < end)
+            {
+                result += ((nextMonthStart - limit).TotalDays / NumberOfDaysAfterOneMonth(limitMonthStart));
+                result += ((end - nextMonthStart).TotalDays / NumberOfDaysAfterOneMonth(nextMonthStart)); 
+            }
+            else
+            {
+                result += ((end - limit).TotalDays / NumberOfDaysAfterOneMonth(limitMonthStart));
+            }
+
+            return result;
+        }
+
+        static double NumberOfDaysAfterOneMonth(DateTime monthStart)
+        {
+            return (monthStart.AddMonths(1) - monthStart).TotalDays;
+        }
+
         public static DateSpan DateSpanTo(this DateTime min, DateTime max)
         {
             return DateSpan.FromToDates(min, max);
