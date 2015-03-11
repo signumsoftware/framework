@@ -40,7 +40,6 @@
                             </Hyperlink>
                         </TextBlock>
                     </Grid>
-                    <m:EntityLine m:Common.Route="Repository" m:Common.IsReadOnly="True"/>
                 </StackPanel>
             </m:DataBorder>
         </Border>

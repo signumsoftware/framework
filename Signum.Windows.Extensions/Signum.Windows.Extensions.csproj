@@ -260,9 +260,6 @@
       <DependentUpon>FilePath.xaml</DependentUpon>
     </Compile>
     <Compile Include="Files\FilePathClient.cs" />
-    <Compile Include="Files\FileRepository.xaml.cs">
-      <DependentUpon>FileRepository.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ExtensionsImageLoader.cs" />
     <Compile Include="Files\ImageFileExtension.cs" />
     <Compile Include="Help\HelpAdorner.cs" />
@@ -669,12 +666,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Files\FilePath.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Files\FileRepository.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
