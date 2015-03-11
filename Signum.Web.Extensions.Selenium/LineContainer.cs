@@ -89,10 +89,15 @@ namespace Signum.Web.Selenium
             return new ValueLineProxy(lineContainer.Selenium, newPrefix, newRoute);
         }
 
-        public static void ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
+        public static void ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
             where T : ModifiableEntity
         {
-            lineContainer.ValueLine(property).Value = value;
+            var valueLine = lineContainer.ValueLine(property);
+
+            valueLine.Value = value;
+
+            if (loseFocus)
+                lineContainer.Selenium.LoseFocus(valueLine.MainElement());
         }
 
         public static FileLineProxy FileLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -150,10 +155,15 @@ namespace Signum.Web.Selenium
             return lite is V ? (V)lite : (V)(object)lite.Retrieve();
         }
 
-        public static void EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
+        public static void EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
             where T : ModifiableEntity
         {
-            lineContainer.EntityCombo(property).LiteValue = value is Lite<IEntity> ? (Lite<IEntity>)value : ((IEntity)value).ToLite();
+            var combo = lineContainer.EntityCombo(property);
+
+            combo.LiteValue = value is Lite<IEntity> ? (Lite<IEntity>)value : ((IEntity)value).ToLite();
+
+            if (loseFocus)
+                lineContainer.Selenium.LoseFocus(lineContainer.Selenium.FindElement(combo.ComboLocator));
         }
 
         public static EntityDetailProxy EntityDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)

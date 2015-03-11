@@ -48,7 +48,6 @@ namespace Signum.Web.Selenium
         {
             get
             {
-                
                 IWebElement element =  Selenium.TryFindElement(By.Id(Prefix));
                 if (element != null && element.TagName == "input" && element.GetAttribute("type") == "checkbox")
                     return element.Selected.ToString();
@@ -128,6 +127,19 @@ namespace Signum.Web.Selenium
             StringValue = value == null ? null :
                     value is IFormattable ? ((IFormattable)value).ToString(format, null) :
                     value.ToString();
+        }
+
+        public IWebElement MainElement()
+        {
+            IWebElement element = Selenium.TryFindElement(By.Id(Prefix));
+            if (element != null)
+                return element;
+
+            var byName = Selenium.TryFindElement(By.Name(Prefix));
+            if (byName != null)
+                return byName;
+
+            throw new NotImplementedException();
         }
     }
 
@@ -388,7 +400,7 @@ namespace Signum.Web.Selenium
             get { return RuntimeInfo().ToLite(); }
             set
             {
-                Selenium.FindElement(ComboLocator).SelectElement().SelectByValue(value == null ? null : value.Key());
+                Selenium.FindElement(ComboLocator).SelectElement().SelectByValue(value == null ? "" : value.Key());
             }
         }
 

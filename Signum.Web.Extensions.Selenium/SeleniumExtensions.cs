@@ -265,5 +265,11 @@ namespace Signum.Web.Selenium
 
             button.Click();
         }
+
+        public static void LoseFocus(this RemoteWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript("arguments[0].focus(); arguments[0].blur(); return true", element);
+        }
     }
 }
