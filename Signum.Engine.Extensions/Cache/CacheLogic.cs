@@ -238,12 +238,7 @@ namespace Signum.Engine.Cache
 
                     foreach (var s in staleServices)
                     {
-                        try
-                        {
-                            new SqlPreCommandSimple("DROP SERVICE [{0}]".FormatWith(s)).ExecuteNonQuery();
-                            new SqlPreCommandSimple("DROP QUEUE [{0}]".FormatWith(s)).ExecuteNonQuery();
-                        }
-                        catch { }
+                        TryDropService(s);
                     }
                 }
 
@@ -286,6 +281,25 @@ namespace Signum.Engine.Cache
                 RegisterOnShutdown();
 
                 started = true;
+            }
+        }
+
+        [DebuggerStepThrough]
+        private static void TryDropService(string s)
+        {
+            try
+            {
+                using (var con = (SqlConnection)Connector.Current.CreateConnection())
+                {
+                    con.Open();
+                    new SqlCommand("DROP SERVICE [{0}]".FormatWith(s), con).ExecuteNonQuery();
+                    new SqlCommand("DROP QUEUE [{0}]".FormatWith(s), con).ExecuteNonQuery();
+                }
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number != 15151)
+                    throw;
             }
         }
 
