@@ -564,7 +564,7 @@ namespace Signum.Utilities
 
         public bool ContainsDescription(string text)
         {
-            return this.Type.Name.Contains(text) ||
+            return this.Type.Name.Contains(text, StringComparison.InvariantCultureIgnoreCase) ||
                             this.Description != null && this.Description.Contains(text, StringComparison.InvariantCultureIgnoreCase) ||
                             this.PluralDescription != null && this.Description.Contains(text, StringComparison.InvariantCultureIgnoreCase);
         }
