@@ -13,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
+using Signum.Engine.Operations;
 
 namespace Signum.Web.Operations
 {
@@ -454,9 +455,14 @@ namespace Signum.Web.Operations
         }
 
 
-        public string Compose(string prefixPart)
+        public string ComposePrefix(string prefixPart)
         {
             return TypeContextUtilities.Compose(this.Prefix, prefixPart); 
+        }
+
+        public string EvaluateCanExecute()
+        {
+            return CanExecute ?? (CanExecute = OperationLogic.ServiceCanExecute((Entity)(IEntity)this.Entity, this.OperationSettings.OperationSymbol));
         }
 
 
