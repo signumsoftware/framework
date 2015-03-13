@@ -112,7 +112,7 @@ namespace Signum.Web
         private static MvcHtmlString AutocompleteTextBox(HtmlHelper helper, EntityLine entityLine)
         {
             if (!entityLine.Autocomplete)
-                return helper.FormControlStatic(entityLine.Compose(EntityBaseKeys.ToStr), null, null);
+                return helper.FormControlStatic(entityLine, entityLine.Compose(EntityBaseKeys.ToStr), null, null);
 
             if (entityLine.Implementations.Value.IsByAll)
                 throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
