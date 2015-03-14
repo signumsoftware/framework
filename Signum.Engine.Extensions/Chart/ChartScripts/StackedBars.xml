@@ -213,17 +213,18 @@
   
   if (y.rangeBand() > 15 && series.length > 0) {
     
-    var xHalf = xRule.size('content') / 2;
+    var size = xRule.size('content');
     var labelMargin = 5;
     chart.append('svg:g').attr('class', 'y-axis-tick-label').attr('transform', translate(xRule.start('content'), yRule.start('content') + y.rangeBand() / 2))
       .enterData(maxDim0,'text', 'y-axis-tick-label sf-chart-strong')
-      .attr('x', function (v) { var posx = x(v.max); return posx >= xHalf ? posx - labelMargin : posx + labelMargin; })
+      .attr('x', function (v) { var posx = x(v.max); return posx >= size/2 ? posx - labelMargin : posx + labelMargin; })
       .attr('y', function (v) { return y(v.dim0); })
-      .attr('text-anchor', function (v) { var posx = x(v.max); return posx >= xHalf ? 'end' : 'start'; })
-      .attr('fill', function (v) { var posx = x(v.max); return posx >= xHalf ? '#fff' : '#000'; })
+      .attr('text-anchor', function (v) { var posx = x(v.max); return posx >= size/2 ? 'end' : 'start'; })
+      .attr('fill', function (v) { var posx = x(v.max); return posx >= size/2 ? '#fff' : '#000'; })
       .attr('dominant-baseline', 'middle')
       .attr('font-weight', 'bold')
-      .text(function (v, i) { return v.dim0.niceToString(); });
+      .text(function (v, i) { return v.dim0.niceToString(); })
+      .each(function (v) { var posx = x(v.max); ellipsis(this, posx >= size/2 ? posx : size - posx, labelMargin); });
   }
   
   var legendScale = d3.scale.ordinal()
@@ -239,11 +240,12 @@
       .attr('height', yRule.size('legend'))
       .attr('fill', function (s) { return s.color || color(s.key); });
   
-      chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend')))
+      chart.append('svg:g').attr('class', 'color-legend').attr('transform',  translate(xRule.start('content') + legendMargin, yRule.middle('legend') + 1))
       .enterData(series, 'text', 'color-text')
       .attr('x', function (e, i) { return legendScale(i); })
       .attr('dominant-baseline', 'middle')
-      .text(function (s) { return s.niceName; });
+      .text(function (s) { return s.niceName; })
+      .each(function (s) { ellipsis(this, legendScale.rangeBand() - legendMargin); });
   }
 
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))

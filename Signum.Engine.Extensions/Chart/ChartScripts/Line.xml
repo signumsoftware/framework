@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true">
+      <Parameter1 Name="Horizontal Margin" Type="Number" ValueDefinition="20" />
+    </Column>
     <Column DisplayName="Height" ColumnType="Positionable">
       <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
       <Parameter2 Name="Color" Type="String" ValueDefinition="steelblue" />
@@ -15,7 +17,7 @@
     _1 : 5,
     title : 15,
     _2 : 10, 
-    labels : 20,
+    labels : parseInt(data.columns.c0.parameter1),
     _3 : 5,
     ticks: 4,
     content: '*',
@@ -59,7 +61,8 @@
         .attr('y', function (r, i) { return yRule.middle('labels' + (i % 2)) - yRule.middle('labels0'); })
         .attr('dominant-baseline', 'middle')
         .attr('text-anchor', 'middle')
-        .text(function (r) { return r.c0.niceToString(); });
+        .text(function (r) { return r.c0.niceToString(); })
+        .each(function (v) { ellipsis(this, x.rangeBand() * 2); });
   }
   
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))

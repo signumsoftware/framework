@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Optional">
   <Columns>
-    <Column DisplayName="Color" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Color" ColumnType="Groupable" IsGroupKey="true">
+      <Parameter1 Name="Horizontal Axis" Type="Number" ValueDefinition="40" />
+    </Column>
     <Column DisplayName="Horizontal Axis" ColumnType="Positionable">
       <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
     </Column>
@@ -19,7 +21,7 @@
     _1 : 5,
     title : 15,
     _2 : 5, 
-    labels: 40,
+    labels: parseInt(data.columns.c0.parameter1),
     _3 : 5,
     ticks: 4,
     content: '*',

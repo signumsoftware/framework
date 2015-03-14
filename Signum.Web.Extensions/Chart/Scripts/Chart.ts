@@ -352,6 +352,7 @@ export class ChartRequest {
             var matrix = ChartUtils.matrix;
             var scaleFor = ChartUtils.scaleFor;
             var rule = ChartUtils.rule;
+            var ellipsis = ChartUtils.ellipsis;
             __baseLineNumber__ = new Error().lineNumber;
             func = eval(code);
         } catch (e) {

@@ -96,16 +96,17 @@
 
   if (y.rangeBand() > 15) 
   {
-    var xHalf = xRule.size('content') / 2;
+    var size = xRule.size('content');
     var labelMargin = 10;
     chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.start('content') + labelMargin, yRule.start('content') + y.rangeBand() / 2))
       .enterData(data.rows, 'text', 'y-label')
-      .attr('x', function (v) { var posx = x(v.c1); return posx >= xHalf ? 0 : posx; })
+      .attr('x', function (v) { var posx = x(v.c1); return posx >= size / 2 ? 0 : posx; })
       .attr('y', function (v) { return y(v.c0); })
-      .attr('fill', function (v) { return x(v.c1) >= xHalf ? '#fff' : (v.c0.color || color(v.c0)); })
+      .attr('fill', function (v) { return x(v.c1) >= size / 2 ? '#fff' : (v.c0.color || color(v.c0)); })
       .attr('dominant-baseline', 'middle')
       .attr('font-weight', 'bold')
-      .text(function (v) { return v.c0.niceToString(); });
+      .text(function (v) { return v.c0.niceToString(); })
+      .each(function (v) { var posx = x(v.c1); ellipsis(this, posx >= size / 2 ? posx : size - posx, labelMargin); });
   }
   
 

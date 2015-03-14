@@ -94,18 +94,23 @@
     .text(function (d) { return d.c0.niceToString() + ': ' + d.c1.niceToString(); });
   
   
-  var yHalf = yRule.size('content') / 2;
+  
   if (x.rangeBand() > 50) {
+    
+    var size = yRule.size('content');
+    
+    var labelMargin = 10;
     
     chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
       .enterData(data.rows, 'text', 'x-label')
       .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, -y(v.c1) ) +  rotate(-90);})
       .attr('dominant-baseline', 'middle')
       .attr('font-weight', 'bold')
-      .attr('fill', function (v) { return y(v.c1) >= yHalf ? '#fff' : (v.c0.color || color(v.c0)); })
-      .attr('dx', function (v) { return y(v.c1) >= yHalf ? -10 : 10; })
-      .attr('text-anchor', function (v) { return y(v.c1) >= yHalf ? 'end' : 'start'; })
-      .text(function (v) { return v.c0.niceToString(); });
+      .attr('fill', function (v) { return y(v.c1) >= size / 2 ? '#fff' : (v.c0.color || color(v.c0)); })
+      .attr('dx', function (v) { return y(v.c1) >= size / 2 ? -labelMargin : labelMargin; })
+      .attr('text-anchor', function (v) { return y(v.c1) >= size / 2 ? 'end' : 'start'; })
+      .text(function (v) { return v.c0.niceToString(); })
+      .each(function (v) { var posy = y(v.c1); ellipsis(this, posy >= size / 2 ? posy : size - posy, labelMargin); });
   }
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))

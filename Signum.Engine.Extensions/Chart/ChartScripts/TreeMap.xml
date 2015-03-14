@@ -92,7 +92,8 @@
       .attr("dx",function(d) { return d.dx/2; })
       .attr("dy",function(d) { return d.dy/2; })
       .attr('data-click', function(p) { return getClickKeys(p.item, data.columns); })
-      .text(function(d) { return d.item.c0.niceToString().substring(0,d.dx/9); })
+      .text(function(d) { return d.item.c0.niceToString(); })
+      .each(function (d) { ellipsis(this, d.dx, 4, ""); })
       .append('svg:title')
       .text(function(d) { return  d.item.c0.niceToString() + ': ' + d.item.c1.niceToString();});
   

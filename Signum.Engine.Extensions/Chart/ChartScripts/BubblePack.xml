@@ -46,7 +46,8 @@
       .attr("text-anchor", "middle")
       .attr("dy", ".3em")
       .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
-      .text(function(d) { return d.c0.niceToString().substring(0, d.r / 4); });
+      .text(function(d) { return d.c0.niceToString(); })
+      .each(function(d) { return ellipsis(this, d.r * 2, 1, ""); });
   
 }]]></Script>
 </ChartScript>

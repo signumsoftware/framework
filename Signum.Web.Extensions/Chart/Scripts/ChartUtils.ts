@@ -45,6 +45,26 @@ module ChartUtils {
         };
     }
 
+    export function ellipsis(elem : SVGTextElement, width: number, padding? : number, ellipsisSymbol?: string) {
+
+        if (ellipsisSymbol === null || ellipsisSymbol == undefined)
+            ellipsisSymbol = '…';
+
+        if (padding)
+            width -= padding * 2;
+
+        var self = d3.select(elem);
+        var textLength = (<any>self.node()).getComputedTextLength();
+        var text = self.text();
+        while (textLength > width && text.length > 0) {
+            text = text.slice(0, -1);
+            while (text[text.length - 1] == ' ' && text.length > 0)
+                text = text.slice(0, -1);
+            self.text(text + ellipsisSymbol);
+            textLength = (<any>self.node()).getComputedTextLength();
+        }
+    } 
+
     export function getClickKeys(row, columns) {
         var options = "";
         for (var k in columns) {
