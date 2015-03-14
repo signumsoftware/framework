@@ -64,10 +64,10 @@ OperationLogic.Start(sb, dqm);
 to the line 
 
 ```
-sb.ExecuteWhenIncluded();
+Schema.Current.OnSchemaCompleted();;
 ```
 
-Both lines not included!
+Both lines NOT included!
 
 Also replace the lines 
 ```C#

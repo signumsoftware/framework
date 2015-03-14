@@ -187,6 +187,7 @@
     <None Include="Administrator.md" />
     <None Include="CodeGeneration\CodeGenerator.md" />
     <None Include="CodeGeneration\EntityCodeGenerator.md" />
+    <None Include="CodeGeneration\LegacyDatabase.AdventureWorks.md" />
     <None Include="CodeGeneration\LogicCodeGenerator.md" />
     <None Include="CodeGeneration\WebCodeGenerator.md" />
     <None Include="CodeGeneration\WindowsCodeGenerator.md" />
