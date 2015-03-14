@@ -128,13 +128,16 @@
     .attr('y2', function (t) { return -y(t); })
     .style('stroke', 'Black');
   
-  chart.append('svg:g').attr('class', 'y-label').attr('transform',  translate(xRule.end('labels'), yRule.end('content') - y.rangeBand() / 2))
-    .enterData(dim1, 'text', 'y-label')
-    .attr('y', function (t) { return -y(t); })
-    .attr('dominant-baseline', 'middle')
-    .attr('text-anchor', 'end')
-    .text(function (d) { return d.niceToString(); })
-    .each(function (v) { ellipsis(this, xRule.size('labels')); });
+   if (y.rangeBand() > 16)     
+   {
+      chart.append('svg:g').attr('class', 'y-label').attr('transform',  translate(xRule.end('labels'), yRule.end('content') - y.rangeBand() / 2))
+        .enterData(dim1, 'text', 'y-label')
+        .attr('y', function (t) { return -y(t); })
+        .attr('dominant-baseline', 'middle')
+        .attr('text-anchor', 'end')
+        .text(function (d) { return d.niceToString(); })
+        .each(function (v) { ellipsis(this, xRule.size('labels')); });  
+	}
  
   chart.append('svg:g').attr('class', 'y-label').attr('transform', translate(xRule.middle('title'), yRule.middle('content')) + rotate(270))
     .append('svg:text').attr('class', 'y-label')
