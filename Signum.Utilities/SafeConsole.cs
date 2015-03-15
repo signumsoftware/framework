@@ -189,6 +189,9 @@ namespace Signum.Utilities
 
         public static void WaitExecute(Action action)
         {
+            if (Console.IsOutputRedirected)
+                action();
+
             int? result = null;
             try
             {
