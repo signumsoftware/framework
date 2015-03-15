@@ -90,28 +90,28 @@
                     }
                     <span class="sf-auth-label">@type.NiceName()</span> <small>@attr.EntityKind/@attr.EntityData</small>
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
-                    @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase.Fallback.ToStringParts() + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".FormatWith(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";"))))
+                    @Html.Hidden(item.Compose("AllowedBase"), (item.Value.AllowedBase.Fallback.Try(f => f.ToStringParts()) ?? "Error") + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".FormatWith(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";"))))
                 </td>
                 @using (var fallback = item.SubContext(a => a.Allowed.Fallback))
                 {
                     <td>
                         <a class="sf-auth-chooser sf-auth-create">
-                            @Html.CheckBox(fallback.Compose("Create"), fallback.Value.IsActive(TypeAllowedBasic.Create), new Dictionary<string, object> { { "data-tag", "Create" } })
+                            @Html.CheckBox(fallback.Compose("Create"), fallback.Value.HasValue && fallback.Value.Value.IsActive(TypeAllowedBasic.Create), new Dictionary<string, object> { { "data-tag", "Create" } })
                         </a>
                     </td>
                     <td>
                         <a class="sf-auth-chooser sf-auth-modify">
-                            @Html.CheckBox(fallback.Compose("Modify"), fallback.Value.IsActive(TypeAllowedBasic.Modify), new Dictionary<string, object> { { "data-tag", "Modify" } })
+                            @Html.CheckBox(fallback.Compose("Modify"), fallback.Value.HasValue && fallback.Value.Value.IsActive(TypeAllowedBasic.Modify), new Dictionary<string, object> { { "data-tag", "Modify" } })
                         </a>
                     </td>
                     <td>
                         <a class="sf-auth-chooser sf-auth-read">
-                            @Html.CheckBox(fallback.Compose("Read"), fallback.Value.IsActive(TypeAllowedBasic.Read), new Dictionary<string, object> { { "data-tag", "Read" } })
+                            @Html.CheckBox(fallback.Compose("Read"), fallback.Value.HasValue && fallback.Value.Value.IsActive(TypeAllowedBasic.Read), new Dictionary<string, object> { { "data-tag", "Read" } })
                         </a>
                     </td>
                     <td>
                         <a class="sf-auth-chooser sf-auth-none">
-                            @Html.CheckBox(fallback.Compose("None"), fallback.Value.IsActive(TypeAllowedBasic.None), new Dictionary<string, object> { { "data-tag", "None" } })
+                            @Html.CheckBox(fallback.Compose("None"), fallback.Value.HasValue && fallback.Value.Value.IsActive(TypeAllowedBasic.None), new Dictionary<string, object> { { "data-tag", "None" } })
                         </a>
                     </td>
                 }

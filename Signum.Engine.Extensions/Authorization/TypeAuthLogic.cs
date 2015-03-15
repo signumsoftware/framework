@@ -254,6 +254,9 @@ namespace Signum.Engine.Authorization
             if (only != null)
                 return only;
 
+            if (baseRules.Any(a => a.Fallback == null))
+                return new TypeAllowedAndConditions(null);
+
             if (baseRules.Any(a => a.Exactly(max)))
                 return new TypeAllowedAndConditions(max);
 
@@ -264,14 +267,14 @@ namespace Signum.Engine.Authorization
             var first = baseRules.FirstOrDefault(c => !c.Conditions.IsNullOrEmpty());
 
             if (first == null)
-                return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)));
+                return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback.Value)));
 
             var conditions = first.Conditions.Select(c => c.TypeCondition).ToList();
 
             if (baseRules.Where(c => !c.Conditions.IsNullOrEmpty() && c != first).Any(br => !br.Conditions.Select(c => c.TypeCondition).SequenceEqual(conditions)))
-                return new TypeAllowedAndConditions(TypeAllowed.None);
+                return new TypeAllowedAndConditions(null);
 
-            return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)),
+            return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback.Value)),
                 conditions.Select((c, i) => new TypeConditionRule(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
         }
 
