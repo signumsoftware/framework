@@ -25,7 +25,7 @@ namespace Signum.Web.Selenium
             this.Selenium = selenium;
         }
 
-        protected virtual string Url(string url)
+        public virtual string Url(string url)
         {
             throw new InvalidOperationException("Implement this method returing something like: http://localhost/MyApp/ + url");
         }
@@ -40,12 +40,12 @@ namespace Signum.Web.Selenium
             return new SearchPageProxy(Selenium);
         }
 
-        protected virtual string FindRoute(object queryName)
+        public virtual string FindRoute(object queryName)
         {
             return "Find/" + GetWebQueryName(queryName);
         }
-
-        protected string GetWebQueryName(object queryName)
+        
+        public string GetWebQueryName(object queryName)
         {
             if (queryName is Type)
             {
@@ -85,7 +85,7 @@ namespace Signum.Web.Selenium
             return new NormalPage<T>(Selenium, null).WaitLoaded();
         }
 
-        protected virtual string NavigateRoute(Type type, PrimaryKey? id)
+        public virtual string NavigateRoute(Type type, PrimaryKey? id)
         {
             var typeName = TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type);
 
@@ -95,7 +95,7 @@ namespace Signum.Web.Selenium
                 return "Create/{0}".FormatWith(typeName);
         }
 
-        protected virtual string NavigateRoute(Lite<IEntity> lite)
+        public virtual string NavigateRoute(Lite<IEntity> lite)
         {
             return NavigateRoute(lite.EntityType, lite.IdOrNull);
         }
