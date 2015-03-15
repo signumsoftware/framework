@@ -252,7 +252,7 @@ namespace Signum.Engine.Authorization
                         return cond.Allowed.Get(inUserInterface) >= allowed;
                 }
 
-                return tac.Fallback.Get(inUserInterface) >= allowed;
+                return tac.FallbackOrNone.Get(inUserInterface) >= allowed;
             }; 
         }
 
@@ -470,7 +470,7 @@ namespace Signum.Engine.Authorization
           
             TypeAllowedAndConditions tac = GetAllowed(type);
 
-            Expression baseValue = Expression.Constant(tac.Fallback.Get(inUserInterface) >= requested);
+            Expression baseValue = Expression.Constant(tac.FallbackOrNone.Get(inUserInterface) >= requested);
 
             var expression = tac.Conditions.Aggregate(baseValue, (acum, tacRule) =>
             {
@@ -498,7 +498,7 @@ namespace Signum.Engine.Authorization
 
             TypeAllowedAndConditions tac = GetAllowed(type);
 
-            Expression baseValue = Expression.Constant(tac.Fallback.Get(inUserInterface) >= requested);
+            Expression baseValue = Expression.Constant(tac.FallbackOrNone.Get(inUserInterface) >= requested);
 
             var list = (from line in tac.Conditions
                         select Expression.New(ciGroupDebugData, Expression.Constant(line.TypeCondition, typeof(TypeConditionSymbol)),
@@ -621,7 +621,7 @@ namespace Signum.Engine.Authorization
             {
                 Role = role,
                 Resource = resource,
-                Allowed = allowed.Fallback,
+                Allowed = allowed.Fallback.Value,
                 Conditions = allowed.Conditions.Select(a => new RuleTypeConditionEntity
                 {
                     Allowed = a.Allowed,
