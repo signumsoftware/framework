@@ -302,17 +302,23 @@ namespace Signum.Entities
         {
             var typeParentheses = fullToString.Before('.');
 
-            if (!typeParentheses.StartsWith("(") || !typeParentheses.EndsWith(")"))
+            if (!typeParentheses.StartsWith("(") || !(typeParentheses.EndsWith(")") || typeParentheses.EndsWith("]")))
                 throw new FormatException("fullToString should start with the type between parentheses");
-
-            var cleanType = typeParentheses.Trim('(', ')');
+            
+            var startType = typeParentheses.IndexOf('(') + 1;
+            var cleanType = typeParentheses.Substring(startType, typeParentheses.IndexOf(')') - startType);
 
             var type = TypeEntity.TryGetType(cleanType);
 
             if (type == null)
                 throw new FormatException("Type {0} is not recognized".FormatWith(typeParentheses));
 
-            return Parse(type, fullToString.After('.'));
+            var propertyRoute = fullToString.After(".");
+            var startMixin = typeParentheses.IndexOf("[");
+            if (startMixin > 0)
+                propertyRoute = "{0}.{1}".FormatWith(typeParentheses.Substring(startMixin), propertyRoute);
+
+            return Parse(type, propertyRoute);
         }
 
         public static PropertyRoute Parse(Type rootType, string propertyString)
