@@ -205,7 +205,7 @@ namespace Signum.Entities.Mailing
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex(AllowMultipleNulls = true)]
         string uniqueId;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string UniqueId
         {
             get { return uniqueId; }
