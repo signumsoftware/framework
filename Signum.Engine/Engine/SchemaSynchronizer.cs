@@ -39,11 +39,16 @@ namespace Signum.Engine
                     null, Spacing.Simple);
         }
 
+        public static Action<Dictionary<string, DiffTable>> SimplifyDiffTables; 
+
         public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
         {
             Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables().ToDictionary(a => a.Name.ToString(), "schema tables");
 
             Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(Schema.Current.DatabaseNames());
+
+            if (SimplifyDiffTables != null) 
+                SimplifyDiffTables(database);
 
             replacements.AskForReplacements(database.Keys.ToHashSet(), model.Keys.ToHashSet(), Replacements.KeyTables);
 
