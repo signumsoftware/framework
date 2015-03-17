@@ -50,11 +50,16 @@ namespace Signum.Web
         public const string ViewRouteName = "sfView";
         public const string CreateRouteName = "sfCreate";
 
+        public static Func<UrlHelper, Type, PrimaryKey?, string> NavigateRouteFunc;
         public static string NavigateRoute(Type type, PrimaryKey? id)
         {
             var entitySettings = EntitySettings(type);
             if (entitySettings.ViewRoute != null)
                 return entitySettings.ViewRoute(new UrlHelper(HttpContext.Current.Request.RequestContext), type, id);
+
+            if (NavigateRouteFunc != null)
+                return NavigateRouteFunc(new UrlHelper(HttpContext.Current.Request.RequestContext), type, id);
+
 
             var result = new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(id == null ? CreateRouteName : ViewRouteName, new
             {

@@ -23,8 +23,14 @@ namespace Signum.Web
         }
 
         public const string FindRouteName = "sfFind";
+
+        public static Func<UrlHelper, object, string> FindRouteFunc;
         public static string FindRoute(object queryName)
         {
+
+            if (FindRouteFunc != null)
+                return FindRouteFunc(new UrlHelper(HttpContext.Current.Request.RequestContext), queryName);
+
             return new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(FindRouteName, new
             {
                 webQueryName = ResolveWebQueryName(queryName)
