@@ -176,13 +176,15 @@ namespace Signum.Engine.Files
                             fp.Sufix = alg.RenameAlgorithm(sufix, i);
                             i++;
                         }
+
+                        SaveFile(fp);
                     }
                 }
             }
         }
 
 
-        private static bool SaveFile(FilePathEntity fp)
+        private static void SaveFile(FilePathEntity fp)
         {
             string fullPhysicalPath = null;
             try
@@ -201,7 +203,6 @@ namespace Signum.Engine.Files
 
                 throw;
             }
-            return true;
         }
 
         public static void Register(FileTypeSymbol fileTypeSymbol, FileTypeAlgorithm algorithm)
