@@ -101,7 +101,7 @@ namespace Signum.Entities.Mailing
     public static class Pop3ConfigurationOperation
     {
         public static readonly ExecuteSymbol<Pop3ConfigurationEntity> Save = OperationSymbol.Execute<Pop3ConfigurationEntity>();
-        public static readonly ExecuteSymbol<Pop3ConfigurationEntity> ReceiveEmails = OperationSymbol.Execute<Pop3ConfigurationEntity>();
+        public static readonly ConstructSymbol<Pop3ReceptionEntity>.From<Pop3ConfigurationEntity> ReceiveEmails = OperationSymbol.Construct<Pop3ReceptionEntity>.From<Pop3ConfigurationEntity>();
     }
 
     public static class Pop3ConfigurationAction

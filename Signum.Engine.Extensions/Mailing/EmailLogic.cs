@@ -292,7 +292,8 @@ namespace Signum.Engine.Mailing
                         IsBodyHtml = m.IsBodyHtml,
                         Template = m.Template,
                         EditableMessage = m.EditableMessage,
-                        State = EmailMessageState.Created
+                        State = EmailMessageState.Created,
+                        Attachments=m.Attachments.ToMList(),
                     }
                 }.Register();
 
