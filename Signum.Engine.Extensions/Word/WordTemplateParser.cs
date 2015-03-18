@@ -176,7 +176,7 @@ namespace Signum.Engine.Word
                             {
                                 var vp = TryParseValueProvider(type, tok.Groups["token"].Value, dec);
 
-                                var format = tok.Groups["format"].Value;
+                                var format = tok.Groups["format"].Value.DefaultText(null);
 
                                 matchNode.Parent.ReplaceChild(new TokenNode(vp, format)
                                 {

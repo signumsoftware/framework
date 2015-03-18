@@ -530,16 +530,18 @@ namespace Signum.Engine.Templating
         {
             public Func<TemplateParameters, object> GetValue;
             public Type Type;
+            public string Format;
         }
 
         public static Dictionary<string, GlobalVariable> GlobalVariables = new Dictionary<string, GlobalVariable>();
 
-        public static void RegisterGlobalVariable<T>(string key, Func<TemplateParameters, T> globalVariable)
+        public static void RegisterGlobalVariable<T>(string key, Func<TemplateParameters, T> globalVariable, string format = null)
         {
             GlobalVariables.Add(key, new GlobalVariable
             {
                 GetValue = a => globalVariable(a),
                 Type = typeof(T),
+                Format = format,
             });
         }
 
@@ -584,7 +586,12 @@ namespace Signum.Engine.Templating
 
         public override string Format
         {
-            get { return Reflector.FormatString(Type); }
+            get
+            {
+                return Members == null ?
+                    GlobalVariables.TryGetC(globalKey).Try(v => v.Format) ?? Reflector.FormatString(Type) :
+                    Reflector.FormatString(Type);
+            }
         }
 
         public override Type Type

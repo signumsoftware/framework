@@ -44,8 +44,6 @@ namespace Signum.Engine.Word
                 }
             }
 
-         
-
             var columns = tokens.NotNull().Distinct().Select(qt => new Signum.Entities.DynamicQuery.Column(qt, null)).ToList();
 
             var filters = systemWordTemplate != null ? systemWordTemplate.GetFilters(this.queryDescription) :
