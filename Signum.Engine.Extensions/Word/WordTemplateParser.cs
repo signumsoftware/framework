@@ -95,7 +95,7 @@ namespace Signum.Engine.Word
 
                                 var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
                                 Run endRunPart = new Run { RunProperties = endRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
-                                endRunPart.AppendChild(new Text { Text = textPart });
+                                endRunPart.AppendChild(new Text { Text = textPart, Space = SpaceProcessingModeValues.Preserve });
 
                                 stack.Push(new ElementInfo
                                 {
