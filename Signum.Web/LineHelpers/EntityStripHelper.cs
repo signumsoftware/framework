@@ -81,44 +81,55 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.SurroundLine(new HtmlTag("li").IdName(itemTC.Compose(EntityStripKeys.StripElement)).Class("sf-strip-element input-group")))
+            if (entityStrip.IsVisible == null || entityStrip.IsVisible(itemTC))
             {
-                var lite = (itemTC.UntypedValue as Lite<IEntity>) ?? (itemTC.UntypedValue as IEntity).Try(i => i.ToLite(i.IsNew));
-
-                if (lite != null && !lite.IsNew && entityStrip.Navigate)
+                using (sb.SurroundLine(new HtmlTag("li").IdName(itemTC.Compose(EntityStripKeys.StripElement)).Class("sf-strip-element input-group")))
                 {
-                    sb.AddLine(
-                        helper.Href(itemTC.Compose(EntityBaseKeys.Link),
-                        lite.ToString(), lite.IdOrNull == null ? null : Navigator.NavigateRoute(lite),
-                            JavascriptMessage.navigate.NiceToString(), "sf-entitStrip-link", null));
-                }
-                else
-                {
-                    sb.AddLine(
-                        helper.Span(itemTC.Compose(EntityBaseKeys.Link),
-                            itemTC.UntypedValue.ToString() ?? " ", "sf-entitStrip-link"));
-                }
+                    var lite = (itemTC.UntypedValue as Lite<IEntity>) ?? (itemTC.UntypedValue as IEntity).Try(i => i.ToLite(i.IsNew));
 
-                sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
-                sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
-
-                if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
-                    sb.AddLine(EntityBaseHelper.RenderPopup(helper, itemTC, RenderPopupMode.PopupInDiv, entityStrip));
-
-                using (sb.SurroundLine(new HtmlTag("span")))
-                {
-                    if (entityStrip.Move)
+                    if (lite != null && !lite.IsNew && entityStrip.Navigate)
                     {
-                        sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, entityStrip, btn: false, elementType: "a", isVertical: entityStrip.Vertical));
-                        sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, entityStrip, btn: false, elementType: "a", isVertical: entityStrip.Vertical));
+                        sb.AddLine(
+                            helper.Href(itemTC.Compose(EntityBaseKeys.Link),
+                            lite.ToString(), lite.IdOrNull == null ? null : Navigator.NavigateRoute(lite),
+                                JavascriptMessage.navigate.NiceToString(), "sf-entitStrip-link", null));
+                    }
+                    else
+                    {
+                        sb.AddLine(
+                            helper.Span(itemTC.Compose(EntityBaseKeys.Link),
+                                itemTC.UntypedValue.ToString() ?? " ", "sf-entitStrip-link"));
                     }
 
-                    if (entityStrip.View)
-                        sb.AddLine(EntityButtonHelper.ViewItem(helper, itemTC, entityStrip, btn: false));
+                    sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
+                    sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
-                    if (entityStrip.Remove)
-                        sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, entityStrip, btn: false));
+                    if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
+                        sb.AddLine(EntityBaseHelper.RenderPopup(helper, itemTC, RenderPopupMode.PopupInDiv, entityStrip));
+
+                    using (sb.SurroundLine(new HtmlTag("span")))
+                    {
+                        if (entityStrip.Move)
+                        {
+                            sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, entityStrip, btn: false, elementType: "a", isVertical: entityStrip.Vertical));
+                            sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, entityStrip, btn: false, elementType: "a", isVertical: entityStrip.Vertical));
+                        }
+
+                        if (entityStrip.View)
+                            sb.AddLine(EntityButtonHelper.ViewItem(helper, itemTC, entityStrip, btn: false));
+
+                        if (entityStrip.Remove)
+                            sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, entityStrip, btn: false));
+                    }
                 }
+            }
+            else
+            {
+                 using (sb.SurroundLine(new HtmlTag("li").IdName(itemTC.Compose(EntityStripKeys.StripElement)).Class("sf-strip-element input-group hidden")))
+                 {
+                     sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
+                     sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
+                 }
             }
 
             return sb.ToHtml();

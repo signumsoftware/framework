@@ -77,35 +77,39 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
+
             sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
-            if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
-                sb.AddLine(EntityBaseHelper.RenderPopup(helper, itemTC, RenderPopupMode.PopupInDiv, entityList));
-            else if (itemTC.Value != null)
-                sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", 
-                    new Dictionary<string, object> { { "style", "display:none" }, { "class", "sf-entity-list" } }));
-
-            var optionTag = new HtmlTag("option")
-                    .Id(itemTC.Compose(EntityBaseKeys.ToStr))
-                    .Class("sf-entity-list-option")
-                    .Let(a => itemTC.Index > 0 ? a : a.Attr("selected", "selected"))
-                    .SetInnerText(itemTC.Value.TryToString());
-
-            if (!EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
+            if (entityList.IsVisible == null || entityList.IsVisible(itemTC))
             {
-                PrimaryKey? idOrNull = null;
-                Type type = itemTC.Value.GetType();
-                if (type.IsLite())
-                    idOrNull = ((Lite<IEntity>)itemTC.Value).IdOrNull;
+                if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
+                    sb.AddLine(EntityBaseHelper.RenderPopup(helper, itemTC, RenderPopupMode.PopupInDiv, entityList));
+                else if (itemTC.Value != null)
+                    sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "",
+                        new Dictionary<string, object> { { "style", "display:none" }, { "class", "sf-entity-list" } }));
 
-                if (type.IsEntity())
-                    idOrNull = ((Entity)(object)itemTC.Value).IdOrNull;
+                var optionTag = new HtmlTag("option")
+                        .Id(itemTC.Compose(EntityBaseKeys.ToStr))
+                        .Class("sf-entity-list-option")
+                        .Let(a => itemTC.Index > 0 ? a : a.Attr("selected", "selected"))
+                        .SetInnerText(itemTC.Value.TryToString());
 
-                optionTag.Attr("title", " ".CombineIfNotEmpty(itemTC.Value.GetType().CleanType().NiceName(), idOrNull));
+                if (!EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
+                {
+                    PrimaryKey? idOrNull = null;
+                    Type type = itemTC.Value.GetType();
+                    if (type.IsLite())
+                        idOrNull = ((Lite<IEntity>)itemTC.Value).IdOrNull;
+
+                    if (type.IsEntity())
+                        idOrNull = ((Entity)(object)itemTC.Value).IdOrNull;
+
+                    optionTag.Attr("title", " ".CombineIfNotEmpty(itemTC.Value.GetType().CleanType().NiceName(), idOrNull));
+                }
+
+                sbOptions.Add(optionTag.ToHtml(TagRenderMode.Normal));
             }
-        
-            sbOptions.Add(optionTag.ToHtml(TagRenderMode.Normal));
 
             return sb.ToHtml();
         }

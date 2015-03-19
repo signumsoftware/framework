@@ -22,6 +22,8 @@ namespace Signum.Web
 
     public abstract class EntityListBase : EntityBase
     {
+        public Func<TypeContext, bool> IsVisible;
+
         public bool Move { get; set; }
 
         public int? MaxElements { get; set; }

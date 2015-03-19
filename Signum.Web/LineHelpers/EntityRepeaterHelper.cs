@@ -69,24 +69,35 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.SurroundLine(new HtmlTag("fieldset", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
+            if (repeater.IsVisible == null || repeater.IsVisible(itemTC))
             {
-                using (sb.SurroundLine(new HtmlTag("legend")))
+                using (sb.SurroundLine(new HtmlTag("fieldset", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element")))
                 {
-                    if (repeater.Remove)
-                        sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, repeater, btn: false, elementType: "a"));
-
-                    if (repeater.Move)
+                    using (sb.SurroundLine(new HtmlTag("legend")))
                     {
-                        sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, repeater, btn: false, elementType: "a", isVertical: true));
-                        sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, repeater, btn: false, elementType: "a", isVertical: true));
+                        if (repeater.Remove)
+                            sb.AddLine(EntityButtonHelper.RemoveItem(helper, itemTC, repeater, btn: false, elementType: "a"));
+
+                        if (repeater.Move)
+                        {
+                            sb.AddLine(EntityButtonHelper.MoveUpItem(helper, itemTC, repeater, btn: false, elementType: "a", isVertical: true));
+                            sb.AddLine(EntityButtonHelper.MoveDownItem(helper, itemTC, repeater, btn: false, elementType: "a", isVertical: true));
+                        }
                     }
+
+                    sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
+                    sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
+
+                    sb.AddLine(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.ContentInVisibleDiv, repeater));
                 }
-
-                sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
-                sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
-
-                sb.AddLine(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.ContentInVisibleDiv, repeater));
+            }
+            else
+            {
+                using (sb.SurroundLine(new HtmlTag("fieldset", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-repeater-element hidden")))
+                {
+                    sb.AddLine(EntityBaseHelper.WriteIndex(helper, itemTC));
+                    sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
+                }
             }
 
             return sb.ToHtml();
