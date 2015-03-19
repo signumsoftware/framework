@@ -93,7 +93,7 @@ namespace Signum.Web.Files
                             sb.AddLine(helper.Href(fileLine.Compose(EntityBaseKeys.Link),
                                 value.Try(f => f.FileName),
                                 hasEntity ? FilesClient.GetDownloadUrl(value) : null,
-                                "Download",
+                                value.Try(f=>f.FileName),
                                 "form-control file-control",
                                 fileLine.Download == DownloadBehaviour.View ? null :
                                 new Dictionary<string, object> { { "download", value.Try(f => f.FileName) } }));
