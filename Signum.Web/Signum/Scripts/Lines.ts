@@ -86,9 +86,13 @@ export class EntityBase {
         return Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
     }
 
-    getEntityValue(): Entities.EntityValue
-    {
-        return new Entities.EntityValue(this.getRuntimeInfo(), this.getToString(), null);
+    getEntityValue(): Entities.EntityValue {
+        var ri = this.getRuntimeInfo();
+
+        if (!ri)
+            return null;
+
+        return new Entities.EntityValue(ri, this.getToString(), null);
     }
 
     extractEntityHtml(itemPrefix?: string): Entities.EntityHtml {
