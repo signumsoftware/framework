@@ -288,7 +288,7 @@ namespace Signum.Web.Operations
             List<ToolBarButton> buttons = new List<ToolBarButton>();
             Dictionary<EntityOperationGroup, ToolBarDropDown> groups = new Dictionary<EntityOperationGroup, ToolBarDropDown>();
 
-            foreach (var eoc in operations)
+            foreach (var eoc in operations.Where(c => c.OperationSettings == null || !c.OperationSettings.HideOnCanExecute || c.CanExecute == null))
             {
                 EntityOperationGroup group = GetDefaultGroup(eoc);
 
@@ -465,9 +465,9 @@ namespace Signum.Web.Operations
         }
         #endregion
 
-        static readonly GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext =
-         new GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>>((ctx, oi, settings) =>
-             new ContextualOperationContext<Entity>(ctx, oi, (ContextualOperationSettings<Entity>)settings));
+        static readonly GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, EntityOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext =
+         new GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, EntityOperationSettingsBase, IContextualOperationContext>>((ctx, oi, settings, entitySettings) =>
+             new ContextualOperationContext<Entity>(ctx, oi, (ContextualOperationSettings<Entity>)settings, (EntityOperationSettings<Entity>)entitySettings));
 
 
         public virtual List<IMenuItem> ContextualItemsHelper_GetConstructorFromManyMenuItems(SelectedItemsMenuContext ctx)
@@ -481,7 +481,7 @@ namespace Signum.Web.Operations
                (from oi in OperationInfos(type)
                 where oi.OperationType == OperationType.ConstructorFromMany
                 let os = GetSettings<ContextualOperationSettingsBase>(type, oi.OperationSymbol)
-                let coc = newContextualOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? oi.BaseType)(ctx, oi, os)
+                let coc = newContextualOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? oi.BaseType)(ctx, oi, os, null)
                 where os == null || !os.HasIsVisible || os.OnIsVisible(coc)
                  select CreateContextual(coc, _coc => JsModule.Operations["constructFromManyDefault"](_coc.Options(), JsFunction.Event)))
                  .OrderBy(a => a.Order)
@@ -507,7 +507,7 @@ namespace Signum.Web.Operations
             var context = (from oi in OperationInfos(type)
                            where oi.IsEntityOperation
                            let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
-                           let coc = newContextualOperationContext.GetInvoker(os.Try(o => o.OverridenType) ?? type)(ctx, oi, os == null ? null : os.ContextualUntyped)
+                           let coc = newContextualOperationContext.GetInvoker(os.Try(o => o.OverridenType) ?? type)(ctx, oi, os == null ? null : os.ContextualUntyped, os)
                            where os == null ? oi.Lite == true :
                                             os.ContextualUntyped.HasIsVisible ? os.ContextualUntyped.OnIsVisible(coc) :
                                             oi.Lite == true && !os.HasIsVisible && (!os.HasClick || os.ContextualUntyped.HasClick)
@@ -527,7 +527,12 @@ namespace Signum.Web.Operations
                 }
             }
 
-            List<IMenuItem> menuItems = context.Select(coc => CreateContextual(coc, DefaultEntityClick)).OrderBy(a => a.Order).Cast<IMenuItem>().ToList();
+            List<IMenuItem> menuItems = context
+                .Where(coc => !coc.HideOnCanExecute || coc.CanExecute == null)
+                .Select(coc => CreateContextual(coc, DefaultEntityClick)).OrderBy(a => a.Order).Cast<IMenuItem>().ToList();
+
+            if (menuItems.IsEmpty())
+                return null;
 
             menuItems.Insert(0, new MenuItemHeader(SearchMessage.Operation.NiceToString()));
 

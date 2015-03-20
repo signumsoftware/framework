@@ -169,6 +169,8 @@ namespace Signum.Web.Operations
         public abstract bool HasIsVisible { get; }
         public abstract bool OnIsVisible(IContextualOperationContext ctx);
 
+        public bool? HideOnCanExecute { get; set; }
+
         protected ContextualOperationSettingsBase(OperationSymbol symbol)
             : base(symbol)
         {
@@ -242,17 +244,19 @@ namespace Signum.Web.Operations
         Type Type { get; }
 
         JsOperationOptions Options();
+
+        bool HideOnCanExecute { get; }
     }
 
     public class ContextualOperationContext<T> : IContextualOperationContext 
         where T : class, IEntity
     {
-
         public List<Lite<T>> Entities { get; private set; }
         public Type SingleType { get { return Entities.Select(a => a.EntityType).Distinct().Only(); } }
 
         public OperationInfo OperationInfo { get; private set; }
         public ContextualOperationSettings<T> OperationSettings { get; set; }
+        public EntityOperationSettings<T> EntityOperationSettings { get; set; }
 
         public SelectedItemsMenuContext Context { get; private set; }
         public string Prefix { get { return Context.Prefix; } }    
@@ -261,12 +265,13 @@ namespace Signum.Web.Operations
 
         public string CanExecute { get; set; }
 
-        public ContextualOperationContext(SelectedItemsMenuContext ctx, OperationInfo info, ContextualOperationSettings<T> settings)
+        public ContextualOperationContext(SelectedItemsMenuContext ctx, OperationInfo info, ContextualOperationSettings<T> settings, EntityOperationSettings<T> entityOperationSettings)
         {
             this.Context = ctx;
             this.OperationInfo = info;
             this.OperationSettings = settings;
             this.Entities = Context.Lites.Cast<Lite<T>>().ToList();
+            this.EntityOperationSettings = entityOperationSettings;
         }
 
         public JsOperationOptions Options()
@@ -287,6 +292,20 @@ namespace Signum.Web.Operations
         public Type Type
         {
             get { return typeof(T); }
+        }
+
+        public bool HideOnCanExecute
+        {
+            get
+            {
+                if (this.OperationSettings != null && this.OperationSettings.HideOnCanExecute.HasValue)
+                    return this.OperationSettings.HideOnCanExecute.Value;
+
+                if (this.EntityOperationSettings != null)
+                    return this.EntityOperationSettings.HideOnCanExecute;
+
+                return false;
+            }
         }
     }
 
@@ -323,9 +342,12 @@ namespace Signum.Web.Operations
         public abstract bool HasIsVisible { get; }
         public abstract bool OnIsVisible(IEntityOperationContext ctx);
 
+        public bool HideOnCanExecute { get; set; }
+
         public EntityOperationSettingsBase(OperationSymbol symbol)
             : base(symbol)
         {
+            this.HideOnCanExecute = false;
         }
 
         static GenericInvoker<Func<OperationSymbol, EntityOperationSettingsBase>> giCreate =
@@ -412,7 +434,6 @@ namespace Signum.Web.Operations
         IEntity Entity { get; }
         EntityOperationSettingsBase OperationSettings { get; }
         string CanExecute { get; set; }
-
         JsOperationOptions Options();
     }
 
@@ -459,12 +480,6 @@ namespace Signum.Web.Operations
         {
             return TypeContextUtilities.Compose(this.Prefix, prefixPart); 
         }
-
-        public string EvaluateCanExecute()
-        {
-            return CanExecute ?? (CanExecute = OperationLogic.ServiceCanExecute((Entity)(IEntity)this.Entity, this.OperationSettings.OperationSymbol));
-        }
-
 
         IEntity IEntityOperationContext.Entity
         {
