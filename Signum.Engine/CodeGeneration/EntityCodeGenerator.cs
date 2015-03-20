@@ -584,20 +584,43 @@ namespace Signum.Engine.CodeGeneration
         {
             List<string> attributes = new List<string>();
 
-            if (HasNotNullValidator(col, relatedEntity))
+            if (HasNotNullableAttribute(col, relatedEntity))
                 attributes.Add("NotNullValidator");
+
+            string stringLengthValidator = GetStringLengthValidator(table, col, relatedEntity);
+            if(stringLengthValidator != null)
+                attributes.Add(stringLengthValidator);
 
             return attributes;
         }
 
-        protected virtual bool HasNotNullValidator(DiffColumn col, string relatedEntity)
+        protected virtual string GetStringLengthValidator(DiffTable table, DiffColumn col, string relatedEntity)
         {
-            return HasNotNullableAttribute(col, relatedEntity);
+            if (GetValueType(col) != typeof(string))
+                return null;
+
+            var parts = new List<string>();
+
+            parts.Add("AllowNulls = " + col.Nullable.ToString().ToLower());
+
+            var min = GetMinStringLength(col);
+            if (min != null)
+                parts.Add("Min = " + min);
+
+            if (col.Length != -1)
+                parts.Add("Max = " + col.Length / DiffColumn.BytesPerChar(col.SqlDbType));
+
+            return "StringLengthValidator(" + parts.ToString(", ") + ")";
+        }
+
+        protected virtual int GetMinStringLength(DiffColumn col)
+        {
+            return 1;
         }
 
         protected virtual bool HasNotNullableAttribute(DiffColumn col, string relatedEntity)
         {
-            return !col.Nullable && (relatedEntity != null || GetValueType(col).IsClass);
+            return !col.Nullable && (relatedEntity != null || !GetValueType(col).IsClass);
         }
 
         protected virtual string GetFieldName(DiffTable table, DiffColumn col)
