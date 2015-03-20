@@ -54,15 +54,6 @@ namespace Signum.Windows.Processes
 
                     SearchControl.GetContextMenuItems += SearchControl_GetContextMenuItems;
                 }
-
-                if (MixinDeclarations.IsDeclared(typeof(ProcessEntity), typeof(UserProcessSessionMixin)))
-                {
-                    Navigator.EntitySettings<ProcessEntity>().OverrideView += (p, c) =>
-                    {
-                        c.Child<EntityLine>("Algorithm").After(new EntityLine().Set(Common.RouteProperty, "[UserProcessSessionMixin].User"));
-                        return c;
-                    }; 
-                }
             }
         }
 
