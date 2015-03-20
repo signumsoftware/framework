@@ -48,7 +48,9 @@ namespace Signum.Entities.Scheduler
             set { Set(ref machineName, value); }
         }
 
+        [NotNullable]
         Lite<IUserEntity> user;
+        [NotNullValidator]
         public Lite<IUserEntity> User
         {
             get { return user; }

@@ -27,7 +27,7 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static Func<ITaskEntity, IDisposable> ApplySession;
+        public static Func<ITaskEntity, ScheduledTaskEntity, IDisposable> ApplySession;
 
         static Expression<Func<ITaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsExpression =
          ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == ct);
@@ -292,7 +292,7 @@ namespace Signum.Engine.Scheduler
                         {
                             var pair = priorityQueue.Pop();
 
-                            ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, null);
+                            ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, pair.ScheduledTask.User.Retrieve());
 
                             pair.NextDate = pair.ScheduledTask.Rule.Next(now);
 
@@ -335,30 +335,20 @@ namespace Signum.Engine.Scheduler
 
         public static Lite<IEntity> ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
         {
-
-
-
-            //   using (Disposable.Combine(ApplySession, f => f(task)))
+            using (Disposable.Combine(ApplySession, f => f(task, scheduledTask)))
             {
-                ScheduledTaskLogEntity stl = null;
-                IUserEntity entityIUser = null;
+                ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
+                {
+                    Task = task,
+                    ScheduledTask = scheduledTask,
+                    StartTime = TimeZoneManager.Now,
+                    MachineName = Environment.MachineName,
+                    ApplicationName = Schema.Current.ApplicationName,
+                    User = user.ToLite(),
+                };
 
                 using (AuthLogic.Disable())
                 {
-                     entityIUser = user == null ? (IUserEntity)scheduledTask.User.Retrieve() : user;
-
-                    using (IsolationEntity.Override(entityIUser.TryIsolation()))
-                        stl = new ScheduledTaskLogEntity
-                       {
-                           Task = task,
-                           ScheduledTask = scheduledTask,
-                           StartTime = TimeZoneManager.Now,
-                           MachineName = Environment.MachineName,
-                           ApplicationName = Schema.Current.ApplicationName,
-                           User=entityIUser.ToLite(),
-                       };
-
-
                     using (Transaction tr = Transaction.ForceNew())
                     {
                         stl.Save();
@@ -369,19 +359,21 @@ namespace Signum.Engine.Scheduler
 
                 try
                 {
-                    var userEntity = entityIUser as UserEntity;
-                    if (userEntity != null)
+                    using (Transaction tr = Transaction.ForceNew())
                     {
-                        using (AuthLogic.UserSession(userEntity))
+                        using (UserHolder.UserSession(user))
                         {
                             stl.ProductEntity = ExecuteTask.Invoke(task);
                         }
-                    }
-                    else
-                    {
-                        stl.ProductEntity = ExecuteTask.Invoke(task);
-                    }
 
+                        using (AuthLogic.Disable())
+                        {
+                            stl.EndTime = TimeZoneManager.Now;
+                            stl.Save();
+                        }
+
+                        tr.Commit();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -392,28 +384,17 @@ namespace Signum.Engine.Scheduler
 
                         var exLog = ex.LogException().ToLite();
 
-                        using (Transaction tr2 = Transaction.ForceNew())
+                        using (Transaction tr = Transaction.ForceNew())
                         {
                             stl.Exception = exLog;
+                            stl.EndTime = TimeZoneManager.Now;
                             stl.Save();
 
-                            tr2.Commit();
+                            tr.Commit();
                         }
                     }
                     throw;
 
-                }
-                finally
-                {
-
-                    using (AuthLogic.Disable())
-                    using (Transaction tr3 = Transaction.ForceNew())
-                    {
-                        stl.EndTime = TimeZoneManager.Now;
-                        stl.Save();
-
-                        tr3.Commit();
-                    }
                 }
 
                 return stl.ProductEntity;
