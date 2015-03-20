@@ -508,6 +508,8 @@ namespace Signum.Engine.Maps
 
         protected virtual FieldEnum GenerateFieldEnum(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
         {
+            var att = Settings.FieldAttribute<SqlDbTypeAttribute>(route);
+
             Type cleanEnum = route.Type.UnNullify();
 
             var referenceTable = Include(EnumEntity.Generate(cleanEnum), route);
@@ -519,6 +521,7 @@ namespace Signum.Engine.Maps
                 IsLite = false,
                 ReferenceTable = referenceTable,
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
+                Default = att.Try(a => a.Default),
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
