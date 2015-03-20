@@ -115,7 +115,7 @@ namespace Signum.Engine
 
                         var changes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                             null,
-                            (i, dix) => dix.IsControlledIndex && SafeConsole.Ask(ref removeExtraControlledIndexes, "Remove extra controlled indexes?") || dix.Columns.Any(removedColums.Contains) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                            (i, dix) => dix.IsControlledIndex && SafeConsole.Ask(ref removeExtraControlledIndexes, "Remove extra controlled index {0} in {1}?".FormatWith(dix.IndexName, tab.Name)) || dix.Columns.Any(removedColums.Contains) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                             (i, mix, dix) => (mix as UniqueIndex).Try(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                             Spacing.Simple);
 
@@ -229,7 +229,7 @@ namespace Signum.Engine
                         Dictionary<string, Index> modelIxs = modelIndices[tab];
 
                         var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
-                            (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
+                            (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndex(mix) : null,
                             null,
                             (i, mix, dix) => (mix as UniqueIndex).Try(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.CreateIndex(mix) :
                                 mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab, dix.IndexName, mix.IndexName) : null,
