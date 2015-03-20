@@ -21,6 +21,7 @@ using System.Linq.Expressions;
 using Signum.Engine.Cache;
 using Signum.Entities.Basics;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Isolation;
 
 namespace Signum.Engine.Scheduler
 {
@@ -51,11 +52,11 @@ namespace Signum.Engine.Scheduler
         }
 
         public static Polymorphic<Func<ITaskEntity, Lite<IEntity>>> ExecuteTask = new Polymorphic<Func<ITaskEntity, Lite<IEntity>>>();
-        
+
         public class ScheduledTaskPair
         {
             public ScheduledTaskEntity ScheduledTask;
-            public DateTime NextDate; 
+            public DateTime NextDate;
         }
 
         static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy;
@@ -127,7 +128,7 @@ namespace Signum.Engine.Scheduler
                         cte.MachineName,
                         cte.User,
                         cte.Exception,
-                        
+
                     });
 
                 dqm.RegisterExpression((ITaskEntity ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
@@ -174,7 +175,7 @@ namespace Signum.Engine.Scheduler
                 }.Register();
 
                 ScheduledTasksLazy = sb.GlobalLazy(() =>
-                    Database.Query<ScheduledTaskEntity>().Where(a => !a.Suspended && 
+                    Database.Query<ScheduledTaskEntity>().Where(a => !a.Suspended &&
                         (a.MachineName == ScheduledTaskEntity.None || a.MachineName == Environment.MachineName && a.ApplicationName == Schema.Current.ApplicationName)).ToList(),
                     new InvalidateWith(typeof(ScheduledTaskEntity)));
 
@@ -329,63 +330,93 @@ namespace Signum.Engine.Scheduler
                         ex.ActionName = "ExecuteAsync";
                     });
                 }
-            }); 
+            });
         }
 
         public static Lite<IEntity> ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
         {
-            using (AuthLogic.UserSession(AuthLogic.SystemUser))
-            using (Disposable.Combine(ApplySession, f => f(task)))
-            {
-                ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
-                {
-                    Task = task,
-                    ScheduledTask = scheduledTask, 
-                    User = user.ToLite(),
-                    StartTime = TimeZoneManager.Now,
-                    MachineName = Environment.MachineName,
-                    ApplicationName = Schema.Current.ApplicationName
-                };
 
-                using (Transaction tr = Transaction.ForceNew())
+
+
+            //   using (Disposable.Combine(ApplySession, f => f(task)))
+            {
+                ScheduledTaskLogEntity stl = null;
+                IUserEntity entityIUser = null;
+
+                using (AuthLogic.Disable())
                 {
-                    stl.Save();
-                 
-                    tr.Commit();
+                     entityIUser = user == null ? (IUserEntity)scheduledTask.User.Retrieve() : user;
+
+                    using (IsolationEntity.Override(entityIUser.TryIsolation()))
+                        stl = new ScheduledTaskLogEntity
+                       {
+                           Task = task,
+                           ScheduledTask = scheduledTask,
+                           StartTime = TimeZoneManager.Now,
+                           MachineName = Environment.MachineName,
+                           ApplicationName = Schema.Current.ApplicationName,
+                           User=entityIUser.ToLite(),
+                       };
+
+
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        stl.Save();
+
+                        tr.Commit();
+                    }
                 }
 
                 try
                 {
-                    using (Transaction tr = new Transaction())
+                    var userEntity = entityIUser as UserEntity;
+                    if (userEntity != null)
                     {
-                        
-
-                        stl.ProductEntity = ExecuteTask.Invoke(task);
-
-                        stl.EndTime = TimeZoneManager.Now;
-                        stl.Save();
-
-                        return tr.Commit(stl.ProductEntity);
+                        using (AuthLogic.UserSession(userEntity))
+                        {
+                            stl.ProductEntity = ExecuteTask.Invoke(task);
+                        }
                     }
+                    else
+                    {
+                        stl.ProductEntity = ExecuteTask.Invoke(task);
+                    }
+
                 }
                 catch (Exception ex)
                 {
-                    if (Transaction.InTestTransaction)
-                        throw;
-
-                    var exLog = ex.LogException().ToLite();
-
-                    using (Transaction tr2 = Transaction.ForceNew())
+                    using (AuthLogic.Disable())
                     {
-                        stl.Exception = exLog;
+                        if (Transaction.InTestTransaction)
+                            throw;
 
+                        var exLog = ex.LogException().ToLite();
+
+                        using (Transaction tr2 = Transaction.ForceNew())
+                        {
+                            stl.Exception = exLog;
+                            stl.Save();
+
+                            tr2.Commit();
+                        }
+                    }
+                    throw;
+
+                }
+                finally
+                {
+
+                    using (AuthLogic.Disable())
+                    using (Transaction tr3 = Transaction.ForceNew())
+                    {
+                        stl.EndTime = TimeZoneManager.Now;
                         stl.Save();
 
-                        tr2.Commit();
+                        tr3.Commit();
                     }
-
-                    throw;
                 }
+
+                return stl.ProductEntity;
             }
         }
 
@@ -411,13 +442,13 @@ namespace Signum.Engine.Scheduler
         public bool Running;
         public TimeSpan SchedulerMargin;
         public DateTime? NextExecution;
-        public List<SchedulerItemState> Queue; 
+        public List<SchedulerItemState> Queue;
     }
 
     public class SchedulerItemState
     {
         public Lite<ScheduledTaskEntity> ScheduledTask;
-        public string Rule; 
-        public DateTime NextExecution; 
+        public string Rule;
+        public DateTime NextExecution;
     }
 }
