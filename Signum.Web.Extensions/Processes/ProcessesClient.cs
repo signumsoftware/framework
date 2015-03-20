@@ -70,9 +70,9 @@ namespace Signum.Web.Processes
             }
         }
 
-        static readonly GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext =
-         new GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>>((ctx, oi, settings) =>
-             new ContextualOperationContext<Entity>(ctx, oi, (ContextualOperationSettings<Entity>)settings));
+        static readonly GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, EntityOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext =
+         new GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, EntityOperationSettingsBase, IContextualOperationContext>>((ctx, oi, settings, entitySettings) =>
+             new ContextualOperationContext<Entity>(ctx, oi, (ContextualOperationSettings<Entity>)settings, (EntityOperationSettings<Entity>)entitySettings));
 
 
         public static List<IMenuItem> CreateGroupContextualItem(SelectedItemsMenuContext ctx)
@@ -94,7 +94,7 @@ namespace Signum.Web.Processes
             var contexts = (from oi in OperationClient.Manager.OperationInfos(type)
                             where oi.IsEntityOperation
                             let os = OperationClient.Manager.GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
-                            let coc = newContextualOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? type)(ctx, oi, os.Try(a => a.ContextualFromManyUntyped))
+                            let coc = newContextualOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? type)(ctx, oi, os.Try(a => a.ContextualFromManyUntyped), os)
                             where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
                                 !os.ContextualFromManyUntyped.HasIsVisible ? (oi.Lite == true && !os.HasIsVisible && oi.OperationType != OperationType.ConstructorFrom && (!os.HasClick || os.ContextualFromManyUntyped.HasClick)) :
                                 os.ContextualFromManyUntyped.OnIsVisible(coc)
@@ -117,10 +117,13 @@ namespace Signum.Web.Processes
                 }
             }
 
-            List<IMenuItem> menuItems = contexts.Select(op => OperationClient.Manager.CreateContextual(op,
-                coc => ProcessClient.Module["processFromMany"](coc.Options(), JsFunction.Event)
-                )).OrderBy(o => o.Order).Cast<IMenuItem>().ToList();
+            List<IMenuItem> menuItems = contexts
+                .Where(c => !c.HideOnCanExecute || c.CanExecute == null)
+                .Select(op => OperationClient.Manager.CreateContextual(op, coc => ProcessClient.Module["processFromMany"](coc.Options(), JsFunction.Event)))
+                .OrderBy(o => o.Order).Cast<IMenuItem>().ToList();
 
+            if (menuItems.IsEmpty())
+                return null;
 
             menuItems.Insert(0, new MenuItemHeader(SearchMessage.Processes.NiceToString()));
 
