@@ -638,7 +638,12 @@ namespace Signum.Web.Selenium
 
         public virtual int ItemsCount()
         {
-            return (int)(long)Selenium.ExecuteScript("return $('{0} fieldset').length".FormatWith(ItemsContainerLocator.CssSelector()));
+            return (int)(long)Selenium.ExecuteScript("return $('{0} fieldset:not(.hidden)').length".FormatWith(ItemsContainerLocator.CssSelector()));
+        }
+
+        public virtual int HiddenItemsCount()
+        {
+            return (int)(long)Selenium.ExecuteScript("return $('{0} fieldset.hidden').length".FormatWith(ItemsContainerLocator.CssSelector()));
         }
 
         public override int? NewIndex()
