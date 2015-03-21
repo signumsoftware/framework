@@ -21,12 +21,13 @@ using System.Linq.Expressions;
 using Signum.Engine.Cache;
 using Signum.Entities.Basics;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Isolation;
 
 namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static Func<ITaskEntity, IDisposable> ApplySession;
+        public static Func<ITaskEntity, ScheduledTaskEntity, IDisposable> ApplySession;
 
         static Expression<Func<ITaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsExpression =
          ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == ct);
@@ -51,11 +52,11 @@ namespace Signum.Engine.Scheduler
         }
 
         public static Polymorphic<Func<ITaskEntity, Lite<IEntity>>> ExecuteTask = new Polymorphic<Func<ITaskEntity, Lite<IEntity>>>();
-        
+
         public class ScheduledTaskPair
         {
             public ScheduledTaskEntity ScheduledTask;
-            public DateTime NextDate; 
+            public DateTime NextDate;
         }
 
         static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy;
@@ -127,7 +128,7 @@ namespace Signum.Engine.Scheduler
                         cte.MachineName,
                         cte.User,
                         cte.Exception,
-                        
+
                     });
 
                 dqm.RegisterExpression((ITaskEntity ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
@@ -174,7 +175,7 @@ namespace Signum.Engine.Scheduler
                 }.Register();
 
                 ScheduledTasksLazy = sb.GlobalLazy(() =>
-                    Database.Query<ScheduledTaskEntity>().Where(a => !a.Suspended && 
+                    Database.Query<ScheduledTaskEntity>().Where(a => !a.Suspended &&
                         (a.MachineName == ScheduledTaskEntity.None || a.MachineName == Environment.MachineName && a.ApplicationName == Schema.Current.ApplicationName)).ToList(),
                     new InvalidateWith(typeof(ScheduledTaskEntity)));
 
@@ -291,7 +292,7 @@ namespace Signum.Engine.Scheduler
                         {
                             var pair = priorityQueue.Pop();
 
-                            ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, null);
+                            ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, pair.ScheduledTask.User.Retrieve());
 
                             pair.NextDate = pair.ScheduledTask.Rule.Next(now);
 
@@ -329,63 +330,74 @@ namespace Signum.Engine.Scheduler
                         ex.ActionName = "ExecuteAsync";
                     });
                 }
-            }); 
+            });
         }
 
         public static Lite<IEntity> ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
         {
-            using (AuthLogic.UserSession(AuthLogic.SystemUser))
-            using (Disposable.Combine(ApplySession, f => f(task)))
+            using (Disposable.Combine(ApplySession, f => f(task, scheduledTask)))
             {
                 ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
                 {
                     Task = task,
-                    ScheduledTask = scheduledTask, 
-                    User = user.ToLite(),
+                    ScheduledTask = scheduledTask,
                     StartTime = TimeZoneManager.Now,
                     MachineName = Environment.MachineName,
-                    ApplicationName = Schema.Current.ApplicationName
+                    ApplicationName = Schema.Current.ApplicationName,
+                    User = user.ToLite(),
                 };
 
-                using (Transaction tr = Transaction.ForceNew())
+                using (AuthLogic.Disable())
                 {
-                    stl.Save();
-                 
-                    tr.Commit();
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        stl.Save();
+
+                        tr.Commit();
+                    }
                 }
 
                 try
                 {
-                    using (Transaction tr = new Transaction())
+                    using (Transaction tr = Transaction.ForceNew())
                     {
-                        
+                        using (UserHolder.UserSession(user))
+                        {
+                            stl.ProductEntity = ExecuteTask.Invoke(task);
+                        }
 
-                        stl.ProductEntity = ExecuteTask.Invoke(task);
+                        using (AuthLogic.Disable())
+                        {
+                            stl.EndTime = TimeZoneManager.Now;
+                            stl.Save();
+                        }
 
-                        stl.EndTime = TimeZoneManager.Now;
-                        stl.Save();
-
-                        return tr.Commit(stl.ProductEntity);
+                        tr.Commit();
                     }
                 }
                 catch (Exception ex)
                 {
-                    if (Transaction.InTestTransaction)
-                        throw;
-
-                    var exLog = ex.LogException().ToLite();
-
-                    using (Transaction tr2 = Transaction.ForceNew())
+                    using (AuthLogic.Disable())
                     {
-                        stl.Exception = exLog;
+                        if (Transaction.InTestTransaction)
+                            throw;
 
-                        stl.Save();
+                        var exLog = ex.LogException().ToLite();
 
-                        tr2.Commit();
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            stl.Exception = exLog;
+                            stl.EndTime = TimeZoneManager.Now;
+                            stl.Save();
+
+                            tr.Commit();
+                        }
                     }
-
                     throw;
+
                 }
+
+                return stl.ProductEntity;
             }
         }
 
@@ -411,13 +423,13 @@ namespace Signum.Engine.Scheduler
         public bool Running;
         public TimeSpan SchedulerMargin;
         public DateTime? NextExecution;
-        public List<SchedulerItemState> Queue; 
+        public List<SchedulerItemState> Queue;
     }
 
     public class SchedulerItemState
     {
         public Lite<ScheduledTaskEntity> ScheduledTask;
-        public string Rule; 
-        public DateTime NextExecution; 
+        public string Rule;
+        public DateTime NextExecution;
     }
 }

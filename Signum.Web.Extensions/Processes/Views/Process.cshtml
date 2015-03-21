@@ -9,6 +9,7 @@
         <div class="col-sm-6">
             @Html.ValueLine(e, f => f.State, f => f.ReadOnly = true)
             @Html.EntityLine(e, f => f.Algorithm)
+            @Html.EntityLine(e, f => f.User)
             @Html.EntityLine(e, f => f.Data, f => f.ReadOnly = true)
             @Html.ValueLine(e, f => f.MachineName)
             @Html.ValueLine(e, f => f.ApplicationName)

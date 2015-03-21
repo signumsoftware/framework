@@ -84,9 +84,9 @@ namespace Signum.Engine.Isolation
             return IsolationEntity.Override(process.Data.TryIsolation());
         }
 
-        static IDisposable SchedulerLogic_ApplySession(ITaskEntity task)
+        static IDisposable SchedulerLogic_ApplySession(ITaskEntity task, ScheduledTaskEntity scheduled)
         {
-            return IsolationEntity.Override(task.TryIsolation());
+            return IsolationEntity.Override(scheduled.TryIsolation() ?? task.TryIsolation());
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)

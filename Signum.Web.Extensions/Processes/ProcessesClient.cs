@@ -59,11 +59,7 @@ namespace Signum.Web.Processes
 
                     ContextualItemsHelper.GetContextualItemsForLites += CreateGroupContextualItem;
                 }
-
-                if (MixinDeclarations.IsDeclared(typeof(ProcessEntity), typeof(UserProcessSessionMixin)))
-                    Navigator.EntitySettings<ProcessEntity>().CreateViewOverrides().AfterLine(p => p.Algorithm, 
-                        (html, tc) => html.EntityLine(tc, p => p.Mixin<UserProcessSessionMixin>().User));
-
+                
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProcessPanel", 
                     () => ProcessPermission.ViewProcessPanel.IsAuthorized(),
                     uh => uh.Action((ProcessController pc) => pc.View())));
