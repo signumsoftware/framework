@@ -46,6 +46,9 @@ namespace Signum.Engine.Files
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                SaveFile = SaveFileDefaultd;
+
+
                 sb.Include<FilePathEntity>();
 
                 SymbolLogic<FileTypeSymbol>.Start(sb, () => FileTypes.Keys.ToHashSet());
@@ -184,7 +187,10 @@ namespace Signum.Engine.Files
         }
 
 
-        private static void SaveFile(FilePathEntity fp)
+        public static Action<FilePathEntity> SaveFile;
+
+
+        public static Action<FilePathEntity> SaveFileDefaultd = fp =>
         {
             string fullPhysicalPath = null;
             try
@@ -203,7 +209,7 @@ namespace Signum.Engine.Files
 
                 throw;
             }
-        }
+        };
 
         public static void Register(FileTypeSymbol fileTypeSymbol, FileTypeAlgorithm algorithm)
         {
