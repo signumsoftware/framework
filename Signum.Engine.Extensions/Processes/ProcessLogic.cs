@@ -289,6 +289,7 @@ namespace Signum.Engine.Processes
                     Data = processData,
                     MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None,
                     ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None,
+                    User = UserHolder.Current.ToLite(),
                 };
                 
                 if(copyMixinsFrom != null)
