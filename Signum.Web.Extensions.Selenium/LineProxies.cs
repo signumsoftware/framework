@@ -686,6 +686,11 @@ namespace Signum.Web.Selenium
 
             return this.Details<T>(index.Value);
         }
+
+        public LineContainer<T> LastDetails<T>() where T : ModifiableEntity
+        {
+            return this.Details<T>(this.ItemsCount() + this.HiddenItemsCount() - 1);
+        }
     }
 
     public class EntityTabRepeaterProxy : EntityRepeaterProxy
