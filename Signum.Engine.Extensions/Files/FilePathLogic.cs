@@ -77,16 +77,18 @@ namespace Signum.Engine.Files
                     {
                         if (!fp.IsNew)
                         {
-                            var originalData = fp.ToLite().InDB(f => new { FileName = f.FileName, Sufix = f.Sufix, FullPhysicalPath = f.FullPhysicalPath });
 
-                            if (fp.FileName != originalData.FileName || fp.Sufix != originalData.Sufix || fp.FullPhysicalPath != originalData.FullPhysicalPath)
+                            var ofp = fp.ToLite().Retrieve();
+
+
+                            if (fp.FileName != ofp.FileName || fp.Sufix != ofp.Sufix || fp.FullPhysicalPath != ofp.FullPhysicalPath)
                             {
                                 using (Transaction tr = new Transaction())
                                 {
-                                    var preSufix = originalData.Sufix.Substring(0, originalData.Sufix.Length - originalData.FileName.Length);
+                                    var preSufix = ofp.Sufix.Substring(0, ofp.Sufix.Length - ofp.FileName.Length);
                                     fp.Sufix = Path.Combine(preSufix, fp.FileName);
                                     fp.Save();
-                                    System.IO.File.Move(originalData.FullPhysicalPath, fp.FullPhysicalPath);
+                                    System.IO.File.Move(ofp.FullPhysicalPath, fp.FullPhysicalPath);
                                     tr.Commit();
                                 }
                             }
