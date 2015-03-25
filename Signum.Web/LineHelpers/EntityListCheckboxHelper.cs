@@ -119,6 +119,9 @@ namespace Signum.Web
                 if(isChecked)
                     cb.Attr("checked", "checked");
 
+                if (entityListCheckBox.ReadOnly)
+                    cb.Attr("disabled", "disabled");
+
                 sb.AddLine(cb);
 
                 if (lite != null && !lite.IsNew && entityListCheckBox.Navigate)
