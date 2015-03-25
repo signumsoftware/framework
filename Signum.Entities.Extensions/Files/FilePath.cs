@@ -125,7 +125,8 @@ namespace Signum.Entities.Files
             return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize(true));
         }
     }
-
+   
+    [Serializable]
     public class PrefixPair 
     {
         public PrefixPair(string physicalPrefix)
