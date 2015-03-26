@@ -33,8 +33,11 @@ namespace Signum.Web.Operations
             UrlsRepository.DefaultSFUrls.AddRange(new Dictionary<string, Func<UrlHelper, string>> 
             { 
                 { "operationExecute", url =>url.Action((OperationController c)=>c.Execute()) },
+                { "operationExecuteMultiple", url =>url.Action((OperationController c)=>c.ExecuteMultiple()) },
                 { "operationDelete", url =>url.Action((OperationController c)=>c.Delete()) },
+                { "operationDeleteMultiple", url =>url.Action((OperationController c)=>c.DeleteMultiple()) },
                 { "operationConstructFrom", url =>url.Action((OperationController c)=>c.ConstructFrom()) },
+                { "operationConstructFromMultiple", url =>url.Action((OperationController c)=>c.ConstructFromMany()) },
                 { "operationConstructFromMany", url =>url.Action((OperationController c)=>c.ConstructFromMany()) },
             });
 
@@ -339,9 +342,11 @@ namespace Signum.Web.Operations
             return null;
         }
 
+
+        public Func<ToolBarButton, ToolBarButton> CustomizeToolBarButton; 
         protected internal virtual ToolBarButton CreateToolBarButton(IEntityOperationContext ctx, EntityOperationGroup group)
         {
-            return new ToolBarButton(ctx.Context.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
+            var result = new ToolBarButton(ctx.Context.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
             {
                 Style = ctx.OperationSettings.Try(a => a.Style) ?? EntityOperationSettingsBase.AutoStyleFunction(ctx.OperationInfo),
 
@@ -351,8 +356,15 @@ namespace Signum.Web.Operations
 
                 Text = ctx.OperationSettings.Try(o => o.Text) ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.OperationSymbol.NiceToString() : group.SimplifyName(ctx.OperationInfo.OperationSymbol.NiceToString())),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)),
-                HtmlProps = { { "data-operation", ctx.OperationInfo.OperationSymbol.Key } }
+                HtmlProps = { { "data-operation", ctx.OperationInfo.OperationSymbol.Key } },
+
+                Tag = ctx,
             };
+
+            if (CustomizeToolBarButton != null)
+                return CustomizeToolBarButton(result);
+
+            return result;
         }
 
         protected internal virtual JsFunction DefaultClick(IEntityOperationContext ctx)
@@ -499,37 +511,66 @@ namespace Signum.Web.Operations
 
         public virtual List<IMenuItem> ContextualItemsHelper_GetEntityOperationMenuItem(SelectedItemsMenuContext ctx)
         {
-            if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count > 1)
+            if (ctx.Lites.IsNullOrEmpty())
                 return null;
 
-            var type = ctx.Lites.Single().EntityType;
+            if (ctx.Implementations.IsByAll)
+                return null;
+
+            var type = ctx.Lites.Select(a => a.EntityType).Distinct().Only();
+
+            if (type == null)
+                return null;
 
             var context = (from oi in OperationInfos(type)
                            where oi.IsEntityOperation
                            let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
-                           let coc = newContextualOperationContext.GetInvoker(os.Try(o => o.OverridenType) ?? type)(ctx, oi, os == null ? null : os.ContextualUntyped, os)
-                           where os == null ? oi.Lite == true :
-                                            os.ContextualUntyped.HasIsVisible ? os.ContextualUntyped.OnIsVisible(coc) :
-                                            oi.Lite == true && !os.HasIsVisible && (!os.HasClick || os.ContextualUntyped.HasClick)
+                           let osc = os == null ? null :
+                                     ctx.Lites.Count > 1 ? os.ContextualUntyped: os.ContextualFromManyUntyped
+                           let coc = newContextualOperationContext.GetInvoker(os.Try(o => o.OverridenType) ?? type)(ctx, oi, osc, os)
+                           let defaultBehaviour = oi.Lite == true && (ctx.Lites.Count == 1 || oi.OperationType != OperationType.ConstructorFrom)
+                           where os == null ? defaultBehaviour :
+                                 !os.ContextualUntyped.HasIsVisible ? defaultBehaviour && !os.HasIsVisible && (!os.HasClick || os.ContextualUntyped.HasClick) :
+                                 os.ContextualUntyped.OnIsVisible(coc)
                            select coc).ToList();
 
             if (context.IsEmpty())
                 return null;
 
-            if (context.Any(eomi => eomi.OperationInfo.HasCanExecute == true))
+            if(ctx.Lites.Count == 1)
             {
-                Dictionary<OperationSymbol, string> canExecutes = OperationLogic.ServiceCanExecute(Database.Retrieve(ctx.Lites.Single()));
-                foreach (var coc in context)
+                if (context.Any(eomi => eomi.OperationInfo.HasCanExecute == true))
                 {
-                    var ce = canExecutes.TryGetC(coc.OperationInfo.OperationSymbol);
-                    if (ce != null)
-                        coc.CanExecute = ce;
+                    Dictionary<OperationSymbol, string> canExecutes = OperationLogic.ServiceCanExecute(Database.Retrieve(ctx.Lites.Single()));
+                    foreach (var coc in context)
+                    {
+                        var ce = canExecutes.TryGetC(coc.OperationInfo.OperationSymbol);
+                        if (ce != null)
+                            coc.CanExecute = ce;
+                    }
+                }
+            }
+            else
+            {
+                var cleanKeys = context.Where(cod => cod.CanExecute == null && cod.OperationInfo.HasStates == true)
+                    .Select(kvp => kvp.OperationInfo.OperationSymbol).ToList();
+
+                if (cleanKeys.Any())
+                {
+                    Dictionary<OperationSymbol, string> canExecutes = OperationLogic.GetContextualCanExecute(ctx.Lites, cleanKeys);
+                    foreach (var cod in context)
+                    {
+                        var ce = canExecutes.TryGetC(cod.OperationInfo.OperationSymbol);
+                        if (ce.HasText())
+                            cod.CanExecute = ce;
+                    }
                 }
             }
 
             List<IMenuItem> menuItems = context
                 .Where(coc => !coc.HideOnCanExecute || coc.CanExecute == null)
-                .Select(coc => CreateContextual(coc, DefaultEntityClick)).OrderBy(a => a.Order).Cast<IMenuItem>().ToList();
+                .Select(coc => CreateContextual(coc, DefaultEntityClick))
+                .OrderBy(a => a.Order).Cast<IMenuItem>().ToList();
 
             if (menuItems.IsEmpty())
                 return null;
@@ -539,24 +580,44 @@ namespace Signum.Web.Operations
             return menuItems;
         }
 
+
         protected virtual JsFunction DefaultEntityClick(IContextualOperationContext ctx)
         {
-            switch (ctx.OperationInfo.OperationType)
+            if (ctx.UntypedEntites.Count() == 1)
             {
-                case OperationType.Execute:
-                    return JsModule.Operations["executeDefaultContextual"](ctx.Options());
-                case OperationType.Delete:
-                    return JsModule.Operations["deleteDefaultContextual"](ctx.Options());
-                case OperationType.ConstructorFrom:
-                    return JsModule.Operations["constructFromDefaultContextual"](ctx.Options(), JsFunction.Event);
-                default:
-                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".FormatWith(ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
+                switch (ctx.OperationInfo.OperationType)
+                {
+                    case OperationType.Execute:
+                        return JsModule.Operations["executeDefaultContextual"](ctx.Options());
+                    case OperationType.Delete:
+                        return JsModule.Operations["deleteDefaultContextual"](ctx.Options());
+                    case OperationType.ConstructorFrom:
+                        return JsModule.Operations["constructFromDefaultContextual"](ctx.Options(), JsFunction.Event);
+                    default:
+                        throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".FormatWith(ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
+                }
+            }
+            else
+            {
+                switch (ctx.OperationInfo.OperationType)
+                {
+                    case OperationType.Execute:
+                        return JsModule.Operations["executeDefaultContextualMultiple"](ctx.Options());
+                    case OperationType.Delete:
+                        return JsModule.Operations["deleteDefaultContextualMultiple"](ctx.Options());
+                    case OperationType.ConstructorFrom:
+                        return JsModule.Operations["constructFromDefaultContextualMultiple"](ctx.Options(), JsFunction.Event);
+                    default:
+                        throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".FormatWith(ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
+                }
             }
         }
 
+
+        public Func<MenuItem, MenuItem> CustomizeMenuItem;
         public virtual MenuItem CreateContextual(IContextualOperationContext ctx, Func<IContextualOperationContext, JsFunction> defaultClick)
         {
-            return new MenuItem(ctx.Context.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
+            var result = new MenuItem(ctx.Context.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
             {
                 Style = ctx.OperationSettings.Try(a=>a.Style) ?? EntityOperationSettingsBase.AutoStyleFunction(ctx.OperationInfo),
 
@@ -566,8 +627,15 @@ namespace Signum.Web.Operations
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order : 0,
 
                 Text = ctx.OperationSettings.Try(o => o.Text) ?? ctx.OperationInfo.OperationSymbol.NiceToString(),
-                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) : defaultClick(ctx))
+                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) : defaultClick(ctx)),
+
+                Tag = ctx,
             };
+
+            if (CustomizeMenuItem != null)
+                return CustomizeMenuItem(result);
+
+            return result;
         }
 
 

@@ -246,6 +246,8 @@ namespace Signum.Web.Operations
         JsOperationOptions Options();
 
         bool HideOnCanExecute { get; }
+
+        IEnumerable<Lite<IEntity>> UntypedEntites { get; }
     }
 
     public class ContextualOperationContext<T> : IContextualOperationContext 
@@ -306,6 +308,12 @@ namespace Signum.Web.Operations
 
                 return false;
             }
+        }
+
+
+        public IEnumerable<Lite<IEntity>> UntypedEntites
+        {
+            get { return Entities; }
         }
     }
 

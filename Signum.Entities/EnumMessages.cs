@@ -167,7 +167,6 @@ Lose changes?")]
         [Description("View Selected")]
         ViewSelected,
         Operations,
-        Processes,
         NoResultsFound,
     }
 

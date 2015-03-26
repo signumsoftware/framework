@@ -75,6 +75,14 @@ export function executeAjaxContextual(options: OperationOptions, runtimeInfo?: E
         .then(SF.isEmpty);
 }
 
+export function executeDefaultContextualMultiple(options: OperationOptions): Promise<void> {
+
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
+    return SF.ajaxPost({ url: options.controllerUrl || SF.Urls.operationExecuteMultiple, data: conextualMultipleRequestData(options) })
+        .then(result=> { markCells(options.prefix); });
+}
 
 export function constructFromDefault(options: EntityOperationOptions, openNewWindowOrEvent : any): Promise<void> {
     options = $.extend({
@@ -182,6 +190,15 @@ export function constructFromSubmitContextual(options: OperationOptions, runtime
     SF.submitOnly(options.controllerUrl, contextualRequestData(options, "", runtimeInfo), true);
 }
 
+export function constructFromDefaultContextualMultiple(options: OperationOptions): Promise<void> {
+
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
+    return SF.ajaxPost({ url: options.controllerUrl || SF.Urls.operationConstructFromMultiple, data: conextualMultipleRequestData(options) })
+        .then(result=> { markCells(options.prefix); });
+}
+
 export function deleteDefault(options: EntityOperationOptions) : Promise <void> {
     options = $.extend({
         avoidValidate: true,
@@ -232,6 +249,15 @@ export function deleteAjaxContextual(options: OperationOptions, runtimeInfo?: En
     return SF.ajaxPost({ url: options.controllerUrl, data: contextualRequestData(options, null, runtimeInfo) });
 }
 
+export function deleteDefaultContextualMultiple(options: OperationOptions): Promise<void> {
+
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
+    return SF.ajaxPost({ url: options.controllerUrl || SF.Urls.operationDeleteMultiple, data: conextualMultipleRequestData(options) })
+        .then(result=> { markCells(options.prefix); });
+}
+
 export function constructFromManyDefault(options: OperationOptions, openNewWindowOrEvent: any): Promise<void> {
 
     if (!confirmIfNecessary(options))
@@ -257,7 +283,7 @@ export function constructFromManyAjax(options: OperationOptions, newPrefix: stri
         controllerUrl: SF.Urls.operationConstructFromMany,
     }, options);
 
-    return SF.ajaxPost({ url: options.controllerUrl, data: constructFromManyRequestData(options, newPrefix) })
+    return SF.ajaxPost({ url: options.controllerUrl, data: conextualMultipleRequestData(options, newPrefix) })
         .then(result=> {
             assertMessageBox(result);
             return Entities.EntityHtml.fromHtml(newPrefix, result);
@@ -270,7 +296,7 @@ export function constructFromManySubmit(options: OperationOptions): void {
         controllerUrl: SF.Urls.operationConstructFromMany,
     }, options);
 
-    SF.submitOnly(options.controllerUrl, constructFromManyRequestData(options, ""), true);
+    SF.submitOnly(options.controllerUrl, conextualMultipleRequestData(options, ""), true);
 }
 
 export function confirmIfNecessary(options: OperationOptions): boolean {
@@ -308,7 +334,7 @@ export function entityRequestData(options: EntityOperationOptions, newPrefix?: s
     return $.extend(result, formValues);
 }
 
-export function constructFromManyRequestData(options: OperationOptions, newPrefix?: string, liteKey? : string[]) : FormData {
+export function conextualMultipleRequestData(options: OperationOptions, newPrefix?: string, liteKey? : string[]) : FormData {
 
     var result = baseRequestData(options, newPrefix); 
 

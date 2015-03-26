@@ -132,5 +132,51 @@ namespace Signum.Web.Controllers
 
             return this.DefaultConstructResult(entity, operation: operationSymbol);
         }
+
+
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
+        public ActionResult ExecuteMultiple()
+        {
+            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
+
+            var lites = this.ParseLiteKeys<Entity>();
+
+            foreach (var item in lites)
+            {
+                OperationLogic.ServiceExecuteLite(item, operationSymbol);
+            }
+
+            return null;
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
+        public ActionResult DeleteMultiple()
+        {
+            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
+
+            var lites = this.ParseLiteKeys<Entity>();
+
+            foreach (var item in lites)
+            {
+                OperationLogic.ServiceDelete(item, operationSymbol);
+            }
+
+            return null;
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
+        public ActionResult ConstructFromMultiple()
+        {
+            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
+
+            var lites = this.ParseLiteKeys<Entity>();
+
+            foreach (var item in lites)
+            {
+                OperationLogic.ServiceConstructFromLite(item, operationSymbol);
+            }
+
+            return null;
+        }
     }
 }
