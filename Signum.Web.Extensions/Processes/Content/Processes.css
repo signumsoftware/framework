@@ -12,3 +12,15 @@
 	width: 0px;
 	height: auto;
 }
+
+ul.dropdown-menu li a span.glyphicon.process-contextual-icon {
+    float: right;
+    font-size: initial;
+    margin-right: -10px;
+    margin-top: 2px;
+    color: gray;
+}
+
+ul.dropdown-menu li a span.glyphicon.process-contextual-icon:hover {
+    color: black;
+}
