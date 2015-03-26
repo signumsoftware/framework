@@ -538,7 +538,7 @@ namespace Signum.Web.Selenium
 
         public int ItemsCount()
         {
-            return (int)(long)Selenium.ExecuteScript("return .$('#{0}_sfList option').length".FormatWith(Prefix));
+            return (int)(long)Selenium.ExecuteScript("return $('#{0}_sfList option').length".FormatWith(Prefix));
         }
 
         public override int? NewIndex()
