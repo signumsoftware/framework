@@ -432,7 +432,9 @@ namespace Signum.Engine.Processes
 
         public void Execute()
         {
-            using (UserHolder.UserSession(CurrentExecution.User.Retrieve()))
+            var user = ExecutionMode.Global().Using(_ => CurrentExecution.User.Retrieve());
+
+            using (UserHolder.UserSession(user))
             {
                 using (ProcessLogic.OnApplySession(CurrentExecution))
                 {
