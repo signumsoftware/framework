@@ -264,6 +264,13 @@ module SF {
             return false;
         }
     }
+
+    export function addCssDynamically(path: string) {
+        if ($('link[href="' + path + '"]').length)
+            return;
+
+        $('head').append('<link rel="stylesheet" href="' + path + '" type="text/css" />');
+    }
 }
 
 interface JQuery {
