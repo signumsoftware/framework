@@ -1,303 +1,267 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="AlertMessage">
-    <Member Name="Alert" Description="Alert" />
-    <Member Name="Alerts" Description="Alerts" />
-    <Member Name="NewAlert" Description="New Alert" />
-  </Type>
-  <Type Name="AuthEmailMessage">
-    <Member Name="YouRecentlyRequestedANewPassword" Description="You recently requested a new password" />
-    <Member Name="YourUsernameIs" Description="Your username is:" />
-    <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="You can reset your password by following the link below" />
-    <Member Name="ResetPasswordRequestSubject" Description="Reset password request" />
-  </Type>
-  <Type Name="AuthMessage">
-    <Member Name="0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} cycles have been found in the graph of Roles due to the relationships:&#xD;&#xA;" />
-    <Member Name="0Rules" Description="{0} rules" />
-    <Member Name="0RulesFor1" Description="{0} rules for {1}" />
-    <Member Name="AccessToFacadeMethod0IsNotAllowed" Description="Access to Facade Method '{0}' is not allowed" />
-    <Member Name="AddCondition" Description="Add condition" />
-    <Member Name="ChooseACondition" Description="Choose a condition" />
-    <Member Name="RemoveCondition" Description="Remove condition" />
-    <Member Name="AuthorizationCacheSuccessfullyUpdated" Description="Authorization cache successfully updated" />
-    <Member Name="ChangePassword" Description="Change password" />
-    <Member Name="ActualPassword" Description="Current password" />
-    <Member Name="ChangePassword" Description="Change password" />
-    <Member Name="ConfirmNewPassword" Description="Confirm new password" />
-    <Member Name="NewPassword" Description="New password" />
-    <Member Name="WriteActualPasswordAndNewOne" Description="Write your current password and the new one" />
-    <Member Name="ConfirmNewPassword" Description="Confirm new password" />
-    <Member Name="EmailMustHaveAValue" Description="The email must have a value" />
-    <Member Name="EmailSent" Description="Email sent" />
-    <Member Name="EnterTheNewPassword" Description="Enter the new password" />
-    <Member Name="EntityGroup" Description="Entity Group" />
-    <Member Name="Overriden" Description="Overriden" />
-    <Member Name="ExpectedUserLogged" Description="Expected a user logged" />
-    <Member Name="ExpiredPassword" Description="Expired password" />
-    <Member Name="ExpiredPasswordMessage" Description="Your password has expired. You should change it" />
-    <Member Name="Allow" Description="Allow" />
-    <Member Name="Deny" Description="Deny" />
-    <Member Name="FacadeMethod" Description="Facade Method" />
-    <Member Name="Overriden" Description="Overriden" />
-    <Member Name="ForgotYourPassword" Description="Forgot your password? Enter your login email below. We will send you an email with a link to reset your password." />
-    <Member Name="IHaveForgottenMyPassword" Description="I have forgotten my password" />
-    <Member Name="IncorrectPassword" Description="Incorrect password" />
-    <Member Name="IntroduceYourUserNameAndPassword" Description="Introduce your username and password" />
-    <Member Name="InvalidUsernameOrPassword" Description="Invalid username or password" />
-    <Member Name="UserName_Watermark" Description="user" />
-    <Member Name="LoginEnter" Description="Login" />
-    <Member Name="NewPassword" Description="New password" />
-    <Member Name="NotAllowedToSaveThis0WhileOffline" Description="Not allowed to save this {0} while offline" />
-    <Member Name="NotAuthorizedTo0The1WithId2" Description="Not authorized to {0} the {1} with Id {2}" />
-    <Member Name="NotAuthorizedToRetrieve0" Description="Not authorized to Retrieve '{0}'" />
-    <Member Name="NotAuthorizedToSave0" Description="Not authorized to Save '{0}'" />
-    <Member Name="NotUserLogged" Description="Not user logged" />
-    <Member Name="Allow" Description="Allow" />
-    <Member Name="DBOnly" Description="DB Only" />
-    <Member Name="None" Description="None" />
-    <Member Name="Operation" Description="Operation" />
-    <Member Name="Overriden" Description="Overriden" />
-    <Member Name="Password" Description="Password" />
-    <Member Name="PasswordChanged" Description="Password changed" />
-    <Member Name="PasswordDoesNotMatchCurrent" Description="The given password doesn't match the current one" />
-    <Member Name="PasswordHasBeenChangedSuccessfully" Description="The password has been changed successfully" />
-    <Member Name="PasswordMustHaveAValue" Description="The password must have a value" />
-    <Member Name="PasswordNearExpired" Description="Your password is near to expired" />
-    <Member Name="PasswordsAreDifferent" Description="Passwords are different" />
-    <Member Name="PasswordsDoNotMatch" Description="Passwords do not match" />
-    <Member Name="Allow" Description="Allow" />
-    <Member Name="Deny" Description="Deny" />
-    <Member Name="Overriden" Description="Overriden" />
-    <Member Name="Permission" Description="Permission" />
-    <Member Name="Please0IntoYourAccount" Description="Please, {0} into your account" />
-    <Member Name="PleaseEnterYourChosenNewPassword" Description="Please, enter your chosen new password" />
-    <Member Name="Modify" Description="Modify" />
-    <Member Name="None" Description="None" />
-    <Member Name="Overriden" Description="Overriden" />
-    <Member Name="Property" Description="Property" />
-    <Member Name="Read" Description="Read" />
-    <Member Name="Allow" Description="Allow" />
-    <Member Name="Deny" Description="Deny" />
-    <Member Name="Overriden" Description="Overriden" />
-    <Member Name="Query" Description="Query" />
-    <Member Name="Remember" Description="Remember" />
-    <Member Name="RememberMe" Description="Remember me" />
-    <Member Name="ResetPassword" Description="Reset Password" />
-    <Member Name="ResetPasswordCode" Description="Reset password code" />
-    <Member Name="ResetPasswordCodeHasBeenSent" Description="A confirmation code to reset your password has been sent to the email account {0}" />
-    <Member Name="ResetPasswordSuccess" Description="Your password has been successfully changed" />
-    <Member Name="Save" Description="Save" />
-    <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="The confirmation code that you have just sent is invalid" />
-    <Member Name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" Description="The password must have between 7 and 15 characters, each of them being a number 0-9 or a letter" />
-    <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="There has been an error with your request to reset your password. Please, enter your login." />
-    <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="There's not a registered user with that email address" />
-    <Member Name="TheSpecifiedPasswordsDontMatch" Description="The specified passwords don't match" />
-    <Member Name="TheUserStateMustBeDisabled" Description="The user state must be disabled" />
-    <Member Name="Create" Description="Create" />
-    <Member Name="Modify" Description="Modify" />
-    <Member Name="None" Description="None" />
-    <Member Name="Operations" Description="Operations" />
-    <Member Name="Overriden" Description="Overriden" />
-    <Member Name="Properties" Description="Properties" />
-    <Member Name="Queries" Description="Queries" />
-    <Member Name="Read" Description="Read" />
-    <Member Name="Type" Description="Type" />
-    <Member Name="User" Description="User" />
-    <Member Name="Username0IsNotValid" Description="Username {0} is not valid" />
-    <Member Name="UserNameMustHaveAValue" Description="The user name must have a value" />
-    <Member Name="View" Description="View" />
-    <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="We received a request to create an account. You can create it following the link below:" />
-    <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="You can reset your password by following the link below:" />
-    <Member Name="YouMustRepeatTheNewPassword" Description="You must repeat the new password" />
-    <Member Name="YouRecentlyRequestedANewPassword" Description="You recently requested a new password" />
-    <Member Name="YourUsernameIs0" Description="Your username is: {0}" />
-    <Member Name="User0IsDisabled" Description="User {0} is disabled" />
-  </Type>
+  <Type Name="AlertCurrentState" />
+  <Type Name="AlertEntity" />
+  <Type Name="AlertMessage" />
+  <Type Name="AlertOperation" />
+  <Type Name="AlertState" />
+  <Type Name="AlertTypeEntity" />
+  <Type Name="AlertTypeOperation" />
+  <Type Name="AppendixHelpEntity" />
+  <Type Name="AppendixHelpOperation" />
+  <Type Name="ApplicationEventLogEntity" />
+  <Type Name="AuthAdminMessage" />
+  <Type Name="AuthEmailMessage" />
+  <Type Name="AuthMessage" />
+  <Type Name="BaseRulePack`1" />
+  <Type Name="BasicPermission" />
+  <Type Name="CachePermission" />
+  <Type Name="CertFileType" />
+  <Type Name="ChartColorEntity" />
+  <Type Name="ChartColumnEntity" />
+  <Type Name="ChartColumnType" />
   <Type Name="ChartMessage">
-    <Member Name="0CanOnlyBeCreatedFromTheChartWindow" Description="{0} can only be created from the chart window" />
-    <Member Name="0CanOnlyBeCreatedFromTheSearchWindow" Description="{0} can only be created from the search window" />
-    <Member Name="Chart" Description="Chart" />
-    <Member Name="Chart" Description="Chart" />
-    <Member Name="Chart" Description="Chart" />
-    <Member Name="ChartSettings" Description="Chart settings" />
-    <Member Name="Dimension" Description="Dimension" />
-    <Member Name="Draw" Description="Draw" />
-    <Member Name="Group" Description="Group" />
-    <Member Name="Query0IsNotAllowed" Description="Query {0} is not allowed" />
-    <Member Name="ToggleInfo" Description="Toggle info" />
-    <Member Name="Edit" Description="Edit Script" />
-    <Member Name="ColorsFor0" Description="Colors for {0}" />
-    <Member Name="CreatePalette" Description="Create palette" />
-    <Member Name="MyCharts" Description="My Charts" />
     <Member Name="CreateNew" Description="Create" />
-    <Member Name="Edit" Description="Edit" />
-    <Member Name="ExportData" Description="Export data" />
-    <Member Name="UserCharts" Description="User charts" />
-    <Member Name="ViewPalette" Description="View palette" />
   </Type>
-  <Type Name="DashboardMessage">
-    <Member Name="CreateNewPart" Description="Create new part" />
-    <Member Name="YouMustSaveThePanelBeforeAddingParts" Description="You must save the panel before adding parts" />
-    <Member Name="Part0IsInColumn1ButPanelHasOnly2Columns" Description="Part {0} is in column {1} but panel has only {2} columns" />
-    <Member Name="Part0IsInColumn1WhichAlreadyHasOtherParts" Description="Part {0} is in column {1} of row {2} which already has other parts" />
-    <Member Name="Rows0DontHaveAnyParts" Description="There are not any parts in rows {0}" />
-    <Member Name="TitleMustBeSpecifiedFor0" Description="Title must be specified for {0}" />
-    <Member Name="CountSearchControlPartEntity" Description="Counter list" />
-    <Member Name="CountUserQueryElement" Description="Counter" />
-  </Type>
-  <Type Name="DisconnectedMessage">
-    <Member Name="NotAllowedToSave0WhileOffline" Description="Not allowed to save {0} while offline" />
-    <Member Name="The0WithId12IsLockedBy3" Description="The {0} with Id {1} ({2}) is locked by {3}" />
-  </Type>
-  <Type Name="ExcelMessage">
-    <Member Name="Data" Description="Data" />
-    <Member Name="Download" Description="Download" />
-    <Member Name="Excel2007Spreadsheet" Description="Microsoft Office Excel 2007 Spreadsheet (*.xlsx)|*.xlsx" />
-    <Member Name="ExcelAdminister" Description="Administer" />
-    <Member Name="ExcelReport" Description="Excel Report" />
-    <Member Name="ExcelReport" Description="Excel Report" />
-    <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="Excel template must have .xlsx extension, and the current one has {0}" />
-    <Member Name="FindLocationFoExcelReport" Description="Find location for Excel Report" />
-    <Member Name="Reports" Description="Reports" />
-    <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="The Excel Template has a column {0} not present in the Find Window" />
-    <Member Name="ThereAreNoResultsToWrite" Description="There are no results to write" />
-  </Type>
-  <Type Name="FileMessage">
-    <Member Name="DownloadFile" Description="Download File" />
-    <Member Name="ErrorSavingFile" Description="Error saving file" />
-    <Member Name="FileTypes" Description="FileTypes" />
-    <Member Name="Open" Description="Open" />
-    <Member Name="OpeningHasNotDefaultImplementationFor0" Description="Opening has no default implementation for {0}" />
-    <Member Name="WebDownload" Description="Download" />
-    <Member Name="WebImage" Description="Image" />
-  </Type>
-  <Type Name="FilesMessage">
-    <Member Name="Remove" Description="Remove" />
-    <Member Name="SavingHasNotDefaultImplementationFor0" Description="Saving has no default implementation for {0}" />
-    <Member Name="SelectFile" Description="Select File" />
-    <Member Name="ViewFile" Description="View file" />
-    <Member Name="ViewingHasNotDefaultImplementationFor0" Description="Viewing has no default implementation for {0}" />
-  </Type>
+  <Type Name="ChartPaletteModel" />
+  <Type Name="ChartParameterType" />
+  <Type Name="ChartPermission" />
+  <Type Name="ChartRequest" />
+  <Type Name="ChartScriptColumnEntity" />
+  <Type Name="ChartScriptEntity" />
+  <Type Name="ChartScriptOperation" />
+  <Type Name="ChartScriptParameterEntity" />
+  <Type Name="ClientCertificationFileEntity" />
+  <Type Name="CountSearchControlPartEntity" />
+  <Type Name="CountUserQueryElementEntity" />
+  <Type Name="CSharpMigrationEntity" />
+  <Type Name="CultureInfoEntity" />
+  <Type Name="CultureInfoOperation" />
+  <Type Name="DashboardEmbedededInEntity" />
+  <Type Name="DashboardEntity" />
+  <Type Name="DashboardMessage" />
+  <Type Name="DashboardOperation" />
+  <Type Name="DashboardPermission" />
+  <Type Name="DateSpanEntity" />
+  <Type Name="DiffLogMessage" />
+  <Type Name="DiffLogMixin" />
+  <Type Name="DisconnectedCreatedMixin" />
+  <Type Name="DisconnectedExportEntity" />
+  <Type Name="DisconnectedExportState" />
+  <Type Name="DisconnectedExportTableEntity" />
+  <Type Name="DisconnectedImportEntity" />
+  <Type Name="DisconnectedImportState" />
+  <Type Name="DisconnectedImportTableEntity" />
+  <Type Name="DisconnectedMachineEntity" />
+  <Type Name="DisconnectedMachineOperation" />
+  <Type Name="DisconnectedMachineState" />
+  <Type Name="DisconnectedMessage" />
+  <Type Name="DisconnectedSubsetMixin" />
+  <Type Name="EmailAddressEntity" />
+  <Type Name="EmailAttachmentEntity" />
+  <Type Name="EmailAttachmentType" />
+  <Type Name="EmailConfigurationEntity" />
+  <Type Name="EmailFileType" />
+  <Type Name="EmailMasterTemplateEntity" />
+  <Type Name="EmailMasterTemplateMessageEntity" />
+  <Type Name="EmailMasterTemplateOperation" />
+  <Type Name="EmailMessageEntity" />
+  <Type Name="EmailMessageMessage" />
+  <Type Name="EmailMessageOperation" />
+  <Type Name="EmailMessageProcess" />
+  <Type Name="EmailMessageState" />
+  <Type Name="EmailOwnerData" />
+  <Type Name="EmailPackageEntity" />
+  <Type Name="EmailReceptionInfoEntity" />
+  <Type Name="EmailReceptionMixin" />
+  <Type Name="EmailRecipientEntity" />
+  <Type Name="EmailRecipientKind" />
+  <Type Name="EmailTemplateContactEntity" />
+  <Type Name="EmailTemplateEntity" />
+  <Type Name="EmailTemplateMessage" />
+  <Type Name="EmailTemplateMessageEntity" />
+  <Type Name="EmailTemplateOperation" />
+  <Type Name="EmailTemplateRecipientEntity" />
+  <Type Name="EmailTemplateViewMessage" />
+  <Type Name="EmbeddedFileEntity" />
+  <Type Name="EntityAction" />
+  <Type Name="EntityHelpEntity" />
+  <Type Name="EntityHelpOperation" />
+  <Type Name="ExcelMessage" />
+  <Type Name="ExcelReportEntity" />
+  <Type Name="ExcelReportOperation" />
+  <Type Name="FileEntity" />
+  <Type Name="FileMessage" />
+  <Type Name="FilePathEntity" />
+  <Type Name="FilePathOperation" />
+  <Type Name="FileTypeSymbol" />
+  <Type Name="GroupByChart" />
+  <Type Name="HelpKindMessage" />
   <Type Name="HelpMessage">
-    <Member Name="0IsA1" Description="{0} is a {1}" />
-    <Member Name="0IsA1AndShows2" Description="{0} is a {1} and shows {2}" />
-    <Member Name="0IsACalculated1" Description="{0} is a calculated {1}" />
-    <Member Name="0IsACollectionOfElements1" Description="{0} is a collection of elements {1}" />
-    <Member Name="Amount" Description="amount" />
-    <Member Name="Any" Description="any" />
-    <Member Name="Appendices" Description="Appendices" />
-    <Member Name="Buscador" Description="Buscador" />
-    <Member Name="Call0Over1OfThe2" Description="Call {0} over {1} of the {2}" />
-    <Member Name="Character" Description="character" />
-    <Member Name="Check" Description="check" />
-    <Member Name="ConstructsANew0" Description="Constructs a new {0}" />
-    <Member Name="Date" Description="date" />
-    <Member Name="DateTime" Description="date and time" />
-    <Member Name="ExpressedIn" Description="expressed in " />
     <Member Name="From0OfThe1" Description="from {0} of the {1} " />
-    <Member Name="FromMany0" Description="from many {0}" />
-    <Member Name="HelpDocumentation" Description="Help documentation" />
-    <Member Name="HelpNotLoaded" Description="Help not loaded" />
-    <Member Name="Integer" Description="integer" />
-    <Member Name="Key0NotFound" Description="Key {0} not found" />
-    <Member Name="OfThe0" Description="of the {0}" />
-    <Member Name="OrNull" Description="or null" />
-    <Member Name="Property0NotExistsInType1" Description="Property {0} does not exist in type {1}" />
-    <Member Name="QueryOf0" Description="Query of {0}" />
-    <Member Name="RemovesThe0FromTheDatabase" Description="Removes the {0} from the database" />
-    <Member Name="Should" Description=". Should  " />
-    <Member Name="String" Description="string" />
-    <Member Name="The0" Description="The {0}" />
-    <Member Name="TheDatabaseVersion" Description="the database version" />
-    <Member Name="TheProperty0" Description="the property {0}" />
-    <Member Name="Value" Description="value" />
-    <Member Name="ValueLike0" Description="value like {0}" />
-    <Member Name="YourVersion" Description="your version" />
   </Type>
-  <Type Name="NoteMessage">
-    <Member Name="NewNote" Description="New Note" />
-    <Member Name="Note" Description="Note:" />
-    <Member Name="Notes" Description="Notes" />
-  </Type>
-  <Type Name="OmniboxMessage">
-    <Member Name="No" Description="no" />
-    <Member Name="NotFound" Description="[Not found]" />
-    <Member Name="DatabaseAccess" Description="Searching between 'apostrophe' will make queries to the database" />
-    <Member Name="Disambiguate" Description="With Shift+Enter you disambiguate you query" />
-    <Member Name="Field" Description="Field" />
-    <Member Name="Help" Description="Help" />
-    <Member Name="MatchingOptions" Description="You can match results by (st)art, mid(dle) or (U)pper(C)ase" />
-    <Member Name="Query" Description="Query" />
-    <Member Name="Type" Description="Type" />
-    <Member Name="UserChart" Description="UserChart" />
-    <Member Name="UserQuery" Description="UserQuery" />
-    <Member Name="Value" Description="Value" />
-    <Member Name="Unknown" Description="Unknown" />
-    <Member Name="Unknown" Description="Unknown" />
-    <Member Name="Yes" Description="yes" />
-  </Type>
-  <Type Name="ProcessMessage">
-    <Member Name="ProcessExecution0IsNotRunningAnymore" Description="ProcessExecution {0} is not running anymore" />
-    <Member Name="ProcessStartIsGreaterThanProcessEnd" Description="Process Start is greater than Process End" />
-    <Member Name="ProcessStartIsNullButProcessEndIsNot" Description="Process Start is null but Process End is not" />
-  </Type>
-  <Type Name="SchedulerMessage">
-    <Member Name="0IsNotMultiple1" Description="{0} is not multiple of {1}" />
-    <Member Name="Each0HoursFrom1" Description="Each {0} hours from {1}" />
-    <Member Name="Each0MinutesFrom1" Description="Each {0} minutes from {1}" />
-    <Member Name="Holidayhavetobenullwhennocalendarisset" Description="Holiday have to be null when no calendar is set" />
-    <Member Name="Holidayhavetobetrueorfalsewhenacalendarisset" Description="Holiday have to be true or false when a calendar is set" />
-    <Member Name="ScheduleRuleDailyEntity" Description="Dialy" />
-    <Member Name="Everydayat" Description="Every day at " />
-    <Member Name="StartingOn" Description="Starting On" />
-    <Member Name="ScheduleRuleHourlyEntity" Description="Each X Hours" />
-    <Member Name="ScheduleRuleMinutelyEntity" Description="Each X Minutes" />
-    <Member Name="ScheduleRuleWeekDaysEntity" Description="Days of week" />
-    <Member Name="AndHoliday" Description="and holidays" />
-    <Member Name="At" Description="at" />
-    <Member Name="ButHoliday" Description="but holidays" />
-    <Member Name="Calendar" Description="Calendar" />
-    <Member Name="F" Description="F" />
-    <Member Name="Friday" Description="Friday" />
-    <Member Name="Holiday" Description="Holiday" />
-    <Member Name="M" Description="M" />
-    <Member Name="Monday" Description="Monday" />
-    <Member Name="S" Description="S" />
-    <Member Name="Sa" Description="Sa" />
-    <Member Name="Saturday" Description="Saturday" />
-    <Member Name="Sunday" Description="Sunday" />
-    <Member Name="T" Description="T" />
-    <Member Name="Th" Description="Th" />
-    <Member Name="Thursday" Description="Thursday" />
-    <Member Name="Tuesday" Description="Tuesday" />
-    <Member Name="W" Description="W" />
-    <Member Name="Wednesday" Description="Wednesday" />
-    <Member Name="ScheduleRuleWeeklyEntity" Description="Weekly" />
-    <Member Name="DayOfTheWeek" Description="Day of the week" />
-  </Type>
-  <Type Name="SmsMessage">
-    <Member Name="Insert" Description="Insert" />
-    <Member Name="Insert" Description="Insert" />
-    <Member Name="Message" Description="Message" />
-    <Member Name="RemainingCharacters" Description="Remaining characters" />
-    <Member Name="RemainingCharacters" Description="Remaining characters" />
-    <Member Name="RemoveNonValidCharacters" Description="Remove non valid characters" />
-    <Member Name="RemoveNonValidCharacters" Description="Remove non valid characters" />
-    <Member Name="StatusCanNotBeUpdatedForNonSentMessages" Description="Status can not be updated for non sent messages" />
-    <Member Name="TheTemplateMustBeActiveToConstructSMSMessages" Description="The template must be Active to construct SMS messages" />
-    <Member Name="TheTextForTheSMSMessageExceedsTheLengthLimit" Description="The text for the SMS message exceeds the length limit" />
-  </Type>
-  <Type Name="SmsMessages">
-    <Member Name="EndDateMustBeHigherThanStartDate" Description="End date must be higher than start date" />
-  </Type>
-  <Type Name="UserQueryMessage">
-    <Member Name="AreYouSureToRemove0" Description="Are you sure to remove '{0}'?" />
-    <Member Name="Edit" Description="Edit" />
-    <Member Name="MyQueries" Description="My Queries" />
-    <Member Name="RemoveUserQuery" Description="Remove User Query?" />
-    <Member Name="ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero" Description="{0} should be -1 (all), empty (default), or a number greater than zero" />
-    <Member Name="CreateNew" Description="Create" />
-    <Member Name="Edit" Description="Edit" />
-    <Member Name="UserQueries" Description="User Queries" />
-  </Type>
+  <Type Name="HelpPermissions" />
+  <Type Name="HelpSearchMessage" />
+  <Type Name="HelpSyntaxMessage" />
+  <Type Name="HolidayCalendarEntity" />
+  <Type Name="HolidayCalendarOperation" />
+  <Type Name="HolidayEntity" />
+  <Type Name="IEmailOwnerEntity" />
+  <Type Name="IPartEntity" />
+  <Type Name="IProcessDataEntity" />
+  <Type Name="IProcessLineDataEntity" />
+  <Type Name="IScheduleRuleEntity" />
+  <Type Name="IsolationEntity" />
+  <Type Name="IsolationMessage" />
+  <Type Name="IsolationMixin" />
+  <Type Name="IsolationOperation" />
+  <Type Name="ITaskEntity" />
+  <Type Name="IUserAssetEntity" />
+  <Type Name="LastAuthRulesImportEntity" />
+  <Type Name="LinkElementEntity" />
+  <Type Name="LinkListPartEntity" />
+  <Type Name="MergeStrategy" />
+  <Type Name="MessageLengthExceeded" />
+  <Type Name="MultipleSMSModel" />
+  <Type Name="NamespaceHelpEntity" />
+  <Type Name="NamespaceHelpOperation" />
+  <Type Name="NewsletterDeliveryEntity" />
+  <Type Name="NewsletterEntity" />
+  <Type Name="NewsletterOperation" />
+  <Type Name="NewsletterProcess" />
+  <Type Name="NewsletterState" />
+  <Type Name="NoteEntity" />
+  <Type Name="NoteMessage" />
+  <Type Name="NoteOperation" />
+  <Type Name="NoteTypeEntity" />
+  <Type Name="NoteTypeOperation" />
+  <Type Name="OmniboxMessage" />
+  <Type Name="OperationAllowed" />
+  <Type Name="OperationHelpEntity" />
+  <Type Name="OperationHelpOperation" />
+  <Type Name="OperationRulePack" />
+  <Type Name="PackageEntity" />
+  <Type Name="PackageLineEntity" />
+  <Type Name="PackageOperationEntity" />
+  <Type Name="PackageOperationProcess" />
+  <Type Name="PanelPartEntity" />
+  <Type Name="PanelStyle" />
+  <Type Name="PasswordExpiresIntervalEntity" />
+  <Type Name="PasswordExpiresIntervalOperation" />
+  <Type Name="PermissionRulePack" />
+  <Type Name="PermissionSymbol" />
+  <Type Name="Pop3ConfigurationAction" />
+  <Type Name="Pop3ConfigurationEntity" />
+  <Type Name="Pop3ConfigurationOperation" />
+  <Type Name="Pop3ReceptionEntity" />
+  <Type Name="Pop3ReceptionExceptionEntity" />
+  <Type Name="ProcessAlgorithmSymbol" />
+  <Type Name="ProcessEntity" />
+  <Type Name="ProcessExceptionLineEntity" />
+  <Type Name="ProcessMessage" />
+  <Type Name="ProcessOperation" />
+  <Type Name="ProcessPermission" />
+  <Type Name="ProcessState" />
+  <Type Name="ProfilerPermission" />
+  <Type Name="PropertyAllowed" />
+  <Type Name="PropertyRouteEntity" />
+  <Type Name="PropertyRouteHelpEntity" />
+  <Type Name="PropertyRulePack" />
+  <Type Name="QueryColumnEntity" />
+  <Type Name="QueryColumnHelpEntity" />
+  <Type Name="QueryEntity" />
+  <Type Name="QueryFilterEntity" />
+  <Type Name="QueryHelpEntity" />
+  <Type Name="QueryHelpOperation" />
+  <Type Name="QueryOrderEntity" />
+  <Type Name="QueryRulePack" />
+  <Type Name="QueryTokenEntity" />
+  <Type Name="ResetPasswordRequestEntity" />
+  <Type Name="RoleEntity" />
+  <Type Name="RoleOperation" />
+  <Type Name="RoleQuery" />
+  <Type Name="RuleEntity`2" />
+  <Type Name="RuleOperationEntity" />
+  <Type Name="RulePermissionEntity" />
+  <Type Name="RulePropertyEntity" />
+  <Type Name="RuleQueryEntity" />
+  <Type Name="RuleTypeConditionEntity" />
+  <Type Name="RuleTypeEntity" />
+  <Type Name="ScheduledTaskEntity" />
+  <Type Name="ScheduledTaskLogEntity" />
+  <Type Name="ScheduledTaskOperation" />
+  <Type Name="SchedulerMessage" />
+  <Type Name="SchedulerPermission" />
+  <Type Name="ScheduleRuleDailyEntity" />
+  <Type Name="ScheduleRuleDayEntity" />
+  <Type Name="ScheduleRuleHourlyEntity" />
+  <Type Name="ScheduleRuleMinutelyEntity" />
+  <Type Name="ScheduleRuleWeekDaysEntity" />
+  <Type Name="ScheduleRuleWeeklyEntity" />
+  <Type Name="SessionLogEntity" />
+  <Type Name="SessionLogPermission" />
+  <Type Name="SimpleTaskSymbol" />
+  <Type Name="SMSConfigurationEntity" />
+  <Type Name="SmsMessage" />
+  <Type Name="SMSMessageEntity" />
+  <Type Name="SMSMessageOperation" />
+  <Type Name="SMSMessageProcess" />
+  <Type Name="SMSMessageState" />
+  <Type Name="SMSPackageEntity" />
+  <Type Name="SMSSendPackageEntity" />
+  <Type Name="SMSTemplateEntity" />
+  <Type Name="SMSTemplateMessage" />
+  <Type Name="SMSTemplateMessageEntity" />
+  <Type Name="SMSTemplateOperation" />
+  <Type Name="SMSUpdatePackageEntity" />
+  <Type Name="SmtpConfigurationEntity" />
+  <Type Name="SmtpConfigurationOperation" />
+  <Type Name="SmtpNetworkDeliveryEntity" />
+  <Type Name="SqlMigrationEntity" />
+  <Type Name="SystemEmailEntity" />
+  <Type Name="SystemWordTemplateEntity" />
+  <Type Name="TaskMessage" />
+  <Type Name="TaskOperation" />
+  <Type Name="TemplateTokenMessage" />
+  <Type Name="TranslatedCultureAction" />
+  <Type Name="TranslatedInstanceEntity" />
+  <Type Name="TranslationJavascriptMessage" />
+  <Type Name="TranslationMessage" />
+  <Type Name="TranslationPermission" />
+  <Type Name="TranslationReplacementEntity" />
+  <Type Name="TranslationReplacementOperation" />
+  <Type Name="TranslatorUserCultureEntity" />
+  <Type Name="TranslatorUserEntity" />
+  <Type Name="TranslatorUserOperation" />
+  <Type Name="TypeAllowed" />
+  <Type Name="TypeAllowedBasic" />
+  <Type Name="TypeConditionSymbol" />
+  <Type Name="TypeEvent" />
+  <Type Name="TypeRulePack" />
+  <Type Name="TypeSearchResult" />
+  <Type Name="UserAssetMessage" />
+  <Type Name="UserAssetPermission" />
+  <Type Name="UserAssetPreviewLine" />
+  <Type Name="UserAssetPreviewModel" />
+  <Type Name="UserChartEntity" />
+  <Type Name="UserChartOperation" />
+  <Type Name="UserChartPartEntity" />
+  <Type Name="UserEntity" />
+  <Type Name="UserOperation" />
+  <Type Name="UserQueryEntity" />
+  <Type Name="UserQueryMessage" />
+  <Type Name="UserQueryOperation" />
+  <Type Name="UserQueryPartEntity" />
+  <Type Name="UserQueryPermission" />
+  <Type Name="UserState" />
+  <Type Name="UserTicketEntity" />
+  <Type Name="ViewLogEntity" />
+  <Type Name="WebDownload" />
+  <Type Name="WebImage" />
+  <Type Name="WordConverterSymbol" />
+  <Type Name="WordTemplateEntity" />
+  <Type Name="WordTemplateMessage" />
+  <Type Name="WordTemplateOperation" />
+  <Type Name="WordTemplatePermission" />
+  <Type Name="WordTransformerSymbol" />
 </Translations>

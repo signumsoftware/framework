@@ -499,7 +499,6 @@
     <Member Name="ReceptionNotified" Description="Empfang bestätigt" />
     <Member Name="Recipients" Description="Empfänger" />
     <Member Name="Sent" Description="Gesendet" />
-    <Member Name="SmtpConfiguration" Description="SMTP-Konfiguration" />
     <Member Name="State" Description="Status" />
     <Member Name="Subject" Description="Betreff" />
     <Member Name="Target" Description="Ziel" />
@@ -581,7 +580,6 @@
     <Member Name="Query" Description="Abfrage" />
     <Member Name="Recipients" Description="Empfänger" />
     <Member Name="SendDifferentMessages" Description="Verschiedene Nachrichten senden" />
-    <Member Name="SmtpConfiguration" Description="SMTP-Konfiguration" />
     <Member Name="StartDate" Description="Startdatum" />
     <Member Name="SystemEmail" Description="System-E-Mail" />
   </Type>
@@ -695,21 +693,9 @@
     <Member Name="FileType" Description="Dateityp" />
     <Member Name="FullPhysicalPath" Description="Physischer Pfad" />
     <Member Name="FullWebPath" Description="URL" />
-    <Member Name="Repository" Description="Ablage" />
     <Member Name="Sufix" Description="Suffix" />
   </Type>
   <Type Name="FilePathOperation">
-    <Member Name="Save" Description="Speichern" />
-  </Type>
-  <Type Name="FileRepositoryEntity" Description="Datei-Repository">
-    <Member Name="Active" Description="Aktiv" />
-    <Member Name="FileTypes" Description="Dateitypen" />
-    <Member Name="FullPhysicalPrefix" Description="Physisches Präfix" />
-    <Member Name="Name" Description="Name" />
-    <Member Name="PhysicalPrefix" Description="Physische Präfix" />
-    <Member Name="WebPrefix" Description="Web-Präfix" />
-  </Type>
-  <Type Name="FileRepositoryOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="FileTypeSymbol" Description="Dateityp" PluralDescription="Dateitypen" Gender="m" />
@@ -891,7 +877,6 @@
     <Member Name="From" Description="Von" />
     <Member Name="Name" Description="Name" />
     <Member Name="Query" Description="Abfrage" />
-    <Member Name="SmtpConfig" Description="Smtp config" />
     <Member Name="State" Description="Status" />
     <Member Name="Subject" Description="Betreff" />
     <Member Name="Text" Description="Text" />
@@ -1365,19 +1350,13 @@
   <Type Name="SMSUpdatePackageEntity" Description="SMS-Updatepaket" PluralDescription="SMS-Updatepakete" Gender="n" />
   <Type Name="SmtpConfigurationEntity" Description="Smtp-Konfiguration">
     <Member Name="AditionalRecipients" Description="Zusätzliche Empfänger" />
-    <Member Name="ClientCertificationFiles" Description="Client-Zertifikat-Dateien" />
     <Member Name="DefaultFrom" Description="Standard von" />
-    <Member Name="EnableSSL" Description="SSL aktivieren" />
-    <Member Name="Host" Description="Host" />
     <Member Name="Name" Description="Name" />
-    <Member Name="Password" Description="Passwort" />
-    <Member Name="Port" Description="Port" />
-    <Member Name="UseDefaultCredentials" Description="Standardberechtigungsnachweis benutzen" />
-    <Member Name="Username" Description="Benutzername" />
   </Type>
   <Type Name="SmtpConfigurationOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="SmtpNetworkDeliveryEntity" />
   <Type Name="SqlMigrationEntity" Description="SQL-Migration">
     <Member Name="VersionNumber" Description="Versionsnummer" />
   </Type>
@@ -1563,9 +1542,6 @@
     <Member Name="SaveNew" Description="Speichern" />
     <Member Name="SetPassword" Description="Passwort festlegen" />
   </Type>
-  <Type Name="UserProcessSessionMixin">
-    <Member Name="User" Description="Benutzer" />
-  </Type>
   <Type Name="UserQueryEntity" Description="Benutzer-Abfrage">
     <Member Name="Columns" Description="Spalten" />
     <Member Name="ColumnsMode" Description="Spalten-Modus" />
@@ -1638,7 +1614,6 @@
     <Member Name="Culture" Description="Kultur" />
     <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />
     <Member Name="EndDate" Description="Enddatum" />
-    <Member Name="FileNameFormat" Description="Dateinamenformat" />
     <Member Name="Name" Description="Name" />
     <Member Name="Query" Description="Abfrage" />
     <Member Name="StartDate" Description="Startdatum" />

@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="AlertCurrentState" Description="Stato attuale dell'avviso">
-  </Type>
+  <Type Name="AlertCurrentState" Description="Stato attuale dell'avviso" />
   <Type Name="AlertEntity" Description="Avviso" PluralDescription="Avvisi">
     <Member Name="AlertDate" Description="Data avviso" />
     <Member Name="AlertType" Description="Tipo di avviso" />
@@ -44,6 +43,8 @@
   <Type Name="AlertTypeOperation">
     <Member Name="Save" Description="Salvare" />
   </Type>
+  <Type Name="AppendixHelpEntity" />
+  <Type Name="AppendixHelpOperation" />
   <Type Name="ApplicationEventLogEntity" Description="Registro eventi applicazione">
     <Member Name="Date" Description="Data" />
     <Member Name="GlobalEvent" Description="Evento globale" />
@@ -272,7 +273,7 @@
     <Member Name="CertFileType" Description="Tipo di file del certificato" />
     <Member Name="FullFilePath" Description="Percorso completo del file" />
   </Type>
-  <Type Name="CountSearchControlPartEntity" Description="Parte di conteggio di ricerca di utente" PluralDescription="Parte di conteggio di ricerca di utente">
+  <Type Name="CountSearchControlPartEntity" Description="Parte di conteggio di ricerca di utente">
     <Member Name="RequiresTitle" Description="Titolo richiesto" />
     <Member Name="UserQueries" Description="Query utente" />
   </Type>
@@ -281,6 +282,7 @@
     <Member Name="Label" Description="Etichetta" />
     <Member Name="UserQuery" Description="Query utente" />
   </Type>
+  <Type Name="CSharpMigrationEntity" />
   <Type Name="CultureInfoEntity" Description="Informazioni di cultura">
     <Member Name="EnglishName" Description="Nome in inglese" />
     <Member Name="Name" Description="Nome" />
@@ -288,6 +290,11 @@
   </Type>
   <Type Name="CultureInfoOperation">
     <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DashboardEmbedededInEntity" Description="Pannello di controllo incorporato all'entità">
+    <Member Name="Bottom" Description="In basso" />
+    <Member Name="None" Description="Nessuno" />
+    <Member Name="Top" Description="In alto" />
   </Type>
   <Type Name="DashboardEntity" Description="Pannello di controllo">
     <Member Name="AutoRefreshPeriod" Description="Periodo di aggiornamento automatico" />
@@ -298,11 +305,6 @@
     <Member Name="Guid" Description="Guid" />
     <Member Name="Owner" Description="Proprietario" />
     <Member Name="Parts" Description="Parti" />
-  </Type>
-  <Type Name="DashboardEmbedededInEntity" Description="Pannello di controllo incorporato all'entità">
-    <Member Name="Bottom" Description="In basso" />
-    <Member Name="None" Description="Nessuno" />
-    <Member Name="Top" Description="In alto" />
   </Type>
   <Type Name="DashboardMessage">
     <Member Name="_0Is1InstedOf2In3" Description="{0} è {1} (anziché {2}) in {3}" />
@@ -375,7 +377,7 @@
     <Member Name="Errors" Description="Errori" />
     <Member Name="Type" Description="Tipo" />
   </Type>
-  <Type Name="DisconnectedImportEntity" Description="Importazione disconnessa" PluralDescription="Importazione disconnessa">
+  <Type Name="DisconnectedImportEntity" Description="Importazione disconnessa">
     <Member Name="Copies" Description="Copie" />
     <Member Name="CreationDate" Description="Data di creazione" />
     <Member Name="DisableForeignKeys" Description="Disattivare chiavi esterne" />
@@ -480,7 +482,6 @@
     <Member Name="ReceptionNotified" Description="Ricezione notificata" />
     <Member Name="Recipients" Description="Destinatari" />
     <Member Name="Sent" Description="Inviato" />
-    <Member Name="SmtpConfiguration" Description="Configurazione SMTP" />
     <Member Name="State" Description="Stato" />
     <Member Name="Subject" Description="Oggetto" />
     <Member Name="Target" Description="Destinazione" />
@@ -544,13 +545,6 @@
     <Member Name="Cc" Description="CC" />
     <Member Name="To" Description="A" />
   </Type>
-  <Type Name="EmailTemplateCanAddTokenMessage">
-    <Member Name="NoColumnSelected" Description="Nessuna colonna selezionata" />
-    <Member Name="YouCannotAddBlocksWithAllOrAny" Description="Non è possibile aggiungere blocchi con 'Tutti' o 'Alcuno'" />
-    <Member Name="YouCannotAddIfBlocksOnCollectionFields" Description="Non è possibile aggiungere blocchi di 'If' in campi di collezione" />
-    <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Solo è possibile aggiungere blocchi 'Foreach' in campi di collezione" />
-    <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Si deve aggiungere il token 'Element' per utilizzare Foreach in campi di collezione" />
-  </Type>
   <Type Name="EmailTemplateContactEntity" Description="Modello email">
     <Member Name="DisplayName" Description="Nome" />
     <Member Name="EmailAddress" Description="Indirizzo email" />
@@ -569,7 +563,6 @@
     <Member Name="Query" Description="Query" />
     <Member Name="Recipients" Description="Destinatari" />
     <Member Name="SendDifferentMessages" Description="Inviare messaggi diversi" />
-    <Member Name="SmtpConfiguration" Description="Configurazione SMTP" />
     <Member Name="StartDate" Description="Data di inizio" />
     <Member Name="SystemEmail" Description="Email di sistema" />
   </Type>
@@ -586,7 +579,6 @@
     <Member Name="TokenAndEmailAddressCanNotBeSetAtTheSameTime" Description="Non è possibile stabilire simultaneamente Token e email" />
     <Member Name="TokenMustBeA0" Description="Token deve essere un {0}" />
     <Member Name="TokenOrEmailAddressMustBeSet" Description="È necessario impostare il Token o email" />
-    <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Tipo {0} non ha una proprietà con nome {1}" />
   </Type>
   <Type Name="EmailTemplateMessageEntity" Description="Messaggio modello email">
     <Member Name="CultureInfo" Description="Informazioni di cultura" />
@@ -619,6 +611,8 @@
     <Member Name="Identical" Description="Identici" />
     <Member Name="New" Description="Nuova" />
   </Type>
+  <Type Name="EntityHelpEntity" />
+  <Type Name="EntityHelpOperation" />
   <Type Name="ExcelMessage">
     <Member Name="Data" Description="Dati" />
     <Member Name="Download" Description="Scarica" />
@@ -663,26 +657,16 @@
     <Member Name="FileType" Description="Tipo di file" />
     <Member Name="FullPhysicalPath" Description="Percorso fisico" />
     <Member Name="FullWebPath" Description="URL" />
-    <Member Name="Repository" Description="Repository" />
     <Member Name="Sufix" Description="Suffisso" />
   </Type>
-  <Type Name="FileRepositoryEntity" Description="File repository">
-    <Member Name="Active" Description="Attivo" />
-    <Member Name="FileTypes" Description="Tipi di file" />
-    <Member Name="FullPhysicalPrefix" Description="Prefisso fisico" />
-    <Member Name="Name" Description="Nome" />
-    <Member Name="PhysicalPrefix" Description="Prefisso fisico" />
-    <Member Name="WebPrefix" Description="Prefisso web" />
-  </Type>
-  <Type Name="FileRepositoryOperation">
-    <Member Name="Save" Description="Salva" />
-  </Type>
-  <Type Name="FileTypeSymbol" Description="Simbolo tipo di file" PluralDescription="Simbolo tipo di file" />
+  <Type Name="FilePathOperation" />
+  <Type Name="FileTypeSymbol" Description="Simbolo tipo di file" />
   <Type Name="GroupByChart" Description="Raggruppa per grafico">
     <Member Name="Always" Description="Sempre" />
     <Member Name="Never" Description="Mai" />
     <Member Name="Optional" Description="Opzionale" />
   </Type>
+  <Type Name="HelpKindMessage" />
   <Type Name="HelpMessage">
     <Member Name="_0IsA1" Description="{0} è un {1}" />
     <Member Name="_0IsA1AndShows2" Description="{0} è un {1} e mostra {2}" />
@@ -701,7 +685,6 @@
     <Member Name="ExpressedIn" Description="espresso in " />
     <Member Name="From0OfThe1" Description="da {0} del {1} " />
     <Member Name="FromMany0" Description="da molti {0}" />
-    <Member Name="HelpDocumentation" Description="Documentazione della Guida" />
     <Member Name="HelpNotLoaded" Description="Aiuto non caricato" />
     <Member Name="Integer" Description="valore intero" />
     <Member Name="Key0NotFound" Description="Chiave {0} non trovata" />
@@ -719,6 +702,9 @@
     <Member Name="ValueLike0" Description="valore come {0}" />
     <Member Name="YourVersion" Description="la tua versione" />
   </Type>
+  <Type Name="HelpPermissions" />
+  <Type Name="HelpSearchMessage" />
+  <Type Name="HelpSyntaxMessage" />
   <Type Name="HolidayCalendarEntity" />
   <Type Name="HolidayCalendarOperation" />
   <Type Name="HolidayEntity" Description="Festivi">
@@ -769,6 +755,8 @@
   </Type>
   <Type Name="MessageLengthExceeded" />
   <Type Name="MultipleSMSModel" />
+  <Type Name="NamespaceHelpEntity" />
+  <Type Name="NamespaceHelpOperation" />
   <Type Name="NewsletterDeliveryEntity" Description="Consegna della newsletter">
     <Member Name="Newsletter" Description="Newsletter" />
     <Member Name="Recipient" Description="Destinatario" />
@@ -780,7 +768,6 @@
     <Member Name="From" Description="Da" />
     <Member Name="Name" Description="Nome" />
     <Member Name="Query" Description="Query" />
-    <Member Name="SmtpConfig" Description="SmtpConfig" />
     <Member Name="State" Description="Stato" />
     <Member Name="Subject" Description="Oggetto" />
     <Member Name="Text" Description="Testo" />
@@ -832,6 +819,8 @@
     <Member Name="DBOnly" Description="DB solo" />
     <Member Name="None" Description="Nessuno" />
   </Type>
+  <Type Name="OperationHelpEntity" />
+  <Type Name="OperationHelpOperation" />
   <Type Name="OperationRulePack" Description="Pacchetto di regole di operazione" />
   <Type Name="PackageEntity" Description="Pacchetto">
     <Member Name="Name" Description="Nome" />
@@ -936,10 +925,12 @@
     <Member Name="RootType" Description="Tipo radice" />
     <Member Name="Route" Description="Itinerario" />
   </Type>
+  <Type Name="PropertyRouteHelpEntity" />
   <Type Name="PropertyRulePack" Description="Pacchetto di regole di proprietà" />
   <Type Name="QueryColumnEntity" Description="Colonna di query">
     <Member Name="DisplayName" Description="Nome visualizzato" />
   </Type>
+  <Type Name="QueryColumnHelpEntity" />
   <Type Name="QueryEntity" Description="Query">
     <Member Name="Key" Description="Chiave di accesso" />
     <Member Name="Name" Description="Nome" />
@@ -948,6 +939,8 @@
     <Member Name="Operation" Description="Operazione" />
     <Member Name="ValueString" Description="Valore stringa" />
   </Type>
+  <Type Name="QueryHelpEntity" />
+  <Type Name="QueryHelpOperation" />
   <Type Name="QueryOrderEntity" Description="Ordine Query">
     <Member Name="OrderType" Description="Tipo di ordine" />
   </Type>
@@ -1065,29 +1058,26 @@
   <Type Name="SMSUpdatePackageEntity" />
   <Type Name="SmtpConfigurationEntity" Description="Configurazione SMTP">
     <Member Name="AditionalRecipients" Description="Destinatari adizionali" />
-    <Member Name="ClientCertificationFiles" Description="Files del certificato di cliente" />
     <Member Name="DefaultFrom" Description="Da predefinito" />
-    <Member Name="EnableSSL" Description="Abilitare SSL" />
-    <Member Name="Host" Description="Host" />
     <Member Name="Name" Description="Nome" />
-    <Member Name="Password" Description="Password" />
-    <Member Name="Port" Description="Port" />
-    <Member Name="UseDefaultCredentials" Description="Utilizzare le credenziali predefinite" />
-    <Member Name="Username" Description="Nome utente" />
   </Type>
   <Type Name="SmtpConfigurationOperation">
     <Member Name="Save" Description="Salva" />
   </Type>
+  <Type Name="SmtpNetworkDeliveryEntity" />
+  <Type Name="SqlMigrationEntity" />
   <Type Name="SystemEmailEntity" Description="Sistema di posta elettronica">
     <Member Name="FullClassName" Description="Nome completo della classe" />
   </Type>
+  <Type Name="SystemWordTemplateEntity" />
   <Type Name="TaskMessage" />
   <Type Name="TaskOperation" />
+  <Type Name="TemplateTokenMessage" />
   <Type Name="TranslatedCultureAction" Description="Azione di cultura tradotta">
     <Member Name="Read" Description="Lettura" />
     <Member Name="Translate" Description="Traduci" />
   </Type>
-  <Type Name="TranslatedInstanceEntity" Description="Entità tradotta" PluralDescription="Entità tradotta">
+  <Type Name="TranslatedInstanceEntity" Description="Entità tradotta">
     <Member Name="Culture" Description="Cultura" />
     <Member Name="Instance" Description="Entità" />
     <Member Name="OriginalText" Description="Testo originale" />
@@ -1167,12 +1157,13 @@
     <Member Name="None" Description="Nessuno" />
     <Member Name="Read" Description="Lettura" />
   </Type>
-  <Type Name="TypeConditionSymbol" Description="Simbolo di condizione di tipo" PluralDescription="Simbolo di condizione di tipo" />
+  <Type Name="TypeConditionSymbol" Description="Simbolo di condizione di tipo" />
   <Type Name="TypeEvent" Description="Tipo evento">
     <Member Name="Start" Description="Inizia" />
     <Member Name="Stop" Description="Ferma" />
   </Type>
   <Type Name="TypeRulePack" Description="Pacchetto di regole di tipo" />
+  <Type Name="TypeSearchResult" />
   <Type Name="UserAssetMessage" />
   <Type Name="UserAssetPermission" />
   <Type Name="UserAssetPreviewLine" Description="Linea di anteprima delle risorse dell'utente">
@@ -1227,7 +1218,6 @@
     <Member Name="SaveNew" Description="Salvare" />
     <Member Name="SetPassword" Description="Impostare la password" />
   </Type>
-  <Type Name="UserProcessSessionMixin" />
   <Type Name="UserQueryEntity" Description="Query utente">
     <Member Name="Columns" Description="Colonne" />
     <Member Name="ColumnsMode" Description="Modalità colonne" />
@@ -1268,4 +1258,10 @@
   <Type Name="WebImage" Description="Immagine Web">
     <Member Name="FullWebPath" Description="Percorso web completo" />
   </Type>
+  <Type Name="WordConverterSymbol" />
+  <Type Name="WordTemplateEntity" />
+  <Type Name="WordTemplateMessage" />
+  <Type Name="WordTemplateOperation" />
+  <Type Name="WordTemplatePermission" />
+  <Type Name="WordTransformerSymbol" />
 </Translations>

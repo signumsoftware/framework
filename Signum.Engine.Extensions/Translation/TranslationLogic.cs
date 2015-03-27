@@ -99,18 +99,15 @@ namespace Signum.Engine.Translation
             {
                 var doc = XDocument.Load(fileName);
 
-                HashSet<string> oldNames = doc.Element("Translations").Elements("Type").Select(t=> t.Attribute("Name").Value).ToHashSet();
+                HashSet<string> oldNames = doc.Element("Translations").Elements("Type").Select(t => t.Attribute("Name").Value).ToHashSet();
 
-                Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, fileName); //cloning
+                Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, replacementKey: Path.GetFileNameWithoutExtension(fileName)); //cloning
 
-                if (replacements.HasItems())
-                {
-                    var culture = fileName.After(assemblyName + ".").Before(".xml");
+                var culture = fileName.After(assemblyName + ".").Before(".xml");
 
-                    var locAssem = LocalizedAssembly.FromXml(assembly, CultureInfo.GetCultureInfo(culture), doc, replacements);
+                var locAssem = LocalizedAssembly.FromXml(assembly, CultureInfo.GetCultureInfo(culture), doc, replacements.Try(r => r.Inverse()));
 
-                    locAssem.ToXml().Save(fileName);
-                }
+                locAssem.ToXml().Save(fileName);
             }
         }
 
@@ -120,7 +117,11 @@ namespace Signum.Engine.Translation
 
             foreach (var kvp in memory)
             {
-                if (oldNames.Contains(kvp.Key) && newNames.Contains(kvp.Value))
+                if (oldNames.Contains(kvp.Key) && kvp.Value == null)
+                {
+                    oldNames.Remove(kvp.Key);
+                }
+                else if (oldNames.Contains(kvp.Key) && newNames.Contains(kvp.Value))
                 {
                     oldNames.Remove(kvp.Key);
                     newNames.Remove(kvp.Value);
@@ -136,9 +137,14 @@ namespace Signum.Engine.Translation
             if (answers != null)
             {
                 result.AddRange(answers);
-
                 memory.SetRange(answers);
             }
+
+            var toDelete = oldNames.Except(newNames);
+            if(answers != null)
+                toDelete = toDelete.Except(answers.Keys);
+
+            memory.SetRange(toDelete.Select(n => KVP.Create(n, (string)null)));
 
             return result;
         }
