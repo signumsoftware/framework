@@ -440,6 +440,7 @@
     <Member Name="Fixed" Description="Behoben" />
   </Type>
   <Type Name="DisconnectedMessage">
+    <Member Name="_0OverlapsWith1" Description="{0} überschneidet sich mit {1}" />
     <Member Name="Exports" Description="Exporte" />
     <Member Name="Imports" Description="Importe" />
     <Member Name="NotAllowedToSave0WhileOffline" Description="Nicht erlaubt {0} offline zu speichern" />
@@ -646,14 +647,14 @@
     <Member Name="Data" Description="Daten" />
     <Member Name="Download" Description="Download" />
     <Member Name="Excel2007Spreadsheet" Description="Microsoft Office Excel 2007 Spreadsheet (*.xlsx)|*.xlsx" />
-    <Member Name="ExcelReport" Description="Excel-Bericht" />
-    <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="Die Excel-Vorlage muss eine xlsx-Erweiterung haben, und die Aktuelle hat eine {0}-Erweiterung" />
-    <Member Name="FindLocationFoExcelReport" Description="Speicherort für Excel-Bericht finden" />
+    <Member Name="ExcelReport" Description="Excel Bericht" />
+    <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="Die Excel Vorlage muss eine xlsx-Erweiterung haben, und die Aktuelle hat eine {0}-Erweiterung" />
+    <Member Name="FindLocationFoExcelReport" Description="Speicherort für Excel Bericht finden" />
     <Member Name="Reports" Description="Berichte" />
-    <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="Die Excel-Vorlage hat eine Spalte {0}, die nicht in der Suche vorhanden ist" />
+    <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="Die Excel Vorlage hat eine Spalte {0}, die nicht in der Suche vorhanden ist" />
     <Member Name="ThereAreNoResultsToWrite" Description="Es gibt keine Ergebnisse für den Bericht zu exportieren" />
   </Type>
-  <Type Name="ExcelReportEntity" Description="Excel-Bericht">
+  <Type Name="ExcelReportEntity" Description="Excel Bericht" PluralDescription="Excel Berichte" Gender="m">
     <Member Name="DisplayName" Description="Berichtname" />
     <Member Name="File" Description="Datei" />
     <Member Name="Query" Description="Abfrage" />
@@ -1044,6 +1045,7 @@
     <Member Name="QueuedDate" Description="Warteschlangendatum" />
     <Member Name="State" Description="Status" />
     <Member Name="SuspendDate" Description="Aussetzungsdatum" />
+    <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="ProcessExceptionLineEntity" Description="Prozessausnahmelinie">
     <Member Name="Exception" Description="Ausnahme" />
@@ -1175,6 +1177,7 @@
     <Member Name="Rule" Description="Regel" />
     <Member Name="Suspended" Description="Ausgesetzt" />
     <Member Name="Task" Description="Geplante Aufgabe" />
+    <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="ScheduledTaskLogEntity" Description="Geplante Task-Protokoll" PluralDescription="Geplanten Task-Protokolle" Gender="n">
     <Member Name="ApplicationName" Description="Anwendungsname" />
@@ -1351,12 +1354,23 @@
   <Type Name="SmtpConfigurationEntity" Description="Smtp-Konfiguration">
     <Member Name="AditionalRecipients" Description="Zusätzliche Empfänger" />
     <Member Name="DefaultFrom" Description="Standard von" />
+    <Member Name="DeliveryMethod" Description="Übermittlungsmethode" />
     <Member Name="Name" Description="Name" />
+    <Member Name="Network" Description="Netzwerk" />
+    <Member Name="PickupDirectoryLocation" Description="Pickup-Verzeichnis Lage" />
   </Type>
   <Type Name="SmtpConfigurationOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="SmtpNetworkDeliveryEntity" />
+  <Type Name="SmtpNetworkDeliveryEntity" Description="SMTP-Netzwerk-Zustellung">
+    <Member Name="ClientCertificationFiles" Description="Klientzertfikatsdateien" />
+    <Member Name="EnableSSL" Description="SSL aktivieren" />
+    <Member Name="Host" Description="Host" />
+    <Member Name="Password" Description="Passwort" />
+    <Member Name="Port" Description="Port" />
+    <Member Name="UseDefaultCredentials" Description="Verwenden der Standardanmeldeinformationen" />
+    <Member Name="Username" Description="Benutzername" />
+  </Type>
   <Type Name="SqlMigrationEntity" Description="SQL-Migration">
     <Member Name="VersionNumber" Description="Versionsnummer" />
   </Type>
@@ -1614,6 +1628,7 @@
     <Member Name="Culture" Description="Kultur" />
     <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />
     <Member Name="EndDate" Description="Enddatum" />
+    <Member Name="FileName" Description="Dateiname" />
     <Member Name="Name" Description="Name" />
     <Member Name="Query" Description="Abfrage" />
     <Member Name="StartDate" Description="Startdatum" />
@@ -1628,6 +1643,7 @@
     <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Typ {0} verfügt nicht über eine Eigenschaft mit dem Namen {1}" />
   </Type>
   <Type Name="WordTemplateOperation">
+    <Member Name="CreateWordReport" Description="Word-Bericht erstellen" />
     <Member Name="CreateWordTemplateFromSystemWordTemplate" Description="Word-Vorlage aus System-Word-Vorlage erstellen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
