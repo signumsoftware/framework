@@ -394,6 +394,17 @@ namespace Signum.Utilities
 
         public void ExportXml()
         {
+            var doc = ToXml();
+
+            string fileName = TranslationFileName(Assembly, Culture);
+
+            doc.Save(fileName);
+
+            DescriptionManager.Invalidate();
+        }
+
+        public XDocument ToXml()
+        {
             var doc = new XDocument(new XDeclaration("1.0", "UTF8", "yes"),
                 new XElement("Translations",
                     from lt in Types.Values
@@ -403,14 +414,9 @@ namespace Signum.Utilities
                     select lt.ExportXml()
                 )
             );
-
-            string fileName = TranslationFileName(Assembly, Culture);
-
-            doc.Save(fileName);
-
-            DescriptionManager.Invalidate();
+            return doc;
         }
-     
+  
         public static LocalizedAssembly ImportXml(Assembly assembly, CultureInfo cultureInfo, bool forceCreate)
         {
             var defaultCulture = GetDefaultAssemblyCulture(assembly);
@@ -422,26 +428,32 @@ namespace Signum.Utilities
 
             string fileName = TranslationFileName(assembly, cultureInfo);
 
-            Dictionary<string, XElement> file = !File.Exists(fileName) ? null :
-                XDocument.Load(fileName).Element("Translations").Elements("Type")
+            XDocument doc = !File.Exists(fileName) ? null : XDocument.Load(fileName);
+
+            if (!isDefault && !forceCreate && doc == null)
+                return null;
+
+            return FromXml(assembly, cultureInfo, doc, null);
+        }
+
+        public static LocalizedAssembly FromXml(Assembly assembly, CultureInfo cultureInfo, XDocument doc, Dictionary<string, string> replacements)
+        {
+            Dictionary<string, XElement> file = doc == null ? null : doc.Element("Translations").Elements("Type")
                 .Select(x => KVP.Create(x.Attribute("Name").Value, x))
                 .Distinct(x => x.Key)
                 .ToDictionary();
-
-            if (!isDefault && !forceCreate && file == null)
-                return null;
 
             var result = new LocalizedAssembly
             {
                 Assembly = assembly,
                 Culture = cultureInfo,
-                IsDefault = isDefault
+                IsDefault = GetDefaultAssemblyCulture(assembly) == cultureInfo.Name
             };
 
             result.Types = (from t in assembly.GetTypes()
                             let opts = GetDescriptionOptions(t)
                             where opts != DescriptionOptions.None
-                            let x = file.TryGetC(t.Name)
+                            let x = file.TryGetC(replacements.TryGetC(t.Name) ?? t.Name)
                             select LocalizedType.ImportXml(t, opts, result, x))
                             .ToDictionary(lt => lt.Type);
 
@@ -513,8 +525,8 @@ namespace Signum.Utilities
 
         internal static LocalizedType ImportXml(Type type, DescriptionOptions opts, LocalizedAssembly assembly, XElement x)
         {
-            string name = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null :
-                (x == null ? null : x.Attribute("Description").Try(xa => xa.Value)) ??
+            string description = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null :
+                (x == null || x.Attribute("Name").Value != type.Name ? null : x.Attribute("Description").Try(xa => xa.Value)) ??
                 (!assembly.IsDefault ? null : DescriptionManager.DefaultTypeDescription(type));
 
             var xMembers = x == null ? null : x.Elements("Member")
@@ -528,16 +540,16 @@ namespace Signum.Utilities
                 Options = opts,
                 Assembly = assembly,
 
-                Description = name,
+                Description = description,
                 PluralDescription = !opts.IsSetAssert(DescriptionOptions.PluralDescription, type) ? null :
                              ((x == null ? null : x.Attribute("PluralDescription").Try(xa => xa.Value)) ??
                              (!assembly.IsDefault ? null : type.GetCustomAttribute<PluralDescriptionAttribute>().Try(t => t.PluralDescription)) ??
-                             (name == null ? null : NaturalLanguageTools.Pluralize(name, assembly.Culture))),
+                             (description == null ? null : NaturalLanguageTools.Pluralize(description, assembly.Culture))),
 
                 Gender = !opts.IsSetAssert(DescriptionOptions.Gender, type) ? null :
                          ((x == null ? null : x.Attribute("Gender").Try(xa => xa.Value.Single())) ??
                          (!assembly.IsDefault ? null : type.GetCustomAttribute<GenderAttribute>().Try(t => t.Gender)) ??
-                         (name == null ? null : NaturalLanguageTools.GetGender(name, assembly.Culture))),
+                         (description == null ? null : NaturalLanguageTools.GetGender(description, assembly.Culture))),
 
                 Members = !opts.IsSetAssert(DescriptionOptions.Members, type) ? null :
                           (from m in GetMembers(type)
