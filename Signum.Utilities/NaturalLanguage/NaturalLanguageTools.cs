@@ -127,7 +127,7 @@ namespace Signum.Utilities
                         sb.Append(pascalStr[i]);
                         break;
 
-                    case CharKind.StartOfAbreviation:
+                    case CharKind.StartOfAbbreviation:
                         sb.Append(" ");
                         sb.Append(pascalStr[i]);
                         break;
@@ -161,12 +161,12 @@ namespace Signum.Utilities
             if (!char.IsUpper(pascalStr[i - 1]))
             {
                 if (i + 2 == pascalStr.Length)
-                    return CharKind.StartOfAbreviation; //aXB|
+                    return CharKind.StartOfAbbreviation; //aXB|
 
                 if (!char.IsUpper(pascalStr[i + 2]))
                     return CharKind.StartOfWord; //aXBc
 
-                return CharKind.StartOfAbreviation; //aXBC
+                return CharKind.StartOfAbbreviation; //aXBC
             }
 
             return CharKind.Abbreviation; //AXB
@@ -177,7 +177,7 @@ namespace Signum.Utilities
             Lowecase,
             StartOfWord,
             StartOfSentence,
-            StartOfAbreviation,
+            StartOfAbbreviation,
             Abbreviation,
         }
 
