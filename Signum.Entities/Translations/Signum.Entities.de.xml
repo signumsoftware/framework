@@ -7,7 +7,10 @@
     <Member Name="Min" Description="Min" />
     <Member Name="Sum" Description="Summe" />
   </Type>
-  <Type Name="BooleanEnum" />
+  <Type Name="BooleanEnum">
+    <Member Name="False" Description="Nein" />
+    <Member Name="True" Description="Ja" />
+  </Type>
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Heute" />
   </Type>
@@ -56,7 +59,7 @@
     <Member Name="Corrupt" Description="korrupt" />
   </Type>
   <Type Name="DeleteLogParametersEntity" Description="Lösch log Parameter">
-    <Member Name="ChunkSize" Description="Chunk-Größe" />
+    <Member Name="ChunkSize" Description="Chunk Größe" />
     <Member Name="DateLimit" Description="Enddatum" />
     <Member Name="DeleteLogsWithMoreThan" Description="Löschen logs mit mehr als" />
     <Member Name="MaxChunks" Description="Max chunks" />
@@ -103,7 +106,7 @@
     <Member Name="MachineName" Description="Computername" />
     <Member Name="QueryString" Description="Query string" />
     <Member Name="Referenced" Description="Auf die verwiesen wird" />
-    <Member Name="RequestUrl" Description="Anforderungs-url" />
+    <Member Name="RequestUrl" Description="Request url" />
     <Member Name="Session" Description="Sitzung" />
     <Member Name="StackTrace" Description="Stack trace" />
     <Member Name="StackTraceHash" Description="Stack trace hash" />
@@ -204,6 +207,7 @@
     <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="Unmöglich zu speichern, Integritätsprüfung fehlgeschlagen:&#xD;&#xA;&#xD;&#xA;" />
     <Member Name="Loading0" Description="{0} läd gerade..." />
     <Member Name="LoseChanges" Description="Es gibt Änderungen, die noch nicht gespeichert wurden. &#xD;&#xA;Sollen Änderungen verlorengehen?" />
+    <Member Name="Message" Description="Nachricht" />
     <Member Name="NoDirectErrors" Description="Keine direkten Fehler" />
     <Member Name="Ok" Description="Ok" />
     <Member Name="Reload" Description="Neu laden" />
@@ -301,7 +305,7 @@
     <Member Name="NoFiltersSpecified" Description="Keine Filter angegeben" />
     <Member Name="NoResultsFound" Description="Keine Ergebnisse gefunden" />
     <Member Name="Of" Description="von" />
-    <Member Name="Operation" Description="Betrieb" />
+    <Member Name="Operation" Description="Verknüpfung" />
     <Member Name="Operations" Description="Operationen" />
     <Member Name="Query0IsNotAllowed" Description="Abfrage {0} ist nicht zulässig." />
     <Member Name="Query0NotAllowed" Description="Abfrage {0} ist nicht zulässig." />
@@ -316,7 +320,7 @@
   </Type>
   <Type Name="SelectorMessage">
     <Member Name="ChooseAValue" Description="Wählen Sie einen Wert" />
-    <Member Name="ConstructorSelector" Description="Konstruktor-Selektor" />
+    <Member Name="ConstructorSelector" Description="Konstruktor Selektor" />
     <Member Name="PleaseChooseAValueToContinue" Description="Bitte wählen Sie einen Wert, um fortzufahren:" />
     <Member Name="PleaseSelectAConstructor" Description="Bitte wählen Sie einen Konstruktor" />
     <Member Name="PleaseSelectAnElement" Description="Bitte wählen Sie ein Element" />
@@ -340,7 +344,7 @@
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
   </Type>
   <Type Name="TypeEntity" Description="Typ">
-    <Member Name="ClassName" Description="Klasse-Name" />
+    <Member Name="ClassName" Description="Klasse Name" />
     <Member Name="CleanName" Description="Clean Name" />
     <Member Name="FullClassName" Description="Full Class Name" />
     <Member Name="Namespace" Description="Namespace" />
@@ -363,12 +367,16 @@
     <Member Name="_0IsNotAllowed" Description="{0} ist nicht zulässig" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
     <Member Name="_0IsNotSet" Description="{0} ist nicht festgelegt" />
+    <Member Name="_0IsSet" Description="{0} wird gesetzt" />
+    <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
+    <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer sein als {1}" />
     <Member Name="_0ShouldBeNull" Description="{0} sollte leer sein" />
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} sollte leer sein, wenn {1} nicht festgelegt ist" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} sollte leer sein, wenn {1} festgelegt ist" />
     <Member Name="Be" Description="sein " />
     <Member Name="BeA0_G" Description="ei[m:n|f:ne|n:n] {0} sein" />
     <Member Name="BeBetween0And1" Description="zwischen {0} und {1} sein" />
+    <Member Name="BeInThePast" Description="in der Vergangenheit sein" />
     <Member Name="BeNotNull" Description="nicht null sein" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Have0Decimals" Description="haben {0} Dezimalstellen" />
