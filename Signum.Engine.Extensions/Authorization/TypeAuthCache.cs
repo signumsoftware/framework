@@ -327,8 +327,8 @@ namespace Signum.Entities.Authorization
                 ));
         }
 
-        static readonly string typeReplacementKey = "AuthRules:" + typeof(TypeEntity).Name;
-        static readonly string typeConditionReplacementKey = "AuthRules:" + typeof(TypeConditionSymbol).Name;
+        internal static readonly string typeReplacementKey = "AuthRules:" + typeof(TypeEntity).Name;
+        internal static readonly string typeConditionReplacementKey = "AuthRules:" + typeof(TypeConditionSymbol).Name;
 
         internal SqlPreCommand ImportXml(XElement element, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
         {
