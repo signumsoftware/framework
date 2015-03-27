@@ -1,24 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="AggregateFunction" />
-  <Type Name="BooleanEnum">
-    <Member Name="False" Description="No" />
-    <Member Name="True" Description="Yes" />
-  </Type>
+  <Type Name="BooleanEnum" />
   <Type Name="CalendarMessage" />
   <Type Name="Case" />
-  <Type Name="CollectionElementType">
-    <Member Name="All2" Description="All (2)" />
-    <Member Name="All3" Description="All (3)" />
-    <Member Name="Any2" Description="Any (2)" />
-    <Member Name="Any3" Description="Any (3)" />
-    <Member Name="AnyNo2" Description="Any no (2)" />
-    <Member Name="AnyNo3" Description="Any no (3)" />
-    <Member Name="Element2" Description="Element (2)" />
-    <Member Name="Element3" Description="Element (3)" />
-    <Member Name="NoOne2" Description="No one (2)" />
-    <Member Name="NoOne3" Description="No one (3)" />
-  </Type>
+  <Type Name="CollectionElementType" />
   <Type Name="ColorEntity" />
   <Type Name="ColumnOptionsMode" />
   <Type Name="ComparisonType">
@@ -29,28 +15,14 @@
     <Member Name="LessThan" Description="less than" />
     <Member Name="LessThanOrEqual" Description="less than or equal" />
   </Type>
-  <Type Name="ConnectionMessage">
-    <Member Name="SessionExpired" Description="Sesion Expired" />
-  </Type>
+  <Type Name="ConnectionMessage" />
   <Type Name="CorruptMixin" />
   <Type Name="DeleteLogParametersEntity" />
   <Type Name="EmbeddedEntity" />
-  <Type Name="EngineMessage">
-    <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Concurrency error on the database, Table = {0}, Id = {1}" />
-    <Member Name="EntityWithType0AndId1NotFound" Description="Entity with type {0} and Id {1} not found" />
-    <Member Name="NoWayOfMappingType0Found" Description="No way of mapping type {0} found" />
-    <Member Name="TheEntity0IsNew" Description="The entity {0} is new" />
-    <Member Name="ThereAre0ThatReferThisEntity" Description="There are '{0}' that refer to this entity" />
-    <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="There are records in '{0}' referring to this table by column '{1}'" />
-    <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="There's already a {0} with {1} equals to '{2}'" />
-    <Member Name="UnauthorizedAccessTo0Because1" Description="Unautorized access to {0} because {1}" />
-  </Type>
+  <Type Name="EngineMessage" />
   <Type Name="Entity" />
   <Type Name="EntityControlMessage" />
-  <Type Name="EntityMessage">
-    <Member Name="AttemptToAddRemove0InLockedEntity1" Description="Attempt to add/remove {0} in locked entity {1}" />
-    <Member Name="AttemptToSet0InLockedEntity1" Description="Attempt to set {0} in locked entity {1}" />
-  </Type>
+  <Type Name="EntityMessage" />
   <Type Name="EnumEntity`1" />
   <Type Name="ExceptionEntity" />
   <Type Name="FilterOperation">
@@ -75,184 +47,34 @@
     <Member Name="AllowChange" Description="Allow Change" />
   </Type>
   <Type Name="IUserEntity" />
-  <Type Name="JavascriptMessage">
-    <Member Name="addFilter" Description="Add filter" />
-    <Member Name="cancel" Description="Cancel" />
-    <Member Name="chooseAType" Description="Choose a type" />
-    <Member Name="chooseAValue" Description="Choose a value" />
-    <Member Name="create" Description="Create" />
-    <Member Name="enterTheNewColumnName" Description="Enter the new column name" />
-    <Member Name="error" Description="Error" />
-    <Member Name="executed" Description="Executed" />
-    <Member Name="find" Description="Find" />
-    <Member Name="hideFilters" Description="Hide filters" />
-    <Member Name="loading" Description="Loading..." />
-    <Member Name="loseCurrentChanges" Description="Lose current changes?" />
-    <Member Name="moveDown" Description="Move down" />
-    <Member Name="moveUp" Description="Move up" />
-    <Member Name="navigate" Description="Navigate" />
-    <Member Name="newEntity" Description="New entity" />
-    <Member Name="noActionsFound" Description="No actions found" />
-    <Member Name="noElementsSelected" Description="No elements selected" />
-    <Member Name="ok" Description="Ok" />
-    <Member Name="openTab" Description="Open tab" />
-    <Member Name="popupErrors" Description="There are errors in the entity, do you want to continue?" />
-    <Member Name="popupErrorsStop" Description="There are errors in the entity" />
-    <Member Name="remove" Description="Remove" />
-    <Member Name="removeColumn" Description="Remove column" />
-    <Member Name="renameColumn" Description="Rename column" />
-    <Member Name="reorderColumn_MoveLeft" Description="Move left" />
-    <Member Name="reorderColumn_MoveRight" Description="Move right" />
-    <Member Name="saveChangesBeforeOrPressCancel" Description="Save changes before or press cancel" />
-    <Member Name="saved" Description="Saved" />
-    <Member Name="search" Description="Search" />
-    <Member Name="searchForResults" Description="Seach for results" />
-    <Member Name="selectOnlyOneElement" Description="Select only one element" />
-    <Member Name="selectToken" Description="Select a token" />
-    <Member Name="showFilters" Description="Show filters" />
-    <Member Name="view" Description="View" />
-  </Type>
-  <Type Name="LiteMessage">
-    <Member Name="InvalidFormat" Description="Invalid Format" />
-    <Member Name="New_G" Description="New" />
-    <Member Name="ToStr" Description="Text" />
-    <Member Name="Type0NotFound" Description="Type {0} not found" />
-  </Type>
+  <Type Name="JavascriptMessage" />
+  <Type Name="LiteMessage" />
   <Type Name="LockableEntity" />
   <Type Name="MixinEntity" />
   <Type Name="ModelEntity" />
   <Type Name="ModifiableEntity" />
-  <Type Name="NormalControlMessage">
-    <Member Name="ViewForType0IsNotAllowed" Description="View for type {0} is not allowed" />
-  </Type>
-  <Type Name="NormalWindowMessage">
-    <Member Name="_0Errors1" Description="{0} Errors: {1}" />
-    <Member Name="_1Error" Description="1 Error: {0}" />
-    <Member Name="ContinueAnyway" Description="Continue anyway?" />
-    <Member Name="ContinueWithErrors" Description="Continue with errors?" />
-    <Member Name="FixErrors" Description="Fix Errors" />
-    <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="Impossible to Save, integrity check failed:&#xD;&#xA;&#xD;&#xA;" />
-    <Member Name="Loading0" Description="Loading {0}..." />
-    <Member Name="LoseChanges" Description="There are changes that haven't been saved. &#xD;&#xA;Lose changes?" />
-    <Member Name="The0HasErrors1" Description="The {0} has errors: &#xD;&#xA;{1}" />
-    <Member Name="ThereAreChangesContinue" Description="There are new changes that will be lost.&#xD;&#xA;&#xD;&#xA;&#x9;Continue?" />
-  </Type>
+  <Type Name="NormalControlMessage" />
+  <Type Name="NormalWindowMessage" />
   <Type Name="OperationLogEntity" />
-  <Type Name="OperationMessage">
-    <Member Name="Create" Description="Create..." />
-    <Member Name="CreateFromRegex" Description="^Create (.*) from .*$" />
-    <Member Name="InUserInterface" Description="(in user interface)" />
-    <Member Name="Operation01IsNotAuthorized" Description="Operation {0} ({1}) is not Authorized" />
-    <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Please confirm you'd like to delete the entity from the system" />
-    <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Please confirm you'd like to delete the selected entities from the system" />
-    <Member Name="StateShouldBe0InsteadOf1" Description="State should be {0} (instead of {1})" />
-    <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} didn't return an entity" />
-  </Type>
+  <Type Name="OperationMessage" />
   <Type Name="OperationSymbol" />
   <Type Name="OrderType" />
   <Type Name="PaginationMessage" />
   <Type Name="PaginationMode" />
-  <Type Name="QueryTokenMessage">
-    <Member Name="_0As1" Description="({0} as {1})" />
-    <Member Name="And" Description=" and " />
-    <Member Name="AnyEntity" Description="any entity" />
-    <Member Name="As0" Description="As {0}" />
-    <Member Name="Check" Description="check" />
-    <Member Name="Column0NotFound" Description="Column {0} not found" />
-    <Member Name="DateTime" Description="date and time" />
-    <Member Name="DecimalNumber" Description="decimal number" />
-    <Member Name="Embedded0" Description="embedded {0}" />
-    <Member Name="GlobalUniqueIdentifier" Description="global unique identifier" />
-    <Member Name="ListOf0" Description="list of {0}" />
-    <Member Name="MonthStart" Description="Month Start " />
-    <Member Name="MoreThanOneColumnNamed0" Description="More than one column named {0}" />
-    <Member Name="Number" Description="number" />
-    <Member Name="Of" Description=" of " />
-    <Member Name="Text" Description="text" />
-  </Type>
-  <Type Name="QuickLinkMessage">
-    <Member Name="No0Found" Description="No {0} found" />
-    <Member Name="Quicklinks" Description="Quick links" />
-  </Type>
+  <Type Name="QueryTokenMessage" />
+  <Type Name="QuickLinkMessage" />
   <Type Name="SearchMessage">
-    <Member Name="_01of2Results_N" Description="{0} - {1} of {2} result[s]." />
-    <Member Name="_0Results_N" Description="{0} result[s]." />
-    <Member Name="CreateNew0_G" Description="Create new {0}" />
     <Member Name="DeleteFilter" Description="Delete Filter" />
-    <Member Name="FinderOf0" Description="Finder of {0}" />
-    <Member Name="First0Results_N" Description="first {0} result[s]." />
     <Member Name="NewColumnSName" Description="New Column's Name" />
-    <Member Name="Of" Description="of" />
-    <Member Name="Query0IsNotAllowed" Description="Query {0} is not allowed" />
-    <Member Name="Query0NotAllowed" Description="Query {0} is not allowed" />
-    <Member Name="Query0NotRegistered" Description="Query {0} is not registered in the DynamicQueryManager" />
-    <Member Name="SearchControl_Pagination_All" Description="All" />
-    <Member Name="ThereIsNo0" Description="There is no {0}" />
-    <Member Name="ViewSelected" Description="View Selected" />
   </Type>
   <Type Name="SelectorMessage">
-    <Member Name="ConstructorSelector" Description="Constructor Selector" />
     <Member Name="PleaseChooseAValueToContinue" Description="Please, choose a value to continue:" />
     <Member Name="PleaseSelectAConstructor" Description="Please Select a Constructor" />
-    <Member Name="PleaseSelectAType" Description="Please select one of the following types: " />
-    <Member Name="TypeSelector" Description="Type Selector" />
-    <Member Name="ValueMustBeSpecifiedFor0" Description="A value must be specified for {0}" />
   </Type>
   <Type Name="SemiSymbol" />
   <Type Name="Symbol" />
-  <Type Name="SynchronizerMessage">
-    <Member Name="_0HasBeenRenamedIn1" Description="     '{0}' has been renamed in {1}?" />
-    <Member Name="EndOfSyncScript" Description="--- END OF SYNC SCRIPT" />
-    <Member Name="NNone" Description="- n: None" />
-    <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- START OF SYNC SCRIPT GENERATED ON {0}" />
-  </Type>
+  <Type Name="SynchronizerMessage" />
   <Type Name="TypeEntity" />
-  <Type Name="ValidationMessage">
-    <Member Name="_0DoesNotHaveAValid0Format" Description="{{0}} does not have a valid {0} format" />
-    <Member Name="_0HasAnInvalidFormat" Description="{0} has an invalid format" />
-    <Member Name="_0HasMoreThan0DecimalPlaces" Description="{{0}} has more than {0} decimal places" />
-    <Member Name="_0HasSomeRepeatedElements0" Description="{{0}} has some repeated elements: {0}" />
-    <Member Name="_0HasToBe0Than1" Description="{{0}} has to be {0} {1}" />
-    <Member Name="_0HasToBeBetween0And1" Description="{{0}} has to be between {0} and {1}" />
-    <Member Name="_0HasToBeLowercase" Description="{0} has to be lowercase" />
-    <Member Name="_0HasToBeUppercase" Description="{0} has to be uppercase" />
-    <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} is mandatory when {1} is not set" />
-    <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} is mandatory when {1} is set" />
-    <Member Name="_0IsNecessary" Description="{0} is necessary" />
-    <Member Name="_0IsNecessaryOnState1" Description="{0} is necessary on state {1}" />
-    <Member Name="_0IsNotA1_G" Description="{0} is not a {1}" />
-    <Member Name="_0IsNotAllowed" Description="{0} is not allowed" />
-    <Member Name="_0IsNotAllowedOnState1" Description="{0} is not allowed on state {1}" />
-    <Member Name="_0IsNotSet" Description="{0} is not set" />
-    <Member Name="_0IsSet" Description="{0} is set" />
-    <Member Name="_0ShouldBeADateInThePast" Description="{0} should be a date in the past" />
-    <Member Name="_0ShouldBeGreaterThan1" Description="{0} should be greater than {1}" />
-    <Member Name="_0ShouldBeNull" Description="{0} should be null" />
-    <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} should be null when {1} is not set" />
-    <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} should be null when {1} is set" />
-    <Member Name="Be" Description="be " />
-    <Member Name="BeA0_G" Description="be a {0}" />
-    <Member Name="BeBetween0And1" Description="be between {0} and {1}" />
-    <Member Name="BeNotNull" Description="be not null" />
-    <Member Name="FileName" Description="file name" />
-    <Member Name="Have0Decimals" Description="have {0} decimals" />
-    <Member Name="HaveANumberOfElements01" Description="have a number of elements {0} {1}" />
-    <Member Name="HaveAPrecisionOf" Description="have a precision of " />
-    <Member Name="HaveBetween0And1Characters" Description="have between {0} and {1} characters" />
-    <Member Name="HaveMaximum0Characters" Description="have maximum {0} characters" />
-    <Member Name="HaveMinimum0Characters" Description="have minimum {0} characters" />
-    <Member Name="HaveNoRepeatedElements" Description="have no repeated elements" />
-    <Member Name="HaveValid0Format" Description="have a valid {0} format" />
-    <Member Name="NotPossibleToaAssign0" Description="Not possible to assign {0}" />
-    <Member Name="OrBeNull" Description="or be null" />
-    <Member Name="TheLenghtOf0HasToBeEqualTo0" Description="The lenght of {{0}} has to be equal to {0}" />
-    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo0" Description="The length of {{0}} has to be greater than or equal to {0}" />
-    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo0" Description="The length of {{0}} has to be less than or equal to {0}" />
-    <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="The number of {0} is being multiplied by {1}" />
-    <Member Name="TheNumberOfElementsOf0HasToBe01" Description="The number of elements of {{0}} has to be {0} {1}" />
-    <Member Name="Type0NotAllowed" Description="Type {0} not allowed" />
-  </Type>
-  <Type Name="VoidEnumMessage">
-    <Member Name="Instance" Description="-" />
-  </Type>
+  <Type Name="ValidationMessage" />
+  <Type Name="VoidEnumMessage" />
 </Translations>

@@ -7,6 +7,7 @@
     <Member Name="Min" Description="Min" />
     <Member Name="Sum" Description="Suma" />
   </Type>
+  <Type Name="BooleanEnum" />
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Hoy" />
   </Type>
@@ -79,11 +80,9 @@
     <Member Name="MoveDown" Description="Mover abajo" />
     <Member Name="MoveUp" Description="Mover arriba" />
     <Member Name="Navigate" Description="Navegar" />
-    <Member Name="No" Description="no" />
     <Member Name="NullValueNotAllowed" Description="No se admite un valor nulo" />
     <Member Name="Remove" Description="Quitar" />
     <Member Name="View" Description="Ver" />
-    <Member Name="Yes" Description="sí" />
   </Type>
   <Type Name="EntityMessage">
     <Member Name="AttemptToAddRemove0InLockedEntity1" Description="Trate de añadir/quitar {0} en entidad bloqueada {1}" />
@@ -304,7 +303,6 @@
     <Member Name="Of" Description="de" />
     <Member Name="Operation" Description="Operación" />
     <Member Name="Operations" Description="Operaciones" />
-    <Member Name="Processes" Description="Procesos" />
     <Member Name="Query0IsNotAllowed" Description="No se permite la consulta {0}" />
     <Member Name="Query0NotAllowed" Description="La query {0} no está permitida" />
     <Member Name="Query0NotRegistered" Description="La query {0} no está registrada en el DynamicQueryManager" />

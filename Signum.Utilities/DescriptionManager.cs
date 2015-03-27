@@ -436,7 +436,7 @@ namespace Signum.Utilities
             return FromXml(assembly, cultureInfo, doc, null);
         }
 
-        public static LocalizedAssembly FromXml(Assembly assembly, CultureInfo cultureInfo, XDocument doc, Dictionary<string, string> replacements)
+        public static LocalizedAssembly FromXml(Assembly assembly, CultureInfo cultureInfo, XDocument doc, Dictionary<string, string> replacements /*new -> old*/)
         {
             Dictionary<string, XElement> file = doc == null ? null : doc.Element("Translations").Elements("Type")
                 .Select(x => KVP.Create(x.Attribute("Name").Value, x))
@@ -487,7 +487,7 @@ namespace Signum.Utilities
 
                     !Options.IsSetAssert(DescriptionOptions.Description, Type) ||
                     Description == null ||
-                    (Assembly.IsDefault && Description == (Type.GetCustomAttribute<DescriptionAttribute>().Try(t => t.Description) ?? DescriptionManager.CleanTypeName(Type).SpacePascal())) ? null :
+                    (Assembly.IsDefault && Description == DescriptionManager.DefaultTypeDescription(Type)) ? null :
                     new XAttribute("Description", Description),
 
                     !Options.IsSetAssert(DescriptionOptions.PluralDescription, Type) ||
@@ -505,7 +505,7 @@ namespace Signum.Utilities
                       where DescriptionManager.OnShouldLocalizeMember(m)
                       orderby m.Name
                       let value = Members.TryGetC(m.Name)
-                      where value != null && (!Assembly.IsDefault || ((Type.GetCustomAttribute<DescriptionAttribute>().Try(t => t.Description) ?? m.Name.NiceName()) != value))
+                      where value != null && !(Assembly.IsDefault && (DescriptionManager.DefaultMemberDescription(m) == value))
                       select new XElement("Member", new XAttribute("Name", m.Name), new XAttribute("Description", value)))
                 );
         }
@@ -542,7 +542,7 @@ namespace Signum.Utilities
 
                 Description = description,
                 PluralDescription = !opts.IsSetAssert(DescriptionOptions.PluralDescription, type) ? null :
-                             ((x == null ? null : x.Attribute("PluralDescription").Try(xa => xa.Value)) ??
+                             ((x == null || x.Attribute("Name").Value != type.Name ? null : x.Attribute("PluralDescription").Try(xa => xa.Value)) ??
                              (!assembly.IsDefault ? null : type.GetCustomAttribute<PluralDescriptionAttribute>().Try(t => t.PluralDescription)) ??
                              (description == null ? null : NaturalLanguageTools.Pluralize(description, assembly.Culture))),
 

@@ -1,37 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="AboutMessage">
-    <Member Name="Unknown0" Description="Unknown ({0})" />
-  </Type>
-  <Type Name="CollectionMessage">
-    <Member Name="And" Description=" and " />
-    <Member Name="Or" Description=" or " />
-  </Type>
-  <Type Name="ConsoleMessage">
-    <Member Name="EnterYourSelection" Description="Enter your selection: " />
-    <Member Name="EnterYoutSelectionsSeparatedByComma" Description="Enter your selections separated by comma: " />
-    <Member Name="NoOptionWithKey0Found" Description="No option with key {0} found" />
-    <Member Name="SelectOneOfTheFollowingOptions" Description="Select one of the following options:" />
-  </Type>
-  <Type Name="DateTimeMessage">
-    <Member Name="0Day" Description="{0} Day" />
-    <Member Name="0Days" Description="{0} Days" />
-    <Member Name="0Hour" Description="{0} Hour" />
-    <Member Name="0Hours" Description="{0} Hours" />
-    <Member Name="0Minute" Description="{0} Minute" />
-    <Member Name="0Minutes" Description="{0} Minutes" />
-    <Member Name="0Month" Description="{0} Month" />
-    <Member Name="0Months" Description="{0} Months" />
-    <Member Name="0Second" Description="{0} Second" />
-    <Member Name="0Seconds" Description="{0} Seconds" />
-    <Member Name="0Year" Description="{0} Year" />
-    <Member Name="0Years" Description="{0} Years" />
-    <Member Name="Ago" Description="{0} ago " />
-    <Member Name="DateLast" Description="Last {0}" />
-    <Member Name="DateThis" Description="This {0}" />
-    <Member Name="In" Description="In {0}" />
-    <Member Name="Today" Description="Today" />
-    <Member Name="Tomorrow" Description="Tomorrow" />
-    <Member Name="Yesterday" Description="Yesterday" />
-  </Type>
+  <Type Name="AboutMessage" />
+  <Type Name="CollectionMessage" />
+  <Type Name="ConsoleMessage" />
+  <Type Name="DateTimeMessage" />
+  <Type Name="DateTimePrecision" />
 </Translations>

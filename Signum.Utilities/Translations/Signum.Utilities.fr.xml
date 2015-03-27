@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="">
-    <Member Name="0HasNoFreeBits" Description="{0:X} n'a pas de bits libres" />
-    <Member Name="0Year1Month2Day" Description="{0} Année(s), {1} Mois, {2} Jour(s)" />
-  </Type>
-  <Type Name="AboutMessage">
-    <Member Name="Unknown0" Description="Inconnu({0})" />
-  </Type>
+  <Type Name="AboutMessage" />
   <Type Name="CollectionMessage">
     <Member Name="And" Description=" et " />
     <Member Name="Or" Description=" ou " />
@@ -18,19 +12,18 @@
     <Member Name="SelectOneOfTheFollowingOptions" Description="Choisissez une des options suivantes:" />
   </Type>
   <Type Name="DateTimeMessage">
-    <Member Name="0Day" Description="{0} Jour" />
-    <Member Name="0Days" Description="{0} Jours" />
-    <Member Name="0Hour" Description="{0} Heure" />
-    <Member Name="0Hours" Description="{0} Heures" />
-    <Member Name="0Minute" Description="{0} Minute" />
-    <Member Name="0Minutes" Description="{0} Minutes" />
-    <Member Name="0Month" Description="{0} Mois" />
-    <Member Name="0Months" Description="{0} Mois" />
-    <Member Name="0Second" Description="{0} Seconde" />
-    <Member Name="0Seconds" Description="{0} Secondes" />
-    <Member Name="0Year" Description="{0} Année" />
-    <Member Name="0Years" Description="{0} Années" />
-    <Member Name="Ago" Description="Il y a {0} " />
+    <Member Name="_0Day" Description="{0} Jour" />
+    <Member Name="_0Days" Description="{0} Jours" />
+    <Member Name="_0Hour" Description="{0} Heure" />
+    <Member Name="_0Hours" Description="{0} Heures" />
+    <Member Name="_0Minute" Description="{0} Minute" />
+    <Member Name="_0Minutes" Description="{0} Minutes" />
+    <Member Name="_0Month" Description="{0} Mois" />
+    <Member Name="_0Months" Description="{0} Mois" />
+    <Member Name="_0Second" Description="{0} Seconde" />
+    <Member Name="_0Seconds" Description="{0} Secondes" />
+    <Member Name="_0Year" Description="{0} Année" />
+    <Member Name="_0Years" Description="{0} Années" />
     <Member Name="DateLast" Description="Dernier {0}" />
     <Member Name="DateThis" Description="Ce {0}" />
     <Member Name="Today" Description="Aujourd'hui" />
@@ -44,5 +37,4 @@
     <Member Name="Minutes" Description="Minutes" />
     <Member Name="Seconds" Description="Secondes" />
   </Type>
-  <Type Name="Unavailable" Description="Indisponible" />
 </Translations>
