@@ -239,6 +239,7 @@ namespace Signum.Web.Operations
         OperationInfo OperationInfo { get; }
         string CanExecute { get; set; }
         ContextualOperationSettingsBase OperationSettings { get; }
+        EntityOperationSettingsBase EntityOperationSettings { get; }
         SelectedItemsMenuContext Context { get; }
 
         Type Type { get; }
@@ -291,6 +292,11 @@ namespace Signum.Web.Operations
             get { return OperationSettings; }
         }
 
+        EntityOperationSettingsBase IContextualOperationContext.EntityOperationSettings
+        {
+            get { return EntityOperationSettings; }
+        }
+
         public Type Type
         {
             get { return typeof(T); }
@@ -309,7 +315,6 @@ namespace Signum.Web.Operations
                 return false;
             }
         }
-
 
         public IEnumerable<Lite<IEntity>> UntypedEntites
         {

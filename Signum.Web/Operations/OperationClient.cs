@@ -619,7 +619,7 @@ namespace Signum.Web.Operations
         {
             var result = new MenuItem(ctx.Context.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
             {
-                Style = ctx.OperationSettings.Try(a=>a.Style) ?? EntityOperationSettingsBase.AutoStyleFunction(ctx.OperationInfo),
+                Style = ctx.OperationSettings.Try(a => a.Style) ?? ctx.EntityOperationSettings.Try(a => a.Style) ?? EntityOperationSettingsBase.AutoStyleFunction(ctx.OperationInfo),
 
                 Tooltip = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
@@ -637,7 +637,5 @@ namespace Signum.Web.Operations
 
             return result;
         }
-
-
     }
 }
