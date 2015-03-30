@@ -526,7 +526,7 @@ namespace Signum.Web.Operations
                            where oi.IsEntityOperation
                            let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
                            let osc = os == null ? null :
-                                     ctx.Lites.Count > 1 ? os.ContextualUntyped: os.ContextualFromManyUntyped
+                                     ctx.Lites.Count == 1 ? os.ContextualUntyped: os.ContextualFromManyUntyped
                            let coc = newContextualOperationContext.GetInvoker(os.Try(o => o.OverridenType) ?? type)(ctx, oi, osc, os)
                            let defaultBehaviour = oi.Lite == true && (ctx.Lites.Count == 1 || oi.OperationType != OperationType.ConstructorFrom)
                            where os == null ? defaultBehaviour :
