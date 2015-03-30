@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Chart.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -77,9 +77,9 @@ namespace Signum.Web.Chart.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Chart/Views/ChartResultsTable.cshtml")]
-    public partial class ChartResultsTable : System.Web.Mvc.WebViewPage<TypeContext<ChartRequest>>
+    public partial class _Chart_Views_ChartResultsTable_cshtml : System.Web.Mvc.WebViewPage<TypeContext<ChartRequest>>
     {
-        public ChartResultsTable()
+        public _Chart_Views_ChartResultsTable_cshtml()
         {
         }
         public override void Execute()
