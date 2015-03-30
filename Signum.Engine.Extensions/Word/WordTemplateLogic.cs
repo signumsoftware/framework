@@ -385,12 +385,24 @@ namespace Signum.Engine.Word
 
         public static void GenerateDefaultTemplates()
         {
-            var systemEmails = Database.Query<SystemWordTemplateEntity>().Where(se => !se.WordTemplates().Any(a => a.Active)).ToList();
+            var systemWordTemplates = Database.Query<SystemWordTemplateEntity>().Where(se => !se.WordTemplates().Any(a => a.Active)).ToList();
 
-            foreach (var se in systemEmails)
+            List<string> exceptions = new List<string>();
+
+            foreach (var se in systemWordTemplates)
             {
-                SystemWordTemplateLogic.CreateDefaultTemplate(se).Save();
+                try
+                {
+                    SystemWordTemplateLogic.CreateDefaultTemplate(se).Save();
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add("{0} in {1}:\r\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
+                }
             }
+
+            if (exceptions.Any())
+                throw new Exception(exceptions.ToString("\r\n\r\n"));
         }
     }
 }

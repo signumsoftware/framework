@@ -302,10 +302,22 @@ namespace Signum.Engine.Mailing
         {
             var systemEmails = Database.Query<SystemEmailEntity>().Where(se => !se.EmailTemplates().Any(a => a.Active)).ToList();
 
+            List<string> exceptions = new List<string>();
+
             foreach (var se in systemEmails)
             {
-                SystemEmailLogic.CreateDefaultTemplate(se).Save();
+                try
+                {
+                    SystemEmailLogic.CreateDefaultTemplate(se).Save();
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add("{0} in {1}:\r\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
+                }
             }
+
+            if (exceptions.Any())
+                throw new Exception(exceptions.ToString("\r\n\r\n"));
         }
     }
 }
