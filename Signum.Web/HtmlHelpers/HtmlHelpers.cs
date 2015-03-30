@@ -156,7 +156,6 @@ namespace Signum.Web
                     checkbox.Attr("checked", "checked");
 
                 HtmlTag hidden = new HtmlTag("input")
-                        .Id(name)
                         .Attrs(new
                         {
                             type = "hidden",
