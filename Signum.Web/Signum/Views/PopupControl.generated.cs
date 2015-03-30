@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -44,9 +44,9 @@ namespace Signum.Web.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/PopupControl.cshtml")]
-    public partial class PopupControl : System.Web.Mvc.WebViewPage<TypeContext>
+    public partial class _Signum_Views_PopupControl_cshtml : System.Web.Mvc.WebViewPage<TypeContext>
     {
-        public PopupControl()
+        public _Signum_Views_PopupControl_cshtml()
         {
         }
         public override void Execute()
@@ -243,14 +243,14 @@ WriteLiteral(" </span>\r\n");
             #line hidden
 WriteLiteral("                        <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 1687), Tuple.Create("\"", 1725)
+WriteAttribute("href", Tuple.Create(" href=\"", 1675), Tuple.Create("\"", 1713)
             
             #line 31 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1694), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(ident)
+, Tuple.Create(Tuple.Create("", 1682), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(ident)
             
             #line default
             #line hidden
-, 1694), false)
+, 1682), false)
 );
 
 WriteLiteral(" class=\"sf-popup-fullscreen\"");
@@ -317,26 +317,26 @@ WriteLiteral("                ");
             #line hidden
 WriteLiteral("\r\n                <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2797), Tuple.Create("\"", 2834)
+WriteAttribute("id", Tuple.Create(" id=\"", 2785), Tuple.Create("\"", 2822)
             
             #line 55 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 2802), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
+, Tuple.Create(Tuple.Create("", 2790), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
             
             #line default
             #line hidden
-, 2802), false)
+, 2790), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 2835), Tuple.Create("\"", 2924)
-, Tuple.Create(Tuple.Create("", 2843), Tuple.Create("sf-main-control", 2843), true)
-, Tuple.Create(Tuple.Create(" ", 2858), Tuple.Create("form-horizontal", 2859), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 2823), Tuple.Create("\"", 2912)
+, Tuple.Create(Tuple.Create("", 2831), Tuple.Create("sf-main-control", 2831), true)
+, Tuple.Create(Tuple.Create(" ", 2846), Tuple.Create("form-horizontal", 2847), true)
             
             #line 55 "..\..\Signum\Views\PopupControl.cshtml"
-                  , Tuple.Create(Tuple.Create("", 2874), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
+                  , Tuple.Create(Tuple.Create("", 2862), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
             
             #line default
             #line hidden
-, 2874), false)
+, 2862), false)
 );
 
 WriteLiteral(" \r\n        data-prefix=\"");

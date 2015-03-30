@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -38,9 +38,9 @@ namespace Signum.Web.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/Exception.cshtml")]
-    public partial class Exception : System.Web.Mvc.WebViewPage<dynamic>
+    public partial class _Signum_Views_Exception_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public Exception()
+        public _Signum_Views_Exception_cshtml()
         {
         }
         public override void Execute()

@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -50,9 +50,9 @@ namespace Signum.Web.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchResults.cshtml")]
-    public partial class SearchResults : System.Web.Mvc.WebViewPage<Context>
+    public partial class _Signum_Views_SearchResults_cshtml : System.Web.Mvc.WebViewPage<Context>
     {
-        public SearchResults()
+        public _Signum_Views_SearchResults_cshtml()
         {
         }
         public override void Execute()

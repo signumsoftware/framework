@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -38,9 +38,9 @@ namespace Signum.Web.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/TypeView.cshtml")]
-    public partial class TypeView : System.Web.Mvc.WebViewPage<dynamic>
+    public partial class _Signum_Views_TypeView_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public TypeView()
+        public _Signum_Views_TypeView_cshtml()
         {
         }
         public override void Execute()

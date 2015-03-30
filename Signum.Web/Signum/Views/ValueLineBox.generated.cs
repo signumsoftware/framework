@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -32,9 +32,9 @@ namespace Signum.Web.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/ValueLineBox.cshtml")]
-    public partial class ValueLineBox : System.Web.Mvc.WebViewPage<Signum.Web.Context>
+    public partial class _Signum_Views_ValueLineBox_cshtml : System.Web.Mvc.WebViewPage<Signum.Web.Context>
     {
-        public ValueLineBox()
+        public _Signum_Views_ValueLineBox_cshtml()
         {
         }
         public override void Execute()

@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -44,9 +44,9 @@ namespace Signum.Web.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/NormalControl.cshtml")]
-    public partial class NormalControl : System.Web.Mvc.WebViewPage<TypeContext>
+    public partial class _Signum_Views_NormalControl_cshtml : System.Web.Mvc.WebViewPage<TypeContext>
     {
-        public NormalControl()
+        public _Signum_Views_NormalControl_cshtml()
         {
         }
         public override void Execute()
