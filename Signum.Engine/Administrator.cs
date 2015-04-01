@@ -142,10 +142,10 @@ namespace Signum.Engine
             }
         }
 
-        public static T SetNew<T>(this T ident)
+        public static T SetNew<T>(this T ident, bool isNew = true)
             where T : Entity
         {
-            ident.IsNew = true;
+            ident.IsNew = isNew;
             ident.SetSelfModified();
             return ident;
         }
