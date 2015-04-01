@@ -362,8 +362,9 @@ namespace Signum.Engine.Mailing
                 try
                 {
                     MailMessage message = CustomCreateMailMessage != null ? CustomCreateMailMessage(email) : CreateMailMessage(email);
-                    
-                    EmailLogic.GetSmtpClient(email).Send(message);
+
+                    using (HeavyProfiler.Log("SMTP-Send"))
+                        EmailLogic.GetSmtpClient(email).Send(message);
 
                     email.State = EmailMessageState.Sent;
                     email.Sent = TimeZoneManager.Now;
