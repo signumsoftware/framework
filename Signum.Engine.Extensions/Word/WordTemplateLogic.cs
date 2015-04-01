@@ -351,6 +351,8 @@ namespace Signum.Engine.Word
                             Schema.Current.Table<WordTemplateEntity>().DeleteSqlSync(template),
                             Schema.Current.Table<FileEntity>().DeleteSqlSync(file));
 
+                    if (ex.Result == FixTokenResult.ReGenerateEntity)
+                        return Regenerate(template, replacements);
 
                     throw new InvalidOperationException("Unexcpected {0}".FormatWith(ex.Result));
                 }
@@ -363,6 +365,17 @@ namespace Signum.Engine.Word
             {
                 return new SqlPreCommandSimple("-- Exception in {0}: {1}".FormatWith(template.BaseToString(), e.Message));
             }
+        }
+
+        private static SqlPreCommand Regenerate(WordTemplateEntity template, Replacements replacements)
+        {
+            var newTemplate = SystemWordTemplateLogic.CreateDefaultTemplate(template.SystemWordTemplate);
+
+            var file = template.Template.Retrieve();
+
+            file.BinaryFile = newTemplate.Template.Entity.BinaryFile;
+
+            return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate Regenerated: " + template.Name);
         }
 
         public static IEnumerable<OpenXmlPartRootElement> RecursivePartsRootElements(this WordprocessingDocument document)

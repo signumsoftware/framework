@@ -191,7 +191,7 @@ namespace Signum.Engine.UserQueries
                         foreach (var item in uq.Filters.ToList())
                         {
                             QueryTokenEntity token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement, "{0} {1}".FormatWith(item.Operation, item.ValueString)))
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
@@ -209,7 +209,7 @@ namespace Signum.Engine.UserQueries
                         foreach (var item in uq.Columns.ToList())
                         {
                             QueryTokenEntity token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.DisplayName.HasText() ? "'{0}'".FormatWith(item.DisplayName) : null))
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.DisplayName.HasText() ? "'{0}'".FormatWith(item.DisplayName) : null, allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: ; return table.DeleteSqlSync(uq);
@@ -227,7 +227,7 @@ namespace Signum.Engine.UserQueries
                         foreach (var item in uq.Orders.ToList())
                         {
                             QueryTokenEntity token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.OrderType.ToString()))
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, item.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
