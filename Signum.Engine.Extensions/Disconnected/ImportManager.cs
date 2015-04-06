@@ -116,7 +116,7 @@ namespace Signum.Engine.Disconnected
             var task = Task.Factory.StartNew(() =>
             {
                 lock (SyncLock)
-                    using (AuthLogic.UserSession(user))
+                    using (UserHolder.UserSession(user))
                     {
                         OnStartImporting(machine);
 

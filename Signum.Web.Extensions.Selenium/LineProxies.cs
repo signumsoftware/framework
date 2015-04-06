@@ -638,7 +638,12 @@ namespace Signum.Web.Selenium
 
         public virtual int ItemsCount()
         {
-            return (int)(long)Selenium.ExecuteScript("return $('{0} fieldset').length".FormatWith(ItemsContainerLocator.CssSelector()));
+            return (int)(long)Selenium.ExecuteScript("return $('{0} fieldset:not(.hidden)').length".FormatWith(ItemsContainerLocator.CssSelector()));
+        }
+
+        public virtual int HiddenItemsCount()
+        {
+            return (int)(long)Selenium.ExecuteScript("return $('{0} fieldset.hidden').length".FormatWith(ItemsContainerLocator.CssSelector()));
         }
 
         public override int? NewIndex()
@@ -680,6 +685,11 @@ namespace Signum.Web.Selenium
             CreateEmbedded<T>(mlist: true);
 
             return this.Details<T>(index.Value);
+        }
+
+        public LineContainer<T> LastDetails<T>() where T : ModifiableEntity
+        {
+            return this.Details<T>(this.ItemsCount() + this.HiddenItemsCount() - 1);
         }
     }
 

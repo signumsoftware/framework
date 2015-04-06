@@ -218,15 +218,9 @@ namespace Signum.Engine.Authorization
                     throw new ApplicationException(AuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
             }
 
-            return UserSession(user);
+            return UserHolder.UserSession(user);
         }
 
-        public static IDisposable UserSession(UserEntity user)
-        {
-            var result = ScopeSessionFactory.OverrideSession();
-            UserEntity.Current = user;
-            return result;
-        }
 
         public static UserEntity RetrieveUser(string username)
         {

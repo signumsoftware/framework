@@ -72,13 +72,13 @@ namespace Signum.Engine.Disconnected
 
             var cancelationSource = new CancellationTokenSource();
 
-            UserEntity user = UserEntity.Current;
+            var user = UserHolder.Current;
 
             var token = cancelationSource.Token;
 
             var task = Task.Factory.StartNew(() =>
             {
-                using (AuthLogic.UserSession(user))
+                using (UserHolder.UserSession(user))
                 {
                     OnStartExporting(machine);
                     DisconnectedMachineEntity.Current = machine.ToLite();

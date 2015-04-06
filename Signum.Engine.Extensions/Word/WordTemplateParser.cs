@@ -95,7 +95,7 @@ namespace Signum.Engine.Word
 
                                 var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
                                 Run endRunPart = new Run { RunProperties = endRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
-                                endRunPart.AppendChild(new Text { Text = textPart });
+                                endRunPart.AppendChild(new Text { Text = textPart, Space = SpaceProcessingModeValues.Preserve });
 
                                 stack.Push(new ElementInfo
                                 {
@@ -165,7 +165,7 @@ namespace Signum.Engine.Word
                     var token = m.Groups["token"].Value;
                     var keyword = m.Groups["keyword"].Value;
                     var dec = m.Groups["dec"].Value;
-
+                    
                     switch (keyword)
                     {
                         case "":
@@ -176,11 +176,11 @@ namespace Signum.Engine.Word
                             {
                                 var vp = TryParseValueProvider(type, tok.Groups["token"].Value, dec);
 
-                                var format = tok.Groups["format"].Value;
+                                var format = tok.Groups["format"].Value.DefaultText(null);
 
                                 matchNode.Parent.ReplaceChild(new TokenNode(vp, format)
                                 {
-                                    RunProperties = matchNode.RunProperties.TryDo(d => d.Remove())
+                                    RunProperties = matchNode.RunProperties.TryDo(d => d.Remove()) 
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -190,7 +190,10 @@ namespace Signum.Engine.Word
                             {
                                 var vp = TryParseValueProvider(type, token, dec);
 
-                                matchNode.Parent.ReplaceChild(new DeclareNode(vp, this.AddError), matchNode);
+                                matchNode.Parent.ReplaceChild(new DeclareNode(vp, this.AddError)
+                                {
+                                    RunProperties = matchNode.RunProperties.TryDo(d => d.Remove()) 
+                                }, matchNode);
 
                                 DeclareVariable(vp);
                             }

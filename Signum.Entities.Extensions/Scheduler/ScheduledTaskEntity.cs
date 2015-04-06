@@ -7,6 +7,7 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Processes;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Scheduler
 {
@@ -45,6 +46,15 @@ namespace Signum.Entities.Scheduler
         {
             get { return machineName; }
             set { Set(ref machineName, value); }
+        }
+
+        [NotNullable]
+        Lite<IUserEntity> user;
+        [NotNullValidator]
+        public Lite<IUserEntity> User
+        {
+            get { return user; }
+            set { Set(ref user, value); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]

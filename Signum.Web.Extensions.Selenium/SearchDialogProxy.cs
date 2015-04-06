@@ -655,9 +655,9 @@ namespace Signum.Web.Selenium
             return new NormalPage<T>(Selenium).WaitLoaded();
         }
 
-        public EntityContextMenuProxy EntityContextMenu(int rowIndex)
+        public EntityContextMenuProxy EntityContextMenu(int rowIndex, string columnToken = "Entity")
         {
-            Selenium.FindElement(CellLocator(rowIndex, "Entity")).ContextClick();
+            Selenium.FindElement(CellLocator(rowIndex, columnToken)).ContextClick();
 
             EntityContextMenuProxy ctx = new EntityContextMenuProxy(this, isContext: true);
 
@@ -666,9 +666,9 @@ namespace Signum.Web.Selenium
             return ctx;
         }
 
-        public EntityContextMenuProxy EntityContextMenu(Lite<Entity> lite)
+        public EntityContextMenuProxy EntityContextMenu(Lite<Entity> lite, string columnToken = "Entity")
         {
-            Selenium.FindElement(CellLocator(lite, "Entity")).ContextClick();
+            Selenium.FindElement(CellLocator(lite, columnToken)).ContextClick();
 
             EntityContextMenuProxy ctx = new EntityContextMenuProxy(this, isContext: true);
 

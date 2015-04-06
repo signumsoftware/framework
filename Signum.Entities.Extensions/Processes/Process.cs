@@ -73,6 +73,15 @@ namespace Signum.Entities.Processes
             set { Set(ref applicationName, value); }
         }
 
+        [NotNullable]
+        Lite<IUserEntity> user;
+        [NotNullValidator]
+        public Lite<IUserEntity> User
+        {
+            get { return user; }
+            set { Set(ref user, value); }
+        }
+
         ProcessState state;
         public ProcessState State
         {
@@ -218,27 +227,6 @@ namespace Signum.Entities.Processes
     public interface IProcessLineDataEntity : IEntity
     {
 
-    }
-
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class UserProcessSessionMixin : MixinEntity
-    {
-        UserProcessSessionMixin(Entity mainEntity, MixinEntity next)
-            : base(mainEntity, next)
-        {
-        }
-
-        Lite<IUserEntity> user = UserHolder.Current.ToLite();
-        public Lite<IUserEntity> User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
-
-        protected override void CopyFrom(MixinEntity mixin, object[] args)
-        {
-            this.User = ((UserProcessSessionMixin)mixin).User;
-        }
     }
 
     public enum ProcessState

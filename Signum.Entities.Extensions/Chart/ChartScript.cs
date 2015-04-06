@@ -192,6 +192,9 @@ namespace Signum.Entities.Chart
                     o.DisplayName = n.DisplayName;
                     o.IsGroupKey = n.IsGroupKey;
                     o.IsOptional = n.IsOptional;
+                    o.Parameter1 = CombineParameters(o.Parameter1, n.Parameter1);
+                    o.Parameter2 = CombineParameters(o.Parameter2, n.Parameter2);
+                    o.Parameter3 = CombineParameters(o.Parameter3, n.Parameter3);
                 }); 
             }
             else
@@ -216,6 +219,21 @@ namespace Signum.Entities.Chart
                 if (icon == null || icon.Entity.FileName != newFile.FileName || !AreEqual(icon.Entity.BinaryFile, newFile.BinaryFile))
                     Icon = newFile.ToLiteFat();
             }
+        }
+
+        private ChartScriptParameterEntity CombineParameters(ChartScriptParameterEntity oldP, ChartScriptParameterEntity newP)
+        {
+            if (newP == null)
+                return null;
+
+            if (oldP == null)
+                oldP = new ChartScriptParameterEntity();
+
+            oldP.Name = newP.Name;
+            oldP.Type = newP.Type;
+            oldP.ValueDefinition = newP.ValueDefinition;
+
+            return newP;
         }
 
         static bool AreEqual(byte[] a1, byte[] a2)

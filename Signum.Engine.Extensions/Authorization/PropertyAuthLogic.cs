@@ -52,7 +52,7 @@ namespace Signum.Engine.Authorization
 
                     foreach (var item in groups)
                     {
-                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeof(TypeEntity).Name, item.Key));
+                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeAuthCache.typeReplacementKey, item.Key));
 
                         if (type == null)
                             continue;
@@ -73,7 +73,7 @@ namespace Signum.Engine.Authorization
                     {
                         var pp = new PropertyPair(s);
 
-                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(typeof(TypeEntity).Name, pp.Type));
+                        Type type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeAuthCache.typeReplacementKey, pp.Type));
                         if (type == null)
                             return null;
 

@@ -95,10 +95,10 @@ namespace Signum.Engine.Processes
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null, null, false)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => ProcessLogic.Start(null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool userProcessSession)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -162,21 +162,7 @@ namespace Signum.Engine.Processes
 
                 dqm.RegisterExpression((IProcessLineDataEntity p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
 
-                if (userProcessSession)
-                {
-                    PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Add(PropertyRoute.Construct((ProcessEntity p) => p.Mixin<UserProcessSessionMixin>().User));
-                    MixinDeclarations.AssertDeclared(typeof(ProcessEntity), typeof(UserProcessSessionMixin));
-                    ApplySession += process =>
-                    {
-                        var user = process.Mixin<UserProcessSessionMixin>().User;
-
-                        if (user != null)
-                            using (ExecutionMode.Global())
-                                UserHolder.Current = user.Retrieve();
-
-                        return null;
-                    };
-                }
+                PropertyAuthLogic.AvoidAutomaticUpgradeCollection.Add(PropertyRoute.Construct((ProcessEntity p) => p.User));
 
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             }
@@ -303,6 +289,7 @@ namespace Signum.Engine.Processes
                     Data = processData,
                     MachineName = JustMyProcesses ? Environment.MachineName : ProcessEntity.None,
                     ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessEntity.None,
+                    User = UserHolder.Current.ToLite(),
                 };
                 
                 if(copyMixinsFrom != null)

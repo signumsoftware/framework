@@ -84,6 +84,7 @@ namespace Signum.Engine.Mailing
 
                 GlobalValueProvider.RegisterGlobalVariable("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
                 GlobalValueProvider.RegisterGlobalVariable("Now", _ => TimeZoneManager.Now);
+                GlobalValueProvider.RegisterGlobalVariable("Today", _ => TimeZoneManager.Now.Date, "d");
 
                 sb.Schema.Synchronizing += Schema_Synchronize_Tokens;
                 sb.Schema.Synchronizing += Schema_Syncronize_DefaultTemplates;

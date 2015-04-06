@@ -10,6 +10,7 @@
         <m:ValueLine m:Common.Route="State" />
         <m:EntityLine m:Common.Route="Algorithm" />
         <m:EntityLine m:Common.Route="Data"/>
+        <m:EntityLine m:Common.Route="User"/>
         <m:ValueLine m:Common.Route="MachineName" />
         <m:ValueLine m:Common.Route="ApplicationName" />
         <m:ValueLine m:Common.Route="CreationDate" />

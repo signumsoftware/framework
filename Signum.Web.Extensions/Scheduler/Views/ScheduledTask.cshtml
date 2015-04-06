@@ -4,8 +4,10 @@
 @using (var e = Html.TypeContext<ScheduledTaskEntity>())
 {
     @Html.ValueLine(e, f => f.Suspended)
-    @Html.EntityLine(e, f => f.Task, vl=>vl.Create = false)
+    @Html.EntityLine(e, f => f.Task, vl => vl.Create = false)
     @Html.EntityDetail(e, f => f.Rule)
     @Html.ValueLine(e, f => f.MachineName)
     @Html.ValueLine(e, f => f.ApplicationName)
+    @Html.EntityLine(e, f => f.User)
+
 }

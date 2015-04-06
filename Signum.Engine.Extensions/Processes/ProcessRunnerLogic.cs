@@ -18,6 +18,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Data.SqlClient;
 using Signum.Engine.Maps;
 using System.Linq.Expressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Processes
 {
@@ -431,7 +432,9 @@ namespace Signum.Engine.Processes
 
         public void Execute()
         {
-            using (ScopeSessionFactory.OverrideSession())
+            var user = ExecutionMode.Global().Using(_ => CurrentExecution.User.Retrieve());
+
+            using (UserHolder.UserSession(user))
             {
                 using (ProcessLogic.OnApplySession(CurrentExecution))
                 {

@@ -22,6 +22,8 @@ using Signum.Engine.Templating;
 using Signum.Entities.Files;
 using Signum.Utilities.DataStructures;
 using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Wordprocessing;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Word
 {
@@ -206,6 +208,8 @@ namespace Signum.Engine.Word
                          renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
                          renderer.AssertClean();
 
+                         FixDocument(document); Dump(document, "4.Fixed.txt");
+
                          if (template.WordTransformer != null)
                              Transformers.GetOrThrow(template.WordTransformer)(template, entity, document);
                      }
@@ -217,6 +221,18 @@ namespace Signum.Engine.Word
 
                      return array;
                  }
+            }
+        }
+
+        private static void FixDocument(WordprocessingDocument document)
+        {
+            foreach (var root in document.RecursivePartsRootElements())
+            {
+                foreach (var cell in root.Descendants<TableCell>().ToList())
+                {
+                    if (!cell.ChildElements.Any(c => !(c is TableCellProperties)))
+                        cell.AppendChild(new Paragraph());
+                }
             }
         }
 

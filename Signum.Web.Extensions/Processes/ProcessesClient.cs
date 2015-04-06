@@ -57,74 +57,94 @@ namespace Signum.Web.Processes
                 {
                     Navigator.AddSetting(new EntitySettings<PackageOperationEntity> { PartialViewName = e => ViewPrefix.FormatWith("PackageOperation") });
 
-                    ContextualItemsHelper.GetContextualItemsForLites += CreateGroupContextualItem;
+                    OperationClient.Manager.CustomizeMenuItem += CustomizeMenuItemForProcess;
                 }
-
-                if (MixinDeclarations.IsDeclared(typeof(ProcessEntity), typeof(UserProcessSessionMixin)))
-                    Navigator.EntitySettings<ProcessEntity>().CreateViewOverrides().AfterLine(p => p.Algorithm, 
-                        (html, tc) => html.EntityLine(tc, p => p.Mixin<UserProcessSessionMixin>().User));
-
+                
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProcessPanel", 
                     () => ProcessPermission.ViewProcessPanel.IsAuthorized(),
                     uh => uh.Action((ProcessController pc) => pc.View())));
             }
         }
 
-        static readonly GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext =
-         new GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>>((ctx, oi, settings) =>
-             new ContextualOperationContext<Entity>(ctx, oi, (ContextualOperationSettings<Entity>)settings));
+        public static Dictionary<OperationSymbol, ContextualOperationSettingsBase> ProcessContextualOperartions;
 
+        public static void Register<T>(this IEntityOperationSymbolContainer<T> entityOperation, ContextualOperationSettings<T> settings) where T : class, IEntity
+        {
+            ProcessContextualOperartions[entityOperation.Symbol] = settings;
+        }
 
-        public static List<IMenuItem> CreateGroupContextualItem(SelectedItemsMenuContext ctx)
+        static MenuItem CustomizeMenuItemForProcess(MenuItem mi)
         {
             if (!Navigator.IsViewable(typeof(PackageOperationEntity), null))
-                return null;
+                return mi;
 
-            if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count <= 1)
-                return null;
+            var coc = (IContextualOperationContext)mi.Tag;
 
-            if (ctx.Implementations.IsByAll)
-                return null;
+            if (coc.UntypedEntites.Count() <= 1)
+                return mi;
 
-            var type = ctx.Lites.Select(a => a.EntityType).Distinct().Only();
+            var settings = ProcessContextualOperartions.TryGetC(coc.OperationInfo.OperationSymbol);
 
-            if (type == null)
-                return null;
-
-            var contexts = (from oi in OperationClient.Manager.OperationInfos(type)
-                            where oi.IsEntityOperation
-                            let os = OperationClient.Manager.GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
-                            let coc = newContextualOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? type)(ctx, oi, os.Try(a => a.ContextualFromManyUntyped))
-                            where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
-                                !os.ContextualFromManyUntyped.HasIsVisible ? (oi.Lite == true && !os.HasIsVisible && oi.OperationType != OperationType.ConstructorFrom && (!os.HasClick || os.ContextualFromManyUntyped.HasClick)) :
-                                os.ContextualFromManyUntyped.OnIsVisible(coc)
-                            select coc).ToList();
-
-            if (contexts.IsEmpty())
-                return null;
-
-            var cleanKeys = contexts.Where(cod => cod.CanExecute == null && cod.OperationInfo.HasStates == true)
-                .Select(kvp => kvp.OperationInfo.OperationSymbol).ToList();
-
-            if (cleanKeys.Any())
+            if (settings != null)
             {
-                Dictionary<OperationSymbol, string> canExecutes = OperationLogic.GetContextualCanExecute(ctx.Lites, cleanKeys);
-                foreach (var cod in contexts)
-                {
-                    var ce = canExecutes.TryGetC(cod.OperationInfo.OperationSymbol);
-                    if (ce.HasText())
-                        cod.CanExecute = ce;
-                }
+                if (settings.HasIsVisible && !settings.OnIsVisible(coc))
+                    return mi;
+
+                if ((settings.HideOnCanExecute ?? coc.HideOnCanExecute) && coc.CanExecute.HasText())
+                    return mi;
             }
 
-            List<IMenuItem> menuItems = contexts.Select(op => OperationClient.Manager.CreateContextual(op,
-                coc => ProcessClient.Module["processFromMany"](coc.Options(), JsFunction.Event)
-                )).OrderBy(o => o.Order).Cast<IMenuItem>().ToList();
+            var clone = new MenuItemProcess(mi.Id)
+            {
+                Text = mi.Text,
+                Html = mi.Html,
+                Title = mi.Title,
+                OnClick = mi.OnClick,
+                Href = mi.Href,
+                Order = mi.Order,
+                Style = mi.Style,
+                CssClass = mi.CssClass,
+                Enabled = mi.Enabled,
+                Tag = mi.Tag,
+            };
 
+            clone.HtmlProps.AddRange(mi.HtmlProps);
 
-            menuItems.Insert(0, new MenuItemHeader(SearchMessage.Processes.NiceToString()));
+            clone.OnClickProcess = ProcessClient.Module["processFromMany"](coc.Options(), JsFunction.Event);
 
-            return menuItems;
+            return clone;
         }
+
+        class MenuItemProcess : MenuItem
+        {
+            public JsFunction OnClickProcess { get; set; }
+
+            public MenuItemProcess(string id) : base(id)
+            {
+            }
+
+            protected override HtmlTag GetLinkElement()
+            {
+                var result = base.GetLinkElement();
+
+                result.TagBuilder.InnerHtml += new HtmlTag("span").Id(this.Id + "_process").Class("glyphicon glyphicon-cog process-contextual-icon").Attr("aria-hidden", "true").ToHtml().ToHtmlString();
+
+                return result;
+            }
+
+            public override MvcHtmlString ToHtml()
+            {
+                string eventHandler = "$('#" + Id + "_process" + "').on('mouseup', function(event){ event.stopPropagation(); if(event.which == 3) return; " + OnClickProcess.ToString() + " });";
+                string dynamicCss = "SF.addCssDynamically('" + RouteHelper.New().Content("~/processes/Content/Processes.css?v=" + ScriptHtmlHelper.Manager.Version) + "')";
+
+                var script = MvcHtmlString.Create("<script>" +
+                eventHandler +
+                dynamicCss + 
+                "</script>");
+
+
+                return base.ToHtml().Concat(script);
+            }
+        } 
     }
 }

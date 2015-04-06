@@ -69,9 +69,9 @@ namespace Signum.Entities.Mailing
         static StateValidator<SmtpConfigurationEntity, SmtpDeliveryMethod> stateValidator = new StateValidator<SmtpConfigurationEntity, SmtpDeliveryMethod>(
             a => a.DeliveryMethod, a => a.Network, a => a.PickupDirectoryLocation)
             {
-{SmtpDeliveryMethod.Network,        true, false },
-{SmtpDeliveryMethod.SpecifiedPickupDirectory, false, true},
-{SmtpDeliveryMethod.PickupDirectoryFromIis,    false, false },
+                {SmtpDeliveryMethod.Network,        true, null },
+                {SmtpDeliveryMethod.SpecifiedPickupDirectory, null, true},
+                {SmtpDeliveryMethod.PickupDirectoryFromIis,    null, null },
             };
 
         static readonly Expression<Func<SmtpConfigurationEntity, string>> ToStringExpression = e => e.name;

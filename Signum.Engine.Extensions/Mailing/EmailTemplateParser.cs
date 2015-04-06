@@ -162,7 +162,7 @@ namespace Signum.Engine.Mailing
                             {
                                 var t = TryParseValueProvider(type, tok.Groups["token"].Value, dec);
 
-                                stack.Peek().Nodes.Add(new ValueNode(t, tok.Groups["format"].Value, isRaw: keyword.Contains("raw")));
+                                stack.Peek().Nodes.Add(new ValueNode(t, tok.Groups["format"].Value.DefaultText(null), isRaw: keyword.Contains("raw")));
 
                                 DeclareVariable(t);
                             }
