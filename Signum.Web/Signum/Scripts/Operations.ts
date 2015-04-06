@@ -343,7 +343,7 @@ export function conextualMultipleRequestData(options: OperationOptions, newPrefi
         liteKey = items.map(i=> i.key());
     }
 
-    result["liteKeys"] = liteKey.join(",");
+    result["liteKeys"] = liteKey.map(i=> i.replace(",","#coma#")).join(",");
 
     return result; 
 }

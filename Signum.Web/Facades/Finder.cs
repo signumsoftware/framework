@@ -89,7 +89,7 @@ namespace Signum.Web
 
         public static List<Lite<T>> ParseLiteKeys<T>(string liteKeys) where T : class, IEntity
         {
-            return liteKeys.SplitNoEmpty(',' ).Select(Lite.Parse<T>).ToList();
+            return liteKeys.SplitNoEmpty(',').Select(e=>e.Replace("#coma#", ",")).Select(Lite.Parse<T>).ToList();
         }
 
 
