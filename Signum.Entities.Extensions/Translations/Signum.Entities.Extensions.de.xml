@@ -210,7 +210,7 @@
     <Member Name="_0IsNotOptional" Description="{0} ist nicht optional" />
     <Member Name="_0ShouldBeAnAggregate" Description="{0} sollte ein Aggregat" />
     <Member Name="_0ShouldBeNull" Description="{0} sollte null sein" />
-    <Member Name="_0ShouldBeSet" Description="{0} sollte festgelegt werden" />
+    <Member Name="_0ShouldBeSet" Description="{0} sollte festgesetzt werden" />
     <Member Name="Chart" Description="Diagramm" />
     <Member Name="Chart_ChartSettings" Description="Chart-Einstellungen" />
     <Member Name="Chart_Dimension" Description="Dimension" />
@@ -587,7 +587,7 @@
   <Type Name="EmailTemplateMessage">
     <Member Name="EndDateMustBeHigherThanStartDate" Description="Enddatum muss größer als Startdatum sein." />
     <Member Name="NewCulture" Description="Neue Kultur" />
-    <Member Name="SystemEmailShouldBeSetToAccessModel0" Description="SystemEmail sollte festgelegt werden, um auf Modell {0} zuzugreifen" />
+    <Member Name="SystemEmailShouldBeSetToAccessModel0" Description="SystemEmail sollte festgesetzt werden, um auf Modell {0} zuzugreifen" />
     <Member Name="ThereAreNoMessagesForTheTemplate" Description="Es gibt keine Nachrichten für die Vorlage" />
     <Member Name="ThereMustBeAMessageFor0" Description="Es muss eine Nachricht für {0} geben" />
     <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Es gibt mehr als eine Nachricht für die gleiche Sprache" />
