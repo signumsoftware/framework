@@ -155,7 +155,7 @@ namespace Signum.Engine.Chart
                 });
         }
 
-        class Options
+        public class Options
         {
             public bool RemoveOld;
             public bool OverrideAll;
