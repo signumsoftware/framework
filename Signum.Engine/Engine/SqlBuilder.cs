@@ -415,7 +415,7 @@ EXEC DB.dbo.sp_executesql @sql
                 .Replace("@sql", "@" + varName)
                 .Replace("{FullTable}", tableName.ToString())
                 .Replace("{Table}", tn.ToString())
-                .Replace("{Column}", columnName.SqlEscape());
+                .Replace("{Column}", columnName);
 
             return new SqlPreCommandSimple(command);
         }
