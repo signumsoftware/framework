@@ -29,14 +29,13 @@ namespace Signum.Utilities.ExpressionTrees
 
         private bool ExpressionHasDependencies(Expression expression)
         {
-            if(expression.NodeType == ExpressionType.Call)
+            if (expression.NodeType == ExpressionType.Call)
             {
-                var m = ((MethodCallExpression)expression); 
+                var m = ((MethodCallExpression)expression);
 
                 return m.Method.DeclaringType == typeof(Queryable) ||
-                    m.Method.DeclaringType == typeof(LinqHints) && m.Method.Name == "DisableQueryFilter";
+                    m.Method.DeclaringType == typeof(LinqHints) && (m.Method.Name == "DisableQueryFilter" || m.Method.Name == "WithHint");
             }
-
 
             return expression.NodeType == ExpressionType.Parameter ||
                 expression.NodeType == ExpressionType.Lambda || // why? 
@@ -158,6 +157,14 @@ namespace Signum.Utilities.ExpressionTrees
 
                 return Expression.Or(Expression.Or(c1, c2), c3);
             }
+        }
+
+        public static IQueryable<T> WithHint<T>(this IQueryable<T> source, string hint)
+        {
+            if (source == null)
+                throw new ArgumentNullException("hint");
+
+            return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T) }), new Expression[] { source.Expression, Expression.Constant(hint, typeof(string)) }));
         }
     }
 }

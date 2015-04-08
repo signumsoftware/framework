@@ -170,7 +170,7 @@ namespace Signum.Engine.Maps
             return index;
         }
 
-        private void AddIndex(Index index)
+        public void AddIndex(Index index)
         {
             ITable table = index.Table;
 

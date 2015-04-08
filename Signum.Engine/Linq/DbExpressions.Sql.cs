@@ -179,15 +179,18 @@ namespace Signum.Engine.Linq
 
         public ObjectName Name { get { return Table.Name; } }
 
+        public readonly string WithHint;
+
         public override Alias[] KnownAliases
         {
             get { return new[] { Alias }; }
         }
 
-        internal TableExpression(Alias alias, ITable table)
+        internal TableExpression(Alias alias, ITable table, string withHint)
             : base(DbExpressionType.Table, alias)
         {
             this.Table = table;
+            this.WithHint = withHint;
         }
 
         public override string ToString()
