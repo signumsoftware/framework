@@ -78,8 +78,15 @@ namespace Signum.Engine.Cache
                     CacheInvalidator.ReceiveInvalidation += CacheInvalidator_ReceiveInvalidation;
                 }
 
+                sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
                 sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
             }
+        }
+
+        static void Schema_SchemaCompleted()
+        {
+            foreach (var cont in controllers.Values.NotNull())
+                cont.CachedTable.CompleteToString();
         }
 
         static void CacheInvalidator_ReceiveInvalidation(string tableName)
