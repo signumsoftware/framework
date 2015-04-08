@@ -191,7 +191,7 @@ namespace Signum.Engine.Templating
                 Console.WriteLine(" " + remainingText);
 
                 QueryToken token;
-                FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false);
+                FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null);
                 switch (result)
                 {
                     case FixTokenResult.Nothing:
@@ -202,6 +202,7 @@ namespace Signum.Engine.Templating
                         break;
                     case FixTokenResult.SkipEntity:
                     case FixTokenResult.RemoveToken:
+                     case FixTokenResult.ReGenerateEntity:
                         throw new TemplateSyncException(result);
                 }
             }

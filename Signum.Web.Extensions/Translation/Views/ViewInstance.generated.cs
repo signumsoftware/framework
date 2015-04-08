@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Translation.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -67,9 +67,9 @@ namespace Signum.Web.Translation.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Translation/Views/ViewInstance.cshtml")]
-    public partial class ViewInstance : System.Web.Mvc.WebViewPage<Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>>
+    public partial class _Translation_Views_ViewInstance_cshtml : System.Web.Mvc.WebViewPage<Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>>
     {
-        public ViewInstance()
+        public _Translation_Views_ViewInstance_cshtml()
         {
         }
         public override void Execute()

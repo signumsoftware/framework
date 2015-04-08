@@ -155,25 +155,30 @@ namespace Signum.Engine.Chart
                 });
         }
 
-        class Options
+        public class Options
         {
             public bool RemoveOld;
             public bool OverrideAll;
             public bool ForceAll;
         }
 
-        public static void ImportChartScripts()
+        public static void ImportChartScriptsAuto()
         {
-            ImportChartScripts(GetDefaultFolderName());
+            ImportChartScripts(GetDefaultFolderName(), new Options
+            {
+                RemoveOld = true,
+                OverrideAll = true,
+                ForceAll = true
+            });
         }
 
-        public static void ImportChartScripts(string folderName)
+        public static void ImportChartScripts(string folderName, Options options = null)
         {
             var files = Directory.GetFiles(folderName, "*.xml").ToDictionary(Path.GetFileNameWithoutExtension);
 
             var charts = Database.Query<ChartScriptEntity>().ToDictionary(a => a.Name);
 
-            Options options = new Options();
+            options = options ?? new Options();
 
             using (OperationLogic.AllowSave<ChartScriptEntity>())
                 Synchronizer.SynchronizeReplacing(new Replacements(), "scripts",

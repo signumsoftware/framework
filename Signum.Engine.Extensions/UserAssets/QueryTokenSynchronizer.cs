@@ -296,7 +296,7 @@ namespace Signum.Engine.UserAssets
             });
         }
 
-        public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenEntity token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken = true)
+        public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenEntity token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken, bool allowReCreate)
         {
             SafeConsole.WriteColor(token.ParseException == null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + token.TokenString);
             Console.WriteLine(" " + remainingText);
@@ -305,7 +305,7 @@ namespace Signum.Engine.UserAssets
                 return FixTokenResult.Nothing;
 
             QueryToken resultToken;
-            FixTokenResult result = FixToken(replacements, token.TokenString, out resultToken, qd, options, remainingText, allowRemoveToken);
+            FixTokenResult result = FixToken(replacements, token.TokenString, out resultToken, qd, options, remainingText, allowRemoveToken, allowReCreate);
 
             if (result == FixTokenResult.Fix)
                 token = new QueryTokenEntity(resultToken);
@@ -313,7 +313,7 @@ namespace Signum.Engine.UserAssets
             return result;
         }
 
-        public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken = true)
+        public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken, bool allowReGenerate)
         {
             string[] parts = original.Split('.');
 
@@ -333,13 +333,20 @@ namespace Signum.Engine.UserAssets
 
             while (true)
             {
-                var result = SelectInteractive(ref current, qd, options, allowRemoveToken);
+                var result = SelectInteractive(ref current, qd, options, allowRemoveToken, allowReGenerate);
                 switch (result)
                 {
                     case UserAssetTokenAction.DeleteEntity:
                         SafeConsole.WriteLineColor(ConsoleColor.Red, "Entity deleted");
                         token = null;
                         return FixTokenResult.DeleteEntity;
+                    case UserAssetTokenAction.ReGenerateEntity:
+                        if (!allowReGenerate)
+                            throw new InvalidOperationException("Unexpected ReGenerate");
+
+                        SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Entity Re-Generated");
+                        token = null;
+                        return FixTokenResult.ReGenerateEntity;
                     case UserAssetTokenAction.RemoveToken:
                         if (!allowRemoveToken)
                             throw new InvalidOperationException("Unexpected RemoveToken");
@@ -367,7 +374,7 @@ namespace Signum.Engine.UserAssets
             }
         }
 
-        static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, bool allowRemoveToken)
+        static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, bool allowRemoveToken, bool allowReGenerate)
         {
             var top = Console.CursorTop;
 
@@ -406,6 +413,10 @@ namespace Signum.Engine.UserAssets
                 if (allowRemoveToken)
                     SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "- r: Remove token");
 
+                if (allowReGenerate)
+                    SafeConsole.WriteLineColor(ConsoleColor.Magenta, "- g: Generate from default template");
+
+
                 SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
 
                 while (true)
@@ -431,6 +442,9 @@ namespace Signum.Engine.UserAssets
 
                     if (answer == "d")
                         return UserAssetTokenAction.DeleteEntity;
+
+                    if (answer == "g")
+                        return UserAssetTokenAction.ReGenerateEntity;
 
                     if (token != null)
                     {
@@ -487,6 +501,7 @@ namespace Signum.Engine.UserAssets
             DeleteEntity,
             SkipEntity,
             Confirm,
+            ReGenerateEntity,
         }
     }
 
@@ -497,5 +512,6 @@ namespace Signum.Engine.UserAssets
         RemoveToken,
         DeleteEntity,
         SkipEntity,
+        ReGenerateEntity,
     }
 }

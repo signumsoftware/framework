@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Word.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -74,9 +74,9 @@ namespace Signum.Web.Word.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Word/Views/WordTemplate.cshtml")]
-    public partial class WordTemplate : System.Web.Mvc.WebViewPage<dynamic>
+    public partial class _Word_Views_WordTemplate_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public WordTemplate()
+        public _Word_Views_WordTemplate_cshtml()
         {
         }
         public override void Execute()
@@ -318,14 +318,14 @@ WriteLiteral("\"");
 WriteLiteral(" class=\"btn btn-default btn-sm sf-button sf-word-inserttoken sf-word-inserttoken-" +
 "basic\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 2152), Tuple.Create("\"", 2233)
+WriteAttribute("value", Tuple.Create(" value=\"", 2146), Tuple.Create("\"", 2227)
             
             #line 50 "..\..\Word\Views\WordTemplate.cshtml"
-                                                                                                      , Tuple.Create(Tuple.Create("", 2160), Tuple.Create<System.Object, System.Int32>(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString()
+                                                                                                      , Tuple.Create(Tuple.Create("", 2154), Tuple.Create<System.Object, System.Int32>(Signum.Entities.Mailing.EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 2160), false)
+, 2154), false)
 );
 
 WriteLiteral(" />\r\n                    <input");

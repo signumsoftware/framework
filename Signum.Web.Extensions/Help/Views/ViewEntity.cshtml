@@ -165,7 +165,7 @@
                         <h2 class="greyTitle">@typeof(QueryEntity).NicePluralName()</h2>
                         @foreach (var mq in allowedQueries)
                         {
-                            using (TypeElementContext<QueryHelpEntity> qctx = queries.GetOrThrow(QueryLogic.GetQuery(mq.Key)))
+                            using (TypeElementContext<QueryHelpEntity> qctx = queries.GetOrThrow(QueryLogic.GetQueryEntity(mq.Key)))
                             {
                                         
                             @Html.HiddenRuntimeInfo(qctx) 

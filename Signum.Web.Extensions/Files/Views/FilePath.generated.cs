@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Files.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -38,9 +38,9 @@ namespace Signum.Web.Files.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Files/Views/FilePath.cshtml")]
-    public partial class FilePath : System.Web.Mvc.WebViewPage<dynamic>
+    public partial class _Files_Views_FilePath_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public FilePath()
+        public _Files_Views_FilePath_cshtml()
         {
         }
         public override void Execute()

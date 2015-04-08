@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Signum.Web.Mailing.Views
+namespace ASP
 {
     using System;
     using System.Collections.Generic;
@@ -38,9 +38,9 @@ namespace Signum.Web.Mailing.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/EmailRecipient.cshtml")]
-    public partial class EmailRecipient : System.Web.Mvc.WebViewPage<dynamic>
+    public partial class _Mailing_Views_EmailRecipient_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public EmailRecipient()
+        public _Mailing_Views_EmailRecipient_cshtml()
         {
         }
         public override void Execute()

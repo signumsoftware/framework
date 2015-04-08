@@ -201,7 +201,7 @@ namespace Signum.Engine.Chart
                         foreach (var item in uc.Filters.ToList())
                         {
                             QueryTokenEntity token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString)))
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate, "{0} {1}".FormatWith(item.Operation, item.ValueString), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
@@ -222,7 +222,7 @@ namespace Signum.Engine.Chart
                             if (item.Token == null)
                                 break;
 
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional))
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
@@ -240,7 +240,7 @@ namespace Signum.Engine.Chart
                         foreach (var item in uc.Orders.ToList())
                         {
                             QueryTokenEntity token = item.Token;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.OrderType.ToString()))
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | canAggregate, item.OrderType.ToString(), allowRemoveToken: true, allowReCreate: false))
                             {
                                 case FixTokenResult.Nothing: break;
                                 case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);

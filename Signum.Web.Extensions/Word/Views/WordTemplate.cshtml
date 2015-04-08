@@ -17,7 +17,7 @@
             @Html.EntityCombo(ec, f => f.Culture)
             @Html.EntityCombo(ec, f => f.WordTransformer)
             @Html.EntityCombo(ec, f => f.WordConverter)
-            @Html.ValueLine(ec, f => f.FileNameFormat)
+            @Html.ValueLine(ec, f => f.FileName)
             @Html.ValueLine(ec, f => f.DisableAuthorization)
         </div>
         @if (!ec.Value.IsNew)

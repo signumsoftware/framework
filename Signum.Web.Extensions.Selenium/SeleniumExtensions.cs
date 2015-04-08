@@ -54,7 +54,8 @@ namespace Signum.Web.Selenium
 
         public static void WaitEquals<T>(this RemoteWebDriver selenium, T expectedValue, Func<T> value, TimeSpan? timeout = null)
         {
-            selenium.Wait<bool>(() => EqualityComparer<T>.Default.Equals(value(), expectedValue), () => "expression to be " + expectedValue, timeout);
+            T lastValue = default(T);
+            selenium.Wait(() => EqualityComparer<T>.Default.Equals(lastValue = value(), expectedValue), () => "expression to be " + expectedValue + " but is " + lastValue, timeout);
         }
 
         public static IWebElement TryFindElement(this RemoteWebDriver selenium, By locator)

@@ -397,15 +397,23 @@ namespace Signum.Engine.Templating
                     return result;
                 }
 
-                if(!(vp is TokenValueProvider))
+                var tvp = vp as TokenValueProvider;
+
+                if(tvp == null)
                 {
                     addError(false, "Variable '{0}' is not a token".FormatWith(v));
                     return result;
                 }
 
+                if (tvp.ParsedToken.QueryToken == null)
+                {
+                    addError(false, "Variable '{0}' is not a correctly parsed".FormatWith(v));
+                    return result;
+                }
+
                 var after = tokenString.TryAfter('.');
 
-                tokenString = ((TokenValueProvider)vp).ParsedToken.QueryToken.FullKey() + (after == null ? null : ("." + after));
+                tokenString = tvp.ParsedToken.QueryToken.FullKey() + (after == null ? null : ("." + after));
             }
 
             try
