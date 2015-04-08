@@ -38,7 +38,7 @@ namespace Signum.Windows.Excel
                         AddExtension = true,
                         DefaultExt = ".xlsx",
                         Filter = ExcelMessage.Excel2007Spreadsheet.NiceToString(),
-                        FileName = reportLite.ToString() + " - " + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx",
+                        FileName = reportLite.ToString() + " - " + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx",
                         OverwritePrompt = true,
                         Title = ExcelMessage.FindLocationFoExcelReport.NiceToString()
                     };
