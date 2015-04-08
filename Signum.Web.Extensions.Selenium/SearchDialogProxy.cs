@@ -739,6 +739,11 @@ namespace Signum.Web.Selenium
 
             Selenium.Wait(() => Selenium.FindElement(headerSelector).FindElements(By.CssSelector("span")).Any(s => s.Text == newName));
         }
+
+        internal void WaitActiveSuccess()
+        {
+            Selenium.WaitElementVisible(RowsLocator.CombineCss(".active.sf-entity-ctxmenu-success"));
+        }
     }
 
     public class EntityContextMenuProxy
@@ -787,7 +792,7 @@ namespace Signum.Web.Selenium
             if (consumeConfirmation)
                 this.resultTable.Selenium.ConsumeAlert();
 
-            resultTable.Selenium.WaitElementNotVisible(EntityContextMenuLocator);
+            resultTable.WaitActiveSuccess();
         }
 
         public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true)
@@ -800,6 +805,8 @@ namespace Signum.Web.Selenium
             MenuClick(operationSymbol.KeyWeb());
             if (consumeConfirmation)
                 this.resultTable.Selenium.ConsumeAlert();
+
+            resultTable.WaitActiveSuccess();
         }
 
         public PopupControl<ProcessEntity> DeleteProcessClick(IOperationSymbolContainer symbolContainer)
