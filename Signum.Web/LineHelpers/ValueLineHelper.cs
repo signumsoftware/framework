@@ -32,7 +32,7 @@ namespace Signum.Web
             if (valueLine.InlineCheckbox)
                 return new HtmlTag("label").InnerHtml("{0} {1}".FormatHtml(value, valueLine.LabelText)).ToHtml();
 
-            return helper.FormGroup(valueLine, valueLine.Prefix, valueLine.LabelText, value);
+            return helper.FormGroup(valueLine, valueLine.Prefix, valueLine.LabelHtml ?? valueLine.LabelText.FormatHtml(), value);
         }
 
         private static MvcHtmlString InternalValue(HtmlHelper helper, ValueLine valueLine)
