@@ -91,6 +91,7 @@ namespace Signum.Engine.Cache
                     st.ResetAll(forceReset);
         }
 
+        public abstract void CompleteToString();
 
         internal void LoadAll()
         {
@@ -201,7 +202,6 @@ namespace Signum.Engine.Cache
                 completer = completerExpression.Compile();
 
                 idGetter = ctr.GetPrimaryKeyGetter((IColumn)table.PrimaryKey);
-                toStrGetter = ToStringExpressionVisitor.GetToString<T>(ctr, s => s.ToString());
             }
 
             rows = new ResetLazy<Dictionary<PrimaryKey, object>>(() =>
@@ -236,6 +236,15 @@ namespace Signum.Engine.Cache
             {
                 semiCachedController = new SemiCachedController<T>(this);
             }
+        }
+
+        public override void CompleteToString()
+        {
+            toStrGetter = ToStringExpressionVisitor.GetToString<T>(this.Constructor, s => s.ToString());
+            if (this.subTables != null)
+                foreach (var item in this.subTables)
+                    item.CompleteToString();
+
         }
 
         protected override void Reset()
@@ -473,6 +482,10 @@ namespace Signum.Engine.Cache
         {
             throw new InvalidOperationException("CacheMListTable does not implements contains");
         }
+
+        public override void CompleteToString()
+        {
+        }
     }
 
 
@@ -481,6 +494,10 @@ namespace Signum.Engine.Cache
         public override IColumn ParentColumn { get; set; }
 
         Table table;
+
+        Alias currentAlias;
+        string lastPartialJoin;
+        string remainingJoins; 
 
         Func<FieldReader, KeyValuePair<PrimaryKey, string>> rowReader;
         ResetLazy<Dictionary<PrimaryKey, string>> toStrings;
@@ -491,14 +508,23 @@ namespace Signum.Engine.Cache
             : base(controller)
         {
             this.table = Schema.Current.Table(typeof(T));
+            this.lastPartialJoin = lastPartialJoin;
+            this.remainingJoins = remainingJoins;
+            this.currentAlias = aliasGenerator.NextTableAlias(table.Name.Name);
 
-            Alias currentAlias = aliasGenerator.NextTableAlias(table.Name.Name);
+            if (!CacheLogic.WithSqlDependency)
+            {
+                semiCachedController = new SemiCachedController<T>(this);
+            }
+        }
 
-            List<IColumn> columns = new List<IColumn> { table.PrimaryKey }; 
+        public override void CompleteToString()
+        {
+            List<IColumn> columns = new List<IColumn> { table.PrimaryKey };
 
             ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
 
-            var expression = ToStringExpressionVisitor.GetToString(table, reader, columns);  
+            var expression = ToStringExpressionVisitor.GetToString(table, reader, columns);
 
             //Query
             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
@@ -508,7 +534,7 @@ namespace Signum.Engine.Cache
                     table.Name.ToString(),
                     currentAlias.Name.SqlEscape());
 
-                select += lastPartialJoin + currentAlias.Name.SqlEscape() + "." + table.PrimaryKey.Name.SqlEscape() + "\r\n" + remainingJoins;
+                select += this.lastPartialJoin + currentAlias.Name.SqlEscape() + "." + table.PrimaryKey.Name.SqlEscape() + "\r\n" + this.remainingJoins;
 
                 query = new SqlPreCommandSimple(select);
             }
@@ -549,13 +575,7 @@ namespace Signum.Engine.Cache
 
                 return result;
             }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
-
-            if (!CacheLogic.WithSqlDependency)
-            {
-                semiCachedController = new SemiCachedController<T>(this);
-            }
         }
-
 
         protected override void Reset()
         {
