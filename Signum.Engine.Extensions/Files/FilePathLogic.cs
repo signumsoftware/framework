@@ -46,7 +46,7 @@ namespace Signum.Engine.Files
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SaveFile = SaveFileDefaultd;
+                SaveFile = SaveFileDefault;
 
 
                 sb.Include<FilePathEntity>();
@@ -129,7 +129,14 @@ namespace Signum.Engine.Files
 
         static void FilePathLogic_Retrieved(FilePathEntity fp)
         {
+            fp.SetPrefixPair();
+        }
+
+        public static FilePathEntity SetPrefixPair(this FilePathEntity fp)
+        {
             fp.prefixPair = FilePathLogic.FileTypes.GetOrThrow(fp.FileType).GetPrefixPair(fp);
+
+            return fp;
         }
 
         public static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
@@ -192,7 +199,7 @@ namespace Signum.Engine.Files
         public static Action<FilePathEntity> SaveFile;
 
 
-        public static Action<FilePathEntity> SaveFileDefaultd = fp =>
+        public static Action<FilePathEntity> SaveFileDefault = fp =>
         {
             string fullPhysicalPath = null;
             try
