@@ -840,19 +840,19 @@ export class SearchControl {
         $tbody.prepend($("<tr></tr>").append($("<td></td>").attr("colspan", $tbody.find(".sf-search-footer td").attr("colspan"))));
     }
 
-    toggleFilters() {
-
-        var promise = this.simpleFilterBuilderUrl ?
-            this.convertFilters() : Promise.resolve(null);
-            
-        promise.then(() => {
+    toggleFilters(showOrHide? : boolean) {
+        return this.convertFiltersIfNecessars().then(() => {
             var $toggler = this.element.find(".sf-filters-header");
-            this.element.find(".sf-filters").toggle();
-            $toggler.toggleClass('active');
+            this.element.find(".sf-filters").toggle(showOrHide);
+            $toggler.toggleClass('active', showOrHide);
         });
     }
 
-    convertFilters(): Promise<any> {
+    convertFiltersIfNecessars(): Promise<boolean> {
+
+        if (this.simpleFilterBuilderUrl == null)
+            return Promise.resolve(false);
+
         return this.getSimpleFilters(true).then(html=> {
             var filters = this.prefix.child("tblFilters").get(); 
 
@@ -865,23 +865,30 @@ export class SearchControl {
             }
             this.prefix.child("simpleFilerBuilder").get().remove();
             this.simpleFilterBuilderUrl = null;
+
+            return true;
         });
     }
 
     quickFilterCell($elem) {
-        var value = $elem.data("value");
-        if (typeof value == "undefined")
-            value = $elem.html().trim()
+        this.toggleFilters(true).then(() => {
+
+            var value = $elem.data("value");
+            if (typeof value == "undefined")
+                value = $elem.html().trim()
 
 
-        var cellIndex = $elem[0].cellIndex;
-        var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).data("column-name");
+            var cellIndex = $elem[0].cellIndex;
+            var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).data("column-name");
 
-        this.filterBuilder.addFilter(tokenName, value);
+            this.filterBuilder.addFilter(tokenName, value);
+        });
     }
 
     quickFilterHeader($th) {
-        this.filterBuilder.addFilter($th.data("column-name"), "");
+        this.toggleFilters(true).then(() => {
+            this.filterBuilder.addFilter($th.data("column-name"), "");
+        });
     }
 
     create_click() {
