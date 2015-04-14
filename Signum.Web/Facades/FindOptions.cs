@@ -415,7 +415,7 @@ namespace Signum.Web
 
         public static void SetFilterTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
         {
-            foreach (var f in filters)
+            foreach (var f in filters.Where(f => f.ColumnName.HasText() && f.Token == null))
                 f.Token = QueryUtils.Parse(f.ColumnName, queryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
     }
@@ -458,7 +458,7 @@ namespace Signum.Web
 
         public static void SetOrderTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
         {
-            foreach (var o in orders)
+            foreach (var o in orders.Where(o => o.ColumnName.HasText() && o.Token == null))
                 o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
     }
@@ -502,10 +502,9 @@ namespace Signum.Web
 
         public static void SetColumnTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
         {
-            foreach (var o in columns)
+            foreach (var o in columns.Where(c => c.ColumnName.HasText() && c.Token == null))
                 o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0));
         }
-
     }
 
     public enum FindMode

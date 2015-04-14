@@ -7,8 +7,11 @@
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     bool filtersVisible = (bool?)ViewData[ViewDataKeys.FiltersVisible] ?? true;
     bool showAddColumn = (bool?)ViewData[ViewDataKeys.ShowAddColumn] ?? false;
+    if(filterOptions.HasItems())
+    {
+        FilterOption.SetFilterTokens(filterOptions, queryDescription, canAggregate: false);
+    }
 }
-
 
 <div id="@Model.Compose("tblFilterBuilder")" class="panel panel-default sf-filters form-xs" @(filtersVisible ? "" : "style=display:none")>
     <div class="panel-heading sf-filters-body">
@@ -51,11 +54,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 0; i < filterOptions.Count; i++)
-                {
-                    FilterOption filter = filterOptions[i];
-                    @Html.NewFilter(queryDescription.QueryName, filter, Model, i)
-                }
+                @Html.Partial(Finder.Manager.FilterRowsView, Model)
             </tbody>
         </table>
     </div>

@@ -118,11 +118,10 @@ namespace Signum.Web.Controllers
             object queryName = Finder.ResolveQueryName(webQueryName);
 
             FilterOption fo = new FilterOption(tokenName, null);
-            if (fo.Token == null)
-            {
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
-            }
+            
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            fo.Token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
+           
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
             try
@@ -134,7 +133,7 @@ namespace Signum.Web.Controllers
                 //Cell Value must be custom and cannot be parsed automatically: Leave value to null
             }
 
-            return Content(FilterBuilderHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index).ToHtmlString());
+            return Content(FilterBuilderHelper.NewFilter(CreateHtmlHelper(this), fo, new Context(null, prefix), index).ToHtmlString());
         }
 
         [HttpPost]
