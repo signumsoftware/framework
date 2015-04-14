@@ -96,17 +96,12 @@ namespace Signum.Web.Chart
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
-            object queryName = Finder.ResolveQueryName(webQueryName);
-
             FilterOption fo = new FilterOption(tokenName, null);
-            if (fo.Token == null)
-            {
-                fo.Token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.GroupResults ? SubTokensOptions.CanAggregate : 0));
-            }
+            fo.Token = QueryUtils.Parse(tokenName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.GroupResults ? SubTokensOptions.CanAggregate : 0));
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
             return Content(FilterBuilderHelper.NewFilter(
-                    FinderController.CreateHtmlHelper(this), queryName, fo, new Context(null, this.Prefix()), index).ToHtmlString());
+                    FinderController.CreateHtmlHelper(this), fo, new Context(null, this.Prefix()), index).ToHtmlString());
         }
 
         [HttpPost]

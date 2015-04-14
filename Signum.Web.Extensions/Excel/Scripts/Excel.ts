@@ -6,12 +6,9 @@ import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
 export function toPlainExcel(prefix: string, url: string) {
-    Finder.getFor(prefix).then(sc=> {
-
-        var info = sc.requestDataForSearch(Finder.RequestType.QueryRequest);
-
-        return SF.submitOnly(url, info);
-    }); 
+    Finder.getFor(prefix)
+        .then(sc=> sc.requestDataForSearch(Finder.RequestType.QueryRequest))
+        .then(info=> SF.submitOnly(url, info));
 }
 
 export function toExcelReport(prefix: string, url: string, excelReportKey : string) {
