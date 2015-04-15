@@ -574,9 +574,11 @@ export class SearchControl {
 
     requestDataForSearchInUrl(): Promise<string> {
         var page = this.prefix.child(this.keys.page).tryGet().val() || 1
-        var form = this.requestDataForSearch(RequestType.FullScreen, page);
+        var formPromise = this.requestDataForSearch(RequestType.FullScreen, page);
 
-        return form.then(fo=> $.param(form));
+        return formPromise.then(fo=> {
+            return $.param(fo);
+        });
     }
 
 
