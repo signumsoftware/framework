@@ -238,8 +238,9 @@ namespace Signum.Engine.Operations
             return Disposable.Combine(SurroundOperation, f => f(operation, log, (Entity)entity, args));
         }
 
-        internal static void SetExceptionData(Exception ex, IEntity entity, object[] args)
+        internal static void SetExceptionData(Exception ex, OperationSymbol operationSymbol, IEntity entity, object[] args)
         {
+            ex.Data["operation"] = operationSymbol;
             ex.Data["entity"] = entity;
             if (args != null)
                 ex.Data["args"] = args;

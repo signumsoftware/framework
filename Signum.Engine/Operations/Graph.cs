@@ -82,7 +82,7 @@ namespace Signum.Engine.Operations
                     }
                     catch (Exception ex)
                     {
-                        OperationLogic.SetExceptionData(ex, null, args);
+                        OperationLogic.SetExceptionData(ex, Symbol.Symbol, null, args);
 
                         if (LogAlsoIfNotSaved)
                         {
@@ -230,7 +230,7 @@ namespace Signum.Engine.Operations
                     }
                     catch (Exception ex)
                     {
-                        OperationLogic.SetExceptionData(ex, (Entity)origin, args);
+                        OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)origin, args);
 
                         if (LogAlsoIfNotSaved)
                         {
@@ -347,7 +347,7 @@ namespace Signum.Engine.Operations
                     }
                     catch (Exception ex)
                     {
-                        OperationLogic.SetExceptionData(ex, null, args);
+                        OperationLogic.SetExceptionData(ex, Symbol.Symbol, null, args);
 
                         if (LogAlsoIfNotSaved)
                         {
@@ -486,7 +486,7 @@ namespace Signum.Engine.Operations
                     }
                     catch (Exception ex)
                     {
-                        OperationLogic.SetExceptionData(ex, (Entity)entity, args);
+                        OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
 
                         if (Transaction.InTestTransaction)
                             throw;
@@ -619,7 +619,7 @@ namespace Signum.Engine.Operations
                         }
                         catch (Exception ex)
                         {
-                            OperationLogic.SetExceptionData(ex, (Entity)entity, args);
+                            OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
 
                             if (Transaction.InTestTransaction)
                                 throw;
