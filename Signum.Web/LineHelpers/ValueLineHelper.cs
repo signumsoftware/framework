@@ -289,9 +289,6 @@ namespace Signum.Web
 
         public static MvcHtmlString Hidden(this HtmlHelper helper, HiddenLine hiddenLine)
         {
-            if (hiddenLine.ReadOnly)
-                return helper.Span(hiddenLine.Prefix, hiddenLine.UntypedValue.TryToString() ?? "", "form-control");
-
             return helper.Hidden(hiddenLine.Prefix, hiddenLine.UntypedValue.TryToString() ?? "", hiddenLine.ValueHtmlProps);
         }
     }
