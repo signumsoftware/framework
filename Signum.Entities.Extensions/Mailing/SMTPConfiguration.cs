@@ -22,6 +22,13 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref name, value); }
         }
 
+        SmtpDeliveryFormat deliveryFormat;
+        public SmtpDeliveryFormat DeliveryFormat
+        {
+            get { return deliveryFormat; }
+            set { Set(ref deliveryFormat, value); }
+        }
+
         SmtpDeliveryMethod deliveryMethod;
         public SmtpDeliveryMethod DeliveryMethod
         {
