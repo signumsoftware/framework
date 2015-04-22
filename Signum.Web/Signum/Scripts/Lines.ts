@@ -448,7 +448,7 @@ export class EntityLine extends EntityBase {
             link.attr('href', entityValue == null ? null : entityValue.link);
         this.prefix.child(Entities.Keys.toStr).get().val('');
         
-        this.visible(this.prefix.child(Entities.Keys.link).tryGet(), entityValue != null);
+        this.visible(this.prefix.child(Entities.Keys.link).tryGet().parent(), entityValue != null);
         this.visible(this.prefix.get().find("ul.typeahead.dropdown-menu"), entityValue == null);
 
 
