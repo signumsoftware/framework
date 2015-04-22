@@ -345,6 +345,11 @@ namespace Signum.Web.Selenium
         {
             get { return this.Selenium.IsElementVisible(this.FiltersPanelLocator); }
         }
+
+        public ILineContainer<T> SimpleFilterBuilder<T>() where T : ModifiableEntity
+        {
+            return new LineContainer<T>(this.Selenium, this.Prefix);
+        }
     }
 
     public class FiltersProxy
