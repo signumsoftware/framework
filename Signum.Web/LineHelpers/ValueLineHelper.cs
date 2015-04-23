@@ -217,6 +217,10 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, (string)valueLine.UntypedValue));
+
+                if (valueLine.FormControlStaticAsFormControlReadonly)
+                    valueLine.ValueHtmlProps.AddCssClass("readonly-textarea");
+
                 return result.Concat(helper.FormControlStatic(valueLine, "", (string)valueLine.UntypedValue, valueLine.ValueHtmlProps));
             }
 
