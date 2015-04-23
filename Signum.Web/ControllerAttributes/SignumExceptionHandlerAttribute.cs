@@ -48,9 +48,11 @@ namespace Signum.Web
         {
             if (context.Request.IsAjaxRequest())
             {
+                var exceptionEntity = Signum.Engine.Basics.ExceptionLogic.GetExceptionEntity(model.Exception);
+
                 return new ContentResult
                 {
-                    Content = model.Exception.Message
+                    Content = (exceptionEntity == null ? null : "(Exception {0}) ".FormatWith(exceptionEntity.IdOrNull)) + model.Exception.Message
                 };
             }
             else
