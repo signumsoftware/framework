@@ -60,12 +60,12 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        MList<EmailRecipientEntity> aditionalRecipients = new MList<EmailRecipientEntity>();
+        MList<EmailRecipientEntity> additionalRecipients = new MList<EmailRecipientEntity>();
         [NoRepeatValidator]
-        public MList<EmailRecipientEntity> AditionalRecipients
+        public MList<EmailRecipientEntity> AdditionalRecipients
         {
-            get { return aditionalRecipients; }
-            set { Set(ref aditionalRecipients, value); }
+            get { return additionalRecipients; }
+            set { Set(ref additionalRecipients, value); }
         }
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)

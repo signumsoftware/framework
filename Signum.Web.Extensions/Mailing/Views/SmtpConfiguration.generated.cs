@@ -141,14 +141,14 @@ Write(Html.EntityDetail(sc, s => s.DefaultFrom));
             #line hidden
             
             #line 11 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.EntityRepeater(sc, s => s.AditionalRecipients));
+Write(Html.EntityRepeater(sc, s => s.AdditionalRecipients));
 
             
             #line default
             #line hidden
             
             #line 11 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                                        
+                                                         
 }
             
             #line default
