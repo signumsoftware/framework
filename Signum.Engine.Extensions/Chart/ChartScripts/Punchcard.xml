@@ -3,8 +3,11 @@
   <Columns>
     <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true">
       <Parameter1 Name="Horizontal Margin" Type="Number" ValueDefinition="110" />
+      <Parameter2 Name="Sort" Type="Enum" ValueDefinition="Ascending|Descending|None" />
     </Column>
-    <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true">
+      <Parameter1 Name="Sort" Type="Enum" ValueDefinition="Ascending|Descending|None" />
+    </Column>
     <Column DisplayName="Size" ColumnType="Magnitude" IsOptional="true">
       <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Log | Sqrt" />
     </Column>
@@ -19,17 +22,29 @@
   var colorSet = data.columns.c3.parameter1;
   var colorScale = data.columns.c3.parameter2;
   
-  var dim0 = d3.nest()
-    .key(function(r){return r.c0.toString(); })
-    .rollup(function(r){return r[0].c0 })
-    .entries(data.rows)
-    .map(function(g){return g.values;});
+  function chooseSort(collection, value){
+    if(value == "Ascending")
+      return collection.orderBy(function(v){return v.key;});
+    
+    if(value == "Descending")
+      return collection.orderByDescending(function(v){return v.key;});
+    
+    return collection;
+  }
   
- var dim1 = d3.nest()
-    .key(function(r){return r.c1.toString(); })
-    .rollup(function(r){return r[0].c1 })
-    .entries(data.rows)
-    .map(function(g){return g.values;});
+  var dim0 = data.rows
+     .groupByArray(function(r){return r.c0; })
+     .map(function(g){return g.elements[0].c0; });
+     
+  
+ var dim1 = data.rows
+     .groupByArray(function(r){return r.c1; })
+     .map(function(g){return g.elements[0].c1; })
+     .orderBy(function(v){return v.key;});
+  
+  dim0 = chooseSort(dim0, data.columns.c0.parameter2);
+  
+  dim1 = chooseSort(dim1, data.columns.c1.parameter1);
 
   var xRule = rule({
     _1 : 5,
@@ -173,6 +188,5 @@
     .attr('y2', yRule.size('content'))
     .style('stroke', 'Black'); 
   
-}
-]]></Script>
+}]]></Script>
 </ChartScript>
