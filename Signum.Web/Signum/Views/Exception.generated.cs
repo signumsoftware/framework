@@ -265,13 +265,7 @@ WriteLiteral("</code></pre>\r\n");
             
             #line 29 "..\..\Signum\Views\Exception.cshtml"
 
-    
-            
-            #line default
-            #line hidden
-            
-            #line 30 "..\..\Signum\Views\Exception.cshtml"
-     using (var tabs = Html.Tabs(e))
+    using (var tabs = Html.Tabs(e))
     {
         tabs.Tab(new Tab("stackTrace", "StackTrace", 
             
@@ -392,12 +386,6 @@ WriteLiteralTo(__razor_template_writer, "</code></pre>");
                                                                                                          ));
         }
     }
-            
-            #line default
-            #line hidden
-            
-            #line 50 "..\..\Signum\Views\Exception.cshtml"
-     
 }
             
             #line default

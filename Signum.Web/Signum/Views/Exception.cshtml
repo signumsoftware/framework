@@ -27,7 +27,7 @@
     <h3 style="color: rgb(139,0,0)">@e.Value.ExceptionType</h3>
     <pre><code>@e.Value.ExceptionMessage</code></pre>
 
-    @using (var tabs = Html.Tabs(e))
+    using (var tabs = Html.Tabs(e))
     {
         tabs.Tab(new Tab("stackTrace", "StackTrace", @<text><pre><code>@e.Value.StackTrace</code></pre></text>));
 
