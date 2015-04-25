@@ -91,7 +91,7 @@ namespace Signum.Engine.Cache
                     st.ResetAll(forceReset);
         }
 
-        public abstract void CompleteToString();
+        public abstract void SchemaCompleted();
 
         internal void LoadAll()
         {
@@ -238,12 +238,12 @@ namespace Signum.Engine.Cache
             }
         }
 
-        public override void CompleteToString()
+        public override void SchemaCompleted()
         {
             toStrGetter = ToStringExpressionVisitor.GetToString<T>(this.Constructor, s => s.ToString());
             if (this.subTables != null)
                 foreach (var item in this.subTables)
-                    item.CompleteToString();
+                    item.SchemaCompleted();
 
         }
 
@@ -483,8 +483,11 @@ namespace Signum.Engine.Cache
             throw new InvalidOperationException("CacheMListTable does not implements contains");
         }
 
-        public override void CompleteToString()
+        public override void SchemaCompleted()
         {
+            if (this.subTables != null)
+                foreach (var item in this.subTables)
+                    item.SchemaCompleted();
         }
     }
 
@@ -518,7 +521,7 @@ namespace Signum.Engine.Cache
             }
         }
 
-        public override void CompleteToString()
+        public override void SchemaCompleted()
         {
             List<IColumn> columns = new List<IColumn> { table.PrimaryKey };
 
@@ -575,6 +578,10 @@ namespace Signum.Engine.Cache
 
                 return result;
             }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
+
+            if (this.subTables != null)
+                foreach (var item in this.subTables)
+                    item.SchemaCompleted();
         }
 
         protected override void Reset()
