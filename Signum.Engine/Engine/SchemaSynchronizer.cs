@@ -24,19 +24,21 @@ namespace Signum.Engine
             {
                 using (Administrator.OverrideDatabaseInSysViews(db))
                 {
-                    database.AddRange(
-                     from s in Database.View<SysSchemas>()
-                     select new SchemaName(db, s.name));
+                    var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(SqlBuilder.StandartSchemas);
+
+                    database.AddRange(schemaNames.Select(sn => new SchemaName(db, sn)));
                 }
             }
 
             using (replacements.WithReplacedDatabaseName())
-                return Synchronizer.SynchronizeScript(
-                    model.ToDictionary(a => a),
-                    database.ToDictionary(a => a),
+                return Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas",
+                    model.ToDictionary(a => a.ToString()),
+                    database.ToDictionary(a => a.ToString()),
                     (_, newSN) => SqlBuilder.CreateSchema(newSN),
-                    null,
-                    null, Spacing.Simple);
+                    (_, oldSN) => SqlBuilder.DropSchema(oldSN),
+                    (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : 
+                        SqlPreCommand.Combine(Spacing.Simple, SqlBuilder.DropSchema(oldSN), SqlBuilder.CreateSchema(newSN)),
+                    Spacing.Double);
         }
 
         public static Action<Dictionary<string, DiffTable>> SimplifyDiffTables; 

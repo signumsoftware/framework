@@ -588,13 +588,38 @@ open cur
 close cur 
 deallocate cur";
 
+        public static readonly string RemoveAllSchemasScript =
+@"declare @schema nvarchar(128)
+DECLARE @sql nvarchar(255) 
+
+declare cur cursor fast_forward for 
+select schema_name
+from information_schema.schemata 
+where schema_name not in ({0})
+open cur 
+    fetch next from cur into @schema
+    while @@fetch_status <> -1 
+    begin 
+        select @sql = 'DROP SCHEMA [' + @schema + '];'
+        exec sp_executesql @sql 
+        fetch next from cur into @schema
+    end 
+close cur 
+deallocate cur";
+
+
+
         public static SqlPreCommand RemoveAllScript(DatabaseName databaseName)
         {
+            var schemas = SqlBuilder.StandartSchemas.ToString(a => "'" + a + "'", ", ");
+
             return SqlPreCommand.Combine(Spacing.Double,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllViewsScript)),
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllConstraintsScript)),
-                new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)));
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)),
+                new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(schemas)))
+                );
         }
 
         static string Use(DatabaseName databaseName, string script)

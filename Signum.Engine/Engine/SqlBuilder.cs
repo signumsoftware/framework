@@ -17,6 +17,23 @@ namespace Signum.Engine
 {
     public static class SqlBuilder
     {
+        public static List<string> StandartSchemas = new List<string>()
+        {
+            "dbo",
+            "guest",
+            "INFORMATION_SCHEMA",
+            "sys",
+            "db_owner",
+            "db_accessadmin",
+            "db_securityadmin",
+            "db_ddladmin",
+            "db_backupoperator",
+            "db_datareader",
+            "db_datawriter",
+            "db_denydatareader",
+            "db_denydatawriter"
+        };
+
         #region Create Tables
         public static SqlPreCommandSimple CreateTableSql(ITable t)
         {
@@ -287,9 +304,13 @@ namespace Signum.Engine
                 return RenameTable(oldTable.Name, newTable.Name.Name);
 
             if (object.Equals(oldTable.Name.Schema.Database, newTable.Name.Schema.Database))
+            {
+                var oldNewSchema = oldTable.Name.OnSchema(newTable.Name.Schema);
+
                 return SqlPreCommand.Combine(Spacing.Simple,
                     AlterSchema(oldTable.Name, newTable.Name.Schema),
-                    oldTable.Name == newTable.Name ? null : RenameTable(new ObjectName(newTable.Name.Schema, oldTable.Name.Name), newTable.Name.Name));
+                    oldNewSchema.Equals(newTable.Name) ? null : RenameTable(oldNewSchema, newTable.Name.Name));
+            }
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 CreateTableSql(newTable),
@@ -368,12 +389,12 @@ FROM {1} as [table]".FormatWith(
 
         public static SqlPreCommand CreateSchema(SchemaName schemaName)
         {
-            return new SqlPreCommandSimple("CREATE SCHEMA {0}".FormatWith(schemaName));
+            return new SqlPreCommandSimple("CREATE SCHEMA {0}".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
         }
 
         public static SqlPreCommand DropSchema(SchemaName schemaName)
         {
-            return new SqlPreCommandSimple("DROP SCHEMA {0}".FormatWith(schemaName));
+            return new SqlPreCommandSimple("DROP SCHEMA {0}".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
         }
 
         public static SqlPreCommandSimple DisableForeignKey(ObjectName tableName, string foreignKey)
