@@ -17,9 +17,8 @@ namespace Signum.Engine
 {
     public static class SqlBuilder
     {
-        public static List<string> StandartSchemas = new List<string>()
+        public static List<string> SystemSchemas = new List<string>()
         {
-            "dbo",
             "guest",
             "INFORMATION_SCHEMA",
             "sys",
