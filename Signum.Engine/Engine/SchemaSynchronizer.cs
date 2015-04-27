@@ -18,9 +18,9 @@ namespace Signum.Engine
     {
         public static SqlPreCommand SynchronizeSchemasScript(Replacements replacements)
         {
-            HashSet<SchemaName> model = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).ToHashSet();
+            HashSet<SchemaName> model = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
             HashSet<SchemaName> database = new HashSet<SchemaName>();
-            foreach (var db in model.Select(a => a.Database).Distinct())
+            foreach (var db in Schema.Current.DatabaseNames())
             {
                 using (Administrator.OverrideDatabaseInSysViews(db))
                 {
@@ -36,7 +36,7 @@ namespace Signum.Engine
                     database.ToDictionary(a => a.ToString()),
                     (_, newSN) => SqlBuilder.CreateSchema(newSN),
                     (_, oldSN) => SqlBuilder.DropSchema(oldSN),
-                    (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : 
+                    (_, newSN, oldSN) => newSN.Equals(oldSN) ? null :
                         SqlPreCommand.Combine(Spacing.Simple, SqlBuilder.DropSchema(oldSN), SqlBuilder.CreateSchema(newSN)),
                     Spacing.Double);
         }

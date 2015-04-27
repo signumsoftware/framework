@@ -19,6 +19,7 @@ namespace Signum.Engine
     {
         public static List<string> SystemSchemas = new List<string>()
         {
+            "dbo",
             "guest",
             "INFORMATION_SCHEMA",
             "sys",
