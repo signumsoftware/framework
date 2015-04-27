@@ -300,7 +300,7 @@ namespace Signum.Engine.Linq
                     Expression reverse = Expression.Call((query ? miReverseQ : miReverseE).MakeGenericMethod(paramTypes[0]), source); 
 
                     if(predicate != null)
-                        reverse = Expression.Call((query ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]), source, predicate);
+                        reverse = Expression.Call((query ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]), reverse, predicate);
 
                     MethodInfo mEqFirst = query ?
                         mi.Name.Contains("OrDefault") ? miFirstOrDefaultQ : miFirstQ :
