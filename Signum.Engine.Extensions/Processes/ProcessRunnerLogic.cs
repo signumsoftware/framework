@@ -167,10 +167,10 @@ namespace Signum.Engine.Processes
                             if (CancelNewProcesses.IsCancellationRequested)
                                 return;
 
-                            using (HeavyProfiler.Log("PWL", ()=> "Process Runner"))
+                            using (HeavyProfiler.Log("PWL", () => "Process Runner"))
                             {
                                 (from p in Database.Query<ProcessEntity>()
-                                 where p.State == ProcessState.Planned && p.PlannedDate <= TimeZoneManager.Now                              
+                                 where p.State == ProcessState.Planned && p.PlannedDate <= TimeZoneManager.Now
                                  select p).SetAsQueued();
 
                                 var list = Database.Query<ProcessEntity>()
@@ -281,6 +281,10 @@ namespace Signum.Engine.Processes
                                 }
                             }
                         }
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        //Ignore
                     }
                     catch (Exception e)
                     {
