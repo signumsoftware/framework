@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<Entity FullName="Signum.Entities.CalendarDN" Language="es-ES">
-  <Description>A labour day calendar that can be used for [ScheduleTaskDN]</Description>
+<Entity FullName="Signum.Entities.CalendarEntity" Language="es-ES">
+  <Description>A labour day calendar that can be used for [ScheduleTaskEntity]</Description>
   <Properties>
     <Property Name="Name">The Name of the Calendar</Property>
-    <Property Name="Holidays">A collection of [HolydayDN]</Property>
+    <Property Name="Holidays">A collection of [HolydayEntity]</Property>
   </Properties>
   <Operations>
     <Operation Key="CalendarOperations.Remove">Remove the Calendar from the database</Operation>
   </Operations>
   <Queries>
-    <Query Key="CalendarDN">Default queries for calendars</Query>
+    <Query Key="CalendarEntity">Default queries for calendars</Query>
     <Query Key="CalendarQueries.RemovedCalendars">Shows all the removed calendars</Query>
   </Queries>
 </Entity>
