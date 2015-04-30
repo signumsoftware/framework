@@ -419,11 +419,8 @@ namespace Signum.Engine.Linq
 
             ProjectionExpression projection = (ProjectionExpression)newSource;
 
-            var projector = projection.Projector.Type == typeof(string) ? projection.Projector :
-                Expression.Call(projection.Projector, OverloadingSimplifier.miToString);
-
             Expression nominated;
-            var set = DbExpressionNominator.Nominate(projector, out nominated, isGroupKey: true);
+            var set = DbExpressionNominator.Nominate(projection.Projector, out nominated, isGroupKey: true);
 
             if (!set.Contains(nominated))
                 return Expression.Call(mi, projection, separator);

@@ -34,6 +34,14 @@ namespace Signum.Test.LinqProvider
                 Database.Query<ArtistEntity>().ToString(a => a.Name, " | "));
         }
 
+        [TestMethod]
+        public void ToStringEntity()
+        {
+            Assert.AreEqual(
+                Database.Query<ArtistEntity>().Select(a => a.Name).ToString(" | "),
+                Database.Query<ArtistEntity>().ToString(" | "));
+        }
+
 
         [TestMethod]
         public void ToStringSubCollection()
