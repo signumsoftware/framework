@@ -16,6 +16,8 @@ namespace Signum.Engine
 {
     public static class SchemaSynchronizer
     {
+        public static Func<SchemaName, bool> DropSchema = s => !s.Name.Contains("/"); 
+
         public static SqlPreCommand SynchronizeSchemasScript(Replacements replacements)
         {
             HashSet<SchemaName> model = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
@@ -35,7 +37,7 @@ namespace Signum.Engine
                     model.ToDictionary(a => a.ToString()),
                     database.ToDictionary(a => a.ToString()),
                     (_, newSN) => SqlBuilder.CreateSchema(newSN),
-                    (_, oldSN) => SqlBuilder.DropSchema(oldSN),
+                    (_, oldSN) => DropSchema(oldSN) ? SqlBuilder.DropSchema(oldSN) :  null,
                     (_, newSN, oldSN) => newSN.Equals(oldSN) ? null :
                         SqlPreCommand.Combine(Spacing.Simple, SqlBuilder.DropSchema(oldSN), SqlBuilder.CreateSchema(newSN)),
                     Spacing.Double);
