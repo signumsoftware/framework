@@ -16,7 +16,7 @@ namespace Signum.Engine
 {
     public static class SchemaSynchronizer
     {
-        public static Func<SchemaName, bool> DropSchema = s => !s.Name.Contains("/"); 
+        public static Func<SchemaName, bool> DropSchema = s => !s.Name.Contains(@"\"); 
 
         public static SqlPreCommand SynchronizeSchemasScript(Replacements replacements)
         {
