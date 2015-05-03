@@ -503,6 +503,8 @@ namespace Signum.Engine.Cache
             }
         }
 
+        public static IEnumerable<Type> SemiControllers { get { return controllers.Where(a=>a.Value == null).Select(a=>a.Key); } }
+
         internal static Dictionary<Type, List<CachedTableBase>> semiControllers = new Dictionary<Type, List<CachedTableBase>>();
         static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
 

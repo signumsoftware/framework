@@ -1108,6 +1108,7 @@
       <DependentUpon>Cache.ts</DependentUpon>
     </EmbeddedResource>
     <Content Include="Calendar\Content\calendar.css" />
+    <TypeScriptCompile Include="Cache\Scripts\CacheColors.ts" />
     <TypeScriptCompile Include="Calendar\Scripts\calendar.ts" />
     <EmbeddedResource Include="Calendar\Scripts\calendar.js">
       <DependentUpon>calendar.ts</DependentUpon>
