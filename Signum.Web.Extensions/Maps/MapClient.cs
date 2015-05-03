@@ -179,23 +179,23 @@ namespace Signum.Web.Maps
             if (tokens.Count == 1)
                 yield return new MapOmniboxResult { Distance = keyMatch.Distance, KeywordMatch = keyMatch };
 
-            else
-            {
-                string pattern = tokens[1].Value;
+            //else
+            //{
+            //    string pattern = tokens[1].Value;
 
-                bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
+            //    bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-                var types = OmniboxParser.Manager.Types().Where(a=>OperationLogic.HasStateOperations(a.Value)).ToDictionary();
+            //    var types = OmniboxParser.Manager.Types().Where(a=> OperationLogic.HasStateOperations(a.Value)).ToDictionary();
 
-                foreach (var match in OmniboxUtils.Matches(types, OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
-                {
-                    var type = match.Value;
-                    if (OmniboxParser.Manager.AllowedQuery(type))
-                    {
-                        yield return new MapOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = (Type)type, TypeMatch = match };
-                    }
-                }
-            }
+            //    foreach (var match in OmniboxUtils.Matches(types, OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
+            //    {
+            //        var type = match.Value;
+            //        if (OmniboxParser.Manager.AllowedQuery(type))
+            //        {
+            //            yield return new MapOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = (Type)type, TypeMatch = match };
+            //        }
+            //    }
+            //}
         }
 
         public override List<HelpOmniboxResult> GetHelp()
