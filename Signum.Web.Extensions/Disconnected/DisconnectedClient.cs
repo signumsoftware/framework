@@ -25,7 +25,7 @@ namespace Signum.Web.Disconnected
     public static class DisconnectedClient
     {
         public static string ViewPrefix = "~/Disconnected/Views/{0}.cshtml";
-        public static JsModule ColorModel = new JsModule("Extensions/Signum.Web.Extensions/Disconnected/Scripts/DisconnectedColors");
+        public static JsModule ColorModule = new JsModule("Extensions/Signum.Web.Extensions/Disconnected/Scripts/DisconnectedColors");
 
         public static void Start()
         {
@@ -54,7 +54,7 @@ namespace Signum.Web.Disconnected
                 { 
                     Name = "disconnected", 
                     NiceName = "Disconnected", 
-                    GetJsProvider =  ColorModel["disconnectedColors"](MapClient.NodesConstant),
+                    GetJsProvider =  ColorModule["disconnectedColors"](MapClient.NodesConstant),
                     AddExtra = t => 
                     {
                         var s = strategies.TryGetC(t.webTypeName);

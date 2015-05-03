@@ -28,7 +28,7 @@ namespace Signum.Web.Cache
     {
         public static string ViewPrefix = "~/Cache/Views/{0}.cshtml";
         public static JsModule Model = new JsModule("Extensions/Signum.Web.Extensions/Cache/Scripts/Cache");
-        public static JsModule ColorModel = new JsModule("Extensions/Signum.Web.Extensions/Cache/Scripts/CacheColors");
+        public static JsModule ColorModule = new JsModule("Extensions/Signum.Web.Extensions/Cache/Scripts/CacheColors");
 
         public static void Start()
         {
@@ -62,7 +62,7 @@ namespace Signum.Web.Cache
                 { 
                     Name = "cache-rows", 
                     NiceName = "Cache - Rows", 
-                    GetJsProvider =  ColorModel["cacheColors"](MapClient.NodesConstant, "Rows", "cache-rows"),
+                    GetJsProvider =  ColorModule["cacheColors"](MapClient.NodesConstant, "Rows", "cache-rows"),
                     AddExtra = t => 
                     {
                         if (groups.ContainsKey(t.tableName)) 
@@ -90,7 +90,7 @@ namespace Signum.Web.Cache
                 { 
                     Name = "cache-invalidations", 
                     NiceName = "Cache - Invalidations", 
-                    GetJsProvider =  ColorModel["cacheColors"](MapClient.NodesConstant, "Invalidations", "cache-invalidations"),
+                    GetJsProvider =  ColorModule["cacheColors"](MapClient.NodesConstant, "Invalidations", "cache-invalidations"),
                     AddExtra = t => 
                     {
                         if (groups.ContainsKey(t.tableName))
@@ -106,7 +106,7 @@ namespace Signum.Web.Cache
                 { 
                     Name = "cache-loads", 
                     NiceName = "Cache - Loads", 
-                    GetJsProvider =  ColorModel["cacheColors"](MapClient.NodesConstant, "Loads", "cache-loads"),
+                    GetJsProvider =  ColorModule["cacheColors"](MapClient.NodesConstant, "Loads", "cache-loads"),
                     AddExtra = t => 
                     {
                         if (groups.ContainsKey(t.tableName))
@@ -122,7 +122,7 @@ namespace Signum.Web.Cache
                 { 
                     Name = "cache-load-time", 
                     NiceName = "Cache - Load Time", 
-                    GetJsProvider =  ColorModel["cacheColors"](MapClient.NodesConstant, "ms Load Time", "cache-load-time"),
+                    GetJsProvider =  ColorModule["cacheColors"](MapClient.NodesConstant, "ms Load Time", "cache-load-time"),
                     AddExtra = t => 
                     {
                         if (groups.ContainsKey(t.tableName))
