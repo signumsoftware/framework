@@ -24,12 +24,7 @@
 <div id="map">
     <svg id="svgMap">
         <defs>
-            <pattern id="pattern-stripe" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                <rect width="2" height="4" transform="translate(0,0)" fill="white"></rect>
-            </pattern>
-            <mask id="mask-stripe">
-                <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-stripe)"></rect>
-            </mask>  
+          
 
             <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
                 <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0" />
@@ -41,7 +36,12 @@
 
             <marker id="mlist_arrow" viewBox="-10 -5 20 10" refX="10" refY="0" markerWidth="10" markerHeight="20" orient="auto">
                 <path fill="black" d="M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" />
-            </marker>   
+            </marker>  
+            
+            @foreach(var cp in colorProviders.Where(c=>c.Defs != null))
+            {
+                @cp.Defs;
+            } 
         </defs>
     </svg>
 </div>

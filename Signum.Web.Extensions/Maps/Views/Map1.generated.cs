@@ -166,45 +166,7 @@ WriteLiteral(">\r\n    <svg");
 
 WriteLiteral(" id=\"svgMap\"");
 
-WriteLiteral(">\r\n        <defs>\r\n            <pattern");
-
-WriteLiteral(" id=\"pattern-stripe\"");
-
-WriteLiteral(" width=\"4\"");
-
-WriteLiteral(" height=\"4\"");
-
-WriteLiteral(" patternUnits=\"userSpaceOnUse\"");
-
-WriteLiteral(" patternTransform=\"rotate(45)\"");
-
-WriteLiteral(">\r\n                <rect");
-
-WriteLiteral(" width=\"2\"");
-
-WriteLiteral(" height=\"4\"");
-
-WriteLiteral(" transform=\"translate(0,0)\"");
-
-WriteLiteral(" fill=\"white\"");
-
-WriteLiteral("></rect>\r\n            </pattern>\r\n            <mask");
-
-WriteLiteral(" id=\"mask-stripe\"");
-
-WriteLiteral(">\r\n                <rect");
-
-WriteLiteral(" x=\"0\"");
-
-WriteLiteral(" y=\"0\"");
-
-WriteLiteral(" width=\"100%\"");
-
-WriteLiteral(" height=\"100%\"");
-
-WriteLiteral(" fill=\"url(#pattern-stripe)\"");
-
-WriteLiteral("></rect>\r\n            </mask>  \r\n\r\n            <marker");
+WriteLiteral(">\r\n        <defs>\r\n          \r\n\r\n            <marker");
 
 WriteLiteral(" id=\"normal_arrow\"");
 
@@ -270,9 +232,40 @@ WriteLiteral(" fill=\"black\"");
 
 WriteLiteral(" d=\"M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0\"");
 
-WriteLiteral(" />\r\n            </marker>   \r\n        </defs>\r\n    </svg>\r\n</div>\r\n<script>\r\n   " +
-" function getProvider(name, nodes) {\r\n        return new Promise(function (resol" +
-"ve) {\r\n            switch (name) {\r\n");
+WriteLiteral(" />\r\n            </marker>  \r\n            \r\n");
+
+            
+            #line 41 "..\..\Maps\Views\Map.cshtml"
+            
+            
+            #line default
+            #line hidden
+            
+            #line 41 "..\..\Maps\Views\Map.cshtml"
+             foreach(var cp in colorProviders.Where(c=>c.Defs != null))
+            {
+                
+            
+            #line default
+            #line hidden
+            
+            #line 43 "..\..\Maps\Views\Map.cshtml"
+           Write(cp.Defs);
+
+            
+            #line default
+            #line hidden
+            
+            #line 43 "..\..\Maps\Views\Map.cshtml"
+                        ;
+            } 
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        </defs>\r\n    </svg>\r\n</div>\r\n<script>\r\n    function getProvider(name, nod" +
+"es) {\r\n        return new Promise(function (resolve) {\r\n            switch (name" +
+") {\r\n");
 
             
             #line 52 "..\..\Maps\Views\Map.cshtml"

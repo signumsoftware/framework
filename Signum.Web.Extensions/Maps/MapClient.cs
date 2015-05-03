@@ -119,6 +119,7 @@ namespace Signum.Web.Maps
         public JsFunction GetJsProvider;
         public string NiceName; 
         public Action<TableInfo> AddExtra;
+        public MvcHtmlString Defs;
     }
 
     public class MapOmniboxProvider : OmniboxClient.OmniboxProvider<MapOmniboxResult>
