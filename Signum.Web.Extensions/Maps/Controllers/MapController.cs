@@ -50,7 +50,7 @@ namespace Signum.Web.Maps
                          }).ToList();
 
 
-            var providers = MapClient.GetColorProviders.GetInvocationListTyped().SelectMany(f => f()).ToList();
+            var providers = MapClient.GetColorProviders.GetInvocationListTyped().SelectMany(f => f()).OrderBy(a=>a.Order).ToList();
 
             ViewData["colorProviders"] = providers;
 

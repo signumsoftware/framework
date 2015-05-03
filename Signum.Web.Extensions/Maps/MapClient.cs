@@ -50,6 +50,7 @@ namespace Signum.Web.Maps
             {
                 Navigator.RegisterArea(typeof(MapClient));
 
+
                 GetColorProviders += () => new[]
                 {
                     new MapColorProvider
@@ -120,6 +121,8 @@ namespace Signum.Web.Maps
         public string NiceName; 
         public Action<TableInfo> AddExtra;
         public MvcHtmlString Defs;
+
+        public decimal Order { get; set; }
     }
 
     public class MapOmniboxProvider : OmniboxClient.OmniboxProvider<MapOmniboxResult>
