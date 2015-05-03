@@ -393,6 +393,18 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Mailing\WebMailProcessor.cs" />
+    <Compile Include="Maps\Controllers\MapController.cs" />
+    <Compile Include="Maps\MapClient.cs" />
+    <Compile Include="Maps\Views\Map1.generated.cs">
+      <DependentUpon>Map.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Maps\Views\_ViewStart.generated.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Scheduler\Controllers\SchedulerController.cs" />
     <Compile Include="Scheduler\Views\SchedulerPanel.generated.cs">
       <DependentUpon>SchedulerPanel.cshtml</DependentUpon>
@@ -992,6 +1004,16 @@
     <EmbeddedResource Include="Word\Scripts\Word.js">
       <DependentUpon>Word.ts</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Maps\Scripts\Map.js">
+      <DependentUpon>Map.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Maps\Scripts\MapColors.js">
+      <DependentUpon>MapColors.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Cache\Scripts\CacheColors.js">
+      <DependentUpon>CacheColors.ts</DependentUpon>
+    </EmbeddedResource>
+    <Content Include="Maps\Content\map.css" />
     <Content Include="Word\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1173,6 +1195,8 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
+    <TypeScriptCompile Include="Maps\Scripts\Map.ts" />
+    <TypeScriptCompile Include="Maps\Scripts\MapColors.ts" />
     <TypeScriptCompile Include="Omnibox\Scripts\Omnibox.ts" />
     <TypeScriptCompile Include="Processes\Scripts\Processes.ts" />
     <TypeScriptCompile Include="Notes\Scripts\Notes.ts" />
@@ -1452,6 +1476,15 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SmtpNetworkDelivery.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="Maps\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Maps\Views\Map.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Map1.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Maps\Views\Web.config" />
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>
@@ -1845,7 +1878,7 @@
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost/Signum.Web.Extensions</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
-          <UseCustomServer>True</UseCustomServer>
+          <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>http://google.com</CustomServerUrl>
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
