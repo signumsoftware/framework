@@ -29,6 +29,7 @@ namespace Signum.Web.Maps
                          let type = EnumEntity.Extract(t.Type) ?? t.Type
                          select new TableInfo
                          {
+                             findUrl = Finder.IsFindable(t.Type) ? Finder.FindRoute(t.Type) : null,
                              webTypeName = Navigator.ResolveWebTypeName(t.Type),
                              niceName = type.NiceName(),
                              tableName = t.Name.ToString(),
@@ -137,6 +138,7 @@ namespace Signum.Web.Maps
 
     public class TableInfo
     {
+        public string findUrl;
         public string webTypeName;
         public string niceName;
         public string tableName;

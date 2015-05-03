@@ -46,6 +46,7 @@ export interface MListTableInfo extends ITableInfo {
 }
 
 export interface ITableInfo extends D3.Layout.GraphNode, Rectangle {
+    findUrl: string;
     tableName: string;
     niceName: string;
     rows: number;
@@ -120,28 +121,21 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         ml.namespace = t.namespace;
     }));
 
-    var nodes = (<ITableInfo[]>map.tables).concat(map.tables.flatMap(t=> t.mlistTables));
+    var allNodes = (<ITableInfo[]>map.tables).concat(map.tables.flatMap(t=> t.mlistTables));
 
-    var nodesDic = nodes.toObject(g=> g.tableName);
+    var nodesDic = allNodes.toObject(g=> g.tableName);
 
     map.relations.forEach(a=> {
         a.source = nodesDic[a.fromTable];
         a.target = nodesDic[a.toTable];
     });
 
-    var links = map.relations.map(a=> <IRelationInfo> a)
+    var allLinks = map.relations.map(a=> <IRelationInfo> a)
         .concat(map.tables.flatMap(t=> t.mlistTables.map(tm => <MListRelationInfo>{ source: t, target: tm, isMList: true })));
 
 
-    //nodes = nodes.filter((n, i) => n.namespace.contains("Notes"));
-
-    links = links.filter(l=>
-        nodes.indexOf(<ITableInfo>l.source) != -1 &&
-        nodes.indexOf(<ITableInfo>l.target) != -1);
 
     var fanIn = map.relations.groupByObject(a=> a.toTable);
-
-    
 
     var opacities = [1, .9, .8, .7, .6, .5, .4, .3, .25, .2, .15, .1, .07, .05, .03, .02];
 
@@ -152,12 +146,32 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         .linkStrength((d: IRelationInfo) => 0.7 * (d.isMList ? 1 : opacities[Math.min(fanIn[(<RelationInfo>d).toTable].length, opacities.length - 1)]))
         .size([width, height]);
 
-    force
-        .nodes(nodes)
-        .links(links)
-        .start();
+    var nodes: ITableInfo[]; 
+    var links: IRelationInfo[]; 
 
+    function restart() {
 
+        var val = (<string>filter.val()).toLowerCase();
+
+        nodes = allNodes.filter((n, i) => val == null ||
+            n.namespace.toLowerCase().contains(val) ||
+            n.tableName.toLowerCase().contains(val) ||
+            n.niceName.toLowerCase().contains(val));
+
+        links = allLinks.filter(l=>
+            nodes.indexOf(<ITableInfo>l.source) != -1 &&
+            nodes.indexOf(<ITableInfo>l.target) != -1);
+
+        force
+            .nodes(nodes)
+            .links(links)
+            .start();
+    }
+
+    restart();
+
+    
+    var selectedTable: ITableInfo;
 
     var svg = d3.select("#" + svgMapId)
         .attr("width", width)
@@ -168,12 +182,18 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         .data(links)
         .enter().append("line")
         .attr("class", "link")
-        .style("stroke-dasharray", d=> (<RelationInfo>d).lite ? "2, 2" : null)
-        .style("stroke-width", d => d.isMList ? 1.5 : 1)
+        .style("stroke-dasharray", d=> (<RelationInfo>d).lite ? "2, 2" : null)     
         .style("stroke", "black")
-        .style("opacity", d=> d.isMList ? 1 : Math.max(.1, opacities[Math.min(fanIn[(<RelationInfo>d).toTable].length, opacities.length - 1)]))
         .attr("marker-end", d  => "url(#" + (d.isMList ? "mlist_arrow" : (<RelationInfo>d).lite ? "lite_arrow" : "normal_arrow") + ")");
 
+
+    function selectedLinks() {
+        link.style("stroke-width", d => d.source == selectedTable || d.target == selectedTable ? 1.5 : d.isMList ? 1.5 : 1)
+            .style("opacity", d => d.source == selectedTable || d.target == selectedTable ? 1 : d.isMList ? 0.8 :
+                    Math.max(.1, opacities[Math.min(fanIn[(<RelationInfo>d).toTable].length, opacities.length - 1)]));
+    };
+
+    selectedLinks();
 
     var nodesG = svg.append("svg:g").attr("class", "nodes");
 
@@ -181,24 +201,41 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
     var nodeGroup = nodesG.selectAll(".nodeGroup")
         .data(nodes)
         .enter()
-        .append("svg:g").attr("class", "nodeGroup");
+        .append("svg:g").attr("class", "nodeGroup")
+        .style("cursor", d=> d.findUrl ? "pointer" : null)
+        .on("click", d=> {
+
+        selectedTable = selectedTable == d ? null : d;
+
+        selectedLinks();
+        selectedNode();
+
+        var event = d3.event;
+        if (event.defaultPrevented)
+            return;
+
+        if ((<any>event).ctrlKey && d.findUrl) {
+            window.open(d.findUrl);
+            d3.event.preventDefault();
+            return false;
+        }
+        }).call(force.drag);
 
     var node = nodeGroup.append("rect")
         .attr("class", d => "node " + EntityBaseType[d.entityBaseType])
         .attr("rx", n =>
-            n.entityBaseType == EntityBaseType.Entity ? 7 :
-            n.entityBaseType == EntityBaseType.Part ? 4 :
-            n.entityBaseType == EntityBaseType.SemiSymbol ? 5 :
-            n.entityBaseType == EntityBaseType.Symbol ? 4 :
-            n.entityBaseType == EntityBaseType.EnumEntity ? 3 : 0)
-        .call(force.drag);
+        n.entityBaseType == EntityBaseType.Entity ? 7 :
+        n.entityBaseType == EntityBaseType.Part ? 4 :
+        n.entityBaseType == EntityBaseType.SemiSymbol ? 5 :
+        n.entityBaseType == EntityBaseType.Symbol ? 4 :
+        n.entityBaseType == EntityBaseType.EnumEntity ? 3 : 0);
 
     var margin = 3;
 
     var label = nodeGroup.append("text")
-        .attr("class", d => "node " +  EntityBaseType[d.entityBaseType])
+        .attr("class", d => "node " + EntityBaseType[d.entityBaseType])
+        .style("cursor", d=> d.findUrl ? "pointer" : null)
         .text(d=> d.niceName)
-        .call(force.drag)
         .each(function (d) {
         wrap(this, 60);
         var b = this.getBBox();
@@ -209,6 +246,16 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
     node.attr("width", d=> d.width)
         .attr("height", d=> d.height);
 
+    function selectedNode() {
+        label.style("font-weight", d=> d == selectedTable ? "bold" : null);
+    }
+
+    filter.keypress(() => {
+        restart();
+
+        nodeGroup.style("display", n=> nodes.indexOf(n) == -1 ? "none" : "inline");
+        link.style("display", r=> links.indexOf(r) == -1 ? "none" : "inline");
+    });
 
     label.attr("transform", d=> "translate(" + d.width / 2 + ", 0)");
 
@@ -240,7 +287,6 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         });
 
         namespaceClustering();
-        //upDown();
         gravity();
 
         nodes.forEach(d=> {
@@ -316,23 +362,16 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         });
     }
 
-    function upDown() {
-
-        links.forEach(link=> {
-
-            var dy = link.target.y - link.source.y;
-
-            if (dy < 50) {
-                var f = 10 * force.alpha();
-                (<ITableInfo> link.target).ny -= f;
-                (<ITableInfo> link.source).ny += f;
-            }
-        });
-    }
-
     function namespaceClustering() {
 
         var quadtree = d3.geom.quadtree(nodes, width, height);
+
+        var constant =
+            nodes.length < 10 ? 100 :
+            nodes.length < 20 ? 50 :
+            nodes.length < 50 ? 30 :
+            nodes.length < 100 ? 20 :
+            nodes.length < 200 ? 15 :10;
 
         nodes.forEach(d=> {
             quadtree.visit((quad: { point: ITableInfo }, x1: number, y1: number, x2: number, y2: number) => {
@@ -348,7 +387,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
                     var ratio = l / 30;
 
-                    var f = 15 * force.alpha() / Math.max(ratio * ratio, 0.1);
+                    var f = constant * force.alpha() / Math.max(ratio * ratio, 0.1);
 
                     if (d.namespace != quad.point.namespace)
                         f *= 4;

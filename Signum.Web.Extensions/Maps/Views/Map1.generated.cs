@@ -39,6 +39,12 @@ namespace ASP
     #line default
     #line hidden
     using Signum.Entities;
+    
+    #line 4 "..\..\Maps\Views\Map.cshtml"
+    using Signum.Entities.Map;
+    
+    #line default
+    #line hidden
     using Signum.Utilities;
     using Signum.Web;
     
@@ -58,7 +64,7 @@ namespace ASP
         public override void Execute()
         {
             
-            #line 5 "..\..\Maps\Views\Map.cshtml"
+            #line 6 "..\..\Maps\Views\Map.cshtml"
 Write(Html.ScriptCss("~/Maps/Content/map.css"));
 
             
@@ -67,7 +73,7 @@ Write(Html.ScriptCss("~/Maps/Content/map.css"));
 WriteLiteral("\r\n");
 
             
-            #line 6 "..\..\Maps\Views\Map.cshtml"
+            #line 7 "..\..\Maps\Views\Map.cshtml"
    var colorProviders = (List<MapColorProvider>)ViewData["colorProviders"]; 
             
             #line default
@@ -86,7 +92,16 @@ WriteLiteral(">\r\n        <label");
 
 WriteLiteral(" for=\"filter\"");
 
-WriteLiteral(">Filter By</label>\r\n        <input");
+WriteLiteral(">");
+
+            
+            #line 11 "..\..\Maps\Views\Map.cshtml"
+                       Write(MapMessage.Filter.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</label>\r\n        <input");
 
 WriteLiteral(" type=\"text\"");
 
@@ -106,7 +121,16 @@ WriteLiteral(">\r\n        <label");
 
 WriteLiteral(" for=\"color\"");
 
-WriteLiteral(">Color</label>\r\n        <select");
+WriteLiteral(">");
+
+            
+            #line 15 "..\..\Maps\Views\Map.cshtml"
+                      Write(MapMessage.Color.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</label>\r\n        <select");
 
 WriteLiteral(" class=\"form-control\"");
 
@@ -115,13 +139,13 @@ WriteLiteral(" id=\"color\"");
 WriteLiteral(">\r\n");
 
             
-            #line 16 "..\..\Maps\Views\Map.cshtml"
+            #line 17 "..\..\Maps\Views\Map.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 16 "..\..\Maps\Views\Map.cshtml"
+            #line 17 "..\..\Maps\Views\Map.cshtml"
              foreach(var cp in colorProviders)
             {
 
@@ -130,20 +154,20 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("                <option");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 706), Tuple.Create("\"", 722)
+WriteAttribute("value", Tuple.Create(" value=\"", 786), Tuple.Create("\"", 802)
             
-            #line 18 "..\..\Maps\Views\Map.cshtml"
-, Tuple.Create(Tuple.Create("", 714), Tuple.Create<System.Object, System.Int32>(cp.Name
+            #line 19 "..\..\Maps\Views\Map.cshtml"
+, Tuple.Create(Tuple.Create("", 794), Tuple.Create<System.Object, System.Int32>(cp.Name
             
             #line default
             #line hidden
-, 714), false)
+, 794), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 18 "..\..\Maps\Views\Map.cshtml"
+            #line 19 "..\..\Maps\Views\Map.cshtml"
                                     Write(cp.NiceName);
 
             
@@ -152,13 +176,28 @@ WriteLiteral(">");
 WriteLiteral("</option>\r\n");
 
             
-            #line 19 "..\..\Maps\Views\Map.cshtml"
+            #line 20 "..\..\Maps\Views\Map.cshtml"
             }
 
             
             #line default
             #line hidden
-WriteLiteral("        </select>\r\n    </div>\r\n</div>\r\n\r\n<div");
+WriteLiteral("        </select>\r\n    </div>\r\n    <span");
+
+WriteLiteral(" style=\"margin-left: 10px;\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("        ");
+
+            
+            #line 24 "..\..\Maps\Views\Map.cshtml"
+   Write(MapMessage.Press0ToExploreEachTable.NiceToString().FormatHtml(new HtmlTag("u").SetInnerText("Ctrl + Click")));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n    </span>\r\n</div>\r\n\r\n<div");
 
 WriteLiteral(" id=\"map\"");
 
@@ -228,20 +267,20 @@ WriteLiteral(" orient=\"auto\"");
 
 WriteLiteral(">\r\n                <path");
 
-WriteLiteral(" fill=\"black\"");
+WriteLiteral(" fill=\"gray\"");
 
 WriteLiteral(" d=\"M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0\"");
 
 WriteLiteral(" />\r\n            </marker>  \r\n            \r\n");
 
             
-            #line 41 "..\..\Maps\Views\Map.cshtml"
+            #line 45 "..\..\Maps\Views\Map.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 41 "..\..\Maps\Views\Map.cshtml"
+            #line 45 "..\..\Maps\Views\Map.cshtml"
              foreach(var cp in colorProviders.Where(c=>c.Defs != null))
             {
                 
@@ -249,14 +288,14 @@ WriteLiteral(" />\r\n            </marker>  \r\n            \r\n");
             #line default
             #line hidden
             
-            #line 43 "..\..\Maps\Views\Map.cshtml"
+            #line 47 "..\..\Maps\Views\Map.cshtml"
            Write(cp.Defs);
 
             
             #line default
             #line hidden
             
-            #line 43 "..\..\Maps\Views\Map.cshtml"
+            #line 47 "..\..\Maps\Views\Map.cshtml"
                         ;
             } 
 
@@ -268,13 +307,13 @@ WriteLiteral("        </defs>\r\n    </svg>\r\n</div>\r\n<script>\r\n    functio
 ") {\r\n");
 
             
-            #line 52 "..\..\Maps\Views\Map.cshtml"
+            #line 56 "..\..\Maps\Views\Map.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 52 "..\..\Maps\Views\Map.cshtml"
+            #line 56 "..\..\Maps\Views\Map.cshtml"
                  foreach (var cp in colorProviders)
                 {
 
@@ -286,7 +325,7 @@ WriteLiteral("                    ");
 WriteLiteral("case \"");
 
             
-            #line 54 "..\..\Maps\Views\Map.cshtml"
+            #line 58 "..\..\Maps\Views\Map.cshtml"
                            Write(cp.Name);
 
             
@@ -295,7 +334,7 @@ WriteLiteral("case \"");
 WriteLiteral("\": \r\n                    require([\'");
 
             
-            #line 55 "..\..\Maps\Views\Map.cshtml"
+            #line 59 "..\..\Maps\Views\Map.cshtml"
                          Write(cp.GetJsProvider.Module);
 
             
@@ -304,7 +343,7 @@ WriteLiteral("\": \r\n                    require([\'");
 WriteLiteral("\'], function(mod) { \r\n                        resolve(mod.");
 
             
-            #line 56 "..\..\Maps\Views\Map.cshtml"
+            #line 60 "..\..\Maps\Views\Map.cshtml"
                                 Write(cp.GetJsProvider.FunctionName);
 
             
@@ -313,7 +352,7 @@ WriteLiteral("\'], function(mod) { \r\n                        resolve(mod.");
 WriteLiteral("(");
 
             
-            #line 56 "..\..\Maps\Views\Map.cshtml"
+            #line 60 "..\..\Maps\Views\Map.cshtml"
                                                                 Write(Html.Raw(cp.GetJsProvider.Arguments.ToString(a=>a == MapClient.NodesConstant ? "nodes" : 
                                                              JsonConvert.SerializeObject(a, cp.GetJsProvider.JsonSerializerSettings),", ")));
 
@@ -325,7 +364,7 @@ WriteLiteral(")) \r\n                    }); break\r\n                    ");
 WriteLiteral("\r\n");
 
             
-            #line 60 "..\..\Maps\Views\Map.cshtml"
+            #line 64 "..\..\Maps\Views\Map.cshtml"
                 }
 
             
@@ -336,7 +375,7 @@ WriteLiteral("            }\r\n        });\r\n    }\r\n\r\n\r\n");
 WriteLiteral("    ");
 
             
-            #line 66 "..\..\Maps\Views\Map.cshtml"
+            #line 70 "..\..\Maps\Views\Map.cshtml"
 Write(MapClient.Module["createMap"]("map", "svgMap", "filter", "color", Model, "getProvider"));
 
             

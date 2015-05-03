@@ -1,17 +1,18 @@
 ﻿@using Signum.Web.Maps;
 @using System.Reflection;
 @using Newtonsoft.Json;
+@using Signum.Entities.Map;
 @model MapInfo
 @Html.ScriptCss("~/Maps/Content/map.css")
 @{ var colorProviders = (List<MapColorProvider>)ViewData["colorProviders"]; }
 
 <div class="form-inline form-sm container" style="margin-top: 10px;">
     <div class="form-group">
-        <label for="filter">Filter By</label>
+        <label for="filter">@MapMessage.Filter.NiceToString()</label>
         <input type="text" class="form-control" id="filter" placeholder="type or namespace">
     </div>
     <div class="form-group" style="margin-left: 10px;">
-        <label for="color">Color</label>
+        <label for="color">@MapMessage.Color.NiceToString()</label>
         <select class="form-control" id="color">
             @foreach(var cp in colorProviders)
             {
@@ -19,6 +20,9 @@
             }
         </select>
     </div>
+    <span style="margin-left: 10px;">
+        @MapMessage.Press0ToExploreEachTable.NiceToString().FormatHtml(new HtmlTag("u").SetInnerText("Ctrl + Click"))
+    </span>
 </div>
 
 <div id="map">
@@ -35,7 +39,7 @@
             </marker>    
 
             <marker id="mlist_arrow" viewBox="-10 -5 20 10" refX="10" refY="0" markerWidth="10" markerHeight="20" orient="auto">
-                <path fill="black" d="M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" />
+                <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" />
             </marker>  
             
             @foreach(var cp in colorProviders.Where(c=>c.Defs != null))

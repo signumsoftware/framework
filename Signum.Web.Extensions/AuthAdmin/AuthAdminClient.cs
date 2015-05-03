@@ -186,7 +186,7 @@ namespace Signum.Web.AuthAdmin
             return roleRules.Keys.Select((r, i) => new MapColorProvider
             {
                 Name = "role-" + r.Key(),
-                NiceName = "Role " + r.ToString(),
+                NiceName = "Role - " + r.ToString(),
                 GetJsProvider = ColorModule["authAdminColor"](MapClient.NodesConstant, "role-" + r.Key()),
                 AddExtra = t =>
                 {
@@ -209,6 +209,9 @@ namespace Signum.Web.AuthAdmin
         {
             if (typeAllowed == null)
                 return "MERGE ERROR!";
+
+            if (typeAllowed.Value.GetDB() == typeAllowed.Value.GetUI())
+                return typeAllowed.Value.GetDB().NiceToString();
 
             return "DB {0} / UI {1}".FormatWith(typeAllowed.Value.GetDB().NiceToString(), typeAllowed.Value.GetUI().NiceToString()); 
         }
