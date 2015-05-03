@@ -68,7 +68,7 @@ namespace Signum.Entities.Mailing
         }
 
         int readTimeout = 60000;
-        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, -1), Unit("ms")]
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, -1), Unit("ms")]
         public int ReadTimeout
         {
             get { return readTimeout; }
