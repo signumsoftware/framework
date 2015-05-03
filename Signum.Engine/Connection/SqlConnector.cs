@@ -611,7 +611,7 @@ deallocate cur";
 
         public static SqlPreCommand RemoveAllScript(DatabaseName databaseName)
         {
-            var schemas = SqlBuilder.StandartSchemas.ToString(a => "'" + a + "'", ", ");
+            var schemas = SqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
 
             return SqlPreCommand.Combine(Spacing.Double,
                 new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),

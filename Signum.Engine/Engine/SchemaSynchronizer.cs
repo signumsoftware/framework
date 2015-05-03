@@ -16,15 +16,17 @@ namespace Signum.Engine
 {
     public static class SchemaSynchronizer
     {
+        public static Func<SchemaName, bool> DropSchema = s => !s.Name.Contains(@"\"); 
+
         public static SqlPreCommand SynchronizeSchemasScript(Replacements replacements)
         {
-            HashSet<SchemaName> model = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).ToHashSet();
+            HashSet<SchemaName> model = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
             HashSet<SchemaName> database = new HashSet<SchemaName>();
-            foreach (var db in model.Select(a => a.Database).Distinct())
+            foreach (var db in Schema.Current.DatabaseNames())
             {
                 using (Administrator.OverrideDatabaseInSysViews(db))
                 {
-                    var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(SqlBuilder.StandartSchemas);
+                    var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(SqlBuilder.SystemSchemas);
 
                     database.AddRange(schemaNames.Select(sn => new SchemaName(db, sn)));
                 }
@@ -35,8 +37,8 @@ namespace Signum.Engine
                     model.ToDictionary(a => a.ToString()),
                     database.ToDictionary(a => a.ToString()),
                     (_, newSN) => SqlBuilder.CreateSchema(newSN),
-                    (_, oldSN) => SqlBuilder.DropSchema(oldSN),
-                    (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : 
+                    (_, oldSN) => DropSchema(oldSN) ? SqlBuilder.DropSchema(oldSN) :  null,
+                    (_, newSN, oldSN) => newSN.Equals(oldSN) ? null :
                         SqlPreCommand.Combine(Spacing.Simple, SqlBuilder.DropSchema(oldSN), SqlBuilder.CreateSchema(newSN)),
                     Spacing.Double);
         }
