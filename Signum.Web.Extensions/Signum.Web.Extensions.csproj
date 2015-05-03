@@ -128,11 +128,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Alerts\Views\Web.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Web.config</DependentUpon>
-    </Compile>
     <Compile Include="Alerts\Views\_ViewStart.generated.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -640,11 +635,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Note.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Notes\Views\Web.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Web.config</DependentUpon>
-    </Compile>
     <Compile Include="Notes\Views\_ViewStart.generated.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -927,11 +917,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>View.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Translation\Views\Web.generated.cs">
-      <DependentUpon>Web.config</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Translation\Views\_ViewStart.generated.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -1051,10 +1036,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>AlertType.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Alerts\Views\Web.config">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Web.generated.cs</LastGenOutput>
-    </Content>
+    <Content Include="Alerts\Views\Web.config" />
     <None Include="AuthAdmin\Views\Operations.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Operations.generated.cs</LastGenOutput>
@@ -1360,10 +1342,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ChartResultsTable1.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Notes\Views\Web.config">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Web.generated.cs</LastGenOutput>
-    </Content>
+    <Content Include="Notes\Views\Web.config" />
     <Content Include="Notes\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1719,10 +1698,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>MultipleSMS.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Translation\Views\Web.config">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Web.generated.cs</LastGenOutput>
-    </Content>
+    <Content Include="Translation\Views\Web.config" />
     <Content Include="Translation\Views\Index.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Index.generated.cs</LastGenOutput>
