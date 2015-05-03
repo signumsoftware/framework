@@ -1019,6 +1019,9 @@
     <EmbeddedResource Include="Isolation\Scripts\IsolationColors.js">
       <DependentUpon>IsolationColors.ts</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="AuthAdmin\Scripts\AuthAdminColors.js">
+      <DependentUpon>AuthAdminColors.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Maps\Content\map.css" />
     <Content Include="Word\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1093,6 +1096,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>User.generated.cs</LastGenOutput>
     </None>
+    <TypeScriptCompile Include="AuthAdmin\Scripts\AuthAdminColors.ts" />
     <TypeScriptCompile Include="Auth\Scripts\Auth.ts" />
     <EmbeddedResource Include="Auth\Scripts\Auth.js">
       <DependentUpon>Auth.ts</DependentUpon>
