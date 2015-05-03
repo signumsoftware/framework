@@ -228,7 +228,7 @@ WriteLiteral(" d=\"M0,0L0,-5L10,0L0,5L0,0\"");
 
 WriteLiteral(" />\r\n            </marker>    \r\n\r\n            <marker");
 
-WriteLiteral(" id=\"normal_lite\"");
+WriteLiteral(" id=\"lite_arrow\"");
 
 WriteLiteral(" viewBox=\"0 -5 10 10\"");
 
@@ -250,7 +250,7 @@ WriteLiteral(" d=\"M5,0L0,-5L10,0L0,5L5,0\"");
 
 WriteLiteral(" />\r\n            </marker>    \r\n\r\n            <marker");
 
-WriteLiteral(" id=\"normal_lite\"");
+WriteLiteral(" id=\"mlist_arrow\"");
 
 WriteLiteral(" viewBox=\"0 -5 10 10\"");
 
