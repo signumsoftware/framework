@@ -24,12 +24,12 @@ module SF {
         }
     }
 
-    var ajaxExtraParameters: {(extraArgs : FormObject) : void } [] = [];
-    export function registerAjaxExtraParameters(getExtraParams: (extraArgs : FormObject) => void) {
+    var ajaxExtraParameters: { (extraArgs: FormObject): void }[] = [];
+    export function registerAjaxExtraParameters(getExtraParams: (extraArgs: FormObject) => void) {
         if (getExtraParams != null)
             ajaxExtraParameters.push(getExtraParams);
     }
-    export function addAjaxExtraParameters(originalParams : FormObject) {
+    export function addAjaxExtraParameters(originalParams: FormObject) {
         if (ajaxExtraParameters.length > 0) {
             ajaxExtraParameters.forEach(addExtraParametersFunc => {
                 addExtraParametersFunc(originalParams);
@@ -37,7 +37,7 @@ module SF {
         }
     }
 
-    once("setupAjaxRedirectPrefilter", () => {
+    once("setupAjaxRedirectPrefilter",() => {
         setupAjaxRedirect();
         setupAjaxExtraParameters();
     });
@@ -55,7 +55,7 @@ module SF {
 
     function setupAjaxRedirect() {
 
-        $.ajaxPrefilter(function (options : JQueryAjaxSettings, originalOptions : JQueryAjaxSettings, jqXHR : JQueryXHR) {
+        $.ajaxPrefilter(function (options: JQueryAjaxSettings, originalOptions: JQueryAjaxSettings, jqXHR: JQueryXHR) {
 
             var originalSuccess = options.success;
 
@@ -208,7 +208,7 @@ module SF {
             Promise.resolve<void>(null));
     }
 
-   export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) : void {
+    export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery): void {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData))
@@ -249,7 +249,7 @@ module SF {
         }
 
         $("body").after($form);
-        
+
         (<HTMLFormElement>$form[0]).submit();
         $form.remove();
 
@@ -285,7 +285,7 @@ interface FormObject {
     [formKey: string]: any
 }
 
-once("serializeObject", () => {
+once("serializeObject",() => {
     $.fn.serializeObject = function () {
         var o = {};
         var a = this.serializeArray();
@@ -305,12 +305,15 @@ interface Array<T> {
     groupByObject(keySelector: (element: T) => string): { [key: string]: T[] };
     orderBy<V>(keySelector: (element: T) => V): T[];
     orderByDescending<V>(keySelector: (element: T) => V): T[];
-    toObject(keySelector: (element: T) => string): { [key: string]: T[] };
-    toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T[] };
+    toObject(keySelector: (element: T) => string): { [key: string]: T };
+    toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T };
+    flatMap<R>(selector: (element: T) => R[]): R[];
+    max(): T;
+    min(): T;
 }
 
-once("arrayExtensions", () => {
-    Array.prototype.groupByArray = function (keySelector: (element: any) => string): { key: string; elements: any[] }[]{
+once("arrayExtensions",() => {
+    Array.prototype.groupByArray = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
         var result: { key: string; elements: any[] }[] = [];
         var objectGrouped = this.groupByObject(keySelector);
         for (var prop in objectGrouped) {
@@ -362,16 +365,16 @@ once("arrayExtensions", () => {
     };
 
     Array.prototype.toObject = function (keySelector: (element: any) => any): any {
-        var obj = {}; 
+        var obj = {};
 
         (<Array<any>>this).forEach(item=> {
             var key = keySelector(item);
 
             if (obj[key])
-                throw new Error("Repeated key {0}".format(key)); 
+                throw new Error("Repeated key {0}".format(key));
 
             obj[key] = item;
-        }); 
+        });
 
         return obj;
     };
@@ -386,6 +389,26 @@ once("arrayExtensions", () => {
         });
 
         return obj;
+    };
+
+    Array.prototype.flatMap = function (selector: (element: any) => any[]): any {
+
+        var array = [];
+
+        (<Array<any>>this).forEach(item=>
+            selector(item).forEach(item2 =>
+                array.push(item2)
+                ));
+
+        return array;
+    };
+
+    Array.prototype.max = function () {
+        return Math.max.apply(null, this);
+    };
+
+    Array.prototype.min = function () {
+        return Math.min.apply(null, this);
     };
 });
 
@@ -417,7 +440,7 @@ interface String {
     tryGetChild(pathPart: string): JQuery;
 }
 
-once("stringExtensions", () => {
+once("stringExtensions",() => {
     String.prototype.hasText = function () {
         return (this == null || this == undefined || this == '') ? false : true;
     }
@@ -553,7 +576,7 @@ once("stringExtensions", () => {
     String.prototype.parent = function (pathPart) {
 
         if (SF.isEmpty(this))
-            throw new Error("impossible to pop the empty string"); 
+            throw new Error("impossible to pop the empty string");
 
         if (SF.isEmpty(pathPart)) {
             var index = this.lastIndexOf("_");
@@ -563,15 +586,14 @@ once("stringExtensions", () => {
 
             return this.substr(0, index);
         }
-        else
-        {
+        else {
             if (this == pathPart)
                 return "";
 
-            var index = this.lastIndexOf("_" + pathPart); 
+            var index = this.lastIndexOf("_" + pathPart);
 
             if (index != -1)
-                return this.substr(0, index); 
+                return this.substr(0, index);
 
             if (pathPart.startsWith(pathPart + "_"))
                 return "";
@@ -583,11 +605,11 @@ once("stringExtensions", () => {
     String.prototype.get = function (context) {
 
         if (SF.isEmpty(this))
-            throw new Error("Impossible to call 'get' on the empty string"); 
+            throw new Error("Impossible to call 'get' on the empty string");
 
         var selector = "[id='" + this + "']";
 
-        var result = $(selector, context); 
+        var result = $(selector, context);
 
         if (result.length == 0 && context)
             result = $(context).filter(selector);
@@ -627,42 +649,42 @@ interface Date {
     addHour(inc: number): Date;
     addDate(inc: number): Date;
     addMonth(inc: number): Date;
-    addYear(inc: number) : Date;
+    addYear(inc: number): Date;
 }
 
-once("dateExtensions", () => {
+once("dateExtensions",() => {
 
-    Date.prototype.addMiliseconds = function(inc: number) {
+    Date.prototype.addMiliseconds = function (inc: number) {
         var n = new Date(this.valueOf());
         n.setMilliseconds(this.getMilliseconds() + inc);
         return n;
     };
 
-    Date.prototype.addSecond = function(inc: number) {
+    Date.prototype.addSecond = function (inc: number) {
         var n = new Date(this.valueOf());
         n.setSeconds(this.getSeconds() + inc);
         return n;
     };
 
-    Date.prototype.addMinutes = function(inc: number) {
+    Date.prototype.addMinutes = function (inc: number) {
         var n = new Date(this.valueOf());
         n.setMinutes(this.getMinutes() + inc);
         return n;
     };
 
-    Date.prototype.addHour = function(inc: number) {
+    Date.prototype.addHour = function (inc: number) {
         var n = new Date(this.valueOf());
         n.setHours(this.getHours() + inc);
         return n;
     };
 
-    Date.prototype.addDate = function(inc: number) {
+    Date.prototype.addDate = function (inc: number) {
         var n = new Date(this.valueOf());
         n.setDate(this.getDate() + inc);
         return n;
     };
 
-    Date.prototype.addMonth = function(inc: number) {
+    Date.prototype.addMonth = function (inc: number) {
         var n = new Date(this.valueOf());
         n.setMonth(this.getMonth() + inc);
         return n;
@@ -673,7 +695,7 @@ once("dateExtensions", () => {
         n.setFullYear(this.getFullYear() + inc);
         return n;
     };
-}); 
+});
 
 interface Window {
     File: any;
