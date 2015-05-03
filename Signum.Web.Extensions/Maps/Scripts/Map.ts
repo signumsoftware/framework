@@ -162,20 +162,6 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         .attr("height", height);
 
 
-    //var defs = svg.append("svg:defs");
-
-    //defs.selectAll("marker").data(["normal", "lite", "mlist"]).enter().append("svg:marker").attr("id", a=> a + "_arrow")
-    //    .attr("viewBox", a=> a == "mlist" ? "-10 -5 20 10" : "0 -5 10 10")
-    //    .attr("refX", 10).attr("refY", 0)
-    //    .attr("markerWidth", 10).attr("markerHeight", a => a == "mlist" ? 20 : 10)
-    //    .attr("orient", "auto")
-    //    .append("path")
-    //    .attr("fill", a=> a == "mlist" ? "black" : "gray")
-    //    .attr("d", a=> a == "normal" ? "M0,0L0,-5L10,0L0,5L0,0" :
-    //    a == "lite" ? "M5,0L0,-5L10,0L0,5L5,0" :
-    //        a == "mlist" ? "M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" : null);
-
-
     var link = svg.append("svg:g").attr("class", "links").selectAll(".link")
         .data(links)
         .enter().append("line")

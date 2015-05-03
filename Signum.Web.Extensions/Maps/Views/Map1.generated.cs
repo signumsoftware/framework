@@ -252,7 +252,7 @@ WriteLiteral(" />\r\n            </marker>    \r\n\r\n            <marker");
 
 WriteLiteral(" id=\"mlist_arrow\"");
 
-WriteLiteral(" viewBox=\"0 -5 10 10\"");
+WriteLiteral(" viewBox=\"-10 -5 20 10\"");
 
 WriteLiteral(" refX=\"10\"");
 
@@ -260,13 +260,13 @@ WriteLiteral(" refY=\"0\"");
 
 WriteLiteral(" markerWidth=\"10\"");
 
-WriteLiteral(" markerHeight=\"10\"");
+WriteLiteral(" markerHeight=\"20\"");
 
 WriteLiteral(" orient=\"auto\"");
 
 WriteLiteral(">\r\n                <path");
 
-WriteLiteral(" fill=\"gray\"");
+WriteLiteral(" fill=\"black\"");
 
 WriteLiteral(" d=\"M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0\"");
 
