@@ -10,7 +10,7 @@ export function cacheColors(nodes: Map.ITableInfo[], title: string, key: string)
     var color = Map.colorScale(max);
 
     return {
-        getColor: t => t.extra["cache-semi"] == undefined ? "lightgray" : <any>color(t.extra[key]),
+        getFill: t => t.extra["cache-semi"] == undefined ? "lightgray" : <any>color(t.extra[key]),
         getMask: t => t.extra["cache-semi"] == undefined ? null :
             t.extra["cache-semi"] ? "url(#mask-stripe)" : null,
         getTooltip: t => t.extra["cache-semi"] == undefined ? "NO Cached" : 

@@ -6,7 +6,7 @@ import Map = require("Extensions/Signum.Web.Extensions/Maps/Scripts/Map")
 export function isolationColors(nodes: Map.ITableInfo[]): Map.ColorProvider {
 
     return {
-        getColor: t => t.extra["isolation"] == null ? "white" :
+        getFill: t => t.extra["isolation"] == null ? "white" :
             t.extra["isolation"] == "Isolated" ? "#CC0099" :
             t.extra["isolation"] == "Optional" ? "#9966FF" :
             t.extra["isolation"] == "None" ? "#00CCFF" : "black",

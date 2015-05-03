@@ -8,7 +8,7 @@ export function namespace(nodes: Map.ITableInfo[]): Map.ColorProvider {
     var color = d3.scale.category20();
 
     return {
-        getColor: t => color(t.namespace),
+        getFill: t => color(t.namespace),
         getTooltip: t => t.namespace
     };
 }
@@ -19,7 +19,7 @@ export function tableSize(nodes: Map.ITableInfo[]): Map.ColorProvider {
     var color = Map.colorScale(nodes.map(a=> a.total_size_kb).max());
 
     return {
-        getColor:t => <any> color(t.total_size_kb),
+        getFill:t => <any> color(t.total_size_kb),
         getTooltip: t => t.total_size_kb + " KB"
     };
 }
@@ -30,7 +30,7 @@ export function rows(nodes: Map.ITableInfo[], rowsText: string): Map.ColorProvid
     var color = Map.colorScale(nodes.map(a=> a.rows).max());
 
     return {
-        getColor: t => <any>color(t.rows),
+        getFill: t => <any>color(t.rows),
         getTooltip: t => t.rows + " " + rowsText
     };
 }
@@ -40,7 +40,7 @@ export function columns(nodes: Map.ITableInfo[], columnsText: string): Map.Color
     var color = Map.colorScale(nodes.map(a=> a.columns).max());
 
     return {
-        getColor: t => <any>color(t.columns),
+        getFill: t => <any>color(t.columns),
         getTooltip: t => t.columns + " " + columnsText
     };
 }
@@ -59,7 +59,7 @@ export function entityKind(nodes: Map.ITableInfo[]): Map.ColorProvider {
     f[Map.EntityKind.SharedPart] = "#bcbd22";
 
     return {
-        getColor: t=> f[t.entityKind],
+        getFill: t=> f[t.entityKind],
         getTooltip: t => Map.EntityKind[t.entityKind]
     };
 }
@@ -67,7 +67,7 @@ export function entityKind(nodes: Map.ITableInfo[]): Map.ColorProvider {
 
 export function entityData(nodes: Map.ITableInfo[]): Map.ColorProvider{
     return {
-        getColor: t =>
+        getFill: t =>
             t.entityData == Map.EntityData.Master ? "#2ca02c" :
                 t.entityData == Map.EntityData.Transactional ? "#d62728" : "black",
         getTooltip: t => Map.EntityData[t.entityData]

@@ -11,7 +11,8 @@ export interface TableInfo extends ITableInfo {
 }
 
 export interface ColorProvider {
-    getColor: (t: ITableInfo) => string;
+    getFill: (t: ITableInfo) => string;
+    getStroke?: (t: ITableInfo) => string;
     getTooltip: (t: ITableInfo) => string;
     getMask?: (t: ITableInfo) => string;
 }
@@ -218,8 +219,8 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         var colorVal = colorCombo.val();
 
         getProvider(colorVal, nodes).then(cp=> {
-            node.style("fill", cp.getColor)
-                .style("stroke", cp.getColor)
+            node.style("fill", cp.getFill)
+                .style("stroke", cp.getStroke || cp.getFill)
                 .style("mask", cp.getMask);
 
             titles.text(t => cp.getTooltip(t) + " (" + EntityBaseType[t.entityBaseType] + ")");
