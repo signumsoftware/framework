@@ -600,7 +600,7 @@ namespace Signum.Engine.Maps
             Type elementType = route.Type.ElementType();
 
             if (table.Ticks == null)
-                throw new InvalidOperationException("Type '{0}' has field '{1}' but does not Ticks. MList require concurrency control.".FormatWith(route.Parent.Type.TypeName(), route.FieldInfo.FieldName()));
+                throw new InvalidOperationException("Type '{0}' has field '{1}' but does not Ticks. MList requires concurrency control.".FormatWith(route.Parent.Type.TypeName(), route.FieldInfo.FieldName()));
 
             var orderAttr = Settings.FieldAttribute<PreserveOrderAttribute>(route);
 

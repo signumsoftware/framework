@@ -662,6 +662,7 @@ namespace Signum.Engine.Maps
         public bool IsNullable { get; set; }
         public bool IsCollection { get; set; }
         public bool IsEnum { get; set; }
+        public bool IsImplementedByAll { get; set; }
     }
 
   
