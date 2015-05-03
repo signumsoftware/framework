@@ -101,6 +101,9 @@ namespace Signum.Web.Maps
             if (typeof(SemiSymbol).IsAssignableFrom(type))
                 return EntityBaseType.SemiSymbol;
 
+            if (EntityKindCache.GetEntityKind(type) == EntityKind.Part)
+                return EntityBaseType.Part;
+
             return EntityBaseType.Entity;
         }
 
@@ -154,7 +157,9 @@ namespace Signum.Web.Maps
         EnumEntity,
         Symbol,
         SemiSymbol,
-        Entity
+        Entity,
+        MList,
+        Part,
     }
 
     public class MListTableInfo

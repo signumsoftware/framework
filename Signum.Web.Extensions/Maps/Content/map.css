@@ -11,6 +11,12 @@ rect.node.Entity {
     fill-opacity: .6;
 }
 
+rect.node.Part {
+    stroke-width: 1px;
+    stroke-opacity: .7;
+    fill-opacity: .3;
+}
+
 rect.node.SemiSymbol {
     stroke-opacity: 0.9;
     fill-opacity: .5;
@@ -39,6 +45,10 @@ text.node{
 
 text.node.Entity {
     font-size: 12px;
+}
+
+text.node.Part {
+    font-size: 10px;
 }
 
 text.node.SemiSymbol {

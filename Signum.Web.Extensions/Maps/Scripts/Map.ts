@@ -38,6 +38,7 @@ export enum EntityBaseType {
     SemiSymbol = 2,
     Entity = 3,
     MList = 4,
+    Part = 5,
 }
 
 export interface MListTableInfo extends ITableInfo {
@@ -185,13 +186,11 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         .attr("class", d => "node " + EntityBaseType[d.entityBaseType])
         .attr("rx", n =>
             n.entityBaseType == EntityBaseType.Entity ? 7 :
+            n.entityBaseType == EntityBaseType.Part ? 4 :
             n.entityBaseType == EntityBaseType.SemiSymbol ? 5 :
             n.entityBaseType == EntityBaseType.Symbol ? 4 :
             n.entityBaseType == EntityBaseType.EnumEntity ? 3 : 0)
         .call(force.drag);
-
-   
-
 
     var margin = 3;
 
@@ -220,7 +219,8 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
         getProvider(colorVal, nodes).then(cp=> {
             node.style("fill", cp.getColor)
-                .style("stroke", cp.getColor);
+                .style("stroke", cp.getColor)
+                .style("mask", cp.getMask);
 
             titles.text(t => cp.getTooltip(t) + " (" + EntityBaseType[t.entityBaseType] + ")");
         });
