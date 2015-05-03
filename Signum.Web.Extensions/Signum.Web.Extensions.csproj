@@ -1013,6 +1013,9 @@
     <EmbeddedResource Include="Cache\Scripts\CacheColors.js">
       <DependentUpon>CacheColors.ts</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Disconnected\Scripts\DisconnectedColors.js">
+      <DependentUpon>DisconnectedColors.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Maps\Content\map.css" />
     <Content Include="Word\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1164,6 +1167,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
+    <TypeScriptCompile Include="Disconnected\Scripts\DisconnectedColors.ts" />
     <TypeScriptCompile Include="Isolation\Scripts\Isolation.ts" />
     <EmbeddedResource Include="Excel\Scripts\Excel.js">
       <DependentUpon>Excel.ts</DependentUpon>
