@@ -81,7 +81,7 @@ Validators for string propertties
 Validators for numeric properties (`int`, `long`, `decimal`, `float`, `double`, etc..) 
 
 ```C#
-[NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
+[NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
 [NumberBetweenValidator(0,10)] //Not using C intervals to please user, so 10 is a valid number as well. 
 [DecimalsValidator(3)] // Numbers should not have more than 3 decimal places, default is 2. Works only with decimal. 
 ```
@@ -91,7 +91,7 @@ Validators for numeric properties (`int`, `long`, `decimal`, `float`, `double`, 
 Validators for `MList<T>` properties
 
 ```C#
-[CountIsValidator(ComparisonType.GreaterThanOrEqual, 3)]  //Limit the number of elements
+[CountIsValidator(ComparisonType.GreaterThanOrEqualTo, 3)]  //Limit the number of elements
 [NoRepeatValidator] //Avoid repeated elements in a MList  
 ```
 
