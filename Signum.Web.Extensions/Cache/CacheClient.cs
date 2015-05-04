@@ -70,11 +70,13 @@ namespace Signum.Web.Cache
                             var isSemi = semiNames.Contains(t.tableName);
                             t.extra["cache-semi"] = isSemi;
                             foreach (var mt in t.mlistTables)
-                                mt.extra["cache-semi"] = isSemi;
+                                if (groups.ContainsKey(mt.tableName))
+                                    mt.extra["cache-semi"] = isSemi;
 
                             t.extra["cache-rows"] = groups[t.tableName].Sum(a => a.Count);
                             foreach (var mt in t.mlistTables)
-                                mt.extra["cache-rows"] = groups[mt.tableName].Sum(a => a.Count);
+                                if (groups.ContainsKey(mt.tableName))
+                                    mt.extra["cache-rows"] = groups[mt.tableName].Sum(a => a.Count);
                         }
                     },
                     Defs = MvcHtmlString.Create(@"
@@ -97,7 +99,8 @@ namespace Signum.Web.Cache
                         {
                             t.extra["cache-invalidations"] = groups[t.tableName].Sum(a => a.Invalidations);
                             foreach (var mt in t.mlistTables)
-                                mt.extra["cache-invalidations"] = groups[mt.tableName].Sum(a => a.Invalidations);
+                                if (groups.ContainsKey(mt.tableName))
+                                    mt.extra["cache-invalidations"] = groups[mt.tableName].Sum(a => a.Invalidations);
                         }
                     }
                 },
@@ -113,7 +116,8 @@ namespace Signum.Web.Cache
                         {
                             t.extra["cache-loads"] = groups[t.tableName].Sum(a => a.Loads);
                             foreach (var mt in t.mlistTables)
-                                mt.extra["cache-loads"] = groups[mt.tableName].Sum(a => a.Loads);
+                                if (groups.ContainsKey(mt.tableName))
+                                    mt.extra["cache-loads"] = groups[mt.tableName].Sum(a => a.Loads);
                         }
                     }
                 },
@@ -129,7 +133,8 @@ namespace Signum.Web.Cache
                         {
                             t.extra["cache-load-time"] = groups[t.tableName].Sum(a => a.SumLoadTime.Milliseconds);
                             foreach (var mt in t.mlistTables)
-                                mt.extra["cache-load-time"] = groups[mt.tableName].Sum(a => a.SumLoadTime.Milliseconds);
+                                if (groups.ContainsKey(mt.tableName))
+                                    mt.extra["cache-load-time"] = groups[mt.tableName].Sum(a => a.SumLoadTime.Milliseconds);
                         }
                     }
                 },
