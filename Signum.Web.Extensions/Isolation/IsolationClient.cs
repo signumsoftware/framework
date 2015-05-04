@@ -87,7 +87,8 @@ namespace Signum.Web.Isolation
                             return;
                         
                         t.extra["isolation"] = s.ToString();
-                    }
+                    },
+                    Order = 3,
                 },
             };
         }

@@ -79,6 +79,7 @@ namespace Signum.Web.Cache
                                     mt.extra["cache-rows"] = groups[mt.tableName].Sum(a => a.Count);
                         }
                     },
+                    Order = 5,
                     Defs = MvcHtmlString.Create(@"
 <pattern id=""pattern-stripe"" width=""4"" height=""4"" patternUnits=""userSpaceOnUse"" patternTransform=""rotate(45)"">
    <rect width=""2"" height=""4"" transform=""translate(0,0)"" fill=""white""></rect>
@@ -102,7 +103,8 @@ namespace Signum.Web.Cache
                                 if (groups.ContainsKey(mt.tableName))
                                     mt.extra["cache-invalidations"] = groups[mt.tableName].Sum(a => a.Invalidations);
                         }
-                    }
+                    },
+                    Order = 5,
                 },
                         
                 new MapColorProvider
@@ -119,7 +121,8 @@ namespace Signum.Web.Cache
                                 if (groups.ContainsKey(mt.tableName))
                                     mt.extra["cache-loads"] = groups[mt.tableName].Sum(a => a.Loads);
                         }
-                    }
+                    },
+                    Order = 5,
                 },
 
                 new MapColorProvider
@@ -136,7 +139,8 @@ namespace Signum.Web.Cache
                                 if (groups.ContainsKey(mt.tableName))
                                     mt.extra["cache-load-time"] = groups[mt.tableName].Sum(a => a.SumLoadTime.Milliseconds);
                         }
-                    }
+                    },
+                    Order = 5,
                 },
             };
         }

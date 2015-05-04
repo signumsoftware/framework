@@ -74,7 +74,8 @@ namespace Signum.Web.Disconnected
                     Defs =  new HtmlStringBuilder(
                         from u in EnumExtensions.GetValues<Upload>()
                         from d in EnumExtensions.GetValues<Download>()
-                        select GradientDef(u, d)).ToHtml()
+                        select GradientDef(u, d)).ToHtml(),
+                    Order = 4,
                 },
             };
         }
