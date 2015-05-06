@@ -745,7 +745,7 @@ namespace Signum.Web.Selenium
             Selenium.Wait(() => Selenium.FindElement(headerSelector).FindElements(By.CssSelector("span")).Any(s => s.Text == newName));
         }
 
-        internal void WaitActiveSuccess()
+        public void WaitActiveSuccess()
         {
             Selenium.WaitElementVisible(RowsLocator.CombineCss(".active.sf-entity-ctxmenu-success"));
         }
