@@ -320,6 +320,11 @@ namespace Signum.Web.Operations
         {
             get { return Entities; }
         }
+
+        public string ComposePrefix(string prefixPart)
+        {
+            return TypeContextUtilities.Compose(this.Prefix, prefixPart);
+        }
     }
 
     public class EntityOperationGroup
