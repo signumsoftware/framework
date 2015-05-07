@@ -285,7 +285,7 @@ WriteLiteral("                    <td>\r\n");
             #line hidden
             
             #line 51 "..\..\Translation\Views\IndexInstance.cshtml"
-                         if (tf.CultureInfo.Name == TranslatedInstanceLogic.DefaultCulture.Name)
+                         if (tf.CultureInfo.Name == TranslatedInstanceLogic.DefaultCulture().Name)
                         {
 
             
@@ -328,14 +328,14 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("                            <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 2185), Tuple.Create("\"", 2307)
+WriteAttribute("href", Tuple.Create(" href=\"", 2187), Tuple.Create("\"", 2309)
             
             #line 59 "..\..\Translation\Views\IndexInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 2192), Tuple.Create<System.Object, System.Int32>(Url.Action((TranslatedInstanceController tc) => tc.ViewFile(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name))
+, Tuple.Create(Tuple.Create("", 2194), Tuple.Create<System.Object, System.Int32>(Url.Action((TranslatedInstanceController tc) => tc.ViewFile(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name))
             
             #line default
             #line hidden
-, 2192), false)
+, 2194), false)
 );
 
 WriteLiteral(">\r\n                                <span");
@@ -371,25 +371,25 @@ WriteLiteral("                            <br />\r\n");
             #line hidden
 WriteLiteral("                            <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 2869), Tuple.Create("\"", 2991)
+WriteAttribute("href", Tuple.Create(" href=\"", 2871), Tuple.Create("\"", 2993)
             
             #line 67 "..\..\Translation\Views\IndexInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 2876), Tuple.Create<System.Object, System.Int32>(Url.Action((TranslatedInstanceController tc) => tc.SyncFile(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name))
+, Tuple.Create(Tuple.Create("", 2878), Tuple.Create<System.Object, System.Int32>(Url.Action((TranslatedInstanceController tc) => tc.SyncFile(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name))
             
             #line default
             #line hidden
-, 2876), false)
+, 2878), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 2992), Tuple.Create("\"", 3027)
-, Tuple.Create(Tuple.Create("", 3000), Tuple.Create("status-", 3000), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 2994), Tuple.Create("\"", 3029)
+, Tuple.Create(Tuple.Create("", 3002), Tuple.Create("status-", 3002), true)
             
             #line 67 "..\..\Translation\Views\IndexInstance.cshtml"
-                                                                                        , Tuple.Create(Tuple.Create("", 3007), Tuple.Create<System.Object, System.Int32>(tf.State.ToString()
+                                                                                        , Tuple.Create(Tuple.Create("", 3009), Tuple.Create<System.Object, System.Int32>(tf.State.ToString()
             
             #line default
             #line hidden
-, 3007), false)
+, 3009), false)
 );
 
 WriteLiteral(">\r\n                                <span");

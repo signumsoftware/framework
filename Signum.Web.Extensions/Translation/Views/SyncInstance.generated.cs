@@ -308,23 +308,23 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 60 "..\..\Translation\Views\SyncInstance.cshtml"
-                     if (mc.Key.Equals(TranslatedInstanceLogic.DefaultCulture))
+                     if (mc.Key.Equals(TranslatedInstanceLogic.DefaultCulture()))
                     {
-                        string originalName = TranslatedInstanceLogic.DefaultCulture.Name + "#" + instance.Instance.Key() + "#" + propertyString;
+                        string originalName = TranslatedInstanceLogic.DefaultCulture().Name + "#" + instance.Instance.Key() + "#" + propertyString;
 
             
             #line default
             #line hidden
 WriteLiteral("                        <textarea");
 
-WriteAttribute("name", Tuple.Create(" name=\"", 2545), Tuple.Create("\"", 2565)
+WriteAttribute("name", Tuple.Create(" name=\"", 2549), Tuple.Create("\"", 2569)
             
             #line 63 "..\..\Translation\Views\SyncInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 2552), Tuple.Create<System.Object, System.Int32>(originalName
+, Tuple.Create(Tuple.Create("", 2556), Tuple.Create<System.Object, System.Int32>(originalName
             
             #line default
             #line hidden
-, 2552), false)
+, 2556), false)
 );
 
 WriteLiteral(" style=\"display:none\"");
@@ -472,15 +472,15 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("                        <textarea");
 
-WriteAttribute("name", Tuple.Create(" name=\"", 4078), Tuple.Create("\"", 4108)
+WriteAttribute("name", Tuple.Create(" name=\"", 4082), Tuple.Create("\"", 4112)
             
             #line 93 "..\..\Translation\Views\SyncInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 4085), Tuple.Create<System.Object, System.Int32>(elementName
+, Tuple.Create(Tuple.Create("", 4089), Tuple.Create<System.Object, System.Int32>(elementName
             
             #line default
             #line hidden
-, 4085), false)
-, Tuple.Create(Tuple.Create("", 4099), Tuple.Create("_original", 4099), true)
+, 4089), false)
+, Tuple.Create(Tuple.Create("", 4103), Tuple.Create("_original", 4103), true)
 );
 
 WriteLiteral(" style=\"display:none\"");
@@ -500,14 +500,14 @@ WriteLiteral("</textarea>\r\n");
 
 WriteLiteral("                        <textarea");
 
-WriteAttribute("name", Tuple.Create(" name=\"", 4224), Tuple.Create("\"", 4243)
+WriteAttribute("name", Tuple.Create(" name=\"", 4228), Tuple.Create("\"", 4247)
             
             #line 94 "..\..\Translation\Views\SyncInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 4231), Tuple.Create<System.Object, System.Int32>(elementName
+, Tuple.Create(Tuple.Create("", 4235), Tuple.Create<System.Object, System.Int32>(elementName
             
             #line default
             #line hidden
-, 4231), false)
+, 4235), false)
 );
 
 WriteLiteral(" style=\"width:90%\"");
@@ -631,14 +631,14 @@ WriteLiteral("    <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 5498), Tuple.Create("\"", 5545)
+WriteAttribute("value", Tuple.Create(" value=\"", 5502), Tuple.Create("\"", 5549)
             
             #line 121 "..\..\Translation\Views\SyncInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 5506), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+, Tuple.Create(Tuple.Create("", 5510), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 5506), false)
+, 5510), false)
 );
 
 WriteLiteral(" />\r\n");

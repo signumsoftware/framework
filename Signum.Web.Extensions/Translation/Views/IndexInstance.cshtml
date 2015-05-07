@@ -48,7 +48,7 @@ else
                 @foreach (var tf in type.Value.Values)
                 {
                     <td>
-                        @if (tf.CultureInfo.Name == TranslatedInstanceLogic.DefaultCulture.Name)
+                        @if (tf.CultureInfo.Name == TranslatedInstanceLogic.DefaultCulture().Name)
                         {
                             <text>@TranslationMessage.None.NiceToString()</text>
                         }

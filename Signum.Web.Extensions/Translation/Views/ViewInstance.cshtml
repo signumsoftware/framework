@@ -13,7 +13,7 @@
 
     Dictionary<LocalizedInstanceKey, string> master = ViewBag.Master;
 
-    var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
+    var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture());
 
     Func<CultureInfo, bool> editCulture = c => culture == null || culture.Name == c.Name;
 
@@ -82,10 +82,10 @@ else
                     {
                         var formName = ci.Name + "#" + key.Instance.Key() + "#" + propertyString;
 
-                        if (ci.Name == TranslatedInstanceLogic.DefaultCulture.Name)
+                        if (ci.Name == TranslatedInstanceLogic.DefaultCulture().Name)
                         {
                             <tr>
-                                <td class="leftCell"><em>@TranslatedInstanceLogic.DefaultCulture</em></td>
+                                <td class="leftCell"><em>@TranslatedInstanceLogic.DefaultCulture()</em></td>
                                 <td class="monospaceCell">
                                     @if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
                                     {

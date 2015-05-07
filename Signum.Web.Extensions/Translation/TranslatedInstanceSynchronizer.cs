@@ -18,7 +18,7 @@ namespace Signum.Web.Translation
 
         public static TypeInstancesChanges GetTypeInstanceChangesTranslated(ITranslator translator, Type type, CultureInfo targetCulture, out int totalInstances)
         {
-            var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
+            var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture());
 
             cultures.Remove(targetCulture);
 

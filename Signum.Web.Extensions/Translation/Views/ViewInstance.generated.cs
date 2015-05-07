@@ -84,7 +84,7 @@ namespace ASP
 
     Dictionary<LocalizedInstanceKey, string> master = ViewBag.Master;
 
-    var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
+    var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture());
 
     Func<CultureInfo, bool> editCulture = c => culture == null || culture.Name == c.Name;
 
@@ -193,14 +193,14 @@ WriteLiteral("        <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1804), Tuple.Create("\"", 1853)
+WriteAttribute("value", Tuple.Create(" value=\"", 1806), Tuple.Create("\"", 1855)
             
             #line 45 "..\..\Translation\Views\ViewInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 1812), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Search.NiceToString()
+, Tuple.Create(Tuple.Create("", 1814), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Search.NiceToString()
             
             #line default
             #line hidden
-, 1812), false)
+, 1814), false)
 );
 
 WriteLiteral(" />\r\n");
@@ -359,7 +359,7 @@ WriteLiteral("</th>\r\n                </tr>\r\n");
                     {
                         var formName = ci.Name + "#" + key.Instance.Key() + "#" + propertyString;
 
-                        if (ci.Name == TranslatedInstanceLogic.DefaultCulture.Name)
+                        if (ci.Name == TranslatedInstanceLogic.DefaultCulture().Name)
                         {
 
             
@@ -373,7 +373,7 @@ WriteLiteral("><em>");
 
             
             #line 88 "..\..\Translation\Views\ViewInstance.cshtml"
-                                                    Write(TranslatedInstanceLogic.DefaultCulture);
+                                                    Write(TranslatedInstanceLogic.DefaultCulture());
 
             
             #line default
@@ -604,14 +604,14 @@ WriteLiteral("        <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 6432), Tuple.Create("\"", 6479)
+WriteAttribute("value", Tuple.Create(" value=\"", 6438), Tuple.Create("\"", 6485)
             
             #line 144 "..\..\Translation\Views\ViewInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 6440), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+, Tuple.Create(Tuple.Create("", 6446), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 6440), false)
+, 6446), false)
 );
 
 WriteLiteral(" />\r\n");

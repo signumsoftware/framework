@@ -57,9 +57,9 @@ else
             <tr>
                 <td class="leftCell">@mc.Key.Name</td>
                 <td class="monospaceCell">
-                    @if (mc.Key.Equals(TranslatedInstanceLogic.DefaultCulture))
+                    @if (mc.Key.Equals(TranslatedInstanceLogic.DefaultCulture()))
                     {
-                        string originalName = TranslatedInstanceLogic.DefaultCulture.Name + "#" + instance.Instance.Key() + "#" + propertyString;
+                        string originalName = TranslatedInstanceLogic.DefaultCulture().Name + "#" + instance.Instance.Key() + "#" + propertyString;
                         <textarea name="@originalName" style="display:none" >@mc.Value.Original</textarea>
                     }
 
