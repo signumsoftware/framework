@@ -312,7 +312,6 @@
     <Content Include="Facades\Navigator.md" />
     <Content Include="Operations\OperationsClient.md" />
     <Content Include="LineHelpers\EntityControls.md" />
-    <None Include="Signum\Headers\bootstrap\twitter.typeahead.ts.old" />
     <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\es6-promises\es6-promises.d.ts" />
     <Content Include="Signum\Headers\jquery\jquery.d.ts" />
