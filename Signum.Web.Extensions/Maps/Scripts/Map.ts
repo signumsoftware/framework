@@ -86,13 +86,13 @@ export interface MapInfo {
     relations: RelationInfo[];
 }
 
-interface Point {
+export interface Point {
     x: number;
     y: number;
 }
 
 
-interface Rectangle extends Point{
+export interface Rectangle extends Point{
     width: number;
     height: number;
 }
