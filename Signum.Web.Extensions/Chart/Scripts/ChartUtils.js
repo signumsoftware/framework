@@ -3,7 +3,9 @@
 var ChartUtils;
 (function (ChartUtils) {
     Array.prototype.enterData = function (data, tag, cssClass) {
-        return this.selectAll(tag + "." + cssClass).data(data).enter().append("svg:" + tag).attr("class", cssClass);
+        return this.selectAll(tag + "." + cssClass).data(data)
+            .enter().append("svg:" + tag)
+            .attr("class", cssClass);
     };
     function fillAllTokenValueFuntions(data) {
         for (var i = 0;; i++) {
@@ -97,15 +99,30 @@ var ChartUtils;
         if (scaleName == undefined)
             scaleName = column.parameter1;
         if (scaleName == "Elements")
-            return d3.scale.ordinal().domain(values).rangeBands([minRange, maxRange]);
+            return d3.scale.ordinal()
+                .domain(values)
+                .rangeBands([minRange, maxRange]);
         if (scaleName == "ZeroMax")
-            return d3.scale.linear().domain([0, d3.max(values)]).range([minRange, maxRange]);
+            return d3.scale.linear()
+                .domain([0, d3.max(values)])
+                .range([minRange, maxRange]);
         if (scaleName == "MinMax")
-            return ((column.type == "Date" || column.type == "DateTime") ? d3.time.scale() : d3.scale.linear()).domain([d3.min(values), d3.max(values)]).range([minRange, maxRange]);
+            return ((column.type == "Date" || column.type == "DateTime") ?
+                d3.time.scale() :
+                d3.scale.linear())
+                .domain([d3.min(values),
+                d3.max(values)])
+                .range([minRange, maxRange]);
         if (scaleName == "Log")
-            return d3.scale.log().domain([d3.min(values), d3.max(values)]).range([minRange, maxRange]);
+            return d3.scale.log()
+                .domain([d3.min(values),
+                d3.max(values)])
+                .range([minRange, maxRange]);
         if (scaleName == "Sqrt")
-            return d3.scale.pow().exponent(.5).domain([d3.min(values), d3.max(values)]).range([minRange, maxRange]);
+            return d3.scale.pow().exponent(.5)
+                .domain([d3.min(values),
+                d3.max(values)])
+                .range([minRange, maxRange]);
         throw Error("Unexpected scale: " + scaleName);
     }
     ChartUtils.scaleFor = scaleFor;
@@ -174,32 +191,41 @@ var ChartUtils;
         Rule.prototype.debugX = function (chart) {
             var keys = d3.keys(this.sizes);
             //paint x-axis rule
-            chart.append('svg:g').attr('class', 'x-rule-tick').enterData(keys, 'line', 'x-rule-tick').attr('x1', function (d) {
-                return this.ends[d];
-            }).attr('x2', function (d) {
-                return this.ends[d];
-            }).attr('y1', 0).attr('y2', 10000).style('stroke-width', 2).style('stroke', 'Pink');
+            chart.append('svg:g').attr('class', 'x-rule-tick')
+                .enterData(keys, 'line', 'x-rule-tick')
+                .attr('x1', function (d) { return this.ends[d]; })
+                .attr('x2', function (d) { return this.ends[d]; })
+                .attr('y1', 0)
+                .attr('y2', 10000)
+                .style('stroke-width', 2)
+                .style('stroke', 'Pink');
             //paint y-axis rule labels
-            chart.append('svg:g').attr('class', 'x-axis-rule-label').enterData(keys, 'text', 'x-axis-rule-label').attr('transform', function (d, i) {
-                return translate(this.starts[d] + this.sizes[d] / 2 - 5, 10 + 100 * (i % 3)) + rotate(90);
-            }).attr('fill', 'DeepPink').text(function (d) {
-                return d;
-            });
+            chart.append('svg:g').attr('class', 'x-axis-rule-label')
+                .enterData(keys, 'text', 'x-axis-rule-label')
+                .attr('transform', function (d, i) {
+                return translate(this.starts[d] + this.sizes[d] / 2 - 5, 10 + 100 * (i % 3)) +
+                    rotate(90);
+            })
+                .attr('fill', 'DeepPink')
+                .text(function (d) { return d; });
         };
         Rule.prototype.debugY = function (chart) {
             var keys = d3.keys(this.sizes);
             //paint y-axis rule
-            chart.append('svg:g').attr('class', 'y-rule-tick').enterData(keys, 'line', 'y-rule-tick').attr('x1', 0).attr('x2', 10000).attr('y1', function (d) {
-                return this.ends[d];
-            }).attr('y2', function (d) {
-                return this.ends[d];
-            }).style('stroke-width', 2).style('stroke', 'Violet');
+            chart.append('svg:g').attr('class', 'y-rule-tick')
+                .enterData(keys, 'line', 'y-rule-tick')
+                .attr('x1', 0)
+                .attr('x2', 10000)
+                .attr('y1', function (d) { return this.ends[d]; })
+                .attr('y2', function (d) { return this.ends[d]; })
+                .style('stroke-width', 2)
+                .style('stroke', 'Violet');
             //paint y-axis rule labels
-            chart.append('svg:g').attr('class', 'y-axis-rule-label').enterData(keys, 'text', 'y-axis-rule-label').attr('transform', function (d, i) {
-                return translate(100 * (i % 3), this.starts[d] + this.sizes[d] / 2 + 4);
-            }).attr('fill', 'DarkViolet').text(function (d) {
-                return d;
-            });
+            chart.append('svg:g').attr('class', 'y-axis-rule-label')
+                .enterData(keys, 'text', 'y-axis-rule-label')
+                .attr('transform', function (d, i) { return translate(100 * (i % 3), this.starts[d] + this.sizes[d] / 2 + 4); })
+                .attr('fill', 'DarkViolet')
+                .text(function (d) { return d; });
         };
         return Rule;
     })();

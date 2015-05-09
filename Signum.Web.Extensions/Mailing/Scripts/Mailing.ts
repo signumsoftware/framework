@@ -234,7 +234,6 @@ export function initHtmlEditorWithTokens(idTargetTextArea: string, culture: stri
 }
 
 function getDocument(iframe: HTMLIFrameElement) {
-    var doc = iframe.document;
 
     if (iframe.contentDocument)
         return iframe.contentDocument; // For NS6
@@ -242,7 +241,7 @@ function getDocument(iframe: HTMLIFrameElement) {
     else if (iframe.contentWindow)
         return iframe.contentWindow.document; // For IE5.5 and IE6
 
-    return doc;
+    return (<any>iframe).document;
 }
 
 export function activateIFrame($iframe: JQuery) {
