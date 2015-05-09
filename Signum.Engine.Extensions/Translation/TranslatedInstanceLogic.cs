@@ -24,20 +24,24 @@ namespace Signum.Engine.Translation
 {
     public static class TranslatedInstanceLogic
     {
-        public static CultureInfo DefaultCulture { get; private set; }
+        static Func<CultureInfo> getDefaultCulture;
+        public static CultureInfo DefaultCulture { get { return getDefaultCulture(); } }
 
         public static Dictionary<Type, Dictionary<PropertyRoute, TraducibleRouteType>> TraducibleRoutes 
             = new Dictionary<Type, Dictionary<PropertyRoute, TraducibleRouteType>>();
         static ResetLazy<Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>> LocalizationCache;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, string defaultCulture)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<CultureInfo> defaultCulture)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<TranslatedInstanceEntity>();
                 sb.AddUniqueIndex<TranslatedInstanceEntity>(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId });
 
-                DefaultCulture = CultureInfo.GetCultureInfo(defaultCulture);
+                if (defaultCulture == null)
+                    throw new ArgumentNullException("defaultCulture");
+
+                TranslatedInstanceLogic.getDefaultCulture = defaultCulture;
 
                 dqm.RegisterQuery(typeof(TranslatedInstanceEntity), () =>
                     from e in Database.Query<TranslatedInstanceEntity>()
