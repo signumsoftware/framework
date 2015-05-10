@@ -43,6 +43,7 @@ namespace Signum.Engine.Operations
         public class Construct : Graph<T>.Construct, IGraphToStateOperation
         {
             public List<S> ToStates { get; private set; }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
 
             public Construct(ConstructSymbol<T>.Simple symbol)
                 : base(symbol)
@@ -74,6 +75,7 @@ namespace Signum.Engine.Operations
             where F : class, IEntity
         {
             public List<S> ToStates { get; private set; }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
 
             public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
                 : base(symbol)
@@ -106,6 +108,7 @@ namespace Signum.Engine.Operations
             where F : class, IEntity
         {
             public List<S> ToStates { get; private set; }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
 
             public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
                 : base(symbol)
@@ -137,6 +140,8 @@ namespace Signum.Engine.Operations
         {
             public List<S> FromStates { get; private set; }
             public List<S> ToStates { get; private set; }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
+            IEnumerable<Enum> IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
 
             bool IGraphHasFromStatesOperation.HasFromStates
             {
@@ -184,6 +189,7 @@ namespace Signum.Engine.Operations
         public class Delete : Graph<T>.Delete, IGraphOperation, IGraphFromStatesOperation
         {
             public List<S> FromStates { get; private set; }
+            IEnumerable<Enum> IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
 
             bool IGraphHasFromStatesOperation.HasFromStates
             {
