@@ -1,5 +1,5 @@
-/// <reference path="../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-/// <reference path="../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
 
 import d3 = require("d3")
 import SchemaMap = require("Extensions/Signum.Web.Extensions/Maps/Scripts/SchemaMap")

@@ -18,6 +18,8 @@ namespace Signum.Entities.Map
         Rows,
         [Description("Press {0} to explore each table")]
         Press0ToExploreEachTable,
+        [Description("Press {0} to explore states and operations")]
+        Press0ToExploreStatesAndOperations,
         Filter,
         Color,
         State,

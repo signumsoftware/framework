@@ -135,7 +135,7 @@ WriteLiteral("        ");
 
             
             #line 17 "..\..\Maps\Views\OperationMap.cshtml"
-   Write(MapMessage.Press0ToExploreEachTable.NiceToString().FormatHtml(new HtmlTag("u").SetInnerText("Ctrl + Click")));
+   Write(MapMessage.Press0ToExploreStatesAndOperations.NiceToString().FormatHtml(new HtmlTag("u").SetInnerText("Ctrl + Click")));
 
             
             #line default
