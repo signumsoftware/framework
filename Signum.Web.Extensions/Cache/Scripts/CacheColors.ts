@@ -1,7 +1,7 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 
 import d3 = require("d3")
-import Map = require("Extensions/Signum.Web.Extensions/Maps/Scripts/Map")
+import Map = require("Extensions/Signum.Web.Extensions/Maps/Scripts/SchemaMap")
 
 export function cacheColors(nodes: Map.ITableInfo[], title: string, key: string): Map.ColorProvider {
 

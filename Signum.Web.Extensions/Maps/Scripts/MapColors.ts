@@ -2,7 +2,7 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
 
 import d3 = require("d3")
-import Map = require("Extensions/Signum.Web.Extensions/Maps/Scripts/Map")
+import Map = require("Extensions/Signum.Web.Extensions/Maps/Scripts/SchemaMap")
 
 export function namespace(nodes: Map.ITableInfo[]): Map.ColorProvider {
     var color = d3.scale.category20();

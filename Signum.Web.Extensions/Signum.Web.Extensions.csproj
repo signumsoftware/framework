@@ -28,6 +28,7 @@
     <IISExpressUseClassicPipelineMode />
     <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
     <TargetFrameworkProfile />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -395,8 +396,15 @@
     <Compile Include="Mailing\WebMailProcessor.cs" />
     <Compile Include="Maps\Controllers\MapController.cs" />
     <Compile Include="Maps\MapClient.cs" />
-    <Compile Include="Maps\Views\Map1.generated.cs">
-      <DependentUpon>Map.cshtml</DependentUpon>
+    <Compile Include="Maps\OperationMap.cs" />
+    <Compile Include="Maps\SchemaMap.cs" />
+    <Compile Include="Maps\Views\OperationMap.generated.cs">
+      <DependentUpon>OperationMap.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Maps\Views\SchemaMap.generated.cs">
+      <DependentUpon>SchemaMap.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
@@ -1004,8 +1012,8 @@
     <EmbeddedResource Include="Word\Scripts\Word.js">
       <DependentUpon>Word.ts</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Maps\Scripts\Map.js">
-      <DependentUpon>Map.ts</DependentUpon>
+    <EmbeddedResource Include="Maps\Scripts\SchemaMap.js">
+      <DependentUpon>SchemaMap.ts</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Maps\Scripts\MapColors.js">
       <DependentUpon>MapColors.ts</DependentUpon>
@@ -1022,7 +1030,11 @@
     <EmbeddedResource Include="AuthAdmin\Scripts\AuthAdminColors.js">
       <DependentUpon>AuthAdminColors.ts</DependentUpon>
     </EmbeddedResource>
-    <Content Include="Maps\Content\map.css" />
+    <Content Include="Maps\Content\operationMap.css" />
+    <Content Include="Maps\Content\schemaMap.css" />
+    <EmbeddedResource Include="Maps\Scripts\OperationMap.js">
+      <DependentUpon>OperationMap.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Word\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1208,7 +1220,8 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <TypeScriptCompile Include="Maps\Scripts\Map.ts" />
+    <TypeScriptCompile Include="Maps\Scripts\OperationMap.ts" />
+    <TypeScriptCompile Include="Maps\Scripts\SchemaMap.ts" />
     <TypeScriptCompile Include="Maps\Scripts\MapColors.ts" />
     <TypeScriptCompile Include="Omnibox\Scripts\Omnibox.ts" />
     <TypeScriptCompile Include="Processes\Scripts\Processes.ts" />
@@ -1493,11 +1506,15 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Maps\Views\Map.cshtml">
+    <Content Include="Maps\Views\SchemaMap.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Map1.generated.cs</LastGenOutput>
+      <LastGenOutput>SchemaMap.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Maps\Views\Web.config" />
+    <Content Include="Maps\Views\OperationMap.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>OperationMap.generated.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>

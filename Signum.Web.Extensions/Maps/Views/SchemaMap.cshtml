@@ -2,8 +2,8 @@
 @using System.Reflection;
 @using Newtonsoft.Json;
 @using Signum.Entities.Map;
-@model MapInfo
-@Html.ScriptCss("~/Maps/Content/map.css")
+@model SchemaMapInfo
+@Html.ScriptCss("~/Maps/Content/schemaMap.css")
 @{ var colorProviders = (List<MapColorProvider>)ViewData["colorProviders"]; }
 
 <div class="form-inline form-sm container" style="margin-top: 10px;">
@@ -67,5 +67,5 @@
     }
 
 
-    @MapClient.Module["createMap"]("map", "svgMap", "filter", "color", Model, "getProvider")
+    @MapClient.SchemaModule["createMap"]("map", "svgMap", "filter", "color", Model, "getProvider")
 </script>

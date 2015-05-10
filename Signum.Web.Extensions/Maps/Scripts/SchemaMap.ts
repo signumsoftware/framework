@@ -3,6 +3,7 @@
 
 import d3 = require("d3")
 
+
 export interface TableInfo extends ITableInfo {
     webTypeName: string;
 
@@ -308,39 +309,6 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
     });
 
 
-    function calculatePoint(rectangle: Rectangle, point: Point): Point {
-
-        var vector = { x: point.x - rectangle.x, y: point.y - rectangle.y };
-
-        var v2 = { x: rectangle.width / 2, y: rectangle.height / 2 };
-
-        var ratio = getRatio(vector, v2);
-
-        return { x: rectangle.x + vector.x * ratio, y: rectangle.y + vector.y * ratio };
-    }
-
-
-    function getRatio(vOut: Point, vIn: Point) {
-
-        var vOut2 = { x: vOut.x, y: vOut.y };
-
-        if (vOut2.x < 0)
-            vOut2.x = -vOut2.x;
-
-        if (vOut2.y < 0)
-            vOut2.y = -vOut2.y;
-
-        if (vOut2.x == 0 && vOut2.y == 0)
-            return null;
-
-        if (vOut2.x == 0)
-            return vIn.y / vOut2.y;
-
-        if (vOut2.y == 0)
-            return vIn.x / vOut2.x;
-
-        return Math.min(vIn.x / vOut2.x, vIn.y / vOut2.y);
-    }
 
     function gravity() {
 
@@ -421,7 +389,7 @@ function distance(v: number, min: number, max: number) {
 }
 
 
-function wrap(textElement: SVGTextElement, width: number) {
+export function wrap(textElement: SVGTextElement, width: number) {
     var text = d3.select(textElement);
     var words: string[] = text.text().split(/\s+/).reverse();
     var word: string;
@@ -452,4 +420,39 @@ export function colorScale(max : number) : D3.Scale.LinearScale {
         .domain([0, max / 4, max])
         .range(["green", "gold", "red"]);
 
+}
+
+
+export function calculatePoint(rectangle: Rectangle, point: Point): Point {
+
+    var vector = { x: point.x - rectangle.x, y: point.y - rectangle.y };
+
+    var v2 = { x: rectangle.width / 2, y: rectangle.height / 2 };
+
+    var ratio = getRatio(vector, v2);
+
+    return { x: rectangle.x + vector.x * ratio, y: rectangle.y + vector.y * ratio };
+}
+
+
+function getRatio(vOut: Point, vIn: Point) {
+
+    var vOut2 = { x: vOut.x, y: vOut.y };
+
+    if (vOut2.x < 0)
+        vOut2.x = -vOut2.x;
+
+    if (vOut2.y < 0)
+        vOut2.y = -vOut2.y;
+
+    if (vOut2.x == 0 && vOut2.y == 0)
+        return null;
+
+    if (vOut2.x == 0)
+        return vIn.y / vOut2.y;
+
+    if (vOut2.y == 0)
+        return vIn.x / vOut2.x;
+
+    return Math.min(vIn.x / vOut2.x, vIn.y / vOut2.y);
 }

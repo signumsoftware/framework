@@ -1,4 +1,5 @@
 ﻿using Signum.Entities.Authorization;
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,6 +20,16 @@ namespace Signum.Entities.Map
         Press0ToExploreEachTable,
         Filter,
         Color,
+        State,
+        StateColor,
+    }
+
+    [DescriptionOptions(DescriptionOptions.Members)]
+    public enum DefaultState
+    {
+        Start,
+        All,
+        End,
     }
 
     public static class MapPermission

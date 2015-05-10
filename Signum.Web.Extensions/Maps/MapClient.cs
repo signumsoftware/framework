@@ -38,7 +38,8 @@ namespace Signum.Web.Maps
     public static class MapClient
     {
         public static string ViewPrefix = "~/Maps/Views/{0}.cshtml";
-        public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Maps/Scripts/Map");
+        public static JsModule SchemaModule = new JsModule("Extensions/Signum.Web.Extensions/Maps/Scripts/SchemaMap");
+        public static JsModule OperationModule = new JsModule("Extensions/Signum.Web.Extensions/Maps/Scripts/OperationMap");
         public static JsModule ColorModule = new JsModule("Extensions/Signum.Web.Extensions/Maps/Scripts/MapColors");
         public static readonly object NodesConstant = new object();
 
@@ -147,7 +148,7 @@ namespace Signum.Web.Maps
         public override string GetUrl(MapOmniboxResult result)
         {
             if (result.TypeMatch != null)
-                return RouteHelper.New().Action("States", "Map", new { webQueryName = Finder.ResolveWebQueryName(result.Type) });
+                return RouteHelper.New().Action("Operation", "Map", new { typeName = Finder.ResolveWebQueryName(result.Type) });
 
             return RouteHelper.New().Action("Index", "Map");
         }
@@ -183,23 +184,23 @@ namespace Signum.Web.Maps
             if (tokens.Count == 1)
                 yield return new MapOmniboxResult { Distance = keyMatch.Distance, KeywordMatch = keyMatch };
 
-            //else
-            //{
-            //    string pattern = tokens[1].Value;
+            else
+            {
+                string pattern = tokens[1].Value;
 
-            //    bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
+                bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-            //    var types = OmniboxParser.Manager.Types().Where(a=> OperationLogic.HasStateOperations(a.Value)).ToDictionary();
+                var types = OmniboxParser.Manager.Types().Where(a => OperationLogic.TypeOperations(a.Value).Any()).ToDictionary();
 
-            //    foreach (var match in OmniboxUtils.Matches(types, OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
-            //    {
-            //        var type = match.Value;
-            //        if (OmniboxParser.Manager.AllowedQuery(type))
-            //        {
-            //            yield return new MapOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = (Type)type, TypeMatch = match };
-            //        }
-            //    }
-            //}
+                foreach (var match in OmniboxUtils.Matches(types, OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
+                {
+                    var type = match.Value;
+                    if (OmniboxParser.Manager.AllowedQuery(type))
+                    {
+                        yield return new MapOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = (Type)type, TypeMatch = match };
+                    }
+                }
+            }
         }
 
         public override List<HelpOmniboxResult> GetHelp()
@@ -228,7 +229,7 @@ namespace Signum.Web.Maps
             if (Type == null)
                 return KeywordMatch.Value.ToString();
 
-            return "{0} {1}".FormatWith(KeywordMatch.Value, Type.NiceName().ToOmniboxPascal());
+            return "{0} {1}".FormatWith(KeywordMatch.Value, Type.NicePluralName().ToOmniboxPascal());
         }
     }
 
