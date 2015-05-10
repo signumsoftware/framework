@@ -158,7 +158,7 @@ namespace Signum.Web.Selenium
                 selenium.SwitchTo().Alert();
                 return true;
             }
-            catch (NoAlertPresentException e)
+            catch (NoAlertPresentException)
             {
                 return false;
             }
