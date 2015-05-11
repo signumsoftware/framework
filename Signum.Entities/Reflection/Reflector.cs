@@ -476,12 +476,12 @@ namespace Signum.Entities.Reflection
                 throw new FormatException("'{0}' is not a valid identifier".FormatWith(step));
         }
 
-        public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object>> property) where T : Entity
+        public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
         {
             return ReflectionTools.GetPropertyInfo(property);
         }
 
-        public static string NicePropertyName<T>(this T entity, Expression<Func<T, object>> property) where T : Entity
+        public static string NicePropertyName<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
         {
             return ReflectionTools.GetPropertyInfo(property).NiceName();
         }
