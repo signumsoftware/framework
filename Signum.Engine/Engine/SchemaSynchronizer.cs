@@ -720,7 +720,12 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             if (p == null)
                 return null;
 
-            return p.Replace("(", "").Replace(")", "").ToLower();
+            while (
+                p.StartsWith("(") && p.EndsWith(")") || 
+                p.StartsWith("'") && p.EndsWith("'"))
+                p = p.Substring(1, p.Length - 2);
+
+            return p.ToLower();
         }
 
         public DiffColumn Clone()
