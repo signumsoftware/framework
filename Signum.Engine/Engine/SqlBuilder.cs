@@ -39,7 +39,7 @@ namespace Signum.Engine
         {
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".FormatWith(
                 t.Name, 
-                t.Columns.Values.Select(c => SqlBuilder.CreateField(c)).ToString(",\r\n").Indent(2)));
+                t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c)).ToString(",\r\n").Indent(2)));
         }
 
         public static SqlPreCommand DropTable(ObjectName tableName)
@@ -67,7 +67,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateField(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column)));
         }
 
         public static bool IsNumber(SqlDbType sqlDbType)
@@ -120,15 +120,15 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateField(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column)));
         }
 
-        public static string CreateField(IColumn c)
+        public static string CreateColumn(IColumn c)
         {
-            return CreateField(c.Name, c.SqlDbType, c.UserDefinedTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.IdentityBehaviour, c.Default);
+            return CreateColumn(c.Name, c.SqlDbType, c.UserDefinedTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.IdentityBehaviour, c.Default);
         }
 
-        public static string CreateField(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity, string @default)
+        public static string CreateColumn(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity, string @default)
         {
             Connector.Current.FixType(ref type, ref size, ref scale);
 
@@ -138,8 +138,16 @@ namespace Signum.Engine
                 GetSizeScale(size, scale),
                 identity && @default == null ? "IDENTITY " : "",
                 nullable ? "NULL" : "NOT NULL",
-                @default != null ? " DEFAULT " + @default : "",
+                @default != null ? " DEFAULT " +  Quote(type, @default) : "",
                 primaryKey ? " PRIMARY KEY" : "");
+        }
+
+        static string Quote(SqlDbType type, string @default)
+        {
+            if (IsString(type) && !(@default.StartsWith("'") && @default.StartsWith("'")))
+                return "'" + @default + "'";
+
+            return @default;
         }
 
         public static string GetSizeScale(int? size, int? scale)
