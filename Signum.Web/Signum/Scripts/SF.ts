@@ -717,15 +717,6 @@ interface Document {
     onpaste: (ev: { clipboardData: DataTransfer }) => any;
 }
 
-interface DataTransfer {
-    items: {
-        type: string;
-        kind: string;
-        getAsFile(): Blob;
-    }[]
-}
-
-
 
 https://github.com/spencertipping/jquery.fix.clone/blob/master/jquery.fix.clone.js
 
