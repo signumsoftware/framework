@@ -318,14 +318,8 @@ namespace Signum.Entities
 
         public static Lite<T> Parse<T>(string liteKey) where T : class, IEntity
         {
-            var parts = liteKey.Split(';');
-            if (parts.Length == 1)
-            {
-                var typeName = TypeDN.GetCleanName(typeof(T));
-                return (Lite<T>)Lite.Parse("{0};{1}".Formato(typeName, liteKey));
-            }
-            else
-                return (Lite<T>)Lite.Parse(liteKey);
+
+            return (Lite<T>)Lite.Parse(liteKey);
         }
 
         public static string TryParseLite(string liteKey, out Lite<Entity> result)
