@@ -27,7 +27,7 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static Func<ITaskEntity, ScheduledTaskEntity, IDisposable> ApplySession;
+        public static Func<ITaskEntity, ScheduledTaskEntity, IUserEntity, IDisposable> ApplySession;
 
         static Expression<Func<ITaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsExpression =
          ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == ct);
@@ -335,7 +335,7 @@ namespace Signum.Engine.Scheduler
 
         public static Lite<IEntity> ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
         {
-            using (Disposable.Combine(ApplySession, f => f(task, scheduledTask)))
+            using (Disposable.Combine(ApplySession, f => f(task, scheduledTask, user)))
             {
                 ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
                 {
