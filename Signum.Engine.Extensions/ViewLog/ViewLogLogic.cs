@@ -11,6 +11,7 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using Signum.Engine.Basics;
 using Signum.Entities.ViewLog;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.ViewLog
 {
@@ -50,7 +51,7 @@ namespace Signum.Engine.ViewLog
 
                 Types = types;
 
-                var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity)=> entity.ViewLogs());
+                var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogs());
 
                 foreach (var t in types)
                 {
@@ -66,12 +67,14 @@ namespace Signum.Engine.ViewLog
             }
         }
 
-        static IDisposable Current_QueryExecuted(DynamicQueryManager.ExecuteType type, object queryName)
+        static IDisposable Current_QueryExecuted(DynamicQueryManager.ExecuteType type, object queryName, BaseQueryRequest baseQueryRequest)
         {
             if (type == DynamicQueryManager.ExecuteType.ExecuteQuery ||
                 type == DynamicQueryManager.ExecuteType.ExecuteGroupQuery)
             {
-                return LogView(QueryLogic.GetQueryEntity(queryName).ToLite(), "Query");
+                baseQueryRequest.QueryTextLog = true;
+                baseQueryRequest.QueryUrlLog = true;
+                return LogView(QueryLogic.GetQueryEntity(queryName).ToLite(), "Query", ()=>"{0} \r\n {1}".FormatWith( baseQueryRequest.QueryText));
             }
 
             return null;
@@ -83,6 +86,11 @@ namespace Signum.Engine.ViewLog
         }
 
         public static IDisposable LogView(Lite<IEntity> entity, string viewAction)
+        {
+            return LogView(entity, viewAction, () => null);
+        }
+
+        public static IDisposable LogView(Lite<IEntity> entity, string viewAction, Func<string>dataString)
         {
             if (!Started || !Types.Contains(entity.EntityType))
                 return null;
@@ -97,6 +105,7 @@ namespace Signum.Engine.ViewLog
             return new Disposable(() =>
             {
                 viewLog.EndDate = TimeZoneManager.Now;
+                viewLog.Data = dataString();
                 using (ExecutionMode.Global())
                     viewLog.Save();
             });

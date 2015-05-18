@@ -51,6 +51,16 @@ namespace Signum.Entities.ViewLog
             set { Set(ref endDate, value); }
         }
 
+
+        [SqlDbType(Size = int.MaxValue)]
+        string data;
+        [StringLengthValidator(AllowNulls = true, Min = 0, Max = int.MaxValue)]
+        public string Data
+        {
+            get { return data; }
+            set { Set(ref data, value); }
+        }
+
         static Expression<Func<ViewLogEntity, double>> DurationExpression =
            sl => (sl.EndDate - sl.StartDate).TotalMilliseconds;
         [Unit("ms")]
