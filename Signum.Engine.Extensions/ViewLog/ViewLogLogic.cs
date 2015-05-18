@@ -74,7 +74,7 @@ namespace Signum.Engine.ViewLog
             {
                 baseQueryRequest.QueryTextLog = true;
                 baseQueryRequest.QueryUrlLog = true;
-                return LogView(QueryLogic.GetQueryEntity(queryName).ToLite(), "Query", ()=>"{0} \r\n {1}".FormatWith( baseQueryRequest.QueryText));
+                return LogView(QueryLogic.GetQueryEntity(queryName).ToLite(), "Query", ()=>"{0} \r\n {1}".FormatWith(baseQueryRequest.QueryUrl, baseQueryRequest.QueryText));
             }
 
             return null;
