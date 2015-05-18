@@ -25,6 +25,7 @@ namespace Signum.Engine.Operations
             Type IOperation.ReturnType { get { return typeof(T); } }
             IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
             IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+            Type IOperation.StateType { get { return null; } } 
 
             public bool LogAlsoIfNotSaved { get; set; }
 
@@ -134,6 +135,7 @@ namespace Signum.Engine.Operations
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
             IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
             IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+            Type IOperation.StateType { get { return null; } }
 
             public bool Lite { get; set; }
             public bool LogAlsoIfNotSaved { get; set; }
@@ -289,6 +291,7 @@ namespace Signum.Engine.Operations
             Type IConstructorFromManyOperation.BaseType { get { return Symbol.BaseType; } }
             IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
             IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+            Type IOperation.StateType { get { return null; } }
 
             public bool LogAlsoIfNotSaved { get; set; }
 
@@ -406,6 +409,7 @@ namespace Signum.Engine.Operations
             public bool Lite { get; set; }
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return null; } }
+            Type IOperation.StateType { get { return null; } }
 
             Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanExecute != null; } }
@@ -548,6 +552,7 @@ namespace Signum.Engine.Operations
             Type IOperation.ReturnType { get { return null; } }
             IEnumerable<Enum> IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
             IEnumerable<Enum> IOperation.UntypedToStates { get { return null; } }
+            Type IOperation.StateType { get { return null; } }
 
             public bool AllowsNew { get { return false; } }
 
