@@ -728,6 +728,7 @@ namespace Signum.Engine.Operations
 
         IEnumerable<Enum> UntypedFromStates { get; }
         IEnumerable<Enum> UntypedToStates { get; }
+        Type StateType { get; }
     }
 
     public interface IEntityOperation : IOperation
