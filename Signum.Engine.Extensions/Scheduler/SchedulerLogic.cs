@@ -192,7 +192,8 @@ namespace Signum.Engine.Scheduler
 
         static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => { Thread.Sleep(1000); ReloadPlan(); });
+            if (running)
+                Task.Factory.StartNew(() => { Thread.Sleep(1000); ReloadPlan(); });
         }
 
 
