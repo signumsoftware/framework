@@ -161,6 +161,7 @@
     <Compile Include="Processes\IProcessServer.cs" />
     <Compile Include="UserAssets\IUserAssetsServer.cs" />
     <Compile Include="UserAssets\QueryToken.cs" />
+    <Compile Include="ViewLog\ViewLogConfigurationEntity.cs" />
     <Compile Include="ViewLog\ViewLogEntity.cs" />
     <Compile Include="UserAssets\UserAssets.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
