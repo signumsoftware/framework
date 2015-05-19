@@ -36,7 +36,7 @@ namespace Signum.Web.Controllers
 
             using (Navigator.Manager.OnRetrievingForView(lite))
             {
-                return Navigator.NormalPage(this, Database.Retrieve(lite));
+                return Navigator.NormalPage(this, Database.RetrieveAndForget(lite));
             }
         }
 
