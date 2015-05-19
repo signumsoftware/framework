@@ -533,10 +533,12 @@ export class SearchControl {
         var $searchButton = this.prefix.child("qbSearch").get();
         $searchButton.addClass("sf-searching");
         var count = parseInt($searchButton.attr("data-searchCount")) || 0;
+        var fullUrl = this.element.attr("data-find-url") + "?" + this.requestDataForSearchInUrl();
+        var formData = $.extend({ queryUrl: fullUrl }, this.requestDataForSearch(RequestType.QueryRequest, page));
         var self = this;
         SF.ajaxPost({
             url: SF.Urls.search,
-            data: this.requestDataForSearch(RequestType.QueryRequest, page)
+            data: formData
         }).then(r => {
                 var $tbody = self.element.find(".sf-search-results-container tbody");
                 if (!SF.isEmpty(r)) {
