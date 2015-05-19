@@ -24,13 +24,11 @@ namespace Signum.Web.Maps
         {
             var operations = OperationLogic.TypeOperationsAndConstructors(type);
 
-            var list = operations.Select(a => WithDefaultStateArray(a.UntypedFromStates, DefaultState.Start))
-                .Concat(operations.Select(a => WithDefaultStateArray(a.UntypedToStates, DefaultState.End)))
-                .SelectMany(a => a).Distinct().ToList();
+            var stateTypes = operations.Select(a => a.UntypedFromStates == null ? typeof(DefaultState) : a.StateType)
+                .Concat(operations.Select(a => a.UntypedToStates == null ? typeof(DefaultState) : a.StateType))
+                .Distinct().ToList();
 
-            var enumTypes = list.Select(a => a.GetType()).Distinct();
-
-            Dictionary<Type, LambdaExpression> expressions = enumTypes
+            Dictionary<Type, LambdaExpression> expressions = stateTypes
                 .ToDictionary(t => t, t => type == typeof(DefaultState) ? null : giGetGraphGetter.GetInvoker(type, t)());
 
             Dictionary<Type, Dictionary<Enum, int>> counts = expressions.SelectDictionary(t => t, exp => 
@@ -49,8 +47,8 @@ namespace Signum.Web.Maps
 
             return new OperationMapInfo
             {
-                states = (from t in enumTypes
-                          from e in Enum.GetValues(t).Cast<Enum>()
+                states = (from t in stateTypes
+                          from e in Enum.GetValues(t.UnNullify()).Cast<Enum>()
                           let ignored = e.GetType().GetField(e.ToString(), BindingFlags.Static | BindingFlags.Public).HasAttribute<IgnoreAttribute>()
                           select new MapState
                           {
@@ -83,7 +81,7 @@ namespace Signum.Web.Maps
                               }).ToList()
             };
         }
-        
+
         static IEnumerable<Enum> WithDefaultStateArray(IEnumerable<Enum> enumerable, DefaultState forNull)
         {
             if (enumerable == null)
@@ -123,7 +121,7 @@ namespace Signum.Web.Maps
             var tuple = Tuple.Create(expr.Parameters.Single().Type, expr.Body.Type);
 
             return Tokens.GetOrCreate(tuple, () =>
-                Reflector.GetMemberListBase(expr.Body).ToString(a => a.Name, "."));
+                "Entity." + Reflector.GetMemberListBase(expr.Body).ToString(a => a.Name, "."));
         }
 
         static readonly GenericInvoker<Func<LambdaExpression>> giGetGraphGetter = 
