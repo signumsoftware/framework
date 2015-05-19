@@ -213,6 +213,7 @@
     <None Include="Linq\Linq.SqlFunctions.md" />
     <None Include="Linq\Linq.TypeMismatch.md" />
     <None Include="Operations\Operations.cd" />
+    <None Include="Operations\Operations.md" />
     <None Include="packages.config" />
     <None Include="Schema\EntityEvents.md" />
     <None Include="Schema\Schema.md" />
