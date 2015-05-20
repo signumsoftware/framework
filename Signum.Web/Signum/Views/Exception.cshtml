@@ -2,10 +2,10 @@
 @using (var e = Html.TypeContext<ExceptionEntity>())
 {
     e.LabelColumns = new BsColumn(4);
-    <div class="ro2">
+    <div class="row">
         <div class="col-sm-6">
             @Html.ValueLine(e, f => f.Environment)
-            @Html.ValueLine(e, f => f.CreationDate)<text>(</text>@e.Value.CreationDate.ToUserInterface().ToAgoString()<text>)</text>
+            @Html.ValueLine(e, f => f.CreationDate, vl => vl.UnitText = e.Value.CreationDate.ToUserInterface().ToAgoString())
             @Html.EntityLine(e, f => f.User)
             @Html.ValueLine(e, f => f.Version)
             @Html.ValueLine(e, f => f.ThreadId)
@@ -17,26 +17,35 @@
             @Html.ValueLine(e, f => f.ControllerName)
             @Html.ValueLine(e, f => f.UserHostAddress)
             @Html.ValueLine(e, f => f.UserHostName)
-            @Html.ValueLine(e, f => f.UserAgent)
+            @Html.ValueLine(e, f => f.UserAgent, vl => vl.ValueLineType = ValueLineType.TextArea)
         </div>
     </div>
     e.LabelColumns = new BsColumn(2);
     @Html.ValueLine(e, f => f.RequestUrl)
     @Html.ValueLine(e, f => f.UrlReferer)
-    
-    <h3>QueryString</h3>
-    <pre><code>@e.Value.QueryString</code></pre>
-    
-    <h3>Form</h3>
-    <pre><code>@e.Value.Form</code></pre>
-
-    <h3>Session</h3>
-    <pre><code>@e.Value.Session</code></pre>
 
     <h3 style="color: rgb(139,0,0)">@e.Value.ExceptionType</h3>
     <pre><code>@e.Value.ExceptionMessage</code></pre>
-    <h3>StackTrace</h3>
-    <pre><code>@e.Value.StackTrace</code></pre>
-    <h3>Data</h3>
-    <pre><code>@e.Value.Data</code></pre>
+
+    using (var tabs = Html.Tabs(e))
+    {
+        tabs.Tab(new Tab("stackTrace", "StackTrace", @<text><pre><code>@e.Value.StackTrace</code></pre></text>));
+
+        if (e.Value.Data.HasText())
+        {
+            tabs.Tab(new Tab("data", "Data", @<text><pre><code>@e.Value.Data</code></pre></text>));
+        }
+        if (e.Value.QueryString.HasText())
+        {
+            tabs.Tab(new Tab("queryString", "QueryString", @<text><pre><code>@e.Value.QueryString</code></pre></text>));
+        }
+        if (e.Value.Form.HasText())
+        {
+            tabs.Tab(new Tab("form", "Form", @<text><pre><code>@e.Value.Form</code></pre></text>));
+        }
+        if (e.Value.Session.HasText())
+        {
+            tabs.Tab(new Tab("session", "Session", @<text><pre><code>@e.Value.Session</code></pre></text>));
+        }
+    }
 }

@@ -31,7 +31,8 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
-            var id = lite.Reference is ImplementedByAllExpression ?
+            var id = lite.Reference is ImplementedByAllExpression || 
+                lite.Reference is ImplementedByExpression && ((ImplementedByExpression)lite.Reference).Implementations.Select(imp=>imp.Value.ExternalId.ValueType.Nullify()).Distinct().Count() > 1 ?
                 (Expression)binder.GetIdString(lite.Reference) :
                 (Expression)binder.GetId(lite.Reference);
 

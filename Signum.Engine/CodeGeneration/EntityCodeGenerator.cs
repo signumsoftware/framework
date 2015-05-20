@@ -613,7 +613,7 @@ namespace Signum.Engine.CodeGeneration
             return "StringLengthValidator(" + parts.ToString(", ") + ")";
         }
 
-        protected virtual int GetMinStringLength(DiffColumn col)
+        protected virtual int? GetMinStringLength(DiffColumn col)
         {
             return 1;
         }

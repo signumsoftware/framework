@@ -20,7 +20,7 @@ namespace Signum.Web
 
     public class ToolBarButton
     {
-        public string Id { get; private set; }
+        public string Id { get; set; }
         public string Text { get; set; }
         public MvcHtmlString Html { get; set; }
         public string Title { get; set; }

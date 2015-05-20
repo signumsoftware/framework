@@ -128,7 +128,10 @@ namespace Signum.Web
         public static object This = new object();
         public static object Event = new object();
 
-      
+        public MvcHtmlString ToScriptTag()
+        {
+            return MvcHtmlString.Create("<script>" + this.ToString() + "</script>");
+        }
 
         public static string SFControlThen(string prefix, string functionCall)
         {

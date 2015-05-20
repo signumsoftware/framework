@@ -179,15 +179,18 @@ namespace Signum.Engine.Linq
 
         public ObjectName Name { get { return Table.Name; } }
 
+        public readonly string WithHint;
+
         public override Alias[] KnownAliases
         {
             get { return new[] { Alias }; }
         }
 
-        internal TableExpression(Alias alias, ITable table)
+        internal TableExpression(Alias alias, ITable table, string withHint)
             : base(DbExpressionType.Table, alias)
         {
             this.Table = table;
+            this.WithHint = withHint;
         }
 
         public override string ToString()
@@ -513,7 +516,7 @@ namespace Signum.Engine.Linq
    
         public override string ToString()
         {
-            return "{0}\r\n{1}\r\n{2}\r\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition.ToString());
+            return "{0}\r\n{1}\r\n{2}\r\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition.TryToString());
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)

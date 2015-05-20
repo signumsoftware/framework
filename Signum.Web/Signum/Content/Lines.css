@@ -21,6 +21,12 @@ input[type=checkbox].form-control
 p.form-control
 {
     background-color: #f6f6f6;
+    margin: 0px;
+}
+
+p.form-control.readonly-textarea
+{
+    height: initial !important;
 }
 
 .numeric 

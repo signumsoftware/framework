@@ -1,0 +1,14 @@
+@using Signum.Entities.DynamicQuery
+@using Signum.Entities.Reflection
+@using Signum.Engine.DynamicQuery
+@model Context
+
+@{
+    var filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
+}
+
+@for (int i = 0; i < filterOptions.Count; i++)
+{
+    FilterOption filter = filterOptions[i];
+    @Html.NewFilter(filter, Model, i)
+}

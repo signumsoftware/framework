@@ -219,19 +219,23 @@ namespace Signum.Web
         {
             if (type.UnNullify() == typeof(bool))
             {
+                if (!value.HasText())
+                    return null;
+
                 string[] vals = ((string)value).Split(',');
                 return (vals[0] == "true" || vals[0] == "True");
             }
             if (type.UnNullify() == typeof(DateTime))
             {
-                if (value.HasText())
-                    return DateTime.Parse(value).FromUserInterface();
-                return null;
+                if (!value.HasText())
+                    return null;
+
+                return DateTime.Parse(value).FromUserInterface();
             }
             if (type.UnNullify().IsLite())
                 return Database.FillToString(Lite.Parse(value));
 
-            return ReflectionTools.Parse(value, type); 
+            return ReflectionTools.Parse(value, type);
         }
     }
 }

@@ -264,9 +264,9 @@ namespace Signum.Engine.SchemaInfoTables
     [TableName("indexes", SchemaName = "sys")]
     public class SysIndexes : IView
     {
+        [ViewPrimaryKey]
         public int index_id;
         public string name;
-        [ViewPrimaryKey]
         public int object_id;
         public bool is_unique;
         public bool is_primary_key;
@@ -285,6 +285,13 @@ namespace Signum.Engine.SchemaInfoTables
         public SysTables Table()
         {
             return TableExpression.Evaluate(this);
+        }
+
+        static Expression<Func<SysIndexes, SysPartitions>> PartitionExpression =
+        ix => Database.View<SysPartitions>().SingleOrDefault(au => au.object_id == ix.object_id && au.index_id == ix.index_id);
+        public SysPartitions Partition()
+        {
+            return PartitionExpression.Evaluate(this);
         }
     }
 
@@ -357,6 +364,31 @@ namespace Signum.Engine.SchemaInfoTables
         public int object_id;
         public string name;
         public string activation_procedure;
+    }
+
+    [TableName("partitions", SchemaName = "sys")]
+    public class SysPartitions : IView
+    {
+        [ViewPrimaryKey]
+        public int partition_id;
+        public int object_id;
+        public int index_id;
+        public int rows;
+
+        static Expression<Func<SysPartitions, IQueryable<SysAllocationUnits>>> AllocationUnitsExpression =
+        ix => Database.View<SysAllocationUnits>().Where(au => au.container_id == ix.partition_id);
+        public IQueryable<SysAllocationUnits> AllocationUnits()
+        {
+            return AllocationUnitsExpression.Evaluate(this);
+        }
+    }
+
+    [TableName("allocation_units", SchemaName = "sys")]
+    public class SysAllocationUnits : IView
+    {
+        [ViewPrimaryKey]
+        public int container_id;
+        public int total_pages;
     }
 
 #pragma warning restore 649

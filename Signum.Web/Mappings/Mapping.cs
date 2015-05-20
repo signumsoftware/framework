@@ -98,14 +98,27 @@ namespace Signum.Web
                     return TimeSpan.Parse(ctx.Input);
             });
 
-            MappingRepository<string>.Mapping = ctx =>
-            {
-                if (ctx.Empty())
-                    return ctx.None();
-
-                return ctx.Input;
-            };
+            MappingRepository<string>.Mapping = StringTrim;
         }
+
+        public static Mapping<string> String = ctx =>
+        {
+            if (ctx.Empty())
+                return ctx.None();
+
+            return ctx.Input;
+        };
+
+        public static Mapping<string> StringTrim = ctx =>
+        {
+            if (ctx.Empty())
+                return ctx.None();
+
+            if (ctx.Input.HasText())
+                return ctx.Input.Trim();
+
+            return ctx.Input;
+        };
 
         public static void RegisterValue<T>(Mapping<T> mapping)
         {

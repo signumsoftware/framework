@@ -16,15 +16,9 @@ namespace Signum.Web
 {
     public static class FilterBuilderHelper
     {
-        public static MvcHtmlString NewFilter(this HtmlHelper helper, object queryName, FilterOption filterOptions, Context context, int index)
+        public static MvcHtmlString NewFilter(this HtmlHelper helper, FilterOption filterOptions, Context context, int index)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            if (filterOptions.Token == null)
-            {
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                filterOptions.Token = QueryUtils.Parse(filterOptions.ColumnName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
-            }
 
             FilterType filterType = QueryUtils.GetFilterType(filterOptions.Token.Type);
             List<FilterOperation> possibleOperations = QueryUtils.GetFilterOperations(filterType);
