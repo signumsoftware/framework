@@ -66,6 +66,7 @@ namespace Signum.Engine.Mailing
             {
                 return new SmtpClient
                 {
+                    DeliveryFormat = config.DeliveryFormat,
                     DeliveryMethod = config.DeliveryMethod,
                     PickupDirectoryLocation = config.PickupDirectoryLocation,
                 };
@@ -73,7 +74,7 @@ namespace Signum.Engine.Mailing
             else
             {
                 SmtpClient client = EmailLogic.SafeSmtpClient(config.Network.Host, config.Network.Port);
-
+                client.DeliveryFormat = config.DeliveryFormat;
                 client.UseDefaultCredentials = config.Network.UseDefaultCredentials;
                 client.Credentials = config.Network.Username.HasText() ? new NetworkCredential(config.Network.Username, config.Network.Password) : null;
                 client.EnableSsl = config.Network.EnableSSL;

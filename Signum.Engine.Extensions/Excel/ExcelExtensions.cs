@@ -145,6 +145,47 @@ namespace Signum.Engine.Excel
             return value;
         }
 
+        public static void SetCellValue(this Cell cell, object value, Type type)
+        {
+            if(type == typeof(string))
+            {
+                cell.RemoveAllChildren();
+                cell.Append(new InlineString(new Text((string)value)));
+                cell.DataType = CellValues.InlineString;
+            }
+            else
+            {
+                string excelValue = value == null ? "" :
+                            type.UnNullify() == typeof(DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
+                            type.UnNullify() == typeof(bool) ? (((bool)value) ? "TRUE": "FALSE") :
+                            IsNumber(type.UnNullify()) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
+                            value.ToString();
+
+                cell.CellValue = new CellValue(excelValue);
+            }
+        }
+
+        private static bool IsNumber(Type type)
+        {
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.Single:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public static WorksheetPart GetWorksheetPartById(this SpreadsheetDocument document, string sheetId)
         {
             WorkbookPart wbPart = document.WorkbookPart;

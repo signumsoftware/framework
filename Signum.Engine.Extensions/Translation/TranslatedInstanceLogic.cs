@@ -24,7 +24,8 @@ namespace Signum.Engine.Translation
 {
     public static class TranslatedInstanceLogic
     {
-        public static Func<CultureInfo> DefaultCulture { get; private set; }
+        static Func<CultureInfo> getDefaultCulture;
+        public static CultureInfo DefaultCulture { get { return getDefaultCulture(); } }
 
         public static Dictionary<Type, Dictionary<PropertyRoute, TraducibleRouteType>> TraducibleRoutes 
             = new Dictionary<Type, Dictionary<PropertyRoute, TraducibleRouteType>>();
@@ -37,7 +38,10 @@ namespace Signum.Engine.Translation
                 sb.Include<TranslatedInstanceEntity>();
                 sb.AddUniqueIndex<TranslatedInstanceEntity>(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId });
 
-                DefaultCulture = defaultCulture;
+                if (defaultCulture == null)
+                    throw new ArgumentNullException("defaultCulture");
+
+                TranslatedInstanceLogic.getDefaultCulture = defaultCulture;
 
                 dqm.RegisterQuery(typeof(TranslatedInstanceEntity), () =>
                     from e in Database.Query<TranslatedInstanceEntity>()
@@ -117,7 +121,7 @@ namespace Signum.Engine.Translation
 
         public static List<TranslatedTypeSummary> TranslationInstancesStatus()
         {
-            var cultures = TranslationLogic.CurrentCultureInfos(DefaultCulture());
+            var cultures = TranslationLogic.CurrentCultureInfos(DefaultCulture);
 
             return (from type in TraducibleRoutes.Keys
                     from ci in cultures
@@ -125,7 +129,7 @@ namespace Signum.Engine.Translation
                     {
                         Type = type,
                         CultureInfo = ci,
-                        State = ci.IsNeutralCulture && ci.Name != DefaultCulture().Name ? GetState(type, ci) : null,
+                        State = ci.IsNeutralCulture && ci.Name != DefaultCulture.Name ? GetState(type, ci) : null,
                     }).ToList();
 
         }
@@ -397,7 +401,7 @@ namespace Signum.Engine.Translation
 
         public static FilePair ExportExcelFileSync(Type type, CultureInfo culture)
         {
-            var changes = TranslatedInstanceLogic.GetInstanceChanges(type, culture, new List<CultureInfo> { TranslatedInstanceLogic.DefaultCulture() });
+            var changes = TranslatedInstanceLogic.GetInstanceChanges(type, culture, new List<CultureInfo> { TranslatedInstanceLogic.DefaultCulture });
 
             var list = (from ic in changes
                         from pr in ic.RouteConflicts
@@ -407,7 +411,7 @@ namespace Signum.Engine.Translation
                             Instance = ic.Instance.Key(),
                             Path = pr.Key.Route.PropertyString(),
                             RowId = pr.Key.RowId.TryToString(),
-                            Original = pr.Value.GetOrThrow(TranslatedInstanceLogic.DefaultCulture()).Original,
+                            Original = pr.Value.GetOrThrow(TranslatedInstanceLogic.DefaultCulture).Original,
                             Translated = null
                         }).ToList();
 
@@ -464,9 +468,9 @@ namespace Signum.Engine.Translation
 
                 var result = (from rc in routeConflicts
                               from c in cultures
-                              let str = c.Equals(TranslatedInstanceLogic.DefaultCulture()) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
+                              let str = c.Equals(TranslatedInstanceLogic.DefaultCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
                               where str.HasText()
-                              let old = c.Equals(TranslatedInstanceLogic.DefaultCulture()) ? target.TryGetC(rc.Key) : null
+                              let old = c.Equals(TranslatedInstanceLogic.DefaultCulture) ? target.TryGetC(rc.Key) : null
                               select new
                               {
                                   rc.Key.Route,
@@ -599,7 +603,7 @@ namespace Signum.Engine.Translation
 
         public int TotalOriginalLength()
         {
-            return RouteConflicts.Values.Sum(dic => dic[TranslatedInstanceLogic.DefaultCulture()].Original.Length);
+            return RouteConflicts.Values.Sum(dic => dic[TranslatedInstanceLogic.DefaultCulture].Original.Length);
         }
     }
 

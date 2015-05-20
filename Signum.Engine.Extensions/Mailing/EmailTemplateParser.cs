@@ -384,7 +384,7 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        private static SqlPreCommand Regenerate(EmailTemplateEntity et, Replacements replacements, Table table)
+        internal static SqlPreCommand Regenerate(EmailTemplateEntity et, Replacements replacements, Table table)
         {
             var newTemplate = SystemEmailLogic.CreateDefaultTemplate(et.SystemEmail);
 
@@ -392,20 +392,9 @@ namespace Signum.Engine.Mailing
             newTemplate.SetNew(false);
             newTemplate.Ticks = et.Ticks; 
 
-            using (replacements.WithReplacedDatabaseName())
+            using (replacements == null ? null : replacements.WithReplacedDatabaseName())
                 return table.UpdateSqlSync(newTemplate, includeCollections: true, comment: "EmailTemplate Regenerated: " + et.Name);
         }
-    
-        //static bool AreSimilar(string p1, string p2)
-        //{
-        //    if (p1.StartsWith("Entity."))
-        //        p1 = p1.After("Entity.");
-
-        //    if (p2.StartsWith("Entity."))
-        //        p2 = p2.After("Entity.");
-
-        //    return p1 == p2;
-        //}
     }
 
     public class EmailTemplateParameters : TemplateParameters

@@ -86,7 +86,14 @@ namespace Signum.Engine.Cache
         static void Schema_SchemaCompleted()
         {
             foreach (var cont in controllers.Values.NotNull())
-                cont.CachedTable.CompleteToString();
+            {
+                cont.BuildCachedTable();
+            }
+
+            foreach (var cont in controllers.Values.NotNull())
+            {
+                cont.CachedTable.SchemaCompleted();
+            }
         }
 
         static void CacheInvalidator_ReceiveInvalidation(string tableName)
@@ -496,6 +503,8 @@ namespace Signum.Engine.Cache
             }
         }
 
+        public static IEnumerable<Type> SemiControllers { get { return controllers.Where(a=>a.Value == null).Select(a=>a.Key); } }
+
         internal static Dictionary<Type, List<CachedTableBase>> semiControllers = new Dictionary<Type, List<CachedTableBase>>();
         static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
 
@@ -575,8 +584,6 @@ namespace Signum.Engine.Cache
                 controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
 
                 TryCacheSubTables(typeof(T), sb);
-
-                cc.BuildCachedTable();
             }
             else //data == EntityData.Transactional
             {
@@ -801,6 +808,8 @@ namespace Signum.Engine.Cache
         void OnChange(object sender, SqlNotificationEventArgs args);
 
         void ForceReset();
+
+        void BuildCachedTable();
     }
 
     public class CacheEventArgs : EventArgs

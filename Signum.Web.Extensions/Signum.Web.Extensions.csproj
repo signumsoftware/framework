@@ -28,6 +28,7 @@
     <IISExpressUseClassicPipelineMode />
     <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
     <TargetFrameworkProfile />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -82,27 +83,27 @@
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.2\lib\net45\System.Web.Helpers.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Mvc, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.2\lib\net45\System.Web.Mvc.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.2\lib\net45\System.Web.Razor.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.2\lib\net45\System.Web.WebPages.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.2\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.2\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.WorkflowServices" />
     <Reference Include="System.Web" />
@@ -127,11 +128,6 @@
       <DependentUpon>AlertType.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Alerts\Views\Web.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Web.config</DependentUpon>
     </Compile>
     <Compile Include="Alerts\Views\_ViewStart.generated.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
@@ -398,6 +394,25 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Mailing\WebMailProcessor.cs" />
+    <Compile Include="Maps\Controllers\MapController.cs" />
+    <Compile Include="Maps\MapClient.cs" />
+    <Compile Include="Maps\OperationMap.cs" />
+    <Compile Include="Maps\SchemaMap.cs" />
+    <Compile Include="Maps\Views\OperationMap.generated.cs">
+      <DependentUpon>OperationMap.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Maps\Views\SchemaMap.generated.cs">
+      <DependentUpon>SchemaMap.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Maps\Views\_ViewStart.generated.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Scheduler\Controllers\SchedulerController.cs" />
     <Compile Include="Scheduler\Views\SchedulerPanel.generated.cs">
       <DependentUpon>SchedulerPanel.cshtml</DependentUpon>
@@ -639,11 +654,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Note.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Notes\Views\Web.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Web.config</DependentUpon>
     </Compile>
     <Compile Include="Notes\Views\_ViewStart.generated.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
@@ -927,11 +937,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>View.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Translation\Views\Web.generated.cs">
-      <DependentUpon>Web.config</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Translation\Views\_ViewStart.generated.cs">
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -1012,6 +1017,29 @@
     <EmbeddedResource Include="Word\Scripts\Word.js">
       <DependentUpon>Word.ts</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Maps\Scripts\SchemaMap.js">
+      <DependentUpon>SchemaMap.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Maps\Scripts\MapColors.js">
+      <DependentUpon>MapColors.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Cache\Scripts\CacheColors.js">
+      <DependentUpon>CacheColors.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Disconnected\Scripts\DisconnectedColors.js">
+      <DependentUpon>DisconnectedColors.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Isolation\Scripts\IsolationColors.js">
+      <DependentUpon>IsolationColors.ts</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AuthAdmin\Scripts\AuthAdminColors.js">
+      <DependentUpon>AuthAdminColors.ts</DependentUpon>
+    </EmbeddedResource>
+    <Content Include="Maps\Content\operationMap.css" />
+    <Content Include="Maps\Content\schemaMap.css" />
+    <EmbeddedResource Include="Maps\Scripts\OperationMap.js">
+      <DependentUpon>OperationMap.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Word\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1061,10 +1089,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>AlertType.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Alerts\Views\Web.config">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Web.generated.cs</LastGenOutput>
-    </Content>
+    <Content Include="Alerts\Views\Web.config" />
     <None Include="AuthAdmin\Views\Operations.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Operations.generated.cs</LastGenOutput>
@@ -1093,6 +1118,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>User.generated.cs</LastGenOutput>
     </None>
+    <TypeScriptCompile Include="AuthAdmin\Scripts\AuthAdminColors.ts" />
     <TypeScriptCompile Include="Auth\Scripts\Auth.ts" />
     <EmbeddedResource Include="Auth\Scripts\Auth.js">
       <DependentUpon>Auth.ts</DependentUpon>
@@ -1114,6 +1140,7 @@
       <DependentUpon>Cache.ts</DependentUpon>
     </EmbeddedResource>
     <Content Include="Calendar\Content\calendar.css" />
+    <TypeScriptCompile Include="Cache\Scripts\CacheColors.ts" />
     <TypeScriptCompile Include="Calendar\Scripts\calendar.ts" />
     <EmbeddedResource Include="Calendar\Scripts\calendar.js">
       <DependentUpon>calendar.ts</DependentUpon>
@@ -1169,6 +1196,8 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
+    <TypeScriptCompile Include="Disconnected\Scripts\DisconnectedColors.ts" />
+    <TypeScriptCompile Include="Isolation\Scripts\IsolationColors.ts" />
     <TypeScriptCompile Include="Isolation\Scripts\Isolation.ts" />
     <EmbeddedResource Include="Excel\Scripts\Excel.js">
       <DependentUpon>Excel.ts</DependentUpon>
@@ -1201,6 +1230,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
+    <TypeScriptCompile Include="Maps\Scripts\OperationMap.ts" />
+    <TypeScriptCompile Include="Maps\Scripts\SchemaMap.ts" />
+    <TypeScriptCompile Include="Maps\Scripts\MapColors.ts" />
     <TypeScriptCompile Include="Omnibox\Scripts\Omnibox.ts" />
     <TypeScriptCompile Include="Processes\Scripts\Processes.ts" />
     <TypeScriptCompile Include="Notes\Scripts\Notes.ts" />
@@ -1370,10 +1402,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ChartResultsTable1.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Notes\Views\Web.config">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Web.generated.cs</LastGenOutput>
-    </Content>
+    <Content Include="Notes\Views\Web.config" />
     <Content Include="Notes\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1482,6 +1511,19 @@
     <Content Include="Mailing\Views\SmtpNetworkDelivery.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SmtpNetworkDelivery.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Maps\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Maps\Views\SchemaMap.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SchemaMap.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Maps\Views\Web.config" />
+    <Content Include="Maps\Views\OperationMap.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>OperationMap.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1729,10 +1771,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>MultipleSMS.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Translation\Views\Web.config">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Web.generated.cs</LastGenOutput>
-    </Content>
+    <Content Include="Translation\Views\Web.config" />
     <Content Include="Translation\Views\Index.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Index.generated.cs</LastGenOutput>
@@ -1879,7 +1918,7 @@
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost/Signum.Web.Extensions</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
-          <UseCustomServer>True</UseCustomServer>
+          <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>http://google.com</CustomServerUrl>
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>

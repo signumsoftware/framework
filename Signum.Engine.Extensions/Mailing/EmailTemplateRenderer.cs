@@ -191,8 +191,10 @@ namespace Signum.Engine.Mailing
                     recipients.AddRange(systemEmail.GetRecipients());
 
                 if (smtpConfig != null)
-                    recipients.AddRange(smtpConfig.AditionalRecipients.Select(r =>
-                        new EmailOwnerRecipientData(r.EmailOwner.Retrieve().EmailOwnerData) { Kind = r.Kind }));
+                {
+                    recipients.AddRange(smtpConfig.AdditionalRecipients.Where(a => a.EmailOwner == null).Select(r =>
+                        new EmailOwnerRecipientData(new EmailOwnerData { CultureInfo = null, DisplayName = r.DisplayName, Email = r.EmailAddress, Owner = r.EmailOwner }) { Kind = r.Kind }));
+                }
 
                 if (recipients.Any())
                     yield return recipients;

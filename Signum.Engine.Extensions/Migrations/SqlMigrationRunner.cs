@@ -182,7 +182,7 @@ namespace Signum.Engine.Migrations
                     {
                         Draw(migrationsInOrder, item);
 
-                        Execute(item);
+                        Execute(item, autoRun);
                     }
 
                     return true;
@@ -200,7 +200,7 @@ namespace Signum.Engine.Migrations
 
         public static int Timeout = 5 * 60; 
 
-        private static void Execute(MigrationInfo mi)
+        private static void Execute(MigrationInfo mi, bool autoRun)
         {
             string title = mi.Version + (mi.Comment.HasText() ? " ({0})".FormatWith(mi.Comment) : null);
 
@@ -221,7 +221,10 @@ namespace Signum.Engine.Migrations
                 {   
                     for (pos = 0; pos < parts.Length; pos++)
 			        {
-                        SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, parts.Length), () => Executor.ExecuteNonQuery(parts[pos]));
+                        if (autoRun)
+                            Executor.ExecuteNonQuery(parts[pos]);
+                        else
+                            SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, parts.Length), () => Executor.ExecuteNonQuery(parts[pos]));
 			        }
                 }
                 catch (SqlException e)

@@ -111,6 +111,7 @@
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
     <Compile Include="Mailing\SystemEmail.cs" />
+    <Compile Include="Map\MapMessage.cs" />
     <Compile Include="Migrations\CSharpMigration.cs" />
     <Compile Include="Migrations\SqlMigration.cs" />
     <Compile Include="Scheduler\ScheduledTaskLogEntity.cs" />
@@ -144,7 +145,6 @@
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\FilePath.cs" />
-    <Compile Include="Files\FileRepository.cs" />
     <Compile Include="Files\IFileServer.cs" />
     <Compile Include="Mailing\EmailConfiguration.cs" />
     <Compile Include="Templating\TemplateTokenMessage.cs" />

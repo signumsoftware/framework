@@ -1,0 +1,71 @@
+﻿@using Signum.Web.Maps;
+@using System.Reflection;
+@using Newtonsoft.Json;
+@using Signum.Entities.Map;
+@model SchemaMapInfo
+@Html.ScriptCss("~/Maps/Content/schemaMap.css")
+@{ var colorProviders = (List<MapColorProvider>)ViewData["colorProviders"]; }
+
+<div class="form-inline form-sm container" style="margin-top: 10px;">
+    <div class="form-group">
+        <label for="filter">@MapMessage.Filter.NiceToString()</label>
+        <input type="text" class="form-control" id="filter" placeholder="type or namespace">
+    </div>
+    <div class="form-group" style="margin-left: 10px;">
+        <label for="color">@MapMessage.Color.NiceToString()</label>
+        <select class="form-control" id="color">
+            @foreach(var cp in colorProviders)
+            {
+                <option value="@cp.Name">@cp.NiceName</option>
+            }
+        </select>
+    </div>
+    <span style="margin-left: 10px;">
+        @MapMessage.Press0ToExploreEachTable.NiceToString().FormatHtml(new HtmlTag("u").SetInnerText("Ctrl + Click"))
+    </span>
+</div>
+
+<div id="map" style="background-color:white">
+    <svg id="svgMap">
+        <defs>
+          
+
+            <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
+                <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0" />
+            </marker>    
+
+            <marker id="lite_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
+                <path fill="gray" d="M5,0L0,-5L10,0L0,5L5,0" />
+            </marker>    
+
+            <marker id="mlist_arrow" viewBox="-10 -5 20 10" refX="10" refY="0" markerWidth="10" markerHeight="20" orient="auto">
+                <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" />
+            </marker>  
+            
+            @foreach(var cp in colorProviders.Where(c=>c.Defs != null))
+            {
+                @cp.Defs;
+            } 
+        </defs>
+    </svg>
+</div>
+<script>
+    function getProvider(name, nodes) {
+        return new Promise(function (resolve) {
+            switch (name) {
+                @foreach (var cp in colorProviders)
+                {
+                    <text>case "@cp.Name": 
+                    require(['@cp.GetJsProvider.Module'], function(mod) { 
+                        resolve(mod.@(cp.GetJsProvider.FunctionName)(@Html.Raw(cp.GetJsProvider.Arguments.ToString(a=>a == MapClient.NodesConstant ? "nodes" : 
+                                                             JsonConvert.SerializeObject(a, cp.GetJsProvider.JsonSerializerSettings),", ")))) 
+                    }); break
+                    </text>
+                }
+            }
+        });
+    }
+
+
+    @MapClient.SchemaModule["createMap"]("map", "svgMap", "filter", "color", Model, "getProvider")
+</script>

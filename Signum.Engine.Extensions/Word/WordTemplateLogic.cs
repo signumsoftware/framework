@@ -367,15 +367,23 @@ namespace Signum.Engine.Word
             }
         }
 
+        public static void Regenerate(WordTemplateEntity template)
+        {
+            Regenerate(template, null).ExecuteLeaves();
+        }
+
         private static SqlPreCommand Regenerate(WordTemplateEntity template, Replacements replacements)
         {
             var newTemplate = SystemWordTemplateLogic.CreateDefaultTemplate(template.SystemWordTemplate);
 
             var file = template.Template.Retrieve();
 
-            file.BinaryFile = newTemplate.Template.Entity.BinaryFile;
+            using (file.AllowChanges())
+            {
+                file.BinaryFile = newTemplate.Template.Entity.BinaryFile;
 
-            return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate Regenerated: " + template.Name);
+                return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate Regenerated: " + template.Name);
+            }
         }
 
         public static IEnumerable<OpenXmlPartRootElement> RecursivePartsRootElements(this WordprocessingDocument document)

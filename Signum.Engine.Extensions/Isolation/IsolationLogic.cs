@@ -238,6 +238,11 @@ namespace Signum.Engine.Isolation
                 Database.Query<T>().Where(e => gr.Contains(e.ToLite())).Select(e => e.Isolation()).Only()
                 ).NotNull().Only();
         }
+
+        public static Dictionary<Type, IsolationStrategy> GetIsolationStrategies()
+        {
+            return strategies.ToDictionary();
+        }
         
     }
 }

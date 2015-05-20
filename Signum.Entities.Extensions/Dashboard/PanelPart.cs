@@ -24,7 +24,7 @@ namespace Signum.Entities.Dashboard
         }
 
         int row;
-        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
         public int Row
         {
             get { return row; }

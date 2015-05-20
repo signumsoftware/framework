@@ -19,6 +19,7 @@ using System.Web.Routing;
 using Signum.Engine.Basics;
 using Signum.Web.Basic;
 using Signum.Web.Omnibox;
+using Signum.Web.Maps;
 
 namespace Signum.Web.AuthAdmin
 {
@@ -26,6 +27,7 @@ namespace Signum.Web.AuthAdmin
     {
         public static string ViewPrefix = "~/authAdmin/Views/{0}.cshtml";
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/AuthAdmin/Scripts/AuthAdmin");
+        public static JsModule ColorModule = new JsModule("Extensions/Signum.Web.Extensions/AuthAdmin/Scripts/AuthAdminColors");
 
         public static void Start(bool types, bool properties, bool queries, bool operations, bool permissions)
         {
@@ -80,6 +82,8 @@ namespace Signum.Web.AuthAdmin
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",
                     () => BasicPermission.AdminRules.IsAuthorized(),
                     uh => uh.Action((AuthAdminController aac) => aac.Export())));
+
+                MapClient.GetColorProviders += GetMapColors;
             }
         }
 
@@ -169,5 +173,97 @@ namespace Signum.Web.AuthAdmin
             {typeof(OperationRulePack),typeof(RuleOperationEntity)},
             {typeof(PermissionRulePack),typeof(RulePermissionEntity)},        
         };
+
+
+
+        static MapColorProvider[] GetMapColors()
+        {
+            if(!BasicPermission.AdminRules.IsAuthorized())
+                return new MapColorProvider[0];
+
+            var roleRules = AuthLogic.RolesInOrder().ToDictionary(r=>r, r=>TypeAuthLogic.GetTypeRules(r).Rules.ToDictionary(a=>Navigator.ResolveWebTypeName(a.Resource.ToType()), a=>a.Allowed));
+
+            return roleRules.Keys.Select((r, i) => new MapColorProvider
+            {
+                Name = "role-" + r.Key(),
+                NiceName = "Role - " + r.ToString(),
+                GetJsProvider = ColorModule["authAdminColor"](MapClient.NodesConstant, "role-" + r.Key()),
+                AddExtra = t =>
+                {
+                    TypeAllowedAndConditions tac = roleRules[r].TryGetC(t.webTypeName);
+
+                    if (tac == null)
+                        return;
+
+                    t.extra["role-" + r.Key() + "-ui"] = GetName(ToStringList(tac, userInterface: true));
+                    t.extra["role-" + r.Key() + "-db"] = GetName(ToStringList(tac, userInterface: false));
+                    t.extra["role-" + r.Key() + "-tooltip"] = ToString(tac.Fallback) + "\n" + (tac.Conditions.IsNullOrEmpty() ? null :
+                        tac.Conditions.ToString(a => a.TypeCondition.NiceToString() + ": " + ToString(a.Allowed), "\n") + "\n");
+                },
+                Defs = i == 0 ? GetAllGradients(roleRules) : null,
+                Order = 10,
+            }).ToArray();
+        }
+
+        private static string ToString(TypeAllowed? typeAllowed)
+        {
+            if (typeAllowed == null)
+                return "MERGE ERROR!";
+
+            if (typeAllowed.Value.GetDB() == typeAllowed.Value.GetUI())
+                return typeAllowed.Value.GetDB().NiceToString();
+
+            return "DB {0} / UI {1}".FormatWith(typeAllowed.Value.GetDB().NiceToString(), typeAllowed.Value.GetUI().NiceToString()); 
+        }
+
+        static string GetName(List<TypeAllowedBasic?> list)
+        {
+            return "auth-" + list.ToString(a => a == null ? "Error" : a.ToString(), "-");
+        }
+
+        static MvcHtmlString GetAllGradients(Dictionary<Lite<RoleEntity>, Dictionary<string, TypeAllowedAndConditions>> roleRules)
+        {
+            var distinct = roleRules.Values.SelectMany(a => a.Values).SelectMany(tac => new[]{
+                ToStringList(tac, userInterface: true),
+                ToStringList(tac, userInterface: false),
+            }).Distinct(a => a.ToString("-"));
+
+            return new HtmlStringBuilder(distinct.Select(list => GradientDef(list))).ToHtml();
+        }
+
+        private static List<TypeAllowedBasic?> ToStringList(TypeAllowedAndConditions tac, bool userInterface)
+        {
+            List<TypeAllowedBasic?> result = new List<TypeAllowedBasic?>();
+            result.Add(tac.Fallback == null ? (TypeAllowedBasic?)null : tac.Fallback.Value.Get(userInterface));
+
+            foreach (var c in tac.Conditions)
+                result.Add(c.Allowed.Get(userInterface));
+
+            return result;
+        }
+
+        static MvcHtmlString GradientDef(List<TypeAllowedBasic?> list)
+        {
+            return MvcHtmlString.Create(@"
+<linearGradient id=""" + GetName(list) + @""" x1=""0%"" y1=""0%"" x2=""100%"" y2=""0%"">" +
+list.Select((l, i) =>
+@"<stop offset=""" + (100 * i / list.Count) + @"%"" style=""stop-color:" + Color(l) + @""" />" +
+@"<stop offset=""" + ((100 * (i + 1) / list.Count) - 1) + @"%"" style=""stop-color:" + Color(l) + @""" />"
+).ToString("\r\n") +
+"</linearGradient>");
+        }
+
+        private static string Color(TypeAllowedBasic? typeAllowedBasic)
+        {
+            switch (typeAllowedBasic)
+            {
+                case null: return "black";
+                case TypeAllowedBasic.Create: return "#0066FF";
+                case TypeAllowedBasic.Modify: return "green";
+                case TypeAllowedBasic.Read: return "gold";
+                case TypeAllowedBasic.None: return "red";
+                default: throw new InvalidOperationException();
+            }
+        }
     }
 }

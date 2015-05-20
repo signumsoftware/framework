@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
-using OpenQA.Selenium.Remote;
 using Signum.Entities.Alerts;
 using Signum.Entities.Notes;
 using Signum.Utilities;

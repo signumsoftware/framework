@@ -113,7 +113,7 @@ export class FileLine extends Lines.EntityBase {
         if (customizeXHR != null)
             customizeXHR(xhr);
 
-        xhr.send(f);
+        xhr.send(<any>f);
     }
 
     fileDropped(e: DragEvent) {

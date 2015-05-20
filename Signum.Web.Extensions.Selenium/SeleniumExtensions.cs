@@ -158,7 +158,7 @@ namespace Signum.Web.Selenium
                 selenium.SwitchTo().Alert();
                 return true;
             }
-            catch (NoAlertPresentException e)
+            catch (NoAlertPresentException)
             {
                 return false;
             }
@@ -271,6 +271,23 @@ namespace Signum.Web.Selenium
         {
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
             js.ExecuteScript("arguments[0].focus(); arguments[0].blur(); return true", element);
+        }
+
+        public static void Retry<T>(this RemoteWebDriver driver, int times, Action action) where T : Exception
+        {
+            for (int i = 0; i < times; i++)
+            {
+                try
+                {
+                    action();
+                    return;
+                }
+                catch (T)
+                {
+                    if (i >= times - 1)
+                        throw;
+                }
+            }
         }
     }
 }

@@ -109,7 +109,7 @@ namespace Signum.Entities.UserQueries
         }
 
         int? elementsPerPage;
-        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 1)]
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 1)]
         public int? ElementsPerPage
         {
             get { return elementsPerPage; }
