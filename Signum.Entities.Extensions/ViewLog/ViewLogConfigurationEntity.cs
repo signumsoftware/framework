@@ -39,7 +39,10 @@ namespace Signum.Entities.ViewLog
         public MList<TypeEntity> TypeList
         {
             get { return typeList; }
-            set { Set(ref typeList, value); }
+            set {
+                if (Set(ref typeList, value))
+                    types = null;
+                }
         }
 
         [Ignore]
