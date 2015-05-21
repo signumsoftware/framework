@@ -101,7 +101,7 @@ namespace Signum.Entities
             return false;
         }
 
-        public virtual Dictionary<Guid, Dictionary<string, string>> IdentifiableIntegrityCheck()
+        public virtual Dictionary<Guid, Dictionary<string, string>> EntityIntegrityCheck()
         {
             using (Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
             {
