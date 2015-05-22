@@ -472,7 +472,7 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("new Graph<{0}>.ConstructFrom<{1}>({2})".FormatWith(type[0].TypeName(), type[1].TypeName(), oper.Symbol.ToString()));
             sb.AppendLine("{");
-            sb.AppendLine("    Construct = ({0}, _) => new {1} {{ }}".FormatWith(GetVariableName(type[0]), type[1].TypeName()));
+            sb.AppendLine("    Construct = ({0}, _) => new {1}".FormatWith(GetVariableName(type[1]), type[0].TypeName()));
             sb.AppendLine("    {");
             sb.AppendLine("    }");
             sb.AppendLine("}.Register();");
@@ -486,7 +486,7 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("new Graph<{0}>.ConstructFromMany<{1}>({2})".FormatWith(type[0].TypeName(), type[1].TypeName(), oper.Symbol.ToString()));
             sb.AppendLine("{");
-            sb.AppendLine("    Construct = ({0}s, _) => new {1}".FormatWith(GetVariableName(type[0]), type[1].TypeName()));
+            sb.AppendLine("    Construct = ({0}s, _) => new {1}".FormatWith(GetVariableName(type[1]), type[0].TypeName()));
             sb.AppendLine("    {");
             sb.AppendLine("    }");
             sb.AppendLine("}.Register();");

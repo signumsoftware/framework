@@ -580,7 +580,7 @@ namespace Signum.Entities
 
             var prec = ((DateTime)value).GetPrecision();
             if (prec > Precision)
-                return "{{0}} has a precission of {0} instead of {1}".FormatWith(prec, Precision);
+                return ValidationMessage._0HasAPrecissionOf1InsteadOf2.NiceToString("{0}", prec, Precision);
 
             return null;
         }
@@ -962,7 +962,7 @@ namespace Signum.Entities
         BeInThePast,
         [Description("{0} should be greater than {1}")]
         _0ShouldBeGreaterThan1,
+        [Description("{0} has a precission of {1} instead of {2}")]
+        _0HasAPrecissionOf1InsteadOf2,
     }
-
-
 }
