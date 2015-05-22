@@ -400,12 +400,12 @@ namespace Signum.Entities.Chart
     {
         [Code("i")] Integer = 1,
         [Code("r")] Real = 2,
-        [Code("rg")] RealGroupable = 4,
-        [Code("d")] Date = 8,
-        [Code("dt")] DateTime = 16,
-        [Code("s")] String = 32, //Guid
-        [Code("l")] Lite = 64,
-        [Code("e")] Enum = 128, // Boolean 
+        [Code("d")] Date = 4,
+        [Code("dt")] DateTime = 8,
+        [Code("s")] String = 16, //Guid
+        [Code("l")] Lite = 32,
+        [Code("e")] Enum = 64, // Boolean,
+        [Code("rg")] RealGroupable = 128,
 
         [Code("G")] Groupable = ChartColumnTypeUtils.GroupMargin | RealGroupable | Integer | Date | String | Lite | Enum,
         [Code("M")] Magnitude = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable,
