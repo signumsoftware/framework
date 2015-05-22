@@ -32,7 +32,7 @@ namespace Signum.Engine.Mailing
             {
                 Running = running,
                 CurrentProcessIdentifier = processIdentifier,
-                DelayBetweenProcessesMilliseconds = EmailLogic.Configuration.AsyncSenderPeriodMilliseconds,
+                AsyncSenderPeriod = EmailLogic.Configuration.AsyncSenderPeriod,
                 NextPlannedExecution = nextPlannedExecution,
                 IsCancelationRequested = CancelProcess.IsCancellationRequested,
                 QueuedItems = queuedItems,
@@ -214,8 +214,8 @@ namespace Signum.Engine.Mailing
 
         private static void SetTimer()
         {
-            nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(EmailLogic.Configuration.AsyncSenderPeriodMilliseconds);
-            timer.Change(0, EmailLogic.Configuration.AsyncSenderPeriodMilliseconds);
+            nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(EmailLogic.Configuration.AsyncSenderPeriod);
+            timer.Change(0, EmailLogic.Configuration.AsyncSenderPeriod);
         }
 
         public static void Stop()
@@ -236,7 +236,7 @@ namespace Signum.Engine.Mailing
 
     public class EmailAsyncProcessState
     {
-        public int DelayBetweenProcessesMilliseconds;
+        public int AsyncSenderPeriod;
         public bool Running;
         public bool IsCancelationRequested;
         public DateTime? NextPlannedExecution;
