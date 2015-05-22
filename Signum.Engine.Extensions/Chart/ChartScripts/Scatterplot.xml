@@ -3,6 +3,7 @@
   <Columns>
     <Column DisplayName="Color" ColumnType="Groupable" IsGroupKey="true">
       <Parameter1 Name="Horizontal Margin" Type="Number" ValueDefinition="40" />
+      <Parameter2 Name="Point Size" Type="Number" ValueDefinition="2" />
     </Column>
     <Column DisplayName="Horizontal Axis" ColumnType="Positionable">
       <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
@@ -42,6 +43,8 @@
   
   var y = scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, yRule.size('content'));
   
+  
+  var pointSize = data.columns.c0.parameter2;
   
   var xTicks = x.ticks(width / 50);
   var xTickFormat = x.tickFormat(width / 50);
@@ -112,7 +115,7 @@
     .attr('stroke', function(p) { return p.c0.color || color(p.c0); })
     .attr('fill', function(p) { return p.c0.color || color(p.c0); })
     .attr('shape-rendering', 'initial')
-    .attr('r', 5)
+    .attr('r', pointSize)
     .attr('cx', function(p) { return x(p.c1); })
     .attr('cy', function(p) { return -y(p.c2); })
     .attr('data-click', function(p) { return getClickKeys(p, data.columns); })
@@ -133,6 +136,5 @@
     .attr('y2', yRule.size('content'))
     .style('stroke', 'Black');
 
-}
-]]></Script>
+}]]></Script>
 </ChartScript>
