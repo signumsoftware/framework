@@ -29,17 +29,17 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return QueryTokenMessage._0Steps1.NiceToString(Parent.ToString(), StepSize);
+            return QueryTokenMessage._0Steps1.NiceToString(Parent.NiceName(), StepSize);
         }
 
         public override string Format
         {
-            get { return null; }
+            get { return Parent.Format; }
         }
 
         public override Type Type
         {
-            get { return Parent.Type; }
+            get { return Parent.Type.Nullify(); }
         }
 
         public override string Key
@@ -52,8 +52,15 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>
             {
                 new StepMultiplierToken(this, 1),
+                new StepMultiplierToken(this, 1.2m),
+                new StepMultiplierToken(this, 1.5m),
                 new StepMultiplierToken(this, 2),
+                new StepMultiplierToken(this, 2.5m),
+                new StepMultiplierToken(this, 3),
+                new StepMultiplierToken(this, 4),
                 new StepMultiplierToken(this, 5),
+                new StepMultiplierToken(this, 6),
+                new StepMultiplierToken(this, 8),
             };
         }
 
@@ -61,7 +68,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var exp = Parent.BuildExpression(context);
 
-            return RoundingExpressionGenerator.RoundExpression(exp, this.StepSize, RoundingType.RoundMiddle);
+            return RoundingExpressionGenerator.RoundExpression(exp, this.StepSize, RoundingType.Ceil);
         }
 
         public override string Unit
@@ -88,15 +95,20 @@ namespace Signum.Entities.DynamicQuery
         {
             return new StepToken(this.Parent.Clone(), this.StepSize);
         }
+
+        public override bool IsRealGroupable
+        {
+            get { return true; }
+        }
     }
 
     public class StepMultiplierToken : QueryToken
     {
-        public int Multiplier;
+        public decimal Multiplier;
     
-        public StepMultiplierToken(StepToken parent, int multiplier) : base(parent)
+        public StepMultiplierToken(StepToken parent, decimal multiplier) : base(parent)
         {
-
+            this.Multiplier = multiplier;
         }
 
 
@@ -107,7 +119,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return QueryTokenMessage._0Steps1.NiceToString(Parent.ToString(), StepSize());
+            return QueryTokenMessage._0Steps1.NiceToString(Parent.Parent.NiceName(), StepSize());
         }
 
         internal decimal StepSize()
@@ -117,12 +129,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Format
         {
-            get { return null; }
+            get { return Parent.Format; }
         }
 
         public override Type Type
         {
-            get { return Parent.Type; }
+            get { return Parent.Type.Nullify(); }
         }
 
         public override string Key
@@ -134,7 +146,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var exp = Parent.BuildExpression(context);
 
-            return RoundingExpressionGenerator.RoundExpression(exp, this.StepSize(), RoundingType.RoundMiddle);
+            return RoundingExpressionGenerator.RoundExpression(exp, this.StepSize(), RoundingType.Ceil);
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
@@ -173,6 +185,10 @@ namespace Signum.Entities.DynamicQuery
             return this.Parent.IsAllowed();
         }
 
+        public override bool IsRealGroupable
+        {
+            get { return true; }
+        }
     }
 
     public class StepRoundingToken : QueryToken
@@ -200,17 +216,17 @@ namespace Signum.Entities.DynamicQuery
                 Rounding == RoundingType.RoundMiddle ? "|{0}|" :
                 new InvalidOperationException().Throw<string>();
 
-            return QueryTokenMessage._0Steps1.NiceToString(Parent.ToString(), str);
+            return QueryTokenMessage._0Steps1.NiceToString(Parent.Parent.Parent.NiceName(), str.FormatWith(num));
         }
 
         public override string Format
         {
-            get { return null; }
+            get { return Parent.Format; }
         }
 
         public override Type Type
         {
-            get { return Parent.Type; }
+            get { return Parent.Type.Nullify(); }
         }
 
         public override string Key
@@ -254,6 +270,11 @@ namespace Signum.Entities.DynamicQuery
         {
             return new StepRoundingToken((StepMultiplierToken)this.Parent.Clone(), this.Rounding);
         }
+
+        public override bool IsRealGroupable
+        {
+            get { return true; }
+        }
     }
 
     internal static class RoundingExpressionGenerator
@@ -292,8 +313,8 @@ namespace Signum.Entities.DynamicQuery
                     Expression.Call(miFloorDouble, result.TryConvert(typeof(double)));
             else if (rounding == RoundingType.Round || rounding == RoundingType.RoundMiddle)
                 result = result.Type.UnNullify() == typeof(decimal) ?
-                    Expression.Call(miRoundDouble, result.UnNullify()) :
-                    Expression.Call(miRoundDecimal, result.TryConvert(typeof(double)));
+                    Expression.Call(miRoundDecimal, result.UnNullify()) :
+                    Expression.Call(miRoundDouble, result.TryConvert(typeof(double)));
 
             if (multiplier != 1)
                 result = Expression.Multiply(result, Constant(multiplier, result.Type));
@@ -301,7 +322,7 @@ namespace Signum.Entities.DynamicQuery
             if (rounding == RoundingType.RoundMiddle)
                 result = Expression.Add(result, Constant(multiplier / 2, result.Type));
 
-            return result.TryConvert(value.Type);
+            return result.Nullify().TryConvert(value.Type.Nullify());
         }
 
         private static ConstantExpression Constant(decimal multiplier, Type type)
