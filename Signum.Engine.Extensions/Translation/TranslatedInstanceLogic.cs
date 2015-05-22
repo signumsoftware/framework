@@ -212,7 +212,7 @@ namespace Signum.Engine.Translation
 
             return (from e in Database.Query<T>()
                     let str = exp.Evaluate(e)
-                    where str != null &&
+                    where str != null && str != "" &&
                     !Database.Query<TranslatedInstanceEntity>().Any(ti =>
                         ti.Instance.RefersTo(e) &
                         ti.PropertyRoute.IsPropertyRoute(pr) &&
