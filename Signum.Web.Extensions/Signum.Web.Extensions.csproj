@@ -322,6 +322,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\Controllers\AsyncEmailSenderController.cs" />
     <Compile Include="Mailing\Controllers\MailingController.cs" />
     <Compile Include="Mailing\Views\ClientCertificationFile.generated.cs">
       <DependentUpon>ClientCertificationFile.cshtml</DependentUpon>
@@ -1049,6 +1050,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>WordTemplate.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="Mailing\Views\AsyncEmailSenderDashboard.cshtml" />
     <None Include="ViewLog\Views\ViewLogConfiguration.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ViewLogConfiguration.generated.cs</LastGenOutput>
@@ -1221,6 +1223,7 @@
     <TypeScriptCompile Include="Help\Scripts\helpWidget.ts" />
     <Content Include="Help\Content\helpWidget.css" />
     <Content Include="Mailing\Content\Mailing.css" />
+    <TypeScriptCompile Include="Mailing\Scripts\AsyncEmailSender.ts" />
     <TypeScriptCompile Include="Mailing\Scripts\Mailing.ts" />
     <TypeScriptCompile Include="Mailing\Scripts\ckeditor.d.ts" />
     <EmbeddedResource Include="Mailing\Scripts\Mailing.js">

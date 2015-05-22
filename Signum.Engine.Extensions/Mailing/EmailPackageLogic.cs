@@ -12,6 +12,8 @@ using System.Reflection;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Engine.Scheduler;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.Mailing
 {
@@ -25,7 +27,7 @@ namespace Signum.Engine.Mailing
         }
 
         static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> RemainingMessagesExpression =
-            p => p.Messages().Where(a => a.State == EmailMessageState.Created);
+            p => p.Messages().Where(a => a.State == EmailMessageState.RecruitedForSending);
         public static IQueryable<EmailMessageEntity> RemainingMessages(this EmailPackageEntity p)
         {
             return RemainingMessagesExpression.Evaluate(p);
@@ -45,7 +47,7 @@ namespace Signum.Engine.Mailing
             {
                 sb.Include<EmailPackageEntity>();
 
-                dqm.RegisterExpression((EmailPackageEntity ep) => ep.Messages(), ()=>EmailMessageMessage.Messages.NiceToString());
+                dqm.RegisterExpression((EmailPackageEntity ep) => ep.Messages(), () => EmailMessageMessage.Messages.NiceToString());
                 dqm.RegisterExpression((EmailPackageEntity ep) => ep.RemainingMessages(), () => EmailMessageMessage.RemainingMessages.NiceToString());
                 dqm.RegisterExpression((EmailPackageEntity ep) => ep.ExceptionMessages(), () => EmailMessageMessage.ExceptionMessages.NiceToString());
 
@@ -74,7 +76,7 @@ namespace Signum.Engine.Mailing
                                 Subject = m.Subject,
                                 Template = m.Template,
                                 EditableMessage = m.EditableMessage,
-                                State = EmailMessageState.Created
+                                State = EmailMessageState.RecruitedForSending
                             }.Save();
                         }
 
@@ -92,33 +94,62 @@ namespace Signum.Engine.Mailing
                     });
             }
         }
+
     }
 
     public class SendEmailProcessAlgorithm : IProcessAlgorithm
     {
         public void Execute(ExecutingProcess executingProcess)
         {
-            EmailPackageEntity package = (EmailPackageEntity)executingProcess.Data;
-
-
-            
+            EmailPackageEntity package = (EmailPackageEntity)executingProcess.Data;          
 
             List<Lite<EmailMessageEntity>> emails = package.RemainingMessages()
+                                                .OrderBy(e => e.CreationTime)
                                                 .Select(e => e.ToLite())
                                                 .ToList();
 
-            for (int i = 0; i < emails.Count; i++)
+            int counter = 0;
+            using (AuthLogic.Disable())
             {
-                executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
-                EmailMessageEntity ml = emails[i].RetrieveAndForget();
-
-                ml.Execute(EmailMessageOperation.Send);
-
-                executingProcess.ProgressChanged(i, emails.Count);
+                foreach (var group in emails.GroupsOf(EmailLogic.Configuration.ChunkSizeToProcessEmails))
+                {
+                    var retrieved = group.RetrieveFromListOfLite();
+                    foreach (var m in retrieved)
+                    {
+                        executingProcess.CancellationToken.ThrowIfCancellationRequested();
+                        counter++;
+                        try
+                        {
+                            using (Transaction tr = Transaction.ForceNew())
+                            {
+                                EmailLogic.SenderManager.Send(m);
+                                tr.Commit();
+                            }
+                            executingProcess.ProgressChanged(counter, emails.Count);
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                if (m.SendRetries < EmailLogic.Configuration.MaxEmailSendRetries)
+                                {
+                                    using (Transaction tr = Transaction.ForceNew())
+                                    {
+                                        var nm = m.ToLite().Retrieve();
+                                        nm.SendRetries += 1;
+                                        nm.State = EmailMessageState.ReadyToSend;
+                                        nm.Save();
+                                        tr.Commit();
+                                    }
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
             }
         }
 
-        public int NotificationSteps = 100;
     }
 }

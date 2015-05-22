@@ -138,6 +138,7 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Isolation\IsolationLogic.cs" />
+    <Compile Include="Mailing\EmailAsyncSenderLogic.cs" />
     <Compile Include="Templating\CommonTemplate.cs" />
     <Compile Include="Mailing\EmailMasterTemplateLogic.cs" />
     <Compile Include="Mailing\EmailTemplateParser.Nodes.cs" />

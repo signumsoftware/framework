@@ -1,0 +1,45 @@
+﻿@using Signum.Entities.Mailing
+@using Signum.Engine.Mailing
+@using Signum.Web.Mailing
+@model EmailAsyncProcessState
+<div id="emailAsyncMainDiv">
+    <h2>Email Async Sender state</h2>
+    <div>
+        <a href="@(Url.Action<AsyncEmailSenderController>(pc => pc.Stop()))" class="sf-button btn btn-default active" style="@(Model.Running ? "" : "display:none");color:red" id="sfEmailAsyncProcessDisable">Stop </a>
+        <a href="@(Url.Action<AsyncEmailSenderController>(pc => pc.Start()))" class="sf-button btn btn-default" style="@(!Model.Running ? "" : "display:none")" id="sfEmailAsyncProcessEnable">Start </a>
+    </div>
+
+    <div>
+        <br />
+        State: <strong>
+            @if (Model.Running)
+            {
+                <span style="color: green">RUNNING</span>
+            }
+            else
+            {
+                <span style="color: red">STOPPED</span>
+            }
+        </strong>
+        <br />
+        CurrentProcessIdentifier: @Model.CurrentProcessIdentifier
+        <br />
+        DelayBetweenProcessesMilliseconds: @Model.DelayBetweenProcessesMilliseconds
+        <br />
+        NextPlannedExecution: @Model.NextPlannedExecution
+        <br />
+        IsCancelationRequested: @Model.IsCancelationRequested
+        <br />
+        QueuedItems: @Model.QueuedItems
+        <br />
+        MachineName: @Model.MachineName
+        <br />
+        ApplicationName: @Model.ApplicationName
+    </div>
+    <script>
+        $(function () {
+            @(MailingClient.AsyncEmailSenderModule["initDashboard"](Url.Action<AsyncEmailSenderController>(p => p.View())))
+        });
+    </script>
+</div>
+

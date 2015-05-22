@@ -7,4 +7,8 @@
     @Html.ValueLine(sc, ca => ca.OverrideEmailAddress)
     @Html.EntityCombo(sc, ca => ca.DefaultCulture)
     @Html.ValueLine(sc, ca => ca.UrlLeft)
+    @Html.ValueLine(sc, ca => ca.CreationDateHoursLimitToSendEmails)
+    @Html.ValueLine(sc, ca => ca.ChunkSizeToProcessEmails)
+    @Html.ValueLine(sc, ca => ca.MaxEmailSendRetries)
+    @Html.ValueLine(sc, ca => ca.AsyncSenderPeriodMilliseconds)
 }
