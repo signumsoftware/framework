@@ -13,17 +13,12 @@ using Signum.Engine.Basics;
 using Signum.Entities.ViewLog;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
+using System.IO;
 
 namespace Signum.Engine.ViewLog
 {
     public static class ViewLogLogic
     {
-        static Func<ViewLogConfigurationEntity> getConfiguration;
-        public static ViewLogConfigurationEntity Configuration
-        {
-            get { return getConfiguration(); }
-        }
-
         public static Func<DynamicQueryManager.ExecuteType, object, BaseQueryRequest, IDisposable> QueryExecutedLog;
 
         static Expression<Func<Entity, IQueryable<ViewLogEntity>>> ViewLogsExpression =
@@ -33,10 +28,10 @@ namespace Signum.Engine.ViewLog
             return ViewLogsExpression.Evaluate(a);
         }
 
-        public static HashSet<Type> Types = new HashSet<Type>();
+        public static Func<Type, bool> LogType = type => true;
+        public static Func<BaseQueryRequest, DynamicQueryManager.ExecuteType, bool> LogQuery = (request, type) => true;
 
-
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm,HashSet<Type> types, Func<DynamicQueryManager.ExecuteType, object, BaseQueryRequest, IDisposable> QueryExecutedLog, Func<ViewLogConfigurationEntity> configuration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, HashSet<Type> registerExpression)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -56,45 +51,52 @@ namespace Signum.Engine.ViewLog
                         e.EndDate,
                     });
 
-                getConfiguration = configuration;
-
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
-
-                Types = types;
-
 
                 var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((Entity entity) => entity.ViewLogs());
 
-                foreach (var t in Types)
+                foreach (var t in registerExpression)
                 {
                     dqm.RegisterExpression(new ExtensionInfo(t, exp, exp.Body.Type, "ViewLogs", () => typeof(ViewLogEntity).NicePluralName()));
                 }
 
-                if (Types.Contains(typeof(QueryEntity)) && QueryExecutedLog != null)
-                {
-                    DynamicQueryManager.Current.QueryExecuted += QueryExecutedLog;
-                }
+                DynamicQueryManager.Current.QueryExecuted += Current_QueryExecuted;
             }
-
-            
         }
 
-  
-
-        public static Func<DynamicQueryManager.ExecuteType, object, BaseQueryRequest, IDisposable> QueryExecutedDefaultLog = (type, queryName, baseQueryRequest) =>
+        static IDisposable Current_QueryExecuted(DynamicQueryManager.ExecuteType type, object queryName, BaseQueryRequest request)
         {
-            if (type == DynamicQueryManager.ExecuteType.ExecuteQuery ||
-                type == DynamicQueryManager.ExecuteType.ExecuteGroupQuery)
+            if (request == null && !LogQuery(request, type))
+                return null;
+
+            var old = Connector.CurrentLogger;
+
+            StringWriter sw = new StringWriter();
+
+            Connector.CurrentLogger = old == null ? (TextWriter)sw : new DuplicateTextWriter(sw, old);
+
+            var viewLog = new ViewLogEntity
             {
-                baseQueryRequest.QueryTextLog = Configuration.QueryTextLog;
-                baseQueryRequest.QueryUrlLog = Configuration.QueryUrlLog;
+                Target = QueryLogic.GetQueryEntity(queryName).ToLite(),
+                User = UserHolder.Current.ToLite(),
+                ViewAction = "Query",
+            };
 
-                return LogView(QueryLogic.GetQueryEntity(queryName).ToLite(), "Query", () =>
-                       baseQueryRequest.QueryTextLog || baseQueryRequest.QueryUrlLog ? "{0} \r\n {1}".FormatWith(baseQueryRequest.QueryUrl, baseQueryRequest.QueryText) : null);
-            }
-
-            return null;
-        };
+            return new Disposable(() =>
+            {
+                try
+                {
+                    viewLog.EndDate = TimeZoneManager.Now;
+                    viewLog.Data = request.QueryUrl + "\r\n\r\n" + sw.ToString();
+                    using (ExecutionMode.Global())
+                        viewLog.Save();
+                }
+                finally
+                {
+                    Connector.CurrentLogger = old;
+                }
+            });
+        }
 
         static void ExceptionLogic_DeleteLogs(DeleteLogParametersEntity parameters)
         {
@@ -103,14 +105,6 @@ namespace Signum.Engine.ViewLog
 
         public static IDisposable LogView(Lite<IEntity> entity, string viewAction)
         {
-            return LogView(entity, viewAction, () => null);
-        }
-
-        public static IDisposable LogView(Lite<IEntity> entity, string viewAction, Func<string> dataString)
-        {
-            if (!Configuration.Active || !Configuration.Types.Contains(entity.EntityType))
-                return null;
-
             var viewLog = new ViewLogEntity
             {
                 Target = (Lite<Entity>)entity,
@@ -121,11 +115,38 @@ namespace Signum.Engine.ViewLog
             return new Disposable(() =>
             {
                 viewLog.EndDate = TimeZoneManager.Now;
-                viewLog.Data = dataString();
                 using (ExecutionMode.Global())
                     viewLog.Save();
             });
         }
     }
 
+    public class DuplicateTextWriter : TextWriter
+    {
+        public TextWriter First;
+        public TextWriter Second; 
+
+        public DuplicateTextWriter(TextWriter first, TextWriter second)
+        {
+            this.First = first;
+            this.Second = second;
+        }
+
+        public override void Write(char[] buffer, int index, int count)
+        {
+            First.Write(buffer, index, count);
+            Second.Write(buffer, index, count);
+        }
+
+        public override void Write(string value)
+        {
+            First.Write(value);
+            Second.Write(value);
+        }
+
+        public override Encoding Encoding
+        {
+            get { return Encoding.Default; }
+        }
+    }
 }

@@ -1,8 +1,0 @@
-﻿@using Signum.Entities.ViewLog
-@using (var cp = Html.TypeContext<ViewLogConfigurationEntity>())
-{
-    @Html.ValueLine(cp, d => d.Active)
-    @Html.ValueLine(cp, d => d.QueryUrlLog)
-    @Html.ValueLine(cp, d => d.QueryTextLog)
-    @Html.EntityList(cp, d => d.TypeList)
-}

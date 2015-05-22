@@ -996,11 +996,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ViewLog\Views\ViewLogConfiguration.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ViewLogConfiguration.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Word\Controllers\WordController.cs" />
     <Compile Include="Word\Views\WordTemplate.generated.cs">
       <DependentUpon>WordTemplate.cshtml</DependentUpon>
@@ -1051,11 +1046,6 @@
       <LastGenOutput>WordTemplate.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Mailing\Views\AsyncEmailSenderDashboard.cshtml" />
-    <None Include="ViewLog\Views\ViewLogConfiguration.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ViewLogConfiguration.generated.cs</LastGenOutput>
-    </None>
-    <Content Include="ViewLog\Views\Web.config" />
     <TypeScriptCompile Include="Alerts\Scripts\Alerts.ts" />
     <EmbeddedResource Include="Alerts\Scripts\Alerts.js">
       <DependentUpon>Alerts.ts</DependentUpon>

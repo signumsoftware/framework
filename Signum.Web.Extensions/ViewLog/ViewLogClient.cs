@@ -22,12 +22,7 @@ namespace Signum.Web.ViewLog
             {
                 Navigator.Manager.RetrievingForView += Manager_RetrievingForView;
                 
-                Navigator.RegisterArea(typeof(ViewLogClient));
-
-                Navigator.AddSettings(new List<EntitySettings>
-                {
-                    new EmbeddedEntitySettings<ViewLogConfigurationEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ViewLogConfiguration") },             
-                });              
+                Navigator.RegisterArea(typeof(ViewLogClient));            
             }
         }
 
@@ -35,7 +30,5 @@ namespace Signum.Web.ViewLog
         {
             return ViewLogLogic.LogView(lite, "WebRetrieve");
         }
-
-      
     }
 }
