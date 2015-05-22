@@ -131,7 +131,7 @@ namespace Signum.Engine.DynamicQuery
 
         public QueryDescription QueryDescription(object queryName)
         {
-            return Execute(ExecuteType.QueryDescription, queryName,null, dqb => dqb.GetDescription());
+            return Execute(ExecuteType.QueryDescription, queryName, null, dqb => dqb.GetDescription());
         }
      
         public event Func<object, bool> AllowQuery;

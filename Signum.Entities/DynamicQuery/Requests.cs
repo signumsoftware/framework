@@ -23,28 +23,6 @@ namespace Signum.Entities.DynamicQuery
             set { filters = value; }
         }
 
-        bool queryTextLog;
-        public bool QueryTextLog
-        {
-            get { return queryTextLog; }
-            set { queryTextLog = value; }
-        }
-
-        string queryText;
-        public string QueryText
-        {
-            get { return queryText; }
-            set { queryText = value; }
-        }
-
-
-        bool queryUrlLog;
-        public bool QueryUrlLog
-        {
-            get { return queryUrlLog; }
-            set { queryUrlLog = value; }
-        }
-
         string queryUrl;
         public string QueryUrl
         {

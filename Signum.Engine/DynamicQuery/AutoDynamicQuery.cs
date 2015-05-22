@@ -39,10 +39,6 @@ namespace Signum.Engine.DynamicQuery
                 .OrderBy(request.Orders)
                 .Select(request.Columns);
 
-            if (request.QueryTextLog)
-                request.QueryText = query.Query.QueryText();
-
-
             var result = query.TryPaginate(request.Pagination);
 
             return result.ToResultTable(request);
