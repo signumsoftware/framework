@@ -1608,7 +1608,15 @@
     <Member Name="Ticket" Description="Ticket" />
     <Member Name="User" Description="Utente" />
   </Type>
+  <Type Name="ViewLogConfigurationEntity" Description="Configurazione Registro Vista">
+    <Member Name="Active" Description="Attivo" />
+    <Member Name="QueryTextLog" Description="Registrare testo query" />
+    <Member Name="QueryUrlLog" Description="Registrare query Url" />
+    <Member Name="TypeList" Description="Elenco tipi" />
+    <Member Name="Types" Description="Tipi" />
+  </Type>
   <Type Name="ViewLogEntity" Description="Registro di visita">
+    <Member Name="Data" Description="Data" />
     <Member Name="Duration" Description="Durata" />
     <Member Name="EndDate" Description="Data di fine" />
     <Member Name="StartDate" Description="Data di inizio" />
