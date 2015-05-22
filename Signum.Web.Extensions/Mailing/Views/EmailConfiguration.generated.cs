@@ -148,7 +148,7 @@ Write(Html.ValueLine(sc, ca => ca.ChunkSizeSendingEmails));
             #line hidden
             
             #line 11 "..\..\Mailing\Views\EmailConfiguration.cshtml"
-                                                          
+                                                        
     
             
             #line default

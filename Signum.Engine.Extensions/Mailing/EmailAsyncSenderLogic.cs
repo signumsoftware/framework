@@ -34,7 +34,7 @@ namespace Signum.Engine.Mailing
                 CurrentProcessIdentifier = processIdentifier,
                 AsyncSenderPeriod = EmailLogic.Configuration.AsyncSenderPeriod,
                 NextPlannedExecution = nextPlannedExecution,
-                IsCancelationRequested = CancelProcess.IsCancellationRequested,
+                IsCancelationRequested = CancelProcess != null && CancelProcess.IsCancellationRequested,
                 QueuedItems = queuedItems,
                 MachineName = Environment.MachineName,
                 ApplicationName = Schema.Current.ApplicationName
