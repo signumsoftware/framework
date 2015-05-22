@@ -96,10 +96,12 @@ namespace Signum.Web.Selenium
             container.Selenium.Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
         }
 
-        public static void ExecuteSubmit<T>(this NormalPage<T> container, ExecuteSymbol<T> symbol)
+        public static void ExecuteSubmit<T>(this NormalPage<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false)
               where T : Entity
         {
             container.OperationClick(symbol);
+            if (consumeAlert)
+                container.Selenium.ConsumeAlert();
             container.WaitLoadedAndId();
         }
 
