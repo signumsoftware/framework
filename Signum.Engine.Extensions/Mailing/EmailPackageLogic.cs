@@ -112,7 +112,7 @@ namespace Signum.Engine.Mailing
             using (AuthLogic.Disable())
             {
 
-                foreach (var group in emails.GroupsOf(EmailLogic.Configuration.ChunkSizeToProcessEmails))
+                foreach (var group in emails.GroupsOf(EmailLogic.Configuration.ChunkSizeSendingEmails))
                 {
                     var retrieved = group.RetrieveFromListOfLite();
                     foreach (var m in retrieved)

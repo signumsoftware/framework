@@ -56,11 +56,11 @@ namespace Signum.Entities.Mailing
             set { Set(ref creationDateHoursLimitToSendEmails, value); }
         }
 
-        int chunkSizeToProcessEmails = 100;
-        public int ChunkSizeToProcessEmails
+        int chunkSizeSendingEmails = 100;
+        public int ChunkSizeSendingEmails
         {
-            get { return chunkSizeToProcessEmails; }
-            set { Set(ref chunkSizeToProcessEmails, value); }
+            get { return chunkSizeSendingEmails; }
+            set { Set(ref chunkSizeSendingEmails, value); }
         }
 
         int maxEmailSendRetries = 3;

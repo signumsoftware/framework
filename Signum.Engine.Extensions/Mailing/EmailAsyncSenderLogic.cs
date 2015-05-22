@@ -113,7 +113,7 @@ namespace Signum.Engine.Mailing
                                         var items = Database.Query<EmailMessageEntity>().Where(m =>
                                             m.ProcessIdentifier == processIdentifier &&
                                             m.State == EmailMessageState.RecruitedForSending)
-                                            .Take(EmailLogic.Configuration.ChunkSizeToProcessEmails).ToList();
+                                            .Take(EmailLogic.Configuration.ChunkSizeSendingEmails).ToList();
                                         queuedItems = items.Count;
                                         foreach (var email in items)
                                         {

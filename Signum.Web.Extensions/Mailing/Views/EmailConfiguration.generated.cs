@@ -141,7 +141,7 @@ Write(Html.ValueLine(sc, ca => ca.CreationDateHoursLimitToSendEmails));
             #line hidden
             
             #line 11 "..\..\Mailing\Views\EmailConfiguration.cshtml"
-Write(Html.ValueLine(sc, ca => ca.ChunkSizeToProcessEmails));
+Write(Html.ValueLine(sc, ca => ca.ChunkSizeSendingEmails));
 
             
             #line default
