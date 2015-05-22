@@ -44,7 +44,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "Step" + StepSize; }
+            get { return "Step" + StepSize.ToString().Replace(".", "_"); }
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
@@ -114,7 +114,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return  "x" + Multiplier;
+            return "x" + Multiplier;
         }
 
         public override string NiceName()
@@ -139,12 +139,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "x" + Multiplier; }
+            get { return "x" + Multiplier.ToString().Replace(".", "_"); }
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = Parent.BuildExpression(context);
+            var exp = Parent.Parent.BuildExpression(context);
 
             return RoundingExpressionGenerator.RoundExpression(exp, this.StepSize(), RoundingType.Ceil);
         }
@@ -241,7 +241,7 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            var exp = Parent.BuildExpression(context);
+            var exp = Parent.Parent.Parent.BuildExpression(context);
 
             return RoundingExpressionGenerator.RoundExpression(exp, ((StepMultiplierToken)this.Parent).StepSize(), this.Rounding);
         }
