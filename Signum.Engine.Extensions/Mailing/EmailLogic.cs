@@ -69,7 +69,8 @@ namespace Signum.Engine.Mailing
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailLogic.GetSmtpClient = getSmtpClient;
                 EmailTemplateLogic.Start(sb, dqm, getSmtpConfiguration);
-                EmailPackageLogic.Start(sb, dqm);
+
+                Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb, dqm));
 
                 sb.Include<EmailMessageEntity>();
 
