@@ -66,7 +66,6 @@ namespace Signum.Engine.Isolation
                     new InvalidateWith(typeof(IsolationEntity)));
 
                 ProcessLogic.ApplySession += ProcessLogic_ApplySession;
-                SchedulerLogic.ApplySession += SchedulerLogic_ApplySession;
 
                 Validator.OverridePropertyValidator((IsolationMixin m) => m.Isolation).StaticPropertyValidation += (mi, pi) =>
                 {

@@ -27,8 +27,7 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static Func<ITaskEntity, ScheduledTaskEntity, IUserEntity, IDisposable> ApplySession;
-
+       
         static Expression<Func<ITaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsExpression =
          ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == ct);
         public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity e)
@@ -336,7 +335,9 @@ namespace Signum.Engine.Scheduler
 
         public static Lite<IEntity> ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
         {
-            using (Disposable.Combine(ApplySession, f => f(task, scheduledTask, user)))
+            IUserEntity entityIUser = user == null ? (IUserEntity)scheduledTask.User.Retrieve() : user;
+
+            using (IsolationEntity.Override(entityIUser.TryIsolation()))
             {
                 ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
                 {
@@ -345,7 +346,7 @@ namespace Signum.Engine.Scheduler
                     StartTime = TimeZoneManager.Now,
                     MachineName = Environment.MachineName,
                     ApplicationName = Schema.Current.ApplicationName,
-                    User = user.ToLite(),
+                    User = entityIUser.ToLite(),
                 };
 
                 using (AuthLogic.Disable())
@@ -362,7 +363,7 @@ namespace Signum.Engine.Scheduler
                 {
                     using (Transaction tr = Transaction.ForceNew())
                     {
-                        using (UserHolder.UserSession(user))
+                        using (UserHolder.UserSession(entityIUser))
                         {
                             stl.ProductEntity = ExecuteTask.Invoke(task);
                         }
