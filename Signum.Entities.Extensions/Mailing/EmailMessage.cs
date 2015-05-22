@@ -15,11 +15,12 @@ using System.Net.Mail;
 using System.Linq.Expressions;
 using Signum.Entities.Files;
 using System.Security.Cryptography;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class EmailMessageEntity : Entity
+    public class EmailMessageEntity : Entity, IProcessLineDataEntity
     {   
         public EmailMessageEntity()
         {
@@ -156,6 +157,20 @@ namespace Signum.Entities.Mailing
         {
             get { return package; }
             set { Set(ref package, value); }
+        }
+
+        Guid? processIdentifier;
+        public Guid? ProcessIdentifier
+        {
+            get { return processIdentifier; }
+            set { Set(ref processIdentifier, value); }
+        }
+
+        int sendRetries;
+        public int SendRetries
+        {
+            get { return sendRetries; }
+            set { Set(ref sendRetries, value); }
         }
 
         [NotNullable]
@@ -454,11 +469,16 @@ namespace Signum.Entities.Mailing
 
     public enum EmailMessageState
     {
+        [Ignore]
         Created,
+        Draft,
+        ReadyToSend,
+        RecruitedForSending,
         Sent,
         SentException,
         ReceptionNotified,
-        Received
+        Received,
+        Outdated
     }
 
     public interface IEmailOwnerEntity : IEntity
@@ -502,6 +522,8 @@ namespace Signum.Entities.Mailing
 
     public static class EmailMessageOperation
     {
+        public static readonly ExecuteSymbol<EmailMessageEntity> Save = OperationSymbol.Execute<EmailMessageEntity>();
+        public static readonly ExecuteSymbol<EmailMessageEntity> ReadyToSend = OperationSymbol.Execute<EmailMessageEntity>();
         public static readonly ExecuteSymbol<EmailMessageEntity> Send = OperationSymbol.Execute<EmailMessageEntity>();
         public static readonly ConstructSymbol<EmailMessageEntity>.From<EmailMessageEntity> ReSend = OperationSymbol.Construct<EmailMessageEntity>.From<EmailMessageEntity>();
         public static readonly ConstructSymbol<ProcessEntity>.FromMany<EmailMessageEntity> ReSendEmails = OperationSymbol.Construct<ProcessEntity>.FromMany<EmailMessageEntity>();
@@ -546,6 +568,11 @@ namespace Signum.Entities.Mailing
     public static class EmailFileType
     {
         public static readonly FileTypeSymbol Attachment = new FileTypeSymbol();
+    }
+
+    public static class AsyncEmailSenderPermission
+    {
+        public static readonly PermissionSymbol ViewAsyncEmailSenderPanel = new PermissionSymbol();
     }
 }
 

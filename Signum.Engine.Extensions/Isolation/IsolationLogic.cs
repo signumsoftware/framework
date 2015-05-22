@@ -66,7 +66,6 @@ namespace Signum.Engine.Isolation
                     new InvalidateWith(typeof(IsolationEntity)));
 
                 ProcessLogic.ApplySession += ProcessLogic_ApplySession;
-                SchedulerLogic.ApplySession += SchedulerLogic_ApplySession;
 
                 Validator.OverridePropertyValidator((IsolationMixin m) => m.Isolation).StaticPropertyValidation += (mi, pi) =>
                 {
@@ -84,9 +83,9 @@ namespace Signum.Engine.Isolation
             return IsolationEntity.Override(process.Data.TryIsolation());
         }
 
-        static IDisposable SchedulerLogic_ApplySession(ITaskEntity task, ScheduledTaskEntity scheduled)
+        static IDisposable SchedulerLogic_ApplySession(ITaskEntity task, ScheduledTaskEntity scheduled, IUserEntity user)
         {
-            return IsolationEntity.Override(scheduled.TryIsolation() ?? task.TryIsolation());
+            return IsolationEntity.Override(scheduled.Try(s => s.TryIsolation()) ?? task.Try(t => t.TryIsolation()) ?? user.Try(u => u.TryIsolation()));
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)

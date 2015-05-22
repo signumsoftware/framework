@@ -48,5 +48,33 @@ namespace Signum.Entities.Mailing
             get { return overrideEmailAddress; }
             set { Set(ref overrideEmailAddress, value); }
         }
+
+        double? creationDateHoursLimitToSendEmails;
+        public double? CreationDateHoursLimitToSendEmails
+        {
+            get { return creationDateHoursLimitToSendEmails; }
+            set { Set(ref creationDateHoursLimitToSendEmails, value); }
+        }
+
+        int chunkSizeToProcessEmails = 100;
+        public int ChunkSizeToProcessEmails
+        {
+            get { return chunkSizeToProcessEmails; }
+            set { Set(ref chunkSizeToProcessEmails, value); }
+        }
+
+        int maxEmailSendRetries = 3;
+        public int MaxEmailSendRetries
+        {
+            get { return maxEmailSendRetries; }
+            set { Set(ref maxEmailSendRetries, value); }
+        }
+
+        int asyncSenderPeriodMilliseconds = (60 * 1000) * 60 * 5; //5 minutes
+        public int AsyncSenderPeriodMilliseconds
+        {
+            get { return asyncSenderPeriodMilliseconds; }
+            set { Set(ref asyncSenderPeriodMilliseconds, value); }
+        }
     }
 }

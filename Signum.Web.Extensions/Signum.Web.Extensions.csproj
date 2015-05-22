@@ -322,6 +322,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\Controllers\AsyncEmailSenderController.cs" />
     <Compile Include="Mailing\Controllers\MailingController.cs" />
     <Compile Include="Mailing\Views\ClientCertificationFile.generated.cs">
       <DependentUpon>ClientCertificationFile.cshtml</DependentUpon>
@@ -995,6 +996,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="ViewLog\Views\ViewLogConfiguration.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ViewLogConfiguration.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Word\Controllers\WordController.cs" />
     <Compile Include="Word\Views\WordTemplate.generated.cs">
       <DependentUpon>WordTemplate.cshtml</DependentUpon>
@@ -1044,6 +1050,12 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>WordTemplate.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="Mailing\Views\AsyncEmailSenderDashboard.cshtml" />
+    <None Include="ViewLog\Views\ViewLogConfiguration.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ViewLogConfiguration.generated.cs</LastGenOutput>
+    </None>
+    <Content Include="ViewLog\Views\Web.config" />
     <TypeScriptCompile Include="Alerts\Scripts\Alerts.ts" />
     <EmbeddedResource Include="Alerts\Scripts\Alerts.js">
       <DependentUpon>Alerts.ts</DependentUpon>
@@ -1211,6 +1223,7 @@
     <TypeScriptCompile Include="Help\Scripts\helpWidget.ts" />
     <Content Include="Help\Content\helpWidget.css" />
     <Content Include="Mailing\Content\Mailing.css" />
+    <TypeScriptCompile Include="Mailing\Scripts\AsyncEmailSender.ts" />
     <TypeScriptCompile Include="Mailing\Scripts\Mailing.ts" />
     <TypeScriptCompile Include="Mailing\Scripts\ckeditor.d.ts" />
     <EmbeddedResource Include="Mailing\Scripts\Mailing.js">

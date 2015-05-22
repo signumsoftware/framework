@@ -29,6 +29,8 @@ using Signum.Web.Basic;
 using Signum.Entities.Processes;
 using Signum.Web.Cultures;
 using Signum.Web.Templating;
+using Signum.Web.Omnibox;
+using Signum.Engine.Authorization;
 
 namespace Signum.Web.Mailing
 {
@@ -36,6 +38,7 @@ namespace Signum.Web.Mailing
     {
         public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing");
+        public static JsModule AsyncEmailSenderModule = new JsModule("Extensions/Signum.Web.Extensions/Mailing/Scripts/AsyncEmailSender");
 
         private static QueryTokenEntity ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
         {
@@ -180,7 +183,11 @@ namespace Signum.Web.Mailing
                              UntrustedImage = null,
                              Url = RouteHelper.New(),
                         });
-                    }); 
+                    });
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("AsyncEmailPanel",
+                    () => AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.IsAuthorized(),
+                    uh => uh.Action((AsyncEmailSenderController pc) => pc.View())));
             }
         }
 

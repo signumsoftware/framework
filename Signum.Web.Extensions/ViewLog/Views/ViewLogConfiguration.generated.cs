@@ -28,7 +28,7 @@ namespace ASP
     using System.Web.WebPages;
     using Signum.Entities;
     
-    #line 1 "..\..\Notes\Views\NoteType.cshtml"
+    #line 1 "..\..\ViewLog\Views\ViewLogConfiguration.cshtml"
     using Signum.Entities.ViewLog;
     
     #line default
@@ -37,16 +37,16 @@ namespace ASP
     using Signum.Web;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Notes/Views/NoteType.cshtml")]
-    public partial class _Notes_Views_NoteType_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/ViewLog/Views/ViewLogConfiguration.cshtml")]
+    public partial class _ViewLog_Views_ViewLogConfiguration_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public _Notes_Views_NoteType_cshtml()
+        public _ViewLog_Views_ViewLogConfiguration_cshtml()
         {
         }
         public override void Execute()
         {
             
-            #line 2 "..\..\Notes\Views\NoteType.cshtml"
+            #line 2 "..\..\ViewLog\Views\ViewLogConfiguration.cshtml"
  using (var cp = Html.TypeContext<ViewLogConfigurationEntity>())
 {
     
@@ -54,57 +54,57 @@ namespace ASP
             #line default
             #line hidden
             
-            #line 4 "..\..\Notes\Views\NoteType.cshtml"
+            #line 4 "..\..\ViewLog\Views\ViewLogConfiguration.cshtml"
 Write(Html.ValueLine(cp, d => d.Active));
 
             
             #line default
             #line hidden
             
-            #line 4 "..\..\Notes\Views\NoteType.cshtml"
+            #line 4 "..\..\ViewLog\Views\ViewLogConfiguration.cshtml"
                                       
     
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Notes\Views\NoteType.cshtml"
+            #line 5 "..\..\ViewLog\Views\ViewLogConfiguration.cshtml"
 Write(Html.ValueLine(cp, d => d.QueryUrlLog));
 
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Notes\Views\NoteType.cshtml"
+            #line 5 "..\..\ViewLog\Views\ViewLogConfiguration.cshtml"
                                            
     
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Notes\Views\NoteType.cshtml"
+            #line 6 "..\..\ViewLog\Views\ViewLogConfiguration.cshtml"
 Write(Html.ValueLine(cp, d => d.QueryTextLog));
 
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Notes\Views\NoteType.cshtml"
+            #line 6 "..\..\ViewLog\Views\ViewLogConfiguration.cshtml"
                                             
     
             
             #line default
             #line hidden
             
-            #line 7 "..\..\Notes\Views\NoteType.cshtml"
+            #line 7 "..\..\ViewLog\Views\ViewLogConfiguration.cshtml"
 Write(Html.EntityList(cp, d => d.TypeList));
 
             
             #line default
             #line hidden
             
-            #line 7 "..\..\Notes\Views\NoteType.cshtml"
-                                      
+            #line 7 "..\..\ViewLog\Views\ViewLogConfiguration.cshtml"
+                                         
 }
             
             #line default

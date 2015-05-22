@@ -356,6 +356,7 @@ namespace Signum.Entities.Authorization
                 return TypeLogic.TypeToEntity[type];
             };
 
+
             return Synchronizer.SynchronizeScript(should, current, 
                 (role, x) =>
                 {
@@ -383,7 +384,7 @@ namespace Signum.Entities.Authorization
                 {
                     var dic = (from xr in  x.Elements("Type")
                               let t = getResource(xr.Attribute("Resource").Value)
-                               where t != null
+                               where t != null && !t.ToType().IsEnumEntity()
                                select KVP.Create(t, xr)).ToDictionary("Type rules for {0}".FormatWith(role));
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(

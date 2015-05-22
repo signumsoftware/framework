@@ -315,7 +315,7 @@ namespace Signum.Engine.Templating
             if (entityToken == null)
                 entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), 0);
 
-            if (!entityToken.Type.IsAssignableFrom(Route.RootType))
+            if (!entityToken.Type.CleanType().IsAssignableFrom(Route.RootType))
                 addError(false, "The entity of {0} ({1}) is not compatible with the property route {2}".FormatWith(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName()));
 
             return entityToken;

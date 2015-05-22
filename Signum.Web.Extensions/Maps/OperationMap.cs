@@ -26,7 +26,7 @@ namespace Signum.Web.Maps
 
             var stateTypes = operations.Select(a => a.UntypedFromStates == null ? typeof(DefaultState) : a.StateType)
                 .Concat(operations.Select(a => a.UntypedToStates == null ? typeof(DefaultState) : a.StateType))
-                .Distinct().ToList();
+                .Distinct().Where(t=>t!=null).ToList();
 
             Dictionary<Type, LambdaExpression> expressions = stateTypes
                 .ToDictionary(t => t, t => type == typeof(DefaultState) ? null : giGetGraphGetter.GetInvoker(type, t)());
