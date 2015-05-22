@@ -540,35 +540,39 @@ export class SearchControl {
         $searchButton.addClass("sf-searching");
         var count = parseInt($searchButton.attr("data-searchCount")) || 0;
 
-        this.requestDataForSearch(RequestType.QueryRequest, page)
-            .then(data=> SF.ajaxPost({
-            url: SF.Urls.search,
-            data: data
-        })).then(r => {
-            var $tbody = this.element.find(".sf-search-results-container tbody");
-            if (!SF.isEmpty(r)) {
-                var rows = $(r);
+        this.requestDataForSearchInUrl().then(paramsUrl => {
+            var fullUrl = this.element.attr("data-find-url") + "?" + paramsUrl; 
+        
+            this.requestDataForSearch(RequestType.QueryRequest, page)
+                .then(data=> SF.ajaxPost({
+                url: SF.Urls.search,
+                data: $.extend({ queryUrl: fullUrl }, data)
+            })).then(r => {
+                var $tbody = this.element.find(".sf-search-results-container tbody");
+                if (!SF.isEmpty(r)) {
+                    var rows = $(r);
 
-                var divs = rows.filter("tr.extract").children().children();
+                    var divs = rows.filter("tr.extract").children().children();
 
-                this.element.find("div.sf-search-footer").replaceWith(divs.filter("div.sf-search-footer"));
+                    this.element.find("div.sf-search-footer").replaceWith(divs.filter("div.sf-search-footer"));
 
-                var mult = divs.filter("div.sf-td-multiply");
-                var multCurrent = this.element.find("div.sf-td-multiply");
+                    var mult = divs.filter("div.sf-td-multiply");
+                    var multCurrent = this.element.find("div.sf-td-multiply");
 
-                if (multCurrent.length)
-                    multCurrent.replaceWith(mult);
-                else
-                    this.element.find("div.sf-query-button-bar").after(mult);
+                    if (multCurrent.length)
+                        multCurrent.replaceWith(mult);
+                    else
+                        this.element.find("div.sf-query-button-bar").after(mult);
 
-                $tbody.html(rows.not("tr.extract"));
-            }
-            else {
-                $tbody.html("");
-            }
-            $searchButton.removeClass("sf-searching");
-            $searchButton.attr("data-searchCount", count + 1);
-            this.updateSelectedButton();
+                    $tbody.html(rows.not("tr.extract"));
+                }
+                else {
+                    $tbody.html("");
+                }
+                $searchButton.removeClass("sf-searching");
+                $searchButton.attr("data-searchCount", count + 1);
+                this.updateSelectedButton();
+            });
         });
     }
 

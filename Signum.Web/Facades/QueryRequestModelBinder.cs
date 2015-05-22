@@ -39,6 +39,9 @@ namespace Signum.Web
 
             qr.QueryName = Finder.ResolveQueryName(webQueryName);
 
+            if (parameters.AllKeys.Contains("queryUrl"))
+                qr.QueryUrl = parameters["queryUrl"];
+
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(qr.QueryName);
 
             qr.Filters = ExtractFilterOptions(controllerContext.HttpContext, queryDescription, canAggregate: false);
