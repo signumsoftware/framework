@@ -485,5 +485,15 @@ namespace Signum.Entities.Reflection
         {
             return ReflectionTools.GetPropertyInfo(property).NiceName();
         }
+
+        public static int NumDecimals(string format)
+        {
+            var str = (0.0).ToString(format).TryAfter('.');
+
+            if(str == null)
+                return 0;
+
+            return str.Length;
+        }
     }
 }

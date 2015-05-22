@@ -82,6 +82,25 @@ namespace Signum.Entities.DynamicQuery
                     return DateTimeProperties(this, DateTimePrecision.Days);
             }
 
+            if (Column.Type.UnNullify() == typeof(double) || 
+                Column.Type.UnNullify() == typeof(float) || 
+                Column.Type.UnNullify() == typeof(decimal))
+            {
+                if (Column.PropertyRoutes != null)
+                {
+                    int? decimalPlaces=
+                        Column.PropertyRoutes.Select(pr => Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)
+                        .Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx())
+                        .Select(dtp => dtp.Try(d => d.DecimalPlaces)).Distinct().Only();
+
+                    if (decimalPlaces != null)
+                        return StepTokens(this, decimalPlaces.Value);
+                }
+
+                if (Column.Format != null)
+                    return StepTokens(this, Reflector.NumDecimals(Column.Format));
+            }
+
             return SubTokensBase(Column.Type, options, Column.Implementations);
         }
 
