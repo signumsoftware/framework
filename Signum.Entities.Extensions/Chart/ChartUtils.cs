@@ -38,7 +38,7 @@ namespace Signum.Entities.Chart
                 case FilterType.String:
                 case FilterType.Guid: return ChartColumnType.String;
                 case FilterType.Integer: return ChartColumnType.Integer;
-                case FilterType.Decimal: return ChartColumnType.Real;
+                case FilterType.Decimal: return token.IsRealGroupable ? ChartColumnType.RealGroupable :  ChartColumnType.Real;
                 case FilterType.DateTime:
                     {
                         if (IsDateOnly(token))
