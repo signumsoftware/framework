@@ -2,17 +2,17 @@
 @using Signum.Engine.Processes
 @using Signum.Web.Processes
 @model ProcessLogicState
-<div id="processMainDiv">
-    <h2>ProcessLogic state</h2>
-    <div>
-        <a href="@Url.Action((ProcessController pc) => pc.Stop())" class="sf-button btn btn-default active" style="@(Model.Running ? "" : "display:none");color:red" id="sfProcessDisable">Stop </a>
-        <a href="@Url.Action((ProcessController pc) => pc.Start())" class="sf-button btn btn-default"  style="@(!Model.Running ? "" : "display:none")" id="sfProcessEnable">Start </a>
-    </div>
 
-    @Html.Partial(ProcessClient.ViewPrefix.FormatWith("ProcessPanelTable"))
-    <script>
-        $(function () {
-            @(ProcessClient.Module["initDashboard"](Url.Action((ProcessController p) => p.View())))
-        });
-    </script>
+<h2>ProcessLogic state</h2>
+<div>
+    <a href="@Url.Action((ProcessController pc) => pc.Stop())" class="sf-button btn btn-default active" style="@(Model.Running ? "" : "display:none");color:red" id="sfProcessDisable">Stop </a>
+    <a href="@Url.Action((ProcessController pc) => pc.Start())" class="sf-button btn btn-default" style="@(!Model.Running ? "" : "display:none")" id="sfProcessEnable">Start </a>
 </div>
+<div id="processMainDiv">
+    @Html.Partial(ProcessClient.ViewPrefix.FormatWith("ProcessPanelTable"))
+</div>
+<script>
+    $(function () {
+        @(ProcessClient.Module["initDashboard"](Url.Action((ProcessController p) => p.View())))
+    });
+</script>
