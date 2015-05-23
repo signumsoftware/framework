@@ -77,9 +77,9 @@ namespace Signum.Engine.Mailing
 
                     using (AuthLogic.Disable())
                     {
-                        if (EmailLogic.Configuration.CreationDateHoursLimitToSendEmails.HasValue)
+                        if (EmailLogic.Configuration.AvoidSendingEmailsOlderThan.HasValue)
                         {
-                            DateTime firstDate = TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.CreationDateHoursLimitToSendEmails.Value);
+                            DateTime firstDate = TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
                             Database.Query<EmailMessageEntity>().Where(m =>
                                 m.State == EmailMessageState.ReadyToSend &&
                                 m.CreationTime < firstDate).UnsafeUpdate()
@@ -185,8 +185,8 @@ namespace Signum.Engine.Mailing
 
         private static bool RecruitQueuedItems()
         {
-            DateTime? firstDate = EmailLogic.Configuration.CreationDateHoursLimitToSendEmails == null ?
-                null : (DateTime?)TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.CreationDateHoursLimitToSendEmails.Value);
+            DateTime? firstDate = EmailLogic.Configuration.AvoidSendingEmailsOlderThan == null ?
+                null : (DateTime?)TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
             queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
                 m.State == EmailMessageState.ReadyToSend &&
                 (firstDate == null ? true : m.CreationTime >= firstDate)).UnsafeUpdate()

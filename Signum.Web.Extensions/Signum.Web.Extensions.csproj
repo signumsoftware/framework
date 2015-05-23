@@ -1041,6 +1041,9 @@
     <EmbeddedResource Include="AuthAdmin\Scripts\AuthAdminColors.js">
       <DependentUpon>AuthAdminColors.ts</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Mailing\Scripts\AsyncEmailSender.js">
+      <DependentUpon>AsyncEmailSender.ts</DependentUpon>
+    </EmbeddedResource>
     <Content Include="Maps\Content\operationMap.css" />
     <Content Include="Maps\Content\schemaMap.css" />
     <EmbeddedResource Include="Maps\Scripts\OperationMap.js">

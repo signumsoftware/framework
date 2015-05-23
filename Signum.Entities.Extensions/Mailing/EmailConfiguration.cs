@@ -49,11 +49,12 @@ namespace Signum.Entities.Mailing
             set { Set(ref overrideEmailAddress, value); }
         }
 
-        double? creationDateHoursLimitToSendEmails;
-        public double? CreationDateHoursLimitToSendEmails
+        double? avoidSendingEmailsOlderThan;
+        [Unit("hs")]
+        public double? AvoidSendingEmailsOlderThan
         {
-            get { return creationDateHoursLimitToSendEmails; }
-            set { Set(ref creationDateHoursLimitToSendEmails, value); }
+            get { return avoidSendingEmailsOlderThan; }
+            set { Set(ref avoidSendingEmailsOlderThan, value); }
         }
 
         int chunkSizeSendingEmails = 100;
@@ -70,8 +71,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref maxEmailSendRetries, value); }
         }
 
-        int asyncSenderPeriod = 5 * 60 * 1000; //5 minutes
-        [Unit("ms")]
+        int asyncSenderPeriod = 5 * 60; //5 minutes
+        [Unit("sec")]
         public int AsyncSenderPeriod
         {
             get { return asyncSenderPeriod; }
