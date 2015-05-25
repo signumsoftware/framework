@@ -175,9 +175,12 @@ namespace Signum.Web.Mailing
                     .RemoveProperty(a => a.Body)
                     .SetProperty(a => a.Body, ctx =>
                     {
+                        if (!ctx.HasInput)
+                            return ctx.None();
+
                         var email = ((EmailMessageEntity)ctx.Parent.UntypedValue);
 
-                        return SetWebMailBody(ctx.Value, new WebMailOptions
+                        return SetWebMailBody(ctx.Input, new WebMailOptions
                         {
                              Attachments = email.Attachments,
                              UntrustedImage = null,

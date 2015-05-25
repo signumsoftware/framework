@@ -1,6 +1,7 @@
 ﻿@using Signum.Entities.Mailing
 @using Signum.Engine.Mailing
 @using Signum.Web.Mailing
+@using Signum.Entities.DynamicQuery
 @model EmailAsyncProcessState
 <div id="emailAsyncMainDiv">
     <h2>Email Async Sender state</h2>
@@ -24,9 +25,9 @@
         <br />
         CurrentProcessIdentifier: @Model.CurrentProcessIdentifier
         <br />
-        AsyncSenderPeriod: @Model.AsyncSenderPeriod ms
+        AsyncSenderPeriod: @Model.AsyncSenderPeriod sec
         <br />
-        NextPlannedExecution: @Model.NextPlannedExecution
+        NextPlannedExecution: @Model.NextPlannedExecution (@(Model.NextPlannedExecution == null ? "-None-" : Model.NextPlannedExecution.Value.ToAgoString()))
         <br />
         IsCancelationRequested: @Model.IsCancelationRequested
         <br />
@@ -36,6 +37,14 @@
         <br />
         ApplicationName: @Model.ApplicationName
     </div>
+    @Html.AntiForgeryToken()
+    @Html.SearchControl(new FindOptions(typeof(EmailMessageEntity))
+{
+    OrderOptions = { new OrderOption("Entity.CreationDate", OrderType.Descending) },
+    ShowFilters = false,
+    SearchOnLoad = true,
+    Pagination = new Pagination.Firsts(10),
+}, new Context(null, "em"))
     <script>
         $(function () {
             @(MailingClient.AsyncEmailSenderModule["initDashboard"](Url.Action<AsyncEmailSenderController>(p => p.View())))

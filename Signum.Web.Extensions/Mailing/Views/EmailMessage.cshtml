@@ -63,7 +63,7 @@
 
                     <script>
                         $(function () {
-                            @(MailingClient.Module["initHtmlEditor"](e.Compose("Body")))
+                            @(MailingClient.Module["initHtmlEditor"](e.Compose("Body"), Signum.Engine.Mailing.EmailLogic.Configuration.DefaultCulture.Name))
                         });
                     </script>
                 }

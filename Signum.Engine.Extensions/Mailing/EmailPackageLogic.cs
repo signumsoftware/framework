@@ -69,7 +69,7 @@ namespace Signum.Engine.Mailing
                             {
                                 Package = emailPackage.ToLite(),
                                 From = m.From,
-                                Recipients = m.Recipients,
+                                Recipients = m.Recipients.ToMList(),
                                 Target = m.Target,
                                 Body = m.Body,
                                 IsBodyHtml = m.IsBodyHtml,
@@ -104,7 +104,7 @@ namespace Signum.Engine.Mailing
             EmailPackageEntity package = (EmailPackageEntity)executingProcess.Data;          
 
             List<Lite<EmailMessageEntity>> emails = package.RemainingMessages()
-                                                .OrderBy(e => e.CreationTime)
+                                                .OrderBy(e => e.CreationDate)
                                                 .Select(e => e.ToLite())
                                                 .ToList();
 

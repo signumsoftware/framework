@@ -60,11 +60,11 @@ namespace Signum.Entities.Mailing
             set { Set(ref template, value); }
         }
 
-        DateTime creationTime = TimeZoneManager.Now;
-        public DateTime CreationTime
+        DateTime creationDate = TimeZoneManager.Now;
+        public DateTime CreationDate
         {
-            get { return creationTime; }
-            private set { Set(ref creationTime, value); }
+            get { return creationDate; }
+            private set { Set(ref creationDate, value); }
         }
 
         DateTime? sent;
@@ -110,7 +110,7 @@ namespace Signum.Entities.Mailing
 
         [NotNullable, SqlDbType(Size = 150)]
         string bodyHash;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 150)]
+        [StringLengthValidator(AllowNulls = true, Min = 1, Max = 150)]
         public string BodyHash
         {
             get { return bodyHash; }

@@ -25,7 +25,7 @@ namespace Signum.Web.Mailing
         [HttpGet]
         public new ActionResult View()
         {
-            EmailAsyncProcessState state = EmailAsyncSenderLogic.ExecutionState();
+            EmailAsyncProcessState state = AsyncEmailSenderLogic.ExecutionState();
 
             if (Request.IsAjaxRequest())
                 return PartialView(MailingClient.ViewPrefix.FormatWith("AsyncEmailSenderDashboard"), state);
@@ -38,7 +38,7 @@ namespace Signum.Web.Mailing
         {
             AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
 
-            EmailAsyncSenderLogic.StartRunningEmailSenderAsync(0);
+            AsyncEmailSenderLogic.StartRunningEmailSenderAsync(0);
 
             Thread.Sleep(1000);
 
@@ -50,7 +50,7 @@ namespace Signum.Web.Mailing
         {
             AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.AssertAuthorized();
 
-            EmailAsyncSenderLogic.Stop();
+            AsyncEmailSenderLogic.Stop();
 
             Thread.Sleep(1000);
 

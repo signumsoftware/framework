@@ -16,7 +16,7 @@ using System.Data.SqlClient;
 
 namespace Signum.Engine.Mailing
 {
-    public static class EmailAsyncSenderLogic
+    public static class AsyncEmailSenderLogic
     {
         static Timer timer;
         internal static DateTime? nextPlannedExecution;
@@ -82,7 +82,7 @@ namespace Signum.Engine.Mailing
                             DateTime firstDate = TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
                             Database.Query<EmailMessageEntity>().Where(m =>
                                 m.State == EmailMessageState.ReadyToSend &&
-                                m.CreationTime < firstDate).UnsafeUpdate()
+                                m.CreationDate < firstDate).UnsafeUpdate()
                                 .Set(m => m.State, m => EmailMessageState.Outdated)
                                 .Execute();
                         }
@@ -189,7 +189,7 @@ namespace Signum.Engine.Mailing
                 null : (DateTime?)TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
             queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
                 m.State == EmailMessageState.ReadyToSend &&
-                (firstDate == null ? true : m.CreationTime >= firstDate)).UnsafeUpdate()
+                (firstDate == null ? true : m.CreationDate >= firstDate)).UnsafeUpdate()
                     .Set(m => m.ProcessIdentifier, m => processIdentifier)
                     .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
                     .Execute();
@@ -214,8 +214,8 @@ namespace Signum.Engine.Mailing
 
         private static void SetTimer()
         {
-            nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(EmailLogic.Configuration.AsyncSenderPeriod);
-            timer.Change(0, EmailLogic.Configuration.AsyncSenderPeriod);
+            nextPlannedExecution = TimeZoneManager.Now.AddMilliseconds(EmailLogic.Configuration.AsyncSenderPeriod * 1000);
+            timer.Change(EmailLogic.Configuration.AsyncSenderPeriod * 1000, Timeout.Infinite);
         }
 
         public static void Stop()
