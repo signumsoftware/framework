@@ -26,9 +26,9 @@ namespace Signum.Engine.Mailing
         static Guid processIdentifier;
         static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 
-        public static EmailAsyncProcessState ExecutionState()
+        public static AsyncEmailSenderState ExecutionState()
         {
-            return new EmailAsyncProcessState
+            return new AsyncEmailSenderState
             {
                 Running = running,
                 CurrentProcessIdentifier = processIdentifier,
@@ -234,7 +234,7 @@ namespace Signum.Engine.Mailing
     }
 
 
-    public class EmailAsyncProcessState
+    public class AsyncEmailSenderState
     {
         public int AsyncSenderPeriod;
         public bool Running;

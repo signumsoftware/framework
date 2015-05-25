@@ -25,7 +25,7 @@ namespace Signum.Web.Mailing
         [HttpGet]
         public new ActionResult View()
         {
-            EmailAsyncProcessState state = AsyncEmailSenderLogic.ExecutionState();
+            AsyncEmailSenderState state = AsyncEmailSenderLogic.ExecutionState();
 
             if (Request.IsAjaxRequest())
                 return PartialView(MailingClient.ViewPrefix.FormatWith("AsyncEmailSenderDashboard"), state);

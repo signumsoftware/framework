@@ -2,7 +2,7 @@
 @using Signum.Engine.Mailing
 @using Signum.Web.Mailing
 @using Signum.Entities.DynamicQuery
-@model EmailAsyncProcessState
+@model AsyncEmailSenderState
 <div id="emailAsyncMainDiv">
     <h2>Email Async Sender state</h2>
     <div>
@@ -37,6 +37,7 @@
         <br />
         ApplicationName: @Model.ApplicationName
     </div>
+    <br />
     @Html.AntiForgeryToken()
     @Html.SearchControl(new FindOptions(typeof(EmailMessageEntity))
 {

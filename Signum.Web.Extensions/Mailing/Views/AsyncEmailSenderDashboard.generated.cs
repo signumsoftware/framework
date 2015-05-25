@@ -56,7 +56,7 @@ namespace ASP
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/AsyncEmailSenderDashboard.cshtml")]
-    public partial class _Mailing_Views_AsyncEmailSenderDashboard_cshtml : System.Web.Mvc.WebViewPage<EmailAsyncProcessState>
+    public partial class _Mailing_Views_AsyncEmailSenderDashboard_cshtml : System.Web.Mvc.WebViewPage<AsyncEmailSenderState>
     {
         public _Mailing_Views_AsyncEmailSenderDashboard_cshtml()
         {
@@ -69,53 +69,53 @@ WriteLiteral(" id=\"emailAsyncMainDiv\"");
 
 WriteLiteral(">\r\n    <h2>Email Async Sender state</h2>\r\n    <div>\r\n        <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 247), Tuple.Create("\"", 312)
+WriteAttribute("href", Tuple.Create(" href=\"", 246), Tuple.Create("\"", 311)
             
             #line 9 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
-, Tuple.Create(Tuple.Create("", 254), Tuple.Create<System.Object, System.Int32>(Url.Action<AsyncEmailSenderController>(pc => pc.Stop())
+, Tuple.Create(Tuple.Create("", 253), Tuple.Create<System.Object, System.Int32>(Url.Action<AsyncEmailSenderController>(pc => pc.Stop())
             
             #line default
             #line hidden
-, 254), false)
+, 253), false)
 );
 
 WriteLiteral(" class=\"sf-button btn btn-default active\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 354), Tuple.Create("\"", 410)
+WriteAttribute("style", Tuple.Create(" style=\"", 353), Tuple.Create("\"", 409)
             
             #line 9 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
-                                               , Tuple.Create(Tuple.Create("", 362), Tuple.Create<System.Object, System.Int32>(Model.Running ? "" : "display:none"
+                                               , Tuple.Create(Tuple.Create("", 361), Tuple.Create<System.Object, System.Int32>(Model.Running ? "" : "display:none"
             
             #line default
             #line hidden
-, 362), false)
-, Tuple.Create(Tuple.Create("", 400), Tuple.Create(";color:red", 400), true)
+, 361), false)
+, Tuple.Create(Tuple.Create("", 399), Tuple.Create(";color:red", 399), true)
 );
 
 WriteLiteral(" id=\"sfEmailAsyncProcessDisable\"");
 
 WriteLiteral(">Stop </a>\r\n        <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 465), Tuple.Create("\"", 531)
+WriteAttribute("href", Tuple.Create(" href=\"", 464), Tuple.Create("\"", 530)
             
             #line 10 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
-, Tuple.Create(Tuple.Create("", 472), Tuple.Create<System.Object, System.Int32>(Url.Action<AsyncEmailSenderController>(pc => pc.Start())
+, Tuple.Create(Tuple.Create("", 471), Tuple.Create<System.Object, System.Int32>(Url.Action<AsyncEmailSenderController>(pc => pc.Start())
             
             #line default
             #line hidden
-, 472), false)
+, 471), false)
 );
 
 WriteLiteral(" class=\"sf-button btn btn-default\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 566), Tuple.Create("\"", 613)
+WriteAttribute("style", Tuple.Create(" style=\"", 565), Tuple.Create("\"", 612)
             
             #line 10 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
-                                         , Tuple.Create(Tuple.Create("", 574), Tuple.Create<System.Object, System.Int32>(!Model.Running ? "" : "display:none"
+                                         , Tuple.Create(Tuple.Create("", 573), Tuple.Create<System.Object, System.Int32>(!Model.Running ? "" : "display:none"
             
             #line default
             #line hidden
-, 574), false)
+, 573), false)
 );
 
 WriteLiteral(" id=\"sfEmailAsyncProcessEnable\"");
@@ -236,12 +236,12 @@ WriteLiteral("\r\n        <br />\r\n        ApplicationName: ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </div>\r\n");
+WriteLiteral("\r\n    </div>\r\n    <br />\r\n");
 
 WriteLiteral("    ");
 
             
-            #line 40 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
+            #line 41 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
 Write(Html.AntiForgeryToken());
 
             
@@ -252,7 +252,7 @@ WriteLiteral("\r\n");
 WriteLiteral("    ");
 
             
-            #line 41 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
+            #line 42 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
 Write(Html.SearchControl(new FindOptions(typeof(EmailMessageEntity))
 {
     OrderOptions = { new OrderOption("Entity.CreationDate", OrderType.Descending) },
@@ -269,7 +269,7 @@ WriteLiteral("\r\n    <script>\r\n        $(function () {\r\n");
 WriteLiteral("            ");
 
             
-            #line 50 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
+            #line 51 "..\..\Mailing\Views\AsyncEmailSenderDashboard.cshtml"
         Write(MailingClient.AsyncEmailSenderModule["initDashboard"](Url.Action<AsyncEmailSenderController>(p => p.View())));
 
             
