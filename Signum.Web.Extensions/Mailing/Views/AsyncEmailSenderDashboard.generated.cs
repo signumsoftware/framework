@@ -67,7 +67,7 @@ WriteLiteral("<div");
 
 WriteLiteral(" id=\"emailAsyncMainDiv\"");
 
-WriteLiteral(">\r\n    <h2>Email Async Sender state</h2>\r\n    <div>\r\n        <a");
+WriteLiteral(">\r\n    <h2>Async Email Sender State</h2>\r\n    <div>\r\n        <a");
 
 WriteAttribute("href", Tuple.Create(" href=\"", 246), Tuple.Create("\"", 311)
             

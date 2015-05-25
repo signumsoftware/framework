@@ -4,7 +4,7 @@
 @using Signum.Entities.DynamicQuery
 @model AsyncEmailSenderState
 <div id="emailAsyncMainDiv">
-    <h2>Email Async Sender state</h2>
+    <h2>Async Email Sender State</h2>
     <div>
         <a href="@(Url.Action<AsyncEmailSenderController>(pc => pc.Stop()))" class="sf-button btn btn-default active" style="@(Model.Running ? "" : "display:none");color:red" id="sfEmailAsyncProcessDisable">Stop </a>
         <a href="@(Url.Action<AsyncEmailSenderController>(pc => pc.Start()))" class="sf-button btn btn-default" style="@(!Model.Running ? "" : "display:none")" id="sfEmailAsyncProcessEnable">Start </a>
