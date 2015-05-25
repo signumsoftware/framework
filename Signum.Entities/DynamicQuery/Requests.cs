@@ -23,6 +23,13 @@ namespace Signum.Entities.DynamicQuery
             set { filters = value; }
         }
 
+        string queryUrl;
+        public string QueryUrl
+        {
+            get { return queryUrl; }
+            set { queryUrl = value; }
+        }
+
         public override string ToString()
         {
             return "{0} {1}".FormatWith(GetType().Name, QueryName);

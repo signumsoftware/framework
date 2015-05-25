@@ -45,9 +45,6 @@ namespace Signum.Engine
             set { @default = value; }
         }
 
-
-
-
         static readonly Variable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout");
         public static int? ScopeTimeout { get { return scopeTimeout.Value; } }
         public static IDisposable CommandTimeoutScope(int? timeoutMilliseconds)

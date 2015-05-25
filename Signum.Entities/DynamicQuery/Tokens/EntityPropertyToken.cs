@@ -91,6 +91,27 @@ namespace Signum.Entities.DynamicQuery
                 }
             }
 
+            if (PropertyInfo.PropertyType.UnNullify() == typeof(double) ||
+                PropertyInfo.PropertyType.UnNullify() == typeof(float) ||
+                PropertyInfo.PropertyType.UnNullify() == typeof(decimal))
+            {
+                PropertyRoute route = this.GetPropertyRoute();
+
+                if (route != null)
+                {
+                    var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name).Try(pp =>
+                        pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx());
+                    if (att != null)
+                    {
+                        return StepTokens(this, att.DecimalPlaces);
+                    }
+
+                    var format = Reflector.FormatString(route);
+                    if (format != null)
+                        return StepTokens(this, Reflector.NumDecimals(format));
+                }
+            }
+
             return SubTokensBase(PropertyInfo.PropertyType, options, GetImplementations());
         }
 

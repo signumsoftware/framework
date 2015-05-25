@@ -96,7 +96,7 @@ namespace Signum.Entities.Reflection
 
             DirectedGraph<Modifiable> identGraph = DirectedGraph<Modifiable>.Generate(graph.Where(a => a is Entity), graph.RelatedTo);
 
-            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.IdentifiableIntegrityCheck()).Where(errors => errors != null).SelectMany(errors => errors);
+            var identErrors = identGraph.OfType<Entity>().Select(ident => ident.EntityIntegrityCheck()).Where(errors => errors != null).SelectMany(errors => errors);
 
             var modErros = graph.Except(identGraph).OfType<ModifiableEntity>().Select(a => KVP.Create(a.temporalId, a.IntegrityCheck())); 
 
