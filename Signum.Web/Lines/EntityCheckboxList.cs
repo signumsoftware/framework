@@ -26,5 +26,7 @@ namespace Signum.Web
         protected override void SetReadOnly()
         {
         }
+
+        public Action<HtmlTag, Lite<IEntity>> CustomizeLabel = null;
     }
 }

@@ -103,7 +103,12 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.SurroundLine(new HtmlTag("label", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-checkbox-element")))
+            var label = new HtmlTag("label", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-checkbox-element");
+
+            if (entityListCheckBox.CustomizeLabel != null)
+                entityListCheckBox.CustomizeLabel(label, lite);
+
+            using (sb.SurroundLine(label))
             {
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
                     sb.AddLine(EntityBaseHelper.RenderPopup(helper, itemTC, RenderPopupMode.PopupInDiv, entityListCheckBox));
