@@ -190,7 +190,10 @@ namespace Signum.Utilities
         public static void WaitExecute(Action action)
         {
             if (Console.IsOutputRedirected)
+            {
                 action();
+                return;
+            }
 
             int? result = null;
             try
