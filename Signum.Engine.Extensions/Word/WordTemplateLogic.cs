@@ -381,6 +381,7 @@ namespace Signum.Engine.Word
             using (file.AllowChanges())
             {
                 file.BinaryFile = newTemplate.Template.Entity.BinaryFile;
+                file.FileName = newTemplate.Template.Entity.FileName;
 
                 return Schema.Current.Table<FileEntity>().UpdateSqlSync(file, comment: "WordTemplate Regenerated: " + template.Name);
             }
