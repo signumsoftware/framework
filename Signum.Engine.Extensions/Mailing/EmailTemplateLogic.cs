@@ -27,7 +27,9 @@ using System.Net.Mail;
 namespace Signum.Engine.Mailing
 {
     public static class EmailTemplateLogic
-    {   
+    {
+        public static bool AvoidSynchronize = false;
+
         public static EmailTemplateMessageEntity GetCultureMessage(this EmailTemplateEntity template, CultureInfo ci)
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
@@ -251,6 +253,9 @@ namespace Signum.Engine.Mailing
 
         static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
         {
+            if (AvoidSynchronize)
+                return null;
+
             StringDistance sd = new StringDistance();
 
             var emailTemplates = Database.Query<EmailTemplateEntity>().ToList();
@@ -264,6 +269,9 @@ namespace Signum.Engine.Mailing
 
         static SqlPreCommand Schema_Syncronize_DefaultTemplates(Replacements replacements)
         {
+            if (AvoidSynchronize)
+                return null;
+
             var table = Schema.Current.Table(typeof(EmailTemplateEntity));
 
             var systemEmails = Database.Query<SystemEmailEntity>().Where(se => !se.EmailTemplates().Any(a => a.Active)).ToList();
