@@ -404,6 +404,14 @@ namespace Signum.Web.Selenium
             }
         }
 
+        public List<Lite<Entity>> Options()
+        {
+           return Selenium.FindElement(ComboLocator)
+                .SelectElement().Options
+                .Select(o => Lite.Parse(o.GetAttribute("value")).TryDo(l => l.SetToString(o.Text)))
+                .ToList();
+        }
+
         public PopupControl<T> View<T>() where T : ModifiableEntity
         {
             Selenium.FindElement(ViewLocator).Click();
