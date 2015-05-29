@@ -11,8 +11,9 @@
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = Lite.Extract(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations.Value;
-    findOptions.Pagination = findOptions.Pagination ?? (Finder.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Pagination) ?? FindOptions.DefaultPagination;
-
+    var settings = Finder.QuerySettings(findOptions.QueryName);
+    findOptions.Pagination = findOptions.Pagination ?? settings.Pagination ?? FindOptions.DefaultPagination;
+    
     ViewData[ViewDataKeys.FindOptions] = findOptions;
 
     var prefix = Model.Compose("sfSearchControl");
@@ -23,6 +24,13 @@
      data-find-url="@Finder.FindRoute(findOptions.QueryName)" 
      data-queryName="@QueryUtils.GetQueryUniqueKey(findOptions.QueryName)" 
      >
+    @if (settings.SimpleFilterBuilder != null)
+    {
+        findOptions.ShowFilters = false;
+        <div id="@Model.Compose("simpleFilerBuilder")" class="form-horizontal">
+            @settings.SimpleFilterBuilder.Control(Html, Model, queryDescription)
+        </div>
+    }
 
     @{
         bool filtersAlwaysHidden = !findOptions.ShowHeader || !findOptions.ShowFilters && !findOptions.ShowFilterButton;
@@ -138,7 +146,8 @@
     }
 </div>
 <script type="text/javascript">
-    require(["@JsModule.Finder"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), 
+    require(["@JsModule.Finder"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"),
         @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString())),
-        @(MvcHtmlString.Create(JsonConvert.SerializeObject(implementations.ToJsTypeInfos(isSearch : true, prefix: prefix))))).ready();});
+        @Html.Json(implementations.ToJsTypeInfos(isSearch : true, prefix: prefix)),
+        @Html.Json(settings.SimpleFilterBuilder == null ? null : settings.SimpleFilterBuilder.Url(Url))).ready();});
 </script>

@@ -579,6 +579,12 @@ namespace Signum.Engine.Linq
 
                 sb.Append(" AS ");
                 sb.Append(((SourceWithAliasExpression)source).Alias.Name.SqlEscape());
+
+                var ta = source as TableExpression;
+                if(ta != null && ta.WithHint != null)
+                {
+                    sb.Append(" WITH(" + ta.WithHint + ")");
+                }
             }
             else
                 this.VisitJoin((JoinExpression)source);

@@ -2,17 +2,20 @@
 @using Signum.Entities.Reflection
 @using Signum.Engine.DynamicQuery
 @model Context
-@{ 
+@{
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     bool filtersVisible = (bool?)ViewData[ViewDataKeys.FiltersVisible] ?? true;
     bool showAddColumn = (bool?)ViewData[ViewDataKeys.ShowAddColumn] ?? false;
+    if(filterOptions.HasItems())
+    {
+        FilterOption.SetFilterTokens(filterOptions, queryDescription, canAggregate: false);
+    }
 }
-
 
 <div id="@Model.Compose("tblFilterBuilder")" class="panel panel-default sf-filters form-xs" @(filtersVisible ? "" : "style=display:none")>
     <div class="panel-heading sf-filters-body">
-        @Html.QueryTokenBuilder(null, new Context(Model, "tokenBuilder"), (QueryTokenBuilderSettings)ViewData[ViewDataKeys.QueryTokenSettings] ?? 
+        @Html.QueryTokenBuilder(null, new Context(Model, "tokenBuilder"), (QueryTokenBuilderSettings)ViewData[ViewDataKeys.QueryTokenSettings] ??
         SearchControlHelper.GetQueryTokenBuilderSettings(queryDescription, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
 
         <div class="btn-group">
@@ -33,27 +36,27 @@
         }
     </div>
 
-    <div class="panel-body sf-filters-list table-responsive">
+    <div class="panel-body sf-filters-list table-responsive" style="overflow-x: visible;">
         <div class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@SearchMessage.NoFiltersSpecified.NiceToString()</div>
         <table id="@Model.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none" : null)" class="table">
             <thead>
                 <tr>
                     <th></th>
-                    <th class="sf-filter-field-header">@SearchMessage.Field.NiceToString()
+                    <th class="sf-filter-field-header">
+                        @SearchMessage.Field.NiceToString()
                     </th>
-                    <th>@SearchMessage.Operation.NiceToString()
+                    <th>
+                        @SearchMessage.Operation.NiceToString()
                     </th>
-                    <th>@SearchMessage.Value.NiceToString()
+                    <th>
+                        @SearchMessage.Value.NiceToString()
                     </th>
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 0; i < filterOptions.Count; i++)
-                {
-                    FilterOption filter = filterOptions[i];
-                    @Html.NewFilter(queryDescription.QueryName, filter, Model, i)
-                }
+                @Html.Partial(Finder.Manager.FilterRowsView, Model)
             </tbody>
         </table>
     </div>
+
 </div>

@@ -238,8 +238,9 @@ namespace Signum.Engine.Operations
             return Disposable.Combine(SurroundOperation, f => f(operation, log, (Entity)entity, args));
         }
 
-        internal static void SetExceptionData(Exception ex, IEntity entity, object[] args)
+        internal static void SetExceptionData(Exception ex, OperationSymbol operationSymbol, IEntity entity, object[] args)
         {
+            ex.Data["operation"] = operationSymbol;
             ex.Data["entity"] = entity;
             if (args != null)
                 ex.Data["args"] = args;
@@ -605,7 +606,7 @@ namespace Signum.Engine.Operations
                 .FirstOrDefault();
         }
 
-        static IEnumerable<IOperation> TypeOperations(Type type)
+        public static IEnumerable<IOperation> TypeOperations(Type type)
         {
             var dic = operations.TryGetValue(type);
 
@@ -613,6 +614,23 @@ namespace Signum.Engine.Operations
                 return Enumerable.Empty<IOperation>();
 
             return dic.Values;
+        }
+
+        public static IEnumerable<IOperation> TypeOperationsAndConstructors(Type type)
+        {
+            var typeOperations = from t in TypeOperations(type)
+                                 where t.OperationType != Entities.OperationType.ConstructorFrom &&
+                                 t.OperationType != Entities.OperationType.ConstructorFromMany
+                                 select t;
+
+            var returnTypeOperations = from kvp in operationsFromKey.Value
+                                       select FindOperation(kvp.Value.FirstEx(), kvp.Key) into op
+                                       where op.OperationType == Entities.OperationType.ConstructorFrom && 
+                                       op.OperationType == Entities.OperationType.ConstructorFromMany
+                                       where op.ReturnType == type
+                                       select op;
+
+            return typeOperations.Concat(returnTypeOperations);
         }
 
         public static string InState<T>(this T state, params T[] fromStates) where T : struct
@@ -707,6 +725,10 @@ namespace Signum.Engine.Operations
         bool Returns { get; }
         Type ReturnType { get; }
         void AssertIsValid();
+
+        IEnumerable<Enum> UntypedFromStates { get; }
+        IEnumerable<Enum> UntypedToStates { get; }
+        Type StateType { get; }
     }
 
     public interface IEntityOperation : IOperation

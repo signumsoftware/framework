@@ -16,27 +16,31 @@ namespace Signum.Engine
 {
     public static class SchemaSynchronizer
     {
+        public static Func<SchemaName, bool> DropSchema = s => !s.Name.Contains(@"\"); 
+
         public static SqlPreCommand SynchronizeSchemasScript(Replacements replacements)
         {
-            HashSet<SchemaName> model = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).ToHashSet();
+            HashSet<SchemaName> model = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
             HashSet<SchemaName> database = new HashSet<SchemaName>();
-            foreach (var db in model.Select(a => a.Database).Distinct())
+            foreach (var db in Schema.Current.DatabaseNames())
             {
                 using (Administrator.OverrideDatabaseInSysViews(db))
                 {
-                    database.AddRange(
-                     from s in Database.View<SysSchemas>()
-                     select new SchemaName(db, s.name));
+                    var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(SqlBuilder.SystemSchemas);
+
+                    database.AddRange(schemaNames.Select(sn => new SchemaName(db, sn)));
                 }
             }
 
             using (replacements.WithReplacedDatabaseName())
-                return Synchronizer.SynchronizeScript(
-                    model.ToDictionary(a => a),
-                    database.ToDictionary(a => a),
+                return Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas",
+                    model.ToDictionary(a => a.ToString()),
+                    database.ToDictionary(a => a.ToString()),
                     (_, newSN) => SqlBuilder.CreateSchema(newSN),
-                    null,
-                    null, Spacing.Simple);
+                    (_, oldSN) => DropSchema(oldSN) ? SqlBuilder.DropSchema(oldSN) :  null,
+                    (_, newSN, oldSN) => newSN.Equals(oldSN) ? null :
+                        SqlPreCommand.Combine(Spacing.Simple, SqlBuilder.DropSchema(oldSN), SqlBuilder.CreateSchema(newSN)),
+                    Spacing.Double);
         }
 
         public static Action<Dictionary<string, DiffTable>> SimplifyDiffTables; 
@@ -716,7 +720,12 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             if (p == null)
                 return null;
 
-            return p.Replace("(", "").Replace(")", "").ToLower();
+            while (
+                p.StartsWith("(") && p.EndsWith(")") || 
+                p.StartsWith("'") && p.EndsWith("'"))
+                p = p.Substring(1, p.Length - 2);
+
+            return p.ToLower();
         }
 
         public DiffColumn Clone()

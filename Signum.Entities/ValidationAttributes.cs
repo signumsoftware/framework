@@ -181,8 +181,12 @@ namespace Signum.Entities
     public class EMailValidatorAttribute : RegexValidatorAttribute
     {
         public static readonly Regex EmailRegex = new Regex(
-                          @"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@"
-                          + @"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$", RegexOptions.IgnoreCase);
+                          @"^(([^<>()[\]\\.,;:\s@\""]+"
+                        + @"(\.[^<>()[\]\\.,;:\s@\""]+)*)|(\"".+\""))@"
+                        + @"((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
+                        + @"\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+"
+                        + @"[a-zA-Z]{2,}))$", RegexOptions.IgnoreCase);
+
         public EMailValidatorAttribute()
             : base(EmailRegex)
         {
@@ -391,14 +395,14 @@ namespace Signum.Entities
             bool ok = (ComparisonType == ComparisonType.EqualTo && val.CompareTo(number) == 0) ||
                       (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(number) != 0) ||
                       (ComparisonType == ComparisonType.GreaterThan && val.CompareTo(number) > 0) ||
-                      (ComparisonType == ComparisonType.GreaterThanOrEqual && val.CompareTo(number) >= 0) ||
+                      (ComparisonType == ComparisonType.GreaterThanOrEqualTo && val.CompareTo(number) >= 0) ||
                       (ComparisonType == ComparisonType.LessThan && val.CompareTo(number) < 0) ||
-                      (ComparisonType == ComparisonType.LessThanOrEqual && val.CompareTo(number) <= 0);
+                      (ComparisonType == ComparisonType.LessThanOrEqualTo && val.CompareTo(number) <= 0);
 
             if (ok)
                 return null;
 
-            return ValidationMessage._0HasToBe0Than1.NiceToString().FormatWith(ComparisonType.NiceToString(), number.ToString());
+            return ValidationMessage._0ShouldBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString(), number.ToString());
         }
 
         public override string HelpMessage
@@ -524,17 +528,17 @@ namespace Signum.Entities
             if ((ComparisonType == ComparisonType.EqualTo && val.CompareTo(number) == 0) ||
                 (ComparisonType == ComparisonType.DistinctTo && val.CompareTo(number) != 0) ||
                 (ComparisonType == ComparisonType.GreaterThan && val.CompareTo(number) > 0) ||
-                (ComparisonType == ComparisonType.GreaterThanOrEqual && val.CompareTo(number) >= 0) ||
+                (ComparisonType == ComparisonType.GreaterThanOrEqualTo && val.CompareTo(number) >= 0) ||
                 (ComparisonType == ComparisonType.LessThan && val.CompareTo(number) < 0) ||
-                (ComparisonType == ComparisonType.LessThanOrEqual && val.CompareTo(number) <= 0))
+                (ComparisonType == ComparisonType.LessThanOrEqualTo && val.CompareTo(number) <= 0))
                 return null;
 
-            return ValidationMessage.TheNumberOfElementsOf0HasToBe01.NiceToString().FormatWith(ComparisonType.NiceToString(), number.ToString());
+            return ValidationMessage.TheNumberOfElementsOf0HasToBe01.NiceToString().FormatWith(ComparisonType.NiceToString().FirstLower(), number.ToString());
         }
 
         public override string HelpMessage
         {
-            get { return ValidationMessage.HaveANumberOfElements01.NiceToString().FormatWith(ComparisonType.NiceToString(), number.ToString()); }
+            get { return ValidationMessage.HaveANumberOfElements01.NiceToString().FormatWith(ComparisonType.NiceToString().FirstLower(), number.ToString()); }
         }
     }
 
@@ -576,7 +580,7 @@ namespace Signum.Entities
 
             var prec = ((DateTime)value).GetPrecision();
             if (prec > Precision)
-                return "{{0}} has a precission of {0} instead of {1}".FormatWith(prec, Precision);
+                return ValidationMessage._0HasAPrecissionOf1InsteadOf2.NiceToString("{0}", prec, Precision);
 
             return null;
         }
@@ -725,9 +729,9 @@ namespace Signum.Entities
         EqualTo,
         DistinctTo,
         GreaterThan,
-        GreaterThanOrEqual,
+        GreaterThanOrEqualTo,
         LessThan,
-        LessThanOrEqual,
+        LessThanOrEqualTo,
     }
 
     public class IsAssignableToValidatorAttribute : ValidatorAttribute
@@ -874,8 +878,8 @@ namespace Signum.Entities
         _0HasMoreThan0DecimalPlaces,
         [Description("{{0}} has some repeated elements: {0}")]
         _0HasSomeRepeatedElements0,
-        [Description("{{0}} has to be {0} {1}")]
-        _0HasToBe0Than1,
+        [Description("{0} should be {1} {2}")]
+        _0ShouldBe12,
         [Description("{{0}} has to be between {0} and {1}")]
         _0HasToBeBetween0And1,
         [Description("{0} has to be lowercase")]
@@ -958,7 +962,7 @@ namespace Signum.Entities
         BeInThePast,
         [Description("{0} should be greater than {1}")]
         _0ShouldBeGreaterThan1,
+        [Description("{0} has a precission of {1} instead of {2}")]
+        _0HasAPrecissionOf1InsteadOf2,
     }
-
-
 }

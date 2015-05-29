@@ -651,6 +651,12 @@ namespace Signum.Test.LinqProvider
             Assert2.Throws<InvalidOperationException>("not supported",
                 () => Database.Query<LabelEntity>().Select(l => l.Owner.Retrieve()).ToList());
         }
+
+        [TestMethod]
+        public void SelectWithHint()
+        {
+            var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_idLabel)").Select(a => a.Label.Name).ToList();
+        }
     }
 
     public static class AuthorExtensions

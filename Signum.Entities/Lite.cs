@@ -311,6 +311,7 @@ namespace Signum.Entities
 
         public static Lite<T> Parse<T>(string liteKey) where T : class, IEntity
         {
+
             return (Lite<T>)Lite.Parse(liteKey);
         }
 

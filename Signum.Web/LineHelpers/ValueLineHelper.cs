@@ -32,7 +32,7 @@ namespace Signum.Web
             if (valueLine.InlineCheckbox)
                 return new HtmlTag("label").InnerHtml("{0} {1}".FormatHtml(value, valueLine.LabelText)).ToHtml();
 
-            return helper.FormGroup(valueLine, valueLine.Prefix, valueLine.LabelText, value);
+            return helper.FormGroup(valueLine, valueLine.Prefix, valueLine.LabelHtml ?? valueLine.LabelText.FormatHtml(), value);
         }
 
         private static MvcHtmlString InternalValue(HtmlHelper helper, ValueLine valueLine)
@@ -217,6 +217,10 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.Prefix, (string)valueLine.UntypedValue));
+
+                if (valueLine.FormControlStaticAsFormControlReadonly)
+                    valueLine.ValueHtmlProps.AddCssClass("readonly-textarea");
+
                 return result.Concat(helper.FormControlStatic(valueLine, "", (string)valueLine.UntypedValue, valueLine.ValueHtmlProps));
             }
 
@@ -289,9 +293,6 @@ namespace Signum.Web
 
         public static MvcHtmlString Hidden(this HtmlHelper helper, HiddenLine hiddenLine)
         {
-            if (hiddenLine.ReadOnly)
-                return helper.Span(hiddenLine.Prefix, hiddenLine.UntypedValue.TryToString() ?? "", "form-control");
-
             return helper.Hidden(hiddenLine.Prefix, hiddenLine.UntypedValue.TryToString() ?? "", hiddenLine.ValueHtmlProps);
         }
     }

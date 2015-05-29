@@ -80,6 +80,13 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void InnerTake()
+        {
+            var result = Database.Query<AlbumEntity>().Where(dr => dr.Songs.OrderByDescending(a => a.Seconds).Take(1).Where(a => a.Name.Contains("1976")).Any()).Select(a => a.ToLite()).ToList();
+            Assert.AreEqual(0, result.Count); 
+        }
+
+        [TestMethod]
         public void OrderByCommonSelectPaginate()
         {
             TestPaginate(Database.Query<ArtistEntity>().OrderBy(a => a.Sex).Select(a => a.Name));

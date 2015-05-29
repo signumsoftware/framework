@@ -17,12 +17,29 @@ namespace Signum.Engine
 {
     public static class SqlBuilder
     {
+        public static List<string> SystemSchemas = new List<string>()
+        {
+            "dbo",
+            "guest",
+            "INFORMATION_SCHEMA",
+            "sys",
+            "db_owner",
+            "db_accessadmin",
+            "db_securityadmin",
+            "db_ddladmin",
+            "db_backupoperator",
+            "db_datareader",
+            "db_datawriter",
+            "db_denydatareader",
+            "db_denydatawriter"
+        };
+
         #region Create Tables
         public static SqlPreCommandSimple CreateTableSql(ITable t)
         {
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".FormatWith(
                 t.Name, 
-                t.Columns.Values.Select(c => SqlBuilder.CreateField(c)).ToString(",\r\n").Indent(2)));
+                t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c)).ToString(",\r\n").Indent(2)));
         }
 
         public static SqlPreCommand DropTable(ObjectName tableName)
@@ -50,7 +67,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAddColumn(ITable table, IColumn column)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateField(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1}".FormatWith(table.Name, CreateColumn(column)));
         }
 
         public static bool IsNumber(SqlDbType sqlDbType)
@@ -103,15 +120,15 @@ namespace Signum.Engine
 
         public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column)
         {
-            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateField(column)));
+            return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column)));
         }
 
-        public static string CreateField(IColumn c)
+        public static string CreateColumn(IColumn c)
         {
-            return CreateField(c.Name, c.SqlDbType, c.UserDefinedTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.IdentityBehaviour, c.Default);
+            return CreateColumn(c.Name, c.SqlDbType, c.UserDefinedTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.IdentityBehaviour, c.Default);
         }
 
-        public static string CreateField(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity, string @default)
+        public static string CreateColumn(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity, string @default)
         {
             Connector.Current.FixType(ref type, ref size, ref scale);
 
@@ -121,8 +138,16 @@ namespace Signum.Engine
                 GetSizeScale(size, scale),
                 identity && @default == null ? "IDENTITY " : "",
                 nullable ? "NULL" : "NOT NULL",
-                @default != null ? " DEFAULT " + @default : "",
+                @default != null ? " DEFAULT " +  Quote(type, @default) : "",
                 primaryKey ? " PRIMARY KEY" : "");
+        }
+
+        static string Quote(SqlDbType type, string @default)
+        {
+            if (IsString(type) && !(@default.StartsWith("'") && @default.StartsWith("'")))
+                return "'" + @default + "'";
+
+            return @default;
         }
 
         public static string GetSizeScale(int? size, int? scale)
@@ -287,9 +312,13 @@ namespace Signum.Engine
                 return RenameTable(oldTable.Name, newTable.Name.Name);
 
             if (object.Equals(oldTable.Name.Schema.Database, newTable.Name.Schema.Database))
+            {
+                var oldNewSchema = oldTable.Name.OnSchema(newTable.Name.Schema);
+
                 return SqlPreCommand.Combine(Spacing.Simple,
                     AlterSchema(oldTable.Name, newTable.Name.Schema),
-                    oldTable.Name == newTable.Name ? null : RenameTable(new ObjectName(newTable.Name.Schema, oldTable.Name.Name), newTable.Name.Name));
+                    oldNewSchema.Equals(newTable.Name) ? null : RenameTable(oldNewSchema, newTable.Name.Name));
+            }
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 CreateTableSql(newTable),
@@ -368,12 +397,12 @@ FROM {1} as [table]".FormatWith(
 
         public static SqlPreCommand CreateSchema(SchemaName schemaName)
         {
-            return new SqlPreCommandSimple("CREATE SCHEMA {0}".FormatWith(schemaName));
+            return new SqlPreCommandSimple("CREATE SCHEMA {0}".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
         }
 
         public static SqlPreCommand DropSchema(SchemaName schemaName)
         {
-            return new SqlPreCommandSimple("DROP SCHEMA {0}".FormatWith(schemaName));
+            return new SqlPreCommandSimple("DROP SCHEMA {0}".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
         }
 
         public static SqlPreCommandSimple DisableForeignKey(ObjectName tableName, string foreignKey)
@@ -415,7 +444,7 @@ EXEC DB.dbo.sp_executesql @sql
                 .Replace("@sql", "@" + varName)
                 .Replace("{FullTable}", tableName.ToString())
                 .Replace("{Table}", tn.ToString())
-                .Replace("{Column}", columnName.SqlEscape());
+                .Replace("{Column}", columnName);
 
             return new SqlPreCommandSimple(command);
         }

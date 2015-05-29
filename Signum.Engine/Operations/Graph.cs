@@ -23,11 +23,14 @@ namespace Signum.Engine.Operations
             OperationType IOperation.OperationType { get { return OperationType.Constructor; } }
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return typeof(T); } }
+            IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+            Type IOperation.StateType { get { return null; } } 
+
             public bool LogAlsoIfNotSaved { get; set; }
 
             //public Func<object[], T> Construct { get; set; } (inherited)
             public bool Lite { get { return false; } }
-
 
             public Construct(ConstructSymbol<T>.Simple symbol)
             {
@@ -82,7 +85,7 @@ namespace Signum.Engine.Operations
                     }
                     catch (Exception ex)
                     {
-                        OperationLogic.SetExceptionData(ex, null, args);
+                        OperationLogic.SetExceptionData(ex, Symbol.Symbol, null, args);
 
                         if (LogAlsoIfNotSaved)
                         {
@@ -130,6 +133,9 @@ namespace Signum.Engine.Operations
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
             Type IOperation.OverridenType { get { return typeof(F); } }
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
+            IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+            Type IOperation.StateType { get { return null; } }
 
             public bool Lite { get; set; }
             public bool LogAlsoIfNotSaved { get; set; }
@@ -230,7 +236,7 @@ namespace Signum.Engine.Operations
                     }
                     catch (Exception ex)
                     {
-                        OperationLogic.SetExceptionData(ex, (Entity)origin, args);
+                        OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)origin, args);
 
                         if (LogAlsoIfNotSaved)
                         {
@@ -280,11 +286,12 @@ namespace Signum.Engine.Operations
             OperationSymbol IOperation.OperationSymbol { get { return Symbol.Symbol; } }
             Type IOperation.OverridenType { get { return typeof(F); } }
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFromMany; } }
-
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return typeof(T); } }
-
             Type IConstructorFromManyOperation.BaseType { get { return Symbol.BaseType; } }
+            IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
+            Type IOperation.StateType { get { return null; } }
 
             public bool LogAlsoIfNotSaved { get; set; }
 
@@ -347,7 +354,7 @@ namespace Signum.Engine.Operations
                     }
                     catch (Exception ex)
                     {
-                        OperationLogic.SetExceptionData(ex, null, args);
+                        OperationLogic.SetExceptionData(ex, Symbol.Symbol, null, args);
 
                         if (LogAlsoIfNotSaved)
                         {
@@ -402,9 +409,12 @@ namespace Signum.Engine.Operations
             public bool Lite { get; set; }
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return null; } }
+            Type IOperation.StateType { get { return null; } }
 
             Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
             bool IEntityOperation.HasCanExecute { get { return CanExecute != null; } }
+            IEnumerable<Enum> IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
 
             public bool AllowsNew { get; set; }
 
@@ -486,7 +496,7 @@ namespace Signum.Engine.Operations
                     }
                     catch (Exception ex)
                     {
-                        OperationLogic.SetExceptionData(ex, (Entity)entity, args);
+                        OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
 
                         if (Transaction.InTestTransaction)
                             throw;
@@ -540,6 +550,9 @@ namespace Signum.Engine.Operations
             public bool Lite { get; set; }
             bool IOperation.Returns { get { return false; } }
             Type IOperation.ReturnType { get { return null; } }
+            IEnumerable<Enum> IOperation.UntypedFromStates { get { return Enumerable.Empty<Enum>(); } }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return null; } }
+            Type IOperation.StateType { get { return null; } }
 
             public bool AllowsNew { get { return false; } }
 
@@ -619,7 +632,7 @@ namespace Signum.Engine.Operations
                         }
                         catch (Exception ex)
                         {
-                            OperationLogic.SetExceptionData(ex, (Entity)entity, args);
+                            OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
 
                             if (Transaction.InTestTransaction)
                                 throw;

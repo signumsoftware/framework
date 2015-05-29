@@ -107,6 +107,11 @@ namespace Signum.Web
         {
             return Manager.OnIsFindable(queryName);
         }
+
+        public static ActionResult SimpleFilterBuilderResult(ControllerBase controller, List<FilterOption> filterOptions)
+        {
+            return Manager.SimpleFilterBuilderResult(controller, filterOptions);
+        }
     }
 
     public class FinderManager
@@ -120,6 +125,7 @@ namespace Signum.Web
         public string SearchControlView = ViewPrefix.FormatWith("SearchControl");
         public string SearchResultsView = ViewPrefix.FormatWith("SearchResults");
         public string FilterBuilderView = ViewPrefix.FormatWith("FilterBuilder");
+        public string FilterRowsView = ViewPrefix.FormatWith("FilterRows");
         public string PaginationSelectorView = ViewPrefix.FormatWith("PaginationSelector");
 
         public Dictionary<object, QuerySettings> QuerySettings { get; set; }
@@ -374,6 +380,34 @@ namespace Signum.Web
                 }
 
             return true;
+        }
+
+        protected internal virtual ActionResult SimpleFilterBuilderResult(ControllerBase controller, List<FilterOption> filterOptions)
+        {
+            object queryName = Finder.ResolveQueryName(controller.ParseValue<string>("webQueryName"));
+
+            var qd = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            FilterOption.SetFilterTokens(filterOptions, qd, canAggregate: false);
+
+            if (controller.ParseValue<bool>("returnHtml"))
+            {
+                controller.ViewData.Model = new Context(null, controller.Prefix());
+                controller.ViewData[ViewDataKeys.FilterOptions] = filterOptions;
+
+                return new PartialViewResult
+                {
+                    ViewName = FilterRowsView,
+                    ViewData = controller.ViewData,
+                };
+            }
+            else
+            {
+                return new ContentResult
+                {
+                    Content = filterOptions.ToString(";")
+                };
+            }
         }
     }
 }

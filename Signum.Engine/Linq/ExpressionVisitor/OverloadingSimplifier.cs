@@ -300,7 +300,7 @@ namespace Signum.Engine.Linq
                     Expression reverse = Expression.Call((query ? miReverseQ : miReverseE).MakeGenericMethod(paramTypes[0]), source); 
 
                     if(predicate != null)
-                        reverse = Expression.Call((query ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]), source, predicate);
+                        reverse = Expression.Call((query ? miWhereQ : miWhereE).MakeGenericMethod(paramTypes[0]), reverse, predicate);
 
                     MethodInfo mEqFirst = query ?
                         mi.Name.Contains("OrDefault") ? miFirstOrDefaultQ : miFirstQ :
@@ -392,9 +392,24 @@ namespace Signum.Engine.Linq
             {
                 MethodInfo mi = m.Method.GetGenericMethodDefinition();
 
-                if (ReflectionTools.MethodEqual(mi, miToStringSeparatorE) || ReflectionTools.MethodEqual(mi, miToStringSeparatorQ))
+                if (ReflectionTools.MethodEqual(mi, miToStringSeparator))
                 {
-                    var args = m.Method.GetGenericArguments();
+                    var type = m.Method.GetGenericArguments().SingleEx();
+                    if (type != typeof(string))
+                    {
+                        var source = Visit(m.GetArgument("source"));
+                        var p = Expression.Parameter(type);
+                        var toString = Visit(Expression.Lambda(Expression.Call(p, miToString), p));
+                        var separator = Visit(m.GetArgument("separator"));
+
+                        return Expression.Call(miToStringSeparator.MakeGenericMethod(typeof(string)),
+                            Expression.Call(miSelectE.MakeGenericMethod(type, typeof(string)), source, toString),
+                            separator);
+                    }
+                }
+                else if (ReflectionTools.MethodEqual(mi, miToStringSeparatorE) || ReflectionTools.MethodEqual(mi, miToStringSeparatorQ))
+                {
+                    var type = m.Method.GetGenericArguments().SingleEx();
                     bool isQuery = ReflectionTools.MethodEqual(mi, miToStringSeparatorQ);
 
                     var source = Visit(m.GetArgument("source"));
@@ -402,7 +417,7 @@ namespace Signum.Engine.Linq
                     var separator = Visit(m.GetArgument("separator"));
 
                     return Expression.Call(miToStringSeparator.MakeGenericMethod(typeof(string)),
-                        Expression.Call((isQuery ? miSelectQ : miSelectE).MakeGenericMethod(args[0], typeof(string)), source, toString),
+                        Expression.Call((isQuery ? miSelectQ : miSelectE).MakeGenericMethod(type, typeof(string)), source, toString),
                         separator);
                 }
             }
