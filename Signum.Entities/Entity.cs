@@ -40,7 +40,7 @@ namespace Signum.Entities
         }
 
 
-        public void SetId(PrimaryKey value)
+        public void SetPrimaryKey(PrimaryKey value)
         {
             id = value;
         }
