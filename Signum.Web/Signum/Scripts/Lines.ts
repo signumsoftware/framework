@@ -1415,3 +1415,6 @@ export class EntityStrip extends EntityList {
     }
 }
 
+export class EntityListCheckbox extends EntityListBase {
+}
+

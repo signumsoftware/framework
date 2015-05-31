@@ -74,7 +74,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityListCheckBox, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityListCheckBox), null));
                 }
 
-                sb.AddLine(entityListCheckBox.ConstructorScript(JsModule.Lines, "EntityRepeater"));
+                sb.AddLine(entityListCheckBox.ConstructorScript(JsModule.Lines, "EntityListCheckbox"));
             }
 
             return sb.ToHtml();
