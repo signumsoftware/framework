@@ -267,6 +267,36 @@ namespace Signum.Utilities
             return DateTimePrecision.Days;
         }
 
+        public static string SmartShortDatePattern(this DateTime date)
+        {
+            DateTime currentdate = DateTime.Today;
+            return SmartShortDatePattern(date, currentdate);
+        }
+
+        public static string SmartShortDatePattern(this DateTime date, DateTime currentdate)
+        {
+            int datediff = (date.Date - currentdate).Days;
+
+            if (-7 <= datediff && datediff <= -2)
+                return DateTimeMessage.DateLast.NiceToString().FormatWith(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek).FirstUpper());
+
+            if (datediff == -1)
+                return DateTimeMessage.Yesterday.NiceToString();
+
+            if (datediff == 0)
+                return DateTimeMessage.Today.NiceToString();
+
+            if (datediff == 1)
+                return DateTimeMessage.Tomorrow.NiceToString();
+
+            if (2 <= datediff && datediff <= 7)
+                return DateTimeMessage.DateThis.NiceToString().FormatWith(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek).FirstUpper());
+
+            if (date.Year == currentdate.Year)
+                return date.ToString("d MMM");
+
+            return date.ToString("d MMMM yyyy");
+        }
 
         public static string SmartDatePattern(this DateTime date)
         {
