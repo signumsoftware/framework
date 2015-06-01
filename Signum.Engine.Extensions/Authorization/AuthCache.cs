@@ -34,15 +34,15 @@ namespace Signum.Entities.Authorization
         public static readonly Coercer<A, K> None = new Coercer<A, K>();
 
         public virtual Func<Lite<RoleEntity>, A, A> GetCoerceValueManual(K key) { return (role, allowed) => allowed; }
-        public virtual Func<K, A, A> GetCoerceValue(Lite<RoleEntity> role) { return (key, allowed) => allowed; } 
+        public virtual Func<K, A, A> GetCoerceValue(Lite<RoleEntity> role) { return (key, allowed) => allowed; }
     }
 
-    class AuthCache<RT, AR, R, K, A>: IManualAuth<K, A> 
+    class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         where RT : RuleEntity<R, A>, new()
         where AR : AllowedRule<R, A>, new()
         where R : Entity
     {
-        readonly ResetLazy<Dictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules; 
+        readonly ResetLazy<Dictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
 
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
@@ -54,7 +54,7 @@ namespace Signum.Entities.Authorization
             this.ToKey = toKey;
             this.ToEntity = toEntity;
             this.merger = merger;
-            this.coercer = coercer ?? Coercer<A, K>.None; 
+            this.coercer = coercer ?? Coercer<A, K>.None;
 
             sb.Include<RT>();
 
@@ -93,7 +93,7 @@ namespace Signum.Entities.Authorization
 
             var keyCoercer = coercer.GetCoerceValueManual(key);
 
-            ManualResourceCache miniCache = new ManualResourceCache(key, resource, merger, keyCoercer); 
+            ManualResourceCache miniCache = new ManualResourceCache(key, resource, merger, keyCoercer);
 
             allowed = keyCoercer(role, allowed);
 
@@ -224,7 +224,7 @@ namespace Signum.Entities.Authorization
         {
             return runtimeRules.Value[role].GetAllowed(key);
         }
-      
+
         internal DefaultDictionary<K, A> GetDefaultDictionary()
         {
             return runtimeRules.Value[RoleEntity.Current.ToLite()].DefaultDictionary();
@@ -236,7 +236,7 @@ namespace Signum.Entities.Authorization
             readonly IMerger<K, A> merger;
             readonly Func<K, A, A> coercer;
 
-            readonly DefaultDictionary<K, A> rules; 
+            readonly DefaultDictionary<K, A> rules;
             readonly List<RoleAllowedCache> baseCaches;
 
 
@@ -328,14 +328,15 @@ namespace Signum.Entities.Authorization
             Func<string, R> toResource, Func<string, A> parseAllowed)
         {
             var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
-            var should = element.Element(rootName).Elements("Role").ToDictionary(x => roles.GetOrThrow(x.Attribute("Name").Value));
+            var xRoles = element.Element(rootName).Try(e => e.Elements("Role")).EmptyIfNull();
+            var should = xRoles.ToDictionary(x => roles.GetOrThrow(x.Attribute("Name").Value));
 
             Table table = Schema.Current.Table(typeof(RT));
-            
-            return Synchronizer.SynchronizeScript(should, current, 
+
+            return Synchronizer.SynchronizeScript(should, current,
                 (role, x) =>
                 {
-                    var dic =  (from xr in x.Elements(elementName)
+                    var dic = (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
                                select KVP.Create(r, parseAllowed(xr.Attribute("Allowed").Value)))
@@ -354,7 +355,7 @@ namespace Signum.Entities.Authorization
                 (role, x, list) =>
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
-                  
+
                     var dic = (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
@@ -362,14 +363,14 @@ namespace Signum.Entities.Authorization
                                .ToDictionary("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
                     SqlPreCommand restSql = Synchronizer.SynchronizeScript(
-                        dic, 
-                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource), 
+                        dic,
+                        list.Where(a => a.Resource != null).ToDictionary(a => a.Resource),
                         (r, xr) =>
                         {
                             var a = parseAllowed(xr.Attribute("Allowed").Value);
                             return table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = a }, comment: Comment(role, r, a));
-                        }, 
-                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), 
+                        },
+                        (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)),
                         (r, xr, rt) =>
                         {
                             var oldA = rt.Allowed;
@@ -378,7 +379,7 @@ namespace Signum.Entities.Authorization
                         }, Spacing.Simple).TryDo(p => p.GoBefore = true);
 
                     return restSql;
-                }, 
+                },
                 Spacing.Double);
         }
 
