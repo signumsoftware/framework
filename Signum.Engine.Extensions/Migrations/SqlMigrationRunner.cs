@@ -18,7 +18,6 @@ namespace Signum.Engine.Migrations
 {
     public class SqlMigrationRunner
     {
-        public static string LastMigration = "LastMigration.txt";
         public static string MigrationsDirectory = @"..\..\Migrations";
         public static string MigrationsDirectoryName = "Migrations";
 
@@ -103,34 +102,7 @@ namespace Signum.Engine.Migrations
                 Comment = a.match.Groups["comment"].Value,
             }).ToDictionary(a => a.Version, "Migrations with the same version");
 
-            var maxVersion = dictionary.Values.Select(a => a.Version).Max();
-
-            AssertLastMigration(maxVersion);
-
             return dictionary;
-        }
-
-        private static void AssertLastMigration(string maxVersion)
-        {
-            var lastMigrationPath = Path.Combine(MigrationsDirectory, LastMigration);
-            if (!File.Exists(lastMigrationPath) && maxVersion != null)
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.White, "File " + lastMigrationPath + " auto-generated...");
-
-                File.WriteAllText(lastMigrationPath, maxVersion);
-            }
-            else if (File.Exists(lastMigrationPath) && maxVersion == null)
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.White, "File " + lastMigrationPath + " removed...");
-
-                File.Delete(lastMigrationPath);
-            }
-
-            var maxVersionInFile = File.Exists(lastMigrationPath) ? File.ReadAllText(lastMigrationPath).Trim() : null;
-
-            if (maxVersion.DefaultText(null) != maxVersionInFile.DefaultText(null))
-                throw new InvalidOperationException("Inconsistency between the {0} ({1}) ant the latest migration in {2} ({3})".FormatWith(LastMigration, maxVersionInFile, MigrationsDirectory, maxVersion));
-
         }
 
         public const string DatabaseNameReplacement = "$DatabaseName$";
@@ -163,8 +135,6 @@ namespace Signum.Engine.Migrations
                     string fileName = version + (comment.HasText() ? "_" + FileNameValidatorAttribute.RemoveInvalidCharts(comment): null) + ".sql";
 
                     File.WriteAllText(Path.Combine(MigrationsDirectory, fileName), script.ToString());
-
-                    File.WriteAllText(Path.Combine(MigrationsDirectory, LastMigration), version);
 
                     AddCsprojReference(fileName);
                 }
@@ -316,11 +286,6 @@ namespace Signum.Engine.Migrations
                 lastContent.AddAfterSelf(element);
             else
                 itemGroups.Last().Add(element);
-
-            var lastMigrationFile =  @"Migrations\" + LastMigration;
-
-            if(!itemGroups.Any(e => e.Elements(xmlns + "Content").Any(a => a.Attribute("Include").Value.Equals(lastMigrationFile, StringComparison.InvariantCultureIgnoreCase))))
-                element.AddAfterSelf(new XElement(xmlns + "Content", new XAttribute("Include", lastMigrationFile)));
 
             doc.Save(csproj);
         }
