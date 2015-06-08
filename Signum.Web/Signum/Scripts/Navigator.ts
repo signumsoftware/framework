@@ -89,6 +89,7 @@ export interface ViewPopupOptions extends ViewOptionsBase {
     allowErrors?: AllowErrors;
     onPopupLoaded?: (popupDiv: JQuery) => void;
     saveProtected?: boolean;
+    canClose?: (isOk: boolean) => Promise<boolean>;
 }
 
 export enum AllowErrors {
@@ -112,12 +113,36 @@ export function viewPopup(entityHtml: Entities.EntityHtml, viewOptions?: ViewPop
         onPopupLoaded: null,
     }, viewOptions);
 
-    if (!viewOptions.avoidValidate)
-        viewOptions.validationOptions = $.extend({
-            prefix: entityHtml.prefix,
-            showPathErrors: true
-        }, viewOptions.validationOptions);
+    if (!viewOptions.canClose) {
 
+        if (viewOptions.avoidValidate)
+            viewOptions.canClose = isOk => Promise.resolve(true);
+        else {
+            viewOptions.validationOptions = $.extend({
+                prefix: entityHtml.prefix,
+                showPathErrors: true
+            }, viewOptions.validationOptions);
+
+            viewOptions.canClose = isOk => {
+                if (!isOk)
+                    return Promise.resolve(true);
+
+                if (viewOptions.avoidValidate)
+                    return Promise.resolve(true);
+
+                return checkValidation(viewOptions.validationOptions, viewOptions.allowErrors).then(valResult=> {
+                    if (valResult == null)
+                        return false;
+
+                    entityHtml.hasErrors = !valResult.isValid;
+                    entityHtml.link = valResult.newLink;
+                    entityHtml.toStr = valResult.newToStr;
+
+                    return true;
+                });
+            };
+        }
+    }
 
     if (entityHtml.isLoaded()) {
 
@@ -138,30 +163,12 @@ function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOp
 
     entityHtml.getChild("panelPopup").data("sf-navigate", false);
 
-    return openEntityHtmlModal(entityHtml, isOk => {
-        if (!isOk)
-            return Promise.resolve(true);
+    return openEntityHtmlModal(entityHtml, viewOptions.canClose, viewOptions.onPopupLoaded).then(pair=> {
+        if (!pair.isOk)
+            return null;
 
-        if (viewOptions.avoidValidate)
-            return Promise.resolve(true);
-
-        return checkValidation(viewOptions.validationOptions, viewOptions.allowErrors).then(valResult=> {
-            if (valResult == null)
-                return false;
-
-            entityHtml.hasErrors = !valResult.isValid;
-            entityHtml.link = valResult.newLink;
-            entityHtml.toStr = valResult.newToStr;
-
-            return true;
-        });
-    }, viewOptions.onPopupLoaded).then(pair=> {
-
-            if (!pair.isOk)
-                return null;
-
-            return pair.entityHtml;
-        });
+        return pair.entityHtml;
+    });
 }
 
 export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
@@ -194,12 +201,12 @@ export function openEntityHtmlModal(entityHtml: Entities.EntityHtml,
         }
     }, shown).then(pair => {
 
-            var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
-            entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
-            entityHtml.html = pair.modalDiv;
+        var main = entityHtml.prefix.child("divMainControl").tryGet(panelPopup);
+        entityHtml.runtimeInfo = Entities.RuntimeInfo.parse(main.data("runtimeinfo"));
+        entityHtml.html = pair.modalDiv;
 
-            return { isOk: pair.button && pair.button.id == okButtonId, entityHtml: entityHtml };
-        });
+        return { isOk: pair.button && pair.button.id == okButtonId, entityHtml: entityHtml };
+    });
 
 }
 
@@ -250,7 +257,7 @@ export function requestAndReload(prefix: string, options?: ViewOptionsBase): Pro
 
     options = $.extend({
         controllerUrl: !prefix ? SF.Urls.normalControl :
-        isNavigatePopup(prefix) ? SF.Urls.popupNavigate : SF.Urls.popupView,
+            isNavigatePopup(prefix) ? SF.Urls.popupNavigate : SF.Urls.popupView,
     }, options);
 
     return requestHtml(getEmptyEntityHtml(prefix), options).then(eHtml=> {
@@ -320,7 +327,6 @@ export function isNavigatePopup(prefix: string): boolean {
     return prefix.child("panelPopup").get().data("sf-navigate")
 }
 
-
 function checkValidation(validatorOptions: Validator.ValidationOptions, allowErrors: AllowErrors): Promise<Validator.ValidationResult> {
 
     return Validator.validate(validatorOptions).then(result=> {
@@ -354,9 +360,9 @@ function requestHtml(entityHtml: Entities.EntityHtml, viewOptions: ViewOptionsBa
             error: reject,
         });
     }).then(htmlText=> {
-            entityHtml.loadHtml(htmlText);
-            return entityHtml
-            });
+        entityHtml.loadHtml(htmlText);
+        return entityHtml
+    });
 }
 
 
@@ -390,12 +396,11 @@ export interface ConstructChooserOption {
 
 export function chooseConstructor(extraJsonData: FormObject, prefix: string, title: string, options: ConstructChooserOption[]): Promise<FormObject> {
 
-    return chooser(prefix, title, options).then(co=>
-    {
+    return chooser(prefix, title, options).then(co=> {
         if (!co)
             return null;
 
-        extraJsonData = $.extend(extraJsonData, { operationFullKey: co.value }); 
+        extraJsonData = $.extend(extraJsonData, { operationFullKey: co.value });
 
         if (co.operationConstructor)
             return <any>co.operationConstructor(extraJsonData);
@@ -417,15 +422,15 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
     if (getStr == null) {
         getStr = (a: any) =>
             a.toStr ? a.toStr :
-            a.text ? a.text :
-            a.toString();
+                a.text ? a.text :
+                    a.toString();
     }
 
     if (getValue == null) {
         getValue = (a: any) =>
             a.type ? a.type :
-            a.value ? a.value :
-            a.toString();
+                a.value ? a.value :
+                    a.toString();
     }
 
     var modalBody = $("<div>")
@@ -447,8 +452,7 @@ export interface MessageBoxOptions {
     message: string;
 }
 
-export function openMessageBox(options: MessageBoxOptions)
-{
+export function openMessageBox(options: MessageBoxOptions) {
     var modalBody = $("<div>").text(options.message);
 
     var modalDiv = createBootstrapModal({
@@ -546,8 +550,8 @@ export function valueLineBox(options: ValueLineBoxOptions): Promise<string> {
         controllerUrl: SF.Urls.valueLineBox,
         requestExtraJsonData: options,
     })
-    .then(eHtml=> openEntityHtmlModal(eHtml))
-    .then(pair => {
+        .then(eHtml=> openEntityHtmlModal(eHtml))
+        .then(pair => {
         if (!pair.isOk)
             return null;
 
