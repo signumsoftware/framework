@@ -625,9 +625,9 @@ namespace Signum.Engine.Maps
             if (collections == null)
                 return insert;
 
-            SqlPreCommand declareParent = new SqlPreCommandSimple("DECLARE @idParent INT") { GoBefore = true };
-            
-            SqlPreCommand setParent = new SqlPreCommandSimple("SET @idParent = @@Identity");
+            SqlPreCommand declareParent = new SqlPreCommandSimple("DECLARE @parentId INT") { GoBefore = true };
+
+            SqlPreCommand setParent = new SqlPreCommandSimple("SET @parentId = @@Identity");
 
             return SqlPreCommand.Combine(Spacing.Simple, declareParent, insert, setParent, collections);
         }
@@ -1001,10 +1001,10 @@ namespace Signum.Engine.Maps
                     return collection.Select((e, i) =>
                     {
                         var parameters = InsertParameters(parent, e, i, new Forbidden(new HashSet<Entity> { parent }), suffix + "_" + i);
-                        var idParent = parameters.First(); // wont be replaced, generating @idParent
+                        var parentId = parameters.First(); // wont be replaced, generating @parentId
                         parameters.RemoveAt(0);
                         string script = sqlInsert(suffix + "_" + i, false);
-                        script = script.Replace(idParent.ParameterName, "@idParent");
+                        script = script.Replace(parentId.ParameterName, "@parentId");
                         return new SqlPreCommandSimple(script, parameters).AddComment(e.ToString());
                     }).Combine(Spacing.Simple);
                 }
@@ -1016,11 +1016,6 @@ namespace Signum.Engine.Maps
                             InsertParameters(parent, e, i, new Forbidden(), suffix + "_" + i)).AddComment(e.ToString())).Combine(Spacing.Simple));
                 }
             }
-
-
-
-
-           
         }
 
         static GenericInvoker<Func<TableMList, IMListCache>> giCreateCache =
@@ -1100,7 +1095,7 @@ namespace Signum.Engine.Maps
 
                 var paramRowId = Expression.Parameter(typeof(PrimaryKey), "rowId");
 
-                string idParent = "idParent";
+                string parentId = "parentId";
                 string rowId = "rowId";
 
                 //BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramSuffix);
@@ -1110,12 +1105,12 @@ namespace Signum.Engine.Maps
 
                 result.sqlUpdate = suffix => "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3} AND {4} = {5}".FormatWith(Name,
                     trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(), p.ParameterName + suffix).Indent(2), ",\r\n"),
-                    this.BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(idParent + suffix),
+                    this.BackReference.Name.SqlEscape(), ParameterBuilder.GetParameterName(parentId + suffix),
                     this.PrimaryKey.Name.SqlEscape(), ParameterBuilder.GetParameterName(rowId + suffix));
 
                 var parameters = trios.Select(a => a.ParameterBuilder).ToList();
 
-                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(idParent, paramSuffix), this.BackReference.SqlDbType, null, false,
+                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(parentId, paramSuffix), this.BackReference.SqlDbType, null, false,
                     Expression.Field(Expression.Property(Expression.Field(paramIdent, Table.fiId), "Value"), "Object")));
                 parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramSuffix), this.PrimaryKey.SqlDbType, null, false,
                     Expression.Field(paramRowId, "Object")));

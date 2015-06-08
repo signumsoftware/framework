@@ -675,7 +675,7 @@ namespace Signum.Engine.CodeGeneration
             if (col.ForeignKey == null)
                 return fieldName;
 
-            return "id" + fieldName;
+            return fieldName + "ID";
         }
 
         protected virtual string GetSqlTypeAttribute(DiffTable table, DiffColumn col)
@@ -880,7 +880,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetBackColumnNameAttribute(DiffColumn backReference)
         {
-            if (backReference.Name == "idParent")
+            if (backReference.Name == "ParentID")
                 return null;
 
             return "BackReferenceColumnName(\"{0}\")".FormatWith(backReference.Name);
