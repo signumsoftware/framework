@@ -278,7 +278,7 @@ namespace Signum.Utilities
             int datediff = (date.Date - currentdate).Days;
 
             if (-7 <= datediff && datediff <= -2)
-                return DateTimeMessage.DateLast.NiceToString().FormatWith(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek).FirstUpper());
+                return DateTimeMessage.Last0.NiceToString(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek).FirstUpper());
 
             if (datediff == -1)
                 return DateTimeMessage.Yesterday.NiceToString();
@@ -290,7 +290,7 @@ namespace Signum.Utilities
                 return DateTimeMessage.Tomorrow.NiceToString();
 
             if (2 <= datediff && datediff <= 7)
-                return DateTimeMessage.DateThis.NiceToString().FormatWith(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek).FirstUpper());
+                return DateTimeMessage.This0.NiceToString(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek).FirstUpper());
 
             if (date.Year == currentdate.Year)
                 return date.ToString("d MMM");
@@ -309,7 +309,7 @@ namespace Signum.Utilities
             int datediff = (date.Date - currentdate).Days;
 
             if (-7 <= datediff && datediff <= -2)
-                return DateTimeMessage.DateLast.NiceToString().FormatWith(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
+                return DateTimeMessage.Last0.NiceToString(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
 
             if (datediff == -1)
                 return DateTimeMessage.Yesterday.NiceToString();
@@ -321,7 +321,7 @@ namespace Signum.Utilities
                 return DateTimeMessage.Tomorrow.NiceToString();
 
             if (2 <= datediff && datediff <= 7)
-                return DateTimeMessage.DateThis.NiceToString().FormatWith(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
+                return DateTimeMessage.This0.NiceToString(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
 
             if (date.Year == currentdate.Year)
             {
@@ -507,9 +507,9 @@ namespace Signum.Utilities
         [Description("{0} ago")]
         _0Ago,
         [Description("Last {0}")]
-        DateLast,
+        Last0,
         [Description("This {0}")]
-        DateThis,
+        This0,
         [Description("In {0}")]
         In0,
         Today,
