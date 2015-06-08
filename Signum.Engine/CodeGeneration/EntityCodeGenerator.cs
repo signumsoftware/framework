@@ -584,7 +584,7 @@ namespace Signum.Engine.CodeGeneration
         {
             List<string> attributes = new List<string>();
 
-            if (HasNotNullableAttribute(col, relatedEntity))
+            if (HasNotNullableAttribute(col, relatedEntity) && GetValueType(col) != typeof(string))
                 attributes.Add("NotNullValidator");
 
             string stringLengthValidator = GetStringLengthValidator(table, col, relatedEntity);
@@ -620,7 +620,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual bool HasNotNullableAttribute(DiffColumn col, string relatedEntity)
         {
-            return !col.Nullable && (relatedEntity != null || !GetValueType(col).IsClass);
+            return !col.Nullable && (relatedEntity != null || GetValueType(col).IsClass);
         }
 
         protected virtual string GetFieldName(DiffTable table, DiffColumn col)
