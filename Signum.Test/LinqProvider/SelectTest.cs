@@ -655,7 +655,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectWithHint()
         {
-            var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_idLabel)").Select(a => a.Label.Name).ToList();
+            var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_LabelID)").Select(a => a.Label.Name).ToList();
         }
     }
 
