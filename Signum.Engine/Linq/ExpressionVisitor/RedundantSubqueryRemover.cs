@@ -178,7 +178,7 @@ namespace Signum.Engine.Linq
                     {
                         if (where != null)
                         {
-                            where = Expression.And(fromSelect.Where, where);
+                            where = Expression.And(fromSelect.Where, where.UnNullify());
                         }
                         else
                         {
