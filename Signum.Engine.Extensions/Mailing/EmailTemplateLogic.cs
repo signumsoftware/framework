@@ -291,7 +291,7 @@ namespace Signum.Engine.Mailing
                 }).Combine(Spacing.Double);
 
                 if (cmd != null)
-                    return SqlPreCommand.Combine(Spacing.Double, new SqlPreCommandSimple("DECLARE @idParent INT"), cmd);
+                    return SqlPreCommand.Combine(Spacing.Double, new SqlPreCommandSimple("DECLARE @parentId INT"), cmd);
 
                 return cmd;
             }
