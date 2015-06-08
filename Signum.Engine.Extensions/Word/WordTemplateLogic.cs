@@ -29,6 +29,8 @@ namespace Signum.Engine.Word
 {
     public static class WordTemplateLogic
     {
+        public static bool AvoidSynchronize = false;
+
         public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy;
 
         public static ResetLazy<Dictionary<TypeEntity, List<Lite<WordTemplateEntity>>>> TemplatesByType;
@@ -254,7 +256,7 @@ namespace Signum.Engine.Word
 
         static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
         {
-            if (!Database.Query<WordTemplateEntity>().Any() || !replacements.Interactive || !SafeConsole.Ask("Synchronize WordTemplates?"))
+            if (AvoidSynchronize)
                 return null;
 
             StringDistance sd = new StringDistance();
