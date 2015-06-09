@@ -334,14 +334,15 @@ namespace Signum.Engine.Mailing
                 .Where(a => a.Type == EmailAttachmentType.LinkedResource)
                 .Select(a => new LinkedResource(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))
                 {
-                    ContentId = a.ContentId
+                    ContentId = a.ContentId,
                 }));
 
             message.Attachments.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.Attachment)
                 .Select(a => new Attachment(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))
                 {
-                    ContentId = a.ContentId
+                    ContentId = a.ContentId,
+                    Name = a.File.FileName,
                 }));
 
             message.AlternateViews.Add(view);
