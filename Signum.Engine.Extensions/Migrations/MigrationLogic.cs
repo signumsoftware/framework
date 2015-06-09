@@ -16,6 +16,7 @@ using Signum.Entities;
 using Signum.Entities.Migrations;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
+using Signum.Engine.SchemaInfoTables;
 
 namespace Signum.Engine.Migrations
 {
@@ -59,6 +60,9 @@ namespace Signum.Engine.Migrations
                     return;
 
                 var table = Schema.Current.Table<T>();
+
+                if (!table.Name.Schema.IsDefault() && !Database.View<SysSchemas>().Any(s => s.name == table.Name.Schema.Name))
+                    SqlBuilder.CreateSchema(table.Name.Schema).ExecuteLeaves();
 
                 SqlBuilder.CreateTableSql(table).ExecuteNonQuery();
 
