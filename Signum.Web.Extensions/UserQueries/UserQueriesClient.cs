@@ -166,7 +166,7 @@ namespace Signum.Web.UserQueries
             if (items.Count > 0)
                 items.Add(new MenuItemSeparator());
 
-            if (Navigator.IsCreable(typeof(UserQueryEntity), isSearch: true))
+            if (Navigator.IsCreable(typeof(UserQueryEntity), isSearch: null))
             {
                 items.Add(new MenuItem(ctx.Prefix, "qbUserQueryNew")
                 {

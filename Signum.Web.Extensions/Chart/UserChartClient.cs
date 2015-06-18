@@ -156,7 +156,7 @@ namespace Signum.Web.Chart
             if (items.Count > 0)
                 items.Add(new MenuItemSeparator());
 
-            if (Navigator.IsCreable(typeof(UserChartEntity), isSearch: true))
+            if (Navigator.IsCreable(typeof(UserChartEntity), isSearch: null))
             {
                 string uqNewText = ChartMessage.CreateNew.NiceToString();
                 items.Add(new MenuItem(prefix, "qbUserChartNew")
