@@ -51,6 +51,12 @@ namespace Signum.Entities
             get { return id; }
         }
 
+        public void SetIsNew(bool value)
+        {
+            IsNew = value;
+        }
+
+
         [Ignore]
         bool isNew = true;
         [HiddenProperty]
