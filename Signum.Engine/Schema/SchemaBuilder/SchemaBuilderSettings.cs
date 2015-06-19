@@ -22,7 +22,7 @@ namespace Signum.Engine.Maps
 
         }
 
-        public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "Id");
+        public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "ID");
         public int DefaultImplementedBySize = 40;
 
         public Action<Type> AssertNotIncluded = null;

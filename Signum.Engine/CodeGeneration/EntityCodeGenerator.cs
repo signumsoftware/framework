@@ -584,7 +584,7 @@ namespace Signum.Engine.CodeGeneration
         {
             List<string> attributes = new List<string>();
 
-            if (HasNotNullableAttribute(col, relatedEntity))
+            if (HasNotNullableAttribute(col, relatedEntity) && GetValueType(col) != typeof(string))
                 attributes.Add("NotNullValidator");
 
             string stringLengthValidator = GetStringLengthValidator(table, col, relatedEntity);
@@ -620,7 +620,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual bool HasNotNullableAttribute(DiffColumn col, string relatedEntity)
         {
-            return !col.Nullable && (relatedEntity != null || !GetValueType(col).IsClass);
+            return !col.Nullable && (relatedEntity != null || GetValueType(col).IsClass);
         }
 
         protected virtual string GetFieldName(DiffTable table, DiffColumn col)
@@ -675,7 +675,7 @@ namespace Signum.Engine.CodeGeneration
             if (col.ForeignKey == null)
                 return fieldName;
 
-            return "id" + fieldName;
+            return fieldName + "ID";
         }
 
         protected virtual string GetSqlTypeAttribute(DiffTable table, DiffColumn col)
@@ -880,7 +880,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetBackColumnNameAttribute(DiffColumn backReference)
         {
-            if (backReference.Name == "idParent")
+            if (backReference.Name == "ParentID")
                 return null;
 
             return "BackReferenceColumnName(\"{0}\")".FormatWith(backReference.Name);
@@ -902,7 +902,7 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("static Expression<Func<{0}, string>> ToStringExpression = e => e.{1}{2};".FormatWith(GetEntityName(table.Name),
                 toStringColumn.PrimaryKey ? "Id" : GetFieldName(table, toStringColumn).FirstUpper(),
-                GetFieldType(table, toStringColumn, null) == "string" ? "" : ".TryToString()"));
+                toStringColumn.PrimaryKey || GetFieldType(table, toStringColumn, GetRelatedEntity(table, toStringColumn)) != "string" ? ".TryToString()" : ""));
             sb.AppendLine("public override string ToString()");
             sb.AppendLine("{");
             sb.AppendLine("    return ToStringExpression.Evaluate(this);");
