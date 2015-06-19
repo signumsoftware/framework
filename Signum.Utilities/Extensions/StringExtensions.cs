@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Signum.Utilities
 {
     public static class StringExtensions
     {
-        static Expression<Func<string, bool>> HasTextExpression = str => str != null && str != "";
-
         public static bool HasText(this string str)
         {
             return !string.IsNullOrEmpty(str);
@@ -61,9 +58,8 @@ namespace Signum.Utilities
         public static string[] Lines(this string str)
         {
             if (str.HasText())
-                return str.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
-            else
-                return new string[0];
+                return str.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            return new string[0];
         }
 
         static InvalidOperationException NotFound(string str, char separator)
@@ -492,17 +488,17 @@ namespace Signum.Utilities
             return sb.ToString();
         }
 
-        public static string FormatWith(string format, object arg0)
+        public static string FormatWith(this string format, object arg0)
         {
             return string.Format(format, arg0);
         }
 
-        public static string FormatWith(string format, object arg0, object arg1)
+        public static string FormatWith(this string format, object arg0, object arg1)
         {
             return string.Format(format, arg0, arg1);
         }
 
-        public static string FormatWith(string format, object arg0, object arg1, object arg2)
+        public static string FormatWith(this string format, object arg0, object arg1, object arg2)
         {
             return string.Format(format, arg0, arg1, arg2);
         }
