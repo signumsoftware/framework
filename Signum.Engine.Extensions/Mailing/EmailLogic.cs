@@ -117,18 +117,22 @@ namespace Signum.Engine.Mailing
         public static void SendMailAsync(this ISystemEmail systemEmail)
         {
             foreach (var email in systemEmail.CreateEmailMessage())
-                email.Execute(EmailMessageOperation.ReadyToSend);
+                email.SendMailAsync();
         }
 
         public static void SendMailAsync(this Lite<EmailTemplateEntity> template, IEntity entity)
         {
             foreach (var email in template.CreateEmailMessage(entity))
-                email.Execute(EmailMessageOperation.ReadyToSend);
+                email.SendMailAsync();
         }
 
         public static void SendMailAsync(this EmailMessageEntity email)
         {
-            email.Execute(EmailMessageOperation.ReadyToSend);
+            using (OperationLogic.AllowSave<EmailMessageEntity>())
+            {
+                email.State = EmailMessageState.ReadyToSend;
+                email.Save();
+            }
         }
 
         public static SmtpClient SafeSmtpClient()
