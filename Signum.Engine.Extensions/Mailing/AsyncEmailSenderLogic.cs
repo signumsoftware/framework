@@ -179,7 +179,7 @@ namespace Signum.Engine.Mailing
 
         private static void SetSqlDepndency()
         {
-            var query = Database.Query<EmailMessageEntity>().Where(m => m.State == EmailMessageState.RecruitedForSending).Select(m => m.Id);
+            var query = Database.Query<EmailMessageEntity>().Where(m => m.State == EmailMessageState.ReadyToSend).Select(m => m.Id);
             query.ToListWithInvalidation(typeof(EmailMessageEntity), "EmailAsyncSender ReadyToSend dependency", a => WakeUp("EmailAsyncSender ReadyToSend dependency", a));
         }
 
