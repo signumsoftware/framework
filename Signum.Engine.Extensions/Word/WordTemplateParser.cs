@@ -83,7 +83,7 @@ namespace Signum.Engine.Word
                                 par.Append(firstRunPart);
                             }
 
-                            par.Append(new MatchNode(m) { RunProperties = startRun.RunProperties.TryDo(r => r.Remove()) });
+                            par.Append(new MatchNode(m) { RunProperties = startRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) });
 
                             ElementInfo end = start;
                             while (end.Interval.Max < interval.Max) //Ignore
