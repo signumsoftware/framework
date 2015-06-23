@@ -32,6 +32,6 @@
     <div class="sf-chartscript-columns">
         @Html.EntityRepeater(cc, c => c.Columns)
     </div>
-    
+    @Html.EntityRepeater(cc, c => c.Parameters)
     @Html.Partial(Signum.Web.Chart.ChartClient.ChartScriptCodeView, cc)
 }

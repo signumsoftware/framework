@@ -58,6 +58,15 @@ namespace Signum.Entities.Chart
             set { Set(ref columns, value); }
         }
 
+        [NotNullable, PreserveOrder]
+        MList<ChartScriptParameterEntity> parameters = new MList<ChartScriptParameterEntity>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<ChartScriptParameterEntity> Parameters
+        {
+            get { return parameters; }
+            set { Set(ref parameters, value); }
+        }
+
         [NotNullable, SqlDbType(Size = 100)]
         string columnsStructure;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -148,11 +157,14 @@ namespace Signum.Entities.Chart
                             new XAttribute("DisplayName", c.DisplayName),
                             new XAttribute("ColumnType", c.ColumnType.ToString()),
                             c.IsGroupKey ? new XAttribute("IsGroupKey", true) : null,
-                            c.IsOptional ? new XAttribute("IsOptional", true) : null,
-                            c.Parameter1 != null ? c.Parameter1.ExportXml(1): null,  
-                            c.Parameter2 != null ? c.Parameter2.ExportXml(2): null,  
-                            c.Parameter3 != null ? c.Parameter3.ExportXml(3): null  
+                            c.IsOptional ? new XAttribute("IsOptional", true) : null
                          ))),
+                    new XElement("Parameters", 
+                        Parameters.Select(p=>new XElement("Parameter",
+                            new XAttribute("Name", p.Name),
+                            new XAttribute("Type", p.Type),
+                            new XAttribute("ValueDefinition", p.ValueDefinition))
+                    )),
                     icon == null ? null :
                     new XElement("Icon",
                         new XAttribute("FileName", icon.FileName),
@@ -173,9 +185,6 @@ namespace Signum.Entities.Chart
                 ColumnType = c.Attribute("ColumnType").Value.ToEnum<ChartColumnType>(),
                 IsGroupKey = c.Attribute("IsGroupKey").Let(a => a != null && a.Value == "true"),
                 IsOptional = c.Attribute("IsOptional").Let(a => a != null && a.Value == "true"),
-                Parameter1 = ChartScriptParameterEntity.ImportXml(c, 1),
-                Parameter2 = ChartScriptParameterEntity.ImportXml(c, 2),
-                Parameter3 = ChartScriptParameterEntity.ImportXml(c, 3)
             }).ToList();
 
             if (!IsNew && !force)
@@ -192,14 +201,32 @@ namespace Signum.Entities.Chart
                     o.DisplayName = n.DisplayName;
                     o.IsGroupKey = n.IsGroupKey;
                     o.IsOptional = n.IsOptional;
-                    o.Parameter1 = CombineParameters(o.Parameter1, n.Parameter1);
-                    o.Parameter2 = CombineParameters(o.Parameter2, n.Parameter2);
-                    o.Parameter3 = CombineParameters(o.Parameter3, n.Parameter3);
                 }); 
             }
             else
             {
                 this.Columns = columns.ToMList();
+            }
+
+            List<ChartScriptParameterEntity> parameters = script.Element("Parameters").Elements("Parameter").Select(p => new ChartScriptParameterEntity
+            {
+                Name = p.Attribute("Name").Value,
+                Type = p.Attribute("Type").Value.ToEnum<ChartParameterType>(),
+                ValueDefinition = p.Attribute("ValueDefinition").Value,
+            }).ToList();
+
+            if (this.Parameters.Count == parameters.Count)
+            {
+                this.Parameters.ZipForeach(parameters, (o, n) =>
+                {
+                    o.Name = n.Name;
+                    o.Type = n.Type;
+                    o.ValueDefinition = n.ValueDefinition;
+                });
+            }
+            else
+            {
+                this.Parameters = parameters.ToMList();
             }
 
             this.Script = script.Elements("Script").Nodes().OfType<XCData>().Single().Value;
@@ -219,21 +246,6 @@ namespace Signum.Entities.Chart
                 if (icon == null || icon.Entity.FileName != newFile.FileName || !AreEqual(icon.Entity.BinaryFile, newFile.BinaryFile))
                     Icon = newFile.ToLiteFat();
             }
-        }
-
-        private ChartScriptParameterEntity CombineParameters(ChartScriptParameterEntity oldP, ChartScriptParameterEntity newP)
-        {
-            if (newP == null)
-                return null;
-
-            if (oldP == null)
-                oldP = new ChartScriptParameterEntity();
-
-            oldP.Name = newP.Name;
-            oldP.Type = newP.Type;
-            oldP.ValueDefinition = newP.ValueDefinition;
-
-            return newP;
         }
 
         static bool AreEqual(byte[] a1, byte[] a2)
@@ -359,27 +371,6 @@ namespace Signum.Entities.Chart
             set { Set(ref isGroupKey, value); }
         }
 
-        ChartScriptParameterEntity parameter1;
-        public ChartScriptParameterEntity Parameter1
-        {
-            get { return parameter1; }
-            set { Set(ref parameter1, value); }
-        }
-
-        ChartScriptParameterEntity parameter2;
-        public ChartScriptParameterEntity Parameter2
-        {
-            get { return parameter2; }
-            set { Set(ref parameter2, value); }
-        }
-
-        ChartScriptParameterEntity parameter3;
-        public ChartScriptParameterEntity Parameter3
-        {
-            get { return parameter3; }
-            set { Set(ref parameter3, value); }
-        }
-
         internal ChartScriptColumnEntity Clone()
         {
             return new ChartScriptColumnEntity
@@ -388,9 +379,6 @@ namespace Signum.Entities.Chart
                 IsGroupKey = IsGroupKey,
                 ColumnType = ColumnType,
                 IsOptional = IsOptional,
-                Parameter1 = Parameter1.Try(p => p.Clone()),
-                Parameter2 = Parameter2.Try(p => p.Clone()),
-                Parameter3 = Parameter3.Try(p => p.Clone()),
             };
         }
     }
@@ -481,6 +469,7 @@ namespace Signum.Entities.Chart
            return null;
        }
     }
+
 
    
 }

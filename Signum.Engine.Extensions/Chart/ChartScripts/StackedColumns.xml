@@ -1,11 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true">
-      <Parameter1 Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette " />
-      <Parameter2 Name="Order" Type="Enum" ValueDefinition="default | inside-out | reverse " />
-      <Parameter3 Name="Horizontal Margin" Type="Number" ValueDefinition="20" />
-    </Column>
+    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Split Columns" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
     <Column DisplayName="Height" ColumnType="Magnitude" />
     <Column DisplayName="Height 2" ColumnType="Magnitude" IsOptional="true" />
@@ -13,6 +9,11 @@
     <Column DisplayName="Height 4" ColumnType="Magnitude" IsOptional="true" />
     <Column DisplayName="Height 5" ColumnType="Magnitude" IsOptional="true" />
   </Columns>
+  <Parameters>
+    <Parameter Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette" />
+    <Parameter Name="Order" Type="Enum" ValueDefinition="default | inside-out | reverse" />
+    <Parameter Name="HorizontalMargin" Type="Number" ValueDefinition="20" />
+  </Parameters>
   <Icon FileName="stackedcolumns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAoJJREFUeNrsmL1uE0EUha9RuhRQBSVKA8iKe6gQUYqEAiHxAsgSqVJFUYQoyRvwEMFPkFSBxg6isCWkdFDElIhHcOyduTc7P7uZtWfHG9+11oVHWs2sLc98e+aeM9bWiAgWuT2ABW9LwFIAmx9bC1uIK/Oa+Ov5FXW6fZCIICXangDtPSLB3qstOHz/slYJ4GXvL7zZfQ4Yp4QQCMNIwHAk4GYoYDBUfQTffvxRgNXUINr4olipRD11CWkUVH2RiJsbIKECMKBoITVcPBZo+iIRPFcFlUIS7SXprh7tVamCSrVUPcckZotNX2kOkrO1iXJu/SlVKwVEyjdHAlytgphvjiQH2UF9enZF7e51WkMo3QXMIq+3G96wRco3h7TgbMBOrw9v917oSUdCxkErddgO4pA1gRvBxeVvb9iGzCHLqkFOlhFRrjmk3X42ICfL1Md55kgiiL3FnCxr1Dfhe/uXmQPJ+yCNZxs8QE6WHa0dw+rOvqdshB1I+Nc9iQf/eVtcRpb54NS4iJFX5pZlJJydQDVZBi69Z9UgI8vIfueHE3pcxMhTTTJ7lqEDh9rWLhxhsdNkqklmzjLl2hTOALlwQBFfQVaW6Rr0wZlewRMXsP50fWqW1Z88zq/BEJwc8U1y+PADPDr4NFZLdlGM9P31z89x/y4AmYXTvY4b4m9xxoVuPLhuDG2xfQgfXJqJHECdwxNwUVrkoSwzDg/AlZGD8T+siey6Tx2Z7ykLl/xGzVHGmwUfnLtgUH0XLnOCUFkKUj5cMg6or9UaLxELR2UAUuZ4kjlqBOWfgCtqjoJHnVNHPjUCdWTU58GpVlPhu2iv31pfmrUM4PIN6xKwwnYrwADxV36Q8C7avwAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
     
@@ -261,6 +262,5 @@
     .attr('y2', yRule.size('content'))
     .style('stroke', 'Black'); 
   
-}
-]]></Script>
+}]]></Script>
 </ChartScript>

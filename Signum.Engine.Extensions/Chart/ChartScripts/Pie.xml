@@ -1,12 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Sections" ColumnType="Groupable" IsGroupKey="true">
-      <Parameter1 Name="InnerRadious" Type="Number" ValueDefinition="0" />
-      <Parameter2 Name="Sort" Type="Enum" ValueDefinition="No | Ascending | Descending" />
-    </Column>
+    <Column DisplayName="Sections" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Angle" ColumnType="Magnitude" />
   </Columns>
+  <Parameters>
+    <Parameter Name="InnerRadious" Type="Number" ValueDefinition="0" />
+    <Parameter Name="Sort" Type="Enum" ValueDefinition="No | Ascending | Descending" />
+  </Parameters>
   <Icon FileName="doughnut.png"><![CDATA[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]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data) {
 

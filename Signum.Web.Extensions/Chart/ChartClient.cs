@@ -227,14 +227,11 @@ namespace Signum.Web.Chart
             return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.Token.FullKey();
         }
 
-        public static void SetupParameter(ValueLine vl, ChartColumnEntity column, ChartScriptParameterEntity scriptParameter)
+        public static void SetupParameter(ValueLine vl, ChartParameterEntity parameter)
         {
-            if (scriptParameter == null)
-            {
-                vl.Visible = false;
-                return;
-            }
+            var scriptParameter = parameter.ScriptParameter;
 
+            vl.LabelColumns = new BsColumn(6);
             vl.LabelText = scriptParameter.Name;
 
             if (scriptParameter.Type == ChartParameterType.Number ||scriptParameter.Type == ChartParameterType.String)
@@ -245,7 +242,7 @@ namespace Signum.Web.Chart
             {
                 vl.ValueLineType = ValueLineType.Enum;
 
-                var token = column.Token.Try(t => t.Token);
+                var token = parameter.GetToken();
 
                 var compatible = scriptParameter.GetEnumValues().Where(a => a.CompatibleWith(token)).ToList();
                 vl.ReadOnly = compatible.Count <= 1;

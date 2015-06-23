@@ -81,19 +81,7 @@
                     sc.FormGroupStyle = FormGroupStyle.Basic;
                     <div class="row">
                         <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.DisplayName, vl => vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange")</div>
-                        @if (sc.Value.ScriptColumn.Parameter1 != null)
-                        {
-                            <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter1))</div>
-                        }
-                        @if (sc.Value.ScriptColumn.Parameter2 != null)
-                        {
-                            <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter2))</div>
-                        }
-                        @if (sc.Value.ScriptColumn.Parameter3 != null)
-                        {
-                            <div class="col-sm-4">@Html.ValueLine(sc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, sc.Value, sc.Value.ScriptColumn.Parameter3))</div>
-                        }
-
+                        
                         @if (sc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorEntity)))
                         {
                             var type = sc.Value.Token.Token.Type.CleanType();

@@ -124,57 +124,6 @@ WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
             
             #line 19 "..\..\Chart\Views\ChartScriptColumn.cshtml"
     }
-    
-    using(var sc= cc.SubContext())
-    {
-        sc.FormGroupSize = FormGroupSize.Small;
-        
-
-            
-            #line default
-            #line hidden
-WriteLiteral("        <div");
-
-WriteLiteral(" class=\"chart-column-parameters\"");
-
-WriteLiteral(">\r\n");
-
-WriteLiteral("            ");
-
-            
-            #line 26 "..\..\Chart\Views\ChartScriptColumn.cshtml"
-       Write(Html.EntityDetail(cc, c => c.Parameter1));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-WriteLiteral("            ");
-
-            
-            #line 27 "..\..\Chart\Views\ChartScriptColumn.cshtml"
-       Write(Html.EntityDetail(cc, c => c.Parameter2));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-WriteLiteral("            ");
-
-            
-            #line 28 "..\..\Chart\Views\ChartScriptColumn.cshtml"
-       Write(Html.EntityDetail(cc, c => c.Parameter3));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n        </div>\r\n");
-
-            
-            #line 30 "..\..\Chart\Views\ChartScriptColumn.cshtml"
-    }
 }
 
             

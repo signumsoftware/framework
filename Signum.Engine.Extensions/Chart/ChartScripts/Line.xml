@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true">
-      <Parameter1 Name="Horizontal Margin" Type="Number" ValueDefinition="20" />
-    </Column>
-    <Column DisplayName="Height" ColumnType="Positionable">
-      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
-      <Parameter2 Name="Color" Type="String" ValueDefinition="steelblue" />
-      <Parameter3 Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis | bundle" />
-    </Column>
+    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Height" ColumnType="Positionable" />
   </Columns>
+  <Parameters>
+    <Parameter Name="Horizontal Margin" Type="Number" ValueDefinition="20" />
+    <Parameter Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
+    <Parameter Name="Color" Type="String" ValueDefinition="steelblue" />
+    <Parameter Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis | bundle" />
+  </Parameters>
   <Icon FileName="lines.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAa1JREFUeNpi/P//P8NgBkwMgxwMDQfGFi/+PxqCow4cdeCoA0cdOOpAsgDLYHEIcm22uDeWcTSKBzSKcUUHuWD38bv/DbXlGIqS7BkHXRpcs+vK/wtXHzG0FHox0iSKu2bvI7upNm/t6f+v3nzC6TiyHairIQ2OWhDm4eZgWLXjEsmOnLrsGFhPVpQVI1XTYMvUXf9rst3ghoIsKGhZ/z/MQ4+ktOvjqs8Q7qHHSNVcXNG9GcVxMDChJpBx4qLDJIUiMY4jyYETFx7631Hqi9NQUWFehgXrz/ynWzGDHB0SonwM3RX+eH0c5W3A2DvvAFYH7jlx7/+xM3fIKpKICkFCjoOB4iQHxvzmdSiOXLHt4v+L1x4z1OW4MVI1BMkF7z58hYe+rbkaw9dvP4EOt2ekahRvO3zzv4aKBEN1pitFtQQLMxNDYYIdI1XT4Jqdl/4/ffGBYseBQFKwKSNVMwmowL378DVDZboz2QZTo25GBowxRYvgidrKRJkhM9KKkWEQAZRcPNgcNyTagwyg8UFQNIPowYiHTot6MA3BIZcEjKNDwKMOHHUgfgAQYACzwAoJxqi5QAAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
   
@@ -126,7 +126,7 @@
       .attr('stroke', 'none')
       .attr('data-click', function (v) { return getClickKeys(v, data.columns); })
       .append('svg:title')
-      .text(function (v) { return v.c0.niceToString() + ': ' + v.c1.niceToString(); })
+      .text(function (v) { return v.c0.niceToString() + ': ' + v.c1.niceToString(); });
       
   //paint graph - points
   chart.append('svg:g').attr('class', 'point').attr('transform', translate(xRule.start('content') + (x.rangeBand() / 2), yRule.end('content')))
@@ -138,8 +138,19 @@
       .attr('data-click', function (v) { return getClickKeys(v, data.columns); })
       .attr('shape-rendering', 'initial')
       .append('svg:title')
-      .text(function (v) { return v.c0.niceToString() + ': ' + v.c1.niceToString(); })
-      
+      .text(function (v) { return v.c0.niceToString() + ': ' + v.c1.niceToString(); });
+  
+    //paint graph - point-labels
+    chart.append('svg:g').attr('class', 'point-label').attr('transform', translate(xRule.start('content') + (x.rangeBand() / 2), yRule.end('content')))
+    .enterData(data.rows, 'text', 'point-label')
+      .attr('r', 5)
+      .attr('x', function (v) { return x(v.c0); })
+      .attr('y', function (v) { return -y(v.c1) + 20; })
+      .attr('text-anchor', 'middle')
+      .attr('data-click', function (v) { return getClickKeys(v, data.columns); })
+      .attr('shape-rendering', 'initial')
+      .text(function (v) { return v.c1.niceToString(); })
+
    chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .append('svg:line')
     .attr('class', 'x-axis')
