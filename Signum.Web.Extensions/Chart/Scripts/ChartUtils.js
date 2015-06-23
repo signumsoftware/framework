@@ -96,8 +96,6 @@ var ChartUtils;
     }
     ChartUtils.matrix = matrix;
     function scaleFor(column, values, minRange, maxRange, scaleName) {
-        if (scaleName == undefined)
-            scaleName = column.parameter1;
         if (scaleName == "Elements")
             return d3.scale.ordinal()
                 .domain(values)

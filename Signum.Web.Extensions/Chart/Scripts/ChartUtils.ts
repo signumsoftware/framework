@@ -114,8 +114,6 @@ module ChartUtils {
     }
 
     export function scaleFor(column, values, minRange, maxRange, scaleName: string): D3.Scale.Scale {
-        if (scaleName == undefined)
-            scaleName = column.parameter1;
 
         if (scaleName == "Elements")
             return d3.scale.ordinal()

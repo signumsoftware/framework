@@ -287,14 +287,6 @@ namespace Signum.Entities.Chart
             }
         }
 
-        internal XElement ExportXml(int index)
-        {
-            return new XElement("Parameter" + index,
-                new XAttribute("Name", Name),
-                new XAttribute("Type", Type),
-                new XAttribute("ValueDefinition", ValueDefinition));
-        }
-
         internal ChartScriptParameterEntity Clone()
         {
             return new ChartScriptParameterEntity
@@ -302,7 +294,13 @@ namespace Signum.Entities.Chart
                 Name = Name,
                 Type = Type,
                 ValueDefinition = ValueDefinition,
+                ColumnIndex = ColumnIndex
             };
+        }
+
+        internal bool ShouldHaveColumnIndex()
+        {
+            return Type == ChartParameterType.Enum && GetEnumValues().Any(a => a.TypeFilter.HasValue);
         }
     }
 

@@ -12,8 +12,11 @@
             @Html.ValueLine(cc, c => c.Type)
         </div>
 
-        <div class="col-sm-8">
+        <div class="col-sm-6">
             @Html.ValueLine(cc, c => c.ValueDefinition)
+        </div>
+        <div class="col-sm-2">
+            @Html.ValueLine(cc, c => c.ColumnIndex)
         </div>
     </div>
 }
