@@ -55,6 +55,7 @@ namespace Signum.Web.Chart
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EmbeddedEntitySettings<ChartRequest>(),
+                    new EmbeddedEntitySettings<ChartParameterEntity>(),
                     new EmbeddedEntitySettings<ChartColumnEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ChartColumn") },
                     new EmbeddedEntitySettings<ChartScriptColumnEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ChartScriptColumn") },
                     new EmbeddedEntitySettings<ChartScriptParameterEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ChartScriptParameter") },
@@ -102,8 +103,8 @@ namespace Signum.Web.Chart
         public static EntityMapping<ChartRequest> MappingChartRequest = new EntityMapping<ChartRequest>(true)
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx))
             .SetProperty(cr => cr.Orders, ctx => ExtractChartOrders(ctx))
-            .SetProperty(cb => cb.Columns, new MListCorrelatedOrDefaultMapping<ChartColumnEntity>(MappingChartColumn));
-
+            .SetProperty(cb => cb.Columns, new MListCorrelatedOrDefaultMapping<ChartColumnEntity>(MappingChartColumn))
+            .SetProperty(cb => cb.Parameters, new MListDictionaryMapping<ChartParameterEntity, string>(p => p.Name));
 
         public class MListCorrelatedOrDefaultMapping<S> : MListMapping<S>
         {

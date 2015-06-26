@@ -81,6 +81,7 @@
                     @foreach (var pc in gr)
                     {
                         <div class="col-sm-4">
+                            @Html.HiddenLine(pc, ct => ct.Name)
                             @Html.ValueLine(pc, ct => ct.Value, vl => ChartClient.SetupParameter(vl, pc.Value))
                         </div>
                     }
