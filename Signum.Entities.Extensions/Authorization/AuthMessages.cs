@@ -44,7 +44,7 @@ namespace Signum.Entities.Authorization
         ExpectedUserLogged,
         ExpiredPassword,
         [Description("Your password has expired. You should change it")]
-        ExpiredPasswordMessage,     
+        ExpiredPasswordMessage,
         [Description("Forgot your password? Enter your login email below.")]
         ForgotYourPasswordEnterYourPasswordBelow,
         [Description("We will send you an email with a link to reset your password.")]
@@ -81,7 +81,7 @@ namespace Signum.Entities.Authorization
         NotAuthorizedToSave0,
         [Description("Not authorized to change property '{0}' on {1}")]
         NotAuthorizedToChangeProperty0on1,
-        NotUserLogged,     
+        NotUserLogged,
         Password,
         PasswordChanged,
         [Description("The given password doesn't match the current one")]
@@ -119,7 +119,7 @@ namespace Signum.Entities.Authorization
         [Description("The specified passwords don't match")]
         TheSpecifiedPasswordsDontMatch,
         TheUserStateMustBeDisabled,
-     
+
         Username,
         [Description("Username {0} is not valid")]
         Username0IsNotValid,
@@ -132,7 +132,10 @@ namespace Signum.Entities.Authorization
         YouMustRepeatTheNewPassword,
         [Description("User {0} is disabled")]
         User0IsDisabled,
-SendEmail,
+        SendEmail,
+        [Description("Welcome {0}")]
+        Welcome0,
+        LoginWithAnotherUser,
     }
 
     public enum AuthEmailMessage

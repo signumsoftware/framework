@@ -1,4 +1,4 @@
-@{  
+@{
     ViewBag.Title = AuthMessage.Login.NiceToString();
 }
 <script type="text/javascript">
@@ -7,9 +7,16 @@
 <br />
 <div class="col-sm-offset-4">
     <h2>Login</h2>
+    @if (Signum.Web.Auth.AuthClient.SingleSignOnMessage)
+    {
+        <p>
+            @AuthMessage.Welcome0.NiceToString().FormatHtml(new HtmlTag("code").SetInnerText(User.Identity.Name))
+        </p>
+    }
     <p>
         @AuthMessage.IntroduceYourUserNameAndPassword.NiceToString()
     </p>
+
     @Html.ValudationSummaryStatic()
 </div>
 @using (Html.BeginForm())
@@ -27,18 +34,18 @@
                 @Html.Password("password", null, new { @class = "form-control", placeholder = AuthMessage.Password.NiceToString() })
             </div>
         </div>
-         @if (Signum.Engine.Authorization.UserTicketLogic.IsStarted)
-         {
-        <div class="form-group">
-            <div class="col-sm-offset-4 col-sm-6">
-                <div class="checkbox">
-                    <label>
-                        @Html.CheckBox("rememberMe") @AuthMessage.RememberMe.NiceToString()
-                    </label>
+        @if (Signum.Engine.Authorization.UserTicketLogic.IsStarted)
+        {
+            <div class="form-group">
+                <div class="col-sm-offset-4 col-sm-6">
+                    <div class="checkbox">
+                        <label>
+                            @Html.CheckBox("rememberMe") @AuthMessage.RememberMe.NiceToString()
+                        </label>
+                    </div>
                 </div>
             </div>
-        </div>
-         }
+        }
         <div class="form-group">
             <div class="col-sm-offset-4 col-sm-6">
                 <button type="submit" class="btn btn-default" id="login">@AuthMessage.Login.NiceToString()</button>
@@ -49,8 +56,8 @@
             </div>
         </div>
         @if (ViewData.ContainsKey("referrer"))
-        { 
-            @Html.Hidden("referrer", ViewData["referrer"]) 
+        {
+            @Html.Hidden("referrer", ViewData["referrer"])
         }
     </div>
 }

@@ -11,6 +11,13 @@
                 Text = AuthMessage.ChangePassword.NiceToString(),
                 Link= Url.Action((AuthController a)=>a.ChangePassword()),
             },            
+          
+            AuthClient.SingleSignOnMessage && User.Identity.Name == UserEntity.Current.UserName ? 
+            new WebMenuItem
+            {
+                Text = AuthMessage.LoginWithAnotherUser.NiceToString(),
+                Link= Url.Action((AuthController a)=>a.Login(null)),
+            }:
             new WebMenuItem
             {
                 Text = AuthMessage.Logout.NiceToString(),
