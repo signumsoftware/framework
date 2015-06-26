@@ -547,6 +547,7 @@ namespace Signum.Entities.UserQueries
         [Description("{0} is not filterable")]
         _0IsNotFilterable,
         [Description("Use {0} to filter current entity")]
-        Use0ToFilterCurrentEntity
+        Use0ToFilterCurrentEntity,
+        Preview
     }
 }

@@ -403,6 +403,7 @@ namespace Signum.Entities.Chart
         Data,
         ChooseABasePalette,
         DeletePalette,
+        Preview,
     }
 
 }

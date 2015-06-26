@@ -53,12 +53,20 @@ namespace Signum.Web.UserQueries
                 UserAssetsClient.Start();
                 UserAssetsClient.RegisterExportAssertLink<UserQueryEntity>();
 
+                LinksClient.RegisterEntityLinks<UserQueryEntity>((lite, ctx) => new[]
+                {
+                   new QuickLinkAction(UserQueryMessage.Preview, RouteHelper.New().Action<UserQueriesController>(cc => cc.View(lite, null, null)))
+                   {
+                       IsVisible =  UserQueryPermission.ViewUserQuery.IsAuthorized()
+                   }
+                });
+
                 RouteTable.Routes.MapRoute(null, "UQ/{webQueryName}/{lite}",
                     new { controller = "UserQueries", action = "View" });
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserQueryEntity> { PartialViewName = e => ViewPrefix.FormatWith("UserQuery") },
+                    new EntitySettings<UserQueryEntity> { PartialViewName = e => ViewPrefix.FormatWith("UserQuery"), IsCreable= EntityWhen.Never },
                     
                     new EmbeddedEntitySettings<QueryFilterEntity>
                     { 
@@ -158,7 +166,7 @@ namespace Signum.Web.UserQueries
             if (items.Count > 0)
                 items.Add(new MenuItemSeparator());
 
-            if (Navigator.IsCreable(typeof(UserQueryEntity), isSearch: true))
+            if (Navigator.IsCreable(typeof(UserQueryEntity), isSearch: null))
             {
                 items.Add(new MenuItem(ctx.Prefix, "qbUserQueryNew")
                 {
