@@ -73,7 +73,7 @@ namespace Signum.Utilities
         static string EncodeCsv(string p, CultureInfo culture)
         {
             if (p == null)
-                return p;
+                return null;
 
             string separator = culture.TextInfo.ListSeparator;
 

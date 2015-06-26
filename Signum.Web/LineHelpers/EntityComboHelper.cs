@@ -131,7 +131,7 @@ namespace Signum.Web
                     entityCombo.ComboHtmlProperties);
         }
 
-        public static MvcHtmlString EntityCombo<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
+        public static MvcHtmlString EntityCombo<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
         {
             return helper.EntityCombo<T, S>(tc, property, null);
         }

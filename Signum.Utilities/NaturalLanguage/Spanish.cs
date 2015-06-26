@@ -142,7 +142,6 @@ namespace Signum.Utilities.NaturalLanguage
 
             //convertimos en text0
             long integer = (long)number;
-            long integerMod1Mill = integer % 1000000;
             integerPart = ConvertNumber(integer, femenin, settings.Unit, settings.UnitPlural);
 
             decimal decimAux = (number - integer);

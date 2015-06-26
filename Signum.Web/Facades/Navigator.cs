@@ -276,7 +276,7 @@ namespace Signum.Web
             return Manager.ResolveWebTypeName(type);
         }
      
-        public static bool IsCreable(Type type, bool isSearch = false)
+        public static bool IsCreable(Type type, bool? isSearch = false)
         {
             return Manager.OnIsCreable(type, isSearch);
         }
@@ -662,13 +662,13 @@ namespace Signum.Web
 
         public event Func<Type, bool> IsCreable;
 
-        internal protected virtual bool OnIsCreable(Type type, bool isSearch)
+        internal protected virtual bool OnIsCreable(Type type, bool? isSearch)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
             if (es == null)
                 return true;
 
-            if (!es.OnIsCreable(isSearch))
+            if (isSearch.HasValue && !es.OnIsCreable(isSearch.Value))
                 return false;
 
 
