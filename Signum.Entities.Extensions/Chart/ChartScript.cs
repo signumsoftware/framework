@@ -105,8 +105,8 @@ namespace Signum.Entities.Chart
                 if (param.ColumnIndex == null && param.ShouldHaveColumnIndex())
                     return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());
 
-                if (!(0 <= param.ColumnIndex && param.ColumnIndex < this.Columns.Count))
-                    return ValidationMessage._0HasToBeBetween0And1.NiceToString(pi.NiceName(), 0, this.columns.Count);
+                if (param.ColumnIndex.HasValue && !(0 <= param.ColumnIndex && param.ColumnIndex < this.Columns.Count))
+                    return ValidationMessage._0HasToBeBetween1And2.NiceToString(pi.NiceName(), 0, this.columns.Count);
             }
 
             return base.ChildPropertyValidation(sender, pi);
@@ -233,6 +233,7 @@ namespace Signum.Entities.Chart
                     o.Name = n.Name;
                     o.Type = n.Type;
                     o.ValueDefinition = n.ValueDefinition;
+                    o.ColumnIndex = n.ColumnIndex;
                 });
             }
             else

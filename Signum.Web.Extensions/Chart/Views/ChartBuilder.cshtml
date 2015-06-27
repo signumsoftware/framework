@@ -74,13 +74,14 @@
         </textarea>
     </div>
     <div class="panel panel-default">
-        <div class="panel-body">
-            @foreach (var gr in chart.TypeElementContext(c => c.Parameters).OrderBy(c => chart.Value.Parameters.IndexOf(c.Value)).GroupsOf(3))
+        <div class="panel-body form-vertical">
+            @foreach (var gr in chart.TypeElementContext(c => c.Parameters).OrderBy(c => chart.Value.Parameters.IndexOf(c.Value)).GroupsOf(6))
             {
                 <div class="row">
                     @foreach (var pc in gr)
                     {
-                        <div class="col-sm-4">
+                        pc.FormGroupStyle = FormGroupStyle.Basic;
+                        <div class="col-sm-2">
                             @Html.HiddenLine(pc, ct => ct.Name)
                             @Html.ValueLine(pc, ct => ct.Value, vl => ChartClient.SetupParameter(vl, pc.Value))
                         </div>
