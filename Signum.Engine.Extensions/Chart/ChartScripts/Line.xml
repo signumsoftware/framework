@@ -6,7 +6,7 @@
   </Columns>
   <Parameters>
     <Parameter Name="Horizontal Margin" Type="Number" ValueDefinition="20" />
-    <Parameter Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
+    <Parameter Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" ColumnIndex="1" />
     <Parameter Name="Color" Type="String" ValueDefinition="steelblue" />
     <Parameter Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis | bundle" />
   </Parameters>

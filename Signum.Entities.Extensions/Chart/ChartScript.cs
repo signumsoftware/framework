@@ -223,7 +223,7 @@ namespace Signum.Entities.Chart
                 Name = p.Attribute("Name").Value,
                 Type = p.Attribute("Type").Value.ToEnum<ChartParameterType>(),
                 ValueDefinition = p.Attribute("ValueDefinition").Value,
-                ColumnIndex = p.Attribute("ColumnIndex").Value.DefaultText(null).Try(int.Parse),
+                ColumnIndex = p.Attribute("ColumnIndex").Try(c => int.Parse(c.Value)),
             }).ToList();
 
             if (this.Parameters.Count == parameters.Count)
