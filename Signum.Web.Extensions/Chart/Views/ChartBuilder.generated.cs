@@ -471,6 +471,17 @@ WriteLiteral("                            ");
 
             
             #line 84 "..\..\Chart\Views\ChartBuilder.cshtml"
+                       Write(Html.HiddenLine(pc, ct => ct.Name));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+WriteLiteral("                            ");
+
+            
+            #line 85 "..\..\Chart\Views\ChartBuilder.cshtml"
                        Write(Html.ValueLine(pc, ct => ct.Value, vl => ChartClient.SetupParameter(vl, pc.Value)));
 
             
@@ -479,7 +490,7 @@ WriteLiteral("                            ");
 WriteLiteral("\r\n                        </div>\r\n");
 
             
-            #line 86 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 87 "..\..\Chart\Views\ChartBuilder.cshtml"
                     }
 
             
@@ -488,7 +499,7 @@ WriteLiteral("\r\n                        </div>\r\n");
 WriteLiteral("                </div>\r\n");
 
             
-            #line 88 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 89 "..\..\Chart\Views\ChartBuilder.cshtml"
             }
 
             
@@ -497,7 +508,7 @@ WriteLiteral("                </div>\r\n");
 WriteLiteral("        </div>\r\n    </div>\r\n</div>\r\n</div>\r\n");
 
             
-            #line 93 "..\..\Chart\Views\ChartBuilder.cshtml"
+            #line 94 "..\..\Chart\Views\ChartBuilder.cshtml"
 }
             
             #line default
