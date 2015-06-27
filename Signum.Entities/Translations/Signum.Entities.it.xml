@@ -351,12 +351,12 @@
     <Member Name="TableName" Description="Table Name" />
   </Type>
   <Type Name="ValidationMessage">
-    <Member Name="_0DoesNotHaveAValid0Format" Description="{{0}} non ha un formato {0} valido " />
+    <Member Name="_0DoesNotHaveAValid1Format" Description="{0} non ha un formato {1} valido " />
     <Member Name="_0HasAnInvalidFormat" Description="{0} ha un formato non valido" />
-    <Member Name="_0HasMoreThan0DecimalPlaces" Description="{0} ha più di {0} decimali" />
-    <Member Name="_0HasSomeRepeatedElements0" Description="{0} ha alcuni elementi ripetuti: {0}" />
-    <Member Name="_0HasToBe0Than1" Description="{0} deve essere {0} {1}" />
-    <Member Name="_0HasToBeBetween0And1" Description="{0} deve essere compreso tra {0} e {1}" />
+    <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} ha più di {1} decimali" />
+    <Member Name="_0HasSomeRepeatedElements1" Description="{0} ha alcuni elementi ripetuti: {1}" />
+    <Member Name="_0HasToBe1Than2" Description="{0} deve essere {1} {2}" />
+    <Member Name="_0HasToBeBetween1And2" Description="{0} deve essere compreso tra {1} e {2}" />
     <Member Name="_0HasToBeLowercase" Description="{0} deve essere minuscolo" />
     <Member Name="_0HasToBeUppercase" Description="{0} deve essere maiuscola" />
     <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} è obbligatorio quando {1} non è impostato" />
@@ -393,11 +393,11 @@
     <Member Name="Numeric" Description="Numerico" />
     <Member Name="OrBeNull" Description="o essere nullo" />
     <Member Name="Telephone" Description="Telefono" />
-    <Member Name="TheLenghtOf0HasToBeEqualTo0" Description="La lunghezza di {{0}} deve essere uguale a {0}" />
-    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo0" Description="La lunghezza di {{0}} deve essere maggiore o uguale a {0}" />
-    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo0" Description="La lunghezza di {{0}} deve essere minore o uguale a {0}" />
+    <Member Name="TheLenghtOf0HasToBeEqualTo1" Description="La lunghezza di {0} deve essere uguale a {1}" />
+    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo1" Description="La lunghezza di {0} deve essere maggiore o uguale a {1}" />
+    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo1" Description="La lunghezza di {0} deve essere minore o uguale a {1}" />
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="Il numero di {0} è essere moltiplicato {1}" />
-    <Member Name="TheNumberOfElementsOf0HasToBe01" Description="Il numero di elementi di {{0}} deve essere {0} {1}" />
+    <Member Name="TheNumberOfElementsOf0HasToBe12" Description="Il numero di elementi di {0} deve essere {1} {2}" />
     <Member Name="Type0NotAllowed" Description="Tipo {0} non consentito" />
   </Type>
   <Type Name="VoidEnumMessage">

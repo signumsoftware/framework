@@ -142,7 +142,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetViewPrefix(Module mod)
         {
-           return "public static string ViewPrefix = \"~/Views/{0}/{{0}}.cshtml\";".FormatWith(mod.ModuleName);
+           return "public static string ViewPrefix = \"~/Views/{0}/{1}.cshtml\";".FormatWith(mod.ModuleName, "{0}");
         }
 
         protected virtual string GetClientNamespace(Module mod)
