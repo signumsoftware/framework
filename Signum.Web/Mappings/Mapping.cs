@@ -1053,6 +1053,8 @@ namespace Signum.Web
 
         public Func<S, bool> FilterElements;
 
+        public bool OnlyIfPossible;
+
         public MListDictionaryMapping(Expression<Func<S, K>> getKeyExpression)
             : this(getKeyExpression, Mapping.New<S>())
         {
@@ -1110,7 +1112,10 @@ namespace Signum.Web
 
                     subContext.Value = KeyMapping(subContext);
 
-                    itemCtx.Value = dic[subContext.Value];
+                    if (!dic.ContainsKey(subContext.Value) && OnlyIfPossible)
+                        continue;
+
+                    itemCtx.Value = dic.GetOrThrow(subContext.Value);
 
                     itemCtx.Value = ElementMapping(itemCtx);
 
