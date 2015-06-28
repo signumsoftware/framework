@@ -1133,7 +1133,7 @@ export module QueryTokenBuilder {
 
         var index = parseInt($selectedCombo.attr("id").after("ddlTokens_"));
 
-        clearChildSubtokenCombos($selectedCombo, prefix, index);
+        clearChildSubtokenCombos($selectedCombo);
         $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
 
         var $selectedOption = $selectedCombo.children("option:selected");
@@ -1160,8 +1160,8 @@ export module QueryTokenBuilder {
             });
     };
 
-    export function clearChildSubtokenCombos($selectedCombo: JQuery, prefix: string, index: number) {
-        $selectedCombo.next("select,input[type=hidden]").remove();
+    export function clearChildSubtokenCombos($selectedCombo: JQuery) {
+        $selectedCombo.nextAll("select,input[type=hidden]").remove();
     }
 
     export function constructTokenName(prefix: string) {
