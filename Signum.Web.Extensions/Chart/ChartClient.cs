@@ -104,7 +104,7 @@ namespace Signum.Web.Chart
             .SetProperty(cr => cr.Filters, ctx => ExtractChartFilters(ctx))
             .SetProperty(cr => cr.Orders, ctx => ExtractChartOrders(ctx))
             .SetProperty(cb => cb.Columns, new MListCorrelatedOrDefaultMapping<ChartColumnEntity>(MappingChartColumn))
-            .SetProperty(cb => cb.Parameters, new MListDictionaryMapping<ChartParameterEntity, string>(p => p.Name));
+            .SetProperty(cb => cb.Parameters, new MListDictionaryMapping<ChartParameterEntity, string>(p => p.Name) { OnlyIfPossible = true });
 
         public class MListCorrelatedOrDefaultMapping<S> : MListMapping<S>
         {
