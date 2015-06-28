@@ -172,7 +172,7 @@ namespace Signum.Entities.Chart
         {
             if (GroupResults)
             {
-                var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token.Token);
+                var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token).NotNull().Select(a => a.Token).ToList();
 
                 Orders.RemoveAll(o => !(o.Token is AggregateToken) && !keys.Contains(o.Token));
             }
