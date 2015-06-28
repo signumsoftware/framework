@@ -91,7 +91,7 @@ export class ChartBuilder {
         this.container.on("change", ".sf-query-token select", e => {
             var token = $(e.currentTarget);
             var id = token.attr("id");
-            Finder.QueryTokenBuilder.clearChildSubtokenCombos(token, id.before("_ddlTokens_"), parseInt(id.after("_ddlTokens_")));
+            Finder.QueryTokenBuilder.clearChildSubtokenCombos(token);
             this.updateChartBuilder(token.closest("tr").attr("data-token"));
         });
 
