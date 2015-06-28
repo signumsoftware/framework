@@ -125,14 +125,23 @@ module ChartUtils {
                 .domain([0, d3.max(values)])
                 .range([minRange, maxRange]);
 
-        if (scaleName == "MinMax")
-            return ((column.type == "Date" || column.type == "DateTime") ?
-                <D3.Scale.Scale>d3.time.scale() :
-                <D3.Scale.Scale>d3.scale.linear())
-                .domain([d3.min(values),
-                    d3.max(values)])
-                .range([minRange, maxRange]);
+        if (scaleName == "MinMax") {
+            if (column.type == "Date" || column.type == "DateTime") {
+                var scale = d3.time.scale()
+                    .domain([new Date(<any>d3.min(values)), new Date(<any>d3.max(values))])
+                    .range([minRange, maxRange]);
 
+                var f = function (d) { return scale(new Date(d)); };
+                (<any>f).ticks = scale.ticks; 
+                (<any>f).tickFormat = scale.tickFormat; 
+                return  <D3.Scale.Scale>f;
+            }
+            else {
+                return <D3.Scale.Scale>d3.scale.linear()
+                    .domain([d3.min(values), d3.max(values)])
+                    .range([minRange, maxRange]);
+            }
+        }
 
         if (scaleName == "Log")
             return d3.scale.log()

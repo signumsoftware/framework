@@ -104,13 +104,22 @@ var ChartUtils;
             return d3.scale.linear()
                 .domain([0, d3.max(values)])
                 .range([minRange, maxRange]);
-        if (scaleName == "MinMax")
-            return ((column.type == "Date" || column.type == "DateTime") ?
-                d3.time.scale() :
-                d3.scale.linear())
-                .domain([d3.min(values),
-                d3.max(values)])
-                .range([minRange, maxRange]);
+        if (scaleName == "MinMax") {
+            if (column.type == "Date" || column.type == "DateTime") {
+                var scale = d3.time.scale()
+                    .domain([new Date(d3.min(values)), new Date(d3.max(values))])
+                    .range([minRange, maxRange]);
+                var f = function (d) { return scale(new Date(d)); };
+                f.ticks = scale.ticks;
+                f.tickFormat = scale.tickFormat;
+                return f;
+            }
+            else {
+                return d3.scale.linear()
+                    .domain([d3.min(values), d3.max(values)])
+                    .range([minRange, maxRange]);
+            }
+        }
         if (scaleName == "Log")
             return d3.scale.log()
                 .domain([d3.min(values),
