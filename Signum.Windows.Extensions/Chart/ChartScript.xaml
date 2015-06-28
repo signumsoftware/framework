@@ -14,6 +14,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -28,7 +29,7 @@
 
         <m:ValueLine m:Common.Route="GroupBy"  Grid.Row="2" Grid.ColumnSpan="2"/>
 
-        <m:EntityRepeater m:Common.Route="Columns" Grid.IsSharedSizeScope="true" Margin="4" MinHeight="100" Grid.Row="3" Grid.ColumnSpan="2">
+        <m:EntityRepeater m:Common.Route="Columns" Grid.IsSharedSizeScope="true" Margin="4" MinHeight="100" Grid.Row="3" Grid.ColumnSpan="2" ButtonsOrientation="Horizontal" m:Common.MinLabelWidth="60">
             <m:EntityRepeater.EntityTemplate>
                 <DataTemplate>
                     <Grid HorizontalAlignment="Stretch">
@@ -47,17 +48,32 @@
                         <m:ValueLine m:Common.Route="DisplayName" Grid.Column="0" />
                         <m:ValueLine m:Common.Route="ColumnType" Grid.Column="1"/>
                         <m:ValueLine m:Common.Route="IsGroupKey" Grid.Column="2"/>
-                        <m:ValueLine m:Common.Route="IsOptional" Grid.Column="3"/> 
-                        
-                        <m:EntityDetail m:Common.Route="Parameter1" Grid.Row="1" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
-                        <m:EntityDetail m:Common.Route="Parameter2" Grid.Row="2" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
-                        <m:EntityDetail m:Common.Route="Parameter3" Grid.Row="3" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
+                        <m:ValueLine m:Common.Route="IsOptional" Grid.Column="3"/>
                     </Grid>
                 </DataTemplate>
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
 
-        <m:ShyBorder Vertical="True" Horizontal="True"  MinHeight="300" MinWidth="300" Grid.Row="4" Grid.ColumnSpan="2" >
+        <m:EntityRepeater m:Common.Route="Parameters" Grid.IsSharedSizeScope="true" Margin="4" MinHeight="100" Grid.Row="4" Grid.ColumnSpan="2" ButtonsOrientation="Horizontal" m:Common.MinLabelWidth="60">
+            <m:EntityRepeater.EntityTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="X" MinWidth="100"/>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Y" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="Z" MinWidth="150" MaxWidth="400"/>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="P" MinWidth="100"/>
+                        </Grid.ColumnDefinitions>
+                        <m:ValueLine m:Common.Route="Name" Grid.Column="0" />
+                        <m:ValueLine m:Common.Route="Type" Grid.Column="1"/>
+                        <m:ValueLine m:Common.Route="ValueDefinition" Grid.Column="2" />
+                        <m:ValueLine m:Common.Route="ColumnIndex" Grid.Column="3" />
+                    </Grid>
+                </DataTemplate>
+            </m:EntityRepeater.EntityTemplate>
+        </m:EntityRepeater>
+
+        <m:ShyBorder Vertical="True" Horizontal="True"  MinHeight="300" MinWidth="300" Grid.Row="5" Grid.ColumnSpan="2" >
             <swsh:SyntaxHighlightBox IsLineNumbersMarginVisible="True" x:Name="box"
                                  Text="{Binding Script, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, ValidatesOnExceptions=True,  NotifyOnValidationError=True}" />
         </m:ShyBorder>

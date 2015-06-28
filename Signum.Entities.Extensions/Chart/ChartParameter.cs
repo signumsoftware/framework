@@ -43,7 +43,11 @@ namespace Signum.Entities.Chart
         public string Value
         {
             get { return value; }
-            set { Set(ref this.value, value); }
+            set
+            {
+                if (Set(ref this.value, value) && ParentChart != null)
+                    ParentChart.InvalidateResults(needNewQuery: false);
+            }
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

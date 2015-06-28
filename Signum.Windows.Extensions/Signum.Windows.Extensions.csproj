@@ -178,9 +178,6 @@
     <Compile Include="Chart\ChartScript.xaml.cs">
       <DependentUpon>ChartScript.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Chart\ChartScriptParameter.xaml.cs">
-      <DependentUpon>ChartScriptParameter.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Chart\UserChart.xaml.cs">
       <DependentUpon>UserChart.xaml</DependentUpon>
     </Compile>
@@ -562,10 +559,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Chart\ChartScript.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Chart\ChartScriptParameter.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

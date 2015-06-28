@@ -200,7 +200,7 @@ namespace Signum.Windows.Chart
             var d = Dispatcher;
             var desc = Description;
 
-            Navigator.Navigate(CurrentUserChart, new NavigateOptions()
+            Navigator.Navigate(CurrentUserChart.ToLite().Retrieve(), new NavigateOptions()
             {
                 View = () => new UserChart { QueryDescription = desc },
                 Closed = (s, args) => d.Invoke(() => Initialize())

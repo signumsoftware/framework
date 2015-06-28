@@ -98,7 +98,7 @@ namespace Signum.Windows.Chart
             webBrowserLoaded = true;
         }
 
-        static string baseResourcePath = "Signum.Windows.Extensions.Chart.Html.";
+        static string baseResourcePath = "Signum.Windows.Chart.Html.";
 
         static ResetLazy<string> FullHtml = new ResetLazy<string>(() =>
         {
