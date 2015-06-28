@@ -5,7 +5,11 @@
     <Column DisplayName="Height" ColumnType="Positionable" />
   </Columns>
   <Parameters>
+    <Parameter Name="UnitMargin" Type="Number" ValueDefinition="20" />
     <Parameter Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" ColumnIndex="1" />
+    <Parameter Name="Labels" Type="Enum" ValueDefinition="Inside | Margin | None" />
+    <Parameter Name="LabelsMargin" Type="Number" ValueDefinition="100" />
+    <Parameter Name="ShowNumber" Type="Enum" ValueDefinition="Yes | No" />
   </Parameters>
   <Icon FileName="columns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAd5JREFUeNrsmL9KA0EQxudErEXwGawlndgpiI8gkkewEh/Cwpcwhb1dCsFYaZVSBO3sBEvN3e3MuLN/klPvLifxbhdxYJmkWX58833DcgkzQ8y1BJHXP+CvAPaPB9Eacbmti88vx3x9+whIBIjkOgO5/0QMu9sbcHS4lQQBHN09wf5OD0hvCaUI0lxBmimYpAreU+k5DG/uBTCMB8mtL9ZKefXkKLQKSm+y4loDZBIAC0oO0sDp34psb7KCW1VQFEJyB3nmR3eCKiiqTdUrhMSO2Page5ALo/XKFf0nqgYFJK4OhwcOqyBVh8PvwYUX9evwgLOXce0FK+ubsLZ3kZQrWB4OdOALA749j2C1d1J7wcPVqQYsD0lVODAGDzJzZTjQjb91QCZVAwiV4fArqFVAZu0hxjjfgxZO1SoY9sGqARlznYQ0PkCjGls4xsgAve8YMwMqPRrAqe8ETo/XqEd5RAp637E7FFFIvvqO1cQqGMOaKfWdgImiUShY8J3x3BS2ff81U7DgOwuadTLaRoDmTUn5N9+ZsccAqMRqOJmNtCPf/WzEzndgkozQdc1RkO2+c77rcrSNANkrKD4MADcXkHxIAsFJJfI0j+3z2+Csn3wCjLn+PwH/ecAPAQYAxTJXxEeMT4QAAAAASUVORK5CYII=]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
@@ -14,7 +18,7 @@
     _1 : 5,
     title : 15,
     _2 : 10, 
-    labels : 20,
+    labels : parseInt(data.parameters["UnitMargin"]) ,
     _3 : 5,
     ticks: 4,
     content: '*',
@@ -28,7 +32,8 @@
     _2 : 5,
     content: '*',
     ticks: 4,
-    _3 : 5,
+    _3: data.parameters["Labels"] == "Margin" ? 5 : 0,
+    labels: data.parameters["Labels"] == "Margin" ? parseInt(data.parameters["LabelsMargin"]) : 0,
     _4 : 10,
     title: 15,
     _5 : 5,
@@ -40,7 +45,7 @@
       .domain($.map(data.rows, function (e) { return e.c0; }))
       .rangeBands([0, xRule.size('content')]);
   
-  var y = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, yRule.size('content'));
+  var y = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, yRule.size('content'), data.parameters["Scale"]);
   
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
     .append('svg:text').attr('class', 'x-title')
@@ -94,24 +99,49 @@
     .append('svg:title')
     .text(function (d) { return d.c0.niceToString() + ': ' + d.c1.niceToString(); });
   
-  
-  
-  if (x.rangeBand() > 50) {
+  if (x.rangeBand() > 15)
+  { 
+     if(data.parameters["Labels"] == "Margin")
+     {
+        chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.start('labels')))
+          .enterData(data.rows, 'text', 'x-label')
+          .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, 0 ) +  rotate(-90);})
+          .attr('dominant-baseline', 'middle')
+          .attr('font-weight', 'bold')
+          .attr('fill', function (v) { return (v.c0.color || color(v.c0)); })
+          .attr('text-anchor', "end")
+          .text(function (v) { return v.c0.niceToString(); })
+          .each(function (v) { ellipsis(this,  yRule.size('labels'), labelMargin); });
+     }
+     else if(data.parameters["Labels"] == "Inside")
+     {
+        var size = yRule.size('content');    
+        var labelMargin = 10;    
+        chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
+          .enterData(data.rows, 'text', 'x-label')
+          .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, -y(v.c1) ) +   rotate(-90);})
+          .attr('dominant-baseline', 'middle')
+          .attr('font-weight', 'bold')
+          .attr('fill', function (v) { return y(v.c1) >= size / 2 ? '#fff' : (v.c0.color || color(v.c0)); })
+          .attr('dx', function (v) { return y(v.c1) >= size / 2 ? -labelMargin : labelMargin; })
+          .attr('text-anchor', function (v) { return y(v.c1) >= size / 2 ? 'end' : 'start'; })
+          .text(function (v) { return v.c0.niceToString(); })
+          .each(function (v) { var posy = y(v.c1); ellipsis(this, posy >= size / 2 ? posy : size - posy, labelMargin); });
+     }
     
-    var size = yRule.size('content');
-    
-    var labelMargin = 10;
-    
-    chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
-      .enterData(data.rows, 'text', 'x-label')
-      .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, -y(v.c1) ) +  rotate(-90);})
-      .attr('dominant-baseline', 'middle')
-      .attr('font-weight', 'bold')
-      .attr('fill', function (v) { return y(v.c1) >= size / 2 ? '#fff' : (v.c0.color || color(v.c0)); })
-      .attr('dx', function (v) { return y(v.c1) >= size / 2 ? -labelMargin : labelMargin; })
-      .attr('text-anchor', function (v) { return y(v.c1) >= size / 2 ? 'end' : 'start'; })
-      .text(function (v) { return v.c0.niceToString(); })
-      .each(function (v) { var posy = y(v.c1); ellipsis(this, posy >= size / 2 ? posy : size - posy, labelMargin); });
+     if(data.parameters["ShowNumber"] == "Yes")
+     {
+       chart.append('svg:g').attr('class', 'numbers-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
+       .enterData(data.rows, 'text', 'number-label')
+       .filter(function(v){return y(v.c1) > 10; })
+       .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, -y(v.c1) / 2 ) +  rotate(-90);})
+       .attr('fill', 'white')
+       .attr('dominant-baseline', 'central')
+       .attr('text-anchor', 'middle')
+       .attr('font-weight', 'bold')
+       .text(function (v) { return v.c1.niceToString(); });
+
+     }
   }
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
