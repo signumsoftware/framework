@@ -16,7 +16,7 @@ export function namespace(nodes: Map.ITableInfo[]): Map.ColorProvider {
 
 export function tableSize(nodes: Map.ITableInfo[]): Map.ColorProvider {
 
-    var color = Map.colorScale(nodes.map(a=> a.total_size_kb).max());
+    var color = Map.colorScaleSqr(nodes.map(a=> a.total_size_kb).max());
 
     return {
         getFill:t => <any> color(t.total_size_kb),
@@ -27,7 +27,7 @@ export function tableSize(nodes: Map.ITableInfo[]): Map.ColorProvider {
 
 export function rows(nodes: Map.ITableInfo[], rowsText: string): Map.ColorProvider{
 
-    var color = Map.colorScale(nodes.map(a=> a.rows).max());
+    var color = Map.colorScaleSqr(nodes.map(a=> a.rows).max());
 
     return {
         getFill: t => <any>color(t.rows),
@@ -37,7 +37,7 @@ export function rows(nodes: Map.ITableInfo[], rowsText: string): Map.ColorProvid
 
 export function columns(nodes: Map.ITableInfo[], columnsText: string): Map.ColorProvider {
 
-    var color = Map.colorScale(nodes.map(a=> a.columns).max());
+    var color = Map.colorScaleSqr(nodes.map(a=> a.columns).max());
 
     return {
         getFill: t => <any>color(t.columns),

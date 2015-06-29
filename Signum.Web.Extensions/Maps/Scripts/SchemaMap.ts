@@ -422,6 +422,13 @@ export function colorScale(max : number) : D3.Scale.LinearScale {
 
 }
 
+export function colorScaleSqr(max: number): D3.Scale.LinearScale {
+    return d3.scale.sqrt()
+        .domain([0, max / 4, max])
+        .range(["green", "gold", "red"]);
+
+}
+
 
 export function calculatePoint(rectangle: Rectangle, point: Point): Point {
 
