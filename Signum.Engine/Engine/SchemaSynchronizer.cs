@@ -119,7 +119,7 @@ namespace Signum.Engine
 
                         var changes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                             null,
-                            (i, dix) => dix.IsControlledIndex && SafeConsole.Ask(ref removeExtraControlledIndexes, "Remove extra controlled index {0} in {1}?".FormatWith(dix.IndexName, tab.Name)) || dix.Columns.Any(removedColums.Contains) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                            (i, dix) => dix.Columns.Any(removedColums.Contains) || dix.IsControlledIndex && SafeConsole.Ask(ref removeExtraControlledIndexes, "Remove extra controlled index {0} in {1}?".FormatWith(dix.IndexName, tab.Name)) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                             (i, mix, dix) => (mix as UniqueIndex).Try(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                             Spacing.Simple);
 
