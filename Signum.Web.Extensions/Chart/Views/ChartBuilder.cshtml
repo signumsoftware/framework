@@ -11,7 +11,7 @@
 @using (var chart = Html.TypeContext<IChartBase>())
 {
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
-   
+
     <div id="@chart.Compose("sfChartBuilder")" class="row sf-chart-builder">
 
         <div class="col-lg-2">
@@ -28,11 +28,11 @@
                     @foreach (var group in ChartUtils.PackInGroups(ChartScriptLogic.Scripts.Value.Values, 4))
                     {
                         foreach (var script in group)
-                        { 
-                        <div class="@ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script)" 
-                            data-related="@(new RuntimeInfo(script).ToString())"  title="@(script.ToString() + "\r\n" + script.ColumnsStructure)">
-                            <img src="@(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") : Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString())))" />
-                        </div>
+                        {
+                            <div class="@ChartClient.ChartTypeImgClass(chart.Value, chart.Value.ChartScript, script)"
+                                 data-related="@(new RuntimeInfo(script).ToString())" title="@(script.ToString() + "\r\n" + script.ColumnsStructure)">
+                                <img src="@(script.Icon == null ? Url.Content("~/Chart/Images/unknown.png") : Url.Action((Signum.Web.Files.FileController fc) => fc.Download(new RuntimeInfo(script.Icon).ToString())))" />
+                            </div>
                         }
                         <div class="clearall">
                         </div>
@@ -49,27 +49,47 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th class="sf-chart-token-narrow">@ChartMessage.Chart_Dimension.NiceToString()
-                                </th>
-                                <th class="">@ChartMessage.Chart_Group.NiceToString()
-                                </th>
-                                <th class="sf-chart-token-wide">Token
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var column in chart.TypeElementContext(a => a.Columns))
-                            {
-                                @Html.HiddenRuntimeInfo(column)
-                                @Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryDescription] = queryDescription)
-                            }
-                        </tbody>
-                    </table>
+                                <th class="sf-chart-token-narrow">
+                                    @ChartMessage.Chart_Dimension.NiceToString()
+                            </th>
+                            <th class="">
+                                @ChartMessage.Chart_Group.NiceToString()
+                        </th>
+                        <th class="sf-chart-token-wide">
+                            Token
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var column in chart.TypeElementContext(a => a.Columns))
+                    {
+                        @Html.HiddenRuntimeInfo(column)
+                        @Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryDescription] = queryDescription)
+                    }
+                </tbody>
+            </table>
+        </div>
+        <textarea class="sf-chart-currentScript" style="display:none" data-url="@Navigator.NavigateRoute(chart.Value.ChartScript)">
+            @chart.Value.ChartScript.Script
+        </textarea>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-body form-vertical">
+            @foreach (var gr in chart.TypeElementContext(c => c.Parameters).OrderBy(c => chart.Value.Parameters.IndexOf(c.Value)).GroupsOf(6))
+            {
+                <div class="row">
+                    @foreach (var pc in gr)
+                    {
+                        pc.FormGroupStyle = FormGroupStyle.Basic;
+                        <div class="col-sm-2">
+                            @Html.HiddenLine(pc, ct => ct.Name)
+                            @Html.ValueLine(pc, ct => ct.Value, vl => ChartClient.SetupParameter(vl, pc.Value))
+                        </div>
+                    }
                 </div>
-                <textarea class="sf-chart-currentScript" style="display:none" data-url="@Navigator.NavigateRoute(chart.Value.ChartScript)">
-                    @chart.Value.ChartScript.Script
-                </textarea>
-            </div>
+            }
         </div>
     </div>
+</div>
+</div>
 }

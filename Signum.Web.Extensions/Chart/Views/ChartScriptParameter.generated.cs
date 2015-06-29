@@ -91,7 +91,7 @@ WriteLiteral("            ");
             #line hidden
 WriteLiteral("\r\n        </div>\r\n\r\n        <div");
 
-WriteLiteral(" class=\"col-sm-8\"");
+WriteLiteral(" class=\"col-sm-6\"");
 
 WriteLiteral(">\r\n");
 
@@ -104,10 +104,25 @@ WriteLiteral("            ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
+WriteLiteral("\r\n        </div>\r\n        <div");
+
+WriteLiteral(" class=\"col-sm-2\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("            ");
 
             
             #line 19 "..\..\Chart\Views\ChartScriptParameter.cshtml"
+       Write(Html.ValueLine(cc, c => c.ColumnIndex));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n        </div>\r\n    </div>\r\n");
+
+            
+            #line 22 "..\..\Chart\Views\ChartScriptParameter.cshtml"
 }
 
             

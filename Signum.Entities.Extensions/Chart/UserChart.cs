@@ -78,10 +78,19 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value))
                 {
-                    chartScript.SyncronizeColumns(this, changeParameters: true);
+                    chartScript.SyncronizeColumns(this);
                     NotifyAllColumns();
                 }
             }
+        }
+
+        [NotNullable]
+        MList<ChartParameterEntity> parameters = new MList<ChartParameterEntity>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<ChartParameterEntity> Parameters
+        {
+            get { return parameters; }
+            set { Set(ref parameters, value); }
         }
 
         bool groupResults = true;
@@ -169,7 +178,7 @@ namespace Signum.Entities.Chart
 
         protected override void PostRetrieving()
         {
-            chartScript.SyncronizeColumns(this, changeParameters: false);
+            chartScript.SyncronizeColumns(this);
         }
 
         public void InvalidateResults(bool needNewQuery)
@@ -191,7 +200,8 @@ namespace Signum.Entities.Chart
                 new XAttribute("GroupResults", GroupResults),
                 Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
                 new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
-                Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(f => f.ToXml(ctx)).ToList()));
+                Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(f => f.ToXml(ctx)).ToList()),
+                Parameters.IsNullOrEmpty() ? null : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
@@ -205,7 +215,13 @@ namespace Signum.Entities.Chart
             Filters.Syncronize(element.Element("Filters").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
             Columns.Syncronize(element.Element("Columns").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
             Orders.Syncronize(element.Element("Orders").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
+            Parameters.Syncronize(element.Element("Parameters").Try(ps => ps.Elements()).EmptyIfNull().ToList(), (p, x) => p.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
+        }
+
+        public void FixParameters(ChartColumnEntity chartColumnEntity)
+        {
+
         }
     }
 

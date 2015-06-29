@@ -43,60 +43,12 @@ namespace Signum.Windows.Chart
 
         public ChartColumn()
         {
-
             InitializeComponent();
-
-            BindParameter(param1, "Parameter1");
-            BindParameter(param2, "Parameter2");
-            BindParameter(param3, "Parameter3");
-
 
             this.Loaded += new RoutedEventHandler(OnLoad);
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(ChartToken_DataContextChanged);
         }
 
-        private void BindParameter(ValueLine vl, string property)
-        {
-            vl.Bind(ValueLine.VisibilityProperty, "ScriptColumn." + property, Converters.NullToVisibility);
-            vl.Bind(ValueLine.ItemSourceProperty, new MultiBinding
-            {
-                Bindings = 
-                {
-                    new Binding("ScriptColumn." + property),
-                    new Binding("Token"),
-                },
-                Converter = EnumValues
-            });
-            vl.Bind(ValueLine.ValueLineTypeProperty, "ScriptColumn." + property + ".Type", ParameterType);
-            vl.Bind(ValueLine.LabelTextProperty, "ScriptColumn." + property + ".Name");
-        }
-
-        public static IMultiValueConverter EnumValues = ConverterFactory.New((ChartScriptParameterEntity csp, QueryTokenEntity token) =>
-        {
-            if (csp == null || csp.Type != ChartParameterType.Enum)
-                return null;
-
-            var t = token.Try(tk => tk.Token);
-
-            return csp.GetEnumValues()
-                .Where(a => a.CompatibleWith(t))
-                .Select(a => a.Name)
-                .ToList();
-        });
-
-        public static IValueConverter ParameterType = ConverterFactory.New((ChartParameterType type) =>
-        {
-            if (type == ChartParameterType.Enum)
-                return ValueLineType.Enum;
-
-            if (type == ChartParameterType.Number)
-                return ValueLineType.Number;
-
-            if (type == ChartParameterType.String)
-                return ValueLineType.String;
-
-            return ValueLineType.String;
-        });
 
         void ChartToken_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {

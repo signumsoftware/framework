@@ -1,39 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Optional">
   <Columns>
-    <Column DisplayName="Line" ColumnType="Groupable" IsGroupKey="true">
-      <Parameter1 Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
-      <Parameter2 Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis | bundle" />
-    </Column>
-    <Column DisplayName="Dimension1" ColumnType="Positionable">
-      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" />
-    </Column>
-    <Column DisplayName="Dimension2" ColumnType="Positionable">
-      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" />
-    </Column>
-    <Column DisplayName="Dimension3" ColumnType="Positionable" IsOptional="true">
-      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" />
-    </Column>
-    <Column DisplayName="Dimension4" ColumnType="Positionable" IsOptional="true">
-      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" />
-    </Column>
-    <Column DisplayName="Dimension5" ColumnType="Positionable" IsOptional="true">
-      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" />
-    </Column>
-    <Column DisplayName="Dimension6" ColumnType="Positionable" IsOptional="true">
-      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" />
-    </Column>
-    <Column DisplayName="Dimension7" ColumnType="Positionable" IsOptional="true">
-      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" />
-    </Column>
-    <Column DisplayName="Dimension8" ColumnType="Positionable" IsOptional="true">
-      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" />
-    </Column>
+    <Column DisplayName="Line" ColumnType="Groupable" IsGroupKey="true" />
+    <Column DisplayName="Dimension1" ColumnType="Positionable" />
+    <Column DisplayName="Dimension2" ColumnType="Positionable" />
+    <Column DisplayName="Dimension3" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Dimension4" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Dimension5" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Dimension6" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Dimension7" ColumnType="Positionable" IsOptional="true" />
+    <Column DisplayName="Dimension8" ColumnType="Positionable" IsOptional="true" />
   </Columns>
+  <Parameters>
+    <Parameter Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+    <Parameter Name="Scale1" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="1" />
+    <Parameter Name="Scale2" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="2" />
+    <Parameter Name="Scale3" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="3" />
+    <Parameter Name="Scale4" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="4" />
+    <Parameter Name="Scale5" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="5" />
+    <Parameter Name="Scale6" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="6" />
+    <Parameter Name="Scale7" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="7" />
+    <Parameter Name="Scale8" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M) | Sqrt(M)" ColumnIndex="8" />
+    <Parameter Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis | bundle" />
+  </Parameters>
   <Icon FileName="parallelcoordinates.png"><![CDATA[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]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
-  
-  var colorSet = data.columns.c0.parameter1;
   
   var yRule = rule({
     _1 : 5,
@@ -52,16 +43,18 @@
   
   var colorQuantizer = d3.scale.quantize()
     .domain([0, 100])
-    .range(colorbrewer[colorSet][9]);
+    .range(colorbrewer[data.parameters["ColorSet"]][9]);
   
  var cords = d3.entries(data.columns)
     .filter(function(p, i){return p.key != "c0" && p.key != "entity" && p.value.token != undefined;})
-    .map(function(p){
+    .map(function(p, i){
       var values = data.rows.map(function(r){return r[p.key];});
       
-      p.value.scale = scaleFor(p.value, values, 0, yRule.size('content'));
+      var scaleType = data.parameters["Scale" + p.key[1]];
       
-      var scaleFunc = scaleFor(p.value, values, 0, 100);
+      p.value.scale = scaleFor(p.value, values, 0, yRule.size('content'),  scaleType);
+      
+      var scaleFunc = scaleFor(p.value, values, 0, 100, scaleType);
       
       p.value.colorScale = function(r){return colorQuantizer(scaleFunc(r[p.key])) };
       
@@ -127,7 +120,7 @@
     .x(function(r) { return x(r.key); })
     .y(function(r) { return  -data.columns[r.key].scale(r.value); })
     .defined(function(r){return r.value != undefined;})
-    .interpolate(data.columns.c0.parameter2);
+    .interpolate(data.parameters["Interpolate"]);
   
   //paint graph - line
   chart.enterData(data.rows, 'g', 'shape-serie').attr('transform', translate(0, yRule.end('content')))

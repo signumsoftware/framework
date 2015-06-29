@@ -100,7 +100,7 @@ namespace Signum.Windows.UserQueries
                 e.Handled = true;
 
                 var d = Dispatcher.CurrentDispatcher;
-                Navigator.Navigate(current, new NavigateOptions
+                Navigator.Navigate(current.ToLite().Retrieve(), new NavigateOptions
                 {
                     View = () => new UserQuery { QueryDescription = sc.Description },
                     Closed = (s, args) =>
