@@ -210,16 +210,18 @@
         .append('svg:title')
         .text(function (r, i) { return r.niceToString; });
       
-
-       d3.select(this).enterData(s.points, 'text', 'number-label')
-       .filter(function(r){return y(r.y) > 10; })
-       .attr('x', function (r) { return x(r.dim0) + x.rangeBand() / 2; })
-       .attr('y', function (r) { return -(y(r.y) / 2) -y(r.y0) })
-       .attr('fill', 'white')
-       .attr('dominant-baseline', 'central')
-       .attr('text-anchor', 'middle')
-       .attr('font-weight', 'bold')
-       .text(function (v) { return v.value; });
+      if(data.parameters["ShowNumber"] == "Yes")
+      {
+          d3.select(this).enterData(s.points, 'text', 'number-label')
+            .filter(function(r){return y(r.y) > 10; })
+            .attr('x', function (r) { return x(r.dim0) + x.rangeBand() / 2; })
+            .attr('y', function (r) { return -(y(r.y) / 2) -y(r.y0) })
+            .attr('fill', 'white')
+            .attr('dominant-baseline', 'central')
+            .attr('text-anchor', 'middle')
+            .attr('font-weight', 'bold')
+            .text(function (v) { return v.value; });
+      }
       
     });
   
