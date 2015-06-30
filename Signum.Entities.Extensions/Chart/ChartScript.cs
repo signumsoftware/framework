@@ -58,6 +58,15 @@ namespace Signum.Entities.Chart
             set { Set(ref columns, value); }
         }
 
+        [NotifyCollectionChanged, ValidateChildProperty, NotNullable, PreserveOrder]
+        MList<ChartScriptParameterEntity> parameters = new MList<ChartScriptParameterEntity>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<ChartScriptParameterEntity> Parameters
+        {
+            get { return parameters; }
+            set { Set(ref parameters, value); }
+        }
+
         [NotNullable, SqlDbType(Size = 100)]
         string columnsStructure;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -81,7 +90,6 @@ namespace Signum.Entities.Chart
         protected override string ChildPropertyValidation(ModifiableEntity sender, System.Reflection.PropertyInfo pi)
         {
             var column = sender as ChartScriptColumnEntity;
-
             if (column != null && pi.Is(() => column.IsGroupKey))
             {
                 if (column.IsGroupKey)
@@ -89,6 +97,16 @@ namespace Signum.Entities.Chart
                     if (!ChartUtils.Flag(ChartColumnType.Groupable, column.ColumnType))
                         return "{0} can not be true for {1}".FormatWith(pi.NiceName(), column.ColumnType.NiceToString());
                 }
+            }
+
+            var param = sender as ChartScriptParameterEntity;
+            if (param != null && pi.Is(() => param.ColumnIndex))
+            {
+                if (param.ColumnIndex == null && param.ShouldHaveColumnIndex())
+                    return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());
+
+                if (param.ColumnIndex.HasValue && !(0 <= param.ColumnIndex && param.ColumnIndex < this.Columns.Count))
+                    return ValidationMessage._0HasToBeBetween1And2.NiceToString(pi.NiceName(), 0, this.columns.Count);
             }
 
             return base.ChildPropertyValidation(sender, pi);
@@ -148,11 +166,15 @@ namespace Signum.Entities.Chart
                             new XAttribute("DisplayName", c.DisplayName),
                             new XAttribute("ColumnType", c.ColumnType.ToString()),
                             c.IsGroupKey ? new XAttribute("IsGroupKey", true) : null,
-                            c.IsOptional ? new XAttribute("IsOptional", true) : null,
-                            c.Parameter1 != null ? c.Parameter1.ExportXml(1): null,  
-                            c.Parameter2 != null ? c.Parameter2.ExportXml(2): null,  
-                            c.Parameter3 != null ? c.Parameter3.ExportXml(3): null  
+                            c.IsOptional ? new XAttribute("IsOptional", true) : null
                          ))),
+                    new XElement("Parameters", 
+                        Parameters.Select(p=>new XElement("Parameter",
+                            new XAttribute("Name", p.Name),
+                            new XAttribute("Type", p.Type),
+                            new XAttribute("ValueDefinition", p.ValueDefinition),
+                            p.ColumnIndex == null ? null : new XAttribute("ColumnIndex", p.ColumnIndex))
+                    )),
                     icon == null ? null :
                     new XElement("Icon",
                         new XAttribute("FileName", icon.FileName),
@@ -173,9 +195,6 @@ namespace Signum.Entities.Chart
                 ColumnType = c.Attribute("ColumnType").Value.ToEnum<ChartColumnType>(),
                 IsGroupKey = c.Attribute("IsGroupKey").Let(a => a != null && a.Value == "true"),
                 IsOptional = c.Attribute("IsOptional").Let(a => a != null && a.Value == "true"),
-                Parameter1 = ChartScriptParameterEntity.ImportXml(c, 1),
-                Parameter2 = ChartScriptParameterEntity.ImportXml(c, 2),
-                Parameter3 = ChartScriptParameterEntity.ImportXml(c, 3)
             }).ToList();
 
             if (!IsNew && !force)
@@ -192,14 +211,34 @@ namespace Signum.Entities.Chart
                     o.DisplayName = n.DisplayName;
                     o.IsGroupKey = n.IsGroupKey;
                     o.IsOptional = n.IsOptional;
-                    o.Parameter1 = CombineParameters(o.Parameter1, n.Parameter1);
-                    o.Parameter2 = CombineParameters(o.Parameter2, n.Parameter2);
-                    o.Parameter3 = CombineParameters(o.Parameter3, n.Parameter3);
                 }); 
             }
             else
             {
                 this.Columns = columns.ToMList();
+            }
+
+            List<ChartScriptParameterEntity> parameters = script.Element("Parameters").Elements("Parameter").Select(p => new ChartScriptParameterEntity
+            {
+                Name = p.Attribute("Name").Value,
+                Type = p.Attribute("Type").Value.ToEnum<ChartParameterType>(),
+                ValueDefinition = p.Attribute("ValueDefinition").Value,
+                ColumnIndex = p.Attribute("ColumnIndex").Try(c => int.Parse(c.Value)),
+            }).ToList();
+
+            if (this.Parameters.Count == parameters.Count)
+            {
+                this.Parameters.ZipForeach(parameters, (o, n) =>
+                {
+                    o.Name = n.Name;
+                    o.Type = n.Type;
+                    o.ValueDefinition = n.ValueDefinition;
+                    o.ColumnIndex = n.ColumnIndex;
+                });
+            }
+            else
+            {
+                this.Parameters = parameters.ToMList();
             }
 
             this.Script = script.Elements("Script").Nodes().OfType<XCData>().Single().Value;
@@ -219,21 +258,6 @@ namespace Signum.Entities.Chart
                 if (icon == null || icon.Entity.FileName != newFile.FileName || !AreEqual(icon.Entity.BinaryFile, newFile.BinaryFile))
                     Icon = newFile.ToLiteFat();
             }
-        }
-
-        private ChartScriptParameterEntity CombineParameters(ChartScriptParameterEntity oldP, ChartScriptParameterEntity newP)
-        {
-            if (newP == null)
-                return null;
-
-            if (oldP == null)
-                oldP = new ChartScriptParameterEntity();
-
-            oldP.Name = newP.Name;
-            oldP.Type = newP.Type;
-            oldP.ValueDefinition = newP.ValueDefinition;
-
-            return newP;
         }
 
         static bool AreEqual(byte[] a1, byte[] a2)
@@ -325,162 +349,4 @@ namespace Signum.Entities.Chart
         Optional,
         Never
     }
-
-    [Serializable]
-    public class ChartScriptColumnEntity : EmbeddedEntity       
-    {
-        [NotNullable, SqlDbType(Size = 80)]
-        string displayName;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 80)]
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { Set(ref displayName, value); }
-        }
-
-        bool isOptional;
-        public bool IsOptional
-        {
-            get { return isOptional; }
-            set { Set(ref isOptional, value); }
-        }
-     
-        ChartColumnType columnType;
-        public ChartColumnType ColumnType
-        {
-            get { return columnType; }
-            set { Set(ref columnType, value); }
-        }
-
-        bool isGroupKey;
-        public bool IsGroupKey
-        {
-            get { return isGroupKey; }
-            set { Set(ref isGroupKey, value); }
-        }
-
-        ChartScriptParameterEntity parameter1;
-        public ChartScriptParameterEntity Parameter1
-        {
-            get { return parameter1; }
-            set { Set(ref parameter1, value); }
-        }
-
-        ChartScriptParameterEntity parameter2;
-        public ChartScriptParameterEntity Parameter2
-        {
-            get { return parameter2; }
-            set { Set(ref parameter2, value); }
-        }
-
-        ChartScriptParameterEntity parameter3;
-        public ChartScriptParameterEntity Parameter3
-        {
-            get { return parameter3; }
-            set { Set(ref parameter3, value); }
-        }
-
-        internal ChartScriptColumnEntity Clone()
-        {
-            return new ChartScriptColumnEntity
-            {
-                DisplayName = DisplayName,
-                IsGroupKey = IsGroupKey,
-                ColumnType = ColumnType,
-                IsOptional = IsOptional,
-                Parameter1 = Parameter1.Try(p => p.Clone()),
-                Parameter2 = Parameter2.Try(p => p.Clone()),
-                Parameter3 = Parameter3.Try(p => p.Clone()),
-            };
-        }
-    }
-
-    [Flags]
-    public enum ChartColumnType
-    {
-        [Code("i")] Integer = 1,
-        [Code("r")] Real = 2,
-        [Code("d")] Date = 4,
-        [Code("dt")] DateTime = 8,
-        [Code("s")] String = 16, //Guid
-        [Code("l")] Lite = 32,
-        [Code("e")] Enum = 64, // Boolean,
-        [Code("rg")] RealGroupable = 128,
-
-        [Code("G")] Groupable = ChartColumnTypeUtils.GroupMargin | RealGroupable | Integer | Date | String | Lite | Enum,
-        [Code("M")] Magnitude = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable,
-        [Code("P")] Positionable = ChartColumnTypeUtils.GroupMargin | Integer | Real | RealGroupable | Date | DateTime | Enum
-    }
-
-
-    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
-    public sealed class CodeAttribute : Attribute
-    {
-        string code;
-        public CodeAttribute(string code)
-        {
-            this.code = code;
-        }
-
-        public string Code
-        {
-            get { return code; }
-        }
-    }
-
-    public static class ChartColumnTypeUtils
-    {
-       public const int GroupMargin = 0x10000000;
-
-       static Dictionary<ChartColumnType, string> codes = EnumFieldCache.Get(typeof(ChartColumnType)).ToDictionary(
-           a => (ChartColumnType)a.Key,
-           a => a.Value.GetCustomAttribute<CodeAttribute>().Code);
-
-       public static string GetCode(this ChartColumnType columnType)
-       {
-           return codes[columnType];
-       }
-
-       public static string GetComposedCode(this ChartColumnType columnType)
-       {
-           var result = columnType.GetCode();
-
-           if (result.HasText())
-               return result;
-
-           return EnumExtensions.GetValues<ChartColumnType>()
-               .Where(a => (int)a < ChartColumnTypeUtils.GroupMargin && columnType.HasFlag(a))
-               .ToString(GetCode, ",");
-       }
-
-       static Dictionary<string, ChartColumnType> fromCodes = EnumFieldCache.Get(typeof(ChartColumnType)).ToDictionary(
-           a => a.Value.GetCustomAttribute<CodeAttribute>().Code,
-           a => (ChartColumnType)a.Key);
-
-       public static string TryParse(string code, out ChartColumnType type)
-       {
-           if(fromCodes.TryGetValue(code, out type))
-               return null;
-                
-           return "{0} is not a valid type code, use {1} instead".FormatWith(code, fromCodes.Keys.CommaOr());
-       }
-
-       public static string TryParseComposed(string code, out ChartColumnType type)
-       {
-           type = default(ChartColumnType);
-           foreach (var item in code.Split(','))
-	       {
-               ChartColumnType temp;
-                string error = TryParse(item,   out temp);
-
-               if(error.HasText())
-                   return error;
-
-               type |= temp;
-           }
-           return null;
-       }
-    }
-
-   
 }

@@ -91,7 +91,7 @@ export class ChartBuilder {
         this.container.on("change", ".sf-query-token select", e => {
             var token = $(e.currentTarget);
             var id = token.attr("id");
-            Finder.QueryTokenBuilder.clearChildSubtokenCombos(token, id.before("_ddlTokens_"), parseInt(id.after("_ddlTokens_")));
+            Finder.QueryTokenBuilder.clearChildSubtokenCombos(token);
             this.updateChartBuilder(token.closest("tr").attr("data-token"));
         });
 
@@ -315,19 +315,17 @@ export class ChartRequest {
                 name = name.substring(this.options.prefix.length + 1, name.length);
             }
             var nameParts = name.split('_');
-            if (nameParts.length == 3 && nameParts[0] == "Columns") {
+            if (nameParts.length == 3 && nameParts[0] == "Columns" && nameParts[2] == "DisplayName") {
                 var column = data.columns["c" + nameParts[1]];
 
-                if (!column)
-                    data.columns["c" + nameParts[1]] = column = {};
+                if (column)
+                    column.title = $element.val();
 
-                switch (nameParts[2]) {
-                    case "DisplayName": column.title = $element.val(); break;
-                    case "Parameter1": column.parameter1 = $element.val(); break;
-                    case "Parameter2": column.parameter2 = $element.val(); break;
-                    case "Parameter3": column.parameter3 = $element.val(); break;
-                    default: break;
-                }
+            } else if (nameParts.length == 3 && nameParts[0] == "Parameters" && nameParts[2] == "Value") {
+
+                var nameId = $element.attr("id").beforeLast("_Value") + "_Name";
+
+                data.parameters[nameId.get().val()] = $element.val();
             }
         });
 

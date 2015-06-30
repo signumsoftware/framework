@@ -268,7 +268,7 @@ namespace Signum.Engine.Chart
 
                 foreach (var item in uc.Columns)
                 {
-                    item.FixParameters();
+                    uc.FixParameters(item);
                 }
 
 

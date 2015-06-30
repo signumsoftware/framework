@@ -1,11 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true">
-      <Parameter1 Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette " />
-      <Parameter2 Name="Order" Type="Enum" ValueDefinition="default | inside-out | reverse " />
-      <Parameter3 Name="Horizontal Margin" Type="Number" ValueDefinition="20" />
-    </Column>
+    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Split Columns" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
     <Column DisplayName="Height" ColumnType="Magnitude" />
     <Column DisplayName="Height 2" ColumnType="Magnitude" IsOptional="true" />
@@ -13,11 +9,18 @@
     <Column DisplayName="Height 4" ColumnType="Magnitude" IsOptional="true" />
     <Column DisplayName="Height 5" ColumnType="Magnitude" IsOptional="true" />
   </Columns>
+  <Parameters>
+    <Parameter Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette" />
+    <Parameter Name="Order" Type="Enum" ValueDefinition="default | inside-out | reverse" />
+    <Parameter Name="UnitMargin" Type="Number" ValueDefinition="20" />
+    <Parameter Name="Labels" Type="Enum" ValueDefinition="Margin  | Inside | None" />
+    <Parameter Name="LabelsMargin" Type="Number" ValueDefinition="100" />
+    <Parameter Name="ShowNumber" Type="Enum" ValueDefinition="Yes | No" />
+  </Parameters>
   <Icon FileName="stackedcolumns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAoJJREFUeNrsmL1uE0EUha9RuhRQBSVKA8iKe6gQUYqEAiHxAsgSqVJFUYQoyRvwEMFPkFSBxg6isCWkdFDElIhHcOyduTc7P7uZtWfHG9+11oVHWs2sLc98e+aeM9bWiAgWuT2ABW9LwFIAmx9bC1uIK/Oa+Ov5FXW6fZCIICXangDtPSLB3qstOHz/slYJ4GXvL7zZfQ4Yp4QQCMNIwHAk4GYoYDBUfQTffvxRgNXUINr4olipRD11CWkUVH2RiJsbIKECMKBoITVcPBZo+iIRPFcFlUIS7SXprh7tVamCSrVUPcckZotNX2kOkrO1iXJu/SlVKwVEyjdHAlytgphvjiQH2UF9enZF7e51WkMo3QXMIq+3G96wRco3h7TgbMBOrw9v917oSUdCxkErddgO4pA1gRvBxeVvb9iGzCHLqkFOlhFRrjmk3X42ICfL1Md55kgiiL3FnCxr1Dfhe/uXmQPJ+yCNZxs8QE6WHa0dw+rOvqdshB1I+Nc9iQf/eVtcRpb54NS4iJFX5pZlJJydQDVZBi69Z9UgI8vIfueHE3pcxMhTTTJ7lqEDh9rWLhxhsdNkqklmzjLl2hTOALlwQBFfQVaW6Rr0wZlewRMXsP50fWqW1Z88zq/BEJwc8U1y+PADPDr4NFZLdlGM9P31z89x/y4AmYXTvY4b4m9xxoVuPLhuDG2xfQgfXJqJHECdwxNwUVrkoSwzDg/AlZGD8T+siey6Tx2Z7ykLl/xGzVHGmwUfnLtgUH0XLnOCUFkKUj5cMg6or9UaLxELR2UAUuZ4kjlqBOWfgCtqjoJHnVNHPjUCdWTU58GpVlPhu2iv31pfmrUM4PIN6xKwwnYrwADxV36Q8C7avwAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
     
-  var pStack = data.columns.c0.parameter1;
-   var pOrder = data.columns.c0.parameter2;
+  var pStack = data.parameters["Stack"];
   
    var dim0, series, title;
   
@@ -98,7 +101,7 @@
     _1 : 5,
     title : 15,
     _2 : 10, 
-    labels : parseInt(data.columns.c0.parameter3),
+    labels : parseInt(data.parameters["UnitMargin"]),
     _3 : 5,
     ticks: 4,
     content: '*',
@@ -112,7 +115,8 @@
     _2 : 5,
     content: '*',
     ticks: 4,
-    _3 : 5,
+    _3: data.parameters["Labels"] == "Margin" ? 5 : 0,
+    labels: data.parameters["Labels"] == "Margin" ? parseInt(data.parameters["LabelsMargin"]) : 0,
     _4 : 10,
     title: 15,
     _5 : 5,
@@ -126,7 +130,7 @@
   
   var stack = d3.layout.stack()
     .offset(pStack)
-    .order(pOrder)
+    .order(data.parameters['Order'])
     .values(function(d) { return d.points; })
     .y(function(p){return p.value == undefined ? 0: p.value;})
     .x(function(p){return x(p.dim0);});
@@ -146,6 +150,7 @@
   var y = d3.scale.linear()
       .domain([0, max])
       .range([0, yRule.size('content')]);
+  
   
 
   chart.append('svg:g').attr('class', 'x-title').attr('transform', translate(xRule.middle('content'), yRule.middle('title')))
@@ -192,6 +197,7 @@
   //PAINT CHART
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .each(function(s){
+      
       d3.select(this).enterData(s.points, 'rect', 'shape')
         .filter(function(r){return r.value != undefined; })
         .attr('stroke', x.rangeBand() > 4 ? '#fff' : null)
@@ -202,28 +208,54 @@
         .attr('y', function (r) { return -y(r.y)-y(r.y0) })
         .attr('data-click', function (r) { return getClickKeys(r.rowClick, data.columns); })
         .append('svg:title')
-        .text(function (r, i) { return r.niceToString; })
-    });
-   
+        .text(function (r, i) { return r.niceToString; });
+      
 
+       d3.select(this).enterData(s.points, 'text', 'number-label')
+       .filter(function(r){return y(r.y) > 10; })
+       .attr('x', function (r) { return x(r.dim0) + x.rangeBand() / 2; })
+       .attr('y', function (r) { return -(y(r.y) / 2) -y(r.y0) })
+       .attr('fill', 'white')
+       .attr('dominant-baseline', 'central')
+       .attr('text-anchor', 'middle')
+       .attr('font-weight', 'bold')
+       .text(function (v) { return v.value; });
+      
+    });
   
-   
   
-  if (x.rangeBand() > 50) {
+  if (x.rangeBand() > 15) {
     
-    var labelMargin = 10;
-    var size = yRule.size('content');
+    if(data.parameters["Labels"] == "Margin")
+    {
+      chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.start('labels')))
+          .enterData(maxDim0, 'text', 'x-label')
+          .attr('transform', function (v){ return translate( x(v.dim0) + x.rangeBand()/2, 0 ) +  rotate(-90);})
+          .attr('dominant-baseline', 'middle')
+          .attr('fill', 'black')
+      	  .attr('shape-rendering', 'geometricPrecision')
+          .attr('text-anchor', "end")
+          .text(function (v) { return v.dim0.niceToString(); })
+          .each(function (v) { ellipsis(this,  yRule.size('labels'), labelMargin); });
+    }
+    else if(data.parameters["Labels"] == "Inside")
+    {
+      var labelMargin = 10;
+      var size = yRule.size('content');
+
+      chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
+        .enterData(maxDim0, 'text', 'x-label')
+        .attr('transform', function (r){ return translate( x(r.dim0) + x.rangeBand()/2, -(y(r.max)) ) +  rotate(-90);})
+        .attr('dominant-baseline', 'middle')
+        .attr('font-weight', 'bold')
+        .attr('fill', function (r) { return y(r.max) >= size/2 ? '#fff' : '#000'; })
+        .attr('dx', function (r) { return y(r.max) >= size/2 ? -labelMargin : labelMargin; })
+        .attr('text-anchor',  function (r) { return y(r.max) >= size/2 ? 'end': 'start';})
+        .text(function (r) { return r.dim0.niceToString(); })
+        .each(function (r) { var posy = y(r.max); ellipsis(this, posy >= size/2 ? posy : size - posy, labelMargin); });
+    }
     
-    chart.append('svg:g').attr('class', 'x-label').attr('transform', translate(xRule.start('content'), yRule.end('content')))
-      .enterData(maxDim0, 'text', 'x-label')
-      .attr('transform', function (r){ return translate( x(r.dim0) + x.rangeBand()/2, -(y(r.max)) ) +  rotate(-90);})
-      .attr('dominant-baseline', 'middle')
-      .attr('font-weight', 'bold')
-      .attr('fill', function (r) { return y(r.max) >= size/2 ? '#fff' : '#000'; })
-      .attr('dx', function (r) { return y(r.max) >= size/2 ? -labelMargin : labelMargin; })
-      .attr('text-anchor',  function (r) { return y(r.max) >= size/2 ? 'end': 'start';})
-      .text(function (r) { return r.dim0.niceToString(); })
-      .each(function (r) { var posy = y(r.max); ellipsis(this, posy >= size/2 ? posy : size - posy, labelMargin); });
+         
   }
   
   var legendScale = d3.scale.ordinal()
@@ -261,6 +293,5 @@
     .attr('y2', yRule.size('content'))
     .style('stroke', 'Black'); 
   
-}
-]]></Script>
+}]]></Script>
 </ChartScript>

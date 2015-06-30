@@ -1,18 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true">
-      <Parameter1 Name="Horizontal Margin" Type="Number" ValueDefinition="140" />
-    </Column>
+    <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Sub-bars" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
-    <Column DisplayName="Width" ColumnType="Positionable">
-      <Parameter1 Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" />
-    </Column>
+    <Column DisplayName="Width" ColumnType="Positionable" />
     <Column DisplayName="Width 2" ColumnType="Positionable" IsOptional="true" />
     <Column DisplayName="Width 3" ColumnType="Positionable" IsOptional="true" />
     <Column DisplayName="Width 4" ColumnType="Positionable" IsOptional="true" />
     <Column DisplayName="Width 5" ColumnType="Positionable" IsOptional="true" />
   </Columns>
+  <Parameters>
+    <Parameter Name="LabelMargin" Type="Number" ValueDefinition="140" />
+    <Parameter Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" ColumnIndex="2" />
+    <Parameter Name="ShowNumber" Type="Enum" ValueDefinition="Yes | No" />
+  </Parameters>
   <Icon FileName="multibars.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAsdJREFUeNrsmD1rFUEUhmeuN1Y2USLR1iakEKxSCAoWEbG3u6VdSCPiHxA7axFSmcI/IKQSDFprJwGFNBYWNlYxZuccz9fM7N6sUe/uxC3uwmTOfNydh/fM7L4bj4huyNfIDfyaA/YCOHmwPdiNOI7B/vPLuECtkXfOjxaoELunDu8pHmvsYjyycoaGNQnjxRW3eGvLFwNcWnt44kREoD9gLY4DNa2P4sMvr8sq2AokARgQSq1QVQZMsFV5wAYULZqB6m2F4z6ZL2Bo4wUB08INqKPmGEZAUy2mPfYXBawOpgBVGVk4Lj4FFVVTJY+KAHp+1fFj5tv3H8UfGXdurrrNyXU/k4J319daDorsLlFSRKUOoML9XAdghbkGiYELqQmB+nhuAKt5DNzO7kcG7HaK0cBk3ycgrp2AcDaD9NHiQceDAEECCQaaoEHndduDCUh2nrSzQgZUW5Bho4qi1FS/zoOsOHQErGgReaqZSqqAyylMCplaoMrFNsa0mlpyH9sKaJCdAH+GIDcXINs3af/EdFr6BMiUracQBVzVilno7THzZvf9qZzimQF3tu57N8Brblh724NfX1xB9Xi+V+6zS9fc+dsvfWfAc1c3/uoHf/KF2fFo+2D/VRk/2A4F2TQkX2iGwmCnHU8Rw3qiSo32bxxPLe7PbtVVOuae8bhZjSpFwPR7zGa2V0dNfk4XmgaCVh+YVapBljzF955d6HSjS8sX3ZOVR62nuBfAuh8UR4MuvYOTY6F2VVERoxAs1jmf9j675cd75T47eeuAy9YooFmnoLXABAOjcW5LbOPFH9QhmtKQrRXHVa1I2xSTNmSXUxxQFEFTiA5qBcEAWS2NRckQ0w5mZHFmM/pPgIcMIalU5TSVYKlEA659f6B6x1N7F79996HTjdZvrJYFHKofTIBD+hfc9tOJb3y4zw3rHPA/Xr8EGAASLnxI0iSooQAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
   
@@ -94,7 +95,7 @@
     _1 : 5,
     title : 15,
     _2 : 10, 
-    labels : parseInt(data.columns.c0.parameter1),
+    labels : parseInt(data.parameters["LabelMargin"]),
     _3 : 5,
     ticks: 4,
     content: '*',
@@ -116,7 +117,7 @@
   }, height);
   //yRule.debugY(chart);
 
-  var x = scaleFor(data.columns.c2, $.map(series, function(s){ return s.points.map(function(p){return p.value;})}), 0, xRule.size('content'));
+  var x = scaleFor(data.columns.c2, $.map(series, function(s){ return s.points.map(function(p){return p.value;})}), 0, xRule.size('content'), data.parameters["Scale"]);
   
   var y = d3.scale.ordinal()
       .domain($.map(dim0, function (v) { return v; }))
@@ -186,6 +187,7 @@
   //PAINT GRAPH
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
     .each(function(s){
+      
       d3.select(this).enterData(s.points, 'rect', 'shape')
       .filter(function (r){return r.value != undefined;})
       .attr('stroke', ySubscale.rangeBand() > 4 ? '#fff' : null)
@@ -197,6 +199,21 @@
       .attr('data-click', function (r) { return getClickKeys(r.rowClick, data.columns); })
       .append('svg:title')
       .text(function (r) { return r.niceToString; });
+      
+      if (ySubscale.rangeBand() > 15 && data.parameters["ShowNumber"] == "Yes")
+      {
+        d3.select(this).enterData(function (s) { return s.points; }, 'text', 'number-label')
+        .filter(function(r) {return r.value != undefined && x(r.value) > 16;})
+        .attr('y', function (r) { return ySubscale(s.key) + ySubscale.rangeBand()/2; })
+        .attr('x', function (r) { return x(r.value) / 2; })
+        .attr('transform', function (r) { return 'translate(0, ' + y(r.dim0) + ')'; })
+        .attr('fill', 'white')
+        .attr('dominant-baseline', 'central')
+        .attr('text-anchor', 'middle')
+        .attr('font-weight', 'bold')
+        .text(function (r) { return r.value; });
+      }
+      
 	});
       
     //paint color legend
@@ -234,6 +251,5 @@
     .attr('class', 'y-axis')
     .attr('y2', yRule.size('content'))
     .style('stroke', 'Black');  
-}
-]]></Script>
+}]]></Script>
 </ChartScript>

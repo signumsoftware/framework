@@ -1,26 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Date" ColumnType="Date" IsGroupKey="true">
-      <Parameter1 Name="StartDate" Type="Enum" ValueDefinition="Sunday | Monday" />
-    </Column>
-    <Column DisplayName="Color" ColumnType="Magnitude">
-      <Parameter1 Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
-      <Parameter2 Name="ColorScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Sqrt  | Log" />
-    </Column>
+    <Column DisplayName="Date" ColumnType="Date" IsGroupKey="true" />
+    <Column DisplayName="Color" ColumnType="Magnitude" />
   </Columns>
+  <Parameters>
+    <Parameter Name="StartDate" Type="Enum" ValueDefinition="Sunday | Monday" />
+    <Parameter Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+    <Parameter Name="ColorScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Sqrt  | Log" />
+  </Parameters>
   <Icon FileName="calendar.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA5BJREFUeNrsWF1LVEEYfs/ZzVZzWyXQDFPEbKFItItExQjUEDGDuojqTroSyqBf0UVEbZfd1IUIRlHRBrV9YGlChFopfmBsJn4sfuSa2+qeM9M7s2dN95zJ/UiRZV+ZnbPPzDnzzPM+M54diVIK2zlk2OaRJBhvmEUNTdfuqQFq2ngC1PASVr0toQqSBBKWUM0xGa/xj/WyplvgSOEe5dKFqh3ha0JIUDaZ5IqyUhAtIkkjRLCd9SEEQMUPhVBQFAKqqoKiYo3fA4qKhWEkiOG1QgkQFe/Dem5Fhe6eMcZlJ5bliAiyIDigEcH92elQV54PnnkfJ/l9YhGqSveBe8LLv/v8Cnzsn4RzJ+0w7lkES4oZBt1z8PDtCCepIjGVP/uv0lptw+KJmKAoo+xZjNyD16M4CVQMB2QE7z8fXFWpIMcKP6YX4U57HxTlZkBNWR5XTtVUJWsnToOENQUjS7Fod+SzxjorMw3OnCjEawrP3rt528U6O1ei+8sk/PKtQG6WFZrPFkOqxQwD32ZXU74+KxKSxWeiDaJaJCJi3Guo2NSsD1pfDKHfKFeFxd1HXyFAVI4dyN0NY1NeuNn6Cez5mWiJAn4fDZ+6FJSDEY+O4LpZsllLoLJUUKL5J5haBQmFCDY1HuK3LfkD0NEzDnl7rdBy/iikoYL9ozN6cmvSRRQlOoJENiEBFShhpIB7jXsHyQ2PzcGAewY9xdRTIIAdrt54w9v5CtX6NV93aQttI19jf9kcHUGTfwk6XV2akpLOlVS3B9J/7ouGWxXuiSwTNmsqHDucQ9uNM0kNS1tbm1fUthmFjcd2sHBcFltwa99yRONte4LmjW5wOp2bzrS+vl6KmSCL6qJ5XfurkUyoLk7R459XoDz1sQ7/8Ps0lJNbelxuiS3FJPivR3jj/8ZD48WkoGs4w7CPq2/ZEO/yNRrj0pX/70EWVVk9uvZ3nlIhXpH2xJB0Bb0tJJ14q3itJ5gqRiHCY0lxXB6sOfhT7z/0pQgXpliAJ/ZGzeqXQzbDdxAR3rl0Kio87lVcueuprp0Ndjy7V4d3TJdAJTj0/eGysH9ipzikllGEZm+kVjT94yZYa1/QtTP/1ZZY9HivX2gJEZ74KTZerUG1DFMssIQIj4tgQ0ODlHyjjkVB9jvc4XB4t4qgx+Nxhh8c8V9+wtMrSQqdldiMzkw2IRi5BeSzHBHB5AlrkuAWxR8BBgCRXe1Dl1jEbAAAAABJRU5ErkJggg==]]></Icon>
-  <Script><![CDATA[ function DrawChart(chart, data)
-{
-  var colorSet = data.columns.c1.parameter1;
-  var scale = data.columns.c1.parameter2;
- 
-  
+  <Script><![CDATA[function DrawChart(chart, data)
+{  
   var day = d3.time.format("%w"),
     week = d3.time.format("%U"),
     format = d3.time.format("%Y-%m-%d");
    
-  if(data.columns.c0.parameter1 == "Monday")
+  if(data.parameters["StartDate"] == "Monday")
   {
     var oldWeek = week;
     var oldDay = day; 
@@ -41,8 +37,10 @@
     } 
   }
   
-  var scaleFunc = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 100, scale);
+  var scaleFunc = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 100, data.parameters["ColorScale"]);
 
+  var colorSet = data.parameters["ColorSet"];
+  
   var colorQuantizer = d3.scale.quantize()
     .domain([0, 100])
     .range(colorbrewer[colorSet][9]);

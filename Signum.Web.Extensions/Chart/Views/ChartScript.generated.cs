@@ -213,6 +213,19 @@ WriteLiteral("\r\n    </div>\r\n");
             
             #line 35 "..\..\Chart\Views\ChartScript.cshtml"
     
+            
+            #line default
+            #line hidden
+            
+            #line 35 "..\..\Chart\Views\ChartScript.cshtml"
+Write(Html.EntityRepeater(cc, c => c.Parameters));
+
+            
+            #line default
+            #line hidden
+            
+            #line 35 "..\..\Chart\Views\ChartScript.cshtml"
+                                               
     
             
             #line default

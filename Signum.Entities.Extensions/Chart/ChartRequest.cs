@@ -22,10 +22,13 @@ namespace Signum.Entities.Chart
         bool GroupResults { get; set; }
 
         MList<ChartColumnEntity> Columns { get; }
+        MList<ChartParameterEntity> Parameters { get; }
 
         void InvalidateResults(bool needNewQuery);
 
         bool Invalidator { get; }
+
+        void FixParameters(ChartColumnEntity chartColumnEntity);
     }
 
     [Serializable]
@@ -52,7 +55,7 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value))
                 {
-                    var newQuery = chartScript.SyncronizeColumns(this, changeParameters: true);
+                    var newQuery = chartScript.SyncronizeColumns(this);
                     NotifyAllColumns();
                     InvalidateResults(newQuery);
                 }
@@ -88,6 +91,15 @@ namespace Signum.Entities.Chart
         {
             get { return columns; }
             set { Set(ref columns, value); }
+        }
+
+        [NotNullable]
+        MList<ChartParameterEntity> parameters = new MList<ChartParameterEntity>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<ChartParameterEntity> Parameters
+        {
+            get { return parameters; }
+            set { Set(ref parameters, value); }
         }
 
         void NotifyAllColumns()
@@ -160,7 +172,7 @@ namespace Signum.Entities.Chart
         {
             if (GroupResults)
             {
-                var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token.Token);
+                var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token).NotNull().Select(a => a.Token).ToList();
 
                 Orders.RemoveAll(o => !(o.Token is AggregateToken) && !keys.Contains(o.Token));
             }
@@ -168,6 +180,12 @@ namespace Signum.Entities.Chart
             {
                 Orders.RemoveAll(o => o.Token is AggregateToken);
             }
+        }
+
+
+        public void FixParameters(ChartColumnEntity chartColumn)
+        {
+            ChartUtils.FixParameters(this, chartColumn);
         }
     }
 }

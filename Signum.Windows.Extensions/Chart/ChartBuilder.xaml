@@ -71,17 +71,34 @@
         </GroupBox>
 
         <GroupBox Grid.Column="1" Header="Chart Settings" Style="{StaticResource EntityGroupBox}" Margin="0,0,2,2" Background="{StaticResource LightBlueLighter}">
-            <ItemsControl Grid.IsSharedSizeScope="True" HorizontalAlignment="Stretch" ItemsSource="{Binding Columns}" x:Name="columnsControl">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type sce:ChartColumnEntity}">
-                        <c:ChartColumn
+            <StackPanel>
+                <ItemsControl Grid.IsSharedSizeScope="True" HorizontalAlignment="Stretch" ItemsSource="{Binding Columns}" x:Name="columnsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type sce:ChartColumnEntity}">
+                            <c:ChartColumn
                             m:Common.PropertyRoute="{m:ContinueRoute Columns/}"
                             GroupResults="{Binding DataContext.GroupResults, ElementName=mecb}"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <ItemsControl HorizontalAlignment="Stretch" ItemsSource="{Binding Parameters}" x:Name="parametersControl">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel IsItemsHost="True">
+                            </WrapPanel>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type sce:ChartParameterEntity}">
+                            <StackPanel m:Common.PropertyRoute="{m:ContinueRoute Parameters/}" MinWidth="150">
+                                <Label Content="{Binding Name}"/>
+                                <m:ValueLine m:Common.Route="Value" Loaded="ValueLine_Loaded" m:Common.LabelVisible="False"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </GroupBox>
-
     </Grid>
-
 </UserControl>
