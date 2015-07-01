@@ -194,14 +194,31 @@
   
   if(data.parameters["ShowNumber"] == "Yes")
   {
+      var two = data.columns.c2.token != null && data.columns.c3.token != null;
+    
+    if(data.columns.c2.token != null)
+    {
       chart.enterData(data.rows, 'text', 'punch').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content') - y.rangeBand() / 2))
       .attr('x', function(r, i) { return x(r.c0); })
-      .attr('y', function(r) { return -y(r.c1); })
+      .attr('y', function(r) { return -y(r.c1) + (two? -10: 0); })
       .attr('fill', 'white')
       .attr('dominant-baseline', 'central')
       .attr('text-anchor', 'middle')
       .attr('font-weight', 'bold')
-      .text(function (r) { return r.c2 + (data.columns.c3.token == null ? "": ""); });
+      .text(function (r) { return r.c2; });
+    }
+    
+     if(data.columns.c3.token != null)
+     {
+       chart.enterData(data.rows, 'text', 'punch2').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content') - y.rangeBand() / 2))
+        .attr('x', function(r, i) { return x(r.c0); })
+        .attr('y', function(r) { return -y(r.c1) + (two? 10: 0); })
+        .attr('fill', 'white')
+        .attr('dominant-baseline', 'central')
+        .attr('text-anchor', 'middle')
+        .attr('font-weight', 'bold')
+        .text(function (r) { return  r.c3; });
+     }
   }
   
   shapes.append('svg:title')
