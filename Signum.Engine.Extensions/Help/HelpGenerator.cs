@@ -101,7 +101,7 @@ namespace Signum.Engine.Help
         {
             Type type = pr.Type;
             string format = Reflector.FormatString(pr);
-            string unit = pr.PropertyInfo.GetCustomAttribute<UnitAttribute>()?.Let(u=>u.UnitName);
+            string unit = pr.PropertyInfo.GetCustomAttribute<UnitAttribute>()?.UnitName;
             return ValueType(type, format, unit);
         }
 

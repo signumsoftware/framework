@@ -28,7 +28,7 @@ namespace Signum.Windows.Processes
             MenuItem miResult = new MenuItem
             {
                 Header = coc.OperationSettings?.Text ?? coc.OperationInfo.OperationSymbol.NiceToString(),
-                Icon = coc.OperationSettings?.Let(s => s.Icon.ToSmallImage()),
+                Icon = coc.OperationSettings?.Icon.ToSmallImage(),
                 Tag = coc,
             };
 

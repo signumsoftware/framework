@@ -145,7 +145,7 @@ namespace Signum.Entities.Chart
 
         public string GetTitle()
         {
-            var unit = Token?.Let(a=>a.Token.Unit);
+            var unit = Token?.Token.Unit;
 
             return DisplayName + (unit.HasText() ? " ({0})".FormatWith(unit) : null);
         }
