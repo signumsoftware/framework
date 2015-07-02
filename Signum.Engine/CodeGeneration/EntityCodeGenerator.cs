@@ -888,7 +888,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetFieldMListName(DiffTable table, DiffTable relatedTable, MListInfo mListInfo)
         {
-            ObjectName name = mListInfo.TrivialElementColumn?.Let(te => te.ForeignKey.TargetTable) ?? relatedTable.Name;
+            ObjectName name = mListInfo.TrivialElementColumn?.ForeignKey.TargetTable ?? relatedTable.Name;
 
             return NaturalLanguageTools.Pluralize(GetEntityName(name).RemoveSuffix("Entity")).FirstLower();
         }

@@ -547,7 +547,7 @@ namespace Signum.Utilities
                              (description == null ? null : NaturalLanguageTools.Pluralize(description, assembly.Culture))),
 
                 Gender = !opts.IsSetAssert(DescriptionOptions.Gender, type) ? null :
-                         ((x == null ? null : x.Attribute("Gender")?.Let(xa => xa.Value.Single())) ??
+                         ((x == null ? null : x.Attribute("Gender")?.Value.Single()) ??
                          (!assembly.IsDefault ? null : type.GetCustomAttribute<GenderAttribute>()?.Gender) ??
                          (description == null ? null : NaturalLanguageTools.GetGender(description, assembly.Culture))),
 

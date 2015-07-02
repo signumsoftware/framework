@@ -304,7 +304,7 @@ namespace Signum.Engine.Maps
             var au = item.GetType().GetCustomAttribute<AttributeUsageAttribute>();
             
             if(au == null ||(au.ValidOn & Targets) == 0)
-             throw new InvalidOperationException("The attributes is not compatible with targets {0}: {1}".FormatWith(Targets, au?.Let(_=>_.ValidOn)));
+             throw new InvalidOperationException("The attributes is not compatible with targets {0}: {1}".FormatWith(Targets, au?.ValidOn));
 
             base.InsertItem(index, item);
         }

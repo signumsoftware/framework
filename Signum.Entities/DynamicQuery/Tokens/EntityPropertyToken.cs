@@ -82,8 +82,8 @@ namespace Signum.Entities.DynamicQuery
 
                 if (route != null)
                 {
-                    var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name)?.Let(pp =>
-                        pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx());
+                    var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name)?.Validators
+                        .OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
                     if (att != null)
                     {
                         return DateTimeProperties(this, att.Precision);
@@ -99,8 +99,8 @@ namespace Signum.Entities.DynamicQuery
 
                 if (route != null)
                 {
-                    var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name)?.Let(pp =>
-                        pp.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx());
+                    var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name)?.Validators
+                        .OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx());
                     if (att != null)
                     {
                         return StepTokens(this, att.DecimalPlaces);

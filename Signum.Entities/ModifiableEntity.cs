@@ -277,7 +277,7 @@ namespace Signum.Entities
         [HiddenProperty]
         public string Error
         {
-            get { return IntegrityCheck()?.Let(a => a.Values.ToString("\r\n")); }
+            get { return IntegrityCheck()?.Values.ToString("\r\n"); }
         }
 
         public Dictionary<string, string> IntegrityCheck()

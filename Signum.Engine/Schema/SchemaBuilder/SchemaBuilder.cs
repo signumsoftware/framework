@@ -478,7 +478,7 @@ namespace Signum.Engine.Maps
             return table.Ticks = new FieldTicks(route.Type)
             {
                 Type = type,
-                Name = ticksAttr?.Let(a=>a.Name) ?? name.ToString(),
+                Name = ticksAttr?.Name ?? name.ToString(),
                 SqlDbType = pair.SqlDbType,
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = false,
@@ -502,7 +502,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.IsNullable(route, forceNull),
                 Size = Settings.GetSqlSize(att, pair.SqlDbType),
                 Scale = Settings.GetSqlScale(att, pair.SqlDbType),
-                Default = att?.Let(a=>a.Default),
+                Default = att?.Default,
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 

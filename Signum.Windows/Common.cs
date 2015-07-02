@@ -637,7 +637,7 @@ namespace Signum.Windows
             ValueLine vl = fe as ValueLine;
             if (vl != null && context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.Type == typeof(string))
             {
-                var slv = Validator.TryGetPropertyValidator(context)?.Let(pv => pv.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault());
+                var slv = Validator.TryGetPropertyValidator(context)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault();
                 if (slv != null && slv.Max != -1)
                     vl.MaxTextLength = slv.Max;
             }
