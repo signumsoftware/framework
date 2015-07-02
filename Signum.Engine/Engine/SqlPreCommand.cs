@@ -147,7 +147,7 @@ namespace Signum.Engine
 
         protected internal override int NumParameters
         {
-            get { return Parameters.Try(p => p.Count) ?? 0; }
+            get { return Parameters?.Count ?? 0; }
         }
 
         static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");

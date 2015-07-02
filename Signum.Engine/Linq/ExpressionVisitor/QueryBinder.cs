@@ -3031,7 +3031,7 @@ namespace Signum.Engine.Linq
             {
                 var ident = (Entity)c.Value;
 
-                Type type = ident.Try(a => PrimaryKey.Type(a.GetType()).Nullify()) ?? typeof(object);
+                Type type = ident?.Let(a => PrimaryKey.Type(a.GetType()).Nullify()) ?? typeof(object);
 
                 return GetEntityConstant(
                     ident == null ? Expression.Constant(null, type) : Expression.Constant(ident.Id.Object, type),
@@ -3048,7 +3048,7 @@ namespace Signum.Engine.Linq
 
                 using (OverrideColExpression(colLite.Reference))
                 {
-                    Type type = lite.Try(a => PrimaryKey.Type(a.EntityType).Nullify()) ?? typeof(object);
+                    Type type = lite?.Let(a => PrimaryKey.Type(a.EntityType).Nullify()) ?? typeof(object);
 
                     var entity = GetEntityConstant(
                         lite == null ? Expression.Constant(null, type) : Expression.Constant(lite.Id.Object, type),

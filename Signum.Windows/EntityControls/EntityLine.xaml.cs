@@ -114,7 +114,7 @@ namespace Signum.Windows
             if (CanAutocomplete() && autocompleteTextBox.Visibility != Visibility.Visible)
             {
                 autocompleteTextBox.Visibility = Visibility.Visible;
-                autocompleteTextBox.Text = Entity.Try(a => a.ToString());
+                autocompleteTextBox.Text = Entity?.ToString();
                 autocompleteTextBox.SelectAndFocus();
             }
         }

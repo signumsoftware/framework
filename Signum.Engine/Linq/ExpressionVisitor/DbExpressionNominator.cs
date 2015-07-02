@@ -1045,7 +1045,7 @@ namespace Signum.Engine.Linq
             {
                 case "string.IndexOf":
                     {
-                        Expression startIndex = m.TryGetArgument("startIndex").Try(e => Expression.Add(e, new SqlConstantExpression(1)));
+                        Expression startIndex = m.TryGetArgument("startIndex")?.Let(e => Expression.Add(e, new SqlConstantExpression(1)));
 
                         Expression charIndex = TrySqlFunction(null, SqlFunction.CHARINDEX, m.Type, m.GetArgument("value"), m.Object, startIndex);
                         if (charIndex == null)

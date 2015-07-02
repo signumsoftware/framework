@@ -541,7 +541,7 @@ namespace Signum.Windows
 
             if (entityType.IsModifiableEntity() || entityType.IsIEntity())
             {
-                DataTemplate template = EntitySettings.TryGetC(entityType).Try(ess => ess.DataTemplate);
+                DataTemplate template = EntitySettings.TryGetC(entityType)?.DataTemplate;
                 if (template != null)
                     return template;
 

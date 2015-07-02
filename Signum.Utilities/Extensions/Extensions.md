@@ -191,7 +191,7 @@ propagate nullability without throwing NullReferenceExceptions using lambdas tha
 idea:
 
 ```C#
-var a = Foo.Try(f=>f.Bar).Try(b=>b.Baz); 
+var a = Foo?.Let(f=>f.Bar)?.Let(b=>b.Baz); 
 
 public static R Try<T, R>(this T t, Func<T, R> func)
 {
@@ -255,7 +255,7 @@ public static T TryDo<T>(this T t, Action<T> action)
 Example:
 
 ```C#
-Departament.Try(d=>d.Boss).TryDo(b=>b.Fire()); 
+Departament?.Let(d=>d.Boss)?.Do(b=>b.Fire()); 
 ```
 
 

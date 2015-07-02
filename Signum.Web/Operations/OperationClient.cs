@@ -153,7 +153,7 @@ namespace Signum.Web.Operations
                 return controller.JsonNet(new MessageBoxOptions
                 {
                     prefix = newPrefix,
-                    message = OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString(operation.Try(o=>o.NiceToString())),
+                    message = OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString(operation?.Let(o=>o.NiceToString())),
                 });
             }
 
@@ -273,7 +273,7 @@ namespace Signum.Web.Operations
             var operations = (from oi in OperationInfos(type)
                               where oi.IsEntityOperation && (oi.AllowsNew.Value || !ident.IsNew)
                               let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
-                              let eoc = newEntityOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? type)(ident, oi, ctx, os)
+                              let eoc = newEntityOperationContext.GetInvoker(os?.OverridenType ?? type)(ident, oi, ctx, os)
                               where (os != null && os.HasIsVisible) ? os.OnIsVisible(eoc) : ctx.ShowOperations
                               select eoc).ToList();
 
@@ -348,13 +348,13 @@ namespace Signum.Web.Operations
         {
             var result = new ToolBarButton(ctx.Context.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
             {
-                Style = ctx.OperationSettings.Try(a => a.Style) ?? EntityOperationSettingsBase.AutoStyleFunction(ctx.OperationInfo),
+                Style = ctx.OperationSettings?.Style ?? EntityOperationSettingsBase.AutoStyleFunction(ctx.OperationInfo),
 
                 Tooltip = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order : 0,
 
-                Text = ctx.OperationSettings.Try(o => o.Text) ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.OperationSymbol.NiceToString() : group.SimplifyName(ctx.OperationInfo.OperationSymbol.NiceToString())),
+                Text = ctx.OperationSettings?.Text ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.OperationSymbol.NiceToString() : group.SimplifyName(ctx.OperationInfo.OperationSymbol.NiceToString())),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)),
                 HtmlProps = { { "data-operation", ctx.OperationInfo.OperationSymbol.Key } },
 
@@ -409,7 +409,7 @@ namespace Signum.Web.Operations
                  dic.Select(kvp => new
                  {
                      value = kvp.Key.Key,
-                     toStr = kvp.Value.Settings.Try(s => s.Text) ?? kvp.Key.NiceToString(),
+                     toStr = kvp.Value.Settings?.Text ?? kvp.Key.NiceToString(),
                      operationConstructor = kvp.Value.Settings == null || !kvp.Value.Settings.HasClientConstructor ? null : new JRaw(PromiseRequire(kvp.Value.Settings.OnClientConstructor(kvp.Value)))
                  }));
         }
@@ -493,7 +493,7 @@ namespace Signum.Web.Operations
                (from oi in OperationInfos(type)
                 where oi.OperationType == OperationType.ConstructorFromMany
                 let os = GetSettings<ContextualOperationSettingsBase>(type, oi.OperationSymbol)
-                let coc = newContextualOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? oi.BaseType)(ctx, oi, os, null)
+                let coc = newContextualOperationContext.GetInvoker(os?.OverridenType ?? oi.BaseType)(ctx, oi, os, null)
                 where os == null || !os.HasIsVisible || os.OnIsVisible(coc)
                  select CreateContextual(coc, _coc => JsModule.Operations["constructFromManyDefault"](_coc.Options(), JsFunction.Event)))
                  .OrderBy(a => a.Order)
@@ -527,7 +527,7 @@ namespace Signum.Web.Operations
                            let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
                            let osc = os == null ? null :
                                      ctx.Lites.Count == 1 ? os.ContextualUntyped: os.ContextualFromManyUntyped
-                           let coc = newContextualOperationContext.GetInvoker(os.Try(o => o.OverridenType) ?? type)(ctx, oi, osc, os)
+                           let coc = newContextualOperationContext.GetInvoker(os?.OverridenType ?? type)(ctx, oi, osc, os)
                            let defaultBehaviour = oi.Lite == true && (ctx.Lites.Count == 1 || oi.OperationType != OperationType.ConstructorFrom)
                            where os == null ? defaultBehaviour :
                                  !os.ContextualUntyped.HasIsVisible ? defaultBehaviour && !os.HasIsVisible && (!os.HasClick || os.ContextualUntyped.HasClick) :
@@ -619,14 +619,14 @@ namespace Signum.Web.Operations
         {
             var result = new MenuItem(ctx.Context.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
             {
-                Style = ctx.OperationSettings.Try(a => a.Style) ?? ctx.EntityOperationSettings.Try(a => a.Style) ?? EntityOperationSettingsBase.AutoStyleFunction(ctx.OperationInfo),
+                Style = ctx.OperationSettings?.Style ?? ctx.EntityOperationSettings?.Style ?? EntityOperationSettingsBase.AutoStyleFunction(ctx.OperationInfo),
 
                 Tooltip = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
 
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order : 0,
 
-                Text = ctx.OperationSettings.Try(o => o.Text) ?? ctx.OperationInfo.OperationSymbol.NiceToString(),
+                Text = ctx.OperationSettings?.Text ?? ctx.OperationInfo.OperationSymbol.NiceToString(),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) : defaultClick(ctx)),
 
                 Tag = ctx,

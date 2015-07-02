@@ -82,7 +82,7 @@ namespace Signum.Engine
                         .ToString(p => "{0} {1}: {2}".FormatWith(
                             p.ParameterName,
                             Connector.Current.GetSqlDbType(p),
-                            p.Value.Try(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
+                            p.Value?.Let(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
                 log.WriteLine();
             }
         }

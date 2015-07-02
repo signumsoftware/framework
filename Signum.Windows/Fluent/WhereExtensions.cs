@@ -272,7 +272,7 @@ namespace Signum.Windows
                         source.BaseValueSource,
                         source.IsExpression ? " (IsExpression)" : "",
                         fe.DataContext.TryToString() ?? "null",
-                        fe.DataContext.Try(d => "(" + d.GetType().Name + " " + d.GetHashCode()));
+                        fe.DataContext?.Let(d => "(" + d.GetType().Name + " " + d.GetHashCode()));
 
                     any = true;
                 }

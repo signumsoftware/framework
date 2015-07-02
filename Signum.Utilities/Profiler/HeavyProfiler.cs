@@ -414,7 +414,7 @@ namespace Signum.Utilities
                 BeforeStart = long.Parse(xLog.Attribute("BeforeStart").Value),
                 Start = long.Parse(xLog.Attribute("Start").Value),
                 End = long.Parse(xLog.Attribute("End").Value),
-                AdditionalData = xLog.Attribute("AdditionalData").Try(ad => ad.Value),
+                AdditionalData = xLog.Attribute("AdditionalData")?.Value,
             };
 
             if (xLog.Element("Log") != null)

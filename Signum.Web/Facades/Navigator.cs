@@ -118,13 +118,13 @@ namespace Signum.Web
 
         public static PartialViewResult PopupView(this ControllerBase controller, ModifiableEntity entity, PopupViewOptions options = null)
         {
-            var prefix = options.Try(o => o.Prefix) ?? controller.Prefix();
-            return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, prefix, options.Try(o => o.PropertyRoute)), options ?? new PopupViewOptions(prefix));
+            var prefix = options?.Prefix ?? controller.Prefix();
+            return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, prefix, options?.PropertyRoute), options ?? new PopupViewOptions(prefix));
         }
 
         public static PartialViewResult PopupNavigate(this ControllerBase controller, IRootEntity entity, PopupNavigateOptions options = null)
         {
-            var prefix = options.Try(o => o.Prefix) ?? controller.Prefix();
+            var prefix = options?.Prefix ?? controller.Prefix();
             return Manager.PopupControl(controller, TypeContextUtilities.UntypedNew(entity, prefix), options ?? new PopupNavigateOptions(prefix));
         }
 

@@ -87,7 +87,7 @@ namespace Signum.Windows.Operations
 
             MenuItem menuItem = new MenuItem
             {
-                Header = eoc.OperationSettings.Try(os => os.Text) ?? 
+                Header = eoc.OperationSettings?.Text ?? 
                 (group == null || group.SimplifyName == null ? eoc.OperationInfo.OperationSymbol.NiceToString() :
                  group.SimplifyName(eoc.OperationInfo.OperationSymbol.NiceToString())),
                 Icon = man.GetImage(eoc.OperationInfo.OperationSymbol, eoc.OperationSettings).ToSmallImage(),

@@ -665,7 +665,7 @@ namespace Signum.Engine.Linq
             {
                 var ei = (Entity)c.Value;
 
-                var id = ei.IdOrNull.Try(pk => Expression.Constant(pk.Object, PrimaryKey.Type(ei.GetType()).Nullify())) ?? SmartEqualizer.NewId;
+                var id = ei.IdOrNull?.Let(pk => Expression.Constant(pk.Object, PrimaryKey.Type(ei.GetType()).Nullify())) ?? SmartEqualizer.NewId;
 
                 return new EntityExpression(ei.GetType(),
                     new PrimaryKeyExpression(id), null, null, null, avoidExpandOnRetrieving: true);
@@ -687,7 +687,7 @@ namespace Signum.Engine.Linq
             {
                 Lite<IEntity> lite = (Lite<IEntity>)c.Value;
 
-                var id = lite.IdOrNull.Try(pk => Expression.Constant(pk.Object, PrimaryKey.Type(lite.EntityType).Nullify())) ?? SmartEqualizer.NewId;
+                var id = lite.IdOrNull?.Let(pk => Expression.Constant(pk.Object, PrimaryKey.Type(lite.EntityType).Nullify())) ?? SmartEqualizer.NewId;
 
                 EntityExpression ere = new EntityExpression(lite.EntityType, new PrimaryKeyExpression(id), null, null, null, false);
 

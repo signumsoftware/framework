@@ -97,7 +97,7 @@ namespace Signum.Web
             if (value != null)
                 items.Where(e => e.Value == value.ToString())
                     .SingleOrDefaultEx()
-                    .TryDo(s => s.Selected = true);
+                    ?.Do(s => s.Selected = true);
 
             valueLine.ValueHtmlProps.AddCssClass("form-control");
             return helper.DropDownList(valueLine.Prefix, items, valueLine.ValueHtmlProps);

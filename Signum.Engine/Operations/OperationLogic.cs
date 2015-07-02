@@ -338,14 +338,14 @@ namespace Signum.Engine.Operations
             return new OperationInfo
             {
                 OperationSymbol = oper.OperationSymbol,
-                Lite = (oper as IEntityOperation).Try(eo => eo.Lite),
+                Lite = (oper as IEntityOperation)?.Lite,
                 Returns = oper.Returns,
                 OperationType = oper.OperationType,
                 ReturnType = oper.ReturnType,
-                HasStates = (oper as IGraphHasFromStatesOperation).Try(eo => eo.HasFromStates) ?? false,
-                HasCanExecute = (oper as IEntityOperation).Try(eo => eo.HasCanExecute) ?? false,
-                AllowsNew = (oper as IEntityOperation).Try(eo => eo.AllowsNew) ?? false,
-                BaseType = (oper as IEntityOperation).Try(eo => eo.BaseType) ?? (oper as IConstructorFromManyOperation).Try(eo => eo.BaseType)
+                HasStates = (oper as IGraphHasFromStatesOperation)?.HasFromStates ?? false,
+                HasCanExecute = (oper as IEntityOperation)?.HasCanExecute ?? false,
+                AllowsNew = (oper as IEntityOperation)?.AllowsNew ?? false,
+                BaseType = (oper as IEntityOperation)?.BaseType ?? (oper as IConstructorFromManyOperation)?.BaseType
             };
         }
 

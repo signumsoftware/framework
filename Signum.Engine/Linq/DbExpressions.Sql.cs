@@ -446,10 +446,10 @@ namespace Signum.Engine.Linq
         {
             return "SELECT {0}{1}{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".FormatWith(
                 IsDistinct ? "DISTINCT " : "",
-                Top.Try(t => "TOP {0} ".FormatWith(t.ToString())),
+                Top?.Let(t => "TOP {0} ".FormatWith(t.ToString())),
                 Columns.ToString(", "),
-                From.Try(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
-                Where.Try(a => "WHERE " + a.ToString() + "\r\n"),
+                From?.Let(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
+                Where?.Let(a => "WHERE " + a.ToString() + "\r\n"),
                 OrderBy.Any() ? ("ORDER BY " + OrderBy.ToString(" ,") + "\r\n") : null,
                 GroupBy.Any() ? ("GROUP BY " + GroupBy.ToString(g => g.ToString(), " ,") + "\r\n") : null,
                 SelectOptions == 0 ? "" : SelectOptions.ToString() + "\r\n",
@@ -1166,7 +1166,7 @@ namespace Signum.Engine.Linq
             return "DELETE {0}\r\nFROM {1}\r\n{2}".FormatWith(
                 Table.Name, 
                 Source.ToString(), 
-                Where.Try(w => "WHERE " + w.ToString())); 
+                Where?.Let(w => "WHERE " + w.ToString())); 
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1197,7 +1197,7 @@ namespace Signum.Engine.Linq
                 Table.Name,
                 Assigments.ToString("\r\n"),
                 Source.ToString(),
-                Where.Try(w => "WHERE " + w.ToString()));
+                Where?.Let(w => "WHERE " + w.ToString()));
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)

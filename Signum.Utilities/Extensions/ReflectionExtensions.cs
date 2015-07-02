@@ -102,7 +102,7 @@ namespace Signum.Utilities
 
             return ft.GetInterfaces().PreAnd(ft)
                 .SingleOrDefaultEx(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                .Try(ti => ti.GetGenericArguments()[0]);
+                ?.Let(ti => ti.GetGenericArguments()[0]);
         }
 
         public static bool IsExtensionMethod(this MethodInfo m)

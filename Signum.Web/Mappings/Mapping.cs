@@ -350,7 +350,7 @@ namespace Signum.Web
             if (ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
             {
                 if (!DisambiguateRuntimeInfo)
-                    return RuntimeInfo.FromFormValue(strRuntimeInfo).Try(ri => ri.EntityType);
+                    return RuntimeInfo.FromFormValue(strRuntimeInfo)?.EntityType;
                 else
                 {
                     RuntimeInfo runtimeInfo = strRuntimeInfo.Split(',')
@@ -358,11 +358,11 @@ namespace Signum.Web
                         .OrderBy(a => !a.ToLite().RefersTo((Entity)(object)ctx.Value))
                         .FirstEx();
 
-                    return runtimeInfo.Try(ri => ri.EntityType);
+                    return runtimeInfo?.EntityType;
                 }
             }
             else
-                return ctx.Value.Try(t => t.GetType());
+                return ctx.Value?.GetType();
         }
 
         static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue =

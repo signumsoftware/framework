@@ -640,7 +640,7 @@ namespace Signum.Engine.Maps
 
         public List<DatabaseName> DatabaseNames()
         {
-            return GetDatabaseTables().Select(a => a.Name.Schema.Try(s => s.Database)).Distinct().ToList();
+            return GetDatabaseTables().Select(a => a.Name.Schema?.Database).Distinct().ToList();
         }
 
         public DirectedEdgedGraph<Table, RelationInfo> ToDirectedGraph()
