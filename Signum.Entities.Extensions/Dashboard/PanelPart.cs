@@ -110,7 +110,7 @@ namespace Signum.Entities.Dashboard
             Row = int.Parse(x.Attribute("Row").Value);
             StartColumn = int.Parse(x.Attribute("StartColumn").Value);
             Columns = int.Parse(x.Attribute("Columns").Value);
-            Title = x.Attribute("Title").Try(a => a.Value);
+            Title = x.Attribute("Title")?.Value;
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
 
@@ -286,7 +286,7 @@ namespace Signum.Entities.Dashboard
         string label;
         public string Label
         {
-            get { return label ?? UserQuery.Try(uq => uq.DisplayName); }
+            get { return label ?? UserQuery?.DisplayName; }
             set { Set(ref label, value); }
         }
 
@@ -324,8 +324,8 @@ namespace Signum.Entities.Dashboard
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Label = element.Attribute("Label").Try(a => a.Value);
-            Href = element.Attribute("Href").Try(a => a.Value);
+            Label = element.Attribute("Label")?.Value;
+            Href = element.Attribute("Href")?.Value;
             UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
         }
     }

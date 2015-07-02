@@ -56,10 +56,10 @@ namespace Signum.Entities.Chart
         string displayName;
         public string DisplayName
         {
-            get { return displayName ?? Token.Try(t => t.Token.Try(tt => tt.NiceName())); }
+            get { return displayName ?? Token?.Let(t => t.Token?.NiceName()); }
             set
             {
-                var name = value == Token.Try(t => t.Token.Try(tt => tt.NiceName())) ? null : value;
+                var name = value == Token?.Let(t => t.Token?.NiceName()) ? null : value;
                 Set(ref displayName, name);
             }
         }
@@ -145,7 +145,7 @@ namespace Signum.Entities.Chart
 
         public string GetTitle()
         {
-            var unit = Token.Try(a=>a.Token.Unit);
+            var unit = Token?.Let(a=>a.Token.Unit);
 
             return DisplayName + (unit.HasText() ? " ({0})".FormatWith(unit) : null);
         }
@@ -175,8 +175,8 @@ namespace Signum.Entities.Chart
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = element.Attribute("Token").Try(a => new QueryTokenEntity(a.Value));
-            DisplayName = element.Attribute("DisplayName").Try(a => a.Value);
+            Token = element.Attribute("Token")?.Let(a => new QueryTokenEntity(a.Value));
+            DisplayName = element.Attribute("DisplayName")?.Value;
         }
 
         public override string ToString()

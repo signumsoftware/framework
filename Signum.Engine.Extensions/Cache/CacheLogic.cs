@@ -150,7 +150,7 @@ namespace Signum.Engine.Cache
             CacheLogic.AssertSqlDependencyStarted();
 
             Table table = Schema.Current.Table(type);
-            DatabaseName db = table.Name.Schema.Try(s => s.Database);
+            DatabaseName db = table.Name.Schema?.Database;
 
             SqlConnector subConnector = ((SqlConnector)Connector.Current).ForDatabase(db);
 
@@ -553,7 +553,7 @@ namespace Signum.Engine.Cache
             foreach (var stype in connected)
             {
                 hs.Add(stype);
-                controllers[stype].TryDo(t => t.NotifyDisabled());
+                controllers[stype]?.Do(t => t.NotifyDisabled());
             }
         }
 

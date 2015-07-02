@@ -311,7 +311,7 @@ namespace Signum.Entities.Authorization
                  let rac = rules[r]
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
-                         from k in allKeys ?? rac.DefaultDictionary().OverrideDictionary.Try(dic => dic.Keys).EmptyIfNull()
+                         from k in allKeys ?? rac.DefaultDictionary().OverrideDictionary?.Keys.EmptyIfNull()
                          let allowedBase = rac.GetAllowedBase(k)
                          let allowed = rac.GetAllowed(k)
                          where allKeys != null || !allowed.Equals(allowedBase)
@@ -328,7 +328,7 @@ namespace Signum.Entities.Authorization
             Func<string, R> toResource, Func<string, A> parseAllowed)
         {
             var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
-            var xRoles = element.Element(rootName).Try(e => e.Elements("Role")).EmptyIfNull();
+            var xRoles = element.Element(rootName)?.Let(e => e.Elements("Role")).EmptyIfNull();
             var should = xRoles.ToDictionary(x => roles.GetOrThrow(x.Attribute("Name").Value));
 
             Table table = Schema.Current.Table(typeof(RT));
@@ -347,11 +347,11 @@ namespace Signum.Entities.Authorization
                         Resource = kvp.Key,
                         Role = role,
                         Allowed = kvp.Value
-                    }, comment: Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple).TryDo(p => p.GoBefore = true);
+                    }, comment: Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true);
 
                     return restSql;
                 },
-                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple).TryDo(p => p.GoBefore = true),
+                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true),
                 (role, x, list) =>
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
@@ -376,7 +376,7 @@ namespace Signum.Entities.Authorization
                             var oldA = rt.Allowed;
                             rt.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
                             return table.UpdateSqlSync(rt, comment: Comment(role, r, oldA, rt.Allowed));
-                        }, Spacing.Simple).TryDo(p => p.GoBefore = true);
+                        }, Spacing.Simple)?.Do(p => p.GoBefore = true);
 
                     return restSql;
                 },

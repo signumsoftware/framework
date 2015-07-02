@@ -61,7 +61,7 @@ namespace Signum.Engine.Help
                     }; 
              
                 entity.Title = element.Attribute(_Title).Value;
-                element.Element(_Description).TryDo(d => entity.Description = d.Value);
+                element.Element(_Description)?.Do(d => entity.Description = d.Value);
 
                 return Save(entity);
             }
@@ -93,7 +93,7 @@ namespace Signum.Engine.Help
                 if (document.Root.Name != _Namespace)
                     throw new InvalidOperationException("{0} does not have a {1} root".FormatWith(fileName, _Namespace));
 
-                var result = document.Root.Attribute(_Name).Try(a => a.Value);
+                var result = document.Root.Attribute(_Name)?.Value;
 
                 if (string.IsNullOrEmpty(result))
                     throw new InvalidOperationException("{0} does not have a {1} attribute".FormatWith(fileName, _Name));
@@ -118,7 +118,7 @@ namespace Signum.Engine.Help
                     };
 
                 entity.Title = element.Attribute(_Title).Value;
-                element.Element(_Description).TryDo(d => entity.Description = d.Value);
+                element.Element(_Description)?.Do(d => entity.Description = d.Value);
 
                 return Save(entity);
             }
@@ -171,7 +171,7 @@ namespace Signum.Engine.Help
                         Query = query,
                     };
 
-                element.Element(_Description).TryDo(d => entity.Description = d.Value);
+                element.Element(_Description)?.Do(d => entity.Description = d.Value);
 
                 var cols = element.Element(_Columns);
                 if (cols != null)
@@ -243,7 +243,7 @@ namespace Signum.Engine.Help
                         Operation = operation,
                     };
 
-                element.Element(_Description).Try(d => entity.Description = d.Value);
+                element.Element(_Description)?.Let(d => entity.Description = d.Value);
 
                 return Save(entity);
             }
@@ -306,7 +306,7 @@ namespace Signum.Engine.Help
                         Type = typeEntity,
                     };
 
-                element.Element(_Description).TryDo(d => entity.Description = d.Value);
+                element.Element(_Description)?.Do(d => entity.Description = d.Value);
 
                 var props = element.Element(_Properties);
                 if (props != null)
@@ -348,7 +348,7 @@ namespace Signum.Engine.Help
                 if (document.Root.Name != _Entity)
                     throw new InvalidOperationException("{0} does not have a {1} root".FormatWith(fileName, _Entity));
 
-                var result = document.Root.Attribute(_FullName).Try(a => a.Value);
+                var result = document.Root.Attribute(_FullName)?.Value;
 
                 if (string.IsNullOrEmpty(result))
                     throw new InvalidOperationException("{0} does not have a {1} attribute".FormatWith(fileName, _FullName));

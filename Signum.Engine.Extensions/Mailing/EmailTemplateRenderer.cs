@@ -132,7 +132,7 @@ namespace Signum.Engine.Mailing
                     {
                         var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]);
 
-                        if (groups.Count() == 1 && groups.Single().Key.Try(a => a.Owner) == null)
+                        if (groups.Count() == 1 && groups.Single().Key?.Owner == null)
                             yield break;
                         else
                         {
@@ -213,7 +213,7 @@ namespace Signum.Engine.Mailing
 
                         List<EmailOwnerData> groups = currentRows.Select(r => (EmailOwnerData)r[owner]).Distinct().ToList();
 
-                        if (groups.Count == 1 && groups[0].Try(a => a.Owner) == null)
+                        if (groups.Count == 1 && groups[0]?.Owner == null)
                             return new List<EmailOwnerRecipientData>();
 
                         return groups.Where(g => g.Email.HasText()).Select(g => new EmailOwnerRecipientData(g) { Kind = tr.Kind }).ToList();
@@ -238,7 +238,7 @@ namespace Signum.Engine.Mailing
 
                 var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]).ToList();
 
-                if (groups.Count == 1 && groups[0].Key.Try(e => e.Owner) == null)
+                if (groups.Count == 1 && groups[0].Key?.Owner == null)
                 {
                     yield return new List<EmailOwnerRecipientData>();
                 }

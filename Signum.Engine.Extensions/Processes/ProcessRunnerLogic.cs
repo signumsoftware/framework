@@ -137,7 +137,7 @@ namespace Signum.Engine.Processes
 
             Task.Factory.StartNew(() =>
             {
-                var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema.Try(s => s.Database); 
+                var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema?.Database; 
 
                 using (AuthLogic.Disable())
                 {

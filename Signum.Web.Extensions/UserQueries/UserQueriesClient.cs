@@ -148,7 +148,7 @@ namespace Signum.Web.UserQueries
             var items = new List<IMenuItem>();
 
             Lite<UserQueryEntity> currentUserQuery = null;
-            string url = (ctx.ControllerContext.RouteData.Route as Route).Try(r => r.Url);
+            string url = (ctx.ControllerContext.RouteData.Route as Route)?.Url;
             if (url.HasText() && url.Contains("UQ"))
                 currentUserQuery = Lite.Create<UserQueryEntity>(PrimaryKey.Parse(ctx.ControllerContext.RouteData.Values["lite"].ToString(), typeof(UserQueryEntity)));
 

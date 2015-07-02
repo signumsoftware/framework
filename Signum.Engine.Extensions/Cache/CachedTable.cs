@@ -211,7 +211,7 @@ namespace Signum.Engine.Cache
                 var connector = (SqlConnector)Connector.Current;
                 Table table = connector.Schema.Table(typeof(T));
 
-                var subConnector = connector.ForDatabase(table.Name.Schema.Try(s => s.Database));
+                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
 
                 Dictionary<PrimaryKey, object> result = new Dictionary<PrimaryKey, object>();
                 using (MeasureLoad())
@@ -396,7 +396,7 @@ namespace Signum.Engine.Cache
 
                 var connector = (SqlConnector)Connector.Current;
 
-                var subConnector = connector.ForDatabase(table.Name.Schema.Try(s => s.Database));
+                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
 
                 Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>> result = new Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>();
 
@@ -557,7 +557,7 @@ namespace Signum.Engine.Cache
 
                 var connector = (SqlConnector)Connector.Current;
 
-                var subConnector = connector.ForDatabase(table.Name.Schema.Try(s => s.Database));
+                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
 
                 Dictionary<PrimaryKey, string> result = new Dictionary<PrimaryKey, string>();
 

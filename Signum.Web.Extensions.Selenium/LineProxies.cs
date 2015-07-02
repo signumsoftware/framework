@@ -408,7 +408,7 @@ namespace Signum.Web.Selenium
         {
            return Selenium.FindElement(ComboLocator)
                 .SelectElement().Options
-                .Select(o => Lite.Parse(o.GetAttribute("value")).TryDo(l => l.SetToString(o.Text)))
+                .Select(o => Lite.Parse(o.GetAttribute("value"))?.Do(l => l.SetToString(o.Text)))
                 .ToList();
         }
 

@@ -101,7 +101,7 @@ WriteLiteral("\r\n");
    
     NamespaceHelp nh = (NamespaceHelp)Model;
 
-    ViewBag.Title = Model.Title + Model.Before.Try(b => " " + HelpMessage.In0.NiceToString(b));
+    ViewBag.Title = Model.Title + Model.Before?.Let(b => " " + HelpMessage.In0.NiceToString(b));
 
             
             #line default

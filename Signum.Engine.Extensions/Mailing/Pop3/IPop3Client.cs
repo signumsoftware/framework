@@ -69,8 +69,8 @@ namespace Signum.Engine.Extensions.Mailing.Pop3
                     new EmailAttachmentEntity
                     {
                         ContentId = a.ContentId,
-                        File = new FilePathEntity(EmailFileType.Attachment, a.ContentDisposition.Try(cd => cd.FileName) ?? a.FileName, a.Body).Save(),
-                        Type = a.ContentDisposition.Try(cd => cd.DispositionType) == "attachment" ? EmailAttachmentType.Attachment : EmailAttachmentType.LinkedResource
+                        File = new FilePathEntity(EmailFileType.Attachment, a.ContentDisposition?.FileName ?? a.FileName, a.Body).Save(),
+                        Type = a.ContentDisposition?.DispositionType == "attachment" ? EmailAttachmentType.Attachment : EmailAttachmentType.LinkedResource
                     }).ToMList()
             };
 

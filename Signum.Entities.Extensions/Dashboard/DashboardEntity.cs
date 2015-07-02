@@ -203,10 +203,10 @@ namespace Signum.Entities.Dashboard
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             DisplayName = element.Attribute("DisplayName").Value;
-            EntityType = element.Attribute("EntityType").Try(a => ctx.GetType(a.Value));
-            Owner = element.Attribute("Owner").Try(a => Lite.Parse<Entity>(a.Value));
-            DashboardPriority = element.Attribute("DashboardPriority").Try(a => int.Parse(a.Value));
-            EmbeddedInEntity = element.Attribute("EmbeddedInEntity").Try(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
+            DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
+            EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
             Parts.Syncronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         }
 

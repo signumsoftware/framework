@@ -44,7 +44,7 @@ namespace Signum.Windows.Isolation
 
                     if (iso != null)
                     {
-                        var msg = new MessageHeader<string>(iso.Item1.Try(i=>i.KeyLong()))
+                        var msg = new MessageHeader<string>(iso.Item1?.Let(i=>i.KeyLong()))
                             .GetUntypedHeader("CurrentIsolation", "http://www.signumsoftware.com/Isolation");
                         context.OutgoingMessageHeaders.Add(msg);
                     }
@@ -176,7 +176,7 @@ namespace Signum.Windows.Isolation
 
             if (result == null)
             {
-                var sc = element as SearchControl ?? (element as SearchWindow).Try(s => s.SearchControl);
+                var sc = element as SearchControl ?? (element as SearchWindow)?.SearchControl;
                 if (sc != null && ctx.OperationInfo != null && (
                     ctx.OperationInfo.OperationType == OperationType.ConstructorFrom ||
                     ctx.OperationInfo.OperationType == OperationType.ConstructorFromMany))

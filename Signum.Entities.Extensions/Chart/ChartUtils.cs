@@ -295,8 +295,8 @@ namespace Signum.Entities.Chart
                     Lite<Entity> l = (Lite<Entity>)r[columnIndex];
                     return new
                     {
-                        key = l.Try(li => li.Key()),
-                        toStr = l.Try(li => li.ToString()),
+                        key = l?.Key(),
+                        toStr = l?.ToString(),
                         color = l == null ? "#555" : GetChartColor(l.EntityType, l.Id).TryToHtml(),
                     };
                 };
@@ -311,7 +311,7 @@ namespace Signum.Entities.Chart
                     return new
                     {
                         key = e == null ? (int?)null : Convert.ToInt32(e),
-                        toStr = e.Try(en => en.NiceToString()),
+                        toStr = e?.NiceToString(),
                         color = e == null ? "#555" : GetChartColor(enumEntity, Convert.ToInt32(e)).TryToHtml(),
                     };
                 };
@@ -393,7 +393,7 @@ namespace Signum.Entities.Chart
             foreach (var p in chartRequest.Parameters.Where(p => p.ScriptParameter.ColumnIndex == index))
 	        {
                 if (p.PropertyCheck(() => p.Value).HasText())
-                    p.Value = p.ScriptParameter.DefaultValue(chartColumn.Token.Try(t => t.Token));
+                    p.Value = p.ScriptParameter.DefaultValue(chartColumn.Token?.Token);
 	        }
         }
     }

@@ -387,7 +387,7 @@ namespace Signum.Engine.UserAssets
 
                 int startingIndex = 0;
 
-                SafeConsole.WriteLineColor(ConsoleColor.Cyan, "  " + token.Try(a => a.FullKey()));
+                SafeConsole.WriteLineColor(ConsoleColor.Cyan, "  " + token?.FullKey());
 
                 bool isRoot = token == null;
 

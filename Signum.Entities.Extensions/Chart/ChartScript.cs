@@ -223,7 +223,7 @@ namespace Signum.Entities.Chart
                 Name = p.Attribute("Name").Value,
                 Type = p.Attribute("Type").Value.ToEnum<ChartParameterType>(),
                 ValueDefinition = p.Attribute("ValueDefinition").Value,
-                ColumnIndex = p.Attribute("ColumnIndex").Try(c => int.Parse(c.Value)),
+                ColumnIndex = p.Attribute("ColumnIndex")?.Let(c => int.Parse(c.Value)),
             }).ToList();
 
             if (this.Parameters.Count == parameters.Count)
@@ -243,7 +243,7 @@ namespace Signum.Entities.Chart
 
             this.Script = script.Elements("Script").Nodes().OfType<XCData>().Single().Value;
 
-            var newFile = script.Element("Icon").Try(icon => new FileEntity
+            var newFile = script.Element("Icon")?.Let(icon => new FileEntity
             {
                 FileName = icon.Attribute("FileName").Value,
                 BinaryFile = Convert.FromBase64String(icon.Nodes().OfType<XCData>().Single().Value),

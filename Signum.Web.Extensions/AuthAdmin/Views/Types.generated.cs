@@ -547,7 +547,7 @@ WriteLiteral("                    ");
 
             
             #line 93 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(Html.Hidden(item.Compose("AllowedBase"), (item.Value.AllowedBase.Fallback.Try(f => f.ToStringParts()) ?? "Error") + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".FormatWith(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";")))));
+               Write(Html.Hidden(item.Compose("AllowedBase"), (item.Value.AllowedBase.Fallback?.ToStringParts() ?? "Error") + (item.Value.AllowedBase.Conditions.IsEmpty() ? "" : (";" + item.Value.AllowedBase.Conditions.ToString(a => "{0}-{1}".FormatWith(a.TypeCondition.Key, a.Allowed.ToStringParts()), ";")))));
 
             
             #line default

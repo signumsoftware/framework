@@ -307,7 +307,7 @@ namespace Signum.Entities.Authorization
                  let rac = rules[r]
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
-                         from k in allTypes ?? rac.DefaultDictionary().OverrideDictionary.Try(dic => dic.Keys).EmptyIfNull()
+                         from k in allTypes ?? rac.DefaultDictionary().OverrideDictionary?.Keys.EmptyIfNull()
                          let allowedBase = rac.GetAllowedBase(k)
                          let allowed = rac.GetAllowed(k)
                          where allTypes != null || !allowed.Equals(allowedBase)
@@ -333,7 +333,7 @@ namespace Signum.Entities.Authorization
         internal SqlPreCommand ImportXml(XElement element, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
         {
             var current = Database.RetrieveAll<RuleTypeEntity>().GroupToDictionary(a => a.Role);
-            var xRoles = element.Element("Types").Try(t => t.Elements("Role")).EmptyIfNull();
+            var xRoles = element.Element("Types")?.Let(t => t.Elements("Role")).EmptyIfNull();
             var should = xRoles.ToDictionary(x => roles[x.Attribute("Name").Value]);
 
             Table table = Schema.Current.Table(typeof(RuleTypeEntity));
@@ -376,11 +376,11 @@ namespace Signum.Entities.Authorization
                         Role = role,
                         Allowed = kvp.Value.Allowed,
                         Conditions = kvp.Value.Condition
-                    }, comment: Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple).TryDo(p => p.GoBefore = true);
+                    }, comment: Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true);
 
                     return restSql;
                 },
-                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple).TryDo(p => p.GoBefore = true),
+                (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true),
                 (role, x, list) =>
                 {
                     var dic = (from xr in x.Elements("Type")
@@ -410,7 +410,7 @@ namespace Signum.Entities.Authorization
 
                             return table.UpdateSqlSync(pr, comment: Comment(role, r, oldA, pr.Allowed));
                         },
-                        Spacing.Simple).TryDo(p => p.GoBefore = true);
+                        Spacing.Simple)?.Do(p => p.GoBefore = true);
 
                     return restSql;
                 }, Spacing.Double);

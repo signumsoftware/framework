@@ -97,7 +97,7 @@ namespace ASP
         li.Instance.Id.ToString() == filter ||
         li.Route.PropertyString().Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
         master.GetOrThrow(li).Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
-        cultures.Any(ci => Model.TryGetC(ci).TryGetC(li).Try(t => t.TranslatedText).DefaultText("").Contains(filter, StringComparison.InvariantCultureIgnoreCase));
+        cultures.Any(ci => (Model.TryGetC(ci).TryGetC(li)?.TranslatedText).DefaultText("").Contains(filter, StringComparison.InvariantCultureIgnoreCase));
 
             
             #line default
@@ -533,7 +533,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 125 "..\..\Translation\Views\ViewInstance.cshtml"
-                                       Write(Html.TextArea(formName, trans.Try(t => t.TranslatedText), new { style = "width:90%;" }));
+                                       Write(Html.TextArea(formName, trans?.TranslatedText, new { style = "width:90%;" }));
 
             
             #line default

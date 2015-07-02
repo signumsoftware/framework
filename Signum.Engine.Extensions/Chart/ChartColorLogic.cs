@@ -124,7 +124,7 @@ namespace Signum.Engine.Chart
                 Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
                 {
                     Related = (Lite<Entity>)l,
-                    Color = dic.TryGetS(l.Id).Try(c => new ColorEntity { Argb = c.ToArgb() })
+                    Color = dic.TryGetS(l.Id)?.Let(c => new ColorEntity { Argb = c.ToArgb() })
                 }).ToMList()
             };
         }

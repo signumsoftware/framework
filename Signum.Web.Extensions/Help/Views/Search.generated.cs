@@ -259,7 +259,7 @@ WriteLiteral(">");
 
             
             #line 45 "..\..\Help\Views\Search.cshtml"
-                              Write(first.Type.Try(t => t.NiceName()) ?? first.ObjectName);
+                              Write(first.Type?.NiceName() ?? first.ObjectName);
 
             
             #line default

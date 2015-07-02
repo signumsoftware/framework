@@ -438,7 +438,7 @@ namespace Signum.Engine.Translation
                 Culture = culture,
                 Key = new LocalizedInstanceKey(PropertyRoute.Parse(type, cellValues[1]),
                     Lite.Parse<Entity>(cellValues[0]),
-                    cellValues[2].DefaultText(null).Try(s => PrimaryKey.Parse(s, type))),
+                    cellValues[2].DefaultText(null)?.Let(s => PrimaryKey.Parse(s, type))),
                 OriginalText = cellValues[3],
                 TranslatedText = cellValues[4]
             });
@@ -468,7 +468,7 @@ namespace Signum.Engine.Translation
 
                 var result = (from rc in routeConflicts
                               from c in cultures
-                              let str = c.Equals(TranslatedInstanceLogic.DefaultCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).Try(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
+                              let str = c.Equals(TranslatedInstanceLogic.DefaultCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key)?.Let(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
                               where str.HasText()
                               let old = c.Equals(TranslatedInstanceLogic.DefaultCulture) ? target.TryGetC(rc.Key) : null
                               select new
@@ -478,8 +478,8 @@ namespace Signum.Engine.Translation
                                   Culture = c,
                                   Conflict = new PropertyRouteConflict
                                   {
-                                      OldOriginal = old.Try(o => o.OriginalText),
-                                      OldTranslation = old.Try(o => o.TranslatedText),
+                                      OldOriginal = old?.OriginalText,
+                                      OldTranslation = old?.TranslatedText,
 
                                       Original = str,
                                       AutomaticTranslation = null

@@ -78,12 +78,12 @@ namespace Signum.Engine.Word
 
                             if (start.Interval.Min < interval.Min)
                             {
-                                Run firstRunPart = new Run { RunProperties = startRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
+                                Run firstRunPart = new Run { RunProperties = startRun.RunProperties?.Let(r => (RunProperties)r.CloneNode(true)) };
                                 firstRunPart.AppendChild(new Text { Text = start.Text.Substring(0, m.Index - start.Interval.Min), Space = SpaceProcessingModeValues.Preserve });
                                 par.Append(firstRunPart);
                             }
 
-                            par.Append(new MatchNode(m) { RunProperties = startRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) });
+                            par.Append(new MatchNode(m) { RunProperties = startRun.RunProperties?.Let(r => (RunProperties)r.CloneNode(true)) });
 
                             ElementInfo end = start;
                             while (end.Interval.Max < interval.Max) //Ignore
@@ -94,7 +94,7 @@ namespace Signum.Engine.Word
                                 Run endRun = (Run)end.Element;
 
                                 var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
-                                Run endRunPart = new Run { RunProperties = endRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
+                                Run endRunPart = new Run { RunProperties = endRun.RunProperties?.Let(r => (RunProperties)r.CloneNode(true)) };
                                 endRunPart.AppendChild(new Text { Text = textPart, Space = SpaceProcessingModeValues.Preserve });
 
                                 stack.Push(new ElementInfo
@@ -146,7 +146,7 @@ namespace Signum.Engine.Word
 
         private static string GetText(Run r)
         {
-            return r.ChildElements.OfType<Text>().SingleOrDefault().Try(t => t.Text) ?? "";
+            return r.ChildElements.OfType<Text>().SingleOrDefault()?.Text ?? "";
         }
 
         Stack<BlockContainerNode> stack = new Stack<BlockContainerNode>();
@@ -180,7 +180,7 @@ namespace Signum.Engine.Word
 
                                 matchNode.Parent.ReplaceChild(new TokenNode(vp, format)
                                 {
-                                    RunProperties = matchNode.RunProperties.TryDo(d => d.Remove()) 
+                                    RunProperties = matchNode.RunProperties?.Do(d => d.Remove()) 
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -192,7 +192,7 @@ namespace Signum.Engine.Word
 
                                 matchNode.Parent.ReplaceChild(new DeclareNode(vp, this.AddError)
                                 {
-                                    RunProperties = matchNode.RunProperties.TryDo(d => d.Remove()) 
+                                    RunProperties = matchNode.RunProperties?.Do(d => d.Remove()) 
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -318,7 +318,7 @@ namespace Signum.Engine.Word
             BlockContainerNode n = stack.Pop();
             if (n == null || !(n is T))
             {
-                AddError(true, "Unexpected '{0}'".FormatWith(BlockContainerNode.UserString(n.Try(p => p.GetType()))));
+                AddError(true, "Unexpected '{0}'".FormatWith(BlockContainerNode.UserString(n?.GetType())));
                 return null;
             }
 
@@ -337,7 +337,7 @@ namespace Signum.Engine.Word
             BlockContainerNode n = stack.Peek();
             if (n == null || !(n is T))
             {
-                AddError(true, "Unexpected '{0}'".FormatWith(BlockContainerNode.UserString(n.Try(p => p.GetType()))));
+                AddError(true, "Unexpected '{0}'".FormatWith(BlockContainerNode.UserString(n?.GetType())));
                 return null;
             }
 

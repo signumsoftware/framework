@@ -131,7 +131,7 @@ namespace Signum.Web.Isolation
             {
                 var model = ((ViewResult)filterContext.Result).Model;
 
-                Entity entity = (model as TypeContext).Try(tc => tc.UntypedValue as Entity) ?? model as Entity;
+                Entity entity = (model as TypeContext)?.Let(tc => tc.UntypedValue as Entity) ?? model as Entity;
 
                 if (entity != null)
                     viewData[Key] = IsolationEntity.Override(entity.TryIsolation());

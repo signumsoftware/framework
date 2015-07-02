@@ -116,14 +116,14 @@ namespace Signum.Engine.Word
                 obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
                 obj.TryToString();
 
-            this.ReplaceBy(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(text)));
+            this.ReplaceBy(new Run(this.RunProperties?.Do(prop => prop.Remove()), new Text(text)));
         }
 
         protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
         {
             var str = "@" + this.ValueProvider.ToString(variables, Format.HasText() ? (":" + Format) : null);
 
-            this.ReplaceBy(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(str)));
+            this.ReplaceBy(new Run(this.RunProperties?.Do(prop => prop.Remove()), new Text(str)));
         }
 
         public override void WriteTo(System.Xml.XmlWriter xmlWriter)
@@ -196,7 +196,7 @@ namespace Signum.Engine.Word
         {
             string str = "@declare" + ValueProvider.ToString(variables, null);
 
-            this.ReplaceBy(new Run(this.RunProperties.TryDo(prop => prop.Remove()), new Text(str)));
+            this.ReplaceBy(new Run(this.RunProperties?.Do(prop => prop.Remove()), new Text(str)));
 
             ValueProvider.Declare(variables);
         }
@@ -380,7 +380,7 @@ namespace Signum.Engine.Word
             this.ValueProvider = original.ValueProvider;
             this.ForeachToken = original.ForeachToken.CloneNode();
             this.EndForeachToken = original.EndForeachToken.CloneNode();
-            this.ForeachBlock = (BlockNode)original.ForeachBlock.Try(a => a.CloneNode(true));
+            this.ForeachBlock = (BlockNode)original.ForeachBlock?.Let(a => a.CloneNode(true));
         }
 
         public override void FillTokens(List<QueryToken> tokens)
@@ -497,7 +497,7 @@ namespace Signum.Engine.Word
 
         internal OpenXmlElement ReplaceMatchNode(string text)
         {
-            var run = new Run(this.MatchNode.RunProperties.TryDo(prop => prop.Remove()), new Text(text));
+            var run = new Run(this.MatchNode.RunProperties?.Do(prop => prop.Remove()), new Text(text));
             if (this.MatchNode == AscendantNode)
                 return run;
 
@@ -549,8 +549,8 @@ namespace Signum.Engine.Word
             this.NotAnyToken = original.NotAnyToken.CloneNode();
             this.EndAnyToken = original.EndAnyToken.CloneNode();
 
-            this.AnyBlock = (BlockNode)original.AnyBlock.Try(a => a.CloneNode(true));
-            this.NotAnyBlock = (BlockNode)original.NotAnyBlock.Try(a => a.CloneNode(true));
+            this.AnyBlock = (BlockNode)original.AnyBlock?.Let(a => a.CloneNode(true));
+            this.NotAnyBlock = (BlockNode)original.NotAnyBlock?.Let(a => a.CloneNode(true));
         }
 
         public override OpenXmlElement CloneNode(bool deep)
@@ -730,8 +730,8 @@ namespace Signum.Engine.Word
             this.ElseToken = original.ElseToken.CloneNode();
             this.EndIfToken = original.EndIfToken.CloneNode();
 
-            this.IfBlock = (BlockNode)original.IfBlock.Try(a => a.CloneNode(true));
-            this.ElseBlock = (BlockNode)original.ElseBlock.Try(a => a.CloneNode(true));
+            this.IfBlock = (BlockNode)original.IfBlock?.Let(a => a.CloneNode(true));
+            this.ElseBlock = (BlockNode)original.ElseBlock?.Let(a => a.CloneNode(true));
         }
 
         public override OpenXmlElement CloneNode(bool deep)

@@ -81,7 +81,7 @@ namespace Signum.Entities.Chart
             if (this.ScriptParameter.ColumnIndex == null)
                 return null;
 
-            return this.ParentChart.Columns[this.ScriptParameter.ColumnIndex.Value].Token.Try(t => t.Token);
+            return this.ParentChart.Columns[this.ScriptParameter.ColumnIndex.Value].Token?.Token;
         }
     }
 }

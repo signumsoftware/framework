@@ -83,7 +83,7 @@ namespace Signum.Engine.Help
 
             var clean = @namespace.Replace(".Entities", "");
 
-            Title = entity.Try(a => a.Title.DefaultText(null)) ?? clean.TryAfterLast('.') ?? clean;
+            Title = entity?.Let(a => a.Title.DefaultText(null)) ?? clean.TryAfterLast('.') ?? clean;
 
             Before = clean.TryBeforeLast('.');
 

@@ -105,7 +105,7 @@ namespace Signum.Engine.Translation
 
                 var culture = fileName.After(assemblyName + ".").Before(".xml");
 
-                var locAssem = LocalizedAssembly.FromXml(assembly, CultureInfo.GetCultureInfo(culture), doc, replacements.Try(r => r.Inverse()));
+                var locAssem = LocalizedAssembly.FromXml(assembly, CultureInfo.GetCultureInfo(culture), doc, replacements?.Inverse());
 
                 locAssem.ToXml().Save(fileName);
             }

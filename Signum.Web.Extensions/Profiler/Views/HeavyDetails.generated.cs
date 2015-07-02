@@ -243,7 +243,7 @@ WriteLiteral(">");
 
             
             #line 69 "..\..\Profiler\Views\HeavyDetails.cshtml"
-                                                  Write(frame.GetMethod().DeclaringType.Try(t => t.TypeName()));
+                                                  Write(frame.GetMethod().DeclaringType?.TypeName());
 
             
             #line default

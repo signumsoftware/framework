@@ -174,7 +174,7 @@ namespace Signum.Engine.Templating
                     if (!(provToken is TokenValueProvider))
                         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not a Query Token");
 
-                    var part = provToken.Try(a => a.ParsedToken); 
+                    var part = provToken?.ParsedToken; 
 
                     if (part != null && part.QueryToken == null)
                         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not fixed yet! currently: '{1}'".FormatWith(v, part.String));

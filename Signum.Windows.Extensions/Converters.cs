@@ -57,7 +57,7 @@ namespace Signum.Windows.Extensions
             (object d) => d == null ? null : Brushes.Pink);
 
         public static readonly IValueConverter TokenToEntity = ConverterFactory.New(
-            (QueryTokenEntity qt) => qt.Try(t => t.TryToken),
+            (QueryTokenEntity qt) => qt?.TryToken,
             (QueryToken t) => new QueryTokenEntity(t));
 
 

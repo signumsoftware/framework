@@ -135,7 +135,7 @@ namespace Signum.Entities.UserQueries
             if (pi.Is(() => ElementsPerPage))
             {
                 if (ElementsPerPage != null && !ShouldHaveElements)
-                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.Try(pm=>pm.NiceToString()) ?? "" );
+                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode?.Let(pm=>pm.NiceToString()) ?? "" );
 
                 if (ElementsPerPage == null && ShouldHaveElements)
                     return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
@@ -192,15 +192,15 @@ namespace Signum.Entities.UserQueries
         {
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             DisplayName = element.Attribute("DisplayName").Value;
-            EntityType = element.Attribute("EntityType").Try(a => ctx.GetType(a.Value));
-            Owner = element.Attribute("Owner").Try(a => Lite.Parse(a.Value));
-            WithoutFilters = element.Attribute("WithoutFilters").Try(a => a.Value == true.ToString()) ?? false;
-            ElementsPerPage = element.Attribute("ElementsPerPage").Try(a => int.Parse(a.Value));
-            PaginationMode = element.Attribute("PaginationMode").Try(a => a.Value.ToEnum<PaginationMode>());
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
+            WithoutFilters = element.Attribute("WithoutFilters")?.Let(a => a.Value == true.ToString()) ?? false;
+            ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
+            PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
             ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
-            Filters.Syncronize(element.Element("Filters").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
-            Columns.Syncronize(element.Element("Columns").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x)=>c.FromXml(x, ctx));
-            Orders.Syncronize(element.Element("Orders").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
+            Filters.Syncronize(element.Element("Filters")?.Elements().EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
+            Columns.Syncronize(element.Element("Columns")?.Elements().EmptyIfNull().ToList(), (c, x)=>c.FromXml(x, ctx));
+            Orders.Syncronize(element.Element("Orders")?.Elements().EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
         }
 
@@ -311,7 +311,7 @@ namespace Signum.Entities.UserQueries
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
             Token = new QueryTokenEntity(element.Attribute("Token").Value);
-            DisplayName = element.Attribute("DisplayName").Try(a => a.Value);
+            DisplayName = element.Attribute("DisplayName")?.Value;
         }
 
         public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)

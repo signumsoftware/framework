@@ -85,12 +85,12 @@ namespace Signum.Engine.Isolation
 
         static IDisposable SchedulerLogic_ApplySession(ITaskEntity task, ScheduledTaskEntity scheduled, IUserEntity user)
         {
-            return IsolationEntity.Override(scheduled.Try(s => s.TryIsolation()) ?? task.Try(t => t.TryIsolation()) ?? user.Try(u => u.TryIsolation()));
+            return IsolationEntity.Override(scheduled?.TryIsolation() ?? task?.TryIsolation() ?? user?.TryIsolation());
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
         {
-            return IsolationEntity.Override(entity.Try(e => e.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationEntity>>());
+            return IsolationEntity.Override(entity?.TryIsolation() ?? args.TryGetArgC<Lite<IsolationEntity>>());
         }
 
         static void EntityEventsGlobal_PreSaving(Entity ident, ref bool graphModified)

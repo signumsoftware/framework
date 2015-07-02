@@ -244,7 +244,7 @@ namespace Signum.Engine.Templating
 
         public override Type Type
         {
-            get { return ParsedToken.QueryToken.Try(t => t.Type); }
+            get { return ParsedToken.QueryToken?.Type; }
         }
 
         public override IEnumerable<object> GetFilteredRows(TemplateParameters p, FilterOperation? operation, string stringValue)
@@ -500,7 +500,7 @@ namespace Signum.Engine.Templating
 
         public override Type Type
         {
-            get { return Members.Try(ms => ms.Last().ReturningType().Nullify()); }
+            get { return Members?.Let(ms => ms.Last().ReturningType().Nullify()); }
         }
 
         public override void FillQueryTokens(List<QueryToken> list)
@@ -597,7 +597,7 @@ namespace Signum.Engine.Templating
             get
             {
                 return Members == null ?
-                    GlobalVariables.TryGetC(globalKey).Try(v => v.Format) ?? Reflector.FormatString(Type) :
+                    GlobalVariables.TryGetC(globalKey)?.Format ?? Reflector.FormatString(Type) :
                     Reflector.FormatString(Type);
             }
         }
@@ -607,9 +607,9 @@ namespace Signum.Engine.Templating
             get
             {
                 if (remainingFieldsOrProperties.HasText())
-                    return Members.Try(ms => ms.Last().ReturningType().Nullify());
+                    return Members?.Let(ms => ms.Last().ReturningType().Nullify());
                 else
-                    return GlobalVariables.TryGetC(globalKey).Try(v => v.Type);
+                    return GlobalVariables.TryGetC(globalKey)?.Type;
             }
         }
 
