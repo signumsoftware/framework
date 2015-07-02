@@ -165,19 +165,6 @@ namespace Signum.Web
                     tce.Route.Add(piEntity), obj);
             }
 
-            if (m.Method.DeclaringType == typeof(Extensions) && m.Method.Name == "Try")
-            {
-                var tce = Cast(Visit(m.Arguments[0]));
-                var lambda = (LambdaExpression)m.Arguments[1];
-
-                if (tce.Value == null)
-                    tce = new TypeContextExpression(tce.Properties, tce.Type, tce.Route, NonValue); 
-
-                replacements.Add(lambda.Parameters[0], tce);
-
-                return Cast(Visit(lambda.Body));
-            }
-
             if (m.Method.IsInstantiationOf(MixinDeclarations.miMixin))
             {
                 var tce = Cast(Visit(m.Object));

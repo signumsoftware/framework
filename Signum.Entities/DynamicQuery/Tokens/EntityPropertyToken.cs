@@ -100,7 +100,7 @@ namespace Signum.Entities.DynamicQuery
                 if (route != null)
                 {
                     var att = Validator.TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name)?.Validators
-                        .OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx());
+                        .OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
                     if (att != null)
                     {
                         return StepTokens(this, att.DecimalPlaces);
