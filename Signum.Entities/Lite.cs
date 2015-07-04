@@ -360,9 +360,6 @@ namespace Signum.Entities
         public static Lite<T> ToLite<T>(this T entity)
           where T : class, IEntity
         {
-            if (entity == null)
-                return null;
-
             if (entity.IsNew)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
@@ -372,9 +369,6 @@ namespace Signum.Entities
         public static Lite<T> ToLite<T>(this T entity, string toStr)
             where T : class, IEntity
         {
-            if (entity == null)
-                return null;
-
             if (entity.IsNew)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
@@ -384,18 +378,12 @@ namespace Signum.Entities
         public static Lite<T> ToLiteFat<T>(this T entity)
          where T : class, IEntity
         {
-            if (entity == null)
-                return null;
-
             return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((Entity)(IEntity)entity, entity.ToString());
         }
 
         public static Lite<T> ToLiteFat<T>(this T entity, string toStr)
           where T : class, IEntity
         {
-            if (entity == null)
-                return null;
-
             return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((Entity)(IEntity)entity, toStr ?? entity.ToString());
         }
 

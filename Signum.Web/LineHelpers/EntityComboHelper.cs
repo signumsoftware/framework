@@ -94,7 +94,7 @@ namespace Signum.Web
             if (entityCombo.SortElements)
                 data = data.OrderBy(a => a.ToString()).ToList();
 
-            var current = entityCombo.UntypedValue is IEntity ? ((IEntity)entityCombo.UntypedValue).ToLite() :
+            var current = entityCombo.UntypedValue is IEntity ? ((IEntity)entityCombo.UntypedValue)?.ToLite() :
                 entityCombo.UntypedValue as Lite<IEntity>;
 
             if (current != null && !data.Contains(current))

@@ -69,7 +69,7 @@ namespace Signum.Windows
         {
             if (e.Refresh)
             {
-                var lite = (Entity as IEntity).ToLite();
+                var lite = (Entity as IEntity)?.ToLite();
 
                 if (lite != null)
                 {

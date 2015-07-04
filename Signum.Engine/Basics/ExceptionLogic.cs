@@ -92,7 +92,7 @@ namespace Signum.Engine.Basics
             entity.Environment = CurrentEnvironment;
             try
             {
-                entity.User = UserHolder.Current.ToLite(); //Session special situations
+                entity.User = UserHolder.Current?.ToLite(); //Session special situations
             }
             catch { }
 

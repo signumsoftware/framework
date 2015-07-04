@@ -52,7 +52,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current.ToLite()
+                        User = UserHolder.Current?.ToLite()
                     };
 
                     try
@@ -199,7 +199,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current.ToLite(),
+                        User = UserHolder.Current?.ToLite(),
                         Origin = origin.ToLiteFat(),
                     };
 
@@ -317,7 +317,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current.ToLite()
+                        User = UserHolder.Current?.ToLite()
                     };
 
                     try
@@ -468,7 +468,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current.ToLite()
+                        User = UserHolder.Current?.ToLite()
                     };
 
                     try
@@ -609,7 +609,7 @@ namespace Signum.Engine.Operations
                     {
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
-                        User = UserHolder.Current.ToLite()
+                        User = UserHolder.Current?.ToLite()
                     };
 
                     using (OperationLogic.AllowSave(entity.GetType()))
