@@ -228,7 +228,7 @@ namespace Signum.Engine
                     {
                         var columnReplacements = replacements.TryGetC(Replacements.KeyColumnsForTable(tn));
 
-                        Func<IColumn, bool> isNew = c => !dif.Columns.ContainsKey(columnReplacements.TryGetC(c.Name) ?? c.Name);
+                        Func<IColumn, bool> isNew = c => !dif.Columns.ContainsKey(columnReplacements?.TryGetC(c.Name) ?? c.Name);
 
                         Dictionary<string, Index> modelIxs = modelIndices[tab];
 

@@ -453,7 +453,7 @@ namespace Signum.Utilities
             result.Types = (from t in assembly.GetTypes()
                             let opts = GetDescriptionOptions(t)
                             where opts != DescriptionOptions.None
-                            let x = file.TryGetC(replacements.TryGetC(t.Name) ?? t.Name)
+                            let x = file?.TryGetC(replacements?.TryGetC(t.Name) ?? t.Name)
                             select LocalizedType.ImportXml(t, opts, result, x))
                             .ToDictionary(lt => lt.Type);
 
@@ -554,7 +554,7 @@ namespace Signum.Utilities
                 Members = !opts.IsSetAssert(DescriptionOptions.Members, type) ? null :
                           (from m in GetMembers(type)
                            where DescriptionManager.OnShouldLocalizeMember(m)
-                           let value = xMembers.TryGetC(m.Name) ?? (!assembly.IsDefault ? null : DescriptionManager.DefaultMemberDescription(m))
+                           let value = xMembers?.TryGetC(m.Name) ?? (!assembly.IsDefault ? null : DescriptionManager.DefaultMemberDescription(m))
                            where value != null
                            select KVP.Create(m.Name, value))
                            .ToDictionary()

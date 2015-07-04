@@ -164,7 +164,7 @@ namespace Signum.Web.PortableAreas
                     .Select(del => del(ctx)).NotNull());
             }
 
-            var afc = actions.TryGetC(actionDescription.ActionName);
+            var afc = actions?.TryGetC(actionDescription.ActionName);
             if (afc != null)
                 afc.Configure(filterInfo, controllerContext, actionDescription);
         }

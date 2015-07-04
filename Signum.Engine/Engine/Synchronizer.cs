@@ -178,7 +178,7 @@ namespace Signum.Engine
         {
             Dictionary<string, string> repDic = this.TryGetC(replacementsKey);
 
-            return repDic.TryGetC(textToReplace) ?? textToReplace;
+            return repDic?.TryGetC(textToReplace) ?? textToReplace;
         }
 
         public virtual Dictionary<string, O> ApplyReplacementsToOld<O>(Dictionary<string, O> oldDictionary, string replacementsKey)

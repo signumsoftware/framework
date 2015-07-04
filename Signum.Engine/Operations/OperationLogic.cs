@@ -535,7 +535,7 @@ namespace Signum.Engine.Operations
 
         public static IOperation FindOperation(Type type, OperationSymbol operationSymbol)
         {
-            IOperation result = operations.TryGetValue(type).TryGetC(operationSymbol);
+            IOperation result = operations.TryGetValue(type)?.TryGetC(operationSymbol);
             if (result == null)
                 throw new InvalidOperationException("Operation '{0}' not found for type {1}".FormatWith(operationSymbol, type));
             return result;
@@ -659,7 +659,7 @@ namespace Signum.Engine.Operations
 
         public static bool IsDefined(Type type, OperationSymbol operation)
         {
-            return operations.TryGetValue(type).TryGetC(operation) != null;
+            return operations.TryGetValue(type)?.TryGetC(operation) != null;
         }
 
         public static OperationType OperationType(Type type, OperationSymbol operationSymbol)

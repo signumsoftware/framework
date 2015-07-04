@@ -78,12 +78,12 @@ namespace Signum.Windows.Operations
 
         public static ImageSource GetImage(Type type, OperationSymbol operation)
         {
-            return Manager.GetImage(operation, Manager.Settings.TryGetValue(type).TryGetC(operation));
+            return Manager.GetImage(operation, Manager.Settings.TryGetValue(type)?.TryGetC(operation));
         }
 
         public static string GetText(Type type, OperationSymbol operation)
         {
-            return Manager.GetText(operation, Manager.Settings.TryGetValue(type).TryGetC(operation));
+            return Manager.GetText(operation, Manager.Settings.TryGetValue(type)?.TryGetC(operation));
         }
 
         public static void AddSetting(OperationSettings setting)
@@ -139,7 +139,7 @@ namespace Signum.Windows.Operations
         public OS GetSettings<OS>(Type type, OperationSymbol operation)
             where OS : OperationSettings
         {
-            OperationSettings settings = Settings.TryGetValue(type).TryGetC(operation);
+            OperationSettings settings = Settings.TryGetValue(type)?.TryGetC(operation);
 
             if (settings != null)
             {

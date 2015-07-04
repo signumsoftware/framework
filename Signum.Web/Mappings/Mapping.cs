@@ -375,7 +375,7 @@ namespace Signum.Web
                 return (R)(object)ctx.None(ValidationMessage.Type0NotAllowed.NiceToString().FormatWith(typeof(R)));
             }
 
-            Mapping<R> mapping = (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
+            Mapping<R> mapping = (Mapping<R>)(AllowedMappings?.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
             SubContext<R> sc = new SubContext<R>(ctx.Prefix, null, route, ctx) { Value = ctx.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
             sc.Value = mapping(sc);
             ctx.SupressChange = sc.SupressChange;

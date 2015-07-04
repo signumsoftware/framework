@@ -98,7 +98,7 @@ namespace Signum.Engine
             if (retrieved.TryGetValue(tuple, out ident))
                 return (T)ident;
 
-            ident = (T)requests.TryGetC(typeof(T)).TryGetC(id.Value);
+            ident = (T)requests?.TryGetC(typeof(T))?.TryGetC(id.Value);
             if (ident != null)
                 return (T)ident;
 
