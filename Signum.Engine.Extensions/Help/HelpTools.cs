@@ -43,7 +43,7 @@ namespace Signum.Engine.Help
             {
                 var key = kvp.Value.Attribute(elementKeyAttribute).Value;
 
-                var newKey = reps.TryGetC(key);
+                var newKey = reps?.TryGetC(key);
 
                 if (newKey != null)
                 {

@@ -66,7 +66,7 @@ namespace Signum.Web.Processes
             }
         }
 
-        public static Dictionary<OperationSymbol, ContextualOperationSettingsBase> ProcessContextualOperartions;
+        public static Dictionary<OperationSymbol, ContextualOperationSettingsBase> ProcessContextualOperartions = new Dictionary<OperationSymbol, ContextualOperationSettingsBase>();
 
         public static void Register<T>(this IEntityOperationSymbolContainer<T> entityOperation, ContextualOperationSettings<T> settings) where T : class, IEntity
         {

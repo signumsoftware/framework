@@ -145,7 +145,7 @@ namespace Signum.Engine.Basics
 
         public static bool IsDefined(Type type, TypeConditionSymbol typeCondition)
         {
-            return infos.TryGetC(type).TryGetC(typeCondition) != null;
+            return infos.TryGetC(type)?.TryGetC(typeCondition) != null;
         }
     }
 }

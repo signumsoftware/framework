@@ -67,9 +67,9 @@ namespace Signum.Web.Translation
                                      select KVP.Create(g.Key, only))
                                      .ToDictionary();
 
-            var dic = list.Distinct().ToDictionary(l=>l, l=>alreadyTranslated.TryGetC(l));
- 
-            if(dic.Any(kvp=>kvp.Value == null))
+            var dic = list.Distinct().ToDictionary(l => l, l => alreadyTranslated.TryGetC(l));
+
+            if (dic.Any(kvp => kvp.Value == null))
             {
                 var subList = dic.Where(kvp => kvp.Value == null).Select(kvp => kvp.Key).ToList();
 
@@ -94,22 +94,20 @@ namespace Signum.Web.Translation
 
         private IEnumerable<KeyValuePair<string, string>> GetAllTranslations(LocalizedType from, LocalizedType to)
         {
-            if(from.Description.HasText() && to.Description.HasText())
+            if (from.Description.HasText() && to.Description.HasText())
                 yield return KVP.Create(from.Description, to.Description);
 
-            if(from.PluralDescription.HasText() && to.PluralDescription.HasText())
+            if (from.PluralDescription.HasText() && to.PluralDescription.HasText())
                 yield return KVP.Create(from.PluralDescription, to.PluralDescription);
 
             foreach (var item in from.Members)
-	        {
+            {
                 var toMember = to.Members.TryGetC(item.Key);
 
-                if(toMember.HasText())
+                if (toMember.HasText())
                     yield return KVP.Create(item.Value, toMember);
-	        }
+            }
         }
-
-        
 
         public bool AutoSelect()
         {

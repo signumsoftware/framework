@@ -27,7 +27,7 @@ namespace Signum.Web.Translation.Controllers
         {
             var cultures = TranslationLogic.CurrentCultureInfos(CultureInfo.GetCultureInfo("en"));
 
-            var assemblies = AssembliesToLocalize().ToDictionary(a=>a.FullName);
+            var assemblies = AssembliesToLocalize().ToDictionary(a => a.FullName);
 
             var dg = DirectedGraph<Assembly>.Generate(assemblies.Values, a => a.GetReferencedAssemblies().Select(an => assemblies.TryGetC(an.FullName)).NotNull());
 

@@ -334,7 +334,7 @@ namespace Signum.Engine.Translation
 
             var key = new LocalizedInstanceKey(route, lite, rowId);
 
-            var result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture).TryGetC(key);
+            var result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture)?.TryGetC(key);
 
             if (result != null)
                 return result;

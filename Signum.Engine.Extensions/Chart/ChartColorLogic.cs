@@ -131,7 +131,7 @@ namespace Signum.Engine.Chart
 
         public static Color? ColorFor(Type type, PrimaryKey id)
         {
-            return Colors.Value.TryGetC(type).TryGetS(id);
+            return Colors.Value.TryGetC(type)?.TryGetS(id);
         }
 
         public static Color? ColorFor(Lite<Entity> lite)
