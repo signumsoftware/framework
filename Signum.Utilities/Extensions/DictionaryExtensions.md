@@ -61,15 +61,6 @@ int? blueSatellites = colorToSatelitesSum.TryGetS("Blue");
 //Return: 41
 ```
 
-**Note**: TryGet returns null even if used over a null Dictionary, to simplify data-structures with nested dictionaries. 
-
-```C#
-Dictionary<Type, Dictionary<string, PropertyInfo>> propertyCache = types.ToDictionary(t=>t, t=>t.GetProperties().ToDictionary(p=>p.PropertyName)); 
-
-PropertyInfo pi = propertyCache.TryGetC(typeof(AnimalEntity)).TryGetC("Color");
-//Returns null even if AnimalEntity is not in the initial dictionary
-```
-
 ### GetOrCreate
 
 When a Dictionary is used for implementing a cache, often the following

@@ -136,7 +136,7 @@ namespace Signum.Engine
 
         public static IDisposable RenameTable(Table table, Replacements replacements)
         {
-            string fullName = replacements.TryGetC(Replacements.KeyTablesInverse).TryGetC(table.Name.ToString());
+            string fullName = replacements.TryGetC(Replacements.KeyTablesInverse)?.TryGetC(table.Name.ToString());
             if (fullName == null)
                 return null;
 
@@ -255,7 +255,7 @@ namespace Signum.Engine
             if (newValues.Contains(oldValue))
                 return oldValue;
 
-            var rep = this.TryGetC(replacementsKey).TryGetC(oldValue);
+            var rep = this.TryGetC(replacementsKey)?.TryGetC(oldValue);
 
             if (rep != null && newValues.Contains(rep))
                 return rep;

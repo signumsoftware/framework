@@ -231,7 +231,7 @@ namespace Signum.Web.Operations
         public OS GetSettings<OS>(Type type, OperationSymbol operation)
             where OS : OperationSettings
         {
-            OperationSettings settings = Settings.TryGetValue(type).TryGetC(operation);
+            OperationSettings settings = Settings.TryGetValue(type)?.TryGetC(operation);
 
             if (settings != null)
             {
