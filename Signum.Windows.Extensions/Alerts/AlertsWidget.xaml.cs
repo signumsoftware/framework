@@ -38,7 +38,7 @@ namespace Signum.Windows.Alerts
             return new AlertEntity
             {
                 Target = entity.ToLite(),
-                CreatedBy = UserHolder.Current.ToLite()
+                CreatedBy = UserHolder.Current?.ToLite()
             };
         }
 

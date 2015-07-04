@@ -53,7 +53,7 @@ namespace Signum.Web.UserQueries
 
             var userQuery = ToUserQuery(request);
 
-            userQuery.Owner = UserEntity.Current.ToLite();
+            userQuery.Owner = UserQueryUtils.DefaultOwner();
 
             return Navigator.NormalPage(this, userQuery);
         }

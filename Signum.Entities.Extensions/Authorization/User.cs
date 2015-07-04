@@ -131,12 +131,12 @@ namespace Signum.Entities.Authorization
             set { UserHolder.Current = value; }
         }
 
-        public static Expression<Func<UserEntity, EmailOwnerData>> EmailOwnerDataExpression = entity => new EmailOwnerData
+        public static Expression<Func<UserEntity, EmailOwnerData>> EmailOwnerDataExpression = u => new EmailOwnerData
         {
-            Owner = entity.ToLite(),
-            CultureInfo = entity.CultureInfo,
-            DisplayName = entity.UserName,
-            Email = entity.Email,
+            Owner = u.ToLite(),
+            CultureInfo = u.CultureInfo,
+            DisplayName = u.UserName,
+            Email = u.Email,
         };
         public EmailOwnerData EmailOwnerData
         {

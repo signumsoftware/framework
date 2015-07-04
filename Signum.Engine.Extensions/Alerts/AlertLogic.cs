@@ -113,7 +113,7 @@ namespace Signum.Engine.Alerts
             var result = new AlertEntity
             {
                 AlertDate = alertDate ?? TimeZoneManager.Now,
-                CreatedBy = user ?? UserHolder.Current.ToLite(),
+                CreatedBy = user ?? UserHolder.Current?.ToLite(),
                 Text = text,
                 Title = title,
                 Target = (Lite<Entity>)entity,

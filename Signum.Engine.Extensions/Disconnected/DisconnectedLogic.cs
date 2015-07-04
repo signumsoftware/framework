@@ -112,7 +112,7 @@ namespace Signum.Engine.Disconnected
         {
             var conflicts = Database.Query<DisconnectedMachineEntity>()
                 .Where(e => e.SeedInterval.Overlap(dm.SeedInterval) && e != dm)
-                .Select(e => new { e.SeedInterval,  Machine = e.ToLite() } )
+                .Select(e => new { e.SeedInterval, Machine = e.ToLite() })
                 .ToList();
 
             conflicts = conflicts.Where(c => c.SeedInterval.Contains(isMin ? dm.SeedMin : dm.SeedMax) ||
@@ -281,12 +281,14 @@ namespace Signum.Engine.Disconnected
 
         public static DisconnectedExportEntity GetDownloadEstimation(Lite<DisconnectedMachineEntity> machine)
         {
-            return Database.Query<DisconnectedExportEntity>().Where(a => a.Total.HasValue).OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
+            return Database.Query<DisconnectedExportEntity>().Where(a => a.Total.HasValue)
+                .OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
         public static DisconnectedImportEntity GetUploadEstimation(Lite<DisconnectedMachineEntity> machine)
         {
-            return Database.Query<DisconnectedImportEntity>().Where(a => a.Total.HasValue).OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
+            return Database.Query<DisconnectedImportEntity>().Where(a => a.Total.HasValue)
+                .OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
         public static Lite<DisconnectedMachineEntity> GetDisconnectedMachine(string machineName)

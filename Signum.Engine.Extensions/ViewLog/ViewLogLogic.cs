@@ -77,7 +77,7 @@ namespace Signum.Engine.ViewLog
             var viewLog = new ViewLogEntity
             {
                 Target = QueryLogic.GetQueryEntity(queryName).ToLite(),
-                User = UserHolder.Current.ToLite(),
+                User = UserHolder.Current?.ToLite(),
                 ViewAction = type.ToString(),
             };
 

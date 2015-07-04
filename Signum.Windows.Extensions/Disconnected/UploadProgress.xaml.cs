@@ -20,6 +20,7 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Threading;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.Disconnected
 {
@@ -100,7 +101,7 @@ namespace Signum.Windows.Disconnected
                         Length = fi.Length,
                         Stream = ps,
                         Machine = DisconnectedMachineEntity.Current,
-                        User = UserEntity.Current.ToLite(),
+                        User = UserHolder.Current.ToLite(),
                     });
 
                     return result.UploadStatistics;

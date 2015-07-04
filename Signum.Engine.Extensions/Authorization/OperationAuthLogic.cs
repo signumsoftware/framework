@@ -113,7 +113,7 @@ namespace Signum.Engine.Authorization
             if (GetTemporallyAllowed(operationKey))
                 return true;
 
-            OperationAllowed allowed =cache.GetAllowed(RoleEntity.Current.ToLite(), operationKey);
+            OperationAllowed allowed = cache.GetAllowed(RoleEntity.Current.ToLite(), operationKey);
 
             return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
         }

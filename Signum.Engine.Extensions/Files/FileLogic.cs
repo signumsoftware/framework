@@ -22,7 +22,7 @@ namespace Signum.Engine.Files
         [ExpressionField("WebImageFileExpression")]
         public static WebImage WebImage(this FileEntity f)
         {
-            return WebImageFileExpression.Evaluate(f);
+            return new WebImage { FullWebPath = DownloadFileUrl(f?.ToLite()) };
         }
 
         static Expression<Func<FileEntity, WebDownload>> WebDownloadFileExpression =
@@ -30,9 +30,8 @@ namespace Signum.Engine.Files
         [ExpressionField("WebDownloadFileExpression")]
         public static WebDownload WebDownload(this FileEntity f)
         {
-            return WebDownloadFileExpression.Evaluate(f);
+            return new WebDownload { FullWebPath = DownloadFileUrl(f?.ToLite()) };
         }
-
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {

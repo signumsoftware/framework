@@ -20,6 +20,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.Authorization;
 using Signum.Engine.Excel;
 using Signum.Entities.UserAssets;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Web.Chart
 {
@@ -269,7 +270,7 @@ namespace Signum.Web.Chart
 
             var userChart = request.ToUserChart();
 
-            userChart.Owner = UserEntity.Current.ToLite();
+            userChart.Owner = UserQueryUtils.DefaultOwner();
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 

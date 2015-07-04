@@ -432,7 +432,7 @@ namespace Signum.Entities.UserQueries
 
     public static class UserQueryUtils
     {
-        public static Func<Lite<Entity>> DefaultRelated = () => UserEntity.Current.ToLite();
+        public static Func<Lite<Entity>> DefaultOwner = () => (Lite<Entity>)UserHolder.Current?.ToLite();
 
         public static UserQueryEntity ToUserQuery(this QueryRequest request, QueryDescription qd, QueryEntity query, Pagination defaultPagination, bool withoutFilters)
         {
@@ -450,7 +450,7 @@ namespace Signum.Entities.UserQueries
             {
                 Query = query,
                 WithoutFilters = withoutFilters,
-                Owner = DefaultRelated(),
+                Owner = DefaultOwner(),
                 Filters = withoutFilters ? new MList<QueryFilterEntity>() : request.Filters.Select(f => new QueryFilterEntity
                 {
                     Token = new QueryTokenEntity(f.Token),

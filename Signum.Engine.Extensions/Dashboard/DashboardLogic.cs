@@ -124,7 +124,8 @@ namespace Signum.Engine.Dashboard
                 Dashboards = sb.GlobalLazy(() => Database.Query<DashboardEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(DashboardEntity)));
 
-                DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
+                DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null)
+                .GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
                     new InvalidateWith(typeof(DashboardEntity)));
             }
         }
@@ -135,7 +136,7 @@ namespace Signum.Engine.Dashboard
             {
                 new Construct(DashboardOperation.Create)
                 {
-                    Construct = (_) => new DashboardEntity { Owner = UserQueryUtils.DefaultRelated() }
+                    Construct = (_) => new DashboardEntity { Owner = UserQueryUtils.DefaultOwner() }
                 }.Register();
 
                 new Execute(DashboardOperation.Save)

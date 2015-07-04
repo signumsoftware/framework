@@ -174,7 +174,7 @@ namespace Signum.Entities.Chart
         {
             var result = new UserChartEntity
             {
-                Owner = UserQueryUtils.DefaultRelated(),
+                Owner = UserQueryUtils.DefaultOwner(),
 
                 QueryName = request.QueryName,
 

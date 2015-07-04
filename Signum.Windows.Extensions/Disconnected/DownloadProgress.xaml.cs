@@ -19,6 +19,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 using System.Threading;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows.Disconnected
 {
@@ -99,7 +100,7 @@ namespace Signum.Windows.Disconnected
         {
             var file = transferServer.EndExportDatabase(new DownloadDatabaseRequests
             {
-                User = UserEntity.Current.ToLite(),
+                User = UserHolder.Current?.ToLite(),
                 DownloadStatistics = currentLite
             });
 
