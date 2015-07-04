@@ -64,7 +64,7 @@ namespace Signum.Web
             var result = new UrlHelper(HttpContext.Current.Request.RequestContext).RouteUrl(id == null ? CreateRouteName : ViewRouteName, new
             {
                 webTypeName = EntitySettings(type).WebTypeName,
-                id = id.TryToString()
+                id = id?.ToString()
             });
 
             return result;

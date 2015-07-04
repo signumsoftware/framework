@@ -91,7 +91,7 @@ namespace Signum.Windows
             ConverterFactory.New((object o) => o != null);
 
         public static readonly IValueConverter ToInt =
-            ConverterFactory.New((int? val) => val.TryToString(), (string str) => str.ToInt());
+            ConverterFactory.New((int? val) => val?.ToString(), (string str) => str.ToInt());
 
         public static readonly IValueConverter BoolToSelectionMode =
             ConverterFactory.New((bool b) => b ? SelectionMode.Extended : SelectionMode.Single);
@@ -117,7 +117,7 @@ namespace Signum.Windows
             });
 
         public static readonly IValueConverter ToStringConverter = ConverterFactory.New(
-            (object d) => d.TryToString());
+            (object d) => d?.ToString());
 
         public static readonly IValueConverter TokenOperations = ConverterFactory.New(
             (QueryToken token) => token == null ? null : QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(token.Type)));

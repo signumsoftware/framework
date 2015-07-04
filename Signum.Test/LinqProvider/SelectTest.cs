@@ -555,23 +555,10 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectTryToString()
-        {
-            var list = Database.Query<AlbumEntity>().Select(a => a.TryToString()).ToList();
-        }
-
-        [TestMethod]
         public void SelectToStringLite()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.ToLite().ToString()).ToList();
         }
-
-        [TestMethod]
-        public void SelectTryToStringLite()
-        {
-            var list = Database.Query<AlbumEntity>().Select(a => a.ToLite().TryToString()).ToList();
-        }
-
 
         [TestMethod]
         public void SelectConditionEnum()

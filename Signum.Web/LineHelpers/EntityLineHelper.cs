@@ -92,14 +92,14 @@ namespace Signum.Web
                            (entityLine.UntypedValue as IEntity)?.Let(i => i.ToLite(i.IsNew));
 
                 result = helper.Href(entityLine.Compose(EntityBaseKeys.Link),
-                        lite.TryToString(),
+                        lite?.ToString(),
                         lite == null || lite.IdOrNull == null ? null : Navigator.NavigateRoute(lite),
                         JavascriptMessage.navigate.NiceToString(), entityLine.ReadOnly ? null:  "form-control  btn-default sf-entity-line-entity", null);
             }
             else
             {
                 result = helper.Span(entityLine.Compose(EntityBaseKeys.Link),
-                        entityLine.UntypedValue.TryToString() ?? " ",
+                        entityLine.UntypedValue?.ToString() ?? " ",
                         entityLine.ReadOnly ? null : "form-control btn-default sf-entity-line-entity");
             }
 

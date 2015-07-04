@@ -119,7 +119,7 @@ namespace Signum.Web
                 var cb = new HtmlTag("input")
                     .Attr("type", "checkbox")
                     .Attr("name", itemTC.Compose(EntityBaseKeys.RuntimeInfo))
-                    .Attr("value", itemTC.RuntimeInfo().TryToString());
+                    .Attr("value", itemTC.RuntimeInfo()?.ToString());
 
                 if(isChecked)
                     cb.Attr("checked", "checked");

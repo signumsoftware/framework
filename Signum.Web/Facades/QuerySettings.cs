@@ -10,6 +10,7 @@ using System.Web.Mvc;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using System.Web.Mvc.Html;
+using System.Globalization;
 
 namespace Signum.Web
 {
@@ -74,24 +75,24 @@ namespace Signum.Web
 
                 new FormatterRule("DateTime", c=>c.Type.UnNullify() == typeof(DateTime), c => new CellFormatter((h,o) => 
                 {
-                    return o != null ? ((DateTime)o).ToUserInterface().TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
+                    return o != null ? ((DateTime)o).ToUserInterface().ToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
                 new FormatterRule("TimeSpan",  c=>c.Type.UnNullify() == typeof(TimeSpan), c => new CellFormatter((h,o) => 
                 {
-                    return o != null ? ((TimeSpan)o).TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
+                    return o != null ? ((TimeSpan)o).ToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
                 new FormatterRule("Number", c=> Reflector.IsNumber(c.Type) && c.Unit == null, c => new CellFormatter((h,o) => 
                 {
-                    return o != null? ((IFormattable)o).TryToString(c.Format).EncodeHtml(): MvcHtmlString.Empty;
+                    return o != null? ((IFormattable)o).ToString(c.Format, CultureInfo.CurrentCulture).EncodeHtml(): MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
                 new FormatterRule("Number with Unit", c=> Reflector.IsNumber(c.Type) && c.Unit.HasText(), c => new CellFormatter((h,o) => 
                 {
                     if (o != null)
                     {
-                        string s = ((IFormattable)o).TryToString(c.Format);
+                        string s = ((IFormattable)o).ToString(c.Format, CultureInfo.CurrentCulture);
                         if (c.Unit.HasText())
                             s += " " + c.Unit;
                         return s.EncodeHtml();
@@ -208,7 +209,7 @@ namespace Signum.Web
             if(!WriteData)
                 return MvcHtmlString.Empty;
 
-            string key = value is Lite<Entity> ? ((Lite<Entity>)value).Key() : value.TryToString();
+            string key = value is Lite<Entity> ? ((Lite<Entity>)value).Key() : value?.ToString();
 
             return MvcHtmlString.Create("data-value=\"" + key + "\"");
         }

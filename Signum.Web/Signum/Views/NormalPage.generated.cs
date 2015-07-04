@@ -81,7 +81,7 @@ WriteLiteral(" class=\"form-horizontal\">\r\n");
             #line 9 "..\..\Signum\Views\NormalPage.cshtml"
          if (string.IsNullOrEmpty(ViewBag.Title))
         {
-            ViewBag.Title = Model.UntypedValue.TryToString();
+            ViewBag.Title = Model.UntypedValue?.ToString();
         }
 
             

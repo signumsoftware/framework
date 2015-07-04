@@ -576,7 +576,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
             if (replacements.SchemaOnly)
                 return null;
 
-            var list = Schema.Current.DatabaseNames().Select(a => a.TryToString()).ToList();
+            var list = Schema.Current.DatabaseNames().Select(a => a?.ToString()).ToList();
 
             if (list.Contains(null))
             {

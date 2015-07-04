@@ -48,7 +48,7 @@ namespace Signum.Web
                 using (sb.SurroundLine(new HtmlTag("div", entityCombo.Compose("inputGroup")).Class("input-group")))
                 {
                     if (entityCombo.ReadOnly)
-                        sb.AddLine(helper.FormControlStatic(entityCombo, entityCombo.Compose(EntityBaseKeys.ToStr), entityCombo.UntypedValue.TryToString()));
+                        sb.AddLine(helper.FormControlStatic(entityCombo, entityCombo.Compose(EntityBaseKeys.ToStr), entityCombo.UntypedValue?.ToString()));
                     else
                         sb.AddLine(DropDownList(helper, entityCombo));
 

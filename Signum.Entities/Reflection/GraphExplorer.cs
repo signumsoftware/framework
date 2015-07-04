@@ -244,7 +244,7 @@ namespace Signum.Entities.Reflection
                new XAttribute("Label", (ie.ToString() ?? "[null]")  + Modified(ie)),
                new XAttribute("TypeName", ie.GetType().TypeName()), 
                new XAttribute("Background", ColorExtensions.ToHtmlColor(ie.GetType().FullName.GetHashCode())),
-               new XAttribute("Description", ie.IdOrNull.TryToString() ?? "New")
+               new XAttribute("Description", ie.IdOrNull?.ToString() ?? "New")
             };
         }
 
@@ -262,7 +262,7 @@ namespace Signum.Entities.Reflection
                new XAttribute("Stroke", ColorExtensions.ToHtmlColor(lite.EntityType.FullName.GetHashCode())),
                new XAttribute("StrokeThickness", "2"),
                new XAttribute("Background", ColorExtensions.ToHtmlColor(lite.EntityType.FullName.GetHashCode()).Replace("#", "#44")),
-               new XAttribute("Description", lite.IdOrNull.TryToString() ?? "New")
+               new XAttribute("Description", lite.IdOrNull?.ToString() ?? "New")
             };
         }
 

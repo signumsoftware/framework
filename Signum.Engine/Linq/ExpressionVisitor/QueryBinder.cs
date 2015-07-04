@@ -1066,8 +1066,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            if(m.Method.Name == "TryToString"  && m.Method.GetParameters().Length == 1 || 
-               m.Method.Name == "ToString" && m.Method.GetParameters().Length == 0)
+            if(m.Method.Name == "ToString" && m.Method.GetParameters().Length == 0)
             {
                 if (source is EntityExpression)
                 {

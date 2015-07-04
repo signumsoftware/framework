@@ -24,7 +24,7 @@ namespace Signum.Entities
             {
                 var od = new DumpVisitor(showIgnoredFields, showByteArrays);
                 od.DumpObject(o);
-                return od.Sb.TryToString();
+                return od.Sb?.ToString();
             }
         }
 
@@ -273,7 +273,7 @@ namespace Signum.Entities
 
             string DumpValue(object item)
             {
-                string value = item.TryToString() ?? "null";
+                string value = item?.ToString() ?? "null";
                 string startDelimiter = null;
                 string endDelimiter = null;
 

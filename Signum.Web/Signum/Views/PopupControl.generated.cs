@@ -217,7 +217,7 @@ WriteLiteral(">");
 
             
             #line 25 "..\..\Signum\Views\PopupControl.cshtml"
-                                              Write(ViewBag.Title ?? Model.UntypedValue.TryToString());
+                                              Write(ViewBag.Title ?? Model.UntypedValue?.ToString());
 
             
             #line default

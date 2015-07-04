@@ -22,7 +22,7 @@
                     </div>
                 }
                 <h4>
-                    <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString()) </span>
+                    <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue?.ToString()) </span>
                     @{
                         var ident = Model.UntypedValue as Entity;
 

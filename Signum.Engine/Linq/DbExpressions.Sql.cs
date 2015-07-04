@@ -516,7 +516,7 @@ namespace Signum.Engine.Linq
    
         public override string ToString()
         {
-            return "{0}\r\n{1}\r\n{2}\r\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition.TryToString());
+            return "{0}\r\n{1}\r\n{2}\r\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition?.ToString());
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -728,7 +728,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return Value.TryToString() ?? "NULL";
+            return Value?.ToString() ?? "NULL";
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)

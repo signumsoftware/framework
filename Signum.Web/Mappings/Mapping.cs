@@ -821,7 +821,7 @@ namespace Signum.Web
                 return lite; // If form does not contains changes to the entity
 
             if (EntityMapping == null)
-                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".FormatWith(lite.TryToString()));
+                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".FormatWith(lite?.ToString()));
 
             var sc = new SubContext<S>(ctx.Prefix, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = lite.Retrieve() };
             sc.Value = EntityMapping(sc);

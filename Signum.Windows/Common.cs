@@ -647,7 +647,7 @@ namespace Signum.Windows
         {
             if (fe.NotSet(AutomationProperties.NameProperty))
             {
-                AutomationProperties.SetName(fe, context.TryToString() ?? "");
+                AutomationProperties.SetName(fe, context?.ToString() ?? "");
             }
         }
 

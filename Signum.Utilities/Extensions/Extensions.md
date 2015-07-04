@@ -164,8 +164,8 @@ public static string TryToString(this object obj, string defaultValue)
 Example:
 
 ```C#
-((int?)null).TryToString(); //Returns null instead of throwing exception
-((int?)null).TryToString("0.00"); //for IFormattable
+((int?)null)?.ToString(); //Returns null instead of throwing exception
+((int?)null)?.ToString("0.00"); //for IFormattable
 ```
 
 

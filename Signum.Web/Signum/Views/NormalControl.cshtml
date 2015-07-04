@@ -13,7 +13,7 @@
 
     @if (string.IsNullOrEmpty(ViewBag.Title))
     {
-        ViewBag.Title = modifiable.TryToString();
+        ViewBag.Title = modifiable?.ToString();
     }
     <span class="sf-entity-title">@(ViewBag.Title)</span>
     <br />

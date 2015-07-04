@@ -106,7 +106,7 @@ WriteLiteral("\r\n\r\n");
             #line 14 "..\..\Signum\Views\NormalControl.cshtml"
      if (string.IsNullOrEmpty(ViewBag.Title))
     {
-        ViewBag.Title = modifiable.TryToString();
+        ViewBag.Title = modifiable?.ToString();
     }
 
             
