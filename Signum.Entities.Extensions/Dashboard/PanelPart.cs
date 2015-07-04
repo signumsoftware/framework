@@ -69,7 +69,7 @@ namespace Signum.Entities.Dashboard
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
+            if (pi.Name == nameof(Title) && string.IsNullOrEmpty(title))
             {
                 if (content != null && content.RequiresTitle)
                     return DashboardMessage.DashboardDN_TitleMustBeSpecifiedFor0.NiceToString().FormatWith(content.GetType().NicePluralName());

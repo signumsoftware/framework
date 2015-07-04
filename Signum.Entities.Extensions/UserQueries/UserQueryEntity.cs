@@ -132,7 +132,7 @@ namespace Signum.Entities.UserQueries
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => ElementsPerPage))
+            if (pi.Name == nameof(ElementsPerPage))
             {
                 if (ElementsPerPage != null && !ShouldHaveElements)
                     return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode?.Let(pm=>pm.NiceToString()) ?? "" );
@@ -141,7 +141,7 @@ namespace Signum.Entities.UserQueries
                     return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
             }
 
-            if (pi.Is(() => Filters) && WithoutFilters && Filters.Any())
+            if (pi.Name == nameof(Filters) && WithoutFilters && Filters.Any())
                 return UserQueryMessage._0ShouldBeEmptyIf1IsSet.NiceToString().FormatWith(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => WithoutFilters).NiceName());
 
             return base.PropertyValidation(pi);
@@ -268,7 +268,7 @@ namespace Signum.Entities.UserQueries
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Token) && token != null && token.Token != null)
+            if (pi.Name == nameof(Token) && token != null && token.Token != null)
             {
                 return QueryUtils.CanOrder(token.Token);
             }
@@ -321,7 +321,7 @@ namespace Signum.Entities.UserQueries
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Token) && token != null && token.Token != null)
+            if (pi.Name == nameof(Token) && token != null && token.Token != null)
             {
                 return QueryUtils.CanColumn(token.Token);
             }
@@ -381,12 +381,12 @@ namespace Signum.Entities.UserQueries
         {
             if (token != null)
             {
-                if (pi.Is(() => Token) && token.Token != null)
+                if (pi.Name == nameof(Token) && token.Token != null)
                 {
                     return QueryUtils.CanFilter(token.Token);
                 }
 
-                if (pi.Is(() => Operation))
+                if (pi.Name == nameof(Operation))
                 {
                     FilterType? filterType = QueryUtils.TryGetFilterType(Token.Token.Type);
 
@@ -397,7 +397,7 @@ namespace Signum.Entities.UserQueries
                         return UserQueryMessage.TheFilterOperation0isNotCompatibleWith1.NiceToString().FormatWith(operation, filterType);
                 }
 
-                if (pi.Is(() => ValueString))
+                if (pi.Name == nameof(ValueString))
                 {
                     object val;
                     return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out val, operation == FilterOperation.IsIn);

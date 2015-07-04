@@ -127,7 +127,7 @@ namespace Signum.Entities.Word
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Template) && Template == null && Active)
+            if (pi.Name == nameof(Template) && Template == null && Active)
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
             return base.PropertyValidation(pi);

@@ -62,7 +62,7 @@ namespace Signum.Entities.Chart
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => ValueDefinition) && ValueDefinition != null)
+            if (pi.Name == nameof(ValueDefinition) && ValueDefinition != null)
             {
                 switch (Type)
                 {

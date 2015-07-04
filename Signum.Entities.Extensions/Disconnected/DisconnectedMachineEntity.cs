@@ -76,7 +76,7 @@ namespace Signum.Entities.Disconnected
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Is(() => SeedMax) && SeedMax <= SeedMin)
+            if (pi.Name == nameof(SeedMax) && SeedMax <= SeedMin)
                 return ValidationMessage._0ShouldBeGreaterThan1.NiceToString(pi, NicePropertyName(() => SeedMin));
 
             return base.PropertyValidation(pi);

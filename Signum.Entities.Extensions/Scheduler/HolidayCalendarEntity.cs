@@ -37,7 +37,7 @@ namespace Signum.Entities.Scheduler
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(()=>Holidays) && holidays != null)
+            if (pi.Name == nameof(Holidays) && holidays != null)
             {
                 string rep = (from h in holidays
                               group 1 by h.Date into g

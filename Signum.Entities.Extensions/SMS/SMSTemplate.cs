@@ -109,13 +109,13 @@ namespace Signum.Entities.SMS
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
+            if (pi.Name == nameof(StartDate) || pi.Name == nameof(EndDate))
             {
                 if (EndDate != null && StartDate >= EndDate)
                     return SMSTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
             }
 
-            if (pi.Is(() => Messages))
+            if (pi.Name == nameof(Messages))
             {
                 if (Messages == null || !Messages.Any())
                     return SMSTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();

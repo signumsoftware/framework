@@ -47,7 +47,7 @@ namespace Signum.Entities.Basics
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Name) && Name.HasText())
+            if (pi.Name == nameof(Name) && Name.HasText())
             {
                 try
                 {

@@ -110,7 +110,7 @@ namespace Signum.Entities.Authorization
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => State))
+            if (pi.Name == nameof(State))
             {
                 if (anulationDate != null && state != UserState.Disabled)
                     return AuthMessage.TheUserStateMustBeDisabled.NiceToString();

@@ -103,7 +103,7 @@ namespace Signum.Entities.Dashboard
             {
                 PanelPartEntity part = (PanelPartEntity)sender;
 
-                if (pi.Is(() => part.StartColumn))
+                if (pi.Name == nameof(part.StartColumn))
                 {
                     if (part.StartColumn + part.Columns > 12)
                         return DashboardMessage.Part0IsTooLarge.NiceToString(part);
@@ -115,7 +115,7 @@ namespace Signum.Entities.Dashboard
                         return DashboardMessage.Part0OverlapsWith1.NiceToString(part, other);
                 }
 
-                if (entityType != null && pi.Is(() => part.Content) && part.Content != null)
+                if (entityType != null && pi.Name == nameof(part.Content) && part.Content != null)
                 {
                     var idents = GraphExplorer.FromRoot((Entity)part.Content).OfType<Entity>();
 
@@ -130,20 +130,6 @@ namespace Signum.Entities.Dashboard
 
             return base.ChildPropertyValidation(sender, pi);
         }
-
-        //protected override string PropertyValidation(PropertyInfo pi)
-        //{
-        //    if (pi.Is(() => Parts) && Parts.Any())
-        //    {
-        //        var rows = Parts.Select(p => p.Row).Distinct().ToList();
-        //        int maxRow = rows.Max();
-        //        var numbers = 0.To(maxRow);
-        //        if (maxRow != rows.Count)
-        //            return DashboardMessage.DashboardDN_Rows0DontHaveAnyParts.NiceToString().FormatWith(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
-        //    }
-
-        //    return base.PropertyValidation(pi);
-        //}
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
@@ -212,7 +198,7 @@ namespace Signum.Entities.Dashboard
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => EmbeddedInEntity))
+            if (pi.Name == nameof(EmbeddedInEntity))
             {
                 if (EmbeddedInEntity == null && EntityType != null)
                     return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());

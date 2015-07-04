@@ -86,7 +86,7 @@ namespace Signum.Entities.UserAssets
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => TokenString) && token == null)
+            if (pi.Name == nameof(TokenString) && token == null)
             {
                 return parseException != null ? parseException.Message : ValidationMessage._0IsNotSet.NiceToString().FormatWith(pi.NiceName());
             }

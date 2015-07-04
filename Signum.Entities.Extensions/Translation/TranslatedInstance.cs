@@ -70,7 +70,7 @@ namespace Signum.Entities.Translation
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => RowId) && PropertyRoute != null)
+            if (pi.Name == nameof(RowId) && PropertyRoute != null)
             {
                 if (RowId == null && PropertyRoute.Path.Contains("/"))
                     return "{0} should be set for route {1}".FormatWith(pi.NiceName(), PropertyRoute);

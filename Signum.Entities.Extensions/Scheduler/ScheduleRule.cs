@@ -45,7 +45,7 @@ namespace Signum.Entities.Scheduler
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => EachMinutes))
+            if (pi.Name == nameof(EachMinutes))
             {
                 if ((60 % EachMinutes) != 0)
                     return SchedulerMessage._0IsNotMultiple1.NiceToString().FormatWith(pi.NiceName(), 60);
@@ -85,7 +85,7 @@ namespace Signum.Entities.Scheduler
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => EachHours))
+            if (pi.Name == nameof(EachHours))
             {
                 if ((24 % EachHours) != 0)
                     return SchedulerMessage._0IsNotMultiple1.NiceToString().FormatWith(pi.NiceName(), 24);

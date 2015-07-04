@@ -77,7 +77,7 @@ namespace Signum.Entities.Help
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Is(() => IsEmpty) && IsEmpty)
+            if (pi.Name == nameof(IsEmpty) && IsEmpty)
                 return "IsEmpty is true";
 
             return base.PropertyValidation(pi);

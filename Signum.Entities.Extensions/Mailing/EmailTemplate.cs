@@ -168,13 +168,13 @@ namespace Signum.Entities.Mailing
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
+            if (pi.Name == nameof(StartDate) || pi.Name == nameof(EndDate))
             {
                 if (EndDate != null && EndDate < StartDate)
                     return EmailTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
             }
 
-            if (pi.Is(() => Messages) && Active)
+            if (pi.Name == nameof(Messages) && Active)
             {
                 if (Messages == null || !Messages.Any())
                     return EmailTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();
@@ -234,7 +234,7 @@ namespace Signum.Entities.Mailing
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Token))
+            if (pi.Name == nameof(Token))
             {
                 if (Token == null && emailAddress.IsNullOrEmpty())
                     return EmailTemplateMessage.TokenOrEmailAddressMustBeSet.NiceToString();

@@ -43,7 +43,7 @@ namespace Signum.Entities.Mailing
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Is(() => Messages))
+            if (pi.Name == nameof(Messages))
             {
                 if (Messages == null || !Messages.Any())
                     return EmailTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();
@@ -126,7 +126,7 @@ namespace Signum.Entities.Mailing
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Text) && !EmailMasterTemplateEntity.MasterTemplateContentRegex.IsMatch(Text))
+            if (pi.Name == nameof(Text) && !EmailMasterTemplateEntity.MasterTemplateContentRegex.IsMatch(Text))
             {
                 throw new ApplicationException(EmailTemplateMessage.TheTextMustContain0IndicatingReplacementPoint.NiceToString().FormatWith("@[content]"));
             }

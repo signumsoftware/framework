@@ -90,7 +90,7 @@ namespace Signum.Entities.Chart
         protected override string ChildPropertyValidation(ModifiableEntity sender, System.Reflection.PropertyInfo pi)
         {
             var column = sender as ChartScriptColumnEntity;
-            if (column != null && pi.Is(() => column.IsGroupKey))
+            if (column != null && pi.Name == nameof(column.IsGroupKey))
             {
                 if (column.IsGroupKey)
                 {
@@ -100,7 +100,7 @@ namespace Signum.Entities.Chart
             }
 
             var param = sender as ChartScriptParameterEntity;
-            if (param != null && pi.Is(() => param.ColumnIndex))
+            if (param != null && pi.Name == nameof(param.ColumnIndex))
             {
                 if (param.ColumnIndex == null && param.ShouldHaveColumnIndex())
                     return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());
@@ -114,7 +114,7 @@ namespace Signum.Entities.Chart
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Is(() => GroupBy))
+            if (pi.Name == nameof(GroupBy))
             {
                 if (GroupBy == GroupByChart.Always || GroupBy == GroupByChart.Optional)
                 {
@@ -128,7 +128,7 @@ namespace Signum.Entities.Chart
                 }
             }
 
-            if (pi.Is(() => Script))
+            if (pi.Name == nameof(Script))
             {
                 if (!Regex.IsMatch(Script, @"function\s+DrawChart\s*\(\s*chart\s*,\s*data\s*\)", RegexOptions.Singleline))
                 {

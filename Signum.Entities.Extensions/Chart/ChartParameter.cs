@@ -52,13 +52,11 @@ namespace Signum.Entities.Chart
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Name) && Name != scriptParameter.Name)
+            if (pi.Name == nameof(Name) && Name != scriptParameter.Name)
                 return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), scriptParameter.Name);
 
-            if (pi.Is(() => Value))
-            {
+            if (pi.Name == nameof(Value))
                 return ScriptParameter.Valdidate(this.Value, this.GetToken());
-            }
 
             return base.PropertyValidation(pi);
         }

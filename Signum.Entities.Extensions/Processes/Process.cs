@@ -189,7 +189,7 @@ namespace Signum.Entities.Processes
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => ExecutionStart) || pi.Is(() => ExecutionEnd))
+            if (pi.Name == nameof(ExecutionStart) || pi.Name == nameof(ExecutionEnd))
             {
                 if (this.ExecutionEnd < this.ExecutionStart)
                     return ProcessMessage.ProcessStartIsGreaterThanProcessEnd.NiceToString();

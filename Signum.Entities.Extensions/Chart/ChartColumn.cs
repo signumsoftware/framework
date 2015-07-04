@@ -112,7 +112,7 @@ namespace Signum.Entities.Chart
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Token))
+            if (pi.Name == nameof(Token))
             {
                 if (Token == null)
                     return !scriptColumn.IsOptional ? ChartMessage._0IsNotOptional.NiceToString().FormatWith(scriptColumn.DisplayName) : null;

@@ -34,7 +34,7 @@ namespace Signum.Entities.Translation
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Cultures))
+            if (pi.Name == nameof(Cultures))
             {
                 var error = Cultures.GroupBy(a => a.Culture).Where(a => a.Count() > 1).ToString(a => a.Key.ToString(), ", ");
 
