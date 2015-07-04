@@ -387,7 +387,7 @@ namespace Signum.Engine.Translation
             {
                 Instance = r.Key.Instance.Key(),
                 Path = r.Key.Route.PropertyString(),
-                RowId = r.Key.RowId.TryToString(),
+                RowId = r.Key.RowId?.ToString(),
                 Original = r.Value.OriginalText,
                 Translated = r.Value.TranslatedText
             }).ToList();
@@ -410,7 +410,7 @@ namespace Signum.Engine.Translation
                         {
                             Instance = ic.Instance.Key(),
                             Path = pr.Key.Route.PropertyString(),
-                            RowId = pr.Key.RowId.TryToString(),
+                            RowId = pr.Key.RowId?.ToString(),
                             Original = pr.Value.GetOrThrow(TranslatedInstanceLogic.DefaultCulture).Original,
                             Translated = null
                         }).ToList();
@@ -520,7 +520,7 @@ namespace Signum.Engine.Translation
                         Culture = n.Culture.ToCultureInfoEntity(),
                         PropertyRoute = routes.GetOrThrow(n.Key.Route),
                         Instance = n.Key.Instance,
-                        RowId  = n.Key.RowId.TryToString(),
+                        RowId  = n.Key.RowId?.ToString(),
                         OriginalText = n.OriginalText,
                         TranslatedText = n.TranslatedText,
                     }.Save(),

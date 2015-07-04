@@ -40,7 +40,7 @@ namespace Signum.Windows.Omnibox
                     }
                     else
                     {
-                        string str = result.Lite.TryToString();
+                        string str = result.Lite?.ToString();
                         if (str.HasText())
                             lines.Add(str);
                     }

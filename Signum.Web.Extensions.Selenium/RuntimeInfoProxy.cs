@@ -58,7 +58,7 @@ namespace Signum.Web.Selenium
 
             return "{0};{1};{2};{3}".FormatWith(
                 (EntityType == null) ? "" : TypeLogic.GetCleanName(EntityType),
-                IdOrNull.TryToString(),
+                IdOrNull?.ToString(),
                 IsNew ? "n" : "o",
                 Ticks
                 );

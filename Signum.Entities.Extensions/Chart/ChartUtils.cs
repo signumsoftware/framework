@@ -326,8 +326,8 @@ namespace Signum.Entities.Chart
                     return new
                     {
                         key = e,
-                        keyForFilter = e.TryToString("s"),
-                        toStr = ct.Token.Token.Format.HasText() ? e.TryToString(ct.Token.Token.Format) : r[columnIndex].TryToString()
+                        keyForFilter = e?.ToString("s"),
+                        toStr = ct.Token.Token.Format.HasText() ? e?.ToString(ct.Token.Token.Format) : r[columnIndex]?.ToString()
                     };
                 };
             }

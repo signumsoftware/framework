@@ -268,7 +268,7 @@ namespace Signum.Engine.Cache
                         }
                         catch (InvalidOperationException ex)
                         {
-                            string databaseName = database.TryToString() ?? Connector.Current.DatabaseName();
+                            string databaseName = database?.ToString() ?? Connector.Current.DatabaseName();
 
                             if (ex.Message.Contains("SQL Server Service Broker"))
                             {

@@ -114,7 +114,7 @@ namespace Signum.Engine.Word
             object obj = ValueProvider.GetValue(p);
             string text = obj is Enum ? ((Enum)obj).NiceToString() :
                 obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
-                obj.TryToString();
+                obj?.ToString();
 
             this.ReplaceBy(new Run(this.RunProperties?.Do(prop => prop.Remove()), new Text(text)));
         }

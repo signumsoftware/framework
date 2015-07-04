@@ -37,13 +37,13 @@ namespace Signum.Entities.UserAssets
         static string ToStringElement(object value, Type type)
         {
             string result;
-            string error = TryToString(value, type, out result);
+            string error = TryToStringElement(value, type, out result);
             if (error == null)
                 return result;
             throw new InvalidOperationException(error);
         }
 
-        static string TryToString(object value, Type type, out string result)
+        static string TryToStringElement(object value, Type type, out string result)
         {
             FilterType filterType = QueryUtils.GetFilterType(type);
 
@@ -53,7 +53,7 @@ namespace Signum.Entities.UserAssets
             {
                 foreach (var fvc in list)
                 {
-                    string error = fvc.TryToString(value, type, out result);
+                    string error = fvc.TryToStringValue(value, type, out result);
                     if(error != Continue)
                         return error;
                 }
@@ -112,7 +112,7 @@ namespace Signum.Entities.UserAssets
             {
                 foreach (var fvc in filters)
                 {
-                    string error = fvc.TryParse(stringValue, type, out result);
+                    string error = fvc.TryParseValue(stringValue, type, out result);
                     if (error != Continue)
                         return error;
                 }
@@ -179,8 +179,8 @@ namespace Signum.Entities.UserAssets
 
     public interface IFilterValueConverter
     {
-        string TryToString(object value, Type type, out string result);
-        string TryParse(string value, Type type, out object result);
+        string TryToStringValue(object value, Type type, out string result);
+        string TryParseValue(string value, Type type, out object result);
     }
 
     public class SmartDateTimeFilterValueConverter : IFilterValueConverter
@@ -367,7 +367,7 @@ namespace Signum.Entities.UserAssets
             }
         }
 
-        public string TryToString(object value, Type type, out string result)
+        public string TryToStringValue(object value, Type type, out string result)
         {
             if (value == null)
             {
@@ -382,7 +382,7 @@ namespace Signum.Entities.UserAssets
             return null;
         }
 
-        public string TryParse(string value, Type type, out object result)
+        public string TryParseValue(string value, Type type, out object result)
         {
             SmartDateTimeSpan ss;
             string error = SmartDateTimeSpan.TryParse(value, out ss);
@@ -407,7 +407,7 @@ namespace Signum.Entities.UserAssets
 
     public class LiteFilterValueConverter : IFilterValueConverter
     {
-        public string TryToString(object value, Type type, out string result)
+        public string TryToStringValue(object value, Type type, out string result)
         {
             if (!(value is Lite<Entity>))
             {
@@ -419,7 +419,7 @@ namespace Signum.Entities.UserAssets
             return null;
         }
 
-        public string TryParse(string value, Type type, out object result)
+        public string TryParseValue(string value, Type type, out object result)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -461,7 +461,7 @@ namespace Signum.Entities.UserAssets
             return new Disposable(() => currentEntityVariable.Value = old);
         }
 
-        public string TryToString(object value, Type type, out string result)
+        public string TryToStringValue(object value, Type type, out string result)
         {
             var lite = value as Lite<Entity>;
 
@@ -475,7 +475,7 @@ namespace Signum.Entities.UserAssets
             return FilterValueConverter.Continue;
         }
 
-        public string TryParse(string value, Type type, out object result)
+        public string TryParseValue(string value, Type type, out object result)
         {
             if (value.HasText() && value.StartsWith(CurrentEntityKey))
             {
@@ -516,7 +516,7 @@ namespace Signum.Entities.UserAssets
     {
         static string CurrentUserKey = "[CurrentUser]";
 
-        public string TryToString(object value, Type type, out string result)
+        public string TryToStringValue(object value, Type type, out string result)
         {
             var lu = value as Lite<UserEntity>;
 
@@ -531,7 +531,7 @@ namespace Signum.Entities.UserAssets
             
         }
 
-        public string TryParse(string value, Type type, out object result)
+        public string TryParseValue(string value, Type type, out object result)
         {
             if (value == CurrentUserKey)
             {

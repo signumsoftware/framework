@@ -208,7 +208,7 @@ namespace Signum.Entities.SMS
 
         public override string ToString()
         {
-            return cultureInfo.TryToString() ?? SMSTemplateMessage.NewCulture.NiceToString();
+            return cultureInfo?.ToString() ?? SMSTemplateMessage.NewCulture.NiceToString();
         }
     }
 

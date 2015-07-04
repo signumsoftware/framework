@@ -32,7 +32,7 @@ namespace Signum.Web.Omnibox
                 {
                     html = html.Concat("{0}: {1}".FormatHtml(result.Id.ToString(), (result.Lite == null) ? 
                         ColoredSpan(OmniboxMessage.NotFound.NiceToString(), "gray") :
-                        new HtmlTag("span").InnerHtml(new MvcHtmlString(result.Lite.TryToString()))));
+                        new HtmlTag("span").InnerHtml(new MvcHtmlString(result.Lite?.ToString()))));
                 }
                 else
                 {

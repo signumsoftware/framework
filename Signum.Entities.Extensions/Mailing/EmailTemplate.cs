@@ -327,7 +327,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return cultureInfo.TryToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
+            return cultureInfo?.ToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
         }
     }
 

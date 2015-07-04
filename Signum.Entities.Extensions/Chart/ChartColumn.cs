@@ -181,7 +181,7 @@ namespace Signum.Entities.Chart
 
         public override string ToString()
         {
-            return token.TryToString();
+            return token?.ToString();
         }
     }
 }

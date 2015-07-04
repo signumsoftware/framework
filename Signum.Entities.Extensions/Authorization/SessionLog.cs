@@ -62,7 +62,7 @@ namespace Signum.Entities.Authorization
         public override string ToString()
         {
             return "{0} ({1}-{2})".FormatWith(
-                user.TryToString(), sessionStart.TryToString(), sessionEnd.TryToString());
+                user?.ToString(), sessionStart, sessionEnd);
         }
 
         static Expression<Func<SessionLogEntity, double?>> DurationExpression = 

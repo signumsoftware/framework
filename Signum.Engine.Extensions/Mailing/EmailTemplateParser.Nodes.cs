@@ -121,7 +121,7 @@ namespace Signum.Engine.Mailing
 
                 var text = obj is Enum ? ((Enum)obj).NiceToString() :
                        obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
-                       obj.TryToString();
+                       obj?.ToString();
 
                 p.StringBuilder.Append(p.IsHtml && !IsRaw && !(obj is HtmlString )? HttpUtility.HtmlEncode(text) : text);
             }

@@ -318,7 +318,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return file.TryToString();
+            return file?.ToString();
         }
     }
 

@@ -160,7 +160,7 @@ namespace Signum.Entities.Dashboard
 
         public override string ToString()
         {
-            return userQuery.TryToString();
+            return userQuery?.ToString();
         }
 
         public bool RequiresTitle
@@ -209,7 +209,7 @@ namespace Signum.Entities.Dashboard
 
         public override string ToString()
         {
-            return userChart.TryToString();
+            return userChart?.ToString();
         }
 
         public bool RequiresTitle

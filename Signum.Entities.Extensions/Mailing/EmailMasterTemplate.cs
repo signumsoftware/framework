@@ -121,7 +121,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return cultureInfo.TryToString();
+            return cultureInfo?.ToString();
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

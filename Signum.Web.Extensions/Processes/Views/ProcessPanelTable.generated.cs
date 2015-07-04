@@ -141,7 +141,7 @@ WriteLiteral("\r\n    <br />\r\n    NextPlannedExecution: ");
 
             
             #line 24 "..\..\Processes\Views\ProcessPanelTable.cshtml"
-                      Write(Model.NextPlannedExecution.TryToString() ?? "-None-");
+                      Write(Model.NextPlannedExecution?.ToString() ?? "-None-");
 
             
             #line default
@@ -230,7 +230,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
             
             #line 57 "..\..\Processes\Views\ProcessPanelTable.cshtml"
-                   Write(item.Progress.TryToString("p"));
+                   Write(item.Progress?.ToString("p"));
 
             
             #line default

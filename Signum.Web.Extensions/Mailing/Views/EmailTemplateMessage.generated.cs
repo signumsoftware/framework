@@ -107,7 +107,7 @@ WriteLiteral(" class=\"sf-tab-title\"");
 WriteAttribute("value", Tuple.Create(" value=\"", 434), Tuple.Create("\"", 479)
             
             #line 13 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 442), Tuple.Create<System.Object, System.Int32>(ec.Value.CultureInfo.TryToString()
+, Tuple.Create(Tuple.Create("", 442), Tuple.Create<System.Object, System.Int32>(ec.Value.CultureInfo?.ToString()
             
             #line default
             #line hidden

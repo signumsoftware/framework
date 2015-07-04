@@ -14,7 +14,7 @@ namespace Signum.Windows.UIAutomation
             {
                 var pc = condition as PropertyCondition;
                 if (pc != null)
-                    return "{0} = {1}".FormatWith(pc.Property.CleanPropertyName(), pc.Value.TryToString());
+                    return "{0} = {1}".FormatWith(pc.Property.CleanPropertyName(), pc.Value?.ToString());
             }
 
             {
@@ -61,7 +61,7 @@ namespace Signum.Windows.UIAutomation
             return ae.GetSupportedProperties()
                 .GroupBy(p => p.ProgrammaticName.Split('.')[0].CleanEnd("PatternIdentifiers"))
                 .OrderBy(a => a.Key).ToString(gr => gr.Key + "\r\n" +
-                    gr.Select(a => "  " + a.CleanPropertyName() + " = " + ae.GetCurrentPropertyValue(a).TryToString())
+                    gr.Select(a => "  " + a.CleanPropertyName() + " = " + ae.GetCurrentPropertyValue(a)?.ToString())
                     .OrderBy()
                     .ToString("\r\n"),
                     "\r\n");

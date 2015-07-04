@@ -85,7 +85,7 @@ WriteLiteral(" class=\"sf-tab-title\"");
 WriteAttribute("value", Tuple.Create(" value=\"", 296), Tuple.Create("\"", 341)
             
             #line 10 "..\..\SMS\Views\SMSTemplateMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 304), Tuple.Create<System.Object, System.Int32>(tc.Value.CultureInfo.TryToString()
+, Tuple.Create(Tuple.Create("", 304), Tuple.Create<System.Object, System.Int32>(tc.Value.CultureInfo?.ToString()
             
             #line default
             #line hidden

@@ -43,7 +43,7 @@
                 </td>
                 <td>@table.Type.TypeName()
                 </td>
-                <td>@(table.Count.TryToString() ?? "-- not loaded --")
+                <td>@(table.Count?.ToString() ?? "-- not loaded --")
                 </td>
                 <td>@table.Hits.DefaultToNull()
                 </td>

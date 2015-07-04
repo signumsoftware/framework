@@ -47,7 +47,7 @@ namespace Signum.Entities.Translation
 
         public override string ToString()
         {
-            return user.TryToString();
+            return user?.ToString();
         }
     }
 

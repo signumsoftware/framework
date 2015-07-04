@@ -110,7 +110,7 @@ WriteLiteralTo(__razor_helper_writer, "\r\n                </td>\r\n            
 
 
 #line 46 "..\..\Cache\Views\Statistics.cshtml"
-WriteTo(__razor_helper_writer, table.Count.TryToString() ?? "-- not loaded --");
+WriteTo(__razor_helper_writer, table.Count?.ToString() ?? "-- not loaded --");
 
 
 #line default

@@ -111,7 +111,7 @@ namespace Signum.Entities.Help
 
         public override string ToString()
         {
-            return this.Property.TryToString();
+            return this.Property?.ToString();
         }
     }
 

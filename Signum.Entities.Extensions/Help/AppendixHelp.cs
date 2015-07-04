@@ -48,7 +48,7 @@ namespace Signum.Entities.Help
 
         public override string ToString()
         {
-            return title.TryToString();
+            return title?.ToString();
         }
     }
 

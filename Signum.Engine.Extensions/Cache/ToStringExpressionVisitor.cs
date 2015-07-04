@@ -160,11 +160,6 @@ namespace Signum.Engine.Cache
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            if (node.Method.Name == "TryToString")
-            {
-                node = Expression.Call(node.Arguments.SingleEx(), miToString);
-            }
-
             var obj = base.Visit(node.Object);
 
             var args = base.Visit(node.Arguments);
