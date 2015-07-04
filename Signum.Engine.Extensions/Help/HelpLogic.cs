@@ -481,7 +481,7 @@ namespace Signum.Engine.Help
             using (replacements.WithReplacedDatabaseName())
                 return entities.Select(e =>
                 {
-                    e.Name = replacements.TryGetC("namespaces").TryGetC(e.Name) ?? e.Name;
+                    e.Name = replacements.TryGetC("namespaces")?.TryGetC(e.Name) ?? e.Name;
 
                     if (!data.Namespaces.Contains(e.Name))
                         return table.DeleteSqlSync(e);

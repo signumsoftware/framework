@@ -116,7 +116,7 @@ namespace Signum.Engine.Translation
         {
             var dic = TraducibleRoutes.TryGetC(route.RootType);
 
-            return dic.TryGetS(route); 
+            return dic?.TryGetS(route); 
         }
 
         public static List<TranslatedTypeSummary> TranslationInstancesStatus()
@@ -342,7 +342,7 @@ namespace Signum.Engine.Translation
             if (CultureInfo.CurrentUICulture.IsNeutralCulture)
                 return null;
 
-            result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture.Parent).TryGetC(key);
+            result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture.Parent)?.TryGetC(key);
 
             if (result != null)
                 return result;
@@ -468,7 +468,7 @@ namespace Signum.Engine.Translation
 
                 var result = (from rc in routeConflicts
                               from c in cultures
-                              let str = c.Equals(TranslatedInstanceLogic.DefaultCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key)?.Let(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
+                              let str = c.Equals(TranslatedInstanceLogic.DefaultCulture) ? rc.Value : support.TryGetC(c)?.TryGetC(rc.Key)?.Let(a => a.OriginalText == rc.Value ? a.TranslatedText : null)
                               where str.HasText()
                               let old = c.Equals(TranslatedInstanceLogic.DefaultCulture) ? target.TryGetC(rc.Key) : null
                               select new

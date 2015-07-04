@@ -26,7 +26,7 @@
         li.Instance.Id.ToString() == filter ||
         li.Route.PropertyString().Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
         master.GetOrThrow(li).Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
-        cultures.Any(ci => (Model.TryGetC(ci).TryGetC(li)?.TranslatedText ?? "").Contains(filter, StringComparison.InvariantCultureIgnoreCase));
+        cultures.Any(ci => (Model.TryGetC(ci)?.TryGetC(li)?.TranslatedText ?? "").Contains(filter, StringComparison.InvariantCultureIgnoreCase));
 }
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 
@@ -101,7 +101,7 @@ else
                         }
                         else
                         {
-                            TranslatedInstanceEntity trans = Model.TryGetC(ci).TryGetC(key);
+                            TranslatedInstanceEntity trans = Model.TryGetC(ci)?.TryGetC(key);
 
                             if (trans != null && editCulture(ci))
                             {
