@@ -173,7 +173,7 @@ By overriding `PropertyValidation`, we can tell the validation system witch is t
 ```C#
 protected override string PropertyValidation(PropertyInfo pi)
 {
-    if (pi.Is(() => Name) && name == "Neo" && dateOfBirth.Year < 1999)
+    if (pi.Name == nameof(Name) && name == "Neo" && dateOfBirth.Year < 1999)
         return "Nobody was named Neo before The Matrix";
 
     return null;
@@ -221,7 +221,7 @@ public class OrderEntity : Entity
 
     protected override string PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Is(() => ShipDate))
+        if (pi.Name == nameof(ShipDate))
         {
             if (ShipDate.HasValue && State != State.Shipped)
                 return "ShipDate has to be null if the state is {0}".FormatWith(State);
@@ -229,7 +229,7 @@ public class OrderEntity : Entity
                 return "ShipDate needs a value if the state is {0}".FormatWith(State); 
         }
 
-        if (pi.Is(() => PaidOn))
+        if (pi.Name == nameof(PaidOn))
         {
             if (PaidOn.HasValue && State != State.Ordered)
                 return "PaidOn has to be null if the state is {0}".FormatWith(State);
@@ -469,7 +469,7 @@ public class PersonEntity : Entity
 
     public override string PropertyValidation(PropertyInfo pi)
     {
-        if(pi.Is(()=>Name) && Name == "Neo" && DateOfBirth.Year < 1999)
+        if(pi.Name == nameof(Name) && Name == "Neo" && DateOfBirth.Year < 1999)
             return "Nobody was named Neo before The Matrix"; 
     }
 }
@@ -575,7 +575,7 @@ public class PersonEntity : Entity
 
     public override string PropertyValidation(PropertyInfo pi)
     {
-        if(pi.Is(()=>Name) && !Corruption.Allowed && Name == "Neo" && DateOfBirth.Year < 1999)
+        if(pi.Name == nameof(Name) && !Corruption.Allowed && Name == "Neo" && DateOfBirth.Year < 1999)
             return "Nobody was named Neo before The Matrix"; 
     }
 

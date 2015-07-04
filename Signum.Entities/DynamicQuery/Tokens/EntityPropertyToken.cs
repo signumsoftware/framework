@@ -54,8 +54,8 @@ namespace Signum.Entities.DynamicQuery
         {
             var baseExpression = Parent.BuildExpression(context);
 
-            if (PropertyInfo.Is((Entity ident) => ident.Id) ||
-                PropertyInfo.Is((Entity ident) => ident.ToStringProperty))
+            if (PropertyInfo.Name == nameof(Entity.Id) ||
+                PropertyInfo.Name == nameof(Entity.ToStringProperty))
             {
                 var entityExpression = baseExpression.ExtractEntity(true);
 
