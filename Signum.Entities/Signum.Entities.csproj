@@ -222,4 +222,8 @@ if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)
   <Target Name="AfterBuild">
   </Target>
   -->
+  <UsingTask TaskName="SignumTask" AssemblyFile="..\Signum.MSBuildTask\bin\Debug\Signum.MSBuildTask.dll"/>
+  <Target Name="AfterCompile" DependsOnTargets="CoreCompile">
+    <SignumTask Assembly="@(IntermediateAssembly)" References="@(ReferencePath)" KeyFile="$(KeyOriginatorFile)"/>
+  </Target>
 </Project>
