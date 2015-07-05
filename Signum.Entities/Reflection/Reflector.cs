@@ -279,9 +279,8 @@ namespace Signum.Entities.Reflection
             FieldInfo fi = null;
             for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
             {
-                fi = (tempType.GetField(pi.Name, privateFlags) ??
-                      tempType.GetField("m" + pi.Name, privateFlags) ??
-                      tempType.GetField("_" + pi, privateFlags));
+                fi = (tempType.GetField("<" + pi.Name + ">k__BackingField", privateFlags) ??
+                      tempType.GetField(pi.Name, privateFlags));
             }
 
             return fi;
@@ -301,7 +300,7 @@ namespace Signum.Entities.Reflection
         {
             const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-            var propertyName = PropertyName(fi.Name);
+            var propertyName = fi.Name.StartsWith("<") ? fi.Name.After('<').Before('>') : fi.Name.FirstUpper();
 
             var result = fi.DeclaringType.GetProperty(propertyName, flags, null, null, new Type[0], null);
 
@@ -319,18 +318,6 @@ namespace Signum.Entities.Reflection
             return null;
         }
         
-        public static Func<string, string> PropertyName = (string fieldName) =>
-        {
-            //if (name.Length > 2)
-            //{
-            //    if (name.StartsWith("_"))
-            //        name = name.Substring(1);
-            //    else if (name.StartsWith("m") && char.IsUpper(name[1]))
-            //        name = Char.ToLower(name[1]) + name.Substring(2);
-            //}
-
-            return fieldName.FirstUpper();
-        };
 
         public static bool QueryableProperty(Type type, PropertyInfo pi)
         {

@@ -38,6 +38,11 @@ namespace Signum.Entities
 
         protected internal const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
+        protected virtual T Get<T>(T fieldValue, [CallerMemberNameAttribute]string automaticPropertyName = null)
+        {
+            return fieldValue;
+        }
+
         protected virtual bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
