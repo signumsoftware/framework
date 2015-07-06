@@ -9,6 +9,7 @@ using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
+using System.Reflection;
 
 namespace Signum.Entities.Chart
 {
@@ -212,9 +213,9 @@ namespace Signum.Entities.Chart
             Owner = element.Attribute("Owner").Try(a => Lite.Parse(a.Value));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
-            Filters.Syncronize(element.Element("Filters").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
+            Filters.Syncronize(element.Element("Filters").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x) => f.FromXml(x, ctx));
             Columns.Syncronize(element.Element("Columns").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
-            Orders.Syncronize(element.Element("Orders").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
+            Orders.Syncronize(element.Element("Orders").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x) => o.FromXml(x, ctx));
             Parameters.Syncronize(element.Element("Parameters").Try(ps => ps.Elements()).EmptyIfNull().ToList(), (p, x) => p.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
         }
@@ -222,6 +223,28 @@ namespace Signum.Entities.Chart
         public void FixParameters(ChartColumnEntity chartColumnEntity)
         {
 
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Parameters) && Parameters != null && ChartScript != null)
+            {
+                try
+                {
+                    EnumerableExtensions.JoinStrict(
+                        Parameters,
+                        ChartScript.Parameters,
+                        p => p.Name,
+                        ps => ps.Name, 
+                        (p, ps) => new { p, ps }, pi.NiceName());
+                }
+                catch (Exception e)
+                {
+                    return e.Message;
+                }
+            }
+
+            return base.PropertyValidation(pi);
         }
     }
 

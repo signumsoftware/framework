@@ -8,6 +8,7 @@ using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
 using Signum.Entities.DynamicQuery;
 using System.Reflection;
+using System.Globalization;
 
 namespace Signum.Entities.Chart
 {
@@ -162,13 +163,13 @@ namespace Signum.Entities.Chart
 
                 interval = new NumberInterval();
 
-                if (!ReflectionTools.TryParse<decimal>(m.Groups["def"].Value, out interval.DefaultValue))
+                if (!ReflectionTools.TryParse<decimal>(m.Groups["def"].Value, CultureInfo.InvariantCulture, out interval.DefaultValue))
                     return "Invalid default value";
 
-                if (!ReflectionTools.TryParse<decimal?>(m.Groups["min"].Value, out interval.MinValue))
+                if (!ReflectionTools.TryParse<decimal?>(m.Groups["min"].Value, CultureInfo.InvariantCulture, out interval.MinValue))
                     return "Invalid min value";
 
-                if (!ReflectionTools.TryParse<decimal?>(m.Groups["max"].Value, out interval.MaxValue))
+                if (!ReflectionTools.TryParse<decimal?>(m.Groups["max"].Value, CultureInfo.InvariantCulture, out interval.MaxValue))
                     return "Invalid max value";
 
                 return null;
