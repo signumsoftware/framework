@@ -303,6 +303,14 @@ namespace Signum.Entities.Chart
         {
             return Type == ChartParameterType.Enum && GetEnumValues().Any(a => a.TypeFilter.HasValue);
         }
+
+        public QueryToken GetToken(IChartBase chartBase)
+        {
+            if (this.ColumnIndex == null)
+                return null;
+
+            return chartBase.Columns[this.ColumnIndex.Value].Token.Try(t => t.Token);
+        }
     }
 
 
