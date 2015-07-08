@@ -82,7 +82,7 @@ namespace Signum.Entities.Chart
             switch (Type)
             {
                 case ChartParameterType.Enum: return GetEnumValues().DefaultValue(token);
-                case ChartParameterType.Number: return GetNumberInterval().DefaultValue.ToString();
+                case ChartParameterType.Number: return GetNumberInterval().DefaultValue.ToString(CultureInfo.InvariantCulture);
                 case ChartParameterType.String: return ValueDefinition;
                 default: throw new InvalidOperationException();
             }

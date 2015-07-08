@@ -231,9 +231,8 @@ namespace Signum.Entities.Chart
 
             result.Parameters.ForEach(r =>
             {
-                r.Value = uq.Parameters.FirstOrDefault(u => u.Name == r.Name).Value;
+                r.Value = uq.Parameters.FirstOrDefault(u => u.Name == r.Name).Try(a => a.Value) ?? r.ScriptParameter.DefaultValue(r.ScriptParameter.GetToken(uq));
             });
-
             return result;
         }
 
