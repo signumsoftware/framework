@@ -14,6 +14,7 @@ using System.Globalization;
 using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
+using System.CodeDom.Compiler;
 
 namespace Signum.Entities.Reflection
 {
@@ -279,11 +280,25 @@ namespace Signum.Entities.Reflection
             FieldInfo fi = null;
             for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
             {
-                fi = (tempType.GetField("<" + pi.Name + ">k__BackingField", privateFlags) ??
-                      tempType.GetField(pi.Name, privateFlags));
+                fi = tempType.GetField("<" + pi.Name + ">k__BackingField", privateFlags);
+                if (fi != null)
+                    CheckSignumProcessed(fi);
+                else
+                    fi = tempType.GetField(pi.Name, privateFlags);
             }
 
             return fi;
+        }
+
+        public static ConcurrentDictionary<Assembly, bool> processedAssemblies = new ConcurrentDictionary<Assembly, bool>();
+
+        private static void CheckSignumProcessed(FieldInfo fieldInfo)
+        {
+            var isProcessed = processedAssemblies.GetOrAdd(fieldInfo.DeclaringType.Assembly,
+                a => a.GetCustomAttributes<GeneratedCodeAttribute>().Any(gc => gc.Tool == "SignumTask"));
+
+            if (!isProcessed)
+                throw new InvalidOperationException("Entity {0} has auto-property {1}, but you can not use auto-propertes if the assembly iy not processed by 'SignumTask'");
         }
 
         public static PropertyInfo FindPropertyInfo(FieldInfo fi)
@@ -300,7 +315,14 @@ namespace Signum.Entities.Reflection
         {
             const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-            var propertyName = fi.Name.StartsWith("<") ? fi.Name.After('<').Before('>') : fi.Name.FirstUpper();
+            string propertyName = null;
+            if(fi.Name.StartsWith("<"))
+            {
+                CheckSignumProcessed(fi);
+                propertyName = fi.Name.After('<').Before('>');
+            }
+            else
+                propertyName = fi.Name.FirstUpper();
 
             var result = fi.DeclaringType.GetProperty(propertyName, flags, null, null, new Type[0], null);
 
