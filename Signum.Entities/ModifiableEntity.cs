@@ -19,6 +19,7 @@ using System.Collections;
 using System.Diagnostics;
 using Signum.Utilities.ExpressionTrees;
 using System.Runtime.CompilerServices;
+using System.Collections.Concurrent;
 
 namespace Signum.Entities
 {
@@ -43,12 +44,13 @@ namespace Signum.Entities
             return fieldValue;
         }
 
+      
         protected virtual bool Set<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
                 return false;
 
-            PropertyInfo pi = this.GetType().GetProperty(automaticPropertyName, flags) ?? this.GetType().GetInterfaces().Select(i => i.GetProperty(automaticPropertyName, flags)).NotNull().FirstOrDefault();
+            PropertyInfo pi = GetPropertyInfo(automaticPropertyName);
 
             if (pi == null)
                 throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".FormatWith(automaticPropertyName, this.GetType().TypeName()));
@@ -111,9 +113,36 @@ namespace Signum.Entities
 
             NotifyPrivate(pi.Name);
             NotifyPrivate("Error");
+            NotifyToString();
+
             ClearTemporalError(pi.Name);
 
             return true;
+        }
+
+        struct PropertyKey : IEquatable<PropertyKey>
+        {
+            public PropertyKey(Type type, string propertyName)
+            {
+                this.Type = type;
+                this.PropertyName = propertyName;
+            }
+
+            public Type Type;
+            public string PropertyName;
+
+            public bool Equals(PropertyKey other) => other.Type == Type && other.PropertyName == PropertyName;
+            public override bool Equals(object obj) => obj is PropertyKey && Equals((PropertyKey)obj);
+            public override int GetHashCode() => Type.GetHashCode() ^ PropertyName.GetHashCode();
+        }
+
+        static ConcurrentDictionary<PropertyKey, PropertyInfo> PropertyCache = new ConcurrentDictionary<PropertyKey, PropertyInfo>();
+
+        protected PropertyInfo GetPropertyInfo(string propertyName)
+        {
+            return PropertyCache.GetOrAdd(new PropertyKey(this.GetType(), propertyName), key =>
+                key.Type.GetProperty(propertyName, flags) ??
+                 key.Type.GetInterfaces().Select(i => i.GetProperty(key.PropertyName, flags)).NotNull().FirstOrDefault());
         }
 
         static readonly Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
@@ -125,16 +154,6 @@ namespace Signum.Entities
                 string str = ToString();
                 return str.HasText() ? str : this.GetType().NiceName();
             }
-        }
-
-        protected bool SetToStr<T>(ref T field, T value, [CallerMemberNameAttribute]string automaticPropertyName = null)
-        {
-            if (this.Set(ref field, value, automaticPropertyName))
-            {
-                NotifyToString();
-                return true;
-            }
-            return false;
         }
 
         #region Collection Events
