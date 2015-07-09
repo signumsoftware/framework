@@ -69,7 +69,7 @@ namespace Signum.MSBuildTask
         private static bool AlreadyProcessed(AssemblyDefinition assembly)
         {
             var nameof = typeof(GeneratedCodeAttribute).FullName;
-            return assembly.CustomAttributes.Any(a => a.AttributeType.Name == nameof && ((string)a.ConstructorArguments[0].Value) == "SignumTask");
+            return assembly.CustomAttributes.Any(a => a.AttributeType.FullName == nameof && ((string)a.ConstructorArguments[0].Value) == "SignumTask");
         }
 
         private void MarkAsProcessed(AssemblyDefinition assembly, IAssemblyResolver resolver)
