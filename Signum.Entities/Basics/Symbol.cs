@@ -76,7 +76,7 @@ namespace Signum.Entities
         public string Key
         {
             get { return key; }
-            set { SetToStr(ref key, value); }
+            set { Set(ref key, value); }
         }
 
         static Expression<Func<Symbol, string>> ToStringExpression = e => e.Key;

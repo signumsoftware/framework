@@ -31,7 +31,7 @@ namespace Signum.Entities.Basics
         public OperationSymbol Operation
         {
             get { return operation; }
-            set { SetToStr(ref operation, value); }
+            set { Set(ref operation, value); }
         }
 
         Lite<IUserEntity> user;
@@ -39,14 +39,14 @@ namespace Signum.Entities.Basics
         public Lite<IUserEntity> User
         {
             get { return user; }
-            set { SetToStr(ref user, value); }
+            set { Set(ref user, value); }
         }
 
         DateTime start;
         public DateTime Start
         {
             get { return start; }
-            set { SetToStr(ref start, value); }
+            set { Set(ref start, value); }
         }
 
         DateTime? end;

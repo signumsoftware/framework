@@ -39,7 +39,7 @@ namespace Signum.Entities.Basics
         public int Argb
         {
             get { return argb; }
-            set { SetToStr(ref argb, value); }
+            set { Set(ref argb, value); }
         }
 
         [HiddenProperty]

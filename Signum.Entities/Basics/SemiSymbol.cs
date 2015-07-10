@@ -70,7 +70,7 @@ namespace Signum.Entities.Basics
         public string Key
         {
             get { return key; }
-            set { SetToStr(ref key, value); }
+            set { Set(ref key, value); }
         }
 
         internal string NiceToString()
