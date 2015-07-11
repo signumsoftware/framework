@@ -21,7 +21,7 @@ namespace Signum.Test.Environment
         public string Text
         {
             get { return text; }
-            set { SetToStr(ref text, value); }
+            set { Set(ref text, value); }
         }
 
         [ImplementedByAll]
@@ -94,7 +94,7 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         bool dead;
@@ -197,7 +197,7 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         [NotNullable]
@@ -313,7 +313,7 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         CountryEntity country;
@@ -359,7 +359,7 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         public override string ToString()
@@ -377,7 +377,7 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         int year;
@@ -472,7 +472,7 @@ namespace Signum.Test.Environment
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         TimeSpan? duration;
