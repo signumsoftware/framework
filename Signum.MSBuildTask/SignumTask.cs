@@ -14,8 +14,6 @@ namespace Signum.MSBuildTask
 {
     public class SignumTask : Task
     {
-        private string key;
-
         [Required]
         public string Assembly { get; set; }
 

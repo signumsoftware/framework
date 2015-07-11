@@ -41,15 +41,18 @@
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Cecil\Mono.Cecil.dll</HintPath>
+      <HintPath>..\Binaries\Mono.Cecil.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Pdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Cecil\Mono.Cecil.Pdb.dll</HintPath>
+      <HintPath>..\Binaries\Mono.Cecil.Pdb.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Rocks, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Cecil\Mono.Cecil.Rocks.dll</HintPath>
+      <HintPath>..\Binaries\Mono.Cecil.Rocks.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -64,11 +67,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyFixer.cs" />
     <Compile Include="SignumTask.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Cecil\Mono.Cecil.dll" />
-    <Content Include="Cecil\Mono.Cecil.Pdb.dll" />
-    <Content Include="Cecil\Mono.Cecil.Rocks.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
