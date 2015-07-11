@@ -37,7 +37,6 @@ namespace Signum.Analyzer
             if (classParent == null)
                 return;
 
-
             FieldDeclarationSyntax field = PreviosField(classParent, property);
             if (field == null)
                 return;

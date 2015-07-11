@@ -49,15 +49,11 @@ namespace ConsoleApplication1
     }
 }";
 
-            VerifyCSharpDiagnostic(test, new DiagnosticResult
+            VerifyDiagnostic(test, new DiagnosticResult
             {
                 Id = AutoPropertyAnalyzer.DiagnosticId,
                 Message = String.Format("Property '{0}' could be transformed to auto-property", "Phone"),
                 Severity = DiagnosticSeverity.Warning,
-                Locations = new[]
-                {
-                    new DiagnosticResultLocation("Test0.cs", 16, 9)
-                }
             });
 
             var fixtest = @"
@@ -67,7 +63,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
-using Signum.Entities
+using Signum.Entities;
 
 namespace ConsoleApplication1
 {
@@ -78,7 +74,7 @@ namespace ConsoleApplication1
         public string Phone { get; set; }
     }
 }";
-            VerifyCSharpFix(test, fixtest);
+            VerifyFix(test, fixtest);
         }
 
 
@@ -99,7 +95,7 @@ using System.Linq.Expressions;
 namespace ConsoleApplication1
 {
     class MyEntity : Entity
-    {   
+    {
         [NotNullable, SqlDbType(Size = 24)]
         string phone;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 24), TelephoneValidator]
@@ -115,7 +111,7 @@ namespace ConsoleApplication1
         public string Phone2
         {
             get { return phone2; }
-            set { SetToStr(ref phone2, value); }
+            internal set { SetToStr(ref phone2, value); }
         }
 
         int number;
@@ -123,6 +119,13 @@ namespace ConsoleApplication1
         {
             get { return number; }
             set { Set(ref number, value); }
+        }
+
+        DateTime creationDate = TimeZoneManager.Now;
+        public DateTime CreationDate
+        {
+            get { return creationDate; }
+            private set { Set(ref creationDate, value); }
         }
 
         static Expression<Func<MyEntity, string>> ToStringExpressions =
@@ -134,33 +137,26 @@ namespace ConsoleApplication1
     }
 }";
 
-            VerifyCSharpDiagnostic(test, new DiagnosticResult
+            VerifyDiagnostic(test, new DiagnosticResult
             {
                 Id = AutoPropertyAnalyzer.DiagnosticId,
                 Message = String.Format("Property '{0}' could be transformed to auto-property", "Phone"),
-                Severity = DiagnosticSeverity.Warning,
-                Locations = new[]
-                {
-                    new DiagnosticResultLocation("Test0.cs", 19, 23)
-                }
+                Severity = DiagnosticSeverity.Warning
             }, new DiagnosticResult
             {
                 Id = AutoPropertyAnalyzer.DiagnosticId,
                 Message = String.Format("Property '{0}' could be transformed to auto-property", "Phone2"),
-                Severity = DiagnosticSeverity.Warning,
-                Locations = new[]
-                {
-                    new DiagnosticResultLocation("Test0.cs", 28, 23)
-                }
+                Severity = DiagnosticSeverity.Warning
             }, new DiagnosticResult
             {
                 Id = AutoPropertyAnalyzer.DiagnosticId,
                 Message = String.Format("Property '{0}' could be transformed to auto-property", "Number"),
-                Severity = DiagnosticSeverity.Warning,
-                Locations = new[]
-                {
-                    new DiagnosticResultLocation("Test0.cs", 35, 20)
-                }
+                Severity = DiagnosticSeverity.Warning
+            }, new DiagnosticResult
+            {
+                Id = AutoPropertyAnalyzer.DiagnosticId,
+                Message = String.Format("Property '{0}' could be transformed to auto-property", "CreationDate"),
+                Severity = DiagnosticSeverity.Warning
             });
 
             var fixtest = @"
@@ -184,9 +180,11 @@ namespace ConsoleApplication1
 
         [NotNullable, SqlDbType(Size = 24)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 24), TelephoneValidator]
-        public string Phone2 { get; set; }
+        public string Phone2 { get; internal set; }
 
         public int Number { get; set; }
+
+        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
         static Expression<Func<MyEntity, string>> ToStringExpressions =
             entity => entity.Phone2;
@@ -196,7 +194,7 @@ namespace ConsoleApplication1
         }
     }
 }";
-            VerifyCSharpFix(test, fixtest);
+            VerifyFix(test, fixtest);
         }
 
 

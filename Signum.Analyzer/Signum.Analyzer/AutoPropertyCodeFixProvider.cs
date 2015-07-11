@@ -40,7 +40,7 @@ namespace Signum.Analyzer
             var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<PropertyDeclarationSyntax>().First();
             
             context.RegisterCodeFix(
-                CodeAction.Create("Convert to auto-property", c => MakeUppercaseAsync(context.Document, declaration, c)),
+                CodeAction.Create("Convert to auto-property", c => MakeUppercaseAsync(context.Document, declaration, c), "Convert to auto-property"),
                 diagnostic);
         }
 
@@ -49,43 +49,53 @@ namespace Signum.Analyzer
             var classParent = (ClassDeclarationSyntax)property.Parent;
 
             var field = AutoPropertyAnalyzer.PreviosField(classParent, property);
+            var fieldVariable = field.Declaration.Variables.Single();
 
-            var modifiers = property.Modifiers;
+            var semanticModel = await document.GetSemanticModelAsync();
+            var symbol = semanticModel.GetDeclaredSymbol(fieldVariable);
+            var solution = document.Project.Solution;
+            solution = await Renamer.RenameSymbolAsync(solution, symbol, property.Identifier.ToString(), solution.Workspace.Options, cancellationToken);
+
+            document = solution.GetDocument(document.Id);
+            var root = await document.GetSyntaxRootAsync();
+            classParent = root.DescendantNodes().OfType<ClassDeclarationSyntax>().SingleOrDefault(c => c.Identifier.IsEquivalentTo(classParent.Identifier));
+            field = classParent.Members.OfType<FieldDeclarationSyntax>().SingleOrDefault(f => f.Declaration.Variables.Any(v => v.Identifier.ToString() == property.Identifier.ToString()));
+            fieldVariable = field.Declaration.Variables.Single();
+
+            var oldProperty = classParent.Members.OfType<PropertyDeclarationSyntax>().SingleOrDefault(a => a.Identifier.ToString() == property.Identifier.ToString());
+
+            var modifiers = oldProperty.Modifiers;
             if(field.AttributeLists.Count == 0)
             {
                 modifiers = modifiers.Replace(
                     modifiers.First(),
                     modifiers.First().WithLeadingTrivia(field.DescendantTokens().First().LeadingTrivia)); 
-            }   
+            }
 
             var newProperty = SyntaxFactory.PropertyDeclaration(
-                new SyntaxList<AttributeListSyntax>().AddRange(field.AttributeLists).AddRange(property.AttributeLists),
+                new SyntaxList<AttributeListSyntax>().AddRange(field.AttributeLists).AddRange(oldProperty.AttributeLists),
                 modifiers,
-                property.Type,
+                oldProperty.Type,
                 null,
-                property.Identifier,
-                SyntaxFactory.AccessorList(SyntaxFactory.List(new[] {
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
-                })));
+                oldProperty.Identifier,
+                SyntaxFactory.AccessorList(SyntaxFactory.List(
+                    property.AccessorList.Accessors.Select(a => a.WithBody(null).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)))
+                )));
             
-            var members = classParent.Members.Replace(property, newProperty);
+            if (fieldVariable.Initializer != null)
+                newProperty = newProperty.WithInitializer(fieldVariable.Initializer).WithSemicolonToken(field.SemicolonToken);
+            
+            var members = classParent.Members.Replace(oldProperty, newProperty);
             members = members.Remove(members.Single(m => m.IsEquivalentTo(field)));
             var newClass = classParent.WithMembers(members);
-
-            var fieldName = field.Declaration.Variables.Single().Identifier.ToString();
-
-            newClass = newClass.ReplaceNodes(
-                newClass.DescendantNodes().OfType<IdentifierNameSyntax>().Where(a => a.Identifier.ToString() == fieldName),
-                (a, b)=> a.WithIdentifier(SyntaxFactory.Identifier(a.GetLeadingTrivia(), SyntaxKind.IdentifierToken, property.Identifier.Text, property.Identifier.Text, a.GetTrailingTrivia())));
-
+         
             var docNode = await document.GetSyntaxRootAsync(cancellationToken);
             docNode = docNode.ReplaceNode(classParent, newClass);
             
-            docNode = Formatter.Format(docNode, document.Project.Solution.Workspace);
-            var originalSolution = document.Project.Solution.WithDocumentSyntaxRoot(document.Id, docNode);
+            docNode = Formatter.Format(docNode, solution.Workspace);
+            var resultSolution = solution.WithDocumentSyntaxRoot(document.Id, docNode);
          
-            return originalSolution;
+            return resultSolution;
         }
     }
 }

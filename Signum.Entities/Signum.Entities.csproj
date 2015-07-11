@@ -210,6 +210,9 @@
     <None Include="Symbol.md" />
     <None Include="Validation.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\Signum.Analyzer\Signum.Analyzer\bin\Debug\Signum.Analyzer.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
