@@ -68,9 +68,10 @@ namespace Signum.Test.Environment
         }
     }
 
+    [AutoInit]
     public static class NoteWithDateOperation
     {
-        public static readonly ExecuteSymbol<NoteWithDateEntity> Save = OperationSymbol.Execute<NoteWithDateEntity>();
+        public static ExecuteSymbol<NoteWithDateEntity> Save;
     }
 
     [DescriptionOptions(DescriptionOptions.All)]
@@ -169,10 +170,11 @@ namespace Signum.Test.Environment
         }
     }
 
+    [AutoInit]
     public static class ArtistOperation
     {
-        public static readonly ExecuteSymbol<ArtistEntity> Save = OperationSymbol.Execute<ArtistEntity>();
-        public static readonly ExecuteSymbol<ArtistEntity> AssignPersonalAward = OperationSymbol.Execute<ArtistEntity>();
+        public static ExecuteSymbol<ArtistEntity> Save;
+        public static ExecuteSymbol<ArtistEntity> AssignPersonalAward;
     }
 
     [Flags]
@@ -245,9 +247,10 @@ namespace Signum.Test.Environment
         }
     }
 
+    [AutoInit]
     public static class BandOperation
     {
-        public static readonly ExecuteSymbol<BandEntity> Save = OperationSymbol.Execute<BandEntity>();
+        public static ExecuteSymbol<BandEntity> Save;
     }
 
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), PrimaryKey(typeof(long))]
@@ -277,9 +280,10 @@ namespace Signum.Test.Environment
         }
     }
 
+    [AutoInit]
     public static class AwardOperation
     {
-        public static readonly ExecuteSymbol<AwardEntity> Save = OperationSymbol.Execute<AwardEntity>();
+        public static ExecuteSymbol<AwardEntity> Save;
     }
 
     public enum AwardResult
@@ -345,9 +349,10 @@ namespace Signum.Test.Environment
         }
     }
 
+    [AutoInit]
     public static class LabelOperation
     {
-        public static readonly ExecuteSymbol<LabelEntity> Save = OperationSymbol.Execute<LabelEntity>();
+        public static ExecuteSymbol<LabelEntity> Save;
     }
 
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
@@ -452,15 +457,16 @@ namespace Signum.Test.Environment
         Saved
     }
 
+    [AutoInit]
     public static class AlbumOperation
     {
-        public static readonly ExecuteSymbol<AlbumEntity> Save = OperationSymbol.Execute<AlbumEntity>();
-        public static readonly ExecuteSymbol<AlbumEntity> Modify = OperationSymbol.Execute<AlbumEntity>();
-        public static readonly ConstructSymbol<AlbumEntity>.From<BandEntity> CreateAlbumFromBand = OperationSymbol.Construct<AlbumEntity>.From<BandEntity>();
-        public static readonly DeleteSymbol<AlbumEntity> Delete = OperationSymbol.Delete<AlbumEntity>();
-        public static readonly ConstructSymbol<AlbumEntity>.From<AlbumEntity> Clone = OperationSymbol.Construct<AlbumEntity>.From<AlbumEntity>();
-        public static readonly ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateGreatestHitsAlbum = OperationSymbol.Construct<AlbumEntity>.FromMany<AlbumEntity>();
-        public static readonly ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateEmptyGreatestHitsAlbum = OperationSymbol.Construct<AlbumEntity>.FromMany<AlbumEntity>();
+        public static ExecuteSymbol<AlbumEntity> Save;
+        public static ExecuteSymbol<AlbumEntity> Modify;
+        public static ConstructSymbol<AlbumEntity>.From<BandEntity> CreateAlbumFromBand;
+        public static DeleteSymbol<AlbumEntity> Delete;
+        public static ConstructSymbol<AlbumEntity>.From<AlbumEntity> Clone;
+        public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateGreatestHitsAlbum;
+        public static ConstructSymbol<AlbumEntity>.FromMany<AlbumEntity> CreateEmptyGreatestHitsAlbum;
     }
 
     [Serializable]
@@ -545,9 +551,10 @@ namespace Signum.Test.Environment
         }
     }
 
+    [AutoInit]
     public static class ConfigOperation
     {
-        public static readonly ExecuteSymbol<ConfigEntity> Save = OperationSymbol.Execute<ConfigEntity>();
+        public static ExecuteSymbol<ConfigEntity> Save;
     }
 
     public class EmbeddedConfigEntity : EmbeddedEntity

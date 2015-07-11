@@ -21,28 +21,18 @@ namespace Signum.Entities
         static Dictionary<Type, Dictionary<string, PrimaryKey>> Ids = new Dictionary<Type, Dictionary<string, PrimaryKey>>();
 
         public Symbol() { }
-      
+
         /// <summary>
-        /// 
+        /// Similar methods of inheritors will be automatically called by Signum.MSBuildTask using AutoInitiAttribute
         /// </summary>
-        /// <param name="frame">Inheritors should use new StackFrame(1, false) and add [MethodImpl(MethodImplOptions.NoInlining)]</param>
-        /// <param name="fieldName">Inheritors should use [CallerMemberName]</param>
-        public Symbol(StackFrame frame, string fieldName)
+        public Symbol(Type declaringType, string fieldName)
         {
-            var mi = frame.GetMethod();
-
-            if (mi != mi.DeclaringType.TypeInitializer)
-                throw new InvalidOperationException(string.Format("{0} {1} can only be created in static field initializers", GetType().Name, fieldName));
-
-            if (!IsStaticClass(mi.DeclaringType))
-                throw new InvalidOperationException(string.Format("{0} {1} is declared in {2}, but {2} is not static", GetType().Name, fieldName, mi.DeclaringType.Name));
-
-            this.fieldInfo = mi.DeclaringType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            this.fieldInfo = declaringType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
             if (this.fieldInfo == null)
-                throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, mi.DeclaringType.Name));
+                throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, declaringType.Name));
 
-            this.Key = mi.DeclaringType.Name + "." + fieldName;
+            this.Key = declaringType.Name + "." + fieldName;
 
             var dic = Ids.TryGetC(this.GetType());
             if (dic != null)

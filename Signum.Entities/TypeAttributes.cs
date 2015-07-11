@@ -10,6 +10,14 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
+    /// <summary>
+    /// When used on a static class, auto-initializes his static fields of symbols or operations 
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public sealed class AutoInitAttribute : Attribute
+    {
+    }
+
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class CleanTypeNameAttribute: Attribute
     {

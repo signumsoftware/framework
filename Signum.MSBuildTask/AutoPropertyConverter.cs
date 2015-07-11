@@ -6,7 +6,7 @@ using Mono.Cecil.Cil;
 
 namespace Signum.MSBuildTask
 {
-    internal class PropertyFixer
+    internal class AutoPropertyConverter
     {
         public AssemblyDefinition Assembly;
         public PreloadingAssemblyResolver Resolver;
@@ -16,12 +16,12 @@ namespace Signum.MSBuildTask
         public MethodDefinition SetMethod;
         public MethodDefinition GetMethod;
 
-        public PropertyFixer(AssemblyDefinition assembly, PreloadingAssemblyResolver resolver)
+        public AutoPropertyConverter(AssemblyDefinition assembly, PreloadingAssemblyResolver resolver)
         {
             this.Assembly = assembly;
             this.Resolver = resolver;
 
-            this.SigumEntities = assembly.Name.Name == "Signum.Entities" ? assembly : resolver.Resolve("Signum.Entities");
+            this.SigumEntities = assembly.Name.Name == "Signum.Entities" ? assembly : resolver.SignumEntities;
             this.ModifiableEntity = SigumEntities.MainModule.GetType("Signum.Entities", "ModifiableEntity");
             this.SetMethod = this.ModifiableEntity.Methods.Single(m => m.Name == "Set" && m.IsDefinition);
             this.GetMethod = this.ModifiableEntity.Methods.Single(m => m.Name == "Get" && m.IsDefinition);
@@ -30,7 +30,7 @@ namespace Signum.MSBuildTask
         internal void FixProperties()
         {
             var entityTypes = (from t in this.Assembly.MainModule.Types
-                               where t.IsClass && Parents(t).Any(td => td.FullName == ModifiableEntity.FullName) && t.HasProperties
+                               where t.IsClass && t.Parents().Any(td => td.FullName == ModifiableEntity.FullName) && t.HasProperties
                                select t).ToList();
 
             foreach (var type in entityTypes)
@@ -94,12 +94,6 @@ namespace Signum.MSBuildTask
         static string BackingFieldName(PropertyDefinition p)
         {
             return "<" + p.Name + ">k__BackingField";
-        }
-
-        private static IEnumerable<TypeDefinition> Parents(TypeDefinition initial)
-        {
-            for (var t = initial; t != null && !t.FullName.StartsWith("System."); t = t.BaseType?.Resolve())
-                yield return t;
         }
     }
 }

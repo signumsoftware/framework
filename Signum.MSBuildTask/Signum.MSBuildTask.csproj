@@ -60,9 +60,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MsBuildExtensions.cs" />
+    <Compile Include="FieldAutoInitiaizer.cs" />
     <Compile Include="PreloadingAssemblyResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyFixer.cs" />
+    <Compile Include="AutoPropertyConverter.cs" />
     <Compile Include="SignumTask.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

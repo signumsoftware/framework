@@ -34,6 +34,9 @@ namespace Signum.Engine.Operations
 
             public Construct(ConstructSymbol<T>.Simple symbol)
             {
+                if (symbol == null)
+                    throw new ArgumentNullException(nameof(symbol));
+
                 this.Symbol = symbol;
             }
 
@@ -165,6 +168,9 @@ namespace Signum.Engine.Operations
 
             public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
             {
+                if (symbol == null)
+                    throw new ArgumentNullException(nameof(symbol));
+
                 this.Symbol = symbol;
                 this.Lite = true;
             }
@@ -304,6 +310,9 @@ namespace Signum.Engine.Operations
 
             public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
             {
+                if (symbol == null)
+                    throw new ArgumentNullException(nameof(symbol));
+
                 this.Symbol = symbol;
             }
 
@@ -434,6 +443,9 @@ namespace Signum.Engine.Operations
 
             public Execute(ExecuteSymbol<T> symbol)
             {
+                if (symbol == null)
+                    throw new ArgumentNullException(nameof(symbol));
+
                 this.Symbol = symbol;
                 this.Lite = true;
             }
@@ -575,6 +587,9 @@ namespace Signum.Engine.Operations
 
             public Delete(DeleteSymbol<T> symbol)
             {
+                if (symbol == null)
+                    throw new ArgumentNullException(nameof(symbol));
+
                 this.Symbol = symbol;
                 this.Lite = true;
             }

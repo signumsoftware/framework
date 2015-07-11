@@ -420,9 +420,10 @@ namespace Signum.Engine.CodeGeneration
                 return null;
 
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine("[AutoInit]");
             sb.AppendLine("public static class {0}".FormatWith(GetOperationName(table.Name)));
             sb.AppendLine("{");
-            sb.AppendLine("    public static readonly ExecuteSymbol<{0}> Save = OperationSymbol.Execute<{0}>();".FormatWith(GetEntityName(table.Name)));
+            sb.AppendLine("    public static readonly ExecuteSymbol<{0}> Save;".FormatWith(GetEntityName(table.Name)));
             sb.AppendLine("}");
             return sb.ToString();
         }

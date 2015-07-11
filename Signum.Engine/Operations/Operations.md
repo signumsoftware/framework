@@ -60,12 +60,12 @@ Example for `Execute` and `Delete`:
 ```C#
 public static class AlbumOperation
 {
-    public static readonly ExecuteSymbol<OrderEntity> SaveNew = OperationSymbol.Execute<OrderEntity>();
-    public static readonly ExecuteSymbol<OrderEntity> Save = OperationSymbol.Execute<OrderEntity>();
-    public static readonly ExecuteSymbol<OrderEntity> Ship = OperationSymbol.Execute<OrderEntity>();
-    public static readonly ExecuteSymbol<OrderEntity> Cancel = OperationSymbol.Execute<OrderEntity>();
+    public static ExecuteSymbol<OrderEntity> SaveNew;
+    public static ExecuteSymbol<OrderEntity> Save;
+    public static ExecuteSymbol<OrderEntity> Ship;
+    public static ExecuteSymbol<OrderEntity> Cancel;
 
-    public static readonly DeleteSymbol<OrderEntity> Delete = OperationSymbol.Delete<OrderEntity>();
+    public static DeleteSymbol<OrderEntity> Delete;
 }
 ```
 
@@ -76,9 +76,9 @@ Declaring `Construct`, `ConstructFrom` and `ConstructFromMany` is a bit more com
 ```C#
 public static class AlbumOperation
 {
-    public static readonly ConstructSymbol<OrderEntity>.Simple Create = OperationSymbol.Construct<OrderEntity>.Simple();
-    public static readonly ConstructSymbol<OrderEntity>.From<CustomerEntity> CreateOrderFromCustomer = OperationSymbol.Construct<OrderEntity>.From<CustomerEntity>();
-    public static readonly ConstructSymbol<OrderEntity>.FromMany<ProductEntity> CreateOrderFromProducts = OperationSymbol.Construct<OrderEntity>.FromMany<ProductEntity>();
+    public static ConstructSymbol<OrderEntity>.Simple Create;
+    public static ConstructSymbol<OrderEntity>.From<CustomerEntity> CreateOrderFromCustomer;
+    public static ConstructSymbol<OrderEntity>.FromMany<ProductEntity> CreateOrderFromProducts;
 }
 ```
 
@@ -512,7 +512,7 @@ So, if you declare the property just once:
 ```C#
 public static class AnimalOperation
 {
-    public static readonly ExecuteSymbol<AnimalEntity> Eat = OperationSymbol.Execute<AnimalEntity>();   
+    public static ExecuteSymbol<AnimalEntity> Eat;   
 }
 ``` 
 

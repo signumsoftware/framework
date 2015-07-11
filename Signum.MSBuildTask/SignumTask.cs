@@ -24,7 +24,7 @@ namespace Signum.MSBuildTask
 
         public override bool Execute()
         {
-            Log.LogMessage("SignumTask starting: {0}", Assembly);
+            Log.LogMessage("Signum.MSBuildTask starting: {0}", Assembly);
             try
             {
                 var resolver = new PreloadingAssemblyResolver(References);
@@ -40,11 +40,15 @@ namespace Signum.MSBuildTask
 
                 if (AlreadyProcessed(assembly))
                 {
-                    Log.LogMessage("SignumTask already processed: {0}", Assembly);
+                    Log.LogMessage("Signum.MSBuildTask already processed: {0}", Assembly);
                     return true;
                 }
 
-                new PropertyFixer(assembly, resolver).FixProperties();
+                new AutoPropertyConverter(assembly, resolver).FixProperties();
+                new FieldAutoInitializer(assembly, resolver, Log).FixAutoInitializer();
+
+                if (Log.HasLoggedErrors)
+                    return true;
 
                 MarkAsProcessed(assembly, resolver);
 
@@ -54,27 +58,30 @@ namespace Signum.MSBuildTask
                     SymbolWriterProvider = hasPdb ? new PdbWriterProvider() : null,
                     StrongNameKeyPair = KeyFile == null ? null : new StrongNameKeyPair(File.ReadAllBytes(KeyFile))
                 });
-
+                
                 return true;
             }
             catch (Exception e)
             {
-                Log.LogError("SignumTask error: {0}", e.Message);
+                Log.LogError("Exception in Signum.MSBuildTask: {0}", e.Message);
                 return false;
             }
         }
 
-        private static bool AlreadyProcessed(AssemblyDefinition assembly)
+        private bool AlreadyProcessed(AssemblyDefinition assembly)
         {
             var nameof = typeof(GeneratedCodeAttribute).FullName;
-            return assembly.CustomAttributes.Any(a => a.AttributeType.FullName == nameof && ((string)a.ConstructorArguments[0].Value) == "SignumTask");
+            var attr = assembly.CustomAttributes
+                .Any(a => a.AttributeType.FullName == nameof && ((string)a.ConstructorArguments[0].Value) == "SignumTask");
+
+            return attr;
         }
 
         private void MarkAsProcessed(AssemblyDefinition assembly, IAssemblyResolver resolver)
         {
             TypeDefinition generatedCodeAttribute = resolver.Resolve("System").MainModule.GetType(typeof(GeneratedCodeAttribute).FullName);
-            MethodDefinition constructor = generatedCodeAttribute.Methods.Single(a=>a.IsConstructor && a.Parameters.Count == 2);
-            
+            MethodDefinition constructor = generatedCodeAttribute.Methods.Single(a => a.IsConstructor && a.Parameters.Count == 2);
+
             TypeReference stringType = assembly.MainModule.TypeSystem.String;
             assembly.CustomAttributes.Add(new CustomAttribute(assembly.MainModule.ImportReference(constructor))
             {
@@ -85,6 +92,5 @@ namespace Signum.MSBuildTask
                 }
             });
         }
-
     }
 }
