@@ -38,9 +38,10 @@ namespace Signum.Entities.Translation
         }
     }
 
+    [AutoInit]
     public static class TranslationReplacementOperation
     {
-        public static readonly ExecuteSymbol<TranslationReplacementEntity> Save = OperationSymbol.Execute<TranslationReplacementEntity>();
-        public static readonly DeleteSymbol<TranslationReplacementEntity> Delete = OperationSymbol.Delete<TranslationReplacementEntity>();
+        public static ExecuteSymbol<TranslationReplacementEntity> Save;
+        public static DeleteSymbol<TranslationReplacementEntity> Delete;
     }
 }

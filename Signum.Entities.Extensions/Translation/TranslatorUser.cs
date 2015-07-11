@@ -77,16 +77,18 @@ namespace Signum.Entities.Translation
         Read,
     }
 
+    [AutoInit]
     public static class TranslationPermission
     {
-        public static readonly PermissionSymbol TranslateCode = new PermissionSymbol();
-        public static readonly PermissionSymbol TranslateInstances = new PermissionSymbol();
+        public static PermissionSymbol TranslateCode;
+        public static PermissionSymbol TranslateInstances;
     }
 
+    [AutoInit]
     public static class TranslatorUserOperation
     {
-        public static readonly ExecuteSymbol<TranslatorUserEntity> Save = OperationSymbol.Execute<TranslatorUserEntity>();
-        public static readonly DeleteSymbol<TranslatorUserEntity> Delete = OperationSymbol.Delete<TranslatorUserEntity>();
+        public static ExecuteSymbol<TranslatorUserEntity> Save;
+        public static DeleteSymbol<TranslatorUserEntity> Delete;
     }
 
     public enum TranslationMessage

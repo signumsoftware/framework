@@ -517,19 +517,20 @@ namespace Signum.Entities.Mailing
 
     public static class EmailMessageProcess
     {
-        public static readonly ProcessAlgorithmSymbol SendEmails = new ProcessAlgorithmSymbol();
+        public static ProcessAlgorithmSymbol SendEmails;
     }
 
+    [AutoInit]
     public static class EmailMessageOperation
     {
-        public static readonly ExecuteSymbol<EmailMessageEntity> Save = OperationSymbol.Execute<EmailMessageEntity>();
-        public static readonly ExecuteSymbol<EmailMessageEntity> ReadyToSend = OperationSymbol.Execute<EmailMessageEntity>();
-        public static readonly ExecuteSymbol<EmailMessageEntity> Send = OperationSymbol.Execute<EmailMessageEntity>();
-        public static readonly ConstructSymbol<EmailMessageEntity>.From<EmailMessageEntity> ReSend = OperationSymbol.Construct<EmailMessageEntity>.From<EmailMessageEntity>();
-        public static readonly ConstructSymbol<ProcessEntity>.FromMany<EmailMessageEntity> ReSendEmails = OperationSymbol.Construct<ProcessEntity>.FromMany<EmailMessageEntity>();
-        public static readonly ConstructSymbol<EmailMessageEntity>.Simple CreateMail = OperationSymbol.Construct<EmailMessageEntity>.Simple();
-        public static readonly ConstructSymbol<EmailMessageEntity>.From<EmailTemplateEntity> CreateMailFromTemplate = OperationSymbol.Construct<EmailMessageEntity>.From<EmailTemplateEntity>();
-        public static readonly DeleteSymbol<EmailMessageEntity> Delete = OperationSymbol.Delete<EmailMessageEntity>();
+        public static ExecuteSymbol<EmailMessageEntity> Save;
+        public static ExecuteSymbol<EmailMessageEntity> ReadyToSend;
+        public static ExecuteSymbol<EmailMessageEntity> Send;
+        public static ConstructSymbol<EmailMessageEntity>.From<EmailMessageEntity> ReSend;
+        public static ConstructSymbol<ProcessEntity>.FromMany<EmailMessageEntity> ReSendEmails;
+        public static ConstructSymbol<EmailMessageEntity>.Simple CreateMail;
+        public static ConstructSymbol<EmailMessageEntity>.From<EmailTemplateEntity> CreateMailFromTemplate;
+        public static DeleteSymbol<EmailMessageEntity> Delete;
     }
 
     public enum EmailMessageMessage
@@ -565,14 +566,16 @@ namespace Signum.Entities.Mailing
         }
     }
 
+    [AutoInit]
     public static class EmailFileType
     {
-        public static readonly FileTypeSymbol Attachment = new FileTypeSymbol();
+        public static FileTypeSymbol Attachment;
     }
 
+    [AutoInit]
     public static class AsyncEmailSenderPermission
     {
-        public static readonly PermissionSymbol ViewAsyncEmailSenderPanel = new PermissionSymbol();
+        public static PermissionSymbol ViewAsyncEmailSenderPanel;
     }
 }
 

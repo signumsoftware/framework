@@ -216,15 +216,17 @@ namespace Signum.Entities.UserQueries
         }
     }
 
+    [AutoInit]
     public static class UserQueryPermission
     {
-        public static readonly PermissionSymbol ViewUserQuery = new PermissionSymbol();
+        public static PermissionSymbol ViewUserQuery;
     }
 
+    [AutoInit]
     public static class UserQueryOperation
     {
-        public static readonly ExecuteSymbol<UserQueryEntity> Save = OperationSymbol.Execute<UserQueryEntity>();
-        public static readonly DeleteSymbol<UserQueryEntity> Delete = OperationSymbol.Delete<UserQueryEntity>();
+        public static ExecuteSymbol<UserQueryEntity> Save;
+        public static DeleteSymbol<UserQueryEntity> Delete;
     }
 
 

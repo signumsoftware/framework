@@ -81,9 +81,10 @@ namespace Signum.Entities.Isolation
         }
     }
 
+    [AutoInit]
     public static class IsolationOperation
     {
-        public static readonly ExecuteSymbol<IsolationEntity> Save = OperationSymbol.Execute<IsolationEntity>(); 
+        public static ExecuteSymbol<IsolationEntity> Save; 
     }
 
     public enum IsolationMessage

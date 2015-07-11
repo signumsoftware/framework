@@ -152,14 +152,15 @@ namespace Signum.Entities.Authorization
         Disabled,
     }
 
+    [AutoInit]
     public static class UserOperation
     {
-        public static readonly ConstructSymbol<UserEntity>.Simple Create = OperationSymbol.Construct<UserEntity>.Simple();
-        public static readonly ExecuteSymbol<UserEntity> SaveNew = OperationSymbol.Execute<UserEntity>();
-        public static readonly ExecuteSymbol<UserEntity> Save = OperationSymbol.Execute<UserEntity>();
-        public static readonly ExecuteSymbol<UserEntity> Enable = OperationSymbol.Execute<UserEntity>();
-        public static readonly ExecuteSymbol<UserEntity> Disable = OperationSymbol.Execute<UserEntity>();
-        public static readonly ExecuteSymbol<UserEntity> SetPassword = OperationSymbol.Execute<UserEntity>();
+        public static ConstructSymbol<UserEntity>.Simple Create;
+        public static ExecuteSymbol<UserEntity> SaveNew;
+        public static ExecuteSymbol<UserEntity> Save;
+        public static ExecuteSymbol<UserEntity> Enable;
+        public static ExecuteSymbol<UserEntity> Disable;
+        public static ExecuteSymbol<UserEntity> SetPassword;
     }
 
     [Serializable]

@@ -82,9 +82,10 @@ namespace Signum.Entities.UserAssets
         SucessfullyImported,
     }
 
+    [AutoInit]
     public static class UserAssetPermission
     {
-        public static readonly PermissionSymbol UserAssetsToXML = new PermissionSymbol();
+        public static PermissionSymbol UserAssetsToXML;
     }
 
     public interface IToXmlContext

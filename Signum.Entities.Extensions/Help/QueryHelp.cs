@@ -95,8 +95,9 @@ namespace Signum.Entities.Help
         }
     }
 
+    [AutoInit]
     public static class QueryHelpOperation
     {
-        public static readonly ExecuteSymbol<QueryHelpEntity> Save = OperationSymbol.Execute<QueryHelpEntity>();
+        public static ExecuteSymbol<QueryHelpEntity> Save;
     }
 }

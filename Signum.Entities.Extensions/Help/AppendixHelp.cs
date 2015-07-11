@@ -52,8 +52,9 @@ namespace Signum.Entities.Help
         }
     }
 
+    [AutoInit]
     public static class AppendixHelpOperation
     {
-        public static readonly ExecuteSymbol<AppendixHelpEntity> Save = OperationSymbol.Execute<AppendixHelpEntity>();
+        public static ExecuteSymbol<AppendixHelpEntity> Save;
     }
 }

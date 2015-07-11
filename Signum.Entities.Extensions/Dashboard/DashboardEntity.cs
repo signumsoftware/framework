@@ -211,17 +211,19 @@ namespace Signum.Entities.Dashboard
         }
     }
 
+    [AutoInit]
     public static class DashboardPermission
     {
-        public static readonly PermissionSymbol ViewDashboard = new PermissionSymbol();
+        public static PermissionSymbol ViewDashboard;
     }
 
+    [AutoInit]
     public static class DashboardOperation
     {
-        public static readonly ConstructSymbol<DashboardEntity>.Simple Create = OperationSymbol.Construct<DashboardEntity>.Simple();
-        public static readonly ExecuteSymbol<DashboardEntity> Save = OperationSymbol.Execute<DashboardEntity>();
-        public static readonly ConstructSymbol<DashboardEntity>.From<DashboardEntity> Clone = OperationSymbol.Construct<DashboardEntity>.From<DashboardEntity>();
-        public static readonly DeleteSymbol<DashboardEntity> Delete = OperationSymbol.Delete<DashboardEntity>();
+        public static ConstructSymbol<DashboardEntity>.Simple Create;
+        public static ExecuteSymbol<DashboardEntity> Save;
+        public static ConstructSymbol<DashboardEntity>.From<DashboardEntity> Clone;
+        public static DeleteSymbol<DashboardEntity> Delete;
     }
 
     public enum DashboardMessage

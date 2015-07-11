@@ -77,10 +77,11 @@ namespace Signum.Entities.Mailing
         }
     }
 
+    [AutoInit]
     public static class EmailMasterTemplateOperation
     {
-        public static readonly ConstructSymbol<EmailMasterTemplateEntity>.Simple Create = OperationSymbol.Construct<EmailMasterTemplateEntity>.Simple();
-        public static readonly ExecuteSymbol<EmailMasterTemplateEntity> Save = OperationSymbol.Execute<EmailMasterTemplateEntity>();
+        public static ConstructSymbol<EmailMasterTemplateEntity>.Simple Create;
+        public static ExecuteSymbol<EmailMasterTemplateEntity> Save;
     }
 
     [Serializable]

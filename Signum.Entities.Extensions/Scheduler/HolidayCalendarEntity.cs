@@ -58,10 +58,11 @@ namespace Signum.Entities.Scheduler
         }
     }
 
+    [AutoInit]
     public static class HolidayCalendarOperation
     {
-        public static readonly ExecuteSymbol<HolidayCalendarEntity> Save = OperationSymbol.Execute<HolidayCalendarEntity>();
-        public static readonly DeleteSymbol<HolidayCalendarEntity> Delete = OperationSymbol.Delete<HolidayCalendarEntity>();
+        public static ExecuteSymbol<HolidayCalendarEntity> Save;
+        public static DeleteSymbol<HolidayCalendarEntity> Delete;
     }
 
     [Serializable]

@@ -336,11 +336,12 @@ namespace Signum.Entities.Chart
         }
     }
 
+    [AutoInit]
     public static class ChartScriptOperation
     {
-        public static readonly ExecuteSymbol<ChartScriptEntity> Save = OperationSymbol.Execute<ChartScriptEntity>();
-        public static readonly ConstructSymbol<ChartScriptEntity>.From<ChartScriptEntity> Clone = OperationSymbol.Construct<ChartScriptEntity>.From<ChartScriptEntity>();
-        public static readonly DeleteSymbol<ChartScriptEntity> Delete = OperationSymbol.Delete<ChartScriptEntity>();
+        public static ExecuteSymbol<ChartScriptEntity> Save;
+        public static ConstructSymbol<ChartScriptEntity>.From<ChartScriptEntity> Clone;
+        public static DeleteSymbol<ChartScriptEntity> Delete;
     }
 
     public enum GroupByChart

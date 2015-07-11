@@ -89,9 +89,10 @@ namespace Signum.Entities.Mailing
     }
 
 
+    [AutoInit]
     public static class SmtpConfigurationOperation
     {
-        public static readonly ExecuteSymbol<SmtpConfigurationEntity> Save = OperationSymbol.Execute<SmtpConfigurationEntity>();
+        public static ExecuteSymbol<SmtpConfigurationEntity> Save;
     }
 
     [Serializable]

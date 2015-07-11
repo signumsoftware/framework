@@ -134,12 +134,13 @@ namespace Signum.Entities.Word
         }
     }
 
+    [AutoInit]
     public static class WordTemplateOperation
     {
-        public static readonly ExecuteSymbol<WordTemplateEntity> Save = OperationSymbol.Execute<WordTemplateEntity>();
-        public static readonly ExecuteSymbol<WordTemplateEntity> CreateWordReport = OperationSymbol.Execute<WordTemplateEntity>();
+        public static ExecuteSymbol<WordTemplateEntity> Save;
+        public static ExecuteSymbol<WordTemplateEntity> CreateWordReport;
 
-        public static readonly ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate = OperationSymbol.Construct<WordTemplateEntity>.From<SystemWordTemplateEntity>();
+        public static ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate;
     }
 
     public enum WordTemplateMessage
@@ -173,8 +174,9 @@ namespace Signum.Entities.Word
         }
     }
 
+    [AutoInit]
     public static class WordTemplatePermission
     {
-        public static readonly PermissionSymbol GenerateReport = new PermissionSymbol();
+        public static PermissionSymbol GenerateReport;
     }
 }

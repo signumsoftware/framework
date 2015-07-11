@@ -138,16 +138,17 @@ namespace Signum.Entities.Mailing
 
     public static class NewsletterProcess
     {
-        public static readonly ProcessAlgorithmSymbol SendNewsletter = new ProcessAlgorithmSymbol();
+        public static ProcessAlgorithmSymbol SendNewsletter;
     }
 
+    [AutoInit]
     public static class NewsletterOperation
     {
-        public static readonly ExecuteSymbol<NewsletterEntity> Save = OperationSymbol.Execute<NewsletterEntity>();
-        public static readonly ConstructSymbol<ProcessEntity>.From<NewsletterEntity> Send = OperationSymbol.Construct<ProcessEntity>.From<NewsletterEntity>();
-        public static readonly ExecuteSymbol<NewsletterEntity> AddRecipients = OperationSymbol.Execute<NewsletterEntity>();
-        public static readonly ExecuteSymbol<NewsletterEntity> RemoveRecipients = OperationSymbol.Execute<NewsletterEntity>();
-        public static readonly ConstructSymbol<NewsletterEntity>.From<NewsletterEntity> Clone = OperationSymbol.Construct<NewsletterEntity>.From<NewsletterEntity>();
+        public static ExecuteSymbol<NewsletterEntity> Save;
+        public static ConstructSymbol<ProcessEntity>.From<NewsletterEntity> Send;
+        public static ExecuteSymbol<NewsletterEntity> AddRecipients;
+        public static ExecuteSymbol<NewsletterEntity> RemoveRecipients;
+        public static ConstructSymbol<NewsletterEntity>.From<NewsletterEntity> Clone;
     }
 
     public enum NewsletterState

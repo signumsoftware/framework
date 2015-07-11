@@ -84,9 +84,10 @@ namespace Signum.Entities.Help
         }
     }
 
+    [AutoInit]
     public static class EntityHelpOperation
     {
-        public static readonly ExecuteSymbol<EntityHelpEntity> Save = OperationSymbol.Execute<EntityHelpEntity>();
+        public static ExecuteSymbol<EntityHelpEntity> Save;
     }
 
     [Serializable]

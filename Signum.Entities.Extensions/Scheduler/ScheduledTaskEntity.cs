@@ -74,10 +74,11 @@ namespace Signum.Entities.Scheduler
         public const string None = "none";
     }
 
+    [AutoInit]
     public static class ScheduledTaskOperation
     {
-        public static readonly ExecuteSymbol<ScheduledTaskEntity> Save = OperationSymbol.Execute<ScheduledTaskEntity>();
-        public static readonly DeleteSymbol<ScheduledTaskEntity> Delete = OperationSymbol.Delete<ScheduledTaskEntity>();
+        public static ExecuteSymbol<ScheduledTaskEntity> Save;
+        public static DeleteSymbol<ScheduledTaskEntity> Delete;
     }
 
     public enum TaskMessage
@@ -87,16 +88,19 @@ namespace Signum.Entities.Scheduler
         LastExecution
     }
 
+    [AutoInit]
     public static class TaskOperation
     {
-        public static readonly ConstructSymbol<IEntity>.From<ITaskEntity> ExecuteSync = OperationSymbol.Construct<IEntity>.From<ITaskEntity>();
-        public static readonly ExecuteSymbol<ITaskEntity> ExecuteAsync = OperationSymbol.Execute<ITaskEntity>();
+        public static ConstructSymbol<IEntity>.From<ITaskEntity> ExecuteSync;
+        public static ExecuteSymbol<ITaskEntity> ExecuteAsync;
     }
 
 
+
+    [AutoInit]
     public static class SchedulerPermission
     {
-        public static readonly PermissionSymbol ViewSchedulerPanel = new PermissionSymbol();
+        public static PermissionSymbol ViewSchedulerPanel;
     }
 
     public interface ITaskEntity : IEntity

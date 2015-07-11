@@ -54,9 +54,10 @@ namespace Signum.Entities.Help
         }
     }
 
+    [AutoInit]
     public static class NamespaceHelpOperation
     {
-        public static readonly ExecuteSymbol<NamespaceHelpEntity> Save = OperationSymbol.Execute<NamespaceHelpEntity>();
+        public static ExecuteSymbol<NamespaceHelpEntity> Save;
     }
 
 

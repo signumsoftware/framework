@@ -138,17 +138,18 @@ namespace Signum.Entities.SMS
         Failed,
     }
 
+    [AutoInit]
     public static class SMSMessageOperation
     {
-        public static readonly ExecuteSymbol<SMSMessageEntity> Send = OperationSymbol.Execute<SMSMessageEntity>();
-        public static readonly ExecuteSymbol<SMSMessageEntity> UpdateStatus = OperationSymbol.Execute<SMSMessageEntity>();
-        public static readonly ConstructSymbol<ProcessEntity>.FromMany<SMSMessageEntity> CreateUpdateStatusPackage = OperationSymbol.Construct<ProcessEntity>.FromMany<SMSMessageEntity>();
-        public static readonly ConstructSymbol<SMSMessageEntity>.From<SMSTemplateEntity> CreateSMSFromSMSTemplate = OperationSymbol.Construct<SMSMessageEntity>.From<SMSTemplateEntity>();
-        public static readonly ConstructSymbol<SMSMessageEntity>.From<Entity> CreateSMSWithTemplateFromEntity = OperationSymbol.Construct<SMSMessageEntity>.From<Entity>();
-        public static readonly ConstructSymbol<SMSMessageEntity>.From<Entity> CreateSMSFromEntity = OperationSymbol.Construct<SMSMessageEntity>.From<Entity>();
+        public static ExecuteSymbol<SMSMessageEntity> Send;
+        public static ExecuteSymbol<SMSMessageEntity> UpdateStatus;
+        public static ConstructSymbol<ProcessEntity>.FromMany<SMSMessageEntity> CreateUpdateStatusPackage;
+        public static ConstructSymbol<SMSMessageEntity>.From<SMSTemplateEntity> CreateSMSFromSMSTemplate;
+        public static ConstructSymbol<SMSMessageEntity>.From<Entity> CreateSMSWithTemplateFromEntity;
+        public static ConstructSymbol<SMSMessageEntity>.From<Entity> CreateSMSFromEntity;
 
-        public static readonly ConstructSymbol<ProcessEntity>.FromMany<Entity> SendSMSMessages = OperationSymbol.Construct<ProcessEntity>.FromMany<Entity>();
-        public static readonly ConstructSymbol<ProcessEntity>.FromMany<Entity> SendSMSMessagesFromTemplate = OperationSymbol.Construct<ProcessEntity>.FromMany<Entity>();
+        public static ConstructSymbol<ProcessEntity>.FromMany<Entity> SendSMSMessages;
+        public static ConstructSymbol<ProcessEntity>.FromMany<Entity> SendSMSMessagesFromTemplate;
     }
 
     [Serializable]
@@ -178,9 +179,10 @@ namespace Signum.Entities.SMS
         }
     }
 
+    [AutoInit]
     public static class SMSMessageProcess
     {
-        public static readonly ProcessAlgorithmSymbol Send = new ProcessAlgorithmSymbol();
-        public static readonly ProcessAlgorithmSymbol UpdateStatus = new ProcessAlgorithmSymbol();
+        public static ProcessAlgorithmSymbol Send;
+        public static ProcessAlgorithmSymbol UpdateStatus;
     }
 }

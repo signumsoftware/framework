@@ -155,13 +155,14 @@ namespace Signum.Entities.Alerts
         Future,
     }
 
+    [AutoInit]
     public static class AlertOperation
     {
-        public static readonly ConstructSymbol<AlertEntity>.From<Entity> CreateAlertFromEntity = OperationSymbol.Construct<AlertEntity>.From<Entity>();
-        public static readonly ExecuteSymbol<AlertEntity> SaveNew = OperationSymbol.Execute<AlertEntity>();
-        public static readonly ExecuteSymbol<AlertEntity> Save = OperationSymbol.Execute<AlertEntity>();
-        public static readonly ExecuteSymbol<AlertEntity> Attend = OperationSymbol.Execute<AlertEntity>();
-        public static readonly ExecuteSymbol<AlertEntity> Unattend = OperationSymbol.Execute<AlertEntity>();
+        public static ConstructSymbol<AlertEntity>.From<Entity> CreateAlertFromEntity;
+        public static ExecuteSymbol<AlertEntity> SaveNew;
+        public static ExecuteSymbol<AlertEntity> Save;
+        public static ExecuteSymbol<AlertEntity> Attend;
+        public static ExecuteSymbol<AlertEntity> Unattend;
     }
 
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
@@ -175,9 +176,10 @@ namespace Signum.Entities.Alerts
         }
     }
 
+    [AutoInit]
     public static class AlertTypeOperation
     {
-        public static readonly ExecuteSymbol<AlertTypeEntity> Save = OperationSymbol.Execute<AlertTypeEntity>();
+        public static ExecuteSymbol<AlertTypeEntity> Save;
     }
 
     public enum AlertMessage

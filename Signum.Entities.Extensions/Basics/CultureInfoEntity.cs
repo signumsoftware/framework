@@ -84,8 +84,9 @@ namespace Signum.Entities.Basics
         }
     }
 
+    [AutoInit]
     public static class CultureInfoOperation
     {
-        public static readonly ExecuteSymbol<CultureInfoEntity> Save = OperationSymbol.Execute<CultureInfoEntity>();
+        public static ExecuteSymbol<CultureInfoEntity> Save;
     }
 }

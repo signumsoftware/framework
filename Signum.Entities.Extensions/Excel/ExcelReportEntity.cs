@@ -47,10 +47,11 @@ namespace Signum.Entities.Excel
         }
     }
 
+    [AutoInit]
     public static class ExcelReportOperation
     {
-        public static readonly ExecuteSymbol<ExcelReportEntity> Save = OperationSymbol.Execute<ExcelReportEntity>();
-        public static readonly DeleteSymbol<ExcelReportEntity> Delete = OperationSymbol.Delete<ExcelReportEntity>();
+        public static ExecuteSymbol<ExcelReportEntity> Save;
+        public static DeleteSymbol<ExcelReportEntity> Delete;
     }
 
     public enum ExcelMessage

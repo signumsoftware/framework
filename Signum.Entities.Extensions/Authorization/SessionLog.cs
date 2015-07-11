@@ -74,8 +74,9 @@ namespace Signum.Entities.Authorization
         }
     }
 
+    [AutoInit]
     public static class SessionLogPermission
     {
-        public static readonly PermissionSymbol TrackSession = new PermissionSymbol();
+        public static PermissionSymbol TrackSession;
     }
 }

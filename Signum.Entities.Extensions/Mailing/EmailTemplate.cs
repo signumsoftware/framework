@@ -331,13 +331,14 @@ namespace Signum.Entities.Mailing
         }
     }
 
+    [AutoInit]
     public static class EmailTemplateOperation
     {
-        public static readonly ConstructSymbol<EmailTemplateEntity>.From<SystemEmailEntity> CreateEmailTemplateFromSystemEmail = OperationSymbol.Construct<EmailTemplateEntity>.From<SystemEmailEntity>();
-        public static readonly ConstructSymbol<EmailTemplateEntity>.Simple Create = OperationSymbol.Construct<EmailTemplateEntity>.Simple();
-        public static readonly ExecuteSymbol<EmailTemplateEntity> Save = OperationSymbol.Execute<EmailTemplateEntity>();
-        public static readonly ExecuteSymbol<EmailTemplateEntity> Enable = OperationSymbol.Execute<EmailTemplateEntity>();
-        public static readonly ExecuteSymbol<EmailTemplateEntity> Disable = OperationSymbol.Execute<EmailTemplateEntity>();
+        public static ConstructSymbol<EmailTemplateEntity>.From<SystemEmailEntity> CreateEmailTemplateFromSystemEmail;
+        public static ConstructSymbol<EmailTemplateEntity>.Simple Create;
+        public static ExecuteSymbol<EmailTemplateEntity> Save;
+        public static ExecuteSymbol<EmailTemplateEntity> Enable;
+        public static ExecuteSymbol<EmailTemplateEntity> Disable;
     }
 
     public enum EmailTemplateMessage

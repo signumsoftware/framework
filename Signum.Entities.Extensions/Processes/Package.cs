@@ -58,9 +58,10 @@ namespace Signum.Entities.Processes
         }
     }
 
+    [AutoInit]
     public static class PackageOperationProcess
     {
-        public static readonly ProcessAlgorithmSymbol PackageOperation = new ProcessAlgorithmSymbol();
+        public static ProcessAlgorithmSymbol PackageOperation;
     }
 
 

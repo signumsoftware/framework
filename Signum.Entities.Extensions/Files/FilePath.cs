@@ -162,9 +162,11 @@ namespace Signum.Entities.Files
     }
 
 
+
+    [AutoInit]
     public static class FilePathOperation
     {
-        public static readonly ExecuteSymbol<FilePathEntity> Save = OperationSymbol.Execute<FilePathEntity>();        
+        public static ExecuteSymbol<FilePathEntity> Save;        
     }
 
 

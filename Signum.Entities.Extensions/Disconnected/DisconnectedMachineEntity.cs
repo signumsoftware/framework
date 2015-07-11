@@ -92,11 +92,12 @@ namespace Signum.Entities.Disconnected
         Fixed,
     }
 
+    [AutoInit]
     public static class DisconnectedMachineOperation
     {
-        public static readonly ExecuteSymbol<DisconnectedMachineEntity> Save = OperationSymbol.Execute<DisconnectedMachineEntity>();
-        public static readonly ExecuteSymbol<DisconnectedMachineEntity> UnsafeUnlock = OperationSymbol.Execute<DisconnectedMachineEntity>();
-        public static readonly ConstructSymbol<DisconnectedImportEntity>.From<DisconnectedMachineEntity> FixImport = OperationSymbol.Construct<DisconnectedImportEntity>.From<DisconnectedMachineEntity>();
+        public static ExecuteSymbol<DisconnectedMachineEntity> Save;
+        public static ExecuteSymbol<DisconnectedMachineEntity> UnsafeUnlock;
+        public static ConstructSymbol<DisconnectedImportEntity>.From<DisconnectedMachineEntity> FixImport;
     }
 
     [Serializable]

@@ -71,10 +71,11 @@ namespace Signum.Entities.Notes
         }
     }
 
+    [AutoInit]
     public static class NoteOperation
     {
-        public static readonly ConstructSymbol<NoteEntity>.From<Entity> CreateNoteFromEntity = OperationSymbol.Construct<NoteEntity>.From<Entity>();
-        public static readonly ExecuteSymbol<NoteEntity> Save = OperationSymbol.Execute<NoteEntity>();
+        public static ConstructSymbol<NoteEntity>.From<Entity> CreateNoteFromEntity;
+        public static ExecuteSymbol<NoteEntity> Save;
     }
 
     public enum NoteMessage
@@ -105,8 +106,9 @@ namespace Signum.Entities.Notes
 
     }
 
+    [AutoInit]
     public static class NoteTypeOperation
     {
-        public static readonly ExecuteSymbol<NoteTypeEntity> Save = OperationSymbol.Execute<NoteTypeEntity>();
+        public static ExecuteSymbol<NoteTypeEntity> Save;
     }
 }

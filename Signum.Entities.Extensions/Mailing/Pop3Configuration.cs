@@ -98,15 +98,16 @@ namespace Signum.Entities.Mailing
 
     }
 
+    [AutoInit]
     public static class Pop3ConfigurationOperation
     {
-        public static readonly ExecuteSymbol<Pop3ConfigurationEntity> Save = OperationSymbol.Execute<Pop3ConfigurationEntity>();
-        public static readonly ConstructSymbol<Pop3ReceptionEntity>.From<Pop3ConfigurationEntity> ReceiveEmails = OperationSymbol.Construct<Pop3ReceptionEntity>.From<Pop3ConfigurationEntity>();
+        public static ExecuteSymbol<Pop3ConfigurationEntity> Save;
+        public static ConstructSymbol<Pop3ReceptionEntity>.From<Pop3ConfigurationEntity> ReceiveEmails;
     }
 
     public static class Pop3ConfigurationAction
     {
-        public static SimpleTaskSymbol ReceiveAllActivePop3Configurations = new SimpleTaskSymbol(); 
+        public static SimpleTaskSymbol ReceiveAllActivePop3Configurations; 
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]

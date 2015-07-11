@@ -87,10 +87,11 @@ namespace Signum.Entities.Authorization
         RolesReferedBy
     }
 
+    [AutoInit]
     public static class RoleOperation
     {
-        public static readonly ExecuteSymbol<RoleEntity> Save = OperationSymbol.Execute<RoleEntity>();
-        public static readonly DeleteSymbol<RoleEntity> Delete = OperationSymbol.Delete<RoleEntity>();
+        public static ExecuteSymbol<RoleEntity> Save;
+        public static DeleteSymbol<RoleEntity> Delete;
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]

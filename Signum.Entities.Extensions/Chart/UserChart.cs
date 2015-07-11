@@ -225,9 +225,10 @@ namespace Signum.Entities.Chart
         }
     }
 
+    [AutoInit]
     public static class UserChartOperation
     {
-        public static readonly ExecuteSymbol<UserChartEntity> Save = OperationSymbol.Execute<UserChartEntity>();
-        public static readonly DeleteSymbol<UserChartEntity> Delete = OperationSymbol.Delete<UserChartEntity>();
+        public static ExecuteSymbol<UserChartEntity> Save;
+        public static DeleteSymbol<UserChartEntity> Delete;
     }
 }

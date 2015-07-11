@@ -241,19 +241,21 @@ namespace Signum.Entities.Processes
         Error,
     }
 
+    [AutoInit]
     public static class ProcessOperation
     {
-        public static readonly ExecuteSymbol<ProcessEntity> Plan = OperationSymbol.Execute<ProcessEntity>();
-        public static readonly ExecuteSymbol<ProcessEntity> Save = OperationSymbol.Execute<ProcessEntity>();
-        public static readonly ExecuteSymbol<ProcessEntity> Cancel = OperationSymbol.Execute<ProcessEntity>();
-        public static readonly ExecuteSymbol<ProcessEntity> Execute = OperationSymbol.Execute<ProcessEntity>();
-        public static readonly ExecuteSymbol<ProcessEntity> Suspend = OperationSymbol.Execute<ProcessEntity>();
-        public static readonly ConstructSymbol<ProcessEntity>.From<ProcessEntity> Retry = OperationSymbol.Construct<ProcessEntity>.From<ProcessEntity>();
+        public static ExecuteSymbol<ProcessEntity> Plan;
+        public static ExecuteSymbol<ProcessEntity> Save;
+        public static ExecuteSymbol<ProcessEntity> Cancel;
+        public static ExecuteSymbol<ProcessEntity> Execute;
+        public static ExecuteSymbol<ProcessEntity> Suspend;
+        public static ConstructSymbol<ProcessEntity>.From<ProcessEntity> Retry;
     }
 
+    [AutoInit]
     public static class ProcessPermission
     {
-        public static readonly PermissionSymbol ViewProcessPanel = new PermissionSymbol();
+        public static PermissionSymbol ViewProcessPanel;
     }
 
     public enum ProcessMessage

@@ -157,10 +157,11 @@ namespace Signum.Entities.SMS
         public static bool AllowEditMessages = true;
     }
 
+    [AutoInit]
     public static class SMSTemplateOperation
     {
-        public static readonly ConstructSymbol<SMSTemplateEntity>.Simple Create = OperationSymbol.Construct<SMSTemplateEntity>.Simple();
-        public static readonly ExecuteSymbol<SMSTemplateEntity> Save = OperationSymbol.Execute<SMSTemplateEntity>();
+        public static ConstructSymbol<SMSTemplateEntity>.Simple Create;
+        public static ExecuteSymbol<SMSTemplateEntity> Save;
     }
 
     public enum MessageLengthExceeded
