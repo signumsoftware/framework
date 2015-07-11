@@ -211,7 +211,7 @@
     <None Include="Validation.md" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\Signum.Analyzer\Signum.Analyzer\bin\Debug\Signum.Analyzer.dll" />
+    <Analyzer Include="..\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -225,7 +225,7 @@ if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)
   <Target Name="AfterBuild">
   </Target>
   -->
-  <UsingTask TaskName="SignumTask" AssemblyFile="..\Binaries\Signum.MSBuildTask.dll" />
+  <UsingTask TaskName="SignumTask" AssemblyFile="..\Signum.MSBuildTask\Binaries\Signum.MSBuildTask.dll" />
   <Target Name="AfterCompile" DependsOnTargets="CoreCompile">
     <SignumTask Assembly="@(IntermediateAssembly)" References="@(ReferencePath)" KeyFile="$(KeyOriginatorFile)" />
   </Target>
