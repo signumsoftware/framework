@@ -41,7 +41,7 @@ namespace Signum.Entities.Authorization
         public string UserName
         {
             get { return userName; }
-            set { SetToStr(ref userName, value); }
+            set { Set(ref userName, value); }
         }
 
         [NotNullable, SqlDbType(Size=128)]

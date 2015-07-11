@@ -20,7 +20,7 @@ namespace Signum.Entities.Scheduler
         public IScheduleRuleEntity Rule
         {
             get { return rule; }
-            set { SetToStr(ref rule, value); }
+            set { Set(ref rule, value); }
         }
 
         [ImplementedBy(typeof(SimpleTaskSymbol))]
@@ -29,7 +29,7 @@ namespace Signum.Entities.Scheduler
         public ITaskEntity Task
         {
             get { return task; }
-            set { SetToStr(ref task, value); }
+            set { Set(ref task, value); }
         }
 
         bool suspended;

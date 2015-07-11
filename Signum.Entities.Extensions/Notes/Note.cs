@@ -22,7 +22,7 @@ namespace Signum.Entities.Notes
         public string Title
         {
             get { return title; }
-            set { SetToStr(ref title, value); }
+            set { Set(ref title, value); }
         }
 
         [ImplementedByAll]
@@ -47,7 +47,7 @@ namespace Signum.Entities.Notes
         public string Text
         {
             get { return text; }
-            set { SetToStr(ref text, value); }
+            set { Set(ref text, value); }
         }
 
         Lite<IUserEntity> createdBy = UserHolder.Current.ToLite();

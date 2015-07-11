@@ -28,7 +28,7 @@ namespace Signum.Entities.Basics
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         string nativeName;

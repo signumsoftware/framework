@@ -14,21 +14,21 @@ namespace Signum.Entities.Basics
         public int Years
         {
             get { return years; }
-            set { SetToStr(ref years, value); }
+            set { Set(ref years, value); }
         }
 
         int months;
         public int Months
         {
             get { return months; }
-            set { SetToStr(ref months, value); }
+            set { Set(ref months, value); }
         }
 
         int days;
         public int Days
         {
             get { return days; }
-            set { SetToStr(ref days, value); }
+            set { Set(ref days, value); }
         }
 
         public bool IsZero()

@@ -27,7 +27,7 @@ namespace Signum.Entities.Basics
         public string Path
         {
             get { return path; }
-            set { SetToStr(ref path, value); }
+            set { Set(ref path, value); }
         }
 
         TypeEntity rootType;

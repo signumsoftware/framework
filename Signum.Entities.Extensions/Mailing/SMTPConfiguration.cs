@@ -19,7 +19,7 @@ namespace Signum.Entities.Mailing
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         SmtpDeliveryFormat deliveryFormat;

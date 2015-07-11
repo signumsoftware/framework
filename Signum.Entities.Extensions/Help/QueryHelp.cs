@@ -18,7 +18,7 @@ namespace Signum.Entities.Help
         public QueryEntity Query
         {
             get { return query; }
-            set { SetToStr(ref query, value); }
+            set { Set(ref query, value); }
         }
 
         [NotNullable]

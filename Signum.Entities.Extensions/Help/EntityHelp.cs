@@ -19,7 +19,7 @@ namespace Signum.Entities.Help
         public TypeEntity Type
         {
             get { return type; }
-            set { SetToStr(ref type, value); }
+            set { Set(ref type, value); }
         }
 
         [NotNullable]

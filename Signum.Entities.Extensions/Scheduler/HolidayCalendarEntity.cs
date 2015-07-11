@@ -18,7 +18,7 @@ namespace Signum.Entities.Scheduler
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
         
         [NotNullable]
@@ -72,7 +72,7 @@ namespace Signum.Entities.Scheduler
         public DateTime Date
         {
             get { return date; }
-            set { SetToStr(ref date, value); }
+            set { Set(ref date, value); }
         }
 
         [SqlDbType(Size = 100)]
@@ -81,7 +81,7 @@ namespace Signum.Entities.Scheduler
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         public override string ToString()

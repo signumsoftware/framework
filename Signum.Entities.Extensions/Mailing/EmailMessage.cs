@@ -71,7 +71,7 @@ namespace Signum.Entities.Mailing
         public DateTime? Sent
         {
             get { return sent; }
-            set { SetToStr(ref sent, value); }
+            set { Set(ref sent, value); }
         }
 
         DateTime? receptionNotified;
@@ -556,7 +556,7 @@ namespace Signum.Entities.Mailing
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         public override string ToString()

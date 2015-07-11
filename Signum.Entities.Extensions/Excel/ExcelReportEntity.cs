@@ -28,7 +28,7 @@ namespace Signum.Entities.Excel
         public string DisplayName
         {
             get { return displayName; }
-            set { SetToStr(ref displayName, value); }
+            set { Set(ref displayName, value); }
         }
 
         [NotNullable]

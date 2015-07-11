@@ -17,7 +17,7 @@ namespace Signum.Entities.Isolation
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         static Expression<Func<IsolationEntity, string>> ToStringExpression = e => e.name;

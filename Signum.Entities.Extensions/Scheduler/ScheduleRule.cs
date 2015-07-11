@@ -147,7 +147,7 @@ namespace Signum.Entities.Scheduler
         public DayOfWeek DayOfTheWeek
         {
             get { return dayOfTheWeek; }
-            set { SetToStr(ref dayOfTheWeek, value); }
+            set { Set(ref dayOfTheWeek, value); }
         }
 
         public override string ToString()
@@ -177,21 +177,21 @@ namespace Signum.Entities.Scheduler
         public bool Monday
         {
             get { return monday; }
-            set { SetToStr(ref monday, value); }
+            set { Set(ref monday, value); }
         }
 
         bool tuesday;
         public bool Tuesday
         {
             get { return tuesday; }
-            set { SetToStr(ref tuesday, value); }
+            set { Set(ref tuesday, value); }
         }
 
         bool wednesday;
         public bool Wednesday
         {
             get { return wednesday; }
-            set { SetToStr(ref wednesday, value); }
+            set { Set(ref wednesday, value); }
         }
 
         bool thursday;
@@ -199,28 +199,28 @@ namespace Signum.Entities.Scheduler
         {
 
             get { return thursday; }
-            set { SetToStr(ref thursday, value); }
+            set { Set(ref thursday, value); }
         }
 
         bool friday;
         public bool Friday
         {
             get { return friday; }
-            set { SetToStr(ref friday, value); }
+            set { Set(ref friday, value); }
         }
 
         bool saturday;
         public bool Saturday
         {
             get { return saturday; }
-            set { SetToStr(ref saturday, value); }
+            set { Set(ref saturday, value); }
         }
 
         bool sunday;
         public bool Sunday
         {
             get { return sunday; }
-            set { SetToStr(ref sunday, value); }
+            set { Set(ref sunday, value); }
         }
 
         HolidayCalendarEntity calendar;
@@ -234,7 +234,7 @@ namespace Signum.Entities.Scheduler
         public bool Holiday
         {
             get { return holiday; }
-            set { SetToStr(ref holiday, value); }
+            set { Set(ref holiday, value); }
         }
 
         public override DateTime Next(DateTime now)

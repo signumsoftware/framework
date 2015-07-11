@@ -56,7 +56,7 @@ namespace Signum.Entities.Alerts
         public string Title
         {
             get { return title; }
-            set { SetToStr(ref title, value); }
+            set { Set(ref title, value); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -65,7 +65,7 @@ namespace Signum.Entities.Alerts
         public string Text
         {
             get { return text; }
-            set { SetToStr(ref text, value); }
+            set { Set(ref text, value); }
         }
 
         Lite<IUserEntity> createdBy;

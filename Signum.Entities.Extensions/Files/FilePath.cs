@@ -61,7 +61,7 @@ namespace Signum.Entities.Files
                 if (ForceExtensionIfEmpty.HasText() && !Path.GetExtension(value).HasText())
                     value += ForceExtensionIfEmpty;
 
-                SetToStr(ref fileName, value);
+                Set(ref fileName, value);
                
             }
         }
@@ -82,7 +82,7 @@ namespace Signum.Entities.Files
         public int FileLength
         {
             get { return fileLength; }
-            internal set { SetToStr(ref fileLength, value); }
+            internal set { Set(ref fileLength, value); }
         }
 
         public string FileLengthString

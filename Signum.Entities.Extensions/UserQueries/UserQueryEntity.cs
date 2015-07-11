@@ -56,7 +56,7 @@ namespace Signum.Entities.UserQueries
         public string DisplayName
         {
             get { return displayName; }
-            set { SetToStr(ref displayName, value); }
+            set { Set(ref displayName, value); }
         }
 
         bool withoutFilters;
@@ -369,7 +369,7 @@ namespace Signum.Entities.UserQueries
         public string ValueString
         {
             get { return valueString; }
-            set { SetToStr(ref valueString, value); }
+            set { Set(ref valueString, value); }
         }
 
         public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)

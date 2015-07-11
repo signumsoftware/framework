@@ -24,7 +24,7 @@ namespace Signum.Entities.Chart
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         Lite<FileEntity> icon;

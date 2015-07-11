@@ -27,7 +27,7 @@ namespace Signum.Entities.Files
         public string FileName
         {
             get { return fileName; }
-            set { SetToStr(ref fileName, value); }
+            set { Set(ref fileName, value); }
         }
 
         string hash;

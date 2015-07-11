@@ -18,7 +18,7 @@ namespace Signum.Entities.Processes
         public string Name
         {
             get { return name; }
-            set { SetToStr(ref name, value); }
+            set { Set(ref name, value); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -49,7 +49,7 @@ namespace Signum.Entities.Processes
         public OperationSymbol Operation
         {
             get { return operation; }
-            set { SetToStr(ref operation, value); }
+            set { Set(ref operation, value); }
         }
 
         public override string ToString()

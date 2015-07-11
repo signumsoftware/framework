@@ -17,7 +17,7 @@ namespace Signum.Entities.Chart
         public Lite<Entity> Related
         {
             get { return related; }
-            set { SetToStr(ref related, value); }
+            set { Set(ref related, value); }
         }
 
         [NotNullable]
@@ -26,7 +26,7 @@ namespace Signum.Entities.Chart
         public ColorEntity Color
         {
             get { return color; }
-            set { SetToStr(ref color, value); }
+            set { Set(ref color, value); }
         }
 
         public override string ToString()

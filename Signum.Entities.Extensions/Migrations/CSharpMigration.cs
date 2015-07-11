@@ -23,7 +23,7 @@ namespace Signum.Entities.Migrations
         public DateTime ExecutionDate
         {
             get { return executionDate; }
-            set { SetToStr(ref executionDate, value); }
+            set { Set(ref executionDate, value); }
         }
 
         static Expression<Func<CSharpMigrationEntity, string>> ToStringExpression = e => e.UniqueName;
