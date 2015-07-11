@@ -20,11 +20,10 @@ namespace Signum.Entities.Processes
     [Serializable]
     public class ProcessAlgorithmSymbol : Symbol
     {
-        private ProcessAlgorithmSymbol() { } 
+        private ProcessAlgorithmSymbol() { }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public ProcessAlgorithmSymbol([CallerMemberName]string memberName = null) : 
-            base(new StackFrame(1, false), memberName)
+        public ProcessAlgorithmSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
         {
         }
     }

@@ -156,9 +156,8 @@ namespace Signum.Entities.Word
     {
         private WordTransformerSymbol() { }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public WordTransformerSymbol([CallerMemberName]string memberName = null) :
-            base(new StackFrame(1, false), memberName)
+        public WordTransformerSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
         {
         }
     }
@@ -167,10 +166,9 @@ namespace Signum.Entities.Word
     public class WordConverterSymbol : Symbol
     {
         private WordConverterSymbol() { }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public WordConverterSymbol([CallerMemberName]string memberName = null) :
-            base(new StackFrame(1, false), memberName)
+        
+        public WordConverterSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
         {
         }
     }

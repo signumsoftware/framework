@@ -12,11 +12,10 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class PermissionSymbol : Symbol
     {
-        private PermissionSymbol() { } 
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public PermissionSymbol([CallerMemberName]string memberName = null) : 
-            base(new StackFrame(1, false), memberName)
+        private PermissionSymbol() { }
+        
+        public PermissionSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
         {
         }
     }

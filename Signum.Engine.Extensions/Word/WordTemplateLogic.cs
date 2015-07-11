@@ -129,11 +129,17 @@ namespace Signum.Engine.Word
 
         public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordTemplateEntity, Entity, WordprocessingDocument> transformer)
         {
+            if (transformerSymbol == null)
+                throw new ArgumentNullException(nameof(transformerSymbol));
+
             Transformers.Add(transformerSymbol, transformer);
         }
 
         public static void RegisterConverter(WordConverterSymbol converterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]> converter)
         {
+            if (converterSymbol == null)
+                throw new ArgumentNullException(nameof(converterSymbol));
+
             Converters.Add(converterSymbol, converter);
         }
 

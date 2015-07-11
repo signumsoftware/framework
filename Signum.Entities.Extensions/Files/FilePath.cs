@@ -154,10 +154,9 @@ namespace Signum.Entities.Files
     public class FileTypeSymbol : Symbol
     {
         private FileTypeSymbol() { }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public FileTypeSymbol([CallerMemberName]string memberName = null) :
-            base(new StackFrame(1, false), memberName)
+        
+        public FileTypeSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
         {
         }
     }

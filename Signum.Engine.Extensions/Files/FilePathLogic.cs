@@ -222,6 +222,9 @@ namespace Signum.Engine.Files
 
         public static void Register(FileTypeSymbol fileTypeSymbol, FileTypeAlgorithm algorithm)
         {
+            if (fileTypeSymbol == null)
+                throw new ArgumentNullException(nameof(fileTypeSymbol));
+
             FileTypes.Add(fileTypeSymbol, algorithm);
         }
 
@@ -242,7 +245,7 @@ namespace Signum.Engine.Files
         public Func<FilePathEntity, string> CalculateSufix { get; set; }
 
         public bool RenameOnCollision {get; set;}
-         public bool TakesOwnership {get; set;}
+        public bool TakesOwnership { get; set; }
 
         public Func<string, int, string> RenameAlgorithm { get; set; }
 

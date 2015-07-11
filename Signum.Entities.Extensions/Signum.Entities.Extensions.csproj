@@ -245,8 +245,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
-if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -255,4 +253,8 @@ if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)
   <Target Name="AfterBuild">
   </Target>
   -->
+  <UsingTask TaskName="SignumTask" AssemblyFile="..\..\Framework\Signum.MSBuildTask\Binaries\Signum.MSBuildTask.dll" />
+  <Target Name="AfterCompile" DependsOnTargets="CoreCompile">
+    <SignumTask Assembly="@(IntermediateAssembly)" References="@(ReferencePath)" KeyFile="$(KeyOriginatorFile)" />
+  </Target>
 </Project>
