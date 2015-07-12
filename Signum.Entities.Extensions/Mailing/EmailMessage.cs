@@ -365,6 +365,7 @@ namespace Signum.Entities.Mailing
         }
     }
 
+    [AutoInit]
     public static class EmailMessageProcess
     {
         public static ProcessAlgorithmSymbol SendEmails;
