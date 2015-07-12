@@ -48,11 +48,14 @@ namespace Signum.MSBuildTask
                 FieldDefinition field;
                 if (fields.TryGetValue(BackingFieldName(prop), out field))
                 {
+                    var targetField = type.GenericParameters.Count == 0 ? field : 
+                        field.MakeHostInstanceGeneric(type.GenericParameters.ToArray());
+
                     if (prop.GetMethod != null)
-                        ProcessGet(prop, field);
+                        ProcessGet(prop, targetField);
 
                     if (prop.SetMethod != null)
-                        ProcessSet(prop, field);
+                        ProcessSet(prop, targetField);
                 }
             }
         }

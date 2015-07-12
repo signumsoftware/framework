@@ -41,6 +41,18 @@ namespace Signum.MSBuildTask
             return reference;
         }
 
+        public static FieldReference MakeHostInstanceGeneric(this FieldReference self, params TypeReference[] args)
+        {
+            var reference = new FieldReference(
+                self.Name,
+                self.FieldType,
+                self.DeclaringType.MakeGenericInstanceType(args))
+            {
+            };
+
+            return reference;
+        }
+
         public static GenericInstanceMethod MakeGenericMethod(this MethodReference reference, params TypeReference[] arguments)
         {
             var result = new GenericInstanceMethod(reference);
