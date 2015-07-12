@@ -37,12 +37,12 @@ namespace Signum.Entities
             var dic = Ids.TryGetC(this.GetType());
             if (dic != null)
             {
-                PrimaryKey? id = dic.TryGetS(this.key);
+                PrimaryKey? id = dic.TryGetS(this.Key);
                 if (id != null)
                     this.SetId(id.Value);
             }
 
-            Symbols.GetOrCreate(this.GetType()).Add(this.key, this);
+            Symbols.GetOrCreate(this.GetType()).Add(this.Key, this);
         }
 
         private static bool IsStaticClass(Type type)
@@ -61,13 +61,8 @@ namespace Signum.Entities
 
 
         [NotNullable, SqlDbType(Size = 200), UniqueIndex]
-        string key;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
-        public string Key
-        {
-            get { return key; }
-            set { Set(ref key, value); }
-        }
+        public string Key { get; set; }
 
         static Expression<Func<Symbol, string>> ToStringExpression = e => e.Key;
         public override string ToString()
@@ -89,7 +84,7 @@ namespace Signum.Entities
 
         public override int GetHashCode()
         {
-            return key.GetHashCode();
+            return Key.GetHashCode();
         }
 
         public string NiceToString()
@@ -104,7 +99,7 @@ namespace Signum.Entities
 
             var symbols = Symbol.Symbols.TryGetC(typeof(S));
 
-            if (symbols != null) 
+            if (symbols != null)
             {
                 foreach (var kvp in symbolIds)
                 {
@@ -119,7 +114,7 @@ namespace Signum.Entities
         {
             this.id = id;
             this.IsNew = false;
-            this.toStr = this.key;
+            this.toStr = this.Key;
             if (this.Modified != ModifiedState.Sealed)
                 this.Modified = ModifiedState.Sealed;
         }

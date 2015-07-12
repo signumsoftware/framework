@@ -11,12 +11,7 @@ namespace Signum.Entities
     {
         CorruptMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
-        bool corrupt;
-        public bool Corrupt
-        {
-            get { return corrupt; }
-            set { Set(ref corrupt, value); }
-        }
+        public bool Corrupt { get; set; }
 
         protected internal override void PreSaving(ref bool graphModified)
         {
