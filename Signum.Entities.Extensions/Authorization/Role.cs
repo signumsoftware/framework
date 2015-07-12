@@ -43,7 +43,7 @@ namespace Signum.Entities.Authorization
                 if (Roles.Any())
                     return null;
 
-                return "� -> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString();
+                return "No Roles -> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString();
             }
         }
 
