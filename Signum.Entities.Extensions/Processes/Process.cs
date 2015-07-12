@@ -124,7 +124,7 @@ namespace Signum.Entities.Processes
         public DateTime? ExecutionStart
         {
             get { return executionStart; }
-            set { if (Set(ref executionStart, value))Notify(() => ExecutionEnd); }
+            set { if (Set(ref executionStart, value)) Notify(() => ExecutionEnd); }
         }
 
         DateTime? executionEnd;
@@ -132,7 +132,7 @@ namespace Signum.Entities.Processes
         public DateTime? ExecutionEnd
         {
             get { return executionEnd; }
-            set { if (Set(ref executionEnd, value))Notify(() => ExecutionStart); }
+            set { if (Set(ref executionEnd, value)) Notify(() => ExecutionStart); }
         }
 
         static Expression<Func<ProcessEntity, double?>> DurationExpression =
@@ -173,11 +173,11 @@ namespace Signum.Entities.Processes
         }
 
         static StateValidator<ProcessEntity, ProcessState> stateValidator = new StateValidator<ProcessEntity, ProcessState>
-        (e => e.State, e => e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e => e.ExceptionDate, e => e.Exception, e=> e.MachineName, e=>e.ApplicationName)
+        (e => e.State, e => e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e => e.ExceptionDate, e => e.Exception, e => e.MachineName, e => e.ApplicationName)
         {
-       {ProcessState.Created,   false,          false,                  false,             false,                 false,               false,              false,           false,               false,          null,          null }, 
-       {ProcessState.Planned,   true,           null,                   null,              null,                  false,               null,               null,            null,                null ,          null,          null }, 
-       {ProcessState.Canceled,  null,           true,                   null,              null,                  false,               null,               null,            null,                null ,          null,          null }, 
+       {ProcessState.Created,   false,          false,                  false,             false,                 false,               false,              false,           false,               false,          null,          null },
+       {ProcessState.Planned,   true,           null,                   null,              null,                  false,               null,               null,            null,                null ,          null,          null },
+       {ProcessState.Canceled,  null,           true,                   null,              null,                  false,               null,               null,            null,                null ,          null,          null },
        {ProcessState.Queued,    null,           null,                   true,              false,                 false,               false,              false,           false,               false,          null,          null },
        {ProcessState.Executing, null,           null,                   true,              true,                  false,               false,              true,            false,               false,          true,          true },
        {ProcessState.Suspending,null,           null,                   true,              true,                  false,               true,               true,            false,               false,          true,          true },
@@ -275,30 +275,15 @@ namespace Signum.Entities.Processes
     public class ProcessExceptionLineEntity : Entity
     {
         [NotNullable]
-        Lite<IProcessLineDataEntity> line;
         [NotNullValidator]
-        public Lite<IProcessLineDataEntity> Line
-        {
-            get { return line; }
-            set { Set(ref line, value); }
-        }
+        public Lite<IProcessLineDataEntity> Line { get; set; }
 
         [NotNullable]
-        Lite<ProcessEntity> process;
         [NotNullValidator]
-        public Lite<ProcessEntity> Process
-        {
-            get { return process; }
-            set { Set(ref process, value); }
-        }
+        public Lite<ProcessEntity> Process { get; set; }
 
         [NotNullable]
-        Lite<ExceptionEntity> exception;
         [NotNullValidator]
-        public Lite<ExceptionEntity> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value); }
-        }
+        public Lite<ExceptionEntity> Exception { get; set; }
     }
 }

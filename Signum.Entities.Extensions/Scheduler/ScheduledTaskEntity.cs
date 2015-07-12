@@ -15,60 +15,30 @@ namespace Signum.Entities.Scheduler
     public class ScheduledTaskEntity : Entity
     {
         [ImplementedBy(typeof(ScheduleRuleDailyEntity), typeof(ScheduleRuleWeeklyEntity), typeof(ScheduleRuleWeekDaysEntity), typeof(ScheduleRuleMinutelyEntity), typeof(ScheduleRuleHourlyEntity))]
-        IScheduleRuleEntity rule;
         [NotNullValidator]
-        public IScheduleRuleEntity Rule
-        {
-            get { return rule; }
-            set { Set(ref rule, value); }
-        }
+        public IScheduleRuleEntity Rule { get; set; }
 
         [ImplementedBy(typeof(SimpleTaskSymbol))]
-        ITaskEntity task;
         [NotNullValidator]
-        public ITaskEntity Task
-        {
-            get { return task; }
-            set { Set(ref task, value); }
-        }
+        public ITaskEntity Task { get; set; }
 
-        bool suspended;
-        public bool Suspended
-        {
-            get { return suspended; }
-            set { Set(ref suspended, value); }
-        }
+        public bool Suspended { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string machineName = None;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string MachineName
-        {
-            get { return machineName; }
-            set { Set(ref machineName, value); }
-        }
+        public string MachineName { get; set; } = None;
 
         [NotNullable]
-        Lite<IUserEntity> user;
         [NotNullValidator]
-        public Lite<IUserEntity> User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
+        public Lite<IUserEntity> User { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string applicationName = None;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string ApplicationName
-        {
-            get { return applicationName; }
-            set { Set(ref applicationName, value); }
-        }
+        public string ApplicationName { get; set; } = None;
 
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(task, rule) + (suspended ? " [{0}]".FormatWith(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");
+            return "{0} {1}".FormatWith(Task, Rule) + (Suspended ? " [{0}]".FormatWith(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");
         }
 
         public const string None = "none";

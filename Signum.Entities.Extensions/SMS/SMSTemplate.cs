@@ -18,90 +18,35 @@ namespace Signum.Entities.SMS
     public class SMSTemplateEntity : Entity
     {
         [SqlDbType(Size = 100)]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        bool certified;
-        public bool Certified
-        {
-            get { return certified; }
-            set { Set(ref certified, value); }
-        }
+        public bool Certified { get; set; }
 
-        bool editableMessage = AllowEditMessages;
-        public bool EditableMessage
-        {
-            get { return editableMessage; }
-            set { Set(ref editableMessage, value); }
-        }
+        public bool EditableMessage { get; set; } = AllowEditMessages;
 
-        TypeEntity associatedType;
-        public TypeEntity AssociatedType
-        {
-            get { return associatedType; }
-            set { Set(ref associatedType, value); }
-        }
+        public TypeEntity AssociatedType { get; set; }
 
         [NotifyCollectionChanged]
-        MList<SMSTemplateMessageEntity> messages = new MList<SMSTemplateMessageEntity>();
-        public MList<SMSTemplateMessageEntity> Messages
-        {
-            get { return messages; }
-            set { Set(ref messages, value); }
-        }
+        public MList<SMSTemplateMessageEntity> Messages { get; set; } = new MList<SMSTemplateMessageEntity>();
 
-        string from;
         [StringLengthValidator(AllowNulls = false)]
-        public string From
-        {
-            get { return from; }
-            set { Set(ref from, value); }
-        }
+        public string From { get; set; }
 
-        MessageLengthExceeded messageLengthExceeded = MessageLengthExceeded.NotAllowed;
-        public MessageLengthExceeded MessageLengthExceeded
-        {
-            get { return messageLengthExceeded; }
-            set { Set(ref messageLengthExceeded, value); }
-        }
+        public MessageLengthExceeded MessageLengthExceeded { get; set; } = MessageLengthExceeded.NotAllowed;
 
-        bool removeNoSMSCharacters = true;
-        public bool RemoveNoSMSCharacters
-        {
-            get { return removeNoSMSCharacters; }
-            set { Set(ref removeNoSMSCharacters, value); }
-        }
+        public bool RemoveNoSMSCharacters { get; set; } = true;
 
-        bool active;
-        public bool Active
-        {
-            get { return active; }
-            set { Set(ref active, value); }
-        }
+        public bool Active { get; set; }
 
-        DateTime startDate = TimeZoneManager.Now.TrimToMinutes();
         [MinutesPrecissionValidator]
-        public DateTime StartDate
-        {
-            get { return startDate; }
-            set { Set(ref startDate, value); }
-        }
+        public DateTime StartDate { get; set; } = TimeZoneManager.Now.TrimToMinutes();
 
-        DateTime? endDate;
         [MinutesPrecissionValidator]
-        public DateTime? EndDate
-        {
-            get { return endDate; }
-            set { Set(ref endDate, value); }
-        }
+        public DateTime? EndDate { get; set; }
 
         static Expression<Func<SMSTemplateEntity, bool>> IsActiveNowExpression =
-            (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
+            (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
         public bool IsActiveNow()
         {
             return IsActiveNowExpression.Evaluate(this);
@@ -135,7 +80,7 @@ namespace Signum.Entities.SMS
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            if (sender == messages)
+            if (sender == Messages)
             {
                 if (args.OldItems != null)
                     foreach (var item in args.OldItems.Cast<SMSTemplateMessageEntity>())
@@ -151,7 +96,7 @@ namespace Signum.Entities.SMS
         {
             base.PreSaving(ref graphModified);
 
-            messages.ForEach(e => e.Template = this);
+            Messages.ForEach(e => e.Template = this);
         }
 
         public static bool AllowEditMessages = true;
@@ -190,26 +135,16 @@ namespace Signum.Entities.SMS
         }
 
         [NotNullable]
-        CultureInfoEntity cultureInfo;
         [NotNullValidator]
-        public CultureInfoEntity CultureInfo
-        {
-            get { return cultureInfo; }
-            set { Set(ref cultureInfo, value); }
-        }
+        public CultureInfoEntity CultureInfo { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string message;
         [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
-        public string Message
-        {
-            get { return message; }
-            set { Set(ref message, value); }
-        }
+        public string Message { get; set; }
 
         public override string ToString()
         {
-            return cultureInfo?.ToString() ?? SMSTemplateMessage.NewCulture.NiceToString();
+            return CultureInfo?.ToString() ?? SMSTemplateMessage.NewCulture.NiceToString();
         }
     }
 

@@ -13,42 +13,22 @@ namespace Signum.Entities.Help
     public class AppendixHelpEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        string uniqueName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string UniqueName
-        {
-            get { return uniqueName; }
-            set { Set(ref uniqueName, value); }
-        }
+        public string UniqueName { get; set; }
 
         [NotNullable]
-        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoEntity Culture
-        {
-            get { return culture; }
-            set { Set(ref culture, value); }
-        }
+        public CultureInfoEntity Culture { get; set; }
 
         [NotNullable, SqlDbType(Size = 300)]
-        string title;
-        public string Title
-        {
-            get { return title; }
-            set { Set(ref title, value); }
-        }
+        public string Title { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        string description;
-        public string Description
-        {
-            get { return description; }
-            set { Set(ref description, value); }
-        }
+        public string Description { get; set; }
 
         public override string ToString()
         {
-            return title?.ToString();
+            return Title?.ToString();
         }
     }
 

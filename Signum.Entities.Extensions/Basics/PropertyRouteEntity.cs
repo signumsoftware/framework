@@ -22,23 +22,13 @@ namespace Signum.Entities.Basics
         }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string path;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
-        public string Path
-        {
-            get { return path; }
-            set { Set(ref path, value); }
-        }
+        public string Path { get; set; }
 
-        TypeEntity rootType;
         [NotNullValidator]
-        public TypeEntity RootType
-        {
-            get { return rootType; }
-            set { Set(ref rootType, value); }
-        }
+        public TypeEntity RootType { get; set; }
 
-        static readonly Expression<Func<PropertyRouteEntity, string>> ToStringExpression = e => e.path;
+        static readonly Expression<Func<PropertyRouteEntity, string>> ToStringExpression = e => e.Path;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

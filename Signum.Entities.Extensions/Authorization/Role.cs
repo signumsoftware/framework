@@ -13,13 +13,8 @@ namespace Signum.Entities.Authorization
     public class RoleEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         MergeStrategy mergeStrategy;
         public MergeStrategy MergeStrategy
@@ -31,18 +26,13 @@ namespace Signum.Entities.Authorization
                     Notify(() => StrategyHint);
             }
         }
-    
+
         [NotNullable, NotifyCollectionChanged]
-        MList<Lite<RoleEntity>> roles = new MList<Lite<RoleEntity>>();
-        public MList<Lite<RoleEntity>> Roles
-        {
-            get { return roles; }
-            set { Set(ref roles, value); }
-        }
+        public MList<Lite<RoleEntity>> Roles { get; set; } = new MList<Lite<RoleEntity>>();
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            Notify(() => StrategyHint); 
+            Notify(() => StrategyHint);
         }
 
         [HiddenProperty]
@@ -50,14 +40,14 @@ namespace Signum.Entities.Authorization
         {
             get
             {
-                if (roles.Any())
+                if (Roles.Any())
                     return null;
 
                 return "� -> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString();
             }
         }
 
-        static readonly Expression<Func<RoleEntity, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<RoleEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -71,7 +61,7 @@ namespace Signum.Entities.Authorization
                 if (user == null)
                     throw new AuthenticationException(AuthMessage.NotUserLogged.NiceToString());
 
-               return user.Role;
+                return user.Role;
             }
         }
     }
@@ -100,12 +90,7 @@ namespace Signum.Entities.Authorization
         [UniqueIndex, FieldWithoutProperty]
         string uniqueKey = "Unique";
 
-        DateTime date;
-        public DateTime Date
-        {
-            get { return date; }
-            set { Set(ref date, value); }
-        }
+        public DateTime Date { get; set; }
 
         static Expression<Func<LastAuthRulesImportEntity, string>> ToStringExpression = e => e.uniqueKey;
         public override string ToString()

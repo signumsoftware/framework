@@ -11,31 +11,16 @@ namespace Signum.Entities.Translation
     public class TranslationReplacementEntity : Entity
     {
         [NotNullable]
-        CultureInfoEntity cultureInfo;
         [NotNullValidator]
-        public CultureInfoEntity CultureInfo
-        {
-            get { return cultureInfo; }
-            set { Set(ref cultureInfo, value); }
-        }
+        public CultureInfoEntity CultureInfo { get; set; }
 
         [NotNullable, SqlDbType(Size = 200)]
-        string wrongTranslation;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
-        public string WrongTranslation
-        {
-            get { return wrongTranslation; }
-            set { Set(ref wrongTranslation, value); }
-        }
+        public string WrongTranslation { get; set; }
 
         [NotNullable, SqlDbType(Size = 200)]
-        string rightTranslation;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
-        public string RightTranslation
-        {
-            get { return rightTranslation; }
-            set { Set(ref rightTranslation, value); }
-        }
+        public string RightTranslation { get; set; }
     }
 
     [AutoInit]

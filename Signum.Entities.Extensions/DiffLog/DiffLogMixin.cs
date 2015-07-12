@@ -14,20 +14,10 @@ namespace Signum.Entities.DiffLog
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        string initialState;
-        public string InitialState
-        {
-            get { return initialState; }
-            set { Set(ref initialState, value); }
-        }
+        public string InitialState { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        string finalState;
-        public string FinalState
-        {
-            get { return finalState; }
-            set { Set(ref finalState, value); }
-        }
+        public string FinalState { get; set; }
     }
 
     public enum DiffLogMessage

@@ -23,27 +23,12 @@ namespace Signum.Entities.Basics
         }
 
         [NotNullable, SqlDbType(Size = 10), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 10)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        string nativeName;
-        public string NativeName
-        {
-            get { return nativeName; }
-            private set { Set(ref nativeName, value); }
-        }
+        public string NativeName { get; private set; }
 
-        string englishName;
-        public string EnglishName
-        {
-            get { return englishName; }
-            private set { Set(ref englishName, value); }
-        }
+        public string EnglishName { get; private set; }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {

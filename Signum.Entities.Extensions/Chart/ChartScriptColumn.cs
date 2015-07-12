@@ -12,34 +12,14 @@ namespace Signum.Entities.Chart
     public class ChartScriptColumnEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 80)]
-        string displayName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 80)]
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { Set(ref displayName, value); }
-        }
+        public string DisplayName { get; set; }
 
-        bool isOptional;
-        public bool IsOptional
-        {
-            get { return isOptional; }
-            set { Set(ref isOptional, value); }
-        }
+        public bool IsOptional { get; set; }
 
-        ChartColumnType columnType;
-        public ChartColumnType ColumnType
-        {
-            get { return columnType; }
-            set { Set(ref columnType, value); }
-        }
+        public ChartColumnType ColumnType { get; set; }
 
-        bool isGroupKey;
-        public bool IsGroupKey
-        {
-            get { return isGroupKey; }
-            set { Set(ref isGroupKey, value); }
-        }
+        public bool IsGroupKey { get; set; }
 
         internal ChartScriptColumnEntity Clone()
         {
@@ -130,7 +110,7 @@ namespace Signum.Entities.Chart
         {
             if (fromCodes.TryGetValue(code, out type))
                 return null;
-            
+
             return "{0} is not a valid type code, use {1} instead".FormatWith(code, fromCodes.Keys.CommaOr());
         }
 

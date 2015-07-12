@@ -13,44 +13,19 @@ namespace Signum.Entities.Disconnected
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DisconnectedMachineEntity : Entity
     {
-        DateTime creationDate = TimeZoneManager.Now;
-        public DateTime CreationDate
-        {
-            get { return creationDate; }
-            private set { Set(ref creationDate, value); }
-        }
+        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string machineName;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
-        public string MachineName
-        {
-            get { return machineName; }
-            set { Set(ref machineName, value); }
-        }
+        public string MachineName { get; set; }
 
-        DisconnectedMachineState state;
-        public DisconnectedMachineState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
+        public DisconnectedMachineState State { get; set; }
 
-        int seedMin;
         [NumberIsValidator(ComparisonType.GreaterThan, 0)]
-        public int SeedMin
-        {
-            get { return seedMin; }
-            set { Set(ref seedMin, value); }
-        }
+        public int SeedMin { get; set; }
 
-        int seedMax;
         [NumberIsValidator(ComparisonType.GreaterThan, 0)]
-        public int SeedMax
-        {
-            get { return seedMax; }
-            set { Set(ref seedMax, value); }
-        }
+        public int SeedMax { get; set; }
 
         static Expression<Func<DisconnectedMachineEntity, Interval<int>>> SeedIntervalExpression =
             entity => new Interval<int>(entity.SeedMin, entity.SeedMax);
@@ -60,13 +35,13 @@ namespace Signum.Entities.Disconnected
             get { return SeedIntervalExpression.Evaluate(this); }
         }
 
-        static Expression<Func<DisconnectedMachineEntity, string>> ToStringExpression = e => e.machineName;
+        static Expression<Func<DisconnectedMachineEntity, string>> ToStringExpression = e => e.MachineName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
 
-        public static readonly SessionVariable<Lite<DisconnectedMachineEntity>> CurrentVariable = 
+        public static readonly SessionVariable<Lite<DisconnectedMachineEntity>> CurrentVariable =
             Statics.SessionVariable<Lite<DisconnectedMachineEntity>>("disconectedMachine");
         public static Lite<DisconnectedMachineEntity> Current
         {
@@ -105,12 +80,7 @@ namespace Signum.Entities.Disconnected
     {
         DisconnectedCreatedMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
-        bool disconnectedCreated;
-        public bool DisconnectedCreated
-        {
-            get { return disconnectedCreated; }
-            set { Set(ref disconnectedCreated, value); }
-        }
+        public bool DisconnectedCreated { get; set; }
     }
 
     [Serializable]
@@ -118,19 +88,9 @@ namespace Signum.Entities.Disconnected
     {
         DisconnectedSubsetMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
-        long? lastOnlineTicks;
-        public long? LastOnlineTicks
-        {
-            get { return lastOnlineTicks; }
-            set { Set(ref lastOnlineTicks, value); }
-        }
+        public long? LastOnlineTicks { get; set; }
 
-        Lite<DisconnectedMachineEntity> disconnectedMachine;
-        public Lite<DisconnectedMachineEntity> DisconnectedMachine
-        {
-            get { return disconnectedMachine; }
-            set { Set(ref disconnectedMachine, value); }
-        }
+        public Lite<DisconnectedMachineEntity> DisconnectedMachine { get; set; }
     }
 
     [Serializable]
@@ -140,7 +100,7 @@ namespace Signum.Entities.Disconnected
         public Upload Upload;
     }
 
-    
+
     public enum Download
     {
         None,

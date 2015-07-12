@@ -12,19 +12,9 @@ namespace Signum.Entities.Migrations
     public class CSharpMigrationEntity : Entity
     {
         [UniqueIndex]
-        string uniqueName;
-        public string UniqueName
-        {
-            get { return uniqueName; }
-            set { Set(ref uniqueName, value); }
-        }
+        public string UniqueName { get; set; }
 
-        DateTime executionDate;
-        public DateTime ExecutionDate
-        {
-            get { return executionDate; }
-            set { Set(ref executionDate, value); }
-        }
+        public DateTime ExecutionDate { get; set; }
 
         static Expression<Func<CSharpMigrationEntity, string>> ToStringExpression = e => e.UniqueName;
         public override string ToString()

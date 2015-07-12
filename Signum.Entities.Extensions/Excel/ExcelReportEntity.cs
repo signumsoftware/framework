@@ -14,33 +14,18 @@ namespace Signum.Entities.Excel
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ExcelReportEntity : Entity
     {
-        QueryEntity query;
         [NotNullValidator]
-        public QueryEntity Query
-        {
-            get { return query; }
-            set { Set(ref query, value); }
-        }
-  
+        public QueryEntity Query { get; set; }
+
         [NotNullable]
-        string displayName;
         [StringLengthValidator(Min = 3)]
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { Set(ref displayName, value); }
-        }
+        public string DisplayName { get; set; }
 
         [NotNullable]
-        EmbeddedFileEntity file;
         [NotNullValidator]
-        public EmbeddedFileEntity File
-        {
-            get { return file; }
-            set { Set(ref file, value); }
-        }
+        public EmbeddedFileEntity File { get; set; }
 
-        static readonly Expression<Func<ExcelReportEntity, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<ExcelReportEntity, string>> ToStringExpression = e => e.DisplayName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

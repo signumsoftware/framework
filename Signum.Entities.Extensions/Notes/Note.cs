@@ -17,58 +17,28 @@ namespace Signum.Entities.Notes
     public class NoteEntity : Entity
     {
         [SqlDbType(Size = 100)]
-        string title;
         [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Title
-        {
-            get { return title; }
-            set { Set(ref title, value); }
-        }
+        public string Title { get; set; }
 
         [ImplementedByAll]
-        Lite<Entity> target;
         [NotNullValidator]
-        public Lite<Entity> Target
-        {
-            get { return target; }
-            set { Set(ref target, value); }
-        }
+        public Lite<Entity> Target { get; set; }
 
-        DateTime creationDate = TimeZoneManager.Now;
-        public DateTime CreationDate
-        {
-            get { return creationDate; }
-            set { Set(ref creationDate, value); }
-        }
+        public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
 
         [SqlDbType(Size = int.MaxValue)]
-        string text;
         [StringLengthValidator(AllowNulls = false, Min = 1)]
-        public string Text
-        {
-            get { return text; }
-            set { Set(ref text, value); }
-        }
+        public string Text { get; set; }
 
-        Lite<IUserEntity> createdBy = UserHolder.Current.ToLite();
         [NotNullValidator]
-        public Lite<IUserEntity> CreatedBy
-        {
-            get { return createdBy; }
-            set { Set(ref createdBy, value); }
-        }
+        public Lite<IUserEntity> CreatedBy { get; set; } = UserHolder.Current.ToLite();
 
         public override string ToString()
         {
-            return " - ".Combine(title, text.FirstNonEmptyLine()).Etc(100);
+            return " - ".Combine(Title, Text.FirstNonEmptyLine()).Etc(100);
         }
 
-        NoteTypeEntity noteType;
-        public NoteTypeEntity NoteType
-        {
-            get { return noteType; }
-            set { Set(ref noteType, value); }
-        }
+        public NoteTypeEntity NoteType { get; set; }
     }
 
     [AutoInit]

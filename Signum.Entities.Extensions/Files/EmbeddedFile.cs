@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Files
 {
-    public interface IFile 
+    public interface IFile
     {
         byte[] BinaryFile { get; set; }
         string FileName { get; set; }
@@ -41,7 +41,7 @@ namespace Signum.Entities.Files
     }
 
 
-    [Serializable, DescriptionOptions(DescriptionOptions.Description| DescriptionOptions.Members)]
+    [Serializable, DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]
     public class WebImage
     {
         public string FullWebPath;
@@ -57,29 +57,19 @@ namespace Signum.Entities.Files
     public class EmbeddedFileEntity : EmbeddedEntity, IFile
     {
         [NotNullable]
-        string fileName;
         [StringLengthValidator(Min = 3)]
-        public string FileName
-        {
-            get { return fileName; }
-            set { Set(ref fileName, value); }
-        }
+        public string FileName { get; set; }
 
         [NotNullable]
-        byte[] binaryFile;
         [NotNullValidator]
-        public byte[] BinaryFile
-        {
-            get { return binaryFile; }
-            set { Set(ref binaryFile, value); }
-        }
-        
+        public byte[] BinaryFile { get; set; }
+
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(fileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
+            return "{0} {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
-        
+
         public string FullWebPath
         {
             get { return null; }

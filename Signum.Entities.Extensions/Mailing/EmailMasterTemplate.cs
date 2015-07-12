@@ -16,26 +16,16 @@ namespace Signum.Entities.Mailing
     public class EmailMasterTemplateEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         [NotifyCollectionChanged, NotNullable]
-        MList<EmailMasterTemplateMessageEntity> messages = new MList<EmailMasterTemplateMessageEntity>();
-        public MList<EmailMasterTemplateMessageEntity> Messages
-        {
-            get { return messages; }
-            set { Set(ref messages, value); }
-        }
+        public MList<EmailMasterTemplateMessageEntity> Messages { get; set; } = new MList<EmailMasterTemplateMessageEntity>();
 
         [Ignore]
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
-        static Expression<Func<EmailMasterTemplateEntity, string>> ToStringExpression = e => e.name;
+        static Expression<Func<EmailMasterTemplateEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -57,7 +47,7 @@ namespace Signum.Entities.Mailing
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            if (sender == messages)
+            if (sender == Messages)
             {
                 if (args.OldItems != null)
                     foreach (var item in args.OldItems.Cast<EmailMasterTemplateMessageEntity>())
@@ -73,7 +63,7 @@ namespace Signum.Entities.Mailing
         {
             base.PreSaving(ref graphModified);
 
-            messages.ForEach(e => e.MasterTemplate = this);
+            Messages.ForEach(e => e.MasterTemplate = this);
         }
     }
 
@@ -103,26 +93,16 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        CultureInfoEntity cultureInfo;
         [NotNullValidator]
-        public CultureInfoEntity CultureInfo
-        {
-            get { return cultureInfo; }
-            set { Set(ref cultureInfo, value); }
-        }
+        public CultureInfoEntity CultureInfo { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string text;
         [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
-        public string Text
-        {
-            get { return text; }
-            set { Set(ref text, value); }
-        }
+        public string Text { get; set; }
 
         public override string ToString()
         {
-            return cultureInfo?.ToString();
+            return CultureInfo?.ToString();
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

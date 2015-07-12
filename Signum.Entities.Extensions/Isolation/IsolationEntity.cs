@@ -8,19 +8,14 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Isolation
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation=true)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
     public class IsolationEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        static Expression<Func<IsolationEntity, string>> ToStringExpression = e => e.name;
+        static Expression<Func<IsolationEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -84,7 +79,7 @@ namespace Signum.Entities.Isolation
     [AutoInit]
     public static class IsolationOperation
     {
-        public static ExecuteSymbol<IsolationEntity> Save; 
+        public static ExecuteSymbol<IsolationEntity> Save;
     }
 
     public enum IsolationMessage
@@ -99,17 +94,12 @@ namespace Signum.Entities.Isolation
     [Serializable]
     public class IsolationMixin : MixinEntity
     {
-        IsolationMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) 
+        IsolationMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next)
         {
         }
 
         [NotNullable, AttachToUniqueIndexes]
-        Lite<IsolationEntity> isolation = IsRetrieving ? null : IsolationEntity.Current;
-        public Lite<IsolationEntity> Isolation
-        {
-            get { return isolation; }
-            set { Set(ref isolation, value); }
-        }
+        public Lite<IsolationEntity> Isolation { get; set; } = IsRetrieving ? null : IsolationEntity.Current;
 
         protected override void CopyFrom(MixinEntity mixin, object[] args)
         {

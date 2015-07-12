@@ -65,57 +65,32 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public abstract class BaseRulePack<T> : ModelEntity
     {
-        Lite<RoleEntity> role;
         [NotNullValidator]
-        public Lite<RoleEntity> Role
-        {
-            get { return role; }
-            internal set { Set(ref role, value); }
-        }
+        public Lite<RoleEntity> Role { get; internal set; }
 
-        MergeStrategy mergeStrategy;
         [HiddenProperty]
-        public MergeStrategy MergeStrategy
-        {
-            get { return mergeStrategy; }
-            set { Set(ref mergeStrategy, value); }
-        }
+        public MergeStrategy MergeStrategy { get; set; }
 
         [NotNullable]
-        MList<Lite<RoleEntity>> subRoles = new MList<Lite<RoleEntity>>();
         [HiddenProperty]
-        public MList<Lite<RoleEntity>> SubRoles
-        {
-            get { return subRoles; }
-            set { Set(ref subRoles, value); }
-        }
+        public MList<Lite<RoleEntity>> SubRoles { get; set; } = new MList<Lite<RoleEntity>>();
 
         public string Strategy
         {
             get
             {
                 return AuthAdminMessage._0of1.NiceToString().FormatWith(
-                    mergeStrategy.NiceToString(),
-                    subRoles.IsNullOrEmpty() ? "∅  -> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString() :
-                    subRoles.CommaAnd());
+                    MergeStrategy.NiceToString(),
+                    SubRoles.IsNullOrEmpty() ? "∅  -> " + (MergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString() :
+                    SubRoles.CommaAnd());
             }
         }
 
-        TypeEntity type;
         [NotNullValidator]
-        public TypeEntity Type
-        {
-            get { return type; }
-            internal set { Set(ref type, value); }
-        }
+        public TypeEntity Type { get; internal set; }
 
         [NotNullable]
-        MList<T> rules = new MList<T>();
-        public MList<T> Rules
-        {
-            get { return rules; }
-            set { Set(ref rules, value); }
-        }
+        public MList<T> Rules { get; set; } = new MList<T>();
     }
 
     [Serializable, DescriptionOptions(DescriptionOptions.None)]
@@ -152,16 +127,11 @@ namespace Signum.Entities.Authorization
             get { return !allowed.Equals(allowedBase); }
         }
 
-        R resource;
-        public R Resource
-        {
-            get { return resource; }
-            set { Set(ref resource, value); }
-        }
+        public R Resource { get; set; }
 
         public override string ToString()
         {
-            return "{0} -> {1}".FormatWith(resource, Allowed) + (Overriden ? "(overriden from {0})".FormatWith(AllowedBase) : "");
+            return "{0} -> {1}".FormatWith(Resource, Allowed) + (Overriden ? "(overriden from {0})".FormatWith(AllowedBase) : "");
         }
 
     }
@@ -176,35 +146,15 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class TypeAllowedRule : AllowedRule<TypeEntity, TypeAllowedAndConditions> 
+    public class TypeAllowedRule : AllowedRule<TypeEntity, TypeAllowedAndConditions>
     {
-        AuthThumbnail? properties;
-        public AuthThumbnail? Properties
-        {
-            get { return properties; }
-            set { Set(ref properties, value); }
-        }
+        public AuthThumbnail? Properties { get; set; }
 
-        AuthThumbnail? operations;
-        public AuthThumbnail? Operations
-        {
-            get { return operations; }
-            set { Set(ref operations, value); }
-        }
+        public AuthThumbnail? Operations { get; set; }
 
-        AuthThumbnail? queries;
-        public AuthThumbnail? Queries
-        {
-            get { return queries; }
-            set { Set(ref queries, value); }
-        }
+        public AuthThumbnail? Queries { get; set; }
 
-        ReadOnlyCollection<TypeConditionSymbol> availableConditions;
-        public ReadOnlyCollection<TypeConditionSymbol> AvailableConditions
-        {
-            get { return availableConditions; }
-            set { Set(ref availableConditions, value); }
-        }
+        public ReadOnlyCollection<TypeConditionSymbol> AvailableConditions { get; set; }
     }
 
     [Serializable, DescriptionOptions(DescriptionOptions.None)]
@@ -313,7 +263,7 @@ namespace Signum.Entities.Authorization
             if (conditions.IsEmpty())
                 return Fallback.ToString();
 
-            return "{0} | {1}".FormatWith(Fallback, conditions.ToString(c=>"{0} {1}".FormatWith(c.TypeCondition, c.Allowed), " | "));
+            return "{0} | {1}".FormatWith(Fallback, conditions.ToString(c => "{0} {1}".FormatWith(c.TypeCondition, c.Allowed), " | "));
         }
 
         internal bool Exactly(TypeAllowed current)
@@ -327,28 +277,18 @@ namespace Signum.Entities.Authorization
     {
         public TypeConditionRule(TypeConditionSymbol typeCondition, TypeAllowed allowed)
         {
-            this.typeCondition = typeCondition;
-            this.allowed = allowed;
+            this.TypeCondition = typeCondition;
+            this.Allowed = allowed;
         }
 
-        TypeConditionSymbol typeCondition;
-        public TypeConditionSymbol TypeCondition
-        {
-            get { return typeCondition; }
-            set { Set(ref typeCondition, value); }
-        }
+        public TypeConditionSymbol TypeCondition { get; set; }
 
-        TypeAllowed allowed;
-        public TypeAllowed Allowed
-        {
-            get { return allowed; }
-            set { Set(ref allowed, value); }
-        }
+        public TypeAllowed Allowed { get; set; }
 
         public bool Equals(TypeConditionRule other)
         {
-            return typeCondition.Equals(other.typeCondition) && 
-                allowed.Equals(other.allowed);
+            return TypeCondition.Equals(other.TypeCondition) &&
+                Allowed.Equals(other.Allowed);
         }
     }
 
@@ -360,15 +300,10 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R,A>
+    public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R, A>
          where R : Entity
     {
-        A[] coercedValues;
-        public A[] CoercedValues
-        {
-            get { return coercedValues; }
-            internal set { Set(ref coercedValues, value); }
-        }
+        public A[] CoercedValues { get; internal set; }
     }
 
     [Serializable]
@@ -406,7 +341,7 @@ namespace Signum.Entities.Authorization
         }
     }
     [Serializable]
-    public class OperationAllowedRule : AllowedRuleCoerced<OperationSymbol, OperationAllowed> { } 
+    public class OperationAllowedRule : AllowedRuleCoerced<OperationSymbol, OperationAllowed> { }
 
 
     [Serializable]
@@ -418,5 +353,5 @@ namespace Signum.Entities.Authorization
         }
     }
     [Serializable]
-    public class PermissionAllowedRule : AllowedRule<PermissionSymbol, bool> { } 
+    public class PermissionAllowedRule : AllowedRule<PermissionSymbol, bool> { }
 }

@@ -13,83 +13,33 @@ namespace Signum.Entities.SMS
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class SMSMessageEntity : Entity, IProcessLineDataEntity
     {
-        Lite<SMSTemplateEntity> template;
-        public Lite<SMSTemplateEntity> Template
-        {
-            get { return template; }
-            set { Set(ref template, value); }
-        }
+        public Lite<SMSTemplateEntity> Template { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        string message;
         [NotNullValidator]
-        public string Message
-        {
-            get { return message; }
-            set { Set(ref message, value); }
-        }
+        public string Message { get; set; }
 
-        bool editableMessage = true;
-        public bool EditableMessage
-        {
-            get { return editableMessage; }
-            set { Set(ref editableMessage, value); }
-        }
+        public bool EditableMessage { get; set; } = true;
 
-        string from;
         [StringLengthValidator(AllowNulls = false)]
-        public string From
-        {
-            get { return from; }
-            set { Set(ref from, value); }
-        }
+        public string From { get; set; }
 
-        DateTime? sendDate;
         [SecondsPrecissionValidator]
-        public DateTime? SendDate
-        {
-            get { return sendDate; }
-            set { Set(ref sendDate, value); }
-        }
+        public DateTime? SendDate { get; set; }
 
-        SMSMessageState state = SMSMessageState.Created;
-        public SMSMessageState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
+        public SMSMessageState State { get; set; } = SMSMessageState.Created;
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string destinationNumber;
         [StringLengthValidator(AllowNulls = false, Min = 9), MultipleTelephoneValidator]
-        public string DestinationNumber
-        {
-            get { return destinationNumber; }
-            set { Set(ref destinationNumber, value); }
-        }
+        public string DestinationNumber { get; set; }
 
         [SqlDbType(Size = 100)]
-        string messageID;
         [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string MessageID
-        {
-            get { return messageID; }
-            set { Set(ref messageID, value); }
-        }
+        public string MessageID { get; set; }
 
-        bool certified;
-        public bool Certified
-        {
-            get { return certified; }
-            set { Set(ref certified, value); }
-        }
+        public bool Certified { get; set; }
 
-        Lite<SMSSendPackageEntity> sendpackage;
-        public Lite<SMSSendPackageEntity> SendPackage
-        {
-            get { return sendpackage; }
-            set { Set(ref sendpackage, value); }
-        }
+        public Lite<SMSSendPackageEntity> SendPackage { get; set; }
 
         Lite<SMSUpdatePackageEntity> updatePackage;
         public Lite<SMSUpdatePackageEntity> UpdatePackage
@@ -97,32 +47,17 @@ namespace Signum.Entities.SMS
             get { return updatePackage; }
             set
             {
-                if(Set(ref updatePackage, value))
+                if (Set(ref updatePackage, value))
                     UpdatePackageProcessed = false;
             }
         }
 
-        bool updatePackageProcessed;
-        public bool UpdatePackageProcessed
-        {
-            get { return updatePackageProcessed; }
-            set { Set(ref updatePackageProcessed, value); }
-        }
+        public bool UpdatePackageProcessed { get; set; }
 
         [ImplementedBy()]
-        Lite<Entity> referred;
-        public Lite<Entity> Referred
-        {
-            get { return referred; }
-            set { Set(ref referred, value); }
-        }
+        public Lite<Entity> Referred { get; set; }
 
-        Lite<ExceptionEntity> exception;
-        public Lite<ExceptionEntity> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value); }
-        }
+        public Lite<ExceptionEntity> Exception { get; set; }
 
         public override string ToString()
         {
@@ -155,28 +90,13 @@ namespace Signum.Entities.SMS
     [Serializable]
     public class MultipleSMSModel : ModelEntity
     {
-        string message;
         [StringLengthValidator(AllowNulls = false, Max = SMSCharacters.SMSMaxTextLength)]
-        public string Message
-        {
-            get { return message; }
-            set { Set(ref message, value); }
-        }
+        public string Message { get; set; }
 
-        string from;
         [StringLengthValidator(AllowNulls = false)]
-        public string From
-        {
-            get { return from; }
-            set { Set(ref from, value); }
-        }
+        public string From { get; set; }
 
-        bool certified;
-        public bool Certified
-        {
-            get { return certified; }
-            set { Set(ref certified, value); }
-        }
+        public bool Certified { get; set; }
     }
 
     [AutoInit]

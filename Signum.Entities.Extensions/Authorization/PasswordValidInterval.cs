@@ -8,26 +8,11 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class PasswordExpiresIntervalEntity : Entity
     {
-        decimal days;
-        public decimal Days
-        {
-            get { return days; }
-            set { Set(ref days, value); }
-        }
+        public decimal Days { get; set; }
 
-        decimal daysWarning;
-        public decimal DaysWarning
-        {
-            get { return daysWarning; }
-            set { Set(ref daysWarning, value); }
-        }
+        public decimal DaysWarning { get; set; }
 
-        bool enabled;
-        public bool Enabled
-        {
-            get { return enabled; }
-            set { Set(ref enabled, value); }
-        }
+        public bool Enabled { get; set; }
     }
 
     [AutoInit]
@@ -45,7 +30,8 @@ namespace Signum.Entities.Authorization
         protected PasswordExpiredException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+            : base(info, context)
+        { }
     }
 }
 

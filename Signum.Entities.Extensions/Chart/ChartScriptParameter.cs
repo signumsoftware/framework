@@ -15,13 +15,8 @@ namespace Signum.Entities.Chart
     public class ChartScriptParameterEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 50)]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         ChartParameterType type;
         public ChartParameterType Type
@@ -36,12 +31,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        int? columnIndex;
-        public int? ColumnIndex
-        {
-            get { return columnIndex; }
-            set { Set(ref columnIndex, value); }
-        }
+        public int? ColumnIndex { get; set; }
 
         [NotNullable, SqlDbType(Size = 200)]
         string valueDefinition;
@@ -67,7 +57,7 @@ namespace Signum.Entities.Chart
                 switch (Type)
                 {
                     case ChartParameterType.Enum: return EnumValueList.TryParse(valueDefinition, out enumValues);
-                    case ChartParameterType.Number: return NumberInterval.TryParse(valueDefinition, out  numberInterval);
+                    case ChartParameterType.Number: return NumberInterval.TryParse(valueDefinition, out numberInterval);
                     case ChartParameterType.String: return null;
                     default: throw new InvalidOperationException();
                 }
@@ -200,7 +190,7 @@ namespace Signum.Entities.Chart
             public static string TryParse(string valueDefinition, out EnumValueList list)
             {
                 list = new EnumValueList();
-                foreach (var item in valueDefinition.SplitNoEmpty('|' ))
+                foreach (var item in valueDefinition.SplitNoEmpty('|'))
                 {
                     EnumValue val;
                     string error = EnumValue.TryParse(item, out val);

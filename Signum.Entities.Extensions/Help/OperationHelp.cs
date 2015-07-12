@@ -13,31 +13,16 @@ namespace Signum.Entities.Help
     public class OperationHelpEntity : Entity
     {
         [NotNullable]
-        OperationSymbol operation;
         [NotNullValidator]
-        public OperationSymbol Operation
-        {
-            get { return operation; }
-            set { Set(ref operation, value); }
-        }
+        public OperationSymbol Operation { get; set; }
 
         [NotNullable]
-        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoEntity Culture
-        {
-            get { return culture; }
-            set { Set(ref culture, value); }
-        }
+        public CultureInfoEntity Culture { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string description;
         [NotNullValidator]
-        public string Description
-        {
-            get { return description; }
-            set { Set(ref description, value); }
-        }
+        public string Description { get; set; }
 
         static Expression<Func<OperationHelpEntity, string>> ToStringExpression = e => e.Operation.ToString();
         public override string ToString()

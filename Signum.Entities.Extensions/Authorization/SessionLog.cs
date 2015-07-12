@@ -10,62 +10,32 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SessionLogEntity : Entity
     {
-        Lite<UserEntity> user;
         [NotNullValidator]
-        public Lite<UserEntity> User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
+        public Lite<UserEntity> User { get; set; }
 
-        DateTime sessionStart;
         [SecondsPrecissionValidator]
-        public DateTime SessionStart
-        {
-            get { return sessionStart; }
-            set { Set(ref sessionStart, value); }
-        }
+        public DateTime SessionStart { get; set; }
 
-        DateTime? sessionEnd;
         [SecondsPrecissionValidator]
-        public DateTime? SessionEnd
-        {
-            get { return sessionEnd; }
-            set { Set(ref sessionEnd, value); }
-        }
+        public DateTime? SessionEnd { get; set; }
 
-        bool sessionTimeOut;
-        public bool SessionTimeOut
-        {
-            get { return sessionTimeOut; }
-            set { Set(ref sessionTimeOut, value); }
-        }
+        public bool SessionTimeOut { get; set; }
 
         [SqlDbType(Size = 100)]
-        string userHostAddress;
         [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string UserHostAddress
-        {
-            get { return userHostAddress; }
-            set { Set(ref userHostAddress, value); }
-        }
+        public string UserHostAddress { get; set; }
 
         [SqlDbType(Size = 300)]
-        string userAgent;
         [StringLengthValidator(AllowNulls = true, Max = 300)]
-        public string UserAgent
-        {
-            get { return userAgent; }
-            set { Set(ref userAgent, value); }
-        }
+        public string UserAgent { get; set; }
 
         public override string ToString()
         {
             return "{0} ({1}-{2})".FormatWith(
-                user?.ToString(), sessionStart, sessionEnd);
+                User?.ToString(), SessionStart, SessionEnd);
         }
 
-        static Expression<Func<SessionLogEntity, double?>> DurationExpression = 
+        static Expression<Func<SessionLogEntity, double?>> DurationExpression =
             sl => sl.SessionEnd != null ? (sl.SessionEnd.Value - sl.SessionStart).TotalSeconds : (double?)null;
         [Unit("s")]
         public double? Duration

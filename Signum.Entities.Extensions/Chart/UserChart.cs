@@ -14,7 +14,7 @@ namespace Signum.Entities.Chart
 {
     public interface IHasEntitytype
     {
-        Lite<TypeEntity> EntityType { get; } 
+        Lite<TypeEntity> EntityType { get; }
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
@@ -29,7 +29,7 @@ namespace Signum.Entities.Chart
         [HiddenProperty]
         public object QueryName
         {
-            get { return ToQueryName(query); }
+            get { return ToQueryName(Query); }
             set { Query = ToQueryEntity(value); }
         }
 
@@ -37,36 +37,16 @@ namespace Signum.Entities.Chart
         internal object queryName;
 
         [NotNullable]
-        QueryEntity query;
         [NotNullValidator]
-        public QueryEntity Query
-        {
-            get { return query; }
-            set { Set(ref query, value); }
-        }
+        public QueryEntity Query { get; set; }
 
-        Lite<TypeEntity> entityType;
-        public Lite<TypeEntity> EntityType
-        {
-            get { return entityType; }
-            set { Set(ref entityType, value); }
-        }
+        public Lite<TypeEntity> EntityType { get; set; }
 
-        Lite<Entity> owner;
-        public Lite<Entity> Owner
-        {
-            get { return owner; }
-            set { Set(ref owner, value); }
-        }
+        public Lite<Entity> Owner { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string displayName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { Set(ref displayName, value); }
-        }
+        public string DisplayName { get; set; }
 
         [NotNullable]
         ChartScriptEntity chartScript;
@@ -85,13 +65,8 @@ namespace Signum.Entities.Chart
         }
 
         [NotNullable]
-        MList<ChartParameterEntity> parameters = new MList<ChartParameterEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<ChartParameterEntity> Parameters
-        {
-            get { return parameters; }
-            set { Set(ref parameters, value); }
-        }
+        public MList<ChartParameterEntity> Parameters { get; set; } = new MList<ChartParameterEntity>();
 
         bool groupResults = true;
         public bool GroupResults
@@ -107,12 +82,7 @@ namespace Signum.Entities.Chart
         }
 
         [NotifyCollectionChanged, ValidateChildProperty, NotNullable, PreserveOrder]
-        MList<ChartColumnEntity> columns = new MList<ChartColumnEntity>();
-        public MList<ChartColumnEntity> Columns
-        {
-            get { return columns; }
-            set { Set(ref columns, value); }
-        }
+        public MList<ChartColumnEntity> Columns { get; set; } = new MList<ChartColumnEntity>();
 
         void NotifyAllColumns()
         {
@@ -123,30 +93,15 @@ namespace Signum.Entities.Chart
         }
 
         [NotNullable, PreserveOrder]
-        MList<QueryFilterEntity> filters = new MList<QueryFilterEntity>();
-        public MList<QueryFilterEntity> Filters
-        {
-            get { return filters; }
-            set { Set(ref filters, value); }
-        }
+        public MList<QueryFilterEntity> Filters { get; set; } = new MList<QueryFilterEntity>();
 
         [NotNullable, PreserveOrder]
-        MList<QueryOrderEntity> orders = new MList<QueryOrderEntity>();
-        public MList<QueryOrderEntity> Orders
-        {
-            get { return orders; }
-            set { Set(ref orders, value); }
-        }
+        public MList<QueryOrderEntity> Orders { get; set; } = new MList<QueryOrderEntity>();
 
         [UniqueIndex]
-        Guid guid = Guid.NewGuid();
-        public Guid Guid
-        {
-            get { return guid; }
-            set { Set(ref guid, value); }
-        }
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
-        static readonly Expression<Func<UserChartEntity, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<UserChartEntity, string>> ToStringExpression = e => e.DisplayName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -212,9 +167,9 @@ namespace Signum.Entities.Chart
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
-            Filters.Syncronize(element.Element("Filters")?.Elements().EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
+            Filters.Syncronize(element.Element("Filters")?.Elements().EmptyIfNull().ToList(), (f, x) => f.FromXml(x, ctx));
             Columns.Syncronize(element.Element("Columns")?.Elements().EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
-            Orders.Syncronize(element.Element("Orders")?.Elements().EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
+            Orders.Syncronize(element.Element("Orders")?.Elements().EmptyIfNull().ToList(), (o, x) => o.FromXml(x, ctx));
             Parameters.Syncronize(element.Element("Parameters")?.Elements().EmptyIfNull().ToList(), (p, x) => p.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
         }

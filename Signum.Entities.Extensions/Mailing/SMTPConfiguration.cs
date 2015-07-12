@@ -14,59 +14,24 @@ namespace Signum.Entities.Mailing
     public class SmtpConfigurationEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        SmtpDeliveryFormat deliveryFormat;
-        public SmtpDeliveryFormat DeliveryFormat
-        {
-            get { return deliveryFormat; }
-            set { Set(ref deliveryFormat, value); }
-        }
+        public SmtpDeliveryFormat DeliveryFormat { get; set; }
 
-        SmtpDeliveryMethod deliveryMethod;
-        public SmtpDeliveryMethod DeliveryMethod
-        {
-            get { return deliveryMethod; }
-            set { Set(ref deliveryMethod, value); }
-        }
+        public SmtpDeliveryMethod DeliveryMethod { get; set; }
 
-        SmtpNetworkDeliveryEntity network;
-        public SmtpNetworkDeliveryEntity Network
-        {
-            get { return network; }
-            set { Set(ref network, value); }
-        }
+        public SmtpNetworkDeliveryEntity Network { get; set; }
 
         [SqlDbType(Size = 300)]
-        string pickupDirectoryLocation;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300), FileNameValidator]
-        public string PickupDirectoryLocation
-        {
-            get { return pickupDirectoryLocation; }
-            set { Set(ref pickupDirectoryLocation, value); }
-        }
+        public string PickupDirectoryLocation { get; set; }
 
-        EmailAddressEntity defaultFrom;
-        public EmailAddressEntity DefaultFrom
-        {
-            get { return defaultFrom; }
-            set { Set(ref defaultFrom, value); }
-        }
+        public EmailAddressEntity DefaultFrom { get; set; }
 
         [NotNullable]
-        MList<EmailRecipientEntity> additionalRecipients = new MList<EmailRecipientEntity>();
         [NoRepeatValidator]
-        public MList<EmailRecipientEntity> AdditionalRecipients
-        {
-            get { return additionalRecipients; }
-            set { Set(ref additionalRecipients, value); }
-        }
+        public MList<EmailRecipientEntity> AdditionalRecipients { get; set; } = new MList<EmailRecipientEntity>();
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
@@ -81,7 +46,7 @@ namespace Signum.Entities.Mailing
                 {SmtpDeliveryMethod.PickupDirectoryFromIis,    null, null },
             };
 
-        static readonly Expression<Func<SmtpConfigurationEntity, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<SmtpConfigurationEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -99,82 +64,37 @@ namespace Signum.Entities.Mailing
     public class SmtpNetworkDeliveryEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        string host;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Host
-        {
-            get { return host; }
-            set { Set(ref host, value); }
-        }
+        public string Host { get; set; }
 
-        int port = 25;
-        public int Port
-        {
-            get { return port; }
-            set { Set(ref port, value); }
-        }
+        public int Port { get; set; } = 25;
 
         [SqlDbType(Size = 100)]
-        string username;
         [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Username
-        {
-            get { return username; }
-            set { Set(ref username, value); }
-        }
+        public string Username { get; set; }
 
         [SqlDbType(Size = 100)]
-        string password;
         [StringLengthValidator(AllowNulls = true, Max = 100)]
-        public string Password
-        {
-            get { return password; }
-            set { Set(ref password, value); }
-        }
+        public string Password { get; set; }
 
-        bool useDefaultCredentials = true;
-        public bool UseDefaultCredentials
-        {
-            get { return useDefaultCredentials; }
-            set { Set(ref useDefaultCredentials, value); }
-        }
+        public bool UseDefaultCredentials { get; set; } = true;
 
-        bool enableSSL;
-        public bool EnableSSL
-        {
-            get { return enableSSL; }
-            set { Set(ref enableSSL, value); }
-        }
+        public bool EnableSSL { get; set; }
 
         [NotNullable]
-        MList<ClientCertificationFileEntity> clientCertificationFiles = new MList<ClientCertificationFileEntity>();
-        public MList<ClientCertificationFileEntity> ClientCertificationFiles
-        {
-            get { return clientCertificationFiles; }
-            set { Set(ref clientCertificationFiles, value); }
-        }
+        public MList<ClientCertificationFileEntity> ClientCertificationFiles { get; set; } = new MList<ClientCertificationFileEntity>();
     }
 
     [Serializable]
     public class ClientCertificationFileEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 300)]
-        string fullFilePath;
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 300),]
-        public string FullFilePath
-        {
-            get { return fullFilePath; }
-            set { Set(ref fullFilePath, value); }
-        }
+        public string FullFilePath { get; set; }
 
-        CertFileType certFileType;
-        public CertFileType CertFileType
-        {
-            get { return certFileType; }
-            set { Set(ref certFileType, value); }
-        }
+        public CertFileType CertFileType { get; set; }
 
-        static readonly Expression<Func<ClientCertificationFileEntity, string>> ToStringExpression = e => e.fullFilePath;
+        static readonly Expression<Func<ClientCertificationFileEntity, string>> ToStringExpression = e => e.FullFilePath;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

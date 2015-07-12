@@ -26,17 +26,12 @@ namespace Signum.Entities.SMS
     {
         public SMSPackageEntity()
         {
-            this.name = GetType().NiceName() + ": " + TimeZoneManager.Now.ToString();
+            this.Name = GetType().NiceName() + ": " + TimeZoneManager.Now.ToString();
         }
 
         [SqlDbType(Size = 200)]
-        string name;
         [StringLengthValidator(AllowNulls = true, Max = 200)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         static Expression<Func<SMSPackageEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()

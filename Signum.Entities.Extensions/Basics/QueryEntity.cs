@@ -14,24 +14,14 @@ namespace Signum.Entities.Basics
     public class QueryEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string key;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Key
-        {
-            get { return key; }
-            set { Set(ref key, value); }
-        }
+        public string Key { get; set; }
 
-        static readonly Expression<Func<QueryEntity, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<QueryEntity, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

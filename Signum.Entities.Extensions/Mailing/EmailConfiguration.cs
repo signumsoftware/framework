@@ -10,73 +10,27 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailConfigurationEntity : EmbeddedEntity
     {
-        CultureInfoEntity defaultCulture;
         [NotNullValidator]
-        public CultureInfoEntity DefaultCulture
-        {
-            get { return defaultCulture; }
-            set { Set(ref defaultCulture, value); }
-        }
+        public CultureInfoEntity DefaultCulture { get; set; }
 
-        string urlLeft;
-        public string UrlLeft
-        {
-            get { return urlLeft; }
-            set { Set(ref urlLeft, value); }
-        }
+        public string UrlLeft { get; set; }
 
-        bool sendEmails;
-        public bool SendEmails
-        {
-            get { return sendEmails; }
-            set { Set(ref sendEmails, value); }
-        }
+        public bool SendEmails { get; set; }
 
-        bool reciveEmails;
-        public bool ReciveEmails
-        {
-            get { return reciveEmails; }
-            set { Set(ref reciveEmails, value); }
-        }
-
+        public bool ReciveEmails { get; set; }
 
         [SqlDbType(Size = 100)]
-        string overrideEmailAddress;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100), EMailValidator]
-        public string OverrideEmailAddress
-        {
-            get { return overrideEmailAddress; }
-            set { Set(ref overrideEmailAddress, value); }
-        }
+        public string OverrideEmailAddress { get; set; }
 
-        double? avoidSendingEmailsOlderThan;
         [Unit("hs")]
-        public double? AvoidSendingEmailsOlderThan
-        {
-            get { return avoidSendingEmailsOlderThan; }
-            set { Set(ref avoidSendingEmailsOlderThan, value); }
-        }
+        public double? AvoidSendingEmailsOlderThan { get; set; }
 
-        int chunkSizeSendingEmails = 100;
-        public int ChunkSizeSendingEmails
-        {
-            get { return chunkSizeSendingEmails; }
-            set { Set(ref chunkSizeSendingEmails, value); }
-        }
+        public int ChunkSizeSendingEmails { get; set; } = 100;
 
-        int maxEmailSendRetries = 3;
-        public int MaxEmailSendRetries
-        {
-            get { return maxEmailSendRetries; }
-            set { Set(ref maxEmailSendRetries, value); }
-        }
+        public int MaxEmailSendRetries { get; set; } = 3;
 
-        int asyncSenderPeriod = 5 * 60; //5 minutes
         [Unit("sec")]
-        public int AsyncSenderPeriod
-        {
-            get { return asyncSenderPeriod; }
-            set { Set(ref asyncSenderPeriod, value); }
-        }
+        public int AsyncSenderPeriod { get; set; } = 5 * 60; //5 minutes
     }
 }

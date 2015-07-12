@@ -22,25 +22,20 @@ namespace Signum.Entities.Scheduler
         {
             DateTime candidate = now.TrimToMinutes();
 
-            candidate = candidate.AddMinutes(-(candidate.Minute % eachMinutes));
+            candidate = candidate.AddMinutes(-(candidate.Minute % EachMinutes));
 
             if (candidate < now)
-                candidate = candidate.AddMinutes(eachMinutes);
+                candidate = candidate.AddMinutes(EachMinutes);
 
-            return candidate; 
+            return candidate;
         }
-
-        int eachMinutes;
+        
         [NumberBetweenValidator(1, 60)]
-        public int EachMinutes
-        {
-            get { return eachMinutes; }
-            set { Set(ref eachMinutes, value); }
-        }
+        public int EachMinutes { get; set; }
 
         public override string ToString()
         {
-            return SchedulerMessage.Each0Minutes.NiceToString().FormatWith(eachMinutes.ToString());
+            return SchedulerMessage.Each0Minutes.NiceToString().FormatWith(EachMinutes.ToString());
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -62,25 +57,20 @@ namespace Signum.Entities.Scheduler
         {
             DateTime candidate = now.TrimToHours();
 
-            candidate = candidate.AddHours(-(candidate.Hour % eachHours));
+            candidate = candidate.AddHours(-(candidate.Hour % EachHours));
 
             if (candidate < now)
-                candidate = candidate.AddHours(eachHours);
+                candidate = candidate.AddHours(EachHours);
 
             return candidate;
         }
 
-        int eachHours;
         [NumberBetweenValidator(1, 24)]
-        public int EachHours
-        {
-            get { return eachHours; }
-            set { Set(ref eachHours, value); }
-        }
+        public int EachHours { get; set; }
 
         public override string ToString()
         {
-            return SchedulerMessage.Each0Hours.NiceToString().FormatWith(eachHours.ToString());
+            return SchedulerMessage.Each0Hours.NiceToString().FormatWith(EachHours.ToString());
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -101,18 +91,13 @@ namespace Signum.Entities.Scheduler
     [Serializable]
     public abstract class ScheduleRuleDayEntity : Entity, IScheduleRuleEntity
     {
-        DateTime startingOn = TimeZoneManager.Now.Date;
-        public DateTime StartingOn
-        {
-            get { return startingOn; }
-            set { Set(ref startingOn, value); }
-        }
+        public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;
 
         public abstract DateTime Next(DateTime now);
 
         protected DateTime BaseNext(DateTime now)
         {
-            DateTime result = DateTimeExtensions.Max(now.Date, startingOn.Date).Add(startingOn.TimeOfDay);
+            DateTime result = DateTimeExtensions.Max(now.Date, StartingOn.Date).Add(StartingOn.TimeOfDay);
 
             if (result < now)
                 result = result.AddDays(1);
@@ -122,7 +107,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return startingOn.ToUserInterface().ToShortTimeString();
+            return StartingOn.ToUserInterface().ToShortTimeString();
         }
     }
 
@@ -143,17 +128,12 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ScheduleRuleWeeklyEntity : ScheduleRuleDayEntity
     {
-        DayOfWeek dayOfTheWeek;
-        public DayOfWeek DayOfTheWeek
-        {
-            get { return dayOfTheWeek; }
-            set { Set(ref dayOfTheWeek, value); }
-        }
+        public DayOfWeek DayOfTheWeek { get; set; }
 
         public override string ToString()
         {
             return "{0} {1} {2}".FormatWith(
-                CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)dayOfTheWeek],
+                CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)DayOfTheWeek],
                 SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
                 base.ToString());
         }
@@ -163,7 +143,7 @@ namespace Signum.Entities.Scheduler
         {
             DateTime result = BaseNext(now);
 
-            while (result.DayOfWeek != dayOfTheWeek)
+            while (result.DayOfWeek != DayOfTheWeek)
                 result = result.AddDays(1);
 
             return result;
@@ -173,69 +153,23 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ScheduleRuleWeekDaysEntity : ScheduleRuleDayEntity
     {
-        bool monday;
-        public bool Monday
-        {
-            get { return monday; }
-            set { Set(ref monday, value); }
-        }
+        public bool Monday { get; set; }
 
-        bool tuesday;
-        public bool Tuesday
-        {
-            get { return tuesday; }
-            set { Set(ref tuesday, value); }
-        }
+        public bool Tuesday { get; set; }
 
-        bool wednesday;
-        public bool Wednesday
-        {
-            get { return wednesday; }
-            set { Set(ref wednesday, value); }
-        }
+        public bool Wednesday { get; set; }
 
-        bool thursday;
-        public bool Thursday
-        {
+        public bool Thursday { get; set; }
 
-            get { return thursday; }
-            set { Set(ref thursday, value); }
-        }
+        public bool Friday { get; set; }
 
-        bool friday;
-        public bool Friday
-        {
-            get { return friday; }
-            set { Set(ref friday, value); }
-        }
+        public bool Saturday { get; set; }
 
-        bool saturday;
-        public bool Saturday
-        {
-            get { return saturday; }
-            set { Set(ref saturday, value); }
-        }
+        public bool Sunday { get; set; }
 
-        bool sunday;
-        public bool Sunday
-        {
-            get { return sunday; }
-            set { Set(ref sunday, value); }
-        }
+        public HolidayCalendarEntity Calendar { get; set; }
 
-        HolidayCalendarEntity calendar;
-        public HolidayCalendarEntity Calendar
-        {
-            get { return calendar; }
-            set { Set(ref calendar, value); }
-        }
-
-        bool holiday;
-        public bool Holiday
-        {
-            get { return holiday; }
-            set { Set(ref holiday, value); }
-        }
+        public bool Holiday { get; set; }
 
         public override DateTime Next(DateTime now)
         {
@@ -249,18 +183,18 @@ namespace Signum.Entities.Scheduler
 
         bool IsAllowed(DateTime dateTime)
         {
-            if (calendar != null && calendar.IsHoliday(dateTime))
-                return holiday;
+            if (Calendar != null && Calendar.IsHoliday(dateTime))
+                return Holiday;
 
             switch (dateTime.DayOfWeek)
             {
-                case DayOfWeek.Sunday: return sunday;
-                case DayOfWeek.Monday: return monday;
-                case DayOfWeek.Tuesday: return tuesday;
-                case DayOfWeek.Wednesday: return wednesday;
-                case DayOfWeek.Thursday: return thursday;
-                case DayOfWeek.Friday: return friday;
-                case DayOfWeek.Saturday: return saturday;
+                case DayOfWeek.Sunday: return Sunday;
+                case DayOfWeek.Monday: return Monday;
+                case DayOfWeek.Tuesday: return Tuesday;
+                case DayOfWeek.Wednesday: return Wednesday;
+                case DayOfWeek.Thursday: return Thursday;
+                case DayOfWeek.Friday: return Friday;
+                case DayOfWeek.Saturday: return Saturday;
                 default: throw new InvalidOperationException();
             }
         }
@@ -268,14 +202,14 @@ namespace Signum.Entities.Scheduler
         public override string ToString()
         {
             return "{0} {1} {2} {3}".FormatWith(
-                (monday ? SchedulerMessage.ScheduleRuleWeekDaysDN_M.NiceToString() : "") +
-                (tuesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_T.NiceToString() : "") +
-                (wednesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_W.NiceToString() : "") +
-                (thursday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Th.NiceToString() : "") +
-                (friday ? SchedulerMessage.ScheduleRuleWeekDaysDN_F.NiceToString() : "") +
-                (saturday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Sa.NiceToString() : "") +
-                (sunday ? SchedulerMessage.ScheduleRuleWeekDaysDN_S.NiceToString() : ""),
-                (calendar != null ? (holiday ? SchedulerMessage.ScheduleRuleWeekDaysDN_AndHoliday.NiceToString() : SchedulerMessage.ScheduleRuleWeekDaysDN_ButHoliday.NiceToString()) : null),
+                (Monday ? SchedulerMessage.ScheduleRuleWeekDaysDN_M.NiceToString() : "") +
+                (Tuesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_T.NiceToString() : "") +
+                (Wednesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_W.NiceToString() : "") +
+                (Thursday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Th.NiceToString() : "") +
+                (Friday ? SchedulerMessage.ScheduleRuleWeekDaysDN_F.NiceToString() : "") +
+                (Saturday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Sa.NiceToString() : "") +
+                (Sunday ? SchedulerMessage.ScheduleRuleWeekDaysDN_S.NiceToString() : ""),
+                (Calendar != null ? (Holiday ? SchedulerMessage.ScheduleRuleWeekDaysDN_AndHoliday.NiceToString() : SchedulerMessage.ScheduleRuleWeekDaysDN_ButHoliday.NiceToString()) : null),
                 SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
                 base.ToString());
         }

@@ -15,22 +15,12 @@ namespace Signum.Entities.Translation
     public class TranslatorUserEntity : Entity
     {
         [NotNullable, UniqueIndex, ImplementedBy(typeof(UserEntity))]
-        Lite<IUserEntity> user;
         [NotNullValidator]
-        public Lite<IUserEntity> User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
+        public Lite<IUserEntity> User { get; set; }
 
         [NotNullable, PreserveOrder]
-        MList<TranslatorUserCultureEntity> cultures = new MList<TranslatorUserCultureEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<TranslatorUserCultureEntity> Cultures
-        {
-            get { return cultures; }
-            set { Set(ref cultures, value); }
-        }
+        public MList<TranslatorUserCultureEntity> Cultures { get; set; } = new MList<TranslatorUserCultureEntity>();
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
@@ -39,7 +29,7 @@ namespace Signum.Entities.Translation
                 var error = Cultures.GroupBy(a => a.Culture).Where(a => a.Count() > 1).ToString(a => a.Key.ToString(), ", ");
 
                 if (error.HasText())
-                    return TranslationMessage.RepeatedCultures0.NiceToString().FormatWith(error); 
+                    return TranslationMessage.RepeatedCultures0.NiceToString().FormatWith(error);
             }
 
             return base.PropertyValidation(pi);
@@ -47,7 +37,7 @@ namespace Signum.Entities.Translation
 
         public override string ToString()
         {
-            return user?.ToString();
+            return User?.ToString();
         }
     }
 
@@ -55,20 +45,10 @@ namespace Signum.Entities.Translation
     public class TranslatorUserCultureEntity : EmbeddedEntity
     {
         [NotNullable]
-        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoEntity Culture
-        {
-            get { return culture; }
-            set { Set(ref culture, value); }
-        }
+        public CultureInfoEntity Culture { get; set; }
 
-        TranslatedCultureAction action;
-        public TranslatedCultureAction Action
-        {
-            get { return action; }
-            set { Set(ref action, value); }
-        }
+        public TranslatedCultureAction Action { get; set; }
     }
 
     public enum TranslatedCultureAction

@@ -11,14 +11,9 @@ namespace Signum.Entities.Mailing
     public class SystemEmailEntity : Entity
     {
         [NotNullable, UniqueIndex]
-        string fullClassName;
-        public string FullClassName
-        {
-            get { return fullClassName; }
-            set { Set(ref fullClassName, value); }
-        }
+        public string FullClassName { get; set; }
 
-        static readonly Expression<Func<SystemEmailEntity, string>> ToStringExpression = e => e.fullClassName;
+        static readonly Expression<Func<SystemEmailEntity, string>> ToStringExpression = e => e.FullClassName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

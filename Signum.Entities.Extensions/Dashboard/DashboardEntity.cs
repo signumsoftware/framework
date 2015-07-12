@@ -36,59 +36,24 @@ namespace Signum.Entities.Dashboard
             }
         }
 
-        DashboardEmbedededInEntity? embeddedInEntity;
-        public DashboardEmbedededInEntity? EmbeddedInEntity
-        {
-            get { return embeddedInEntity; }
-            set { Set(ref embeddedInEntity, value); }
-        }
+        public DashboardEmbedededInEntity? EmbeddedInEntity { get; set; }
 
-        Lite<Entity> owner;
-        public Lite<Entity> Owner
-        {
-            get { return owner; }
-            set { Set(ref owner, value); }
-        }
+        public Lite<Entity> Owner { get; set; }
 
-        int? dashboardPriority;
-        public int? DashboardPriority
-        {
-            get { return dashboardPriority; }
-            set { Set(ref dashboardPriority, value); }
-        }
+        public int? DashboardPriority { get; set; }
 
-        int? autoRefreshPeriod;
         [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThan, 1)]
-        public int? AutoRefreshPeriod
-        {
-            get { return autoRefreshPeriod; }
-            set { Set(ref autoRefreshPeriod, value); }
-        }
+        public int? AutoRefreshPeriod { get; set; }
 
-        string displayName;
         [StringLengthValidator(AllowNulls = false, Min = 2)]
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { Set(ref displayName, value); }
-        }
+        public string DisplayName { get; set; }
 
         [ValidateChildProperty, NotifyCollectionChanged, NotifyChildProperty, NotNullable]
-        MList<PanelPartEntity> parts = new MList<PanelPartEntity>();
         [NoRepeatValidator]
-        public MList<PanelPartEntity> Parts
-        {
-            get { return parts; }
-            set { Set(ref parts, value); }
-        }
+        public MList<PanelPartEntity> Parts { get; set; } = new MList<PanelPartEntity>();
 
         [UniqueIndex]
-        Guid guid = Guid.NewGuid();
-        public Guid Guid
-        {
-            get { return guid; }
-            set { Set(ref guid, value); }
-        }
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
         static Expression<Func<DashboardEntity, IPartEntity, bool>> ContainsContentExpression =
             (cp, content) => cp.Parts.Any(p => p.Content.Is(content));
@@ -108,7 +73,7 @@ namespace Signum.Entities.Dashboard
                     if (part.StartColumn + part.Columns > 12)
                         return DashboardMessage.Part0IsTooLarge.NiceToString(part);
 
-                    var other = parts.TakeWhile(p => p != part)
+                    var other = Parts.TakeWhile(p => p != part)
                         .FirstOrDefault(a => a.Row == part.Row && a.ColumnInterval().Overlap(part.ColumnInterval()));
 
                     if (other != null)
@@ -133,7 +98,7 @@ namespace Signum.Entities.Dashboard
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            if(sender == Parts)
+            if (sender == Parts)
                 foreach (var pp in Parts)
                     pp.NotifyRowColumn();
 
@@ -156,7 +121,7 @@ namespace Signum.Entities.Dashboard
             base.ChildPropertyChanged(sender, e);
         }
 
-        static readonly Expression<Func<DashboardEntity, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<DashboardEntity, string>> ToStringExpression = e => e.DisplayName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -182,7 +147,7 @@ namespace Signum.Entities.Dashboard
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 DashboardPriority == null ? null : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
                 EmbeddedInEntity == null ? null : new XAttribute("EmbeddedInEntity", DashboardPriority.Value.ToString()),
-                new XElement("Parts", Parts.Select(p => p.ToXml(ctx)))); 
+                new XElement("Parts", Parts.Select(p => p.ToXml(ctx))));
         }
 
 

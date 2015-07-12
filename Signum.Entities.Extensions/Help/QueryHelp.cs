@@ -13,40 +13,20 @@ namespace Signum.Entities.Help
     public class QueryHelpEntity : Entity
     {
         [NotNullable]
-        QueryEntity query;
         [NotNullValidator]
-        public QueryEntity Query
-        {
-            get { return query; }
-            set { Set(ref query, value); }
-        }
+        public QueryEntity Query { get; set; }
 
         [NotNullable]
-        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoEntity Culture
-        {
-            get { return culture; }
-            set { Set(ref culture, value); }
-        }
+        public CultureInfoEntity Culture { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        string description;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
-        public string Description
-        {
-            get { return description; }
-            set { Set(ref description, value); }
-        }
+        public string Description { get; set; }
 
         [NotNullable, PreserveOrder]
-        MList<QueryColumnHelpEntity> columns = new MList<QueryColumnHelpEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<QueryColumnHelpEntity> Columns
-        {
-            get { return columns; }
-            set { Set(ref columns, value); }
-        }
+        public MList<QueryColumnHelpEntity> Columns { get; set; } = new MList<QueryColumnHelpEntity>();
 
         public bool IsEmpty
         {
@@ -72,22 +52,12 @@ namespace Signum.Entities.Help
     public class QueryColumnHelpEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        string columnName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string ColumnName
-        {
-            get { return columnName; }
-            set { Set(ref columnName, value); }
-        }
+        public string ColumnName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        string description;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
-        public string Description
-        {
-            get { return description; }
-            set { Set(ref description, value); }
-        }
+        public string Description { get; set; }
 
         public override string ToString()
         {
