@@ -742,7 +742,7 @@ namespace Signum.Engine.Maps
 
         public virtual string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)
         {
-            string name = route.PropertyInfo != null && !route.PropertyInfo.Name.Contains(".") ? route.PropertyInfo.Name
+            string name = route.PropertyInfo != null ? (route.PropertyInfo.Name.TryAfterLast('.') ?? route.PropertyInfo.Name) 
                 : route.FieldInfo.Name.FirstUpper();
 
             switch (kindOfField)

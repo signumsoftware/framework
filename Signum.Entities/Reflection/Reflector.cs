@@ -277,10 +277,13 @@ namespace Signum.Entities.Reflection
         static readonly BindingFlags privateFlags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic;
         public static FieldInfo TryFindFieldInfo(Type type, PropertyInfo pi)
         {
+            string prefix = pi.DeclaringType != type && pi.DeclaringType.IsInterface ? pi.DeclaringType.FullName + "." : null;
+
             FieldInfo fi = null;
             for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
             {
-                fi = tempType.GetField("<" + pi.Name + ">k__BackingField", privateFlags);
+                fi = tempType.GetField("<" + pi.Name + ">k__BackingField", privateFlags) ??
+                    (prefix != null ? tempType.GetField("<" + prefix + pi.Name + ">k__BackingField", privateFlags) : null);
                 if (fi != null)
                     CheckSignumProcessed(fi);
                 else
