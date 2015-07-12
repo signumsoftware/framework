@@ -36,17 +36,8 @@ namespace Signum.Analyzer
             var classParent = property.Parent as ClassDeclarationSyntax;
             if (classParent == null)
                 return;
-
-            FieldDeclarationSyntax field = PreviosField(classParent, property);
-            if (field == null)
-                return;
-
-            var getter = property.AccessorList.Accessors.SingleOrDefault(a => a.Kind() == SyntaxKind.GetAccessorDeclaration);
-            if (!IsValidGetter(getter, field))
-                return;
-
-            var setter = property.AccessorList.Accessors.SingleOrDefault(a => a.Kind() == SyntaxKind.SetAccessorDeclaration);
-            if (!IsValidSetter(setter, field))
+            
+            if (!IsSimpleProperty(property, classParent))
                 return;
 
             var symbol = context.SemanticModel.GetDeclaredSymbol(classParent);
@@ -57,6 +48,23 @@ namespace Signum.Analyzer
 
                 context.ReportDiagnostic(diagnostic);
             }
+        }
+
+        public static bool IsSimpleProperty(PropertyDeclarationSyntax property, ClassDeclarationSyntax classParent)
+        {
+            FieldDeclarationSyntax field = PreviosField(classParent, property);
+            if (field == null)
+                return false;
+
+            var getter = property.AccessorList.Accessors.SingleOrDefault(a => a.Kind() == SyntaxKind.GetAccessorDeclaration);
+            if (!IsValidGetter(getter, field))
+                return false;
+
+            var setter = property.AccessorList.Accessors.SingleOrDefault(a => a.Kind() == SyntaxKind.SetAccessorDeclaration);
+            if (!IsValidSetter(setter, field))
+                return false;
+
+            return true;
         }
 
         public static FieldDeclarationSyntax PreviosField(ClassDeclarationSyntax classParent, PropertyDeclarationSyntax property)

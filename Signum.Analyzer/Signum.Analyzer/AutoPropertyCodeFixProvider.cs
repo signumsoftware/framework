@@ -38,13 +38,41 @@ namespace Signum.Analyzer
             var diagnosticSpan = diagnostic.Location.SourceSpan;
             
             var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<PropertyDeclarationSyntax>().First();
-            
+
             context.RegisterCodeFix(
-                CodeAction.Create("Convert to auto-property", c => MakeUppercaseAsync(context.Document, declaration, c), "Convert to auto-property"),
+                CodeAction.Create("Convert to auto-property", c => AutoPropertyFixer.FixAllProperties(context.Document, (ClassDeclarationSyntax)declaration.Parent, c), "Convert to auto-property"),
                 diagnostic);
+
+            //context.RegisterCodeFix(
+            //    CodeAction.Create("Convert to auto-property", c => AutoPropertyFixer.FixProperty(context.Document, declaration, c), "Convert to auto-property"),
+            //    diagnostic);
+        }
+    }
+
+
+
+    public static class AutoPropertyFixer
+    {
+        public static async Task<Solution> FixAllProperties(Document document, ClassDeclarationSyntax parentClass, CancellationToken cancellationToken)
+        {
+            var currentSolution = document.Project.Solution;
+            var currentDocument = document;
+            var currentClass = parentClass;
+
+            while(true)
+            {
+                var property = currentClass.Members.OfType<PropertyDeclarationSyntax>().FirstOrDefault(p => AutoPropertyAnalyzer.IsSimpleProperty(p, currentClass));
+                if (property == null)
+                    return currentSolution;
+
+                currentSolution = await FixProperty(currentDocument, property, cancellationToken);
+                currentDocument = currentSolution.GetDocument(currentDocument.Id);
+                currentClass = (await currentDocument.GetSyntaxRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
+                    .FirstOrDefault(a => a.Identifier.ToString() == currentClass.Identifier.ToString());
+            }
         }
 
-        private async Task<Solution> MakeUppercaseAsync(Document document, PropertyDeclarationSyntax property, CancellationToken cancellationToken)
+        public static async Task<Solution> FixProperty(Document document, PropertyDeclarationSyntax property, CancellationToken cancellationToken)
         {
             var classParent = (ClassDeclarationSyntax)property.Parent;
 
@@ -65,11 +93,11 @@ namespace Signum.Analyzer
             var oldProperty = classParent.Members.OfType<PropertyDeclarationSyntax>().SingleOrDefault(a => a.Identifier.ToString() == property.Identifier.ToString());
 
             var modifiers = oldProperty.Modifiers;
-            if(field.AttributeLists.Count == 0)
+            if (field.AttributeLists.Count == 0)
             {
                 modifiers = modifiers.Replace(
                     modifiers.First(),
-                    modifiers.First().WithLeadingTrivia(field.DescendantTokens().First().LeadingTrivia)); 
+                    modifiers.First().WithLeadingTrivia(field.DescendantTokens().First().LeadingTrivia));
             }
 
             var newProperty = SyntaxFactory.PropertyDeclaration(
@@ -81,20 +109,20 @@ namespace Signum.Analyzer
                 SyntaxFactory.AccessorList(SyntaxFactory.List(
                     property.AccessorList.Accessors.Select(a => a.WithBody(null).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)))
                 )));
-            
+
             if (fieldVariable.Initializer != null)
                 newProperty = newProperty.WithInitializer(fieldVariable.Initializer).WithSemicolonToken(field.SemicolonToken);
-            
+
             var members = classParent.Members.Replace(oldProperty, newProperty);
             members = members.Remove(members.Single(m => m.IsEquivalentTo(field)));
             var newClass = classParent.WithMembers(members);
-         
+
             var docNode = await document.GetSyntaxRootAsync(cancellationToken);
             docNode = docNode.ReplaceNode(classParent, newClass);
-            
+
             docNode = Formatter.Format(docNode, solution.Workspace);
             var resultSolution = solution.WithDocumentSyntaxRoot(document.Id, docNode);
-         
+
             return resultSolution;
         }
     }
