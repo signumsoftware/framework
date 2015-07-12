@@ -90,7 +90,7 @@ namespace Signum.MSBuildTask
                     inst.Add(Instruction.Create(OpCodes.Call, Assembly.MainModule.ImportReference(GetTypeFromHandle)));
                     inst.Add(Instruction.Create(OpCodes.Ldstr, field.Name));
 
-                    if (method.CallingConvention == MethodCallingConvention.C)
+                    if (method.Resolve().IsConstructor)
                         inst.Add(Instruction.Create(OpCodes.Newobj, Assembly.MainModule.ImportReference(method)));
                     else
                         inst.Add(Instruction.Create(OpCodes.Call, Assembly.MainModule.ImportReference(method)));
