@@ -13,8 +13,8 @@ namespace Signum.MSBuildTask
 
         public AssemblyDefinition SigumEntities;
         public TypeDefinition ModifiableEntity;
-        public MethodDefinition SetMethod;
-        public MethodDefinition GetMethod;
+        public MethodReference SetMethod;
+        public MethodReference GetMethod;
 
         public AutoPropertyConverter(AssemblyDefinition assembly, PreloadingAssemblyResolver resolver)
         {
@@ -23,8 +23,8 @@ namespace Signum.MSBuildTask
 
             this.SigumEntities = assembly.Name.Name == "Signum.Entities" ? assembly : resolver.SignumEntities;
             this.ModifiableEntity = SigumEntities.MainModule.GetType("Signum.Entities", "ModifiableEntity");
-            this.SetMethod = this.ModifiableEntity.Methods.Single(m => m.Name == "Set" && m.IsDefinition);
-            this.GetMethod = this.ModifiableEntity.Methods.Single(m => m.Name == "Get" && m.IsDefinition);
+            this.SetMethod = Assembly.MainModule.ImportReference(this.ModifiableEntity.Methods.Single(m => m.Name == "Set" && m.IsDefinition));
+            this.GetMethod = Assembly.MainModule.ImportReference(this.ModifiableEntity.Methods.Single(m => m.Name == "Get" && m.IsDefinition));
         }
 
         internal void FixProperties()
@@ -66,7 +66,7 @@ namespace Signum.MSBuildTask
             inst.Add(Instruction.Create(OpCodes.Ldarg_0));
             inst.Add(Instruction.Create(OpCodes.Ldfld, field));
             inst.Add(Instruction.Create(OpCodes.Ldstr, prop.Name));
-            inst.Add(Instruction.Create(OpCodes.Callvirt, new GenericInstanceMethod(this.GetMethod) { GenericArguments = { prop.PropertyType } }));
+            inst.Add(Instruction.Create(OpCodes.Callvirt, this.GetMethod.MakeGenericMethod(prop.PropertyType)));
             inst.Add(Instruction.Create(OpCodes.Stloc_0));
             var loc = Instruction.Create(OpCodes.Ldloc_0);
             inst.Add(Instruction.Create(OpCodes.Br_S, loc));
@@ -84,7 +84,7 @@ namespace Signum.MSBuildTask
             inst.Add(Instruction.Create(OpCodes.Ldflda, field));
             inst.Add(Instruction.Create(OpCodes.Ldarg_1));
             inst.Add(Instruction.Create(OpCodes.Ldstr, prop.Name));
-            inst.Add(Instruction.Create(OpCodes.Callvirt, new GenericInstanceMethod(this.SetMethod) { GenericArguments = { prop.PropertyType } }));
+            inst.Add(Instruction.Create(OpCodes.Callvirt, this.SetMethod.MakeGenericMethod(prop.PropertyType)));
             inst.Add(Instruction.Create(OpCodes.Pop));
             inst.Add(Instruction.Create(OpCodes.Ret));
         }
