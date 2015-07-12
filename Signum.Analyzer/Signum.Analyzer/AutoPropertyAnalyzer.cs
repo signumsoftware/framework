@@ -17,7 +17,7 @@ namespace Signum.Analyzer
 
         internal static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, 
             "Use auto-properties in entities",
-            "Property '{0}' could be transformed to auto-property", "Entities", 
+            "Properties in '{0}' could be transformed to auto-property", "Entities", 
             DiagnosticSeverity.Warning, 
             isEnabledByDefault: true,
             description: "Entities with auto-properties will be converted by a Signum.MsBuildTask into the expanded pattern");
@@ -26,28 +26,31 @@ namespace Signum.Analyzer
 
         public override void Initialize(AnalysisContext context)
         {
-            context.RegisterSyntaxNodeAction(AnalyzePropertySymbol, SyntaxKind.PropertyDeclaration);
+            context.RegisterSyntaxNodeAction(AnalyzePropertySymbol, SyntaxKind.ClassDeclaration);
         }
 
 
         static void AnalyzePropertySymbol(SyntaxNodeAnalysisContext context)
         {
-            var property = (PropertyDeclarationSyntax)context.Node;
-            var classParent = property.Parent as ClassDeclarationSyntax;
-            if (classParent == null)
+            var classDeclaration = (ClassDeclarationSyntax)context.Node;
+            var symbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration);
+
+            if (!InheritsFrom(symbol, "Signum.Entities.ModifiableEntity"))
+                return;
+
+            var properties = classDeclaration.Members.OfType<PropertyDeclarationSyntax>()
+                .Where(p => IsSimpleProperty(p, classDeclaration))
+                .ToList();
+
+            if (properties.Count == 0)
                 return;
             
-            if (!IsSimpleProperty(property, classParent))
-                return;
+            var diagnostic = Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(),
+                properties.Select(p => p.Identifier.GetLocation()),
+                classDeclaration.Identifier.ToString());
 
-            var symbol = context.SemanticModel.GetDeclaredSymbol(classParent);
+            context.ReportDiagnostic(diagnostic);
 
-            if (InheritsFrom(symbol, "Signum.Entities.ModifiableEntity"))
-            {
-                var diagnostic = Diagnostic.Create(Rule, property.Identifier.GetLocation(), property.Identifier.ToString());
-
-                context.ReportDiagnostic(diagnostic);
-            }
         }
 
         public static bool IsSimpleProperty(PropertyDeclarationSyntax property, ClassDeclarationSyntax classParent)

@@ -52,7 +52,7 @@ namespace ConsoleApplication1
             VerifyDiagnostic(test, new DiagnosticResult
             {
                 Id = AutoPropertyAnalyzer.DiagnosticId,
-                Message = String.Format("Property '{0}' could be transformed to auto-property", "Phone"),
+                Message = "Properties in 'MyEntity' could be transformed to auto-property",
                 Severity = DiagnosticSeverity.Warning,
             });
 
@@ -128,6 +128,14 @@ namespace ConsoleApplication1
             private set { Set(ref creationDate, value); }
         }
 
+        int? synchronizeSchema;       
+        [Unit(""ms"")]
+        public int? SynchronizeSchema
+        {
+            get { return synchronizeSchema; }
+            set { Set(ref synchronizeSchema, value); }
+        }
+
         static Expression<Func<MyEntity, string>> ToStringExpressions =
             entity => entity.phone2;
         public override string ToString()
@@ -140,22 +148,7 @@ namespace ConsoleApplication1
             VerifyDiagnostic(test, new DiagnosticResult
             {
                 Id = AutoPropertyAnalyzer.DiagnosticId,
-                Message = String.Format("Property '{0}' could be transformed to auto-property", "Phone"),
-                Severity = DiagnosticSeverity.Warning
-            }, new DiagnosticResult
-            {
-                Id = AutoPropertyAnalyzer.DiagnosticId,
-                Message = String.Format("Property '{0}' could be transformed to auto-property", "Phone2"),
-                Severity = DiagnosticSeverity.Warning
-            }, new DiagnosticResult
-            {
-                Id = AutoPropertyAnalyzer.DiagnosticId,
-                Message = String.Format("Property '{0}' could be transformed to auto-property", "Number"),
-                Severity = DiagnosticSeverity.Warning
-            }, new DiagnosticResult
-            {
-                Id = AutoPropertyAnalyzer.DiagnosticId,
-                Message = String.Format("Property '{0}' could be transformed to auto-property", "CreationDate"),
+                Message = "Properties in 'MyEntity' could be transformed to auto-property",
                 Severity = DiagnosticSeverity.Warning
             });
 
@@ -185,6 +178,9 @@ namespace ConsoleApplication1
         public int Number { get; set; }
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+
+        [Unit(""ms"")]
+        public int? SynchronizeSchema { get; set; }
 
         static Expression<Func<MyEntity, string>> ToStringExpressions =
             entity => entity.Phone2;

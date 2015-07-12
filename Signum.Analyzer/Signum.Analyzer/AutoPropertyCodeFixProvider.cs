@@ -37,10 +37,10 @@ namespace Signum.Analyzer
             var diagnostic = context.Diagnostics.First();
             var diagnosticSpan = diagnostic.Location.SourceSpan;
             
-            var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<PropertyDeclarationSyntax>().First();
+            var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<ClassDeclarationSyntax>().First();
 
             context.RegisterCodeFix(
-                CodeAction.Create("Convert to auto-property", c => AutoPropertyFixer.FixAllProperties(context.Document, (ClassDeclarationSyntax)declaration.Parent, c), "Convert to auto-property"),
+                CodeAction.Create("Convert to auto-property", c => AutoPropertyFixer.FixAllProperties(context.Document, declaration, c), "Convert to auto-property"),
                 diagnostic);
 
             //context.RegisterCodeFix(
@@ -64,11 +64,16 @@ namespace Signum.Analyzer
                 var property = currentClass.Members.OfType<PropertyDeclarationSyntax>().FirstOrDefault(p => AutoPropertyAnalyzer.IsSimpleProperty(p, currentClass));
                 if (property == null)
                     return currentSolution;
-
-                currentSolution = await FixProperty(currentDocument, property, cancellationToken);
-                currentDocument = currentSolution.GetDocument(currentDocument.Id);
-                currentClass = (await currentDocument.GetSyntaxRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
-                    .FirstOrDefault(a => a.Identifier.ToString() == currentClass.Identifier.ToString());
+                try {
+                    currentSolution = await FixProperty(currentDocument, property, cancellationToken);
+                    currentDocument = currentSolution.GetDocument(currentDocument.Id);
+                    currentClass = (await currentDocument.GetSyntaxRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
+                        .FirstOrDefault(a => a.Identifier.ToString() == currentClass.Identifier.ToString());
+                }
+                catch (Exception e)
+                {
+                    return currentSolution;
+                }
             }
         }
 
@@ -92,23 +97,21 @@ namespace Signum.Analyzer
 
             var oldProperty = classParent.Members.OfType<PropertyDeclarationSyntax>().SingleOrDefault(a => a.Identifier.ToString() == property.Identifier.ToString());
 
-            var modifiers = oldProperty.Modifiers;
-            if (field.AttributeLists.Count == 0)
-            {
-                modifiers = modifiers.Replace(
-                    modifiers.First(),
-                    modifiers.First().WithLeadingTrivia(field.DescendantTokens().First().LeadingTrivia));
-            }
-
             var newProperty = SyntaxFactory.PropertyDeclaration(
                 new SyntaxList<AttributeListSyntax>().AddRange(field.AttributeLists).AddRange(oldProperty.AttributeLists),
-                modifiers,
+                oldProperty.Modifiers,
                 oldProperty.Type,
                 null,
                 oldProperty.Identifier,
                 SyntaxFactory.AccessorList(SyntaxFactory.List(
                     property.AccessorList.Accessors.Select(a => a.WithBody(null).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)))
                 )));
+            
+            var leading = field.DescendantTokens().First().LeadingTrivia;
+
+            var first = newProperty.DescendantTokens().First();
+            newProperty = newProperty.ReplaceToken(first, first.WithLeadingTrivia(leading));
+
 
             if (fieldVariable.Initializer != null)
                 newProperty = newProperty.WithInitializer(fieldVariable.Initializer).WithSemicolonToken(field.SemicolonToken);
