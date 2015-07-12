@@ -16,40 +16,20 @@ namespace Signum.Test.Environment
     public class NoteWithDateEntity : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
-        string text;
         [StringLengthValidator(AllowNulls = false, Min = 3)]
-        public string Text
-        {
-            get { return text; }
-            set { Set(ref text, value); }
-        }
+        public string Text { get; set; }
 
         [ImplementedByAll]
-        IEntity target;
-        public IEntity Target
-        {
-            get { return target; }
-            set { Set(ref target, value); }
-        }
+        public IEntity Target { get; set; }
 
         [ImplementedByAll]
-        Lite<IEntity> otherTarget;
-        public Lite<IEntity> OtherTarget
-        {
-            get { return otherTarget; }
-            set { Set(ref otherTarget, value); }
-        }
+        public Lite<IEntity> OtherTarget { get; set; }
 
-        DateTime creationTime;
-        public DateTime CreationTime
-        {
-            get { return creationTime; }
-            set { Set(ref creationTime, value); }
-        }
+        public DateTime CreationTime { get; set; }
 
         public override string ToString()
         {
-            return "{0} -> {1}".FormatWith(creationTime, text);
+            return "{0} -> {1}".FormatWith(CreationTime, Text);
         }
     }
 
@@ -59,13 +39,8 @@ namespace Signum.Test.Environment
         ColaboratorsMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 
         [NotNullable]
-        MList<ArtistEntity> colaborators = new MList<ArtistEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<ArtistEntity> Colaborators
-        {
-            get { return colaborators; }
-            set { Set(ref colaborators, value); }
-        }
+        public MList<ArtistEntity> Colaborators { get; set; } = new MList<ArtistEntity>();
     }
 
     [AutoInit]
@@ -90,35 +65,14 @@ namespace Signum.Test.Environment
     public class ArtistEntity : Entity, IAuthorEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        bool dead;
-        public bool Dead
-        {
-            get { return dead; }
-            set { Set(ref dead, value); }
-        }
+        public bool Dead { get; set; }
 
-        Sex sex;
-        public Sex Sex
-        {
-            get { return sex; }
-            set { Set(ref sex, value); }
-        }
+        public Sex Sex { get; set; }
 
-        Status? status;
-        public Status? Status
-        {
-            get { return status; }
-            set { Set(ref status, value); }
-        }
-
+        public Status? Status { get; set; }
 
         static Expression<Func<ArtistEntity, bool>> IsMaleExpression = a => a.Sex == Sex.Male;
         public bool IsMale
@@ -127,12 +81,7 @@ namespace Signum.Test.Environment
         }
 
         [ImplementedByAll]
-        AwardEntity lastAward;
-        public AwardEntity LastAward
-        {
-            get { return lastAward; }
-            set { Set(ref lastAward, value); }
-        }
+        public AwardEntity LastAward { get; set; }
 
         static Expression<Func<ArtistEntity, IEnumerable<Lite<Entity>>>> FriendsCovariantExpression =
             a => a.Friends;
@@ -142,12 +91,7 @@ namespace Signum.Test.Environment
         }
 
         //[NotNullable] Do not add Nullable for testing purposes
-        MList<Lite<ArtistEntity>> friends = new MList<Lite<ArtistEntity>>();
-        public MList<Lite<ArtistEntity>> Friends
-        {
-            get { return friends; }
-            set { Set(ref friends, value); }
-        }
+        public MList<Lite<ArtistEntity>> Friends { get; set; } = new MList<Lite<ArtistEntity>>();
 
         static Expression<Func<ArtistEntity, string>> FullNameExpression =
              a => a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female");
@@ -163,7 +107,7 @@ namespace Signum.Test.Environment
             return LonelyExpression.Evaluate(this);
         }
 
-        static Expression<Func<ArtistEntity, string>> ToStringExpression = a => a.name;
+        static Expression<Func<ArtistEntity, string>> ToStringExpression = a => a.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -194,37 +138,17 @@ namespace Signum.Test.Environment
     public class BandEntity : Entity, IAuthorEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         [NotNullable]
-        MList<ArtistEntity> members = new MList<ArtistEntity>();
-        public MList<ArtistEntity> Members
-        {
-            get { return members; }
-            set { Set(ref members, value); }
-        }
+        public MList<ArtistEntity> Members { get; set; } = new MList<ArtistEntity>();
 
         [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity))]
-        AwardEntity lastAward;
-        public AwardEntity LastAward
-        {
-            get { return lastAward; }
-            set { Set(ref lastAward, value); }
-        }
+        public AwardEntity LastAward { get; set; }
 
         [ImplementedBy(typeof(GrammyAwardEntity), typeof(AmericanMusicAwardEntity)), NotNullable]
-        MList<AwardEntity> otherAwards = new MList<AwardEntity>();
-        public MList<AwardEntity> OtherAwards
-        {
-            get { return otherAwards; }
-            set { Set(ref otherAwards, value); }
-        }
+        public MList<AwardEntity> OtherAwards { get; set; } = new MList<AwardEntity>();
 
         static Expression<Func<BandEntity, string>> FullNameExpression =
             b => b.Name + " (" + b.Members.Count + " members)";
@@ -240,7 +164,7 @@ namespace Signum.Test.Environment
             return LonelyExpression.Evaluate(this);
         }
 
-        static Expression<Func<BandEntity, string>> ToStringExpression = a => a.name;
+        static Expression<Func<BandEntity, string>> ToStringExpression = a => a.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -256,28 +180,13 @@ namespace Signum.Test.Environment
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), PrimaryKey(typeof(long))]
     public abstract class AwardEntity : Entity
     {
-        int year;
-        public int Year
-        {
-            get { return year; }
-            set { Set(ref year, value); }
-        }
+        public int Year { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string category;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Category
-        {
-            get { return category; }
-            set { Set(ref category, value); }
-        }
+        public string Category { get; set; }
 
-        AwardResult result;
-        public AwardResult Result
-        {
-            get { return result; }
-            set { Set(ref result, value); }
-        }
+        public AwardResult Result { get; set; }
     }
 
     [AutoInit]
@@ -312,37 +221,17 @@ namespace Signum.Test.Environment
     public class LabelEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        CountryEntity country;
-        public CountryEntity Country
-        {
-            get { return country; }
-            set { Set(ref country, value); }
-        }
+        public CountryEntity Country { get; set; }
 
-        Lite<LabelEntity> owner;
-        public Lite<LabelEntity> Owner
-        {
-            get { return owner; }
-            set { Set(ref owner, value); }
-        }
+        public Lite<LabelEntity> Owner { get; set; }
 
         [UniqueIndex]
-        SqlHierarchyId node;
-        public SqlHierarchyId Node
-        {
-            get { return node; }
-            set { Set(ref node, value); }
-        }
+        public SqlHierarchyId Node { get; set; }
 
-        static Expression<Func<LabelEntity, string>> ToStringExpression = a => a.name;
+        static Expression<Func<LabelEntity, string>> ToStringExpression = a => a.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -359,17 +248,12 @@ namespace Signum.Test.Environment
     public class CountryEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         public override string ToString()
         {
-            return name;
+            return Name;
         }
     }
 
@@ -377,68 +261,28 @@ namespace Signum.Test.Environment
     public class AlbumEntity : Entity, ISecretContainer
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        int year;
         [NumberBetweenValidator(1900, 2100)]
-        public int Year
-        {
-            get { return year; }
-            set { Set(ref year, value); }
-        }
+        public int Year { get; set; }
 
         [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
-        IAuthorEntity author;
         [NotNullValidator]
-        public IAuthorEntity Author
-        {
-            get { return author; }
-            set { Set(ref author, value); }
-        }
+        public IAuthorEntity Author { get; set; }
 
         [NotNullable, PreserveOrder]
-        MList<SongEntity> songs = new MList<SongEntity>();
-        public MList<SongEntity> Songs
-        {
-            get { return songs; }
-            set { Set(ref songs, value); }
-        }
+        public MList<SongEntity> Songs { get; set; } = new MList<SongEntity>();
 
-        SongEntity bonusTrack;
-        public SongEntity BonusTrack
-        {
-            get { return bonusTrack; }
-            set { Set(ref bonusTrack, value); }
-        }
+        public SongEntity BonusTrack { get; set; }
 
-        LabelEntity label;
-        public LabelEntity Label
-        {
-            get { return label; }
-            set { Set(ref label, value); }
-        }
+        public LabelEntity Label { get; set; }
 
-        AlbumState state;
-        public AlbumState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
+        public AlbumState State { get; set; }
 
-        string secret;
-        string ISecretContainer.Secret
-        {
-            get { return secret; }
-            set { Set(ref secret, value); }
-        }
+        string ISecretContainer.Secret { get; set; }
 
-        static Expression<Func<AlbumEntity, string>> ToStringExpression = a => a.name;
+        static Expression<Func<AlbumEntity, string>> ToStringExpression = a => a.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -473,13 +317,8 @@ namespace Signum.Test.Environment
     public class SongEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         TimeSpan? duration;
         public TimeSpan? Duration
@@ -488,25 +327,15 @@ namespace Signum.Test.Environment
             set
             {
                 if (Set(ref duration, value))
-                    seconds = duration == null ? null : (int?)duration.Value.TotalSeconds;
+                    Seconds = duration == null ? null : (int?)duration.Value.TotalSeconds;
             }
         }
 
-        int? seconds;
-        public int? Seconds
-        {
-            get { return seconds; }
-            set { Set(ref seconds, value); }
-        }
+        public int? Seconds { get; set; }
 
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value); }
-        }
+        public int Index { get; set; }
 
-        static Expression<Func<SongEntity, string>> ToStringExpression = a => a.name;
+        static Expression<Func<SongEntity, string>> ToStringExpression = a => a.Name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -517,38 +346,18 @@ namespace Signum.Test.Environment
     public class AwardNominationEntity : Entity
     {
         [ImplementedBy(typeof(ArtistEntity), typeof(BandEntity))]
-        Lite<IAuthorEntity> author;
-        public Lite<IAuthorEntity> Author
-        {
-            get { return author; }
-            set { Set(ref author, value); }
-        }
+        public Lite<IAuthorEntity> Author { get; set; }
 
         [ImplementedBy(typeof(GrammyAwardEntity), typeof(PersonalAwardEntity), typeof(AmericanMusicAwardEntity))]
-        Lite<AwardEntity> award;
-        public Lite<AwardEntity> Award
-        {
-            get { return award; }
-            set { Set(ref award, value); }
-        }
+        public Lite<AwardEntity> Award { get; set; }
 
-        int year;
-        public int Year
-        {
-            get { return year; }
-            set { Set(ref year, value); }
-        }
+        public int Year { get; set; }
     }
 
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class ConfigEntity : Entity
     {
-        EmbeddedConfigEntity embeddedConfig;
-        public EmbeddedConfigEntity EmbeddedConfig
-        {
-            get { return embeddedConfig; }
-            set { Set(ref embeddedConfig, value); }
-        }
+        public EmbeddedConfigEntity EmbeddedConfig { get; set; }
     }
 
     [AutoInit]
@@ -560,13 +369,8 @@ namespace Signum.Test.Environment
     public class EmbeddedConfigEntity : EmbeddedEntity
     {
         [NotNullable]
-        MList<Lite<GrammyAwardEntity>> awards = new MList<Lite<GrammyAwardEntity>>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<Lite<GrammyAwardEntity>> Awards
-        {
-            get { return awards; }
-            set { Set(ref awards, value); }
-        }
+        public MList<Lite<GrammyAwardEntity>> Awards { get; set; } = new MList<Lite<GrammyAwardEntity>>();
     }
 
 
