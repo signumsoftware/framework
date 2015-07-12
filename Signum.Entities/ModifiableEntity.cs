@@ -23,7 +23,7 @@ using System.Collections.Concurrent;
 
 namespace Signum.Entities
 {
-    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy)), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
+    [Serializable, DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
         static Func<bool> isRetrievingFunc = null;
@@ -425,89 +425,6 @@ namespace Signum.Entities
             this.temporalErrors.Remove(propertyName);
             NotifyPrivate(propertyName);
             NotifyError();
-        }
-    }
-
-    //Based on: http://blogs.msdn.com/b/jaredpar/archive/2010/02/19/flattening-class-hierarchies-when-debugging-c.aspx
-    internal sealed class FlattenHierarchyProxy
-    {
-        [DebuggerDisplay("{Value}", Name = "{Name,nq}", Type = "{TypeName,nq}")]
-        internal struct Member
-        {
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            internal string Name;
-            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-            internal object Value;
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            internal Type Type;
-            internal Member(string name, object value, Type type)
-            {
-                Name = name;
-                Value = value;
-                Type = type;
-            }
-
-            [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            internal string TypeName
-            {
-                get { return Type.TypeName(); }
-            }
-        }
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly object target;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private Member[] memberList;
-
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        internal Member[] Items
-        {
-            get
-            {
-                if (memberList == null)
-                {
-                    memberList = BuildMemberList().ToArray();
-                }
-                return memberList;
-            }
-        }
-
-        public FlattenHierarchyProxy(object target)
-        {
-            this.target = target;
-        }
-
-        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
-
-        private List<Member> BuildMemberList()
-        {
-            var list = new List<Member>();
-            if (target == null)
-                return list;
-         
-            var type = target.GetType();
-            list.Add(new Member("Type", type, typeof(Type)));
-
-            foreach (var t in type.Follow(t => t.BaseType).TakeWhile(t => t != typeof(ModifiableEntity) && t != typeof(Modifiable) && t != typeof(MixinEntity)).Reverse())
-            {
-                foreach (var fi in t.GetFields(flags).Where(fi => fi.Name != "mixin").OrderBy(f => f.MetadataToken))
-                {
-                    object value = fi.GetValue(target);
-                    list.Add(new Member(fi.Name, value, fi.FieldType));
-                }
-            }
-
-            Entity ident = target as Entity;
-
-            if (ident != null)
-            {
-                foreach (var m in ident.Mixins)
-                {
-                    list.Add(new Member(m.GetType().Name, m, m.GetType()));
-                }
-            }
-
-            return list;
         }
     }
 }

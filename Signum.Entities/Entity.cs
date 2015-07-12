@@ -16,15 +16,16 @@ using Signum.Services;
 using System.Runtime.CompilerServices;
 using System.Data;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace Signum.Entities
 {
     [Serializable, DescriptionOptions(DescriptionOptions.All)]
     public abstract class Entity : ModifiableEntity, IEntity
     {
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal PrimaryKey? id = null;
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         protected internal string toStr; //for queries and lites on entities with non-expression ToString 
 
         [HiddenProperty, Description("Id")]
@@ -45,7 +46,7 @@ namespace Signum.Entities
             get { return id; }
         }
 
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool isNew = true;
         [HiddenProperty]
         public bool IsNew
@@ -54,7 +55,7 @@ namespace Signum.Entities
             internal set { isNew = value; }
         }
 
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal long ticks = 0;
         [HiddenProperty]
         public long Ticks
@@ -127,7 +128,7 @@ namespace Signum.Entities
             mixin = MixinDeclarations.CreateMixins(this);
         }
 
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         readonly MixinEntity mixin;
         public M Mixin<M>() where M : MixinEntity
         {
@@ -214,7 +215,4 @@ namespace Signum.Entities
     {
 
     }
-
-   
-
 }

@@ -50,7 +50,7 @@ namespace Signum.Entities
 
         }
 
-        [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
+        [Serializable]
         public sealed class LiteImp<T> : LiteImp, Lite<T>, ISerializable
             where T : Entity
         {
