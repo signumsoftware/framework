@@ -555,15 +555,8 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
 
             WriteAttributeTag(sb, GetFieldAttributes(table, col, relatedEntity));
-            sb.AppendLine("{0} {1};".FormatWith(type, CSharpRenderer.Escape(fieldName)));
             WriteAttributeTag(sb, GetPropertyAttributes(table, col, relatedEntity));
-
-            sb.AppendLine("public {0} {1}".FormatWith(type, fieldName.FirstUpper()));
-            sb.AppendLine("{");
-            sb.AppendLine("    get { return " + CSharpRenderer.Escape(fieldName) + "; }");
-            if (!IsReadonly(table, col))
-                sb.AppendLine("    set { Set(ref " + CSharpRenderer.Escape(fieldName) + ", value); }");
-            sb.AppendLine("}");
+            sb.AppendLine("public {0} {1} { get; {2}set; }".FormatWith(type, fieldName.FirstUpper(), IsReadonly(table, col) ? "private" : null));
 
             return sb.ToString();
         }
@@ -798,13 +791,8 @@ namespace Signum.Engine.CodeGeneration
             string typeName = GetEmbeddedTypeName(fieldName);
 
             sb.AppendLine("[NotNullable]");
-            sb.AppendLine("{0} {1};".FormatWith(typeName, fieldName));
             sb.AppendLine("[NotNullValidator]");
-            sb.AppendLine("public {0} {1}".FormatWith(typeName, propertyName));
-            sb.AppendLine("{");
-            sb.AppendLine("    get { return " + fieldName + "; }");
-            sb.AppendLine("    set { Set(ref " + fieldName + ", value); }");
-            sb.AppendLine("}");
+            sb.AppendLine("public {0} {1} { get; set; }".FormatWith(typeName, fieldName.FirstUpper()));
 
             return sb.ToString();
         }
@@ -851,14 +839,8 @@ namespace Signum.Engine.CodeGeneration
 
             string fieldName = GetFieldMListName(table, relatedTable, mListInfo);
             WriteAttributeTag(sb, fieldAttributes);
-
-            sb.AppendLine("MList<{0}> {1} = new MList<{0}>();".FormatWith(type, CSharpRenderer.Escape(fieldName)));
             sb.AppendLine("[NotNullValidator, NoRepeatValidator]");
-            sb.AppendLine("public MList<{0}> {1}".FormatWith(type, fieldName.FirstUpper()));
-            sb.AppendLine("{");
-            sb.AppendLine("    get { return " + CSharpRenderer.Escape(fieldName) + "; }");
-            sb.AppendLine("    set { Set(ref " + CSharpRenderer.Escape(fieldName) + ", value); }");
-            sb.AppendLine("}");
+            sb.AppendLine("public MList<{0}> {1} { get; set; } = new MList<{0}>();".FormatWith(type, fieldName.FirstUpper()));
 
             return sb.ToString();
         }

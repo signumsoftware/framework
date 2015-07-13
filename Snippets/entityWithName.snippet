@@ -24,11 +24,6 @@
 					<Default>Foo</Default>
 				</Literal>
         <Literal>
-          <ID>name</ID>
-          <ToolTip>Name field</ToolTip>
-          <Default>name</Default>
-        </Literal>
-        <Literal>
           <ID>Name</ID>
           <ToolTip>Name Property</ToolTip>
           <Default>Name</Default>
@@ -39,13 +34,8 @@
     public class $entityName$Entity: Entity
     {
         [NotNullable, SqlDbType( Size = 100), UniqueIndex]
-        string $name$;
         [StringLengthValidator(AllowNulls=false, Min = 3, Max = 100)]
-        public string $Name$
-        {
-            get { return $name$; }
-            set { SetToStr(ref $name$, value); }
-        }
+        public string $Name$ { get; set; }
         
         $end$
 
@@ -57,9 +47,10 @@
         }
     }
     
+    [AutoInit]
     public static class $entityName$Operation
     {
-        public static readonly ExecuteSymbol<$entityName$Entity> Save = OperationSymbol.Execute<$entityName$Entity>();
+        public static readonly ExecuteSymbol<$entityName$Entity> Save;
     }]]>
 			</Code>
 		</Snippet>

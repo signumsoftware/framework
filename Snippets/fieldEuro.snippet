@@ -19,12 +19,6 @@
       </Imports>
       <Declarations>
         <Literal>
-          <ID>field</ID>
-          <ToolTip>Field</ToolTip>
-          <Default>amount</Default>
-          <Function></Function>
-        </Literal>
-        <Literal>
           <ID>property</ID>
           <ToolTip>Property</ToolTip>
           <Default>Amount</Default>
@@ -32,13 +26,9 @@
         </Literal>
       </Declarations>
 			<Code Language="csharp">
-				<![CDATA[decimal $field$;
+				<![CDATA[
         [DecimalsValidatorAttribute, Unit("€")]
-        public decimal $property$
-        {
-            get { return $field$; }
-            set { Set(ref $field$, value); }
-        }$end$]]>
+        public decimal $property$ { get; set; }$end$]]>
 			</Code>
 		</Snippet>
 	</CodeSnippet>

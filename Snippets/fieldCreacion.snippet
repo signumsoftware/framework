@@ -18,12 +18,7 @@
         </Import>
       </Imports>
 			<Code Language="csharp">
-				<![CDATA[DateTime creationDate = TimeZoneManager.Now;
-        public DateTime CreationDate
-        {
-            get { return creationDate; }
-            private set { Set(ref creationDate, value); }
-        }$end$]]>
+				<![CDATA[public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;$end$]]>
 			</Code>
 		</Snippet>
 	</CodeSnippet>
