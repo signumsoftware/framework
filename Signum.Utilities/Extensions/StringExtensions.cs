@@ -723,9 +723,19 @@ namespace Signum.Utilities
             return text.Split(new[] { separator }, StringSplitOptions.RemoveEmptyEntries);
         }
 
+        public static string[] SplitNoEmpty(this string text, params string[] separators)
+        {
+            return text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+        }
+
         public static string[] SplitNoEmpty(this string text, char separator)
         {
             return text.Split(new[] { separator }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public static string[] SplitNoEmpty(this string text, params char[] separators)
+        {
+            return text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
         }
     }
 }
