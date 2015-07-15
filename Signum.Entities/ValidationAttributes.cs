@@ -80,22 +80,32 @@ namespace Signum.Entities
 
     public class StringLengthValidatorAttribute : ValidatorAttribute
     {
-        int min = -1;
-        int max = -1;
-        bool allowNulls = false;
+        public bool AllowNulls { get; set; }
 
-        public bool AllowNulls
+        bool? allowLeadingSpaces;
+        public bool AllowLeadingSpaces
         {
-            get { return allowNulls; }
-            set { allowNulls = value; }
+            get { return allowLeadingSpaces ?? MultiLine; }
+            set { this.allowLeadingSpaces = value; }
         }
 
+        bool? allowTrailingSpaces;
+        public bool AllowTrailingSpaces
+        {
+            get { return allowTrailingSpaces ?? MultiLine; }
+            set { this.allowTrailingSpaces = value; }
+        }
+
+        public bool MultiLine { get; set; }
+
+        int min = -1;
         public int Min
         {
             get { return min; }
             set { min = value; }
         }
 
+        int max = -1;
         public int Max
         {
             get { return max; }
@@ -107,7 +117,16 @@ namespace Signum.Entities
             string val = (string)value;
 
             if (string.IsNullOrEmpty(val))
-                return allowNulls ? null : ValidationMessage._0IsNotSet.NiceToString();
+                return AllowNulls ? null : ValidationMessage._0IsNotSet.NiceToString();
+
+            if(!MultiLine && (val.Contains('\n') || val.Contains('\r')))
+                return ValidationMessage._0ShouldNotHaveBreakLines.NiceToString();
+
+            if (!AllowLeadingSpaces && Regex.IsMatch(val, @"^\s+"))
+                return ValidationMessage._0ShouldNotHaveInitialSpaces.NiceToString();
+
+             if (!AllowLeadingSpaces && Regex.IsMatch(val, @"\s+$"))
+                return ValidationMessage._0ShouldNotHaveFinalSpaces.NiceToString();
 
             if (min == max && min != -1 && val.Length != min)
                 return ValidationMessage.TheLenghtOf0HasToBeEqualTo1.NiceToString("{0}", min);
@@ -130,7 +149,7 @@ namespace Signum.Entities
                     min != -1 ? ValidationMessage.HaveMinimum0Characters.NiceToString().FormatWith(min) :
                     max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().FormatWith(max) : null;
 
-                if (allowNulls)
+                if (AllowNulls)
                     result = result.Add(" ", ValidationMessage.OrBeNull.NiceToString());
 
                 return result;
@@ -934,6 +953,12 @@ namespace Signum.Entities
         [Description("or be null")]
         OrBeNull,
         Telephone,
+        [Description("{0} should not have break lines")]
+        _0ShouldNotHaveBreakLines,
+        [Description("{0} should not have initial spaces")]
+        _0ShouldNotHaveInitialSpaces,
+        [Description("{0} should not have final spaces")]
+        _0ShouldNotHaveFinalSpaces,
         [Description("The lenght of {0} has to be equal to {1}")]
         TheLenghtOf0HasToBeEqualTo1,
         [Description("The length of {0} has to be greater than or equal to {1}")]
