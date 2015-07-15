@@ -157,7 +157,6 @@ namespace Signum.Entities.Processes
             set { Set(ref exceptionDate, value); }
         }
 
-        [SqlDbType(Size = int.MaxValue)]
         Lite<ExceptionEntity> exception;
         public Lite<ExceptionEntity> Exception
         {

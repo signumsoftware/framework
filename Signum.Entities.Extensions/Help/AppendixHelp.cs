@@ -40,6 +40,7 @@ namespace Signum.Entities.Help
 
         [SqlDbType(Size = int.MaxValue)]
         string description;
+        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Description
         {
             get { return description; }

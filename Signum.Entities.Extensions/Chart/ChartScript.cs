@@ -36,7 +36,7 @@ namespace Signum.Entities.Chart
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string script;
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Script
         {
             get { return script; }

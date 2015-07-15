@@ -54,7 +54,7 @@ namespace Signum.Entities.ViewLog
 
         [SqlDbType(Size = int.MaxValue)]
         string data;
-        [StringLengthValidator(AllowNulls = true, Min = 0, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, Min = 0, MultiLine=true)]
         public string Data
         {
             get { return data; }
