@@ -82,7 +82,7 @@ namespace Signum.Windows.Chart
             if (cp == null || cp.ScriptParameter.Type != ChartParameterType.Enum)
                 return null;
 
-            var t = cp.GetToken();
+            var t = cp.ScriptParameter.GetToken(cp.ParentChart);
 
             return cp.ScriptParameter.GetEnumValues()
                 .Where(a => a.CompatibleWith(t))
