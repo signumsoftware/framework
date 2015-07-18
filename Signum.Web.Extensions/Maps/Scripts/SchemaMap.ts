@@ -153,11 +153,29 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
     function restart() {
 
         var val = (<string>filter.val()).toLowerCase();
+        
+        var parts = val.match(/[+-]?((\w+)|\*)/g);
+
+        function isMatch(str: string): boolean {
+
+            if (!parts)
+                return true;
+
+            for (var i = parts.length-1; i >= 0; i--) {
+                var p = parts[i];
+                var pair = p.startsWith("+") ? { isPositive: true, token: p.after("+") } :
+                    p.startsWith("-") ? { isPositive: false, token: p.after("-") } :
+                        { isPositive: true, token: p };
+
+                if (pair.token == "*" || str.contains(pair.token))
+                    return pair.isPositive;
+            }
+
+            return false;
+        };
 
         nodes = allNodes.filter((n, i) => val == null ||
-            n.namespace.toLowerCase().contains(val) ||
-            n.tableName.toLowerCase().contains(val) ||
-            n.niceName.toLowerCase().contains(val));
+            isMatch(n.namespace.toLowerCase() + "|" + n.tableName.toLowerCase() + "|" + n.niceName.toLowerCase()));
 
         links = allLinks.filter(l=>
             nodes.indexOf(<ITableInfo>l.source) != -1 &&
