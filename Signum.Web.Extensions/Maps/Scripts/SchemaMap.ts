@@ -181,7 +181,15 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
             nodes.indexOf(<ITableInfo>l.source) != -1 &&
             nodes.indexOf(<ITableInfo>l.target) != -1);
 
+        var distance = nodes.length < 10 ? 80 :
+            nodes.length < 20 ? 60 :
+            nodes.length < 30 ? 50 :
+            nodes.length < 50 ? 40 :
+            nodes.length < 100 ? 35 :
+            nodes.length < 200 ? 30 : 25;
+
         force
+            .linkDistance((d: IRelationInfo) => d.isMList ? distance * 0.7 : distance * 1.5)
             .nodes(nodes)
             .links(links)
             .start();
