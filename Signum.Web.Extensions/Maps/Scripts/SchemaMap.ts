@@ -143,7 +143,6 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
     var force = d3.layout.force()
         .gravity(0)
         .charge(0)
-        .linkDistance((d: IRelationInfo) => d.isMList ? 30 : 60)
         .linkStrength((d: IRelationInfo) => 0.7 * (d.isMList ? 1 : opacities[Math.min(fanIn[(<RelationInfo>d).toTable].length, opacities.length - 1)]))
         .size([width, height]);
 
@@ -161,7 +160,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
             if (!parts)
                 return true;
 
-            for (var i = parts.length-1; i >= 0; i--) {
+            for (var i = parts.length - 1; i >= 0; i--) {
                 var p = parts[i];
                 var pair = p.startsWith("+") ? { isPositive: true, token: p.after("+") } :
                     p.startsWith("-") ? { isPositive: false, token: p.after("-") } :
@@ -206,7 +205,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
 
     var link = svg.append("svg:g").attr("class", "links").selectAll(".link")
-        .data(links)
+        .data(allLinks)
         .enter().append("line")
         .attr("class", "link")
         .style("stroke-dasharray", d=> (<RelationInfo>d).lite ? "2, 2" : null)     
@@ -224,9 +223,11 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
     var nodesG = svg.append("svg:g").attr("class", "nodes");
 
+    var drag = force.drag()
+        .on("dragstart", d=> d.fixed = true);
 
     var nodeGroup = nodesG.selectAll(".nodeGroup")
-        .data(nodes)
+        .data(allNodes)
         .enter()
         .append("svg:g").attr("class", "nodeGroup")
         .style("cursor", d=> d.findUrl ? "pointer" : null)
@@ -246,7 +247,10 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
             d3.event.preventDefault();
             return false;
         }
-        }).call(force.drag);
+        })
+        .on("dblclick", d=> {
+        d.fixed = false;
+        }).call(drag);
 
     var node = nodeGroup.append("rect")
         .attr("class", d => "node " + EntityBaseType[d.entityBaseType])
@@ -277,7 +281,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         label.style("font-weight", d=> d == selectedTable ? "bold" : null);
     }
 
-    filter.keypress(() => {
+    filter.keyup(() => {
         restart();
 
         nodeGroup.style("display", n=> nodes.indexOf(n) == -1 ? "none" : "inline");
