@@ -140,14 +140,21 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
     var opacities = [1, .9, .8, .7, .6, .5, .4, .3, .25, .2, .15, .1, .07, .05, .03, .02];
 
+    var nodes: ITableInfo[];
+    var links: IRelationInfo[]; 
+
     var force = d3.layout.force()
         .gravity(0)
         .charge(0)
-        .linkStrength((d: IRelationInfo) => 0.7 * (d.isMList ? 1 : opacities[Math.min(fanIn[(<RelationInfo>d).toTable].length, opacities.length - 1)]))
         .size([width, height]);
 
-    var nodes: ITableInfo[]; 
-    var links: IRelationInfo[]; 
+    function getOpacity(toTable: string) {
+        var length = fanIn[toTable].filter(l=> nodes.indexOf(<ITableInfo>l.source) != -1).length;
+
+        var min = Math.min(length, opacities.length - 1);
+
+        return opacities[min];
+    }
 
     function restart() {
 
@@ -189,6 +196,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
         force
             .linkDistance((d: IRelationInfo) => d.isMList ? distance * 0.7 : distance * 1.5)
+            .linkStrength((d: IRelationInfo) => 0.7 * (d.isMList ? 1 : getOpacity((<RelationInfo>d).toTable)))
             .nodes(nodes)
             .links(links)
             .start();
@@ -216,7 +224,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
     function selectedLinks() {
         link.style("stroke-width", d => d.source == selectedTable || d.target == selectedTable ? 1.5 : d.isMList ? 1.5 : 1)
             .style("opacity", d => d.source == selectedTable || d.target == selectedTable ? 1 : d.isMList ? 0.8 :
-                    Math.max(.1, opacities[Math.min(fanIn[(<RelationInfo>d).toTable].length, opacities.length - 1)]));
+            Math.max(.1, getOpacity((<RelationInfo>d).toTable)));
     };
 
     selectedLinks();
@@ -283,7 +291,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
     filter.keyup(() => {
         restart();
-
+        selectedLinks();
         nodeGroup.style("display", n=> nodes.indexOf(n) == -1 ? "none" : "inline");
         link.style("display", r=> links.indexOf(r) == -1 ? "none" : "inline");
     });
