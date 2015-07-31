@@ -342,6 +342,7 @@ namespace Signum.Engine
                 options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion))
             using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
             {
+                bulkCopy.BulkCopyTimeout = 15000000;
                 foreach (DataColumn c in dt.Columns)
                     bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
 
