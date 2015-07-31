@@ -179,7 +179,7 @@
   </Type>
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="Id no válido" />
-    <Member Name="InvalidFormat" Description="Formato inválido" />
+    <Member Name="InvalidFormat" Description="FormatWith inválido" />
     <Member Name="New_G" Description="Nuev[m:o|f:a]" />
     <Member Name="ToStr" Description="Texto" />
     <Member Name="Type0NotFound" Description="Tipo {0} no encontrado" />
@@ -379,8 +379,8 @@
     <Member Name="HaveMinimum0Characters" Description="tener mínimo {0} caracteres" />
     <Member Name="HaveNoRepeatedElements" Description="no debe tener elementos repetidos" />
     <Member Name="HaveValid0Format" Description="debe tener un formato {0} válido" />
-    <Member Name="InvalidDateFormat" Description="Formato de fecha incorrecto" />
-    <Member Name="InvalidFormat" Description="Formato inválido" />
+    <Member Name="InvalidDateFormat" Description="FormatWith de fecha incorrecto" />
+    <Member Name="InvalidFormat" Description="FormatWith inválido" />
     <Member Name="NotPossibleToaAssign0" Description="No es posible asignar {0}" />
     <Member Name="Numeric" Description="Numérico" />
     <Member Name="OrBeNull" Description="o ser nulo" />

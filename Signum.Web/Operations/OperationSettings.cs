@@ -279,7 +279,7 @@ namespace Signum.Web.Operations
 
         public JsOperationOptions Options()
         {
-            var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite };
+            var result = new JsOperationOptions(OperationInfo.OperationSymbol, this.Prefix) { isLite = OperationInfo.Lite , isContextual=true};
 
             result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
                 OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
@@ -529,6 +529,8 @@ namespace Signum.Web.Operations
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string confirmMessage;
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string controllerUrl; 
+        public string controllerUrl;
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool? isContextual;
     }
 }

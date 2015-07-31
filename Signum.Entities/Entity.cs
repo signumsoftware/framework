@@ -39,6 +39,7 @@ namespace Signum.Entities
             internal set { id = value; }
         }
 
+
         public void SetPrimaryKey(PrimaryKey value)
         {
             id = value;
@@ -54,6 +55,7 @@ namespace Signum.Entities
         {
             IsNew = value;
         }
+
 
         [Ignore]
         bool isNew = true;
