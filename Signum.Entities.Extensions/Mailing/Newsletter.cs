@@ -65,7 +65,7 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string text;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine=true)]
         public string Text
         {
             get { return text; }

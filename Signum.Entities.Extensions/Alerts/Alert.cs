@@ -61,7 +61,7 @@ namespace Signum.Entities.Alerts
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string text;
-        [StringLengthValidator(Min = 1)]
+        [StringLengthValidator(Min = 1, MultiLine = true)]
         public string Text
         {
             get { return text; }

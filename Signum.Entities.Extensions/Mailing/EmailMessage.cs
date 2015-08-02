@@ -92,7 +92,7 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string body;
-        [StringLengthValidator(AllowNulls = true)]
+        [StringLengthValidator(AllowNulls = true, MultiLine=true)]
         public string Body
         {
             get { return body; }
