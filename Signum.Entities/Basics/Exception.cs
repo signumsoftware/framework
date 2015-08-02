@@ -66,7 +66,7 @@ namespace Signum.Entities.Basics
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string stackTrace;
-        [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine=true)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
         public string StackTrace
         {
             get { return stackTrace; }
@@ -146,7 +146,7 @@ namespace Signum.Entities.Basics
 
         [SqlDbType(Size = 100)]
         string actionName;
-        [StringLengthValidator(AllowNulls = true,  Max = 100)]
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string ActionName
         {
             get { return actionName; }
@@ -181,7 +181,7 @@ namespace Signum.Entities.Basics
 
         [SqlDbType(Size = 100)]
         string userHostAddress;
-        [StringLengthValidator(AllowNulls = true,  Max = 100)]
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
         public string UserHostAddress
         {
             get { return userHostAddress; }

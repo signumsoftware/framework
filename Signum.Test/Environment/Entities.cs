@@ -17,7 +17,7 @@ namespace Signum.Test.Environment
     {
         [SqlDbType(Size = int.MaxValue)]
         string text;
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Text
         {
             get { return text; }
