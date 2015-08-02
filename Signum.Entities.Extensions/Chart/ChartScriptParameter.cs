@@ -299,7 +299,7 @@ namespace Signum.Entities.Chart
             if (this.ColumnIndex == null)
                 return null;
 
-            return chartBase.Columns[this.ColumnIndex.Value].Token.Try(t => t.Token);
+            return chartBase.Columns[this.ColumnIndex.Value].Token?.Token;
         }
     }
 

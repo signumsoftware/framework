@@ -56,7 +56,7 @@ namespace Signum.Entities.Chart
                 return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), scriptParameter.Name);
 
             if (pi.Name == nameof(Value))
-                return ScriptParameter.Valdidate(this.Value, this.ScriptParameter.GetToken(this.ParentChart));            }
+                return ScriptParameter.Valdidate(this.Value, this.ScriptParameter.GetToken(this.ParentChart));
 
             return base.PropertyValidation(pi);
         }

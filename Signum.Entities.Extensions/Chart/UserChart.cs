@@ -182,7 +182,7 @@ namespace Signum.Entities.Chart
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Parameters) && Parameters != null && ChartScript != null)
+            if (pi.Name == nameof(Parameters) && Parameters != null && ChartScript != null)
             {
                 try
                 {
