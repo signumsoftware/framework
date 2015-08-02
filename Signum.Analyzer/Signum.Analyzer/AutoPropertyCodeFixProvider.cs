@@ -70,7 +70,7 @@ namespace Signum.Analyzer
                     currentClass = (await currentDocument.GetSyntaxRootAsync()).DescendantNodes().OfType<ClassDeclarationSyntax>()
                         .FirstOrDefault(a => a.Identifier.ToString() == currentClass.Identifier.ToString());
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return currentSolution;
                 }

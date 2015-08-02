@@ -239,12 +239,12 @@ namespace TestHelper
             return CreateProject(new[] { source }).Documents.First();
         }
 
-        private static readonly MetadataReference CorlibReference = MetadataReference.CreateFromAssembly(typeof(object).Assembly);
-        private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromAssembly(typeof(Enumerable).Assembly);
-        private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromAssembly(typeof(CSharpCompilation).Assembly);
-        private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromAssembly(typeof(Compilation).Assembly);
-        private static readonly MetadataReference EntityReference = MetadataReference.CreateFromAssembly(typeof(Entity).Assembly);
-        private static readonly MetadataReference UtilitiesReference = MetadataReference.CreateFromAssembly(typeof(Csv).Assembly);
+        private static readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
+        private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
+        private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
+        private static readonly MetadataReference EntityReference = MetadataReference.CreateFromFile(typeof(Entity).Assembly.Location);
+        private static readonly MetadataReference UtilitiesReference = MetadataReference.CreateFromFile(typeof(Csv).Assembly.Location);
 
         /// <summary>
         /// Create a project using the inputted strings as sources.
