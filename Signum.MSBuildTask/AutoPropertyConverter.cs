@@ -63,6 +63,7 @@ namespace Signum.MSBuildTask
         private void ProcessGet(PropertyDefinition prop, FieldReference field)
         {
             var inst = prop.GetMethod.Body.Instructions;
+            prop.GetMethod.Body.Variables.Add(new VariableDefinition(field.FieldType));
             inst.Clear();
             inst.Add(Instruction.Create(OpCodes.Nop));
             inst.Add(Instruction.Create(OpCodes.Ldarg_0));
