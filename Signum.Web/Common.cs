@@ -120,16 +120,19 @@ namespace Signum.Web
             ValueLine vl = bl as ValueLine;
             if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                var atribute = bl.PropertyRoute.PropertyInfo.GetCustomAttribute<StringLengthValidatorAttribute>();
-                if (atribute != null)
+                var slv = Validator.TryGetPropertyValidator(bl.PropertyRoute).Try(pv => pv.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault());
+                if (slv != null)
                 {
-                    int max = atribute.Max; //-1 if not set
+                    int max = slv.Max; //-1 if not set
                     if (max != -1)
                     {
                         vl.ValueHtmlProps.Add("maxlength", max);
                         int? maxSize = ValueLineHelper.Configurator.MaxValueLineSize;
                         vl.ValueHtmlProps.Add("size", maxSize.HasValue ? Math.Min(max, maxSize.Value) : max);
                     }
+
+                    if (slv.MultiLine)
+                        vl.ValueLineType = ValueLineType.TextArea;
                 }
             }
         }

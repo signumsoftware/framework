@@ -640,6 +640,9 @@ namespace Signum.Windows
                 var slv = Validator.TryGetPropertyValidator(context).Try(pv => pv.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault());
                 if (slv != null && slv.Max != -1)
                     vl.MaxTextLength = slv.Max;
+
+                //if (slv != null && slv.MultiLine)
+                //    vl.ValueLineType = ValueLineType.TextArea;
             }
         }
 
