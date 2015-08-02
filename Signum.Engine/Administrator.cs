@@ -504,13 +504,18 @@ namespace Signum.Engine
         }
 
         public static void BulkInsertDisableIdentity<T>(IEnumerable<T> entities,
-          SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
+          SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false)
           where T : Entity
         {
             options |= SqlBulkCopyOptions.KeepIdentity;
 
             if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
                 throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
+            if (validateFirst)
+            {
+                Validate<T>(entities);
+            }
 
             var list = entities.ToList();
 
@@ -534,11 +539,16 @@ namespace Signum.Engine
         }
 
         public static void BulkInsert<T>(IEnumerable<T> entities,
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false)
             where T : Entity
         {
             if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
                 throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
+            if (validateFirst)
+            {
+                Validate<T>(entities);
+            }
 
             var t = Schema.Current.Table<T>();
 
@@ -552,6 +562,17 @@ namespace Signum.Engine
 
                 if (tr != null)
                     tr.Commit();
+            }
+        }
+
+        private static void Validate<T>(IEnumerable<T> entities) where T : Entity
+        {
+            foreach (var e in entities)
+            {
+                var ic = e.IntegrityCheck();
+
+                if (ic != null)
+                    throw new IntegrityCheckException(new Dictionary<Guid, Dictionary<string, string>> { { e.temporalId, ic } });
             }
         }
 

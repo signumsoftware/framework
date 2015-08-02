@@ -16,7 +16,7 @@ namespace Signum.Test.Environment
     public class NoteWithDateEntity : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Text { get; set; }
 
         [ImplementedByAll]

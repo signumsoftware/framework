@@ -199,7 +199,7 @@ namespace Signum.Utilities
             var vals = m.Groups["val"].Captures;
 
             if (vals.Count < members.Count)
-                throw new FormatException("Not enought fields on line: " + m.Value);
+                throw new FormatException("Only {0} coulumns found (instead of {1}) in line: ".FormatWith(vals.Count, members.Count, m.Value));
 
             T t = new T();
             for (int i = 0; i < members.Count; i++)

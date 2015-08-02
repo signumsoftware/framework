@@ -49,7 +49,7 @@ namespace Signum.Entities.Basics
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string stackTrace;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
         public string StackTrace
         {
             get { return stackTrace; }
