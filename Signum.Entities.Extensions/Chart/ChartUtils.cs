@@ -112,47 +112,50 @@ namespace Signum.Entities.Chart
                 result = true;
             }
 
-            if (chart.Parameters.Select(a => a.Name).OrderBy().SequenceEqual(chartScript.Parameters.Select(a => a.Name).OrderBy()))
+            if (chart.Parameters.Modified != ModifiedState.Sealed)
             {
-                foreach (var cp in chart.Parameters)
+                if (chart.Parameters.Select(a => a.Name).OrderBy().SequenceEqual(chartScript.Parameters.Select(a => a.Name).OrderBy()))
                 {
-                    var sp = chartScript.Parameters.FirstEx(a => a.Name == cp.Name);
-
-                    cp.parentChart = chart;
-                    cp.ScriptParameter = sp;
-                    //if (cp.PropertyCheck(() => cp.Value).HasText())
-                    //    cp.Value = sp.DefaultValue(cp.GetToken());
-                }
-            }
-            else
-            {
-                var byName = chart.Parameters.ToDictionary(a => a.Name);
-                chart.Parameters.Clear();
-                foreach (var sp in chartScript.Parameters)
-                {
-                    var cp = byName.TryGetC(sp.Name);
-
-                    if (cp != null)
+                    foreach (var cp in chart.Parameters)
                     {
+                        var sp = chartScript.Parameters.FirstEx(a => a.Name == cp.Name);
+
                         cp.parentChart = chart;
                         cp.ScriptParameter = sp;
-
                         //if (cp.PropertyCheck(() => cp.Value).HasText())
                         //    cp.Value = sp.DefaultValue(cp.GetToken());
                     }
-                    else
+                }
+                else
+                {
+                    var byName = chart.Parameters.ToDictionary(a => a.Name);
+                    chart.Parameters.Clear();
+                    foreach (var sp in chartScript.Parameters)
                     {
-                        cp = new ChartParameterEntity
+                        var cp = byName.TryGetC(sp.Name);
+
+                        if (cp != null)
                         {
-                            Name = sp.Name,
-                            parentChart = chart,
-                            ScriptParameter = sp,
-                        };
+                            cp.parentChart = chart;
+                            cp.ScriptParameter = sp;
 
-                        cp.Value = sp.DefaultValue(cp.GetToken());
+                            //if (cp.PropertyCheck(() => cp.Value).HasText())
+                            //    cp.Value = sp.DefaultValue(cp.GetToken());
+                        }
+                        else
+                        {
+                            cp = new ChartParameterEntity
+                            {
+                                Name = sp.Name,
+                                parentChart = chart,
+                                ScriptParameter = sp,
+                            };
+
+                            cp.Value = sp.DefaultValue(sp.GetToken(chart));
+                        }
+
+                        chart.Parameters.Add(cp);
                     }
-
-                    chart.Parameters.Add(cp);
                 }
             }
 
@@ -228,9 +231,8 @@ namespace Signum.Entities.Chart
 
             result.Parameters.ForEach(r =>
             {
-                r.Value = uq.Parameters.FirstOrDefault(u => u.Name == r.Name).Value;
+                r.Value = uq.Parameters.FirstOrDefault(u => u.Name == r.Name).Try(a => a.Value) ?? r.ScriptParameter.DefaultValue(r.ScriptParameter.GetToken(uq));
             });
-
             return result;
         }
 
@@ -266,6 +268,8 @@ namespace Signum.Entities.Chart
                 });
             }
 
+            var parameters = request.Parameters.ToDictionary(p=> p.Name, p => p.Value);
+
             return new
             {
                 columns = cols.ToDictionary(a => a.name, a => new
@@ -276,8 +280,8 @@ namespace Signum.Entities.Chart
                     a.isGroupKey,
                     a.type,
                 }),
-                parameters = request.Parameters.ToDictionary(p=> p.Name, p => p.Value),
-                rows = resultTable.Rows.Select(r => cols.ToDictionary(a => a.name, a => a.converter == null? null: a.converter(r))).ToList()
+                parameters = request.ChartScript.Parameters.ToDictionary(a => a.Name, a => parameters.TryGetC(a.Name) ?? a.DefaultValue(a.GetToken(request))),
+                rows = resultTable.Rows.Select(r => cols.ToDictionary(a => a.name, a => a.converter == null ? null : a.converter(r))).ToList()
             };
         }
 

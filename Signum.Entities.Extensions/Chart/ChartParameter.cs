@@ -56,7 +56,7 @@ namespace Signum.Entities.Chart
                 return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), ComparisonType.EqualTo.NiceToString(), scriptParameter.Name);
 
             if (pi.Name == nameof(Value))
-                return ScriptParameter.Valdidate(this.Value, this.GetToken());
+                return ScriptParameter.Valdidate(this.Value, this.ScriptParameter.GetToken(this.ParentChart));            }
 
             return base.PropertyValidation(pi);
         }
@@ -72,14 +72,6 @@ namespace Signum.Entities.Chart
         {
             Name = x.Attribute("Name").Value;
             Value = x.Attribute("Value").Value;
-        }
-
-        public QueryToken GetToken()
-        {
-            if (this.ScriptParameter.ColumnIndex == null)
-                return null;
-
-            return this.ParentChart.Columns[this.ScriptParameter.ColumnIndex.Value].Token?.Token;
         }
     }
 }

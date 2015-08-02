@@ -25,7 +25,7 @@ namespace Signum.Entities.Chart
         public Lite<FileEntity> Icon { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Script { get; set; }
 
         public GroupByChart GroupBy { get; set; }

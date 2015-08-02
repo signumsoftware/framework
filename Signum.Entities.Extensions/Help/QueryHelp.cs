@@ -21,7 +21,7 @@ namespace Signum.Entities.Help
         public CultureInfoEntity Culture { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
         [NotNullable, PreserveOrder]
@@ -56,7 +56,7 @@ namespace Signum.Entities.Help
         public string ColumnName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
         public override string ToString()

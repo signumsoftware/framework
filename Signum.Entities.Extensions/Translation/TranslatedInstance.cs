@@ -26,11 +26,11 @@ namespace Signum.Entities.Translation
         public string RowId { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = false)]
+        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
         public string TranslatedText { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = false)]
+        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
         public string OriginalText { get; set; }
 
         public override string ToString()

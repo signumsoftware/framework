@@ -21,7 +21,7 @@ namespace Signum.Entities.Help
         public CultureInfoEntity Culture { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        [NotNullValidator]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
         static Expression<Func<OperationHelpEntity, string>> ToStringExpression = e => e.Operation.ToString();

@@ -16,7 +16,7 @@ namespace Signum.Entities.SMS
         public Lite<SMSTemplateEntity> Template { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        [NotNullValidator]
+        [StringLengthValidator(AllowNulls=false, MultiLine = true)]
         public string Message { get; set; }
 
         public bool EditableMessage { get; set; } = true;

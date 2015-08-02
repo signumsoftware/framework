@@ -28,7 +28,7 @@ namespace Signum.Entities.ViewLog
         public DateTime EndDate { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = true, Min = 0, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, Min = 0, MultiLine = true)]
         public string Data { get; set; }
 
         static Expression<Func<ViewLogEntity, double>> DurationExpression =

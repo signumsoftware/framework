@@ -204,7 +204,8 @@ namespace Signum.Engine.Mailing
                         case "notany":
                             {
                                 var an = (AnyNode)PopBlock(typeof(AnyNode)).owner;
-                                PushBlock(an.CreateNotAny());
+                                if (an != null)
+                                    PushBlock(an.CreateNotAny());
                                 break;
                             }
                         case "endany":
@@ -252,7 +253,8 @@ namespace Signum.Engine.Mailing
                         case "else":
                             {
                                 var ifn = (IfNode)PopBlock(typeof(IfNode)).owner;
-                                PushBlock(ifn.CreateElse());
+                                if (ifn != null)
+                                    PushBlock(ifn.CreateElse());
                                 break;
                             }
                         case "endif":

@@ -77,7 +77,8 @@ namespace Signum.Web.Chart
                             ElementMapping = new EntityMapping<QueryOrderEntity>(false)
                                 .CreateProperty(a => a.OrderType)
                                 .SetProperty(a => a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
-                        }); 
+                        })
+                        .SetProperty(cb => cb.Parameters, new MListDictionaryMapping<ChartParameterEntity, string>(p => p.Name) { OnlyIfPossible = true }); 
 
                 RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
                      new { controller = "Chart", action = "ViewUserChart" });

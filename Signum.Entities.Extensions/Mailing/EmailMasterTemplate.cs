@@ -97,7 +97,7 @@ namespace Signum.Entities.Mailing
         public CultureInfoEntity CultureInfo { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
         public string Text { get; set; }
 
         public override string ToString()

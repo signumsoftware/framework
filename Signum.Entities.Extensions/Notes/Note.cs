@@ -27,7 +27,7 @@ namespace Signum.Entities.Notes
         public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
 
         [SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = false, Min = 1)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
         public string Text { get; set; }
 
         [NotNullValidator]

@@ -183,7 +183,7 @@ namespace Signum.Engine.Migrations
 
                 text = text.Replace(DatabaseNameReplacement, databaseName);
 
-                var parts = text.SplitNoEmpty("GO\r\n" );
+                var parts = Regex.Split(text, " *GO *\r?\n", RegexOptions.IgnoreCase);
 
                 int pos = 0;
 

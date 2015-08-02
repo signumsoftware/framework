@@ -46,9 +46,6 @@ namespace Signum.Engine.Files
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                SaveFile = SaveFileDefault;
-
-
                 sb.Include<FilePathEntity>();
 
                 SymbolLogic<FileTypeSymbol>.Start(sb, () => FileTypes.Keys.ToHashSet());
@@ -143,16 +140,26 @@ namespace Signum.Engine.Files
         {
             if (!unsafeMode.Value)
             {
-                var list = query.Select(a => new { a.FullPhysicalPath, a.FileType }).ToList();
+                var list = query.ToList();
 
                 Transaction.PostRealCommit += ud =>
                 {
-                    foreach (var pair in list)
+                    foreach (var gr in list.GroupBy(f=>f.FileType))
                     {
-                        if (FileTypes.GetOrThrow(pair.FileType).TakesOwnership)
-                            File.Delete(pair.FullPhysicalPath);
+                        var alg = FileTypes.GetOrThrow(gr.Key);
+                        if (alg.TakesOwnership)
+                            alg.DeleteFiles(gr.ToList());
                     }
                 };
+            }
+        }
+        
+
+        public static void DeleteFilesDefault(List<FilePathEntity> filePaths)
+        {
+            foreach (var fp in filePaths)
+            {
+                File.Delete(fp.FullPhysicalPath);
             }
         }
 
@@ -183,23 +190,20 @@ namespace Signum.Engine.Files
 
                         int i = 2;
                         fp.Sufix = sufix;
-                        while (File.Exists(fp.FullPhysicalPath) && alg.RenameOnCollision)
+                        while (alg.RenameOnCollision && File.Exists(fp.FullPhysicalPath))
                         {
                             fp.Sufix = alg.RenameAlgorithm(sufix, i);
                             i++;
                         }
 
-                        SaveFile(fp);
+                        alg.SaveFile(fp);
                     }
                 }
             }
         }
 
-
-        public static Action<FilePathEntity> SaveFile;
-
-
-        public static Action<FilePathEntity> SaveFileDefault = fp =>
+        
+        public static void SaveFileDefault(FilePathEntity fp)
         {
             string fullPhysicalPath = null;
             try
@@ -218,7 +222,7 @@ namespace Signum.Engine.Files
 
                 throw;
             }
-        };
+        }
 
         public static void Register(FileTypeSymbol fileTypeSymbol, FileTypeAlgorithm algorithm)
         {
@@ -249,6 +253,9 @@ namespace Signum.Engine.Files
 
         public Func<string, int, string> RenameAlgorithm { get; set; }
 
+        public Action<FilePathEntity> SaveFile;
+        public Action<List<FilePathEntity>> DeleteFiles;
+
         public FileTypeAlgorithm()
         {
             TakesOwnership = true;
@@ -256,6 +263,9 @@ namespace Signum.Engine.Files
 
             RenameOnCollision = true;        
             RenameAlgorithm = DefaultRenameAlgorithm;
+
+            SaveFile = FilePathLogic.SaveFileDefault;
+            DeleteFiles = FilePathLogic.DeleteFilesDefault;
         }
 
         public static readonly Func<string, int, string> DefaultRenameAlgorithm = (sufix, num) =>
@@ -292,5 +302,6 @@ namespace Signum.Engine.Files
 
             return error;
         }
+
     }
 }

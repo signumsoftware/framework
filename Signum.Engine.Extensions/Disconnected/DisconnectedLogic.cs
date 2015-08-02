@@ -49,10 +49,14 @@ namespace Signum.Engine.Disconnected
             return ExportsExpression.Evaluate(m);
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static long ServerSeed;
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, long serverSeed = 1000000000)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                ServerSeed = serverSeed;
+
                 sb.Include<DisconnectedMachineEntity>();
                 sb.Include<DisconnectedExportEntity>();
                 sb.Include<DisconnectedImportEntity>();
@@ -99,6 +103,8 @@ namespace Signum.Engine.Disconnected
 
                 sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
 
+                sb.Schema.Synchronizing += Schema_Synchronizing;
+
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
 
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
@@ -106,6 +112,20 @@ namespace Signum.Engine.Disconnected
                 Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMin).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: true);
                 Validator.PropertyValidator((DisconnectedMachineEntity d) => d.SeedMax).StaticPropertyValidation += (dm, pi) => ValidateDisconnectedMachine(dm, pi, isMin: false);
             }
+        }
+
+        private static SqlPreCommand Schema_Synchronizing(Replacements arg)
+        {
+            if (DisconnectedLogic.OfflineMode)
+                return null;
+
+            return Schema.Current.Tables.Values
+                .Where(t => GetStrategy(t.Type).Upload != Upload.None)
+                .SelectMany(t => t.TablesMList().Cast<ITable>().PreAnd(t))
+                .Where(t => t.PrimaryKey.Identity)
+                .Where(a => DisconnectedTools.GetNextId(a) < ServerSeed)
+                .Select(a => DisconnectedTools.SetNextIdSync(a, ServerSeed))
+                .Combine(Spacing.Simple);
         }
 
         static string ValidateDisconnectedMachine(DisconnectedMachineEntity dm, PropertyInfo pi, bool isMin)

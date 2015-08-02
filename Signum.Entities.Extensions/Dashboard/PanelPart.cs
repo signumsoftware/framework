@@ -315,7 +315,7 @@ namespace Signum.Entities.Dashboard
         public string Label { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        [URLValidator, NotNullValidator]
+        [URLValidator, StringLengthValidator(AllowNulls = false)]
         public string Link { get; set; }
 
         public LinkElementEntity Clone()

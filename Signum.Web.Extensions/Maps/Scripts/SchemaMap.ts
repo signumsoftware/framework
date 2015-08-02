@@ -140,30 +140,63 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
     var opacities = [1, .9, .8, .7, .6, .5, .4, .3, .25, .2, .15, .1, .07, .05, .03, .02];
 
+    var nodes: ITableInfo[];
+    var links: IRelationInfo[]; 
+
     var force = d3.layout.force()
         .gravity(0)
         .charge(0)
-        .linkDistance((d: IRelationInfo) => d.isMList ? 30 : 60)
-        .linkStrength((d: IRelationInfo) => 0.7 * (d.isMList ? 1 : opacities[Math.min(fanIn[(<RelationInfo>d).toTable].length, opacities.length - 1)]))
         .size([width, height]);
 
-    var nodes: ITableInfo[]; 
-    var links: IRelationInfo[]; 
+    function getOpacity(toTable: string) {
+        var length = fanIn[toTable].filter(l=> nodes.indexOf(<ITableInfo>l.source) != -1).length;
+
+        var min = Math.min(length, opacities.length - 1);
+
+        return opacities[min];
+    }
 
     function restart() {
 
         var val = (<string>filter.val()).toLowerCase();
+        
+        var parts = val.match(/[+-]?((\w+)|\*)/g);
+
+        function isMatch(str: string): boolean {
+
+            if (!parts)
+                return true;
+
+            for (var i = parts.length - 1; i >= 0; i--) {
+                var p = parts[i];
+                var pair = p.startsWith("+") ? { isPositive: true, token: p.after("+") } :
+                    p.startsWith("-") ? { isPositive: false, token: p.after("-") } :
+                        { isPositive: true, token: p };
+
+                if (pair.token == "*" || str.contains(pair.token))
+                    return pair.isPositive;
+            }
+
+            return false;
+        };
 
         nodes = allNodes.filter((n, i) => val == null ||
-            n.namespace.toLowerCase().contains(val) ||
-            n.tableName.toLowerCase().contains(val) ||
-            n.niceName.toLowerCase().contains(val));
+            isMatch(n.namespace.toLowerCase() + "|" + n.tableName.toLowerCase() + "|" + n.niceName.toLowerCase()));
 
         links = allLinks.filter(l=>
             nodes.indexOf(<ITableInfo>l.source) != -1 &&
             nodes.indexOf(<ITableInfo>l.target) != -1);
 
+        var distance = nodes.length < 10 ? 80 :
+            nodes.length < 20 ? 60 :
+            nodes.length < 30 ? 50 :
+            nodes.length < 50 ? 40 :
+            nodes.length < 100 ? 35 :
+            nodes.length < 200 ? 30 : 25;
+
         force
+            .linkDistance((d: IRelationInfo) => d.isMList ? distance * 0.7 : distance * 1.5)
+            .linkStrength((d: IRelationInfo) => 0.7 * (d.isMList ? 1 : getOpacity((<RelationInfo>d).toTable)))
             .nodes(nodes)
             .links(links)
             .start();
@@ -180,7 +213,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
 
     var link = svg.append("svg:g").attr("class", "links").selectAll(".link")
-        .data(links)
+        .data(allLinks)
         .enter().append("line")
         .attr("class", "link")
         .style("stroke-dasharray", d=> (<RelationInfo>d).lite ? "2, 2" : null)     
@@ -191,16 +224,18 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
     function selectedLinks() {
         link.style("stroke-width", d => d.source == selectedTable || d.target == selectedTable ? 1.5 : d.isMList ? 1.5 : 1)
             .style("opacity", d => d.source == selectedTable || d.target == selectedTable ? 1 : d.isMList ? 0.8 :
-                    Math.max(.1, opacities[Math.min(fanIn[(<RelationInfo>d).toTable].length, opacities.length - 1)]));
+            Math.max(.1, getOpacity((<RelationInfo>d).toTable)));
     };
 
     selectedLinks();
 
     var nodesG = svg.append("svg:g").attr("class", "nodes");
 
+    var drag = force.drag()
+        .on("dragstart", d=> d.fixed = true);
 
     var nodeGroup = nodesG.selectAll(".nodeGroup")
-        .data(nodes)
+        .data(allNodes)
         .enter()
         .append("svg:g").attr("class", "nodeGroup")
         .style("cursor", d=> d.findUrl ? "pointer" : null)
@@ -220,7 +255,10 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
             d3.event.preventDefault();
             return false;
         }
-        }).call(force.drag);
+        })
+        .on("dblclick", d=> {
+        d.fixed = false;
+        }).call(drag);
 
     var node = nodeGroup.append("rect")
         .attr("class", d => "node " + EntityBaseType[d.entityBaseType])
@@ -251,9 +289,9 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         label.style("font-weight", d=> d == selectedTable ? "bold" : null);
     }
 
-    filter.keypress(() => {
+    filter.keyup(() => {
         restart();
-
+        selectedLinks();
         nodeGroup.style("display", n=> nodes.indexOf(n) == -1 ? "none" : "inline");
         link.style("display", r=> links.indexOf(r) == -1 ? "none" : "inline");
     });
@@ -417,6 +455,13 @@ export function wrap(textElement: SVGTextElement, width: number) {
 
 export function colorScale(max : number) : D3.Scale.LinearScale {
     return d3.scale.linear()
+        .domain([0, max / 4, max])
+        .range(["green", "gold", "red"]);
+
+}
+
+export function colorScaleSqr(max: number): D3.Scale.LinearScale {
+    return d3.scale.sqrt()
         .domain([0, max / 4, max])
         .range(["green", "gold", "red"]);
 

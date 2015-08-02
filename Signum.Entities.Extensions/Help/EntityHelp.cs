@@ -22,6 +22,7 @@ namespace Signum.Entities.Help
         public CultureInfoEntity Culture { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
+		[StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
         [NotNullable]
@@ -68,6 +69,7 @@ namespace Signum.Entities.Help
         public PropertyRouteEntity Property { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
+		[StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Description { get; set; }
 
         public override string ToString()

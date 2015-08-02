@@ -224,16 +224,21 @@ namespace Signum.Engine.Word
                         case "notany":
                             {
                                 var an = PeekBlock<AnyNode>();
-                                an.NotAnyToken = new MatchNodePair(matchNode);
+                                if (an != null)
+                                {
+                                    an.NotAnyToken = new MatchNodePair(matchNode);
+                                }
                                 break;
                             }
                         case "endany":
                             {
                                 var an = PopBlock<AnyNode>();
-                                an.EndAnyToken = new MatchNodePair(matchNode);
+                                if (an != null)
+                                {
+                                    an.EndAnyToken = new MatchNodePair(matchNode);
 
-                                an.ReplaceBlock();
-
+                                    an.ReplaceBlock();
+                                }
                                 break;
                             }
                         case "if":
@@ -263,17 +268,21 @@ namespace Signum.Engine.Word
                         case "else":
                             {
                                 var an = PeekBlock<IfNode>();
-                                an.ElseToken = new MatchNodePair(matchNode);
-
+                                if (an != null)
+                                {
+                                    an.ElseToken = new MatchNodePair(matchNode);
+                                }
                                 break;
                             }
                         case "endif":
                             {
                                 var ifn = PopBlock<IfNode>();
-                                ifn.EndIfToken = new MatchNodePair(matchNode);
+                                if (ifn != null)
+                                {
+                                    ifn.EndIfToken = new MatchNodePair(matchNode);
 
-                                ifn.ReplaceBlock();
-
+                                    ifn.ReplaceBlock();
+                                }
                                 break;
                             }
                         case "foreach":
@@ -288,9 +297,12 @@ namespace Signum.Engine.Word
                         case "endforeach":
                             {
                                 var fn = PopBlock<ForeachNode>();
-                                fn.EndForeachToken = new MatchNodePair(matchNode);
+                                if (fn != null)
+                                {
+                                    fn.EndForeachToken = new MatchNodePair(matchNode);
 
-                                fn.ReplaceBlock();
+                                    fn.ReplaceBlock();
+                                }
                                 break;
                             }
                         default:

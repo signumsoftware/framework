@@ -13,10 +13,11 @@
     <Parameter Name="UnitMargin" Type="Number" ValueDefinition="20" />
     <Parameter Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" ColumnIndex="2" />
     <Parameter Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis | bundle" />
-    <Parameter Name="ShowNumber" Type="Enum" ValueDefinition="Yes | No" />
+    <Parameter Name="NumberOpacity" Type="Number" ValueDefinition="0.8" />
   </Parameters>
   <Icon FileName="multilines.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAx5JREFUeNpi/P//P8NgBkwMgxwMDQfGFi/+PxqCow4cIMBCjqbjneLwNGtZ/pJxNIpJAR9f3fRF5j8+0v3/3p7a/5/QxKkGQDVJTNGi/yCaGHxtS/n/xyemoqh/cnzi/7sbYog2gxRMUgje3Fr4X4znJ4OMeRZKupO2yGNkU/D3e7Qzl+zyFJSuYZisKAZZLiCpySBs3481U8joh2xmVIxgeLIh4D9dcjGyT9iUQhgktb0ZxLW88OZYWTVrxuPrg/4/Bup9y6DI4FN+guQc/o+BmfRiRkndiEGQgOPQgQDDU5IcJqUfxiDvMZmRrFwsqJdMckgwM/xiOLO55f/z4z0Eo/zq9tr/PLx8pOXiu1tzKM6V717e8X20M+//272pOM26vrPx/6s9Gf9JysWvt4X9F5Y3xulj3/Qp/2EYb8iLKW/mNcjz+/3rG8OzPXkYaq8fmOIrxnSPQdR5OiOBTILQ+3KT739xv81Uq74EgI5k8FjCeG9fE7gIAWUCJoa/4CqS/+elTULuC/DaxQTSlCVWCs61b3fGUNVxKBnNqY4Rkuj/gvkvtsf8l3KfxUhSMcNu2upHSENi48b/m2fmwA3uWnz8v7gwD0O8ly5JHpPwXEKUesZjHWLg+P3GIMTgXH4dr6bmuYf/1ybbYqiZvfHC/xdvPjNgkyMWIKdn5AAgqi7eceLe/6pp+wjm6vS2Lf/XH7xFVu73SZv8H4aRxVmI8ZGymirDhGJ3gqEzo9KbEaRv7tKd/zFCgpYNVmIcRynQN9BhaMl0IK8moTXI7Nj239lClfiaZOuxu/87Fh6jqCbZfuL+/+rp+/9vOnIXrzmdi47/33HyAU41GA4EJfKCvp1Ua3y2zj+K06y6mQf/r9hzA69dKGlw4+Hb/28/fMPQX+hGtTRnqCHFUDP9wH8zPTmG2Yu2wcUdHcwYpMT4GMKd1fHaxQjK1jCOnoE2Q2umI00yROXU/f+vXLoK57s4WTDkh5sQtAslk9DKcSDQno1qNjGOI7tfTC4gq1wktVdHbzx0hj4G0xDc4t5YeFJgHB0CHnXgqAPxA4AAAwBZvKXgQxkvbwAAAABJRU5ErkJggg==]]></Icon>
-  <Script><![CDATA[function DrawChart(chart, data){
+  <Script>
+    <![CDATA[function DrawChart(chart, data){
   
   var dim0, series, title;
   
@@ -232,14 +233,14 @@
       .text(function(r) { return r.niceToString; });      
     });
   
-   if(parseInt(data.parameters["UnitMargin"]))
-   {
+   if(data.parameters["NumberOpacity"] > 0){
       //paint graph - points-labels
       chart.enterData(series, 'g', 'point-label-serie').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content')))
        .each(function(s){
         d3.select(this).enterData(s.points, 'text', 'point-label')
         .filter(function(r) {return r.value != undefined;})
         .attr('text-anchor', 'middle')
+        .attr('opacity', data.parameters["NumberOpacity"])
         .attr('x', function(r) { return x(r.dim0); })
         .attr('y', function(r) { return -y(r.value) - 8; })
         .attr('data-click', function(r) { return getClickKeys(r.rowClick, data.columns); })

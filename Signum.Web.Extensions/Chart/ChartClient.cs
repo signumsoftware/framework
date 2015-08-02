@@ -243,7 +243,7 @@ namespace Signum.Web.Chart
             {
                 vl.ValueLineType = ValueLineType.Enum;
 
-                var token = parameter.GetToken();
+                var token = scriptParameter.GetToken(parameter.ParentChart);
 
                 var compatible = scriptParameter.GetEnumValues().Where(a => a.CompatibleWith(token)).ToList();
                 vl.ReadOnly = compatible.Count <= 1;

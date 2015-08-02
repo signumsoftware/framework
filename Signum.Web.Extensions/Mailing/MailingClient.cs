@@ -52,7 +52,7 @@ namespace Signum.Web.Mailing
             return new QueryTokenEntity(QueryUtils.Parse(tokenString, qd, SubTokensOptions.CanElement));
         }
 
-        public static void Start(bool newsletter, bool pop3Config)
+        public static void Start(bool smtpConfig, bool newsletter, bool pop3Config)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -116,10 +116,6 @@ namespace Signum.Web.Mailing
                                 return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
                             })
                     },
-
-                    new EntitySettings<SmtpConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpConfiguration") },
-                    new EmbeddedEntitySettings<SmtpNetworkDeliveryEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpNetworkDelivery") },
-                    new EmbeddedEntitySettings<ClientCertificationFileEntity> { PartialViewName = e => ViewPrefix.FormatWith("ClientCertificationFile")},
                 });
 
                 OperationClient.AddSettings(new List<OperationSettings>
@@ -132,6 +128,16 @@ namespace Signum.Web.Mailing
                             ctx.Url.Action((MailingController mc)=>mc.CreateMailFromTemplateAndEntity()))
                     }
                 });
+
+                if (smtpConfig)
+                {
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<SmtpConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpConfiguration") },
+                        new EmbeddedEntitySettings<SmtpNetworkDeliveryEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpNetworkDelivery") },
+                        new EmbeddedEntitySettings<ClientCertificationFileEntity> { PartialViewName = e => ViewPrefix.FormatWith("ClientCertificationFile")},
+                    });
+                }
 
                 if (newsletter)
                 {

@@ -9,6 +9,7 @@ using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
+using System.Reflection;
 
 namespace Signum.Entities.Chart
 {
@@ -177,6 +178,28 @@ namespace Signum.Entities.Chart
         public void FixParameters(ChartColumnEntity chartColumnEntity)
         {
 
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Parameters) && Parameters != null && ChartScript != null)
+            {
+                try
+                {
+                    EnumerableExtensions.JoinStrict(
+                        Parameters,
+                        ChartScript.Parameters,
+                        p => p.Name,
+                        ps => ps.Name, 
+                        (p, ps) => new { p, ps }, pi.NiceName());
+                }
+                catch (Exception e)
+                {
+                    return e.Message;
+                }
+            }
+
+            return base.PropertyValidation(pi);
         }
     }
 

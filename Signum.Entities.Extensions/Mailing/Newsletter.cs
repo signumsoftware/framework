@@ -39,7 +39,7 @@ namespace Signum.Entities.Mailing
         internal object SubjectParsedNode;
 
         [SqlDbType(Size = int.MaxValue)]
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Text { get; set; }
 
         [Ignore]
