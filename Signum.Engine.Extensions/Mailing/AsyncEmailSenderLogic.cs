@@ -187,8 +187,10 @@ namespace Signum.Engine.Mailing
         {
             DateTime? firstDate = EmailLogic.Configuration.AvoidSendingEmailsOlderThan == null ?
                 null : (DateTime?)TimeZoneManager.Now.AddHours(-EmailLogic.Configuration.AvoidSendingEmailsOlderThan.Value);
+
             queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
                 m.State == EmailMessageState.ReadyToSend &&
+                m.CreationDate  < TimeZoneManager.Now &&
                 (firstDate == null ? true : m.CreationDate >= firstDate)).UnsafeUpdate()
                     .Set(m => m.ProcessIdentifier, m => processIdentifier)
                     .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
