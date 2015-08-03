@@ -39,7 +39,7 @@ namespace Signum.Web.Selenium
                     PollingInterval = DefaultPoolingInterval
                 };
 
-                wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(NoAlertPresentException));
+                wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(NoAlertPresentException), typeof(StaleElementReferenceException));
                 
                 return wait.Until(_ => condition());
             }
