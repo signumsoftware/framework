@@ -43,7 +43,7 @@ namespace Signum.Entities.Notes
 
         [SqlDbType(Size = int.MaxValue)]
         string text;
-        [StringLengthValidator(AllowNulls = false, Min = 1)]
+        [StringLengthValidator(AllowNulls = false, Min = 1, MultiLine = true)]
         public string Text
         {
             get { return text; }

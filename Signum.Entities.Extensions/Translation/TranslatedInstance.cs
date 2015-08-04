@@ -47,7 +47,7 @@ namespace Signum.Entities.Translation
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string translatedText;
-        [StringLengthValidator(AllowNulls = false)]
+        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
         public string TranslatedText
         {
             get { return translatedText; }
@@ -56,7 +56,7 @@ namespace Signum.Entities.Translation
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string originalText;
-        [StringLengthValidator(AllowNulls = false)]
+        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
         public string OriginalText
         {
             get { return originalText; }

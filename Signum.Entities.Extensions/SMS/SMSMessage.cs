@@ -22,7 +22,7 @@ namespace Signum.Entities.SMS
 
         [SqlDbType(Size = int.MaxValue)]
         string message;
-        [NotNullValidator]
+        [StringLengthValidator(AllowNulls=false, MultiLine = true)]
         public string Message
         {
             get { return message; }

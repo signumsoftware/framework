@@ -385,7 +385,7 @@ namespace Signum.Entities.Dashboard
 
         [SqlDbType(Size = int.MaxValue)]
         string link;
-        [URLValidator, NotNullValidator]
+        [URLValidator, StringLengthValidator(AllowNulls = false)]
         public string Link
         {
             get { return link; }

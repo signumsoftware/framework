@@ -199,7 +199,7 @@ namespace Signum.Entities.SMS
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string message;
-        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
         public string Message
         {
             get { return message; }

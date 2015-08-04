@@ -32,7 +32,7 @@ namespace Signum.Entities.Help
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string description;
-        [NotNullValidator]
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Description
         {
             get { return description; }

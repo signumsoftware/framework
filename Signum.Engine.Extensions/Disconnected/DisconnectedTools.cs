@@ -150,36 +150,28 @@ MOVE '{4}' TO '{5}'{6}".FormatWith(databaseName, backupFile,
             return GetSeedInfo(table).Identity == null;
         }
 
-        public static int GetNextId(ITable table)
+        public static long GetNextId(ITable table)
         {
             var info = GetSeedInfo(table);
 
             if (info.Identity.HasValue)
                 return info.Identity.Value + 1;
 
-            return Executor.ExecuteNonQuery("SELECT IDENT_CURRENT ('{0}') ".FormatWith(table.Name));
+            return (long)(decimal)Executor.ExecuteScalar("SELECT IDENT_CURRENT ('{0}') ".FormatWith(table.Name));
         }
 
         public static void SetNextId(ITable table, long nextId)
         {
-            var pb = Connector.Current.ParameterBuilder;
-
-            Executor.ExecuteNonQuery("DBCC CHECKIDENT ('{0}', RESEED, @seed)".FormatWith(table.Name), new List<DbParameter>
-            {
-                pb.CreateParameter("@seed", IsEmpty(table) ? nextId :  nextId  -1,  table.PrimaryKey.Type)
-            });
+            SetNextIdSync(table, nextId).ExecuteNonQuery();
         }
 
-        public static IDisposable SaveAndRestoreNextId(ITable table)
+        public static SqlPreCommandSimple SetNextIdSync(ITable table, long nextId)
         {
-            if (!table.PrimaryKey.Identity)
-                return null;
+            var pb = Connector.Current.ParameterBuilder;
 
-            int nextId = DisconnectedTools.GetNextId(table);
-
-            return new Disposable(() =>
+            return new SqlPreCommandSimple("DBCC CHECKIDENT ('{0}', RESEED, @seed)".FormatWith(table.Name), new List<DbParameter>
             {
-                DisconnectedTools.SetNextId(table, nextId);
+                pb.CreateParameter("@seed", nextId,  table.PrimaryKey.Type)
             });
         }
 

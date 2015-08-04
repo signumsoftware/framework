@@ -33,6 +33,7 @@ namespace Signum.Entities.Help
 
         [SqlDbType(Size = int.MaxValue)]
         string description;
+        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
         public string Description
         {
             get { return description; }
@@ -103,6 +104,7 @@ namespace Signum.Entities.Help
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string description;
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
         public string Description
         {
             get { return description; }
