@@ -16,6 +16,7 @@ using Signum.Services;
 using System.Runtime.CompilerServices;
 using System.Data;
 using System.Globalization;
+using System.Collections.Concurrent;
 
 namespace Signum.Entities
 {

@@ -443,7 +443,7 @@ namespace Signum.Engine
         }
 
         public static void BulkInsertDisableIdentity<T>(IEnumerable<T> entities,
-          SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false)
+          SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false, int? timeout = null)
           where T : Entity
         {
             options |= SqlBulkCopyOptions.KeepIdentity;
@@ -467,7 +467,7 @@ namespace Signum.Engine
                 {
                     DataTable dt = CreateDataTable<T>(list, t);
 
-                    Executor.BulkCopy(dt, t.Name, options);
+                    Executor.BulkCopy(dt, t.Name, options, timeout);
 
                     foreach (var item in list)
                         item.SetNotModified();
@@ -478,7 +478,7 @@ namespace Signum.Engine
         }
 
         public static void BulkInsert<T>(IEnumerable<T> entities,
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false)
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false, int? timeout = null)
             where T : Entity
         {
             if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
@@ -497,7 +497,7 @@ namespace Signum.Engine
             {
                 Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
 
-                Executor.BulkCopy(dt, t.Name, options);
+                Executor.BulkCopy(dt, t.Name, options, timeout);
 
                 if (tr != null)
                     tr.Commit();
@@ -535,7 +535,8 @@ namespace Signum.Engine
 
         public static void BulkInsertMList<E, V>(Expression<Func<E, MList<V>>> mListProperty,
             IEnumerable<MListElement<E, V>> entities,
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, 
+            int? timeout = null)
             where E : Entity
         {
             if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
@@ -555,7 +556,7 @@ namespace Signum.Engine
             {
                 Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
 
-                Executor.BulkCopy(dt, t.Name, options);
+                Executor.BulkCopy(dt, t.Name, options, timeout);
 
                 tr.Commit();
             }
