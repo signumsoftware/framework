@@ -212,6 +212,9 @@ namespace Signum.Engine.Word
                          parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                          parser.AssertClean();
 
+                         if (parser.Errors.Any())
+                             throw new InvalidOperationException("Error in template {0}:\r\n".FormatWith(template) + parser.Errors.ToString(e => e.Message, "\r\n"));
+
                          var renderer = new WordTemplateRenderer(document, qd, entity, template.Culture.ToCultureInfo(), systemWordTemplate);
                          renderer.MakeQuery();
                          renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
