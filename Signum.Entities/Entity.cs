@@ -39,11 +39,23 @@ namespace Signum.Entities
             internal set { id = value; }
         }
 
+
+        public void SetPrimaryKey(PrimaryKey value)
+        {
+            id = value;
+        }
+
         [HiddenProperty]
         public PrimaryKey? IdOrNull
         {
             get { return id; }
         }
+
+        public void SetIsNew(bool value)
+        {
+            IsNew = value;
+        }
+
 
         [Ignore]
         bool isNew = true;
