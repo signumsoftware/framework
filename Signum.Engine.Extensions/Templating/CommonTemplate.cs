@@ -121,7 +121,7 @@ namespace Signum.Engine.Templating
         {
             var members = new List<MemberInfo>();
             var type = modelType;
-            foreach (var field in fieldOrPropertyChain.Split('.'))
+            foreach (var field in fieldOrPropertyChain.Trim().Split('.'))
             {
                 var info = (MemberInfo)type.GetField(field, Flags) ??
                            (MemberInfo)type.GetProperty(field, Flags);
