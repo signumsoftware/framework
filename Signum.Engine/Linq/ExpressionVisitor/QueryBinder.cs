@@ -1939,7 +1939,7 @@ namespace Signum.Engine.Linq
             return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this);
         }
 
-        static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => Administrator.SetReadonly(null, (Entity a) => a.Id, 1)).GetGenericMethodDefinition();
+        static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => UnsafeEntityExtensions.SetReadonly(null, (Entity a) => a.Id, 1)).GetGenericMethodDefinition();
         static readonly MethodInfo miSetMixin = ReflectionTools.GetMethodInfo(() => ((Entity)null).SetMixin((CorruptMixin m) => m.Corrupt, true)).GetGenericMethodDefinition();
 
         public void FillColumnAssigments(List<ColumnAssignment> assignments, ParameterExpression toInsert, Expression body)

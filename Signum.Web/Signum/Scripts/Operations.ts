@@ -12,6 +12,7 @@ export interface OperationOptions {
     controllerUrl?: string;
     requestExtraJsonData?: any;
     isLite?: boolean;
+    isContextual?: boolean;
     avoidReturnRedirect?: boolean;
     avoidReturnView?: boolean;
     confirmMessage?: string;
