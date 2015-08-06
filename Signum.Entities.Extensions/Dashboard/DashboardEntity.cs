@@ -195,7 +195,7 @@ namespace Signum.Entities.Dashboard
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 DashboardPriority == null ? null : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
-                EmbeddedInEntity == null ? null : new XAttribute("EmbeddedInEntity", DashboardPriority.Value.ToString()),
+                EmbeddedInEntity == null ? null : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
                 new XElement("Parts", Parts.Select(p => p.ToXml(ctx)))); 
         }
 
