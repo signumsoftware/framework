@@ -51,20 +51,6 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString HiddenAnonymous(this HtmlHelper html, object value)
-        {
-            return HiddenAnonymous(html, value, null);
-        }
-
-        public static MvcHtmlString HiddenAnonymous(this HtmlHelper html, object value, object htmlAttributes)
-        {
-            return new HtmlTag("input").Attrs(new
-            {
-                type = "hidden",
-                value = value.ToString()
-            }).Attrs(htmlAttributes).ToHtmlSelf();
-        }
-
         public static MvcHtmlString FormGroupStatic(this HtmlHelper html, Context context, string controlId, string label, string text)
         {
             var span = html.FormControlStatic(context, controlId, text);
