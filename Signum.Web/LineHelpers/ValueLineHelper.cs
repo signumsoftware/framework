@@ -45,7 +45,7 @@ namespace Signum.Web
                 sb.AddLine(Configurator.Helper[vltype](helper, valueLine));
 
                 if (valueLine.UnitText.HasText())
-                    sb.AddLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, "input-group-addon"));
+                    sb.AddLine(helper.Span(null, valueLine.UnitText, "input-group-addon"));
             }
 
             return sb.ToHtml();
@@ -156,9 +156,9 @@ namespace Signum.Web
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value));
 
                 if (valueLine.UnitText.HasText())
-                    return new HtmlTag("p").Id(valueLine.Prefix).SetInnerText(value).Class("form-control").Attrs(valueLine.ValueHtmlProps).ToHtml();
+                    return result.Concat(new HtmlTag("p").SetInnerText(value).Class("form-control").Attrs(valueLine.ValueHtmlProps).ToHtml());
                 else
-                    return result.Concat(helper.FormControlStatic(valueLine, valueLine.Prefix, value, valueLine.ValueHtmlProps));
+                    return result.Concat(helper.FormControlStatic(valueLine, null, value, valueLine.ValueHtmlProps));
             }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
@@ -221,7 +221,7 @@ namespace Signum.Web
                 if (valueLine.FormControlStaticAsFormControlReadonly)
                     valueLine.ValueHtmlProps.AddCssClass("readonly-textarea");
 
-                return result.Concat(helper.FormControlStatic(valueLine, "", (string)valueLine.UntypedValue, valueLine.ValueHtmlProps));
+                return result.Concat(helper.FormControlStatic(valueLine, null, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps));
             }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
