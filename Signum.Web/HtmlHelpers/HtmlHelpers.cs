@@ -207,14 +207,14 @@ namespace Signum.Web
                         .ToHtml();
         }
 
-        public static MvcHtmlString Span(this HtmlHelper html, string name, string value, string cssClass)
+        public static MvcHtmlString Span(this HtmlHelper html, string id, string value, string cssClass)
         {
-            return Span(html, name, value, cssClass, null);
+            return Span(html, id, value, cssClass, null);
         }
 
-        public static MvcHtmlString Span(this HtmlHelper html, string name, string value)
+        public static MvcHtmlString Span(this HtmlHelper html, string id, string value)
         {
-            return Span(html, name, value, null, null);
+            return Span(html, id, value, null, null);
         }
 
         public static MvcHtmlString Href(this HtmlHelper html, string url, string text)
