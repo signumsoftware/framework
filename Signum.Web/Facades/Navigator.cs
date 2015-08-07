@@ -642,7 +642,7 @@ namespace Signum.Web
             if (runtimeInfo == null)
                 throw new ArgumentNullException("{0} not found in form request".FormatWith(key));
 
-            if (!runtimeInfo.IsNew )
+            if (runtimeInfo.EntityType.IsEntity() && !runtimeInfo.IsNew)
                 return Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             else
                 return new ConstructorContext(controller).ConstructUntyped(runtimeInfo.EntityType);
