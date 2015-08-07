@@ -388,7 +388,7 @@ namespace Signum.Engine.Linq
             Type type = TableType(c.Value);
             if (type != null)
             {
-                if (typeof(IRootEntity).IsAssignableFrom(type))
+                if (typeof(Entity).IsAssignableFrom(type))
                     return new MetaProjectorExpression(c.Type, new MetaExpression(type, new CleanMeta(Implementations.By(type), PropertyRoute.Root(type))));
 
                 if (type.IsInstantiationOf(typeof(MListElement<,>)))
