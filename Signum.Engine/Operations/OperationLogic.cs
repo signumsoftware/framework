@@ -199,7 +199,7 @@ namespace Signum.Engine.Operations
         static SqlPreCommand Operation_PreDeleteSqlSync(Entity arg)
         {
             var t = Schema.Current.Table<OperationLogEntity>();
-            var f = (FieldReference)t.Fields["operation"].Field;
+            var f = (FieldReference)Schema.Current.Field((OperationLogEntity ol) => ol.Operation);
 
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
 
@@ -209,7 +209,7 @@ namespace Signum.Engine.Operations
         static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
         {
             var t = Schema.Current.Table<OperationLogEntity>();
-            var f = ((FieldImplementedByAll)t.Fields["target"].Field).ColumnType;
+            var f = ((FieldImplementedByAll)Schema.Current.Field((OperationLogEntity ol) => ol.Target)).ColumnType;
 
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
 
