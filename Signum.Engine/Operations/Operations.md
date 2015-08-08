@@ -176,7 +176,7 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
         new Execute(OrderOperation.Save)
         {
             FromStates = { OrderState.Ordered }, //New property
-            ToState = OrderState.Ordered,
+            ToStates = { OrderState.Ordered },
             Lite = false,
             Execute = (o, _) =>
             {
@@ -228,7 +228,7 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
 		new Execute(OrderOperation.SaveNew) 
 		{
 		    FromStates = { OrderState.New }, //The operation can only be executed for new entities
-		    ToState = OrderState.Ordered, //After the execution, Ordered state will be asserted
+		    ToStates = { OrderState.Ordered }, //After the execution, Ordered state will be asserted
 		    AllowsNew = true, //Can be executed for new entities
 		    Lite = false, //The whole entity will be sent, and can be dirty
 		    Execute = (o, args) =>
@@ -241,7 +241,7 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
 		new Execute(OrderOperation.Save)
 		{
 		    FromStates = { OrderState.Ordered },
-		    ToState = OrderState.Ordered,
+		    ToStates = { OrderState.Ordered },
 		    Lite = false, //The whole entity will be sent, and can be dirty
 		    Execute = (o, _) =>
 		    {
@@ -252,7 +252,7 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
 		{
 		    CanExecute = o => o.Details.IsEmpty() ? "No order lines" : null, //Special CanExecute
 		    FromStates = { OrderState.Ordered },
-		    ToState = OrderState.Shipped, 
+		    ToStates = { OrderState.Shipped }, 
             //Lite = true by default, so only a lite (or a clean entity) can be used
 		    Execute = (o, args) =>
 		    {
@@ -341,7 +341,7 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
         ...
         new Construct(OrderOperation.Create)
         {
-            ToState = OrderState.New,
+            ToStates = { OrderState.New },
             Construct = (_) => new OrderEntity
             {
                 State = OrderState.New,
@@ -381,7 +381,7 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
         ...
         new ConstructFrom<CustomerEntity>(OrderOperation.CreateOrderFromCustomer)
         {
-            ToState = OrderState.New,
+            ToStates = { OrderState.New },
             Construct = (c, _) => new OrderEntity
             {
                 State = OrderState.New,
@@ -423,7 +423,7 @@ public class OrderGraph : Graph<OrderEntity, OrderState>
         ...
         new ConstructFromMany<ProductEntity>(OrderOperation.CreateOrderFromProducts)
         {
-            ToState = OrderState.New,
+            ToStates = { OrderState.New },
             Construct = (prods, _) =>
             {
                 var dic = Database.Query<ProductEntity>()
@@ -559,7 +559,7 @@ new Execute(OrderOperation.Ship)
 {
     CanExecute = o => o.Details.IsEmpty() ? "No order lines" : null,
     FromStates = { OrderState.Ordered },
-    ToState = OrderState.Shipped,
+    ToStates = { OrderState.Shipped },
     Execute = (o, args) =>
     {
         o.ShippedDate = args.TryGetArgS<DateTime>() ?? DateTime.Now;

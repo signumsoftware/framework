@@ -17,6 +17,7 @@ using System.Runtime.CompilerServices;
 using System.Data;
 using System.Globalization;
 using System.Diagnostics;
+using System.Collections.Concurrent;
 
 namespace Signum.Entities
 {
@@ -215,4 +216,71 @@ namespace Signum.Entities
     {
 
     }
+
+    public static class UnsafeEntityExtensions
+    {
+        public static T SetId<T>(this T ident, PrimaryKey? id)
+        where T : Entity
+        {
+            ident.id = id;
+            return ident;
+        }
+
+        public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value)
+             where T : ModifiableEntity
+        {
+            var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
+
+            Action<T, V> setter = ReadonlySetterCache<T>.Setter<V>(pi);
+
+            setter(ident, value);
+
+            ident.SetSelfModified();
+
+            return ident;
+        }
+
+        static class ReadonlySetterCache<T> where T : ModifiableEntity
+        {
+            static ConcurrentDictionary<string, Delegate> cache = new ConcurrentDictionary<string, Delegate>();
+
+            internal static Action<T, V> Setter<V>(PropertyInfo pi)
+            {
+                return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi)));
+            }
+        }
+
+        public static T SetNew<T>(this T ident, bool isNew = true)
+            where T : Entity
+        {
+            ident.IsNew = isNew;
+            ident.SetSelfModified();
+            return ident;
+        }
+
+        public static T SetNotModified<T>(this T ident)
+            where T : Modifiable
+        {
+            if (ident is Entity)
+                ((Entity)(Modifiable)ident).IsNew = false;
+            ident.Modified = ModifiedState.Clean;
+            return ident;
+        }
+
+        public static T SetNotModifiedGraph<T>(this T ident, PrimaryKey id)
+            where T : Entity
+        {
+            foreach (var item in GraphExplorer.FromRoot(ident).Where(a => a.Modified != ModifiedState.Sealed))
+            {
+                item.SetNotModified();
+                if (item is Entity)
+                    ((Entity)item).SetId(new PrimaryKey("invalidId"));
+            }
+
+            ident.SetId(id);
+
+            return ident;
+        }
+    }
+
 }

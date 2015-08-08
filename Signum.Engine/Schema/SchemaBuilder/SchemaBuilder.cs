@@ -711,7 +711,7 @@ namespace Signum.Engine.Maps
         private SchemaName GetSchemaName(TableNameAttribute tn)
         {
             ServerName server = tn.ServerName == null ? null : new ServerName(tn.ServerName);
-            DatabaseName dataBase = tn.DatabaseName == null && server == null ? null : new DatabaseName(server, tn.ServerName);
+            DatabaseName dataBase = tn.DatabaseName == null && server == null ? null : new DatabaseName(server, tn.DatabaseName);
             SchemaName schema = tn.SchemaName == null && dataBase == null ? SchemaName.Default : new SchemaName(dataBase, tn.SchemaName);
             return schema;
         }

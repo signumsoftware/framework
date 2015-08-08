@@ -111,68 +111,7 @@ namespace Signum.Engine
         }
 
 
-        public static T SetId<T>(this T ident, PrimaryKey? id)
-            where T : Entity
-        {
-            ident.id = id;
-            return ident;
-        }
-
-        public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value)
-             where T : ModifiableEntity
-        {
-            var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
-
-            Action<T, V> setter = ReadonlySetterCache<T>.Setter<V>(pi);
-
-            setter(ident, value);
-
-            ident.SetSelfModified();
-
-            return ident;
-        }
-
-        static class ReadonlySetterCache<T> where T : ModifiableEntity
-        {
-            static ConcurrentDictionary<string, Delegate> cache = new ConcurrentDictionary<string, Delegate>();
-
-            internal static Action<T, V> Setter<V>(PropertyInfo pi)
-            {
-                return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi)));
-            }
-        }
-
-        public static T SetNew<T>(this T ident, bool isNew = true)
-            where T : Entity
-        {
-            ident.IsNew = isNew;
-            ident.SetSelfModified();
-            return ident;
-        }
-
-        public static T SetNotModified<T>(this T ident)
-            where T : Modifiable
-        {
-            if (ident is Entity)
-                ((Entity)(Modifiable)ident).IsNew = false;
-            ident.Modified = ModifiedState.Clean;
-            return ident;
-        }
-
-        public static T SetNotModifiedGraph<T>(this T ident, PrimaryKey id)
-            where T : Entity
-        {
-            foreach (var item in GraphExplorer.FromRoot(ident).Where(a => a.Modified != ModifiedState.Sealed))
-            {
-                item.SetNotModified();
-                if (item is Entity)
-                    ((Entity)item).SetId(new PrimaryKey("invalidId"));
-            }
-
-            ident.SetId(id);
-
-            return ident;
-        }
+    
 
         public static IDisposable DisableIdentity<T>()
             where T : Entity
@@ -504,7 +443,7 @@ namespace Signum.Engine
         }
 
         public static void BulkInsertDisableIdentity<T>(IEnumerable<T> entities,
-          SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false)
+          SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false, int? timeout = null)
           where T : Entity
         {
             options |= SqlBulkCopyOptions.KeepIdentity;
@@ -528,7 +467,7 @@ namespace Signum.Engine
                 {
                     DataTable dt = CreateDataTable<T>(list, t);
 
-                    Executor.BulkCopy(dt, t.Name, options);
+                    Executor.BulkCopy(dt, t.Name, options, timeout);
 
                     foreach (var item in list)
                         item.SetNotModified();
@@ -539,7 +478,7 @@ namespace Signum.Engine
         }
 
         public static void BulkInsert<T>(IEnumerable<T> entities,
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false)
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false, int? timeout = null)
             where T : Entity
         {
             if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
@@ -558,7 +497,7 @@ namespace Signum.Engine
             {
                 Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
 
-                Executor.BulkCopy(dt, t.Name, options);
+                Executor.BulkCopy(dt, t.Name, options, timeout);
 
                 if (tr != null)
                     tr.Commit();
@@ -596,7 +535,8 @@ namespace Signum.Engine
 
         public static void BulkInsertMList<E, V>(Expression<Func<E, MList<V>>> mListProperty,
             IEnumerable<MListElement<E, V>> entities,
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default)
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, 
+            int? timeout = null)
             where E : Entity
         {
             if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
@@ -616,7 +556,7 @@ namespace Signum.Engine
             {
                 Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
 
-                Executor.BulkCopy(dt, t.Name, options);
+                Executor.BulkCopy(dt, t.Name, options, timeout);
 
                 tr.Commit();
             }
