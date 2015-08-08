@@ -35,8 +35,8 @@ namespace Signum.Engine.Word
 
         public static ResetLazy<Dictionary<TypeEntity, List<Lite<WordTemplateEntity>>>> TemplatesByType;
 
-        public static Dictionary<WordTransformerSymbol, Action<WordTemplateEntity, Entity, WordprocessingDocument>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordTemplateEntity, Entity, WordprocessingDocument>>();
-        public static Dictionary<WordConverterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]>>();
+        public static Dictionary<WordTransformerSymbol, Action<WordContext, WordprocessingDocument>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, WordprocessingDocument>>();
+        public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
 
         static Expression<Func<SystemWordTemplateEntity, IQueryable<WordTemplateEntity>>> WordTemplatesExpression =
             e => Database.Query<WordTemplateEntity>().Where(a => a.SystemWordTemplate == e);
@@ -127,7 +127,7 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordTemplateEntity, Entity, WordprocessingDocument> transformer)
+        public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordContext, WordprocessingDocument> transformer)
         {
             if (transformerSymbol == null)
                 throw new ArgumentNullException(nameof(transformerSymbol));
@@ -135,7 +135,14 @@ namespace Signum.Engine.Word
             Transformers.Add(transformerSymbol, transformer);
         }
 
-        public static void RegisterConverter(WordConverterSymbol converterSymbol, Func<WordTemplateEntity, Entity, byte[], byte[]> converter)
+        public class WordContext
+        {
+            public WordTemplateEntity Template;
+            public Entity Entity;
+            public ISystemWordTemplate SystemWordTemplate;
+        }
+
+        public static void RegisterConverter(WordConverterSymbol converterSymbol, Func<WordContext, byte[], byte[]> converter)
         {
             if (converterSymbol == null)
                 throw new ArgumentNullException(nameof(converterSymbol));
@@ -211,6 +218,9 @@ namespace Signum.Engine.Word
                          parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                          parser.AssertClean();
 
+                         if (parser.Errors.Any())
+                             throw new InvalidOperationException("Error in template {0}:\r\n".FormatWith(template) + parser.Errors.ToString(e => e.Message, "\r\n"));
+
                          var renderer = new WordTemplateRenderer(document, qd, entity, template.Culture.ToCultureInfo(), systemWordTemplate);
                          renderer.MakeQuery();
                          renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
@@ -219,13 +229,23 @@ namespace Signum.Engine.Word
                          FixDocument(document); Dump(document, "4.Fixed.txt");
 
                          if (template.WordTransformer != null)
-                             Transformers.GetOrThrow(template.WordTransformer)(template, entity, document);
+                             Transformers.GetOrThrow(template.WordTransformer)(new WordContext
+                             {
+                                 Template = template,
+                                 Entity = entity,
+                                 SystemWordTemplate = systemWordTemplate
+                             }, document);
                      }
 
                      var array = memory.ToArray();
 
                      if (!avoidConversion && template.WordConverter != null)
-                         array = Converters.GetOrThrow(template.WordConverter)(template, entity, array);
+                         array = Converters.GetOrThrow(template.WordConverter)(new WordContext
+                         {
+                             Template = template,
+                             Entity = entity,
+                             SystemWordTemplate = systemWordTemplate
+                         }, array);
 
                      return array;
                  }

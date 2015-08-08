@@ -48,7 +48,7 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string subject;
-        [StringLengthValidator(AllowNulls = true)]
+        [StringLengthValidator(AllowNulls = true, AllowLeadingSpaces=true, AllowTrailingSpaces=true)]
         public string Subject
         {
             get { return subject; }

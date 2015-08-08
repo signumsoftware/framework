@@ -80,8 +80,14 @@ namespace Signum.Engine.Templating
 
         protected static bool ToBool(object obj)
         {
-            if (obj == null || obj is bool && ((bool)obj) == false)
+            if (obj == null)
                 return false;
+
+            if (obj is bool)
+                return ((bool)obj);
+
+            if (obj is string)
+                return ((string)obj) != "";
 
             return true;
         }
