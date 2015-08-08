@@ -71,7 +71,7 @@ namespace Signum.Entities.Authorization
         SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
         {
             var t = Schema.Current.Table<RT>();
-            var f = (FieldReference)t.Fields["resource"].Field;
+            var f = (FieldReference)Schema.Current.Field((RT r) => r.Resource);
 
             var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
 
