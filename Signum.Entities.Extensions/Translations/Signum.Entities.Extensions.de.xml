@@ -134,7 +134,7 @@
     <Member Name="Please0IntoYourAccount" Description="Bitte, {0} in Ihr Konto" />
     <Member Name="PleaseEnterYourChosenNewPassword" Description="Bitte geben Sie Ihr neues Passwort ein" />
     <Member Name="Remember" Description="Denken Sie daran" />
-    <Member Name="RememberMe" Description="Mich daran erinnern" />
+    <Member Name="RememberMe" Description="Auf diesem Computer merken" />
     <Member Name="ResetPassword" Description="Passwort zurücksetzen" />
     <Member Name="ResetPasswordCode" Description="Code für die Wiederherstellung des Passworts" />
     <Member Name="ResetPasswordCodeHasBeenSent" Description="Ein Bestätigungs-Code zum Zurücksetzen Ihres Passworts wurde an das E-Mail-Konto {0} gesendet" />
