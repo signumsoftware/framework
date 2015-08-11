@@ -52,13 +52,16 @@ namespace Signum.Utilities.ExpressionTrees
 
     }
 
-    //The name of the field for the expression that defines the content
+    /// <summary>
+    /// Associates a method with his corresponding 
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method| AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class ExpressionFieldAttribute : Attribute
     {
         public string Name { get; set; }
         public Type Type { get; set; }
-        public ExpressionFieldAttribute(string name)
+        /// <param name="name">The name of the field for the expression that defines the content. If not set, will be automatically found from the method body. </param>
+        public ExpressionFieldAttribute(string name = "auto")
         {
             this.Name =name;
         }

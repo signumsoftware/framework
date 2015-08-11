@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoExpressionField.cs" />
     <Compile Include="MsBuildExtensions.cs" />
     <Compile Include="FieldAutoInitiaizer.cs" />
     <Compile Include="PreloadingAssemblyResolver.cs" />

@@ -4,6 +4,7 @@ namespace Signum.MSBuildTask
 {
     internal class PreloadingAssemblyResolver : DefaultAssemblyResolver
     {
+        public AssemblyDefinition SignumUtilities { get; private set; } 
         public AssemblyDefinition SignumEntities { get; private set; } 
 
         public PreloadingAssemblyResolver(string references)
@@ -14,6 +15,9 @@ namespace Signum.MSBuildTask
 
                 if (assembly.Name.Name == "Signum.Entities")
                     SignumEntities = assembly;
+
+                if (assembly.Name.Name == "Signum.Utilities")
+                    SignumUtilities = assembly;
 
                 RegisterAssembly(assembly);
             }

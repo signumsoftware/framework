@@ -46,6 +46,7 @@ namespace Signum.MSBuildTask
 
                 new AutoPropertyConverter(assembly, resolver).FixProperties();
                 new FieldAutoInitializer(assembly, resolver, Log).FixAutoInitializer();
+                new AutoExpressionField(assembly, resolver, Log).FixAutoExpressionField();
 
                 if (Log.HasLoggedErrors)
                     return true;
