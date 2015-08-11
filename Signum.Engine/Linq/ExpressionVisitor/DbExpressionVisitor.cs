@@ -93,7 +93,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitTypeFieldInit(TypeEntityExpression typeFie)
         {
-            var externalId = Visit(typeFie.ExternalId);
+            var externalId = (PrimaryKeyExpression)Visit(typeFie.ExternalId);
 
             if (externalId != typeFie.ExternalId)
                 return new TypeEntityExpression(externalId, typeFie.TypeValue);
@@ -133,7 +133,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
         {
-            var implementations = Visit(typeIb.TypeImplementations, eid => Visit(eid));
+            var implementations = Visit(typeIb.TypeImplementations, eid => (PrimaryKeyExpression)Visit(eid));
 
             if (implementations != typeIb.TypeImplementations)
                 return new TypeImplementedByExpression(implementations);
@@ -142,7 +142,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
         {
-            var column = Visit(typeIba.TypeColumn);
+            var column = (PrimaryKeyExpression)Visit(typeIba.TypeColumn);
 
             if (column != typeIba.TypeColumn)
                 return new TypeImplementedByAllExpression(column);
@@ -168,7 +168,7 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitMListElement(MListElementExpression mle)
         {
-            var rowId = Visit(mle.RowId);
+            var rowId = (PrimaryKeyExpression)Visit(mle.RowId);
             var parent = (EntityExpression)Visit(mle.Parent);
             var order = Visit(mle.Order);
             var element = Visit(mle.Element);
@@ -224,7 +224,7 @@ namespace Signum.Engine.Linq
             var bindings = Visit(ee.Bindings, VisitFieldBinding);
             var mixins = Visit(ee.Mixins, VisitMixinEntity);
 
-            var id = Visit(ee.ExternalId);
+            var id = (PrimaryKeyExpression)Visit(ee.ExternalId);
 
             if (ee.Bindings != bindings || ee.ExternalId != id || ee.Mixins != mixins)
                 return new EntityExpression(ee.Type, id, ee.TableAlias, bindings, mixins, ee.AvoidExpandOnRetrieving);
@@ -250,7 +250,7 @@ namespace Signum.Engine.Linq
 
             if (me.Bindings != bindings)
             {
-                return new MixinEntityExpression(me.Type, bindings, me.FieldMixin);
+                return new MixinEntityExpression(me.Type, bindings, me.MainEntityAlias, me.FieldMixin);
             }
             return me;
         }
@@ -468,6 +468,25 @@ namespace Signum.Engine.Linq
                 return o;
 
             return new OrderExpression(o.OrderType, e);
+        }
+
+        protected internal virtual Expression VisitPrimaryKey(PrimaryKeyExpression pk)
+        {
+            var e = Visit(pk.Value);
+            if (e == pk.Value)
+                return pk;
+
+            return new PrimaryKeyExpression(e);
+        }
+
+        protected internal virtual Expression VisitPrimaryKeyString(PrimaryKeyStringExpression pk)
+        {
+            var typeId = Visit(pk.TypeId);
+            var id = Visit(pk.Id);
+            if (typeId == pk && pk.Id == id)
+                return pk;
+
+            return new PrimaryKeyStringExpression(id, (TypeImplementedByAllExpression)typeId);
         }
     }
 }

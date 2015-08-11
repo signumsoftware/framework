@@ -1,22 +1,22 @@
-# Database
+﻿# Database
 
 `Database` is the main facade of Signum Engine for normal operations with entities, like [saving](Database.Save.md), [retrieving](Database.Retrieve.md) or [deleting](Database.Delete.md) particular entities, or write complex queries to [retrieving](Database.Query.md), [update](Database.UnsafeUpdate.md), [delete](Database.UnsafeDelete.md) or [insert](Database.UnsafeInsert.md) many entities at the same time.
 
 Three things that make `Database` class different to many other ORM:
 
 1. **Database class is static**: No need to instantiate it, neither to pass it as a parameter or store it in some global variable. Client code (your code) is simpler and easier to re-use, while preserving flexibility to change the DB connection and the schema using `Connector.Override` method.
-2. **No Property for each table**: On Database class you will find general purpose methods to deal with `IdentifiableEntity` objects, also you will find strongly-typed generic overloading. But what you are not going to find there are properties to deal specifically with some concrete entity. This way the business logic in your modules only depend on the common `Database` class, not a particular class representing your particular database, so they can be used in other projects. 
+2. **No Property for each table**: On Database class you will find general purpose methods to deal with `Entity` objects, also you will find strongly-typed generic overloading. But what you are not going to find there are properties to deal specifically with some concrete entity. This way the business logic in your modules only depend on the common `Database` class, not a particular class representing your particular database, so they can be used in other projects. 
 3. **No need to synchronize DB and Code while developing**: Since Signum Framework is entirely based on entities, and they are written in C# code, you don't need to synchronize the database schema before doing the next step. You can write big parts of the application from scratch without even connecting to SQL Server and then, at the very end, generate or re-synchronize the schema using `Administrator`, and test all your queries and code. 
 
 ## Example: 
 
 Let's start with an example. 
 
-Suppose you have a very simplistic UserDN entity like this one: 
+Suppose you have a very simplistic UserEntity entity like this one: 
 
 ```C#
 [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-public class UserDN : Entity
+public class UserEntity : Entity
 {
     [UniqueIndex] 
     string userName;
@@ -46,7 +46,7 @@ private static void ChangePassword(string userName, string oldPasswordHash, stri
 {
     using (Transaction tr = new Transaction())
     {
-        UserDN user = Database.Query<UserDN>().Single(a => a.UserName == userName);
+        UserEntity user = Database.Query<UserEntity>().Single(a => a.UserName == userName);
         if (user.PasswordHash != oldPasswordHash)
            throw new ApplicationException("Incorrect password");
         user.PasswordHash = newPasswordHash;

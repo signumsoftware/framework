@@ -100,11 +100,9 @@ namespace Signum.Windows
             string text = txtBox.Text;
 
             source = new CancellationTokenSource();
-            var parent = Thread.CurrentThread;
             var context = Statics.ExportThreadContext();
             var task = Task.Factory.StartNew<IEnumerable>(() =>
             {
-                Thread.CurrentThread.AssignCultures(parent);
                 Statics.ImportThreadContext(context);
                 return Autocompleting(text, source.Token);
             }, source.Token);

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,13 +40,13 @@ namespace Signum.Windows
         }
 
         public static void Navigate<T>(Lite<T> entity, NavigateOptions options = null)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             Manager.Navigate(entity, options ?? new NavigateOptions());
         }
 
         public static void Navigate<T>(T entity, NavigateOptions options = null)
-            where T : IIdentifiable
+            where T : IEntity
         {
             Manager.Navigate(entity, options ?? new NavigateOptions());
         }
@@ -58,7 +58,7 @@ namespace Signum.Windows
         }
 
         public static Lite<T> View<T>(Lite<T> entity, ViewOptions options = null) 
-            where T: class, IIdentifiable
+            where T: class, IEntity
         {
             return (Lite<T>)Manager.View(entity, options ?? new ViewOptions());
         }
@@ -111,7 +111,7 @@ namespace Signum.Windows
             return Manager.OnIsNavigable(type, null, isSearch);
         }
 
-        public static bool IsNavigable(IIdentifiable entity, bool isSearch = false)
+        public static bool IsNavigable(IEntity entity, bool isSearch = false)
         {
             return Manager.OnIsNavigable(entity.GetType(), entity, isSearch);
         }
@@ -134,7 +134,7 @@ namespace Signum.Windows
         }
 
         public static EntitySettings<T> EntitySettings<T>()
-            where T : IdentifiableEntity
+            where T : Entity
         {
             return (EntitySettings<T>)EntitySettings(typeof(T));
         }
@@ -178,11 +178,15 @@ namespace Signum.Windows
             EntitySettings = new Dictionary<Type, EntitySettings>();
 
             if (!Server.OfflineMode)
-                TypeDN.SetTypeNameAndResolveType(
+            {
+                TypeEntity.SetTypeNameCallbacks(
                     t => Server.ServerTypes.GetOrThrow(t).CleanName,
-                    Server.TryGetType,
+                    Server.TryGetType);
+
+                TypeEntity.SetTypeDNCallbacks(
                     t => Server.ServerTypes.GetOrThrow(t),
                     tdn => Server.GetType(tdn.CleanName));
+            }
         }
         
         public event Action Initializing;
@@ -262,12 +266,12 @@ namespace Signum.Windows
             if (entityOrLite == null)
                 throw new ArgumentNullException("entity");
 
-            Type type = entityOrLite is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)entityOrLite).EntityType : entityOrLite.GetType();
+            Type type = entityOrLite is Lite<Entity> ? ((Lite<Entity>)entityOrLite).EntityType : entityOrLite.GetType();
 
             OpenIndependentWindow(() =>
             {
                 NormalWindow win = CreateNormalWindow();
-                win.SetTitleText(NormalWindowMessage.Loading0.NiceToString().Formato(type.NiceName()));
+                win.SetTitleText(NormalWindowMessage.Loading0.NiceToString().FormatWith(type.NiceName()));
                 return win;
             },
             afterShown: win =>
@@ -277,13 +281,13 @@ namespace Signum.Windows
                     ModifiableEntity entity = entityOrLite as ModifiableEntity;
                     if (entity == null)
                     {
-                        Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)entityOrLite;
+                        Lite<Entity> lite = (Lite<Entity>)entityOrLite;
                         entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
                     }
 
                     EntitySettings es = AssertViewableEntitySettings(entity);
                     if (!es.OnIsNavigable(true))
-                        throw new Exception("{0} is not navigable".Formato(entity));
+                        throw new Exception("{0} is not navigable".FormatWith(entity));
 
                     if (entity is EmbeddedEntity)
                         throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
@@ -313,12 +317,12 @@ namespace Signum.Windows
             if (entity == null)
             {
                 liteType = Lite.Extract(entityOrLite.GetType());
-                entity = Server.Retrieve((Lite<IdentifiableEntity>)entityOrLite);
+                entity = Server.Retrieve((Lite<Entity>)entityOrLite);
             }
 
             EntitySettings es = AssertViewableEntitySettings(entity);
             if (!es.OnIsViewable())
-                throw new Exception("{0} is not viewable".Formato(entity));
+                throw new Exception("{0} is not viewable".FormatWith(entity));
 
             Control ctrl = options.View ?? es.CreateView(entity, options.PropertyRoute);
             ctrl = es.OnOverrideView(entity, ctrl);
@@ -337,14 +341,14 @@ namespace Signum.Windows
             object result = win.DataContext;
             if (liteType != null)
             {
-                IdentifiableEntity ident = (IdentifiableEntity)result;
+                Entity ident = (Entity)result;
 
                 bool saveProtected = ((ViewOptions)options).SaveProtected ?? OperationClient.SaveProtected(ident.GetType());
 
                 if (GraphExplorer.HasChanges(ident))
                 {
                     if (saveProtected)
-                        throw new InvalidOperationException("The lite '{0}' of type '{1}' is SaveProtected but has changes. Consider setting SaveProtected = false in ViewOptions".Formato(entityOrLite, liteType.TypeName()));
+                        throw new InvalidOperationException("The lite '{0}' of type '{1}' is SaveProtected but has changes. Consider setting SaveProtected = false in ViewOptions".FormatWith(entityOrLite, liteType.TypeName()));
 
                     return ident.ToLiteFat();
                 }
@@ -376,7 +380,7 @@ namespace Signum.Windows
 
             if (options is ViewOptions)
                 win.SaveProtected = ((ViewOptions)options).SaveProtected ??
-                    (typeof(IdentifiableEntity).IsAssignableFrom(entityType) && OperationClient.SaveProtected(entityType)); //Matters even on Ok
+                    (typeof(Entity).IsAssignableFrom(entityType) && OperationClient.SaveProtected(entityType)); //Matters even on Ok
 
             if (TaskNormalWindow != null)
                 TaskNormalWindow(win, entity);
@@ -397,7 +401,7 @@ namespace Signum.Windows
             }
             else
             {
-                if (type.IsIdentifiableEntity())//HACK
+                if (type.IsEntity())//HACK
                     return false;
                 else
                     return true;
@@ -449,18 +453,18 @@ namespace Signum.Windows
         {
             EntitySettings es = EntitySettings.TryGetC(entity.GetType());
             if (es == null)
-                throw new InvalidOperationException("No EntitySettings for type {0}".Formato(entity.GetType().Name));
+                throw new InvalidOperationException("No EntitySettings for type {0}".FormatWith(entity.GetType().Name));
 
             if (!es.HasView())
-                throw new InvalidOperationException("No view has been set in the EntitySettings for {0}".Formato(entity.GetType().Name));
+                throw new InvalidOperationException("No view has been set in the EntitySettings for {0}".FormatWith(entity.GetType().Name));
 
             if (!IsViewableBase(entity.GetType(), entity))
-                throw new InvalidOperationException("Entities of type {0} are not viewable".Formato(entity.GetType().Name));
+                throw new InvalidOperationException("Entities of type {0} are not viewable".FormatWith(entity.GetType().Name));
 
             return es;
         }
 
-        internal protected virtual bool OnIsNavigable(Type type, IIdentifiable entity, bool isSearchEntity)
+        internal protected virtual bool OnIsNavigable(Type type, IEntity entity, bool isSearchEntity)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
 
@@ -523,7 +527,7 @@ namespace Signum.Windows
             string name = methodBase.DeclaringType.FullName + "." + methodBase.Name;
 
             if (!loadedModules.Contains(name))
-                throw new InvalidOperationException("Call {0} firs".Formato(name));
+                throw new InvalidOperationException("Call {0} firs".FormatWith(name));
         }
 
         public virtual DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)
@@ -535,7 +539,7 @@ namespace Signum.Windows
                     return template;
             }
 
-            if (entityType.IsModifiableEntity() || entityType.IsIIdentifiable())
+            if (entityType.IsModifiableEntity() || entityType.IsIEntity())
             {
                 DataTemplate template = EntitySettings.TryGetC(entityType).Try(ess => ess.DataTemplate);
                 if (template != null)

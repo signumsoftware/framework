@@ -1,4 +1,4 @@
-## Database.UnsafeUpdate 
+﻿## Database.UnsafeUpdate 
 
 `UnsafeUpdate` extension method let you create efficient low-level `UPDATE` statements without retrieving the entities and modifying them one by one.
 
@@ -18,7 +18,7 @@ This is the simplest version, allows updating properties in the main table of an
 
 ```C#
 public static IUpdateable<E> UnsafeUpdate<E>(this IQueryable<E> query)
-	where E : IdentifiableEntity
+	where E : Entity
 
 public interface IUpdateable<T> : IUpdateable
 {
@@ -33,7 +33,7 @@ public static int Execute(this IUpdateable update)
 Example: 
 
 ```C#
-int updated = Database.Query<BugDN>()
+int updated = Database.Query<BugEntity>()
              .Where(b => b.Description.StartsWith("A"))
              .Take(10)
              .UnsafeUpdate()
@@ -45,15 +45,15 @@ int updated = Database.Query<BugDN>()
 Translates to:
 
 ```SQL
-UPDATE BugDN SET
+UPDATE BugEntity SET
   Description = (ISNULL(s2.Description, '') + ' Updated!'),  --SqlParameters inlined
   Start = DATEADD(day, 1, s2.Start)
 FROM (
   (SELECT TOP (10) bdn.Id, bdn.Description, bdn.Start
-  FROM BugDN AS bdn
+  FROM BugEntity AS bdn
   WHERE bdn.Description LIKE ('A' + '%'))
 ) AS s2
-WHERE (BugDN.Id = s2.Id);
+WHERE (BugEntity.Id = s2.Id);
 
 SELECT @@rowcount
 ```
@@ -69,7 +69,7 @@ It's easy to forget the last `Execute` call, so it's a good idea to start all th
 The current API is definitely more complicated that we would like, but scales better to more complex examples, like updating read-only properties or mixins: 
 
 ```C#
-int updated = Database.Query<BugDN>()
+int updated = Database.Query<BugEntity>()
              .Where(b => b.Description.StartsWith("A"))
              .Take(10)
              .UnsafeUpdate()
@@ -85,7 +85,7 @@ This variation let you have a wider context for your `valueExpression`. Even if 
 ```C#
 public static IUpdateablePart<A, E> UnsafeUpdatePart<A, E>(this IQueryable<A> query, 
 	Expression<Func<A, E>> partSelector)
-	where E : IdentifiableEntity
+	where E : Entity
 
 public interface IUpdateablePart<A, T> : IUpdateable
 {
@@ -104,7 +104,7 @@ Notice how now `UnsafeUpdatePart` returns a `IUpdateablePart<A, E>` where `A` re
 Example: 
 
 ```C#
-int updated = Database.Query<BugDN>()
+int updated = Database.Query<BugEntity>()
              .Where(b => b.Description.StartsWith("A"))
              .Take(10)
              .UnsafeUpdatePart(b => b.Fixer)
@@ -112,21 +112,21 @@ int updated = Database.Query<BugDN>()
              .Execute();
 ```
 
-Here we need information of the `BugDN` to update the `DeveloperDN` in the `Fixer` property. 
+Here we need information of the `BugEntity` to update the `DeveloperEntity` in the `Fixer` property. 
 
 That gets translated to: 
 
 ```SQL
-UPDATE DeveloperDN SET 
+UPDATE DeveloperEntity SET 
   Name = (ISNULL((ISNULL(s2.Name, '') + 'Fixer of'), '') + ISNULL(s2.Description, '')) 
 FROM (
   (SELECT TOP (10) bdn.idFixer, ddn.Name, bdn.Description
-  FROM BugDN AS bdn
-  LEFT OUTER JOIN DeveloperDN AS ddn
+  FROM BugEntity AS bdn
+  LEFT OUTER JOIN DeveloperEntity AS ddn
     ON (bdn.idFixer = ddn.Id)
   WHERE bdn.Description LIKE ('A' + '%')) --SqlParameters inlined
 ) AS s2
-WHERE (DeveloperDN.Id = s2.idFixer);
+WHERE (DeveloperEntity.Id = s2.idFixer);
 
 SELECT @@rowcount
 ```
@@ -138,7 +138,7 @@ Using `UnsafeUpdateMList` you can also execute `UPDATE` commands on MListTables.
 
 ```C#
 public static IUpdateable<MListElement<E, V>> UnsafeUpdateMList<E, V>(this IQueryable<MListElement<E, V>> query)
-    where E : IdentifiableEntity
+    where E : Entity
 
 public interface IUpdateable<T> : IUpdateable
 {
@@ -158,7 +158,7 @@ Example using `MListElements` expression:
 
 
 ```C#
-int updated = Database.MListQuery((BugDN b)=> b.Comments)
+int updated = Database.MListQuery((BugEntity b)=> b.Comments)
              .Where(mle => mle.Element.Text.StartsWith("Hi"))
              .Take(10)
              .UnsafeUpdateMList()
@@ -190,7 +190,7 @@ Closing the circle, with `UnsafeUpdateMListPart` you can send `UPDATE` commands 
 ```C#
 public static IUpdateablePart<A, MListElement<E, V>> UnsafeUpdateMListPart<A, E, V>(this IQueryable<A> query, 
 	Expression<Func<A, MListElement<E, V>>> partSelector)
-    where E : IdentifiableEntity
+    where E : Entity
 
 public interface IUpdateablePart<A, T> : IUpdateable
 {
@@ -202,11 +202,11 @@ public interface IUpdateablePart<A, T> : IUpdateable
 public static int Execute(this IUpdateable update)
 ```
 
-Now let's make a mor complex example, movin the Comment from a `BugDN` to the inmediately next, if exists:
+Now let's make a mor complex example, movin the Comment from a `BugEntity` to the inmediately next, if exists:
 
 ```C#
-var updated = (from b1 in Database.Query<BugDN>()
-               join b2 in Database.Query<BugDN>() on b1.Start equals b2.End
+var updated = (from b1 in Database.Query<BugEntity>()
+               join b2 in Database.Query<BugEntity>() on b1.Start equals b2.End
                from mle in b1.MListElements(b => b.Comments)
                select new { mle, b2 })
                .UnsafeUpdateMListPart(a => a.mle)
@@ -221,8 +221,8 @@ UPDATE BugDNComments SET
   idParent = s5.Id1
 FROM (
   (SELECT s4.Id, bdn1.Id AS Id1
-  FROM BugDN AS bdn
-  INNER JOIN BugDN AS bdn1
+  FROM BugEntity AS bdn
+  INNER JOIN BugEntity AS bdn1
     ON (bdn.Start = bdn1.[End])
   CROSS APPLY (
     (SELECT bdnc.Id

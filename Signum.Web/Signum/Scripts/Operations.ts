@@ -66,6 +66,7 @@ export function executeAjaxContextual(options: OperationOptions, runtimeInfo?: E
     options = $.extend({
         controllerUrl: SF.Urls.operationExecute,
         avoidReturnView: true,
+        avoidReturnRedirect: true,
         isLite: true,
     }, options);
 

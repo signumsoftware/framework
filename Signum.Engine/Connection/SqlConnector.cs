@@ -8,7 +8,6 @@ using System.Data;
 using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
-using Signum.Engine.Exceptions;
 using System.Data.SqlTypes;
 using System.Reflection;
 using Signum.Utilities.Reflection;
@@ -42,13 +41,21 @@ namespace Signum.Engine
             this.ParameterBuilder = new SqlParameterBuilder();
 
             this.Version = version;
-            if (version >= SqlServerVersion.SqlServer2008)
+            if (version >= SqlServerVersion.SqlServer2008 && schema != null)
             {
-                schema.Settings.TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
+                var s = schema.Settings;
 
-                schema.Settings.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
-                schema.Settings.UdtSqlName.Add(typeof(SqlGeography), "Geography");
-                schema.Settings.UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
+                if (!s.TypeValues.ContainsKey(typeof(TimeSpan)))
+                    schema.Settings.TypeValues.Add(typeof(TimeSpan), SqlDbType.Time);
+
+                if (!s.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
+                    s.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
+
+                if (!s.UdtSqlName.ContainsKey(typeof(SqlGeography)))
+                    s.UdtSqlName.Add(typeof(SqlGeography), "Geography");
+
+                if (!s.UdtSqlName.ContainsKey(typeof(SqlGeometry)))
+                    s.UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
             }
         }
 
@@ -77,9 +84,9 @@ namespace Signum.Engine
             return result;
         }
 
-        SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection overridenConnection)
+        SqlCommand NewCommand(SqlPreCommandSimple preCommand, SqlConnection overridenConnection, CommandType commandType)
         {
-            SqlCommand cmd = new SqlCommand();
+            SqlCommand cmd = new SqlCommand { CommandType = commandType };
 
             int? timeout = Connector.ScopeTimeout ?? CommandTimeout;
             if (timeout.HasValue)
@@ -108,10 +115,10 @@ namespace Signum.Engine
             return cmd;
         }
 
-        protected internal override object ExecuteScalar(SqlPreCommandSimple preCommand)
+        protected internal override object ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con))
+            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
             {
                 try
@@ -134,10 +141,10 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand)
+        protected internal override int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con))
+            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
             {
                 try
@@ -156,14 +163,14 @@ namespace Signum.Engine
             }
         }
 
-        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action reconect, Action<FieldReader> forEach)
+        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action reconect, Action<FieldReader> forEach, CommandType commandType)
         {
             bool reconected = false; 
             retry:
             try
             {
                 using (SqlConnection con = EnsureConnection())
-                using (SqlCommand cmd = NewCommand(preCommand, con))
+                using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
                 using (HeavyProfiler.Log("SQL-Dependency"))
                 using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
                 {
@@ -221,11 +228,11 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple preCommand)
+        protected internal override DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             try
             {
-                SqlCommand cmd = NewCommand(preCommand, null);
+                SqlCommand cmd = NewCommand(preCommand, null, commandType);
 
                 return cmd.ExecuteReader();
             }
@@ -239,10 +246,10 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override DataTable ExecuteDataTable(SqlPreCommandSimple preCommand)
+        protected internal override DataTable ExecuteDataTable(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con))
+            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
             {
                 try
@@ -264,10 +271,10 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override DataSet ExecuteDataSet(SqlPreCommandSimple preCommand)
+        protected internal override DataSet ExecuteDataSet(SqlPreCommandSimple preCommand, CommandType commandType)
         {
             using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con))
+            using (SqlCommand cmd = NewCommand(preCommand, con, commandType))
             using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
             {
                 try
@@ -316,7 +323,7 @@ namespace Signum.Engine
 
                 if (mins.Any())
                 {
-                    return new ArgumentOutOfRangeException("{0} {1} not initialized and equal to DateTime.MinValue".Formato(
+                    return new ArgumentOutOfRangeException("{0} {1} not initialized and equal to DateTime.MinValue".FormatWith(
                         mins.CommaAnd(a => a.ParameterName),
                         mins.Count() == 1 ? "is" : "are"), ex);
                 }
@@ -324,6 +331,23 @@ namespace Signum.Engine
 
             return ex;
 
+        }
+
+        protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options)
+        {
+            using (SqlConnection con = EnsureConnection())
+            using (SqlBulkCopy bulkCopy = new SqlBulkCopy(
+                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection,
+                options,
+                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion))
+            using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
+            {
+                foreach (DataColumn c in dt.Columns)
+                    bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
+
+                bulkCopy.DestinationTableName = destinationTable.ToString();
+                bulkCopy.WriteToServer(dt);
+            }
         }
 
         public override string DatabaseName()
@@ -411,18 +435,18 @@ namespace Signum.Engine
             return new[]
             {
                 this.Version == SqlServerVersion.SqlServer2005 ?  
-                    new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".Formato(schemaName)):
+                    new SqlPreCommandSimple("BACKUP LOG {0} WITH TRUNCATE_ONLY".FormatWith(schemaName)):
                     new []
                     {
-                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".Formato(schemaName)),
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY SIMPLE WITH NO_WAIT".FormatWith(schemaName)),
                         new[]{
                             new SqlPreCommandSimple("DECLARE @fileID BIGINT"),
                             new SqlPreCommandSimple("SET @fileID = (SELECT FILE_IDEX((SELECT TOP(1)name FROM sys.database_files WHERE type = 1)))"),
                             new SqlPreCommandSimple("DBCC SHRINKFILE(@fileID, 1)"),
-                        }.Combine(Spacing.Simple).ToSimple(),
-                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".Formato(schemaName)),                  
+                        }.Combine(Spacing.Simple).PlainSqlCommand(),
+                        new SqlPreCommandSimple("ALTER DATABASE {0} SET RECOVERY FULL WITH NO_WAIT".FormatWith(schemaName)),                  
                     }.Combine(Spacing.Simple),
-                new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".Formato(schemaName))
+                new SqlPreCommandSimple("DBCC SHRINKDATABASE ( {0} , TRUNCATEONLY )".FormatWith(schemaName))
             }.Combine(Spacing.Simple);
         }
 

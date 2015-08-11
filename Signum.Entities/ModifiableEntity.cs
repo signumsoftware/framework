@@ -46,7 +46,7 @@ namespace Signum.Entities
             PropertyInfo pi = this.GetType().GetProperty(automaticPropertyName, flags) ?? this.GetType().GetInterfaces().Select(i => i.GetProperty(automaticPropertyName, flags)).NotNull().FirstOrDefault();
 
             if (pi == null)
-                throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".Formato(automaticPropertyName, this.GetType().TypeName()));
+                throw new ArgumentException("No PropertyInfo with name {0} found in {1} or any implemented interface".FormatWith(automaticPropertyName, this.GetType().TypeName()));
 
             if (value is IMListPrivate && !((IMListPrivate)value).IsNew && !object.ReferenceEquals(value, field))
                 throw new InvalidOperationException("Only MList<T> with IsNew = true can be assigned to an entity");
@@ -106,6 +106,7 @@ namespace Signum.Entities
 
             NotifyPrivate(pi.Name);
             NotifyPrivate("Error");
+            ClearTemporalError(pi.Name);
 
             return true;
         }
@@ -257,20 +258,18 @@ namespace Signum.Entities
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        static long temporalIdCounter = 0;
-
+        
         #region Temporal ID
         [Ignore]
-        internal int temporalId;
+        internal Guid temporalId = Guid.NewGuid();
 
         internal ModifiableEntity()
         {
-            temporalId = unchecked((int)Interlocked.Increment(ref temporalIdCounter));
         }
 
         public override int GetHashCode()
         {
-            return GetType().FullName.GetHashCode() ^ temporalId;
+            return GetType().FullName.GetHashCode() ^ temporalId.GetHashCode();
         }
         #endregion
 
@@ -278,23 +277,31 @@ namespace Signum.Entities
         [HiddenProperty]
         public string Error
         {
-            get { return IntegrityCheck(); }
+            get { return IntegrityCheck().Try(a => a.Values.ToString("\r\n")); }
         }
 
-        public string IntegrityCheck()
+        public Dictionary<string, string> IntegrityCheck()
         {
             using (var log = HeavyProfiler.LogNoStackTrace("IntegrityCheck"))
             {
                 var validators = Validator.GetPropertyValidators(GetType());
 
-                return validators.Values.Select(pv =>
-                {
-                    var result = pv.PropertyCheck(this);
-                    if (result == null)
-                        return null;
+                Dictionary<string, string> result = null;
 
-                    return result; // place breakpoint here
-                }).NotNull().ToString("\r\n").DefaultText(null);
+                foreach (var pv in validators.Values)
+                {
+                    var error = pv.PropertyCheck(this);
+
+                    if (error != null)
+                    {
+                        if (result == null)
+                            result = new Dictionary<string, string>();
+
+                        result.Add(pv.PropertyInfo.Name, error);
+                    }
+                }
+
+                return result;
             }
         }
 
@@ -336,16 +343,10 @@ namespace Signum.Entities
             Validator.PropertyValidator(property).StaticPropertyValidation += validate;
         }
 
-        public string FullIntegrityCheck()
+        public Dictionary<Guid, Dictionary<string, string>> FullIntegrityCheck()
         {
             var graph = GraphExplorer.FromRoot(this);
-            return GraphExplorer.FullIntegrityCheck(graph, withIndependentEmbeddedEntities: !(this is IdentifiableEntity));
-        }
-
-        public Dictionary<ModifiableEntity, string> FullIntegrityCheckDictionary()
-        {
-            var graph = GraphExplorer.FromRoot(this);
-            return GraphExplorer.IntegrityDictionary(graph);
+            return GraphExplorer.FullIntegrityCheck(graph);
         }
 
         protected static string NicePropertyName<R>(Expression<Func<R>> property)
@@ -368,6 +369,39 @@ namespace Signum.Entities
         }
 
         #endregion
+
+
+        [Ignore]
+        internal Dictionary<string, string> temporalErrors;
+        internal void SetTemporalErrors(Dictionary<string, string> errors)
+        {
+            NotifyTemporalErrors();
+
+            this.temporalErrors = errors;
+
+            NotifyTemporalErrors();
+        }
+
+        void NotifyTemporalErrors()
+        {
+            if (temporalErrors != null)
+            {
+                foreach (var e in temporalErrors.Keys)
+                    NotifyPrivate(e);
+
+                NotifyError();
+            }
+        }
+
+        void ClearTemporalError(string propertyName)
+        {
+            if (this.temporalErrors == null)
+                return;
+
+            this.temporalErrors.Remove(propertyName);
+            NotifyPrivate(propertyName);
+            NotifyError();
+        }
     }
 
     //Based on: http://blogs.msdn.com/b/jaredpar/archive/2010/02/19/flattening-class-hierarchies-when-debugging-c.aspx
@@ -439,7 +473,7 @@ namespace Signum.Entities
                 }
             }
 
-            IdentifiableEntity ident = target as IdentifiableEntity;
+            Entity ident = target as Entity;
 
             if (ident != null)
             {

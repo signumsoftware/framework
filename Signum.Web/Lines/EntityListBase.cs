@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +9,6 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Newtonsoft.Json.Linq;
-#endregion
 
 namespace Signum.Web
 {
@@ -86,7 +84,7 @@ namespace Signum.Web
 
             if (WriteIndex == Web.WriteIndex.ForSavedEntities)
             {
-                IdentifiableEntity ie = tc.Parent.Follow(a => a.Parent).OfType<TypeContext>().Select(a => a.UntypedValue).OfType<IdentifiableEntity>().FirstEx(() => "Parent entity not found");
+                Entity ie = tc.Parent.Follow(a => a.Parent).OfType<TypeContext>().Select(a => a.UntypedValue).OfType<Entity>().FirstEx(() => "Parent entity not found");
                 return !ie.IsNew; 
             }
 

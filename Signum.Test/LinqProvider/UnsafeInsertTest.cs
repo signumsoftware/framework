@@ -24,7 +24,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         public static void MyClassInitialize(TestContext testContext)
         {
             MusicStarter.StartAndLoad();
-            Schema.Current.EntityEvents<AlbumDN>().PreUnsafeInsert += (query, constructor, entityQuery) => constructor;
+            Schema.Current.EntityEvents<AlbumEntity>().PreUnsafeInsert += (query, constructor, entityQuery) => constructor;
         }
 
         [TestInitialize]
@@ -38,7 +38,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                int value = Database.Query<AlbumDN>().UnsafeInsert(a => new AlbumDN
+                int value = Database.Query<AlbumEntity>().UnsafeInsert(a => new AlbumEntity
                 {
                     Author = a.Author,
                     BonusTrack = a.BonusTrack,
@@ -57,9 +57,9 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                using (Administrator.DisableIdentity<AlbumDN>())
+                using (Administrator.DisableIdentity<AlbumEntity>())
                 {
-                    int value = Database.Query<AlbumDN>().UnsafeInsert(a => new AlbumDN
+                    int value = Database.Query<AlbumEntity>().UnsafeInsert(a => new AlbumEntity
                     {
                         Author = a.Author,
                         BonusTrack = a.BonusTrack,
@@ -68,7 +68,7 @@ namespace Signum.Test.LinqProviderUpdateDelete
                         State = a.State,
                         Year = a.Year,
                     }.SetReadonly(_ => _.Ticks, a.Ticks)
-                    .SetReadonly(_ => _.Id, a.Id + 100));
+                    .SetReadonly(_ => _.Id, (int)a.Id + 100));
                 }
 
                 //tr.Commit();
@@ -80,8 +80,8 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                int value = Database.MListQuery((AlbumDN a) => a.Songs)
-                    .UnsafeInsertMList((AlbumDN a) => a.Songs, mle => new MListElement<AlbumDN, SongDN>
+                int value = Database.MListQuery((AlbumEntity a) => a.Songs)
+                    .UnsafeInsertMList((AlbumEntity a) => a.Songs, mle => new MListElement<AlbumEntity, SongEntity>
                 {
                     Parent = mle.Parent,
                     Element = mle.Element,
@@ -97,14 +97,14 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                using (Administrator.DisableIdentity((AlbumDN a)=>a.Songs))
+                using (Administrator.DisableIdentity((AlbumEntity a)=>a.Songs))
                 {
-                    int value = Database.MListQuery((AlbumDN a) => a.Songs)
-                        .UnsafeInsertMList((AlbumDN a) => a.Songs, mle => new MListElement<AlbumDN, SongDN>
+                    int value = Database.MListQuery((AlbumEntity a) => a.Songs)
+                        .UnsafeInsertMList((AlbumEntity a) => a.Songs, mle => new MListElement<AlbumEntity, SongEntity>
                         {
                             Parent = mle.Parent,
                             Element = mle.Element,
-                            RowId = mle.RowId + 1000,
+                            RowId = (int)mle.RowId + 1000,
                             Order = mle.Order,
                         });
                 }
@@ -118,11 +118,11 @@ namespace Signum.Test.LinqProviderUpdateDelete
         {
             using (Transaction tr = new Transaction())
             {
-                int value = Database.Query<AlbumDN>().UnsafeInsert(a => new AlbumDN
+                int value = Database.Query<AlbumEntity>().UnsafeInsert(a => new AlbumEntity
                 {
                     Author = a.Author,
                     BonusTrack = a.BonusTrack,
-                    Label = Database.Query<LabelDN>().Single(l => l.Is(a.Label)),
+                    Label = Database.Query<LabelEntity>().Single(l => l.Is(a.Label)),
                     Name = a.Name + "copy",
                     State = a.State,
                     Year = a.Year,

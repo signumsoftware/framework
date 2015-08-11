@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,10 +18,10 @@ namespace Signum.Entities.DynamicQuery
             string isAllowed, PropertyRoute propertyRoute)
             : base(parent)
         {
-            var shouldHaveImplementations = typeof(IIdentifiable).IsAssignableFrom((isProjection ? type.ElementType() : type).CleanType());
+            var shouldHaveImplementations = typeof(IEntity).IsAssignableFrom((isProjection ? type.ElementType() : type).CleanType());
 
             if (shouldHaveImplementations && implementations == null)
-                throw new ArgumentException("Extension token '{0}' (of type {1}) registered on type {2} has no implementations".Formato(key, type.TypeName(), parent.Type.CleanType().TypeName()));
+                throw new ArgumentException("Extension token '{0}' (of type {1}) registered on type {2} has no implementations".FormatWith(key, type.TypeName(), parent.Type.CleanType().TypeName()));
 
             this.key= key;
             this.type = type;
@@ -46,7 +46,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
         Type type;
-        public override Type Type { get { return type.BuildLite().Nullify(); } }
+        public override Type Type { get { return type.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); } }
 
         string key;
         public override string Key { get { return key; } }
@@ -78,7 +78,7 @@ namespace Signum.Entities.DynamicQuery
 
             var result = BuildExtension(Parent.Type.CleanType().UnNullify(), Key, parentExpression);
 
-            return result.BuildLite().Nullify();
+            return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.propertyRoute });
         }
 
         public PropertyRoute propertyRoute;

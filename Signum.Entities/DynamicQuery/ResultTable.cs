@@ -138,7 +138,7 @@ namespace Signum.Entities.DynamicQuery
                 case TypeCode.DateTime: return str => DateTime.ParseExact(str, "O", CultureInfo.InvariantCulture); 
             }
 
-            throw new InvalidOperationException("Impossible to deserialize a ResultColumn of {0}".Formato(column.Type));
+            throw new InvalidOperationException("Impossible to deserialize a ResultColumn of {0}".FormatWith(column.Type));
         }
 
         Func<object, string> GetValueSerializer()
@@ -193,22 +193,24 @@ namespace Signum.Entities.DynamicQuery
 
         static string SerializeLite(object obj, Type defaultEntityType)
         {
-            var lite = ((Lite<IdentifiableEntity>)obj);
+            var lite = ((Lite<Entity>)obj);
 
-            return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : TypeDN.GetCleanName(lite.EntityType)) + ";" + lite.ToString();
+            return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : TypeEntity.GetCleanName(lite.EntityType)) + ";" + lite.ToString();
         }
 
         static object DeserializeLite(string str, Type defaultEntityType)
         {
-            int id = int.Parse(str.Before(';'));
+            string idStr = str.Before(';'); 
 
-            string after = str.After(';');
+            string tmp = str.After(';');
 
-            string type = after.Before(';');
+            string typeStr = tmp.Before(';');
 
-            string toStr = after.After(';');
+            string toStr = tmp.After(';');
 
-            return Lite.Create(string.IsNullOrEmpty(type) ? defaultEntityType : TypeDN.TryGetType(type), id, toStr);
+            Type type = string.IsNullOrEmpty(typeStr) ? defaultEntityType : TypeEntity.TryGetType(typeStr);
+
+            return Lite.Create(type, PrimaryKey.Parse(idStr, type), toStr);
         }
     }
 
@@ -274,8 +276,8 @@ namespace Signum.Entities.DynamicQuery
 
         private object Convert(object p)
         {
-            if (p is Lite<IdentifiableEntity>)
-                return ((Lite<IdentifiableEntity>)p).KeyLong();
+            if (p is Lite<Entity>)
+                return ((Lite<Entity>)p).KeyLong();
 
             return p;
         }
@@ -338,9 +340,9 @@ namespace Signum.Entities.DynamicQuery
             this.Table = table;
         }
 
-        public Lite<IdentifiableEntity> Entity
+        public Lite<Entity> Entity
         {
-            get { return (Lite<IdentifiableEntity>)Table.entityColumn.Values[Index]; }
+            get { return (Lite<Entity>)Table.entityColumn.Values[Index]; }
         }
 
         public T GetValue<T>(string columnName)

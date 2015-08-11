@@ -1,4 +1,3 @@
-#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +13,6 @@ using System.Configuration;
 using Signum.Engine;
 using Signum.Utilities.Reflection;
 using Signum.Web.Controllers;
-#endregion
 
 namespace Signum.Web
 {
@@ -82,7 +80,7 @@ namespace Signum.Web
                 sb.AddLine(entityLine.ConstructorScript(JsModule.Lines, "EntityLine"));
             }
 
-            return helper.FormGroup(entityLine, entityLine.Prefix, entityLine.LabelText, sb.ToHtml());
+            return helper.FormGroup(entityLine, entityLine.Prefix, entityLine.LabelHtml ?? entityLine.LabelText.FormatHtml(), sb.ToHtml());
         }
 
         private static MvcHtmlString LinkOrSpan(HtmlHelper helper, EntityLine entityLine)
@@ -90,8 +88,8 @@ namespace Signum.Web
             MvcHtmlString result;
             if (entityLine.Navigate)
             {
-                var lite = (entityLine.UntypedValue as Lite<IIdentifiable>) ??
-                           (entityLine.UntypedValue as IIdentifiable).Try(i => i.ToLite(i.IsNew));
+                var lite = (entityLine.UntypedValue as Lite<IEntity>) ??
+                           (entityLine.UntypedValue as IEntity).Try(i => i.ToLite(i.IsNew));
 
                 result = helper.Href(entityLine.Compose(EntityBaseKeys.Link),
                         lite.TryToString(),

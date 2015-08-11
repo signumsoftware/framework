@@ -7,7 +7,7 @@ import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 
 export interface EntityBaseOptions {
     prefix: string;
-    partialViewName: string;
+    partialViewName?: string;
     template?: string;
     templateToString?: string;
 
@@ -30,7 +30,7 @@ export class EntityBase {
     shownButton: JQuery;
     autoCompleter: EntityAutocompleter;
 
-    entityChanged: () => void;
+    entityChanged: (entityValue: Entities.EntityValue, itemPrefix?: string) => void;
     removing: (prefix: string) => Promise<boolean>;
     creating: (prefix: string) => Promise<Entities.EntityValue>;
     finding: (prefix: string) => Promise<Entities.EntityValue>;
@@ -157,7 +157,7 @@ export class EntityBase {
         this.updateButtonsDisplay();
         this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
-            this.entityChanged();
+            this.entityChanged(entityValue, itemPrefix);
         }
     }
 
@@ -374,7 +374,7 @@ export interface EntityAutocompleter {
 }
 
 export interface AutocompleteResult {
-    id: number;
+    id: string;
     text: string;
     type: string;
     link: string;
@@ -384,9 +384,9 @@ export class AjaxEntityAutocompleter implements EntityAutocompleter {
 
     controllerUrl: string;
 
-    getData: (term: string) => any;
+    getData: (term: string) => FormObject;
 
-    constructor(controllerUrl: string, getData: (term: string) => any) {
+    constructor(controllerUrl: string, getData: (term: string) => FormObject) {
         this.controllerUrl = controllerUrl;
         this.getData = getData;
     }
@@ -418,7 +418,7 @@ export class EntityLine extends EntityBase {
         var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
         if ($txt.length) {
             this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
-                term => ({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
+                term => <any>({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
         }
@@ -441,7 +441,15 @@ export class EntityLine extends EntityBase {
         
         this.visible(this.prefix.child(Entities.Keys.link).tryGet(), entityValue != null);
         this.visible(this.prefix.get().find("ul.typeahead.dropdown-menu"), entityValue == null);
-        this.visible(this.prefix.child(Entities.Keys.toStr).tryGet(), entityValue == null);
+
+
+        var toStr = this.prefix.child(Entities.Keys.toStr).tryGet();
+        if (toStr != null && toStr.is(":focus")) {
+            var tabables = toStr.closest("form").find("*[tabindex != '-1']:visible");
+            var index = tabables.index(toStr);
+            tabables.eq(index + 1).focus(); // Is there a better way? 
+        }
+        this.visible(toStr, entityValue == null);
     }
 
     visible(element : JQuery, visible: boolean) {
@@ -496,7 +504,7 @@ export class EntityCombo extends EntityBase {
     }
 }
 
-export class EntityLineDetail extends EntityBase {
+export class EntityDetail extends EntityBase {
 
     options: EntityBaseOptions;
 
@@ -516,7 +524,7 @@ export class EntityLineDetail extends EntityBase {
             return;
 
         if (!entityValue.isLoaded())
-            throw new Error("EntityLineDetail requires a loaded Entities.EntityHtml, consider calling Navigator.loadPartialView");
+            throw new Error("EntityDetail requires a loaded Entities.EntityHtml, consider calling Navigator.loadPartialView");
     }
 
     onCreating(prefix: string): Promise<Entities.EntityValue> {
@@ -645,7 +653,7 @@ export class EntityListBase extends EntityBase {
         this.updateButtonsDisplay();
         this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
-            this.entityChanged();
+            this.entityChanged(entityValue, itemPrefix);
         }
     }
 
@@ -684,7 +692,7 @@ export class EntityListBase extends EntityBase {
         this.updateButtonsDisplay();
         this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
-            this.entityChanged();
+            this.entityChanged(entityValue, itemPrefix);
         }
     }
 
@@ -698,7 +706,7 @@ export class EntityListBase extends EntityBase {
         this.updateButtonsDisplay();
         this.notifyChanges(true);
         if (!SF.isEmpty(this.entityChanged)) {
-            this.entityChanged();
+            this.entityChanged(null, itemPrefix);
         }
     }
 
@@ -739,12 +747,12 @@ export class EntityListBase extends EntityBase {
         }
     }
 
-    freeReservedPrefix(itemPrefix : string) {
+    freeReservedPrefix(itemPrefix: string): void {
         var index = this.reservedPrefixes.indexOf(itemPrefix);
         if (index == -1)
             throw Error("itemPrefix not reserved: " + itemPrefix);
 
-        return this.reservedPrefixes.splice(index, 1);
+        this.reservedPrefixes.splice(index, 1);
     }
 
     getLastPosIndex(): number {
@@ -1186,7 +1194,7 @@ export class EntityRepeater extends EntityListBase {
 
                         return promise.then(
                             ev=> { this.addEntity(ev, itemPrefix); this.freeReservedPrefix(itemPrefix); return itemPrefix; },
-                            error => this.freeReservedPrefix(itemPrefix));
+                            error => { this.freeReservedPrefix(itemPrefix); return null; });
                     }))
                     .then(result => result.join(","));
             });
@@ -1285,7 +1293,7 @@ export class EntityStrip extends EntityList {
         var $txt = this.prefix.child(Entities.Keys.toStr).tryGet().filter(".sf-entity-autocomplete");
         if ($txt.length) {
             this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
-                term => ({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
+                term => <any>({ types: this.options.types.map(t=> t.name).join(","), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
         }
@@ -1336,7 +1344,7 @@ export class EntityStrip extends EntityList {
             "</li>" 
             );
 
-        this.prefix.child(EntityStrip.key_itemsContainer).get().find(" ." + EntityStrip.key_input).before(li);
+        this.prefix.child(EntityStrip.key_itemsContainer).get().children(" ." + EntityStrip.key_input).before(li);
 
     }
 

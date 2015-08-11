@@ -22,10 +22,13 @@ namespace Signum.Web
 
         public bool IsFindable { get; set; }
 
+        public string DefaultOrderColumn { get; set; }
+
         public QuerySettings(object queryName)
         {
             this.QueryName = queryName;
             this.IsFindable = true;
+            this.DefaultOrderColumn = "Id";
         }
 
         public static List<FormatterRule> FormatRules { get; set; }
@@ -40,6 +43,9 @@ namespace Signum.Web
             set { formatters = value; }
         }
 
+        public EntityFormatter EntityFormatter { get; set; }
+        public RowAttributes RowAttributes { get; set; }
+        public List<ColumnOption> HiddenColumns { get; set; }
 
         static QuerySettings()
         {
@@ -57,8 +63,13 @@ namespace Signum.Web
 
                 new FormatterRule("Lite", c => c.Type.UnNullify().IsLite(), c => new CellFormatter((h,o) => 
                 {
-                    return h.LightEntityLine((Lite<IIdentifiable>)o, false);
+                    return h.LightEntityLine((Lite<IEntity>)o, false);
                 })),
+
+                 new FormatterRule("Guid", c=>c.Type.UnNullify() == typeof(Guid), c => new CellFormatter((h,o) => 
+                {
+                    return o != null ? (new HtmlTag("span").Class("guid").SetInnerText(o.ToString().Start(5) + "…" + o.ToString().End(5))) : MvcHtmlString.Empty;
+                }){ WriteData = true, TextAlign = "middle" }),
 
                 new FormatterRule("DateTime", c=>c.Type.UnNullify() == typeof(DateTime), c => new CellFormatter((h,o) => 
                 {
@@ -99,10 +110,10 @@ namespace Signum.Web
 
             EntityFormatRules = new List<EntityFormatterRule>
             {
-                new EntityFormatterRule(l => true, (h,l) => 
+                new EntityFormatterRule(row => true, (h,row) => 
                 {
-                    if (Navigator.IsNavigable(l.EntityType, null, isSearch: true ))
-                        return h.Href(Navigator.NavigateRoute(l.EntityType, l.Id), h.Encode(EntityControlMessage.View.NiceToString()));
+                    if (Navigator.IsNavigable(row.Entity.EntityType, null, isSearch: true ))
+                        return h.Href(Navigator.NavigateRoute(row.Entity), h.Encode(EntityControlMessage.View.NiceToString()));
                     else
                         return MvcHtmlString.Empty;
                 }),
@@ -155,15 +166,18 @@ namespace Signum.Web
 
     public class EntityFormatterRule
     {
-        public Func<HtmlHelper, Lite<IIdentifiable>, MvcHtmlString> Formatter { get; set; }
-        public Func<Lite<IIdentifiable>, bool> IsApplyable { get; set; }
+        public EntityFormatter Formatter { get; set; }
+        public Func<ResultRow, bool> IsApplyable { get; set; }
 
-        public EntityFormatterRule(Func<Lite<IIdentifiable>, bool> isApplyable, Func<HtmlHelper, Lite<IIdentifiable>, MvcHtmlString> formatter)
+        public EntityFormatterRule(Func<ResultRow, bool> isApplyable, EntityFormatter formatter)
         {
             Formatter = formatter;
             IsApplyable = isApplyable;
         }
     }
+
+    public delegate MvcHtmlString EntityFormatter(HtmlHelper html, ResultRow lite);
+    public delegate MvcHtmlString RowAttributes(HtmlHelper html, ResultRow row);
 
     public class CellFormatter
     {
@@ -181,7 +195,7 @@ namespace Signum.Web
             if(!WriteData)
                 return MvcHtmlString.Empty;
 
-            string key = value is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)value).Key() : value.TryToString();
+            string key = value is Lite<Entity> ? ((Lite<Entity>)value).Key() : value.TryToString();
 
             return MvcHtmlString.Create("data-value=\"" + key + "\"");
         }

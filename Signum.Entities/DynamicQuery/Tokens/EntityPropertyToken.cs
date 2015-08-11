@@ -18,7 +18,7 @@ namespace Signum.Entities.DynamicQuery
 
         public PropertyRoute PropertyRoute { get; private set; }
 
-        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((IdentifiableEntity e) => e.Id); 
+        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity e) => e.Id); 
 
         public static QueryToken IdProperty(QueryToken parent)
         {
@@ -37,7 +37,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override Type Type
         {
-            get { return PropertyInfo.PropertyType.BuildLite().Nullify(); }
+            get { return PropertyInfo.PropertyType.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.GetPropertyRoute() }); }
         }
 
         public override string ToString()
@@ -54,12 +54,12 @@ namespace Signum.Entities.DynamicQuery
         {
             var baseExpression = Parent.BuildExpression(context);
 
-            if (PropertyInfo.Is((IdentifiableEntity ident) => ident.Id) ||
-                PropertyInfo.Is((IdentifiableEntity ident) => ident.ToStringProperty))
+            if (PropertyInfo.Is((Entity ident) => ident.Id) ||
+                PropertyInfo.Is((Entity ident) => ident.ToStringProperty))
             {
                 var entityExpression = baseExpression.ExtractEntity(true);
 
-                return Expression.Property(entityExpression, PropertyInfo.Name).Nullify(); // Late binding over Lite or Identifiable
+                return Expression.Property(entityExpression, PropertyInfo.Name).BuildLiteNulifyUnwrapPrimaryKey(new[] { this.PropertyRoute }); // Late binding over Lite or Identifiable
             }
             else
             {
@@ -70,7 +70,7 @@ namespace Signum.Entities.DynamicQuery
 
                 Expression result = Expression.Property(entityExpression, PropertyInfo);
 
-                return result.BuildLite().Nullify();
+                return result.BuildLiteNulifyUnwrapPrimaryKey(new[] { this.PropertyRoute });
             }
         }
 
@@ -106,7 +106,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Unit
         {
-            get { return PropertyInfo.SingleAttribute<UnitAttribute>().Try(u => u.UnitName); }
+            get { return PropertyInfo.GetCustomAttribute<UnitAttribute>().Try(u => u.UnitName); }
         }
 
         public override string IsAllowed()

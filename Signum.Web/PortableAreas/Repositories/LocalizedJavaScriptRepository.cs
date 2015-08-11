@@ -61,7 +61,7 @@ namespace Signum.Web.PortableAreas
                 using (StreamWriter sw = new StreamWriter(ms, Encoding.UTF8))
                 {
                     sw.WriteLine("if(typeof lang == 'undefined' || lang == null) lang = {};");
-                    sw.WriteLine("lang.{0} = {1};".Formato(JavaScriptVariableName, JsonConvert.SerializeObject(dic, Formatting.Indented)));
+                    sw.WriteLine("lang.{0} = {1};".FormatWith(JavaScriptVariableName, JsonConvert.SerializeObject(dic, Formatting.Indented)));
                 }
 
                 return ms.ToArray();
@@ -101,7 +101,7 @@ namespace Signum.Web.PortableAreas
 
         public override string ToString()
         {
-            return "LocalizedJavaScript {0} -> {1}".Formato(MessageType.Name, VirtualPathPrefix);
+            return "LocalizedJavaScript {0} -> {1}".FormatWith(MessageType.Name, VirtualPathPrefix);
         }
     }
 }

@@ -45,14 +45,14 @@ namespace Signum.Engine.DynamicQuery
 
                 core.QueryName = QueryName;
 
-                core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
+                core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column on {0}".FormatWith(QueryUtils.GetQueryUniqueKey(QueryName)));
 
                 core.EntityColumnFactory().Implementations = entityImplementations;
 
-                var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable()).ToString(a => a.Name, ", ");
+                var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIEntity()).ToString(a => a.Name, ", ");
 
                 if (errors.HasText())
-                    throw new InvalidOperationException("Column {0} of {1} does not have implementations deffined. Use Column extension method".Formato(errors, QueryUtils.GetQueryUniqueKey(QueryName)));
+                    throw new InvalidOperationException("Column {0} of {1} does not have implementations deffined. Use Column extension method".FormatWith(errors, QueryUtils.GetQueryUniqueKey(QueryName)));
 
                 return core;
             });
@@ -77,7 +77,7 @@ namespace Signum.Engine.DynamicQuery
 
         ResultTable ExecuteQuery(QueryRequest request);
         int ExecuteQueryCount(QueryCountRequest request);
-        Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
+        Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
         ResultTable ExecuteQueryGroup(QueryGroupRequest request);
     }
 
@@ -89,7 +89,7 @@ namespace Signum.Engine.DynamicQuery
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
-        public abstract Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
+        public abstract Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
         public abstract ResultTable ExecuteQueryGroup(QueryGroupRequest request);
 
         protected virtual ColumnDescriptionFactory[] InitializeColumns()
@@ -126,7 +126,7 @@ namespace Signum.Engine.DynamicQuery
 
         public ColumnDescriptionFactory EntityColumnFactory()
         {
-            return StaticColumns.Where(c => c.IsEntity).SingleEx(() => "Entity column on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
+            return StaticColumns.Where(c => c.IsEntity).SingleEx(() => "Entity column on {0}".FormatWith(QueryUtils.GetQueryUniqueKey(QueryName)));
         }
 
         public virtual Expression Expression
@@ -140,7 +140,7 @@ namespace Signum.Engine.DynamicQuery
             string allowed = entity.IsAllowed();
             if (allowed != null)
                 throw new InvalidOperationException(
-                    "Not authorized to see Entity column on {0} because {1}".Formato(QueryUtils.GetQueryUniqueKey(QueryName), allowed));
+                    "Not authorized to see Entity column on {0} because {1}".FormatWith(QueryUtils.GetQueryUniqueKey(QueryName), allowed));
 
             var columns = StaticColumns.Where(f => f.IsAllowed() == null).Select(f => f.BuildColumnDescription()).ToList();
 
@@ -218,7 +218,9 @@ namespace Signum.Engine.DynamicQuery
         {
             ParameterExpression pe = Expression.Parameter(typeof(object));
 
-            var dic = description.Columns.ToDictionary(cd => (QueryToken)new ColumnToken(cd, description.QueryName), cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLite());
+            var dic = description.Columns.ToDictionary(
+                cd => (QueryToken)new ColumnToken(cd, description.QueryName),
+                cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLiteNulifyUnwrapPrimaryKey(cd.PropertyRoutes));
 
             return new DQueryable<T>(query.Select(a => (object)a), new BuildExpressionContext(typeof(T), pe, dic));
         }
@@ -267,7 +269,7 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerable<T> Concat<T>(this DEnumerable<T> collection, DEnumerable<T> other)
         {
             if (collection.Context.TupleType != other.Context.TupleType)
-                throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\r\n Enumerable: {0}: \r\n Other:  {1}".Formato(
+                throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\r\n Enumerable: {0}: \r\n Other:  {1}".FormatWith(
                     collection.Context.TupleType.TypeName(),
                     other.Context.TupleType.TypeName()));
 
@@ -277,7 +279,7 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerableCount<T> Concat<T>(this DEnumerableCount<T> collection, DEnumerableCount<T> other)
         {
             if (collection.Context.TupleType != other.Context.TupleType)
-                throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\r\n Enumerable: {0}: \r\n Other:  {1}".Formato(
+                throw new InvalidOperationException("Enumerable's TupleType does not match Other's one.\r\n Enumerable: {0}: \r\n Other:  {1}".FormatWith(
                     collection.Context.TupleType.TypeName(),
                     other.Context.TupleType.TypeName()));
 
@@ -317,8 +319,8 @@ namespace Signum.Engine.DynamicQuery
             return query;
         }
 
-        static MethodInfo miSelectMany = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().SelectMany(t => t.Namespace, (t, c) => t)).GetGenericMethodDefinition();
-        static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().AsEnumerable().DefaultIfEmpty()).GetGenericMethodDefinition();
+        static MethodInfo miSelectMany = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().SelectMany(t => t.Namespace, (t, c) => t)).GetGenericMethodDefinition();
+        static MethodInfo miDefaultIfEmptyE = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().AsEnumerable().DefaultIfEmpty()).GetGenericMethodDefinition();
 
         public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, CollectionElementToken cet)
         {
@@ -411,10 +413,10 @@ namespace Signum.Engine.DynamicQuery
 
         #region OrderBy
 
-        static MethodInfo miOrderByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miThenByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miOrderByDescendingQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
-        static MethodInfo miThenByDescendingQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeDN>().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miOrderByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderBy(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miThenByQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderBy(t => t.Id).ThenBy(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miOrderByDescendingQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderByDescending(t => t.Id)).GetGenericMethodDefinition();
+        static MethodInfo miThenByDescendingQ = ReflectionTools.GetMethodInfo(() => Database.Query<TypeEntity>().OrderBy(t => t.Id).ThenByDescending(t => t.Id)).GetGenericMethodDefinition();
 
         public static DQueryable<T> OrderBy<T>(this DQueryable<T> query, List<Order> orders)
         {
@@ -590,7 +592,7 @@ namespace Signum.Engine.DynamicQuery
                 return new DEnumerableCount<T>(list, query.Context, totalElements ?? query.Query.Count());
             }
 
-            throw new InvalidOperationException("pagination type {0} not expexted".Formato(pagination.GetType().Name)); 
+            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name)); 
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination)
@@ -631,7 +633,7 @@ namespace Signum.Engine.DynamicQuery
                 return new DEnumerableCount<T>(list, collection.Context, totalElements ?? collection.Collection.Count());
             }
 
-            throw new InvalidOperationException("pagination type {0} not expexted".Formato(pagination.GetType().Name)); 
+            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name)); 
         }
 
         public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, Pagination pagination)
@@ -663,7 +665,7 @@ namespace Signum.Engine.DynamicQuery
                 return new DEnumerableCount<T>(c, collection.Context, collection.TotalElements);
             }
 
-            throw new InvalidOperationException("pagination type {0} not expexted".Formato(pagination.GetType().Name)); 
+            throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name)); 
         }
 
         #endregion
@@ -729,7 +731,7 @@ namespace Signum.Engine.DynamicQuery
 
         static Expression BuildAggregateExpression(Expression collection, AggregateToken at, BuildExpressionContext context)
         {
-            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).SingleEx(() => "IEnumerable<T> implementations on {0}".Formato(collection.Type)).GetGenericArguments()[0];
+            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).SingleEx(() => "IEnumerable<T> implementations on {0}".FormatWith(collection.Type)).GetGenericArguments()[0];
 
             if (at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Count)
                 return Expression.Call(typeof(Enumerable), "Count", new[] { groupType }, new[] { collection });

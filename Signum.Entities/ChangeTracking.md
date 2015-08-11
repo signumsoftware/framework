@@ -1,4 +1,4 @@
-# Change Tracking
+﻿# Change Tracking
 
 One reson we don't support POCO (saving and retrieving object not inheriting from `Entity`), is that the CLR has no infrastructure for knowing what properties have changed in an object from a given *start* moment. 
 
@@ -112,13 +112,13 @@ The above is also applicable to sub-collections using `INotifyCollectionChanged`
 Place a `NotifyPropertyChangedAttribute` attribute over the field you are interested in, then override `ChildPropertyChanged` like this: 
 
 ```C#
-public class SchoolDN: Entity
+public class SchoolEntity: Entity
 {
     string name; 
     (...)
 
     [NotifyPropertyChanged]
-    PersonDN director; 
+    PersonEntity director; 
     (...)
 
     protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -136,13 +136,13 @@ public class SchoolDN: Entity
 Place a `NotifyCollectionChangedAttribute` over the field you are interested in, then override `ChildCollectionChanged` like this: 
 
 ```C#
-public class SchoolDN: Entity
+public class SchoolEntity: Entity
 {
     decimal stateFunds; 
     (...)
 
     [NotifyCollectionChanged]
-    MList<PersonDN> students; 
+    MList<PersonEntity> students; 
     (...)
 
     protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
@@ -162,13 +162,13 @@ public class SchoolDN: Entity
 Place a `NotifyCollectionChangedAttribute` and `NotifyPropertyChangedAttribute` attribute over the field of the collection you are interested in, then override `ChildPropertyChanged` like this: 
 
 ```C#
-public class SchoolDN: Entity
+public class SchoolEntity: Entity
 {
     decimal stateFunds; 
     (...)
 
     [NotifyCollectionChanged, NotifyCollectionChanged]
-    MList<PersonDN> students; 
+    MList<PersonEntity> students; 
     (...)
 
     protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)

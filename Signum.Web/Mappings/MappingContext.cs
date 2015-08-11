@@ -1,5 +1,4 @@
-#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +14,6 @@ using Signum.Utilities.DataStructures;
 using System.Web.Mvc;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
-#endregion
 
 namespace Signum.Web
 {
@@ -55,12 +53,12 @@ namespace Signum.Web
 
         public abstract object UntypedValue { get; }
 
-        public abstract MappingContext UntypedValidateGlobal();
+        public abstract MappingContext UntypedValidate();
 
         public string Prefix { get; private set; }
 
         public abstract SortedList<string, string> GlobalInputs { get; }
-        public abstract Dictionary<string, List<string>> GlobalErrors { get; }
+        public abstract Dictionary<string, HashSet<string>> GlobalErrors { get; }
 
         public bool HasInput
         {
@@ -79,7 +77,7 @@ namespace Signum.Web
 
         public abstract IDictionary<string, string> Inputs { get; }
 
-        public List<string> Error
+        public HashSet<string> Error
         {
             get { return Root.GlobalErrors.GetOrCreate(Prefix); }
             set
@@ -91,7 +89,7 @@ namespace Signum.Web
             }
         }
 
-        public abstract IDictionary<string, List<string>> Errors { get; }
+        public abstract IDictionary<string, HashSet<string>> Errors { get; }
 
         public MappingContext(string prefix, IPropertyValidator propertyValidator, PropertyRoute route)
         {
@@ -105,7 +103,7 @@ namespace Signum.Web
             var mapping = Mapping.ForValue<V>();
 
             if (mapping == null)
-                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(V).TypeName()));
+                throw new InvalidOperationException("No mapping for value {0}".FormatWith(typeof(V).TypeName()));
 
             var sc = new SubContext<V>(TypeContextUtilities.Compose(this.Prefix, property), null, null, this);
 
@@ -119,7 +117,7 @@ namespace Signum.Web
             var mapping = Mapping.ForValue<V>();
 
             if (mapping == null)
-                throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(V).TypeName()));
+                throw new InvalidOperationException("No mapping for value {0}".FormatWith(typeof(V).TypeName()));
 
             var sc = new SubContext<V>(this.Prefix, null, null, this);
 
@@ -171,7 +169,70 @@ namespace Signum.Web
             if (newToStringLink != null)
                 result.Add(EntityBaseKeys.Link, newToStringLink);
 
-            return new JsonNetResult { Data = result };
+            return new JsonNetResult(result);
+        }
+
+        public MappingContext<T> TryFindParent<T>()
+        {
+            MappingContext mapping = this;
+            while (mapping != null)
+            {
+                if (mapping is MappingContext<T>)
+                    return (MappingContext<T>)mapping;
+
+                mapping = mapping.Parent;
+            }
+
+            return null;
+        }
+
+        public MappingContext<T> FindParent<T>()
+        {
+            var result = TryFindParent<T>();
+
+            if (result == null)
+                throw new InvalidOperationException("{0} not found in the chain of parents".FormatWith(typeof(MappingContext<T>).TypeName()));
+
+            return result;
+        }
+
+
+        public void ImportErrors(Dictionary<Guid, Dictionary<string, string>> errorDictionary)
+        {
+            this.DistributeErrors(errorDictionary);
+
+            if (errorDictionary.Count > 0)
+                this.Errors.GetOrCreate(ViewDataKeys.GlobalErrors)
+                    .AddRange(errorDictionary.SelectMany(a => a.Value.Values));
+        }
+
+        protected void DistributeErrors(Dictionary<Guid, Dictionary<string, string>> errorDictionary)
+        {
+            var mod = this.UntypedValue as ModifiableEntity;
+
+            var dic = mod == null ? null : errorDictionary.TryGetC(mod.temporalId);
+
+            foreach (var child in this.Children())
+            {
+                var pv = child.PropertyValidator;
+
+                if (pv != null && dic != null)
+                {
+                    string error = dic.TryGetC(pv.PropertyInfo.Name);
+
+                    if (error != null)
+                    {
+                        dic.Remove(pv.PropertyInfo.Name);
+
+                        child.Error.AddRange(error.SplitNoEmpty("\r\n" ));
+                    }
+                }
+
+                child.DistributeErrors(errorDictionary);
+            }
+
+            if (dic != null && dic.IsEmpty())
+                errorDictionary.Remove(mod.temporalId);
         }
 
     }
@@ -228,31 +289,23 @@ namespace Signum.Web
             get { throw new NotImplementedException(); }
         }
 
-        public override MappingContext UntypedValidateGlobal()
+        public override MappingContext UntypedValidate()
         {
-            return ValidateGlobal();
+            return Validate();
         }
 
-        public MappingContext<T> ValidateGlobal()
-        {
-            var globalErrors = CalculateGlobalErrors();
-
-            //meter el resto en el diccionario
-            if (globalErrors.Count > 0)
-                Errors.GetOrCreate(ViewDataKeys.GlobalErrors).AddRange(globalErrors.ToList());
-
-            return this;
-        }
-
-        public List<string> CalculateGlobalErrors()
+        public MappingContext<T> Validate()
         {
             var entity = (ModifiableEntity)(object)Value;
 
             GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity));
 
-            Dictionary<ModifiableEntity, string> dicGlobalErrors = entity.FullIntegrityCheckDictionary();
-            //Split each error in one entry in the HashTable:
-            return dicGlobalErrors.SelectMany(a => a.Value.Lines()).Except(Errors.SelectMany(e => e.Value)).ToList();
+            Dictionary<Guid, Dictionary<string, string>> errorDictionary = entity.FullIntegrityCheck();
+
+            if (errorDictionary != null)
+                ImportErrors(errorDictionary);
+
+            return this;
         }
 
         public RuntimeInfo GetRuntimeInfo()
@@ -276,8 +329,8 @@ namespace Signum.Web
             get { return globalInputs; }
         }
 
-        Dictionary<string, List<string>> globalErrors = new Dictionary<string,List<string>>();
-        public override Dictionary<string, List<string>> GlobalErrors
+        Dictionary<string, HashSet<string>> globalErrors = new Dictionary<string, HashSet<string>>();
+        public override Dictionary<string, HashSet<string>> GlobalErrors
         {
             get { return globalErrors; }
         }
@@ -285,8 +338,8 @@ namespace Signum.Web
         IDictionary<string, string> inputs;
         public override IDictionary<string, string> Inputs { get { return inputs; } }
 
-        IDictionary<string, List<string>> errors;
-        public override IDictionary<string, List<string>> Errors { get { return errors; } }
+        IDictionary<string, HashSet<string>> errors;
+        public override IDictionary<string, HashSet<string>> Errors { get { return errors; } }
 
         public RootContext(string prefix, SortedList<string, string> globalInputs, PropertyRoute route, ControllerBase controller) :
             base(prefix, null, route)
@@ -295,7 +348,7 @@ namespace Signum.Web
             if (prefix.HasText())
             {
                 this.inputs = new ContextualSortedList<string>(globalInputs, prefix + TypeContext.Separator);
-                this.errors = new ContextualDictionary<List<string>>(globalErrors, prefix+ TypeContext.Separator);
+                this.errors = new ContextualDictionary<HashSet<string>>(globalErrors, prefix + TypeContext.Separator);
             }
             else
             {
@@ -337,7 +390,7 @@ namespace Signum.Web
             get { return root.GlobalInputs; }
         }
 
-        public override Dictionary<string, List<string>> GlobalErrors
+        public override Dictionary<string, HashSet<string>> GlobalErrors
         {
             get { return root.GlobalErrors; }
         }
@@ -345,8 +398,8 @@ namespace Signum.Web
         ContextualSortedList<string> inputs;
         public override IDictionary<string, string> Inputs { get { return inputs; } }
 
-        ContextualDictionary<List<string>> errors;
-        public override IDictionary<string, List<string>> Errors { get { return errors; } }
+        ContextualDictionary<HashSet<string>> errors;
+        public override IDictionary<string, HashSet<string>> Errors { get { return errors; } }
 
         public SubContext(string prefix, IPropertyValidator propertyValidator, PropertyRoute route, MappingContext parent) :
             base(prefix, propertyValidator, route)
@@ -354,7 +407,7 @@ namespace Signum.Web
             this.parent = parent;
             this.root = parent.Root;
             this.inputs = new ContextualSortedList<string>(parent.Inputs, prefix + TypeContext.Separator);
-            this.errors = new ContextualDictionary<List<string>>(root.GlobalErrors, prefix);
+            this.errors = new ContextualDictionary<HashSet<string>>(root.GlobalErrors, prefix);
         }
     }
 
@@ -375,9 +428,9 @@ namespace Signum.Web
 
         public override ControllerBase Controller {   get { return root.Controller; }}
         public override SortedList<string, string> GlobalInputs{   get { return root.GlobalInputs; }}
-        public override Dictionary<string, List<string>> GlobalErrors{ get { return root.GlobalErrors; }}
+        public override Dictionary<string, HashSet<string>> GlobalErrors{ get { return root.GlobalErrors; }}
         public override IDictionary<string, string> Inputs { get { return parent.Inputs; } }
-        public override IDictionary<string, List<string>> Errors { get { return parent.Errors; } }
+        public override IDictionary<string, HashSet<string>> Errors { get { return parent.Errors; } }
 
         public MixinContext(PropertyRoute route, MappingContext parent) :
             base(parent.Prefix, null, route)

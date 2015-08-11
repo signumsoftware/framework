@@ -4,7 +4,7 @@
 @{
     ModifiableEntity modifiable = Model.UntypedValue as ModifiableEntity;
     string partialViewName = ViewData[ViewDataKeys.PartialViewName].ToString();
-    var wc = new WidgetContext { Entity = modifiable, PartialViewName = partialViewName, Prefix = Model.Prefix };
+    var wc = new WidgetContext { TypeContext = Model, PartialViewName = partialViewName };
 }
 <h3>
     @Html.AntiForgeryToken()

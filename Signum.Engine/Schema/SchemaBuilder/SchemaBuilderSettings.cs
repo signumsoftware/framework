@@ -11,6 +11,7 @@ using System.Data;
 using Signum.Entities.Reflection;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
+using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Maps
 {
@@ -21,12 +22,16 @@ namespace Signum.Engine.Maps
 
         }
 
-        public Func<Type, string> CanOverrideAttributes = null;
+        public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "Id");
+        public int DefaultImplementedBySize = 40;
+
+        public Action<Type> AssertNotIncluded = null;
 
         public int MaxNumberOfParameters = 2000;
-        public int MaxNumberOfStatementsInSaveQueries = 16; 
+        public int MaxNumberOfStatementsInSaveQueries = 16;
 
-        public Dictionary<PropertyRoute, Attribute[]> OverridenAttributes = new Dictionary<PropertyRoute, Attribute[]>();
+        public Dictionary<PropertyRoute, AttributeCollection> FieldAttributesCache = new Dictionary<PropertyRoute, AttributeCollection>();
+        public Dictionary<Type, AttributeCollection> TypeAttributesCache = new Dictionary<Type, AttributeCollection>();
 
         public Dictionary<Type, string> UdtSqlName = new Dictionary<Type, string>()
         {
@@ -61,7 +66,6 @@ namespace Signum.Engine.Maps
         {
             {SqlDbType.NVarChar, 200}, 
             {SqlDbType.VarChar, 200}, 
-            {SqlDbType.Image, 8000}, 
             {SqlDbType.VarBinary, int.MaxValue}, 
             {SqlDbType.Binary, 8000}, 
             {SqlDbType.Char, 1}, 
@@ -74,78 +78,84 @@ namespace Signum.Engine.Maps
             {SqlDbType.Decimal, 2}, 
         };
 
-        public bool IsOverriden<T, S>(Expression<Func<T, S>> propertyRoute) where T : IdentifiableEntity
+        public AttributeCollection FieldAttributes<T, S>(Expression<Func<T, S>> propertyRoute)
+            where T : Entity
         {
-            return IsOverriden(PropertyRoute.Construct(propertyRoute));
+            return FieldAttributes(PropertyRoute.Construct(propertyRoute));
         }
 
-        private bool IsOverriden(PropertyRoute propertyRoute)
+        public AttributeCollection FieldAttributes(PropertyRoute propertyRoute)
         {
-            return OverridenAttributes.ContainsKey(propertyRoute);
+            return FieldAttributesCache.GetOrCreate(propertyRoute, () =>
+            {
+                switch (propertyRoute.PropertyRouteType)
+                {
+                    case PropertyRouteType.FieldOrProperty:
+                        if (propertyRoute.FieldInfo == null)
+                            return null;
+                        return new AttributeCollection(AttributeTargets.Field, propertyRoute.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToList(),
+                            () => AssertNotIncluded(propertyRoute.RootType));
+                    case PropertyRouteType.MListItems:
+                        if (propertyRoute.Parent.FieldInfo == null)
+                            return null;
+                        return new AttributeCollection(AttributeTargets.Field, propertyRoute.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToList(),
+                            () => AssertNotIncluded(propertyRoute.RootType));
+                    default:
+                        throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
+                }
+            });
         }
 
-        public void OverrideAttributes<T, S>(Expression<Func<T, S>> propertyRoute, params Attribute[] attributes)
-            where T : IdentifiableEntity
+        public AttributeCollection TypeAttributes<T>() where T : Entity
         {
-            OverrideAttributes(PropertyRoute.Construct(propertyRoute), attributes);
+            return TypeAttributes(typeof(T));
         }
 
-        public void OverrideAttributes(PropertyRoute propertyRoute, params Attribute[] attributes)
+        public AttributeCollection TypeAttributes(Type entityType)
         {
-            string error = CanOverrideAttributes == null ? null : CanOverrideAttributes(propertyRoute.RootType); 
+            if (!typeof(Entity).IsAssignableFrom(entityType) && !typeof(IView).IsAssignableFrom(entityType))
+                throw new InvalidOperationException("{0} is not an Entity or View".FormatWith(entityType.Name));
 
-            if (error != null)
-                throw new InvalidOperationException(error);
+            if (entityType.IsAbstract)
+                throw new InvalidOperationException("{0} is abstract".FormatWith(entityType.Name));
 
-            AssertCorrect(attributes, AttributeTargets.Field);
+            return TypeAttributesCache.GetOrCreate(entityType, () =>
+            {
+                var list = entityType.GetCustomAttributes(true).Cast<Attribute>().ToList();
 
-            OverridenAttributes.Add(propertyRoute, attributes);
+                var enumType = EnumEntity.Extract(entityType);
+
+                if (enumType != null)
+                    foreach (var at in enumType.GetCustomAttributes(true).Cast<Attribute>().ToList())
+                    {
+                        list.RemoveAll(a => a.GetType() == at.GetType());
+                        list.Add(at);
+                    }
+
+                return new AttributeCollection(AttributeTargets.Class, list, () => AssertNotIncluded(entityType));
+            });
         }
 
-        private void AssertCorrect(Attribute[] attributes, AttributeTargets attributeTargets)
-        {
-            var incorrects = attributes.Where(a => a.GetType().SingleAttribute<AttributeUsageAttribute>().Try(au => (au.ValidOn & attributeTargets) == 0) ?? false);
 
-            if (incorrects.Count() > 0)
-                throw new InvalidOperationException("The following attributes ar not compatible with targets {0}: {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
-        }
-
-        public void AssertNotIgnored<T, S>(Expression<Func<T, S>> propertyRoute, string errorContext) where T : IdentifiableEntity
+        public void AssertNotIgnored<T, S>(Expression<Func<T, S>> propertyRoute, string errorContext) where T : Entity
         {
             var pr = PropertyRoute.Construct<T, S>(propertyRoute);
 
-            if (FieldAttributes(pr).OfType<IgnoreAttribute>().Any())
-                throw new InvalidOperationException("In order to {0} you need to OverrideAttributes for {1} to remove IgnoreAttribute".Formato(errorContext, pr));
+            if (FieldAttribute<IgnoreAttribute>(pr) != null)
+                throw new InvalidOperationException("In order to {0} you need to override the attributes for {1} by using SchemaBuilderSettings.FieldAttributes to remove IgnoreAttribute".FormatWith(errorContext, pr));
         }
 
-        public Attribute[] FieldAttributes<T, S>(Expression<Func<T, S>> propertyRoute) where T : IdentifiableEntity
-        {
-            return FieldAttributes(PropertyRoute.Construct<T, S>(propertyRoute));
-        }
-
-        public Attribute[] FieldAttributes(PropertyRoute propertyRoute)
+        public A FieldAttribute<A>(PropertyRoute propertyRoute) where A : Attribute
         {
             if(propertyRoute.PropertyRouteType == PropertyRouteType.Root || propertyRoute.PropertyRouteType == PropertyRouteType.LiteEntity)
-                throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(propertyRoute.PropertyRouteType));
+                throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
 
-            var overriden = OverridenAttributes.TryGetC(propertyRoute); 
+            return (A)FieldAttributes(propertyRoute).FirstOrDefault(a => a.GetType() == typeof(A));
+        }
 
-            if(overriden!= null)
-                return overriden; 
-
-            switch (propertyRoute.PropertyRouteType)
-	        {
-                case PropertyRouteType.FieldOrProperty:
-                    if (propertyRoute.FieldInfo == null)
-                        return new Attribute[0];
-                    return propertyRoute.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
-                case PropertyRouteType.MListItems:
-                    if (propertyRoute.Parent.FieldInfo == null)
-                        return new Attribute[0];
-                    return propertyRoute.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray();
-                default:
-                    throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(propertyRoute.PropertyRouteType));
-	        }
+        public A TypeAttribute<A>(Type entityType) where A : Attribute
+        {
+            return (A)TypeAttributes(entityType).FirstOrDefault(a => a.GetType() == typeof(A));
         }
 
         internal bool IsNullable(PropertyRoute propertyRoute, bool forceNull)
@@ -153,39 +163,32 @@ namespace Signum.Engine.Maps
             if (forceNull)
                 return true;
 
-            var attrs = FieldAttributes(propertyRoute);
-
-            if (attrs.OfType<NotNullableAttribute>().Any())
+            if (FieldAttribute<NotNullableAttribute>(propertyRoute) != null)
                 return false;
 
-            if (attrs.OfType<NullableAttribute>().Any())
+            if (FieldAttribute<NullableAttribute>(propertyRoute) != null)
                 return true;
 
             return !propertyRoute.Type.IsValueType || propertyRoute.Type.IsNullable();
         }
 
-        internal UniqueIndexAttribute GetUniqueIndexAttribute(PropertyRoute propertyRoute)
-        {
-            return FieldAttributes(propertyRoute).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
-        }
-
-        public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : IdentifiableEntity
+        public bool ImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity
         {
             var imp = GetImplementations(propertyRoute);
             return !imp.IsByAll  && imp.Types.Contains(typeToImplement);
         }
 
-        public void AssertImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : IdentifiableEntity
+        public void AssertImplementedBy<T>(Expression<Func<T, object>> propertyRoute, Type typeToImplement) where T : Entity
         {
             var propRoute = PropertyRoute.Construct(propertyRoute);
 
             Implementations imp = GetImplementations(propRoute);
 
             if (imp.IsByAll || !imp.Types.Contains(typeToImplement))
-                throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".Formato(propRoute, typeToImplement.Name));
+                throw new InvalidOperationException("Route {0} is not ImplementedBy {1}".FormatWith(propRoute, typeToImplement.Name));
         }
 
-        public Implementations GetImplementations<T>(Expression<Func<T, object>> propertyRoute) where T : IdentifiableEntity
+        public Implementations GetImplementations<T>(Expression<Func<T, object>> propertyRoute) where T : Entity
         {
             return GetImplementations(PropertyRoute.Construct(propertyRoute));
         }
@@ -193,38 +196,32 @@ namespace Signum.Engine.Maps
         public Implementations GetImplementations(PropertyRoute propertyRoute)
         {
             var cleanType = propertyRoute.Type.CleanType();  
-            if (!propertyRoute.Type.CleanType().IsIIdentifiable())
-                throw new InvalidOperationException("{0} is not a {1}".Formato(propertyRoute, typeof(IIdentifiable).Name));
+            if (!propertyRoute.Type.CleanType().IsIEntity())
+                throw new InvalidOperationException("{0} is not a {1}".FormatWith(propertyRoute, typeof(IEntity).Name));
 
-            var fieldAtt = FieldAttributes(propertyRoute);
-
-            return Implementations.FromAttributes(cleanType, fieldAtt, propertyRoute);
+            return Implementations.FromAttributes(cleanType, propertyRoute,
+                FieldAttribute<ImplementedByAttribute>(propertyRoute),
+                FieldAttribute<ImplementedByAllAttribute>(propertyRoute));
         }
 
-        internal SqlDbTypePair GetSqlDbType(PropertyRoute propertyRoute)
+        internal SqlDbTypePair GetSqlDbType(SqlDbTypeAttribute att, Type type)
         {
-            SqlDbTypeAttribute att = FieldAttributes(propertyRoute).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
-
             if (att != null && att.HasSqlDbType)
-                return new SqlDbTypePair(att.SqlDbType, att.UdtTypeName);
+                return new SqlDbTypePair(att.SqlDbType, att.UserDefinedTypeName);
 
-            return GetSqlDbTypePair(propertyRoute.Type.UnNullify());
+            return GetSqlDbTypePair(type.UnNullify());
         }
 
-        internal int? GetSqlSize(PropertyRoute propertyRoute, SqlDbType sqlDbType)
+        internal int? GetSqlSize(SqlDbTypeAttribute att, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = FieldAttributes(propertyRoute).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
-
             if (att != null && att.HasSize)
                 return att.Size;
 
             return defaultSize.TryGetS(sqlDbType);
         }
 
-        internal int? GetSqlScale(PropertyRoute propertyRoute, SqlDbType sqlDbType)
+        internal int? GetSqlScale(SqlDbTypeAttribute att, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = FieldAttributes(propertyRoute).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
-
             if (att != null && att.HasScale)
                 return att.Scale;
 
@@ -259,7 +256,7 @@ namespace Signum.Engine.Maps
 
         public string GetUdtName(Type udtType)
         {
-            var att = udtType.SingleAttribute<SqlUserDefinedTypeAttribute>();
+            var att = udtType.GetCustomAttribute<SqlUserDefinedTypeAttribute>();
 
             if (att == null)
                 return null;
@@ -271,19 +268,92 @@ namespace Signum.Engine.Maps
         {
             return type.IsEnum || GetSqlDbTypePair(type) != null;
         }
+
     }
 
     public class SqlDbTypePair
     {
         public SqlDbType SqlDbType { get; private set; }
-        public string UdtTypeName { get; private set; }
+        public string UserDefinedTypeName { get; private set; }
 
         public SqlDbTypePair() { }
 
         public SqlDbTypePair(SqlDbType type, string udtTypeName)
         {
             this.SqlDbType = type;
-            this.UdtTypeName = udtTypeName;
+            this.UserDefinedTypeName = udtTypeName;
+        }
+    }
+
+    public class AttributeCollection : Collection<Attribute>
+    {
+        AttributeTargets Targets;
+
+        Action assertNotIncluded; 
+
+        public AttributeCollection(AttributeTargets targets, IList<Attribute> attributes, Action assertNotIncluded):base(attributes)
+        {
+            this.Targets = targets; 
+            this.assertNotIncluded = assertNotIncluded;
+        }
+
+        protected override void InsertItem(int index, Attribute item)
+        {
+            assertNotIncluded();
+
+            var au = item.GetType().GetCustomAttribute<AttributeUsageAttribute>();
+            
+            if(au == null ||(au.ValidOn & Targets) == 0)
+             throw new InvalidOperationException("The attributes is not compatible with targets {0}: {1}".FormatWith(Targets, au.Try(_=>_.ValidOn)));
+
+            base.InsertItem(index, item);
+        }
+
+        public new AttributeCollection Add(Attribute attr)
+        {
+            base.Add(attr);
+
+            return this;
+        }
+
+        public AttributeCollection Replace(Attribute attr)
+        {
+            if (attr is ImplementedByAttribute || attr is ImplementedByAllAttribute)
+                this.RemoveAll(a => a is ImplementedByAttribute || a is ImplementedByAllAttribute);
+            else
+                this.RemoveAll(a => a.GetType() == attr.GetType());
+
+            this.Add(attr);
+
+            return this;
+        }
+
+        public AttributeCollection Remove<A>() where A : Attribute
+        {
+            this.RemoveAll(a=>a is A);
+
+            return this;
+        }
+
+        protected override void ClearItems()
+        {
+            assertNotIncluded();
+
+            base.ClearItems();
+        }
+
+        protected override void SetItem(int index, Attribute item)
+        {
+            assertNotIncluded();
+
+            base.SetItem(index, item);
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            assertNotIncluded();
+
+            base.RemoveItem(index);
         }
     }
 

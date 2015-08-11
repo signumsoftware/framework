@@ -1,4 +1,4 @@
-# Navigator class
+﻿# Navigator class
 
 The main responsibilities of `Navigator` is showing entities in a modal window (`View`) or an independent window (`Navigate`) using the custom control registered using `EntitySettings<T>`. 
 
@@ -17,7 +17,7 @@ There are three different overloads:
 public static T View<T>(T entity, ViewOptions options = null) where T : ModifiableEntity
  
 //Takes and returns a Lite<T> (thin or fat)
-public static Lite<T> View<T>(Lite<T> entity, ViewOptions options = null) where T: class, IIdentifiable
+public static Lite<T> View<T>(Lite<T> entity, ViewOptions options = null) where T: class, IEntity
 
 //A ModifiableEntity or a Lite<T> should be passed, the same type will be returned 
 public static object ViewUntyped(object entity, ViewOptions options = null)
@@ -65,14 +65,14 @@ If `NavigationManager` is instantiated with `multithreaded = true` then the `Nor
 There are also three different overloads: 
 
 ```C#
-//Takes a IIdentifiable, you can not navigate to an EmbeddedEntity or ModelEntity!
-public static void Navigate<T>(T entity, NavigateOptions options = null) where T : IIdentifiable
+//Takes a IEntity, you can not navigate to an EmbeddedEntity or ModelEntity!
+public static void Navigate<T>(T entity, NavigateOptions options = null) where T : IEntity
  
 //Takes a Lite<T> (thin or fat)
-public static void Navigate<T>(Lite<T> entity, NavigateOptions options = null) where T : class, IIdentifiable
+public static void Navigate<T>(Lite<T> entity, NavigateOptions options = null) where T : class, IEntity
 
 //A ModifiableEntity or a Lite<T> should be passed
-public static void Navigate<T>(T entity, NavigateOptions options = null) where T : IIdentifiable
+public static void Navigate<T>(T entity, NavigateOptions options = null) where T : IEntity
 ```
 
 All of this methods return `void` because they open independent windows.
@@ -108,8 +108,8 @@ Additionally we can override any default behavior that is not properly deduced f
 
 
 * **IsCreable**: Indicates if the entity can be created from search-like control (like `SearchControl`) and/or a line-like control (like an `EntityLine`). For example:
-	* Doesn't make sense create a `CountryDN` on the fly from an address using a line, so it will be `EntityWhen.IsSearch`.
-	* Oppositely doesn't make sense to go to `AddressDN` to create the `ShippingAddress` of an `OrderDN`, so it will be `EntityWhen.IsLine`.
+	* Doesn't make sense create a `CountryEntity` on the fly from an address using a line, so it will be `EntityWhen.IsSearch`.
+	* Oppositely doesn't make sense to go to `AddressEntity` to create the `ShippingAddress` of an `OrderEntity`, so it will be `EntityWhen.IsLine`.
 * **IsViewable**: Indicates if the entity can be viewed in a modal window from a line-like control.
 * **IsNavigable**: Indicates if the entity can be navigable from a search-like control and/or a line-like control. `EntityBase` also turns off `Navigate` if `View=true`.   
 * **IsReadOnly**: Indicates if any `View` or `Navigate` should set the custom control as read-only. 
@@ -127,7 +127,7 @@ Example:
 ```C#
 Navigator.AddSettings(new List<EntitySettings>
 {
-    new EntitySettings<EmployeeDN>() { View = e => new Employee()},
+    new EntitySettings<EmployeeEntity>() { View = e => new Employee()},
     ...
 });
 ```
@@ -135,7 +135,7 @@ Navigator.AddSettings(new List<EntitySettings>
 You can also retrieve a `EntitySettings<T>` using the methods with the same name.
 
 ```C#
-public static EntitySettings<T> EntitySettings<T>() where T : IdentifiableEntity
+public static EntitySettings<T> EntitySettings<T>() where T : Entity
 public static EmbeddedEntitySettings<T> EmbeddedEntitySettings<T>() where T : EmbeddedEntity
 public static EntitySettings EntitySettings(Type type)
 ````
@@ -147,7 +147,7 @@ This methods will throw an exception if the `EntitySettings` is not previously r
 You can use this methods, in combination with `OverrideView` event, to customize some controls that are not under your control: 
 
 ```C#
-Navigator.EntitySettings<UserDN>().OverrideView += (usr, ctrl) =>
+Navigator.EntitySettings<UserEntity>().OverrideView += (usr, ctrl) =>
 {
     ctrl.Child<EntityLine>("Role").After(new ValueLine().Set(Common.RouteProperty, "[UserEmployeeMixin].AllowLogin"));
     ctrl.Child<EntityLine>("Role").After(new EntityLine().Set(Common.RouteProperty, "[UserEmployeeMixin].Employee"));
@@ -170,7 +170,7 @@ public static bool IsViewable(Type type)
 public static bool IsViewable(ModifiableEntity entity)
 
 public static bool IsNavigable(Type type, bool isSearch = false)
-public static bool IsNavigable(IIdentifiable entity, bool isSearch = false)
+public static bool IsNavigable(IEntity entity, bool isSearch = false)
 ``` 
 
 In order to answer this questions, `Navigator` takes into account the configuration in the `EntitySettings` (usualy inherited from the `EntityKind`) as well as the events defined in `NavigationManager`: 

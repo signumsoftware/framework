@@ -1,4 +1,4 @@
-# LinkClient
+﻿# LinkClient
 
 `LinkClient` allows you to register links from any entity to navigate to other entities, open `SearchWindows` or do any other custom action. 
 
@@ -13,20 +13,20 @@ Internally `LinkClient` uses a [`Polymorphic`](../../Signum.Utilities/Polymorphi
 ```C#
 public static class LinksClient
 {
-    public static Polymorphic<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>> EntityLinks;
+    public static Polymorphic<Func<Lite<Entity>, Control, QuickLink[]>> EntityLinks;
 
     public static void RegisterEntityLinks<T>(Func<Lite<T>, Control, QuickLink[]> getQuickLinks)
-        where T : IdentifiableEntity
+        where T : Entity
 }
 ```
 
-For example, this is how `OperationClient` registers `OperationLogDN` as a `QuickLink` for any entity but `OperationLogDN` itself: 
+For example, this is how `OperationClient` registers `OperationLogEntity` as a `QuickLink` for any entity but `OperationLogEntity` itself: 
 
 ```C#
-LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, control) => new[]
+LinksClient.RegisterEntityLinks<Entity>((entity, control) => new[]
 { 
-    entity.GetType() == typeof(OperationLogDN) ? null : 
-        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
+    entity.GetType() == typeof(OperationLogEntity) ? null : 
+        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogEntity), "Target", entity)
         {
             OrderOptions = { new OrderOption("Start") }
         }){ IsShy = true}
@@ -60,7 +60,7 @@ Abstract base class that contains:
 * **Label:** That will be shown in the elements of the `LinkWidget` or the `MenuItem`. 
 * **Name:** Unique name used for `UIAutomation`. 
 * **IsVisible:** Hides the `QuickLink`
-* **IsShy:** If LinksWidgets finds some `QuickLinks` for a parcicular entitiy that are `IsShy == false`, it raises `ForceShow` event to make `WidgetPanel` visible. By default is `false`, but can be set to `true` for common QuickLinks, like `OperationLogDN`.  
+* **IsShy:** If LinksWidgets finds some `QuickLinks` for a parcicular entitiy that are `IsShy == false`, it raises `ForceShow` event to make `WidgetPanel` visible. By default is `false`, but can be set to `true` for common QuickLinks, like `OperationLogEntity`.  
 * **ToolTip:** A ToolTip that will be shown when overing over the elements of the `LinkWidget` or the `MenuItem` in the contextual menu.
 * **Icon:** A small 16x16 icon that will be shown in the `LinkWidget` or the `MenuItem`.
 
@@ -84,7 +84,7 @@ public class QuickLinkAction : QuickLink
 The `action` will be invoked when the user clicks the `QuickLink`. Example:
 
 ```C#
-LinksClient.RegisterEntityLinks<DashboardDN>((cp, ctrl) => new[]
+LinksClient.RegisterEntityLinks<DashboardEntity>((cp, ctrl) => new[]
 {  
     new QuickLinkAction(DashboardMessage.Preview, () => Navigate(cp, null)) 
     {
@@ -122,10 +122,10 @@ Additionally, the property `ShowResultCount` let you query for the number of res
 Example: 
 
 ```C#
-LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, control) => new[]
+LinksClient.RegisterEntityLinks<Entity>((entity, control) => new[]
 { 
-    entity.GetType() == typeof(OperationLogDN) ? null : 
-        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
+    entity.GetType() == typeof(OperationLogEntity) ? null : 
+        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogEntity), "Target", entity)
         {
             OrderOptions = { new OrderOption("Start") }
         }){ IsShy = true}
@@ -149,7 +149,7 @@ The reason is that we avoid retrieving the entity just to show the quick links, 
 Inherits from `QuickLink` and is specialized to open `NormalWindows` by calling `Finder.Navigate` after executing a `QueryUnique`. 
 
 ```C#
-public class QuickLinkNavigate<T> : QuickLink  where T : IdentifiableEntity
+public class QuickLinkNavigate<T> : QuickLink  where T : Entity
 {
    public NavigateOptions NavigateOptions { get; set; }
    public UniqueOptions FindUniqueOptions { get; set; }

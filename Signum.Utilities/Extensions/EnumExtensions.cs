@@ -87,9 +87,15 @@ namespace Signum.Utilities
             where T: struct
         {
             return (T?)(object)EnumFieldCache.Get(typeof(T))
-                .Where(kvp => kvp.Value.SingleAttribute<CodeAttribute>().Code == code)
+                .Where(kvp => kvp.Value.GetCustomAttribute<CodeAttribute>().Code == code)
                 .Select(kvp => kvp.Key)
                 .SingleOrDefaultEx();
+        }
+
+        public static IComparable GetUnderlyingValue(Enum value)
+        {
+            Type type = Enum.GetUnderlyingType(value.GetType());
+            return (IComparable)Convert.ChangeType(value, type);
         }
     }
 
@@ -122,7 +128,7 @@ namespace Signum.Utilities
         public static Dictionary<Enum, FieldInfo> Get(Type type)
         {
             if (!type.IsEnum)
-                throw new ArgumentException("{0} is not an Enum".Formato(type));
+                throw new ArgumentException("{0} is not an Enum".FormatWith(type));
 
             return enumCache.GetOrAdd(type, t => t.GetFields(flags).ToDictionary(fi => (Enum)fi.GetValue(null), fi => fi));
         }

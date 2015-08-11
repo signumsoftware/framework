@@ -10,6 +10,7 @@ using Signum.Entities.Reflection;
 using Signum.Entities;
 using System.Globalization;
 using Signum.Entities.Basics;
+using System.Reflection;
 
 
 namespace Signum.Web
@@ -41,7 +42,7 @@ namespace Signum.Web
 
             using (valueLine.UnitText == null ? null : sb.SurroundLine(new HtmlTag("div").Class("input-group")))
             {
-                sb.AddLine(Configurator.Constructor[vltype](helper, valueLine));
+                sb.AddLine(Configurator.Helper[vltype](helper, valueLine));
 
                 if (valueLine.UnitText.HasText())
                     sb.AddLine(helper.Span(valueLine.Compose("unit"), valueLine.UnitText, "input-group-addon"));
@@ -55,6 +56,29 @@ namespace Signum.Web
             var uType = valueLine.Type.UnNullify();
             Enum value = valueLine.UntypedValue as Enum;
 
+            return InternalComboBox(helper, valueLine, uType, value);
+        }
+
+        public static MvcHtmlString BooleanEnumComboBox(this HtmlHelper helper, ValueLine valueLine)
+        {
+            var uType = valueLine.Type.UnNullify();
+            if (uType != typeof(bool))
+                throw new InvalidOperationException("valueLine Type is not a boolean");
+
+            BooleanEnum? value = ToBooleanEnum((bool?)valueLine.UntypedValue);
+
+            return InternalComboBox(helper, valueLine, typeof(BooleanEnum), value);
+        }
+
+        private static BooleanEnum? ToBooleanEnum(bool? value)
+        {
+            return value == null ? (BooleanEnum?)null :
+                value.Value ? BooleanEnum.True :
+                BooleanEnum.False;
+        }
+
+        private static MvcHtmlString InternalComboBox(HtmlHelper helper, ValueLine valueLine, Type uType, Enum value)
+        {
             if (valueLine.ReadOnly)
             {
                 MvcHtmlString result = MvcHtmlString.Empty;
@@ -109,8 +133,8 @@ namespace Signum.Web
                     result = result.Concat(helper.Hidden(valueLine.Prefix, value.TryToString(valueLine.Format)));
                 return result.Concat(helper.FormControlStatic(null, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps));
             }
-
-            var dateFormatAttr = valueLine.PropertyRoute.PropertyInfo.SingleAttribute<TimeSpanDateFormatAttribute>();
+            
+            var dateFormatAttr = valueLine.PropertyRoute.PropertyInfo.GetCustomAttribute<TimeSpanDateFormatAttribute>();
             if (dateFormatAttr != null)
                 return helper.TimePicker(valueLine.Prefix, true, value, dateFormatAttr.Format, CultureInfo.CurrentCulture, valueLine.ValueHtmlProps);
             else
@@ -169,7 +193,7 @@ namespace Signum.Web
             {
                 valueLine.ValueHtmlProps.AddCssClass("form-control");
 
-                ColorDN color = (ColorDN)valueLine.UntypedValue;
+                ColorEntity color = (ColorEntity)valueLine.UntypedValue;
 
                 sb.AddLine(helper.TextBox(valueLine.Prefix, color == null ? "" : color.RGBHex(), valueLine.ValueHtmlProps));
 
@@ -276,11 +300,14 @@ namespace Signum.Web
 
         public virtual ValueLineType GetDefaultValueLineType(Type type)
         {
+            if (type == typeof(bool?))
+                return ValueLineType.Enum;
+
             type = type.UnNullify();
 
             if (type.IsEnum)
-                return ValueLineType.Combo;
-            else if (type == typeof(ColorDN))
+                return ValueLineType.Enum;
+            else if (type == typeof(ColorEntity))
                 return ValueLineType.Color;
             else if (type == typeof(TimeSpan))
                 return ValueLineType.TimeSpan;
@@ -315,12 +342,12 @@ namespace Signum.Web
 
         }
 
-        public Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>> Constructor = new Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>>()
+        public Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>> Helper = new Dictionary<ValueLineType, Func<HtmlHelper, ValueLine, MvcHtmlString>>()
         {
             {ValueLineType.TextBox, (helper, valueLine) => helper.TextboxInLine(valueLine)},
             {ValueLineType.TextArea, (helper, valueLine) => helper.TextAreaInLine(valueLine)},
             {ValueLineType.Boolean, (helper, valueLine) => helper.CheckBox(valueLine)},
-            {ValueLineType.Combo, (helper, valueLine) => helper.EnumComboBox(valueLine)},
+            {ValueLineType.Enum, (helper, valueLine) =>  valueLine.Type.UnNullify() == typeof(bool) ? helper.BooleanEnumComboBox(valueLine):  helper.EnumComboBox(valueLine)},
             {ValueLineType.DateTime, (helper, valueLine) => helper.DateTimePicker(valueLine)},
             {ValueLineType.TimeSpan, (helper, valueLine) => helper.TimeSpanPicker(valueLine)},
             {ValueLineType.Number, (helper, valueLine) => helper.NumericTextbox(valueLine)},
@@ -331,7 +358,7 @@ namespace Signum.Web
     public enum ValueLineType
     {
         Boolean,
-        Combo,
+        Enum,
         DateTime,
         TimeSpan,
         TextBox,

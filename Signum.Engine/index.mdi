@@ -12,3 +12,8 @@ Schema
 Connection
 EntityCache
 Administrator
+DynamicQuery
+Engine
+Operations
+CodeGeneration
+

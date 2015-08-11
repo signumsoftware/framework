@@ -1,8 +1,8 @@
-# Lite\<T>
+﻿# Lite\<T>
 
 Every Persistence Framework has to deal with laziness in some way. Linq to SQL and Entity Framework, for example, follow a run-time laziness approach, meaning that you can define at run-time if a relationship is lazy or not.
 
-Singum Framework, however, needs you to define that a field/property type as `Lite<T>` instead of `T` to create a lazy relationship (where `T` is some `IIdentifiable`).
+Singum Framework, however, needs you to define that a field/property type as `Lite<T>` instead of `T` to create a lazy relationship (where `T` is some `IEntity`).
 
 That means that laziness is structural (you have to define it at compile time), and also non-transparent (since you have to explicitly load a `Lite<T>` before accessing it). 
 
@@ -11,8 +11,8 @@ This is mandatory because Signum Entities are meant to be easy `Serializable`, s
 Given that lites are an important decision when designing your entities, hiding it in the property getter/setter is not a good idea because you will make your entities dependent on the engine. 
 
 ```C#
- Lite<PersonDN> person;
- public PersonDN Person
+ Lite<PersonEntity> person;
+ public PersonEntity Person
  {
     get { return person.Retrieve(); }  //Don't do this!!
     set { Set(ref person, value.ToLite()); } //Don't do this!!
@@ -24,8 +24,8 @@ Given that lites are an important decision when designing your entities, hiding 
 ### Lite\<T> class
 
 ```C#
-public interface Lite<out T> : IComparable, IComparable<Lite<IdentifiableEntity>>
-    where T : class, IIdentifiable
+public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
+    where T : class, IEntity
 {
     T Entity { get; }
     T EntityOrNull { get; }
@@ -34,20 +34,20 @@ public interface Lite<out T> : IComparable, IComparable<Lite<IdentifiableEntity>
     bool IsNew { get;  }
     int? IdOrNull { get; }
     Type EntityType { get; }
-    IdentifiableEntity UntypedEntityOrNull { get; }
+    Entity UntypedEntityOrNull { get; }
 }
 
 public static class Lite
 { 
-    public static Lite<T> ToLite<T>(this T entity) where T : class, IIdentifiable
-    public static Lite<T> ToLite<T>(this T entity, string toStr) where T : class, IIdentifiable
-    public static Lite<T> ToLiteFat<T>(this T entity) where T : class, IIdentifiable
-    public static Lite<T> ToLiteFat<T>(this T entity, string toStr) where T : class, IIdentifiable
-    public static Lite<T> ToLite<T>(this T entity, bool fat) where T : class, IIdentifiable
+    public static Lite<T> ToLite<T>(this T entity) where T : class, IEntity
+    public static Lite<T> ToLite<T>(this T entity, string toStr) where T : class, IEntity
+    public static Lite<T> ToLiteFat<T>(this T entity) where T : class, IEntity
+    public static Lite<T> ToLiteFat<T>(this T entity, string toStr) where T : class, IEntity
+    public static Lite<T> ToLite<T>(this T entity, bool fat) where T : class, IEntity
 
-    public static Lite<IdentifiableEntity> Create(Type type, int id)
-    public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr)
-    public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr, ModifiedState state)
+    public static Lite<Entity> Create(Type type, int id)
+    public static Lite<Entity> Create(Type type, int id, string toStr)
+    public static Lite<Entity> Create(Type type, int id, string toStr, ModifiedState state)
 }
 ```
 
@@ -62,7 +62,7 @@ Internally, a `Lite<T>` basically contains:
 * The `ToString` of the referred entity.
 
 This means that `Lite<T>` are a perfect identity card for entities and much better than passing `Ids` around becaus: 
-* They are strongly typed (so no risk of confusing an `Id` of `OrderDN` with an `Id` of `OrderLineDN`)
+* They are strongly typed (so no risk of confusing an `Id` of `OrderEntity` with an `Id` of `OrderLineEntity`)
 * They carry a cached `ToString` of the entity, simplifying debugging and allowing them to be shown in the user interface in ComboBoxes, AutoCompletes, or Search Control columns. 
 * They are more convinient to use using `ToLite` and `Retrieve` extension methods. 
 
@@ -86,25 +86,25 @@ If you paid attention to the `Lite<T>` definition above you'll realize that.... 
 Thanks to lite covariance you can do this: 
 
 ```C#
-//Returns a GiraffeDN, but can be assigned to AnimalDN variable
-AnimalDN animal = Database.Retrieve<GiraffeDN>(3); 
+//Returns a GiraffeEntity, but can be assigned to AnimalEntity variable
+AnimalEntity animal = Database.Retrieve<GiraffeEntity>(3); 
 
 
-//Returns a Lite<GiraffeDN>, but can be assigned to Lite<AnimalDN> variable
-Lite<AnimalDN> animalLite = Database.RetrieveLite<GiraffeDN>(3);
+//Returns a Lite<GiraffeEntity>, but can be assigned to Lite<AnimalEntity> variable
+Lite<AnimalEntity> animalLite = Database.RetrieveLite<GiraffeEntity>(3);
 ```
 
 Also you can test the object as you expected
 
 ```C#
-animalLite is Lite<GiraffeDN>
-animalLite.EntityType == typeof(GiraffeDN)
+animalLite is Lite<GiraffeEntity>
+animalLite.EntityType == typeof(GiraffeEntity)
 ```
 But if you use GetType() you'll find the trick, the internal `LiteImp<T>` class
 
 ```C#
-animalLite.GetType() == typeof(Lite<GiraffeDN>) 
-//False, actually returns typeof(LiteImp<GiraffeDN>))
+animalLite.GetType() == typeof(Lite<GiraffeEntity>) 
+//False, actually returns typeof(LiteImp<GiraffeEntity>))
 ```
 
 Also, be careful when comparing lites and references because **unfortunately it compiles**. 
@@ -122,8 +122,8 @@ animalLite.Is(animal.ToLite()) // Ok
 Even in scenarios outside of the .Net Type system (like the Web or reading and writing files) is useful to keep the entity type to avoid confusing numeric ids of different entity types. That's why Lites can be serialized with `Key` method (returning `"Type;Id"`) or  `KeyLong` method (returning `"Type;Id;ToString"`)
 
 ```C#
-public interface Lite<out T> : IComparable, IComparable<Lite<IdentifiableEntity>>
-    where T : class, IIdentifiable
+public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
+    where T : class, IEntity
 {
     string Key(); //Returns "Person;3"
     string KeyLong(); //Returns "Person;3;John connor"
@@ -131,10 +131,10 @@ public interface Lite<out T> : IComparable, IComparable<Lite<IdentifiableEntity>
 
 public static class Lite
 { 
-    public static Lite<IdentifiableEntity> Parse(string liteKey)
-    public static Lite<T> Parse<T>(string liteKey) where T : class, IIdentifiable
+    public static Lite<Entity> Parse(string liteKey)
+    public static Lite<T> Parse<T>(string liteKey) where T : class, IEntity
 
-    public static string TryParseLite(string liteKey, out Lite<IdentifiableEntity> result)
-    public static string TryParse<T>(string liteKey, out Lite<T> lite) where T : class, IIdentifiable
+    public static string TryParseLite(string liteKey, out Lite<Entity> result)
+    public static string TryParse<T>(string liteKey, out Lite<T> lite) where T : class, IEntity
 }
 ```

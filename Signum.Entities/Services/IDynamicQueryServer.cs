@@ -21,7 +21,7 @@ namespace Signum.Services
         int ExecuteQueryCount(QueryCountRequest request);
 
         [OperationContract, NetDataContract]
-        Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
+        Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request);
 
         [OperationContract, NetDataContract]
         object[] BatchExecute(BaseQueryRequest[] requests);

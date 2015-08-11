@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +10,6 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
-#endregion
 
 namespace Signum.Web
 {
@@ -72,7 +70,7 @@ namespace Signum.Web
                 sb.AddLine(entityList.ConstructorScript(JsModule.Lines, "EntityList"));
             }
 
-            return helper.FormGroup(entityList, entityList.Prefix, entityList.LabelText, sb.ToHtml());
+            return helper.FormGroup(entityList, entityList.Prefix, entityList.LabelHtml ?? entityList.LabelText.FormatHtml(), sb.ToHtml());
         }
 
         static MvcHtmlString InternalListElement<T>(this HtmlHelper helper, HtmlStringBuilder sbOptions, TypeElementContext<T> itemTC, EntityList entityList)
@@ -96,13 +94,13 @@ namespace Signum.Web
 
             if (!EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
             {
-                int? idOrNull = null;
+                PrimaryKey? idOrNull = null;
                 Type type = itemTC.Value.GetType();
                 if (type.IsLite())
-                    idOrNull = ((Lite<IIdentifiable>)itemTC.Value).IdOrNull;
+                    idOrNull = ((Lite<IEntity>)itemTC.Value).IdOrNull;
 
-                if (type.IsIdentifiableEntity())
-                    idOrNull = ((IdentifiableEntity)(object)itemTC.Value).IdOrNull;
+                if (type.IsEntity())
+                    idOrNull = ((Entity)(object)itemTC.Value).IdOrNull;
 
                 optionTag.Attr("title", " ".CombineIfNotEmpty(itemTC.Value.GetType().CleanType().NiceName(), idOrNull));
             }

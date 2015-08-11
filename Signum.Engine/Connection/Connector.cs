@@ -9,7 +9,6 @@ using System.IO;
 using System.Data.SqlClient;
 using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
-using Signum.Engine.Exceptions;
 using Signum.Engine.DynamicQuery;
 using System.Data.Common;
 using System.Linq.Expressions;
@@ -83,7 +82,7 @@ namespace Signum.Engine
                 log.WriteLine(pcs.Sql);
                 if (pcs.Parameters != null)
                     log.WriteLine(pcs.Parameters
-                        .ToString(p => "{0} {1}: {2}".Formato(
+                        .ToString(p => "{0} {1}: {2}".FormatWith(
                             p.ParameterName,
                             Connector.Current.GetSqlDbType(p),
                             p.Value.Try(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
@@ -93,11 +92,12 @@ namespace Signum.Engine
 
         public abstract SqlDbType GetSqlDbType(DbParameter p);
 
-        protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand);
-        protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand);
-        protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command);
-        protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple);
-        protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple);
+        protected internal abstract object ExecuteScalar(SqlPreCommandSimple preCommand, CommandType commandType);
+        protected internal abstract int ExecuteNonQuery(SqlPreCommandSimple preCommand, CommandType commandType);
+        protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command, CommandType commandType);
+        protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
+        protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
+        protected internal abstract void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options);
 
         public abstract string DatabaseName();
 
@@ -129,11 +129,11 @@ namespace Signum.Engine
         {
             string toFind = "+" + catalogPostfix;
 
-            string result = connectionString.TryBefore("+" + catalogPostfix).TryAfterLast("=");
+            string result = connectionString.TryBefore(toFind).TryAfterLast("=");
             if (result == null)
                 return null;
 
-            connectionString = connectionString.Replace("+" + catalogPostfix, ""); // Remove toFind 
+            connectionString = connectionString.Replace(toFind, ""); // Remove toFind 
 
             return result + catalogPostfix;
         }
@@ -144,7 +144,7 @@ namespace Signum.Engine
 
             int index = connectionString.IndexOf(toFind);
             if (index == -1)
-                throw new InvalidOperationException("CatalogPostfix '{0}' not found in the connection string".Formato(toFind));
+                throw new InvalidOperationException("CatalogPostfix '{0}' not found in the connection string".FormatWith(toFind));
 
             connectionString = connectionString.Substring(0, index) + connectionString.Substring(index + toFind.Length); // Remove toFind 
 
@@ -164,6 +164,7 @@ namespace Signum.Engine
         public abstract bool AllowsConvertToTime { get; }
 
         public abstract bool SupportsSqlDependency { get; }
+     
     }
 
   
@@ -175,16 +176,16 @@ namespace Signum.Engine
             return "@" + name;
         }
 
-        public DbParameter CreateReferenceParameter(string parameterName, bool nullable, int? id)
+        public DbParameter CreateReferenceParameter(string parameterName, PrimaryKey? id, IColumn column)
         {
-            return CreateParameter(parameterName, SqlBuilder.PrimaryKeyType, null, nullable, id);
+            return CreateParameter(parameterName, column.SqlDbType, null, column.Nullable, id == null ? (object)null : id.Value.Object);
         }
 
         public DbParameter CreateParameter(string parameterName, object value, Type type)
         {
             var pair = Schema.Current.Settings.GetSqlDbTypePair(type.UnNullify());
 
-            return CreateParameter(parameterName, pair.SqlDbType, pair.UdtTypeName, type == null || type.IsByRef || type.IsNullable(), value);
+            return CreateParameter(parameterName, pair.SqlDbType, pair.UserDefinedTypeName, type == null || type.IsByRef || type.IsNullable(), value);
         }
 
         public abstract DbParameter CreateParameter(string parameterName, SqlDbType type, string udtTypeName, bool nullable, object value);

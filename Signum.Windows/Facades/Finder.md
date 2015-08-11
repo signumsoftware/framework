@@ -1,4 +1,4 @@
-# Finder class 
+﻿# Finder class 
 
 The main responsibilities of `Finder` is to open query result to search for a particular entity using a modal window (`Find` and `FindMany`) or just take a look at the entities and start actions from there in an independent window (`Explore`). 
 
@@ -12,9 +12,9 @@ This method is used by default in the find (o-) buttons in `EntityLine` or `Enti
 There are three different overloads: 
 
 ```C#
-public static Lite<T> Find<T>() where T : IdentifiableEntity
-public static Lite<T> Find<T>(FindOptions options) where T : IdentifiableEntity
-public static Lite<IdentifiableEntity> Find(FindOptions options)
+public static Lite<T> Find<T>() where T : Entity
+public static Lite<T> Find<T>(FindOptions options) where T : Entity
+public static Lite<Entity> Find(FindOptions options)
 ```
 
 All of this overloads will return `null` if the user cancels the operation.
@@ -47,7 +47,7 @@ For `EntityList`, `EntityRepeater` or `EntityStrip`, selecting more than one ele
 ```C#
 public static List<Lite<T>> FindMany<T>()
 public static List<Lite<T>> FindMany<T>(FindManyOptions options)
-public static List<Lite<IdentifiableEntity>> FindMany(FindManyOptions options)
+public static List<Lite<Entity>> FindMany(FindManyOptions options)
 ```
 
 The behavior is similar, returning a `null` list if the user cancels the `SearchWindow` dialog. 
@@ -121,7 +121,7 @@ public class QuerySettings
 Example: 
 
 ```C#
-QuerySettings.RegisterPropertyFormat((AlbumDN a) => a.BonusTrack.Duration, 
+QuerySettings.RegisterPropertyFormat((AlbumEntity a) => a.BonusTrack.Duration, 
                 b => Fluent.GetDataTemplate(() => new TextBlock().Bind(TextBlock.TextProperty, b)));
 ```
 

@@ -25,11 +25,11 @@ namespace Signum.Engine
         {
             List<ITable> tables = Schema.Current.GetDatabaseTables().ToList();
 
-            SqlPreCommand createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double);
+            SqlPreCommand createTables = tables.Select(SqlBuilder.CreateTableSql).Combine(Spacing.Double).PlainSqlCommand();
 
-            SqlPreCommand foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double);
-            
-            SqlPreCommand indices = tables.Select(SqlBuilder.CreateAllIndices).NotNull().Combine(Spacing.Double);
+            SqlPreCommand foreignKeys = tables.Select(SqlBuilder.AlterTableForeignKeys).Combine(Spacing.Double).PlainSqlCommand();
+
+            SqlPreCommand indices = tables.Select(SqlBuilder.CreateAllIndices).NotNull().Combine(Spacing.Double).PlainSqlCommand();
 
             return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices);
         }
@@ -39,8 +39,8 @@ namespace Signum.Engine
             return (from t in Schema.Current.Tables.Values
                     let enumType = EnumEntity.Extract(t.Type)
                     where enumType != null
-                    select (from ie in EnumEntity.GetEntities(enumType)
-                            select t.InsertSqlSync(ie)).Combine(Spacing.Simple)).Combine(Spacing.Double);
+                    select EnumEntity.GetEntities(enumType).Select((e, i) => t.InsertSqlSync(e, suffix: t.Name.Name + i)).Combine(Spacing.Simple)
+                    ).Combine(Spacing.Double).PlainSqlCommand();
         }
 
       
@@ -60,8 +60,11 @@ namespace Signum.Engine
             var cmd = list.Select(a =>
                 SqlPreCommand.Combine(Spacing.Simple,
                 //DisconnectUsers(a.name, "SPID" + i) : null,
+                SqlBuilder.SetSingleUser(a),
                 SqlBuilder.SetSnapshotIsolation(a, true),
-                SqlBuilder.MakeSnapshotIsolationDefault(a, true))).Combine(Spacing.Double);
+                SqlBuilder.MakeSnapshotIsolationDefault(a, true),
+                SqlBuilder.SetMultiUser(a))                              
+                ).Combine(Spacing.Double);
 
             return cmd;
         }

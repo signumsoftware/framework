@@ -102,7 +102,7 @@ namespace Signum.Utilities.ExpressionTrees
             return value;
         }
 
-        public static T KeepConstantSubexpressions<T>(this T value)
+        public static T KeepConstantSubexpressions<T>(T value)
         {
             return value;
         }

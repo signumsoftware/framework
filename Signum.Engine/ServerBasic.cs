@@ -14,6 +14,8 @@ using Signum.Utilities;
 using Signum.Engine.Linq;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
+using System.ServiceModel.Channels;
+using Signum.Entities.Reflection;
 
 namespace Signum.Services
 {
@@ -30,6 +32,7 @@ namespace Signum.Services
         {
             try
             {
+                using (CultureFromOperationContext())
                 using (ScopeSessionFactory.OverrideSession(session))
                 using (ExecutionMode.Global())
                 {
@@ -44,7 +47,8 @@ namespace Signum.Services
                     el.ActionName = mi.Name;
                     el.QueryString = description;
                 });
-                throw new FaultException(e.Message);
+
+                throw;
             }
             finally
             {
@@ -62,45 +66,58 @@ namespace Signum.Services
             Return(mi, description, () => { action(); return true; });
         }
 
+        public static IDisposable CultureFromOperationContext()
+        {
+            MessageHeaders headers = OperationContext.Current.IncomingMessageHeaders;
+
+            int culture = headers.FindHeader("CurrentCulture", "http://www.signumsoftware.com/Culture");
+            int cultureUI = headers.FindHeader("CurrentUICulture", "http://www.signumsoftware.com/Culture");
+
+            var changeCulture = culture == -1 ? null : CultureInfoUtils.ChangeCulture(headers.GetHeader<string>(culture));
+            var changeUICulture = cultureUI == -1 ? null : CultureInfoUtils.ChangeCulture(headers.GetHeader<string>(cultureUI));
+
+            return Disposable.Combine(changeCulture, changeUICulture);
+        }
+
         #region IBaseServer
-        public virtual IdentifiableEntity Retrieve(Type type, int id)
+        public virtual Entity Retrieve(Type type, PrimaryKey id)
         {
             return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () => Database.Retrieve(type, id));
         }
 
-        public virtual IdentifiableEntity Save(IdentifiableEntity entidad)
+        public virtual Entity Save(Entity entidad)
         {
             return Return(MethodInfo.GetCurrentMethod(), entidad.GetType().Name,
                 () => Database.Save(entidad));
         }
 
-        public virtual List<IdentifiableEntity> RetrieveAll(Type type)
+        public virtual List<Entity> RetrieveAll(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () => Database.RetrieveAll(type));
         }
 
-        public virtual List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type)
+        public virtual List<Lite<Entity>> RetrieveAllLite(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(), type.Name,
                 () => Database.RetrieveAllLite(type));
         }
 
-        public virtual List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list)
+        public virtual List<Entity> SaveList(List<Entity> list)
         {
             Execute(MethodInfo.GetCurrentMethod(),
                 () =>Database.SaveList(list));
             return list;
         }
 
-        public virtual List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
+        public virtual List<Lite<Entity>> FindAllLite(Implementations implementations)
         {
             return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
                 () => AutocompleteUtils.FindAllLite(implementations));
         }
 
-        public virtual List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
+        public virtual List<Lite<Entity>> FindLiteLike(Implementations implementations, string subString, int count)
         {
             return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
                 () => AutocompleteUtils.FindLiteLike(implementations, subString, count));
@@ -118,16 +135,16 @@ namespace Signum.Services
              () => MixinDeclarations.Declarations);
         }
 
-        public virtual bool Exists(Type type, int id)
+        public virtual bool Exists(Type type, PrimaryKey id)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                   () => Database.Exists(type, id));
         }
 
-        public virtual Dictionary<Type, TypeDN> ServerTypes()
+        public virtual Dictionary<Type, TypeEntity> ServerTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => TypeLogic.TypeToDN);
+                () => TypeLogic.TypeToEntity);
         }
 
         public virtual DateTime ServerNow()
@@ -136,7 +153,7 @@ namespace Signum.Services
                 () => TimeZoneManager.Now);
         }
 
-        public virtual string GetToStr(Type type, int id)
+        public virtual string GetToStr(Type type, PrimaryKey id)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => Database.GetToStr(type, id));
@@ -148,16 +165,22 @@ namespace Signum.Services
                 () => entity.InDB(e => e.Ticks));
         }
 
-        public Dictionary<string, int> GetSymbolIds(Type type)
+        public Dictionary<string, PrimaryKey> GetSymbolIds(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                  () => Symbol.GetSymbolIds(type));
         }
 
-        public Dictionary<string, Tuple<int,string>> GetSemiSymbolIdsAndNames(Type type)
+        public Dictionary<string, Tuple<PrimaryKey, string>> GetSemiSymbolIdsAndNames(Type type)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                  () => SemiSymbol.GetSemiSymbolIdsAndNames(type));
+        }
+
+        public Dictionary<Type, Type> ImportPrimaryKeyDefinitions()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                 () => PrimaryKey.Export());
         }
         #endregion
 
@@ -186,7 +209,7 @@ namespace Signum.Services
                 () => DynamicQueryManager.Current.ExecuteQueryCount(request));
         }
 
-        public virtual Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
+        public virtual Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteUniqueEntity(request));
@@ -212,25 +235,25 @@ namespace Signum.Services
         #endregion
 
         #region IOperationServer Members
-        public Dictionary<OperationSymbol, string> GetCanExecuteAll(IdentifiableEntity entity)
+        public Dictionary<OperationSymbol, string> GetCanExecuteAll(Entity entity)
         {
             return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name,
                 () => OperationLogic.ServiceCanExecute(entity));
         }
 
-        public Dictionary<OperationSymbol, string> GetCanExecuteLiteAll(Lite<IdentifiableEntity> lite)
+        public Dictionary<OperationSymbol, string> GetCanExecuteLiteAll(Lite<Entity> lite)
         {
             return Return(MethodInfo.GetCurrentMethod(), lite.EntityType.Name,
                 () => OperationLogic.ServiceCanExecute(Database.Retrieve(lite)));
         }
 
-        public string GetCanExecute(IdentifiableEntity entity, OperationSymbol operationSymbol)
+        public string GetCanExecute(Entity entity, OperationSymbol operationSymbol)
         {
             return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name + " " + operationSymbol,
                 () => OperationLogic.ServiceCanExecute(entity, operationSymbol));
         }
 
-        public string GetCanExecuteLite(Lite<IdentifiableEntity> lite, OperationSymbol operationSymbol)
+        public string GetCanExecuteLite(Lite<Entity> lite, OperationSymbol operationSymbol)
         {
             return Return(MethodInfo.GetCurrentMethod(), lite.EntityType.Name + " " + operationSymbol,
                 () => OperationLogic.ServiceCanExecute(lite.Retrieve(), operationSymbol));
@@ -254,55 +277,55 @@ namespace Signum.Services
                 () => OperationLogic.GetSaveProtectedTypes());
         }
 
-        public IdentifiableEntity ExecuteOperation(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args)
+        public Entity ExecuteOperation(IEntity entity, OperationSymbol operationSymbol, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
                 () => OperationLogic.ServiceExecute(entity, operationSymbol, args));
         }
 
-        public IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
+        public Entity ExecuteOperationLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
-                () => (IdentifiableEntity)OperationLogic.ServiceExecuteLite(lite, operationSymbol, args));
+                () => (Entity)OperationLogic.ServiceExecuteLite(lite, operationSymbol, args));
         }
 
-        public void DeleteLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
+        public void DeleteLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[] args)
         {
             Execute(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
                  () => OperationLogic.ServiceDelete(lite, operationSymbol, args));
         }
 
-        public void Delete(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args)
+        public void Delete(IEntity entity, OperationSymbol operationSymbol, params object[] args)
         {
             Execute(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
-                 () => OperationLogic.ServiceDelete((IdentifiableEntity)entity, operationSymbol, args));
+                 () => OperationLogic.ServiceDelete((Entity)entity, operationSymbol, args));
         }
 
-        public IdentifiableEntity Construct(Type type, OperationSymbol operationSymbol, params object[] args)
+        public Entity Construct(Type type, OperationSymbol operationSymbol, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
                 () => OperationLogic.ServiceConstruct(type, operationSymbol, args));
         }
 
-        public IdentifiableEntity ConstructFrom(IIdentifiable entity, OperationSymbol operationSymbol, params object[] args)
+        public Entity ConstructFrom(IEntity entity, OperationSymbol operationSymbol, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
                 () => OperationLogic.ServiceConstructFrom(entity, operationSymbol, args));
         }
 
-        public IdentifiableEntity ConstructFromLite(Lite<IIdentifiable> lite, OperationSymbol operationSymbol, params object[] args)
+        public Entity ConstructFromLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),
                 () => OperationLogic.ServiceConstructFromLite(lite, operationSymbol, args));
         }
 
-        public IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, OperationSymbol operationKey, params object[] args)
+        public Entity ConstructFromMany(IEnumerable<Lite<IEntity>> lites, Type type, OperationSymbol operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
                 () => OperationLogic.ServiceConstructFromMany(lites, type, operationKey, args));
         }
 
-        public Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IIdentifiable>> lite, List<OperationSymbol> operatonSymbols)
+        public Dictionary<OperationSymbol, string> GetContextualCanExecute(IEnumerable<Lite<IEntity>> lite, List<OperationSymbol> operatonSymbols)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => OperationLogic.GetContextualCanExecute(lite, operatonSymbols));

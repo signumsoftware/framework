@@ -379,7 +379,7 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(Elapsed.NiceToString(), Role);
+            return "{0} {1}".FormatWith(Elapsed.NiceToString(), Role);
         }
 
         public XElement ExportXml()

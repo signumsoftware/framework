@@ -55,7 +55,7 @@ namespace Signum.Engine.Linq
 
             ITranslateResult result;
 
-            using (HeavyProfiler.Log("LINQ", () => expression.NiceToString()))
+            using (HeavyProfiler.Log("LINQ", () => expression.ToString()))
             using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
                 Expression cleaned = Clean(expression, true, log);

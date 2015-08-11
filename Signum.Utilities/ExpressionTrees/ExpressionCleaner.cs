@@ -127,12 +127,12 @@ namespace Signum.Utilities.ExpressionTrees
             if (m.Method.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
                 return null;
 
-            MethodExpanderAttribute attribute = m.Method.SingleAttribute<MethodExpanderAttribute>();
+            MethodExpanderAttribute attribute = m.Method.GetCustomAttribute<MethodExpanderAttribute>();
             if (attribute != null)
             {
                 IMethodExpander expander = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
                 if (expander == null)
-                    throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander".Formato(attribute.ExpanderType.TypeName()));
+                    throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander".FormatWith(attribute.ExpanderType.TypeName()));
 
                 Expression exp = expander.Expand(
                     m.Object,
@@ -220,7 +220,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         static LambdaExpression GetExpansion(MemberInfo mi)
         {
-            ExpressionFieldAttribute efa = mi.SingleAttribute<ExpressionFieldAttribute>();
+            ExpressionFieldAttribute efa = mi.GetCustomAttribute<ExpressionFieldAttribute>();
 
             string name = efa.Try(a => a.Name) ?? mi.Name + "Expression";
             Type type = mi.DeclaringType;
@@ -229,7 +229,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (fi == null)
             {
                 if (efa != null)
-                    throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".Formato(name, type.TypeName()));
+                    throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".FormatWith(name, type.TypeName()));
 
                 return null;
             }
@@ -237,12 +237,12 @@ namespace Signum.Utilities.ExpressionTrees
             var obj = fi.GetValue(null);
 
             if (obj == null)
-                throw new InvalidOperationException("Expression field '{0}' is null".Formato(name));
+                throw new InvalidOperationException("Expression field '{0}' is null".FormatWith(name));
 
             var result = obj as LambdaExpression;
 
             if (result == null)
-                throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".Formato(name, type.TypeName()));
+                throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".FormatWith(name, type.TypeName()));
 
             return result;
         }

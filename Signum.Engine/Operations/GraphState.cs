@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,9 +24,10 @@ namespace Signum.Engine.Operations
     }
 
     public class Graph<T, S>
-        where T : IdentifiableEntity
-        where S : struct
+        where T : Entity
     {
+        
+
         public interface IGraphOperation : IOperation
         {
         }
@@ -43,11 +44,11 @@ namespace Signum.Engine.Operations
 
         public class Construct : Graph<T>.Construct, IGraphToStateOperation
         {
-            S? toState;
+            Box<S> toState;
             public S ToState
             {
                 get { return toState.Value; }
-                set { toState = value; }
+                set { toState = new Box<S>(value); }
             }
 
             public Construct(ConstructSymbol<T>.Simple symbol)
@@ -70,19 +71,19 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".FormatWith(Symbol.Symbol));
 
             }
         }
 
         public class ConstructFrom<F> : Graph<T>.ConstructFrom<F>, IGraphToStateOperation
-            where F : class, IIdentifiable
+            where F : class, IEntity
         {
-            S? toState;
+            Box<S> toState;
             public S ToState
             {
                 get { return toState.Value; }
-                set { toState = value; }
+                set { toState = new Box<S>(value); }
             }
 
             public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
@@ -107,18 +108,18 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".FormatWith(Symbol.Symbol));
             }
         }
 
         public class ConstructFromMany<F> : Graph<T>.ConstructFromMany<F>, IGraphToStateOperation
-            where F : class, IIdentifiable
+            where F : class, IEntity
         {
-            S? toState;
+            Box<S> toState;
             public S ToState
             {
                 get { return toState.Value; }
-                set { toState = value; }
+                set { toState = new Box<S>(value); }
             }
 
             public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
@@ -142,17 +143,17 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".FormatWith(Symbol));
             }
         }
 
         public class Execute : Graph<T>.Execute, IGraphToStateOperation, IGraphFromStatesOperation, IEntityOperation
         {
-            S? toState;
+            Box<S> toState;
             public S ToState
             {
                 get { return toState.Value; }
-                set { toState = value; }
+                set { toState = new Box<S>(value); }
             }
             
             public List<S> FromStates { get; private set; }
@@ -175,7 +176,7 @@ namespace Signum.Engine.Operations
                 S state = Graph<T, S>.GetStateFunc(entity);
 
                 if (!FromStates.Contains(state))
-                    return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().Formato(
+                    return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
                         FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
                         ((Enum)(object)state).NiceToString());
 
@@ -192,10 +193,10 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".FormatWith(Symbol));
 
                 if (FromStates.IsEmpty())
-                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".FormatWith(Symbol));
             }
         }
 
@@ -219,7 +220,7 @@ namespace Signum.Engine.Operations
                 S state = Graph<T, S>.GetStateFunc(entity);
 
                 if (!FromStates.Contains(state))
-                    return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().Formato(
+                    return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
                         FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
                         ((Enum)(object)state).NiceToString());
 
@@ -238,7 +239,7 @@ namespace Signum.Engine.Operations
                 base.AssertIsValid();
 
                 if (FromStates.IsEmpty())
-                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(Symbol.Symbol));
+                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".FormatWith(Symbol.Symbol));
             }
         }
 
@@ -316,8 +317,8 @@ namespace Signum.Engine.Operations
                     case OperationType.ConstructorFromMany:
                         {
                             string from = item.OperationType == OperationType.Constructor ? "[New]" :
-                                            item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) :
-                                            item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) : "";
+                                            item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".FormatWith(item.GetType().GetGenericArguments()[2].TypeName()) :
+                                            item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".FormatWith(item.GetType().GetGenericArguments()[2].TypeName()) : "";
 
                             Add(from, ((IGraphToStateOperation)item).ToState.ToString(), item.OperationSymbol);
 
@@ -334,7 +335,17 @@ namespace Signum.Engine.Operations
             S state = GetStateFunc(entity);
 
             if (!state.Equals(operation.ToState))
-                throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".Formato(operation.OperationSymbol, operation.ToState, state));
+                throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".FormatWith(operation.OperationSymbol, operation.ToState, state));
         }
+    }
+
+    internal class Box<T>
+    {
+        public Box(T value)
+        {
+            this.Value = value;
+        }
+
+        public readonly T Value;
     }
 }

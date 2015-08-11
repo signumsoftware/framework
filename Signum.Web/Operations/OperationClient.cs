@@ -1,5 +1,4 @@
-#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +19,6 @@ using Signum.Web.Controllers;
 using Signum.Utilities.Reflection;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-#endregion
 
 namespace Signum.Web.Operations
 {
@@ -52,7 +50,7 @@ namespace Signum.Web.Operations
 
         static bool Manager_IsCreable(Type type)
         {
-            if (!type.IsIdentifiableEntity() || !OperationLogic.HasConstructOperations(type))
+            if (!type.IsEntity() || !OperationLogic.HasConstructOperations(type))
                 return true;
 
             return Manager.HasConstructOperationsAllowedAndVisible(type);
@@ -60,7 +58,7 @@ namespace Signum.Web.Operations
 
         public static void AddSetting(OperationSettings setting)
         {
-            Manager.Settings.GetOrAddDefinition(setting.OverridenType).AddOrThrow(setting.OperationSymbol, setting, "EntitySettings {0} repeated");
+            Manager.Settings.GetOrAddDefinition(setting.OverridenType).AddOrThrow(setting.OperationSymbol, setting, "{0} repeated");
         }
 
         public static void AddSettings(List<OperationSettings> settings)
@@ -71,34 +69,41 @@ namespace Signum.Web.Operations
             }
         }
 
-        public static EntityOperationSettings<T> GetEntitySettings<T>(IEntityOperationSymbolContainer<T> operation) where T : class, IIdentifiable
+        public static void ReplaceSetting(OperationSettings setting)
+        {
+            Manager.Settings.GetOrAddDefinition(setting.OverridenType)[setting.OperationSymbol] = setting;
+            Manager.Settings.ClearCache();
+        }
+
+        public static EntityOperationSettings<T> GetEntitySettings<T>(IEntityOperationSymbolContainer<T> operation) where T : class, IEntity
         {
             return Manager.GetSettings<EntityOperationSettings<T>>(typeof(T), operation.Symbol);
         }
 
-        public static ConstructorOperationSettings<T> GetConstructorSettings<T>(ConstructSymbol<T>.Simple operation) where T : class, IIdentifiable
+        public static ConstructorOperationSettings<T> GetConstructorSettings<T>(ConstructSymbol<T>.Simple operation) where T : class, IEntity
         {
             return Manager.GetSettings<ConstructorOperationSettings<T>>(typeof(T), operation.Symbol);
         }
 
-        public static ContextualOperationSettings<T> GetContextualSettings<T>(IConstructFromManySymbolContainer<T> operation) where T : class, IIdentifiable
+        public static ContextualOperationSettings<T> GetContextualSettings<T>(IConstructFromManySymbolContainer<T> operation) where T : class, IEntity
         {
             return Manager.GetSettings<ContextualOperationSettings<T>>(typeof(T), operation.Symbol);
         }
 
 
-        public static ActionResult DefaultExecuteResult(this ControllerBase controller, IdentifiableEntity entity, string prefix = null)
+        public static ActionResult DefaultExecuteResult(this ControllerBase controller, Entity entity, string prefix = null)
         {
             if (prefix == null)
                 prefix = controller.Prefix();
 
             var request = controller.ControllerContext.HttpContext.Request;
 
-            if (request[ViewDataKeys.AvoidReturnView].HasText())
-                return new ContentResult();
 
             if (prefix.HasText())
             {
+                if (request[ViewDataKeys.AvoidReturnView].HasText())
+                    return new ContentResult();
+
                 if (request[ViewDataKeys.ViewMode] == ViewMode.View.ToString())
                     return controller.PopupView(entity, new PopupViewOptions(prefix));
                 else
@@ -112,6 +117,9 @@ namespace Signum.Web.Operations
                     if (!request.UrlReferrer.AbsolutePath.Contains(newUrl) && !request[ViewDataKeys.AvoidReturnRedirect].HasText())
                         return controller.RedirectHttpOrAjax(newUrl);
                 }
+
+                if (request[ViewDataKeys.AvoidReturnView].HasText())
+                    return new ContentResult();
 
                 if (request.IsAjaxRequest())
                     return Navigator.NormalControl(controller, entity);
@@ -130,12 +138,9 @@ namespace Signum.Web.Operations
             return new ContentResult();
         }
 
-        public static ActionResult DefaultConstructResult(this ControllerBase controller, IdentifiableEntity entity, string newPrefix = null)
+        public static ActionResult DefaultConstructResult(this ControllerBase controller, Entity entity, string newPrefix = null)
         {
             var request = controller.ControllerContext.HttpContext.Request;
-
-            if (request[ViewDataKeys.AvoidReturnView].HasText())
-                return new ContentResult();
 
             if (newPrefix == null)
                 newPrefix = request["newPrefix"];
@@ -145,12 +150,18 @@ namespace Signum.Web.Operations
 
             if (newPrefix.HasText())
             {
+                if (request[ViewDataKeys.AvoidReturnView].HasText())
+                    return new ContentResult();
+
                 return controller.PopupNavigate(entity, new PopupNavigateOptions(newPrefix));
             }
             else //NormalWindow
             {
                 if (!entity.IsNew && !request[ViewDataKeys.AvoidReturnRedirect].HasText())
                     return controller.RedirectHttpOrAjax(Navigator.NavigateRoute(entity));
+
+                if (request[ViewDataKeys.AvoidReturnView].HasText())
+                    return new ContentResult();
 
                 if (request.IsAjaxRequest())
                     return Navigator.NormalControl(controller, entity);
@@ -193,7 +204,7 @@ namespace Signum.Web.Operations
     public class OperationManager
     {
         public Polymorphic<Dictionary<OperationSymbol, OperationSettings>> Settings =
-            new Polymorphic<Dictionary<OperationSymbol, OperationSettings>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
+            new Polymorphic<Dictionary<OperationSymbol, OperationSettings>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IEntity));
 
         public OS GetSettings<OS>(Type type, OperationSymbol operation)
             where OS : OperationSettings
@@ -205,7 +216,7 @@ namespace Signum.Web.Operations
                 var result = settings as OS;
 
                 if (result == null)
-                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), operation.Key, typeof(OS).TypeName()));
+                    throw new InvalidOperationException("{0}({1}) should be a {2}".FormatWith(settings.GetType().TypeName(), operation.Key, typeof(OS).TypeName()));
 
                 return result;
             }
@@ -224,13 +235,13 @@ namespace Signum.Web.Operations
 
         #region Execute ToolBarButton
 
-        static readonly GenericInvoker<Func<IdentifiableEntity, OperationInfo, EntityButtonContext, EntityOperationSettingsBase, IEntityOperationContext>> newEntityOperationContext =
-              new GenericInvoker<Func<IdentifiableEntity, OperationInfo, EntityButtonContext, EntityOperationSettingsBase, IEntityOperationContext>>((entity, oi, ctx, settings) =>
-                  new EntityOperationContext<IdentifiableEntity>(entity, oi, ctx, (EntityOperationSettings<IdentifiableEntity>)settings));
+        static readonly GenericInvoker<Func<Entity, OperationInfo, EntityButtonContext, EntityOperationSettingsBase, IEntityOperationContext>> newEntityOperationContext =
+              new GenericInvoker<Func<Entity, OperationInfo, EntityButtonContext, EntityOperationSettingsBase, IEntityOperationContext>>((entity, oi, ctx, settings) =>
+                  new EntityOperationContext<Entity>(entity, oi, ctx, (EntityOperationSettings<Entity>)settings));
 
         public virtual ToolBarButton[] ButtonBar_GetButtonBarElement(EntityButtonContext ctx, ModifiableEntity entity)
         {
-            IdentifiableEntity ident = entity as IdentifiableEntity;
+            Entity ident = entity as Entity;
 
             if (ident == null)
                 return null;
@@ -313,7 +324,7 @@ namespace Signum.Web.Operations
         {
             return new ToolBarButton(ctx.Context.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
             {
-                Style = EntityOperationSettingsBase.Style(ctx.OperationInfo),
+                Style = ctx.OperationSettings.Try(a => a.Style) ?? EntityOperationSettingsBase.AutoStyleFunction(ctx.OperationInfo),
 
                 Tooltip = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
@@ -321,6 +332,7 @@ namespace Signum.Web.Operations
 
                 Text = ctx.OperationSettings.Try(o => o.Text) ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.OperationSymbol.NiceToString() : group.SimplifyName(ctx.OperationInfo.OperationSymbol.NiceToString())),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)),
+                HtmlProps = { { "data-operation", ctx.OperationInfo.OperationSymbol.Key } }
             };
         }
 
@@ -335,7 +347,7 @@ namespace Signum.Web.Operations
                 case OperationType.ConstructorFrom:
                     return JsModule.Operations["constructFromDefault"](ctx.Options(), JsFunction.Event);
                 default:
-                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".FormatWith(
                         ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
             }
         }
@@ -345,7 +357,7 @@ namespace Signum.Web.Operations
 
         static readonly GenericInvoker<Func<OperationInfo, ClientConstructorContext, ConstructorOperationSettingsBase, IClientConstructorOperationContext>> newClientConstructorOperationContext =
              new GenericInvoker<Func<OperationInfo, ClientConstructorContext, ConstructorOperationSettingsBase, IClientConstructorOperationContext>>((oi, cctx, settings) =>
-                new ClientConstructorOperationContext<IdentifiableEntity>(oi, cctx, (ConstructorOperationSettings<IdentifiableEntity>)settings));
+                new ClientConstructorOperationContext<Entity>(oi, cctx, (ConstructorOperationSettings<Entity>)settings));
 
     
 
@@ -388,9 +400,9 @@ namespace Signum.Web.Operations
 
         static readonly GenericInvoker<Func<OperationInfo, ConstructorContext, ConstructorOperationSettingsBase, IConstructorOperationContext>> newConstructorOperationContext =
         new GenericInvoker<Func<OperationInfo, ConstructorContext, ConstructorOperationSettingsBase, IConstructorOperationContext>>((oi, ctx, settings) =>
-            new ConstructorOperationContext<IdentifiableEntity>(oi, ctx, (ConstructorOperationSettings<IdentifiableEntity>)settings));
+            new ConstructorOperationContext<Entity>(oi, ctx, (ConstructorOperationSettings<Entity>)settings));
 
-        protected internal virtual IdentifiableEntity Construct(ConstructorContext ctx)
+        protected internal virtual Entity Construct(ConstructorContext ctx)
         {
             OperationInfo constructor = GetConstructor(ctx);
 
@@ -437,7 +449,7 @@ namespace Signum.Web.Operations
 
         static readonly GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext =
          new GenericInvoker<Func<SelectedItemsMenuContext, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>>((ctx, oi, settings) =>
-             new ContextualOperationContext<IdentifiableEntity>(ctx, oi, (ContextualOperationSettings<IdentifiableEntity>)settings));
+             new ContextualOperationContext<Entity>(ctx, oi, (ContextualOperationSettings<Entity>)settings));
 
 
         public virtual List<IMenuItem> ContextualItemsHelper_GetConstructorFromManyMenuItems(SelectedItemsMenuContext ctx)
@@ -515,7 +527,7 @@ namespace Signum.Web.Operations
                 case OperationType.ConstructorFrom:
                     return JsModule.Operations["constructFromDefaultContextual"](ctx.Options(), JsFunction.Event);
                 default:
-                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".FormatWith(ctx.OperationInfo.OperationType.ToString(), ctx.OperationInfo.OperationSymbol));
             }
         }
 
@@ -523,7 +535,7 @@ namespace Signum.Web.Operations
         {
             return new MenuItem(ctx.Context.Prefix, ctx.OperationInfo.OperationSymbol.Key.Replace(".", "_"))
             {
-                Style = EntityOperationSettingsBase.Style(ctx.OperationInfo),
+                Style = ctx.OperationSettings.Try(a=>a.Style) ?? EntityOperationSettingsBase.AutoStyleFunction(ctx.OperationInfo),
 
                 Tooltip = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,

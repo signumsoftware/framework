@@ -33,12 +33,12 @@ namespace Signum.Test
 
         void SetName(string newName)
         {
-            Database.Query<ArtistDN>().Where(a => a.Id == 1).UnsafeUpdate(a => new ArtistDN { Name = newName });
+            Database.Query<ArtistEntity>().Where(a => a.Id == 1).UnsafeUpdate(a => new ArtistEntity { Name = newName });
         }
 
         string GetName()
         {
-            return Database.Query<ArtistDN>().Where(a => a.Id == 1).Select(a => a.Name).Single();
+            return Database.Query<ArtistEntity>().Where(a => a.Id == 1).Select(a => a.Name).Single();
         }
 
         [TestMethod]

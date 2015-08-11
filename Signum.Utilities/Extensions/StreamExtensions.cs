@@ -28,16 +28,15 @@ namespace Signum.Utilities
             str.Write(data, 0, data.Length);
         }
 
-        public static string ReadResourceStream(this Assembly assembly, string name)
+        public static string ReadResourceStream(this Assembly assembly, string name, Encoding encoding = null)
         {
             using (Stream stream = assembly.GetManifestResourceStream(name))
             {
                 if (stream == null)
-                    throw new MissingManifestResourceException("{0} not found on {1}".Formato(name, assembly));
+                    throw new MissingManifestResourceException("{0} not found on {1}".FormatWith(name, assembly));
 
-                using (StreamReader reader = new StreamReader(stream))
+                using (StreamReader reader = encoding == null ? new StreamReader(stream) : new StreamReader(stream, encoding))
                     return reader.ReadToEnd();
-
             }
         }
 
@@ -77,17 +76,54 @@ namespace Signum.Utilities
         public static R Using<T, R>(this T disposable, Func<T, R> function)
             where T : IDisposable
         {
-            using (disposable)
+            try
+            {
                 return function(disposable);
+            }
+            catch (Exception e)
+            {
+                var de = disposable as IDisposableException;
+
+                if (de != null)
+                    de.OnException(e);
+
+                throw;
+            }
+            finally
+            {
+                if (disposable != null)
+                    disposable.Dispose();
+            }
         }
 
         [DebuggerStepThrough]
         public static void EndUsing<T>(this T disposable, Action<T> action)
             where T : IDisposable
         {
-            using (disposable)
+            try
+            {
                 action(disposable);
+            }
+            catch (Exception e)
+            {
+                var de = disposable as IDisposableException;
+
+                if (de != null)
+                    de.OnException(e);
+
+                throw;
+            }
+            finally
+            {
+                if (disposable != null)
+                    disposable.Dispose();
+            }
         }
+    }
+
+    public interface IDisposableException : IDisposable
+    {
+        void OnException(Exception ex);
     }
 
     public class ProgressStream : Stream

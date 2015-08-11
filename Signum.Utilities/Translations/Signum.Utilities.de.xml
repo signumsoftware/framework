@@ -1,38 +1,38 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="">
-    <Member Name="0HasNoFreeBits" Description="{0:X} Hat keine freien Bits" />
-    <Member Name="0Year1Month2Day" Description="{0} Jahr(e), {1} Monat(e), {2} Tag(e)" />
-  </Type>
   <Type Name="AboutMessage">
-    <Member Name="Unknown0" Description="Unbekannt ({0})" />
+    <Member Name="OS_Unknown0" Description="Unbekanntes ({0})" />
   </Type>
   <Type Name="CollectionMessage">
     <Member Name="And" Description=" und " />
+    <Member Name="MoreThanOne0Found" Description="Mehr als eine(n) {0} gefunden" />
+    <Member Name="No0Found" Description="Keine(n) {0} gefunden" />
     <Member Name="Or" Description=" oder " />
   </Type>
   <Type Name="ConsoleMessage">
     <Member Name="EnterYourSelection" Description="Geben Sie Ihre Auswahl ein: " />
     <Member Name="EnterYoutSelectionsSeparatedByComma" Description="Geben Sie Ihre Auswahl durch Kommata getrennt ein: " />
+    <Member Name="More" Description="mehr..." />
     <Member Name="NoOptionWithKey0Found" Description="Keine Option mit Schlüssel {0} gefunden" />
     <Member Name="SelectOneOfTheFollowingOptions" Description="Wählen Sie eine der folgenden Optionen:" />
   </Type>
   <Type Name="DateTimeMessage">
-    <Member Name="0Day" Description="{0} Tag" />
-    <Member Name="0Days" Description="{0} Tage" />
-    <Member Name="0Hour" Description="{0} Stunde" />
-    <Member Name="0Hours" Description="{0} Stunden" />
-    <Member Name="0Minute" Description="{0} Minute" />
-    <Member Name="0Minutes" Description="{0} Minuten" />
-    <Member Name="0Month" Description="{0} Monat" />
-    <Member Name="0Months" Description="{0} Monate" />
-    <Member Name="0Second" Description="{0} Sekunde" />
-    <Member Name="0Seconds" Description="{0} Sekunden" />
-    <Member Name="0Year" Description="{0} Jahr" />
-    <Member Name="0Years" Description="{0} Jahre" />
-    <Member Name="Ago" Description="{0} vor " />
+    <Member Name="_0Ago" Description="vor {0} " />
+    <Member Name="_0Day" Description="{0} Tag" />
+    <Member Name="_0Days" Description="{0} Tage" />
+    <Member Name="_0Hour" Description="{0} Stunden" />
+    <Member Name="_0Hours" Description="{0} Stunden" />
+    <Member Name="_0Minute" Description="{0} Minute" />
+    <Member Name="_0Minutes" Description="{0} Minuten" />
+    <Member Name="_0Month" Description="{0} Monat" />
+    <Member Name="_0Months" Description="{0} Monate" />
+    <Member Name="_0Second" Description="{0} Sekunde" />
+    <Member Name="_0Seconds" Description="{0} Sekunden" />
+    <Member Name="_0Year" Description="{0} Jahr" />
+    <Member Name="_0Years" Description="{0} Jahre" />
     <Member Name="DateLast" Description="Letzte {0}" />
     <Member Name="DateThis" Description="Dieser {0}" />
+    <Member Name="In0" Description="In {0}" />
     <Member Name="Today" Description="Heute" />
     <Member Name="Tomorrow" Description="Morgen" />
     <Member Name="Yesterday" Description="Gestern" />
@@ -44,5 +44,4 @@
     <Member Name="Minutes" Description="Minuten" />
     <Member Name="Seconds" Description="Sekunden" />
   </Type>
-  <Type Name="Unavailable" Description="Nicht verfügbar" />
 </Translations>

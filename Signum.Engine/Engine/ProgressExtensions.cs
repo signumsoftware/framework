@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -117,18 +117,22 @@ namespace Signum.Engine
         public static void ProgressForeachDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             Table table = Schema.Current.Table(tableType);
-            table.Identity = false;
+
+            if (!table.IdentityBehaviour)
+                throw new InvalidOperationException("Identity is false already");
+
+            table.IdentityBehaviour = false;
             try
             {
                 collection.ProgressForeach(elementID, fileName, (item, writer) =>
                 {
-                    using (Administrator.DisableIdentity(table.Name))
+                    using (table.PrimaryKey.Default != null ? null: Administrator.DisableIdentity(table.Name))
                         action(item, writer);
                 });
             }
             finally
             {
-                table.Identity = true;
+                table.IdentityBehaviour = true;
                 SafeConsole.ClearSameLine();
             }
         }
@@ -138,18 +142,22 @@ namespace Signum.Engine
         public static void ProgressForeachParallelDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             Table table = Schema.Current.Table(tableType);
-            table.Identity = false;
+
+            if (!table.IdentityBehaviour)
+                throw new InvalidOperationException("Identity is false already");
+
+            table.IdentityBehaviour = false;
             try
             {
                 collection.ProgressForeachParallel(elementID, fileName, (item, writer) =>
                 {
-                    using (Administrator.DisableIdentity(table.Name))
+                    using (table.PrimaryKey.Default != null ? null : Administrator.DisableIdentity(table.Name))
                         action(item, writer);
                 });
             }
             finally
             {
-                table.Identity = true;
+                table.IdentityBehaviour = true;
             }
         }
 
@@ -187,7 +195,7 @@ namespace Signum.Engine
             {
                 return (color, str, parameters) =>
                 {
-                    string f = parameters == null ? str : str.Formato(parameters);
+                    string f = parameters == null ? str : str.FormatWith(parameters);
                     lock (logStreamWriter)
                         logStreamWriter.WriteLine(f);
                     lock (SafeConsole.SyncKey)

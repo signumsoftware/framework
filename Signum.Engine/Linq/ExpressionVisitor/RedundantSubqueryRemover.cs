@@ -210,7 +210,7 @@ namespace Signum.Engine.Linq
                 for (int i = 0, n = select.Columns.Count; i < n; i++)
                 {
                     var cd = select.Columns[i];
-                    if (cd.Expression.NodeType != (ExpressionType)DbExpressionType.Column &&
+                    if (!(cd.Expression is ColumnExpression) &&
                         cd.Expression.NodeType != ExpressionType.Constant)
                         return false;
                 }

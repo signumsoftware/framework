@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -103,7 +103,7 @@ namespace Signum.Entities.DynamicQuery
 
         Dictionary<string, QueryToken> CachedSubTokensOverride(SubTokensOptions options)
         {
-            return subTokensOverrideCache.GetOrAdd(Tuple.Create(this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionary(a => a.Key));
+            return subTokensOverrideCache.GetOrAdd(Tuple.Create(this, options), (tup) => tup.Item1.SubTokensOverride(tup.Item2).ToDictionary(a => a.Key, "subtokens for " + this.Key));
         }
 
         protected List<QueryToken> SubTokensBase(Type type, SubTokensOptions options, Implementations? implementations)
@@ -116,7 +116,7 @@ namespace Signum.Entities.DynamicQuery
                 return DecimalProperties(this);
 
             Type cleanType = type.CleanType();
-            if (cleanType.IsIIdentifiable())
+            if (cleanType.IsIEntity())
             {
                 if (implementations.Value.IsByAll)
                     return new List<QueryToken>(); // new[] { EntityPropertyToken.IdProperty(this) };
@@ -214,7 +214,7 @@ namespace Signum.Entities.DynamicQuery
                          where Reflector.QueryableProperty(type, p)
                          select (QueryToken)new EntityPropertyToken(this, p, this.AddPropertyRoute(p));
 
-            if (!type.IsIdentifiableEntity())
+            if (!type.IsEntity())
                 return result;
 
             var mixinProperties = from mt in MixinDeclarations.GetMixinDeclarations(type)
@@ -285,7 +285,7 @@ namespace Signum.Entities.DynamicQuery
 
                 if (IsCollection(type))
                 {
-                    return QueryTokenMessage.ListOf0.NiceToString().Formato(GetNiceTypeName(Type.ElementType(), GetElementImplementations()));
+                    return QueryTokenMessage.ListOf0.NiceToString().FormatWith(GetNiceTypeName(Type.ElementType(), GetElementImplementations()));
                 }
 
                 return GetNiceTypeName(Type, GetImplementations());
@@ -327,7 +327,7 @@ namespace Signum.Entities.DynamicQuery
 
                     return imp.Types.CommaOr(t => t.NiceName());
                 }
-                case FilterType.Embedded: return QueryTokenMessage.Embedded0.NiceToString().Formato(type.NiceName());
+                case FilterType.Embedded: return QueryTokenMessage.Embedded0.NiceToString().FormatWith(type.NiceName());
                 default: return type.TypeName();
             }
         }

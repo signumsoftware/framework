@@ -24,8 +24,34 @@ module SF {
         }
     }
 
-    once("setupAjaxRedirectPrefilter", () =>
-        setupAjaxRedirect());
+    var ajaxExtraParameters: {(extraArgs : FormObject) : void } [] = [];
+    export function registerAjaxExtraParameters(getExtraParams: (extraArgs : FormObject) => void) {
+        if (getExtraParams != null)
+            ajaxExtraParameters.push(getExtraParams);
+    }
+    export function addAjaxExtraParameters(originalParams : FormObject) {
+        if (ajaxExtraParameters.length > 0) {
+            ajaxExtraParameters.forEach(addExtraParametersFunc => {
+                addExtraParametersFunc(originalParams);
+            });
+        }
+    }
+
+    once("setupAjaxRedirectPrefilter", () => {
+        setupAjaxRedirect();
+        setupAjaxExtraParameters();
+    });
+
+    function setupAjaxExtraParameters() {
+
+        $.ajaxPrefilter((options: JQueryAjaxSettings, originalOptions: JQueryAjaxSettings, jqXHR: JQueryXHR) => {
+            if (ajaxExtraParameters.length) {
+                var data = $.extend({}, originalOptions.data);
+                addAjaxExtraParameters(data);
+                options.data = $.param(data);
+            }
+        });
+    }
 
     function setupAjaxRedirect() {
 
@@ -33,7 +59,7 @@ module SF {
 
             var originalSuccess = options.success;
 
-            var getRredirectUrl = function (ajaxResult) {
+            var getRedirectUrl = function (ajaxResult) {
                 if (SF.isEmpty(ajaxResult))
                     return null;
 
@@ -53,11 +79,10 @@ module SF {
                 //if (!options.avoidRedirect && jqXHR.status == 302)  
                 //    location.href = jqXHR.getResponseHeader("Location");
 
-                var url = getRredirectUrl(result);
+                var url = getRedirectUrl(result);
                 if (!SF.isEmpty(url))
                     location.href = url;
-
-                if (originalSuccess)
+                else if (originalSuccess)
                     originalSuccess(result, text, xhr);
             };
         });
@@ -136,7 +161,7 @@ module SF {
                 } catch (e) { }
             }
             return Cookies.read(key);
-        };
+        }
 
         export function setItem(key: string, value: string, days?: number) {
             if (isSupported) {
@@ -146,12 +171,7 @@ module SF {
                 } catch (e) { }
             } else
                 Cookies.create(key, value, days ? days : 30);
-        };
-
-        return {
-            getItem: getItem,
-            setItem: setItem
-        };
+        }
     }
 
     export function hiddenInput(id: string, value: any) {
@@ -228,8 +248,7 @@ module SF {
             }
         }
 
-        var currentForm = $("form");
-        currentForm.after($form);
+        $("body").after($form);
         
         (<HTMLFormElement>$form[0]).submit();
         $form.remove();

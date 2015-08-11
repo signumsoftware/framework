@@ -39,13 +39,13 @@ namespace Signum.Windows
             
             string niceName = mod.GetType().NiceName();
 
-            IdentifiableEntity ident = mod as IdentifiableEntity;
+            Entity ident = mod as Entity;
             if (ident == null)
                 return niceName;
 
             if (ident.IsNew)
             {
-                return LiteMessage.New.NiceToString().ForGenderAndNumber(ident.GetType().GetGender()) + " " + niceName; 
+                return LiteMessage.New_G.NiceToString().ForGenderAndNumber(ident.GetType().GetGender()) + " " + niceName; 
             }
             return niceName + " " + ident.Id;
         }

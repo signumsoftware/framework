@@ -26,11 +26,11 @@ export interface TypeInfo {
 
 export class RuntimeInfo {
     type: string;
-    id: number;
+    id: string;
     isNew: boolean;
     ticks: string;
 
-    constructor(entityType: string, id: number, isNew: boolean, ticks?: string) {
+    constructor(entityType: string, id: string, isNew: boolean, ticks?: string) {
         if (SF.isEmpty(entityType))
             throw new Error("entityTyp is mandatory for RuntimeInfo");
 
@@ -47,7 +47,7 @@ export class RuntimeInfo {
         var array = runtimeInfoString.split(';');
         return new RuntimeInfo(
             array[0],
-            SF.isEmpty(array[1]) ? null : parseInt(array[1]),
+            SF.isEmpty(array[1]) ? null : array[1],
             array[2] == "n",
             array[3]);
     }
@@ -65,7 +65,7 @@ export class RuntimeInfo {
 
         return new RuntimeInfo(
             key.before(";"),
-            parseInt(key.after(";")),
+            key.after(";"),
             false);
     }
 

@@ -20,7 +20,7 @@ namespace Signum.Web.Controllers
             if (typeArray == null)
                 throw new ArgumentException("ImplementedByAll not allowed in Autocomplete");
 
-            List<Lite<IdentifiableEntity>> lites = AutocompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);
+            List<Lite<Entity>> lites = AutocompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);
 
             var result = lites.Select(o => new AutocompleteResult(o)).ToList();
 
@@ -35,7 +35,7 @@ namespace Signum.Web.Controllers
                 Take(l)
                 .Select(o => new AutocompleteResult
                 {
-                    id = o.Id,
+                    id = o.Id.ToString(),
                     text = o.ToString(),
                     type = Navigator.ResolveWebTypeName(o.GetType())
                 }).ToList();
@@ -84,7 +84,7 @@ namespace Signum.Web.Controllers
         [HttpPost, ActionSplitter("webQueryName")]
         public ContentResult SelectedItemsContextMenu(string webQueryName, string implementationsKey, string prefix)
         {
-            var lites = this.ParseLiteKeys<IdentifiableEntity>();
+            var lites = this.ParseLiteKeys<Entity>();
             if (lites.IsEmpty())
                 return Content("");
 
@@ -170,15 +170,15 @@ namespace Signum.Web.Controllers
         {
         }
 
-        public AutocompleteResult(Lite<IdentifiableEntity> lite)
+        public AutocompleteResult(Lite<Entity> lite)
         {
-            id = lite.Id;
+            id = lite.Id.ToString();
             text = lite.ToString();
             type = Navigator.ResolveWebTypeName(lite.EntityType);
             link = Navigator.NavigateRoute(lite);
         }
 
-        public int id;
+        public string id;
         public string text;
         public string type;
         public string link;

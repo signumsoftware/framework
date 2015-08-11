@@ -59,7 +59,7 @@ interface CarouselOptions {
 
 interface TypeaheadOptions {
     source?: (query: string, cb: (items: any[]) => void) => void;
-    items?: number;
+    items?: any;
     minLength?: number;
     matcher?: (item: any) => boolean;
     sorter?: (items: any[]) => any[];

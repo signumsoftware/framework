@@ -61,12 +61,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
-    <OutputPath>bin\Partial\</OutputPath>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <Private>False</Private>
@@ -346,8 +340,6 @@
     <Page Include="Widgets\LinksWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Widgets\WidgetPanel.xaml">
       <SubType>Designer</SubType>
@@ -540,6 +532,7 @@
     <Compile Include="Widgets\LinksClient.cs" />
     <Compile Include="Widgets\LinksWidget.xaml.cs">
       <DependentUpon>LinksWidget.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="Widgets\WidgetPanel.xaml.cs">
       <DependentUpon>WidgetPanel.xaml</DependentUpon>
@@ -642,6 +635,8 @@
     <None Include="Introduction.md" />
     <None Include="LocExtension.md" />
     <None Include="NormalWindow.md" />
+    <None Include="Operations\OperationClient.md" />
+    <None Include="Operations\OperationServer.md" />
     <None Include="Widgets\LinksClient.md" />
     <None Include="Widgets\WidgetPanel.md" />
   </ItemGroup>

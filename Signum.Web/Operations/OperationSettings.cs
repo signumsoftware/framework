@@ -1,5 +1,4 @@
-#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,15 +12,15 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Signum.Utilities.ExpressionTrees;
-#endregion
+using Signum.Utilities.Reflection;
 
 namespace Signum.Web.Operations
 {
     public abstract class OperationSettings
     {
-        public OperationSettings(IOperationSymbolContainer symbol)
+        protected OperationSettings(OperationSymbol symbol)
         {
-            this.OperationSymbol = symbol.Symbol; 
+            this.OperationSymbol = symbol;
         }
 
         public OperationSymbol OperationSymbol { get; private set; }
@@ -32,7 +31,7 @@ namespace Signum.Web.Operations
 
         public override string ToString()
         {
-            return "{0}({1})".Formato(this.GetType().TypeName(), OperationSymbol.Key);
+            return "{0}({1})".FormatWith(this.GetType().TypeName(), OperationSymbol.Key);
         }
     }
 
@@ -43,19 +42,26 @@ namespace Signum.Web.Operations
         public abstract bool OnIsVisible(IClientConstructorOperationContext ctx);
 
         public abstract bool HasConstructor { get; }
-        public abstract IdentifiableEntity OnConstructor(IConstructorOperationContext ctx);
+        public abstract Entity OnConstructor(IConstructorOperationContext ctx);
 
         public abstract bool HasClientConstructor { get; }
         public abstract JsFunction OnClientConstructor(IClientConstructorOperationContext ctx);
 
-        protected ConstructorOperationSettingsBase(IOperationSymbolContainer constructOperation)
-            : base(constructOperation)
+        protected ConstructorOperationSettingsBase(OperationSymbol symbol)
+            : base(symbol)
         {
 
         }
+
+        static GenericInvoker<Func<OperationSymbol, ConstructorOperationSettingsBase>> giCreate =
+           new GenericInvoker<Func<OperationSymbol, ConstructorOperationSettingsBase>>(symbol => new ConstructorOperationSettings<Entity>(symbol));
+        public static ConstructorOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        {
+            return giCreate.GetInvoker(type)(symbol);
+        }
     }
 
-    public class ConstructorOperationSettings<T> : ConstructorOperationSettingsBase where T : class, IIdentifiable
+    public class ConstructorOperationSettings<T> : ConstructorOperationSettingsBase where T : class, IEntity
     {
         public Func<ClientConstructorOperationContext<T>, bool> IsVisible { get; set; }
         public Func<ClientConstructorOperationContext<T>, JsFunction> ClientConstructor { get; set; }
@@ -63,7 +69,12 @@ namespace Signum.Web.Operations
         public Func<ConstructorOperationContext<T>, T> Constructor { get; set; }
 
         public ConstructorOperationSettings(ConstructSymbol<T>.Simple constructOperation)
-            : base(constructOperation)
+            : base(constructOperation.Symbol)
+        {
+        }
+
+        internal ConstructorOperationSettings(OperationSymbol symbol)
+            : base(symbol)
         {
         }
 
@@ -83,12 +94,10 @@ namespace Signum.Web.Operations
 
         public override bool HasConstructor { get { return Constructor != null; } }
 
-        public override IdentifiableEntity OnConstructor(IConstructorOperationContext ctx)
+        public override Entity OnConstructor(IConstructorOperationContext ctx)
         {
-            return (IdentifiableEntity)(IIdentifiable)Constructor((ConstructorOperationContext<T>)ctx);
+            return (Entity)(IEntity)Constructor((ConstructorOperationContext<T>)ctx);
         }
-
-     
 
         public override Type OverridenType
         {
@@ -103,7 +112,7 @@ namespace Signum.Web.Operations
         ConstructorOperationSettingsBase Settings { get; }
     }
 
-    public class ClientConstructorOperationContext<T> : IClientConstructorOperationContext where T : class, IIdentifiable
+    public class ClientConstructorOperationContext<T> : IClientConstructorOperationContext where T : class, IEntity
     {
         public OperationInfo OperationInfo { get; private set; }
         public ClientConstructorContext ClientConstructorContext { get; private set; }
@@ -129,7 +138,7 @@ namespace Signum.Web.Operations
         ConstructorOperationSettingsBase Settings { get; }
     }
 
-    public class ConstructorOperationContext<T> : IConstructorOperationContext where T : class, IIdentifiable
+    public class ConstructorOperationContext<T> : IConstructorOperationContext where T : class, IEntity
     {
         public OperationInfo OperationInfo { get; private set; }
         public ConstructorContext ConstructorContext { get; private set; }
@@ -159,22 +168,36 @@ namespace Signum.Web.Operations
         public abstract bool HasIsVisible { get; }
         public abstract bool OnIsVisible(IContextualOperationContext ctx);
 
-        protected ContextualOperationSettingsBase(IOperationSymbolContainer constructOperation)
-            : base(constructOperation)
+        protected ContextualOperationSettingsBase(OperationSymbol symbol)
+            : base(symbol)
         {
         }
+
+        static GenericInvoker<Func<OperationSymbol, ContextualOperationSettingsBase>> giCreate =
+            new GenericInvoker<Func<OperationSymbol, ContextualOperationSettingsBase>>(symbol => new ContextualOperationSettings<Entity>(symbol));
+        public static ContextualOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        {
+            return giCreate.GetInvoker(type)(symbol);
+        }
+
+        public BootstrapStyle? Style { get; set; }
     }
 
-    public class ContextualOperationSettings<T> : ContextualOperationSettingsBase where T : class, IIdentifiable
+    public class ContextualOperationSettings<T> : ContextualOperationSettingsBase where T : class, IEntity
     {
         public ContextualOperationSettings(IConstructFromManySymbolContainer<T> symbolContainer)
-            : base(symbolContainer)
+            : base(symbolContainer.Symbol)
         {
         }
 
 
         internal ContextualOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
-            : base(symbolContainer)
+            : base(symbolContainer.Symbol)
+        {
+        }
+
+        internal ContextualOperationSettings(OperationSymbol symbol)
+            : base(symbol)
         {
         }
 
@@ -221,7 +244,7 @@ namespace Signum.Web.Operations
     }
 
     public class ContextualOperationContext<T> : IContextualOperationContext 
-        where T : class, IIdentifiable
+        where T : class, IEntity
     {
 
         public List<Lite<T>> Entities { get; private set; }
@@ -285,6 +308,7 @@ namespace Signum.Web.Operations
 
     public abstract class EntityOperationSettingsBase : OperationSettings
     {
+        public BootstrapStyle? Style { get; set; } 
         public double Order { get; set; }
 
         public abstract ContextualOperationSettingsBase ContextualUntyped { get; }
@@ -298,29 +322,43 @@ namespace Signum.Web.Operations
         public abstract bool HasIsVisible { get; }
         public abstract bool OnIsVisible(IEntityOperationContext ctx);
 
-        public EntityOperationSettingsBase(IOperationSymbolContainer symbol)
+        public EntityOperationSettingsBase(OperationSymbol symbol)
             : base(symbol)
         {
         }
 
-        public static Func<OperationInfo, BootstrapStyle> Style { get; set; }
+        static GenericInvoker<Func<OperationSymbol, EntityOperationSettingsBase>> giCreate =
+            new GenericInvoker<Func<OperationSymbol, EntityOperationSettingsBase>>(symbol => new EntityOperationSettings<Entity>(symbol));
+        public static EntityOperationSettingsBase Create(Type type, OperationSymbol symbol)
+        {
+            return giCreate.GetInvoker(type)(symbol);
+        }
+
+        public static Func<OperationInfo, BootstrapStyle> AutoStyleFunction { get; set; }
     }
 
-    public class EntityOperationSettings<T> : EntityOperationSettingsBase where T : class, IIdentifiable
+    public class EntityOperationSettings<T> : EntityOperationSettingsBase where T : class, IEntity
     {
         public ContextualOperationSettings<T> ContextualFromMany { get; private set; }
         public ContextualOperationSettings<T> Contextual { get; private set; }
 
         public EntityOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
-            : base(symbolContainer)
+            : base(symbolContainer.Symbol)
         {
             this.Contextual = new ContextualOperationSettings<T>(symbolContainer);
             this.ContextualFromMany = new ContextualOperationSettings<T>(symbolContainer); 
         }
 
+        internal EntityOperationSettings(OperationSymbol symbol)
+            : base(symbol)
+        {
+            this.Contextual = new ContextualOperationSettings<T>(symbol);
+            this.ContextualFromMany = new ContextualOperationSettings<T>(symbol);
+        }
+
         static EntityOperationSettings()
         {
-            Style = oi => oi.OperationType == OperationType.Delete ? BootstrapStyle.Danger :
+            AutoStyleFunction = oi => oi.OperationType == OperationType.Delete ? BootstrapStyle.Danger :
                 oi.OperationType == OperationType.Execute && oi.OperationSymbol.Key.EndsWith(".Save") ? BootstrapStyle.Primary :
                 BootstrapStyle.Default;
         }
@@ -370,14 +408,14 @@ namespace Signum.Web.Operations
         EntityButtonContext Context { get; }
 
         OperationInfo OperationInfo { get; }
-        IIdentifiable Entity { get; }
+        IEntity Entity { get; }
         EntityOperationSettingsBase OperationSettings { get; }
         string CanExecute { get; set; }
 
         JsOperationOptions Options();
     }
 
-    public class EntityOperationContext<T> : IEntityOperationContext where T : class, IIdentifiable
+    public class EntityOperationContext<T> : IEntityOperationContext where T : class, IEntity
     {
         public EntityButtonContext Context { get; private set; }
         public UrlHelper Url { get { return Context.Url; } }
@@ -422,7 +460,7 @@ namespace Signum.Web.Operations
         }
 
 
-        IIdentifiable IEntityOperationContext.Entity
+        IEntity IEntityOperationContext.Entity
         {
             get { return this.Entity; }
         }

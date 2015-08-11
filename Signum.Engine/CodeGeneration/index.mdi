@@ -1,0 +1,6 @@
+CodeGenerator
+EntityCodeGenerator
+LogicCodeGenerator
+WebCodeGenerator
+WindowsCodeGenerator
+LegacyDatabase.AdventureWorks

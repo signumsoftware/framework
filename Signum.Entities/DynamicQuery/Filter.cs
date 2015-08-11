@@ -122,7 +122,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return "{0} {1} {2}".Formato(Token.FullKey(), Operation, Value);
+            return "{0} {1} {2}".FormatWith(Token.FullKey(), Operation, Value);
         }
     }
 

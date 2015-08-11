@@ -1,4 +1,4 @@
-# TimeTracker
+﻿# TimeTracker
 
 This class records aggregate performance information of actions in a dictionary. 
 
@@ -36,7 +36,7 @@ public class TimeTrackerEntry
 
     public override string ToString()
     {
-        return "Last: {0}ms, Min: {1}ms, Avg: {2}ms, Max: {3}ms, Count: {4}".Formato(
+        return "Last: {0}ms, Min: {1}ms, Avg: {2}ms, Max: {3}ms, Count: {4}".FormatWith(
             LastTime, MinTime, Average, MaxTime, Count);
     }
 }

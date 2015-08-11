@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
+using System.Data.SqlClient;
 
 namespace Signum.Engine
 {
@@ -240,6 +241,11 @@ namespace Signum.Engine
             }
         }
 
+        protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
         public override string DatabaseName()
         {
             return new SqlCeConnection(connectionString).Database;
@@ -330,6 +336,7 @@ namespace Signum.Engine
         {
             get { return false; }
         }
+       
     }
 
     public class SqlCeParameterBuilder : ParameterBuilder
@@ -347,7 +354,7 @@ namespace Signum.Engine
             result.SqlDbType = sqlType;
 
             if (sqlType == SqlDbType.Udt)
-                throw new InvalidOperationException("User Defined Tyeps not supported on SQL Server Compact ({0})".Formato(udtTypeName));
+                throw new InvalidOperationException("User Defined Tyeps not supported on SQL Server Compact ({0})".FormatWith(udtTypeName));
 
             return result;
         }
@@ -371,7 +378,7 @@ namespace Signum.Engine
             };
 
             if (sqlType == SqlDbType.Udt)
-                throw new InvalidOperationException("User Defined Tyeps not supported on SQL Server Compact ({0})".Formato(udtTypeName));
+                throw new InvalidOperationException("User Defined Tyeps not supported on SQL Server Compact ({0})".FormatWith(udtTypeName));
 
             return Expression.MemberInit(newExpr, mb);
         }

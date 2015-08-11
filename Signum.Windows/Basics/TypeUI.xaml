@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities"
-    m:Common.TypeContext="{x:Type d:TypeDN}"
+    m:Common.TypeContext="{x:Type d:TypeEntity}"
     MinWidth="600">
     <StackPanel>
         <m:ValueLine m:Common.Route="FullClassName" />

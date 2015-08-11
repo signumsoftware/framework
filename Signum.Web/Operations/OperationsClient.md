@@ -1,4 +1,4 @@
-# OperationClient
+﻿# OperationClient
 
 `OperationClient` is the class responsible of providing the services to `NormalPage` and `SearchControl` to show the available [Operations](../../Signum.Engine/Operations/Operations.md) for an entity as `ToolBarButton` (in the first case) or `IMenuItem` (for the second). 
 
@@ -84,7 +84,7 @@ With `ClientConstructorOperationContext` and `ConstructorOperationContext` defin
 
 ```C#
 public class ClientConstructorOperationContext<T> /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public OperationInfo OperationInfo { get; private set; }
     public ClientConstructorContext ClientConstructorContext { get; private set; }
@@ -92,7 +92,7 @@ public class ClientConstructorOperationContext<T> /*Simplification*/
 }
 
 public class ConstructorOperationContext<T> /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public OperationInfo OperationInfo { get; private set; }
     public ConstructorContext ConstructorContext { get; private set; }
@@ -111,10 +111,10 @@ public static JsModule OrderModule = new JsModule("Order");
 ...
 OperationClient.AddSettings(new List<OperationSettings>()
 {
-    new ConstructorOperationSettings<OrderDN>(OrderOperation.Create)
+    new ConstructorOperationSettings<OrderEntity>(OrderOperation.Create)
     {
          ClientConstructor = ctx => OrderModule["createOrder"](ClientConstructorManager.ExtraJsonParams, 
-             new FindOptions(typeof(CustomerDN)){ SearchOnLoad = true }.ToJS(ctx.ClientConstructorContext.Prefix, "cust")),
+             new FindOptions(typeof(CustomerEntity)){ SearchOnLoad = true }.ToJS(ctx.ClientConstructorContext.Prefix, "cust")),
          
          Constructor = ...
     }
@@ -141,13 +141,13 @@ export function createOrder(extraJsonArgs: FormObject, findOptions: Finder.FindO
 ```C#
 OperationClient.AddSettings(new List<OperationSettings>()
 {
-    new ConstructorOperationSettings<OrderDN>(OrderOperation.Create)
+    new ConstructorOperationSettings<OrderEntity>(OrderOperation.Create)
     {
          ClientConstructor = ...,
          
          Constructor = ctx=>
          {
-             var cust = ctx.ConstructorContext.Controller.TryParseLite<CustomerDN>("customer");
+             var cust = ctx.ConstructorContext.Controller.TryParseLite<CustomerEntity>("customer");
              return OperationLogic.Construct(OrderOperation.Create, cust);
          }
     }
@@ -163,7 +163,7 @@ It has the following options.
 
 ```C#
 public class ContextualOperationSettings<T>  : OperationContext  /*Simplification*/ 
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public ContextualOperationSettings(IConstructFromManySymbolContainer<T> symbolContainer)
 
@@ -184,7 +184,7 @@ All of this events take a `ContextualOperationContext`:
 
 ```C#
 public class ContextualOperationContext<T>  /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public List<Lite<T>> Entities { get; private set; }
     public Type SingleType { get; }
@@ -222,10 +222,10 @@ public static JsModule OrderModule = new JsModule("Order");
 ...
 OperationClient.AddSettings(new List<OperationSettings>()
 {
-     new ContextualOperationSettings<ProductDN>(OrderOperation.CreateOrderFromProducts)
+     new ContextualOperationSettings<ProductEntity>(OrderOperation.CreateOrderFromProducts)
      {
           Click = ctx => OrderModule["createOrderFromProducts"](ctx.Options(), 
-              new FindOptions(typeof(CustomerDN)){ SearchOnLoad = true }.ToJS(ctx.Prefix, "cust"), 
+              new FindOptions(typeof(CustomerEntity)){ SearchOnLoad = true }.ToJS(ctx.Prefix, "cust"), 
                ctx.Url.Action((HomeController c)=>c.CreateOrderFromProducts()), 
               JsFunction.Event)
      },
@@ -254,9 +254,9 @@ export function createOrderFromProducts(options: Operations.OperationOptions, fi
 ```C#
 public ActionResult CreateOrderFromProducts()
 {
-    Lite<CustomerDN> customer = this.TryParseLite<CustomerDN>("customer");
+    Lite<CustomerEntity> customer = this.TryParseLite<CustomerEntity>("customer");
 
-    var products = this.ParseLiteKeys<ProductDN>(); 
+    var products = this.ParseLiteKeys<ProductEntity>(); 
 
     var order = OperationLogic.ConstructFromMany(products, OrderOperation.CreateOrderFromProducts, customer);
 
@@ -277,7 +277,7 @@ public ActionResult CreateOrderFromProducts()
 
 ```C#
 public class EntityOperationSettings<T> : OperationSettings /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public EntityOperationSettings(IEntityOperationSymbolContainer<T> symbolContainer)
 
@@ -295,7 +295,7 @@ All this method receive a `EntityOperationContext<T>` with the following propert
 
 ```C#
 public class EntityOperationContext<T> /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public EntityButtonContext Context { get; }
     public UrlHelper Url { get; }
@@ -316,7 +316,7 @@ public class EntityOperationContext<T> /*Simplification*/
 * **Url, PartialViewName, Prefix, ViewMode and ShowOperations:** Shortcut to get the similar properties in `EntityButtonContext`.       
 * **OperationInfo:** Information over the operation, like the returned type or whether is lite or not.
 * **OperationSettings:**  The registered `EntityOperationContext<T>` itself.    
-* **Entity:** The `IdentifiableEntity` (of type `T`) in the `NormalWindow` that could receive the operation invocation.
+* **Entity:** The `Entity` (of type `T`) in the `NormalWindow` that could receive the operation invocation.
 * **CanExecute:** The `string` that indicats a potential pre-condition error to execute the operation. By default this will disable the button and show the message as tooltip, but you can hide it overriding `IsVisible`.  
 
 ### Examples:
@@ -338,7 +338,7 @@ OperationClient.AddSettings(new List<OperationSettings>()
 {
     new EntityOperationSettings(OrderOperation.Cancel)
     { 
-        ConfirmMessage = ctx=> ((OrderDN)ctx.Entity).State != OrderState.Shipped ? null :
+        ConfirmMessage = ctx=> ((OrderEntity)ctx.Entity).State != OrderState.Shipped ? null :
            OrderMessage.CancelShippedOrder0.NiceToString(ctx.Entity) 
     }, 
 }); 
@@ -349,7 +349,7 @@ OperationClient.AddSettings(new List<OperationSettings>()
 ```C#
 OperationClient.AddSettings(new List<OperationSettings>()
 {
-    new EntityOperationSettings<OrderDN>(OrderOperation.Ship)
+    new EntityOperationSettings<OrderEntity>(OrderOperation.Ship)
     { 
         Click = ctx => OrderModule["shipOrder"](ctx.Options(), 
             ctx.Url.Action((HomeController c)=>c.ShipOrder()), 
@@ -365,7 +365,7 @@ Additionally, `EntityOperationSettings` contains more properties that can be use
 
 ```C#
 public class EntityOperationSettings<T> : OperationSettings /*Simplification*/
-	where T : class, IIdentifiable
+	where T : class, IEntity
 {
     public double Order { get; set; }
 
@@ -417,7 +417,7 @@ public static JsModule OrderModule = new JsModule("Order");
 ...
 OperationClient.AddSettings(new List<OperationSettings>()
 {
-    new EntityOperationSettings<OrderDN>(OrderOperation.Ship)
+    new EntityOperationSettings<OrderEntity>(OrderOperation.Ship)
     { 
         Click = ctx => OrderModule["shipOrder"](ctx.Options(), 
             ctx.Url.Action((HomeController c)=>c.ShipOrder()), 
@@ -438,7 +438,7 @@ private static ValueLineBoxOptions GetValueLineOptions(string prefix)
 {
     return new ValueLineBoxOptions(ValueLineType.DateTime, prefix)
     {
-        labelText = DescriptionManager.NiceName((OrderDN o) => o.ShippedDate),
+        labelText = DescriptionManager.NiceName((OrderEntity o) => o.ShippedDate),
         value = DateTime.Now
     };
 }
@@ -472,7 +472,7 @@ export function shipOrder(options: Operations.EntityOperationOptions, url: strin
 ```C#
 public ActionResult ShipOrder()
 {
-    var order = this.ExtractEntity<OrderDN>();
+    var order = this.ExtractEntity<OrderEntity>();
 
     var shipDate = this.ParseValue<DateTime>("shipDate");
 

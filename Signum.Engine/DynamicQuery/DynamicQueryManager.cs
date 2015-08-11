@@ -49,7 +49,7 @@ namespace Signum.Engine.DynamicQuery
             var property = type.GetProperty("Entity", BindingFlags.Instance | BindingFlags.Public);
 
             if (property == null)
-                throw new InvalidOperationException("Entity property not found on query {0}".Formato(QueryUtils.GetQueryUniqueKey(queryName)));
+                throw new InvalidOperationException("Entity property not found on query {0}".FormatWith(QueryUtils.GetQueryUniqueKey(queryName)));
 
             return Implementations.By(property.PropertyType.CleanType());
         }
@@ -124,7 +124,7 @@ namespace Signum.Engine.DynamicQuery
             return Execute(ExecuteType.ExecuteGroupQuery, request.QueryName, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
         }
 
-        public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
+        public Lite<Entity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             return Execute(ExecuteType.ExecuteUniqueEntity, request.QueryName, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
         }
@@ -157,7 +157,7 @@ namespace Signum.Engine.DynamicQuery
         public void AssertQueryAllowed(object queryName)
         {
             if(!QueryAllowed(queryName))
-                throw new UnauthorizedAccessException("Access to query {0} not allowed".Formato(queryName));
+                throw new UnauthorizedAccessException("Access to query {0} not allowed".FormatWith(queryName));
         }
 
         public List<object> GetAllowedQueryNames()
@@ -218,7 +218,7 @@ namespace Signum.Engine.DynamicQuery
 
                 return RegisterExpression<E, S>(lambdaToMethodOrProperty, () => pi.NiceName(), pi.Name);
             }
-            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.NiceToString()));
+            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
         }
 
         public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName)
@@ -237,7 +237,7 @@ namespace Signum.Engine.DynamicQuery
 
                 return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName, pi.Name);
             }
-            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".Formato(lambdaToMethodOrProperty.NiceToString()));
+            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
         }
 
         private static void AssertExtensionMethod(MethodInfo mi)
@@ -317,6 +317,10 @@ namespace Signum.Engine.DynamicQuery
 
         public Implementations? ForceImplementations;
         public PropertyRoute ForcePropertyRoute;
+        public string ForceFormat;
+        public string ForceUnit;
+        public Func<string> ForceIsAllowed;
+
 
         internal readonly LambdaExpression Lambda;
         public Func<string> NiceName;
@@ -325,7 +329,7 @@ namespace Signum.Engine.DynamicQuery
         {
             var info = metas.GetOrAdd(parent, qt =>
             {
-                Expression e = MetadataVisitor.JustVisit(Lambda, MetaExpression.FromRoute(qt.Type, qt.GetImplementations(), qt.GetPropertyRoute()));
+                Expression e = MetadataVisitor.JustVisit(Lambda, MetaExpression.FromToken(qt, SourceType));
 
                 MetaExpression me;
 
@@ -357,13 +361,22 @@ namespace Signum.Engine.DynamicQuery
                     result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
                 }
 
+                result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
+
                 if (ForcePropertyRoute != null)
                     result.PropertyRoute = ForcePropertyRoute;
 
                 if (ForceImplementations != null)
                     result.Implementations = ForceImplementations;
-              
-                result.IsAllowed = () => (me == null || me.Meta == null) ? null : me.Meta.IsAllowed();
+
+                if (ForceFormat != null)
+                    result.Format = ForceFormat;
+
+                if (ForceUnit != null)
+                    result.Unit = ForceUnit;
+
+                if (ForceIsAllowed != null)
+                    result.IsAllowed = ForceIsAllowed;
 
                 return result;
             });

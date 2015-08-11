@@ -15,7 +15,7 @@ namespace Signum.Web
 {
     public static class EntityInfoHelper
     {
-        public static MvcHtmlString HiddenLite(this HtmlHelper helper, string name, Lite<IIdentifiable> lite)
+        public static MvcHtmlString HiddenLite(this HtmlHelper helper, string name, Lite<IEntity> lite)
         {
             return helper.Hidden(name, lite.KeyLong());
         }
@@ -35,11 +35,11 @@ namespace Signum.Web
     public class RuntimeInfo
     {
         public Type EntityType { get; private set; }
-        public int? IdOrNull { get; private set; }
+        public PrimaryKey? IdOrNull { get; private set; }
         public bool IsNew { get; private set; }
         public long? Ticks { get; private set; }
 
-        public RuntimeInfo(Type type, int? idOrNull, bool isNew, long? ticks) 
+        public RuntimeInfo(Type type, PrimaryKey? idOrNull, bool isNew, long? ticks) 
         {
             if(type == null)
                 throw new ArgumentNullException("type"); 
@@ -50,7 +50,7 @@ namespace Signum.Web
             this.Ticks = ticks;
         }
 
-        public RuntimeInfo(Lite<IIdentifiable> lite) :
+        public RuntimeInfo(Lite<IEntity> lite) :
             this(lite.EntityType, lite.IdOrNull, lite.IdOrNull == null, null)
         {
         }
@@ -60,7 +60,7 @@ namespace Signum.Web
         {
         }
 
-        public RuntimeInfo(IIdentifiable entity)
+        public RuntimeInfo(IEntity entity)
             : this(entity.GetType(), entity.IdOrNull, entity.IsNew,
                  entity is Entity ? ((Entity)entity).Ticks : (long?)null)
         {
@@ -68,13 +68,10 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            if (IdOrNull != null && IsNew)
-                throw new ArgumentException("Invalid RuntimeInfo parameters: IdOrNull={0} and IsNew=true".Formato(IdOrNull));
-
             if (EntityType != null && EntityType.IsLite())
                 throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
 
-            return "{0};{1};{2};{3}".Formato(
+            return "{0};{1};{2};{3}".FormatWith(
                 Navigator.ResolveWebTypeName(EntityType),
                 IdOrNull.TryToString(),
                 IsNew ? "n" : "o",
@@ -89,19 +86,21 @@ namespace Signum.Web
 
             string[] parts = formValue.Split(new[] { ";" }, StringSplitOptions.None);
             if (parts.Length != 4)
-                throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));
+                throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".FormatWith(formValue));
 
             string entityTypeString = parts[0];
 
+            Type type = Navigator.ResolveType(entityTypeString);
+
             return new RuntimeInfo(
-                Navigator.ResolveType(entityTypeString),
-                (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
+                type,
+                (parts[1].HasText()) ? PrimaryKey.Parse(parts[1], type) : (PrimaryKey?)null,
                 parts[2] == "n",
                 parts.Length == 4 && parts[3].HasText() ? long.Parse(parts[3]) : (long?)null
             );
         }
 
-        public Lite<IdentifiableEntity> ToLite()
+        public Lite<Entity> ToLite()
         {
             if (IsNew)
                 throw new InvalidOperationException("The RuntimeInfo represents a new entity");

@@ -16,11 +16,6 @@ using Signum.Entities.Basics;
 
 namespace Signum.Web
 {
-    enum TypeContextNodeType
-    {
-        TypeContext = 1000,
-    }
-
 
     class TypeContextExpression : Expression
     {
@@ -44,7 +39,7 @@ namespace Signum.Web
 
         public override ExpressionType NodeType
         {
-            get{return (ExpressionType)TypeContextNodeType.TypeContext; }
+            get { return ExpressionType.Extension; }
         }
 
         public readonly PropertyInfo[] Properties;
@@ -59,7 +54,7 @@ namespace Signum.Web
 
         public PropertyRoute AddDynamic(MemberInfo mi)
         {
-            if (Value is IdentifiableEntity)
+            if (Value is Entity)
                 return PropertyRoute.Root(value.GetType()).Add(mi);
             else
                 return Route.Add(mi); 
@@ -67,7 +62,7 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            return "TypeSubContext<{0}>".Formato(Type.Name);
+            return "TypeSubContext<{0}>".FormatWith(Type.Name);
         }
     }
 
@@ -90,19 +85,19 @@ namespace Signum.Web
                 (S)(object)null :
                 (S)result.Value;
 
-            return new TypeSubContext<S>(value, tc, result.Properties, result.Route);
+            return new TypeContext<S>(value, tc, result.Properties.ToString(a => a.Name, TypeContext.Separator), result.Route);
         }
 
         protected override Expression VisitParameter(ParameterExpression p)
         {
-            return replacements.GetOrThrow(p, "TypeSubContext can not be created: {0}".Formato(p.NiceToString()));
+            return replacements.GetOrThrow(p, "TypeSubContext can not be created: {0}".FormatWith(p.ToString()));
         }
 
         static TypeContextExpression Cast(Expression expression)
         {
             var result = expression as TypeContextExpression;
             if (result == null)
-                throw new InvalidOperationException("TypeSubContext can not be created: {0}".Formato(expression == null ? null : expression.NiceToString()));
+                throw new InvalidOperationException("TypeSubContext can not be created: {0}".FormatWith(expression == null ? null : expression.ToString()));
             return result;
         }
 
@@ -111,11 +106,11 @@ namespace Signum.Web
             var tce = Cast(Visit(me.Expression));
 
             if (tce.Value == null)
-                throw new InvalidOperationException("Impossible to access member {0} of null reference".Formato(me.Member.Name)); 
+                throw new InvalidOperationException("Impossible to access member {0} of null reference".FormatWith(me.Member.Name)); 
 
             if (tce.Type.IsLite() && (me.Member.Name == "EntityOrNull" || me.Member.Name == "Entity"))
             {
-                var lite = tce.Value as Lite<IIdentifiable>;
+                var lite = tce.Value as Lite<IEntity>;
 
                 return new TypeContextExpression(tce.Properties, me.Type,
                     tce.AddDynamic(me.Member),
@@ -151,9 +146,9 @@ namespace Signum.Web
             return base.VisitUnary(u);
         }
 
-        static readonly PropertyInfo piEntity = ReflectionTools.GetPropertyInfo((Lite<IIdentifiable> lite) => lite.Entity);
+        static readonly PropertyInfo piEntity = ReflectionTools.GetPropertyInfo((Lite<IEntity> lite) => lite.Entity);
         
-        static readonly MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
+        static readonly MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeEntity> l) => l.Retrieve()).GetGenericMethodDefinition();
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
@@ -161,7 +156,7 @@ namespace Signum.Web
             {
                 var tce = Cast(Visit(m.Arguments[0]));
 
-                Lite<IIdentifiable> lite = tce.Value as Lite<IIdentifiable>;
+                Lite<IEntity> lite = tce.Value as Lite<IEntity>;
 
                 var obj =  tce.Value == NonValue ? NonValue:
                     lite.Retrieve();
@@ -188,7 +183,7 @@ namespace Signum.Web
                 var tce = Cast(Visit(m.Object));
                 var mixinType = m.Method.GetGenericArguments().SingleEx();
 
-                var ident = tce.Value as IdentifiableEntity;
+                var ident = tce.Value as Entity;
 
                 return new TypeContextExpression(tce.Properties, mixinType, tce.Route.Add(mixinType),
                     tce.Value == NonValue ? NonValue :

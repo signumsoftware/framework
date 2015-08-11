@@ -1,4 +1,4 @@
-# Constructor class
+﻿# Constructor class
 
 `Constructor` static class is used internally by Singnum.Web when an entity has to be created server-side in the controller (using C#) or client-side in the browser (using TypeScript). 
 
@@ -88,7 +88,7 @@ public class ConstructorContext
 Example: 
 
 ```C#
-Constructor.Register(ctx => new OrderLineDN
+Constructor.Register(ctx => new OrderLineEntity
 {
    Quantity = 1, 
    Discount = 0,
@@ -137,7 +137,7 @@ public ActionResult Create(string webTypeName)
 ```C#
 public ActionResult Create()
 {
-    var orderLine = new ConstructorContext(this).SurroundConstruct(ctx => new ProductDN
+    var orderLine = new ConstructorContext(this).SurroundConstruct(ctx => new ProductEntity
 	{
 	   UnitsInStock = 0,
 	});
@@ -181,7 +181,7 @@ Constructor.ClientManager.GlobalPreConstructors += ctx =>
     IsolationLogic.Isolations.Value.Select(iso => iso.ToChooserOption()));
 ```
 
-```Typescript
+```TypeScript
 //In Isolation.ts
 export function getIsolation(extraJsonData: any, prefix: string, title: string, isolations: Navigator.ChooserOption[]) : Promise<any> {
 

@@ -28,8 +28,8 @@ namespace Signum.Utilities
         public static T AssertSingle<T>(this IEnumerable<T> collection, object key)
         {
             int c = collection.Count();
-            if (c == 0) throw new InvalidOperationException("No element exists with key '{0}'".Formato(key));
-            if (c > 1) throw new InvalidOperationException("There's more than one element with key '{0}'".Formato(key));
+            if (c == 0) throw new InvalidOperationException("No element exists with key '{0}'".FormatWith(key));
+            if (c > 1) throw new InvalidOperationException("There's more than one element with key '{0}'".FormatWith(key));
             return collection.SingleEx();
         }
 
@@ -150,9 +150,10 @@ namespace Signum.Utilities
                 yield return newList;
         }
 
-        public static IEnumerable<Interval<int>> IntervalsOf(this IEnumerable<int> collection, int groupSize)
+        public static IEnumerable<IntervalWithEnd<T>> IntervalsOf<T>(this IEnumerable<T> collection, int groupSize)
+            where T : struct, IEquatable<T>, IComparable<T>
         {
-            return collection.OrderBy().GroupsOf(groupSize).Select(gr => new Interval<int>(gr.Min(), gr.Max() + 1));
+            return collection.OrderBy().GroupsOf(groupSize).Select(gr => new IntervalWithEnd<T>(gr.Min(), gr.Max()));
         }
 
         public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)

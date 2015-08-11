@@ -8,6 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
+using System.Linq.Expressions;
 
 namespace Signum.Utilities
 {
@@ -436,7 +437,8 @@ namespace Signum.Utilities
             throw exception;
         }
 
-        public static IEnumerable<D> GetInvocationListTyped<D>(this D multicastDelegate) where D : class, ICloneable, ISerializable
+        public static IEnumerable<D> GetInvocationListTyped<D>(this D multicastDelegate) 
+            where D : class, ICloneable, ISerializable
         {
             if (multicastDelegate == null)
                 return Enumerable.Empty<D>();

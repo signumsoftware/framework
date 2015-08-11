@@ -69,37 +69,37 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static string ParameterSignature(this ParameterInfo pi)
         {
-            return "{0} {1}".Formato(pi.ParameterType.TypeName(), pi.Name);
+            return "{0} {1}".FormatWith(pi.ParameterType.TypeName(), pi.Name);
         }
 
         public static string PropertyName(this PropertyInfo pi)
         {
-            return "{0} {1}".Formato(pi.PropertyType.TypeName(), pi.Name);
+            return "{0} {1}".FormatWith(pi.PropertyType.TypeName(), pi.Name);
         }
 
         public static string FieldName(this FieldInfo pi)
         {
-            return "{0} {1}".Formato(pi.FieldType.TypeName(), pi.Name);
+            return "{0} {1}".FormatWith(pi.FieldType.TypeName(), pi.Name);
         }
 
         public static string MethodName(this MethodInfo method)
         {
             if (method.IsGenericMethod)
-                return "{0}<{1}>".Formato(method.Name.Split('`')[0], method.GetGenericArguments().ToString(t => TypeName(t), ","));
+                return "{0}<{1}>".FormatWith(method.Name.Split('`')[0], method.GetGenericArguments().ToString(t => TypeName(t), ","));
 
             return method.Name;
         }
 
         public static string ConstructorSignature(this ConstructorInfo constructor)
         {
-            return "{0}({1})".Formato(
+            return "{0}({1})".FormatWith(
                 constructor.DeclaringType.TypeName(),
                 constructor.GetParameters().ToString(p => p.ParameterSignature(), ", "));
         }
 
         public static string MethodSignature(this MethodInfo method)
         {
-            return "{0} {1}({2})".Formato(
+            return "{0} {1}({2})".FormatWith(
                 method.ReturnType.TypeName(),
                 method.MethodName(),
                 method.GetParameters().ToString(p => p.ParameterSignature(), ", "));
@@ -126,18 +126,18 @@ namespace Signum.Utilities.ExpressionTrees
                 return result;
 
             if (type.IsArray)
-                return "{0}[{1}]".Formato(type.GetElementType().TypeName(), new string(',', type.GetArrayRank() - 1));
+                return "{0}[{1}]".FormatWith(type.GetElementType().TypeName(), new string(',', type.GetArrayRank() - 1));
 
             Type ut = Nullable.GetUnderlyingType(type);
             if (ut != null)
-                return "{0}?".Formato(ut.TypeName());
+                return "{0}?".FormatWith(ut.TypeName());
 
             if (type.IsGenericType)
             {
                 if (type.IsGenericTypeDefinition)
-                    return "{0}<{1}>".Formato(type.Name.Split('`')[0], type.GetGenericArguments().ToString(_ => "", ","));
+                    return "{0}<{1}>".FormatWith(type.Name.Split('`')[0], type.GetGenericArguments().ToString(_ => "", ","));
 
-                return "{0}<{1}>".Formato(type.Name.Split('`')[0], type.GetGenericArguments().ToString(t => TypeName(t), ","));
+                return "{0}<{1}>".FormatWith(type.Name.Split('`')[0], type.GetGenericArguments().ToString(t => TypeName(t), ","));
 
             }
 
@@ -275,6 +275,17 @@ namespace Signum.Utilities.ExpressionTrees
             else
                 return new CodeTypeReference(type); ;
         }
+        public static HashSet<string> Keywords = @"abstract as base bool break byte case catch char checked class const continue decimal default 
+delegate do double else enum event explicit extern false finally fixed float for foreach goto if implicit in int interface internal is lock long
+namespace new null object operator out out override params private protected public readonly ref return sbyte sealed short sizeof stackalloc static 
+string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using virtual void volatile while".Split(' ', '\r', '\n').NotNull().ToHashSet();
 
+        public static string Escape(string p)
+        {
+            if (Keywords.Contains(p))
+                return "@" + p;
+
+            return p;
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Signum.Utilities;
 
@@ -27,7 +28,7 @@ namespace Signum.Entities
         public static Implementations GetImplementations(PropertyRoute route)
         {
             if (!typeof(ModelEntity).IsAssignableFrom(route.RootType))
-                throw new InvalidOperationException("Route {0} is not rooted on a {1}".Formato(route, typeof(ModifiableEntity).Name));
+                throw new InvalidOperationException("Route {0} is not rooted on a {1}".FormatWith(route, typeof(ModifiableEntity).Name));
 
             PropertyRoute fieldRoute = route;
             if (fieldRoute.PropertyRouteType == PropertyRouteType.LiteEntity)
@@ -35,19 +36,12 @@ namespace Signum.Entities
 
             if (fieldRoute.PropertyRouteType == PropertyRouteType.MListItems)
                 fieldRoute = fieldRoute.Parent;
-
+            
             return Implementations.FromAttributes(
                 route.Type.CleanType(),
-                fieldRoute.FieldInfo.GetCustomAttributes(true).Cast<Attribute>().ToArray(),
-                route);
-        }
-
-        public void AssertIntegrityCheck()
-        {
-            string error = this.IntegrityCheck();
-
-            if (error.HasText())
-                throw new ApplicationException(error);
+                route,
+                fieldRoute.FieldInfo.GetCustomAttribute<ImplementedByAttribute>(),
+                fieldRoute.FieldInfo.GetCustomAttribute<ImplementedByAllAttribute>());
         }
     }
 }

@@ -222,7 +222,7 @@ namespace Signum.Engine.Linq
             if (exp.NodeType == ExpressionType.Coalesce)
             {
                 var be = ((BinaryExpression)exp);
-                if (be.Right.NodeType == ExpressionType.Constant || be.Right.NodeType == (ExpressionType)DbExpressionType.SqlConstant)
+                if (be.Right.NodeType == ExpressionType.Constant || be.Right is SqlConstantExpression)
                     exp = ((BinaryExpression)exp).Left;
             }
 

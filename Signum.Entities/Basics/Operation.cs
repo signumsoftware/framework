@@ -6,6 +6,9 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using Signum.Entities.Reflection;
+using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
@@ -20,7 +23,7 @@ namespace Signum.Entities
         }
 
         public static class Construct<T>
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static ConstructSymbol<T>.Simple Simple([CallerMemberName]string memberName = null)
@@ -30,14 +33,14 @@ namespace Signum.Entities
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static ConstructSymbol<T>.From<F> From<F>([CallerMemberName]string memberName = null)
-                where F : class,  IIdentifiable
+                where F : class,  IEntity
             {
                 return new FromImp<F> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]
             public static ConstructSymbol<T>.FromMany<F>  FromMany<F>([CallerMemberName]string memberName = null)
-                where F : class, IIdentifiable
+                where F : class, IEntity
             {
                 return new FromManyImp<F> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
             }
@@ -51,11 +54,16 @@ namespace Signum.Entities
                     get { return symbol; }
                     internal set { this.symbol = value; }
                 }
+
+                public override string ToString()
+                {
+                    return "{0}({1})".FormatWith(this.GetType().TypeName(), Symbol);
+                }
             }
 
             [Serializable]
             class FromImp<F> : ConstructSymbol<T>.From<F>
-                where F : class, IIdentifiable
+                where F : class, IEntity
             {
                 OperationSymbol symbol;
                 public OperationSymbol Symbol
@@ -67,12 +75,17 @@ namespace Signum.Entities
                 public Type BaseType
                 {
                     get { return typeof(F); }
+                }
+
+                public override string ToString()
+                {
+                    return "{0}({1})".FormatWith(this.GetType().TypeName(), Symbol);
                 }
             }
 
             [Serializable]
             class FromManyImp<F> : ConstructSymbol<T>.FromMany<F>
-                where F : class, IIdentifiable
+                where F : class, IEntity
             {
                 OperationSymbol symbol;
                 public OperationSymbol Symbol
@@ -84,6 +97,11 @@ namespace Signum.Entities
                 public Type BaseType
                 {
                     get { return typeof(F); }
+                }
+
+                public override string ToString()
+                {
+                    return "{0}({1})".FormatWith(this.GetType().TypeName(), Symbol);
                 }
             }
         }
@@ -94,14 +112,14 @@ namespace Signum.Entities
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ExecuteSymbol<T> Execute<T>([CallerMemberName]string memberName = null)
-            where T : class,  IIdentifiable
+            where T : class,  IEntity
         {
             return new ExecuteSymbolImp<T> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static DeleteSymbol<T> Delete<T>([CallerMemberName]string memberName = null)
-            where T : class, IIdentifiable
+            where T : class, IEntity
         {
             return new DeleteSymbolImp<T> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
         }
@@ -109,7 +127,7 @@ namespace Signum.Entities
 
         [Serializable]
         class ExecuteSymbolImp<T> : ExecuteSymbol<T>
-          where T : class, IIdentifiable
+          where T : class, IEntity
         {
             OperationSymbol symbol;
             public OperationSymbol Symbol
@@ -121,12 +139,17 @@ namespace Signum.Entities
             public Type BaseType
             {
                 get { return typeof(T); }
+            }
+
+            public override string ToString()
+            {
+                return "{0}({1})".FormatWith(this.GetType().TypeName(), Symbol);
             }
         }
 
         [Serializable]
         class DeleteSymbolImp<T> : DeleteSymbol<T>
-          where T : class, IIdentifiable
+          where T : class, IEntity
         {
             OperationSymbol symbol;
             public OperationSymbol Symbol
@@ -138,6 +161,11 @@ namespace Signum.Entities
             public Type BaseType
             {
                 get { return typeof(T); }
+            }
+
+            public override string ToString()
+            {
+                return "{0}({1})".FormatWith(this.GetType().TypeName(), Symbol);
             }
         }
     }
@@ -152,50 +180,45 @@ namespace Signum.Entities
     }
 
     public interface IEntityOperationSymbolContainer<in T> : IEntityOperationSymbolContainer
-        where T : class, IIdentifiable
+        where T : class, IEntity
     {
         Type BaseType { get; }
     }
 
     public interface IConstructFromManySymbolContainer<in T> : IOperationSymbolContainer
-       where T : class, IIdentifiable
+       where T : class, IEntity
     {
         Type BaseType { get; }
     }
 
 
     public static class ConstructSymbol<T>
-        where T : class, IIdentifiable
+        where T : class, IEntity
     {
         public interface Simple : IOperationSymbolContainer
         {
         }
 
         public interface From<in F> : IEntityOperationSymbolContainer<F>
-            where F : class, IIdentifiable
+            where F : class, IEntity
         {
         }
 
         public interface FromMany<in F> : IConstructFromManySymbolContainer<F>
-            where F : class, IIdentifiable
+            where F : class, IEntity
         {
         }
     }
 
-
-
     public interface ExecuteSymbol<in T> : IEntityOperationSymbolContainer<T>
-        where T : class, IIdentifiable
+        where T : class, IEntity
     {
-       
     }
 
     public interface DeleteSymbol<in T> : IEntityOperationSymbolContainer<T>
-        where T : class, IIdentifiable
+        where T : class, IEntity
     {
     }
-
-
 
     [Serializable]
     public class OperationInfo
@@ -214,7 +237,7 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return "{0} ({1}) Lite = {2}, Returns {3}".Formato(OperationSymbol, OperationType, Lite, Returns);
+            return "{0} ({1}) Lite = {2}, Returns {3}".FormatWith(OperationSymbol, OperationType, Lite, Returns);
         }
 
         public bool IsEntityOperation

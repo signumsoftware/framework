@@ -1,4 +1,3 @@
-#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,6 @@ using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
 using Signum.Engine;
-#endregion
 
 namespace Signum.Web
 {
@@ -30,7 +28,7 @@ namespace Signum.Web
                 using (sb.SurroundLine(new HtmlTag("legend")))
                 using (sb.SurroundLine(new HtmlTag("div", repeater.Compose("header"))))
                 {
-                    sb.AddLine(new HtmlTag("span").SetInnerText(repeater.LabelText).ToHtml());
+                    sb.AddLine(new HtmlTag("span").InnerHtml(repeater.LabelHtml ?? repeater.LabelText.FormatHtml()).ToHtml());
 
                     using (sb.SurroundLine(new HtmlTag("span", repeater.Compose("shownButton")).Class("pull-right")))
                     {

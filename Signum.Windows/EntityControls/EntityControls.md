@@ -1,4 +1,4 @@
-## Entity Controls
+﻿## Entity Controls
 
 Entity Controls are a family of controls designed to manipulate any property of your entities using **just a simple line of XAML**.
 
@@ -54,7 +54,7 @@ public partial class ValueLine : LineBase
 | single double, decimal | Number |
 | DateTime      | DateTime      |
 | TimeSpan      | TimeSpan      |
-| ColorDN       | Color         |
+| ColorEntity       | Color         |
 | any Enum      | Enum          |
 | string, char  | String      |
 | any object    | String      |
@@ -66,11 +66,13 @@ public partial class ValueLine : LineBase
 | ------------- |---------|------------------|-------------------|
 | Boolean  |ComboBox |IsChecked|!IsEnabled|
 | Number  |NumericTextBox |Value |IsReadOnly|
-| string  |TextBox |Text |IsReadOnly|
+| String  |TextBox |Text |IsReadOnly|
 | DateTime  |DateTimePicker | SlectedDate|IsReadOnly|
 | TimeSpan  |TimePicker | TimePart|IsReadOnly|
 | Enum  |ComboBox | SelectedItem|!IsEnabled|
 | TimeSpan  |TimePicker | TimePart|IsReadOnly|
+| Color  |ColorPicker | SelectedColor|IsReadOnly|
+
 
 *  **Value:** This property contains the actual value that will be bound.
 
@@ -155,13 +157,23 @@ But you can handle `Creating` event to customize this process, returning `null` 
 Example of using `Creating` to initialize to customize the entity initialization: 
 
 ```XML
- <m:EntityLine m:Common.Route="Customer" Creating="EntityLine_Creating" />
+<m:EntityCombo m:Common.Route="Category"  Creating="EntityCombo_Creating" x:Name="category"/>
 ```
 
 ```C#
-private object EntityLine_Creating()
+public Product()
 {
-   return new OrderLineDN { Quantity = 1 }; 
+    InitializeComponent();
+    this.category.Remove = true;
+    this.category.Create = Navigator.IsCreable(typeof(CategoryEntity), isSearch: true); 
+}
+
+private object EntityCombo_Creating()
+{
+    return Navigator.View(new CategoryEntity
+    {
+        CategoryName = ((ProductEntity)this.DataContext).ProductName
+    });
 }
 ``` 
 
@@ -175,7 +187,7 @@ and opens `SearchWindow` entity using `Finder.Find`.
 
 But you can handle `Finding` event to customize this process, returning `null` or a `ModifiableEntity`/`Lite<T>`. For example to open a `SearchControl` already filtered by some business criteria. 
 
-Example of using `Finding` to initialize to customize the entity initialization: 
+Example of using `Finding` to search using a custom `FindOptions`: 
 
 ```XML
  <m:EntityLine m:Common.Route="Customer" Finding="EntityLine_Fining" />
@@ -184,7 +196,7 @@ Example of using `Finding` to initialize to customize the entity initialization:
 ```C#
 private object EntityLine_Fining()
 {
-   return Finder.Find<CustomerDN>(new FindOptions()
+   return Finder.Find<CustomerEntity>(new FindOptions()
    {
        FilterOptions = { new FilterOption("IsActive", true) { Frozen = true } },
    }); 
@@ -260,9 +272,37 @@ private bool EntityLine_Removing(object entity)
 }
 ``` 
 
-> Note that `Remove` will just disasociate the relationship, not delete the related entity from the database. If you want to delete the related entity from the database, consider doing so in the server side using `Save` or any other operation, or even using `EntityEvents`. 
+> Note that `Remove` will just dissociate the relationship, not delete the related entity from the database. If you want to delete the related entity from the database, consider doing so in the server side using `Save` or any other operation, or even using `EntityEvents`. 
 
-      
+
+###  EntityChange
+
+Finally, the event `EntityChange` is defined in `EntityBase` control and fired every time the `Entity` property changes its value. 
+
+```C#
+public event EntityChangedEventHandler EntityChanged;
+
+public delegate void EntityChangedEventHandler(object sender, bool userInteraction, 
+    object oldValue, object newValue);
+```
+
+`EntityChanged` will be fired independently of which button is pressed, or even if the property is changed programmatically, in this case `userInteraction` parameter will be `false`. 
+   
+Example: 
+
+
+```XML
+<m:EntityLine m:Common.Route="Customer" EntityChanged="EntityLine_EntityChanged" />
+```
+
+```C#
+private void EntityLine_EntityChanged(object sender, bool userInteraction, object oldValue, object newValue)
+{
+    if (userInteraction)
+        this.OrderEntity.ShipAddress = ((CustomerEntity)newValue).Try(a => a.Address.Clone());
+}
+``` 
+
 ## EntityLine
 
 `EntityLine` is a `EntityBase` control that contains, in his right side, a placeholder for an entity. This placeholder is just a box with the four buttons (Create, Find, View and Remove) conveniently hidden depending if the entity is `null` or not.
@@ -274,7 +314,7 @@ Where `EntityLine` shines is representing relationships with high-populated enti
 
 By double-clicking (single-click if `Entity` is `null`), or pressing [F2] when focused, the blue place holder of the `EntityLine` becomes a `AutocompleteTextBox` already configured to query the database. 
 
-By default, `Autocomplete` is even able to find candidate entity by `ToString` or `Id` (user quotes to find number in the text, like: `'1`), and used the default `ToString` of the entity.
+By default, `Autocomplete` is even able to find candidate entity by `ToString` using the default `ToString` of the entity,  or `Id`. You can use quotes to find ID-like values in the text, like: `'1`.
 
 `Autocomplete` is also able to understand `Implementations`, querying multiple tables if necessary. 
 
@@ -283,7 +323,7 @@ By default, `Autocomplete` is even able to find candidate entity by `ToString` o
 public partial class EntityLine : EntityBase
 { 
     public bool Autocomplete; 
-    public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> Autocompleting;
+    public event Func<string, IEnumerable<Lite<Entity>>> Autocompleting;
     public int AutocompleteElements = 5;
 }
 ```
@@ -295,15 +335,15 @@ Example:
 ```
 
 ```C#
-private IEnumerable<Lite<IdentifiableEntity>> EntityLine_Autocompleting(string term)
+private IEnumerable<Lite<Entity>> EntityLine_Autocompleting(string term)
 {
    return Server.Returning((ICustomServer c) => c.CustomAutocomplete(term)); 
 }
 ```
 ```C#
 //And in the server side
-return Database.Query<CustomerDN>()
-    .Where(...)
+return Database.Query<PersonEntity>()
+    .Where(p => !p.Corrupt)
     .Autocomplete(term, 5);  //Defined in AutoCompleteUtils
 ```
 
@@ -321,16 +361,16 @@ public partial class EntityCombo : EntityBase
 { 
     public LoadDataTrigger LoadDataTrigger;
     public bool SortElements;
-    public event Func<IEnumerable<Lite<IIdentifiable>>> LoadData;
+    public event Func<IEnumerable<Lite<IEntity>>> LoadData;
     public bool NullValue;
 }
 ```
 
 * **LoadDataTrigger:** Indicates when the `ComboBox` should be loaded, when the `EntityCombo.Loaded` fires, or then is expanded the first time (default). 
 
-* **SortElements:** Indicates if the elements shoud be sorted alphabetically before showing it (default true). 
+* **SortElements:** Indicates if the elements should be sorted alphabetically before showing it (default true). 
 
-* **LoadData:** This event let's you customize the entitiy that will be shown when the `EntityCombo` is loaded, by default all the visible `Lite<T>` of the different `Implementations` are retrieved from the database. 
+* **LoadData:** This event lets you customize the entities that will be shown when the `EntityCombo` is loaded, by default all the visible `Lite<T>` of the different `Implementations` are retrieved from the database. 
 
 * **NullValue:** If `true`, a faked `null` value with `ToString == " - "` will be added, letting the user turn back to `null` value once something is selected. It's more intuitive and takes less space than making `Remove` visible.  
 
@@ -342,9 +382,9 @@ public partial class EntityCombo : EntityBase
 ```
 
 ```C#
-private IEnumerable<Lite<IdentifiableEntity>> EntityCombo_LoadData(string term)
+private IEnumerable<Lite<Entity>> EntityCombo_LoadData(string term)
 {
-   return new List<Lite<CountryDN>>
+   return new List<Lite<CountryEntity>>
    {
       brazil, rusia, india, china
    }; 
@@ -402,7 +442,7 @@ public partial class EntityListBase : EntityBase
  * `T` should be a `Lite<T>` or `ModifiableEntity`. 
  * `EntityBase.Entity` will be used as the selected element if any that makes sense (`EntityList`).
  
-* **EntitiesType:** The `ElementType` of the collection.  For example if `EntityBase.Type` is `MList<CustomerDN>`, `EntitiesType` will be just `CustomerDN`.  All the controls inheriting from `EntityBase `EntityBase.Implementations` will also 
+* **EntitiesType:** The `ElementType` of the collection.  For example if `EntityBase.Type` is `MList<CustomerEntity>`, `EntitiesType` will be just `CustomerEntity`.  All the controls inheriting from `EntityBase `EntityBase.Implementations` will also 
 
 ### Move
 
@@ -417,13 +457,13 @@ By default this property is set by a [`Common`](../Common.md) task if the `MList
 In fact, the default implementation is overriden in `EntityListBase` to use `Finder.FindMany`, but you can write your own. 
 
 ```XML
- <m:EntityList m:Common.Route="Customers" Finding="EntityList_Fining" />
+ <m:EntityList m:Common.Route="Customers" Finding="EntityList_Finding" />
 ```
 
 ```C#
-private object EntityList_Fining()
+private object EntityList_Finding()
 {
-   return Finder.FindMany<CustomerDN>(new FindOptions()
+   return Finder.FindMany<CustomerEntity>(new FindOptions()
    {
        FilterOptions = { new FilterOption("IsActive", true) { Frozen = true } },
    }); 
@@ -554,14 +594,14 @@ public partial class EntityStrip : EntityListBase
 { 
     public bool Autocomplete
     public int AutocompleteElements 
-    public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> Autocompleting
+    public event Func<string, IEnumerable<Lite<Entity>>> Autocompleting
 }
 ```
 
 Additionally, `EntityStrip` defines an `Orientation` property that changes the layout of the control: 
 
 * **Orientation.Horizontal:** Optimized for a few number of small tag-like entities where the order doesn't matter. 
-* **Orientation.Vertical:** Optimized for a larger number of longer entities, or then the order doesn't matter and move buttons are required.
+* **Orientation.Vertical:** Optimized for a larger number of longer entities, or the order does matter and move buttons are required.
 
 Finally, just like in `EntityRepeater`, you can customize how the elements are laid out using `ItemsPanel` and `ItemContainerStyle` properties.
 

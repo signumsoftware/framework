@@ -45,11 +45,12 @@ namespace Signum.Windows
 
         public static bool AssertErrors(Modifiable mod, Window window)
         {
-            string error = GetErrors(mod); 
+            var error = GetErrors(mod);
 
-            if (error.HasText())
+            if (error != null)
             {
-                MessageBox.Show(window, NormalWindowMessage.ImpossibleToSaveIntegrityCheckFailed.NiceToString() + error, NormalWindowMessage.ThereAreErrors.NiceToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(window, NormalWindowMessage.ImpossibleToSaveIntegrityCheckFailed.NiceToString() + error.Values.SelectMany(a=>a.Values).ToString("\r\n"), NormalWindowMessage.ThereAreErrors.NiceToString(), 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             return true;
@@ -63,7 +64,7 @@ namespace Signum.Windows
 
             var visualErrors = VisualErrors(element).DefaultText(null);
 
-            var entityErrors = GetErrors((Modifiable)element.DataContext).DefaultText(null);
+            var entityErrors = GetErrors((Modifiable)element.DataContext).Try(dic => dic.Values.ToString(d => d.Values.ToString("\r\n"), "\r\n"));
 
             return "\r\n".Combine(visualErrors, entityErrors).DefaultText(null);
         }
@@ -77,10 +78,10 @@ namespace Signum.Windows
             return visualErrors;
         }
 
-        public static string GetErrors(Modifiable mod)
+        public static Dictionary<Guid, Dictionary<string, string>> GetErrors(Modifiable mod)
         {
             var graph = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(mod));
-            string error = GraphExplorer.FullIntegrityCheck(graph, withIndependentEmbeddedEntities: !(mod is IdentifiableEntity));
+            var error = GraphExplorer.FullIntegrityCheck(graph);
             return error;
         }
 

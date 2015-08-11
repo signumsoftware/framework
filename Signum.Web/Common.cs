@@ -19,7 +19,7 @@ namespace Signum.Web
 {
     public static class Common
     {
-        public static event Action<BaseLine> CommonTask;
+        public static event Action<LineBase> CommonTask;
 
         static Common()
         {
@@ -32,30 +32,30 @@ namespace Signum.Web
             CommonTask += TaskSetHtmlProperties;
         }
 
-        public static void FireCommonTasks(BaseLine eb)
+        public static void FireCommonTasks(LineBase eb)
         {
             CommonTask(eb);
         }
 
         #region Tasks
-        public static void TaskSetLabelText(BaseLine bl)
+        public static void TaskSetLabelText(LineBase bl)
         {
             if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
                 bl.LabelText = bl.PropertyRoute.PropertyInfo.NiceName();
         }
 
-        static void TaskSetUnitText(BaseLine bl)
+        static void TaskSetUnitText(LineBase bl)
         {
             ValueLine vl = bl as ValueLine;
             if (vl != null && vl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                UnitAttribute ua = bl.PropertyRoute.PropertyInfo.SingleAttribute<UnitAttribute>();
+                UnitAttribute ua = bl.PropertyRoute.PropertyInfo.GetCustomAttribute<UnitAttribute>();
                 if (ua != null)
                     vl.UnitText = ua.UnitName;
             }
         }
 
-        static void TaskSetFormatText(BaseLine bl)
+        static void TaskSetFormatText(LineBase bl)
         {
             ValueLine vl = bl as ValueLine;
             if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
@@ -66,7 +66,7 @@ namespace Signum.Web
             }
         }
 
-        public static void TaskSetImplementations(BaseLine bl)
+        public static void TaskSetImplementations(LineBase bl)
         {
             EntityBase eb = bl as EntityBase;
             if (eb != null)
@@ -76,7 +76,7 @@ namespace Signum.Web
                 if (bl.Type.IsMList())
                     route = route.Add("Item");
 
-                if (route.Type.CleanType().IsIIdentifiable())
+                if (route.Type.CleanType().IsIEntity())
                 {
                     IImplementationsFinder finder = typeof(ModelEntity).IsAssignableFrom(route.RootType) ?
                         (IImplementationsFinder)Navigator.EntitySettings(route.RootType) : Schema.Current;
@@ -93,7 +93,7 @@ namespace Signum.Web
             }
         }
 
-        public static void TaskSetMove(BaseLine bl)
+        public static void TaskSetMove(LineBase bl)
         {
             EntityListBase eb = bl as EntityListBase;
             if (eb != null)
@@ -104,7 +104,7 @@ namespace Signum.Web
             }
         }
 
-        public static void TaskSetReadOnly(BaseLine bl)
+        public static void TaskSetReadOnly(LineBase bl)
         {
             if (bl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
@@ -115,12 +115,12 @@ namespace Signum.Web
             }
         }
 
-        public static void TaskSetHtmlProperties(BaseLine bl)
+        public static void TaskSetHtmlProperties(LineBase bl)
         {
             ValueLine vl = bl as ValueLine;
             if (vl != null && bl.PropertyRoute.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                var atribute = bl.PropertyRoute.PropertyInfo.SingleAttribute<StringLengthValidatorAttribute>();
+                var atribute = bl.PropertyRoute.PropertyInfo.GetCustomAttribute<StringLengthValidatorAttribute>();
                 if (atribute != null)
                 {
                     int max = atribute.Max; //-1 if not set
@@ -143,7 +143,7 @@ namespace Signum.Web
         }
 
         static GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>> miWalkExpression = 
-            new GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>>((tc, le) => Common.WalkExpression<TypeDN, TypeDN>((TypeContext<TypeDN>)tc, (Expression<Func<TypeDN, TypeDN>>)le));
+            new GenericInvoker<Func<TypeContext, LambdaExpression, TypeContext>>((tc, le) => Common.WalkExpression<TypeEntity, TypeEntity>((TypeContext<TypeEntity>)tc, (Expression<Func<TypeEntity, TypeEntity>>)le));
         public static TypeContext<S> WalkExpression<T, S>(TypeContext<T> tc, Expression<Func<T, S>> lambda)
         {
             return MemberAccessGatherer.WalkExpression(tc, lambda);
@@ -159,7 +159,7 @@ namespace Signum.Web
         //        if (context == null)
         //            return null;
 
-        //        string appPath = "{0}://{1}{2}{3}".Formato(
+        //        string appPath = "{0}://{1}{2}{3}".FormatWith(
         //              context.Request.Url.Scheme,
         //              context.Request.Url.Host,
         //              context.Request.Url.Port == 80 ? string.Empty : ":" + context.Request.Url.Port,
@@ -182,9 +182,9 @@ namespace Signum.Web
             if (type.IsAssignableFrom(objType))
                 return obj;
 
-            if (objType.IsLite() && type.IsAssignableFrom(((Lite<IIdentifiable>)obj).EntityType))
+            if (objType.IsLite() && type.IsAssignableFrom(((Lite<IEntity>)obj).EntityType))
             {
-                Lite<IIdentifiable> lite = (Lite<IIdentifiable>)obj;
+                Lite<IEntity> lite = (Lite<IEntity>)obj;
                 return lite.UntypedEntityOrNull ?? Database.RetrieveAndForget(lite);
             }
 
@@ -193,11 +193,11 @@ namespace Signum.Web
                 Type liteType = Lite.Extract(type);
                 if (liteType.IsAssignableFrom(objType))
                 {
-                    return ((IdentifiableEntity)obj).ToLite();
+                    return ((Entity)obj).ToLite();
                 }
             }
 
-            throw new InvalidCastException("Impossible to convert objet {0} from type {1} to type {2}".Formato(obj, objType, type));
+            throw new InvalidCastException("Impossible to convert objet {0} from type {1} to type {2}".FormatWith(obj, objType, type));
         }
     }
 }

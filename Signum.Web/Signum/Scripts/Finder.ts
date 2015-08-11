@@ -635,7 +635,7 @@ export class SearchControl {
     static getSelectedItems(prefix: string): Array<Entities.EntityValue> {
         return $("input:checkbox[name^=" + prefix.child("rowSelection") + "]:checked").toArray().map(v=> {
             var parts = (<HTMLInputElement>v).value.split("__");
-            return new Entities.EntityValue(new Entities.RuntimeInfo(parts[1], parseInt(parts[0]), false),
+            return new Entities.EntityValue(new Entities.RuntimeInfo(parts[1], parts[0], false),
                 parts[2],
                 $(v).parent().next().children('a').attr('href'));
         });
@@ -1030,7 +1030,7 @@ export class FilterBuilder {
         }).join(";");
     }
 
-    encodeValue($filter: JQuery, index: string) {
+    encodeValue($filter: JQuery, index: string): any {
         var filterValuePrefix = this.prefix.child("value").child(index);
 
         var eleme = filterValuePrefix.get();

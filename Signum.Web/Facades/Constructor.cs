@@ -90,7 +90,7 @@ namespace Signum.Web
 
         public string GetPreConstructorScript(ClientConstructorContext ctx)
         {
-            if (!ctx.Type.IsIdentifiableEntity())
+            if (!ctx.Type.IsEntity())
                 return Default();
 
             List<JsFunction> list = new List<JsFunction>();
@@ -186,7 +186,7 @@ namespace Signum.Web
                     return result;
             }
 
-            if (ctx.Type.IsIdentifiableEntity() && OperationLogic.HasConstructOperations(ctx.Type))
+            if (ctx.Type.IsEntity() && OperationLogic.HasConstructOperations(ctx.Type))
                 return OperationClient.Manager.Construct(ctx);
 
             return (ModifiableEntity)Activator.CreateInstance(ctx.Type, true);
@@ -199,7 +199,7 @@ namespace Signum.Web
             if (!httpContext.Request.Params.AllKeys.Contains("webQueryName"))
                 return;
 
-            if (!(entity is IdentifiableEntity))
+            if (!(entity is Entity))
                 return;
 
             object queryName = Finder.ResolveQueryName(httpContext.Request.Params["webQueryName"]);

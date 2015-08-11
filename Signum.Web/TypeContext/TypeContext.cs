@@ -285,15 +285,15 @@ namespace Signum.Web
 
             Type type = this.UntypedValue.GetType();
             if (type.IsLite())
-                return new RuntimeInfo((Lite<IIdentifiable>)this.UntypedValue);
+                return new RuntimeInfo((Lite<IEntity>)this.UntypedValue);
 
             if (type.IsEmbeddedEntity())
                 return new RuntimeInfo((EmbeddedEntity)this.UntypedValue);
 
-            if (type.IsIdentifiableEntity())
-                return new RuntimeInfo((IdentifiableEntity)this.UntypedValue);
+            if (type.IsEntity())
+                return new RuntimeInfo((Entity)this.UntypedValue);
 
-            throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, IdentifiableEntity or EmbeddedEntity".Formato(type));
+            throw new ArgumentException("Invalid type {0} for RuntimeInfo. It must be Lite, Entity or EmbeddedEntity".FormatWith(type));
         }
 
         internal abstract TypeContext Clone(object newValue);
@@ -301,7 +301,7 @@ namespace Signum.Web
         internal static void AssertId(string id)
         {
             if (!Regex.IsMatch(id, @"^[A-Za-z][A-Za-z0-9-_]*$"))
-                throw new InvalidOperationException("'{0}' is not a valid HTML id".Formato(id));
+                throw new InvalidOperationException("'{0}' is not a valid HTML id".FormatWith(id));
         }
     }
     #endregion
@@ -323,7 +323,7 @@ namespace Signum.Web
         }
 
         public TypeContext(T value, TypeContext parent, string prefix, PropertyRoute propertyRoute)
-            : base(parent, prefix, propertyRoute)
+            : base(parent, prefix, propertyRoute ?? PropertyRoute.Root(value.GetType()))
         {
             Value = value;
         }
@@ -344,6 +344,11 @@ namespace Signum.Web
             return Common.WalkExpression(this, property);
         }
 
+        public string SubContextPrefix<S>(Expression<Func<T, S>> property)
+        {
+            return SubContext(property).Prefix;
+        }
+
         public IEnumerable<TypeElementContext<S>> TypeElementContext<S>(Expression<Func<T, MList<S>>> property)
         {
             return TypeContextUtilities.TypeElementContext(Common.WalkExpression(this, property));
@@ -351,30 +356,9 @@ namespace Signum.Web
 
         internal override TypeContext Clone(object newValue)
         {
-            return new TypeContext<T>((T)newValue, (TypeContext)Parent, Prefix, PropertyRoute);
-        }
-    }
-    #endregion
-
-    #region TypeSubContext<T>
-    public class TypeSubContext<T> : TypeContext<T>, IDisposable
-    {
-        PropertyInfo[] properties;
-
-        public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties, PropertyRoute propertyRoute)
-            : base(value, parent.ThrowIfNull(""), properties.ToString(a => a.Name, Separator), propertyRoute)
-        {
-            this.properties = properties;
-        }
-
-        public PropertyInfo[] Properties
-        {
-            get { return properties; }
-        }
-
-        internal override TypeContext Clone(object newValue)
-        {
-            return new TypeSubContext<T>((T)newValue, (TypeContext)Parent, Properties, PropertyRoute);
+            var result = new TypeContext<T>((T)newValue, (TypeContext)Parent, null, PropertyRoute);
+            result.Prefix = this.Prefix;
+            return result;
         }
     }
     #endregion
@@ -383,9 +367,9 @@ namespace Signum.Web
     public class TypeElementContext<T> : TypeContext<T>
     {
         public int Index { get; private set; }
-        public int? RowId { get; private set; }
+        public PrimaryKey? RowId { get; private set; }
 
-        public TypeElementContext(T value, TypeContext parent, int index, int? rowId)
+        public TypeElementContext(T value, TypeContext parent, int index, PrimaryKey? rowId)
             : base(value, parent, index.ToString(), parent.PropertyRoute.Add("Item"))
         {
             this.Index = index;
@@ -398,172 +382,4 @@ namespace Signum.Web
         }
     }
     #endregion
-
-    public interface IViewOverrides
-    {
-        List<Tab> ExpandTabs(List<Tab> tabs, string containerId, HtmlHelper helper, TypeContext context);
-        MvcHtmlString OnSurroundLine(PropertyRoute propertyRoute, HtmlHelper helper, TypeContext tc, MvcHtmlString result);
-        bool IsVisible(PropertyRoute propertyRoute);
-    }
-
-    public class ViewOverrides<T> : IViewOverrides where T : IRootEntity
-    {
-        public Dictionary<string, Func<HtmlHelper, TypeContext, Tab>> BeforeTabDictionary;
-        public ViewOverrides<T> BeforeTab(string id, Func<HtmlHelper, TypeContext<T>, Tab> constructor) 
-        {
-            if (BeforeTabDictionary == null)
-                BeforeTabDictionary = new Dictionary<string, Func<HtmlHelper, TypeContext, Tab>>();
-
-            BeforeTabDictionary[id] = BeforeTabDictionary.TryGetC(id) + new Func<HtmlHelper, TypeContext, Tab>((html, tc) => constructor(html, (TypeContext<T>)tc));
-
-            return this;
-        }
-
-        public Dictionary<string, Func<HtmlHelper, TypeContext, Tab>> AfterTabDictionary;
-        public ViewOverrides<T> AfterTab(string id, Func<HtmlHelper, TypeContext, Tab> constructor)
-        {
-            if (AfterTabDictionary == null)
-                AfterTabDictionary = new Dictionary<string, Func<HtmlHelper, TypeContext, Tab>>();
-
-            AfterTabDictionary[id] = AfterTabDictionary.TryGetC(id) + new Func<HtmlHelper, TypeContext, Tab>((html, tc) => constructor(html, (TypeContext<T>)tc));
-
-            return this;
-        }
-
-        HashSet<string> hiddenTabs;
-
-        public ViewOverrides<T> HideTab(string id)
-        {
-            if (hiddenTabs == null)
-                hiddenTabs = new HashSet<string>();
-            hiddenTabs.Add(id);
-
-            return this;
-        }
-
-        List<Tab> IViewOverrides.ExpandTabs(List<Tab> tabs, string containerId, HtmlHelper helper, TypeContext context)
-        {
-            if (hiddenTabs != null && hiddenTabs.Contains(containerId))
-                return null;
-
-            List<Tab> newTabs = new List<Tab>();
-
-            var before = BeforeTabDictionary.TryGetC(containerId);
-            if (before != null)
-                foreach (var b in before.GetInvocationListTyped())
-                {
-                    var newTab = b(helper, context);
-                    if (newTab != null)
-                        ExpandTab(newTab, helper, context, newTabs);
-                }
-
-            foreach (var item in tabs)
-                ExpandTab(item, helper, context, newTabs);
-
-            var after = AfterTabDictionary.TryGetC(containerId);
-            if (after != null)
-                foreach (var a in after.GetInvocationListTyped())
-                {
-                    var newTab = a(helper, context);
-                    if (newTab != null)
-                        ExpandTab(newTab, helper, context, newTabs);
-                }
-
-            return newTabs;
-        }
-
-        void ExpandTab(Tab item, HtmlHelper helper, TypeContext context, List<Tab> newTabs)
-        {
-            var before = BeforeTabDictionary.TryGetC(item.Id);
-            if (before != null)
-                foreach (var b in before.GetInvocationListTyped())
-                {
-                    var newTab = b(helper, context);
-                    if (newTab != null)
-                        ExpandTab(newTab, helper, context, newTabs);
-                }
-
-            if (hiddenTabs == null || !hiddenTabs.Contains(item.Id))
-                newTabs.Add(item);
-
-            var after = AfterTabDictionary.TryGetC(item.Id);
-            if (after != null)
-                foreach (var a in after.GetInvocationListTyped())
-                {
-                    var newTab = a(helper, context);
-                    if (newTab != null)
-                        ExpandTab(newTab, helper, context, newTabs);
-                }
-        }
-
-        Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeLine;
-        public ViewOverrides<T> BeforeLine<S>(Expression<Func<T, S>> propertyRoute, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
-        {
-            return BeforeLine(PropertyRoute.Construct(propertyRoute), (helper, tc) => constructor(helper, (TypeContext<T>)tc));
-        }
-
-        public ViewOverrides<T> BeforeLine(PropertyRoute propertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
-        {
-            if (beforeLine == null)
-                beforeLine = new Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
-
-            beforeLine[propertyRoute] = beforeLine.TryGetC(propertyRoute) + constructor;
-
-            return this; 
-        }
-
-
-        Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> afterLine;
-        public ViewOverrides<T> AfterLine< S>(Expression<Func<T, S>> propertyRoute, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
-        {
-            return AfterLine(PropertyRoute.Construct(propertyRoute), (helper, tc) => constructor(helper, (TypeContext<T>)tc));
-        }
-
-        public ViewOverrides<T> AfterLine(PropertyRoute propertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
-        {
-            if (afterLine == null)
-                afterLine = new Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
-
-            afterLine[propertyRoute] = afterLine.TryGetC(propertyRoute) + constructor;
-
-            return this;
-        }
-
-
-        MvcHtmlString IViewOverrides.OnSurroundLine(PropertyRoute propertyRoute, HtmlHelper helper, TypeContext tc, MvcHtmlString result)
-        {
-            var before = beforeLine.TryGetC(propertyRoute);
-            if (before != null)
-                foreach (var b in before.GetInvocationListTyped())
-                    result = b(helper, tc).Concat(result);
-
-            var after = afterLine.TryGetC(propertyRoute);
-            if (after != null)
-                foreach (var a in after.GetInvocationListTyped())
-                    result = result.Concat(a(helper, tc));
-
-            return result;
-        }
-
-        public ViewOverrides<T> HideLine<S>(Expression<Func<T, S>> propertyRoute) 
-        {
-            return HideLine(PropertyRoute.Construct(propertyRoute));
-        }
-
-        HashSet<PropertyRoute> hiddenLines;
-        public ViewOverrides<T> HideLine(PropertyRoute propertyRoute)
-        {
-            if (hiddenLines == null)
-                hiddenLines = new HashSet<PropertyRoute>();
-
-            hiddenLines.Add(propertyRoute);
-
-            return this;
-        }
-
-        bool IViewOverrides.IsVisible(PropertyRoute propertyRoute)
-        {
-            return hiddenLines == null || !hiddenLines.Contains(propertyRoute);
-        }
-    }
 }

@@ -1,8 +1,16 @@
 ﻿
-input[type=checkbox]
+input[type=checkbox],
+input[type=radio]
 {
     width: 16px;
     height: 16px;
+}
+
+label input[type=checkbox],
+label input[type=radio] 
+{
+    margin:0;
+    vertical-align: middle;
 }
 
 input[type=checkbox].form-control
@@ -90,13 +98,22 @@ fieldset
    margin: 10px 0px;
 }
 
-fieldset legend
+fieldset > legend
 {
-    border: 1px solid #ddd;
+    border: 0px;
     border-radius: 4px;
-    padding: 5px 10px 0 10px;
+    padding: 3px 10px 0 10px;
     margin: 0px;
+    margin-bottom: -5px;
+    font-size: 16px;
+    font-weight: bold;
+    width: initial;
 }
+
+    fieldset > legend > div > span.pull-right
+    {
+        margin-left: 5px;
+    }
 
 .border
 {
@@ -123,6 +140,7 @@ fieldset.sf-repeater-element > legend
     float: left;
     margin-left: -6px;
     margin-right: 10px;
+    margin-top: 5px;
     border: 0px;
 }
 
@@ -131,6 +149,7 @@ fieldset.sf-repeater-element > legend
     float: right;
     margin-left: 6px;
     margin-right: -10px;
+    margin-top: 5px;
     border: 0px;
 }
 
@@ -170,6 +189,10 @@ ul.sf-strip-vertical>li>.form-control
 .sf-strip-horizontal > li > *
 {
     vertical-align: middle;
+}
+
+label.sf-checkbox-element {
+    display: block;
 }
 
 /*Tabs*/
@@ -229,7 +252,8 @@ ul.nav-tabs
     padding: 0px 3px;
 }
 
-.form-xs .form-control:not(textarea)
+.form-xs .form-control:not(textarea),
+.form-xs .form-control-static
 {
     height: 20px;
 }
@@ -237,7 +261,8 @@ ul.nav-tabs
 .form-xs input[type=checkbox].form-control
 {
     height: 16px;
-    padding: 0px;
+    margin-top: 9px;
+    padding: 2px;
 }
 
 .form-xs .input-group .btn,
@@ -286,21 +311,23 @@ ul.nav-tabs
     padding: 3px 6px;
 }
 
-.form-sm .form-control:not(textarea)
+.form-sm .form-control:not(textarea),
+.form-sm .form-control-static
 {
-    height: 30px;
+    height: 26px;
 }
 
 .form-sm input[type=checkbox].form-control
 {
     height: 16px;
     padding: 0px;
+    margin-top: 4px;
 }
 
 .form-sm .input-group .btn,
 .form-sm .input-group .input-group-addon
 {
-    padding: 4px 6px;
+    padding: 2px 4px;
 }
 
 .form-sm .sf-strip
@@ -332,11 +359,10 @@ ul.nav-tabs
 .form-horizontal .form-sm .form-control-static {
     margin-top: 0;
     margin-bottom: 0;
-    padding-top: 5px;
+    padding-top: 2px;
 }
 
 /*form-inline*/
-
 .form-horizontal .form-inline .form-group
 {
     margin-right: 0px;
@@ -350,6 +376,16 @@ ul.nav-tabs
     padding-top: 0;
     text-align: start;
     width: auto;
+}
+
+.form-vertical .form-sm.form-group > label 
+{
+    margin-bottom:0px;
+}
+
+.form-vertical .form-xs.form-group > label 
+{
+    margin-bottom:0px;
 }
 
 .form-vertical .form-group

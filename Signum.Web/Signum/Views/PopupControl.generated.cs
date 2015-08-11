@@ -233,7 +233,7 @@ WriteLiteral(" </span>\r\n");
             
             #line 26 "..\..\Signum\Views\PopupControl.cshtml"
                       
-                        var ident = Model.UntypedValue as IdentifiableEntity;
+                        var ident = Model.UntypedValue as Entity;
 
                         if (ident != null && !ident.IsNew && Navigator.IsNavigable(ident, null))
                         {

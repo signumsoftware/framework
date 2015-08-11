@@ -37,13 +37,13 @@ namespace Signum.Entities.Reflection
 
         static Reflector()
         {
-            DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
+            DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityEntity
             DescriptionManager.CleanType = t => EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
 
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsEnumsInEntities;
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsQuery;
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsSymbolContainer;
-            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsIIdentifiable;
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsIEntity;
 
             DescriptionManager.ShouldLocalizeMemeber += DescriptionManager_ShouldLocalizeMemeber;
             DescriptionManager.Invalidate();
@@ -58,8 +58,8 @@ namespace Signum.Entities.Reflection
         {
             return (from a in AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>())
                     from t in a.GetTypes()
-                    where typeof(IIdentifiable).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
-                    let da = t.SingleAttributeInherit<DescriptionOptionsAttribute>()
+                    where typeof(IEntity).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
+                    let da = t.GetCustomAttribute<DescriptionOptionsAttribute>(true)
                     where da == null || da.Options.IsSet(DescriptionOptions.Members)
                     from p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                     where DescriptionManager.OnShouldLocalizeMember(p)
@@ -73,9 +73,9 @@ namespace Signum.Entities.Reflection
             return EnumsInEntities.Value.Contains(t) ? DescriptionOptions.Members | DescriptionOptions.Description : (DescriptionOptions?)null;
         }
 
-        static DescriptionOptions? DescriptionManager_IsIIdentifiable(Type t)
+        static DescriptionOptions? DescriptionManager_IsIEntity(Type t)
         {
-             return t.IsInterface && typeof(IIdentifiable).IsAssignableFrom(t) ? DescriptionOptions.Members : (DescriptionOptions?)null;
+             return t.IsInterface && typeof(IEntity).IsAssignableFrom(t) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
         static DescriptionOptions? DescriptionManager_IsQuery(Type t)
@@ -92,13 +92,30 @@ namespace Signum.Entities.Reflection
 
         public static string CleanTypeName(Type t)
         {
-            return t.Name.RemovePostfix("DN").RemovePostfix("Model").RemovePostfix("Symbol");
+            if (t.Name.EndsWith("Entity"))
+                return t.Name.RemoveSuffix("Entity");
+
+            if (t.Name.EndsWith("Model"))
+                return t.Name.RemoveSuffix("Model");
+
+            if (t.Name.EndsWith("Symbol"))
+                return t.Name.RemoveSuffix("Symbol");
+
+            return t.Name;
         }
 
-        static string RemovePostfix(this string text, string postfix)
+        public static string RemoveSuffix(this string text, string postfix)
         {
             if (text.EndsWith(postfix) && text != postfix)
                 return text.Substring(0, text.Length - postfix.Length);
+
+            return text;
+        }
+
+        public static string RemovePrefix(this string text, string prefix)
+        {
+            if (text.StartsWith(prefix) && text != prefix)
+                return text.Substring(prefix.Length);
 
             return text;
         }
@@ -113,9 +130,9 @@ namespace Signum.Entities.Reflection
             return typeof(Modifiable).IsAssignableFrom(t);
         }
 
-        public static bool IsIIdentifiable(this Type type)
+        public static bool IsIEntity(this Type type)
         {
-            return typeof(IIdentifiable).IsAssignableFrom(type);
+            return typeof(IEntity).IsAssignableFrom(type);
         }
 
         public static bool IsIRootEntity(this Type type)
@@ -130,12 +147,12 @@ namespace Signum.Entities.Reflection
 
         public static bool IsModifiableIdentifiableOrLite(this Type t)
         {
-            return t.IsModifiable() || t.IsIIdentifiable() || t.IsLite();
+            return t.IsModifiable() || t.IsIEntity() || t.IsLite();
         }
 
-        public static bool IsIdentifiableEntity(this Type ft)
+        public static bool IsEntity(this Type ft)
         {
-            return typeof(IdentifiableEntity).IsAssignableFrom(ft);
+            return typeof(Entity).IsAssignableFrom(ft);
         }
 
         public static bool IsEmbeddedEntity(this Type t)
@@ -212,7 +229,7 @@ namespace Signum.Entities.Reflection
                 case ExpressionType.Parameter: return null;
             }
 
-            throw new InvalidCastException("Not supported {0}".Formato(e.NodeType));
+            throw new InvalidCastException("Not supported {0}".FormatWith(e.NodeType));
         }
 
         static readonly string[] collectionMethods = new[] { "Element" };
@@ -242,7 +259,7 @@ namespace Signum.Entities.Reflection
                 }
                 case ExpressionType.Convert: return ((UnaryExpression)e).Type;
                 case ExpressionType.Parameter: return null;
-                default: throw new InvalidCastException("Not supported {0}".Formato(e.NodeType));
+                default: throw new InvalidCastException("Not supported {0}".FormatWith(e.NodeType));
             }
         }
 
@@ -251,7 +268,7 @@ namespace Signum.Entities.Reflection
             var fi = TryFindFieldInfo(type, value);
 
             if (fi == null)
-                throw new InvalidOperationException("No FieldInfo for '{0}' found on '{1}'".Formato(value.Name, type.Name));
+                throw new InvalidOperationException("No FieldInfo for '{0}' found on '{1}'".FormatWith(value.Name, type.Name));
 
             return fi;
         }
@@ -275,7 +292,7 @@ namespace Signum.Entities.Reflection
             var pi = TryFindPropertyInfo(fi);
 
             if (pi == null)
-                throw new InvalidOperationException("No PropertyInfo for '{0}' found".Formato(fi.Name));
+                throw new InvalidOperationException("No PropertyInfo for '{0}' found".FormatWith(fi.Name));
 
             return pi;
         }
@@ -317,7 +334,7 @@ namespace Signum.Entities.Reflection
 
         public static bool QueryableProperty(Type type, PropertyInfo pi)
         {
-            QueryablePropertyAttribute spa = pi.SingleAttribute<QueryablePropertyAttribute>();
+            QueryablePropertyAttribute spa = pi.GetCustomAttribute<QueryablePropertyAttribute>();
             if (spa != null)
                 return spa.AvailableForQueries;
 
@@ -351,9 +368,9 @@ namespace Signum.Entities.Reflection
 
         public static string FormatString(PropertyRoute route)
         {
-            PropertyRoute simpleRoute = route.SimplifyNoRoot();
+            PropertyRoute simpleRoute = route.SimplifyToProperty();
 
-            FormatAttribute format = simpleRoute.PropertyInfo.SingleAttribute<FormatAttribute>();
+            FormatAttribute format = simpleRoute.PropertyInfo.GetCustomAttribute<FormatAttribute>();
             if (format != null)
                 return format.Format;
 
@@ -456,7 +473,7 @@ namespace Signum.Entities.Reflection
         public static void AssertValidIdentifier(string step)
         {
             if (!ValidIdentifier(step))
-                throw new FormatException("'{0}' is not a valid identifier".Formato(step));
+                throw new FormatException("'{0}' is not a valid identifier".FormatWith(step));
         }
     }
 }

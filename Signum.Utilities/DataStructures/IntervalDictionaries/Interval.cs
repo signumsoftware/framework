@@ -29,22 +29,17 @@ namespace Signum.Utilities.DataStructures
             this.max = max;
         }
 
-
         [MethodExpander(typeof(IntervalMethodExpander))]
         public bool Contains(T value)
         {
             return min.CompareTo(value) <= 0 && value.CompareTo(max) < 0;
         }
 
+
+        [MethodExpander(typeof(OverlapMethodExpander))]
         public bool Overlap(Interval<T> other)
         {
-            if (max.CompareTo(other.min) <= 0)
-                return false;
-
-            if (other.max.CompareTo(min) <= 0)
-                return false;
-
-            return true;
+            return !((max.CompareTo(other.min) <= 0) || (other.max.CompareTo(min) <= 0));
         }
 
 
@@ -133,22 +128,33 @@ namespace Signum.Utilities.DataStructures
         }
     }
 
-    class IntervalMethodExpander: IMethodExpander
+    class IntervalMethodExpander : IMethodExpander
     {
         public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
         {
-            if (instance.Type.IsInstantiationOf(typeof(Interval<>)))
-                return Expression.And( //min <= value && value < max;                    
-                    Expression.LessThanOrEqual(Expression.Property(instance, "Min"), arguments[0]),
-                    Expression.LessThan(arguments[0], Expression.Property(instance, "Max")));
-            else
-                return Expression.And(
-                    Expression.Or(Expression.Not(Expression.Property(Expression.Property(instance, "Min"), "HasValue")), Expression.LessThanOrEqual(Expression.Property(Expression.Property(instance, "Min"), "Value"), arguments[0])),
-                    Expression.Or(Expression.Not(Expression.Property(Expression.Property(instance, "Max"), "HasValue")), Expression.LessThan(arguments[0], Expression.Property(Expression.Property(instance, "Max"), "Value"))));  
-
+            return Expression.And( //min <= value && value < max;                    
+                Expression.LessThanOrEqual(Expression.Property(instance, "Min"), arguments[0]),
+                Expression.LessThan(arguments[0], Expression.Property(instance, "Max")));
         }
     }
 
+
+    //Overlap
+    class OverlapMethodExpander : IMethodExpander
+    {
+        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        {
+            Expression other = arguments.SingleEx();
+
+            //!((max.CompareTo(other.min) <= 0) || (other.max.CompareTo(min) <= 0));
+
+            return Expression.Not(Expression.Or(
+                  Expression.LessThanOrEqual(Expression.Property(instance, "Max"), Expression.Property(other, "Min")),
+                  Expression.LessThanOrEqual(Expression.Property(other, "Max"), Expression.Property(instance, "Min"))
+                  ));
+        }
+    }
+   
 
     [Serializable]
     public struct NullableInterval<T> : IEquatable<NullableInterval<T>>, IComparable<NullableInterval<T>>, IFormattable, IComparable
@@ -171,21 +177,21 @@ namespace Signum.Utilities.DataStructures
             this.max = max;
         }
 
-        [MethodExpander(typeof(IntervalMethodExpander))]
+        [MethodExpander(typeof(ContainsNullableMethodExpander))]
         public bool Contains(T value)
         {
             return (!min.HasValue || min.Value.CompareTo(value) <= 0) &&
                    (!max.HasValue || value.CompareTo(max.Value) < 0);
         }
 
+
+        [MethodExpander(typeof(OverlapNullableMethodExpander))]
         public bool Overlap(NullableInterval<T> other)
         {
-            if (max.HasValue && other.min.HasValue && max.Value.CompareTo(other.min.Value) <= 0)
-                return false;
-            if (other.max.HasValue && min.HasValue && other.max.Value.CompareTo(min.Value) <= 0)
-                return false;
-
-            return true;
+            return !(
+                (max.HasValue && other.min.HasValue && max.Value.CompareTo(other.min.Value) <= 0) || 
+                (other.max.HasValue && min.HasValue && other.max.Value.CompareTo(min.Value) <= 0)
+                );
         }
 
         public bool Overlap(Interval<T> other)
@@ -314,7 +320,188 @@ namespace Signum.Utilities.DataStructures
         }
     }
 
+    class ContainsNullableMethodExpander : IMethodExpander
+    {
+        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        {
+            var min = Expression.Property(instance, "Min");
+            var max = Expression.Property(instance, "Max");
 
+            return Expression.And(
+                Expression.Or(Expression.Not(Expression.Property(min, "HasValue")), Expression.LessThanOrEqual(Expression.Property(min, "Value"), arguments[0])),
+                Expression.Or(Expression.Not(Expression.Property(max, "HasValue")), Expression.LessThan(arguments[0], Expression.Property(max, "Value"))));
+        }
+    }
+
+    //Overlap
+    class OverlapNullableMethodExpander : IMethodExpander
+    {
+        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        {
+            Expression other = arguments.SingleEx();
+
+            //!((max.CompareTo(other.min) <= 0) || (other.max.CompareTo(min) <= 0));
+
+            return Expression.Not(Expression.Or(
+                LessOrEqualNullable(Expression.Property(instance, "Max"), Expression.Property(other, "Min")),
+                LessOrEqualNullable(Expression.Property(other, "Max"), Expression.Property(instance, "Min"))
+                ));
+        }
+
+        private Expression LessOrEqualNullable(MemberExpression max, MemberExpression min)
+        {
+            return Expression.And(
+                Expression.And(Expression.Property(max, "HasValue"), Expression.Property(min, "HasValue")),
+                Expression.LessThanOrEqual(Expression.Property(max, "Value"), Expression.Property(min, "Value"))); 
+        }
+    }
+
+
+    [Serializable]
+    public struct IntervalWithEnd<T> : IEquatable<IntervalWithEnd<T>>, IComparable<IntervalWithEnd<T>>, IFormattable, IComparable
+        where T : struct, IComparable<T>, IEquatable<T>
+    {
+        readonly T min;
+        readonly T max;
+
+        public T Min { get { return min; } }
+        public T Max { get { return max; } }
+
+        public IntervalWithEnd(T min, T max)
+        {
+            if (min.CompareTo(max) > 0)
+                throw new ArgumentException("Argument min is greater than max");
+
+            this.min = min;
+            this.max = max;
+        }
+
+        [MethodExpander(typeof(ContainsWithEndMethodExpander))]
+        public bool Contains(T value)
+        {
+            return min.CompareTo(value) <= 0 && value.CompareTo(max) <= 0;
+        }
+
+        [MethodExpander(typeof(OverlapWithEndMethodExpander))]
+        public bool Overlap(IntervalWithEnd<T> other)
+        {
+            return !((max.CompareTo(other.min) < 0) || (other.max.CompareTo(min) < 0));
+        }
+
+
+        public IntervalWithEnd<T>? Intersection(IntervalWithEnd<T> other)
+        {
+            T minVal = min.CompareTo(other.min) > 0 ? min : other.min;
+            T maxVal = max.CompareTo(other.max) < 0 ? max : other.max;
+
+            if (minVal.CompareTo(maxVal) > 0)
+                return null;
+
+            return new IntervalWithEnd<T>(minVal, maxVal);
+        }
+
+        public IntervalWithEnd<T> Union(IntervalWithEnd<T> other)
+        {
+            T minVal = min.CompareTo(other.min) > 0 ? other.min : min;
+            T maxVal = max.CompareTo(other.max) < 0 ? other.max : max;
+
+            return new IntervalWithEnd<T>(minVal, maxVal);
+        }
+
+        public bool Subset(IntervalWithEnd<T> other)
+        {
+            return this.min.CompareTo(other.min) <= 0 && other.max.CompareTo(this.max) <= 0;
+        }
+
+
+        public IEnumerable<T> Elements()
+        {
+            yield return min;
+            yield return max;
+        }
+
+        public int CompareTo(IntervalWithEnd<T> other)
+        {
+            return min.CompareTo(other.min);
+        }
+
+        public int CompareTo(object obj)
+        {
+            return CompareTo((IntervalWithEnd<T>)obj);
+        }
+
+        public override string ToString()
+        {
+            return "[" + min + " - " + max + "]";
+        }
+
+        public bool Equals(IntervalWithEnd<T> other)
+        {
+            return other.min.Equals(min) && other.max.Equals(max);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !(obj is IntervalWithEnd<T>))
+                return false;
+
+            return Equals((IntervalWithEnd<T>)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return min.GetHashCode();
+        }
+
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            if (format == null)
+                return string.Format(formatProvider, "{0} - {1}", min, max);
+            else if (format.Contains("{"))
+                return string.Format(formatProvider, format, min, max);
+            else
+                return string.Format(formatProvider, "{0:" + format + "} - {1:" + format + "}", min, max);
+        }
+
+        public static bool operator ==(IntervalWithEnd<T> first, IntervalWithEnd<T> second)
+        {
+            return first.Equals(second);
+        }
+
+        public static bool operator !=(IntervalWithEnd<T> first, IntervalWithEnd<T> second)
+        {
+            return !first.Equals(second);
+        }
+
+      
+    }
+
+    class ContainsWithEndMethodExpander : IMethodExpander
+    {
+        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        {
+            return Expression.And( //min <= value && value < max;                    
+                Expression.LessThanOrEqual(Expression.Property(instance, "Min"), arguments[0]),
+                Expression.LessThanOrEqual(arguments[0], Expression.Property(instance, "Max")));
+        }
+    }
+
+
+    //Overlap
+    class OverlapWithEndMethodExpander : IMethodExpander
+    {
+        public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+        {
+            Expression other = arguments.SingleEx();
+
+            //!((max.CompareTo(other.min) < 0) || (other.max.CompareTo(min) < 0));
+
+            return Expression.Not(Expression.Or(
+                  Expression.LessThan(Expression.Property(instance, "Max"), Expression.Property(other, "Min")),
+                  Expression.LessThan(Expression.Property(other, "Max"), Expression.Property(instance, "Min"))
+                  ));
+        }
+    }
 
     public static class IntervalExtensions
     {

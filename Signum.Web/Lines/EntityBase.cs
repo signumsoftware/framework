@@ -27,7 +27,7 @@ namespace Signum.Web
         public const string Detail = "sfDetail";
     }
 
-    public abstract class EntityBase : BaseLine
+    public abstract class EntityBase : LineBase
     {
         public EntityBase(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, prefix, propertyRoute)
@@ -53,7 +53,6 @@ namespace Signum.Web
         public bool Create { get; set; }
         public bool Find { get; set; }
         public bool Remove { get; set; }
-        public bool ReadOnlyEntity { get; set; }
 
         bool preserveViewData = false;
         /// <summary>
@@ -133,7 +132,7 @@ namespace Signum.Web
                 if (UntypedValue == null)
                     return null;
 
-                return UntypedValue.GetType().IsLite() ? (UntypedValue as Lite<IIdentifiable>).EntityType : UntypedValue.GetType();
+                return UntypedValue.GetType().IsLite() ? (UntypedValue as Lite<IEntity>).EntityType : UntypedValue.GetType();
             }
         }
 
@@ -184,7 +183,7 @@ namespace Signum.Web
 
         string NewLine(string varLines, string type)
         {
-            return "new {0}.{1}($('#{2}'), {3})".Formato(varLines, type, this.Prefix, JsonConvert.SerializeObject(this.OptionsJSInternal()));
+            return "new {0}.{1}($('#{2}'), {3})".FormatWith(varLines, type, this.Prefix, JsonConvert.SerializeObject(this.OptionsJSInternal()));
         }
     }
 }

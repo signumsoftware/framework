@@ -13,7 +13,7 @@ namespace Signum.Web
     {
         public UrlHelper Url { get; set; }
         public ControllerContext ControllerContext { get; set; }
-        public List<Lite<IdentifiableEntity>> Lites { get; set; }
+        public List<Lite<Entity>> Lites { get; set; }
         public object QueryName { get; set; }
         public Implementations Implementations { get; set; }
         public string Prefix { get; set; }

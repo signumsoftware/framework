@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -48,7 +48,7 @@ namespace Signum.Entities
 
             string error = ErrorMessage == null ? defaultError : ErrorMessage();
             if (error != null)
-                error = error.Formato(property.NiceName());
+                error = error.FormatWith(property.NiceName());
 
             return error; 
         }
@@ -110,13 +110,13 @@ namespace Signum.Entities
                 return allowNulls ? null : ValidationMessage._0IsNotSet.NiceToString();
 
             if (min == max && min != -1 && val.Length != min)
-                return ValidationMessage.TheLenghtOf0HasToBeEqualTo0.NiceToString().Formato(min);
+                return ValidationMessage.TheLenghtOf0HasToBeEqualTo0.NiceToString().FormatWith(min);
 
             if (min != -1 && val.Length < min)
-                return ValidationMessage.TheLengthOf0HasToBeGreaterOrEqualTo0.NiceToString().Formato(min);
+                return ValidationMessage.TheLengthOf0HasToBeGreaterOrEqualTo0.NiceToString().FormatWith(min);
 
             if (max != -1 && val.Length > max)
-                return ValidationMessage.TheLengthOf0HasToBeLesserOrEqualTo0.NiceToString().Formato(max);
+                return ValidationMessage.TheLengthOf0HasToBeLesserOrEqualTo0.NiceToString().FormatWith(max);
 
             return null;
         }
@@ -126,9 +126,9 @@ namespace Signum.Entities
             get
             {
                 string result =
-                    min != -1 && max != -1 ? ValidationMessage.HaveBetween0And1Characters.NiceToString().Formato(min, max) :
-                    min != -1 ? ValidationMessage.HaveMinimum0Characters.NiceToString().Formato(min) :
-                    max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().Formato(max) : null;
+                    min != -1 && max != -1 ? ValidationMessage.HaveBetween0And1Characters.NiceToString().FormatWith(min, max) :
+                    min != -1 ? ValidationMessage.HaveMinimum0Characters.NiceToString().FormatWith(min) :
+                    max != -1 ? ValidationMessage.HaveMaximum0Characters.NiceToString().FormatWith(max) : null;
 
                 if (allowNulls)
                     result = result.Add(" ", ValidationMessage.OrBeNull.NiceToString());
@@ -166,14 +166,14 @@ namespace Signum.Entities
             if (regex.IsMatch(str))
                 return null;
 
-            return ValidationMessage._0DoesNotHaveAValid0Format.NiceToString().Formato(FormatName);
+            return ValidationMessage._0DoesNotHaveAValid0Format.NiceToString().FormatWith(FormatName);
         }
 
         public override string HelpMessage
         {
             get
             {
-                return ValidationMessage.HaveValid0Format.NiceToString().Formato(FormatName);
+                return ValidationMessage.HaveValid0Format.NiceToString().FormatWith(FormatName);
             }
         }
     }
@@ -281,7 +281,7 @@ namespace Signum.Entities
 
         public override string HelpMessage
         {
-            get { return ValidationMessage.HaveValid0Format.NiceToString().Formato(FormatName); }
+            get { return ValidationMessage.HaveValid0Format.NiceToString().FormatWith(FormatName); }
         }
 
         protected override string OverrideError(object value)
@@ -294,7 +294,7 @@ namespace Signum.Entities
             if (str.IndexOfAny(InvalidCharts) == -1)
                 return null;
 
-            return ValidationMessage._0DoesNotHaveAValid0Format.NiceToString().Formato(FormatName);
+            return ValidationMessage._0DoesNotHaveAValid0Format.NiceToString().FormatWith(FormatName);
         }
 
         public static string RemoveInvalidCharts(string a)
@@ -324,7 +324,7 @@ namespace Signum.Entities
 
             if (value is decimal && Math.Round((decimal)value, DecimalPlaces) != (decimal)value)
             {
-                return ValidationMessage._0HasMoreThan0DecimalPlaces.NiceToString().Formato(DecimalPlaces);
+                return ValidationMessage._0HasMoreThan0DecimalPlaces.NiceToString().FormatWith(DecimalPlaces);
             }
 
             return null;
@@ -332,7 +332,7 @@ namespace Signum.Entities
 
         public override string HelpMessage
         {
-            get { return ValidationMessage.Have0Decimals.NiceToString().Formato(DecimalPlaces); }
+            get { return ValidationMessage.Have0Decimals.NiceToString().FormatWith(DecimalPlaces); }
         }
     }
 
@@ -398,7 +398,7 @@ namespace Signum.Entities
             if (ok)
                 return null;
 
-            return ValidationMessage._0HasToBe0Than1.NiceToString().Formato(ComparisonType.NiceToString(), number.ToString());
+            return ValidationMessage._0HasToBe0Than1.NiceToString().FormatWith(ComparisonType.NiceToString(), number.ToString());
         }
 
         public override string HelpMessage
@@ -466,12 +466,12 @@ namespace Signum.Entities
                 val.CompareTo(max) <= 0)
                 return null;
 
-            return ValidationMessage._0HasToBeBetween0And1.NiceToString().Formato(min, max);
+            return ValidationMessage._0HasToBeBetween0And1.NiceToString().FormatWith(min, max);
         }
 
         public override string HelpMessage
         {
-            get { return ValidationMessage.BeBetween0And1.NiceToString().Formato(min, max); }
+            get { return ValidationMessage.BeBetween0And1.NiceToString().FormatWith(min, max); }
         }
     }
 
@@ -482,9 +482,9 @@ namespace Signum.Entities
             IList list = (IList)value;
             if (list == null || list.Count <= 1)
                 return null;
-            string ex = list.Cast<object>().GroupCount().Where(kvp => kvp.Value > 1).ToString(e => "{0} x {1}".Formato(e.Key, e.Value), ", ");
+            string ex = list.Cast<object>().GroupCount().Where(kvp => kvp.Value > 1).ToString(e => "{0} x {1}".FormatWith(e.Key, e.Value), ", ");
             if (ex.HasText())
-                return ValidationMessage._0HasSomeRepeatedElements0.NiceToString().Formato(ex);
+                return ValidationMessage._0HasSomeRepeatedElements0.NiceToString().FormatWith(ex);
             return null;
         }
 
@@ -498,7 +498,7 @@ namespace Signum.Entities
             var errors = collection.GroupBy(keySelector)
                 .Select(gr => new { gr.Key, Count = gr.Count() })
                 .Where(a => a.Count > 1)
-                .ToString(e => "{0} x {1}".Formato(e.Key, e.Count), ", ");
+                .ToString(e => "{0} x {1}".FormatWith(e.Key, e.Count), ", ");
 
             return errors;
         }
@@ -529,12 +529,12 @@ namespace Signum.Entities
                 (ComparisonType == ComparisonType.LessThanOrEqual && val.CompareTo(number) <= 0))
                 return null;
 
-            return ValidationMessage.TheNumberOfElementsOf0HasToBe01.NiceToString().Formato(ComparisonType.NiceToString(), number.ToString());
+            return ValidationMessage.TheNumberOfElementsOf0HasToBe01.NiceToString().FormatWith(ComparisonType.NiceToString(), number.ToString());
         }
 
         public override string HelpMessage
         {
-            get { return ValidationMessage.HaveANumberOfElements01.NiceToString().Formato(ComparisonType.NiceToString(), number.ToString()); }
+            get { return ValidationMessage.HaveANumberOfElements01.NiceToString().FormatWith(ComparisonType.NiceToString(), number.ToString()); }
         }
     }
 
@@ -576,7 +576,7 @@ namespace Signum.Entities
 
             var prec = ((DateTime)value).GetPrecision();
             if (prec > Precision)
-                return "{{0}} has a precission of {0} instead of {1}".Formato(prec, Precision);
+                return "{{0}} has a precission of {0} instead of {1}".FormatWith(prec, Precision);
 
             return null;
         }
@@ -607,6 +607,28 @@ namespace Signum.Entities
         }
     }
 
+    public class DateInPastValidator : ValidatorAttribute
+    {
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            if (((DateTime)value) > TimeZoneManager.Now)
+                return ValidationMessage._0ShouldBeADateInThePast.NiceToString();
+
+            return null;
+        }
+
+        public override string HelpMessage
+        {
+            get
+            {
+                return ValidationMessage.BeInThePast.NiceToString();
+            }
+        }
+    }
+
     public class TimeSpanPrecissionValidatorAttribute : ValidatorAttribute
     {
         public DateTimePrecision Precision { get; private set; }
@@ -623,10 +645,10 @@ namespace Signum.Entities
 
             var prec = ((TimeSpan)value).GetPrecision();
             if (prec > Precision)
-                return "{{0}} has a precission of {0} instead of {1}".Formato(prec, Precision);
+                return "{{0}} has a precission of {0} instead of {1}".FormatWith(prec, Precision);
 
             if(((TimeSpan)value).Days != 0)
-                return "{{0}} has days".Formato(prec, Precision);
+                return "{{0}} has days".FormatWith(prec, Precision);
 
             return null;
         }
@@ -722,10 +744,10 @@ namespace Signum.Entities
             if (value == null)
                 return null;
 
-            var t = (TypeDN)value;
+            var t = (TypeEntity)value;
             if (!Type.IsAssignableFrom(t.ToType()))
             {
-                return ValidationMessage._0IsNotA1.NiceToString().ForGenderAndNumber(Type.GetGender()).Formato(t.ToType().NiceName(), Type.NiceName());
+                return ValidationMessage._0IsNotA1_G.NiceToString().ForGenderAndNumber(Type.GetGender()).FormatWith(t.ToType().NiceName(), Type.NiceName());
             }
 
             return null;
@@ -733,7 +755,7 @@ namespace Signum.Entities
 
         public override string HelpMessage
         {
-            get { return ValidationMessage.BeA0.NiceToString().ForGenderAndNumber(Type.GetGender()).Formato(Type.NiceName()); }
+            get { return ValidationMessage.BeA0_G.NiceToString().ForGenderAndNumber(Type.GetGender()).FormatWith(Type.NiceName()); }
         }
     }
 
@@ -748,19 +770,19 @@ namespace Signum.Entities
 
         Dictionary<S, bool?[]> dictionary = new Dictionary<S, bool?[]>();
 
-        public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] properties)
+        public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] propertyGetters)
         {
             this.getState = getState;
-            this.properties = properties.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
-            this.propertyNames = properties.Select(pi => pi.Name).ToArray();
-            this.getters = properties.Select(p => p.Compile()).ToArray();
+            this.properties = propertyGetters.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
+            this.propertyNames = this.properties.Select(pi => pi.Name).ToArray();
+            this.getters = propertyGetters.Select(p => p.Compile()).ToArray();
         }
 
         public void Add(S state, params bool?[] necessary)
         {
             if (necessary != null && necessary.Length != propertyNames.Length)
                 throw new ArgumentException("The StateValidator {0} for state {1} has {2} values instead of {3}"
-                    .Formato(GetType().TypeName(), state, necessary.Length, propertyNames.Length));
+                    .FormatWith(GetType().TypeName(), state, necessary.Length, propertyNames.Length));
 
             dictionary.Add(state, necessary);
         }
@@ -804,12 +826,12 @@ namespace Signum.Entities
                 val = null;
 
             if (val != null && !necessary.Value)
-                return showState ? ValidationMessage._0IsNotAllowedOnState1.NiceToString().Formato(properties[index].NiceName(), state) :
-                                   ValidationMessage._0IsNotAllowed.NiceToString().Formato(properties[index].NiceName());
+                return showState ? ValidationMessage._0IsNotAllowedOnState1.NiceToString().FormatWith(properties[index].NiceName(), state) :
+                                   ValidationMessage._0IsNotAllowed.NiceToString().FormatWith(properties[index].NiceName());
 
             if (val == null && necessary.Value)
-                return showState ? ValidationMessage._0IsNecessaryOnState1.NiceToString().Formato(properties[index].NiceName(), state) :
-                                   ValidationMessage._0IsNecessary.NiceToString().Formato(properties[index].NiceName());
+                return showState ? ValidationMessage._0IsNecessaryOnState1.NiceToString().FormatWith(properties[index].NiceName(), state) :
+                                   ValidationMessage._0IsNecessary.NiceToString().FormatWith(properties[index].NiceName());
 
             return null;
         }
@@ -854,7 +876,7 @@ namespace Signum.Entities
         _0HasSomeRepeatedElements0,
         [Description("{{0}} has to be {0} {1}")]
         _0HasToBe0Than1,
-        [Description("{{0}} Has to be between {0} and {1}")]
+        [Description("{{0}} has to be between {0} and {1}")]
         _0HasToBeBetween0And1,
         [Description("{0} has to be lowercase")]
         _0HasToBeLowercase,
@@ -871,9 +893,9 @@ namespace Signum.Entities
         [Description("{0} is not set")]
         _0IsNotSet,
         [Description("{0} is not a {1}")]
-        _0IsNotA1,
+        _0IsNotA1_G,
         [Description("be a {0}")]
-        BeA0,
+        BeA0_G,
         [Description("be ")]
         Be,
         [Description("be between {0} and {1}")]
@@ -928,7 +950,12 @@ namespace Signum.Entities
         [Description("{0} should be null when {1} is set")]
         _0ShouldBeNullWhen1IsSet,
         [Description("{0} should be null")]
-        _0ShouldBeNull
+        _0ShouldBeNull,
+        [Description("{0} should be a date in the past")]
+        _0ShouldBeADateInThePast,
+        BeInThePast,
+        [Description("{0} should be greater than {1}")]
+        _0ShouldBeGreaterThan1
     }
 
 

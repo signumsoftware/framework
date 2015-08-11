@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,11 +13,11 @@ namespace Signum.Engine
 {
     public interface IRetriever : IDisposable
     {
-        T Complete<T>(int? id, Action<T> complete) where T : IdentifiableEntity;
-        T Request<T>(int? id) where T : IdentifiableEntity;
-        T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable;
-        Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable;
-        T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity;
+        T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity;
+        T Request<T>(PrimaryKey? id) where T : Entity;
+        T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity;
+        Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity;
+        T ModifiablePostRetrieving<T>(T entity) where T : Modifiable;
         IRetriever Parent { get; }
 
         ModifiedState ModifiedState { get; }
@@ -36,14 +36,14 @@ namespace Signum.Engine
         }
 
         EntityCache.RealEntityCache entityCache;
-        Dictionary<IdentityTuple, IdentifiableEntity> retrieved = new Dictionary<IdentityTuple, IdentifiableEntity>();
-        Dictionary<Type, Dictionary<int, IdentifiableEntity>> requests;
-        Dictionary<IdentityTuple, List<Lite<IIdentifiable>>> liteRequests;
-        List<EmbeddedEntity> embeddedPostRetrieving;
+        Dictionary<IdentityTuple, Entity> retrieved = new Dictionary<IdentityTuple, Entity>();
+        Dictionary<Type, Dictionary<PrimaryKey, Entity>> requests;
+        Dictionary<IdentityTuple, List<Lite<IEntity>>> liteRequests;
+        List<Modifiable> modifiablePostRetrieving = new List<Modifiable>();
 
-        bool TryGetRequest(IdentityTuple key, out IdentifiableEntity value)
+        bool TryGetRequest(IdentityTuple key, out Entity value)
         {
-            Dictionary<int, IdentifiableEntity> dic;
+            Dictionary<PrimaryKey, Entity> dic;
             if (requests != null && requests.TryGetValue(key.Type, out dic) && dic.TryGetValue(key.Id, out value))
                 return true;
 
@@ -51,14 +51,14 @@ namespace Signum.Engine
             return false;
         }
 
-        public T Complete<T>(int? id, Action<T> complete) where T : IdentifiableEntity
+        public T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity
         {
             if (id == null)
                 return null;
 
             IdentityTuple tuple = new IdentityTuple(typeof(T), id.Value);
 
-            IdentifiableEntity result;
+            Entity result;
             if (entityCache.TryGetValue(tuple, out result))
                 return (T)result;
 
@@ -82,16 +82,16 @@ namespace Signum.Engine
             return entity;
         }
 
-        static GenericInvoker<Func<RealRetriever, int?, IdentifiableEntity>> giRequest =
-            new GenericInvoker<Func<RealRetriever, int?, IdentifiableEntity>>((rr, id) => rr.Request<IdentifiableEntity>(id));
-        public T Request<T>(int? id) where T : IdentifiableEntity
+        static GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>> giRequest =
+            new GenericInvoker<Func<RealRetriever, PrimaryKey?, Entity>>((rr, id) => rr.Request<Entity>(id));
+        public T Request<T>(PrimaryKey? id) where T : Entity
         {
             if (id == null)
                 return null;
 
             IdentityTuple tuple = new IdentityTuple(typeof(T), id.Value);
 
-            IdentifiableEntity ident;
+            Entity ident;
             if (entityCache.TryGetValue(tuple, out ident))
                 return (T)ident;
 
@@ -104,48 +104,48 @@ namespace Signum.Engine
 
             T entity = EntityCache.Construct<T>(id.Value);
             if (requests == null)
-                requests = new Dictionary<Type, Dictionary<int, IdentifiableEntity>>();
+                requests = new Dictionary<Type, Dictionary<PrimaryKey, Entity>>();
 
             requests.GetOrCreate(tuple.Type).Add(tuple.Id, entity);
 
             return entity;
         }
 
-        public T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
+        public T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity
         {
             if (id == null)
                 return null;
 
             Type type = TypeLogic.IdToType[typeId.Value];
 
-            return (T)(IIdentifiable)giRequest.GetInvoker(type)(this, id);
+            var parsedId = PrimaryKey.Parse(id, type);
+
+            return (T)(IEntity)giRequest.GetInvoker(type)(this, parsedId);
         }
 
-        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable
+        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity
         {
             if (lite == null)
                 return null;
 
             IdentityTuple tuple = new IdentityTuple(lite.EntityType, lite.Id);
             if (liteRequests == null)
-                liteRequests = new Dictionary<IdentityTuple, List<Lite<IIdentifiable>>>();
+                liteRequests = new Dictionary<IdentityTuple, List<Lite<IEntity>>>();
             liteRequests.GetOrCreate(tuple).Add(lite);
             return lite;
         }
 
-        public T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity
+        public T ModifiablePostRetrieving<T>(T modifiable) where T : Modifiable
         {
-            if (embeddedPostRetrieving == null)
-                embeddedPostRetrieving = new List<EmbeddedEntity>();
+            if (modifiable != null)
+                modifiablePostRetrieving.Add(modifiable);
 
-            embeddedPostRetrieving.Add(entity);
-
-            return entity;
+            return modifiable;
         }
 
         public void Dispose()
         {
-            retry:
+        retry:
             if (requests != null)
             {
                 while (requests.Count > 0)
@@ -161,7 +161,7 @@ namespace Signum.Engine
 
                         while (dic.Count > 0)
                         {
-                            IdentifiableEntity ident = dic.Values.FirstEx();
+                            Entity ident = dic.Values.FirstEx();
 
                             cc.Complete(ident, this);
 
@@ -213,7 +213,7 @@ namespace Signum.Engine
 
                     foreach (var item in group)
                     {
-                        var toStr = dic.TryGetC(item.Key.Id) ?? ("[" + EngineMessage.EntityWithType0AndId1NotFound.NiceToString().Formato(item.Key.Type.NiceName(), item.Key.Id) + "]");
+                        var toStr = dic.TryGetC(item.Key.Id) ?? ("[" + EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(item.Key.Type.NiceName(), item.Key.Id) + "]");
                         foreach (var lite in item.Value)
                         {
                             lite.SetToString(toStr);
@@ -224,39 +224,39 @@ namespace Signum.Engine
                 }
             }
 
-
-            ModifiedState ms = ModifiedState;
-            foreach (var kvp in retrieved)
+            foreach (var entity in retrieved.Values)
             {
-                IdentifiableEntity entity = kvp.Value;
-
                 entity.PostRetrieving();
                 Schema.Current.OnRetrieved(entity);
-                entity.Modified = ms;
-                entity.IsNew = false;
-
                 entityCache.Add(entity);
             }
 
-            if (embeddedPostRetrieving != null)
-                foreach (var embedded in embeddedPostRetrieving)
-                {
-                    embedded.PostRetrieving();
-                }
+            foreach (var embedded in modifiablePostRetrieving)
+                embedded.PostRetrieving();
+
+            ModifiedState ms = ModifiedState;
+            foreach (var entity in retrieved.Values)
+            {
+                entity.Modified = ms;
+                entity.IsNew = false;
+            }
+
+            foreach (var embedded in modifiablePostRetrieving)
+                embedded.Modified = ms;
 
             if (liteRequests != null && liteRequests.Count > 0 ||
                 requests != null && requests.Count > 0) // PostRetrieving could retrieve as well
             {
                 retrieved.Clear();
-                if (embeddedPostRetrieving != null) embeddedPostRetrieving.Clear();
+                modifiablePostRetrieving.Clear();
                 goto retry;
             }
 
             entityCache.ReleaseRetriever(this);
         }
 
-        static readonly GenericInvoker<Func<List<int>, Dictionary<int, string>>> giGetStrings = new GenericInvoker<Func<List<int>, Dictionary<int, string>>>(ids => GetStrings<IdentifiableEntity>(ids));
-        static Dictionary<int, string> GetStrings<T>(List<int> ids) where T : IdentifiableEntity
+        static readonly GenericInvoker<Func<List<PrimaryKey>, Dictionary<PrimaryKey, string>>> giGetStrings = new GenericInvoker<Func<List<PrimaryKey>, Dictionary<PrimaryKey, string>>>(ids => GetStrings<Entity>(ids));
+        static Dictionary<PrimaryKey, string> GetStrings<T>(List<PrimaryKey> ids) where T : Entity
         {
             ICacheController cc = Schema.Current.CacheController(typeof(T));
 
@@ -288,29 +288,29 @@ namespace Signum.Engine
             this.entityCache = entityCache;
         }
 
-        public T Complete<T>(int? id, Action<T> complete) where T : IdentifiableEntity
+        public T Complete<T>(PrimaryKey? id, Action<T> complete) where T : Entity
         {
             return Parent.Complete<T>(id, complete);
         }
 
-        public T Request<T>(int? id) where T : IdentifiableEntity
+        public T Request<T>(PrimaryKey? id) where T : Entity
         {
             return Parent.Request<T>(id);
         }
 
-        public T RequestIBA<T>(int? id, int? typeId) where T : class, IIdentifiable
+        public T RequestIBA<T>(PrimaryKey? typeId, string id) where T : class, IEntity
         {
-            return Parent.RequestIBA<T>(id, typeId);
+            return Parent.RequestIBA<T>(typeId, id);
         }
 
-        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable
+        public Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IEntity
         {
             return Parent.RequestLite<T>(lite);
         }
 
-        public T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity
+        public T ModifiablePostRetrieving<T>(T entity) where T : Modifiable
         {
-            return Parent.EmbeddedPostRetrieving(entity);
+            return Parent.ModifiablePostRetrieving(entity);
         }
 
         public void Dispose()

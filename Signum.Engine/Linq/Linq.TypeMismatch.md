@@ -1,4 +1,4 @@
-## LINQ Type Mismatch
+﻿## LINQ Type Mismatch
 
 Even if Signum Framework tries to reduce type-mismatch between C# and SQL to the minimum when generating the tables, there are situations where this is currently inevitable. 
 
@@ -11,12 +11,12 @@ In SQL this behavior is hard to imitate, and the only sensible behavior is to pr
 This mismatch has problems when the result is a value type:
 
 ```C#
-Database.Query<BugDN>().Select(a => a.Fixer.Id).ToList();
+Database.Query<BugEntity>().Select(a => a.Fixer.Id).ToList();
 ```
 
 The result type of this query is inevitably `List<int>`, and there's nothing LINQ to Signum (or any other provider) can do to change it to `List<int?>`. 
 
-So, if `Fixes` is `null` for some `BugDN` the options are:
+So, if `Fixes` is `null` for some `BugEntity` the options are:
 
 * **Option 1:**  Returns `default(T)` in this case `0`. 
 * **Option 2:**  Throws an exception to force you make space for `null` values. 
@@ -28,7 +28,7 @@ We went for the second option. It's the most honest, but also the hardest one.
 This means that executing this expression: 
 
 ```C#
-Database.Query<BugDN>()
+Database.Query<BugEntity>()
 .Select(b => new 
 {
     b.Id,
@@ -50,8 +50,8 @@ Projector:
     row => new <>f__AnonymousType0<int,string,int,string>(Id = row.Reader.GetInt32(0), Description = row.Reader.GetString(1), FixerId = row.Reader.GetInt32(2), FixerName = row.Reader.GetString(3))
 Command:
     SELECT bdn.Id, bdn.Description, bdn.idFixer, ddn.Name
-    FROM BugDN AS bdn
-    LEFT OUTER JOIN DeveloperDN AS ddn
+    FROM BugEntity AS bdn
+    LEFT OUTER JOIN DeveloperEntity AS ddn
       ON (bdn.idFixer = ddn.Id)
 ```
 
@@ -80,7 +80,7 @@ So now looking at our example:
 3. If instead we want nulls in the result, we see that `row.Reader.GetInt32(2)` is used in `FixerId = row.Reader.GetInt32(2)` so `FixerId` is the property that is not letting nulls get in. Let's change the query to: 
 
 ```C#
-Database.Query<BugDN>()
+Database.Query<BugEntity>()
 .Select(b => new 
 {
     b.Id,
@@ -93,7 +93,7 @@ Database.Query<BugDN>()
 And now it should work properly. In the future version of C# we could write this instead: 
 
 ```C#
-Database.Query<BugDN>()
+Database.Query<BugEntity>()
 .Select(b => new 
 {
     b.Id,

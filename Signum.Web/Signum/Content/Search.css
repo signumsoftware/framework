@@ -14,9 +14,9 @@ table.sf-search-results > thead
     white-space:nowrap;
 }
 
-table.sf-search-results tr td
-{
+table.sf-search-results > tbody > tr > td {
     white-space: pre-wrap;
+    vertical-align: middle;
 }
 
 .sf-query-button-bar
@@ -249,6 +249,12 @@ th.sf-th-selection > input[type=checkbox]
 {
     width: 16px;
     height: 16px;
+}
+
+
+span.guid{
+    color:gray;
+    white-space:nowrap;
 }
 
 /* sf-entity-ctxmenu-success */

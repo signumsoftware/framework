@@ -59,12 +59,11 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
-    <OutputPath>bin\Partial\</OutputPath>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\packages\HashFoo.SqlServer.SpatialTypes.10.0.0.0\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -85,6 +84,7 @@
     <Compile Include="ConsoleSwitch.cs" />
     <Compile Include="MimeTypes.cs" />
     <Compile Include="NaturalLanguage\English.cs" />
+    <Compile Include="NaturalLanguage\German.cs" />
     <Compile Include="NaturalLanguage\Spanish.cs" />
     <Compile Include="Profiler\TimeTracker.cs" />
     <Compile Include="Statics.cs" />
@@ -131,7 +131,6 @@
     <Compile Include="ExpressionTrees\ExpressionEvaluator.cs" />
     <Compile Include="ExpressionTrees\ExpressionHelper.cs" />
     <Compile Include="ExpressionTrees\ExpressionNominator.cs" />
-    <Compile Include="ExpressionTrees\ExpressionToString.cs" />
     <Compile Include="ExpressionTrees\Query.cs" />
     <Compile Include="ExpressionTrees\QueryProvider.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
@@ -204,7 +203,6 @@
     <None Include="ExpressionTrees\ExpressionEvaluator.md" />
     <None Include="ExpressionTrees\ExpressionHelper.md" />
     <None Include="ExpressionTrees\ExpressionNominator.md" />
-    <None Include="ExpressionTrees\ExpressionToString.md" />
     <None Include="ExpressionTrees\LinqExtensibility.md" />
     <None Include="ExpressionTrees\Query.md" />
     <None Include="ExpressionTrees\QueryProvider.md" />
@@ -252,6 +250,7 @@
     <None Include="MimeTypes.md" />
     <None Include="MyRandom.md" />
     <None Include="NaturalLanguage\NaturalLangageTools.md" />
+    <None Include="packages.config" />
     <None Include="Polymorphic.md" />
     <None Include="Profiler\HeavyProfiler.md" />
     <None Include="Profiler\TimeTracker.md" />

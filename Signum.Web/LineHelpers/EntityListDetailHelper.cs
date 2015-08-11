@@ -1,4 +1,3 @@
-#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +10,6 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
-#endregion
 
 namespace Signum.Web
 {
@@ -72,7 +70,7 @@ namespace Signum.Web
                 sb.AddLine(listDetail.ConstructorScript(JsModule.Lines, "EntityListDetail"));
             }
 
-            var formGroup = helper.FormGroup(listDetail, listDetail.Prefix, listDetail.LabelText, sb.ToHtml());
+            var formGroup = helper.FormGroup(listDetail, listDetail.Prefix, listDetail.LabelHtml ?? listDetail.LabelText.FormatHtml(), sb.ToHtml());
 
             if (listDetail.DetailDiv != listDetail.Compose(EntityBaseKeys.Detail))
                 return formGroup;

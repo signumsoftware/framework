@@ -33,6 +33,8 @@ namespace Signum.Engine.Maps
     {
         ObjectName Name { get; }
 
+        IColumn PrimaryKey { get; }
+
         Dictionary<string, IColumn> Columns { get; }
 
         List<Index> MultiColumnIndexes { get; set; }
@@ -54,7 +56,7 @@ namespace Signum.Engine.Maps
 
         public ObjectName Name { get; set; }
 
-        public bool Identity {get; set;}
+        public bool IdentityBehaviour { get; set; }
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
@@ -78,12 +80,14 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            var tableName = "columns in table " + this.Name;
+            var errorSuffix = "columns in table " + this.Name.Name;
 
-            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name, tableName);
+            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name, errorSuffix);
 
             if (Mixins != null)
-                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name, tableName), tableName);
+                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name, errorSuffix), errorSuffix);
+
+            SetFullMListGetter();
 
             Columns = columns;
 
@@ -102,7 +106,7 @@ namespace Signum.Engine.Maps
                 if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
                 {
                     if(Mixins == null)
-                        throw new InvalidOperationException("{0} has not mixins".Formato(this.Type.Name));
+                        throw new InvalidOperationException("{0} has not mixins".FormatWith(this.Type.Name));
 
                     return Mixins.GetOrThrow(mi.GetGenericArguments().Single());
                 }
@@ -111,7 +115,7 @@ namespace Signum.Engine.Maps
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
 
             if (fi == null)
-                throw new InvalidOperationException("Field {0} not found on {1}".Formato(member.Name, Type));
+                throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, Type));
 
             EntityField field = Fields.GetOrThrow(fi.Name, "Field {0} not found on schema");
 
@@ -169,7 +173,7 @@ namespace Signum.Engine.Maps
 
             if (result.OfType<UniqueIndex>().Any())
             {
-                List<IColumn> attachedFields = fields.Where(f => f.FieldInfo.SingleAttribute<AttachToUniqueIndexesAttribute>() != null)
+                List<IColumn> attachedFields = fields.Where(f => f.FieldInfo.GetCustomAttribute<AttachToUniqueIndexesAttribute>() != null)
                    .SelectMany(f => Index.GetColumnsFromFields(f.Field))
                    .ToList();
 
@@ -204,14 +208,25 @@ namespace Signum.Engine.Maps
 
         public IEnumerable<TableMList> TablesMList()
         {
-            var tables = Fields.Values.SelectMany(a => a.Field.TablesMList(a.Getter)).ToList();
+            return this.AllFields().SelectMany(f => f.Field.TablesMList()); 
+        }
 
-            if (Mixins != null)
-                tables.AddRange(from m in Mixins.Values
-                                from rt in m.TablesMList(m.Getter)
-                                select rt);
+        public void SetFullMListGetter()
+        {
+            var root = PropertyRoute.Root(this.Type);
 
-            return tables; 
+            foreach (var field in this.Fields.Values)
+            {
+                field.Field.SetFullMListGetter(root.Add(field.FieldInfo), field.Getter);
+            }
+
+            if (this.Mixins != null)
+            {
+                foreach (var kvp in this.Mixins)
+                {
+                    kvp.Value.SetFullMListGetter(root.Add(kvp.Key), kvp.Value.Getter);
+                }
+            }
         }
 
         /// <summary>
@@ -231,6 +246,21 @@ namespace Signum.Engine.Maps
 
             foreach (var item in TablesMList())
                 item.ToSchema(schemaName);
+        }
+
+        public FieldTicks Ticks { get; internal set; }
+        public FieldPrimaryKey PrimaryKey { get; internal set; }
+
+        IColumn ITable.PrimaryKey
+        {
+            get { return PrimaryKey; }
+        }
+
+        internal IEnumerable<EntityField> AllFields()
+        {
+            return this.Fields.Values.Concat(
+                this.Mixins == null ? Enumerable.Empty<EntityField>() :
+                this.Mixins.Values.SelectMany(fm => fm.Fields.Values));
         }
     }
 
@@ -292,7 +322,8 @@ namespace Signum.Engine.Maps
 
         internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
 
-        internal abstract IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter); 
+        internal abstract IEnumerable<TableMList> TablesMList();
+        internal abstract void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter); 
     }
 
     public static class FieldExtensions
@@ -314,7 +345,7 @@ namespace Signum.Engine.Maps
         public static void AssertImplements(this Field field, Type type)
         {
             if (!Implements(field, type))
-                throw new InvalidOperationException("{0} does not implement {1}".Formato(field.ToString(), type.Name));
+                throw new InvalidOperationException("{0} does not implement {1}".FormatWith(field.ToString(), type.Name));
         }
     }
 
@@ -323,12 +354,16 @@ namespace Signum.Engine.Maps
         string Name { get; }
         bool Nullable { get; }
         SqlDbType SqlDbType { get; }
-        string UdtTypeName { get; }
+        Type Type { get; }
+        string UserDefinedTypeName { get; }
         bool PrimaryKey { get; }
+        bool IdentityBehaviour { get; }
         bool Identity { get; }
+        string Default { get; set; }
         int? Size { get; }
         int? Scale { get; }
         Table ReferenceTable { get; }
+        bool AvoidForeignKey { get; }
     }
 
     public static partial class ColumnExtensions
@@ -349,15 +384,19 @@ namespace Signum.Engine.Maps
 
     public partial class FieldPrimaryKey : Field, IColumn
     {
-        public string Name { get { return SqlBuilder.PrimaryKeyName; } }
+        public string Name { get; set; }
         bool IColumn.Nullable { get { return false; } }
-        SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
-        string IColumn.UdtTypeName { get { return null; } }
+        public SqlDbType SqlDbType { get; set; }
+        public string UserDefinedTypeName { get; set; }
         bool IColumn.PrimaryKey { get { return true; } }
-        bool IColumn.Identity { get { return table.Identity; } }
+        public bool Identity { get; set; }
+        bool IColumn.IdentityBehaviour { get { return table.IdentityBehaviour; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         Table IColumn.ReferenceTable { get { return null; } }
+        public Type Type { get; set; }
+        public bool AvoidForeignKey { get { return false; } }
+        public string Default { get; set; }
 
         Table table;
         public FieldPrimaryKey(Type fieldType, Table table)
@@ -368,7 +407,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} PrimaryKey".Formato(Name);
+            return "{0} PrimaryKey".FormatWith(Name);
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -389,9 +428,13 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
         }
     }
 
@@ -400,12 +443,15 @@ namespace Signum.Engine.Maps
         public string Name { get; set; }
         public bool Nullable { get; set; }
         public SqlDbType SqlDbType { get; set; }
-        public string UdtTypeName { get; set; }
+        public string UserDefinedTypeName { get; set; }
         public bool PrimaryKey { get; set; }
         bool IColumn.Identity { get { return false; } }
+        bool IColumn.IdentityBehaviour { get { return false; } }
         public int? Size { get; set; }
         public int? Scale { get; set; }
         Table IColumn.ReferenceTable { get { return null; } }
+        public bool AvoidForeignKey { get { return false; } }
+        public string Default { get; set; }
 
         public FieldValue(Type fieldType)
             : base(fieldType)
@@ -414,7 +460,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} {1} ({2},{3},{4})".Formato(
+            return "{0} {1} ({2},{3},{4})".FormatWith(
                 Name,
                 SqlDbType,
                 Nullable ? "Nullable" : "",
@@ -432,9 +478,29 @@ namespace Signum.Engine.Maps
             return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
+            
+        }
+
+        public virtual Type Type
+        {
+            get { return this.Nullable ? this.FieldType.Nullify() : this.FieldType; }
+        }
+    }
+
+    public partial class FieldTicks : FieldValue
+    {
+        public new Type Type { get; set; }
+
+        public FieldTicks(Type fieldType)
+            : base(fieldType)
+        {
         }
     }
 
@@ -445,12 +511,16 @@ namespace Signum.Engine.Maps
             public string Name { get; set; }
             public bool Nullable { get { return false; } } //even on neasted embeddeds
             public SqlDbType SqlDbType { get { return SqlDbType.Bit; } }
-            string IColumn.UdtTypeName { get { return null; } }
+            string IColumn.UserDefinedTypeName { get { return null; } }
             bool IColumn.PrimaryKey { get { return false; } }
             bool IColumn.Identity { get { return false; } }
+            bool IColumn.IdentityBehaviour { get { return false; } }
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             public Table ReferenceTable { get { return null; } }
+            Type IColumn.Type { get { return typeof(bool); } }
+            public bool AvoidForeignKey { get { return false; } }
+            public string Default { get; set; }
         }
 
         public EmbeddedHasValueColumn HasValue { get; set; }
@@ -466,7 +536,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "Embebed\r\n{0}".Formato(EmbeddedFields.ToString(c => "{0} : {1}".Formato(c.Key, c.Value), "\r\n").Indent(2));
+            return "Embebed\r\n{0}".FormatWith(EmbeddedFields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2));
         }
 
         public Field GetField(MemberInfo member)
@@ -474,7 +544,7 @@ namespace Signum.Engine.Maps
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
 
             if (fi == null)
-                throw new InvalidOperationException("Field {0} not found on {1}".Formato(member.Name, FieldType));
+                throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, FieldType));
 
             EntityField field = EmbeddedFields.GetOrThrow(fi.Name, "Field {0} not found on schema");
 
@@ -524,32 +594,45 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
-            return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList(obj =>
+            return EmbeddedFields.Values.SelectMany(e => e.Field.TablesMList()); 
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
+            foreach (var item in EmbeddedFields.Values)
             {
-                var embedded = getter(obj);
+                item.Field.SetFullMListGetter(route.Add(item.FieldInfo), entity =>
+                {
+                    var embedded = getter(entity);
 
-                if (embedded == null)
-                    return null;
 
-                return e.Getter(embedded);
-            })); 
+                    if (embedded == null)
+                        return null;
+
+                    return item.Getter(embedded);
+                }); 
+            }
+
         }
     }
 
     public partial class FieldMixin : Field, IFieldFinder
     {
         public Dictionary<string, EntityField> Fields { get; set; }
-   
-        public FieldMixin(Type fieldType)
+
+        public Table MainEntityTable;
+
+        public FieldMixin(Type fieldType, Table mainEntityTable)
             : base(fieldType)
         {
+            this.MainEntityTable = mainEntityTable;
         }
 
         public override string ToString()
         {
-            return "Mixin\r\n{0}".Formato(Fields.ToString(c => "{0} : {1}".Formato(c.Key, c.Value), "\r\n").Indent(2));
+            return "Mixin\r\n{0}".FormatWith(Fields.ToString(c => "{0} : {1}".FormatWith(c.Key, c.Value), "\r\n").Indent(2));
         }
 
         public Field GetField(MemberInfo member)
@@ -557,7 +640,7 @@ namespace Signum.Engine.Maps
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
 
             if (fi == null)
-                throw new InvalidOperationException("Field {0} not found on {1}".Formato(member.Name, FieldType));
+                throw new InvalidOperationException("Field {0} not found on {1}".FormatWith(member.Name, FieldType));
 
             EntityField field = Fields.GetOrThrow(fi.Name, "Field {0} not found on schema");
 
@@ -603,14 +686,23 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
+
+        internal override IEnumerable<TableMList> TablesMList()
         {
-            return Fields.Values.SelectMany(e => e.Field.TablesMList(ident => e.Getter(getter(ident))));
+            return Fields.Values.SelectMany(e => e.Field.TablesMList());
         }
 
-        internal MixinEntity Getter(IdentifiableEntity ident)
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
         {
-            return ((IdentifiableEntity)ident).Mixins.Single(mo => mo.GetType() == FieldType);
+            foreach (var field in Fields.Values)
+            {
+                field.Field.SetFullMListGetter(route.Add(field.FieldInfo), entity => field.Getter(getter(entity)));
+            }
+        }
+
+        internal MixinEntity Getter(Entity ident)
+        {
+            return ((Entity)ident).GetMixin(FieldType);
         }
     }
 
@@ -618,22 +710,28 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
-        public SqlDbType SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
-        public string UdtTypeName { get { return null; } }
+    
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
+        bool IColumn.IdentityBehaviour { get { return false; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
+        public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
+        public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
+        public Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
+        
+        public bool AvoidForeignKey { get; set; }
 
         public bool IsLite { get; internal set; }
-        public bool AvoidExpandOnRetrieving { get; internal set; }
+        public bool AvoidExpandOnRetrieving { get; set; }
+        public string Default { get; set; }
 
         public FieldReference(Type fieldType) : base(fieldType) { }
 
         public override string ToString()
         {
-            return "{0} -> {1} {4} ({2})".Formato(
+            return "{0} -> {1} {3} ({2})".FormatWith(
                 Name,
                 ReferenceTable.Name,
                 IsLite ? "Lite" : "",
@@ -678,9 +776,13 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
         }
     }
 
@@ -690,7 +792,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "{0} -> {1} {4} ({2})".Formato(
+            return "{0} -> {1} {4} ({2})".FormatWith(
                 Name,
                 "-",
                 IsLite ? "Lite" : "",
@@ -710,9 +812,13 @@ namespace Signum.Engine.Maps
             });
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
         }
     }
 
@@ -728,7 +834,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "ImplementedBy\r\n{0}".Formato(ImplementationColumns.ToString(k => "{0} -> {1} ({2})".Formato(k.Value.Name, k.Value.ReferenceTable.Name, k.Key.Name), "\r\n").Indent(2));
+            return "ImplementedBy\r\n{0}".FormatWith(ImplementationColumns.ToString(k => "{0} -> {1} ({2})".FormatWith(k.Value.Name, k.Value.ReferenceTable.Name, k.Key.Name), "\r\n").Indent(2));
         }
 
         public override IEnumerable<IColumn> Columns()
@@ -766,9 +872,13 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
         }
     }
 
@@ -778,14 +888,14 @@ namespace Signum.Engine.Maps
 
         public bool AvoidExpandOnRetrieving { get; internal set; }
 
-        public ImplementationColumn Column { get; set; }
+        public ImplementationStringColumn Column { get; set; }
         public ImplementationColumn ColumnType { get; set; }
 
         public FieldImplementedByAll(Type fieldType) : base(fieldType) { }
 
         public override IEnumerable<IColumn> Columns()
         {
-            return new[] { Column, ColumnType };
+            return new IColumn[] { Column, ColumnType };
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -816,9 +926,13 @@ namespace Signum.Engine.Maps
             return base.GenerateIndexes(table);
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
             return Enumerable.Empty<TableMList>();
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
         }
     }
 
@@ -826,13 +940,34 @@ namespace Signum.Engine.Maps
     {
         public string Name { get; set; }
         public bool Nullable { get; set; }
-        SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
-        string IColumn.UdtTypeName { get { return null; } }
         bool IColumn.PrimaryKey { get { return false; } }
         bool IColumn.Identity { get { return false; } }
+        bool IColumn.IdentityBehaviour { get { return false; } }
         int? IColumn.Size { get { return null; } }
         int? IColumn.Scale { get { return null; } }
         public Table ReferenceTable { get; set; }
+        public SqlDbType SqlDbType { get { return ReferenceTable.PrimaryKey.SqlDbType; } }
+        public string UserDefinedTypeName { get { return ReferenceTable.PrimaryKey.UserDefinedTypeName; } }
+        public Type Type { get { return this.Nullable ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type; } }
+        public bool AvoidForeignKey { get; set; }
+        public string Default { get; set; }
+    }
+
+    public partial class ImplementationStringColumn : IColumn
+    {
+        public string Name { get; set; }
+        public bool Nullable { get; set; }
+        string IColumn.UserDefinedTypeName { get { return null; } }
+        bool IColumn.PrimaryKey { get { return false; } }
+        bool IColumn.Identity { get { return false; } }
+        bool IColumn.IdentityBehaviour { get { return false; } }
+        public int? Size { get; set; }
+        int? IColumn.Scale { get { return null; } }
+        public Table ReferenceTable { get { return null; } }
+        public SqlDbType SqlDbType { get { return SqlDbType.NVarChar; } }
+        public Type Type { get { return typeof(string); } }
+        public bool AvoidForeignKey { get { return false; } }
+        public string Default { get; set; }
     }
 
     public partial class FieldMList : Field, IFieldFinder
@@ -843,7 +978,7 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return "Coleccion\r\n{0}".Formato(TableMList.ToString().Indent(2));
+            return "Coleccion\r\n{0}".FormatWith(TableMList.ToString().Indent(2));
         }
 
         public Field GetField(MemberInfo member)
@@ -851,7 +986,7 @@ namespace Signum.Engine.Maps
             if (member.Name == "Item")
                 return TableMList.Field;
 
-            throw new InvalidOperationException("{0} not supported by MList field".Formato(member.Name));
+            throw new InvalidOperationException("{0} not supported by MList field".FormatWith(member.Name));
         }
 
         public Field TryGetField(MemberInfo member)
@@ -884,11 +1019,15 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal override IEnumerable<TableMList> TablesMList(Func<IdentifiableEntity, object> getter)
+        internal override IEnumerable<TableMList> TablesMList()
         {
-            TableMList.FullGetter = getter;
-
             return new[] { TableMList };
+        }
+
+        internal override void SetFullMListGetter(PropertyRoute route, Func<Entity, object> getter)
+        {
+            TableMList.Route = route;
+            TableMList.FullGetter = getter;
         }
     }
 
@@ -896,15 +1035,19 @@ namespace Signum.Engine.Maps
     {
         public class PrimaryKeyColumn : IColumn
         {
-            public string Name { get { return SqlBuilder.PrimaryKeyName; } }
+            public string Name { get; set; }
             bool IColumn.Nullable { get { return false; } }
-            SqlDbType IColumn.SqlDbType { get { return SqlBuilder.PrimaryKeyType; } }
-            string IColumn.UdtTypeName { get { return null; } }
+            public SqlDbType SqlDbType { get; set; }
+            public string UserDefinedTypeName { get; set; }
             bool IColumn.PrimaryKey { get { return true; } }
-            bool IColumn.Identity { get { return true; } }
+            public bool Identity { get; set; }
+            bool IColumn.IdentityBehaviour { get { return true; } }
             int? IColumn.Size { get { return null; } }
             int? IColumn.Scale { get { return null; } }
             Table IColumn.ReferenceTable { get { return null; } }
+            public Type Type { get; set; }
+            public bool AvoidForeignKey { get { return false; } }
+            public string Default { get; set; }
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }
@@ -919,16 +1062,18 @@ namespace Signum.Engine.Maps
         public Type CollectionType { get; private set; }
         public Func<IList> Constructor { get; private set; }
 
-        public Func<IdentifiableEntity, object> FullGetter { get; internal set; }
+        public Func<Entity, object> FullGetter { get; internal set; }
+        public PropertyRoute Route { get; internal set; }
 
         public TableMList(Type collectionType)
         {
             this.CollectionType = collectionType;
+            this.cache = new Lazy<IMListCache>(() => (IMListCache)giCreateCache.GetInvoker(this.Field.FieldType)(this));
         }
 
         public override string ToString()
         {
-            return "[{0}]\r\n  {1}\r\n  {2}".Formato(Name, BackReference.Name, Field.ToString());
+            return "[{0}]\r\n  {1}\r\n  {2}".FormatWith(Name, BackReference.Name, Field.ToString());
         }
 
         public void GenerateColumns()
@@ -960,7 +1105,7 @@ namespace Signum.Engine.Maps
             Field result = TryGetField(member); 
 
             if(result  == null)
-                throw new InvalidOperationException("'{0}' not found".Formato(member.Name));
+                throw new InvalidOperationException("'{0}' not found".FormatWith(member.Name));
 
             return result;
         }
@@ -984,6 +1129,17 @@ namespace Signum.Engine.Maps
         public void ToSchema(SchemaName schemaName)
         {
             this.Name = this.Name.OnSchema(schemaName);
+        }
+
+
+        IColumn ITable.PrimaryKey
+        {
+            get { return PrimaryKey; }
+        }
+
+        internal object[] BulkInsertDataRow(Entity entity, object value, int order)
+        {
+            return this.cache.Value.BulkInsertDataRow(entity, value, order);
         }
     }
 }

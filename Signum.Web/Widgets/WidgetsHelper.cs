@@ -70,14 +70,13 @@ namespace Signum.Web
         }
     }
 
-
     public class WidgetContext
     {
-        public ModifiableEntity Entity;
+        public TypeContext TypeContext;
+        public ModifiableEntity Entity { get { return (ModifiableEntity)TypeContext.UntypedValue; } }
+        public string Prefix { get { return TypeContext.Prefix; } }
         public string PartialViewName;
-        public string Prefix; 
     }
-
 
     public interface IEmbeddedWidget
     {

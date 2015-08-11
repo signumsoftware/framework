@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +31,7 @@ namespace Signum.Windows.Operations
             {
                 Manager = operationManager;
 
-                Navigator.AddSetting(new EntitySettings<OperationLogDN>() { View = e => new OperationLog() });
+                Navigator.AddSetting(new EntitySettings<OperationLogEntity>() { View = e => new OperationLog() });
 
                 Navigator.Manager.GetButtonBarElementGlobal += Manager.ButtonBar_GetButtonBarElement;
                 Navigator.Manager.IsCreable += Manager_IsCreable;
@@ -41,10 +41,10 @@ namespace Signum.Windows.Operations
 
                 Server.SetSymbolIds<OperationSymbol>();
 
-                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, control) => new[]
+                LinksClient.RegisterEntityLinks<Entity>((entity, control) => new[]
                 { 
-                    entity.GetType() == typeof(OperationLogDN) ? null : 
-                        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
+                    entity.GetType() == typeof(OperationLogEntity) ? null : 
+                        new QuickLinkExplore(new ExploreOptions(typeof(OperationLogEntity), "Target", entity)
                         {
                             OrderOptions = { new OrderOption("Start") }
                         }){ IsShy = true}
@@ -54,7 +54,7 @@ namespace Signum.Windows.Operations
 
         static bool Manager_IsCreable(Type type)
         {
-            if (!type.IsIdentifiableEntity() || !OperationClient.Manager.HasConstructOperations(type))
+            if (!type.IsEntity() || !OperationClient.Manager.HasConstructOperations(type))
                 return true;
 
             return Manager.HasConstructOperationsAllowedAndVisible(type);
@@ -88,7 +88,8 @@ namespace Signum.Windows.Operations
 
         public static void AddSetting(OperationSettings setting)
         {
-            Manager.Settings.GetOrAddDefinition(setting.OverridenType).AddOrThrow(setting.OperationSymbol, setting, "EntitySettings {0} repeated");
+            Manager.Settings.GetOrAddDefinition(setting.OverridenType).AddOrThrow(setting.OperationSymbol, setting, "{0} repeated");
+            Manager.Settings.ClearCache();
         }
 
         public static void AddSettings(List<OperationSettings> settings)
@@ -99,17 +100,23 @@ namespace Signum.Windows.Operations
             }
         }
 
-        public static EntityOperationSettings<T> GetEntitySettings<T>(IEntityOperationSymbolContainer<T> operation) where T : class, IIdentifiable
+        public static void ReplaceSetting(OperationSettings setting)
+        {
+            Manager.Settings.GetOrAddDefinition(setting.OverridenType)[setting.OperationSymbol] = setting;
+            Manager.Settings.ClearCache();
+        }
+
+        public static EntityOperationSettings<T> GetEntitySettings<T>(IEntityOperationSymbolContainer<T> operation) where T : class, IEntity
         {
             return Manager.GetSettings<EntityOperationSettings<T>>(typeof(T), operation.Symbol);
         }
 
-        public static ConstructorOperationSettings<T> GetConstructorSettings<T>(ConstructSymbol<T>.Simple operation) where T : class, IIdentifiable
+        public static ConstructorOperationSettings<T> GetConstructorSettings<T>(ConstructSymbol<T>.Simple operation) where T : class, IEntity
         {
             return Manager.GetSettings<ConstructorOperationSettings<T>>(typeof(T), operation.Symbol);
         }
 
-        public static ContextualOperationSettings<T> GetContextualSettings<T>(IConstructFromManySymbolContainer<T> operation) where T : class, IIdentifiable
+        public static ContextualOperationSettings<T> GetContextualSettings<T>(IConstructFromManySymbolContainer<T> operation) where T : class, IEntity
         {
             return Manager.GetSettings<ContextualOperationSettings<T>>(typeof(T), operation.Symbol);
         }
@@ -118,7 +125,7 @@ namespace Signum.Windows.Operations
     public class OperationManager
     {
         public Polymorphic<Dictionary<OperationSymbol, OperationSettings>> Settings =
-            new Polymorphic<Dictionary<OperationSymbol, OperationSettings>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
+            new Polymorphic<Dictionary<OperationSymbol, OperationSettings>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IEntity));
 
         public Func<OperationSymbol, bool> IsSave = e => e.ToString().EndsWith(".Save");
 
@@ -139,7 +146,7 @@ namespace Signum.Windows.Operations
                 var result = settings as OS;
 
                 if (result == null)
-                    throw new InvalidOperationException("{0}({1}) should be a {2}".Formato(settings.GetType().TypeName(), operation.Key, typeof(OS).TypeName()));
+                    throw new InvalidOperationException("{0}({1}) should be a {2}".FormatWith(settings.GetType().TypeName(), operation.Key, typeof(OS).TypeName()));
 
                 return result;
             }
@@ -159,13 +166,13 @@ namespace Signum.Windows.Operations
             return hasConstructOperations.GetOrAdd(entityType, t => Server.Return((IOperationServer o) => o.HasConstructOperations(t)));
         }
 
-        static readonly GenericInvoker<Func<IdentifiableEntity, OperationInfo, EntityButtonContext, EntityOperationSettingsBase, IEntityOperationContext>> newEntityOperationContext =
-            new GenericInvoker<Func<IdentifiableEntity,OperationInfo,EntityButtonContext,EntityOperationSettingsBase,IEntityOperationContext>>((entity, oi, ctx, settings)=>
-                new EntityOperationContext<IdentifiableEntity>(entity, oi, ctx, (EntityOperationSettings<IdentifiableEntity>)settings));
+        static readonly GenericInvoker<Func<Entity, OperationInfo, EntityButtonContext, EntityOperationSettingsBase, IEntityOperationContext>> newEntityOperationContext =
+            new GenericInvoker<Func<Entity,OperationInfo,EntityButtonContext,EntityOperationSettingsBase,IEntityOperationContext>>((entity, oi, ctx, settings)=>
+                new EntityOperationContext<Entity>(entity, oi, ctx, (EntityOperationSettings<Entity>)settings));
 
         protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, EntityButtonContext ctx)
         {
-            IdentifiableEntity ident = entity as IdentifiableEntity;
+            Entity ident = entity as Entity;
 
             if (ident == null)
                 return null;
@@ -277,9 +284,9 @@ namespace Signum.Windows.Operations
 
         static readonly GenericInvoker<Func<OperationInfo, ConstructorContext, ConstructorOperationSettingsBase, IConstructorOperationContext>> newConstructorOperationContext = 
              new GenericInvoker<Func<OperationInfo,ConstructorContext, ConstructorOperationSettingsBase, IConstructorOperationContext>>((oi, ctx, settings)=>
-                new ConstructorOperationContext<IdentifiableEntity>(oi, ctx, (ConstructorOperationSettings<IdentifiableEntity>)settings));
+                new ConstructorOperationContext<Entity>(oi, ctx, (ConstructorOperationSettings<Entity>)settings));
 
-        protected internal virtual IdentifiableEntity Construct(ConstructorContext ctx)
+        protected internal virtual Entity Construct(ConstructorContext ctx)
         {
             var dic = (from oi in OperationInfos(ctx.Type)
                        where oi.OperationType == OperationType.Constructor
@@ -318,7 +325,7 @@ namespace Signum.Windows.Operations
 
         static readonly GenericInvoker<Func<SearchControl, OperationInfo, ContextualOperationSettingsBase, IContextualOperationContext>> newContextualOperationContext = 
             new GenericInvoker<Func<SearchControl,OperationInfo,ContextualOperationSettingsBase,IContextualOperationContext>>((sc, oi, settings)=>
-                new ContextualOperationContext<IdentifiableEntity>(sc, oi, (ContextualOperationSettings<IdentifiableEntity>)settings));
+                new ContextualOperationContext<Entity>(sc, oi, (ContextualOperationSettings<Entity>)settings));
 
         protected internal virtual IEnumerable<MenuItem> SearchControl_GetConstructorFromManyMenuItems(SearchControl sc)
         {
@@ -381,7 +388,7 @@ namespace Signum.Windows.Operations
         static HashSet<Type> SaveProtectedCache;
         protected internal virtual bool SaveProtected(Type type)
         {
-            if (!type.IsIIdentifiable())
+            if (!type.IsIEntity())
                 return false;
 
             if (SaveProtectedCache == null)

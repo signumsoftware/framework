@@ -27,6 +27,7 @@ namespace Signum.Windows.Operations
             {
                 Header = coc.OperationSettings.Try(f => f.Text) ?? coc.OperationInfo.OperationSymbol.NiceToString(),
                 Icon = coc.OperationSettings.Try(f => f.Icon.ToSmallImage()),
+                Tag = coc,
             };
 
             if (coc.OperationSettings != null && coc.OperationSettings.Order != 0)
@@ -62,7 +63,7 @@ namespace Signum.Windows.Operations
                                 break;
                             case OperationType.ConstructorFrom:
                                 {
-                                    var result = (IdentifiableEntity)new ConstructorContext(coc.SearchControl, coc.OperationInfo).SurroundConstructUntyped(coc.OperationInfo.ReturnType, ctx =>
+                                    var result = (Entity)new ConstructorContext(coc.SearchControl, coc.OperationInfo).SurroundConstructUntyped(coc.OperationInfo.ReturnType, ctx =>
                                         Server.Return((IOperationServer os) => os.ConstructFromLite(lite, coc.OperationInfo.OperationSymbol)));
 
                                     if (result == null)

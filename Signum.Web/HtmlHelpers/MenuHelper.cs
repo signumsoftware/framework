@@ -44,7 +44,7 @@ namespace Signum.Web
             set { children = value; }
         }
       
-        public WriteAHref ManualA { get; set; } //Specify all the tag string (href, title, text)=>"<a href='{0}' title={1}>{2}</a>".Formato(href,title,text); 
+        public WriteAHref ManualA { get; set; } //Specify all the tag string (href, title, text)=>"<a href='{0}' title={1}>{2}</a>".FormatWith(href,title,text); 
 
         public object Link { get; set; }
 
@@ -62,7 +62,7 @@ namespace Signum.Web
                 if (findOptions != null)
                     return QueryUtils.GetNiceName(findOptions.QueryName);
 
-                throw new InvalidOperationException("Text not set for menu item {0}".Formato(Link.ToString()));
+                throw new InvalidOperationException("Text not set for menu item {0}".FormatWith(Link.ToString()));
             }
             set { text = value; }
         }

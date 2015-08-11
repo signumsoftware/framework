@@ -55,7 +55,7 @@ namespace Signum.Windows
 
         public XElement GenerateEntityStackPanel(Type type)
         {
-            XNamespace entityNamespace = "clr-namespace:{0};assembly={1}".Formato(type.Namespace, type.Assembly.GetName().Name);
+            XNamespace entityNamespace = "clr-namespace:{0};assembly={1}".FormatWith(type.Namespace, type.Assembly.GetName().Name);
             string alias = new string(type.Namespace.Split('.').Select(a => a[0]).ToArray()).ToLower();
 
             XElement sp = GenerateStackPanel(type);
@@ -84,7 +84,7 @@ namespace Signum.Windows
 
             Type t = pi.PropertyType;
             Type lt = t.CleanType();
-            if (Reflector.IsIIdentifiable(lt))
+            if (Reflector.IsIEntity(lt))
             {
                 if (EntityKindCache.IsLowPopulation(lt))
                     return new XElement(m + "EntityCombo", new XAttribute(m + "Common.Route", pi.Name));
@@ -99,7 +99,7 @@ namespace Signum.Windows
             if (Reflector.IsMList(t))
             {
                 Type et = t.ElementType();
-                if (Reflector.IsIIdentifiable(et.CleanType()))
+                if (Reflector.IsIEntity(et.CleanType()))
                     return new XElement(xmlns + "GroupBox", new XAttribute("Header", pi.Name),
                         new XElement(m + "EntityList", new XAttribute(m + "Common.Route", pi.Name), new XAttribute("MaxHeight", "150")));
 

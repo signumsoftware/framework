@@ -1,4 +1,4 @@
-# Disposable
+﻿# Disposable
 
 This simple class implements `IDisposable` by executing an action taken as a parameter.
 
@@ -73,9 +73,9 @@ Example:
 
 
 ```C#
-public static event Func<Pop3ConfigurationDN, IDisposable> SurroundReceiveEmail;
+public static event Func<Pop3ConfigurationEntity, IDisposable> SurroundReceiveEmail;
 
-public static Pop3ReceptionDN ReceiveEmails(this Pop3ConfigurationDN config)
+public static Pop3ReceptionEntity ReceiveEmails(this Pop3ConfigurationEntity config)
 {
     using (Disposable.Combine(SurroundReceiveEmail, func => func(config)))
 	{

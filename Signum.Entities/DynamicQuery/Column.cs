@@ -21,6 +21,8 @@ namespace Signum.Entities.DynamicQuery
         QueryToken token;
         public QueryToken Token { get { return token; } }
 
+        public bool IsVisible = true;
+
         public Column(QueryToken token, string displayName)
         {
             this.token = token;
@@ -40,7 +42,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return "{0} '{1}'".Formato(Token.FullKey(), DisplayName);
+            return "{0} '{1}'".FormatWith(Token.FullKey(), DisplayName);
         }
 
         public override bool Equals(object obj)

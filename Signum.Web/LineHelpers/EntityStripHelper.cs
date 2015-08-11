@@ -1,4 +1,3 @@
-#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,6 @@ using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
 using Signum.Engine;
-#endregion
 
 namespace Signum.Web
 {
@@ -76,7 +74,7 @@ namespace Signum.Web
                 sb.AddLine(entityStrip.ConstructorScript(JsModule.Lines, "EntityStrip"));
             }
 
-            return helper.FormGroup(entityStrip, entityStrip.Prefix, entityStrip.LabelText, sb.ToHtml());
+            return helper.FormGroup(entityStrip, entityStrip.Prefix, entityStrip.LabelHtml ?? entityStrip.LabelText.FormatHtml(), sb.ToHtml());
         }
 
         private static MvcHtmlString InternalStripElement<T>(this HtmlHelper helper, TypeElementContext<T> itemTC, EntityStrip entityStrip)
@@ -85,7 +83,7 @@ namespace Signum.Web
 
             using (sb.SurroundLine(new HtmlTag("li").IdName(itemTC.Compose(EntityStripKeys.StripElement)).Class("sf-strip-element input-group")))
             {
-                var lite = (itemTC.UntypedValue as Lite<IIdentifiable>) ?? (itemTC.UntypedValue as IIdentifiable).Try(i => i.ToLite(i.IsNew));
+                var lite = (itemTC.UntypedValue as Lite<IEntity>) ?? (itemTC.UntypedValue as IEntity).Try(i => i.ToLite(i.IsNew));
 
                 if (lite != null && !lite.IsNew && entityStrip.Navigate)
                 {

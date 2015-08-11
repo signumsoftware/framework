@@ -16,6 +16,8 @@
     <SolidColorBrush x:Key="LightBlue" Color="#FFC9E4FF"/>
     <SolidColorBrush x:Key="LightBlueDarker" Color="#FFA6D3FF"/>
 
+    <Color x:Key="LightBlueColor">#FFC9E4FF</Color>
+    
     <LinearGradientBrush x:Key="EntityTitleUpperBackgroundGradient" EndPoint="0.5,1" StartPoint="0.5,0">
         <GradientStop Color="#FFEAF0F6" Offset="0.150"/>
         <GradientStop Color="#FFD9ECFF" Offset="0.805"/>
@@ -971,6 +973,21 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType="ToolTip">
+        <Style.Triggers>
+            <Trigger Property="Content"
+                 Value="{x:Static sys:String.Empty}">
+                <Setter Property="Visibility"
+                    Value="Collapsed" />
+            </Trigger>
+            <Trigger Property="Content"
+                 Value="{x:Null}">
+                <Setter Property="Visibility"
+                    Value="Collapsed" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>

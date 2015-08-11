@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -162,7 +162,17 @@ namespace Signum.Engine
             return "Enums:" + tableName;
         }
 
-        public bool Interactive = true; 
+        public bool Interactive = true;
+        public bool SchemaOnly = false;
+        public string ReplaceDatabaseName = null;
+
+        public IDisposable WithReplacedDatabaseName()
+        {
+            if(ReplaceDatabaseName == null)
+                return null;
+
+            return ObjectName.OverrideOptions(new ObjectNameOptions { DatabaseNameReplacement = ReplaceDatabaseName });
+        }
 
         public string Apply(string replacementsKey, string textToReplace)
         {
@@ -262,34 +272,33 @@ namespace Signum.Engine
             return sel.NewValue;
         }
 
-        public static Func<string, List<string>, Selection?> AutoRepacement; 
+        public static Func<string, List<string>, Selection?> AutoReplacement; 
 
         private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
         {
-            if (AutoRepacement != null)
+            if (AutoReplacement != null)
             {
-                Selection? selection = AutoRepacement(oldValue, newValues);
+                Selection? selection = AutoReplacement(oldValue, newValues);
                 if (selection != null)
                 {
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "AutoReplacement: {0} -> {1}", selection.Value.OldValue, selection.Value.NewValue);
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "AutoReplacement:");
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, " OLD " + selection.Value.OldValue);
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkGreen, " NEW " + selection.Value.NewValue);
                     return selection.Value;
                 }
             }
 
             if (!interactive)
-                return new Selection(oldValue, newValues.First());
-
-            if (Console.Out == null)
-                throw new InvalidOperationException("Impossible to synchronize without interactive Console");
+                throw new InvalidOperationException("Impossible to synchronize {0} without interactive Console".FormatWith(replacementsKey));
 
             int startingIndex = 0;
 
-            Console.WriteLine(SynchronizerMessage._0HasBeenRenamedIn1.NiceToString().Formato(oldValue, replacementsKey));
+            Console.WriteLine(SynchronizerMessage._0HasBeenRenamedIn1.NiceToString().FormatWith(oldValue, replacementsKey));
         retry:
             int maxElement = Console.LargestWindowHeight - 7;
 
         newValues.Skip(startingIndex).Take(maxElement)
-                .Select((s, i) => "-{0}{1,2}: {2} ".Formato(i + startingIndex == 0 ? ">" : " ", i + startingIndex, s)).ToConsole();
+                .Select((s, i) => "-{0}{1,2}: {2} ".FormatWith(i + startingIndex == 0 ? ">" : " ", i + startingIndex, s)).ToConsole();
             Console.WriteLine();
 
             Console.WriteLine(SynchronizerMessage.NNone.NiceToString());
@@ -301,9 +310,6 @@ namespace Signum.Engine
             while (true)
             {
                 string answer = Console.ReadLine();
-
-                if (answer == null)
-                    throw new InvalidOperationException("Impossible to synchronize interactively without Console");
                 
                  answer= answer.ToLower();
 
@@ -337,5 +343,6 @@ namespace Signum.Engine
             public readonly string OldValue;
             public readonly string NewValue;
         }
+
     }
 }

@@ -27,7 +27,7 @@ namespace Signum.Entities
         [Serializable]
         public struct RowIdValue : IEquatable<RowIdValue>, IComparable<RowIdValue>, ISerializable
         {
-            public readonly int? RowId;
+            public readonly PrimaryKey? RowId;
             public readonly T Value;
             public readonly int? OldIndex; 
 
@@ -38,7 +38,7 @@ namespace Signum.Entities
                 this.OldIndex = null;
             }
 
-            public RowIdValue(T value, int rowId, int? oldIndex)
+            public RowIdValue(T value, PrimaryKey rowId, int? oldIndex)
             {
                 this.Value = value;
                 this.RowId = rowId;
@@ -87,7 +87,7 @@ namespace Signum.Entities
                 if(this.OldIndex != null)
                     pre += " Ix: " + this.OldIndex;
 
-                return "({0}) {1}".Formato(pre, Value);
+                return "({0}) {1}".FormatWith(pre, Value);
             }
 
             private RowIdValue(SerializationInfo info, StreamingContext ctxt)
@@ -99,7 +99,7 @@ namespace Signum.Entities
                 {
                     switch (item.Name)
                     {
-                        case "rowid": this.RowId = (int?)item.Value; break;
+                        case "rowid": this.RowId = (PrimaryKey?)item.Value; break;
                         case "oldindex": this.OldIndex = (int?)item.Value; break;
                         case "value": this.Value = (T)item.Value; break;
                         default: throw new InvalidOperationException("Unexpected SerializationEntry");
@@ -192,7 +192,7 @@ namespace Signum.Entities
         void AssertNotSealed()
         {
             if (Modified == ModifiedState.Sealed)
-                throw new InvalidOperationException("The instance {0} is sealed and can not be modified".Formato(this));
+                throw new InvalidOperationException("The instance {0} is sealed and can not be modified".FormatWith(this));
         }
 
         public T this[int index]
@@ -555,7 +555,7 @@ namespace Signum.Entities
 
         public override string ToString()
         {
-            return "{0}{{ Count = {1} }}".Formato(GetType().TypeName(), Count);
+            return "{0}{{ Count = {1} }}".FormatWith(GetType().TypeName(), Count);
         }
 
         #region IList Members
@@ -632,17 +632,17 @@ namespace Signum.Entities
                     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
         }
 
-        void IMListPrivate.SetRowId(int index, int rowId)
+        void IMListPrivate.SetRowId(int index, PrimaryKey rowId)
         {
             var prev = this.innerList[index]; 
 
             if(prev.RowId.HasValue)
-                throw new InvalidOperationException("Index {0} already as RowId".Formato(index));
+                throw new InvalidOperationException("Index {0} already as RowId".FormatWith(index));
 
             this.innerList[index] = new RowIdValue(prev.Value, rowId, null);
         }
 
-        void IMListPrivate.ForceRowId(int index, int rowId)
+        void IMListPrivate.ForceRowId(int index, PrimaryKey rowId)
         {
             var prev = this.innerList[index];
 
@@ -677,8 +677,8 @@ namespace Signum.Entities
 
         void ExecutePostRetrieving();
         void SetOldIndex(int index);
-        void SetRowId(int index, int rowId);
-        void ForceRowId(int index, int rowId);
+        void SetRowId(int index, PrimaryKey rowId);
+        void ForceRowId(int index, PrimaryKey rowId);
 
         void InnerListModified(IList newItems, IList oldItems); 
     }
@@ -718,10 +718,17 @@ namespace Signum.Entities
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-    public sealed class PreserveOrderAttribute : Attribute
-    {  
+    public sealed class PreserveOrderAttribute : SqlDbTypeAttribute
+    {
+        public string Name { get; set; }
+
         public PreserveOrderAttribute()
         {
+        }
+
+        public PreserveOrderAttribute(string name)
+        {
+            this.Name = name;
         }
     }
 }

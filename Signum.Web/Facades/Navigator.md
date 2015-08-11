@@ -1,4 +1,4 @@
-# Navigator class
+﻿# Navigator class
 
 The main responsibilities of `Navigator` class in the server-side is to return the `ActionResults` that are necessary to open a `NormalPage`, `NormalControl` or `PopupControl` after creating or retrieving the entities from the database.
 
@@ -90,8 +90,8 @@ And `PopupViewOptions` adds some properties of his own:
 Additionally we can override any default behavior that is not properly deduced from the [EntityKind](../../Signum.Entities/EntityKindAttribute.md) of the entity for rare cases, but as a general rule choosing the right `EntityKind` will make it unnecessary. 
 
 * **IsCreable**: Indicates if the entity can be created from search-like control (like `SearchControl`) and/or a line-like control (like an `EntityLine`). For example:
-	* Doesn't make sense create a `CountryDN` on the fly from an address using a line, so it will be `EntityWhen.IsSearch`.
-	* Oppositely doesn't make sense to go to `AddressDN` to create the `ShippingAddress` of an `OrderDN`, so it will be `EntityWhen.IsLine`.
+	* Doesn't make sense create a `CountryEntity` on the fly from an address using a line, so it will be `EntityWhen.IsSearch`.
+	* Oppositely doesn't make sense to go to `AddressEntity` to create the `ShippingAddress` of an `OrderEntity`, so it will be `EntityWhen.IsLine`.
 * **IsViewable**: Indicates if the entity can be viewed in a modal window from a line-like control.
 * **IsNavigable**: Indicates if the entity can be navigable from a search-like control and/or a line-like control. `EntityBase` also turns off `Navigate` if `View=true`.   
 * **IsReadOnly**: Indicates if any `View` or `Navigate` should set the custom control as read-only. 
@@ -128,9 +128,9 @@ Additionally we can override any default behavior that is not properly deduced f
 | SharedPart	|Full 	    | Full 
 
   
-> When modifying an `AddressDN` you can change the `Country` property (of type `CountryDN` with  `EntityKind` `String`) by any other instance in the database (*Simple MappingLine*), but doesn't make sense that you change the properties of the `CountryDN` itself (*Full MappingLine*). In order to do that, you need to edit the `CountryDN` directly (*Full MappingMain*).
+> When modifying an `AddressEntity` you can change the `Country` property (of type `CountryEntity` with  `EntityKind` `String`) by any other instance in the database (*Simple MappingLine*), but doesn't make sense that you change the properties of the `CountryEntity` itself (*Full MappingLine*). In order to do that, you need to edit the `CountryEntity` directly (*Full MappingMain*).
 > 
-> The same is not true for the `AddressDN` entity, that can be modified from his parent entity without worries (using `EntityKing` `Part` or `SharedPart`).    
+> The same is not true for the `AddressEntity` entity, that can be modified from his parent entity without worries (using `EntityKing` `Part` or `SharedPart`).    
 
 In order to register `EntitySettings` in the `Navigator`, `AddSetting` or `AddSettings` should be used. 
 
@@ -147,17 +147,17 @@ public static string ViewPrefix = "~/Views/MyApp/{0}.cshtml";
 
 Navigator.AddSettings(new List<EntitySettings>
 {
-    new EntitySettings<EmployeeDN>() { PartialViewName = e => ViewPrefix.Formato("Employee") },
+    new EntitySettings<EmployeeEntity>() { PartialViewName = e => ViewPrefix.FormatWith("Employee") },
     ...
 });
 ```
 
-> Use absolute paths to find the `PartialViewName` (with the help of `Formato`) since will be used from different controllers. 
+> Use absolute paths to find the `PartialViewName` (with the help of `FormatWith`) since will be used from different controllers. 
 
 You can also retrieve a `EntitySettings<T>` using the methods with the same name.
 
 ```C#
-public static EntitySettings<T> EntitySettings<T>() where T : IdentifiableEntity
+public static EntitySettings<T> EntitySettings<T>() where T : Entity
 public static EmbeddedEntitySettings<T> EmbeddedEntitySettings<T>() where T : EmbeddedEntity
 public static EntitySettings EntitySettings(Type type)
 ````
@@ -169,9 +169,9 @@ This methods will throw an exception if the `EntitySettings` is not previously r
 You can use this methods, in combination with `CreateViewOverride` method, to customize some controls that are not under your control: 
 
 ```C#
-Navigator.EntitySettings<UserDN>().CreateViewOverrides()
-     .AfterLine((UserDN u) => u.Role, (html, tc) => html.ValueLine(tc, u => u.Mixin<UserEmployeeMixin>().AllowLogin))
-     .AfterLine((UserDN u) => u.Role, (html, tc) => html.EntityLine(tc, u => u.Mixin<UserEmployeeMixin>().Employee));
+Navigator.EntitySettings<UserEntity>().CreateViewOverrides()
+     .AfterLine((UserEntity u) => u.Role, (html, tc) => html.ValueLine(tc, u => u.Mixin<UserEmployeeMixin>().AllowLogin))
+     .AfterLine((UserEntity u) => u.Role, (html, tc) => html.EntityLine(tc, u => u.Mixin<UserEmployeeMixin>().Employee));
 ```
 
 In Signum.Windows the whole control is exposed as a tree that can be arbitrary manipulated. Such tree does not exists in Signum.Web since Razor returns the HTML as plain text. Instead you have to take advantage of the strategic method defined in `ViewOverride<T>`: 
@@ -203,7 +203,7 @@ public class ViewOverrides<T> : IViewOverrides where T : IRootEntity
 * **AfterLine**: Adds an arbitrary `MvcHtmlString` after another line, identifying it from his `PropertyRoute` or a more convinient `Expression`. 
 * **HideLine**: Hides any line, identifying it from his `PropertyRoute` or a more convinient `Expression`. 
 
-### Check features
+### Checking features
 
 Finally, `Navigator` exposes a set of methods to determine if an entity (or a particular instance) can be Navigated, Viewed, Created or should be ReadOnly. 
 
@@ -217,7 +217,7 @@ public static bool IsViewable(Type type, string partialViewName)
 public static bool IsViewable(ModifiableEntity entity, string partialViewName)
 
 public static bool IsNavigable(Type type, string partialViewName, bool isSearch = false)
-public static bool IsNavigable(IIdentifiable entity, string partialViewName, bool isSearch = false)
+public static bool IsNavigable(IEntity entity, string partialViewName, bool isSearch = false)
 ``` 
 
 In order to answer this questions, `Navigator` takes into account the configuration in the `EntitySettings` (usualy inherited from the `EntityKind`) as well as the events defined in `NavigationManager`: 

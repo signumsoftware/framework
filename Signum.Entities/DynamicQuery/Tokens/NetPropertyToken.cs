@@ -53,11 +53,15 @@ namespace Signum.Entities.DynamicQuery
             get { return PropertyInfo.Name; }
         }
 
+        public static MethodInfo miInSql = ReflectionTools.GetMethodInfo(() => (1).InSql()).GetGenericMethodDefinition();
+
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {   
             var result = Parent.BuildExpression(context);
 
-            return Expression.Property(result.UnNullify(), PropertyInfo).Nullify();
+            var prop = Expression.Property(result.UnNullify(), PropertyInfo);
+
+            return Expression.Call(miInSql.MakeGenericMethod(prop.Type), prop).Nullify();
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)

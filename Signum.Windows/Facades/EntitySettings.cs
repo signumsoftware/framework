@@ -37,7 +37,7 @@ namespace Signum.Windows
         internal abstract bool HasView();
     }
 
-    public class EntitySettings<T> : EntitySettings where T:IdentifiableEntity
+    public class EntitySettings<T> : EntitySettings where T:Entity
     {
         public override Type StaticType
         {

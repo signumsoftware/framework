@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -16,7 +15,7 @@ using Signum.Engine.Operations;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
 using Signum.Web.Operations;
-#endregion
+using Signum.Entities.Reflection;
 
 namespace Signum.Web.Controllers
 {
@@ -27,21 +26,29 @@ namespace Signum.Web.Controllers
         {
             OperationSymbol operationSymbol = this.GetOperationKeyAssert();
 
-            IdentifiableEntity entity = null;
+            Entity entity = null;
             if (this.IsLite())
             {
-                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>();
+                Lite<Entity> lite = this.ExtractLite<Entity>();
                 entity = OperationLogic.ServiceExecuteLite(lite, operationSymbol);
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
-                entity = (IdentifiableEntity)context.UntypedValue;
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidate();
+                entity = (Entity)context.UntypedValue;
 
                 if (context.HasErrors())
                     return context.ToJsonModelState();
 
-                entity = OperationLogic.ServiceExecute(entity, operationSymbol);
+                try
+                {
+                    entity = OperationLogic.ServiceExecute(entity, operationSymbol);
+                }
+                catch (IntegrityCheckException e)
+                {
+                    context.ImportErrors(e.Errors);
+                    return context.ToJsonModelState();
+                }
             }
 
            return this.DefaultExecuteResult(entity);
@@ -54,7 +61,7 @@ namespace Signum.Web.Controllers
 
             if (this.IsLite())
             {
-                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>();
+                Lite<Entity> lite = this.ExtractLite<Entity>();
 
                 OperationLogic.ServiceDelete(lite, operationSymbol, null);
 
@@ -62,10 +69,19 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
-                IdentifiableEntity entity = (IdentifiableEntity)context.UntypedValue;
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidate();
 
-                OperationLogic.ServiceDelete(entity, operationSymbol, null);
+                Entity entity = (Entity)context.UntypedValue;
+
+                try
+                {
+                    OperationLogic.ServiceDelete(entity, operationSymbol, null);
+                }
+                catch (IntegrityCheckException e)
+                {
+                    context.ImportErrors(e.Errors);
+                    return context.ToJsonModelState();
+                }
 
                 return this.DefaultDelete(entity.GetType());
             }
@@ -76,21 +92,30 @@ namespace Signum.Web.Controllers
         {
             OperationSymbol operationSymbol = this.GetOperationKeyAssert();
 
-            IdentifiableEntity entity = null;
+            Entity entity = null;
             if (this.IsLite())
             {
-                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>();
+                Lite<Entity> lite = this.ExtractLite<Entity>();
                 entity = OperationLogic.ServiceConstructFromLite(lite, operationSymbol);
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidateGlobal();
-                entity = (IdentifiableEntity)context.UntypedValue;
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this).UntypedValidate();
+
+                entity = (Entity)context.UntypedValue;
 
                 if (context.HasErrors())
                     return context.ToJsonModelState();
 
-                entity = OperationLogic.ServiceConstructFrom(entity, operationSymbol);
+                try
+                {
+                    entity = OperationLogic.ServiceConstructFrom(entity, operationSymbol);
+                }
+                catch (IntegrityCheckException e)
+                {
+                    context.ImportErrors(e.Errors);
+                    return context.ToJsonModelState();
+                }
             }
 
             return this.DefaultConstructResult(entity);
@@ -101,9 +126,9 @@ namespace Signum.Web.Controllers
         {
             OperationSymbol operationKey = this.GetOperationKeyAssert();
 
-            var lites = this.ParseLiteKeys<IdentifiableEntity>();
+            var lites = this.ParseLiteKeys<Entity>();
 
-            IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, operationKey);
+            Entity entity = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, operationKey);
 
             return this.DefaultConstructResult(entity);
         }

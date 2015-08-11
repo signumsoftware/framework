@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using Signum.Entities.Reflection;
 
 namespace Signum.Windows.Operations
 {
@@ -118,17 +119,17 @@ namespace Signum.Windows.Operations
         static void OperationExecute(IEntityOperationContext eoc)
         {
             if (eoc.CanExecute != null)
-                throw new ApplicationException("Operation {0} is disabled: {1}".Formato(eoc.OperationInfo.OperationSymbol, eoc.CanExecute));
+                throw new ApplicationException("Operation {0} is disabled: {1}".FormatWith(eoc.OperationInfo.OperationSymbol, eoc.CanExecute));
 
             if (eoc.OperationSettings != null && eoc.OperationSettings.HasClick)
             {
-                IIdentifiable newIdent = eoc.OperationSettings.OnClick(eoc);
+                IEntity newIdent = eoc.OperationSettings.OnClick(eoc);
                 if (newIdent != null)
                     eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
             }
             else
             {
-                IdentifiableEntity ident = (IdentifiableEntity)(IIdentifiable)eoc.Entity;
+                Entity ident = (Entity)(IEntity)eoc.Entity;
                 if (eoc.OperationInfo.OperationType == OperationType.Execute)
                 {
                     if (eoc.OperationInfo.Lite.Value)
@@ -137,8 +138,8 @@ namespace Signum.Windows.Operations
                         {
                             if (eoc.ConfirmMessage())
                             {
-                                Lite<IdentifiableEntity> lite = ident.ToLite();
-                                IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperationLite(lite, eoc.OperationInfo.OperationSymbol, null));
+                                Lite<Entity> lite = ident.ToLite();
+                                IEntity newIdent = Server.Return((IOperationServer s) => s.ExecuteOperationLite(lite, eoc.OperationInfo.OperationSymbol, null));
                                 if (eoc.OperationInfo.Returns)
                                     eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
                             }
@@ -148,9 +149,18 @@ namespace Signum.Windows.Operations
                     {
                         if (eoc.ConfirmMessage())
                         {
-                            IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ExecuteOperation(ident, eoc.OperationInfo.OperationSymbol, null));
-                            if (eoc.OperationInfo.Returns)
-                                eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                            try
+                            {
+
+                                IEntity newIdent = Server.Return((IOperationServer s) => s.ExecuteOperation(ident, eoc.OperationInfo.OperationSymbol, null));
+                                if (eoc.OperationInfo.Returns)
+                                    eoc.EntityControl.RaiseEvent(new ChangeDataContextEventArgs(newIdent));
+                            }
+                            catch (IntegrityCheckException e)
+                            {
+                                GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(ident), e);
+                                throw e;
+                            }
                         }
                     }
                 }
@@ -162,16 +172,31 @@ namespace Signum.Windows.Operations
                     if (!eoc.ConfirmMessage())
                         return;
 
-                    IIdentifiable result = (IdentifiableEntity)new ConstructorContext(eoc.EntityControl, eoc.OperationInfo).SurroundConstructUntyped(eoc.OperationInfo.ReturnType, ctx =>
+                    IEntity result = (Entity)new ConstructorContext(eoc.EntityControl, eoc.OperationInfo).SurroundConstructUntyped(eoc.OperationInfo.ReturnType, ctx =>
                     {
-                        var entity = eoc.OperationInfo.Lite.Value ?
-                            Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null)) :
-                            Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
+                        Entity r;
 
-                        if (entity == null)
-                            MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(eoc.OperationInfo.OperationSymbol.NiceToString()));
+                        if (eoc.OperationInfo.Lite.Value)
+                        {
+                            r = Server.Return((IOperationServer s) => s.ConstructFromLite(ident.ToLite(), eoc.OperationInfo.OperationSymbol, null));
+                        }
+                        else
+                        {
+                            try
+                            {
+                                r = Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.OperationSymbol, null));
+                            }
+                            catch (IntegrityCheckException e)
+                            {
+                                GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(ident), e);
+                                throw e;
+                            }
+                        }
 
-                        return entity;
+                        if (r == null)
+                            MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().FormatWith(eoc.OperationInfo.OperationSymbol.NiceToString()));
+
+                        return r;
                     });
 
                     if (result != null)
@@ -182,7 +207,7 @@ namespace Signum.Windows.Operations
                 {
                     if (eoc.ConfirmMessage())
                     {
-                        Lite<IdentifiableEntity> lite = ident.ToLite();
+                        Lite<Entity> lite = ident.ToLite();
                         Server.Execute((IOperationServer s) => s.DeleteLite(lite, eoc.OperationInfo.OperationSymbol, null));
                         Window.GetWindow(eoc.EntityControl).Close();
                     }

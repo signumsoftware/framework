@@ -20,25 +20,25 @@ namespace Signum.Services
     public interface IBaseServer
     {
         [OperationContract, NetDataContract]
-        IdentifiableEntity Retrieve(Type type, int id);
+        Entity Retrieve(Type type, PrimaryKey id);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity Save(IdentifiableEntity entity); 
+        Entity Save(Entity entity); 
 
         [OperationContract, NetDataContract]
-        List<IdentifiableEntity> RetrieveAll(Type type);
+        List<Entity> RetrieveAll(Type type);
 
         [OperationContract, NetDataContract]
-        List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type);
+        List<Lite<Entity>> RetrieveAllLite(Type type);
 
         [OperationContract, NetDataContract]
-        List<IdentifiableEntity> SaveList(List<IdentifiableEntity> list);
+        List<Entity> SaveList(List<Entity> list);
 
         [OperationContract, NetDataContract]
-        List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations);
+        List<Lite<Entity>> FindAllLite(Implementations implementations);
 
         [OperationContract, NetDataContract]
-        List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count);
+        List<Lite<Entity>> FindLiteLike(Implementations implementations, string subString, int count);
 
         [OperationContract, NetDataContract]
         Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root);
@@ -47,24 +47,27 @@ namespace Signum.Services
         Dictionary<Type, HashSet<Type>> FindAllMixins();
 
         [OperationContract, NetDataContract]
-        Dictionary<Type, TypeDN> ServerTypes();
+        Dictionary<Type, TypeEntity> ServerTypes();
 
         [OperationContract, NetDataContract]
         DateTime ServerNow();
 
         [OperationContract, NetDataContract]
-        string GetToStr(Type type, int id);
+        string GetToStr(Type type, PrimaryKey id);
 
         [OperationContract, NetDataContract]
-        bool Exists(Type type, int id);
+        bool Exists(Type type, PrimaryKey id);
 
         [OperationContract, NetDataContract]
         long Ticks(Lite<Entity> entity);
 
         [OperationContract, NetDataContract]
-        Dictionary<string, int> GetSymbolIds(Type type);
+        Dictionary<string, PrimaryKey> GetSymbolIds(Type type);
 
         [OperationContract, NetDataContract]
-        Dictionary<string, Tuple<int, string>> GetSemiSymbolIdsAndNames(Type type);
+        Dictionary<string, Tuple<PrimaryKey, string>> GetSemiSymbolIdsAndNames(Type type);
+
+        [OperationContract, NetDataContract]
+        Dictionary<Type, Type> ImportPrimaryKeyDefinitions();
     }
 }

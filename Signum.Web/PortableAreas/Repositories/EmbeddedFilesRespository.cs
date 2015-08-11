@@ -23,12 +23,6 @@ namespace Signum.Web.PortableAreas
 
         readonly Dictionary<string, string> resources;
 
-        public EmbeddedFilesRepository(Assembly assembly, string areaName) :
-            this(assembly, "~/" + areaName + "/", assembly.GetName().Name + "." + areaName.Replace("/", "."))
-        {
-            
-        }
-
         public EmbeddedFilesRepository(Assembly assembly, string virtualPath, string namespaceName)
         {
             if (assembly == null)
@@ -55,12 +49,12 @@ namespace Signum.Web.PortableAreas
             string resourceName = GetResourceName(file);
 
             if (resourceName == null)
-                throw new FileNotFoundException("{0} does not belong to this repository".Formato(file)); 
+                throw new FileNotFoundException("{0} does not belong to this repository".FormatWith(file)); 
 
             string actualResourceName = resources.TryGetC(resourceName);
 
             if (actualResourceName == null)
-                throw new FileNotFoundException("{0} not found".Formato(file));
+                throw new FileNotFoundException("{0} not found".FormatWith(file));
 
             return new StaticContentResult(this.Assembly.GetManifestResourceStream(actualResourceName).ReadAllBytes(), file);
         }
@@ -86,7 +80,7 @@ namespace Signum.Web.PortableAreas
 
         public override string ToString()
         {
-            return "EmbeddedResources {0} -> {1}".Formato(namespaceName, VirtualPath);
+            return "EmbeddedResources {0} -> {1}".FormatWith(namespaceName, VirtualPath);
         }
     }
 

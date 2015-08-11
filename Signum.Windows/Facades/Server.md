@@ -1,4 +1,4 @@
-# Server class
+﻿# Server class
 
 `Server` static class is the main class for the client application to communicate with the server. Internally it's just a holder of your Server WCF TransparentProxy. 
 
@@ -37,7 +37,7 @@ In both cases, the parameter `S` corresponds to one particular interface impleme
 Example: 
 
 ```C#
-Server.Return((IBaseServer s) => s.Retrieve(typeof(PersonDN), id)); 
+Server.Return((IBaseServer s) => s.Retrieve(typeof(PersonEntity), id)); 
 Server.Execute((IDynamicQueryServer s) => s.ExecuteQuery(request)); 
 ```
 
@@ -46,7 +46,7 @@ Server.Execute((IDynamicQueryServer s) => s.ExecuteQuery(request));
 `Server.Connecting` is a `Action` event can be used to download some information just after the server is connected. Think of it as the equivalent of `Schema.Initialize` for the client side. 
 
 ## OnOperation event
-`Server.OnOperation` is a `Action<OperationContext>` event will be called on every `Execute` and `Return` method and gives you the opportunity to add some custom information. For example, the Isolation module uses it to implicitly transfer the current `IsolationDN`. 
+`Server.OnOperation` is a `Action<OperationContext>` event will be called on every `Execute` and `Return` method and gives you the opportunity to add some custom information. For example, the Isolation module uses it to implicitly transfer the current `IsolationEntity`. 
 
 
 ## Database-like methods
@@ -56,25 +56,25 @@ Additionally, `Server` class defines a set of static methods, some of them exten
 ```C#
 public static class Server
 {
-    public static T Save<T>(this T entidad) where T : IdentifiableEntity
-    public static IdentifiableEntity Save(IdentifiableEntity entidad)
+    public static T Save<T>(this T entidad) where T : Entity
+    public static Entity Save(Entity entidad)
 
-    public static bool Exists<T>(int id) where T : IdentifiableEntity
-    public static bool Exists<T>(Lite<T> lite) where T : class, IIdentifiable
-    public static bool Exists<T>(T entity) where T : class, IIdentifiable
+    public static bool Exists<T>(int id) where T : Entity
+    public static bool Exists<T>(Lite<T> lite) where T : class, IEntity
+    public static bool Exists<T>(T entity) where T : class, IEntity
 
-    public static T Retrieve<T>(int id) where T : IdentifiableEntity
-    public static IdentifiableEntity Retrieve(Type type, int id)
-    public static T Retrieve<T>(this Lite<T> lite) where T : class, IIdentifiable
-    public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IIdentifiable
+    public static T Retrieve<T>(int id) where T : Entity
+    public static Entity Retrieve(Type type, int id)
+    public static T Retrieve<T>(this Lite<T> lite) where T : class, IEntity
+    public static T RetrieveAndForget<T>(this Lite<T> lite) where T : class, IEntity
 
-    public static List<T> RetrieveAll<T>() where T : IdentifiableEntity
-    public static List<IdentifiableEntity> RetrieveAll(Type type)
+    public static List<T> RetrieveAll<T>() where T : Entity
+    public static List<Entity> RetrieveAll(Type type)
 
-    public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
+    public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IEntity
 
-    public static List<Lite<IdentifiableEntity>> RetrieveAllLite(Type type)
-    public static List<Lite<T>> RetrieveAllLite<T>() where T : class, IIdentifiable    
+    public static List<Lite<Entity>> RetrieveAllLite(Type type)
+    public static List<Lite<T>> RetrieveAllLite<T>() where T : class, IEntity    
 }
 ```
 
@@ -85,7 +85,7 @@ public static class Server
 ```C#
 public static class Server
 {
-    public static Dictionary<Type, TypeDN> ServerTypes { get; }
+    public static Dictionary<Type, TypeEntity> ServerTypes { get; }
     public static Dictionary<string, Type> NameToType { get; }
 
     public static Type GetType(string cleanName) //Throws exception if not found
@@ -97,7 +97,7 @@ public static class Server
 
 ## Convert
 
-Finally `Server` class exposes method to convert `Lite<T>` to `IdentifiableEntity` by calling `Retrieve` and back (`ToLite`):
+Finally `Server` class exposes method to convert `Lite<T>` to `Entity` by calling `Retrieve` and back (`ToLite`):
 
 ```C#
 public static class Server

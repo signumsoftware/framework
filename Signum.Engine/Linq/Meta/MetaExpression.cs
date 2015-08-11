@@ -9,6 +9,8 @@ using Signum.Entities;
 using Signum.Utilities;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
+using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -20,88 +22,96 @@ namespace Signum.Engine.Linq
         MetaConstant
     }
 
-    internal class MetaProjectorExpression : Expression
+    internal abstract class MetaBaseExpression : Expression
     {
-        public readonly Expression Projector;
-
         readonly Type type;
         public override Type Type
         {
             get { return type; }
         }
 
+        readonly MetaExpressionType metaNodeType;
+        public MetaExpressionType MetaNodeType
+        {
+            get { return metaNodeType; }
+        }
+
         public override ExpressionType NodeType
         {
-            get { return (ExpressionType)MetaExpressionType.MetaProjector; }
+            get { return ExpressionType.Extension; }
         }
 
-        public MetaProjectorExpression(Type type, Expression projector)
+        protected MetaBaseExpression(MetaExpressionType nodeType, Type type)
         {
             this.type = type;
-            this.Projector = projector;
+            this.metaNodeType = nodeType;
         }
+
+        public abstract override string ToString();
     }
 
-    internal class MetaExpression : Expression
+    internal class MetaProjectorExpression : MetaBaseExpression
+    {
+        public readonly Expression Projector;
+
+        public MetaProjectorExpression(Type type, Expression projector)
+            : base(MetaExpressionType.MetaProjector, type)
+        {
+            this.Projector = projector;
+        }
+
+        public override string ToString()
+        {
+            return "MetaProjector({0})".FormatWith(this.Projector.ToString());
+        }  
+    }
+
+    internal class MetaExpression : MetaBaseExpression
     {
         public bool IsEntity
         {
             get { return typeof(ModifiableEntity).IsAssignableFrom(Type); }
         }
 
-        readonly Type type;
-        public override Type Type
-        {
-            get { return type; }
-        }
-
-        public override ExpressionType NodeType
-        {
-            get { return (ExpressionType)MetaExpressionType.MetaExpression; }
-        }
-
         public readonly Meta Meta;
 
-        public MetaExpression(Type type, Meta meta)
+        public MetaExpression(Type type, Meta meta):
+            base(MetaExpressionType.MetaExpression, type)
         {
-            this.type = type;
             this.Meta = meta;
         }
 
-
         public override string ToString()
         {
-            return "Exp({0})".Formato(Meta);
+            return "Exp({0})".FormatWith(Meta);
         }
 
-        internal static MetaExpression FromRoute(Type type, Implementations? implementations, PropertyRoute pr)
+        internal static MetaExpression FromToken(QueryToken token, Type sourceType)
         {
-            if (pr == null)
-                return new MetaExpression(type.UnNullify().CleanType(), new DirtyMeta(implementations, new Meta[0]));
+            var pr = token.GetPropertyRoute();
 
-            return new MetaExpression(type.UnNullify().CleanType(), new CleanMeta(implementations, new[] { pr }));
+            if (pr == null)
+                return new MetaExpression(sourceType, new DirtyMeta(token.GetImplementations(), new Meta[0]));
+
+            if (!sourceType.IsLite()  && pr.Type.IsLite())
+                return new MetaExpression(sourceType, new CleanMeta(token.GetImplementations(), new[] { pr.Add("Entity") }));
+
+            return new MetaExpression(sourceType, new CleanMeta(token.GetImplementations(), new[] { pr }));
+
+            //throw new InvalidOperationException("Impossible to convert {0} to {1}".FormatWith(pr.Type.TypeName(), sourceType.TypeName()));
         }
+
+        static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()); 
     }
 
-    internal class MetaMListExpression : Expression
+    internal class MetaMListExpression : MetaBaseExpression
     {
-        readonly Type type;
-        public override Type Type
-        {
-            get { return type; }
-        }
-
-        public override ExpressionType NodeType
-        {
-            get { return (ExpressionType)MetaExpressionType.MetaMListExpression; }
-        }
-
         public readonly CleanMeta Parent;
         public readonly CleanMeta Element;
 
         public MetaMListExpression(Type type, CleanMeta parent, CleanMeta element)
+            :base(MetaExpressionType.MetaMListExpression, type)
         {
-            this.type = type;
             this.Parent = parent;
             this.Element = element;
         }
@@ -109,7 +119,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "ExpMList({0}, {1})".Formato(Parent, Element);
+            return "ExpMList({0}, {1})".FormatWith(Parent, Element);
         }
     }
 }

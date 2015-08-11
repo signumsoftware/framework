@@ -7,7 +7,7 @@ using Signum.Entities;
 
 namespace Signum.Web.Lines
 {
-    public class HourMinuteLine : BaseLine
+    public class HourMinuteLine : LineBase
     {
         public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 

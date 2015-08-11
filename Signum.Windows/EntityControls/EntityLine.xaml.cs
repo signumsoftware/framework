@@ -31,7 +31,7 @@ namespace Signum.Windows
     /// </summary>
     public partial class EntityLine : EntityBase
     {
-        public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> Autocompleting;
+        public event Func<string, IEnumerable<Lite<Entity>>> Autocompleting;
 
         public static readonly DependencyProperty AutocompleteProperty =
             DependencyProperty.Register("Autocomplete", typeof(bool), typeof(EntityLine), new FrameworkPropertyMetadata(true));

@@ -9,6 +9,7 @@ using Signum.Utilities;
 using System.Text.RegularExpressions;
 using Signum.Engine;
 using System.Globalization;
+using Signum.Engine.Maps;
 
 namespace Signum.Web.Controllers
 {
@@ -23,15 +24,17 @@ namespace Signum.Web.Controllers
                  if (value == null)
                  {
                      object routeValue = controllerContext.RouteData.Values[bindingContext.ModelName];
-                     if (routeValue is Lite<IdentifiableEntity>)
+                     if (routeValue is Lite<Entity>)
                          return routeValue;
-                     else if(routeValue is int)
-                         return Lite.Create(cleanType, (int)routeValue);
+                     else if (routeValue is PrimaryKey || routeValue is long || routeValue is Guid)
+                         return Lite.Create(cleanType, (PrimaryKey)routeValue);
+                     else if (routeValue is int || routeValue is long || routeValue is Guid)
+                         return Lite.Create(cleanType, new PrimaryKey((IComparable)routeValue));
                      else
                          value = (string)routeValue;
                  }
-                 int id;
-                 if (int.TryParse(value, out id))
+                 PrimaryKey id;
+                 if (value.HasText() && Schema.Current.Tables.ContainsKey(cleanType) && PrimaryKey.TryParse(value, cleanType, out id))
                      return Lite.Create(cleanType, id);
 
                  return Lite.Parse(value);

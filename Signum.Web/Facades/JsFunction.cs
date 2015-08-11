@@ -161,7 +161,7 @@ namespace Signum.Web
             return new ChooserOption(symbol.Key, symbol.NiceToString());
         }
 
-        public static ChooserOption ToChooserOption(this Lite<IIdentifiable> lite)
+        public static ChooserOption ToChooserOption(this Lite<IEntity> lite)
         {
             return new ChooserOption(lite.KeyLong(), lite.ToString());
         }

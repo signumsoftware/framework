@@ -291,7 +291,7 @@ namespace Signum.Web
                 case ColumnOptionsMode.Replace:
                     return ColumnOptions.Select(co => co.ToColumn(qd)).ToList();
                 default:
-                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(ColumnOptionsMode));
+                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".FormatWith(ColumnOptionsMode));
             }
         }
 
@@ -375,7 +375,7 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            return "{0},{1},{2}".Formato(ColumnName, Operation.ToString(), EncodeCSV(StringValue()));
+            return "{0},{1},{2}".FormatWith(ColumnName, Operation.ToString(), EncodeCSV(StringValue()));
         }
 
         public string StringValue()
@@ -386,7 +386,7 @@ namespace Signum.Web
 
             if (v.GetType().IsLite())
             {
-                Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)v;
+                Lite<Entity> lite = (Lite<Entity>)v;
                 return lite.Key();
             }
             
@@ -485,14 +485,14 @@ namespace Signum.Web
         public string ColumnName { get; set; }
         public string DisplayName { get; set; }
 
-        public Column ToColumn(QueryDescription qd)
+        public Column ToColumn(QueryDescription qd, bool isVisible = true)
         {
-            return new Column(Token, DisplayName.DefaultText(Token.NiceName()));
+            return new Column(Token, DisplayName.DefaultText(Token.NiceName())) { IsVisible = isVisible };
         }
 
         public override string ToString()
         {
-            return DisplayName.HasText() ? "{0},{1}".Formato(ColumnName, DisplayName) : ColumnName;
+            return DisplayName.HasText() ? "{0},{1}".FormatWith(ColumnName, DisplayName) : ColumnName;
         }
 
         public JObject ToJS()

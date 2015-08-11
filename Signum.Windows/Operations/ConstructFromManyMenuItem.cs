@@ -27,6 +27,7 @@ namespace Signum.Windows.Operations
             {
                 Header = OperationClient.GetText(coc.Type, coc.OperationInfo.OperationSymbol),
                 Icon = OperationClient.GetImage(coc.Type, coc.OperationInfo.OperationSymbol).ToSmallImage(),
+                Tag = coc,
             };
 
             if (coc.OperationSettings != null && coc.OperationSettings.Order != 0)
@@ -50,13 +51,13 @@ namespace Signum.Windows.Operations
                 {
                     if (coc.ConfirmMessage())
                     {
-                        IdentifiableEntity result = (IdentifiableEntity)new ConstructorContext(coc.SearchControl, coc.OperationInfo).SurroundConstructUntyped(coc.OperationInfo.ReturnType, ctx =>
+                        Entity result = (Entity)new ConstructorContext(coc.SearchControl, coc.OperationInfo).SurroundConstructUntyped(coc.OperationInfo.ReturnType, ctx =>
                             Server.Return((IOperationServer s) => s.ConstructFromMany(coc.SearchControl.SelectedItems.ToList(), coc.Type, coc.OperationInfo.OperationSymbol, ctx.Args)));
 
                         if (result != null)
                             Navigator.Navigate(result);
                         else
-                            MessageBox.Show(Window.GetWindow(coc.SearchControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(coc.OperationInfo.OperationSymbol.NiceToString()));
+                            MessageBox.Show(Window.GetWindow(coc.SearchControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().FormatWith(coc.OperationInfo.OperationSymbol.NiceToString()));
                     }
                 }
             };

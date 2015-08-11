@@ -68,18 +68,20 @@ namespace Signum.Utilities
             Console.ForegroundColor = old;
         }
 
-        public static string AskString(string question, Func<string, bool> stringValidator)
+        public static string AskString(string question, Func<string, string> stringValidator)
         {
             Console.Write(question);
             do
             {
-                var userAnswer = Console.ReadLine().ToLower();
+                var userAnswer = Console.ReadLine();
 
-                if (stringValidator(userAnswer))
+                string error = stringValidator(userAnswer); 
+                if (error == null)
                     return userAnswer;
+
+                Console.Write(error);
             } while (true);
         }
-
 
         public static bool Ask(string question)
         {
@@ -89,7 +91,7 @@ namespace Signum.Utilities
         public static string Ask(string question, params string[] answers)
         {
 
-            Console.Write(question + " ({0}) ".Formato(answers.ToString("/")));
+            Console.Write(question + " ({0}) ".FormatWith(answers.ToString("/")));
             do
             {
                 var userAnswer = Console.ReadLine().ToLower();
@@ -97,7 +99,7 @@ namespace Signum.Utilities
                 if (result != null)
                     return result;
 
-                Console.Write("Possible answers: {0} ".Formato(answers.ToString("/")));
+                Console.Write("Possible answers: {0} ".FormatWith(answers.ToString("/")));
             } while (true);
         }
 
@@ -124,7 +126,7 @@ namespace Signum.Utilities
 
             lock (SyncKey)
             {
-                Console.Write(question + " ({0} - !forAll) ".Formato(answers.ToString("/")));
+                Console.Write(question + " ({0} - !forAll) ".FormatWith(answers.ToString("/")));
                 do
                 {
                     var userAnswer = Console.ReadLine().ToLower();
@@ -141,7 +143,7 @@ namespace Signum.Utilities
                         return result;
                     }
 
-                    Console.Write("Possible answers: ({0} - !forAll)".Formato(answers.ToString("/")));
+                    Console.Write("Possible answers: ({0} - !forAll)".FormatWith(answers.ToString("/")));
                 } while (true);
             }
         }
@@ -229,9 +231,5 @@ namespace Signum.Utilities
             CTRL_SHUTDOWN_EVENT = 6
         }
 
-        public static bool IsConsolePresent
-        {
-            get { return Console.In.GetType().Name != "NullStreamReader"; }
-        }
     }
 }

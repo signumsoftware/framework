@@ -176,7 +176,7 @@ namespace Signum.Utilities.DataStructures
         {
             var result = adjacency.TryGetC(node);
             if (result == null)
-                throw new InvalidOperationException("The node {0} is not in the graph".Formato(node));
+                throw new InvalidOperationException("The node {0} is not in the graph".FormatWith(node));
             return result;
         }
 
@@ -333,8 +333,8 @@ namespace Signum.Utilities.DataStructures
 
         public override string ToString()
         {
-            return adjacency.ToString(kvp => "{0}=>{1};".Formato(kvp.Key,
-                 kvp.Value.ToString(kvp2 => "[{0}->{1}]".Formato(kvp2.Value, kvp2.Key), ",")),
+            return adjacency.ToString(kvp => "{0}=>{1};".FormatWith(kvp.Key,
+                 kvp.Value.ToString(kvp2 => "[{0}->{1}]".FormatWith(kvp2.Value, kvp2.Key), ",")),
                 "\r\n"); ;
         }
 
@@ -353,11 +353,11 @@ namespace Signum.Utilities.DataStructures
             int num = 0;
             Dictionary<T, int> nodeDic = Nodes.ToDictionary(n => n, n => num++, Comparer);
 
-            string nodes = Nodes.ToString(e => "   {0} [ label =\"{1}\"];".Formato(nodeDic[e], getNodeLabel(e)), "\r\n");
+            string nodes = Nodes.ToString(e => "   {0} [ label =\"{1}\"];".FormatWith(nodeDic[e], getNodeLabel(e)), "\r\n");
 
-            string edges = EdgesWithValue.ToString(e => "   {0} -> {1} [ label =\"{2}\"];".Formato(nodeDic[e.From], nodeDic[e.To], getEdgeLabel(e.Value)), "\r\n");
+            string edges = EdgesWithValue.ToString(e => "   {0} -> {1} [ label =\"{2}\"];".FormatWith(nodeDic[e.From], nodeDic[e.To], getEdgeLabel(e.Value)), "\r\n");
 
-            return "digraph \"{0}\"\r\n{{\r\n{1}\r\n{2}\r\n}}".Formato(name, nodes, edges);
+            return "digraph \"{0}\"\r\n{{\r\n{1}\r\n{2}\r\n}}".FormatWith(name, nodes, edges);
         }
 
         public XDocument ToDGML()
@@ -567,7 +567,7 @@ namespace Signum.Utilities.DataStructures
 
         public override string ToString()
         {
-            return "{0}-{1}->{2}".Formato(From, Value, To);
+            return "{0}-{1}->{2}".FormatWith(From, Value, To);
         }
     };
 }

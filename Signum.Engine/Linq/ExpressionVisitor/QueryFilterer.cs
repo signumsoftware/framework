@@ -16,7 +16,7 @@ namespace Signum.Engine.Linq
 {
     public class QueryFilterer : ExpressionVisitor
     {
-        static GenericInvoker<Func<Schema, LambdaExpression>> giFilter = new GenericInvoker<Func<Schema, LambdaExpression>>(s => s.GetInDatabaseFilter<TypeDN>());
+        static GenericInvoker<Func<Schema, LambdaExpression>> giFilter = new GenericInvoker<Func<Schema, LambdaExpression>>(s => s.GetInDatabaseFilter<TypeEntity>());
         static MethodInfo miWhere = ReflectionTools.GetMethodInfo((IQueryable<object> q) => q.Where(a => true)).GetGenericMethodDefinition();
 
         bool filter;
@@ -36,7 +36,7 @@ namespace Signum.Engine.Linq
 
                     if (filter)
                     {
-                        if (typeof(IdentifiableEntity).IsAssignableFrom(queryType))
+                        if (typeof(Entity).IsAssignableFrom(queryType))
                         {
                             LambdaExpression rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
 

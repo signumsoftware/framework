@@ -11,25 +11,30 @@ namespace Signum.Utilities
 {
     public class Statics
     {
-        static Dictionary<string, IUntypedVariable> threadVariables = new Dictionary<string, IUntypedVariable>();
+        static Dictionary<string, IThreadVariable> threadVariables = new Dictionary<string, IThreadVariable>();
 
-        public static ThreadVariable<T> ThreadVariable<T>(string name)
+        public static ThreadVariable<T> ThreadVariable<T>(string name, bool avoidExportImport = false)
         {
-            var variable = new ThreadVariable<T>(name);
+            var variable = new ThreadVariable<T>(name) { AvoidExportImport = avoidExportImport };
             threadVariables.AddOrThrow(name, variable, "Thread variable {0} already defined");
             return variable;
         }
        
-        public static Dictionary<string, object> ExportThreadContext()
+        public static Dictionary<string, object> ExportThreadContext(bool force = false)
         {
-            return threadVariables.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.UntypedValue);
+            return threadVariables.Where(t => !t.Value.IsClean && (!t.Value.AvoidExportImport || force)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value.UntypedValue);
         }
 
         public static IDisposable ImportThreadContext(Dictionary<string, object> context)
         {
-            foreach (var kvp in context)
+            foreach (var kvp in threadVariables)
             {
-                threadVariables[kvp.Key].UntypedValue = kvp.Value;
+                var val = context.TryGetC(kvp.Key);
+
+                if (val != null)
+                    kvp.Value.UntypedValue = val;
+                else
+                    kvp.Value.Clean();
             }
 
             return new Disposable(() =>
@@ -43,7 +48,7 @@ namespace Signum.Utilities
 
         public static void CleanThreadContextAndAssert()
         {
-            string errors = threadVariables.Values.Where(v => !v.IsClean).ToString(v => "{0} contains the non-default value {1}".Formato(v.Name, v.UntypedValue), "\r\n");
+            string errors = threadVariables.Values.Where(v => !v.IsClean).ToString(v => "{0} contains the non-default value {1}".FormatWith(v.Name, v.UntypedValue), "\r\n");
 
             foreach (var v in threadVariables.Values)
             {
@@ -131,7 +136,12 @@ namespace Signum.Utilities
         public abstract void Clean();
     }
 
-    public class ThreadVariable<T> : Variable<T>
+    public interface IThreadVariable: IUntypedVariable
+    {
+        bool AvoidExportImport { get; }
+    }
+
+    public class ThreadVariable<T> : Variable<T>, IThreadVariable
     {
         ThreadLocal<T> store = new ThreadLocal<T>();
 
@@ -142,6 +152,8 @@ namespace Signum.Utilities
             get { return store.Value; }
             set { store.Value = value; }
         }
+
+        public bool AvoidExportImport { get; set; }
 
         public override void Clean()
         {

@@ -9,14 +9,14 @@ using System.Collections;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class ExceptionDN : IdentifiableEntity
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
+    public class ExceptionEntity : Entity
     {
         public const string ExceptionDataKey = "exceptionEntity";
 
-        public ExceptionDN() { }
+        public ExceptionEntity() { }
 
-        public ExceptionDN(Exception ex)
+        public ExceptionEntity(Exception ex)
         {
             this.ExceptionType = ex.GetType().Name;
             this.ExceptionMessage = ex.Message;
@@ -93,8 +93,8 @@ namespace Signum.Entities.Basics
             set { Set(ref threadId, value); }
         }
 
-        Lite<IUserDN> user;
-        public Lite<IUserDN> User
+        Lite<IUserEntity> user;
+        public Lite<IUserEntity> User
         {
             get { return user; }
             set { Set(ref user, value); }
@@ -238,12 +238,44 @@ namespace Signum.Entities.Basics
 
         public override string ToString()
         {
-            return "{0}: {1}".Formato(exceptionType, exceptionMessage).Etc(200);
+            return "{0}: {1}".FormatWith(exceptionType, exceptionMessage).Etc(200);
         }
 
         public static string Dump(NameValueCollection nameValueCollection)
         {
             return nameValueCollection.Cast<string>().ToString(key => key + ": " + nameValueCollection[key], "\r\n");
+        }
+    }
+
+
+    [Serializable]
+    public class DeleteLogParametersEntity : EmbeddedEntity
+    {
+        int deleteLogsWithMoreThan = 30 * 6;
+        [Unit("Days"), NumberIsValidator(ComparisonType.GreaterThan, 0)]
+        public int DeleteLogsWithMoreThan
+        {
+            get { return deleteLogsWithMoreThan; }
+            set { Set(ref deleteLogsWithMoreThan, value); }
+        }
+
+        public DateTime DateLimit
+        {
+            get { return DateTime.Today.AddDays(-DeleteLogsWithMoreThan); }
+        }
+
+        int chunkSize = 1000;
+        public int ChunkSize
+        {
+            get { return chunkSize; }
+            set { Set(ref chunkSize, value); }
+        }
+
+        int maxChunks;
+        public int MaxChunks
+        {
+            get { return maxChunks; }
+            set { Set(ref maxChunks, value); }
         }
     }
 }

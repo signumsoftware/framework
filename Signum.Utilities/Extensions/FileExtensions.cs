@@ -16,7 +16,7 @@ namespace Signum.Utilities
             string extension = Path.GetExtension(fileName);
             for (int i = 1; ; i++)
             {
-                string fullPath = "{0}({1}){2}".Formato(path, i, extension);
+                string fullPath = "{0}({1}){2}".FormatWith(path, i, extension);
                 if (!File.Exists(fullPath))
                     return fullPath;
             }
@@ -24,17 +24,15 @@ namespace Signum.Utilities
 
         public static void CreateParentDirectory(string filePath)
         {
-            if (filePath != string.Empty)
-            {
-                string directory = Path.GetDirectoryName(filePath);
-                if (directory != string.Empty)
-                {
-                    if (!Directory.Exists(directory))
-                    {
-                        Directory.CreateDirectory(directory);
-                    }
-                }
-            }
+            if (!filePath.HasText())
+                return;
+
+            string directory = Path.GetDirectoryName(filePath);
+            if (!directory.HasText())
+                return;
+
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
         }
 
         public class TemporalFile : IDisposable
@@ -61,7 +59,7 @@ namespace Signum.Utilities
             private void Create(byte[] data, string extension)
             {
                 tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
-                    "{0}{1}".Formato(System.IO.Path.GetTempFileName(), extension.HasText() ? "." + extension.Replace(".", null) : null));
+                    "{0}{1}".FormatWith(System.IO.Path.GetTempFileName(), extension.HasText() ? "." + extension.Replace(".", null) : null));
                 File.WriteAllBytes(tempFile, data);
             }
 

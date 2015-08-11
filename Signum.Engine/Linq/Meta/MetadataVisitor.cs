@@ -48,7 +48,7 @@ namespace Signum.Engine.Linq
 
             if (proj.NodeType != ExpressionType.New &&  //anonymous types
                 proj.NodeType != ExpressionType.MemberInit && // not-anonymous type
-                !(proj.NodeType == (ExpressionType)MetaExpressionType.MetaExpression && ((MetaExpression)proj).IsEntity)) // raw-entity!
+                !(proj is MetaExpression && ((MetaExpression)proj).IsEntity)) // raw-entity!
                 return null;
 
             PropertyInfo[] props = proj.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -198,7 +198,7 @@ namespace Signum.Engine.Linq
                 m.Method.Name == "Truncate"))
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
 
-            if (m.Method.Name == "ToString" && m.Object != null && typeof(IIdentifiable).IsAssignableFrom(m.Object.Type))
+            if (m.Method.Name == "ToString" && m.Object != null && typeof(IEntity).IsAssignableFrom(m.Object.Type))
                 return Visit(Expression.Property(m.Object, piToStringProperty));
 
             if (m.Object != null)
@@ -214,7 +214,7 @@ namespace Signum.Engine.Linq
             }
         }
 
-        static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((IIdentifiable ii) => ii.ToStringProperty);
+        static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((IEntity ii) => ii.ToStringProperty);
 
 
         private Expression MapAndVisit(LambdaExpression lambda, params MetaProjectorExpression[] projs)
@@ -244,7 +244,7 @@ namespace Signum.Engine.Linq
                 MetaExpression meta = expression as MetaExpression;
                 if (meta != null && meta.Meta is CleanMeta)
                 {
-                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.SingleEx(() => "PropertyRoutes for {0}. Metas don't work over polymorphic MLists".Formato(meta.Meta)).Add("Item");
+                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.SingleEx(() => "PropertyRoutes for {0}. Metas don't work over polymorphic MLists".FormatWith(meta.Meta)).Add("Item");
 
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
@@ -394,18 +394,15 @@ namespace Signum.Engine.Linq
                 if (type.IsInstantiationOf(typeof(MListElement<,>)))
                 {
                     var parentType = type.GetGenericArguments()[0];
-                    PropertyRoute parent = PropertyRoute.Root(parentType);
-
+                
                     ISignumTable st = (ISignumTable)c.Value;
-                    var rt = (TableMList)st.Table;
+                    TableMList rt = (TableMList)st.Table;
 
-                    Table table = rt.BackReference.ReferenceTable;
-                    FieldInfo fieldInfo = table.Fields.Values.Single(f => f.Field is FieldMList && ((FieldMList)f.Field).TableMList == rt).FieldInfo;
 
-                    PropertyRoute element = parent.Add(fieldInfo).Add("Item");
+                    PropertyRoute element = rt.Route.Add("Item");
 
                     return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, 
-                        new CleanMeta(Implementations.By(parentType), parent), 
+                        new CleanMeta(Implementations.By(parentType), PropertyRoute.Root(rt.Route.RootType)), 
                         new CleanMeta(element.TryGetImplementations(), element)));
                 }
             }
@@ -446,21 +443,22 @@ namespace Signum.Engine.Linq
                         return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
                     }
                     break;
-                case (ExpressionType)MetaExpressionType.MetaMListExpression:
-                    {
-                        MetaMListExpression mme = (MetaMListExpression)source;
-                        var ga = mme.Type.GetGenericArguments();
-                        if (member.Name == "Parent")
-                            return new MetaExpression(ga[0], mme.Parent);
-
-                        if (member.Name == "Element")
-                            return new MetaExpression(ga[1], mme.Element);
-
-                        throw new InvalidOperationException("Property {0} not found on {1}".Formato(member.Name, mme.Type.TypeName()));
-                    }
             }
 
-            if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
+            if (source is MetaMListExpression)
+            {
+                MetaMListExpression mme = (MetaMListExpression)source;
+                var ga = mme.Type.GetGenericArguments();
+                if (member.Name == "Parent")
+                    return new MetaExpression(ga[0], mme.Parent);
+
+                if (member.Name == "Element")
+                    return new MetaExpression(ga[1], mme.Element);
+
+                throw new InvalidOperationException("Property {0} not found on {1}".FormatWith(member.Name, mme.Type.TypeName()));
+            }
+
+            if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IEntity).IsAssignableFrom(source.Type))
             {
                 var pi = member as PropertyInfo ?? Reflector.TryFindPropertyInfo((FieldInfo)member);
 
@@ -483,7 +481,7 @@ namespace Signum.Engine.Linq
                     return new MetaExpression(memberType, new CleanMeta(GetImplementations(routes, memberType), routes));
                 }
 
-                if (typeof(IdentifiableEntity).IsAssignableFrom(source.Type) && !source.Type.IsAbstract) //Works for simple entities and also for interface casting
+                if (typeof(Entity).IsAssignableFrom(source.Type) && !source.Type.IsAbstract) //Works for simple entities and also for interface casting
                 {
                     var pr = PropertyRoute.Root(source.Type).Add(pi);
 
@@ -508,7 +506,7 @@ namespace Signum.Engine.Linq
 
         internal static Entities.Implementations? GetImplementations(PropertyRoute[] propertyRoutes, Type cleanType)
         {
-            if (!cleanType.IsIIdentifiable() && !cleanType.IsLite())
+            if (!cleanType.IsIEntity() && !cleanType.IsLite())
                 return (Implementations?)null;
 
             var only = propertyRoutes.Only();
@@ -565,7 +563,7 @@ namespace Signum.Engine.Linq
             if (implementations.IsByAll)
             {
                 if (!Schema.Current.Tables.ContainsKey(cleanType))
-                    throw new InvalidOperationException("Tye type {0} is not registered in the schema as a concrete table".Formato(cleanType));
+                    throw new InvalidOperationException("Tye type {0} is not registered in the schema as a concrete table".FormatWith(cleanType));
 
                 return Signum.Entities.Implementations.By(cleanType);
             }

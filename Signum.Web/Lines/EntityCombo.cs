@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +12,6 @@ using Signum.Entities.Reflection;
 using Signum.Engine;
 using System.Configuration;
 using System.Web.Routing;
-#endregion
 
 namespace Signum.Web
 {
@@ -26,7 +24,7 @@ namespace Signum.Web
     {
         public readonly RouteValueDictionary ComboHtmlProperties = new RouteValueDictionary();
         
-        public IEnumerable<Lite<IIdentifiable>> Data { get; set; }
+        public IEnumerable<Lite<IEntity>> Data { get; set; }
         public int Size { get; set; }
 
         public EntityCombo(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)

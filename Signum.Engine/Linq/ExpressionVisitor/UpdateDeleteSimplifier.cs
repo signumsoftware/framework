@@ -36,7 +36,7 @@ namespace Signum.Engine.Linq
             if (table == null || delete.Table != table.Table)
                 return delete;
 
-            if (TrivialWhere(delete, select))
+            if (!TrivialWhere(delete, select))
                 return delete;
 
             return new DeleteExpression(delete.Table, table, select.Where);
@@ -44,13 +44,19 @@ namespace Signum.Engine.Linq
 
         private bool TrivialWhere(DeleteExpression delete, SelectExpression select)
         {
-            if (delete.Where == null || delete.Where.NodeType == ExpressionType.Equal)
+            if (select.SelectRoles != 0)
+                return false;
+
+            if (delete.Where == null)
+                return false;
+
+            if (delete.Where.NodeType != ExpressionType.Equal)
                 return false;
 
             var b = (BinaryExpression)delete.Where;
 
-            var ce1 = b.Left as ColumnExpression;
-            var ce2 = b.Right as ColumnExpression;
+            var ce1 = RemoveConvert(b.Left) as ColumnExpression;
+            var ce2 = RemoveConvert(b.Right) as ColumnExpression;
 
             if (ce1 == null || ce2 == null)
                 return false;
@@ -58,7 +64,18 @@ namespace Signum.Engine.Linq
             ce1 = ResolveColumn(ce1, select);
             ce2 = ResolveColumn(ce2, select);
 
-            return ce1.Equals(ce2); 
+            return ce1.Name == ce2.Name && ce1.Alias.Name == ce2.Alias.Name;
+        }
+
+        private Expression RemoveConvert(Expression expression)
+        {
+            if (expression is PrimaryKeyExpression)
+                return RemoveConvert(((PrimaryKeyExpression)expression).Value);
+
+            if (expression.NodeType == ExpressionType.Convert)
+                return RemoveConvert(((UnaryExpression)expression).Operand);
+
+            return expression;
         }
 
         private ColumnExpression ResolveColumn(ColumnExpression ce, SelectExpression select)

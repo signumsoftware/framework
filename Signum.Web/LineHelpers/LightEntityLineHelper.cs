@@ -15,7 +15,7 @@ namespace Signum.Web
 {
     public static class LightEntityLineHelper
     {
-        public static MvcHtmlString LightEntityLine(this HtmlHelper helper, Lite<IIdentifiable> lite, bool isSearch)
+        public static MvcHtmlString LightEntityLine(this HtmlHelper helper, Lite<IEntity> lite, bool isSearch)
         {
             if (lite == null)
                 return MvcHtmlString.Empty;

@@ -18,7 +18,7 @@ namespace Signum.Web
     public abstract class EntitySettings
     {
         public virtual string WebTypeName { get; set; }
-        public Func<UrlHelper, Type, int?, string> ViewRoute { get; set; }
+        public Func<UrlHelper, Type, PrimaryKey?, string> ViewRoute { get; set; }
 
         public abstract Type StaticType { get; }
      
@@ -26,6 +26,7 @@ namespace Signum.Web
         public abstract Delegate UntypedMappingMain { get; }
 
         internal abstract bool OnIsCreable(bool isSearch);
+        internal abstract bool OnIsFindable();
         internal abstract bool OnIsViewable(string partialViewName);
         internal abstract bool OnIsNavigable(string partialViewName, bool isSearch);
         internal abstract bool OnIsReadonly();
@@ -37,7 +38,7 @@ namespace Signum.Web
         public bool AvoidValidateRequest { get; set; }
     }
 
-    public class EntitySettings<T> : EntitySettings where T : IdentifiableEntity
+    public class EntitySettings<T> : EntitySettings where T : Entity
     {
         public override string WebTypeName
         {
@@ -57,6 +58,7 @@ namespace Signum.Web
         public bool IsViewable { get; set; }
         public EntityWhen IsNavigable { get; set; }
         public bool IsReadonly { get; set; }
+        public bool IsFindable { get; set; }
 
         public override Delegate UntypedMappingLine { get { return MappingLine; } }
         public override Delegate UntypedMappingMain { get { return MappingMain; } }
@@ -66,7 +68,7 @@ namespace Signum.Web
         public override string OnPartialViewName(ModifiableEntity entity)
         {
             if (PartialViewName == null)
-                throw new InvalidOperationException("PartialViewName not set for {0}".Formato(GetType().TypeName()));
+                throw new InvalidOperationException("PartialViewName not set for {0}".FormatWith(GetType().TypeName()));
 
             return PartialViewName((T)entity);
         }
@@ -77,6 +79,7 @@ namespace Signum.Web
             {
                 case EntityKind.SystemString:
                     IsCreable = EntityWhen.Never;
+                    IsFindable = true;
                     IsViewable = false;
                     IsNavigable = EntityWhen.Never;
                     IsReadonly = true;
@@ -85,6 +88,7 @@ namespace Signum.Web
 
                 case EntityKind.System:
                     IsCreable = EntityWhen.Never;
+                    IsFindable = true;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     IsReadonly = true;
@@ -93,6 +97,7 @@ namespace Signum.Web
 
                 case EntityKind.Relational:
                     IsCreable = EntityWhen.Never;
+                    IsFindable = false;
                     IsViewable = false;
                     IsNavigable = EntityWhen.Never;
                     IsReadonly = true;
@@ -101,6 +106,7 @@ namespace Signum.Web
 
                 case EntityKind.String:
                     IsCreable = EntityWhen.IsSearch;
+                    IsFindable = true;
                     IsViewable = false;
                     IsNavigable = EntityWhen.IsSearch;
                     MappingMain = new EntityMapping<T>(true).GetValue;
@@ -109,6 +115,7 @@ namespace Signum.Web
 
                 case EntityKind.Shared:
                     IsCreable = EntityWhen.Always;
+                    IsFindable = true;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
@@ -116,6 +123,7 @@ namespace Signum.Web
 
                 case EntityKind.Main:
                     IsCreable = EntityWhen.IsSearch;
+                    IsFindable = true;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = new EntityMapping<T>(true).GetValue;
@@ -124,6 +132,7 @@ namespace Signum.Web
 
                 case EntityKind.Part:
                     IsCreable = EntityWhen.IsLine;
+                    IsFindable = false;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
@@ -131,6 +140,7 @@ namespace Signum.Web
 
                 case EntityKind.SharedPart:
                     IsCreable = EntityWhen.IsLine;
+                    IsFindable = true;
                     IsViewable = true;
                     IsNavigable = EntityWhen.Always;
                     MappingMain = MappingLine = new EntityMapping<T>(true).GetValue;
@@ -144,6 +154,11 @@ namespace Signum.Web
         internal override bool OnIsCreable(bool isSearch)
         {
             return IsCreable.HasFlag(isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
+        }
+
+        internal override bool OnIsFindable()
+        {
+            return IsFindable;
         }
 
         internal override bool OnIsViewable(string partialViewName)
@@ -204,7 +219,7 @@ namespace Signum.Web
         public override string OnPartialViewName(ModifiableEntity entity)
         {
             if (PartialViewName == null)
-                throw new InvalidOperationException("PartialViewName not set for {0}".Formato(GetType().TypeName()));
+                throw new InvalidOperationException("PartialViewName not set for {0}".FormatWith(GetType().TypeName()));
 
             return PartialViewName((T)entity);
         }
@@ -223,6 +238,11 @@ namespace Signum.Web
                 throw new InvalidOperationException("EmbeddedEntitySettigs are not compatible with isSearch");
 
             return IsCreable;
+        }
+
+        internal override bool OnIsFindable()
+        {
+            return false;
         }
 
         internal override bool OnIsViewable(string partialViewName)

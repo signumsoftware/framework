@@ -9,30 +9,30 @@ using Signum.Utilities;
 namespace Signum.Entities.Basics
 {
     [Serializable]
-    public class ColorDN : EmbeddedEntity
+    public class ColorEntity : EmbeddedEntity
     {
-        public ColorDN()
+        public ColorEntity()
         {
         }
 
-        public static ColorDN FromARGB(byte a, byte r, byte g, byte b)
+        public static ColorEntity FromARGB(byte a, byte r, byte g, byte b)
         {
-            return new ColorDN { Argb = a << 0x18 | r << 0x10 | g << 0x8 | b };
+            return new ColorEntity { Argb = a << 0x18 | r << 0x10 | g << 0x8 | b };
         }
 
-        public static ColorDN FromARGB(byte a, int rgb)
+        public static ColorEntity FromARGB(byte a, int rgb)
         {
-            return new ColorDN { Argb = a << 0x18 | rgb };
+            return new ColorEntity { Argb = a << 0x18 | rgb };
         }
 
-        public static ColorDN FromARGB(int argb)
+        public static ColorEntity FromARGB(int argb)
         {
-            return new ColorDN { Argb = argb };
+            return new ColorEntity { Argb = argb };
         }
 
-        public static ColorDN FromRGBHex(string htmlColor)
+        public static ColorEntity FromRGBHex(string htmlColor)
         {
-            return ColorDN.FromARGB(ColorTranslator.FromHtml(htmlColor).ToArgb());
+            return ColorEntity.FromARGB(ColorTranslator.FromHtml(htmlColor).ToArgb());
         }
 
         int argb;
@@ -83,7 +83,7 @@ namespace Signum.Entities.Basics
 
         public string RGBAExpression()
         {
-            return  "rgb({0:X2}, {1:X2}, {2:X2}, {3})".Formato(R, G, B, (A / 255.0));
+            return  "rgb({0:X2}, {1:X2}, {2:X2}, {3})".FormatWith(R, G, B, (A / 255.0));
         }
 
         public override string ToString()

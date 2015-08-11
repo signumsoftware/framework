@@ -1,4 +1,4 @@
-# StringExtensions
+﻿# StringExtensions
 --------------------
 
 Useful extension methods to deal with strings.
@@ -168,7 +168,7 @@ public static string TryAfterLast(this string str, string separator)
 
 There are 16 different method because they can vary in 4 different aspects : 
 * **char/string separator:** The use different overloads of `IndexOf`, I assume char is faster.   
-* **Try/-:** If the separators is not found, Try methods return null while the default ones throw `InvalidOperationException("Separator '{0}' not found in {1}".Formato(separator, str))`
+* **Try/-:** If the separators is not found, Try methods return null while the default ones throw `InvalidOperationException("Separator '{0}' not found in {1}".FormatWith(separator, str))`
 * **Before/After:** Get the string after or before the separator, never including the separator itself. 
 * **-/Last:** Find the separator from the beginning or the end of the string.  
 
@@ -194,7 +194,7 @@ public static string TryBetween(this string str, char firstSeparator, char secon
 If `secondSeparator` is not specified, `firstSeparator` is taken as default. 
 
 The `char` variations use char overload of `IndexOf`. I assume is faster. 
-The `Try` variations return `null` if one or both of the separators is not found. The default variations throw `InvalidOperationException("Separator '{0}' not found in {1}".Formato(separator, str))` 
+The `Try` variations return `null` if one or both of the separators is not found. The default variations throw `InvalidOperationException("Separator '{0}' not found in {1}".FormatWith(separator, str))` 
 
 ```C#
 "He is 'The Man'".Between('\''); // "The Man"
@@ -214,7 +214,7 @@ public static string End(this string str, int numChars)
 public static string TryEnd(this string str, int numChars)
 ```
 
-If `str.Length < numCharts`, the `Try` methods return `str`, while the default methods throw `InvalidOperationException("String '{0}' is too short".Formato(str))`. Also the `Try` method allow `str == null`.
+If `str.Length < numCharts`, the `Try` methods return `str`, while the default methods throw `InvalidOperationException("String '{0}' is too short".FormatWith(str))`. Also the `Try` method allow `str == null`.
 
 Example:
 
@@ -362,9 +362,9 @@ Now go, cat, go".RemoveChars('a', 'e', 'i', 'o', 'u');
 
 Usefull to remove special chars like ñ, ß, etc..
 
-### Formato (Very Useful!!)
+### FormatWith (Very Useful!!)
 
-Formato is just another extension method for calling string.Format in a
+FormatWith is just another extension method for calling string.Format in a
 sorter way.
 
 string.Format is better than error prone string concatenation:
@@ -388,20 +388,20 @@ to make an extension method.
 
 *Why this name?* Well... `Format` is already in use, `FormatWith` is too long, `F`
 is too short, so we keep it the way it was before translating everything
-to English: `Formato`
+to English: `FormatWith`
 
 ```C#
-public static string Formato(string format, object arg0)
-public static string Formato(string format, object arg0, object arg1)
-public static string Formato(string format, object arg0, object arg1, object arg2)
-public static string Formato(this string pattern, params object[] parameters)
-public static string Formato(this string format, IFormatProvider provider, params object[] args)
+public static string FormatWith(string format, object arg0)
+public static string FormatWith(string format, object arg0, object arg1)
+public static string FormatWith(string format, object arg0, object arg1, object arg2)
+public static string FormatWith(this string pattern, params object[] parameters)
+public static string FormatWith(this string format, IFormatProvider provider, params object[] args)
 ```
 
 Example:
 
 ```C#
-"Hasta la vista {0}".Formato("baby"); //Returns: "Hasta la vista baby"
+"Hasta la vista {0}".FormatWith("baby"); //Returns: "Hasta la vista baby"
 ```
 
 ### Replace
@@ -454,7 +454,7 @@ Dolly".Indent(3);
 It's useful for code generation, like C# or SQL statements:
 
 ```C#
-"SELECT\r\n{0}\r\nFROM Customers".Formato(
+"SELECT\r\n{0}\r\nFROM Customers".FormatWith(
      new[] { "FirstName", "SecondName", "Address" }.ToString(",\r\n").Indent(2));
 //Result: 
 //SELECT

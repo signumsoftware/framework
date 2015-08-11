@@ -1,4 +1,4 @@
-# Constructor class
+﻿# Constructor class
 
 Constructor static class is used internally by Singnum.Windows when a create button (+) is pressed to create a new Entity. 
 
@@ -48,7 +48,7 @@ Example:
 ```C#
 void OrderLine_Create()
 {
-    return new ConstructorContext(this).Construct<OrderLineDN>();
+    return new ConstructorContext(this).Construct<OrderLineEntity>();
 }
 ```
 
@@ -69,7 +69,7 @@ public static class Constructor
 Example: 
 
 ```C#
-Constructor.Register(ctx => new OrderLineDN
+Constructor.Register(ctx => new OrderLineEntity
 {
    Quantity = 1, 
    Discount = 0,
@@ -108,7 +108,7 @@ Example:
 ```C#
 void OrderLine_Create()
 {
-    return new ConstructorContext(this).SurroundConstruct(ctx => new ProductDN
+    return new ConstructorContext(this).SurroundConstruct(ctx => new ProductEntity
 	{
 	   UnitsInStock = 0,
 	});

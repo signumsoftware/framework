@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 
 namespace Signum.Windows
 {
@@ -136,6 +137,8 @@ namespace Signum.Windows
         protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
         {
             DependencyObject obj = e.NewFocus as DependencyObject;
+
+            obj = obj == null ? null : obj.VisualParents().FirstOrDefault(a => a is Visual || a is Visual3D);
 
             if (obj == null || !popup.Child.IsAncestorOf(obj))
                 popup.IsOpen = false;

@@ -1,4 +1,4 @@
-## LINQ `SelectMany` differences
+﻿## LINQ `SelectMany` differences
 
 `SelectMany` is a very simple operator, however, it creates some problems for people to grasp. You can see more about how `SelectMany` is meant to work [here](http://www.hookedonlinq.com/SelectManyOperator.ashx). 
 
@@ -12,10 +12,10 @@ We save ourselves from writing this code, instead we use `CROSS APPLY` any time 
 So if you write a query like this
 
 ```C#
-IQueryable<CommentDN> result = Database.Query<BugDN>().SelectMany(b => b.Comments);
+IQueryable<CommentEntity> result = Database.Query<BugEntity>().SelectMany(b => b.Comments);
 
 //Or the equivalent using query expressions
-IQueryable<CommentDN> result = from b in Database.Query<BugDN>()
+IQueryable<CommentEntity> result = from b in Database.Query<BugEntity>()
                                from c in b.Comments    
                                select c;
 ```
@@ -24,15 +24,15 @@ IQueryable<CommentDN> result = from b in Database.Query<BugDN>()
 
 ```SQL
 SELECT s1.Text, s1.Date, cdn.Id, cdn.Ticks, cdn.Name, s1.idWriter_Customer, ddn.Id AS Id1, ddn.Ticks AS Ticks1, ddn.Name AS Name1, s1.idWriter_Developer, s1.HasValue
-FROM BugDN AS bdn
+FROM BugEntity AS bdn
 CROSS APPLY (
   (SELECT bdnc.Text, bdnc.Date, bdnc.idWriter_Customer, bdnc.idWriter_Developer, bdnc.HasValue
   FROM BugDNComments AS bdnc
   WHERE (bdn.Id = bdnc.idParent))
 ) AS s1
-LEFT OUTER JOIN CustomerDN AS cdn
+LEFT OUTER JOIN CustomerEntity AS cdn
   ON (s1.idWriter_Customer = cdn.Id)
-LEFT OUTER JOIN DeveloperDN AS ddn
+LEFT OUTER JOIN DeveloperEntity AS ddn
   ON (s1.idWriter_Developer = ddn.Id)
 ```
 
@@ -45,25 +45,25 @@ We support `OUTER APPLY` by adding `DefaultIfEmpty` at the end of the selector l
 So a query like this: 
 
 ```C#
-IQueryable<CommentDN> result = from b in Database.Query<BugDN>()
+IQueryable<CommentEntity> result = from b in Database.Query<BugEntity>()
                                from c in b.Comments.DefaultIfEmpty()    
                                select c;
 ```
 
-Will return one `null` element for each `BugsDN` that have no `Comments`, instead of just skipping it. 
+Will return one `null` element for each `BugsEntity` that have no `Comments`, instead of just skipping it. 
 
 This is thanks to the use of `OUTER APPLY` instead of `CROSS APPLY`. 
 
 ```SQL
 SELECT s1.Text, s1.Date, cdn.Id, cdn.Ticks, cdn.Name, s1.idWriter_Customer, ddn.Id AS Id1, ddn.Ticks AS Ticks1, ddn.Name AS Name1, s1.idWriter_Developer, s1.HasValue
-FROM BugDN AS bdn
+FROM BugEntity AS bdn
 OUTER APPLY (
   (SELECT bdnc.Text, bdnc.Date, bdnc.idWriter_Customer, bdnc.idWriter_Developer, bdnc.HasValue
   FROM BugDNComments AS bdnc
   WHERE (bdn.Id = bdnc.idParent))
 ) AS s1
-LEFT OUTER JOIN CustomerDN AS cdn
+LEFT OUTER JOIN CustomerEntity AS cdn
   ON (s1.idWriter_Customer = cdn.Id)
-LEFT OUTER JOIN DeveloperDN AS ddn
+LEFT OUTER JOIN DeveloperEntity AS ddn
   ON (s1.idWriter_Developer = ddn.Id)
 ```

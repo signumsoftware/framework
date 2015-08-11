@@ -6,8 +6,8 @@
     <Border BorderThickness="0,0,0,1" Background="{StaticResource EntityTitleBackgroundGradient}" BorderBrush="{StaticResource EntityTitleDarkShadowGradient}">		
         <Border BorderThickness="0,0,0,3" Padding="2" BorderBrush="{StaticResource EntityTitleLightShadowGradient}" >			
             <StackPanel  TextBlock.Foreground="{DynamicResource BlueBorder}" HorizontalAlignment="Left" Orientation="Vertical" Margin="6">
-			    <TextBox x:Name="tbEntityId" TextBlock.FontWeight="SemiBold"  IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}"/>
-                <TextBox x:Name="tbEntityToStr" Text="{Binding ToStringProperty, Mode=OneWay}" IsReadOnly="True" Foreground="#ff666666" Background="Transparent" BorderThickness="0" FontSize="14" />
+                <TextBox x:Name="tbEntityToStr" Text="{Binding ToStringProperty, Mode=OneWay}" TextBlock.FontWeight="SemiBold"  IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}"/>
+                <TextBox x:Name="tbEntityId" IsReadOnly="True" Foreground="#ff666666" Background="Transparent" BorderThickness="0" FontSize="14" />
             </StackPanel>
 		</Border>
 	</Border>

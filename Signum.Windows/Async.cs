@@ -48,13 +48,6 @@ namespace Signum.Windows
             return Task.Factory.StartNew(action);
         }
 
-        //Remove on .net 4.5
-        public static void AssignCultures(this Thread current, Thread parent)
-        {
-            current.CurrentCulture = parent.CurrentCulture;
-            current.CurrentUICulture = parent.CurrentUICulture;
-        }
-
         public static void Invoke(this Dispatcher dispatcher, Action action)
         {
             dispatcher.Invoke(action);
@@ -99,12 +92,8 @@ namespace Signum.Windows
 
                 Dispatcher prevDispatcher = Dispatcher.CurrentDispatcher;
 
-                var parent = Thread.CurrentThread;
-
                 Thread t = new Thread(() =>
                 {
-                    Thread.CurrentThread.AssignCultures(parent);
-
                     SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
                     try
                     {

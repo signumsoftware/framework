@@ -115,6 +115,8 @@ namespace Signum.Windows
         public bool ShowFooter { get; set; }
 
         public string WindowTitle { get; set; }
+        public string EntityTypeTitle { get; set; }
+        public string QueryNameTitle { get; set; }
 
         internal abstract SearchMode GetSearchMode();
 
@@ -312,7 +314,7 @@ namespace Signum.Windows
 
         public override string ToString()
         {
-            return "{0} {1} {2}".Formato(ColumnName, Operation, Value);
+            return "{0} {1} {2}".FormatWith(ColumnName, Operation, Value);
         }
 
         public FilterOption CloneIfNecessary()
@@ -458,7 +460,7 @@ namespace Signum.Windows
                 case ColumnOptionsMode.Replace:
                     return columns.Select(co => co.ToColumn()).ToList();
                 default:
-                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(mode));
+                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".FormatWith(mode));
             }
         }    
     }

@@ -31,7 +31,10 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
-            var id = binder.GetId(lite.Reference);
+            var id = lite.Reference is ImplementedByAllExpression ?
+                (Expression)binder.GetIdString(lite.Reference) :
+                (Expression)binder.GetId(lite.Reference);
+
             var typeId = binder.GetEntityType(lite.Reference);
             var toStr = LiteToString(lite, typeId);
 
@@ -67,7 +70,7 @@ namespace Signum.Engine.Linq
                     return null;
 
                 return ibe.Implementations.Values.Select(ee =>
-                    new When(SmartEqualizer.NotEqualNullable(ee.ExternalId, QueryBinder.NullId),
+                    new When(SmartEqualizer.NotEqualNullable(ee.ExternalId, QueryBinder.NullId(ee.ExternalId.ValueType)),
                      binder.BindMethodCall(Expression.Call(ee, EntityExpression.ToStringMethod)))
                      ).ToCondition(typeof(string));
             }
@@ -104,7 +107,7 @@ namespace Signum.Engine.Linq
             var bindings =  Visit(ee.Bindings, VisitFieldBinding);
             var mixins = Visit(ee.Mixins, VisitMixinEntity);
 
-            var id = Visit(ee.ExternalId);
+            var id = (PrimaryKeyExpression)Visit(ee.ExternalId);
 
             var result = new EntityExpression(ee.Type, id, ee.TableAlias, bindings, mixins, ee.AvoidExpandOnRetrieving);
 

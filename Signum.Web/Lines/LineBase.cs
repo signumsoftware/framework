@@ -1,5 +1,4 @@
-﻿#region usings
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,27 +7,20 @@ using System.Web.Mvc.Html;
 using Signum.Utilities;
 using Signum.Entities;
 using System.Web.Routing;
-#endregion
 
 namespace Signum.Web
 {
-    public abstract class BaseLine : TypeContext
+    public abstract class LineBase : TypeContext
     {
-        protected BaseLine(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+        protected LineBase(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(parent, prefix, propertyRoute)
         {
             this.type = type;
             this.untypedValue = untypedValue; 
         }
 
+        public MvcHtmlString LabelHtml { get; set; }
         public string LabelText { get; set; }
-
-        string labelClass = "sf-label-line";
-        public string LabelClass
-        {
-            get { return labelClass; }
-            set { labelClass = value; }
-        }
 
         public readonly RouteValueDictionary LabelHtmlProps = new RouteValueDictionary();
         public readonly RouteValueDictionary FormGroupHtmlProps = new RouteValueDictionary();

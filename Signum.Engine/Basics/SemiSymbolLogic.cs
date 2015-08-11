@@ -64,7 +64,7 @@ namespace Signum.Engine.Extensions.Basics
 
             IEnumerable<T> should = CreateSemiSymbols();
 
-            return should.Select(a => table.InsertSqlSync(a)).Combine(Spacing.Simple);
+            return should.Select((a, i) => table.InsertSqlSync(a, suffix: i.ToString())).Combine(Spacing.Simple);
         }
 
         private static IEnumerable<T> CreateSemiSymbols()
@@ -85,24 +85,25 @@ namespace Signum.Engine.Extensions.Basics
             List<T> current = AvoidCache().Using(_ => Administrator.TryRetrieveAll<T>(replacements));
             IEnumerable<T> should = CreateSemiSymbols();
 
-            return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
-                should.ToDictionary(s => s.Key),
-                current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key),
-                (k, s) => table.InsertSqlSync(s),
-                (k, c) => table.DeleteSqlSync(c),
-                (k, s, c) =>
-                {
-                    var originalName = c.Key;
-                    c.Key = s.Key;
-                    c.Name = s.Name;
-                    return table.UpdateSqlSync(c, comment: originalName);
-                }, Spacing.Double);
+            using (replacements.WithReplacedDatabaseName())
+                return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
+                    should.ToDictionary(s => s.Key),
+                    current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key),
+                    (k, s) => table.InsertSqlSync(s),
+                    (k, c) => table.DeleteSqlSync(c),
+                    (k, s, c) =>
+                    {
+                        var originalName = c.Key;
+                        c.Key = s.Key;
+                        c.Name = s.Name;
+                        return table.UpdateSqlSync(c, comment: originalName);
+                    }, Spacing.Double);
         }
 
         static Dictionary<string, T> AssertStarted()
         {
             if (lazy == null)
-                throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".Formato(typeof(SemiSymbolLogic<T>).TypeName()));
+                throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".FormatWith(typeof(SemiSymbolLogic<T>).TypeName()));
 
             return lazy.Value;
         }

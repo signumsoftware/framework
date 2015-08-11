@@ -61,13 +61,10 @@ namespace Signum.Entities
             }
         }
 
-        public static Implementations? TryFromAttributes(Type t, Attribute[] fieldAttributes, PropertyRoute route)
+        public static Implementations? TryFromAttributes(Type t, PropertyRoute route, ImplementedByAttribute ib, ImplementedByAllAttribute iba)
         {
-            ImplementedByAttribute ib = fieldAttributes.OfType<ImplementedByAttribute>().SingleOrDefaultEx();
-            ImplementedByAllAttribute iba = fieldAttributes.OfType<ImplementedByAllAttribute>().SingleOrDefaultEx();
-
             if (ib != null && iba != null)
-                throw new NotSupportedException("Route {0} contains both {1} and {2}".Formato(route, ib.GetType().Name, iba.GetType().Name));
+                throw new NotSupportedException("Route {0} contains both {1} and {2}".FormatWith(route, ib.GetType().Name, iba.GetType().Name));
 
             if (ib != null) return Implementations.By(ib.ImplementedTypes);
             if (iba != null) return Implementations.ByAll;
@@ -79,19 +76,19 @@ namespace Signum.Entities
         }
 
 
-        public static Implementations FromAttributes(Type t, Attribute[] fieldAttributes, PropertyRoute route)
+        public static Implementations FromAttributes(Type t, PropertyRoute route, ImplementedByAttribute ib, ImplementedByAllAttribute iba)
         {
-            Implementations? imp = TryFromAttributes(t, fieldAttributes, route);
+            Implementations? imp = TryFromAttributes(t, route, ib, iba);
 
             if (imp == null)
             {
-                var message = Error(t) + @". Set implementations for {0}.".Formato(route);
+                var message = Error(t) + @". Set implementations for {0}.".FormatWith(route);
 
                 if(t.IsInterface || t.IsAbstract)
                 {
                     message += @"\r\nConsider writing something like this in your Starter class: 
-sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribute(typeof(YourConcrete{2}));"
-                    .Formato(route.RootType.TypeName(), route.PropertyString().Replace("/", ".First()."), t.TypeName());
+sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAttribute(typeof(YourConcrete{2})));"
+                    .FormatWith(route.RootType.TypeName(), route.PropertyString().Replace("/", ".First()."), t.TypeName());
                 }
 
                 throw new InvalidOperationException(message);
@@ -131,13 +128,13 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
         static string Error(Type type)
         {
             if (type.IsInterface)
-                return "{0} is an interface".Formato(type.Name);
+                return "{0} is an interface".FormatWith(type.Name);
 
             if (type.IsAbstract)
-                return "{0} is abstract".Formato(type.Name);
+                return "{0} is abstract".FormatWith(type.Name);
 
-            if (!type.IsIdentifiableEntity())
-                return "{0} is not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
+            if (!type.IsEntity())
+                return "{0} is not {1}".FormatWith(type.Name, typeof(Entity).Name);
 
             return null;
         }
@@ -147,7 +144,7 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
             if (IsByAll)
                 return "ImplementedByAll";
 
-            return "ImplementedBy({0})".Formato(Types.ToString(t => t.Name, ", "));
+            return "ImplementedBy({0})".FormatWith(Types.ToString(t => t.Name, ", "));
         }
 
         public override bool Equals(object obj)
@@ -234,21 +231,21 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
 
 
     [AttributeUsage(AttributeTargets.Field)]
-    public sealed class SqlDbTypeAttribute : Attribute
+    public class SqlDbTypeAttribute : Attribute
     {
-        SqlDbType? type;
+        SqlDbType? sqlDbType;
         int? size;
         int? scale;
 
         public SqlDbType SqlDbType
         {
-            get { return type.Value; }
-            set { type = value; }
+            get { return sqlDbType.Value; }
+            set { sqlDbType = value; }
         }
 
         public bool HasSqlDbType
         {
-            get { return type.HasValue; }
+            get { return sqlDbType.HasValue; }
         }
 
         public int Size
@@ -273,11 +270,104 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
             get { return scale.HasValue; }
         }
 
-        public string UdtTypeName { get; set; }
+        public string UserDefinedTypeName { get; set; }
+
+        public string Default { get; set; }
+
+        public const string NewId = "NEWID()";
+        public const string NewSequentialId = "NEWSEQUENTIALID()";
     }
-    
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
+    public sealed class PrimaryKeyAttribute : SqlDbTypeAttribute
+    {
+        public Type Type { get; set; }
+
+        public string Name { get; set; }
+
+        public bool Identity { get; set; }
+
+        bool identityBehaviour;
+        public bool IdentityBehaviour
+        {
+            get { return identityBehaviour; }
+            set
+            {
+                identityBehaviour = value;
+                if (Type == typeof(Guid))
+                {
+                    this.Default = identityBehaviour ? NewSequentialId : null;
+                }
+            }
+        }
+
+        public PrimaryKeyAttribute(Type type, string name = "Id")
+        {
+            this.Type = type;
+            this.Name = name;
+            this.Identity = type == typeof(Guid) ? false : true;
+            this.IdentityBehaviour = true;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    public sealed class ColumnNameAttribute : Attribute
+    {
+        public string Name { get; set; }
+
+        public ColumnNameAttribute(string name)
+        {
+            this.Name = name;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    public sealed class BackReferenceColumnNameAttribute : Attribute
+    {
+        public string Name { get; set; }
+
+        public BackReferenceColumnNameAttribute(string name)
+        {
+            this.Name = name;
+        }
+    }
+
     [AttributeUsage(AttributeTargets.Field)]
-    public class ForceForeignKeyAttribute : Attribute
+    sealed class ViewPrimaryKeyAttribute : Attribute
+    { 
+    }
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
+    public sealed class TableNameAttribute : Attribute
+    {
+        public string Name { get; set; }
+        public string SchemaName { get; set; }
+        public string DatabaseName { get; set; }
+        public string ServerName { get; set; }
+
+        public TableNameAttribute(string name)
+        {
+            this.Name = name;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
+    public sealed class TicksColumnAttribute : SqlDbTypeAttribute
+    {
+        public bool HasTicks { get; private set; }
+
+        public string Name { get; set; }
+
+        public Type Type { get; set; }
+
+        public TicksColumnAttribute(bool hasTicks = true)
+        {
+            this.HasTicks = hasTicks;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class AvoidForeignKeyAttribute : Attribute
     {
 
     }
@@ -308,12 +398,12 @@ sb.Schema.Settings.OverrideAttributes(({0} a) => a.{1}, new ImplementedByAttribu
 
     public static class LinqHintEntities
     {
-        public static T CombineCase<T>(this T value) where T : IIdentifiable
+        public static T CombineCase<T>(this T value) where T : IEntity
         {
             return value;
         }
 
-        public static T CombineUnion<T>(this T value) where T : IIdentifiable
+        public static T CombineUnion<T>(this T value) where T : IEntity
         {
             return value;
         }

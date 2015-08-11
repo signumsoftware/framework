@@ -17,11 +17,13 @@ namespace Signum.Utilities
         {
             {"es", new SpanishPluralizer()},
             {"en", new EnglishPluralizer()},
+            {"de", new GermanPluralizer()},
         };
 
         public static Dictionary<string, IGenderDetector> GenderDetectors = new Dictionary<string, IGenderDetector>
         {
             {"es", new SpanishGenderDetector()},
+            {"de", new GermanGenderDetector()},
         };
 
         public static Dictionary<string, INumberWriter> NumberWriters = new Dictionary<string, INumberWriter>

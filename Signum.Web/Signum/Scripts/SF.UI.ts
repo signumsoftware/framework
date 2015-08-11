@@ -1,5 +1,4 @@
-﻿/// <reference path="SF.ts"/>
-/// <reference path="../Headers/bootstrap/bootstrap.d.ts"/>
+﻿/// <reference path="../Headers/bootstrap/bootstrap.d.ts"/>
 /// <reference path="../Headers/bootstrap/bootstrap.datepicker.d.ts"/>
 /// <reference path="../Headers/bootstrap/bootstrap.timepicker.d.ts"/>
 
@@ -174,6 +173,25 @@ module SF {
 
         element.closest(".sf-main-control").addClass("sf-changed");
     }
+
+    export function getDateTime(dateTimePickerId: string): string {
+        var date = dateTimePickerId.child("Date").get();
+        var time = dateTimePickerId.child("Time").get();
+
+        return date.val() + " " + time.val();
+    }
+
+    export function setDateTime(dateTimePickerId: string, value: string): void {
+
+        var date = dateTimePickerId.child("Date").get();
+        var time = dateTimePickerId.child("Time").get();
+
+        date.val(SF.isEmpty(value) ? "" : value.before(" "));
+        time.val(SF.isEmpty(value) ? "" : value.after(" "));
+    }
+
+
+
 }
 
 
@@ -353,9 +371,27 @@ once("ajaxError", () =>
 
 once("dateTimePickerSync", () => {
     $(function () {
+        $(document).on("paste", 'div.date-time div.date input', function (e: JQueryEventObject) {
+            setTimeout(function () {
+                var dateTime: string = $(e.currentTarget).val();
+
+                var hour = dateTime.tryAfterLast(" ");
+                var date = dateTime.tryBeforeLast(" ");
+
+                if (hour && date) {
+                    var timePicker = $(e.currentTarget).closest("div.date-time").find("div.time");
+                    timePicker.timepicker("setTime", hour);
+                    $(e.currentTarget).val(date.tryAfterLast(" ") || date)
+                }
+            }, 100);             
+        });
+
         $(document).on("changeDate clearDate", 'div.date-time div.date', function (e : any) {
-            var time = $(this).closest("div.date-time").find("div.time")
-            time.timepicker("setTime", e.date);
+            var time = $(this).closest("div.date-time").find("div.time");
+
+            var input = time.is("input") ? time : time.find("input");
+            if (SF.isEmpty(input.val()) != SF.isEmpty(e.date))
+                time.timepicker("setTime", e.date);
         });
 
         $(document).on("show.timepicker", 'div.date-time div.time', function (e: any) {
@@ -366,5 +402,4 @@ once("dateTimePickerSync", () => {
         });
     });
 });
-
 

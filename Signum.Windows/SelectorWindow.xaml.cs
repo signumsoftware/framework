@@ -28,6 +28,7 @@ namespace Signum.Windows
             public object Element { get; set; }
             public ImageSource Image { get; set; }
             public string Text { get; set; }
+            public string ToolTipText { get; set; }
         }
 
         public static readonly DependencyProperty TypesProperty =
@@ -62,7 +63,8 @@ namespace Signum.Windows
             string title = null,
             string message = null,
             bool autoSelectOnlyElement = true,
-            Window owner = null)
+            Window owner = null,
+            Func<T, string> elementTooltip = null)
         {
             if (title == null)
                 title = SelectorMessage.SelectAnElement.NiceToString();
@@ -82,6 +84,9 @@ namespace Signum.Windows
             if (elementText == null)
                 elementText = o => o.ToString();
 
+            if (elementTooltip == null)
+                elementTooltip = o => null;
+
             SelectorWindow w = new SelectorWindow()
             {
                 WindowStartupLocation = owner == null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.CenterOwner,
@@ -92,7 +97,8 @@ namespace Signum.Windows
                 {
                     Element = e,
                     Image = elementIcon(e),
-                    Text = elementText(e)
+                    Text = elementText(e),
+                    ToolTipText = elementTooltip(e)
                 }).ToArray()
             };
             bool res = w.ShowDialog() ?? false;

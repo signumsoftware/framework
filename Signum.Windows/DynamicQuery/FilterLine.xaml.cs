@@ -84,7 +84,7 @@ namespace Signum.Windows
 
             if (f.Operation != FilterOperation.IsIn)
             {
-                FillLite(f.RealValue as Lite<IIdentifiable>);
+                FillLite(f.RealValue as Lite<IEntity>);
 
                 valueContainer.Children.Add(GetValueControl(f.Token, "RealValue"));
             }
@@ -94,7 +94,7 @@ namespace Signum.Windows
                 var list = (IList)f.Value;
                 for (int i = 0; i < list.Count; i++)
                 {
-                    FillLite(list[i] as Lite<IIdentifiable>);
+                    FillLite(list[i] as Lite<IEntity>);
 
                     sp.Children.Add(new DockPanel
                     {
@@ -114,7 +114,7 @@ namespace Signum.Windows
             }
         }
 
-        private static void FillLite(Lite<IIdentifiable> lite)
+        private static void FillLite(Lite<IEntity> lite)
         {
             if (lite != null && string.IsNullOrEmpty(lite.ToString()))
                 Server.FillToStr(lite);

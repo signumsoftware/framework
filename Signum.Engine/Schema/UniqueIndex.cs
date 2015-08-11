@@ -41,7 +41,7 @@ namespace Signum.Engine.Maps
 
         public virtual string IndexName
         {
-            get { return "IX_{0}".Formato(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
+            get { return "IX_{0}".FormatWith(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
         }
 
         protected virtual string ColumnSignature()
@@ -59,7 +59,7 @@ namespace Signum.Engine.Maps
 
         public override string IndexName
         {
-            get { return "UIX_{0}".Formato(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
+            get { return "UIX_{0}".FormatWith(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
         }
 
         public string ViewName
@@ -72,7 +72,7 @@ namespace Signum.Engine.Maps
                 if (Connector.Current.AllowsIndexWithWhere(Where))
                     return null;
 
-                return "VIX_{0}_{1}".Formato(Table.Name.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength);
+                return "VIX_{0}_{1}".FormatWith(Table.Name.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength);
             }
         }
 
@@ -144,7 +144,7 @@ namespace Signum.Engine.Maps
                 case ExpressionType.Invoke:
                 case ExpressionType.MemberInit:
                 case ExpressionType.ListInit:
-                    throw new NotSupportedException("Expression of type {0} not supported: {1}".Formato(exp.NodeType, exp.NiceToString()));
+                    throw new NotSupportedException("Expression of type {0} not supported: {1}".FormatWith(exp.NodeType, exp.ToString()));
                 default:
                     return base.Visit(exp);
             }
@@ -162,7 +162,7 @@ namespace Signum.Engine.Maps
                     sb.Append(fr.Name.SqlEscape() + " IS NOT NULL");
                 }
                 else
-                    throw new InvalidOperationException("A {0} will never be {1}".Formato(fr.FieldType.TypeName(), b.TypeOperand.TypeName()));
+                    throw new InvalidOperationException("A {0} will never be {1}".FormatWith(fr.FieldType.TypeName(), b.TypeOperand.TypeName()));
 
                 return b;
             }
@@ -175,7 +175,7 @@ namespace Signum.Engine.Maps
                 if (imp.Any())
                     sb.Append(imp.ToString(kvp => kvp.Value.Name.SqlEscape() + " IS NOT NULL", " OR "));
                 else
-                    throw new InvalidOperationException("No implementation ({0}) will never be {1}".Formato(fib.ImplementationColumns.Keys.ToString(t=>t.TypeName(), ", "), b.TypeOperand.TypeName()));
+                    throw new InvalidOperationException("No implementation ({0}) will never be {1}".FormatWith(fib.ImplementationColumns.Keys.ToString(t=>t.TypeName(), ", "), b.TypeOperand.TypeName()));
 
                 return b;
             }
@@ -218,19 +218,6 @@ namespace Signum.Engine.Maps
             return u;
         }
 
-        static bool IsString(SqlDbType sqlDbType)
-        {
-            switch (sqlDbType)
-            {
-                case SqlDbType.NText:
-                case SqlDbType.NVarChar:
-                case SqlDbType.Text:
-                case SqlDbType.VarChar:
-                    return true;
-            }
-
-            return false;
-        }
 
         public static string IsNull(Field field, bool equals)
         {
@@ -240,9 +227,9 @@ namespace Signum.Engine.Maps
             {
                 var col = ((IColumn)field);
 
-                string result = isNull.Formato(col.Name.SqlEscape());
+                string result = isNull.FormatWith(col.Name.SqlEscape());
 
-                if (!IsString(col.SqlDbType))
+                if (!SqlBuilder.IsString(col.SqlDbType))
                     return result;
 
                 return result + (equals ? " OR " : " AND ") + (col.Name.SqlEscape() + (equals ? " == " : " <> ") + "''");
@@ -252,27 +239,27 @@ namespace Signum.Engine.Maps
             {
                 var ib = (FieldImplementedBy)field;
 
-                return ib.ImplementationColumns.Values.Select(ic => isNull.Formato(ic.Name.SqlEscape())).ToString(equals ? " AND " : " OR ");
+                return ib.ImplementationColumns.Values.Select(ic => isNull.FormatWith(ic.Name.SqlEscape())).ToString(equals ? " AND " : " OR ");
             }
             else if (field is FieldImplementedByAll)
             {
                 var iba = (FieldImplementedByAll)field;
 
-                return isNull.Formato(iba.Column.Name.SqlEscape()) +
+                return isNull.FormatWith(iba.Column.Name.SqlEscape()) +
                     (equals ? " AND " : " OR ") +
-                    isNull.Formato(iba.ColumnType.Name.SqlEscape());
+                    isNull.FormatWith(iba.ColumnType.Name.SqlEscape());
             }
             else if (field is FieldEmbedded)
             {
                 var fe = (FieldEmbedded)field;
 
                 if (fe.HasValue == null)
-                    throw new NotSupportedException("{0} is not nullable".Formato(field));
+                    throw new NotSupportedException("{0} is not nullable".FormatWith(field));
 
                 return fe.HasValue.Name.SqlEscape() + " = TRUE";
             }
 
-            throw new NotSupportedException(isNull.Formato(field.GetType())); 
+            throw new NotSupportedException(isNull.FormatWith(field.GetType())); 
         }
 
         static string Equals(Field field, object value, bool equals)
@@ -289,7 +276,7 @@ namespace Signum.Engine.Maps
                         (equals ? " = " : " <> ") + SqlPreCommandSimple.Encode(value);
                 }
 
-                throw new NotSupportedException("Impossible to compare {0} to {1}".Formato(field, value));
+                throw new NotSupportedException("Impossible to compare {0} to {1}".FormatWith(field, value));
             }
         }
 
@@ -321,7 +308,7 @@ namespace Signum.Engine.Maps
                     sb.Append(Equals(field, ((ConstantExpression)b.Right).Value, b.NodeType == ExpressionType.Equal));
                 }
                 else
-                    throw new NotSupportedException("Impossible to translate {0}".Formato(b.NiceToString()));
+                    throw new NotSupportedException("Impossible to translate {0}".FormatWith(b.ToString()));
             }
             else
             {

@@ -318,7 +318,7 @@ namespace Signum.Windows
             PropertyRoute parentContext = GetPropertyRoute(fe.Parent ?? fe);
 
             if (parentContext == null)
-                throw new InvalidOperationException("Route attached property can not be set with null PropertyRoute: '{0}'".Formato(route));
+                throw new InvalidOperationException("Route attached property can not be set with null PropertyRoute: '{0}'".FormatWith(route));
 
             var context = ContinueRouteExtension.Continue(parentContext, route); 
 
@@ -462,7 +462,7 @@ namespace Signum.Windows
             {
                 string text = context.PropertyInfo.NiceName();
 
-                UnitAttribute ua = context.PropertyInfo.SingleAttribute<UnitAttribute>();
+                UnitAttribute ua = context.PropertyInfo.GetCustomAttribute<UnitAttribute>();
                 if (ua != null)
                     text += " (" + ua.UnitName + ")";
 
@@ -540,7 +540,7 @@ namespace Signum.Windows
             ValueLine vl = fe as ValueLine;
             if (vl != null && vl.NotSet(ValueLine.UnitTextProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                UnitAttribute ua = context.PropertyInfo.SingleAttribute<UnitAttribute>();
+                UnitAttribute ua = context.PropertyInfo.GetCustomAttribute<UnitAttribute>();
                 if (ua != null)
                     vl.UnitText = ua.UnitName;
             }
@@ -574,7 +574,7 @@ namespace Signum.Windows
             {
                 PropertyRoute entityContext = eb.GetEntityPropertyRoute();
 
-                if (entityContext != null && entityContext.Type.CleanType().IsIIdentifiable())
+                if (entityContext != null && entityContext.Type.CleanType().IsIEntity())
                 {
                     eb.Implementations = entityContext.GetImplementations();
                 }
@@ -703,20 +703,20 @@ namespace Signum.Windows
             if (newValue is EmbeddedEntity)
                 return newValue.GetType().Name;
 
-            var ident = newValue as IdentifiableEntity;
+            var ident = newValue as Entity;
             if (ident != null)
             {
                 if (ident.IsNew)
-                    return "{0};New".Formato(Server.ServerTypes[ident.GetType()].CleanName);
+                    return "{0};New".FormatWith(Server.ServerTypes[ident.GetType()].CleanName);
 
                 return ident.ToLite().Key();
             }
 
-            var lite = newValue as Lite<IIdentifiable>;
+            var lite = newValue as Lite<IEntity>;
             if (lite != null)
             {
                 if (lite.UntypedEntityOrNull != null && lite.UntypedEntityOrNull.IsNew)
-                    return "{0};New".Formato(Server.ServerTypes[lite.EntityType].CleanName);
+                    return "{0};New".FormatWith(Server.ServerTypes[lite.EntityType].CleanName);
 
                 return lite.Key();
             }

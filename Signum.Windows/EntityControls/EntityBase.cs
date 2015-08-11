@@ -202,7 +202,7 @@ namespace Signum.Windows
                 EntityTemplate = Navigator.FindDataTemplate(this, type);
             }
 
-            if (this.NotSet(EntityBase.ImplementationsProperty) && CleanType.IsIdentifiableEntity() && !CleanType.IsAbstract)
+            if (this.NotSet(EntityBase.ImplementationsProperty) && CleanType.IsEntity() && !CleanType.IsAbstract)
                 Implementations = Signum.Entities.Implementations.By(CleanType);
 
             if (this.NotSet(EntityBase.CreateProperty) && Create)
@@ -260,7 +260,7 @@ namespace Signum.Windows
 
             if (View && this.NotSet(ViewProperty))
             {
-                Type entityType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
+                Type entityType = CleanLite ? ((Lite<Entity>)entity).EntityType : entity.GetType();
 
                 return Navigator.IsViewable(entityType);
             }
@@ -280,7 +280,7 @@ namespace Signum.Windows
 
             if (Navigate && this.NotSet(NavigateProperty))
             {
-                Type entityType = CleanLite ? ((Lite<IdentifiableEntity>)entity).EntityType : entity.GetType();
+                Type entityType = CleanLite ? ((Lite<Entity>)entity).EntityType : entity.GetType();
 
                 return Navigator.IsNavigable(entityType, isSearch: false);
             }

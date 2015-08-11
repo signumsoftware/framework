@@ -118,6 +118,14 @@ namespace Signum.Windows
             this.AddHandler(EntityRepeaterContentControl.ViewClickEvent, new RoutedEventHandler(btView_Click));
         }
 
+        public override void OnLoad(object sender, RoutedEventArgs e)
+        {
+            if (EntityTemplate == null)
+                EntityTemplate = Fluent.GetDataTemplate(() => new DataBorder { AutoChild = true });
+
+            base.OnLoad(sender, e);
+        }
+
 
         protected override void btCreate_Click(object sender, RoutedEventArgs e)
         {

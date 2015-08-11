@@ -47,13 +47,13 @@ namespace Signum.Utilities
         public static bool IsSetAssert(this DescriptionOptions opts, DescriptionOptions flag, MemberInfo member)
         {
             if ((opts.IsSet(DescriptionOptions.PluralDescription) || opts.IsSet(DescriptionOptions.Gender)) && !opts.IsSet(DescriptionOptions.Description))
-                throw new InvalidOperationException("{0} has {1} set also requires {2}".Formato(member.Name, opts, DescriptionOptions.Description));
+                throw new InvalidOperationException("{0} has {1} set also requires {2}".FormatWith(member.Name, opts, DescriptionOptions.Description));
 
             if ((member is PropertyInfo || member is FieldInfo) &&
                 (opts.IsSet(DescriptionOptions.PluralDescription) ||
                  opts.IsSet(DescriptionOptions.Gender) ||
                  opts.IsSet(DescriptionOptions.Members)))
-                throw new InvalidOperationException("Member {0} has {1} set".Formato(member.Name, opts));
+                throw new InvalidOperationException("Member {0} has {1} set".FormatWith(member.Name, opts));
 
             return opts.IsSet(flag);
         }
@@ -120,7 +120,7 @@ namespace Signum.Utilities
 
     public static class DescriptionManager
     {
-        public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityDN
+        public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityEntity
         public static Func<Type, Type> CleanType = t => t; //To allow Lite<T>
 
         public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath), "Translations");
@@ -157,7 +157,7 @@ namespace Signum.Utilities
             {
                 var loc = GetLocalizedType(type, CultureInfo.GetCultureInfo(defaultCulture));
                 if (loc == null)
-                    throw new InvalidOperationException("Type {0} is not localizable".Formato(type.TypeName()));
+                    throw new InvalidOperationException("Type {0} is not localizable".FormatWith(type.TypeName()));
 
                 return typeValue(loc);
             }
@@ -188,13 +188,13 @@ namespace Signum.Utilities
             if (result != null)
                 return result;
 
-            return type.SingleAttribute<PluralDescriptionAttribute>().Try(a => a.PluralDescription) ??
+            return type.GetCustomAttribute<PluralDescriptionAttribute>().Try(a => a.PluralDescription) ??
                 NaturalLanguageTools.Pluralize(DefaultTypeDescription(type)); 
         }
 
         public static string NiceToString(this Enum a, params object[] args)
         {
-            return a.NiceToString().Formato(args);
+            return a.NiceToString().FormatWith(args);
         }
 
         public static string NiceToString(this Enum a)
@@ -245,7 +245,7 @@ namespace Signum.Utilities
                 if (type == typeof(DayOfWeek))
                     return CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)memberInfo).GetValue(null)];
 
-                return memberInfo.SingleAttribute<DescriptionAttribute>().Try(a => a.Description) ?? memberInfo.Name.NiceName();
+                return memberInfo.GetCustomAttribute<DescriptionAttribute>().Try(a => a.Description) ?? memberInfo.Name.NiceName();
             }
        
             var result = Fallback(type, lt => lt.Members.TryGetC(memberInfo.Name));
@@ -262,7 +262,7 @@ namespace Signum.Utilities
             var cc = CultureInfo.CurrentUICulture;
 
             if(LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly) == null)
-                return type.SingleAttribute<GenderAttribute>().Try(a => a.Gender) ??
+                return type.GetCustomAttribute<GenderAttribute>().Try(a => a.Gender) ??
                     NaturalLanguageTools.GetGender(type.NiceName());
 
             var lt = GetLocalizedType(type, cc);
@@ -344,12 +344,12 @@ namespace Signum.Utilities
 
         internal static string DefaultTypeDescription(Type type)
         {
-            return type.SingleAttribute<DescriptionAttribute>().Try(t => t.Description) ?? DescriptionManager.CleanTypeName(type).SpacePascal();
+            return type.GetCustomAttribute<DescriptionAttribute>().Try(t => t.Description) ?? DescriptionManager.CleanTypeName(type).SpacePascal();
         }
 
         internal static string DefaultMemberDescription(MemberInfo m)
         {
-            return m.SingleAttribute<DescriptionAttribute>().Try(t => t.Description) ?? m.Name.NiceName();
+            return m.GetCustomAttribute<DescriptionAttribute>().Try(t => t.Description) ?? m.Name.NiceName();
         }
     }
 
@@ -366,12 +366,12 @@ namespace Signum.Utilities
 
         public static string TranslationFileName(Assembly assembly, CultureInfo cultureInfo)
         {
-            return Path.Combine(DescriptionManager.TranslationDirectory, "{0}.{1}.xml".Formato(assembly.GetName().Name, cultureInfo.Name));
+            return Path.Combine(DescriptionManager.TranslationDirectory, "{0}.{1}.xml".FormatWith(assembly.GetName().Name, cultureInfo.Name));
         }
 
         public static DescriptionOptions GetDescriptionOptions(Type type)
         {
-            var doa = type.SingleAttributeInherit<DescriptionOptionsAttribute>();
+            var doa = type.GetCustomAttribute<DescriptionOptionsAttribute>(true);
             if (doa != null)
                 return type.IsGenericTypeDefinition ? doa.Options & DescriptionOptions.Members : doa.Options;
 
@@ -384,7 +384,7 @@ namespace Signum.Utilities
 
         public static string GetDefaultAssemblyCulture(Assembly assembly)
         {
-            var defaultLoc = assembly.SingleAttribute<DefaultAssemblyCultureAttribute>();
+            var defaultLoc = assembly.GetCustomAttribute<DefaultAssemblyCultureAttribute>();
 
             if (defaultLoc == null)
                 return null;
@@ -450,7 +450,7 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            return "Localized {0}".Formato(Assembly.GetName().Name);
+            return "Localized {0}".FormatWith(Assembly.GetName().Name);
         }
     }
 
@@ -475,7 +475,7 @@ namespace Signum.Utilities
 
                     !Options.IsSetAssert(DescriptionOptions.Description, Type) ||
                     Description == null ||
-                    (Assembly.IsDefault && Description == (Type.SingleAttribute<DescriptionAttribute>().Try(t => t.Description) ?? DescriptionManager.CleanTypeName(Type).SpacePascal())) ? null :
+                    (Assembly.IsDefault && Description == (Type.GetCustomAttribute<DescriptionAttribute>().Try(t => t.Description) ?? DescriptionManager.CleanTypeName(Type).SpacePascal())) ? null :
                     new XAttribute("Description", Description),
 
                     !Options.IsSetAssert(DescriptionOptions.PluralDescription, Type) ||
@@ -493,7 +493,7 @@ namespace Signum.Utilities
                       where DescriptionManager.OnShouldLocalizeMember(m)
                       orderby m.Name
                       let value = Members.TryGetC(m.Name)
-                      where value != null && (!Assembly.IsDefault || ((Type.SingleAttribute<DescriptionAttribute>().Try(t => t.Description) ?? m.Name.NiceName()) != value))
+                      where value != null && (!Assembly.IsDefault || ((Type.GetCustomAttribute<DescriptionAttribute>().Try(t => t.Description) ?? m.Name.NiceName()) != value))
                       select new XElement("Member", new XAttribute("Name", m.Name), new XAttribute("Description", value)))
                 );
         }
@@ -531,12 +531,12 @@ namespace Signum.Utilities
                 Description = name,
                 PluralDescription = !opts.IsSetAssert(DescriptionOptions.PluralDescription, type) ? null :
                              ((x == null ? null : x.Attribute("PluralDescription").Try(xa => xa.Value)) ??
-                             (!assembly.IsDefault ? null : type.SingleAttribute<PluralDescriptionAttribute>().Try(t => t.PluralDescription)) ??
+                             (!assembly.IsDefault ? null : type.GetCustomAttribute<PluralDescriptionAttribute>().Try(t => t.PluralDescription)) ??
                              (name == null ? null : NaturalLanguageTools.Pluralize(name, assembly.Culture))),
 
                 Gender = !opts.IsSetAssert(DescriptionOptions.Gender, type) ? null :
                          ((x == null ? null : x.Attribute("Gender").Try(xa => xa.Value.Single())) ??
-                         (!assembly.IsDefault ? null : type.SingleAttribute<GenderAttribute>().Try(t => t.Gender)) ??
+                         (!assembly.IsDefault ? null : type.GetCustomAttribute<GenderAttribute>().Try(t => t.Gender)) ??
                          (name == null ? null : NaturalLanguageTools.GetGender(name, assembly.Culture))),
 
                 Members = !opts.IsSetAssert(DescriptionOptions.Members, type) ? null :
@@ -553,7 +553,7 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            return "Localized {0}".Formato(Type.Name);
+            return "Localized {0}".FormatWith(Type.Name);
         }
 
         public bool Contains(string text)

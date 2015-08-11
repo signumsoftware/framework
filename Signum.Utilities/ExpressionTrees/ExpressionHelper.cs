@@ -27,8 +27,9 @@ namespace Signum.Utilities.ExpressionTrees
         [DebuggerStepThrough]
         public static Expression Nullify(this Expression expression)
         {
-            if (!expression.Type.IsByRef)
-                return Expression.Convert(expression, expression.Type.Nullify());
+            Type type = expression.Type.Nullify();
+            if (expression.Type != type)
+                return Expression.Convert(expression, type);
             return expression;
         }
 
@@ -98,7 +99,7 @@ namespace Signum.Utilities.ExpressionTrees
             int index = FindParameter(mce.Method.GetParameters(), parameterName);
 
             if (index == -1)
-                throw new ArgumentException("parameterName '{0}' not found".Formato(parameterName));
+                throw new ArgumentException("parameterName '{0}' not found".FormatWith(parameterName));
 
             return mce.Arguments[index];
         }
@@ -152,7 +153,7 @@ namespace Signum.Utilities.ExpressionTrees
             var q = query as Query<T>;
 
             if (q == null)
-                throw new ArgumentException("query is not an instance of {0}".Formato(typeof(Query<T>).NicePluralName()));
+                throw new ArgumentException("query is not an instance of {0}".FormatWith(typeof(Query<T>).NicePluralName()));
 
             return q.QueryText;
         }

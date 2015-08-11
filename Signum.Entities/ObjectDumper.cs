@@ -16,7 +16,7 @@ namespace Signum.Entities
 {
     public static class ObjectDumper
     {
-        public static HashSet<Type> IgnoreTypes = new HashSet<Type> { typeof(ExceptionDN) };
+        public static HashSet<Type> IgnoreTypes = new HashSet<Type> { typeof(ExceptionEntity) };
 
         public static string Dump(this object o, bool showIgnoredFields = false, bool showByteArrays = false)
         {
@@ -89,43 +89,43 @@ namespace Signum.Entities
 
                 if (objects.Contains(o))
                 {
-                    if (o is IdentifiableEntity)
+                    if (o is Entity)
                     {
-                        var ident = o as IdentifiableEntity;
+                        var ident = o as Entity;
                         var ent = o as Entity;
 
-                        Sb.Append("({0}{1})".Formato(
+                        Sb.Append("({0}{1})".FormatWith(
                             ident.IsNew ? "IsNew": ident.IdOrNull.ToString(),
                             ent == null ? null : ", ticks: " + ent.ticks
                             ));
                     }
-                    if (o is Lite<IdentifiableEntity>)
+                    if (o is Lite<Entity>)
                     {
-                        var id =  ((Lite<IdentifiableEntity>)o).IdOrNull;
-                        Sb.Append(id.HasValue ? "({0})".Formato(id.Value) : "");
+                        var id =  ((Lite<Entity>)o).IdOrNull;
+                        Sb.Append(id.HasValue ? "({0})".FormatWith(id.Value) : "");
                     }
-                    Sb.Append(" /* [CICLE] {0} */".Formato(o.ToString()));
+                    Sb.Append(" /* [CICLE] {0} */".FormatWith(o.ToString()));
                     return;
                 }
 
                 objects.Add(o);
 
-                if (o is IdentifiableEntity)
+                if (o is Entity)
                 {
-                    var ident = o as IdentifiableEntity;
+                    var ident = o as Entity;
                     var ent = o as Entity;
-                    Sb.Append("({0}{1})".Formato(
+                    Sb.Append("({0}{1})".FormatWith(
                         ident.IsNew ? "IsNew" : ident.IdOrNull.ToString(),
                         ent == null ? null : ", ticks: " + ent.ticks
                         ));
-                    Sb.Append(" /* {0} */".Formato(o.ToString()));
+                    Sb.Append(" /* {0} */".FormatWith(o.ToString()));
                 }
 
-                if (o is Lite<IdentifiableEntity>)
+                if (o is Lite<Entity>)
                 {
-                    var l = o as Lite<IdentifiableEntity>;
-                    Sb.Append("({0}, \"{1}\")".Formato((l.IdOrNull.HasValue ? l.Id.ToString() : "null"), l.ToString()));
-                    if (((Lite<IdentifiableEntity>)o).UntypedEntityOrNull == null)
+                    var l = o as Lite<Entity>;
+                    Sb.Append("({0}, \"{1}\")".FormatWith((l.IdOrNull.HasValue ? l.Id.ToString() : "null"), l.ToString()));
+                    if (((Lite<Entity>)o).UntypedEntityOrNull == null)
                         return;
                 }
 
@@ -145,7 +145,7 @@ namespace Signum.Entities
                 level += 1;
 
                 if (t.Namespace.HasText() && t.Namespace.StartsWith("System.Reflection"))
-                    Sb.AppendLine("ToString = {0},".Formato(o.ToString()).Indent(level));
+                    Sb.AppendLine("ToString = {0},".FormatWith(o.ToString()).Indent(level));
                 else if (o is Exception)
                 {
                     var ex = o as Exception;
@@ -211,13 +211,13 @@ namespace Signum.Entities
 
             private bool IsMixinField(FieldInfo field)
             {
-                return field.Name == "mixin" && field.DeclaringType == typeof(IdentifiableEntity) ||
+                return field.Name == "mixin" && field.DeclaringType == typeof(Entity) ||
                     field.Name == "next" && field.DeclaringType == typeof(MixinEntity);
             }
 
             private bool IsIdOrTicks(FieldInfo field)
             {
-                return field.Name == "id" && field.DeclaringType == typeof(IdentifiableEntity) ||
+                return field.Name == "id" && field.DeclaringType == typeof(Entity) ||
                     field.Name == "ticks" && field.DeclaringType == typeof(Entity);
             }
 
@@ -286,11 +286,11 @@ namespace Signum.Entities
 
                     if (item is DateTime)
                     {
-                        value = "DateTime.Parse(\"{0}\")".Formato(value);
+                        value = "DateTime.Parse(\"{0}\")".FormatWith(value);
                     }
                 }
 
-                return "{0}{1}{2}".Formato(startDelimiter, value, endDelimiter);
+                return "{0}{1}{2}".FormatWith(startDelimiter, value, endDelimiter);
             }
         };
 

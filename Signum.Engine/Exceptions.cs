@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,11 +9,10 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
-using System.Data.SqlServerCe;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace Signum.Engine.Exceptions
+namespace Signum.Engine
 {
     [Serializable]
     public class UniqueKeyException : ApplicationException
@@ -45,7 +44,7 @@ namespace Signum.Engine.Exceptions
                     IndexName = m.Groups["index"].Value;
                     Values = m.Groups["value"].Value;
 
-                    Table = cachedTables.GetOrAdd(TableName, tn=>Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToStringDbo() == tn));
+                    Table = cachedTables.GetOrAdd(TableName, tn => Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToString() == tn));
 
                     if(Table != null)
                     {
@@ -87,7 +86,7 @@ namespace Signum.Engine.Exceptions
                 if (Table == null)
                     return InnerException.Message;
 
-                return EngineMessage.TheresAlreadyA0With1EqualsTo2.NiceToString().ForGenderAndNumber(Table == null? null: Table.Type.GetGender()).Formato(
+                return EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table == null? null: Table.Type.GetGender()).FormatWith(
                     Table == null ? TableName : Table.Type.NiceName(),
                     Index == null ? IndexName :
                     Properties.IsNullOrEmpty() ? Index.Columns.CommaAnd(c => c.Name) : 
@@ -157,12 +156,12 @@ namespace Signum.Engine.Exceptions
 
                 if (IsInsert)
                     return (TableType == null || ReferedTableType == null) ?
-                        "The column {0} on table {1} does not reference {2}".Formato(Field, TableName, ReferedTableName) :
-                        "The column {0} of the {1} does not refer to a valid {2}".Formato(Field, TableType.NiceName(), ReferedTableType.NiceName());
+                        "The column {0} on table {1} does not reference {2}".FormatWith(Field, TableName, ReferedTableName) :
+                        "The column {0} of the {1} does not refer to a valid {2}".FormatWith(Field, TableType.NiceName(), ReferedTableType.NiceName());
                 else
                     return (TableType == null) ?
-                        EngineMessage.ThereAreRecordsIn0PointingToThisTableByColumn1.NiceToString().Formato(TableName, Field) :
-                        EngineMessage.ThereAre0ThatReferThisEntity.NiceToString().Formato(TableType.NicePluralName());
+                        EngineMessage.ThereAreRecordsIn0PointingToThisTableByColumn1.NiceToString().FormatWith(TableName, Field) :
+                        EngineMessage.ThereAre0ThatReferThisEntity.NiceToString().FormatWith(TableType.NicePluralName());
             }
         }
     }
@@ -172,12 +171,12 @@ namespace Signum.Engine.Exceptions
     public class EntityNotFoundException : Exception
     {
         public Type Type { get; private set; }
-        public int[] Ids { get; private set; }
+        public PrimaryKey[] Ids { get; private set; }
 
         protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        public EntityNotFoundException(Type type, params int[] ids)
-            : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().Formato(type.Name, ids.ToString(", ")))
+        public EntityNotFoundException(Type type, params PrimaryKey[] ids)
+            : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(type.Name, ids.ToString(", ")))
         {
             this.Type = type;
             this.Ids = ids;
@@ -188,12 +187,12 @@ namespace Signum.Engine.Exceptions
     public class ConcurrencyException: Exception
     {
         public Type Type { get; private set; }
-        public int[] Ids { get; private set; }
+        public PrimaryKey[] Ids { get; private set; }
 
         protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        public ConcurrencyException(Type type, params int[] ids)
-            : base(EngineMessage.ConcurrencyErrorOnDatabaseTable0Id1.NiceToString().Formato(type.NiceName(), ids.ToString(", ")))
+        public ConcurrencyException(Type type, params PrimaryKey[] ids)
+            : base(EngineMessage.ConcurrencyErrorOnDatabaseTable0Id1.NiceToString().FormatWith(type.NiceName(), ids.ToString(", ")))
         {
             this.Type = type;
             this.Ids = ids;

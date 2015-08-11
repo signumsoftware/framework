@@ -14,10 +14,10 @@ namespace Signum.Web.PortableAreas
 
         public static void RegisterView(Type viewType)
         {
-            PageVirtualPathAttribute attribute = viewType.SingleAttribute<PageVirtualPathAttribute>();
+            PageVirtualPathAttribute attribute = viewType.GetCustomAttribute<PageVirtualPathAttribute>();
 
             if (attribute == null)
-                throw new InvalidOperationException("{0} has not {1}".Formato(viewType.Name, typeof(PageVirtualPathAttribute).Name));
+                throw new InvalidOperationException("{0} has not {1}".FormatWith(viewType.Name, typeof(PageVirtualPathAttribute).Name));
 
             Views.AddOrThrow(attribute.VirtualPath, viewType, "compiled view {0} already registered");
         }
@@ -32,7 +32,7 @@ namespace Signum.Web.PortableAreas
         {
             List<Type> viewsInArea = (from t in assembly.GetTypes()
                                       where t.IsSubclassOf(typeof(WebPageRenderingBase))
-                                      let att = t.SingleAttribute<PageVirtualPathAttribute>()
+                                      let att = t.GetCustomAttribute<PageVirtualPathAttribute>()
                                       where views.Contains(att.VirtualPath, StringComparer.InvariantCultureIgnoreCase)
                                       select t).ToList();
 
@@ -48,7 +48,7 @@ namespace Signum.Web.PortableAreas
 
             var viewsInArea = (from t in assembly.GetTypes()
                                where t.IsSubclassOf(typeof(WebPageRenderingBase))
-                               let att = t.SingleAttribute<PageVirtualPathAttribute>()
+                               let att = t.GetCustomAttribute<PageVirtualPathAttribute>()
                                where att.VirtualPath.StartsWith(prefix, StringComparison.InvariantCultureIgnoreCase)
                                select new { att.VirtualPath, Type = t });
 

@@ -106,7 +106,7 @@ namespace Signum.Utilities
         {
             V result;
             if (!dictionary.TryGetValue(key, out result))
-                throw new KeyNotFoundException(messageWithFormat.Formato(key));
+                throw new KeyNotFoundException(messageWithFormat.FormatWith(key));
            return result;
         }
 
@@ -114,14 +114,14 @@ namespace Signum.Utilities
         {
             V result;
             if (!dictionary.TryGetValue(key, out result))
-                throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".Formato(key, key.GetType().TypeName(), dictionary.GetType().TypeName()));
+                throw new KeyNotFoundException("Key '{0}' ({1}) not found on {2}".FormatWith(key, key.GetType().TypeName(), dictionary.GetType().TypeName()));
             return result;
         }
 
         public static void AddOrThrow<K, V>(this IDictionary<K, V> dictionary, K key, V value, string messageWithFormat)
         {
             if (dictionary.ContainsKey(key))
-                throw new ArgumentException(messageWithFormat.Formato(key));
+                throw new ArgumentException(messageWithFormat.FormatWith(key));
 
             dictionary.Add(key, value);
         }
@@ -208,12 +208,12 @@ namespace Signum.Utilities
 
             if (currentOnly.Count != 0)
                 if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(errorContext, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".FormatWith(errorContext, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
                 else
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(errorContext, currentOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".FormatWith(errorContext, currentOnly.ToString(", ")));
             else
                 if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Missing: {1}".Formato(errorContext, shouldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Missing: {1}".FormatWith(errorContext, shouldOnly.ToString(", ")));
 
             return currentDictionary.ToDictionary(kvp => kvp.Key, kvp => resultSelector(kvp.Value, shouldDictionary[kvp.Key]));
         }
@@ -239,12 +239,12 @@ namespace Signum.Utilities
 
             if (currentOnly.Count != 0)
                 if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(errorContext, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".FormatWith(errorContext, currentOnly.ToString(", "), shouldOnly.ToString(", ")));
                 else
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(errorContext, currentOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".FormatWith(errorContext, currentOnly.ToString(", ")));
             else
                 if (shouldOnly.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(errorContext, shouldOnly.ToString(", ")));
+                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".FormatWith(errorContext, shouldOnly.ToString(", ")));
 
             foreach (var kvp in currentDictionary)
             {
@@ -372,8 +372,8 @@ namespace Signum.Utilities
             }
 
             if (repetitions.Count > 0)
-                throw new ArgumentException("There are some repeated {0}: {1}".Formato(errorContext, repetitions
-                    .ToString(kvp => "{0} ({1})".Formato(kvp.Key, kvp.Value.ToString(", ")), "\r\n")));
+                throw new ArgumentException("There are some repeated {0}: {1}".FormatWith(errorContext, repetitions
+                    .ToString(kvp => "{0} ({1})".FormatWith(kvp.Key, kvp.Value.ToString(", ")), "\r\n")));
         }
 
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)

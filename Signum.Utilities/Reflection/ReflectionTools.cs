@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Resources;
 using System.Globalization;
 using System.Collections.Concurrent;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Utilities.Reflection
 {
@@ -217,12 +218,12 @@ namespace Signum.Utilities.Reflection
 
         public static ConstructorInfo GetGenericConstructorDefinition(this ConstructorInfo ci)
         {
-            return ci.DeclaringType.GetGenericTypeDefinition().GetConstructors().Single(a => a.MetadataToken == ci.MetadataToken);
+            return ci.DeclaringType.GetGenericTypeDefinition().GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SingleEx(a => a.MetadataToken == ci.MetadataToken);
         }
 
         public static ConstructorInfo MakeGenericConstructor(this ConstructorInfo ci, params Type[] types)
         {
-            return ci.DeclaringType.MakeGenericType(types).GetConstructors().Single(a => a.MetadataToken == ci.MetadataToken);
+            return ci.DeclaringType.MakeGenericType(types).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).SingleEx(a => a.MetadataToken == ci.MetadataToken);
         }
 
 
@@ -385,10 +386,28 @@ namespace Signum.Utilities.Reflection
             Type utype = type.UnNullify();
             if (utype.IsEnum)
                 return Enum.Parse(utype, (string)value);
-            else if (utype == typeof(Guid))
+
+            if (utype == typeof(Guid))
                 return Guid.Parse(value);
-            else
-                return Convert.ChangeType(value, utype);
+
+            if (utype.Namespace == "Microsoft.SqlServer.Types")
+                return ParseSqlServerType(utype, value); //Delay reference
+
+            return Convert.ChangeType(value, utype);
+        }
+
+        private static object ParseSqlServerType(Type type, string value)
+        {
+            if (type == typeof(SqlHierarchyId))
+                return SqlHierarchyId.Parse(value);
+
+            if (type == typeof(SqlGeography))
+                return SqlGeography.Parse(value);
+
+            if (type == typeof(SqlGeometry))
+                return SqlGeometry.Parse(value);
+
+            throw new InvalidOperationException("Unexpected {0}".FormatWith(type.Name));
         }
 
         public static T Parse<T>(string value, CultureInfo culture)
@@ -711,7 +730,18 @@ namespace Signum.Utilities.Reflection
                 else if (utype == typeof(Guid) && value is string)
                     return Guid.Parse((string)value);
                 else
+                {
+                    var conv = TypeDescriptor.GetConverter(type);
+                    if(conv != null && conv.CanConvertFrom(value.GetType()))
+                        return conv.ConvertFrom(value);
+
+                    conv = TypeDescriptor.GetConverter(value.GetType());
+                    if (conv != null && conv.CanConvertTo(type))
+                        return conv.ConvertTo(value, type);
+
                     return Convert.ChangeType(value, utype);
+                }
+                  
             }
         }
 

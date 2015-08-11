@@ -1,4 +1,4 @@
-## Dynamic Queries
+﻿## Dynamic Queries
 
 The Dynamic query system is a layer, on top of the LINQ provider, that allows a more dynamic manipulation of queries at run-time. 
 
@@ -29,8 +29,8 @@ public class DynamicQueryManager
 Example in `OrderLogic.Start`: 
 
 ```C#
-dqm.RegisterQuery(typeof(OrderDN), () =>
-    from o in Database.Query<OrderDN>()
+dqm.RegisterQuery(typeof(OrderEntity), () =>
+    from o in Database.Query<OrderEntity>()
     select new
     {
         Entity = o,
@@ -45,7 +45,7 @@ dqm.RegisterQuery(typeof(OrderDN), () =>
     });
 
 dqm.RegisterQuery(OrderQuery.OrderLines, () =>
-    from o in Database.Query<OrderDN>()
+    from o in Database.Query<OrderEntity>()
     from od in o.Details
     select new
     {
@@ -86,8 +86,8 @@ public class DynamicQueryManager
 And using `Column` method (or `ColumnDisplayName`) to override each column meta-data like this:
 
 ```C#
-dqm.RegisterQuery(typeof(OrderDN), () => DynamicQuery.Auto(
-    from o in Database.Query<OrderDN>()
+dqm.RegisterQuery(typeof(OrderEntity), () => DynamicQuery.Auto(
+    from o in Database.Query<OrderEntity>()
     select new
     {
         Entity = o.ToLite(),
@@ -116,11 +116,11 @@ public static ManualDynamicQueryCore<T> Manual<T>(Func<QueryRequest, QueryDescri
 Example: 
 
 ```C#
-dqm.RegisterQuery(typeof(CustomerDN), () => DynamicQuery.Manual((QueryRequest request, QueryDescription descriptions) =>
+dqm.RegisterQuery(typeof(CustomerEntity), () => DynamicQuery.Manual((QueryRequest request, QueryDescription descriptions) =>
 {
-    var persons = Database.Query<PersonDN>().Select(p => new
+    var persons = Database.Query<PersonEntity>().Select(p => new
     {
-        Entity = p.ToLite<CustomerDN>(),
+        Entity = p.ToLite<CustomerEntity>(),
         Id = "P " + p.Id,
         Name = p.FirstName + " " + p.LastName,
         p.Address,
@@ -128,9 +128,9 @@ dqm.RegisterQuery(typeof(CustomerDN), () => DynamicQuery.Manual((QueryRequest re
         p.Fax
     }).ToDQueryable(descriptions).AllQueryOperations(request);
 
-    var companies = Database.Query<CompanyDN>().Select(p => new
+    var companies = Database.Query<CompanyEntity>().Select(p => new
     {
-        Entity = p.ToLite<CustomerDN>(),
+        Entity = p.ToLite<CustomerEntity>(),
         Id = "C " + p.Id,
         Name = p.CompanyName,
         p.Address,
@@ -144,22 +144,22 @@ dqm.RegisterQuery(typeof(CustomerDN), () => DynamicQuery.Manual((QueryRequest re
 
 })
 .ColumnProperyRoutes(a => a.Id, 
-    PropertyRoute.Construct((PersonDN comp) => comp.Id), 
-    PropertyRoute.Construct((CompanyDN p) => p.Id))
+    PropertyRoute.Construct((PersonEntity comp) => comp.Id), 
+    PropertyRoute.Construct((CompanyEntity p) => p.Id))
 .ColumnProperyRoutes(a => a.Name, 
-    PropertyRoute.Construct((PersonDN comp) => comp.FirstName), 
-    PropertyRoute.Construct((PersonDN comp) => comp.LastName), 
-    PropertyRoute.Construct((CompanyDN p) => p.CompanyName))
+    PropertyRoute.Construct((PersonEntity comp) => comp.FirstName), 
+    PropertyRoute.Construct((PersonEntity comp) => comp.LastName), 
+    PropertyRoute.Construct((CompanyEntity p) => p.CompanyName))
 .ColumnProperyRoutes(a => a.Address, 
-    PropertyRoute.Construct((PersonDN comp) => comp.Address), 
-    PropertyRoute.Construct((PersonDN comp) => comp.Address))
+    PropertyRoute.Construct((PersonEntity comp) => comp.Address), 
+    PropertyRoute.Construct((PersonEntity comp) => comp.Address))
 .ColumnProperyRoutes(a => a.Phone, 
-    PropertyRoute.Construct((PersonDN comp) => comp.Phone), 
-    PropertyRoute.Construct((CompanyDN p) => p.Phone))
+    PropertyRoute.Construct((PersonEntity comp) => comp.Phone), 
+    PropertyRoute.Construct((CompanyEntity p) => p.Phone))
 .ColumnProperyRoutes(a => a.Fax, 
-    PropertyRoute.Construct((PersonDN comp) => comp.Fax), 
-    PropertyRoute.Construct((CompanyDN p) => p.Fax))
-, entityImplementations: Implementations.By(typeof(PersonDN), typeof(CompanyDN)));
+    PropertyRoute.Construct((PersonEntity comp) => comp.Fax), 
+    PropertyRoute.Construct((CompanyEntity p) => p.Fax))
+, entityImplementations: Implementations.By(typeof(PersonEntity), typeof(CompanyEntity)));
 ```
 
 Using `ToDQueryable` we get a dynamic query (`DQueryable<T>`) that can be manipulated using the dynamic versions of `Select`, `SelectMany`, `Where`, `OrderBy`, `Unique`, `TryTake` and `TryPaginate`. Most of the time you just need to execute all the operations requested by the `SearchControl` using `AllQueryOperations` method.
@@ -195,9 +195,9 @@ Typically you only need to use the two different ones, and all the information i
 Let's suppose that we have an `expressionMethod` like this one: 
 
 ```C#
-static Expression<Func<RegionDN, IQueryable<TerritoryDN>>> TerritoriesExpression =
-    r => Database.Query<TerritoryDN>().Where(a => a.Region == r);
-public static IQueryable<TerritoryDN> Territories(this RegionDN r)
+static Expression<Func<RegionEntity, IQueryable<TerritoryEntity>>> TerritoriesExpression =
+    r => Database.Query<TerritoryEntity>().Where(a => a.Region == r);
+public static IQueryable<TerritoryEntity> Territories(this RegionEntity r)
 {
     return TerritoriesExpression.Evaluate(r);
 }
@@ -206,25 +206,25 @@ public static IQueryable<TerritoryDN> Territories(this RegionDN r)
 This `expressionMethod` let's us simplify queries like this one: 
 
 ```C#
-Database.Query<RegionDN>().Where(r=>!r.Territories().Any()).UnsafeDelete();
+Database.Query<RegionEntity>().Where(r=>!r.Territories().Any()).UnsafeDelete();
 ```
 
 But `Territories` is a concept that is only available for programmers, without `RegisterExpression` the user is not able to take advantage of it. Let's do it then: 
 
 ```C#
 //In TerritoryLogic.Start
-dqm.RegisterExpression((RegionDN r) => r.Territories());
+dqm.RegisterExpression((RegionEntity r) => r.Territories());
 ```
 
-Now, the a new expression with key `"Territories"` has been registered on `RegionDN` and returns an `IQueryable<TerritoryDN>`. 
+Now, the a new expression with key `"Territories"` has been registered on `RegionEntity` and returns an `IQueryable<TerritoryEntity>`. 
 
 Unfortunately, the `NiceName` will always be `"Territories"`, independently of the user `CultureInfo`. 
 
-Let's fix that re-using the `NicePluralName` of `TerritoryDN`: 
+Let's fix that re-using the `NicePluralName` of `TerritoryEntity`: 
 
 ```C#
 //In TerritoryLogic.Start
-dqm.RegisterExpression((RegionDN r) => r.Territories(), () => typeof(TerritoryDN).NiceName());
+dqm.RegisterExpression((RegionEntity r) => r.Territories(), () => typeof(TerritoryEntity).NiceName());
 ```
 
 ## Executing queries (Advanced)

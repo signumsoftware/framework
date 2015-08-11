@@ -54,8 +54,9 @@
       <Private>True</Private>
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>../Dependencies/Json.Net/Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Activities" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -121,6 +122,7 @@
     <Compile Include="Facades\ExceptionClient.cs" />
     <Compile Include="Facades\QueryRequestModelBinder.cs" />
     <Compile Include="Facades\ViewOptions.cs" />
+    <Compile Include="Facades\ViewOverrides.cs" />
     <Compile Include="HtmlHelpers\CalendarHelper.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Facades\Constructor.cs" />
@@ -132,14 +134,21 @@
     <Compile Include="ControllerAttributes\SignumExceptionHandlerAttribute.cs" />
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
     <Compile Include="HtmlHelpers\TabHelpers.cs" />
+    <Compile Include="LineHelpers\EntityListCheckboxHelper.cs" />
     <Compile Include="LineHelpers\EntityTabRepeaterHelper.cs" />
     <Compile Include="LineHelpers\EntityStripHelper.cs" />
+    <Compile Include="Lines\EntityCheckboxList.cs" />
     <Compile Include="Lines\EntityStrip.cs" />
     <Compile Include="Lines\HourMinuteLine.cs" />
     <Compile Include="Widgets\LinksClient.cs" />
     <Compile Include="Widgets\WidgetsHelper.cs" />
     <Content Include="Signum\Content\Search.css" />
     <Content Include="Signum\Content\Widgets.css" />
+    <Compile Include="Signum\Views\DeleteLogParameters.generated.cs">
+      <DependentUpon>DeleteLogParameters.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="ValueLineBoxOptions.cs" />
     <Compile Include="Operations\OperationClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
@@ -249,16 +258,16 @@
     <Compile Include="TypeContext\TypeContextHelper.cs" />
     <Compile Include="TypeContext\TypeContextUtilities.cs" />
     <Compile Include="LineHelpers\EntityInfo.cs" />
-    <Compile Include="Lines\BaseLine.cs" />
+    <Compile Include="Lines\LineBase.cs" />
     <Compile Include="Lines\EntityRepeater.cs" />
     <Compile Include="Lines\EntityListDetail.cs" />
     <Compile Include="Lines\EntityList.cs" />
-    <Compile Include="Lines\EntityLineDetail.cs" />
+    <Compile Include="Lines\EntityDetail.cs" />
     <Compile Include="Lines\EntityCombo.cs" />
     <Compile Include="LineHelpers\EntityBaseHelper.cs" />
     <Compile Include="Lines\EntityLine.cs" />
     <Compile Include="LineHelpers\EntityListDetailHelper.cs" />
-    <Compile Include="LineHelpers\EntityLineDetailHelper.cs" />
+    <Compile Include="LineHelpers\EntityDetailHelper.cs" />
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="HtmlHelpers\MenuHelper.cs" />
@@ -293,6 +302,7 @@
     <Content Include="Facades\JsFunction.md" />
     <Content Include="Facades\Navigator.md" />
     <Content Include="Operations\OperationsClient.md" />
+    <Content Include="LineHelpers\EntityControls.md" />
     <None Include="Signum\Headers\bootstrap\twitter.typeahead.ts.old" />
     <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\es6-promises\es6-promises.d.ts" />
@@ -344,6 +354,11 @@
     <Content Include="Signum\Views\TypeView.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>TypeView.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
+    </Content>
+    <Content Include="Signum\Views\DeleteLogParameters.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>DeleteLogParameters.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </Content>
     <None Include="Signum\Views\PaginationSelector.cshtml">
@@ -441,7 +456,6 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v12.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <Target Name="BeforeBuild">
     <ItemGroup>
@@ -451,13 +465,7 @@
   <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
     <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
   </Target>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <TypeScriptTarget>ES5</TypeScriptTarget>
-    <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
-    <TypeScriptSourceMap>true</TypeScriptSourceMap>
-    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+  <PropertyGroup>
     <TypeScriptTarget>ES5</TypeScriptTarget>
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>

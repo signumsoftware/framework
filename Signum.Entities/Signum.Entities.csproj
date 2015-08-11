@@ -60,11 +60,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
-    <OutputPath>bin\Partial\</OutputPath>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -86,7 +81,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="Basics\Exception.cs" />
-    <Compile Include="Basics\IUserDN.cs" />
+    <Compile Include="Basics\IUserEntity.cs" />
     <Compile Include="Basics\Operation.cs" />
     <Compile Include="Basics\OperationLog.cs" />
     <Compile Include="Basics\SemiSymbol.cs" />
@@ -125,11 +120,13 @@
     <Compile Include="DynamicQuery\QueryDescription.cs" />
     <Compile Include="Patterns\ImmutableEntity.cs" />
     <Compile Include="Patterns\LockeableEntity.cs" />
+    <Compile Include="PrimaryKey.cs" />
     <Compile Include="PropertyAttributes.cs" />
     <Compile Include="PropertyRoute.cs" />
     <Compile Include="Reflection\GraphExplorer.cs" />
     <Compile Include="Reflection\Reflector.cs" />
     <Compile Include="Reflection\StringHashEncoder.cs" />
+    <Compile Include="Services\ExceptionMarshalling.cs" />
     <Compile Include="Services\IOperationServer.cs" />
     <Compile Include="Basics\Symbol.cs" />
     <Compile Include="TimeZoneManager.cs" />
@@ -142,9 +139,8 @@
     <Compile Include="Basics\Type.cs" />
     <Compile Include="ModifiableEntity.cs" />
     <Compile Include="Lite.cs" />
-    <Compile Include="Entity.cs" />
     <Compile Include="EmbeddedEntity.cs" />
-    <Compile Include="IdentifiableEntity.cs" />
+    <Compile Include="Entity.cs" />
     <Compile Include="MList.cs" />
     <Compile Include="Modifiable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -183,6 +179,7 @@
     </Content>
     <Content Include="Translations\Signum.Entities.es.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Translations\Signum.Entities.fr.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -206,6 +203,7 @@
     <None Include="Lite.md" />
     <None Include="Mixin.md" />
     <None Include="MList.md" />
+    <None Include="PrimaryKey.md" />
     <None Include="PropertyAttributes.md" />
     <None Include="PropertyRoute.md" />
     <None Include="Services\Services.md" />

@@ -1,4 +1,4 @@
-## ThreadSafeEnumerator
+﻿## ThreadSafeEnumerator
 
 Have you ever considered why there's two different interfaces for enumeration, `IEnumerable<T>` and `IEmunerator<T>`?
 
@@ -38,7 +38,7 @@ Thread[] threads = 0.To(10).Select(i => new Thread(() =>
 {
     foreach (var num in threadSafeNumbers)
     {
-        Console.WriteLine("{0} Getting {1}".Formato(Thread.CurrentThread.Name, num));
+        Console.WriteLine("{0} Getting {1}".FormatWith(Thread.CurrentThread.Name, num));
         Thread.Sleep(100); //To force some thread changes
     }
 }) { Name = "Thread #" + i }).ToArray();

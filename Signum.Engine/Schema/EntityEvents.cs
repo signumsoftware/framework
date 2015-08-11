@@ -9,7 +9,7 @@ using Signum.Utilities;
 namespace Signum.Engine.Maps
 {
     public class EntityEvents<T> : IEntityEvents
-            where T : IdentifiableEntity
+            where T : Entity
     {
         public event PreSavingEventHandler<T> PreSaving;
         public event SavingEventHandler<T> Saving;
@@ -27,6 +27,7 @@ namespace Signum.Engine.Maps
         public event PreUnsafeUpdateHandler<T> PreUnsafeUpdate;
 
         public event PreUnsafeInsertHandler<T> PreUnsafeInsert;
+        public event BulkInsetHandler<T> PreBulkInsert;
 
         internal IEnumerable<FilterQueryResult<T>> OnFilterQuery()
         {
@@ -69,27 +70,34 @@ namespace Signum.Engine.Maps
             return constructor;
         }
 
-        void IEntityEvents.OnPreSaving(IdentifiableEntity entity, ref bool graphModified)
+        void IEntityEvents.OnPreBulkInsert()
+        {
+            if (PreBulkInsert != null)
+                foreach (var action in PreBulkInsert.GetInvocationListTyped().Reverse())
+                    action();
+        }
+
+        void IEntityEvents.OnPreSaving(Entity entity, ref bool graphModified)
         {
             if (PreSaving != null)
                 PreSaving((T)entity, ref graphModified);
         }
 
-        void IEntityEvents.OnSaving(IdentifiableEntity entity)
+        void IEntityEvents.OnSaving(Entity entity)
         {
             if (Saving != null)
                 Saving((T)entity);
 
         }
 
-        void IEntityEvents.OnSaved(IdentifiableEntity entity, SavedEventArgs args)
+        void IEntityEvents.OnSaved(Entity entity, SavedEventArgs args)
         {
             if (Saved != null)
                 Saved((T)entity, args);
 
         }
 
-        void IEntityEvents.OnRetrieved(IdentifiableEntity entity)
+        void IEntityEvents.OnRetrieved(Entity entity)
         {
             if (Retrieved != null)
                 Retrieved((T)entity);
@@ -101,16 +109,17 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : IdentifiableEntity;
-    public delegate void RetrievedEventHandler<T>(T ident) where T : IdentifiableEntity;
-    public delegate void SavingEventHandler<T>(T ident) where T : IdentifiableEntity;
-    public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
-    public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : IdentifiableEntity;
+    public delegate void PreSavingEventHandler<T>(T ident, ref bool graphModified) where T : Entity;
+    public delegate void RetrievedEventHandler<T>(T ident) where T : Entity;
+    public delegate void SavingEventHandler<T>(T ident) where T : Entity;
+    public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
+    public delegate FilterQueryResult<T> FilterQueryEventHandler<T>() where T : Entity;
 
     public delegate void PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
     public delegate void PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
     public delegate void PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
     public delegate LambdaExpression PreUnsafeInsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
+    public delegate void BulkInsetHandler<T>();
 
     public class SavedEventArgs
     {
@@ -124,7 +133,7 @@ namespace Signum.Engine.Maps
         LambdaExpression InDatabaseExpression{get;}
     }
 
-    public class FilterQueryResult<T> : IFilterQueryResult where T : IdentifiableEntity
+    public class FilterQueryResult<T> : IFilterQueryResult where T : Entity
     {
         public FilterQueryResult(Expression<Func<T, bool>> inDatabaseExpression, Func<T, bool> inMemoryFunction)
         {
@@ -140,14 +149,15 @@ namespace Signum.Engine.Maps
 
     internal interface IEntityEvents
     {
-        void OnPreSaving(IdentifiableEntity entity, ref bool graphModified);
-        void OnSaving(IdentifiableEntity entity);
-        void OnSaved(IdentifiableEntity entity, SavedEventArgs args);
+        void OnPreSaving(Entity entity, ref bool graphModified);
+        void OnSaving(Entity entity);
+        void OnSaved(Entity entity, SavedEventArgs args);
 
-        void OnRetrieved(IdentifiableEntity entity);
+        void OnRetrieved(Entity entity);
 
         void OnPreUnsafeUpdate(IUpdateable update);
         LambdaExpression OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
+        void OnPreBulkInsert();
 
         ICacheController CacheController { get; }
     }

@@ -24,7 +24,7 @@
                 <h4>
                     <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString()) </span>
                     @{
-                        var ident = Model.UntypedValue as IdentifiableEntity;
+                        var ident = Model.UntypedValue as Entity;
 
                         if (ident != null && !ident.IsNew && Navigator.IsNavigable(ident, null))
                         {

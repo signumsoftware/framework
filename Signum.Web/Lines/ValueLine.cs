@@ -9,7 +9,7 @@ using Signum.Utilities;
 
 namespace Signum.Web
 {
-    public class ValueLine : BaseLine
+    public class ValueLine : LineBase
     {
         public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 
@@ -32,7 +32,12 @@ namespace Signum.Web
 
         public List<SelectListItem> CreateComboItems()
         {
-            return CreateComboItems(EnumExtensions.UntypedGetValues(Type.UnNullify()),
+            var uType = Type.UnNullify();
+
+            if (uType == typeof(bool))
+                uType = typeof(BooleanEnum);
+
+            return CreateComboItems(EnumExtensions.UntypedGetValues(uType),
                 addNull: UntypedValue == null ||
                 Type.IsNullable() && (PropertyRoute == null || !Validator.TryGetPropertyValidator(PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any()));
         }
@@ -56,7 +61,7 @@ namespace Signum.Web
         public bool InlineCheckbox { get; set; }
     }
 
-    public class HiddenLine : BaseLine
+    public class HiddenLine : LineBase
     {
         public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 

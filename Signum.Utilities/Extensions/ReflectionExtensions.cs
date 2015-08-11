@@ -57,16 +57,6 @@ namespace Signum.Utilities
             return mi.IsDefined(typeof(T), true);
         }
 
-        public static T SingleAttribute<T>(this ICustomAttributeProvider mi) where T : Attribute
-        {
-            return mi.GetCustomAttributes(typeof(T), false).Cast<T>().SingleOrDefaultEx();
-        }
-
-        public static T SingleAttributeInherit<T>(this ICustomAttributeProvider mi) where T : Attribute
-        {
-            return mi.GetCustomAttributes(typeof(T), true).Cast<T>().SingleOrDefaultEx();
-        }
-
         public static bool IsInstantiationOf(this Type type, Type genericTypeDefinition)
         {
             if (!genericTypeDefinition.IsGenericTypeDefinition)

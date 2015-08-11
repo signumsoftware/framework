@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,15 +58,17 @@ namespace Signum.Entities.DynamicQuery
         {
             var cleanType = PropertyInfo.PropertyType.CleanType();
 
-            if (!typeof(IIdentifiable).IsAssignableFrom(cleanType))
+            if (!typeof(IEntity).IsAssignableFrom(cleanType))
                 return null;
 
             var fi = Reflector.TryFindFieldInfo(Parent.Type, PropertyInfo);
             if (fi != null)
-                return Implementations.FromAttributes(cleanType, fi.GetCustomAttributes(true).Cast<Attribute>().ToArray(), null);
+                return Implementations.FromAttributes(cleanType, null, 
+                    fi.GetCustomAttribute<ImplementedByAttribute>(), 
+                    fi.GetCustomAttribute<ImplementedByAllAttribute>());
 
             if (cleanType.IsAbstract)
-                throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(PropertyInfo.PropertyName()));
+                throw new InvalidOperationException("Impossible to determine implementations for {0}".FormatWith(PropertyInfo.PropertyName()));
 
             return Implementations.By(cleanType);
         }
@@ -75,7 +77,7 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                FormatAttribute format = PropertyInfo.SingleAttribute<FormatAttribute>();
+                FormatAttribute format = PropertyInfo.GetCustomAttribute<FormatAttribute>();
                 if (format != null)
                     return format.Format;
 
@@ -85,7 +87,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Unit
         {
-            get { return PropertyInfo.SingleAttribute<UnitAttribute>().Try(u => u.UnitName); }
+            get { return PropertyInfo.GetCustomAttribute<UnitAttribute>().Try(u => u.UnitName); }
         }
 
         public override string IsAllowed()

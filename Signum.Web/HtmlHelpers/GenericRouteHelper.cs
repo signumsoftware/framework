@@ -188,12 +188,12 @@ namespace Signum.Web
     {
         public bool CanConvert(object obj)
         {
-            return obj is Lite<IIdentifiable>;
+            return obj is Lite<IEntity>;
         }
 
         public object Convert(object obj, Type parameterType)
         {
-            Lite<IIdentifiable> lite = (Lite<IIdentifiable>)obj;
+            Lite<IEntity> lite = (Lite<IEntity>)obj;
             if (Lite.Extract(parameterType) == lite.EntityType)
                 return lite.Id;
             else
