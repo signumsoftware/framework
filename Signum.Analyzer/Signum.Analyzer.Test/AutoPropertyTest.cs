@@ -23,7 +23,7 @@ namespace Signum.Analyzer.Test
 
         //Diagnostic and CodeFix both triggered and checked for
         [TestMethod]
-        public void TestMethod2()
+        public void AutoPropTest1()
         {
             var test = @"
 using System;
@@ -79,7 +79,7 @@ namespace ConsoleApplication1
 
 
         [TestMethod]
-        public void TestMethod3()
+        public void AutoPropTest2()
         {
             var test = @"
 using System;

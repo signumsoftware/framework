@@ -32,6 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ExpressionFieldAnalyzer.cs" />
     <Compile Include="AutoPropertyCodeFixProvider.cs" />
     <Compile Include="AutoPropertyAnalyzer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

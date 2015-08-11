@@ -49,7 +49,8 @@ namespace TestHelper
         /// <param name="expected">DiagnosticResults that should appear after the analyzer is run on the sources</param>
         protected void VerifyDiagnostic(string[] sources, params DiagnosticResult[] expected)
         {
-            var diagnostics = GetSortedDiagnosticsFromDocuments(GetDocuments(sources));
+            var documents = GetDocuments(sources);
+            var diagnostics = GetSortedDiagnosticsFromDocuments(documents);
             VerifyDiagnosticResults(diagnostics, expected);
         }
 
@@ -101,7 +102,7 @@ namespace TestHelper
                 if (actual.GetMessage() != expected.Message)
                 {
                     Assert.IsTrue(false,
-                        string.Format("Expected diagnostic message to be \"{0}\" was \"{1}\"\r\n\r\nDiagnostic:\r\n    {2}\r\n",
+                        string.Format("Expected diagnostic message to be \r\n\"{0}\"\r\nbut was \r\n\"{1}\"\r\n\r\nDiagnostic:\r\n    {2}\r\n",
                             expected.Message, actual.GetMessage(), FormatDiagnostics(analyzer, actual)));
                 }
             }
