@@ -95,6 +95,7 @@ public class ComputerEntity : Entity
     }
 
     static Expression<Func<ComputerEntity, string>> ToStringExpression = e => e.SerialNumber;
+    [ExpressionField]
     public override string ToString()
     {
         return ToStringExpression.Evaluate(this);

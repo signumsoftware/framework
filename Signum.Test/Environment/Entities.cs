@@ -9,6 +9,7 @@ using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
 using Signum.Engine;
 using Signum.Engine.Maps;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test.Environment
 {
@@ -75,9 +76,10 @@ namespace Signum.Test.Environment
         public Status? Status { get; set; }
 
         static Expression<Func<ArtistEntity, bool>> IsMaleExpression = a => a.Sex == Sex.Male;
+        [ExpressionField]
         public bool IsMale
         {
-            get { return Sex == Sex.Male; }
+            get { return IsMaleExpression.Evaluate(this); }
         }
 
         [ImplementedByAll]
@@ -85,6 +87,7 @@ namespace Signum.Test.Environment
 
         static Expression<Func<ArtistEntity, IEnumerable<Lite<Entity>>>> FriendsCovariantExpression =
             a => a.Friends;
+        [ExpressionField]
         public IEnumerable<Lite<Entity>> FriendsCovariant()
         {
             return FriendsCovariantExpression.Evaluate(this);
@@ -95,6 +98,7 @@ namespace Signum.Test.Environment
 
         static Expression<Func<ArtistEntity, string>> FullNameExpression =
              a => a.Name + (a.Dead ? " Dead" : "") + (a.IsMale ? " Male" : " Female");
+        [ExpressionField]
         public string FullName
         {
             get { return FullNameExpression.Evaluate(this); }
@@ -102,12 +106,14 @@ namespace Signum.Test.Environment
 
         static Expression<Func<ArtistEntity, bool>> LonelyExpression =
             a => !a.Friends.Any();
+        [ExpressionField]
         public bool Lonely()
         {
             return LonelyExpression.Evaluate(this);
         }
 
         static Expression<Func<ArtistEntity, string>> ToStringExpression = a => a.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -152,6 +158,7 @@ namespace Signum.Test.Environment
 
         static Expression<Func<BandEntity, string>> FullNameExpression =
             b => b.Name + " (" + b.Members.Count + " members)";
+        [ExpressionField]
         public string FullName
         {
             get { return FullNameExpression.Evaluate(this); }
@@ -159,12 +166,14 @@ namespace Signum.Test.Environment
 
         static Expression<Func<BandEntity, bool>> LonelyExpression =
             b => !b.Members.Any();
+        [ExpressionField]
         public bool Lonely()
         {
             return LonelyExpression.Evaluate(this);
         }
 
         static Expression<Func<BandEntity, string>> ToStringExpression = a => a.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -232,6 +241,7 @@ namespace Signum.Test.Environment
         public SqlHierarchyId Node { get; set; }
 
         static Expression<Func<LabelEntity, string>> ToStringExpression = a => a.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -283,6 +293,7 @@ namespace Signum.Test.Environment
         string ISecretContainer.Secret { get; set; }
 
         static Expression<Func<AlbumEntity, string>> ToStringExpression = a => a.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -336,6 +347,7 @@ namespace Signum.Test.Environment
         public int Index { get; set; }
 
         static Expression<Func<SongEntity, string>> ToStringExpression = a => a.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
@@ -91,6 +92,7 @@ namespace Signum.Entities.Basics
         public string Name { get; set; }
 
         static Expression<Func<SemiSymbol, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

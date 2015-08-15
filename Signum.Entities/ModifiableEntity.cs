@@ -145,7 +145,7 @@ namespace Signum.Entities
                  key.Type.GetInterfaces().Select(i => i.GetProperty(key.PropertyName, flags)).NotNull().FirstOrDefault());
         }
 
-        static readonly Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
+        static Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
         [HiddenProperty]
         public string ToStringProperty
         {

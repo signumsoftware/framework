@@ -330,22 +330,23 @@ namespace Signum.Engine.CodeGeneration
 
             string str =  info.IsUnique?
 @"static Expression<Func<{from}, {to}>> {MethodExpression} = 
-    {f} => Database.Query<{to}>().SingleOrDefaultEx({filter}); 
-{attr}public static {to} {Method}(this {from} e)
+    {f} => Database.Query<{to}>().SingleOrDefaultEx({filter});
+[ExpressionField]
+public static {to} {Method}(this {from} e)
 {
     return {MethodExpression}.Evaluate(e);
 }
 " :
 @"static Expression<Func<{from}, IQueryable<{to}>>> {MethodExpression} = 
     {f} => Database.Query<{to}>().Where({filter});
-{attr}public static IQueryable<{to}> {Method}(this {from} e)
+[ExpressionField]
+public static IQueryable<{to}> {Method}(this {from} e)
 {
     return {MethodExpression}.Evaluate(e);
 }
 ";
 
             return str.Replace("{filter}", filter)
-                .Replace("{attr}", info.ExpressionName == info.Name + "Expression" ? null : "[ExpressionField(\"{MethodExpression}\")]\r\n")
                 .Replace("{from}", from.Name)
                 .Replace("{to}", info.ToType.Name)
                 .Replace("{t}", varTo)

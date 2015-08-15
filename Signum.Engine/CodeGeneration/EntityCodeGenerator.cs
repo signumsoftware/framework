@@ -886,6 +886,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("static Expression<Func<{0}, string>> ToStringExpression = e => e.{1}{2};".FormatWith(GetEntityName(table.Name),
                 toStringColumn.PrimaryKey ? "Id" : GetFieldName(table, toStringColumn).FirstUpper(),
                 toStringColumn.PrimaryKey || GetFieldType(table, toStringColumn, GetRelatedEntity(table, toStringColumn)) != "string" ? "?.ToString()" : ""));
+            sb.AppendLine("[ExpressionField]");
             sb.AppendLine("public override string ToString()");
             sb.AppendLine("{");
             sb.AppendLine("    return ToStringExpression.Evaluate(this);");

@@ -110,6 +110,7 @@ Imagine we have an inverted relationship between `BodyEntity` and `HeadEntity`. 
 ```C#
 static Expression<Func<BodyEntity, HeadEntity>> HeadExpression = 
     p => Database.Query<HeadEntity>().Single(h=>h.Body == b); 
+[ExpressionField] 
 public static HeadEntity Head(this BodyEntity b)
 {
     return HeadExpression.Evaluate(b);

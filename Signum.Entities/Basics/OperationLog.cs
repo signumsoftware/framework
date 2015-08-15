@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
@@ -28,6 +29,7 @@ namespace Signum.Entities.Basics
 
         static Expression<Func<OperationLogEntity, double?>> DurationExpression =
             log => (double?)(log.End - log.Start).Value.TotalMilliseconds;
+        [ExpressionField("DurationExpression")]
         public double? Duration
         {
             get { return End == null ? null : DurationExpression.Evaluate(this); }

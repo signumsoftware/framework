@@ -24,7 +24,7 @@ namespace Signum.Engine.Operations
     {
         static Expression<Func<Entity, IQueryable<OperationLogEntity>>> OperationLogsEntityExpression =
             e => Database.Query<OperationLogEntity>().Where(a => a.Target.RefersTo(e));
-        [ExpressionField("OperationLogsEntityExpression")]
+        [ExpressionField]
         public static IQueryable<OperationLogEntity> OperationLogs(this Entity e)
         {
             return OperationLogsEntityExpression.Evaluate(e);
@@ -32,6 +32,7 @@ namespace Signum.Engine.Operations
 
         static Expression<Func<OperationSymbol, IQueryable<OperationLogEntity>>> LogsExpression =
             o => Database.Query<OperationLogEntity>().Where(a => a.Operation == o);
+        [ExpressionField]
         public static IQueryable<OperationLogEntity> Logs(this OperationSymbol o)
         {
             return LogsExpression.Evaluate(o);
