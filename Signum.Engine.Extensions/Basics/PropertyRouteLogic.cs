@@ -10,6 +10,7 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Basics
 {
@@ -17,6 +18,7 @@ namespace Signum.Engine.Basics
     {
         static Expression<Func<PropertyRouteEntity, PropertyRoute, bool>> IsPropertyRouteExpression = 
             (prdn, pr) => prdn.RootType == pr.RootType.ToTypeEntity() && prdn.Path == pr.PropertyString() ;
+        [ExpressionField]
         public static bool IsPropertyRoute(this PropertyRouteEntity prdn, PropertyRoute pr)
         {
             return IsPropertyRouteExpression.Evaluate(prdn, pr);

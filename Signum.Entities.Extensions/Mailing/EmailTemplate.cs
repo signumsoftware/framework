@@ -14,6 +14,7 @@ using System.ComponentModel;
 using Signum.Entities.Translation;
 using System.Reflection;
 using Signum.Entities.UserAssets;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {
@@ -70,6 +71,7 @@ namespace Signum.Entities.Mailing
 
         static Expression<Func<EmailTemplateEntity, bool>> IsActiveNowExpression =
             (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
+        [ExpressionField]
         public bool IsActiveNow()
         {
             return IsActiveNowExpression.Evaluate(this);
@@ -117,6 +119,7 @@ namespace Signum.Entities.Mailing
         }
 
         static readonly Expression<Func<EmailTemplateEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

@@ -10,6 +10,7 @@ using Signum.Utilities;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
 using System.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Chart
 {
@@ -102,7 +103,8 @@ namespace Signum.Entities.Chart
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
-        static readonly Expression<Func<UserChartEntity, string>> ToStringExpression = e => e.DisplayName;
+        static Expression<Func<UserChartEntity, string>> ToStringExpression = e => e.DisplayName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

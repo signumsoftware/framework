@@ -8,6 +8,7 @@ using Signum.Utilities;
 using Signum.Entities.Files;
 using System.Linq.Expressions;
 using System.ComponentModel;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Excel
 {
@@ -26,6 +27,7 @@ namespace Signum.Entities.Excel
         public EmbeddedFileEntity File { get; set; }
 
         static readonly Expression<Func<ExcelReportEntity, string>> ToStringExpression = e => e.DisplayName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

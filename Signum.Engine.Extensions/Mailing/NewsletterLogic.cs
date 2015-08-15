@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Net.Mail;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Templating;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Mailing
 {
@@ -25,6 +26,7 @@ namespace Signum.Engine.Mailing
     {
         static Expression<Func<IEmailOwnerEntity, IQueryable<NewsletterDeliveryEntity>>> NewsletterDeliveriesExpression =
             eo => Database.Query<NewsletterDeliveryEntity>().Where(d => d.Recipient.RefersTo(eo));
+        [ExpressionField]
         public static IQueryable<NewsletterDeliveryEntity> NewsletterDeliveries(this IEmailOwnerEntity eo)
         {
             return NewsletterDeliveriesExpression.Evaluate(eo);
@@ -32,6 +34,7 @@ namespace Signum.Engine.Mailing
 
         static Expression<Func<NewsletterEntity, IQueryable<NewsletterDeliveryEntity>>> DeliveriesExpression =
             n => Database.Query<NewsletterDeliveryEntity>().Where(nd => nd.Newsletter.RefersTo(n));
+        [ExpressionField]
         public static IQueryable<NewsletterDeliveryEntity> Deliveries(this NewsletterEntity n)
         {
             return DeliveriesExpression.Evaluate(n);

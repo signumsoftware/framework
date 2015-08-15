@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Isolation
 {
@@ -16,6 +17,7 @@ namespace Signum.Entities.Isolation
         public string Name { get; set; }
 
         static Expression<Func<IsolationEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -111,6 +113,7 @@ namespace Signum.Entities.Isolation
     {
         static Expression<Func<IEntity, Lite<IsolationEntity>>> IsolationExpression =
              entity => ((Entity)entity).Mixin<IsolationMixin>().Isolation;
+        [ExpressionField]
         public static Lite<IsolationEntity> Isolation(this IEntity entity)
         {
             return IsolationExpression.Evaluate(entity);

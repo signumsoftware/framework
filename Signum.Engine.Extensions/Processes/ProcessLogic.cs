@@ -36,7 +36,7 @@ namespace Signum.Engine.Processes
 
         static Expression<Func<ProcessAlgorithmSymbol, IQueryable<ProcessEntity>>> ProcessesFromAlgorithmExpression =
             p => Database.Query<ProcessEntity>().Where(a => a.Algorithm == p);
-        [ExpressionField("ProcessesFromAlgorithmExpression")]
+        [ExpressionField]
         public static IQueryable<ProcessEntity> Processes(this ProcessAlgorithmSymbol p)
         {
             return ProcessesFromAlgorithmExpression.Evaluate(p);
@@ -44,7 +44,7 @@ namespace Signum.Engine.Processes
 
         static Expression<Func<ProcessAlgorithmSymbol, ProcessEntity>> LastProcessFromAlgorithmExpression =
             p => p.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault();
-          [ExpressionField("LastProcessFromAlgorithmExpression")]
+        [ExpressionField]
         public static ProcessEntity LastProcess(this ProcessAlgorithmSymbol p)
         {
             return LastProcessFromAlgorithmExpression.Evaluate(p);
@@ -52,7 +52,7 @@ namespace Signum.Engine.Processes
 
         static Expression<Func<ProcessEntity, IQueryable<ProcessExceptionLineEntity>>> ExceptionLinesProcessExpression =
             p => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Process.RefersTo(p));
-        [ExpressionField("ExceptionLinesProcessExpression")]
+        [ExpressionField]
         public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this ProcessEntity p)
         {
             return ExceptionLinesProcessExpression.Evaluate(p);
@@ -61,7 +61,7 @@ namespace Signum.Engine.Processes
 
         static Expression<Func<IProcessLineDataEntity, IQueryable<ProcessExceptionLineEntity>>> ExceptionLinesLineExpression =
             p => Database.Query<ProcessExceptionLineEntity>().Where(a => a.Line.RefersTo(p));
-        [ExpressionField("ExceptionLinesLineExpression")]
+        [ExpressionField]
         public static IQueryable<ProcessExceptionLineEntity> ExceptionLines(this IProcessLineDataEntity pl)
         {
             return ExceptionLinesLineExpression.Evaluate(pl);
@@ -69,6 +69,7 @@ namespace Signum.Engine.Processes
 
         static Expression<Func<IProcessLineDataEntity, ProcessEntity, ExceptionEntity>> ExceptionExpression =
             (pl, p) => p.ExceptionLines().SingleOrDefault(el => el.Line.RefersTo(pl)).Exception.Entity;
+        [ExpressionField]
         public static ExceptionEntity Exception(this IProcessLineDataEntity pl, ProcessEntity p)
         {
             return ExceptionExpression.Evaluate(pl, p);
@@ -77,7 +78,7 @@ namespace Signum.Engine.Processes
 
         static Expression<Func<IProcessDataEntity, IQueryable<ProcessEntity>>> ProcessesFromDataExpression =
             e => Database.Query<ProcessEntity>().Where(a => a.Data == e);
-        [ExpressionField("ProcessesFromDataExpression")]
+        [ExpressionField]
         public static IQueryable<ProcessEntity> Processes(this IProcessDataEntity e)
         {
             return ProcessesFromDataExpression.Evaluate(e);
@@ -85,7 +86,7 @@ namespace Signum.Engine.Processes
 
         static Expression<Func<IProcessDataEntity, ProcessEntity>> LastProcessFromDataExpression =
           e => e.Processes().OrderByDescending(a => a.ExecutionStart).FirstOrDefault();
-        [ExpressionField("LastProcessFromDataExpression")]
+        [ExpressionField]
         public static ProcessEntity LastProcess(this IProcessDataEntity e)
         {
             return LastProcessFromDataExpression.Evaluate(e);

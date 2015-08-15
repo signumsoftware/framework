@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Help
 {
@@ -29,6 +30,7 @@ namespace Signum.Entities.Help
         public string Description { get; set; }
 
         static Expression<Func<NamespaceHelpEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

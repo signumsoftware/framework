@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.SMS
 {
@@ -34,6 +35,7 @@ namespace Signum.Entities.SMS
         public string Name { get; set; }
 
         static Expression<Func<SMSPackageEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

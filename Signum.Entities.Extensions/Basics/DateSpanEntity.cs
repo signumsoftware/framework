@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
@@ -23,6 +24,7 @@ namespace Signum.Entities.Basics
 
         static Expression<Func<DateSpanEntity, DateTime, DateTime>> AddExpression =
              (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
+        [ExpressionField]
         public DateTime Add(DateTime date)
         {
             return AddExpression.Evaluate(this, date);
@@ -30,6 +32,7 @@ namespace Signum.Entities.Basics
 
         static Expression<Func<DateSpanEntity, DateTime, DateTime>> SubtractExpression =
            (ds, dt) => dt.AddYears(-ds.Years).AddMonths(-ds.Months).AddDays(-ds.Days);
+        [ExpressionField]
         public DateTime Subtract(DateTime date)
         {
             return SubtractExpression.Evaluate(this, date);

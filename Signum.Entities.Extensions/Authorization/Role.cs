@@ -6,6 +6,7 @@ using Signum.Utilities;
 using System.Security.Authentication;
 using System.Linq.Expressions;
 using System.Collections.Specialized;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Authorization
 {
@@ -47,7 +48,8 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        static readonly Expression<Func<RoleEntity, string>> ToStringExpression = e => e.Name;
+        static Expression<Func<RoleEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -93,6 +95,7 @@ namespace Signum.Entities.Authorization
         public DateTime Date { get; set; }
 
         static Expression<Func<LastAuthRulesImportEntity, string>> ToStringExpression = e => e.uniqueKey;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

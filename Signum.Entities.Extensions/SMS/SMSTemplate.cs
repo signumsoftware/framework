@@ -11,6 +11,7 @@ using System.Reflection;
 using System.ComponentModel;
 using System.Collections.Specialized;
 using System.Globalization;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.SMS
 {
@@ -47,6 +48,7 @@ namespace Signum.Entities.SMS
 
         static Expression<Func<SMSTemplateEntity, bool>> IsActiveNowExpression =
             (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
+        [ExpressionField]
         public bool IsActiveNow()
         {
             return IsActiveNowExpression.Evaluate(this);
@@ -73,6 +75,7 @@ namespace Signum.Entities.SMS
         }
 
         static readonly Expression<Func<SMSTemplateEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

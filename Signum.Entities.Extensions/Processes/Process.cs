@@ -137,6 +137,7 @@ namespace Signum.Entities.Processes
 
         static Expression<Func<ProcessEntity, double?>> DurationExpression =
          log => (double?)(log.ExecutionEnd - log.ExecutionStart).Value.TotalMilliseconds;
+        [ExpressionField("DurationExpression")]
         public double? Duration
         {
             get { return ExecutionEnd == null ? null : DurationExpression.Evaluate(this); }

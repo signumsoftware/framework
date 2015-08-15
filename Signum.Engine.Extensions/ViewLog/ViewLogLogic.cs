@@ -13,6 +13,7 @@ using Signum.Engine.Basics;
 using Signum.Entities.ViewLog;
 using Signum.Entities.DynamicQuery;
 using System.IO;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.ViewLog
 {
@@ -22,6 +23,7 @@ namespace Signum.Engine.ViewLog
 
         static Expression<Func<Entity, IQueryable<ViewLogEntity>>> ViewLogsExpression =
             a => Database.Query<ViewLogEntity>().Where(log => log.Target.RefersTo(a));
+        [ExpressionField]
         public static IQueryable<ViewLogEntity> ViewLogs(this Entity a)
         {
             return ViewLogsExpression.Evaluate(a);

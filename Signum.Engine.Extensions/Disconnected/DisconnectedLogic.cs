@@ -18,6 +18,7 @@ using System.IO.Compression;
 using System.Data.SqlClient;
 using Signum.Engine.Operations;
 using Signum.Entities.Basics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Disconnected
 {
@@ -37,6 +38,7 @@ namespace Signum.Engine.Disconnected
 
         static Expression<Func<DisconnectedMachineEntity, IQueryable<DisconnectedImportEntity>>> ImportsExpression =
                 m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.RefersTo(m));
+        [ExpressionField]
         public static IQueryable<DisconnectedImportEntity> Imports(this DisconnectedMachineEntity m)
         {
             return ImportsExpression.Evaluate(m);
@@ -44,6 +46,7 @@ namespace Signum.Engine.Disconnected
 
         static Expression<Func<DisconnectedMachineEntity, IQueryable<DisconnectedImportEntity>>> ExportsExpression =
                m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.RefersTo(m));
+        [ExpressionField]
         public static IQueryable<DisconnectedImportEntity> Exports(this DisconnectedMachineEntity m)
         {
             return ExportsExpression.Evaluate(m);
@@ -261,7 +264,6 @@ namespace Signum.Engine.Disconnected
 
         static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((DisconnectedCreatedMixin m) => m.DisconnectedCreated, true)).GetGenericMethodDefinition();
         static Expression<Func<DisconnectedCreatedMixin, bool>> disconnectedCreated = (DisconnectedCreatedMixin m) => m.DisconnectedCreated;
-
 
         public static DisconnectedStrategy<T> Register<T>(Download download, Upload upload) where T : Entity
         {

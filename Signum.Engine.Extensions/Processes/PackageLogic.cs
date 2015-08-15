@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Engine.Operations;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Processes
 {
@@ -23,6 +24,7 @@ namespace Signum.Engine.Processes
     {
         static Expression<Func<PackageEntity, IQueryable<PackageLineEntity>>> LinesExpression =
             p => Database.Query<PackageLineEntity>().Where(pl => pl.Package.RefersTo(p));
+        [ExpressionField]
         public static IQueryable<PackageLineEntity> Lines(this PackageEntity p)
         {
             return LinesExpression.Evaluate(p);

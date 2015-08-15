@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Scheduler
 {
@@ -29,6 +30,7 @@ namespace Signum.Entities.Scheduler
 
         static Expression<Func<ScheduledTaskLogEntity, double?>> DurationExpression =
             log => (double?)(log.EndTime - log.StartTime).Value.TotalMilliseconds;
+        [ExpressionField("DurationExpression")]
         public double? Duration
         {
             get { return EndTime == null ? null : DurationExpression.Evaluate(this); }

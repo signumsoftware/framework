@@ -6,6 +6,7 @@ using Signum.Utilities;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Entities.Basics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Disconnected
 {
@@ -111,6 +112,7 @@ namespace Signum.Entities.Disconnected
                 stat.ReseedIds.Value +
                 stat.BackupDatabase.Value +
                 stat.DropDatabase.Value;
+        [ExpressionField]
         public int CalculateTotal()
         {
             return CalculateTotalExpression.Evaluate(this);

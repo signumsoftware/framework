@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Help
 {
@@ -36,6 +37,7 @@ namespace Signum.Entities.Help
         public MList<QueryHelpEntity> Queries { get; set; } = new MList<QueryHelpEntity>();
 
         static Expression<Func<EntityHelpEntity, string>> ToStringExpression = e => e.Type.ToString();
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

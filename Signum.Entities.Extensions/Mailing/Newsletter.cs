@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {
@@ -59,6 +60,7 @@ namespace Signum.Entities.Mailing
         }
 
         static readonly Expression<Func<NewsletterEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

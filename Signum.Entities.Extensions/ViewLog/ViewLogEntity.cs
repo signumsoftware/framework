@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.ViewLog
 {
@@ -33,7 +34,7 @@ namespace Signum.Entities.ViewLog
 
         static Expression<Func<ViewLogEntity, double>> DurationExpression =
            sl => (sl.EndDate - sl.StartDate).TotalMilliseconds;
-        [Unit("ms")]
+        [ExpressionField, Unit("ms")]
         public double Duration
         {
             get { return DurationExpression.Evaluate(this); }

@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Word
 {
@@ -44,6 +45,7 @@ namespace Signum.Entities.Word
 
         static Expression<Func<WordTemplateEntity, bool>> IsActiveNowExpression =
             (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
+        [ExpressionField]
         public bool IsActiveNow()
         {
             return IsActiveNowExpression.Evaluate(this);
@@ -60,6 +62,7 @@ namespace Signum.Entities.Word
         public WordConverterSymbol WordConverter { get; set; }
 
         static Expression<Func<WordTemplateEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

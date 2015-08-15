@@ -13,6 +13,7 @@ using System.ServiceModel;
 using Signum.Services;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Alerts
 {
@@ -55,6 +56,7 @@ namespace Signum.Entities.Alerts
 
         static Expression<Func<AlertEntity, bool>> AttendedExpression =
            a => a.AttendedDate.HasValue;
+        [ExpressionField]
         public bool Attended
         {
             get { return AttendedExpression.Evaluate(this); }
@@ -62,6 +64,7 @@ namespace Signum.Entities.Alerts
 
         static Expression<Func<AlertEntity, bool>> NotAttendedExpression =
            a => a.AttendedDate == null;
+        [ExpressionField]
         public bool NotAttended
         {
             get { return NotAttendedExpression.Evaluate(this); }
@@ -69,6 +72,7 @@ namespace Signum.Entities.Alerts
 
         static Expression<Func<AlertEntity, bool>> AlertedExpression =
             a => !a.AttendedDate.HasValue && a.AlertDate <= TimeZoneManager.Now;
+        [ExpressionField]
         public bool Alerted
         {
             get { return AlertedExpression.Evaluate(this); }
@@ -76,6 +80,7 @@ namespace Signum.Entities.Alerts
 
         static Expression<Func<AlertEntity, bool>> FutureExpression =
             a => !a.AttendedDate.HasValue && a.AlertDate > TimeZoneManager.Now;
+        [ExpressionField]
         public bool Future
         {
             get { return FutureExpression.Evaluate(this); }
@@ -84,6 +89,7 @@ namespace Signum.Entities.Alerts
         static Expression<Func<AlertEntity, AlertCurrentState>> CurrentStateExpression =
             a => a.AttendedDate.HasValue ? AlertCurrentState.Attended :
                 a.AlertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted : AlertCurrentState.Future;
+        [ExpressionField]
         public AlertCurrentState CurrentState
         {
             get { return CurrentStateExpression.Evaluate(this); }

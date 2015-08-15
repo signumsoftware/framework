@@ -183,7 +183,6 @@ namespace Signum.Engine.Isolation
         static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((IsolationMixin m) => m.Isolation, null)).GetGenericMethodDefinition();
         static Expression<Func<IsolationMixin, Lite<IsolationEntity>>> isolationProperty = (IsolationMixin m) => m.Isolation;
 
-
         public static void Register<T>(IsolationStrategy strategy) where T : Entity
         {
             strategies.Add(typeof(T), strategy);

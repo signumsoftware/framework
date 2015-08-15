@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using Signum.Utilities;
 using System.ComponentModel;
 using Signum.Utilities.DataStructures;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Disconnected
 {
@@ -36,6 +37,7 @@ namespace Signum.Entities.Disconnected
         }
 
         static Expression<Func<DisconnectedMachineEntity, string>> ToStringExpression = e => e.MachineName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

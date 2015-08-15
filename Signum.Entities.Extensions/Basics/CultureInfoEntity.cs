@@ -7,6 +7,7 @@ using System.Globalization;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Authorization;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
@@ -63,6 +64,7 @@ namespace Signum.Entities.Basics
         }
 
         static Expression<Func<CultureInfoEntity, string>> ToStringExpression = e => e.EnglishName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

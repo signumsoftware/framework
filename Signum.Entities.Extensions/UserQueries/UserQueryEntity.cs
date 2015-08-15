@@ -13,6 +13,7 @@ using System.ComponentModel;
 using Signum.Entities.Authorization;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.UserQueries
 {
@@ -75,6 +76,7 @@ namespace Signum.Entities.UserQueries
         public Guid Guid { get; set; } = Guid.NewGuid();
 
         static readonly Expression<Func<UserQueryEntity, string>> ToStringExpression = e => e.DisplayName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

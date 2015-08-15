@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Help
 {
@@ -25,6 +26,7 @@ namespace Signum.Entities.Help
         public string Description { get; set; }
 
         static Expression<Func<OperationHelpEntity, string>> ToStringExpression = e => e.Operation.ToString();
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

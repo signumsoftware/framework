@@ -14,6 +14,7 @@ using Signum.Utilities.Reflection;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 using Signum.Entities.Authorization;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Dashboard
 {
@@ -57,6 +58,7 @@ namespace Signum.Entities.Dashboard
 
         static Expression<Func<DashboardEntity, IPartEntity, bool>> ContainsContentExpression =
             (cp, content) => cp.Parts.Any(p => p.Content.Is(content));
+        [ExpressionField]
         public bool ContainsContent(IPartEntity content)
         {
             return ContainsContentExpression.Evaluate(this, content);
@@ -122,6 +124,7 @@ namespace Signum.Entities.Dashboard
         }
 
         static readonly Expression<Func<DashboardEntity, string>> ToStringExpression = e => e.DisplayName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

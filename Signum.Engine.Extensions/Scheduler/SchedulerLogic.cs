@@ -30,6 +30,7 @@ namespace Signum.Engine.Scheduler
        
         static Expression<Func<ITaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsExpression =
          ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == ct);
+        [ExpressionField]
         public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity e)
         {
             return ExecutionsExpression.Evaluate(e);
@@ -37,6 +38,7 @@ namespace Signum.Engine.Scheduler
 
         static Expression<Func<ITaskEntity, ScheduledTaskLogEntity>> LastExecutionExpression =
             e => e.Executions().OrderByDescending(a => a.StartTime).FirstOrDefault();
+        [ExpressionField]
         public static ScheduledTaskLogEntity LastExecution(this ITaskEntity e)
         {
             return LastExecutionExpression.Evaluate(e);
@@ -44,7 +46,7 @@ namespace Signum.Engine.Scheduler
 
         static Expression<Func<ScheduledTaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsSTExpression =
             ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask == ct);
-        [ExpressionField("ExecutionsSTExpression")]
+        [ExpressionField]
         public static IQueryable<ScheduledTaskLogEntity> Executions(this ScheduledTaskEntity e)
         {
             return ExecutionsSTExpression.Evaluate(e);

@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using Signum.Entities.Files;
 using System.Security.Cryptography;
 using Signum.Entities.Scheduler;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {
@@ -108,6 +109,7 @@ namespace Signum.Entities.Mailing
             };
 
         static Expression<Func<EmailMessageEntity, string>> ToStringExpression = e => e.Subject;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

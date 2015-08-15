@@ -254,7 +254,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Analyzer Include="..\..\Framework\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -263,4 +265,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <UsingTask TaskName="SignumTask" AssemblyFile="..\..\Framework\Signum.MSBuildTask\Binaries\Signum.MSBuildTask.dll" />
+  <Target Name="AfterCompile" DependsOnTargets="CoreCompile">
+    <SignumTask Assembly="@(IntermediateAssembly)" References="@(ReferencePath)" KeyFile="$(KeyOriginatorFile)" />
+  </Target>
 </Project>

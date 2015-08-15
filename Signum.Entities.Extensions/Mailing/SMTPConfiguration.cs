@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Files;
 using System.Net.Mail;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {
@@ -46,7 +47,8 @@ namespace Signum.Entities.Mailing
                 {SmtpDeliveryMethod.PickupDirectoryFromIis,    null, null },
             };
 
-        static readonly Expression<Func<SmtpConfigurationEntity, string>> ToStringExpression = e => e.Name;
+        static Expression<Func<SmtpConfigurationEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -94,7 +96,8 @@ namespace Signum.Entities.Mailing
 
         public CertFileType CertFileType { get; set; }
 
-        static readonly Expression<Func<ClientCertificationFileEntity, string>> ToStringExpression = e => e.FullFilePath;
+        static Expression<Func<ClientCertificationFileEntity, string>> ToStringExpression = e => e.FullFilePath;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

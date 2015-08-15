@@ -109,6 +109,7 @@ namespace Signum.Engine.Processes
 
         static Expression<Func<ProcessEntity, bool>> IsMineExpression =
             p => p.MachineName == Environment.MachineName && p.ApplicationName == Schema.Current.ApplicationName; 
+        [ExpressionField] 
         public static bool IsMine(this ProcessEntity p)
         {
             return IsMineExpression.Evaluate(p);
@@ -116,6 +117,7 @@ namespace Signum.Engine.Processes
 
         static Expression<Func<ProcessEntity, bool>> IsSharedExpression =
             p => !ProcessLogic.JustMyProcesses && p.MachineName == ProcessEntity.None;
+        [ExpressionField]
         public static bool IsShared(this ProcessEntity p)
         {
             return IsSharedExpression.Evaluate(p);

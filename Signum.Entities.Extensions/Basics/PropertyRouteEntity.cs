@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using System.Reflection;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
@@ -29,6 +30,7 @@ namespace Signum.Entities.Basics
         public TypeEntity RootType { get; set; }
 
         static readonly Expression<Func<PropertyRouteEntity, string>> ToStringExpression = e => e.Path;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

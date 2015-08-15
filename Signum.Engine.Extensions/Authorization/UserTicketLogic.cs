@@ -12,6 +12,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using System.IO;
 using Signum.Engine.Operations;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Authorization
 {
@@ -57,6 +58,7 @@ namespace Signum.Engine.Authorization
 
         static Expression<Func<UserEntity, IQueryable<UserTicketEntity>>> UserTicketsExpression =
             u => Database.Query<UserTicketEntity>().Where(ut => ut.User == u.ToLite());
+        [ExpressionField]
         public static IQueryable<UserTicketEntity> UserTickets(this UserEntity u)
         {
             return UserTicketsExpression.Evaluate(u);

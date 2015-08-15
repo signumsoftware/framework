@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using Signum.Engine.Operations;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Isolation;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Files
 {
@@ -23,6 +24,7 @@ namespace Signum.Engine.Files
     {
         static Expression<Func<FilePathEntity, WebImage>> WebImageExpression =
             fp => new WebImage { FullWebPath = fp.FullWebPath };
+        [ExpressionField]
         public static WebImage WebImage(this FilePathEntity fp)
         {
             return WebImageExpression.Evaluate(fp);
@@ -30,6 +32,7 @@ namespace Signum.Engine.Files
 
         static Expression<Func<FilePathEntity, WebDownload>> WebDownloadExpression =
            fp => new WebDownload { FullWebPath = fp.FullWebPath };
+        [ExpressionField]
         public static WebDownload WebDownload(this FilePathEntity fp)
         {
             return WebDownloadExpression.Evaluate(fp);

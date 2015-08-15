@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Chart
 {
@@ -42,6 +43,7 @@ namespace Signum.Entities.Chart
         public string ColumnsStructure { get; set; }
 
         static Expression<Func<ChartScriptEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

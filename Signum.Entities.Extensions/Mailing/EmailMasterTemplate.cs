@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {
@@ -26,6 +27,7 @@ namespace Signum.Entities.Mailing
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
         static Expression<Func<EmailMasterTemplateEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

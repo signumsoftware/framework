@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
 using System.Globalization;
 using Signum.Entities.Translation;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Authorization
 {
@@ -79,7 +80,8 @@ namespace Signum.Entities.Authorization
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<UserEntity, string>> ToStringExpression = e => e.UserName;
+        static Expression<Func<UserEntity, string>> ToStringExpression = e => e.UserName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -98,6 +100,7 @@ namespace Signum.Entities.Authorization
             DisplayName = u.UserName,
             Email = u.Email,
         };
+        [ExpressionField]
         public EmailOwnerData EmailOwnerData
         {
             get { return EmailOwnerDataExpression.Evaluate(this); }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Authorization
 {
@@ -37,7 +38,7 @@ namespace Signum.Entities.Authorization
 
         static Expression<Func<SessionLogEntity, double?>> DurationExpression =
             sl => sl.SessionEnd != null ? (sl.SessionEnd.Value - sl.SessionStart).TotalSeconds : (double?)null;
-        [Unit("s")]
+        [ExpressionField, Unit("s")]
         public double? Duration
         {
             get { return DurationExpression.Evaluate(this); }

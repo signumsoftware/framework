@@ -14,6 +14,7 @@ using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Engine.Scheduler;
 using Signum.Engine.Authorization;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Mailing
 {
@@ -21,6 +22,7 @@ namespace Signum.Engine.Mailing
     {
         static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> MessagesExpression =
             p => Database.Query<EmailMessageEntity>().Where(a => a.Package.RefersTo(p));
+        [ExpressionField]
         public static IQueryable<EmailMessageEntity> Messages(this EmailPackageEntity p)
         {
             return MessagesExpression.Evaluate(p);
@@ -28,6 +30,7 @@ namespace Signum.Engine.Mailing
 
         static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> RemainingMessagesExpression =
             p => p.Messages().Where(a => a.State == EmailMessageState.RecruitedForSending);
+        [ExpressionField]
         public static IQueryable<EmailMessageEntity> RemainingMessages(this EmailPackageEntity p)
         {
             return RemainingMessagesExpression.Evaluate(p);
@@ -35,6 +38,7 @@ namespace Signum.Engine.Mailing
 
         static Expression<Func<EmailPackageEntity, IQueryable<EmailMessageEntity>>> ExceptionMessagesExpression =
             p => p.Messages().Where(a => a.State == EmailMessageState.SentException);
+        [ExpressionField]
         public static IQueryable<EmailMessageEntity> ExceptionMessages(this EmailPackageEntity p)
         {
             return ExceptionMessagesExpression.Evaluate(p);

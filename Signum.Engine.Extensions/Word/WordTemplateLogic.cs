@@ -24,6 +24,7 @@ using Signum.Utilities.DataStructures;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.Text.RegularExpressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Word
 {
@@ -40,6 +41,7 @@ namespace Signum.Engine.Word
 
         static Expression<Func<SystemWordTemplateEntity, IQueryable<WordTemplateEntity>>> WordTemplatesExpression =
             e => Database.Query<WordTemplateEntity>().Where(a => a.SystemWordTemplate == e);
+        [ExpressionField]
         public static IQueryable<WordTemplateEntity> WordTemplates(this SystemWordTemplateEntity e)
         {
             return WordTemplatesExpression.Evaluate(e);

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Word
 {
@@ -15,6 +16,7 @@ namespace Signum.Entities.Word
         public string FullClassName { get; set; }
 
         static readonly Expression<Func<SystemWordTemplateEntity, string>> ToStringExpression = e => e.FullClassName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

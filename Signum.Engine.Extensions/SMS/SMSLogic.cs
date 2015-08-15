@@ -34,6 +34,7 @@ namespace Signum.Engine.SMS
 
         public static Expression<Func<Entity, IQueryable<SMSMessageEntity>>> SMSMessagesExpression =
             e => Database.Query<SMSMessageEntity>().Where(m => m.Referred.RefersTo(e));
+        [ExpressionField]
         public static IQueryable<SMSMessageEntity> SMSMessages(this Entity e)
         {
             return SMSMessagesExpression.Evaluate(e);
@@ -41,7 +42,7 @@ namespace Signum.Engine.SMS
 
         static Expression<Func<SMSSendPackageEntity, IQueryable<SMSMessageEntity>>> SMSMessagesSendExpression =
             e => Database.Query<SMSMessageEntity>().Where(a => a.SendPackage.RefersTo(e));
-        [ExpressionField("SMSMessagesSendExpression")]
+        [ExpressionField]
         public static IQueryable<SMSMessageEntity> SMSMessages(this SMSSendPackageEntity e)
         {
             return SMSMessagesSendExpression.Evaluate(e);
@@ -49,7 +50,7 @@ namespace Signum.Engine.SMS
 
         static Expression<Func<SMSUpdatePackageEntity, IQueryable<SMSMessageEntity>>> SMSMessagesUpdateExpression =
           e => Database.Query<SMSMessageEntity>().Where(a => a.UpdatePackage.RefersTo(e));
-        [ExpressionField("SMSMessagesUpdateExpression")]
+        [ExpressionField]
         public static IQueryable<SMSMessageEntity> SMSMessages(this SMSUpdatePackageEntity e)
         {
             return SMSMessagesUpdateExpression.Evaluate(e);

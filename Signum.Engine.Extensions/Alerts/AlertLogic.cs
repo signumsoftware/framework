@@ -24,6 +24,7 @@ namespace Signum.Engine.Alerts
     {
         static Expression<Func<Entity, IQueryable<AlertEntity>>> AlertsExpression =
             e => Database.Query<AlertEntity>().Where(a => a.Target.RefersTo(e));
+        [ExpressionField]
         public static IQueryable<AlertEntity> Alerts(this Entity e)
         {
             return AlertsExpression.Evaluate(e);
