@@ -13,7 +13,7 @@ namespace Signum.Analyzer.Test
     {
         protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
-            return new AutoPropertyCodeFixProvider();
+            return new ExpressionFieldFixProvider();
         }
 
         protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
@@ -25,7 +25,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionFieldNoReturnType()
         {
-            Test("no return type", @"        
+            TestDiagnostic("no return type", @"        
         [ExpressionField]
         public static void OperationLogs(this Entity e)
         {
@@ -35,7 +35,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionComplexParameter()
         {
-            Test("complex paramerer 'e'", @"        
+            TestDiagnostic("complex paramerer 'e'", @"        
         [ExpressionField]
         public static int OperationLogs(ref Entity e)
         {
@@ -46,7 +46,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void Expression2Statements()
         {
-            Test("2 statements", @"        
+            TestDiagnostic("2 statements", @"        
         [ExpressionField]
         public static int OperationLogs(this Entity e)
         {
@@ -58,7 +58,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionNoReturn()
         {
-            Test("no return", @"        
+            TestDiagnostic("no return", @"        
         [ExpressionField]
         public static int OperationLogs(this Entity e)
         {
@@ -69,7 +69,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionNoReturnExpression()
         {
-            Test("no return expression", @"        
+            TestDiagnostic("no return expression", @"        
         [ExpressionField]
         public static int OperationLogs(this Entity e)
         {
@@ -80,7 +80,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionNoGetter()
         {
-            Test("no getter", @"        
+            TestDiagnostic("no getter", @"        
         [ExpressionField]
         public static int OperationLogs { set; }");
         }
@@ -88,7 +88,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionNoGetterBody()
         {
-            Test("no getter body", @"        
+            TestDiagnostic("no getter body", @"        
         [ExpressionField]
         public static int OperationLogs { get; }");
         }
@@ -96,7 +96,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionMethodExpressionBody()
         {
-            Test("no invocation", @"        
+            TestDiagnostic("no invocation", @"        
         [ExpressionField]
         public static int OperationLogs => 1");
         }
@@ -104,7 +104,7 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionGetterExpressionBody()
         {
-            Test("no invocation", @"        
+            TestDiagnostic("no invocation", @"        
         [ExpressionField]
         public static int OperationLogs(this Entity e) => 1");
         }
@@ -112,8 +112,8 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionNoEvaluate()
         {
-            Test("no Evaluate", @"
-        static Expression<Entity, int> MyExpression;         
+            TestDiagnostic("no Evaluate", @"
+        static Expression<Func<Entity, int>> MyExpression;         
         [ExpressionField]
         public static int OperationLogs(this Entity e) => MyExpression.Invoke(e)");
         }
@@ -121,8 +121,8 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionNoStaticField()
         {
-            Test("no static field", @"
-        static Expression<Entity, int> MyExpression { get; }         
+            TestDiagnostic("no static field", @"
+        static Expression<Func<Entity, int>> MyExpression { get; }         
         [ExpressionField]
         public static int OperationLogs(this Entity e) => MyExpression.Evaluate(e)");
         }
@@ -130,8 +130,8 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionThis()
         {
-            Test("first argument should be 'this'", @"
-        static Expression<Entity, int> MyExpression;        
+            TestDiagnostic("first argument should be 'this'", @"
+        static Expression<Func<Entity, int>> MyExpression;        
         [ExpressionField]
         public int OperationLogs(this Entity e) => MyExpression.Evaluate(e, e)");
         }
@@ -139,8 +139,8 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionMissingArgument()
         {
-            Test("missing argument 'e'", @"
-        static Expression<Bla, int> MyExpression;        
+            TestDiagnostic("missing argument 'e'", @"
+        static Expression<Func<Bla, int>> MyExpression;        
         [ExpressionField]
         public int OperationLogs(this Entity e) => MyExpression.Evaluate(this)");
         }
@@ -148,8 +148,8 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionExtra()
         {
-            Test("extra parameters", @"
-        static Expression<Bla, Entity, Entity, int> MyExpression;        
+            TestDiagnostic("extra parameters", @"
+        static Expression<Func<Bla, Entity, Entity, int>> MyExpression;        
         [ExpressionField]
         public int OperationLogs(this Entity e) => MyExpression.Evaluate(this, e, e)");
         }
@@ -157,15 +157,57 @@ namespace Signum.Analyzer.Test
         [TestMethod]
         public void ExpressionCorrect()
         {
-            Test(null, @"
-        static Expression<Bla, Entity, int> MyExpression;        
+            TestDiagnostic(null, @"
+        static Expression<Func<Bla, Entity, int>> MyExpression;        
         [ExpressionField]
         public int OperationLogs(this Entity e) => MyExpression.Evaluate(this, e)");
         }
 
-        private void Test(string text, string expression)
+        [TestMethod]
+        public void ExpressionExplicitNotFound()
         {
-            var test = @"
+            TestDiagnostic("field 'MyExpression' not found", @"
+        static Expression<Func<Bla, Entity, int>> MyExpressionBad;        
+        [ExpressionField(""MyExpression"")]
+        public int OperationLogs(this Entity e) => 0");
+        }
+
+        [TestMethod]
+        public void ExpressionExplicitWrongType()
+        {
+            TestDiagnostic("type of 'MyExpression' should be 'Expression<Func<Bla, Entity, int>>'", @"
+        static Expression<Func<Entity, int>> MyExpression;        
+        [ExpressionField(""MyExpression"")]
+        public int OperationLogs(this Entity e) => 0", withIncludes: true);
+        }
+
+        [TestMethod]
+        public void ExpressionExplicitCorrect()
+        {
+            TestDiagnostic(null, @"
+        static Expression<Func<Bla, Entity, int>> MyExpression;        
+        [ExpressionField(""MyExpression"")]
+        public int OperationLogs(this Entity e) => 0", withIncludes: true);
+        }
+
+
+        private void TestDiagnostic(string expectedError, string code, bool withIncludes = false)
+        {
+            string test = Surround(code, withIncludes: withIncludes);
+            if (expectedError == null)
+                VerifyDiagnostic(test, new DiagnosticResult[0]);
+            else
+                VerifyDiagnostic(test, new DiagnosticResult
+                {
+                    Id = ExpressionFieldAnalyzer.DiagnosticId,
+                    Message = string.Format("'OperationLogs' should reference an static field of type Expression<T> with the same signature ({0})", expectedError),
+                    Severity = DiagnosticSeverity.Warning,
+                });
+        }
+
+        private static string Surround(string expression, bool withIncludes = false)
+        {
+            return @"
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -173,143 +215,80 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Signum.Entities;
+using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;" + (withIncludes ? @"
+using System.Linq.Expressions;" : null) +  @"
 
 namespace ConsoleApplication1
 {
-    static class Bla
-    {   
-" + expression +
+    class Bla
+    {"
++ expression +
 @"
     }
 }";
-
-            if (text == null)
-                VerifyDiagnostic(test, new DiagnosticResult[0]);
-            else
-                VerifyDiagnostic(test, new DiagnosticResult
-                {
-                    Id = ExpressionFieldAnalyzer.DiagnosticId,
-                    Message = string.Format("'OperationLogs' should be a simple evaluation of an static Expression<T> field with the same signature ({0})", text),
-                    Severity = DiagnosticSeverity.Warning,
-                });
         }
 
+        [TestMethod]
+        public void ExpressionFixStatic()
+        {
+            TestCodeFix(@"
+        [ExpressionField]
+        public static int GetId(Entity e) => (int)e.Id;",
+        @"
+        static Expression<Func<Entity, int>> GetIdExpression = e => (int)e.Id;
+        [ExpressionField]
+        public static int GetId(Entity e) => GetIdExpression.Evaluate(e);");
+        }
 
-        //        [TestMethod]
-        //        public void TestMethod3()
-        //        {
-        //            var test = @"
-        //using System;
-        //using System.Collections.Generic;
-        //using System.Linq;
-        //using System.Text;
-        //using System.Threading.Tasks;
-        //using System.Diagnostics;
-        //using Signum.Entities;
-        //using Signum.Utilities;
-        //using System.Linq.Expressions;
+        [TestMethod]
+        public void ExpressionFixInstanceProperty()
+        {
+            TestCodeFix(@"
 
-        //namespace ConsoleApplication1
-        //{
-        //    class MyEntity : Entity
-        //    {
-        //        [NotNullable, SqlDbType(Size = 24)]
-        //        string phone;
-        //        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 24), TelephoneValidator]
-        //        public string Phone
-        //        {
-        //            get { return phone; }
-        //            set { Set(ref phone, value); }
-        //        }
+        [ExpressionField]
+        public string GetId => this.ToString();",
+        @"
 
-        //        [NotNullable, SqlDbType(Size = 24)]
-        //        string phone2;
-        //        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 24), TelephoneValidator]
-        //        public string Phone2
-        //        {
-        //            get { return phone2; }
-        //            internal set { SetToStr(ref phone2, value); }
-        //        }
+        static Expression<Func<Bla, string>> GetIdExpression = @this => @this.ToString();
+        [ExpressionField]
+        public string GetId => GetIdExpression.Evaluate(this);");
+        }
 
-        //        int number;
-        //        public int Number
-        //        {
-        //            get { return number; }
-        //            set { Set(ref number, value); }
-        //        }
+        [TestMethod]
+        public void ExpressionFixInstancePropertyStatement()
+        {
+            TestCodeFix(@"
 
-        //        DateTime creationDate = TimeZoneManager.Now;
-        //        public DateTime CreationDate
-        //        {
-        //            get { return creationDate; }
-        //            private set { Set(ref creationDate, value); }
-        //        }
+        [ExpressionField]
+        public string GetId { get { return this.ToString(); } }",
+        @"
 
-        //        int? synchronizeSchema;       
-        //        [Unit(""ms"")]
-        //        public int? SynchronizeSchema
-        //        {
-        //            get { return synchronizeSchema; }
-        //            set { Set(ref synchronizeSchema, value); }
-        //        }
+        static Expression<Func<Bla, string>> GetIdExpression = @this => @this.ToString();
+        [ExpressionField]
+        public string GetId { get { return GetIdExpression.Evaluate(this); } }");
+        }
+        
 
-        //        static Expression<Func<MyEntity, string>> ToStringExpressions =
-        //            entity => entity.phone2;
-        //        public override string ToString()
-        //        {
-        //            return ToStringExpressions.Evaluate(this);
-        //        }
-        //    }
-        //}";
+        [TestMethod]
+        public void ExpressionFixDiagnosticStatic2()
+        {
+            TestCodeFix(@"
+        static Expression<Func<Entity, int>> GetIdExpression = e => (int)e.Id + 2;
 
-        //            VerifyDiagnostic(test, new DiagnosticResult
-        //            {
-        //                Id = AutoPropertyAnalyzer.DiagnosticId,
-        //                Message = "Properties in 'MyEntity' could be transformed to auto-property",
-        //                Severity = DiagnosticSeverity.Warning
-        //            });
+        [ExpressionField]
+        public static int GetId(Entity e) => (int)e.Id;",
+        @"
+        static Expression<Func<Entity, int>> GetIdExpression = e => (int)e.Id + 2;
 
-        //            var fixtest = @"
-        //using System;
-        //using System.Collections.Generic;
-        //using System.Linq;
-        //using System.Text;
-        //using System.Threading.Tasks;
-        //using System.Diagnostics;
-        //using Signum.Entities;
-        //using Signum.Utilities;
-        //using System.Linq.Expressions;
+        static Expression<Func<Entity, int>> GetIdExpression2 = e => (int)e.Id;
+        [ExpressionField]
+        public static int GetId(Entity e) => GetIdExpression2.Evaluate(e);");
+        }
 
-        //namespace ConsoleApplication1
-        //{
-        //    class MyEntity : Entity
-        //    {
-        //        [NotNullable, SqlDbType(Size = 24)]
-        //        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 24), TelephoneValidator]
-        //        public string Phone { get; set; }
-
-        //        [NotNullable, SqlDbType(Size = 24)]
-        //        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 24), TelephoneValidator]
-        //        public string Phone2 { get; internal set; }
-
-        //        public int Number { get; set; }
-
-        //        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
-
-        //        [Unit(""ms"")]
-        //        public int? SynchronizeSchema { get; set; }
-
-        //        static Expression<Func<MyEntity, string>> ToStringExpressions =
-        //            entity => entity.Phone2;
-        //        public override string ToString()
-        //        {
-        //            return ToStringExpressions.Evaluate(this);
-        //        }
-        //    }
-        //}";
-        //            VerifyFix(test, fixtest);
-        //        }
-
-
+        private void TestCodeFix(string initial, string final)
+        {
+            VerifyFix(Surround(initial), Surround(final, withIncludes:true));
+        }
     }
 }

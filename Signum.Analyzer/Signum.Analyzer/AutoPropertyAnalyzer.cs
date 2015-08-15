@@ -143,5 +143,10 @@ namespace Signum.Analyzer
 
             return collection.Single();
         }
+
+        public static QualifiedNameSyntax Qualified(this NameSyntax left, string ident)
+        {
+            return SyntaxFactory.QualifiedName(left, SyntaxFactory.IdentifierName(ident));
+        }
     }
 }
