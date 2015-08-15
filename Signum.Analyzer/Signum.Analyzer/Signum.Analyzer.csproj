@@ -36,6 +36,7 @@
     <Compile Include="ExpressionFieldAnalyzer.cs" />
     <Compile Include="AutoPropertyCodeFixProvider.cs" />
     <Compile Include="AutoPropertyAnalyzer.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -134,19 +134,5 @@ namespace Signum.Analyzer
         }
     }
 
-    public static class Extensions
-    {
-        public static T Only<T>(this IEnumerable<T> collection) where T : class
-        {
-            if (collection.Count() != 1)
-                return null;
-
-            return collection.Single();
-        }
-
-        public static QualifiedNameSyntax Qualified(this NameSyntax left, string ident)
-        {
-            return SyntaxFactory.QualifiedName(left, SyntaxFactory.IdentifierName(ident));
-        }
-    }
+  
 }

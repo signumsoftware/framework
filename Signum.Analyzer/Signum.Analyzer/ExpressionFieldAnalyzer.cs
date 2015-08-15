@@ -47,7 +47,7 @@ namespace Signum.Analyzer
             {
                 if (method.ReturnType.ToString() == "void")
                 {
-                    Diagnostic(context, ident, method.ReturnType.GetLocation(), "no return type", fixable: false);
+                    Diagnostic(context, ident, method.ReturnType.GetLocation(), "no return type");
                     return;
                 }
 
@@ -71,7 +71,7 @@ namespace Signum.Analyzer
 
                 if (fieldName == null)
                 {
-                    Diagnostic(context, ident, argument.GetLocation(), "invalid field name", fixable: false);
+                    Diagnostic(context, ident, argument.GetLocation(), "invalid field name");
                     return;
                 }
 
@@ -80,7 +80,7 @@ namespace Signum.Analyzer
 
                 if(fieldSymbol == null)
                 {
-                    Diagnostic(context, ident, att.GetLocation(), string.Format("field '{0}' not found", fieldName), fixable: false);
+                    Diagnostic(context, ident, att.GetLocation(), string.Format("field '{0}' not found", fieldName));
                     return;
                 }
 
@@ -91,7 +91,7 @@ namespace Signum.Analyzer
                 if (!expressionType.Equals(fieldSymbol.Type))
                 {
                     var minimalParts = expressionType.ToMinimalDisplayString(context.SemanticModel, member.GetLocation().SourceSpan.Start);
-                    Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}'", fieldName, minimalParts), fixable: false);
+                    Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}'", fieldName, minimalParts));
                     return;
                 }
             }
@@ -105,14 +105,14 @@ namespace Signum.Analyzer
                 var inv = expr as InvocationExpressionSyntax;
                 if (inv == null)
                 {
-                    Diagnostic(context, ident, expr.GetLocation(), "no invocation", fixable: true);
+                    Diagnostic(context, ident, att.GetLocation(), "no invocation", fixable: true);
                     return;
                 }
 
                 var memberAccess = inv.Expression as MemberAccessExpressionSyntax;
                 if (memberAccess == null || memberAccess.Name.ToString() != "Evaluate")
                 {
-                    Diagnostic(context, ident, expr.GetLocation(), "no Evaluate", fixable: true);
+                    Diagnostic(context, ident, att.GetLocation(), "no Evaluate", fixable: true);
                     return;
                 }
 

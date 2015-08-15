@@ -133,7 +133,7 @@ namespace Signum.Analyzer.Test
             TestDiagnostic("first argument should be 'this'", @"
         static Expression<Func<Entity, int>> MyExpression;        
         [ExpressionField]
-        public int OperationLogs(this Entity e) => MyExpression.Evaluate(e, e)");
+        public int OperationLogs(this Entity e) => MyExpression.Evaluate(e)");
         }
 
         [TestMethod]
@@ -256,12 +256,28 @@ namespace ConsoleApplication1
         }
 
         [TestMethod]
-        public void ExpressionFixInstancePropertyStatement()
+        public void ExpressionFixInstancePropertyImplicitThis()
+        {
+            TestCodeFix(@"
+        string id;
+
+        [ExpressionField]
+        public string GetId => id;",
+        @"
+        string id;
+
+        static Expression<Func<Bla, string>> GetIdExpression = @this => @this.id;
+        [ExpressionField]
+        public string GetId => GetIdExpression.Evaluate(this);");
+        }
+
+        [TestMethod]
+        public void ExpressionFixInstancePropertyStatementImplicitThis()
         {
             TestCodeFix(@"
 
         [ExpressionField]
-        public string GetId { get { return this.ToString(); } }",
+        public string GetId { get { return ToString(); } }",
         @"
 
         static Expression<Func<Bla, string>> GetIdExpression = @this => @this.ToString();

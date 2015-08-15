@@ -71,7 +71,7 @@ namespace Signum.Analyzer
             TypeSyntax returnType = GetReturnType(declaration);
 
             var bodyExpression = GetSingleBody(declaration);
-            var newField = GetStaticField(candidateName, parameterList, returnType, bodyExpression);
+            var newField = GetStaticField(candidateName, parameterList, returnType, bodyExpression, sm, type);
 
             var newBody = GetNewBody(candidateName, parameterList);
 
@@ -157,15 +157,22 @@ namespace Signum.Analyzer
 
             if (!symbol.IsStatic)
                 parameterList.Insert(0, SyntaxFactory.Parameter(SyntaxFactory.Identifier("@this")).WithType(SyntaxFactory.IdentifierName(type.Name)));
+
             return parameterList;
         }
 
-        private FieldDeclarationSyntax GetStaticField(string name, List<ParameterSyntax> parameterList, TypeSyntax returType, ExpressionSyntax bodyExpression)
+        private FieldDeclarationSyntax GetStaticField(string name, List<ParameterSyntax> parameterList, TypeSyntax returType, ExpressionSyntax bodyExpression,  SemanticModel sm, ITypeSymbol type)
         {
             GenericNameSyntax expressionType = GetExpressionTypeSyntax(parameterList, returType);
 
-            var newBody = parameterList.Count > 0 & parameterList[0].Identifier.ToString() == "@this" ?
-                        bodyExpression.ReplaceNodes(bodyExpression.DescendantNodes().OfType<ThisExpressionSyntax>().ToList(), (thisExp, _) => SyntaxFactory.IdentifierName(parameterList[0].Identifier)) : bodyExpression;
+            ExpressionSyntax newBody = bodyExpression;
+            if (parameterList.Count > 0 & parameterList[0].Identifier.ToString() == "@this")
+            {
+                newBody = AddImplicitThis(newBody, sm, type);
+
+                newBody = newBody.ReplaceNodes(newBody.DescendantNodes().OfType<ThisExpressionSyntax>().ToList(), 
+                    (thisExp, _) => SyntaxFactory.IdentifierName(parameterList[0].Identifier));
+            }
 
             if (newBody.Span.Length > 80)
                 newBody = newBody.WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed);
@@ -185,7 +192,21 @@ namespace Signum.Analyzer
                 .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
         }
 
-      
+        private ExpressionSyntax AddImplicitThis(ExpressionSyntax bodyExpression, SemanticModel sm, ITypeSymbol type)
+        {
+            var candidates =
+                (from ident in bodyExpression.DescendantNodesAndSelf().OfType<IdentifierNameSyntax>()
+                 where ident.Parent.Kind() != SyntaxKind.SimpleMemberAccessExpression || ((MemberAccessExpressionSyntax)ident.Parent).Expression == ident
+                 let symbol = sm.GetSymbolInfo(ident).Symbol
+                 where !symbol.IsStatic && (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Field)
+                 where type.GetInheritedMembers().Contains(symbol)
+                 select ident).ToList();
+
+            var result = bodyExpression.ReplaceNodes(candidates, (ident, _) => SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.ThisExpression(), ident));
+
+            return result;
+        }
 
         public static ExpressionSyntax GetSingleBody(MemberDeclarationSyntax member)
         {
