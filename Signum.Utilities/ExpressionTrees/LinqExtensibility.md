@@ -18,7 +18,6 @@ Imagine you have an entity like this
 public class PersonEntity
 {
     string county;
-    [ExpressionField]
     public string Country
     {
        get { ... }
