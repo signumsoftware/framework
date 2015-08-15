@@ -40,7 +40,8 @@
         $end$
 
 
-        static Expression<Func<$entityName$Entity, string>> ToStringExpression = e => e.$name$;
+        static Expression<Func<$entityName$Entity, string>> ToStringExpression = @this => @this.$name$;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
