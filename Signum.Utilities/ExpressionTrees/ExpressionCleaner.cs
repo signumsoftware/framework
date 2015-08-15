@@ -53,14 +53,14 @@ namespace Signum.Utilities.ExpressionTrees
     }
 
     /// <summary>
-    /// Associates a method with his corresponding 
+    /// Associates a method or property with a static field of type Expression with an equivalent definition that can be used inside IQueryable queries
     /// </summary>
     [AttributeUsage(AttributeTargets.Method| AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class ExpressionFieldAttribute : Attribute
     {
         public string Name { get; set; }
         public Type Type { get; set; }
-        /// <param name="name">The name of the field for the expression that defines the content. If not set, will be automatically found from the method body. </param>
+        /// <param name="name">The name of the field for the expression that defines the content. If not set, will be automatically found from the method body.</param>
         public ExpressionFieldAttribute(string name = "auto")
         {
             this.Name =name;
@@ -224,28 +224,23 @@ namespace Signum.Utilities.ExpressionTrees
         static LambdaExpression GetExpansion(MemberInfo mi)
         {
             ExpressionFieldAttribute efa = mi.GetCustomAttribute<ExpressionFieldAttribute>();
-
-            string name = efa?.Name ?? mi.Name + "Expression";
-            Type type = mi.DeclaringType;
-
-            FieldInfo fi = type.GetField(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            if (fi == null)
-            {
-                if (efa != null)
-                    throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".FormatWith(name, type.TypeName()));
-
+            if (efa == null)
                 return null;
-            }
+            
+            Type type = mi.DeclaringType;
+            FieldInfo fi = type.GetField(efa.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            if (fi == null)
+                throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".FormatWith(efa.Name, type.TypeName()));
 
             var obj = fi.GetValue(null);
 
             if (obj == null)
-                throw new InvalidOperationException("Expression field '{0}' is null".FormatWith(name));
+                throw new InvalidOperationException("Expression field '{0}' is null".FormatWith(efa.Name));
 
             var result = obj as LambdaExpression;
 
             if (result == null)
-                throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".FormatWith(name, type.TypeName()));
+                throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".FormatWith(efa.Name, type.TypeName()));
 
             return result;
         }
