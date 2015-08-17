@@ -66,7 +66,7 @@ namespace Signum.Engine.Mailing.Pop3
             {
                 GetPop3Client = getPop3Client;
 
-                FilePathLogic.Register(EmailFileType.Attachment, attachment);
+                FileTypeLogic.Register(EmailFileType.Attachment, attachment);
 
                 MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
 

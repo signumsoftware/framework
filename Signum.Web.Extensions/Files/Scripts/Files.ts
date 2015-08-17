@@ -17,7 +17,7 @@ export interface FileLineOptions extends Lines.EntityBaseOptions {
     dragAndDrop?: boolean;
     download: DownloadBehaviour;
     fileType: string;
-    extraData: string;
+    calculatedDirectory: string;
 }
 
 export interface FileAsyncUploadResult {
@@ -80,7 +80,7 @@ export class FileLine extends Lines.EntityBase {
         xhr.setRequestHeader("X-Prefix", this.options.prefix);
         xhr.setRequestHeader("X-" + this.options.prefix.child(Entities.Keys.runtimeInfo), Entities.RuntimeInfo.getFromPrefix(this.options.prefix).toString());
         xhr.setRequestHeader("X-sfFileType", this.options.fileType);
-        xhr.setRequestHeader("X-sfExtraData", this.options.extraData);
+        xhr.setRequestHeader("X-sfCalculatedDirectory", this.options.calculatedDirectory);
         xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
         var extraParams: FormObject = {};
@@ -154,7 +154,7 @@ export class FileLine extends Lines.EntityBase {
         $divNew.after($clonedDivNew).appendTo($fileForm); //if not attached to our DOM first there are problems with filename
 
         $("<input type='hidden' name='" + this.options.prefix + "_sfFileType' value='" + this.options.fileType + "'/>").appendTo($fileForm);
-        $("<input type='hidden' name='" + this.options.prefix + "_sfExtraData' value='" + this.options.extraData + "'/>").appendTo($fileForm);
+        $("<input type='hidden' name='" + this.options.prefix + "_sfCalculatedDirectory' value='" + this.options.calculatedDirectory + "'/>").appendTo($fileForm);
 
         var extraParams: FormObject = {};
         SF.addAjaxExtraParameters(extraParams);

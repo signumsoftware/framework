@@ -35,8 +35,6 @@ namespace Signum.Engine.Files
             return WebDownloadExpression.Evaluate(fp);
         }
         
-        public static Dictionary<FileTypeSymbol, FileTypeAlgorithm> FileTypes = new Dictionary<FileTypeSymbol, FileTypeAlgorithm>();
-
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null, null)));
@@ -46,9 +44,9 @@ namespace Signum.Engine.Files
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<FilePathEntity>();
+                FileTypeLogic.Start(sb, dqm);
 
-                SymbolLogic<FileTypeSymbol>.Start(sb, () => FileTypes.Keys.ToHashSet());
+                sb.Include<FilePathEntity>();
 
                 sb.Schema.EntityEvents<FilePathEntity>().Retrieved += FilePathLogic_Retrieved;
                 sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
@@ -94,34 +92,15 @@ namespace Signum.Engine.Files
 
                 OperationLogic.SetProtectedSave<FilePathEntity>(false);
 
-                dqm.RegisterQuery(typeof(FileTypeSymbol), () =>
-                    from f in Database.Query<FileTypeSymbol>()
-                    select new
-                    {
-                        Entity = f,
-                        f.Key
-                    });
-
                 sb.AddUniqueIndex<FilePathEntity>(f => new { f.Sufix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
 
                 dqm.RegisterExpression((FilePathEntity fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
                 dqm.RegisterExpression((FilePathEntity fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
 
-                sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
             }
         }
 
-        static void Schema_SchemaCompleted()
-        {
-            var errors = (from kvp in FileTypes
-                          let error = kvp.Value.Errors()
-                          where error.HasText()
-                          select kvp.Key + ": " + error.Indent(4)).ToList();
-
-            if (errors.Any())
-                throw new InvalidOperationException("Errors in the following FileType algorithms: \r\n" +
-                    errors.ToString("\r\n").Indent(4));
-        }
+      
 
         static void FilePathLogic_Retrieved(FilePathEntity fp)
         {
@@ -130,7 +109,7 @@ namespace Signum.Engine.Files
 
         public static FilePathEntity SetPrefixPair(this FilePathEntity fp)
         {
-            fp.prefixPair = FilePathLogic.FileTypes.GetOrThrow(fp.FileType).GetPrefixPair(fp);
+            fp.prefixPair = FileTypeLogic.FileTypes.GetOrThrow(fp.FileType).GetPrefixPair(fp);
 
             return fp;
         }
@@ -145,20 +124,11 @@ namespace Signum.Engine.Files
                 {
                     foreach (var gr in list.GroupBy(f=>f.FileType))
                     {
-                        var alg = FileTypes.GetOrThrow(gr.Key);
+                        var alg = FileTypeLogic.FileTypes.GetOrThrow(gr.Key);
                         if (alg.TakesOwnership)
-                            alg.DeleteFiles(gr.ToList());
+                            alg.DeleteFiles(gr.Cast<IFilePath>().ToList());
                     }
                 };
-            }
-        }
-        
-
-        public static void DeleteFilesDefault(List<FilePathEntity> filePaths)
-        {
-            foreach (var fp in filePaths)
-            {
-                File.Delete(fp.FullPhysicalPath);
             }
         }
 
@@ -175,57 +145,8 @@ namespace Signum.Engine.Files
         {
             if (fp.IsNew && !unsafeMode.Value)
             {
-                using (new EntityCache(EntityCacheType.ForceNew))
-                {
-                    FileTypeAlgorithm alg = FileTypes.GetOrThrow(fp.FileType);
-
-                    if(alg.TakesOwnership)
-                    {
-                        string sufix = alg.CalculateSufix(fp);
-                        if (!sufix.HasText())
-                            throw new InvalidOperationException("Sufix not set");
-
-                        fp.prefixPair = alg.GetPrefixPair(fp);
-
-                        int i = 2;
-                        fp.Sufix = sufix;
-                        while (alg.RenameOnCollision && File.Exists(fp.FullPhysicalPath))
-                        {
-                            fp.Sufix = alg.RenameAlgorithm(sufix, i);
-                            i++;
-                        }
-
-                        alg.SaveFile(fp);
-                    }
-                }
+                FileTypeLogic.SaveFile(fp);
             }
-        }
-
-        
-        public static void SaveFileDefault(FilePathEntity fp)
-        {
-            string fullPhysicalPath = null;
-            try
-            {
-                string path = Path.GetDirectoryName(fp.FullPhysicalPath);
-                fullPhysicalPath = path;
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
-                File.WriteAllBytes(fp.FullPhysicalPath, fp.BinaryFile);
-                fp.BinaryFile = null;
-            }
-            catch (IOException ex)
-            {
-                ex.Data.Add("FullPhysicalPath", fullPhysicalPath);
-                ex.Data.Add("CurrentPrincipal", System.Threading.Thread.CurrentPrincipal.Identity.Name);
-
-                throw;
-            }
-        }
-
-        public static void Register(FileTypeSymbol fileTypeSymbol, FileTypeAlgorithm algorithm)
-        {
-            FileTypes.Add(fileTypeSymbol, algorithm);
         }
 
         public static byte[] GetByteArray(this FilePathEntity fp)
@@ -237,67 +158,5 @@ namespace Signum.Engine.Files
         {
             return File.ReadAllBytes(fp.InDB(f => f.FullPhysicalPath));
         }
-    }
-
-    public sealed class FileTypeAlgorithm
-    {
-        public Func<FilePathEntity, PrefixPair> GetPrefixPair { get; set; }
-        public Func<FilePathEntity, string> CalculateSufix { get; set; }
-
-        public bool RenameOnCollision {get; set;}
-         public bool TakesOwnership {get; set;}
-
-        public Func<string, int, string> RenameAlgorithm { get; set; }
-
-        public Action<FilePathEntity> SaveFile;
-        public Action<List<FilePathEntity>> DeleteFiles;
-
-        public FileTypeAlgorithm()
-        {
-            TakesOwnership = true;
-            CalculateSufix = FileName_Sufix;
-
-            RenameOnCollision = true;        
-            RenameAlgorithm = DefaultRenameAlgorithm;
-
-            SaveFile = FilePathLogic.SaveFileDefault;
-            DeleteFiles = FilePathLogic.DeleteFilesDefault;
-        }
-
-        public static readonly Func<string, int, string> DefaultRenameAlgorithm = (sufix, num) =>
-           Path.Combine(Path.GetDirectoryName(sufix),
-              "{0}({1}){2}".FormatWith(Path.GetFileNameWithoutExtension(sufix), num, Path.GetExtension(sufix)));
-
-        public static readonly Func<FilePathEntity, string> FileName_Sufix = (FilePathEntity fp) => fp.FileName;
-
-        public static readonly Func<FilePathEntity, string> Year_FileName_Sufix = (FilePathEntity fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), fp.FileName);
-        public static readonly Func<FilePathEntity, string> Year_Month_FileName_Sufix = (FilePathEntity fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), fp.FileName));
-
-        public static readonly Func<FilePathEntity, string> Year_GuidExtension_Sufix = (FilePathEntity fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Guid.NewGuid().ToString() + Path.GetExtension(fp.FileName));
-        public static readonly Func<FilePathEntity, string> Year_Month_GuidExtension_Sufix = (FilePathEntity fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName)));
-
-        public static readonly Func<FilePathEntity, string> YearMonth_Guid_Filename_Sufix = (FilePathEntity fp) => Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
-        public static readonly Func<FilePathEntity, string> Isolated_YearMonth_Guid_Filename_Sufix = (FilePathEntity fp) => Path.Combine(IsolationEntity.Current.IdOrNull.ToString() ?? "None", TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
-
-
-        public string Errors()
-        {
-            string error = null;
-
-            if (GetPrefixPair == null)
-                error = "GetPrefixPair";
-
-            if (TakesOwnership && CalculateSufix == null)
-                error = ", ".CombineIfNotEmpty(error,  "CalculateSufix");
-
-            if (RenameOnCollision && RenameAlgorithm == null)
-                error = ", ".CombineIfNotEmpty(error, "RenameAlgorithm");
-
-            if (error.HasText())
-                error += " not set";
-
-            return error;
-        }
-
     }
 }
