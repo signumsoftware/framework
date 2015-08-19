@@ -257,7 +257,7 @@ namespace Signum.Web.Auth
 
                 var user = Database.Query<UserEntity>().SingleOrDefaultEx(u => u.UserName == identityName);
 
-                if (user != null)
+                if (user != null && user.State != UserState.Disabled)
                 {
                     AuthController.OnUserPreLogin(null, user);
                     AuthController.AddUserSession(user);
