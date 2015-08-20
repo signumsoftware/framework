@@ -564,6 +564,30 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        public static void AutomaticImportAuthRules()
+        {
+            AutomaticImportAuthRules("AuthRules.xml");
+        }
+
+        public static void AutomaticImportAuthRules(string fileName)
+        {
+            Schema.Current.Initialize();
+            var script = AuthLogic.ImportRulesScript(XDocument.Load(fileName), interactive: false);
+            if (script == null)
+            {
+                SafeConsole.WriteColor(ConsoleColor.Green, "AuthRules already synchronized");
+                return;
+            }
+
+            using (var tr = new Transaction())
+            {
+                SafeConsole.WriteColor(ConsoleColor.Yellow, "Executing AuthRules changes...");
+                SafeConsole.WriteColor(ConsoleColor.DarkYellow, script.PlainSql());
+
+                script.PlainSqlCommand().ExecuteLeaves();
+                tr.Commit();
+            }
+        }
 
         public static void ImportExportAuthRules()
         {
