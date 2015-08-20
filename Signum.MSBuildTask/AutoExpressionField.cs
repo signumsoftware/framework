@@ -21,7 +21,7 @@ namespace Signum.MSBuildTask
             this.Resolver = resolver;
             this.Log = log;
             this.SignumUtilities = assembly.Name.Name == "Signum.Utilities" ? assembly : resolver.SignumUtilities;
-            this.ExpressionField = SignumUtilities.MainModule.GetType("Signum.Utilities.ExpressionTrees", "ExpressionFieldAttribute");
+            this.ExpressionField = SignumUtilities.MainModule.GetType("Signum.Utilities", "ExpressionFieldAttribute");
         }
 
         internal void FixAutoExpressionField()
