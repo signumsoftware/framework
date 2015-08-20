@@ -108,7 +108,7 @@ namespace Signum.Web.Files
             return FilesClient.DownloadFileResult(ri);
         }
 
-        internal FileResult DownloadEmbedded(Lite<FileTypeSymbol> lite, string suffix, string fileName)
+        public FileResult DownloadEmbedded(Lite<FileTypeSymbol> lite, string suffix, string fileName)
         {
             var pair = FileTypeLogic.FileTypes.GetOrThrow(lite.Retrieve()).GetPrefixPair(null);
 

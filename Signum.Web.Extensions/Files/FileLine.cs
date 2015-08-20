@@ -78,17 +78,17 @@ namespace Signum.Web.Files
                 result.Add("dragAndDrop", false);
             result.Add("download", (int)Download);
 
-            if (this.Type.CleanType() == typeof(FilePathEntity) && !this.ReadOnly)
+            if (typeof(IFilePath).IsAssignableFrom(this.Type) && !this.ReadOnly)
             {
                 if (FileType == null)
                     throw new ArgumentException("FileType is mandatory for FilePathEntity (FileLine {0})".FormatWith(Prefix));
 
                 result.Add("fileType", FileType.Key);
-            }
 
-            if (this.CalculatedDirectory.HasText())
-            {
-                result.Add("calculateDirectory", this.CalculatedDirectory);
+                if (this.CalculatedDirectory.HasText())
+                {
+                    result.Add("calculatedDirectory", this.CalculatedDirectory);
+                }
             }
 
             return result;

@@ -251,23 +251,21 @@ namespace Signum.Web.Files
                             return null;
                         else
                         {
-                            if (runtimeInfo.IsNew)
+                            HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
+                            if (hpf != null)
                             {
-                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
-                                if (hpf != null)
+                                string fileType = ctx.Inputs[FileLineKeys.FileType];
+                                return new EmbeddedFilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType))
                                 {
-                                    string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                    return new EmbeddedFilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType))
-                                    {
-                                        FileName = Path.GetFileName(hpf.FileName),
-                                        BinaryFile = hpf.InputStream.ReadAllBytes(),
-                                    };
-                                }
-                                else
-                                {
-                                    throw new InvalidOperationException("Impossible to create new FilePath {0}".FormatWith(ctx.Prefix));
-                                }
+                                    FileName = Path.GetFileName(hpf.FileName),
+                                    BinaryFile = hpf.InputStream.ReadAllBytes(),
+                                };
                             }
+                            else if (ctx.Inputs.ContainsKey(EntityBaseKeys.EntityState))
+                            {
+                                return (EmbeddedFilePathEntity)Navigator.Manager.DeserializeEntity(ctx.Inputs[EntityBaseKeys.EntityState]);
+                            }
+
                             else
                                 return baseMapping(ctx);
                         }
