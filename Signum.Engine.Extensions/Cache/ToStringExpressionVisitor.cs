@@ -188,6 +188,36 @@ namespace Signum.Engine.Cache
         {
             return this.replacements.TryGetC(node) ?? node;
         }
+
+        protected override Expression VisitBinary(BinaryExpression node)
+        {
+            var result = (BinaryExpression)base.VisitBinary(node);
+            
+            if (result.NodeType == ExpressionType.Equal || result.NodeType == ExpressionType.NotEqual)
+            { 
+                if (result.Left is CachedEntityExpression || result.Right is CachedEntityExpression)
+                {
+                    var left = GetPrimaryKey(result.Left);
+                    var right = GetPrimaryKey(result.Right);
+
+                    return Expression.MakeBinary(node.NodeType, left, right);
+                }
+            }
+
+            return result;
+        }
+
+        private Expression GetPrimaryKey(Expression exp)
+        {
+            if (exp is ConstantExpression && ((ConstantExpression)exp).Value == null)
+                return Expression.Constant(null, typeof(PrimaryKey?));
+
+            var cee = exp as CachedEntityExpression;
+            if (cee != null)
+                return cee.PrimaryKey;
+
+            throw new InvalidOperationException("");
+        }
     }
 
 
@@ -243,6 +273,11 @@ namespace Signum.Engine.Cache
                 return this;
 
             return new CachedEntityExpression(pk, type, Constructor, FieldEmbedded);
+        }
+
+        public override string ToString()
+        {
+            return $"CachedEntityExpression({Type.TypeName()}, {PrimaryKey})";
         }
     }
 }
