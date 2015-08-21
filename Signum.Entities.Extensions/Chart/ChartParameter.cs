@@ -29,13 +29,8 @@ namespace Signum.Entities.Chart
         }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         [SqlDbType(Size = 50)]
         string value;

@@ -45,79 +45,34 @@ namespace Signum.Entities.Processes
             get { return algorithm; }
         }
 
-        IProcessDataEntity data;
-        public IProcessDataEntity Data
-        {
-            get { return data; }
-            set { Set(ref data, value); }
-        }
+        public IProcessDataEntity Data { get; set; }
 
         public const string None = "none";
 
         [SqlDbType(Size = 100), NotNullable]
-        string machineName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string MachineName
-        {
-            get { return machineName; }
-            set { Set(ref machineName, value); }
-        }
+        public string MachineName { get; set; }
 
         [SqlDbType(Size = 100), NotNullable]
-        string applicationName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string ApplicationName
-        {
-            get { return applicationName; }
-            set { Set(ref applicationName, value); }
-        }
+        public string ApplicationName { get; set; }
 
         [NotNullable]
-        Lite<IUserEntity> user;
         [NotNullValidator]
-        public Lite<IUserEntity> User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
+        public Lite<IUserEntity> User { get; set; }
 
-        ProcessState state;
-        public ProcessState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
+        public ProcessState State { get; set; }
 
-        DateTime creationDate = TimeZoneManager.Now;
-        public DateTime CreationDate
-        {
-            get { return creationDate; }
-            private set { Set(ref creationDate, value); }
-        }
+        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        DateTime? plannedDate;
         [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
-        public DateTime? PlannedDate
-        {
-            get { return plannedDate; }
-            set { Set(ref plannedDate, value); }
-        }
+        public DateTime? PlannedDate { get; set; }
 
-        DateTime? cancelationDate;
         [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
-        public DateTime? CancelationDate
-        {
-            get { return cancelationDate; }
-            set { Set(ref cancelationDate, value); }
-        }
+        public DateTime? CancelationDate { get; set; }
 
-        DateTime? queuedDate;
         [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
-        public DateTime? QueuedDate
-        {
-            get { return queuedDate; }
-            set { Set(ref queuedDate, value); }
-        }
+        public DateTime? QueuedDate { get; set; }
 
         DateTime? executionStart;
         [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
@@ -143,34 +98,14 @@ namespace Signum.Entities.Processes
             get { return ExecutionEnd == null ? null : DurationExpression.Evaluate(this); }
         }
 
-        DateTime? suspendDate;
-        public DateTime? SuspendDate
-        {
-            get { return suspendDate; }
-            set { Set(ref suspendDate, value); }
-        }
+        public DateTime? SuspendDate { get; set; }
 
-        DateTime? exceptionDate;
-        public DateTime? ExceptionDate
-        {
-            get { return exceptionDate; }
-            set { Set(ref exceptionDate, value); }
-        }
+        public DateTime? ExceptionDate { get; set; }
 
-        Lite<ExceptionEntity> exception;
-        public Lite<ExceptionEntity> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value); }
-        }
+        public Lite<ExceptionEntity> Exception { get; set; }
 
-        decimal? progress;
         [NumberBetweenValidator(0, 1), Format("p")]
-        public decimal? Progress
-        {
-            get { return progress; }
-            set { Set(ref progress, value); }
-        }
+        public decimal? Progress { get; set; }
 
         static StateValidator<ProcessEntity, ProcessState> stateValidator = new StateValidator<ProcessEntity, ProcessState>
         (e => e.State, e => e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e => e.ExceptionDate, e => e.Exception, e => e.MachineName, e => e.ApplicationName)
@@ -203,15 +138,15 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            switch (state)
+            switch (State)
             {
-                case ProcessState.Created: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Created.NiceToString(), creationDate);
-                case ProcessState.Planned: return "{0} {1} for {2}".FormatWith(algorithm, ProcessState.Planned.NiceToString(), plannedDate);
-                case ProcessState.Canceled: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Canceled.NiceToString(), cancelationDate);
-                case ProcessState.Queued: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Queued.NiceToString(), queuedDate);
+                case ProcessState.Created: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Created.NiceToString(), CreationDate);
+                case ProcessState.Planned: return "{0} {1} for {2}".FormatWith(algorithm, ProcessState.Planned.NiceToString(), PlannedDate);
+                case ProcessState.Canceled: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Canceled.NiceToString(), CancelationDate);
+                case ProcessState.Queued: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Queued.NiceToString(), QueuedDate);
                 case ProcessState.Executing: return "{0} {1} since {2}".FormatWith(algorithm, ProcessState.Executing.NiceToString(), executionStart);
-                case ProcessState.Suspending: return "{0} {1} since {2}".FormatWith(algorithm, ProcessState.Suspending.NiceToString(), suspendDate);
-                case ProcessState.Suspended: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Suspended.NiceToString(), suspendDate);
+                case ProcessState.Suspending: return "{0} {1} since {2}".FormatWith(algorithm, ProcessState.Suspending.NiceToString(), SuspendDate);
+                case ProcessState.Suspended: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Suspended.NiceToString(), SuspendDate);
                 case ProcessState.Finished: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Finished.NiceToString(), executionEnd);
                 case ProcessState.Error: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Error.NiceToString(), executionEnd);
                 default: return "{0} ??".FormatWith(algorithm);

@@ -15,7 +15,7 @@ using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Chart
 {
-    public interface IChartBase 
+    public interface IChartBase
     {
         ChartScriptEntity ChartScript { get; }
 
@@ -86,21 +86,11 @@ namespace Signum.Entities.Chart
         }
 
         [NotifyCollectionChanged, ValidateChildProperty, NotNullable]
-        MList<ChartColumnEntity> columns = new MList<ChartColumnEntity>();
-        public MList<ChartColumnEntity> Columns
-        {
-            get { return columns; }
-            set { Set(ref columns, value); }
-        }
+        public MList<ChartColumnEntity> Columns { get; set; } = new MList<ChartColumnEntity>();
 
         [NotNullable]
-        MList<ChartParameterEntity> parameters = new MList<ChartParameterEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<ChartParameterEntity> Parameters
-        {
-            get { return parameters; }
-            set { Set(ref parameters, value); }
-        }
+        public MList<ChartParameterEntity> Parameters { get; set; } = new MList<ChartParameterEntity>();
 
         void NotifyAllColumns()
         {
@@ -136,19 +126,9 @@ namespace Signum.Entities.Chart
         }
 
 
-        List<Filter> filters = new List<Filter>();
-        public List<Filter> Filters
-        {
-            get { return filters; }
-            set { Set(ref filters, value); }
-        }
+        public List<Filter> Filters { get; set; } = new List<Filter>();
 
-        List<Order> orders = new List<Order>();
-        public List<Order> Orders
-        {
-            get { return orders; }
-            set { Set(ref orders, value); }
-        }
+        public List<Order> Orders { get; set; } = new List<Order>();
 
         public List<QueryToken> AllTokens()
         {
