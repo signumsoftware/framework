@@ -136,6 +136,21 @@ namespace ConsoleApplication1
             set { Set(ref synchronizeSchema, value); }
         }
 
+        object queryName;
+        [NotNullValidator]
+        public object QueryName
+        {
+            get { return queryName; }
+        }
+
+        [NonSerialized]
+        bool needNewQuery;
+        public bool NeedNewQuery
+        {
+            get { return needNewQuery; }
+            set { Set(ref needNewQuery, value); }
+        }
+
         static Expression<Func<MyEntity, string>> ToStringExpressions =
             entity => entity.phone2;
         public override string ToString()
@@ -181,6 +196,21 @@ namespace ConsoleApplication1
 
         [Unit(""ms"")]
         public int? SynchronizeSchema { get; set; }
+
+        object queryName;
+        [NotNullValidator]
+        public object QueryName
+        {
+            get { return queryName; }
+        }
+
+        [NonSerialized]
+        bool needNewQuery;
+        public bool NeedNewQuery
+        {
+            get { return needNewQuery; }
+            set { Set(ref needNewQuery, value); }
+        }
 
         static Expression<Func<MyEntity, string>> ToStringExpressions =
             entity => entity.Phone2;

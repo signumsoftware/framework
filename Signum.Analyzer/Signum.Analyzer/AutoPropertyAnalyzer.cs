@@ -32,26 +32,35 @@ namespace Signum.Analyzer
 
         static void AnalyzePropertySymbol(SyntaxNodeAnalysisContext context)
         {
-            var classDeclaration = (ClassDeclarationSyntax)context.Node;
-            var symbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration);
+            try
+            {
 
-            if (!InheritsFrom(symbol, "Signum.Entities.ModifiableEntity"))
-                return;
+                var classDeclaration = (ClassDeclarationSyntax)context.Node;
+                var symbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration);
 
-            var properties = classDeclaration.Members.OfType<PropertyDeclarationSyntax>()
-                .Where(p => IsSimpleProperty(p, classDeclaration))
-                .ToList();
+                if (!InheritsFrom(symbol, "Signum.Entities.ModifiableEntity"))
+                    return;
 
-            if (properties.Count == 0)
-                return;
-            
-            var diagnostic = Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(),
-                properties.Select(p => p.Identifier.GetLocation()),
-                classDeclaration.Identifier.ToString());
+                var properties = classDeclaration.Members.OfType<PropertyDeclarationSyntax>()
+                    .Where(p => IsSimpleProperty(p, classDeclaration))
+                    .ToList();
 
-            context.ReportDiagnostic(diagnostic);
+                if (properties.Count == 0)
+                    return;
 
+                var diagnostic = Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation(),
+                    properties.Select(p => p.Identifier.GetLocation()),
+                    classDeclaration.Identifier.ToString());
+
+                context.ReportDiagnostic(diagnostic);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(context.SemanticModel.SyntaxTree.FilePath + "\r\n" + e.Message + "\r\n" + e.StackTrace);
+            }
         }
+
+        static string[] AvoidAttributes = new[] { "NonSerialized" };
 
         public static bool IsSimpleProperty(PropertyDeclarationSyntax property, ClassDeclarationSyntax classParent)
         {
@@ -59,15 +68,29 @@ namespace Signum.Analyzer
             if (field == null)
                 return false;
 
+            if (field.AttributeLists.Any(al => al.Attributes.Any(a => AvoidAttributes.Contains(LastName(a.Name)))))
+                return false;
+
             var getter = property.AccessorList.Accessors.SingleOrDefault(a => a.Kind() == SyntaxKind.GetAccessorDeclaration);
-            if (!IsValidGetter(getter, field))
+            if (getter == null || !IsValidGetter(getter, field))
                 return false;
 
             var setter = property.AccessorList.Accessors.SingleOrDefault(a => a.Kind() == SyntaxKind.SetAccessorDeclaration);
-            if (!IsValidSetter(setter, field))
+            if (setter == null || !IsValidSetter(setter, field))
                 return false;
 
             return true;
+        }
+
+        private static string LastName(NameSyntax s)
+        {
+            if (s is IdentifierNameSyntax)
+                return ((IdentifierNameSyntax)s).Identifier.Text;
+
+            if (s is QualifiedNameSyntax)
+                return LastName(((QualifiedNameSyntax)s).Right);
+
+            return null;
         }
 
         public static FieldDeclarationSyntax PreviosField(ClassDeclarationSyntax classParent, PropertyDeclarationSyntax property)
@@ -133,6 +156,4 @@ namespace Signum.Analyzer
             }
         }
     }
-
-  
 }

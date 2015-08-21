@@ -32,137 +32,144 @@ namespace Signum.Analyzer
 
         static void AnalyzePropertySymbol(SyntaxNodeAnalysisContext context)
         {
-            var att = (AttributeSyntax)context.Node;
-
-            if (!att.Name.ToString().EndsWith("ExpressionField"))
-                return;
-            
-            var member = att.FirstAncestorOrSelf<MemberDeclarationSyntax>();
-            var method = member as MethodDeclarationSyntax;
-            var prop = member as PropertyDeclarationSyntax;
-
-            var ident = prop?.Identifier.ToString() ?? method?.Identifier.ToString();
-
-            if (method != null)
+            try
             {
-                if (method.ReturnType.ToString() == "void")
-                {
-                    Diagnostic(context, ident, method.ReturnType.GetLocation(), "no return type");
-                    return;
-                }
+                var att = (AttributeSyntax)context.Node;
 
-                foreach (var param in method.ParameterList.Parameters)
-                {
-                    if (param.Modifiers.Any(a => a.Kind() != SyntaxKind.ThisKeyword))
-                    {
-                        Diagnostic(context, ident, param.Modifiers.First().GetLocation(), "complex paramerer '" + param.Identifier.ToString() + "'");
-                        return;
-                    }
-                }
-            }
-
-            var argument = att.ArgumentList?.Arguments.Select(a => a.Expression).FirstOrDefault();
-            
-            if (argument != null)
-            {
-                var val = context.SemanticModel.GetConstantValue(argument);
-
-                string fieldName = val.HasValue ? (val.Value as string) : null;
-
-                if (fieldName == null)
-                {
-                    Diagnostic(context, ident, argument.GetLocation(), "invalid field name");
-                    return;
-                }
-
-                var type = context.SemanticModel.GetDeclaredSymbol(member.FirstAncestorOrSelf<TypeDeclarationSyntax>());
-                var fieldSymbol = type.GetMembers().OfType<IFieldSymbol>().SingleOrDefault(a => a.Name == fieldName);
-
-                if(fieldSymbol == null)
-                {
-                    Diagnostic(context, ident, att.GetLocation(), string.Format("field '{0}' not found", fieldName));
-                    return;
-                }
-
-                var memberSymbol = context.SemanticModel.GetDeclaredSymbol(member);
-
-                var expressionType = GetExpressionType(memberSymbol, context.SemanticModel);
-                
-                if (!expressionType.Equals(fieldSymbol.Type))
-                {
-                    var minimalParts = expressionType.ToMinimalDisplayString(context.SemanticModel, member.GetLocation().SourceSpan.Start);
-                    Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}'", fieldName, minimalParts));
-                    return;
-                }
-            }
-            else
-            {
-                ExpressionSyntax expr = GetSingleBody(context, ident, att, member);
-
-                if (expr == null)
+                if (!att.Name.ToString().EndsWith("ExpressionField"))
                     return;
 
-                var inv = expr as InvocationExpressionSyntax;
-                if (inv == null)
-                {
-                    Diagnostic(context, ident, att.GetLocation(), "no invocation", fixable: true);
-                    return;
-                }
+                var member = att.FirstAncestorOrSelf<MemberDeclarationSyntax>();
+                var method = member as MethodDeclarationSyntax;
+                var prop = member as PropertyDeclarationSyntax;
 
-                var memberAccess = inv.Expression as MemberAccessExpressionSyntax;
-                if (memberAccess == null || memberAccess.Name.ToString() != "Evaluate")
-                {
-                    Diagnostic(context, ident, att.GetLocation(), "no Evaluate", fixable: true);
-                    return;
-                }
+                var ident = prop?.Identifier.ToString() ?? method?.Identifier.ToString();
 
-                var symbol = context.SemanticModel.GetSymbolInfo(memberAccess.Expression).Symbol as IFieldSymbol;
-                if (symbol == null || !symbol.IsStatic)
-                {
-                    Diagnostic(context, ident, memberAccess.Expression.GetLocation(), "no static field");
-                    return;
-                }
-
-                var args = inv.ArgumentList.Arguments;
-
-                var isStatic = member is MethodDeclarationSyntax ?
-                    ((MethodDeclarationSyntax)member).Modifiers.Any(a => a.Kind() == SyntaxKind.StaticKeyword) :
-                    ((PropertyDeclarationSyntax)member).Modifiers.Any(a => a.Kind() == SyntaxKind.StaticKeyword);
-
-                if (!isStatic)
-                {
-                    if (args.Count == 0 || !(args[0].Expression is ThisExpressionSyntax))
-                    {
-                        Diagnostic(context, ident, inv.ArgumentList.OpenParenToken.GetLocation(), "first argument should be 'this'");
-                        return;
-                    }
-                }
-
-                int positon = isStatic ? 0 : 1;
                 if (method != null)
                 {
-                    foreach (var item in method.ParameterList.Parameters)
+                    if (method.ReturnType.ToString() == "void")
                     {
-                        if (args.Count <= positon)
-                        {
-                            Diagnostic(context, ident, inv.ArgumentList.CloseParenToken.GetLocation(), string.Format("missing argument '{0}'", item.Identifier));
-                            return;
-                        }
-                        var arg = args[positon++];
+                        Diagnostic(context, ident, method.ReturnType.GetLocation(), "no return type");
+                        return;
+                    }
 
-                        if (arg.ToString() != item.Identifier.ToString())
+                    foreach (var param in method.ParameterList.Parameters)
+                    {
+                        if (param.Modifiers.Any(a => a.Kind() != SyntaxKind.ThisKeyword))
                         {
-                            Diagnostic(context, ident, arg.GetLocation(), string.Format("missing argument '{0}'", item.Identifier));
+                            Diagnostic(context, ident, param.Modifiers.First().GetLocation(), "complex paramerer '" + param.Identifier.ToString() + "'");
                             return;
                         }
                     }
                 }
 
-                if (args.Count > positon)
+                var argument = att.ArgumentList?.Arguments.Select(a => a.Expression).FirstOrDefault();
+
+                if (argument != null)
                 {
-                    Diagnostic(context, ident, args[positon].GetLocation(), "extra parameters");
-                    return;
+                    var val = context.SemanticModel.GetConstantValue(argument);
+
+                    string fieldName = val.HasValue ? (val.Value as string) : null;
+
+                    if (fieldName == null)
+                    {
+                        Diagnostic(context, ident, argument.GetLocation(), "invalid field name");
+                        return;
+                    }
+
+                    var type = context.SemanticModel.GetDeclaredSymbol(member.FirstAncestorOrSelf<TypeDeclarationSyntax>());
+                    var fieldSymbol = type.GetMembers().OfType<IFieldSymbol>().SingleOrDefault(a => a.Name == fieldName);
+
+                    if (fieldSymbol == null)
+                    {
+                        Diagnostic(context, ident, att.GetLocation(), string.Format("field '{0}' not found", fieldName));
+                        return;
+                    }
+
+                    var memberSymbol = context.SemanticModel.GetDeclaredSymbol(member);
+
+                    var expressionType = GetExpressionType(memberSymbol, context.SemanticModel);
+
+                    if (!expressionType.Equals(fieldSymbol.Type))
+                    {
+                        var minimalParts = expressionType.ToMinimalDisplayString(context.SemanticModel, member.GetLocation().SourceSpan.Start);
+                        Diagnostic(context, ident, att.GetLocation(), string.Format("type of '{0}' should be '{1}'", fieldName, minimalParts));
+                        return;
+                    }
                 }
+                else
+                {
+                    ExpressionSyntax expr = GetSingleBody(context, ident, att, member);
+
+                    if (expr == null)
+                        return;
+
+                    var inv = expr as InvocationExpressionSyntax;
+                    if (inv == null)
+                    {
+                        Diagnostic(context, ident, att.GetLocation(), "no invocation", fixable: true);
+                        return;
+                    }
+
+                    var memberAccess = inv.Expression as MemberAccessExpressionSyntax;
+                    if (memberAccess == null || memberAccess.Name.ToString() != "Evaluate")
+                    {
+                        Diagnostic(context, ident, att.GetLocation(), "no Evaluate", fixable: true);
+                        return;
+                    }
+
+                    var symbol = context.SemanticModel.GetSymbolInfo(memberAccess.Expression).Symbol as IFieldSymbol;
+                    if (symbol == null || !symbol.IsStatic)
+                    {
+                        Diagnostic(context, ident, memberAccess.Expression.GetLocation(), "no static field");
+                        return;
+                    }
+
+                    var args = inv.ArgumentList.Arguments;
+
+                    var isStatic = member is MethodDeclarationSyntax ?
+                        ((MethodDeclarationSyntax)member).Modifiers.Any(a => a.Kind() == SyntaxKind.StaticKeyword) :
+                        ((PropertyDeclarationSyntax)member).Modifiers.Any(a => a.Kind() == SyntaxKind.StaticKeyword);
+
+                    if (!isStatic)
+                    {
+                        if (args.Count == 0 || !(args[0].Expression is ThisExpressionSyntax))
+                        {
+                            Diagnostic(context, ident, inv.ArgumentList.OpenParenToken.GetLocation(), "first argument should be 'this'");
+                            return;
+                        }
+                    }
+
+                    int positon = isStatic ? 0 : 1;
+                    if (method != null)
+                    {
+                        foreach (var item in method.ParameterList.Parameters)
+                        {
+                            if (args.Count <= positon)
+                            {
+                                Diagnostic(context, ident, inv.ArgumentList.CloseParenToken.GetLocation(), string.Format("missing argument '{0}'", item.Identifier));
+                                return;
+                            }
+                            var arg = args[positon++];
+
+                            if (arg.ToString() != item.Identifier.ToString())
+                            {
+                                Diagnostic(context, ident, arg.GetLocation(), string.Format("missing argument '{0}'", item.Identifier));
+                                return;
+                            }
+                        }
+                    }
+
+                    if (args.Count > positon)
+                    {
+                        Diagnostic(context, ident, args[positon].GetLocation(), "extra parameters");
+                        return;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(context.SemanticModel.SyntaxTree.FilePath + "\r\n" + e.Message + "\r\n" + e.StackTrace);
             }
         }
 
@@ -172,7 +179,7 @@ namespace Signum.Analyzer
 
             if (!memberSymbol.IsStatic)
                 parameters.Insert(0, (ITypeSymbol)memberSymbol.ContainingSymbol);
-            
+
             var returnType = memberSymbol is IMethodSymbol ? ((IMethodSymbol)memberSymbol).ReturnType : ((IPropertySymbol)memberSymbol).Type;
 
             parameters.Add(returnType);
@@ -191,7 +198,7 @@ namespace Signum.Analyzer
 
                 if (method.ExpressionBody != null)
                     return method.ExpressionBody.Expression;
-                
+
                 return OnlyReturn(context, ident, att, method.Body.Statements);
             }
             else if (member is PropertyDeclarationSyntax)
@@ -222,7 +229,7 @@ namespace Signum.Analyzer
             return null;
         }
 
-        internal static ExpressionSyntax OnlyReturn(SyntaxNodeAnalysisContext context,string ident, AttributeSyntax att, SyntaxList<StatementSyntax> statements)
+        internal static ExpressionSyntax OnlyReturn(SyntaxNodeAnalysisContext context, string ident, AttributeSyntax att, SyntaxList<StatementSyntax> statements)
         {
             var only = statements.Only();
 
@@ -239,15 +246,15 @@ namespace Signum.Analyzer
                 return null;
             }
 
-            if(ret.Expression == null)
+            if (ret.Expression == null)
             {
                 Diagnostic(context, ident, only.GetLocation(), "no return expression");
                 return null;
             }
-            
+
             return ret.Expression;
         }
-        
+
         private static void Diagnostic(SyntaxNodeAnalysisContext context, string identifier, Location location, string error, bool fixable = false)
         {
             var properties = ImmutableDictionary<string, string>.Empty.Add("fixable", fixable.ToString());
