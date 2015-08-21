@@ -100,6 +100,8 @@
     <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
     <Compile Include="DiffLog\DiffLogMixin.cs" />
     <Compile Include="DiffLog\Services.cs" />
+    <Compile Include="Files\EmbeddedFile.cs" />
+    <Compile Include="Files\FileUtils.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
     <Compile Include="Help\IHelpServer.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
@@ -144,7 +146,7 @@
     <Compile Include="Disconnected\DisconnectedMachineEntity.cs" />
     <Compile Include="Disconnected\DisconnectedExportEntity.cs" />
     <Compile Include="Disconnected\FileMessage.cs" />
-    <Compile Include="Files\EmbeddedFile.cs" />
+    <Compile Include="Files\EmbeddedFilePath.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="Files\IFileServer.cs" />

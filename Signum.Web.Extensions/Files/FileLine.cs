@@ -22,7 +22,7 @@ namespace Signum.Web.Files
     {
         public const string File = "sfFile";
         public const string FileType = "sfFileType";
-        public const string ExtraData = "sfExtraData";
+        public const string CalculatedDirectory = "sfCalculatedDirectory";
     }
 
     public enum DownloadBehaviour
@@ -36,7 +36,7 @@ namespace Signum.Web.Files
     {
         public FileTypeSymbol FileType { get; set; }
 
-        public string ExtraData { get; set; }
+        public string CalculatedDirectory { get; set; }
 
         public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 
@@ -78,17 +78,17 @@ namespace Signum.Web.Files
                 result.Add("dragAndDrop", false);
             result.Add("download", (int)Download);
 
-            if (this.Type.CleanType() == typeof(FilePathEntity) && !this.ReadOnly)
+            if (typeof(IFilePath).IsAssignableFrom(this.Type) && !this.ReadOnly)
             {
                 if (FileType == null)
                     throw new ArgumentException("FileType is mandatory for FilePathEntity (FileLine {0})".FormatWith(Prefix));
 
                 result.Add("fileType", FileType.Key);
-            }
 
-            if (this.ExtraData.HasText())
-            {
-                result.Add("extraData", this.ExtraData);
+                if (this.CalculatedDirectory.HasText())
+                {
+                    result.Add("calculatedDirectory", this.CalculatedDirectory);
+                }
             }
 
             return result;

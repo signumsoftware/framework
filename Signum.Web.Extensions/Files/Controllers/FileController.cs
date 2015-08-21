@@ -41,9 +41,15 @@ namespace Signum.Web.Files
             string fileName = Path.GetFileName(hpf.FileName);
             byte[] bytes = hpf.InputStream.ReadAllBytes();
             string fileType = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.FileType)];
-            string extraData = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.ExtraData)];
+            string extraData = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.CalculatedDirectory)];
 
-            IFile file = FilesClient.ConstructFile(info.EntityType, new UploadedFileData { FileName = fileName, Content = bytes, FileType = fileType, ExtraData = extraData });
+            IFile file = FilesClient.ConstructFile(info.EntityType, new UploadedFileData
+            {
+                FileName = fileName,
+                Content = bytes,
+                FileType = fileType,
+                CalculatedDirectory = extraData
+            });
 
             StringBuilder sb = new StringBuilder();
             //Use plain javascript not to have to add also the reference to jquery in the result iframe
@@ -71,9 +77,15 @@ namespace Signum.Web.Files
             string fileName = Request.Headers["X-FileName"];
             byte[] bytes = Request.InputStream.ReadAllBytes();
             string fileType = (string)Request.Headers["X-" + FileLineKeys.FileType];
-            string extraData = (string)Request.Headers["X-" + FileLineKeys.ExtraData];
+            string calculatedDirectory = (string)Request.Headers["X-" + FileLineKeys.CalculatedDirectory];
 
-            IFile file = FilesClient.ConstructFile(info.EntityType, new UploadedFileData { FileName = fileName, Content = bytes, FileType = fileType, ExtraData = extraData });
+            IFile file = FilesClient.ConstructFile(info.EntityType, new UploadedFileData
+            {
+                FileName = fileName,
+                Content = bytes,
+                FileType = fileType,
+                CalculatedDirectory = calculatedDirectory
+            });
 
             RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IEntity)file);
             
@@ -94,6 +106,15 @@ namespace Signum.Web.Files
             RuntimeInfo ri = RuntimeInfo.FromFormValue(file);
 
             return FilesClient.DownloadFileResult(ri);
+        }
+
+        public FileResult DownloadEmbedded(Lite<FileTypeSymbol> lite, string suffix, string fileName)
+        {
+            var pair = FileTypeLogic.FileTypes.GetOrThrow(lite.Retrieve()).GetPrefixPair(null);
+
+            var fullPhyisicalPath = Path.Combine(pair.PhysicalPrefix, suffix);
+
+            return new FilePathResult(fullPhyisicalPath, MimeType.FromFileName(fullPhyisicalPath)) { FileDownloadName = fileName };
         }
     }
 }

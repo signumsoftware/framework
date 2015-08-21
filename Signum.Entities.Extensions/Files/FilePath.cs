@@ -16,7 +16,7 @@ using System.Diagnostics;
 namespace Signum.Entities.Files
 {
     [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Transactional)]
-    public class FilePathEntity : LockableEntity, IFile
+    public class FilePathEntity : LockableEntity, IFile, IFilePath
     {
         public static string ForceExtensionIfEmpty = ".dat";
 
@@ -40,8 +40,7 @@ namespace Signum.Entities.Files
             this.FileName = fileName;
             this.BinaryFile = fileData;
         }
-
-
+        
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
         [NotNullable, SqlDbType(Size = 260)]
@@ -57,7 +56,6 @@ namespace Signum.Entities.Files
                     value += ForceExtensionIfEmpty;
 
                 Set(ref fileName, value);
-
             }
         }
 
@@ -84,11 +82,18 @@ namespace Signum.Entities.Files
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260)]
         public string Sufix { get; set; }
 
+        [Ignore]
+        public string CalculatedDirectory { get; set; }
+
         [NotNullable]
         public FileTypeSymbol FileType { get; internal set; }
 
         [Ignore]
         internal PrefixPair prefixPair;
+        public void SetPrefixPair(PrefixPair prefixPair)
+        {
+            this.prefixPair = prefixPair;
+        }
 
         public string FullPhysicalPath
         {
