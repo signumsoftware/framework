@@ -172,7 +172,6 @@ namespace Signum.Web.Files
                     Navigator.AddSettings(new List<EntitySettings>
                     {
                         new EntitySettings<FilePathEntity>{ PartialViewName = e => ViewPrefix.FormatWith("FilePath")},
-                        new EntitySettings<FileTypeSymbol>(),
                     });
 
                     var es = Navigator.EntitySettings<FilePathEntity>();
