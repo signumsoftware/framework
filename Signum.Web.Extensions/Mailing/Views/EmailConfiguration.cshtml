@@ -8,7 +8,7 @@
     @Html.EntityCombo(sc, ca => ca.DefaultCulture)
     @Html.ValueLine(sc, ca => ca.UrlLeft)
 
-    @using (var ac = sc.SubContext())
+    using (var ac = sc.SubContext())
     {
         ac.FormGroupStyle = FormGroupStyle.Basic;
         <fieldset class="form-vertical">

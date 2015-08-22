@@ -122,13 +122,7 @@ Write(Html.ValueLine(sc, ca => ca.UrlLeft));
             #line 9 "..\..\Mailing\Views\EmailConfiguration.cshtml"
                                          
 
-    
-            
-            #line default
-            #line hidden
-            
-            #line 11 "..\..\Mailing\Views\EmailConfiguration.cshtml"
-     using (var ac = sc.SubContext())
+    using (var ac = sc.SubContext())
     {
         ac.FormGroupStyle = FormGroupStyle.Basic;
 
@@ -200,12 +194,6 @@ WriteLiteral("\r\n                </div>\r\n            </div>\r\n        </fiel
             
             #line 27 "..\..\Mailing\Views\EmailConfiguration.cshtml"
     }
-            
-            #line default
-            #line hidden
-            
-            #line 27 "..\..\Mailing\Views\EmailConfiguration.cshtml"
-     
 }
 
             
