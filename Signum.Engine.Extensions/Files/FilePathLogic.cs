@@ -37,7 +37,7 @@ namespace Signum.Engine.Files
         {
             return WebDownloadExpression.Evaluate(fp);
         }
-        
+
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null, null)));
@@ -112,7 +112,8 @@ namespace Signum.Engine.Files
 
         public static FilePathEntity SetPrefixPair(this FilePathEntity fp)
         {
-            fp.prefixPair = FileTypeLogic.FileTypes.GetOrThrow(fp.FileType).GetPrefixPair(fp);
+            using (new EntityCache(EntityCacheType.ForceNew))
+                fp.prefixPair = FileTypeLogic.FileTypes.GetOrThrow(fp.FileType).GetPrefixPair(fp);
 
             return fp;
         }
@@ -125,7 +126,7 @@ namespace Signum.Engine.Files
 
                 Transaction.PostRealCommit += ud =>
                 {
-                    foreach (var gr in list.GroupBy(f=>f.FileType))
+                    foreach (var gr in list.GroupBy(f => f.FileType))
                     {
                         var alg = FileTypeLogic.FileTypes.GetOrThrow(gr.Key);
                         if (alg.TakesOwnership)
@@ -134,7 +135,7 @@ namespace Signum.Engine.Files
                 };
             }
         }
-        
+
         static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
 
         public static IDisposable UnsafeMode()
@@ -149,9 +150,9 @@ namespace Signum.Engine.Files
             if (fp.IsNew && !unsafeMode.Value)
             {
                 FileTypeLogic.SaveFile(fp);
-                }
             }
-        
+        }
+
         public static byte[] GetByteArray(this FilePathEntity fp)
         {
             return fp.BinaryFile ?? File.ReadAllBytes(fp.FullPhysicalPath);

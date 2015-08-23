@@ -37,7 +37,8 @@ namespace Signum.Engine.Files
 
         public static EmbeddedFilePathEntity SetPrefixPair(this EmbeddedFilePathEntity efp)
         {
-            efp.prefixPair = FileTypeLogic.FileTypes.GetOrThrow(efp.FileType).GetPrefixPair(efp);
+            using (new EntityCache(EntityCacheType.ForceNew))
+                efp.prefixPair = FileTypeLogic.FileTypes.GetOrThrow(efp.FileType).GetPrefixPair(efp);
 
             return efp;
         }
