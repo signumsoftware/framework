@@ -241,7 +241,6 @@ namespace Signum.Engine.Mailing
                     ValueProvider.Declare(newVars);
                     Block.ToString(sb, newVars);
                 }
-
                 sb.Append("@endforeach");
             }
 

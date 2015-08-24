@@ -99,7 +99,13 @@ namespace Signum.Engine.Templating
 
             foreach (var item in collection)
             {
-                forEachElement();
+                using (p.Scope())
+                {
+                    if (this.Variable != null)
+                        p.RuntimeVariables.Add(this.Variable, item);
+
+                    forEachElement();
+                }
             }
         }
 
@@ -172,6 +178,9 @@ namespace Signum.Engine.Templating
         public readonly CultureInfo Culture;
         public readonly Dictionary<QueryToken, ResultColumn> Columns;
         public IEnumerable<ResultRow> Rows { get; private set; }
+
+        public ScopedDictionary<string, object> RuntimeVariables = new ScopedDictionary<string, object>(null);
+
         public abstract object GetModel();
 
         public IDisposable OverrideRows(IEnumerable<ResultRow> rows)
@@ -179,6 +188,13 @@ namespace Signum.Engine.Templating
             var old = this.Rows;
             this.Rows = rows;
             return new Disposable(() => this.Rows = old);
+        }
+
+        internal IDisposable Scope()
+        {
+            var old = RuntimeVariables;
+            RuntimeVariables = new ScopedDictionary<string, object>(RuntimeVariables);
+            return new Disposable(() => RuntimeVariables = old);
         }
     }
 
@@ -382,6 +398,7 @@ namespace Signum.Engine.Templating
             get { return typeof(string); }
         }
     }
+
 
     public class ParsedToken
     {
