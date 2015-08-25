@@ -146,7 +146,7 @@ namespace Signum.Entities
         }
 
         static Expression<Func<ModifiableEntity, string>> ToStringPropertyExpression = m => m.ToString();
-        [HiddenProperty]
+        [HiddenProperty, ExpressionField("ToStringPropertyExpression")]
         public string ToStringProperty
         {
             get
