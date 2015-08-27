@@ -147,20 +147,9 @@ namespace Signum.Entities.Omnibox
 
         public IEnumerable<Tuple<string, bool>> BoldSpans()
         {
-            bool lastIsBool = BoldIndices[0];
-            int lastIndex = 0;
-            for (int i = 1; i < Text.Length; i++)
-            {
-                if (BoldIndices[i] != lastIsBool)
-                {
-                    yield return Tuple.Create(Text.Substring(lastIndex, i - lastIndex), lastIsBool);
-
-                    lastIsBool = BoldIndices[i];
-                    lastIndex = i;
-                }
-            }
-
-            yield return Tuple.Create(Text.Substring(lastIndex, Text.Length - lastIndex), lastIsBool);
+            return this.Text.ZipStrict(BoldIndices)
+                .GroupWhenChange(a => a.Item2)
+                .Select(gr => Tuple.Create(new string(gr.Select(a => a.Item1).ToArray()), gr.Key));
         }
     }
 
