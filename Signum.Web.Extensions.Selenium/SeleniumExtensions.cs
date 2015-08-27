@@ -267,6 +267,23 @@ namespace Signum.Web.Selenium
             button.Click();
         }
 
+        public static void SafeClick(this IWebElement element)
+        {
+            if (!element.Displayed)
+            {
+                element.GetDriver().ScrollTo(element);
+            }
+
+            element.Click();
+        }
+
+        public static void ScrollTo(this RemoteWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript("arguments[0].scrollIntoView(true);", element);
+            Thread.Sleep(500);
+        }
+
         public static void LoseFocus(this RemoteWebDriver driver, IWebElement element)
         {
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
