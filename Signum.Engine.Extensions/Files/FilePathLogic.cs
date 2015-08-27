@@ -107,7 +107,8 @@ namespace Signum.Engine.Files
 
         static void FilePathLogic_Retrieved(FilePathEntity fp)
         {
-            fp.SetPrefixPair();
+            using (new EntityCache(EntityCacheType.ForceNew))
+                fp.SetPrefixPair();
         }
 
         public static FilePathEntity SetPrefixPair(this FilePathEntity fp)
