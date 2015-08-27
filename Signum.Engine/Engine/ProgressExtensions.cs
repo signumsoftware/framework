@@ -171,7 +171,7 @@ namespace Signum.Engine
 
         public static string DefaultLogFolder = "Log";
 
-        private static StreamWriter TryOpenAutoFlush(string fileName)
+        public static StreamWriter TryOpenAutoFlush(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
                 return null;
@@ -189,19 +189,22 @@ namespace Signum.Engine
             return result;
         }
 
-        private static LogWriter GetLogWriter(StreamWriter logStreamWriter)
+        public static LogWriter GetLogWriter(StreamWriter logStreamWriter)
         {
             if (logStreamWriter != null)
             {
                 return (color, str, parameters) =>
                 {
-                    string f = parameters == null ? str : str.FormatWith(parameters);
+                    string f = parameters.IsNullOrEmpty() ? str : str.FormatWith(parameters);
                     lock (logStreamWriter)
                         logStreamWriter.WriteLine(f);
                     lock (SafeConsole.SyncKey)
                     {
                         SafeConsole.ClearSameLine();
-                        SafeConsole.WriteLineColor(color, str, parameters);
+                        if (parameters.IsNullOrEmpty())
+                            SafeConsole.WriteLineColor(color, str);
+                        else
+                            SafeConsole.WriteLineColor(color, str, parameters);
                     }
                 };
             }
@@ -212,7 +215,10 @@ namespace Signum.Engine
                     lock (SafeConsole.SyncKey)
                     {
                         SafeConsole.ClearSameLine();
-                        SafeConsole.WriteLineColor(color, str, parameters);
+                        if (parameters.IsNullOrEmpty())
+                            SafeConsole.WriteLineColor(color, str);
+                        else
+                            SafeConsole.WriteLineColor(color, str, parameters);
                     }
                 };
             }
