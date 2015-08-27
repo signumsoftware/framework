@@ -125,6 +125,9 @@ namespace Signum.Entities.Omnibox
     {
         public OmniboxMatch(object value, int remaining, string choosenString, bool[] boldIndices)
         {
+            if (choosenString.Length != boldIndices.Length)
+                throw new ArgumentException("choosenString '{0}' is {1} long but boldIndices is {2}".FormatWith(choosenString, choosenString.Length, boldIndices.Length));
+
             this.Value = value;
 
             this.Text = choosenString;
