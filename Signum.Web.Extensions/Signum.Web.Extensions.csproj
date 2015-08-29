@@ -1490,7 +1490,9 @@
       <LastGenOutput>OperationLog.generated.cs</LastGenOutput>
     </Content>
     <Content Include="DiffLog\Views\Web.config" />
-    <Content Include="packages.config" />
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Calendar\Views\Web.config" />
     <Content Include="Help\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1630,7 +1632,9 @@
     <EmbeddedResource Include="UserQueries\Scripts\UserQuery.js">
       <DependentUpon>UserQuery.ts</DependentUpon>
     </EmbeddedResource>
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Dashboard\Views\Web.config" />
     <Content Include="Help\Views\Web.config" />
