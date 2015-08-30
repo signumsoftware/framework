@@ -48,24 +48,28 @@ namespace Signum.Web.Selenium
 
         public virtual void Dispose()
         {
-            if (!AvoidClose)
-            {
-                try
+            if (!Selenium.IsAlertPresent())
+                if (!AvoidClose)
                 {
-                    var button = Selenium.FindElements(CloseButtonLocator).SingleOrDefaultEx();
-                    if (button != null && button.Displayed)
-                        button.Click();
-                }
-                catch (ElementNotVisibleException)
-                {
-                }
-                catch (StaleElementReferenceException)
-                {
-                }
+                    try
+                    {
 
-                Selenium.WaitElementNotVisible(BackdropLocator);
-                Selenium.WaitElementNotVisible(PopupLocator);
-            }
+
+                        var button = Selenium.FindElements(CloseButtonLocator).SingleOrDefaultEx();
+                        if (button != null && button.Displayed)
+                            button.Click();
+
+                    }
+                    catch (ElementNotVisibleException)
+                    {
+                    }
+                    catch (StaleElementReferenceException)
+                    {
+                    }
+
+                    Selenium.WaitElementNotVisible(BackdropLocator);
+                    Selenium.WaitElementNotVisible(PopupLocator);
+                }
 
             if (Disposing != null)
                 Disposing(OkPressed);
@@ -107,7 +111,7 @@ namespace Signum.Web.Selenium
             return new PopupControl<T>(Selenium, prefix ?? Prefix) { Disposing = disposing };
         }
 
-        public bool OkPressed; 
+        public bool OkPressed;
         public void OkWaitClosed()
         {
             Selenium.FindElement(OkButtonLocator).Click();
@@ -125,7 +129,7 @@ namespace Signum.Web.Selenium
             return "_".CombineIfNotEmpty(prefix, "panelPopup");
         }
 
-    
+
     }
 
     public class ChooserPopup : Popup
@@ -183,7 +187,7 @@ namespace Signum.Web.Selenium
 
         public T GetValue<T>()
         {
-            return ValueLine.GetValue<T>(); 
+            return ValueLine.GetValue<T>();
         }
 
         public void SetValue(object value, string format = null)
