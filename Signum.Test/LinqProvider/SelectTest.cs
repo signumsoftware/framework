@@ -561,6 +561,18 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectTryToStringString()
+        {
+            var list = Database.Query<AlbumEntity>().Select(a => a.Name.TryToString()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectTryToStringNumber()
+        {
+            var list = Database.Query<AlbumEntity>().Select(a => a.BonusTrack.Seconds.TryToString()).ToList();
+        }
+
+        [TestMethod]
         public void SelectToStringLite()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.ToLite().ToString()).ToList();
