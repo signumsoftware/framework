@@ -382,7 +382,7 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             Alias alias = NextSelectAlias();
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, selectTrivialColumns: true);
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, isGroupKey: true, selectTrivialColumns: true);
             return new ProjectionExpression(
                 new SelectExpression(alias, true, null, pc.Columns, projection.Select, null, null, null, 0),
                 pc.Projector, null, resultType);
@@ -1066,8 +1066,14 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            if(m.Method.Name == "TryToString"  && m.Method.GetParameters().Length == 1 || 
-               m.Method.Name == "ToString" && m.Method.GetParameters().Length == 0)
+            if (m.Method.Name == "TryToString" && (source is EntityExpression || source is LiteReferenceExpression))
+            {
+                var toStr = BindMethodCall(Expression.Call(source, EntityExpression.ToStringMethod));
+
+                return toStr;
+            }
+
+            if (m.Method.Name == "ToString" && m.Method.GetParameters().Length == 0)
             {
                 if (source is EntityExpression)
                 {
