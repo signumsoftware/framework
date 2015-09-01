@@ -45,7 +45,7 @@
   
   var pointSize = data.parameters["PointSize"];
   
-  var numXTicks = data.columns.c1.type == 'Date' || data.columns.c1.type == 'DateTime' ? 100 : 50;
+  var numXTicks = data.columns.c1.type == 'Date' || data.columns.c1.type == 'DateTime' ? 100 : 60;
   
   var xTicks = x.ticks(width / numXTicks);
   var xTickFormat = x.tickFormat(width / numXTicks);
