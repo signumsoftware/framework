@@ -104,9 +104,7 @@ namespace Signum.Engine
                     },
                      Spacing.Double);
 
-
-                bool? removeExtraControlledIndexes = null;
-
+                
                 SqlPreCommand dropIndices =
                     Synchronizer.SynchronizeScript(model, database,
                      null,
