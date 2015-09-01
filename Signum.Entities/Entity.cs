@@ -55,6 +55,11 @@ namespace Signum.Entities
             internal set { isNew = value; }
         }
 
+        public void SetIsNew(bool value)
+        {
+            IsNew = value;
+        }
+
         [Ignore]
         internal long ticks = 0;
         [HiddenProperty]
