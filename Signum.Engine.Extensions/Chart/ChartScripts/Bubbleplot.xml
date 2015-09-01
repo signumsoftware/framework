@@ -46,7 +46,7 @@
   
   var y = scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, yRule.size('content'), data.parameters["VerticalScale"]);
   
-  var xTickSize = data.columns.c1.type == "Date" ||data.columns.c1.type == "DateTime" ? 100 : 50; 
+  var xTickSize = data.columns.c1.type == "Date" ||data.columns.c1.type == "DateTime" ? 100 : 60; 
   
   var xTicks = x.ticks(width / xTickSize);
   var xTickFormat = x.tickFormat(width / 50);
