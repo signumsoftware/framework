@@ -298,6 +298,32 @@ namespace Signum.Web
         {
             return MvcHtmlString.Create(lambda(null).ToHtmlString());
         }
+
+        public static MvcHtmlString SafeDropDownList(this HtmlHelper html, string idAndName, IEnumerable<SelectListItem> elements, object htmlAttributes)
+        {
+            return html.SafeDropDownList(idAndName, elements, new RouteValueDictionary(htmlAttributes));
+        }
+
+        //http://stackoverflow.com/questions/979095/asp-net-mvc-dropdownlist-pre-selected-item-ignored
+        public static MvcHtmlString SafeDropDownList(this HtmlHelper html, string idAndName, IEnumerable<SelectListItem> elements, IDictionary<string, object> htmlAttributes = null)
+        {
+            var select = new HtmlTag("select").IdName(idAndName).Attrs(htmlAttributes);
+            
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            foreach (var se in elements)
+	        {
+                var option = new HtmlTag("option").Attr("value", se.Value).SetInnerText(se.Text);
+ 
+                if(se.Selected)
+                    option.Attr("selected", "selected");
+
+                sb.Add(option.ToHtml());
+	        }
+
+            select.InnerHtml(sb.ToHtml());
+
+            return select.ToHtml();
+        }
     }
 }
 

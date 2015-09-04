@@ -52,14 +52,14 @@
                 Selected = currentMode == pm
             }).ToList();   
         }
-        @Html.DropDownList(Model.Compose("sfPaginationMode"), modes, new { @class = "sf-pagination-size form-control" })
+        @Html.SafeDropDownList(Model.Compose("sfPaginationMode"), modes, new { @class = "sf-pagination-size form-control" })
 
         @if (!(pagination is Pagination.All))
         {
             var currentElements = pagination.GetElementsPerPage();
             var elements = new List<int> { 5, 10, 20, 50, 100, 200 }.Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i == currentElements }).ToList();
             
-            @Html.DropDownList(Model.Compose("sfElems"), elements, new { @class = "sf-pagination-size form-control" })
+            @Html.SafeDropDownList(Model.Compose("sfElems"), elements, new { @class = "sf-pagination-size form-control" })
         }
     </div>
 

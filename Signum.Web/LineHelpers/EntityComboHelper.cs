@@ -125,7 +125,7 @@ namespace Signum.Web
             if (entityCombo.PlaceholderLabels && !entityCombo.ComboHtmlProperties.ContainsKey("placeholder"))
                 entityCombo.ComboHtmlProperties.Add("placeholder", entityCombo.LabelText);
 
-            return helper.DropDownList(
+            return helper.SafeDropDownList(
                     entityCombo.Compose(EntityComboKeys.Combo),
                     items,
                     entityCombo.ComboHtmlProperties);
