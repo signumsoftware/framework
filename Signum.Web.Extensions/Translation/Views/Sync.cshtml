@@ -117,7 +117,7 @@ else
                                     {
                                         list.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
                                     }
-                                    @Html.DropDownList(locKey(typeChanges.Type) + ".Gender", list);
+                                    @Html.SafeDropDownList(locKey(typeChanges.Type) + ".Gender", list);
                                 }
 
                             </th>
@@ -133,7 +133,7 @@ else
                                 }
                                 else
                                 {
-                                    @Html.DropDownList(elemName, items, new { style = "width:90%" });
+                                    @Html.SafeDropDownList(elemName, items, new { style = "width:90%" });
                                     <a class="edit">@TranslationMessage.Edit.NiceToString()</a>
                                 }
                                 }
@@ -193,7 +193,7 @@ else
                         }
                         else
                         {
-                            @Html.DropDownList(elemName, items);
+                            @Html.SafeDropDownList(elemName, items);
                                     <a class="edit">@TranslationMessage.Edit.NiceToString()</a>
                         }
                                 }

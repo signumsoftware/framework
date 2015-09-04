@@ -211,11 +211,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>LoginUserControl.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Auth\Views\Register.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Register.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Auth\Views\ResetPassword.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1668,10 +1663,6 @@
     <None Include="Auth\Views\LoginUserControl.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>LoginUserControl.generated.cs</LastGenOutput>
-    </None>
-    <None Include="Auth\Views\Register.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Register.generated.cs</LastGenOutput>
     </None>
     <None Include="Auth\Views\ResetPassword.cshtml">
       <Generator>RazorGenerator</Generator>

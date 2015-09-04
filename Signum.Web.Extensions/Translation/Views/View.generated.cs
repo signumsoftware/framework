@@ -399,14 +399,14 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 98 "..\..\Translation\Views\View.cshtml"
-                                       Write(Html.DropDownList(locKey(locType) + ".Gender", list));
+                                       Write(Html.SafeDropDownList(locKey(locType) + ".Gender", list));
 
             
             #line default
             #line hidden
             
             #line 98 "..\..\Translation\Views\View.cshtml"
-                                                                                                 ;
+                                                                                                     ;
                                         }
                                         else
                                         {
@@ -716,14 +716,14 @@ WriteLiteral("            <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 9121), Tuple.Create("\"", 9168)
+WriteAttribute("value", Tuple.Create(" value=\"", 9125), Tuple.Create("\"", 9172)
             
             #line 175 "..\..\Translation\Views\View.cshtml"
-, Tuple.Create(Tuple.Create("", 9129), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+, Tuple.Create(Tuple.Create("", 9133), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 9129), false)
+, 9133), false)
 );
 
 WriteLiteral(" />\r\n");

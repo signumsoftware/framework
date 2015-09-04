@@ -95,7 +95,7 @@ else
                                             {
                                                 list.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
                                             }
-                                            @Html.DropDownList(locKey(locType) + ".Gender", list);
+                                            @Html.SafeDropDownList(locKey(locType) + ".Gender", list);
                                         }
                                         else
                                         {
