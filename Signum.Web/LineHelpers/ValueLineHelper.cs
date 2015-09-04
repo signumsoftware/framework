@@ -108,7 +108,7 @@ namespace Signum.Web
                     .SingleOrDefaultEx()?.Do(s => s.Selected = true);
 
             valueLine.ValueHtmlProps.AddCssClass("form-control");
-            return helper.DropDownList(valueLine.Prefix, items, valueLine.ValueHtmlProps);
+            return helper.SafeDropDownList(valueLine.Prefix, items, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString DateTimePicker(this HtmlHelper helper, ValueLine valueLine)

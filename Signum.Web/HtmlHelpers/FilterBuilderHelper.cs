@@ -63,7 +63,7 @@ namespace Signum.Web
                         dic.Add("disabled", "disabled");
 
                     sb.AddLine(
-                        helper.DropDownList(
+                        helper.SafeDropDownList(
                         context.Compose("ddlSelector", index.ToString()),
                         possibleOperations.Select(fo =>
                             new SelectListItem
