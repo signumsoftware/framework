@@ -103,9 +103,9 @@ namespace Signum.Web.Selenium
 
         public virtual string GetCurrentUser()
         {
-            var element = Selenium.WaitElementPresent(By.CssSelector("a.sf-user, .sf-login"));
-            if (element.HasClass("sf-login"))
-                return null;
+            //var element = Selenium.WaitElementPresent(By.CssSelector("a.sf-user, .sf-login"));
+            //if (element.HasClass("sf-login"))
+            //    return null;
             
             var result = (string)Selenium.ExecuteScript("return $('.sf-user span').text()");
 
@@ -115,7 +115,7 @@ namespace Signum.Web.Selenium
         public virtual void Logout()
         {
             Selenium.FindElement(By.CssSelector("a[href$='Auth/Logout']")).ButtonClick();
-            Selenium.Wait(() => GetCurrentUser() == null);
+            Selenium.Wait(() => GetCurrentUser() == "");
 
             Selenium.Url = Url("Auth/Login");
             Selenium.WaitElementVisible(By.CssSelector(".sf-login"));
