@@ -348,7 +348,7 @@ once("removeKeyPress", () =>
 
 once("ajaxError", () =>
     $(function () {
-        $("body").bind("sf-ajax-error", function (event, XMLHttpRequest, textStatus, thrownError) {
+        $("body").bind("sf-ajax-error", <any>function (event, XMLHttpRequest, textStatus, thrownError) {
 
             var error = XMLHttpRequest.responseText;
             if (!error) {

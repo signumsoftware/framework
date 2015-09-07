@@ -977,14 +977,14 @@ export class EntityList extends EntityListBase {
         this.inputGroup.before(SF.hiddenDiv(itemPrefix.child(EntityList.key_entity), ""));
 
         var select = this.prefix.child(EntityList.key_list).get();
-        select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
+        select.children('option').attr('selected', ''); //Fix for Firefox: Set selected after retrieving the html of the select
 
         var ri = entityValue.runtimeInfo;
 
         $("<option/>")
             .attr("id", itemPrefix.child(Entities.Keys.toStr))
             .attr("value", "")
-            .attr('selected', true)
+            .attr('selected', 'selected')
             .text(entityValue.toStr)
             .attr('title', this.options.isEmbedded ? null : (this.getNiceName(ri.type) + (ri.id ? " " + ri.id : null)))
             .appendTo(select);
