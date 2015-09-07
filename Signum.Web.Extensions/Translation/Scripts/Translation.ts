@@ -71,7 +71,7 @@ function isSpace(str: string) {
 }
 
 
-function onFeedbackClick(e: MouseEvent) {
+function onFeedbackClick(e: JQueryMouseEventObject) {
     e.preventDefault();
 
     var $this = $(this);
