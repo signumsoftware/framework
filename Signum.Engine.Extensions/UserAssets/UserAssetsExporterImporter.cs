@@ -100,7 +100,7 @@ namespace Signum.Engine.UserAssets
                     previews.Add(guid, new UserAssetPreviewLine
                     {
                         Text = entity.ToString(),
-                        Type = entity.GetType(),
+                        Type = entity.GetType().ToTypeEntity(),
                         Guid = guid,
                         Action = entity.IsNew ? EntityAction.New :
                                  GraphExplorer.FromRoot((Entity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :

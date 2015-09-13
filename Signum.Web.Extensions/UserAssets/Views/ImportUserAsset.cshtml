@@ -1,5 +1,6 @@
 ﻿@using Signum.Entities.UserAssets
 @using Signum.Web.UserAssets
+@using Signum.Entities.Basics
 <h2>@UserAssetMessage.ImportUserAssets.NiceToString()
 </h2>
 <br />
@@ -38,6 +39,7 @@ else
 
         @foreach (var item in e.TypeElementContext(a => a.Lines))
         {
+            
             <tr>
                 <td>@item.Value.Action.NiceToString()</td>
                 <td>
@@ -47,7 +49,7 @@ else
                     }
                     @Html.Hidden(item.Compose("Guid"), item.Value.Guid)
                 </td>
-                <td>@item.Value.Type.NiceName()</td>
+                <td>@item.Value.Type.ToType().NiceName()</td>
                 <td>@item.Value.Text</td>
             </tr>
         }
