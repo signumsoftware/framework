@@ -141,6 +141,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Signum.Entities.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Signum.Entities.ts</LastGenOutput>
+    </Content>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -161,11 +165,17 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controllers\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Signum.Entities.ts">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Signum.Entities.tt</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Typings\bootstrap\bootstrap.d.ts" />
     <TypeScriptCompile Include="Typings\d3\d3.d.ts" />
     <TypeScriptCompile Include="Typings\jquery\jquery.d.ts" />

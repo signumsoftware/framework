@@ -21,7 +21,7 @@ using System.Collections.Concurrent;
 
 namespace Signum.Entities
 {
-    [Serializable, DescriptionOptions(DescriptionOptions.All)]
+    [Serializable, DescriptionOptions(DescriptionOptions.All), InTypeScript(false)]
     public abstract class Entity : ModifiableEntity, IEntity
     {
         [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]

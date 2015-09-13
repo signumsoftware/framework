@@ -10,7 +10,7 @@ using Signum.Utilities;
 namespace Signum.Entities
 {
     [Serializable]
-    public class ImmutableEntity : Entity
+    public abstract class ImmutableEntity : Entity
     {
         [Ignore]
         bool allowTemporaly = false;

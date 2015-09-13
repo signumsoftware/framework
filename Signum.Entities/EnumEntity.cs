@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Signum.Entities
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), InTypeScript(false)]
     [TicksColumn(false)]
     public class EnumEntity<T> : Entity, IEquatable<EnumEntity<T>>
         where T : struct

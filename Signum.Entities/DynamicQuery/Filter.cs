@@ -126,6 +126,7 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
+    [InTypeScript(true)]
     public enum FilterOperation
     {
         EqualTo,
@@ -145,6 +146,7 @@ namespace Signum.Entities.DynamicQuery
         IsIn,
     }
 
+    [InTypeScript(true)]
     public enum FilterType
     {
         Integer,
@@ -158,6 +160,7 @@ namespace Signum.Entities.DynamicQuery
         Guid,
     }
 
+    [InTypeScript(true)]
     public enum UniqueType
     {
         First,

@@ -23,7 +23,7 @@ using System.Collections.Concurrent;
 
 namespace Signum.Entities
 {
-    [Serializable, DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
+    [Serializable, DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(false)]
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
         static Func<bool> isRetrievingFunc = null;

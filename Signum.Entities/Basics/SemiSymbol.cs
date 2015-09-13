@@ -58,6 +58,7 @@ namespace Signum.Entities.Basics
 
         [Ignore]
         FieldInfo fieldInfo;
+        [HiddenProperty]
         public FieldInfo FieldInfo
         {
             get { return fieldInfo; }

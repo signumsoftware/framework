@@ -12,7 +12,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
-    [Serializable, DescriptionOptions(DescriptionOptions.Members)]
+    [Serializable, DescriptionOptions(DescriptionOptions.Members), InTypeScript(false)]
     public abstract class MixinEntity : ModifiableEntity
     {
         protected MixinEntity(Entity mainEntity, MixinEntity next)

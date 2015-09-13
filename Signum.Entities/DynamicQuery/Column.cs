@@ -67,6 +67,7 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
+    [InTypeScript(true)]
     public enum ColumnOptionsMode
     {
         Add,
