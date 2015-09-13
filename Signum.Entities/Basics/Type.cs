@@ -63,7 +63,7 @@ namespace Signum.Entities.Basics
         }
     }
 
-    public static class TypeDNExtensions
+    public static class TypeEntityExtensions
     {
         public static Type ToType(this TypeEntity type)
         {
