@@ -335,6 +335,7 @@ namespace Signum.Entities.Mailing
 
     public interface IEmailOwnerEntity : IEntity
     {
+        [InTypeScript(false)]
         EmailOwnerData EmailOwnerData { get; }
     }
 

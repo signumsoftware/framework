@@ -1,0 +1,23 @@
+﻿<#@ template debug="true" hostSpecific="true" #>
+<#@ output extension=".ts" #>
+<#@ Assembly Name="System.Core.dll" #>
+<#@ Assembly Name="System.Xml.dll" #>
+<#@ Assembly Name="System.Xml.Linq.dll" #>
+<#@ Assembly Name="System.Windows.Forms.dll" #>
+<#@ assembly name="$(ProjectDir)..\..\Framework\Signum.T4\bin\Debug\Signum.T4.dll" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="Signum.T4" #>
+<#= EntityDeclarationGenerator.Process(new Options
+{
+	ProjectFile = this.Host.ResolvePath(@"..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj"), 
+	BaseNamespace = "Signum.Entities",
+	References = {
+		new Reference { 
+			Assembly = "Signum.Entities",
+			BaseNamespace = "Signum.Entities",
+			VariableName = "Entities",
+			Path = "Framework/Signum.React/Signum.Entities"
+        },
+    }
+})
+ #>

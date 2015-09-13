@@ -30,7 +30,7 @@ namespace Signum.Entities.Disconnected
 
         static Expression<Func<DisconnectedMachineEntity, Interval<int>>> SeedIntervalExpression =
             entity => new Interval<int>(entity.SeedMin, entity.SeedMax);
-        [HiddenProperty]
+        [HiddenProperty, ExpressionField]
         public Interval<int> SeedInterval
         {
             get { return SeedIntervalExpression.Evaluate(this); }

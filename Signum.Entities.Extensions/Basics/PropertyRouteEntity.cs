@@ -16,6 +16,7 @@ namespace Signum.Entities.Basics
 
         [field: Ignore]
         PropertyRoute route;
+        [HiddenProperty]
         public PropertyRoute Route
         {
             get { return route; }
