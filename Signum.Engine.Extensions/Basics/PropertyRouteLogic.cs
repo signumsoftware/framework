@@ -41,7 +41,7 @@ namespace Signum.Engine.Basics
         {
             var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
 
-            var should = TypeLogic.TryDNToType(rep).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
+            var should = TypeLogic.TryEntityToType(rep).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
 
             Table table = Schema.Current.Table<PropertyRouteEntity>();
 
