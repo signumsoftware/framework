@@ -10,6 +10,7 @@
     <Parameter Name="Labels" Type="Enum" ValueDefinition="Inside | Margin | None" />
     <Parameter Name="LabelsMargin" Type="Number" ValueDefinition="100" />
     <Parameter Name="NumberOpacity" Type="Number" ValueDefinition="0.8" />
+    <Parameter Name="NumberColor" Type="String" ValueDefinition="white" />
   </Parameters>
   <Icon FileName="columns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAd5JREFUeNrsmL9KA0EQxudErEXwGawlndgpiI8gkkewEh/Cwpcwhb1dCsFYaZVSBO3sBEvN3e3MuLN/klPvLifxbhdxYJmkWX58833DcgkzQ8y1BJHXP+CvAPaPB9Eacbmti88vx3x9+whIBIjkOgO5/0QMu9sbcHS4lQQBHN09wf5OD0hvCaUI0lxBmimYpAreU+k5DG/uBTCMB8mtL9ZKefXkKLQKSm+y4loDZBIAC0oO0sDp34psb7KCW1VQFEJyB3nmR3eCKiiqTdUrhMSO2Page5ALo/XKFf0nqgYFJK4OhwcOqyBVh8PvwYUX9evwgLOXce0FK+ubsLZ3kZQrWB4OdOALA749j2C1d1J7wcPVqQYsD0lVODAGDzJzZTjQjb91QCZVAwiV4fArqFVAZu0hxjjfgxZO1SoY9sGqARlznYQ0PkCjGls4xsgAve8YMwMqPRrAqe8ETo/XqEd5RAp637E7FFFIvvqO1cQqGMOaKfWdgImiUShY8J3x3BS2ff81U7DgOwuadTLaRoDmTUn5N9+ZsccAqMRqOJmNtCPf/WzEzndgkozQdc1RkO2+c77rcrSNANkrKD4MADcXkHxIAsFJJfI0j+3z2+Csn3wCjLn+PwH/ecAPAQYAxTJXxEeMT4QAAAAASUVORK5CYII=]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){
@@ -137,7 +138,7 @@
        .enterData(data.rows, 'text', 'number-label')
        .filter(function(v){return y(v.c1) > 10; })
        .attr('transform', function (v){ return translate( x(v.c0) + x.rangeBand()/2, -y(v.c1) / 2 ) +  rotate(-90);})
-       .attr('fill', 'white')
+       .attr('fill', data.parameters["NumberColor"])
        .attr('dominant-baseline', 'central')
        .attr('opacity', data.parameters["NumberOpacity"])
        .attr('text-anchor', 'middle')
