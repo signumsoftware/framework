@@ -36,7 +36,7 @@ namespace Signum.Engine
                     using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
                         try
                         {
-                            using (Transaction tr = new Transaction())
+                            using (Transaction tr = Transaction.ForceNew())
                             {
                                 action(item, writer);
                                 tr.Commit();
@@ -78,7 +78,7 @@ namespace Signum.Engine
                         using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
                             try
                             {
-                                using (Transaction tr = new Transaction())
+                                using (Transaction tr = Transaction.ForceNew())
                                 {
                                     action(item, writer);
                                     tr.Commit();
