@@ -109,7 +109,7 @@
   var yRule = rule({
     _1 : 5,
     legend : 15,
-    _2 : 5,
+    _2 : 20,
     content: '*',
     ticks: 4,
     _3 : 5,
