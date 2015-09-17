@@ -191,7 +191,7 @@ namespace Signum.Engine.Mailing
             return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress));
         }
 
-        public static ProcessEntity SendAllAsync<T>(List<T> emails)
+        public static void SendAllAsync<T>(List<T> emails)
                    where T : ISystemEmail
         {
             var list = emails.SelectMany(a => a.CreateEmailMessage()).ToList();
