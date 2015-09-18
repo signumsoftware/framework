@@ -191,27 +191,17 @@ namespace Signum.Engine.Mailing
             return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress));
         }
 
-        public static ProcessEntity SendAll<T>(List<T> emails, string packageName = null)
+        public static void SendAllAsync<T>(List<T> emails)
                    where T : ISystemEmail
         {
-            EmailPackageEntity package = new EmailPackageEntity
+            var list = emails.SelectMany(a => a.CreateEmailMessage()).ToList();
+
+            list.ForEach(a => a.State = EmailMessageState.ReadyToSend);
+
+            using (OperationLogic.AllowSave<EmailMessageEntity>())
             {
-                Name = packageName ?? "Package of {0} created on {0}".FormatWith(typeof(T).TypeName(), TimeZoneManager.Now)
-            }.Save();
-
-            var packLite = package.ToLite();
-
-            var list = emails.SelectMany(e => e.CreateEmailMessage()).ToList();
-
-            list.ForEach(l => l.Package = packLite);
-
-            list.SaveList();
-
-            var process = ProcessLogic.Create(EmailMessageProcess.SendEmails, package);
-
-            process.Execute(ProcessOperation.Execute);
-
-            return process;
+                list.SaveList();
+            }
         }
 
         class EmailGraph : Graph<EmailMessageEntity, EmailMessageState>
