@@ -889,7 +889,7 @@ namespace Signum.Entities
 
     public enum ValidationMessage
     {
-        [Description("{0} does not have a valid {0} format")]
+        [Description("{0} does not have a valid {1} format")]
         _0DoesNotHaveAValid1Format,
         [Description("{0} has an invalid format")]
         _0HasAnInvalidFormat,
