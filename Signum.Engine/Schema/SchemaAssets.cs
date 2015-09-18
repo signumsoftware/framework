@@ -40,12 +40,12 @@ namespace Signum.Engine.Maps
 
             public SqlPreCommandSimple CreateView()
             {
-                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".FormatWith(Name) + Definition) { GoBefore = true };
+                return new SqlPreCommandSimple("CREATE VIEW {0} ".FormatWith(Name) + Definition) { GoBefore = true };
             }
 
             public SqlPreCommandSimple AlterView()
             {
-                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".FormatWith(Name) + Definition) { GoBefore = true };
+                return new SqlPreCommandSimple("ALTER VIEW {0} ".FormatWith(Name) + Definition) { GoBefore = true };
             } 
         }
 
