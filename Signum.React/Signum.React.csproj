@@ -171,11 +171,14 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\Lines.tsx" />
+    <TypeScriptCompile Include="Scripts\Meta.ts" />
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Signum.Entities.tt</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Scripts\TypeContext.ts" />
     <TypeScriptCompile Include="Typings\bootstrap\bootstrap.d.ts" />
     <TypeScriptCompile Include="Typings\d3\d3.d.ts" />
     <TypeScriptCompile Include="Typings\jquery\jquery.d.ts" />
