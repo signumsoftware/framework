@@ -9,7 +9,7 @@
 <#@ import namespace="Signum.T4" #>
 <#= EntityDeclarationGenerator.Process(new Options
 {
-	ProjectFile = this.Host.ResolvePath(@"..\Signum.Entities\Signum.Entities.csproj"), 
+	ProjectFile = this.Host.ResolvePath(@"..\..\Signum.Entities\Signum.Entities.csproj"), 
 	BaseNamespace = "Signum.Entities",
 })
  #>

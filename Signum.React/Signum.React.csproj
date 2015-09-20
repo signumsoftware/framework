@@ -141,7 +141,7 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum.Entities.tt">
+    <Content Include="Scripts\Signum.Entities.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Signum.Entities.ts</LastGenOutput>
     </Content>
@@ -171,7 +171,7 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Signum.Entities.ts">
+    <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Signum.Entities.tt</DependentUpon>
@@ -188,7 +188,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <TypeScriptTarget>ES5</TypeScriptTarget>
-    <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
+    <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>

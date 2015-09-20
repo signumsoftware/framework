@@ -131,7 +131,7 @@ export module OperationMessage {
     export const Logs = "OperationMessage.Logs"
 }
 
-export const OperationSymbol: Type<OperationSymbol> = "OperationSymbol"
+export const OperationSymbol: Type<OperationSymbol> = "OperationSymbol";
 export interface OperationSymbol extends Symbol {
 }
 
@@ -263,12 +263,12 @@ export module VoidEnumMessage {
 
 export namespace Basics {
 
-    export const ColorEntity: Type<ColorEntity> = "ColorEntity"
+    export const ColorEntity: Type<ColorEntity> = "ColorEntity";
     export interface ColorEntity extends EmbeddedEntity {
         argb?: number;
     }
     
-    export const DeleteLogParametersEntity: Type<DeleteLogParametersEntity> = "DeleteLogParametersEntity"
+    export const DeleteLogParametersEntity: Type<DeleteLogParametersEntity> = "DeleteLogParametersEntity";
     export interface DeleteLogParametersEntity extends EmbeddedEntity {
         deleteLogsWithMoreThan?: number;
         dateLimit?: string;
@@ -276,7 +276,7 @@ export namespace Basics {
         maxChunks?: number;
     }
     
-    export const ExceptionEntity: Type<ExceptionEntity> = "ExceptionEntity"
+    export const ExceptionEntity: Type<ExceptionEntity> = "ExceptionEntity";
     export interface ExceptionEntity extends Entity {
         creationDate?: string;
         exceptionType?: string;
@@ -307,7 +307,7 @@ export namespace Basics {
     export interface IUserEntity extends IEntity {
     }
     
-    export const OperationLogEntity: Type<OperationLogEntity> = "OperationLogEntity"
+    export const OperationLogEntity: Type<OperationLogEntity> = "OperationLogEntity";
     export interface OperationLogEntity extends Entity {
         target?: Lite<IEntity>;
         origin?: Lite<IEntity>;
@@ -315,7 +315,6 @@ export namespace Basics {
         user?: Lite<IUserEntity>;
         start?: string;
         end?: string;
-        duration?: number;
         exception?: Lite<ExceptionEntity>;
     }
     
@@ -324,7 +323,7 @@ export namespace Basics {
         name?: string;
     }
     
-    export const TypeEntity: Type<TypeEntity> = "TypeEntity"
+    export const TypeEntity: Type<TypeEntity> = "TypeEntity";
     export interface TypeEntity extends Entity {
         fullClassName?: string;
         cleanName?: string;
