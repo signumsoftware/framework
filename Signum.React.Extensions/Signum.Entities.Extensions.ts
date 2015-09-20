@@ -1,6 +1,6 @@
 ﻿//Auto-generated from Signum.Entities.Extensions.csproj. Do not modify!
 
-import * as Entities from 'Framework/Signum.React/Signum.Entities'
+import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities'
 
 export namespace Alerts {
 

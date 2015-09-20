@@ -16,7 +16,7 @@
 			Assembly = "Signum.Entities",
 			BaseNamespace = "Signum.Entities",
 			VariableName = "Entities",
-			Path = "Framework/Signum.React/Signum.Entities"
+			Path = "Framework/Signum.React/Scripts/Signum.Entities"
         },
     }
 })
