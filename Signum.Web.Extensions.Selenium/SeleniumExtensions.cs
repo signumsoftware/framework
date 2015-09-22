@@ -280,7 +280,7 @@ namespace Signum.Web.Selenium
         public static void ScrollTo(this RemoteWebDriver driver, IWebElement element)
         {
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-            js.ExecuteScript("arguments[0].scrollIntoView(true);", element);
+            js.ExecuteScript("arguments[0].scrollIntoView(false);", element);
             Thread.Sleep(500);
         }
 
