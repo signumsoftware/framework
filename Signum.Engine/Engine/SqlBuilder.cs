@@ -125,7 +125,7 @@ namespace Signum.Engine
 
         public static string CreateColumn(IColumn c)
         {
-            return CreateColumn(c.Name, c.SqlDbType, c.UserDefinedTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.IdentityBehaviour, c.Default);
+            return CreateColumn(c.Name, c.SqlDbType, c.UserDefinedTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.Identity, c.Default);
         }
 
         public static string CreateColumn(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity, string @default)
@@ -136,7 +136,7 @@ namespace Signum.Engine
                 name.SqlEscape(),
                 type == SqlDbType.Udt ? udtTypeName : type.ToString().ToUpper(),
                 GetSizeScale(size, scale),
-                identity && @default == null ? "IDENTITY " : "",
+                identity ? "IDENTITY " : "",
                 nullable ? "NULL" : "NOT NULL",
                 @default != null ? " DEFAULT " +  Quote(type, @default) : "",
                 primaryKey ? " PRIMARY KEY" : "");
