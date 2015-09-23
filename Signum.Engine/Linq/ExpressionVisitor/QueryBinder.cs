@@ -1144,7 +1144,7 @@ namespace Signum.Engine.Linq
                 var bin = (BinaryExpression)source;
                 return Expression.Condition(
                     Expression.NotEqual(bin.Left, Expression.Constant(null, bin.Left.Type)),
-                    BindMemberAccess(Expression.MakeMemberAccess(bin.Left, m.Member)),
+                    BindMemberAccess(Expression.MakeMemberAccess(bin.Left.UnNullify(), m.Member)),
                     BindMemberAccess(Expression.MakeMemberAccess(bin.Right, m.Member)));
             }
 

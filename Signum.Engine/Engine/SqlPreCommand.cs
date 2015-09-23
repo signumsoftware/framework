@@ -164,7 +164,7 @@ namespace Signum.Engine
                 return "\'" + ((Guid)value).ToString() + "'";
 
             if (value is DateTime)
-                return "convert(datetime, '{0:s}', 126)".FormatWith(value);
+                return "convert(datetime, '{0:yyyy-MM-ddThh:mm:ss.fff}', 126)".FormatWith(value);
 
             if (value is TimeSpan)
                 return "convert(time, '{0:g}')".FormatWith(value);
