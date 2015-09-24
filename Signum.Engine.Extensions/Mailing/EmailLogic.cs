@@ -64,7 +64,7 @@ namespace Signum.Engine.Mailing
                 if (getSmtpClient == null)
                     throw new ArgumentNullException("getSmtpClient");
 
-                FilePathLogic.AssertStarted(sb);
+                EmbeddedFilePathLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailLogic.GetSmtpClient = getSmtpClient;
