@@ -154,9 +154,9 @@ namespace Signum.Entities.Mailing
         public EmailAttachmentType Type { get; set; }
 
         [NotNullable]
-        FilePathEntity file;
+        EmbeddedFilePathEntity file;
         [NotNullValidator]
-        public FilePathEntity File
+        public EmbeddedFilePathEntity File
         {
             get { return file; }
             set
