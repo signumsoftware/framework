@@ -132,7 +132,7 @@ namespace Signum.Engine.Word
         public static void RegisterTransformer(WordTransformerSymbol transformerSymbol, Action<WordContext, WordprocessingDocument> transformer)
         {
             if (transformerSymbol == null)
-                throw new ArgumentNullException(nameof(transformerSymbol));
+                throw AutoInitAttribute.ArgumentNullException(typeof(WordTransformerSymbol), nameof(transformerSymbol));
 
             Transformers.Add(transformerSymbol, transformer);
         }

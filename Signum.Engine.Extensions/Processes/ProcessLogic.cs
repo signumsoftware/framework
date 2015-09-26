@@ -190,15 +190,15 @@ namespace Signum.Engine.Processes
             return Disposable.Combine(ApplySession, f => f(process));
         }
 
-        public static void Register(ProcessAlgorithmSymbol processAlgorthm, IProcessAlgorithm logic)
+        public static void Register(ProcessAlgorithmSymbol processAlgorithm, IProcessAlgorithm logic)
         {
-            if (processAlgorthm == null)
-                throw new ArgumentNullException("processAlgorthmSymbol");
+            if (processAlgorithm == null)
+                throw AutoInitAttribute.ArgumentNullException(typeof(ProcessAlgorithmSymbol), nameof(processAlgorithm));
 
             if (logic == null)
-                throw new ArgumentNullException("logic");
+                throw new ArgumentNullException(nameof(logic));
 
-            registeredProcesses.Add(processAlgorthm, logic);
+            registeredProcesses.Add(processAlgorithm, logic);
         }
 
 
