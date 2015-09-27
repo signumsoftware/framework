@@ -333,7 +333,7 @@ namespace Signum.Entities.Authorization
         internal SqlPreCommand ImportXml(XElement element, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
         {
             var current = Database.RetrieveAll<RuleTypeEntity>().GroupToDictionary(a => a.Role);
-            var xRoles = element.Element("Types")?.Let(t => t.Elements("Role")).EmptyIfNull();
+            var xRoles = (element.Element("Types")?.Elements("Role")).EmptyIfNull();
             var should = xRoles.ToDictionary(x => roles[x.Attribute("Name").Value]);
 
             Table table = Schema.Current.Table(typeof(RuleTypeEntity));

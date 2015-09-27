@@ -2,6 +2,7 @@
 using Signum.Engine.Maps;
 using Signum.Entities.Files;
 using Signum.Utilities;
+using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,6 +15,11 @@ namespace Signum.Engine.Files
 {
     public static class EmbeddedFilePathLogic
     {
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmbeddedFilePathLogic.Start(null, null)));
+        }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -54,5 +60,7 @@ namespace Signum.Engine.Files
             efp.BinaryFile = null;
             return efp;
         }
+
+        
     }
 }
