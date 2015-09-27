@@ -115,11 +115,27 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static string TypeName(this Type type)
         {
+            List<Type> arguments = type.IsGenericType ? type.GetGenericArguments().ToList() : null;
+
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in type.Follow(a => a.IsNested ? a.DeclaringType : null).Reverse())
+            {
+                if (sb.Length > 0)
+                    sb.Append(".");
+
+                sb.Append(TypeNameSimple(item, arguments));
+            }
+
+            return sb.ToString();
+        }
+
+        static string TypeNameSimple(Type type, List<Type> globalGenericArguments)
+        {
             if (type == typeof(object))
                 return "object";
 
             if (type.IsEnum)
-                return type.Name; 
+                return type.Name;
 
             string result = basicTypes.TryGetC(Type.GetTypeCode(type));
             if (result != null)
@@ -132,13 +148,13 @@ namespace Signum.Utilities.ExpressionTrees
             if (ut != null)
                 return "{0}?".FormatWith(ut.TypeName());
 
-            if (type.IsGenericType)
+            if (type.IsGenericType && globalGenericArguments.Count > 0)
             {
-                if (type.IsGenericTypeDefinition)
-                    return "{0}<{1}>".FormatWith(type.Name.Split('`')[0], type.GetGenericArguments().ToString(_ => "", ","));
+                var args = globalGenericArguments.Take(type.GetGenericArguments().Length).ToList();
 
-                return "{0}<{1}>".FormatWith(type.Name.Split('`')[0], type.GetGenericArguments().ToString(t => TypeName(t), ","));
+                globalGenericArguments.RemoveRange(0, args.Count);
 
+                return "{0}<{1}>".FormatWith(type.Name.Before('`'), args.ToString(t => TypeName(t), ","));
             }
 
             return type.Name;

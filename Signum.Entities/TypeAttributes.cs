@@ -11,11 +11,15 @@ using Signum.Utilities.ExpressionTrees;
 namespace Signum.Entities
 {
     /// <summary>
-    /// When used on a static class, auto-initializes his static fields of symbols or operations 
+    /// When used on a static class, auto-initializes its static fields of symbols or operations 
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class AutoInitAttribute : Attribute
     {
+        public static Exception ArgumentNullException(Type argumentType, string argumentName)
+        {
+            return new ArgumentNullException(argumentName, $"The argument '{argumentName}' of type '{argumentType.TypeName()}' is null. \r\nAre you missing an [AutoInit] attribute?");
+        }
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Property, AllowMultiple = false)]
