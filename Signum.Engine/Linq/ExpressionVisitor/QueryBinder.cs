@@ -1926,7 +1926,7 @@ namespace Signum.Engine.Linq
             ParameterExpression toInsertParam = Expression.Parameter(toInsert.Type, "toInsert");
 
             List<ColumnAssignment> assignments = new List<ColumnAssignment>();
-            using (SetCurrentSource(pr.Select.From))
+            using (SetCurrentSource(pr.Select))
             {
                 map.Add(param, pr.Projector);
                 map.Add(toInsertParam, toInsert);
@@ -2752,6 +2752,18 @@ namespace Signum.Engine.Linq
                 return new UpdateExpression(update.Table, select, where, assigments);
             }
             return update;
+        }
+
+        protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        {
+            var source = VisitSource(insertSelect.Source);
+            var assigments = Visit(insertSelect.Assigments, VisitColumnAssigment);
+            if (source != insertSelect.Source || assigments != insertSelect.Assigments)
+            {
+                var select = (source as SourceWithAliasExpression) ?? WrapSelect(source);
+                return new InsertSelectExpression(insertSelect.Table, select, assigments);
+            }
+            return insertSelect;
         }
 
         private SelectExpression WrapSelect(SourceExpression source)
