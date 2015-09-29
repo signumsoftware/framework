@@ -465,5 +465,15 @@ namespace Signum.Test.LinqProvider
                 .Select(gr => new { gr.Key, Count = gr.Count() })
                 .ToList();
         }
+
+
+        [TestMethod]
+        public void GroupByCount()
+        {
+            var list = Database.Query<AlbumEntity>()
+                .GroupBy(a => a.Songs.Count)
+                .Select(gr => new { NumSongs =  gr.Key, Count = gr.Count() })
+                .ToList();
+        }
     }
 }

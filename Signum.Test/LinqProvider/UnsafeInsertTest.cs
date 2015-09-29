@@ -130,5 +130,19 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 //tr.Commit();
             }
         }
+
+        [TestMethod]
+        public void InsertDistinct()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int value = Database.Query<LabelEntity>().Select(a => a.Country).Distinct().UnsafeInsert(c => new CountryEntity
+                {
+                    Name = "Clone of " + c.Name,
+                    Ticks = 0
+                });
+                //tr.Commit();
+            }
+        }
     }
 }

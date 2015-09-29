@@ -295,7 +295,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareAggregate(AggregateExpression a, AggregateExpression b)
         {
-            return a.AggregateFunction == b.AggregateFunction && Compare(a.Source, b.Source);
+            return a.AggregateFunction == b.AggregateFunction && Compare(a.Expression, b.Expression);
         }
 
         protected virtual bool CompareAggregateSubquery(AggregateRequestsExpression a, AggregateRequestsExpression b)
