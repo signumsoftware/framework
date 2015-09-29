@@ -298,21 +298,21 @@ namespace Signum.Engine.Linq
 
     internal class AggregateExpression : DbExpression
     {
-        public readonly Expression Source;
+        public readonly Expression Expression;
         public readonly AggregateFunction AggregateFunction;
-        public AggregateExpression(Type type, Expression source, AggregateFunction aggregateFunction)
+        public AggregateExpression(Type type, Expression expression, AggregateFunction aggregateFunction)
             : base(DbExpressionType.Aggregate, type)
         {
-            if (source == null && aggregateFunction != AggregateFunction.Count) 
-                throw new ArgumentNullException("source");
+            if (expression == null && aggregateFunction != AggregateFunction.Count) 
+                throw new ArgumentNullException("expression");
 
-            this.Source = source;
+            this.Expression = expression;
             this.AggregateFunction = aggregateFunction;
         }
 
         public override string ToString()
         {
-            return "{0}({1})".FormatWith(AggregateFunction, Source.ToString() ?? "*");
+            return "{0}({1})".FormatWith(AggregateFunction, Expression.TryToString() ?? "*");
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
