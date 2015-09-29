@@ -1,5 +1,4 @@
-﻿import { PropertyRoute } from 'Framework/Signum.React/Scripts/Meta'
-
+﻿import { PropertyRoute } from 'Framework/Signum.React/Scripts/Reflection'
 
 export class TypeContext<T> {
 

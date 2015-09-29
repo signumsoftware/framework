@@ -173,7 +173,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="Views\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
-    <TypeScriptCompile Include="Scripts\Meta.ts" />
+    <TypeScriptCompile Include="Scripts\Reflection.ts" />
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
