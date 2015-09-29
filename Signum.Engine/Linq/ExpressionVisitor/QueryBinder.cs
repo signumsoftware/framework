@@ -763,11 +763,25 @@ namespace Signum.Engine.Linq
 
             Expression key = GroupEntityCleaner.Clean(MapVisitExpand(keySelector, projection));
             ProjectedColumns keyPC = ColumnProjector.ProjectColumns(key, alias, isGroupKey: true, selectTrivialColumns: true);  // Use ProjectColumns to get group-by expressions from key expression
-            Expression elemExpr = elementSelector == null ? projection.Projector : MapVisitExpand(elementSelector, projection);
+            
+            var select = projection.Select;
+
+            if (keyPC.Columns.Any(c => ContainsAggregateVisitor.ContainsAggregate(c.Expression))) //SQL Server doesn't like to use aggregates (like Count) as grouping keys, and a intermediate query is necessary
+            {
+                select = new SelectExpression(alias, false, null, keyPC.Columns, projection.Select, null, null, null, 0);
+                alias = NextSelectAlias();
+                ColumnGenerator cg = new ColumnGenerator();
+                var newColumns = keyPC.Columns.Select(cd => cg.MapColumn(cd.GetReference(select.Alias))).ToReadOnly();
+                var dic = newColumns.ToDictionary(cd => (ColumnExpression)cd.Expression, cd => cd.GetReference(alias));
+                var newProjector = ColumnReplacerVisitor.ReplaceColumns(dic, keyPC.Projector);
+                keyPC = new ProjectedColumns(newProjector, newColumns);
+            }
+
+            Expression elemExpr = MapVisitExpand(elementSelector, projection);
 
             Expression subqueryKey = GroupEntityCleaner.Clean(MapVisitExpand(keySelector, subqueryProjection));// recompute key columns for group expressions relative to subquery (need these for doing the correlation predicate
             ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumns(subqueryKey, aliasGenerator.Raw("basura"), isGroupKey: true, selectTrivialColumns: true); // use same projection trick to get group-by expressions based on subquery
-            Expression subqueryElemExpr = elementSelector == null ? subqueryProjection.Projector : MapVisitExpand(elementSelector, subqueryProjection); // compute element based on duplicated subquery
+            Expression subqueryElemExpr = MapVisitExpand(elementSelector, subqueryProjection); // compute element based on duplicated subquery
 
             Expression subqueryCorrelation = keyPC.Columns.IsEmpty() ? null :
                 keyPC.Columns.Zip(subqueryKeyPC.Columns, (c1, c2) => SmartEqualizer.EqualNullableGroupBy(new ColumnExpression(c1.Expression.Type, alias, c1.Name), c2.Expression))
@@ -791,14 +805,47 @@ namespace Signum.Engine.Linq
             {
                 GroupAlias = alias,
                 Projector = elemExpr,
-                Source = projection.Select,
+                Source = select,
             });
 
             var result = new ProjectionExpression(
-                new SelectExpression(alias, false, null, keyPC.Columns, projection.Select, null, null, keyPC.Columns.Select(c => c.Expression), 0),
+                new SelectExpression(alias, false, null, keyPC.Columns, select, null, null, keyPC.Columns.Select(c => c.Expression), 0),
                 resultExpr, null, resultType.GetGenericTypeDefinition().MakeGenericType(resultExpr.Type));
 
             return result;
+        }
+
+        class ContainsAggregateVisitor : DbExpressionVisitor
+        {
+            bool hasAggregate;
+
+            public static bool ContainsAggregate(Expression exp)
+            {
+                var cav = new ContainsAggregateVisitor();
+                cav.Visit(exp);
+                return cav.hasAggregate;
+            }
+
+            protected internal override Expression VisitAggregate(AggregateExpression aggregate)
+            {
+                hasAggregate = true;
+                return base.VisitAggregate(aggregate);
+            }
+        }
+
+        class ColumnReplacerVisitor : DbExpressionVisitor
+        {
+            Dictionary<ColumnExpression, ColumnExpression> Replacements;
+
+            public static Expression ReplaceColumns(Dictionary<ColumnExpression, ColumnExpression> replacements, Expression exp)
+            {
+                return new ColumnReplacerVisitor { Replacements = replacements }.Visit(exp);
+            }
+
+            protected internal override Expression VisitColumn(ColumnExpression column)
+            {
+                return Replacements.TryGetC(column) ?? column;
+            }
         }
 
 
