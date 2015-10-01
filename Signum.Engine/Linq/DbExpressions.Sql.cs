@@ -312,7 +312,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "{0}({1})".FormatWith(AggregateFunction, Expression.TryToString() ?? "*");
+            return "{0}({1})".FormatWith(AggregateFunction, Expression?.ToString() ?? "*");
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
