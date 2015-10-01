@@ -103,7 +103,6 @@ namespace Signum.Engine
                         return SqlBuilder.DropStatistics(tn, dif.Stats.Where(a => a.Columns.Any(removedColums.Contains)).ToList());
                     },
                      Spacing.Double);
-
                 
                 SqlPreCommand dropIndices =
                     Synchronizer.SynchronizeScript(model, database,
@@ -340,7 +339,7 @@ namespace Signum.Engine
 
             return new SqlPreCommandSimple(
 @"UPDATE {2}
-SET {0} = GetId{5}({4}.Id)
+SET {0} =  -- get {5} id from {4}.Id
 FROM {1} {2}
 JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                 tn, ag.NextTableAlias(tn),
