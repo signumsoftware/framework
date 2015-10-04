@@ -330,8 +330,8 @@ namespace Signum.Engine.Linq
 
         protected internal virtual Expression VisitAggregate(AggregateExpression aggregate)
         {
-            Expression source = Visit(aggregate.Source);
-            if (source != aggregate.Source)
+            Expression source = Visit(aggregate.Expression);
+            if (source != aggregate.Expression)
                 return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction);
             return aggregate;
         }
