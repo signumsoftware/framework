@@ -13,10 +13,10 @@
     <Parameter Name="UnitMargin" Type="Number" ValueDefinition="20" />
     <Parameter Name="Scale" Type="Enum" ValueDefinition="ZeroMax(M) | MinMax | Log(M)" ColumnIndex="2" />
     <Parameter Name="NumberOpacity" Type="Number" ValueDefinition="0.8" />
+    <Parameter Name="NumberColor" Type="String" ValueDefinition="White" />
   </Parameters>
   <Icon FileName="multicolumns.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmpJREFUeNrsmDFLHEEUgGdFAkIqwV+QTmxSB5IioFinicUFEoR0CWKXf5DCxk4sLK5I/oEYiGiRUtKI+A+UBCKEE3Fn3nvOm93B2515d3OLnFvswHIwezv7zfvevJ3djIhUm9uMannrAB8EsLfZpy6CHWAHGG+zk/x5u/+L9o/Pgv7VV4vqU+9F9uiADPf+7eugf+/7TwZsp2JAao/iWMMI4L+DNcr//g76nyw8V/Mr37KpATKcAQz6Ge7p0segf3C6M13FYOFigK3IQc49w4eBdgIioo0gKN3GCEKZe9pYxRqmv4qvDtfJXJ0rQqMUQfGL2p75PARIDjCHNEAe48v5V3Wxvhss++WXi2rjXbzQRwEZbu7Zm/DEYbFyWS3nnjs0JsHxRC8u/6gPa0Wh1/ba65tc/R/cqh9HJwz4MIrB5p6xkdMWMk9YxRULlQpQGOBj4hwkwviNOLo8sM8/Aw40CQ5vg/rpJjqmCsQjSBC9UQFYqNXaQ2ISHEFetcAVwEBTQBQVmVKLBwVJcQ2O3CIL9TZS7AFjitzCKGfPmiTAAK4ErOttFEEeXFKU+/wr4UB68a/B+evrescVemEVk6iIC7OLHkOiPHgAV+ZwXa9ploNGVKShgOPo4Yi9YB3uvgpU9ZomEYzBeUVe76joFYpDOF8FhvU2ArSFUFRkylnjmJ10DM5PcFgvK2+oOK5I2wGTtvkRuPsyNVQFsJFiFBUBgttqJT1/I62ud5yJGSnBJUUIKS9J8gQm0SsCukkJitL00gjAdL0ioDayosTN32jARL3cMv4E3LbPb/2tXlYB7D4edYCP2O4EGADo6x722MhiTAAAAABJRU5ErkJggg==]]></Icon>
-  <Script>
-        <![CDATA[function DrawChart(chart, data){
+  <Script><![CDATA[function DrawChart(chart, data){
   
    var dim0, series, title;
   
@@ -214,11 +214,14 @@
         .attr('y', function (r) { return yRule.size('content') - y(r.value) / 2; })
         .attr('transform', function(r) { return translate(xSubscale(s.key),0); })
         .attr('opacity', data.parameters["NumberOpacity"])
-        .attr('fill', 'white')
+        .attr('fill',data.parameters["NumberColor"])
         .attr('dominant-baseline', 'central')
         .attr('text-anchor', 'middle')
         .attr('font-weight', 'bold')
-        .text(function (r) { return r.value; });
+        .text(function (r) { return r.value; })     
+        .attr('data-click', function (r) { return getClickKeys(r.rowClick, data.columns); })
+      	.append('svg:title')
+      	.text(function (r) { return r.niceToString; });
       }
       
 	});

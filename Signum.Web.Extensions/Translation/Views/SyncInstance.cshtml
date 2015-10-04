@@ -109,7 +109,7 @@ else
                         translations.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
                     }
                     
-                        @Html.DropDownList(elementName, translations);
+                        @Html.SafeDropDownList(elementName, translations);
                         <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
                 }
                     }

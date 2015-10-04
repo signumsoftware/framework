@@ -143,3 +143,7 @@ div.chart-column-parameters > fieldset > legend
 .sf-chart-color-input.form-control {
     width: auto !important;
 }
+
+[data-click] {
+    cursor: pointer;
+}
