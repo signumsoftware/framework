@@ -10,7 +10,7 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Operations
 {
-    public delegate F Overrider<F>(F baseFunc); 
+    public delegate F Overrider<F>(F baseFunc);
 
     public class Graph<T>
          where T : class, IEntity
@@ -25,7 +25,7 @@ namespace Signum.Engine.Operations
             Type IOperation.ReturnType { get { return typeof(T); } }
             IEnumerable<Enum> IOperation.UntypedFromStates { get { return null; } }
             IEnumerable<Enum> IOperation.UntypedToStates { get { return Enumerable.Empty<Enum>(); } }
-            Type IOperation.StateType { get { return null; } } 
+            Type IOperation.StateType { get { return null; } }
 
             public bool LogAlsoIfNotSaved { get; set; }
 
@@ -58,7 +58,7 @@ namespace Signum.Engine.Operations
                     try
                     {
                         using (Transaction tr = new Transaction())
-                        { 
+                        {
                             T result;
                             using (OperationLogic.AllowSave<T>())
                             using (OperationLogic.OnSuroundOperation(this, null, log, args))
@@ -454,6 +454,8 @@ namespace Signum.Engine.Operations
                 return null;
             }
 
+
+
             void IExecuteOperation.Execute(IEntity entity, params object[] args)
             {
                 using (HeavyProfiler.Log("Execute", () => Symbol.Symbol.Key))
@@ -478,6 +480,9 @@ namespace Signum.Engine.Operations
                             using (OperationLogic.AllowSave(entity.GetType()))
                             using (OperationLogic.OnSuroundOperation(this, log, entity, args))
                             {
+                                if (OperationLogic.BeforeExecute != null)
+                                    OperationLogic.BeforeExecute.Invoke(Symbol.Symbol, entity, args);
+
                                 Execute((T)entity, args);
 
                                 AssertEntity((T)entity);
@@ -490,6 +495,10 @@ namespace Signum.Engine.Operations
 
                             using (ExecutionMode.Global())
                                 log.Save();
+
+
+                            if (OperationLogic.AfterExecute != null)
+                                OperationLogic.AfterExecute.Invoke(Symbol.Symbol, entity, args);
 
                             tr.Commit();
                         }

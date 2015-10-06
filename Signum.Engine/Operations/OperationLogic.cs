@@ -22,6 +22,11 @@ namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
+
+
+        public static Action<Symbol, IEntity, object[]> BeforeExecute;
+        public static Action<Symbol, IEntity, object[]> AfterExecute;
+
         static Expression<Func<Entity, IQueryable<OperationLogEntity>>> OperationLogsEntityExpression =
             e => Database.Query<OperationLogEntity>().Where(a => a.Target.RefersTo(e));
         [ExpressionField("OperationLogsEntityExpression")]
