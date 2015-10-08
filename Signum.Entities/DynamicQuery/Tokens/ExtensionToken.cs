@@ -42,7 +42,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return DisplayName + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return DisplayName;
         }
 
         Type type;

@@ -29,7 +29,7 @@ namespace Signum.Engine.Maps
 
         static string Clean(string command)
         {
-            return command.Trim(' ', '\r', '\n', ';');
+            return command.Replace("\r", "").Trim(' ', '\n', ';');
         }
 
         #region Views
