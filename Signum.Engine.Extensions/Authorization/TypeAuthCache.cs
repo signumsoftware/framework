@@ -307,7 +307,7 @@ namespace Signum.Entities.Authorization
                  let rac = rules[r]
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
-                         from k in allTypes ?? rac.DefaultDictionary().OverrideDictionary?.Keys.EmptyIfNull()
+                         from k in allTypes ?? (rac.DefaultDictionary().OverrideDictionary?.Keys).EmptyIfNull()
                          let allowedBase = rac.GetAllowedBase(k)
                          let allowed = rac.GetAllowed(k)
                          where allTypes != null || !allowed.Equals(allowedBase)
