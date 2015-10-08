@@ -78,7 +78,7 @@ namespace Signum.Web.Files
                 result.Add("dragAndDrop", false);
             result.Add("download", (int)Download);
 
-            if (typeof(IFilePath).IsAssignableFrom(this.Type) && !this.ReadOnly)
+            if (typeof(IFilePath).IsAssignableFrom(this.Type.CleanType()) && !this.ReadOnly)
             {
                 if (FileType == null)
                     throw new ArgumentException("FileType is mandatory for FilePathEntity (FileLine {0})".FormatWith(Prefix));
