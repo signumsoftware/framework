@@ -105,8 +105,7 @@ namespace Signum.Web
 
             var label = new HtmlTag("label", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-checkbox-element");
 
-            if (entityListCheckBox.CustomizeLabel != null)
-                entityListCheckBox.CustomizeLabel(label, lite);
+            entityListCheckBox.CustomizeLabel?.Invoke(label, lite);
 
             using (sb.SurroundLine(label))
             {
@@ -126,6 +125,8 @@ namespace Signum.Web
 
                 if (entityListCheckBox.ReadOnly)
                     cb.Attr("disabled", "disabled");
+                
+                entityListCheckBox.CustomizeCheckBox?.Invoke(cb, lite);
 
                 sb.AddLine(cb);
 

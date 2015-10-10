@@ -28,5 +28,6 @@ namespace Signum.Web
         }
 
         public Action<HtmlTag, Lite<IEntity>> CustomizeLabel = null;
+        public Action<HtmlTag, Lite<IEntity>> CustomizeCheckBox = null;
     }
 }
