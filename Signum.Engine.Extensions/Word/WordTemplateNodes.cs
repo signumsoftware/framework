@@ -372,6 +372,7 @@ namespace Signum.Engine.Word
         public ForeachNode(ValueProviderBase valueProvider)
         {
             this.ValueProvider = valueProvider;
+            valueProvider.IsForeach = true;
         }
 
         public ForeachNode(ForeachNode original)

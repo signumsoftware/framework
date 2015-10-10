@@ -24,6 +24,8 @@ namespace Signum.Engine.Templating
     {
         public string Variable { get; set; }
 
+        public bool IsForeach { get; set; }
+
         public abstract object GetValue(TemplateParameters p);
 
         public abstract string Format { get; }
@@ -122,6 +124,21 @@ namespace Signum.Engine.Templating
             {
                 case "":
                     {
+                        if(token.StartsWith("$"))
+                        {
+                            string v = token.TryBefore('.') ?? token;
+
+                            ValueProviderBase vp;
+                            if (!variables.TryGetValue(v, out vp))
+                            {
+                                addError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
+                                return null;
+                            }
+
+                            if (!(vp is TokenValueProvider))
+                                return new ContinueValueProvider(token.TryAfter('.'), vp, addError);
+                        }
+
                         ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, qd, variables, addError);
 
                         if (result.QueryToken != null && TranslateInstanceValueProvider.IsTranslateInstanceCanditate(result.QueryToken))
@@ -666,6 +683,94 @@ namespace Signum.Engine.Templating
 
                 if (Members != null)
                     remainingFieldsOrProperties = Members.ToString(a => a.Name, ".");
+            }
+
+            Declare(sc.Variables);
+        }
+    }
+
+    public class ContinueValueProvider : ValueProviderBase
+    {
+        string fieldOrPropertyChain;
+        List<MemberInfo> Members;
+        ValueProviderBase Parent; 
+
+        public ContinueValueProvider(string fieldOrPropertyChain, ValueProviderBase parent, Action<bool, string> addError)
+        {
+            this.Parent = parent;
+
+            this.Members = ParsedModel.GetMembers(ParentType(), fieldOrPropertyChain, addError);
+        }
+
+        private Type ParentType()
+        {
+            if (Parent.IsForeach)
+                return Parent.Type?.ElementType();
+
+            return Parent.Type;
+        }
+
+        public override object GetValue(TemplateParameters p)
+        {
+            object value;
+            if (!p.RuntimeVariables.TryGetValue(Parent.Variable, out value))
+                throw new InvalidOperationException("Variable {0} not found".FormatWith(Parent.Variable));
+
+            foreach (var m in Members)
+            {
+                value = Getter(m, value);
+                if (value == null)
+                    break;
+            }
+
+            return value;
+        }
+
+        internal static object Getter(MemberInfo member, object value)
+        {
+            var pi = member as PropertyInfo;
+
+            if (pi != null)
+                return pi.GetValue(value, null);
+
+            return ((FieldInfo)member).GetValue(value);
+        }
+
+        public override string Format
+        {
+            get { return Reflector.FormatString(this.Type); }
+        }
+
+        public override Type Type
+        {
+            get { return Members?.Let(ms => ms.Last().ReturningType().Nullify()); }
+        }
+
+        public override void FillQueryTokens(List<QueryToken> list)
+        {
+        }
+
+        public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables, string afterToken)
+        {
+            sb.Append("[");
+            sb.Append(Parent.Variable);
+            sb.Append(".");
+            sb.Append(Members == null ? fieldOrPropertyChain : Members.ToString(a => a.Name, "."));
+            sb.Append(afterToken);
+            sb.Append("]");
+
+            if (Variable.HasItems())
+                sb.Append(" as " + Variable);
+        }
+
+        public override void Synchronize(SyncronizationContext sc, string p)
+        {
+            if (Members == null)
+            {
+                Members = sc.GetMembers(fieldOrPropertyChain, ParentType());
+
+                if (Members != null)
+                    fieldOrPropertyChain = Members.ToString(a => a.Name, ".");
             }
 
             Declare(sc.Variables);
