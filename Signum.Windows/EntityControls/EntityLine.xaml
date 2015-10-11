@@ -70,7 +70,6 @@
             <Button Focusable="False" x:Name="btCreate" Style="{StaticResource RoundButton}" Click="btCreate_Click"  Content="{StaticResource Create}" ToolTip="{m:Loc {x:Static d:OperationMessage.Create}}"/>
             <Button Focusable="False" x:Name="btFind" Style="{StaticResource RoundButton}" Click="btFind_Click" Content="{StaticResource Find}" ToolTip="{m:Loc {x:Static d:SearchMessage.Find}}"/>
             <Button Focusable="False" x:Name="btView" Style="{StaticResource RoundButton}" Click="btView_Click"  Content="{StaticResource View}" ToolTip="{m:Loc {x:Static d:EntityControlMessage.View}}"/>
-            <Button Focusable="False" x:Name="btNavigate" Style="{StaticResource RoundButton}" Click="btNavigate_Click" Content="{StaticResource Navigate}" ToolTip="{m:Loc {x:Static d:EntityControlMessage.Navigate}}"/>
             <Button Focusable="False" x:Name="btRemove" Style="{StaticResource RoundButton}" Click="btRemove_Click" Content="{StaticResource Remove}" ToolTip="{m:Loc {x:Static d:EntityControlMessage.Remove}}"/>
         </StackPanel>
     </Grid>
