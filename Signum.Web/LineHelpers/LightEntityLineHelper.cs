@@ -15,7 +15,7 @@ namespace Signum.Web
 {
     public static class LightEntityLineHelper
     {
-        public static MvcHtmlString LightEntityLine(this HtmlHelper helper, Lite<IEntity> lite, bool isSearch)
+        public static MvcHtmlString LightEntityLine(this HtmlHelper helper, Lite<IEntity> lite, bool isSearch, bool targetBlank = true, string innerText = null)
         {
             if (lite == null)
                 return MvcHtmlString.Empty;
@@ -23,15 +23,21 @@ namespace Signum.Web
             if (lite.ToString() == null)
                 Database.FillToString(lite);
 
-            MvcHtmlString result = Navigator.IsNavigable(lite.EntityType, null, isSearch) ?
-                helper.Href("",
-                    lite.ToString(),
-                    Navigator.NavigateRoute(lite),
-                    HttpUtility.HtmlEncode(EntityControlMessage.View.NiceToString()),
-                    "", null) :
-                lite.ToString().EncodeHtml();
+            if (!Navigator.IsNavigable(lite.EntityType, null, isSearch))
+                return (innerText ?? lite.ToString()).EncodeHtml();
 
-            return result;
+            Dictionary<string, object> htmlAtributes = new Dictionary<string, object>();
+            if (targetBlank)
+                htmlAtributes.Add("target", "_blank");
+
+            if (!Navigator.EntitySettings(lite.EntityType).AvoidPopup)
+                htmlAtributes.Add("data-entity-link", lite.Key());
+
+            return helper.Href("",
+                    innerText ?? lite.ToString(),
+                    Navigator.NavigateRoute(lite),
+                    HttpUtility.HtmlEncode(lite.ToString()),
+                    "sf-light-entity-line", htmlAtributes);
         }
     }
 }

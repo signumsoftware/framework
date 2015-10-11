@@ -36,16 +36,7 @@ namespace Signum.Web
         protected override Dictionary<string, object> OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
-            if(Create)
-                result.Add("create", true);
-            if (Remove)
-                result.Add("remove", true);
-            if (Find)
-                result.Add("find", true);
-            if (View)
-                result.Add("view", true);
-            if (Navigate)
-                result.Add("navigate", true);
+           
             if (Move)
                 result.Add("reorder", true);
             if (MaxElements != null)

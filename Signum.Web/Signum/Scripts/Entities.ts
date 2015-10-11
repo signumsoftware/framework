@@ -22,6 +22,7 @@ export interface TypeInfo {
     creable?: boolean;
     findable?: boolean;
     preConstruct?: (extraJsonArgs?: FormObject) => Promise<any>;
+    avoidPopup?: boolean;
 }
 
 export class RuntimeInfo {
@@ -86,18 +87,16 @@ export class RuntimeInfo {
 }
 
 export class EntityValue {
-    constructor(runtimeInfo: RuntimeInfo, toString?: string, link?: string) {
+    constructor(runtimeInfo: RuntimeInfo, toString?: string) {
         if (runtimeInfo == null)
             throw new Error("runtimeInfo is mandatory for an EntityValue");
 
         this.runtimeInfo = runtimeInfo;
         this.toStr = toString;
-        this.link = link;
     }
 
     runtimeInfo: RuntimeInfo;
     toStr: string;
-    link: string;
 
     assertPrefixAndType(prefix: string, types: TypeInfo[]) {
         if (types == null) // All
@@ -138,8 +137,8 @@ export class EntityHtml extends EntityValue {
 
     hasErrors: boolean;
 
-    constructor(prefix: string, runtimeInfo: RuntimeInfo, toString?: string, link?: string) {
-        super(runtimeInfo, toString, link);
+    constructor(prefix: string, runtimeInfo: RuntimeInfo, toString?: string) {
+        super(runtimeInfo, toString);
 
         if (prefix == null)
             throw new Error("prefix is mandatory for EntityHtml");
