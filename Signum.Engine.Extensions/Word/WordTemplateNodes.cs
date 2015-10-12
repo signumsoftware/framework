@@ -419,25 +419,19 @@ namespace Signum.Engine.Word
         protected internal override void RenderNode(WordTemplateParameters p)
         {
             var parent = this.Parent;
-            int index = parent.ChildElements.IndexOf(this);
-            parent.RemoveChild(this);
-
-            List<Tuple<BlockNode, IEnumerable<ResultRow>>> tuples = new List<Tuple<BlockNode, IEnumerable<ResultRow>>>();
+            
             this.ValueProvider.Foreach(p, () =>
             {
                 var clone = (BlockNode)this.ForeachBlock.CloneNode(true);
 
-                parent.InsertAt(clone, index++);
+                var index = parent.ChildElements.IndexOf(this);
+                
+                parent.InsertAt(clone, index);
 
-                tuples.Add(Tuple.Create(clone, p.Rows));
+                clone.RenderNode(p);
             });
 
-            var prev = p.Rows;
-            foreach (var tuple in tuples)
-            {
-                using (p.OverrideRows(tuple.Item2))
-                    tuple.Item1.RenderNode(p);
-            }
+            parent.RemoveChild(this);
         }
 
         protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
