@@ -50,7 +50,7 @@ export function attachMavigatePopupClick(container: JQuery, prefix: string) {
         event.stopPropagation();
         event.preventDefault();
 
-        navigatePopup(new Entities.EntityHtml(prefix, Entities.RuntimeInfo.fromKey(liteKey)));
+        navigatePopup(new Entities.EntityHtml(prefix.child("nav"), Entities.RuntimeInfo.fromKey(liteKey)));
     });
 }
 

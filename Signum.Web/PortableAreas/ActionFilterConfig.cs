@@ -64,11 +64,11 @@ namespace Signum.Web.PortableAreas
 
             if (addFilterDelegate != null)
             {
-                var ctx = new ConditionalFilterContext(controllerContext, actionDescription, filterInfo); 
+                var ctx = new ConditionalFilterContext(controllerContext, actionDescription, filterInfo);
 
-                filterInfo.AddFilters(
-                    addFilterDelegate.GetInvocationListTyped()
-                    .Select(del => del(ctx)).NotNull());
+                var filters = addFilterDelegate.GetInvocationListTyped().Select(del => del(ctx)).NotNull().ToList();
+
+                filterInfo.AddFilters(filters);
             }
         }
 
