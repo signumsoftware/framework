@@ -225,13 +225,13 @@ namespace Signum.Utilities
                 if (number.Value == 1)
                     return GetPart(genderAwareText, "1:");
 
-                return GetPart(genderAwareText, number.Value + ":", "");
+                return GetPart(genderAwareText, number.Value + ":", ":");
             }
 
             if (number.Value == 1)
                 return GetPart(genderAwareText, "1" + gender.Value + ":", "1:");
 
-            return GetPart(genderAwareText, gender.Value + number.Value + ":", gender.Value + ":", number.Value + ":", "");
+            return GetPart(genderAwareText, gender.Value + number.Value + ":", gender.Value + ":", number.Value + ":", ":");
         }
 
         static string GetPart(string textToReplace, params string[] prefixes)

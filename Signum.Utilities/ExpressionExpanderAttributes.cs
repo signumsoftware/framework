@@ -37,6 +37,12 @@ namespace Signum.Utilities
         }
     }
 
+    [System.AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+    public class AvoidEagerEvaluationAttribute : Attribute
+    {
+      
+    }
+
     //The member is polymorphic and should be expanded in a latter stage
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
     public sealed class PolymorphicExpansionAttribute : Attribute
