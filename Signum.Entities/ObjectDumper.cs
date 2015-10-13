@@ -200,7 +200,7 @@ namespace Signum.Entities
                             DumpPropertyOrField(field.FieldType, GetFieldName(field), val);
                         }
 
-                        if (!showIgnoredFields && (field.HasAttribute<IgnoreAttribute>()) || (Reflector.FindPropertyInfo(field)?.HasAttribute<IgnoreAttribute>() == true))
+                        if (!showIgnoredFields && (field.HasAttribute<IgnoreAttribute>()) || (Reflector.TryFindPropertyInfo(field)?.HasAttribute<IgnoreAttribute>() == true))
                             continue;
 
                         DumpPropertyOrField(field.FieldType, GetFieldName(field), field.GetValue(o));
