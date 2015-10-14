@@ -189,7 +189,7 @@ namespace Signum.Test.Environment
                 Label = mjj
             }.Execute(AlbumOperation.Save); ;
 
-            var ga = new GrammyAwardEntity { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }
+            var ga = (GrammyAwardEntity)new GrammyAwardEntity { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }
                 .Execute(AwardOperation.Save);
 
             BandEntity sigurRos = new BandEntity
