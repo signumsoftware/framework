@@ -173,7 +173,7 @@ namespace Signum.Web
             }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
-                valueLine.ValueHtmlProps.Add("autocomplete", "off");
+                valueLine.ValueHtmlProps.Add("autocomplete", "flase");
             else
                 valueLine.ValueHtmlProps.Remove("autocomplete");
 
