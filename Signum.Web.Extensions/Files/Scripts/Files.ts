@@ -187,7 +187,7 @@ export class FileLine extends Lines.EntityBase {
         this.prefix.child("sfFile").get().val("");
         if (entityValue) {
             this.prefix.child(Entities.Keys.toStr).tryGet().html(entityValue.toStr);
-            this.prefix.child(Entities.Keys.link).tryGet().html(entityValue.toStr).attr("href", entityValue.link);
+            this.prefix.child(Entities.Keys.link).tryGet().html(entityValue.toStr);
 
             if (this.options.download == DownloadBehaviour.SaveAs)
                 this.prefix.child(Entities.Keys.link).tryGet().attr("download", entityValue.toStr);
@@ -200,7 +200,8 @@ export class FileLine extends Lines.EntityBase {
 
     onUploaded(fileName: string, link: string, runtimeInfo: string, entityState: string) {
 
-        this.setEntity(new Entities.EntityValue(Entities.RuntimeInfo.parse(runtimeInfo), fileName, link));
+        this.setEntity(new Entities.EntityValue(Entities.RuntimeInfo.parse(runtimeInfo), fileName));
+        this.prefix.child(Entities.Keys.link).tryGet().attr("href", link);
 
         this.prefix.child(Entities.Keys.entityState).tryGet().val(entityState);
 

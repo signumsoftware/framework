@@ -250,7 +250,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                ((T)(IEntity)line.Target).Delete<T, T>(DeleteSymbol, args);
+                ((T)(IEntity)line.Target).Delete(DeleteSymbol, args);
 
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();

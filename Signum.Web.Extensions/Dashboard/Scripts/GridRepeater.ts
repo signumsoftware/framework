@@ -249,7 +249,7 @@ export class GridRepeater extends Lines.EntityRepeater {
 
     setupRemove() {
         this.prefix.child(Lines.EntityRepeater.key_itemsContainer).get().on("click", ".sf-grid-element  > .panel > .panel-heading > .sf-remove", e => {
-            this.removeItem_click((<HTMLElement>e.currentTarget).id.parent("btnRemove"));
+            this.removeItem_click((<HTMLElement>e.currentTarget).id.parent("btnRemove"), <any>e);
         }); 
     }
 

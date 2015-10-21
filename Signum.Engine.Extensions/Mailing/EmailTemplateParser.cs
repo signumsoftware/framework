@@ -219,7 +219,7 @@ namespace Signum.Engine.Mailing
                                 var fn = new ForeachNode(vp);
                                 stack.Peek().Nodes.Add(fn);
                                 PushBlock(fn.Block);
-
+                                vp.IsForeach = true;
                                 DeclareVariable(vp);
                                 break;
                             }
