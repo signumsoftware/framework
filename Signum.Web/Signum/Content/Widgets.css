@@ -5,6 +5,11 @@
     margin-top:-30px;
 }
 
+.modal-body > ul.sf-widgets
+{
+    margin-top: -45px;
+}
+
 ul.sf-widgets>li
 {
     display:block;

@@ -577,7 +577,7 @@ namespace Signum.Windows
         
         void UpdateViewSelection()
         {
-            btNavigate.Visibility = Navigate && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
+            btView.Visibility = Navigate && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = Remove && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
 
             SelectedItem = ((ResultRow)lvResult.SelectedItem)?.Entity;

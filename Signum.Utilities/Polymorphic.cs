@@ -67,10 +67,11 @@ namespace Signum.Utilities
             {
                 var types = interfaces.Where(a => a.Value.ContainsKey(item)).Select(a => new { a.Key, Value = a.Value[item] }).ToList();
 
-                if (types.Count > 1)
+                var groups = types.GroupBy(t => t.Value);
+                if (groups.Count() > 1)
                     throw new InvalidOperationException("Ambiguity for key {0} in type {0} between interfaces {1}".FormatWith(item, currentValue.Key.Name, types.CommaAnd(t => t.Key.Name)));
 
-                newDictionary[item] = types.SingleEx().Value;
+                newDictionary[item] = groups.Single().Key;
             }
 
             return newDictionary;

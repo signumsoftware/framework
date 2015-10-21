@@ -100,7 +100,7 @@ namespace Signum.Web
             {
                 PropertyRoute route = bl.PropertyRoute;
 
-                eb.Move = bl.PropertyRoute.FieldInfo.HasAttribute<PreserveOrderAttribute>();
+                eb.Move = Schema.Current.Settings.FieldAttributes(bl.PropertyRoute).OfType<PreserveOrderAttribute>().Any();
             }
         }
 

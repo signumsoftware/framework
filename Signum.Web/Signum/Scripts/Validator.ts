@@ -15,7 +15,6 @@ export interface ValidationResult {
     modelState: ModelState;
     isValid: boolean;
     newToStr: string;
-    newLink: string;
 }
 
 export interface ModelState {
@@ -46,8 +45,7 @@ export function validate(valOptions: ValidationOptions): Promise<ValidationResul
             var validatorResult: ValidationResult = {
                 modelState: result.ModelState,
                 isValid: isValid(result.ModelState),
-                newToStr: result[Entities.Keys.toStr],
-                newLink: result[Entities.Keys.link]
+                newToStr: result[Entities.Keys.toStr]
             };
             showErrors(options, validatorResult.modelState);
             return validatorResult

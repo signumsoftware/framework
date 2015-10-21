@@ -87,12 +87,18 @@ namespace Signum.Web
                 {
                     var lite = (itemTC.UntypedValue as Lite<IEntity>) ?? (itemTC.UntypedValue as IEntity)?.Let(i => i.ToLite(i.IsNew));
 
-                    if (lite != null && !lite.IsNew && entityStrip.Navigate)
+                    if (lite != null && (entityStrip.Navigate || entityStrip.View))
                     {
+                        var dic = new Dictionary<string, object>
+                        {
+                            { "onclick", entityStrip.SFControlThen("viewItem_click(\"" + itemTC.Prefix+ "\", event)") }
+                        };
+
                         sb.AddLine(
                             helper.Href(itemTC.Compose(EntityBaseKeys.Link),
-                            lite.ToString(), lite.IdOrNull == null ? null : Navigator.NavigateRoute(lite),
-                                JavascriptMessage.navigate.NiceToString(), "sf-entitStrip-link", null));
+                            lite.ToString(), 
+                            "#",
+                            lite.ToString(), "sf-entitStrip-link", dic));
                     }
                     else
                     {

@@ -216,15 +216,10 @@ namespace Signum.Windows
                     Implementations.Value.IsByAll ? true :
                     Implementations.Value.Types.Any(t => Navigator.IsViewable(t));
 
-            if (this.NotSet(EntityBase.NavigateProperty) && Navigate)
-            {
-                if (View)
-                    Navigate = false;
-                else
-                    Navigate = CleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(CleanType, isSearch: false) :
-                        Implementations.Value.IsByAll ? true :
-                        Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, isSearch: false));
-            }
+            if (this.NotSet(EntityBase.NavigateProperty) && Navigate)            
+                Navigate = CleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(CleanType, isSearch: false) :
+                    Implementations.Value.IsByAll ? true :
+                    Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, isSearch: false));
 
             if (this.NotSet(EntityBase.FindProperty) && Find)
                 Find = CleanType.IsEmbeddedEntity() ? false:
@@ -248,16 +243,21 @@ namespace Signum.Windows
             return Entity != null && Remove && !Common.GetIsReadOnly(this);
         }
 
-        protected bool CanView()
+        protected bool CanViewOrNavigate()
         {
-            return CanView(Entity);
+            return CanViewOrNavigate(Entity);
         }
 
-        protected virtual bool CanView(object entity)
+        protected virtual bool CanViewOrNavigate(object entity)
         {
             if (entity == null)
                 return false;
 
+            return _CanView(entity) || _CanNavigate(entity);
+        }
+
+        protected bool _CanView(object entity)
+        {
             if (View && this.NotSet(ViewProperty))
             {
                 Type entityType = CleanLite ? ((Lite<Entity>)entity).EntityType : entity.GetType();
@@ -268,16 +268,8 @@ namespace Signum.Windows
                 return View;
         }
 
-        protected bool CanNavigate()
+        protected bool _CanNavigate(object entity)
         {
-            return CanNavigate(Entity);
-        }
-
-        protected virtual bool CanNavigate(object entity)
-        {
-            if (entity == null)
-                return false;
-
             if (Navigate && this.NotSet(NavigateProperty))
             {
                 Type entityType = CleanLite ? ((Lite<Entity>)entity).EntityType : entity.GetType();
@@ -316,15 +308,10 @@ namespace Signum.Windows
 
         protected virtual void btView_Click(object sender, RoutedEventArgs e)
         {
-            object entity = OnViewing(Entity, creating: false);
+            object entity = OnViewingOrNavigating(Entity, creating: false);
 
             if (entity != null)
                 SetEntityUserInteraction(entity);
-        }
-
-        protected virtual void btNavigate_Click(object sender, RoutedEventArgs e)
-        {
-            OnNavigating(Entity);
         }
 
         protected virtual void btRemove_Click(object sender, RoutedEventArgs e)
@@ -379,7 +366,7 @@ namespace Signum.Windows
 
             if (ViewOnCreate)
             {
-                value = OnViewing(value, creating: true);
+                value = OnViewingOrNavigating(value, creating: true);
             }
 
             return value;
@@ -413,11 +400,29 @@ namespace Signum.Windows
             return Common.GetPropertyRoute(this);
         }
 
-        protected object OnViewing(object entity, bool creating)
+        protected object OnViewingOrNavigating(object entity, bool creating)
         {
-            if (!CanView(entity))
+            if (!CanViewOrNavigate(entity))
                 return null;
 
+            bool navigatePreferred = _CanNavigate(entity) && (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl) || Mouse.MiddleButton == MouseButtonState.Pressed);
+
+            if (navigatePreferred)
+            {
+                _OnNavigating(entity);
+                return null;
+            }
+            else
+            {
+                if (!_CanView(entity))
+                    return null;
+
+                return _OnViewing(entity, creating);
+            }
+        }
+
+        private object _OnViewing(object entity, bool creating)
+        {
             if (Viewing != null)
                 return Viewing(entity);
 
@@ -433,11 +438,8 @@ namespace Signum.Windows
             return Navigator.ViewUntyped(entity, options);
         }
 
-        protected void OnNavigating(object entity)
+        protected void _OnNavigating(object entity)
         {
-            if (!CanNavigate(entity))
-                return;
-
             if (Navigating != null)
                 Navigating(entity);
             else

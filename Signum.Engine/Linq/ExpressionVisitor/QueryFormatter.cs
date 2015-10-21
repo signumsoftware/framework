@@ -500,10 +500,10 @@ namespace Signum.Engine.Linq
         {
             sb.Append(dic[aggregate.AggregateFunction]);
             sb.Append("(");
-            if (aggregate.Source == null)
+            if (aggregate.Expression == null)
                 sb.Append("*");
             else
-                Visit(aggregate.Source);
+                Visit(aggregate.Expression);
             sb.Append(")");
 
             return aggregate; 

@@ -86,15 +86,21 @@ namespace Signum.Web
         private static MvcHtmlString LinkOrSpan(HtmlHelper helper, EntityLine entityLine)
         {
             MvcHtmlString result;
-            if (entityLine.Navigate)
+            if (entityLine.Navigate || entityLine.View)
             {
                 var lite = (entityLine.UntypedValue as Lite<IEntity>) ??
                            (entityLine.UntypedValue as IEntity)?.Let(i => i.ToLite(i.IsNew));
 
+                var dic = new Dictionary<string, object>
+                {
+                    { "onclick", entityLine.SFControlThen("view_click(event)") }
+                };
+
                 result = helper.Href(entityLine.Compose(EntityBaseKeys.Link),
                         lite?.ToString(),
-                        lite == null || lite.IdOrNull == null ? null : Navigator.NavigateRoute(lite),
-                        JavascriptMessage.navigate.NiceToString(), entityLine.ReadOnly ? null:  "form-control  btn-default sf-entity-line-entity", null);
+                        "#",
+                        JavascriptMessage.navigate.NiceToString(), entityLine.ReadOnly ? null : "form-control  btn-default sf-entity-line-entity",
+                        dic);
             }
             else
             {

@@ -50,6 +50,9 @@ namespace Signum.Entities.DynamicQuery
 
         internal PropertyRoute AddPropertyRoute(PropertyInfo pi)
         {
+            if(typeof(ModelEntity).IsAssignableFrom(Type))
+                return PropertyRoute.Root(Type).Add(pi);
+
             Type type = Lite.Extract(Type); //Because Add doesn't work with lites
             if (type != null)
                 return PropertyRoute.Root(type).Add(pi);

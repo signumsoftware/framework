@@ -18,7 +18,6 @@ namespace Signum.Entities
     {
         public EnumEntity()
         {
-            Modified = ModifiedState.Clean;
         }
 
         [MethodExpander(typeof(FromEnumMethodExpander))]
@@ -60,7 +59,7 @@ namespace Signum.Entities
 
         public static implicit operator EnumEntity<T>(T enumerable)
         {
-            return FromEnum(enumerable);
+            return FromEnumNotNew(enumerable);
         }
 
         public static explicit operator T(EnumEntity<T> enumEntity)

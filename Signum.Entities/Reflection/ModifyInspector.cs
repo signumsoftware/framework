@@ -22,9 +22,15 @@ namespace Signum.Entities.Reflection
                 return getterCache.GetOrCreate(type, () =>
                 {
                     FieldInfo[] aux = Reflector.InstanceFieldsInOrder(type);
-                    return aux.Where(fi => Reflector.IsModifiableIdentifiableOrLite(fi.FieldType) && !fi.HasAttribute<IgnoreAttribute>())
+                    return aux.Where(fi => Reflector.IsModifiableIdentifiableOrLite(fi.FieldType) && !IsIgnored(fi))
                         .Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray();
                 });
+        }
+
+        private static bool IsIgnored(FieldInfo fi)
+        {
+            return fi.HasAttribute<IgnoreAttribute>() ||
+                (Reflector.FindPropertyInfo(fi)?.HasAttribute<IgnoreAttribute>() ?? false);
         }
 
 

@@ -65,7 +65,7 @@ namespace Signum.Web
 
                 new FormatterRule("Lite", c => c.Type.UnNullify().IsLite(), c => new CellFormatter((h,o) => 
                 {
-                    return h.LightEntityLine((Lite<IEntity>)o, false);
+                    return h.LightEntityLine((Lite<IEntity>)o, isSearch: false);
                 })),
 
                  new FormatterRule("Guid", c=>c.Type.UnNullify() == typeof(Guid), c => new CellFormatter((h,o) => 
@@ -115,7 +115,7 @@ namespace Signum.Web
                 new EntityFormatterRule(row => true, (h,row) => 
                 {
                     if (Navigator.IsNavigable(row.Entity.EntityType, null, isSearch: true ))
-                        return h.Href(Navigator.NavigateRoute(row.Entity), h.Encode(EntityControlMessage.View.NiceToString()));
+                        return h.LightEntityLine(row.Entity, isSearch: true, innerText: EntityControlMessage.View.NiceToString());
                     else
                         return MvcHtmlString.Empty;
                 }),

@@ -86,25 +86,14 @@ WriteLiteral(" class=\"glyphicon glyphicon-new-window\"");
 
 WriteLiteral("></span>\r\n            </a>\r\n        </h2>\r\n");
 
-WriteLiteral("        ");
-
             
             #line 12 "..\..\Signum\Views\SearchPage.cshtml"
-   Write(Html.ValidationSummaryAjax());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 13 "..\..\Signum\Views\SearchPage.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 13 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 12 "..\..\Signum\Views\SearchPage.cshtml"
            ViewData[ViewDataKeys.AvoidFullScreenButton] = true; 
             
             #line default
@@ -114,7 +103,7 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 14 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 13 "..\..\Signum\Views\SearchPage.cshtml"
    Write(Html.Partial(Finder.Manager.SearchControlView));
 
             
@@ -125,7 +114,7 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 15 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 14 "..\..\Signum\Views\SearchPage.cshtml"
    Write(Html.AntiForgeryToken());
 
             
@@ -134,7 +123,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 17 "..\..\Signum\Views\SearchPage.cshtml"
+            #line 16 "..\..\Signum\Views\SearchPage.cshtml"
 }
             
             #line default

@@ -39,6 +39,21 @@ export function navigate(runtimeInfo: Entities.RuntimeInfo, extraJsonArguments?:
     }
 }
 
+export function attachMavigatePopupClick(container: JQuery, prefix: string) {
+
+    container.on("click", "[data-entity-link]", event=> {
+        var liteKey = $(event.currentTarget).attr("data-entity-link");
+
+        if (isOpenNewWindow(event))
+            return;
+
+        event.stopPropagation();
+        event.preventDefault();
+
+        navigatePopup(new Entities.EntityHtml(prefix.child("nav"), Entities.RuntimeInfo.fromKey(liteKey)));
+    });
+}
+
 export function isOpenNewWindow(openNewWindowOrEvent: any): boolean {
     if (openNewWindowOrEvent == null)
         return false;
@@ -135,7 +150,6 @@ export function viewPopup(entityHtml: Entities.EntityHtml, viewOptions?: ViewPop
                         return false;
 
                     entityHtml.hasErrors = !valResult.isValid;
-                    entityHtml.link = valResult.newLink;
                     entityHtml.toStr = valResult.newToStr;
 
                     return true;
@@ -149,7 +163,7 @@ export function viewPopup(entityHtml: Entities.EntityHtml, viewOptions?: ViewPop
         if (viewOptions.avoidClone)
             return openPopupView(entityHtml, viewOptions);
 
-        var clone = new Entities.EntityHtml(entityHtml.prefix, entityHtml.runtimeInfo, entityHtml.toStr, entityHtml.link);
+        var clone = new Entities.EntityHtml(entityHtml.prefix, entityHtml.runtimeInfo, entityHtml.toStr);
 
         clone.html = entityHtml.html.clone(true);
 

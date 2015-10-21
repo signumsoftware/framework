@@ -351,7 +351,7 @@ namespace Signum.Entities.Reflection
                 return spa.AvailableForQueries;
 
             FieldInfo fi = TryFindFieldInfo(type, pi);
-            if (fi != null && !fi.HasAttribute<IgnoreAttribute>())
+            if (fi != null && !fi.HasAttribute<IgnoreAttribute>() && !pi.HasAttribute<IgnoreAttribute>())
                 return true;
 
             if (ExpressionCleaner.HasExpansions(type, pi))

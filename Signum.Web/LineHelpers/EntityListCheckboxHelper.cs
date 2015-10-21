@@ -105,8 +105,7 @@ namespace Signum.Web
 
             var label = new HtmlTag("label", itemTC.Compose(EntityRepeaterKeys.RepeaterElement)).Class("sf-checkbox-element");
 
-            if (entityListCheckBox.CustomizeLabel != null)
-                entityListCheckBox.CustomizeLabel(label, lite);
+            entityListCheckBox.CustomizeLabel?.Invoke(label, lite);
 
             using (sb.SurroundLine(label))
             {
@@ -126,15 +125,23 @@ namespace Signum.Web
 
                 if (entityListCheckBox.ReadOnly)
                     cb.Attr("disabled", "disabled");
+                
+                entityListCheckBox.CustomizeCheckBox?.Invoke(cb, lite);
 
                 sb.AddLine(cb);
 
-                if (lite != null && !lite.IsNew && entityListCheckBox.Navigate)
+                if (lite != null && (entityListCheckBox.Navigate || entityListCheckBox.View))
                 {
+                    var dic = new Dictionary<string, object>
+                    {
+                        { "target", "_blank"}
+                    };
+
                     sb.AddLine(
                         helper.Href(itemTC.Compose(EntityBaseKeys.Link),
-                        lite.ToString(), lite.IdOrNull == null ? null : Navigator.NavigateRoute(lite),
-                            JavascriptMessage.navigate.NiceToString(), "sf-entitStrip-link", null));
+                        lite.ToString(),
+                        lite.IdOrNull == null ? null : Navigator.NavigateRoute(lite),
+                        lite.ToString(), "sf-entitStrip-link", dic));
                 }
                 else
                 {

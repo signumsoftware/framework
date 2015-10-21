@@ -15,6 +15,11 @@ export interface EntityBaseOptions {
 
     types: Entities.TypeInfo[]; 
 
+    create?: boolean;
+    remove?: boolean;
+    find?: boolean;
+    view?: boolean;
+    navigate?: boolean;
     isEmbedded: boolean;
     isReadonly: boolean;
     rootType?: string;
@@ -31,10 +36,10 @@ export class EntityBase {
     autoCompleter: EntityAutocompleter;
 
     entityChanged: (entityValue: Entities.EntityValue, itemPrefix?: string) => void;
-    removing: (prefix: string) => Promise<boolean>;
-    creating: (prefix: string) => Promise<Entities.EntityValue>;
-    finding: (prefix: string) => Promise<Entities.EntityValue>;
-    viewing: (entityHtml: Entities.EntityHtml) => Promise<Entities.EntityValue>;
+    removing: (prefix: string, event: MouseEvent) => Promise<boolean>;
+    creating: (prefix: string, event: MouseEvent) => Promise<Entities.EntityValue>;
+    finding: (prefix: string, event: MouseEvent) => Promise<Entities.EntityValue>;
+    viewing: (entityHtml: Entities.EntityHtml, event: MouseEvent) => Promise<Entities.EntityValue>;
 
     constructor(element: JQuery, options: EntityBaseOptions) {
         this.element = element;
@@ -92,7 +97,7 @@ export class EntityBase {
         if (!ri)
             return null;
 
-        return new Entities.EntityValue(ri, this.getToString(), null);
+        return new Entities.EntityValue(ri, this.getToString());
     }
 
     extractEntityHtml(itemPrefix?: string): Entities.EntityHtml {
@@ -104,9 +109,7 @@ export class EntityBase {
 
         var div = this.containerDiv();
 
-        var result = new Entities.EntityHtml(this.options.prefix, runtimeInfo,
-            this.getToString(),
-            this.getLink());
+        var result = new Entities.EntityHtml(this.options.prefix, runtimeInfo, this.getToString());
 
         result.html = div.children();
 
@@ -124,9 +127,7 @@ export class EntityBase {
 
         var div = this.containerDiv();
 
-        var result = new Entities.EntityHtml(this.options.prefix, runtimeInfo,
-            this.getToString(),
-            this.getLink());
+        var result = new Entities.EntityHtml(this.options.prefix, runtimeInfo, this.getToString());
 
         result.html = div.children();
 
@@ -134,10 +135,6 @@ export class EntityBase {
             return Promise.resolve(result); 
 
         return Navigator.requestPartialView(result, this.defaultViewOptions(null));
-    }
-
-    getLink(itemPrefix?: string): string {
-        return null;
     }
 
     getToString(itemPrefix?: string): string {
@@ -177,8 +174,8 @@ export class EntityBase {
         this.element.attr("changes", (parseInt(this.element.attr("changes")) || 0) + 1);
     }
 
-    remove_click(): Promise<string> {
-        return this.onRemove(this.options.prefix).then(result=> {
+    remove_click(event: MouseEvent): Promise<string> {
+        return this.onRemove(this.options.prefix, event).then(result=> {
             if (result) {
                 this.setEntity(null);
                 return this.options.prefix;
@@ -188,15 +185,15 @@ export class EntityBase {
         });
     }
 
-    onRemove(prefix: string): Promise<boolean> {
+    onRemove(prefix: string, event: MouseEvent): Promise<boolean> {
         if (this.removing != null)
-            return this.removing(prefix);
+            return this.removing(prefix, event);
 
         return Promise.resolve(true);
     }
 
-    create_click(): Promise<string> {
-        return this.onCreating(this.options.prefix).then(result => {
+    create_click(event: MouseEvent): Promise<string> {
+        return this.onCreating(this.options.prefix, event).then(result => {
             if (result) {
                 this.setEntity(result);
                 return this.options.prefix;
@@ -218,9 +215,9 @@ export class EntityBase {
         return this.options.types[0].name;
     }
 
-    onCreating(prefix: string): Promise<Entities.EntityValue> {
+    onCreating(prefix: string, event: MouseEvent): Promise<Entities.EntityValue> {
         if (this.creating != null)
-            return this.creating(prefix);
+            return this.creating(prefix, event);
 
         return this.typeChooser(ti => ti.creable).then(type=> {
             if (!type)
@@ -230,6 +227,12 @@ export class EntityBase {
 
                 if (!extra)
                     return null;
+
+                if (Navigator.isOpenNewWindow(event) || type.avoidPopup) {
+                    if (this.options.navigate)
+                        Navigator.navigate(new Entities.RuntimeInfo(type.name, null, true), extra, true);
+                    return null;
+                }
 
                 var newEntity = this.options.template ? this.getEmbeddedTemplate(prefix) :
                     new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type.name, null, true), lang.signum.newEntity);
@@ -251,10 +254,13 @@ export class EntityBase {
         return result;
     }
 
-    view_click(): Promise<string> {
+    view_click(event: MouseEvent): Promise<string> {
+        event.preventDefault();
+        event.stopPropagation();
+
         var entityHtml = this.extractEntityHtml();
 
-        return this.onViewing(entityHtml).then(result=> {
+        return this.onViewing(entityHtml, event).then(result=> {
             if (result) {
                 this.setEntity(result);
                 return this.options.prefix;
@@ -266,15 +272,23 @@ export class EntityBase {
         });
     }
 
-    onViewing(entityHtml: Entities.EntityHtml): Promise<Entities.EntityValue> {
+    onViewing(entityHtml: Entities.EntityHtml, event: MouseEvent): Promise<Entities.EntityValue> {
         if (this.viewing != null)
-            return this.viewing(entityHtml);
+            return this.viewing(entityHtml, event);
 
-        return Navigator.viewPopup(entityHtml, this.defaultViewOptions(null));
+        var type = this.options.types.filter(t=> t.name == entityHtml.runtimeInfo.type)[0];
+
+        if (Navigator.isOpenNewWindow(event) || type.avoidPopup) {
+            if (this.options.navigate && !entityHtml.runtimeInfo.isNew)
+                Navigator.navigate(entityHtml.runtimeInfo, null, true);
+            return null;
+        }
+        else
+            return Navigator.viewPopup(entityHtml, this.defaultViewOptions(null));
     }
 
-    find_click(): Promise<string> {
-        return this.onFinding(this.options.prefix).then(result => {
+    find_click(event: MouseEvent): Promise<string> {
+        return this.onFinding(this.options.prefix, event).then(result => {
             if (result) {
                 this.setEntity(result);
                 return this.options.prefix;
@@ -287,9 +301,9 @@ export class EntityBase {
 
 
 
-    onFinding(prefix: string): Promise<Entities.EntityValue> {
+    onFinding(prefix: string, event: MouseEvent): Promise<Entities.EntityValue> {
         if (this.finding != null)
-            return this.finding(prefix);
+            return this.finding(prefix, event);
 
         return this.typeChooser(ti => ti.findable).then(type=> {
             if (!type)
@@ -412,7 +426,7 @@ export class AjaxEntityAutocompleter implements EntityAutocompleter {
                 data: this.getData(term),
                 success: function (data: AutocompleteResult[]) {
                     this.lastXhr = null;
-                    var entities = data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text, item.link));
+                    var entities = data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text));
                     resolve(entities);
                 }
             });
@@ -444,8 +458,6 @@ export class EntityLine extends EntityBase {
     setEntitySpecific(entityValue: Entities.EntityValue, itemPrefix?: string) {
         var link = this.prefix.child(Entities.Keys.link).get();
         link.text(entityValue == null ? null : entityValue.toStr);
-        if (link.is('a'))
-            link.attr('href', entityValue == null ? null : entityValue.link);
         this.prefix.child(Entities.Keys.toStr).get().val('');
         
         var linkParent = link.parent(".form-control-static");
@@ -544,9 +556,9 @@ export class EntityDetail extends EntityBase {
             throw new Error("EntityDetail requires a loaded Entities.EntityHtml, consider calling Navigator.loadPartialView");
     }
 
-    onCreating(prefix: string): Promise<Entities.EntityValue> {
+    onCreating(prefix: string, event: MouseEvent): Promise<Entities.EntityValue> {
         if (this.creating != null)
-            return this.creating(prefix);
+            return this.creating(prefix, event);
 
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
@@ -566,8 +578,8 @@ export class EntityDetail extends EntityBase {
         });
     }
 
-    find_click(): Promise<string> {
-        return this.onFinding(this.options.prefix).then(result => {
+    find_click(event: MouseEvent): Promise<string> {
+        return this.onFinding(this.options.prefix, event).then(result => {
             if (result == null) {
                 this.notifyChanges(false);
                 return null;
@@ -601,8 +613,8 @@ export class EntityListBase extends EntityBase {
     static key_rowId = "sfRowId";
 
     options: EntityListBaseOptions;
-    finding: (prefix: string) => Promise<Entities.EntityValue>;  // DEPRECATED!
-    findingMany: (prefix: string) => Promise<Entities.EntityValue[]>;
+    finding: (prefix: string, event: MouseEvent) => Promise<Entities.EntityValue>;  // DEPRECATED!
+    findingMany: (prefix: string, event: MouseEvent) => Promise<Entities.EntityValue[]>;
 
     constructor(element: JQuery, options: EntityListBaseOptions) {
         super(element, options);
@@ -642,9 +654,7 @@ export class EntityListBase extends EntityBase {
 
         var div = this.containerDiv(itemPrefix);
 
-        var result = new Entities.EntityHtml(itemPrefix, runtimeInfo,
-            this.getToString(itemPrefix),
-            this.getLink(itemPrefix));
+        var result = new Entities.EntityHtml(itemPrefix, runtimeInfo, this.getToString(itemPrefix));
 
         result.html = div.children();
 
@@ -674,9 +684,9 @@ export class EntityListBase extends EntityBase {
         }
     }
 
-    create_click(): Promise<string> {
+    create_click(event: MouseEvent): Promise<string> {
         var itemPrefix = this.reserveNextPrefix();
-        return this.onCreating(itemPrefix).then(entity => {
+        return this.onCreating(itemPrefix, event).then(entity => {
             if (entity) {
                 this.addEntity(entity, itemPrefix);
                 return itemPrefix;
@@ -792,11 +802,11 @@ export class EntityListBase extends EntityBase {
         return SF.isEmpty(this.options.maxElements) || this.getItems().length < this.options.maxElements;
     }
 
-    find_click(): Promise<string> {
+    find_click(event: MouseEvent): Promise<string> {
 
         var prefixes = [];
 
-        return this.onFindingMany(this.options.prefix).then(result => {
+        return this.onFindingMany(this.options.prefix, event).then(result => {
             if (result) {
 
                 result.forEach(ev=> {
@@ -815,13 +825,13 @@ export class EntityListBase extends EntityBase {
             error => { prefixes.forEach(this.freeReservedPrefix); throw error; return ""; });
     }
 
-    onFinding(prefix: string): Promise<Entities.EntityValue> {
+    onFinding(prefix: string, event: MouseEvent): Promise<Entities.EntityValue> {
         throw new Error("onFinding is deprecated in EntityListBase");
     }
 
-    onFindingMany(prefix: string): Promise<Entities.EntityValue[]> {
+    onFindingMany(prefix: string, event: MouseEvent): Promise<Entities.EntityValue[]> {
         if (this.findingMany != null)
-            return this.findingMany(prefix);
+            return this.findingMany(prefix, event);
 
         return this.typeChooser(t => t.findable).then(type=> {
             if (type == null)
@@ -834,7 +844,7 @@ export class EntityListBase extends EntityBase {
         });
     }
 
-    moveUp(itemPrefix: string) {
+    moveUp(itemPrefix: string, event: MouseEvent) {
 
         var suffix = this.itemSuffix();
         var $item = itemPrefix.child(suffix).get();
@@ -855,7 +865,7 @@ export class EntityListBase extends EntityBase {
         this.notifyChanges(true);
     }
 
-    moveDown(itemPrefix: string) {
+    moveDown(itemPrefix: string, event: MouseEvent) {
 
         var suffix = this.itemSuffix();
         var $item = itemPrefix.child(suffix).get();
@@ -928,12 +938,12 @@ export class EntityList extends EntityListBase {
         return this.prefix.child(EntityList.key_list).get().children("option");
     }
 
-    view_click(): Promise<string> {
+    view_click(event: MouseEvent): Promise<string> {
         var selectedItemPrefix = this.selectedItemPrefix();
 
         var entityHtml = this.extractEntityHtml(selectedItemPrefix);
 
-        return this.onViewing(entityHtml).then(result=> {
+        return this.onViewing(entityHtml, event).then(result=> {
             if (result) {
                 this.setEntity(result, selectedItemPrefix);
                 return selectedItemPrefix;
@@ -990,9 +1000,9 @@ export class EntityList extends EntityListBase {
             .appendTo(select);
     }
 
-    remove_click(): Promise<string> {
+    remove_click(event: MouseEvent): Promise<string> {
         var selectedItemPrefix = this.selectedItemPrefix();
-        return this.onRemove(selectedItemPrefix).then(result=> {
+        return this.onRemove(selectedItemPrefix, event).then(result=> {
             if (result) {
                 var next = this.getItems().filter(":selected").next();
                 if (next.length == 0)
@@ -1018,12 +1028,12 @@ export class EntityList extends EntityListBase {
         itemPrefix.child(EntityList.key_rowId).tryGet().remove();
     }
 
-    moveUp_click() {
-        this.moveUp(this.selectedItemPrefix());
+    moveUp_click(event: MouseEvent) {
+        this.moveUp(this.selectedItemPrefix(), event);
     }
 
-    moveDown_click() {
-        this.moveDown(this.selectedItemPrefix());
+    moveDown_click(event: MouseEvent) {
+        this.moveDown(this.selectedItemPrefix(), event);
     }
 }
 
@@ -1040,16 +1050,16 @@ export class EntityListDetail extends EntityList {
         this.stageCurrentSelected();
     }
 
-    remove_click(): Promise<string>  {
-        return super.remove_click().then(result => { this.stageCurrentSelected(); return result })
+    remove_click(event: MouseEvent): Promise<string>  {
+        return super.remove_click(event).then(result => { this.stageCurrentSelected(); return result })
     }
 
-    create_click() {
-        return super.create_click().then(result => { this.stageCurrentSelected(); return result; });
+    create_click(event: MouseEvent) {
+        return super.create_click(event).then(result => { this.stageCurrentSelected(); return result; });
     }
 
-    find_click() {
-        return super.find_click().then(result => { this.stageCurrentSelected(); return result; })
+    find_click(event: MouseEvent) {
+        return super.find_click(event).then(result => { this.stageCurrentSelected(); return result; })
     }
 
     stageCurrentSelected() {
@@ -1075,7 +1085,7 @@ export class EntityListDetail extends EntityList {
             var selContainer = this.containerDiv(selPrefix);
 
             var promise = selContainer.children().length ? Promise.resolve<void>(null) :
-                Navigator.requestPartialView(new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null, null), this.defaultViewOptions(null))
+                Navigator.requestPartialView(new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null), this.defaultViewOptions(null))
                     .then<void>(e=> selContainer.html(e.html));
 
             promise.then(() =>
@@ -1095,9 +1105,9 @@ export class EntityListDetail extends EntityList {
         }
     }
 
-    onCreating(prefix: string): Promise<Entities.EntityValue> {
+    onCreating(prefix: string, event: MouseEvent): Promise<Entities.EntityValue> {
         if (this.creating != null)
-            return this.creating(prefix);
+            return this.creating(prefix, event);
 
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
@@ -1141,9 +1151,9 @@ export class EntityRepeater extends EntityListBase {
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
         var fieldSet = $("<fieldset id='" + itemPrefix.child(EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" +
             "<legend><div class='item-group'>" +
-            (this.options.remove ? ("<a id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "") +
-            (this.options.reorder ? ("<a id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-up'></span></span></a>") : "") +
-            (this.options.reorder ? ("<a id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-down'></span></span></a>") : "") +
+            (this.options.remove ? ("<a id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "', event);" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "") +
+            (this.options.reorder ? ("<a id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "', event);" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-up'></span></span></a>") : "") +
+            (this.options.reorder ? ("<a id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "', event);" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-down'></span></span></a>") : "") +
             "</div></legend>" +
             SF.hiddenInput(itemPrefix.child(EntityListBase.key_index), this.getNextPosIndex()) +
             SF.hiddenInput(itemPrefix.child(EntityListBase.key_rowId), "") +
@@ -1162,8 +1172,8 @@ export class EntityRepeater extends EntityListBase {
 
     remove_click(): Promise<string> { throw new Error("remove_click is deprecated in EntityRepeater"); }
 
-    removeItem_click(itemPrefix: string): Promise<string> {
-        return this.onRemove(itemPrefix).then(result=> {
+    removeItem_click(itemPrefix: string, event: MouseEvent): Promise<string> {
+        return this.onRemove(itemPrefix, event).then(result=> {
             if (result) {
                 this.removeEntity(itemPrefix);
                 return itemPrefix;
@@ -1172,9 +1182,9 @@ export class EntityRepeater extends EntityListBase {
         });
     }
 
-    onCreating(prefix: string): Promise<Entities.EntityValue> {
+    onCreating(prefix: string, event: MouseEvent): Promise<Entities.EntityValue> {
         if (this.creating != null)
-            return this.creating(prefix);
+            return this.creating(prefix, event);
 
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
@@ -1194,8 +1204,8 @@ export class EntityRepeater extends EntityListBase {
         });
     }
 
-    find_click(): Promise<string> {
-        return this.onFindingMany(this.options.prefix)
+    find_click(event: MouseEvent): Promise<string> {
+        return this.onFindingMany(this.options.prefix, event)
             .then(result => {
                 if (!result) {
                     this.notifyChanges(false);
@@ -1260,9 +1270,9 @@ export class EntityTabRepeater extends EntityRepeater {
             SF.hiddenInput(itemPrefix.child(EntityListBase.key_index), this.getNextPosIndex()) +
             SF.hiddenInput(itemPrefix.child(EntityListBase.key_rowId), "") +
             SF.hiddenInput(itemPrefix.child(Entities.Keys.runtimeInfo), null) +
-            (this.options.reorder ? ("<span id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-left'></span></span>") : "") +
-            (this.options.reorder ? ("<span id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-right'></span></span>") : "") +
-            (this.options.remove ? ("<span id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove' ><span class='glyphicon glyphicon-remove'></span></span>") : "") +
+            (this.options.reorder ? ("<span id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "', event);" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-left'></span></span>") : "") +
+            (this.options.reorder ? ("<span id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "', event);" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-right'></span></span>") : "") +
+            (this.options.remove ? ("<span id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "', event);" + "\" class='sf-line-button sf-remove' ><span class='glyphicon glyphicon-remove'></span></span>") : "") +
             "</a>" +
             "</li>"
             );
@@ -1284,11 +1294,10 @@ export class EntityTabRepeater extends EntityRepeater {
 
 export interface EntityStripOptions extends EntityBaseOptions {
     maxElements?: number;
-    remove?: boolean;
+    
     vertical?: boolean;
     reorder?: boolean;
-    view?: boolean;
-    navigate?: boolean;
+
 }
 
 export class EntityStrip extends EntityList {
@@ -1327,8 +1336,6 @@ export class EntityStrip extends EntityList {
     setEntitySpecific(entityValue: Entities.EntityValue, itemPrefix?: string) {
         var link = itemPrefix.child(Entities.Keys.link).get();
         link.text(entityValue.toStr);
-        if (this.options.navigate)
-            link.attr("href", entityValue.link);
     }
 
     getLink(itemPrefix?: string): string {
@@ -1346,7 +1353,7 @@ export class EntityStrip extends EntityList {
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
         var li = $("<li id='" + itemPrefix.child(EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + " input-group'>" +
             (this.options.navigate ?
-            ("<a class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") :
+            ("<a class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "' onclick=\"" + this.getRepeaterCall() + ".viewItem_click('" + itemPrefix + "', event);" + "\" title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") :
             ("<span class='sf-entitStrip-link' id='" + itemPrefix.child(Entities.Keys.link) + "'>" + entityValue.toStr + "</span>")) +
             SF.hiddenInput(itemPrefix.child(EntityStrip.key_index), this.getNextPosIndex()) +
             SF.hiddenInput(itemPrefix.child(EntityStrip.key_rowId), "") +
@@ -1355,8 +1362,8 @@ export class EntityStrip extends EntityList {
             "<span>" + (
             (this.options.reorder ? ("<a id='" + itemPrefix.child("btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this.getRepeaterCall() + ".moveUp('" + itemPrefix + "');" + "\" class='sf-line-button move-up'><span class='glyphicon glyphicon-chevron-" + (this.options.vertical ? "up" : "left") + "'></span></a>") : "") +
             (this.options.reorder ? ("<a id='" + itemPrefix.child("btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this.getRepeaterCall() + ".moveDown('" + itemPrefix + "');" + "\" class='sf-line-button move-down'><span class='glyphicon glyphicon-chevron-" + (this.options.vertical ? "down" : "right") + "'></span></a>") : "") +
-            (this.options.view ? ("<a id='" + itemPrefix.child("btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this.getRepeaterCall() + ".view_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-view'><span class='glyphicon glyphicon-arrow-right'></span></a>") : "") +
-            (this.options.remove ? ("<a id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "")) +
+            (this.options.view ? ("<a id='" + itemPrefix.child("btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this.getRepeaterCall() + ".viewItem_click('" + itemPrefix + "', event);" + "\" class='sf-line-button sf-view'><span class='glyphicon glyphicon-arrow-right'></span></a>") : "") +
+            (this.options.remove ? ("<a id='" + itemPrefix.child("btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this.getRepeaterCall() + ".removeItem_click('" + itemPrefix + "', event);" + "\" class='sf-line-button sf-remove'><span class='glyphicon glyphicon-remove'></span></a>") : "")) +
             "</span>" +
             "</li>" 
             );
@@ -1369,10 +1376,10 @@ export class EntityStrip extends EntityList {
         return "$('#" + this.options.prefix + "').data('SF-control')";
     }
 
-    remove_click(): Promise<string> { throw new Error("remove_click is deprecated in EntityRepeater"); }
+    remove_click(event: MouseEvent): Promise<string> { throw new Error("remove_click is deprecated in EntityRepeater"); }
 
-    removeItem_click(itemPrefix: string): Promise<string> {
-        return this.onRemove(itemPrefix).then(result=> {
+    removeItem_click(itemPrefix: string, event: MouseEvent): Promise<string> {
+        return this.onRemove(itemPrefix, event).then(result=> {
             if (result) {
                 this.removeEntity(itemPrefix);
                 return itemPrefix;
@@ -1382,12 +1389,15 @@ export class EntityStrip extends EntityList {
         });
     }
 
-    view_click(): Promise<string> { throw new Error("remove_click is deprecated in EntityRepeater"); }
+    view_click(event: MouseEvent): Promise<string> { throw new Error("remove_click is deprecated in EntityRepeater"); }
 
-    viewItem_click(itemPrefix: string): Promise<string> {
+    viewItem_click(itemPrefix: string, event: MouseEvent): Promise<string> {
+        event.preventDefault();
+        event.stopPropagation();
+
         var entityHtml = this.extractEntityHtml(itemPrefix);
 
-        return this.onViewing(entityHtml).then(result=> {
+        return this.onViewing(entityHtml, event).then(result=> {
             if (result) {
                 this.setEntity(result, itemPrefix);
                 return itemPrefix;
@@ -1416,5 +1426,6 @@ export class EntityStrip extends EntityList {
 }
 
 export class EntityListCheckbox extends EntityListBase {
+
 }
 

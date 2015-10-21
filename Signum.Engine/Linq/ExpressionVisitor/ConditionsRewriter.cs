@@ -302,8 +302,8 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
-            Expression source = MakeSqlValue(Visit(aggregate.Source));
-            if (source != aggregate.Source)
+            Expression source = MakeSqlValue(Visit(aggregate.Expression));
+            if (source != aggregate.Expression)
                 return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction);
             return aggregate;
         }

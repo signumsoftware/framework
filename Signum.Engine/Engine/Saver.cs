@@ -158,6 +158,11 @@ namespace Signum.Engine
             {
                 return Type.GetHashCode() ^ (IsNew ? 1 : 0);
             }
+
+            public override string ToString()
+            {
+                return $"{Type} IsNew={IsNew}";
+            }
         }
     }
 }

@@ -64,12 +64,23 @@ namespace Signum.Engine.Operations
 
             public override void AssertIsValid()
             {
+                AssertGetState();
                 base.AssertIsValid();
 
                 if (ToStates.IsEmpty())
                     throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
 
             }
+        }
+
+        private static void AssertGetState()
+        {
+            if (GetState == null)
+            {
+                var graphName = typeof(Graph<T, S>).TypeName();
+                throw new InvalidOperationException($"{graphName}.GetState is not set. Consider writing something like 'GetState = a => a.State' at the beginning of your Register method.");
+            }
+               
         }
 
         public class ConstructFrom<F> : Graph<T>.ConstructFrom<F>, IGraphToStateOperation
@@ -99,6 +110,7 @@ namespace Signum.Engine.Operations
 
             public override void AssertIsValid()
             {
+                AssertGetState();
                 base.AssertIsValid();
 
                 if (ToStates.IsEmpty())
@@ -132,6 +144,7 @@ namespace Signum.Engine.Operations
 
             public override void AssertIsValid()
             {
+                AssertGetState();
                 base.AssertIsValid();
 
                 if (ToStates.IsEmpty())
@@ -180,6 +193,7 @@ namespace Signum.Engine.Operations
 
             public override void AssertIsValid()
             {
+                AssertGetState();
                 base.AssertIsValid();
 
                 if (ToStates.IsEmpty())
@@ -221,6 +235,7 @@ namespace Signum.Engine.Operations
 
             protected override void OnDelete(T entity, object[] args)
             {
+                AssertGetState();
                 S oldState = Graph<T, S>.GetStateFunc(entity);
 
                 base.OnDelete(entity, args);
