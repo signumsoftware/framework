@@ -409,11 +409,11 @@ WriteTo(__razor_template_writer, Html.Raw(body));
 WriteLiteralTo(__razor_template_writer, "\r\n                            </iframe>\r\n");
 
 WriteLiteralTo(__razor_template_writer, "                            <script>\r\n                                $(function " +
-"() {\r\n                                    var iframe = $(\"");
+"() {\r\n                                    var iframe = $(\".sf-email-message #");
 
             
             #line 86 "..\..\Mailing\Views\EmailMessage.cshtml"
-                    WriteTo(__razor_template_writer, e.Compose("iframe"));
+                                       WriteTo(__razor_template_writer, e.Compose("iframe"));
 
             
             #line default
