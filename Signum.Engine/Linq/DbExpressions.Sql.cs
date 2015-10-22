@@ -276,7 +276,7 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             if (Name.HasText())
-                return "{0} AS {1}".FormatWith(Expression.ToString(), Name);
+                return "{1} = {0}".FormatWith(Expression.ToString(), Name);
 
             return Expression.ToString();
         }
