@@ -782,6 +782,21 @@ namespace Signum.Entities
         }
     }
 
+    public class IpValidatorAttribute : RegexValidatorAttribute
+    {
+        public static readonly Regex IpRegex = new Regex(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
+
+        public IpValidatorAttribute()
+            : base(IpRegex)
+        {
+        }
+
+        public override string FormatName
+        {
+            get { return "IP"; }
+        }
+    }
+
     public class StateValidator<E, S> : IEnumerable
         where E : ModifiableEntity
         where S : struct
