@@ -277,9 +277,9 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        FilePathEntity file;
+        EmbeddedFilePathEntity file;
         [NotNullValidator]
-        public FilePathEntity File
+        public EmbeddedFilePathEntity File
         {
             get { return file; }
             set

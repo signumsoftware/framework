@@ -70,6 +70,13 @@ namespace Signum.Entities.UserQueries
             }
         }
 
+        bool allowSelection = true;
+        public bool AllowSelection
+        {
+            get { return allowSelection; }
+            set { allowSelection = value; }
+        }
+
         [NotNullable, PreserveOrder]
         MList<QueryFilterEntity> filters = new MList<QueryFilterEntity>();
         public MList<QueryFilterEntity> Filters

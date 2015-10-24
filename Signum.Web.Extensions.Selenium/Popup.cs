@@ -283,6 +283,7 @@ namespace Signum.Web.Selenium
         }
     }
 
+
     public static class PopupExtensions
     {
         public static P WaitVisible<P>(this P popup) where P : Popup

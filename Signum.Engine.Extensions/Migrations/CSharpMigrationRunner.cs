@@ -72,7 +72,7 @@ namespace Signum.Engine.Migrations
 
                 try
                 {
-                    foreach (var item in this.Migrations.AsEnumerable().SkipWhile(a => a.IsExecuted))
+                    foreach (var item in this.Migrations.AsEnumerable().Where(a => !a.IsExecuted))
                     {
                         Draw(item);
 
