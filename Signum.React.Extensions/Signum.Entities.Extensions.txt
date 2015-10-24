@@ -1,0 +1,6 @@
+﻿//Assembly: Signum.Entities.Extensions.dll
+//BaseNamespace: Signum.Entities
+
+//Entities.Assembly: Signum.Entities.dll
+//Entities.BaseNamespace: Signum.Entities
+import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 

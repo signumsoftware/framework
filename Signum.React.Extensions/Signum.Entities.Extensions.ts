@@ -1,15 +1,9 @@
-﻿//Auto-generated from Signum.Entities.Extensions.csproj. Do not modify!
-
-import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities'
-
+//////////////////////////////////
+//Auto-generated. Do NOT modify!//
+//////////////////////////////////
+import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
 export namespace Alerts {
 
-    export enum AlertCurrentState {
-        Attended,
-        Alerted,
-        Future,
-    }
-    
     export const AlertEntity: Entities.Type<AlertEntity> = "AlertEntity";
     export interface AlertEntity extends Entities.Entity {
         target?: Entities.Lite<Entities.Entity>;
@@ -63,15 +57,15 @@ export namespace Alerts {
 
 export namespace Authorization {
 
-    export interface AllowedRule extends Entities.ModelEntity {
-        allowedBase?: any;
-        allowed?: any;
+    export interface AllowedRule<R, A> extends Entities.ModelEntity {
+        allowedBase?: A;
+        allowed?: A;
         overriden?: boolean;
-        resource?: any;
+        resource?: R;
     }
     
-    export interface AllowedRuleCoerced extends AllowedRule {
-        coercedValues?: any;
+    export interface AllowedRuleCoerced<R, A> extends AllowedRule<R, A> {
+        coercedValues?: A[];
     }
     
     export module AuthAdminMessage {
@@ -178,11 +172,11 @@ export namespace Authorization {
         None,
     }
     
-    export interface BaseRulePack extends Entities.ModelEntity {
+    export interface BaseRulePack<T> extends Entities.ModelEntity {
         role?: Entities.Lite<RoleEntity>;
         strategy?: string;
         type?: Entities.Basics.TypeEntity;
-        rules?: Entities.MList<any>;
+        rules?: Entities.MList<T>;
     }
     
     export module BasicPermission {
@@ -202,12 +196,18 @@ export namespace Authorization {
         Intersection,
     }
     
+    export enum OperationAllowed {
+        None,
+        DBOnly,
+        Allow,
+    }
+    
     export const OperationAllowedRule: Entities.Type<OperationAllowedRule> = "OperationAllowedRule";
-    export interface OperationAllowedRule extends AllowedRuleCoerced {
+    export interface OperationAllowedRule extends AllowedRuleCoerced<Entities.OperationSymbol, OperationAllowed> {
     }
     
     export const OperationRulePack: Entities.Type<OperationRulePack> = "OperationRulePack";
-    export interface OperationRulePack extends BaseRulePack {
+    export interface OperationRulePack extends BaseRulePack<OperationAllowedRule> {
     }
     
     export const PasswordExpiresIntervalEntity: Entities.Type<PasswordExpiresIntervalEntity> = "PasswordExpiresIntervalEntity";
@@ -222,31 +222,37 @@ export namespace Authorization {
     }
     
     export const PermissionAllowedRule: Entities.Type<PermissionAllowedRule> = "PermissionAllowedRule";
-    export interface PermissionAllowedRule extends AllowedRule {
+    export interface PermissionAllowedRule extends AllowedRule<PermissionSymbol, boolean> {
     }
     
     export const PermissionRulePack: Entities.Type<PermissionRulePack> = "PermissionRulePack";
-    export interface PermissionRulePack extends BaseRulePack {
+    export interface PermissionRulePack extends BaseRulePack<PermissionAllowedRule> {
     }
     
     export const PermissionSymbol: Entities.Type<PermissionSymbol> = "PermissionSymbol";
     export interface PermissionSymbol extends Entities.Symbol {
     }
     
+    export enum PropertyAllowed {
+        None,
+        Read,
+        Modify,
+    }
+    
     export const PropertyAllowedRule: Entities.Type<PropertyAllowedRule> = "PropertyAllowedRule";
-    export interface PropertyAllowedRule extends AllowedRuleCoerced {
+    export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, PropertyAllowed> {
     }
     
     export const PropertyRulePack: Entities.Type<PropertyRulePack> = "PropertyRulePack";
-    export interface PropertyRulePack extends BaseRulePack {
+    export interface PropertyRulePack extends BaseRulePack<PropertyAllowedRule> {
     }
     
     export const QueryAllowedRule: Entities.Type<QueryAllowedRule> = "QueryAllowedRule";
-    export interface QueryAllowedRule extends AllowedRuleCoerced {
+    export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity, boolean> {
     }
     
     export const QueryRulePack: Entities.Type<QueryRulePack> = "QueryRulePack";
-    export interface QueryRulePack extends BaseRulePack {
+    export interface QueryRulePack extends BaseRulePack<QueryAllowedRule> {
     }
     
     export const ResetPasswordRequestEntity: Entities.Type<ResetPasswordRequestEntity> = "ResetPasswordRequestEntity";
@@ -269,27 +275,26 @@ export namespace Authorization {
         export const Delete : Entities.DeleteSymbol<RoleEntity> = { key: "RoleOperation.Delete" };
     }
     
-    export const RuleEntity: Entities.Type<RuleEntity> = "RuleEntity";
-    export interface RuleEntity extends Entities.Entity {
+    export interface RuleEntity<R, A> extends Entities.Entity {
         role?: Entities.Lite<RoleEntity>;
-        resource?: any;
-        allowed?: any;
+        resource?: R;
+        allowed?: A;
     }
     
     export const RuleOperationEntity: Entities.Type<RuleOperationEntity> = "RuleOperationEntity";
-    export interface RuleOperationEntity extends RuleEntity {
+    export interface RuleOperationEntity extends RuleEntity<Entities.OperationSymbol, OperationAllowed> {
     }
     
     export const RulePermissionEntity: Entities.Type<RulePermissionEntity> = "RulePermissionEntity";
-    export interface RulePermissionEntity extends RuleEntity {
+    export interface RulePermissionEntity extends RuleEntity<PermissionSymbol, boolean> {
     }
     
     export const RulePropertyEntity: Entities.Type<RulePropertyEntity> = "RulePropertyEntity";
-    export interface RulePropertyEntity extends RuleEntity {
+    export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntity, PropertyAllowed> {
     }
     
     export const RuleQueryEntity: Entities.Type<RuleQueryEntity> = "RuleQueryEntity";
-    export interface RuleQueryEntity extends RuleEntity {
+    export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, boolean> {
     }
     
     export const RuleTypeConditionEntity: Entities.Type<RuleTypeConditionEntity> = "RuleTypeConditionEntity";
@@ -299,7 +304,7 @@ export namespace Authorization {
     }
     
     export const RuleTypeEntity: Entities.Type<RuleTypeEntity> = "RuleTypeEntity";
-    export interface RuleTypeEntity extends RuleEntity {
+    export interface RuleTypeEntity extends RuleEntity<Entities.Basics.TypeEntity, TypeAllowed> {
         conditions?: Entities.MList<RuleTypeConditionEntity>;
     }
     
@@ -338,7 +343,7 @@ export namespace Authorization {
     }
     
     export const TypeAllowedRule: Entities.Type<TypeAllowedRule> = "TypeAllowedRule";
-    export interface TypeAllowedRule extends AllowedRule {
+    export interface TypeAllowedRule extends AllowedRule<Entities.Basics.TypeEntity, TypeAllowedAndConditions> {
         properties?: AuthThumbnail;
         operations?: AuthThumbnail;
         queries?: AuthThumbnail;
@@ -352,13 +357,13 @@ export namespace Authorization {
     }
     
     export const TypeRulePack: Entities.Type<TypeRulePack> = "TypeRulePack";
-    export interface TypeRulePack extends BaseRulePack {
+    export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
     }
     
     export const UserEntity: Entities.Type<UserEntity> = "UserEntity";
     export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Entities.Basics.IUserEntity {
         userName?: string;
-        passwordHash?: any;
+        passwordHash?: string;
         passwordSetDate?: string;
         passwordNeverExpires?: boolean;
         role?: RoleEntity;
@@ -887,14 +892,14 @@ export namespace Files {
     export const EmbeddedFileEntity: Entities.Type<EmbeddedFileEntity> = "EmbeddedFileEntity";
     export interface EmbeddedFileEntity extends Entities.EmbeddedEntity {
         fileName?: string;
-        binaryFile?: any;
+        binaryFile?: string;
         fullWebPath?: string;
     }
     
     export const EmbeddedFilePathEntity: Entities.Type<EmbeddedFilePathEntity> = "EmbeddedFilePathEntity";
     export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
         fileName?: string;
-        binaryFile?: any;
+        binaryFile?: string;
         fileLength?: number;
         fileLengthString?: string;
         sufix?: string;
@@ -908,7 +913,7 @@ export namespace Files {
     export interface FileEntity extends Entities.ImmutableEntity {
         fileName?: string;
         hash?: string;
-        binaryFile?: any;
+        binaryFile?: string;
         fullWebPath?: string;
     }
     
@@ -932,7 +937,7 @@ export namespace Files {
     export interface FilePathEntity extends Entities.Patterns.LockableEntity {
         creationDate?: string;
         fileName?: string;
-        binaryFile?: any;
+        binaryFile?: string;
         fileLength?: number;
         fileLengthString?: string;
         sufix?: string;
@@ -1176,7 +1181,7 @@ export namespace Mailing {
     export const EmailAttachmentEntity: Entities.Type<EmailAttachmentEntity> = "EmailAttachmentEntity";
     export interface EmailAttachmentEntity extends Entities.EmbeddedEntity {
         type?: EmailAttachmentType;
-        file?: Files.FilePathEntity;
+        file?: Files.EmbeddedFilePathEntity;
         contentId?: string;
     }
     
@@ -1592,7 +1597,7 @@ export namespace Processes {
     export const PackageEntity: Entities.Type<PackageEntity> = "PackageEntity";
     export interface PackageEntity extends Entities.Entity, IProcessDataEntity {
         name?: string;
-        operationArguments?: any;
+        operationArguments?: string;
     }
     
     export const PackageLineEntity: Entities.Type<PackageLineEntity> = "PackageLineEntity";

@@ -142,10 +142,7 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum.Entities.Extensions.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Signum.Entities.Extensions.ts</LastGenOutput>
-    </Content>
+    <Content Include="Signum.Entities.Extensions.txt" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -163,6 +160,10 @@
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
+      <Project>{7d851227-5294-4beb-990e-56b4fbb7a148}</Project>
+      <Name>Signum.Entities.Extensions</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
@@ -170,9 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Signum.Entities.Extensions.ts">
-      <DependentUpon>Signum.Entities.Extensions.tt</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
+      <DependentUpon>Signum.Entities.Extensions.txt</DependentUpon>
     </TypeScriptCompile>
   </ItemGroup>
   <PropertyGroup>
@@ -230,4 +229,14 @@
     <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.1\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.1\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
+  <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\..\Framework\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
+  <Target Name="GenerateSignumTS">
+    <SignumTSGenerator TemplateFile="Signum.Entities.Extensions.txt" References="@(ReferencePath)" />
+  </Target>
+  <PropertyGroup>
+    <CompileDependsOn>
+      GenerateSignumTS;
+      $(CompileDependsOn);
+    </CompileDependsOn>
+  </PropertyGroup>
 </Project>
