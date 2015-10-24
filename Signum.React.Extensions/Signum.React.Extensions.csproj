@@ -234,9 +234,9 @@
     <SignumTSGenerator TemplateFile="Signum.Entities.Extensions.txt" References="@(ReferencePath)" />
   </Target>
   <PropertyGroup>
-    <CompileDependsOn>
+    <CompileTypeScriptDependsOn>
       GenerateSignumTS;
-      $(CompileDependsOn);
-    </CompileDependsOn>
+      $(CompileTypeScriptDependsOn);
+    </CompileTypeScriptDependsOn>
   </PropertyGroup>
 </Project>
