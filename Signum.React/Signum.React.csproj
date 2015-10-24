@@ -141,15 +141,19 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Scripts\Signum.Entities.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Signum.Entities.ts</LastGenOutput>
-    </Content>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Extensions\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
+      <Project>{ba7fa363-61a1-41b1-945b-9b9c7bbcd357}</Project>
+      <Name>Signum.Engine.Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Extensions\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
+      <Project>{7d851227-5294-4beb-990e-56b4fbb7a148}</Project>
+      <Name>Signum.Entities.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
       <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
       <Name>Signum.Engine</Name>
@@ -171,14 +175,13 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Scripts\Signum.Entities.txt" />
+    <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
+      <DependentUpon>Signum.Entities.txt</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Views\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
     <TypeScriptCompile Include="Scripts\Reflection.ts" />
-    <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Signum.Entities.tt</DependentUpon>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\TypeContext.ts" />
     <TypeScriptCompile Include="Typings\bootstrap\bootstrap.d.ts" />
     <TypeScriptCompile Include="Typings\d3\d3.d.ts" />
@@ -240,4 +243,14 @@
     <Error Condition="!Exists('..\..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.1\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.1\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
+  <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
+  <Target Name="GenerateSignumTS">
+    <SignumTSGenerator TemplateFile="Scripts\Signum.Entities.txt" References="@(ReferencePath)" />
+  </Target>
+  <PropertyGroup>
+    <CompileDependsOn>
+      GenerateSignumTS;
+      $(CompileDependsOn);
+    </CompileDependsOn>
+  </PropertyGroup>
 </Project>

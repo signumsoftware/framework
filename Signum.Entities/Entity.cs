@@ -198,6 +198,7 @@ namespace Signum.Entities
        
     }
 
+    [InTypeScript(false)]
     public interface IEntity : INotifyPropertyChanged, IDataErrorInfo, IRootEntity
     {
         PrimaryKey Id { get; }

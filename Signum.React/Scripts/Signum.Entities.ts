@@ -1,6 +1,46 @@
-﻿//Auto-generated from Signum.Entities.csproj. Do not modify!
+//////////////////////////////////
+//Auto-generated. Do NOT modify!//
+//////////////////////////////////
+export interface ModifiableEntity {
+    ToString?: string;
+}
 
+export interface IEntity {
+    Type?: string;
+    id?: any;
+    isNew?: boolean;
+    ticks?: number;
+    ToString?: string;
+}
 
+export interface Entity extends ModifiableEntity, IEntity {
+    mixins?: { [name: string]: MixinEntity }
+}
+
+export interface MixinEntity extends ModifiableEntity {
+}
+
+export type MList<T> = Array<MListElement<T>>;
+
+export interface MListElement<T> {
+    rowId?: any;
+    element?: T;
+}
+
+export interface Lite<T> {
+    entity?: T;
+    _type?: string;
+    id?: any;
+    ToString?: string;
+}
+
+export type Type<T extends ModifiableEntity> = string;
+
+export type ExecuteSymbol<T extends IEntity> = OperationSymbol;
+export type DeleteSymbol<T extends IEntity> = OperationSymbol;
+export type ConstructSymbol_Simple<T extends Entity> = OperationSymbol;
+export type ConstructSymbol_From<T extends Entity, F extends IEntity> = OperationSymbol;
+export type ConstructSymbol_FromMany<T extends Entity, F extends IEntity> = OperationSymbol; 
 export module CalendarMessage {
     export const Today = "CalendarMessage.Today"
 }
@@ -439,51 +479,4 @@ export namespace Patterns {
     }
     
 }
-
-
-export interface ModifiableEntity
-{
-    ToString?: string;
-}
-
-export interface IEntity
-{
-    Type?: string;
-    id?: any;
-    isNew?: boolean;
-    ticks?: number;
-	ToString? : string;
-}
-
-export interface Entity extends ModifiableEntity, IEntity
-{
-    mixins?: { [name: string]: MixinEntity }
-}
-    
-export interface MixinEntity extends ModifiableEntity{
-}
-
-export type MList<T> = Array<MListElement<T>>;
-
-export interface MListElement<T> {
-    rowId?: any;
-    element?: T;
-}
-
-export interface Lite<T> {
-    entity?: T;
-    _type?: string;
-    id?: any;
-    ToString?: string;
-}
-
-export type Type<T extends ModifiableEntity> = string;
-
-export type ExecuteSymbol<T extends IEntity> = OperationSymbol; 
-export type DeleteSymbol<T extends IEntity> = OperationSymbol; 
-export type ConstructSymbol_Simple<T extends Entity> = OperationSymbol; 
-export type ConstructSymbol_From<T extends Entity, F extends IEntity> = OperationSymbol; 
-export type ConstructSymbol_FromMany<T extends Entity, F extends IEntity> = OperationSymbol; 
-
-
 

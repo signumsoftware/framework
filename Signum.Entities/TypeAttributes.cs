@@ -22,16 +22,15 @@ namespace Signum.Entities
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Property | AttributeTargets.Interface, AllowMultiple = false)]
     public sealed class InTypeScriptAttribute : Attribute
     {
-        public bool InTypeScript;
+        public bool InTypeScript { get; set; }
         public InTypeScriptAttribute(bool inTypeScript)
         {
             this.InTypeScript = inTypeScript;
         }
-
-        public string PropertyType { get; set; }
+        
     }
 
     [AttributeUsage(AttributeTargets.Class)]
