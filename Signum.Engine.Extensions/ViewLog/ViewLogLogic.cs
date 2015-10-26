@@ -108,7 +108,7 @@ namespace Signum.Engine.ViewLog
         {
             var viewLog = new ViewLogEntity
             {
-                Target = (Lite<Entity>)entity,
+                Target = (Lite<Entity>)entity.Clone(),
                 User = UserHolder.Current.ToLite(),
                 ViewAction = viewAction,
             };
