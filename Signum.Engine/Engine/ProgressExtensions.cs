@@ -29,7 +29,8 @@ namespace Signum.Engine
 
                 var enumerator = collection.ToProgressEnumerator(out pi);
 
-                SafeConsole.WriteSameLine(pi.ToString());
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.WriteSameLine(pi.ToString());
 
                 foreach (var item in enumerator)
                 {
@@ -48,12 +49,14 @@ namespace Signum.Engine
                             writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
 
                             if (StopOnException != null && StopOnException(elementID(item), fileName, e))
-                                throw; 
+                                throw;
                         }
 
-                    SafeConsole.WriteSameLine(pi.ToString());
+                    if (!Console.IsOutputRedirected)
+                        SafeConsole.WriteSameLine(pi.ToString());
                 }
-                SafeConsole.ClearSameLine();
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.ClearSameLine();
             }
         }
 
