@@ -122,6 +122,9 @@ namespace Signum.Engine.Disconnected
             if (DisconnectedLogic.OfflineMode)
                 return null;
 
+            if (!arg.Interactive  && arg.SchemaOnly) // Is ImportManager
+                return null;
+
             return Schema.Current.Tables.Values
                 .Where(t => GetStrategy(t.Type).Upload != Upload.None)
                 .SelectMany(t => t.TablesMList().Cast<ITable>().PreAnd(t))
