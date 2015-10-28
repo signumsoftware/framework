@@ -67,17 +67,17 @@ namespace Signum.Engine.ViewLog
             }
         }
 
-        
+
         static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
         {
-                var t = Schema.Current.Table<ViewLogEntity>();
-                var f = ((FieldImplementedByAll)Schema.Current.Field((ViewLogEntity vl) => vl.Target)).ColumnType;
+            var t = Schema.Current.Table<ViewLogEntity>();
+            var f = ((FieldImplementedByAll)Schema.Current.Field((ViewLogEntity vl) => vl.Target)).ColumnType;
 
-                var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
+            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
 
-                return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
-            }
-        
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
+        }
+
 
         static IDisposable Current_QueryExecuted(DynamicQueryManager.ExecuteType type, object queryName, BaseQueryRequest request)
         {
