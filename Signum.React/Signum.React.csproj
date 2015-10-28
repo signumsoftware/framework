@@ -142,6 +142,11 @@
     <Compile Include="Controllers\ResourcesController.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Lines.css" />
+    <Content Include="Content\NormalPage.css" />
+    <Content Include="Content\Notify.css" />
+    <Content Include="Content\Search.css" />
+    <Content Include="Content\Widgets.css" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
