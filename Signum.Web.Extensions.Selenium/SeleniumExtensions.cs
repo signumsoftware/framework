@@ -20,14 +20,8 @@ namespace Signum.Web.Selenium
 {
     public static class SeleniumExtensions
     {
-        //public static string PageLoadTimeout = "20000";
         public static TimeSpan DefaultTimeout = TimeSpan.FromMilliseconds(20 * 1000);
         public static TimeSpan DefaultPoolingInterval = TimeSpan.FromMilliseconds(200);
-
-        //public static void WaitForPageToLoad(this RemoteWebDriver selenium)
-        //{
-        //    selenium.WaitForPageToLoad(PageLoadTimeout);
-        //}
 
         public static T Wait<T>(this RemoteWebDriver selenium, Func<T> condition, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
