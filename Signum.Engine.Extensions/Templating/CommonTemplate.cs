@@ -31,7 +31,7 @@ namespace Signum.Engine.Templating
                 () => "Multiple values for column {0}".FormatWith(column.Column.Token.FullKey()));
         }
 
-        class SemiStructuralEqualityComparer : IEqualityComparer<object>
+        internal class SemiStructuralEqualityComparer : IEqualityComparer<object>
         {
             public static readonly SemiStructuralEqualityComparer Comparer = new SemiStructuralEqualityComparer();
 
