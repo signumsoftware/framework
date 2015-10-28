@@ -351,48 +351,34 @@ WriteLiteral("\r\n    </div>\r\n");
             
             #line 68 "..\..\UserQueries\Views\UserQuery.cshtml"
     }
-
+    
     
             
             #line default
             #line hidden
             
             #line 70 "..\..\UserQueries\Views\UserQuery.cshtml"
-Write(Html.ValueLine(e, f => f.AllowSelection));
-
-            
-            #line default
-            #line hidden
-            
-            #line 70 "..\..\UserQueries\Views\UserQuery.cshtml"
-                                             
-    
-            
-            #line default
-            #line hidden
-            
-            #line 71 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.ValueLine(e, f => f.PaginationMode));
 
             
             #line default
             #line hidden
             
-            #line 71 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 70 "..\..\UserQueries\Views\UserQuery.cshtml"
                                              
     
             
             #line default
             #line hidden
             
-            #line 72 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 71 "..\..\UserQueries\Views\UserQuery.cshtml"
 Write(Html.ValueLine(e, f => f.ElementsPerPage));
 
             
             #line default
             #line hidden
             
-            #line 72 "..\..\UserQueries\Views\UserQuery.cshtml"
+            #line 71 "..\..\UserQueries\Views\UserQuery.cshtml"
                                               
 }
 

@@ -158,6 +158,13 @@ namespace Signum.Entities.Dashboard
             set { Set(ref userQuery, value); }
         }
 
+        bool allowSelection = true;
+        public bool AllowSelection
+        {
+            get { return allowSelection; }
+            set { allowSelection = value; }
+        }
+
         public override string ToString()
         {
             return userQuery.TryToString();

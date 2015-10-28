@@ -88,7 +88,7 @@ WriteLiteral("\r\n");
     {
         ShowHeader = false,
         ShowFooter = false,
-        AllowSelection = uq.AllowSelection,
+        AllowSelection = tc.Value.AllowSelection,
         SearchOnLoad = true,
     };
     
