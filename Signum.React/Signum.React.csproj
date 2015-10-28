@@ -186,6 +186,7 @@
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
       <DependentUpon>Signum.Entities.txt</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Typings\react-router\react-router.d.ts" />
     <TypeScriptCompile Include="Views\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
     <TypeScriptCompile Include="Scripts\Reflection.ts" />
