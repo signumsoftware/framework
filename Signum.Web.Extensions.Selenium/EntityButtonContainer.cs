@@ -157,13 +157,13 @@ namespace Signum.Web.Selenium
             return popup;
         }
 
-        public static PopupControl<T> ConstructFromPopup<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+        public static PopupControl<T> ConstructFromPopup<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol, string prefix = "New")
             where T : Entity
             where F : Entity
         {
             container.OperationClick(symbol);
 
-            var popup = new PopupControl<T>(container.Selenium, "New");
+            var popup = new PopupControl<T>(container.Selenium, prefix);
 
             container.Selenium.WaitElementPresent(popup.PopupLocator);
 

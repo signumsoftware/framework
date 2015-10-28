@@ -88,7 +88,7 @@ WriteLiteral("\r\n");
     {
         ShowHeader = false,
         ShowFooter = false,
-        AllowSelection = false,
+        AllowSelection = tc.Value.AllowSelection,
         SearchOnLoad = true,
     };
     

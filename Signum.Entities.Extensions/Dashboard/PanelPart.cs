@@ -123,6 +123,13 @@ namespace Signum.Entities.Dashboard
         [NotNullValidator]
         public UserQueryEntity UserQuery { get; set; }
 
+        bool allowSelection = true;
+        public bool AllowSelection
+        {
+            get { return allowSelection; }
+            set { allowSelection = value; }
+        }
+
         public override string ToString()
         {
             return UserQuery?.ToString();
