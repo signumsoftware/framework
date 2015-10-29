@@ -135,6 +135,14 @@ namespace Signum.Test.LinqProvider
             Assert.IsTrue(Database.Query<ArtistEntity>().Any(a => a.Sex == Sex.Female));
         }
 
+
+        [TestMethod]
+        public void None()
+        {
+            Assert.IsFalse(Database.Query<ArtistEntity>().None(a => a.Sex == Sex.Female));
+        }
+
+
         [TestMethod]
         public void AnyCollection()
         {
@@ -147,6 +155,13 @@ namespace Signum.Test.LinqProvider
         public void AnySql()
         {
             BandEntity smashing = Database.Query<BandEntity>().SingleEx(b => b.Members.Any(a => a.Sex == Sex.Female));
+        }
+
+
+        [TestMethod]
+        public void NoneSql()
+        {
+            BandEntity smashing = Database.Query<BandEntity>().SingleEx(b => b.Members.None(a => a.Sex == Sex.Female));
         }
 
         [TestMethod]
