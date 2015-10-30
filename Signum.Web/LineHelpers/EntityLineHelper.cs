@@ -97,7 +97,7 @@ namespace Signum.Web
                 };
 
                 result = helper.Href(entityLine.Compose(EntityBaseKeys.Link),
-                        lite?.ToString(),
+                        entityLine.UntypedValue?.ToString(),
                         "#",
                         JavascriptMessage.navigate.NiceToString(), entityLine.ReadOnly ? null : "form-control  btn-default sf-entity-line-entity",
                         dic);
