@@ -160,6 +160,10 @@
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
+      <Project>{ba7fa363-61a1-41b1-945b-9b9c7bbcd357}</Project>
+      <Name>Signum.Engine.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
       <Project>{7d851227-5294-4beb-990e-56b4fbb7a148}</Project>
       <Name>Signum.Entities.Extensions</Name>
