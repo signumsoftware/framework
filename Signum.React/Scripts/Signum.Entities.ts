@@ -1,6 +1,8 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+
 export interface ModifiableEntity {
     ToString?: string;
 }
@@ -41,13 +43,15 @@ export type DeleteSymbol<T extends IEntity> = OperationSymbol;
 export type ConstructSymbol_Simple<T extends Entity> = OperationSymbol;
 export type ConstructSymbol_From<T extends Entity, F extends IEntity> = OperationSymbol;
 export type ConstructSymbol_FromMany<T extends Entity, F extends IEntity> = OperationSymbol; 
+
+
 export module CalendarMessage {
-    export const Today = "CalendarMessage.Today"
+    export const Today = new MessageKey("CalendarMessage", "Today");
 }
 
 export module ConnectionMessage {
-    export const AConnectionWithTheServerIsNecessaryToContinue = "ConnectionMessage.AConnectionWithTheServerIsNecessaryToContinue"
-    export const SessionExpired = "ConnectionMessage.SessionExpired"
+    export const AConnectionWithTheServerIsNecessaryToContinue = new MessageKey("ConnectionMessage", "AConnectionWithTheServerIsNecessaryToContinue");
+    export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");
 }
 
 export interface CorruptMixin extends MixinEntity {
@@ -58,26 +62,26 @@ export interface EmbeddedEntity extends ModifiableEntity {
 }
 
 export module EngineMessage {
-    export const ConcurrencyErrorOnDatabaseTable0Id1 = "EngineMessage.ConcurrencyErrorOnDatabaseTable0Id1"
-    export const EntityWithType0AndId1NotFound = "EngineMessage.EntityWithType0AndId1NotFound"
-    export const NoWayOfMappingType0Found = "EngineMessage.NoWayOfMappingType0Found"
-    export const TheEntity0IsNew = "EngineMessage.TheEntity0IsNew"
-    export const ThereAre0ThatReferThisEntity = "EngineMessage.ThereAre0ThatReferThisEntity"
-    export const ThereAreRecordsIn0PointingToThisTableByColumn1 = "EngineMessage.ThereAreRecordsIn0PointingToThisTableByColumn1"
-    export const UnauthorizedAccessTo0Because1 = "EngineMessage.UnauthorizedAccessTo0Because1"
-    export const TheresAlreadyA0With1EqualsTo2_G = "EngineMessage.TheresAlreadyA0With1EqualsTo2_G"
+    export const ConcurrencyErrorOnDatabaseTable0Id1 = new MessageKey("EngineMessage", "ConcurrencyErrorOnDatabaseTable0Id1");
+    export const EntityWithType0AndId1NotFound = new MessageKey("EngineMessage", "EntityWithType0AndId1NotFound");
+    export const NoWayOfMappingType0Found = new MessageKey("EngineMessage", "NoWayOfMappingType0Found");
+    export const TheEntity0IsNew = new MessageKey("EngineMessage", "TheEntity0IsNew");
+    export const ThereAre0ThatReferThisEntity = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntity");
+    export const ThereAreRecordsIn0PointingToThisTableByColumn1 = new MessageKey("EngineMessage", "ThereAreRecordsIn0PointingToThisTableByColumn1");
+    export const UnauthorizedAccessTo0Because1 = new MessageKey("EngineMessage", "UnauthorizedAccessTo0Because1");
+    export const TheresAlreadyA0With1EqualsTo2_G = new MessageKey("EngineMessage", "TheresAlreadyA0With1EqualsTo2_G");
 }
 
 export module EntityControlMessage {
-    export const Create = "EntityControlMessage.Create"
-    export const Find = "EntityControlMessage.Find"
-    export const Detail = "EntityControlMessage.Detail"
-    export const MoveDown = "EntityControlMessage.MoveDown"
-    export const MoveUp = "EntityControlMessage.MoveUp"
-    export const Navigate = "EntityControlMessage.Navigate"
-    export const NullValueNotAllowed = "EntityControlMessage.NullValueNotAllowed"
-    export const Remove = "EntityControlMessage.Remove"
-    export const View = "EntityControlMessage.View"
+    export const Create = new MessageKey("EntityControlMessage", "Create");
+    export const Find = new MessageKey("EntityControlMessage", "Find");
+    export const Detail = new MessageKey("EntityControlMessage", "Detail");
+    export const MoveDown = new MessageKey("EntityControlMessage", "MoveDown");
+    export const MoveUp = new MessageKey("EntityControlMessage", "MoveUp");
+    export const Navigate = new MessageKey("EntityControlMessage", "Navigate");
+    export const NullValueNotAllowed = new MessageKey("EntityControlMessage", "NullValueNotAllowed");
+    export const Remove = new MessageKey("EntityControlMessage", "Remove");
+    export const View = new MessageKey("EntityControlMessage", "View");
 }
 
 export interface ImmutableEntity extends Entity {
@@ -85,150 +89,150 @@ export interface ImmutableEntity extends Entity {
 }
 
 export module JavascriptMessage {
-    export const chooseAType = "JavascriptMessage.chooseAType"
-    export const chooseAValue = "JavascriptMessage.chooseAValue"
-    export const addFilter = "JavascriptMessage.addFilter"
-    export const openTab = "JavascriptMessage.openTab"
-    export const renameColumn = "JavascriptMessage.renameColumn"
-    export const enterTheNewColumnName = "JavascriptMessage.enterTheNewColumnName"
-    export const error = "JavascriptMessage.error"
-    export const executed = "JavascriptMessage.executed"
-    export const hideFilters = "JavascriptMessage.hideFilters"
-    export const loading = "JavascriptMessage.loading"
-    export const noActionsFound = "JavascriptMessage.noActionsFound"
-    export const saveChangesBeforeOrPressCancel = "JavascriptMessage.saveChangesBeforeOrPressCancel"
-    export const loseCurrentChanges = "JavascriptMessage.loseCurrentChanges"
-    export const noElementsSelected = "JavascriptMessage.noElementsSelected"
-    export const searchForResults = "JavascriptMessage.searchForResults"
-    export const selectOnlyOneElement = "JavascriptMessage.selectOnlyOneElement"
-    export const popupErrors = "JavascriptMessage.popupErrors"
-    export const popupErrorsStop = "JavascriptMessage.popupErrorsStop"
-    export const removeColumn = "JavascriptMessage.removeColumn"
-    export const reorderColumn_MoveLeft = "JavascriptMessage.reorderColumn_MoveLeft"
-    export const reorderColumn_MoveRight = "JavascriptMessage.reorderColumn_MoveRight"
-    export const saved = "JavascriptMessage.saved"
-    export const search = "JavascriptMessage.search"
-    export const Selected = "JavascriptMessage.Selected"
-    export const selectToken = "JavascriptMessage.selectToken"
-    export const showFilters = "JavascriptMessage.showFilters"
-    export const find = "JavascriptMessage.find"
-    export const remove = "JavascriptMessage.remove"
-    export const view = "JavascriptMessage.view"
-    export const create = "JavascriptMessage.create"
-    export const moveDown = "JavascriptMessage.moveDown"
-    export const moveUp = "JavascriptMessage.moveUp"
-    export const navigate = "JavascriptMessage.navigate"
-    export const newEntity = "JavascriptMessage.newEntity"
-    export const ok = "JavascriptMessage.ok"
-    export const cancel = "JavascriptMessage.cancel"
+    export const chooseAType = new MessageKey("JavascriptMessage", "chooseAType");
+    export const chooseAValue = new MessageKey("JavascriptMessage", "chooseAValue");
+    export const addFilter = new MessageKey("JavascriptMessage", "addFilter");
+    export const openTab = new MessageKey("JavascriptMessage", "openTab");
+    export const renameColumn = new MessageKey("JavascriptMessage", "renameColumn");
+    export const enterTheNewColumnName = new MessageKey("JavascriptMessage", "enterTheNewColumnName");
+    export const error = new MessageKey("JavascriptMessage", "error");
+    export const executed = new MessageKey("JavascriptMessage", "executed");
+    export const hideFilters = new MessageKey("JavascriptMessage", "hideFilters");
+    export const loading = new MessageKey("JavascriptMessage", "loading");
+    export const noActionsFound = new MessageKey("JavascriptMessage", "noActionsFound");
+    export const saveChangesBeforeOrPressCancel = new MessageKey("JavascriptMessage", "saveChangesBeforeOrPressCancel");
+    export const loseCurrentChanges = new MessageKey("JavascriptMessage", "loseCurrentChanges");
+    export const noElementsSelected = new MessageKey("JavascriptMessage", "noElementsSelected");
+    export const searchForResults = new MessageKey("JavascriptMessage", "searchForResults");
+    export const selectOnlyOneElement = new MessageKey("JavascriptMessage", "selectOnlyOneElement");
+    export const popupErrors = new MessageKey("JavascriptMessage", "popupErrors");
+    export const popupErrorsStop = new MessageKey("JavascriptMessage", "popupErrorsStop");
+    export const removeColumn = new MessageKey("JavascriptMessage", "removeColumn");
+    export const reorderColumn_MoveLeft = new MessageKey("JavascriptMessage", "reorderColumn_MoveLeft");
+    export const reorderColumn_MoveRight = new MessageKey("JavascriptMessage", "reorderColumn_MoveRight");
+    export const saved = new MessageKey("JavascriptMessage", "saved");
+    export const search = new MessageKey("JavascriptMessage", "search");
+    export const Selected = new MessageKey("JavascriptMessage", "Selected");
+    export const selectToken = new MessageKey("JavascriptMessage", "selectToken");
+    export const showFilters = new MessageKey("JavascriptMessage", "showFilters");
+    export const find = new MessageKey("JavascriptMessage", "find");
+    export const remove = new MessageKey("JavascriptMessage", "remove");
+    export const view = new MessageKey("JavascriptMessage", "view");
+    export const create = new MessageKey("JavascriptMessage", "create");
+    export const moveDown = new MessageKey("JavascriptMessage", "moveDown");
+    export const moveUp = new MessageKey("JavascriptMessage", "moveUp");
+    export const navigate = new MessageKey("JavascriptMessage", "navigate");
+    export const newEntity = new MessageKey("JavascriptMessage", "newEntity");
+    export const ok = new MessageKey("JavascriptMessage", "ok");
+    export const cancel = new MessageKey("JavascriptMessage", "cancel");
 }
 
 export module LiteMessage {
-    export const IdNotValid = "LiteMessage.IdNotValid"
-    export const InvalidFormat = "LiteMessage.InvalidFormat"
-    export const New_G = "LiteMessage.New_G"
-    export const Type0NotFound = "LiteMessage.Type0NotFound"
-    export const ToStr = "LiteMessage.ToStr"
+    export const IdNotValid = new MessageKey("LiteMessage", "IdNotValid");
+    export const InvalidFormat = new MessageKey("LiteMessage", "InvalidFormat");
+    export const New_G = new MessageKey("LiteMessage", "New_G");
+    export const Type0NotFound = new MessageKey("LiteMessage", "Type0NotFound");
+    export const ToStr = new MessageKey("LiteMessage", "ToStr");
 }
 
 export interface ModelEntity extends EmbeddedEntity {
 }
 
 export module NormalControlMessage {
-    export const Save = "NormalControlMessage.Save"
-    export const ViewForType0IsNotAllowed = "NormalControlMessage.ViewForType0IsNotAllowed"
+    export const Save = new MessageKey("NormalControlMessage", "Save");
+    export const ViewForType0IsNotAllowed = new MessageKey("NormalControlMessage", "ViewForType0IsNotAllowed");
 }
 
 export module NormalWindowMessage {
-    export const _0Errors1 = "NormalWindowMessage._0Errors1"
-    export const _1Error = "NormalWindowMessage._1Error"
-    export const Cancel = "NormalWindowMessage.Cancel"
-    export const ContinueAnyway = "NormalWindowMessage.ContinueAnyway"
-    export const ContinueWithErrors = "NormalWindowMessage.ContinueWithErrors"
-    export const FixErrors = "NormalWindowMessage.FixErrors"
-    export const ImpossibleToSaveIntegrityCheckFailed = "NormalWindowMessage.ImpossibleToSaveIntegrityCheckFailed"
-    export const Loading0 = "NormalWindowMessage.Loading0"
-    export const LoseChanges = "NormalWindowMessage.LoseChanges"
-    export const NoDirectErrors = "NormalWindowMessage.NoDirectErrors"
-    export const Ok = "NormalWindowMessage.Ok"
-    export const Reload = "NormalWindowMessage.Reload"
-    export const The0HasErrors1 = "NormalWindowMessage.The0HasErrors1"
-    export const ThereAreChanges = "NormalWindowMessage.ThereAreChanges"
-    export const ThereAreChangesContinue = "NormalWindowMessage.ThereAreChangesContinue"
-    export const ThereAreErrors = "NormalWindowMessage.ThereAreErrors"
-    export const Message = "NormalWindowMessage.Message"
+    export const _0Errors1 = new MessageKey("NormalWindowMessage", "_0Errors1");
+    export const _1Error = new MessageKey("NormalWindowMessage", "_1Error");
+    export const Cancel = new MessageKey("NormalWindowMessage", "Cancel");
+    export const ContinueAnyway = new MessageKey("NormalWindowMessage", "ContinueAnyway");
+    export const ContinueWithErrors = new MessageKey("NormalWindowMessage", "ContinueWithErrors");
+    export const FixErrors = new MessageKey("NormalWindowMessage", "FixErrors");
+    export const ImpossibleToSaveIntegrityCheckFailed = new MessageKey("NormalWindowMessage", "ImpossibleToSaveIntegrityCheckFailed");
+    export const Loading0 = new MessageKey("NormalWindowMessage", "Loading0");
+    export const LoseChanges = new MessageKey("NormalWindowMessage", "LoseChanges");
+    export const NoDirectErrors = new MessageKey("NormalWindowMessage", "NoDirectErrors");
+    export const Ok = new MessageKey("NormalWindowMessage", "Ok");
+    export const Reload = new MessageKey("NormalWindowMessage", "Reload");
+    export const The0HasErrors1 = new MessageKey("NormalWindowMessage", "The0HasErrors1");
+    export const ThereAreChanges = new MessageKey("NormalWindowMessage", "ThereAreChanges");
+    export const ThereAreChangesContinue = new MessageKey("NormalWindowMessage", "ThereAreChangesContinue");
+    export const ThereAreErrors = new MessageKey("NormalWindowMessage", "ThereAreErrors");
+    export const Message = new MessageKey("NormalWindowMessage", "Message");
 }
 
 export module OperationMessage {
-    export const Create = "OperationMessage.Create"
-    export const CreateFromRegex = "OperationMessage.CreateFromRegex"
-    export const StateShouldBe0InsteadOf1 = "OperationMessage.StateShouldBe0InsteadOf1"
-    export const InUserInterface = "OperationMessage.InUserInterface"
-    export const Operation01IsNotAuthorized = "OperationMessage.Operation01IsNotAuthorized"
-    export const PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem = "OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem"
-    export const PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem = "OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem"
-    export const TheOperation0DidNotReturnAnEntity = "OperationMessage.TheOperation0DidNotReturnAnEntity"
-    export const Logs = "OperationMessage.Logs"
+    export const Create = new MessageKey("OperationMessage", "Create");
+    export const CreateFromRegex = new MessageKey("OperationMessage", "CreateFromRegex");
+    export const StateShouldBe0InsteadOf1 = new MessageKey("OperationMessage", "StateShouldBe0InsteadOf1");
+    export const InUserInterface = new MessageKey("OperationMessage", "InUserInterface");
+    export const Operation01IsNotAuthorized = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
+    export const PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem");
+    export const PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem");
+    export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
+    export const Logs = new MessageKey("OperationMessage", "Logs");
 }
 
-export const OperationSymbol: Type<OperationSymbol> = "OperationSymbol";
+export const OperationSymbol_Type = new Type<OperationSymbol>("OperationSymbol");
 export interface OperationSymbol extends Symbol {
 }
 
 export module PaginationMessage {
-    export const All = "PaginationMessage.All"
+    export const All = new MessageKey("PaginationMessage", "All");
 }
 
 export module QuickLinkMessage {
-    export const Quicklinks = "QuickLinkMessage.Quicklinks"
-    export const No0Found = "QuickLinkMessage.No0Found"
+    export const Quicklinks = new MessageKey("QuickLinkMessage", "Quicklinks");
+    export const No0Found = new MessageKey("QuickLinkMessage", "No0Found");
 }
 
 export module SearchMessage {
-    export const ChooseTheDisplayNameOfTheNewColumn = "SearchMessage.ChooseTheDisplayNameOfTheNewColumn"
-    export const Field = "SearchMessage.Field"
-    export const AddColumn = "SearchMessage.AddColumn"
-    export const AddFilter = "SearchMessage.AddFilter"
-    export const DeleteFilter = "SearchMessage.DeleteFilter"
-    export const Filters = "SearchMessage.Filters"
-    export const Find = "SearchMessage.Find"
-    export const FinderOf0 = "SearchMessage.FinderOf0"
-    export const Name = "SearchMessage.Name"
-    export const NewColumnSName = "SearchMessage.NewColumnSName"
-    export const NoActionsFound = "SearchMessage.NoActionsFound"
-    export const NoColumnSelected = "SearchMessage.NoColumnSelected"
-    export const NoFiltersSpecified = "SearchMessage.NoFiltersSpecified"
-    export const Of = "SearchMessage.Of"
-    export const Operation = "SearchMessage.Operation"
-    export const Query0IsNotAllowed = "SearchMessage.Query0IsNotAllowed"
-    export const Query0NotAllowed = "SearchMessage.Query0NotAllowed"
-    export const Query0NotRegistered = "SearchMessage.Query0NotRegistered"
-    export const Rename = "SearchMessage.Rename"
-    export const _0Results_N = "SearchMessage._0Results_N"
-    export const First0Results_N = "SearchMessage.First0Results_N"
-    export const _01of2Results_N = "SearchMessage._01of2Results_N"
-    export const Search = "SearchMessage.Search"
-    export const Create = "SearchMessage.Create"
-    export const CreateNew0_G = "SearchMessage.CreateNew0_G"
-    export const SearchControl_Pagination_All = "SearchMessage.SearchControl_Pagination_All"
-    export const ThereIsNo0 = "SearchMessage.ThereIsNo0"
-    export const Value = "SearchMessage.Value"
-    export const View = "SearchMessage.View"
-    export const ViewSelected = "SearchMessage.ViewSelected"
-    export const Operations = "SearchMessage.Operations"
-    export const NoResultsFound = "SearchMessage.NoResultsFound"
+    export const ChooseTheDisplayNameOfTheNewColumn = new MessageKey("SearchMessage", "ChooseTheDisplayNameOfTheNewColumn");
+    export const Field = new MessageKey("SearchMessage", "Field");
+    export const AddColumn = new MessageKey("SearchMessage", "AddColumn");
+    export const AddFilter = new MessageKey("SearchMessage", "AddFilter");
+    export const DeleteFilter = new MessageKey("SearchMessage", "DeleteFilter");
+    export const Filters = new MessageKey("SearchMessage", "Filters");
+    export const Find = new MessageKey("SearchMessage", "Find");
+    export const FinderOf0 = new MessageKey("SearchMessage", "FinderOf0");
+    export const Name = new MessageKey("SearchMessage", "Name");
+    export const NewColumnSName = new MessageKey("SearchMessage", "NewColumnSName");
+    export const NoActionsFound = new MessageKey("SearchMessage", "NoActionsFound");
+    export const NoColumnSelected = new MessageKey("SearchMessage", "NoColumnSelected");
+    export const NoFiltersSpecified = new MessageKey("SearchMessage", "NoFiltersSpecified");
+    export const Of = new MessageKey("SearchMessage", "Of");
+    export const Operation = new MessageKey("SearchMessage", "Operation");
+    export const Query0IsNotAllowed = new MessageKey("SearchMessage", "Query0IsNotAllowed");
+    export const Query0NotAllowed = new MessageKey("SearchMessage", "Query0NotAllowed");
+    export const Query0NotRegistered = new MessageKey("SearchMessage", "Query0NotRegistered");
+    export const Rename = new MessageKey("SearchMessage", "Rename");
+    export const _0Results_N = new MessageKey("SearchMessage", "_0Results_N");
+    export const First0Results_N = new MessageKey("SearchMessage", "First0Results_N");
+    export const _01of2Results_N = new MessageKey("SearchMessage", "_01of2Results_N");
+    export const Search = new MessageKey("SearchMessage", "Search");
+    export const Create = new MessageKey("SearchMessage", "Create");
+    export const CreateNew0_G = new MessageKey("SearchMessage", "CreateNew0_G");
+    export const SearchControl_Pagination_All = new MessageKey("SearchMessage", "SearchControl_Pagination_All");
+    export const ThereIsNo0 = new MessageKey("SearchMessage", "ThereIsNo0");
+    export const Value = new MessageKey("SearchMessage", "Value");
+    export const View = new MessageKey("SearchMessage", "View");
+    export const ViewSelected = new MessageKey("SearchMessage", "ViewSelected");
+    export const Operations = new MessageKey("SearchMessage", "Operations");
+    export const NoResultsFound = new MessageKey("SearchMessage", "NoResultsFound");
 }
 
 export module SelectorMessage {
-    export const ConstructorSelector = "SelectorMessage.ConstructorSelector"
-    export const PleaseChooseAValueToContinue = "SelectorMessage.PleaseChooseAValueToContinue"
-    export const PleaseSelectAConstructor = "SelectorMessage.PleaseSelectAConstructor"
-    export const PleaseSelectAType = "SelectorMessage.PleaseSelectAType"
-    export const TypeSelector = "SelectorMessage.TypeSelector"
-    export const ValueMustBeSpecifiedFor0 = "SelectorMessage.ValueMustBeSpecifiedFor0"
-    export const ChooseAValue = "SelectorMessage.ChooseAValue"
-    export const SelectAnElement = "SelectorMessage.SelectAnElement"
-    export const PleaseSelectAnElement = "SelectorMessage.PleaseSelectAnElement"
+    export const ConstructorSelector = new MessageKey("SelectorMessage", "ConstructorSelector");
+    export const PleaseChooseAValueToContinue = new MessageKey("SelectorMessage", "PleaseChooseAValueToContinue");
+    export const PleaseSelectAConstructor = new MessageKey("SelectorMessage", "PleaseSelectAConstructor");
+    export const PleaseSelectAType = new MessageKey("SelectorMessage", "PleaseSelectAType");
+    export const TypeSelector = new MessageKey("SelectorMessage", "TypeSelector");
+    export const ValueMustBeSpecifiedFor0 = new MessageKey("SelectorMessage", "ValueMustBeSpecifiedFor0");
+    export const ChooseAValue = new MessageKey("SelectorMessage", "ChooseAValue");
+    export const SelectAnElement = new MessageKey("SelectorMessage", "SelectAnElement");
+    export const PleaseSelectAnElement = new MessageKey("SelectorMessage", "PleaseSelectAnElement");
 }
 
 export interface Symbol extends Entity {
@@ -236,79 +240,79 @@ export interface Symbol extends Entity {
 }
 
 export module SynchronizerMessage {
-    export const _0HasBeenRenamedIn1 = "SynchronizerMessage._0HasBeenRenamedIn1"
-    export const EndOfSyncScript = "SynchronizerMessage.EndOfSyncScript"
-    export const NNone = "SynchronizerMessage.NNone"
-    export const StartOfSyncScriptGeneratedOn0 = "SynchronizerMessage.StartOfSyncScriptGeneratedOn0"
+    export const _0HasBeenRenamedIn1 = new MessageKey("SynchronizerMessage", "_0HasBeenRenamedIn1");
+    export const EndOfSyncScript = new MessageKey("SynchronizerMessage", "EndOfSyncScript");
+    export const NNone = new MessageKey("SynchronizerMessage", "NNone");
+    export const StartOfSyncScriptGeneratedOn0 = new MessageKey("SynchronizerMessage", "StartOfSyncScriptGeneratedOn0");
 }
 
 export module ValidationMessage {
-    export const _0DoesNotHaveAValid1Format = "ValidationMessage._0DoesNotHaveAValid1Format"
-    export const _0HasAnInvalidFormat = "ValidationMessage._0HasAnInvalidFormat"
-    export const _0HasMoreThan1DecimalPlaces = "ValidationMessage._0HasMoreThan1DecimalPlaces"
-    export const _0HasSomeRepeatedElements1 = "ValidationMessage._0HasSomeRepeatedElements1"
-    export const _0ShouldBe12 = "ValidationMessage._0ShouldBe12"
-    export const _0HasToBeBetween1And2 = "ValidationMessage._0HasToBeBetween1And2"
-    export const _0HasToBeLowercase = "ValidationMessage._0HasToBeLowercase"
-    export const _0HasToBeUppercase = "ValidationMessage._0HasToBeUppercase"
-    export const _0IsNecessary = "ValidationMessage._0IsNecessary"
-    export const _0IsNecessaryOnState1 = "ValidationMessage._0IsNecessaryOnState1"
-    export const _0IsNotAllowed = "ValidationMessage._0IsNotAllowed"
-    export const _0IsNotAllowedOnState1 = "ValidationMessage._0IsNotAllowedOnState1"
-    export const _0IsNotSet = "ValidationMessage._0IsNotSet"
-    export const _0IsSet = "ValidationMessage._0IsSet"
-    export const _0IsNotA1_G = "ValidationMessage._0IsNotA1_G"
-    export const BeA0_G = "ValidationMessage.BeA0_G"
-    export const Be = "ValidationMessage.Be"
-    export const BeBetween0And1 = "ValidationMessage.BeBetween0And1"
-    export const BeNotNull = "ValidationMessage.BeNotNull"
-    export const FileName = "ValidationMessage.FileName"
-    export const Have0Decimals = "ValidationMessage.Have0Decimals"
-    export const HaveANumberOfElements01 = "ValidationMessage.HaveANumberOfElements01"
-    export const HaveAPrecisionOf = "ValidationMessage.HaveAPrecisionOf"
-    export const HaveBetween0And1Characters = "ValidationMessage.HaveBetween0And1Characters"
-    export const HaveMaximum0Characters = "ValidationMessage.HaveMaximum0Characters"
-    export const HaveMinimum0Characters = "ValidationMessage.HaveMinimum0Characters"
-    export const HaveNoRepeatedElements = "ValidationMessage.HaveNoRepeatedElements"
-    export const HaveValid0Format = "ValidationMessage.HaveValid0Format"
-    export const InvalidDateFormat = "ValidationMessage.InvalidDateFormat"
-    export const InvalidFormat = "ValidationMessage.InvalidFormat"
-    export const NotPossibleToaAssign0 = "ValidationMessage.NotPossibleToaAssign0"
-    export const Numeric = "ValidationMessage.Numeric"
-    export const OrBeNull = "ValidationMessage.OrBeNull"
-    export const Telephone = "ValidationMessage.Telephone"
-    export const _0ShouldNotHaveBreakLines = "ValidationMessage._0ShouldNotHaveBreakLines"
-    export const _0ShouldNotHaveInitialSpaces = "ValidationMessage._0ShouldNotHaveInitialSpaces"
-    export const _0ShouldNotHaveFinalSpaces = "ValidationMessage._0ShouldNotHaveFinalSpaces"
-    export const TheLenghtOf0HasToBeEqualTo1 = "ValidationMessage.TheLenghtOf0HasToBeEqualTo1"
-    export const TheLengthOf0HasToBeGreaterOrEqualTo1 = "ValidationMessage.TheLengthOf0HasToBeGreaterOrEqualTo1"
-    export const TheLengthOf0HasToBeLesserOrEqualTo1 = "ValidationMessage.TheLengthOf0HasToBeLesserOrEqualTo1"
-    export const TheNumberOf0IsBeingMultipliedBy1 = "ValidationMessage.TheNumberOf0IsBeingMultipliedBy1"
-    export const TheNumberOfElementsOf0HasToBe12 = "ValidationMessage.TheNumberOfElementsOf0HasToBe12"
-    export const Type0NotAllowed = "ValidationMessage.Type0NotAllowed"
-    export const _0IsMandatoryWhen1IsNotSet = "ValidationMessage._0IsMandatoryWhen1IsNotSet"
-    export const _0IsMandatoryWhen1IsSet = "ValidationMessage._0IsMandatoryWhen1IsSet"
-    export const _0ShouldBeNullWhen1IsNotSet = "ValidationMessage._0ShouldBeNullWhen1IsNotSet"
-    export const _0ShouldBeNullWhen1IsSet = "ValidationMessage._0ShouldBeNullWhen1IsSet"
-    export const _0ShouldBeNull = "ValidationMessage._0ShouldBeNull"
-    export const _0ShouldBeADateInThePast = "ValidationMessage._0ShouldBeADateInThePast"
-    export const BeInThePast = "ValidationMessage.BeInThePast"
-    export const _0ShouldBeGreaterThan1 = "ValidationMessage._0ShouldBeGreaterThan1"
-    export const _0HasAPrecissionOf1InsteadOf2 = "ValidationMessage._0HasAPrecissionOf1InsteadOf2"
+    export const _0DoesNotHaveAValid1Format = new MessageKey("ValidationMessage", "_0DoesNotHaveAValid1Format");
+    export const _0HasAnInvalidFormat = new MessageKey("ValidationMessage", "_0HasAnInvalidFormat");
+    export const _0HasMoreThan1DecimalPlaces = new MessageKey("ValidationMessage", "_0HasMoreThan1DecimalPlaces");
+    export const _0HasSomeRepeatedElements1 = new MessageKey("ValidationMessage", "_0HasSomeRepeatedElements1");
+    export const _0ShouldBe12 = new MessageKey("ValidationMessage", "_0ShouldBe12");
+    export const _0HasToBeBetween1And2 = new MessageKey("ValidationMessage", "_0HasToBeBetween1And2");
+    export const _0HasToBeLowercase = new MessageKey("ValidationMessage", "_0HasToBeLowercase");
+    export const _0HasToBeUppercase = new MessageKey("ValidationMessage", "_0HasToBeUppercase");
+    export const _0IsNecessary = new MessageKey("ValidationMessage", "_0IsNecessary");
+    export const _0IsNecessaryOnState1 = new MessageKey("ValidationMessage", "_0IsNecessaryOnState1");
+    export const _0IsNotAllowed = new MessageKey("ValidationMessage", "_0IsNotAllowed");
+    export const _0IsNotAllowedOnState1 = new MessageKey("ValidationMessage", "_0IsNotAllowedOnState1");
+    export const _0IsNotSet = new MessageKey("ValidationMessage", "_0IsNotSet");
+    export const _0IsSet = new MessageKey("ValidationMessage", "_0IsSet");
+    export const _0IsNotA1_G = new MessageKey("ValidationMessage", "_0IsNotA1_G");
+    export const BeA0_G = new MessageKey("ValidationMessage", "BeA0_G");
+    export const Be = new MessageKey("ValidationMessage", "Be");
+    export const BeBetween0And1 = new MessageKey("ValidationMessage", "BeBetween0And1");
+    export const BeNotNull = new MessageKey("ValidationMessage", "BeNotNull");
+    export const FileName = new MessageKey("ValidationMessage", "FileName");
+    export const Have0Decimals = new MessageKey("ValidationMessage", "Have0Decimals");
+    export const HaveANumberOfElements01 = new MessageKey("ValidationMessage", "HaveANumberOfElements01");
+    export const HaveAPrecisionOf = new MessageKey("ValidationMessage", "HaveAPrecisionOf");
+    export const HaveBetween0And1Characters = new MessageKey("ValidationMessage", "HaveBetween0And1Characters");
+    export const HaveMaximum0Characters = new MessageKey("ValidationMessage", "HaveMaximum0Characters");
+    export const HaveMinimum0Characters = new MessageKey("ValidationMessage", "HaveMinimum0Characters");
+    export const HaveNoRepeatedElements = new MessageKey("ValidationMessage", "HaveNoRepeatedElements");
+    export const HaveValid0Format = new MessageKey("ValidationMessage", "HaveValid0Format");
+    export const InvalidDateFormat = new MessageKey("ValidationMessage", "InvalidDateFormat");
+    export const InvalidFormat = new MessageKey("ValidationMessage", "InvalidFormat");
+    export const NotPossibleToaAssign0 = new MessageKey("ValidationMessage", "NotPossibleToaAssign0");
+    export const Numeric = new MessageKey("ValidationMessage", "Numeric");
+    export const OrBeNull = new MessageKey("ValidationMessage", "OrBeNull");
+    export const Telephone = new MessageKey("ValidationMessage", "Telephone");
+    export const _0ShouldNotHaveBreakLines = new MessageKey("ValidationMessage", "_0ShouldNotHaveBreakLines");
+    export const _0ShouldNotHaveInitialSpaces = new MessageKey("ValidationMessage", "_0ShouldNotHaveInitialSpaces");
+    export const _0ShouldNotHaveFinalSpaces = new MessageKey("ValidationMessage", "_0ShouldNotHaveFinalSpaces");
+    export const TheLenghtOf0HasToBeEqualTo1 = new MessageKey("ValidationMessage", "TheLenghtOf0HasToBeEqualTo1");
+    export const TheLengthOf0HasToBeGreaterOrEqualTo1 = new MessageKey("ValidationMessage", "TheLengthOf0HasToBeGreaterOrEqualTo1");
+    export const TheLengthOf0HasToBeLesserOrEqualTo1 = new MessageKey("ValidationMessage", "TheLengthOf0HasToBeLesserOrEqualTo1");
+    export const TheNumberOf0IsBeingMultipliedBy1 = new MessageKey("ValidationMessage", "TheNumberOf0IsBeingMultipliedBy1");
+    export const TheNumberOfElementsOf0HasToBe12 = new MessageKey("ValidationMessage", "TheNumberOfElementsOf0HasToBe12");
+    export const Type0NotAllowed = new MessageKey("ValidationMessage", "Type0NotAllowed");
+    export const _0IsMandatoryWhen1IsNotSet = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsNotSet");
+    export const _0IsMandatoryWhen1IsSet = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsSet");
+    export const _0ShouldBeNullWhen1IsNotSet = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsNotSet");
+    export const _0ShouldBeNullWhen1IsSet = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsSet");
+    export const _0ShouldBeNull = new MessageKey("ValidationMessage", "_0ShouldBeNull");
+    export const _0ShouldBeADateInThePast = new MessageKey("ValidationMessage", "_0ShouldBeADateInThePast");
+    export const BeInThePast = new MessageKey("ValidationMessage", "BeInThePast");
+    export const _0ShouldBeGreaterThan1 = new MessageKey("ValidationMessage", "_0ShouldBeGreaterThan1");
+    export const _0HasAPrecissionOf1InsteadOf2 = new MessageKey("ValidationMessage", "_0HasAPrecissionOf1InsteadOf2");
 }
 
 export module VoidEnumMessage {
-    export const Instance = "VoidEnumMessage.Instance"
+    export const Instance = new MessageKey("VoidEnumMessage", "Instance");
 }
 
 export namespace Basics {
 
-    export const ColorEntity: Type<ColorEntity> = "ColorEntity";
+    export const ColorEntity_Type = new Type<ColorEntity>("ColorEntity");
     export interface ColorEntity extends EmbeddedEntity {
         argb?: number;
     }
     
-    export const DeleteLogParametersEntity: Type<DeleteLogParametersEntity> = "DeleteLogParametersEntity";
+    export const DeleteLogParametersEntity_Type = new Type<DeleteLogParametersEntity>("DeleteLogParametersEntity");
     export interface DeleteLogParametersEntity extends EmbeddedEntity {
         deleteLogsWithMoreThan?: number;
         dateLimit?: string;
@@ -316,7 +320,7 @@ export namespace Basics {
         maxChunks?: number;
     }
     
-    export const ExceptionEntity: Type<ExceptionEntity> = "ExceptionEntity";
+    export const ExceptionEntity_Type = new Type<ExceptionEntity>("ExceptionEntity");
     export interface ExceptionEntity extends Entity {
         creationDate?: string;
         exceptionType?: string;
@@ -347,7 +351,7 @@ export namespace Basics {
     export interface IUserEntity extends IEntity {
     }
     
-    export const OperationLogEntity: Type<OperationLogEntity> = "OperationLogEntity";
+    export const OperationLogEntity_Type = new Type<OperationLogEntity>("OperationLogEntity");
     export interface OperationLogEntity extends Entity {
         target?: Lite<IEntity>;
         origin?: Lite<IEntity>;
@@ -363,7 +367,7 @@ export namespace Basics {
         name?: string;
     }
     
-    export const TypeEntity: Type<TypeEntity> = "TypeEntity";
+    export const TypeEntity_Type = new Type<TypeEntity>("TypeEntity");
     export interface TypeEntity extends Entity {
         fullClassName?: string;
         cleanName?: string;
@@ -381,6 +385,7 @@ export namespace DynamicQuery {
         Remove,
         Replace,
     }
+    export const ColumnOptionsMode_Type = new EnumType<ColumnOptionsMode>("ColumnOptionsMode", ColumnOptionsMode);
     
     export enum FilterOperation {
         EqualTo,
@@ -399,6 +404,7 @@ export namespace DynamicQuery {
         NotLike,
         IsIn,
     }
+    export const FilterOperation_Type = new EnumType<FilterOperation>("FilterOperation", FilterOperation);
     
     export enum FilterType {
         Integer,
@@ -411,49 +417,52 @@ export namespace DynamicQuery {
         Enum,
         Guid,
     }
+    export const FilterType_Type = new EnumType<FilterType>("FilterType", FilterType);
     
     export enum OrderType {
         Ascending,
         Descending,
     }
+    export const OrderType_Type = new EnumType<OrderType>("OrderType", OrderType);
     
     export enum PaginationMode {
         All,
         Firsts,
         Paginate,
     }
+    export const PaginationMode_Type = new EnumType<PaginationMode>("PaginationMode", PaginationMode);
     
     export module QueryTokenMessage {
-        export const _0As1 = "QueryTokenMessage._0As1"
-        export const And = "QueryTokenMessage.And"
-        export const AnyEntity = "QueryTokenMessage.AnyEntity"
-        export const As0 = "QueryTokenMessage.As0"
-        export const Check = "QueryTokenMessage.Check"
-        export const Column0NotFound = "QueryTokenMessage.Column0NotFound"
-        export const Count = "QueryTokenMessage.Count"
-        export const Date = "QueryTokenMessage.Date"
-        export const DateTime = "QueryTokenMessage.DateTime"
-        export const Day = "QueryTokenMessage.Day"
-        export const DayOfWeek = "QueryTokenMessage.DayOfWeek"
-        export const DayOfYear = "QueryTokenMessage.DayOfYear"
-        export const DecimalNumber = "QueryTokenMessage.DecimalNumber"
-        export const Embedded0 = "QueryTokenMessage.Embedded0"
-        export const GlobalUniqueIdentifier = "QueryTokenMessage.GlobalUniqueIdentifier"
-        export const Hour = "QueryTokenMessage.Hour"
-        export const ListOf0 = "QueryTokenMessage.ListOf0"
-        export const Millisecond = "QueryTokenMessage.Millisecond"
-        export const Minute = "QueryTokenMessage.Minute"
-        export const Month = "QueryTokenMessage.Month"
-        export const MonthStart = "QueryTokenMessage.MonthStart"
-        export const MoreThanOneColumnNamed0 = "QueryTokenMessage.MoreThanOneColumnNamed0"
-        export const Number = "QueryTokenMessage.Number"
-        export const Of = "QueryTokenMessage.Of"
-        export const Second = "QueryTokenMessage.Second"
-        export const Text = "QueryTokenMessage.Text"
-        export const Year = "QueryTokenMessage.Year"
-        export const WeekNumber = "QueryTokenMessage.WeekNumber"
-        export const _0Steps1 = "QueryTokenMessage._0Steps1"
-        export const Step0 = "QueryTokenMessage.Step0"
+        export const _0As1 = new MessageKey("QueryTokenMessage", "_0As1");
+        export const And = new MessageKey("QueryTokenMessage", "And");
+        export const AnyEntity = new MessageKey("QueryTokenMessage", "AnyEntity");
+        export const As0 = new MessageKey("QueryTokenMessage", "As0");
+        export const Check = new MessageKey("QueryTokenMessage", "Check");
+        export const Column0NotFound = new MessageKey("QueryTokenMessage", "Column0NotFound");
+        export const Count = new MessageKey("QueryTokenMessage", "Count");
+        export const Date = new MessageKey("QueryTokenMessage", "Date");
+        export const DateTime = new MessageKey("QueryTokenMessage", "DateTime");
+        export const Day = new MessageKey("QueryTokenMessage", "Day");
+        export const DayOfWeek = new MessageKey("QueryTokenMessage", "DayOfWeek");
+        export const DayOfYear = new MessageKey("QueryTokenMessage", "DayOfYear");
+        export const DecimalNumber = new MessageKey("QueryTokenMessage", "DecimalNumber");
+        export const Embedded0 = new MessageKey("QueryTokenMessage", "Embedded0");
+        export const GlobalUniqueIdentifier = new MessageKey("QueryTokenMessage", "GlobalUniqueIdentifier");
+        export const Hour = new MessageKey("QueryTokenMessage", "Hour");
+        export const ListOf0 = new MessageKey("QueryTokenMessage", "ListOf0");
+        export const Millisecond = new MessageKey("QueryTokenMessage", "Millisecond");
+        export const Minute = new MessageKey("QueryTokenMessage", "Minute");
+        export const Month = new MessageKey("QueryTokenMessage", "Month");
+        export const MonthStart = new MessageKey("QueryTokenMessage", "MonthStart");
+        export const MoreThanOneColumnNamed0 = new MessageKey("QueryTokenMessage", "MoreThanOneColumnNamed0");
+        export const Number = new MessageKey("QueryTokenMessage", "Number");
+        export const Of = new MessageKey("QueryTokenMessage", "Of");
+        export const Second = new MessageKey("QueryTokenMessage", "Second");
+        export const Text = new MessageKey("QueryTokenMessage", "Text");
+        export const Year = new MessageKey("QueryTokenMessage", "Year");
+        export const WeekNumber = new MessageKey("QueryTokenMessage", "WeekNumber");
+        export const _0Steps1 = new MessageKey("QueryTokenMessage", "_0Steps1");
+        export const Step0 = new MessageKey("QueryTokenMessage", "Step0");
     }
     
     export enum UniqueType {
@@ -464,14 +473,15 @@ export namespace DynamicQuery {
         SingleOrMany,
         Only,
     }
+    export const UniqueType_Type = new EnumType<UniqueType>("UniqueType", UniqueType);
     
 }
 
 export namespace Patterns {
 
     export module EntityMessage {
-        export const AttemptToSet0InLockedEntity1 = "EntityMessage.AttemptToSet0InLockedEntity1"
-        export const AttemptToAddRemove0InLockedEntity1 = "EntityMessage.AttemptToAddRemove0InLockedEntity1"
+        export const AttemptToSet0InLockedEntity1 = new MessageKey("EntityMessage", "AttemptToSet0InLockedEntity1");
+        export const AttemptToAddRemove0InLockedEntity1 = new MessageKey("EntityMessage", "AttemptToAddRemove0InLockedEntity1");
     }
     
     export interface LockableEntity extends Entity {

@@ -135,7 +135,9 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="ApiControllers\QueryController.cs" />
     <Compile Include="Facades\ServerBuilder.cs" />
+    <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="PortableAreas\EmbeddedFilesRespository.cs" />
     <Compile Include="PortableAreas\FileRepositoryManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -183,9 +185,12 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Scripts\Signum.Entities.txt" />
+    <TypeScriptCompile Include="Scripts\Service.ts" />
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
       <DependentUpon>Signum.Entities.txt</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Typings\es6-promise\es6-promise.d.ts" />
+    <TypeScriptCompile Include="Scripts\Globals.ts" />
     <TypeScriptCompile Include="Typings\react-router\react-router.d.ts" />
     <TypeScriptCompile Include="Views\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />

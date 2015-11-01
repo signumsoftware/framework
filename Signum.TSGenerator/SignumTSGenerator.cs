@@ -32,10 +32,13 @@ namespace Signum.TSGenerator
                 return "";
             }, RegexOptions.Multiline);
 
-            var references = Regex.Matches(file, @"import \* as (?<variable>\w+) from '.*?'").Cast<Match>().Select(a => a.Groups["variable"].Value)
-                .Select(var => new Reference(refs.GetReferencedAssembly(parameters.ConsumeParameter(var + ".Assembly"), this.BuildEngine.ProjectFileOfTaskNode))
+            var imports = Regex.Matches(file, @"import \* as (?<variable>\w+) from '.*?'").Cast<Match>().Select(a => a.Groups["variable"].Value).ToList();
+
+            var references = imports
+                .Select(var => new Reference
                 {
                     VariableName = var,
+                    AssemblyFullPath = refs.GetReferencedAssembly(parameters.ConsumeParameter(var + ".Assembly"), this.BuildEngine.ProjectFileOfTaskNode),
                     BaseNamespace = parameters.ConsumeParameter(var + ".BaseNamespace"),
                 }).ToList();
 
@@ -62,7 +65,7 @@ namespace Signum.TSGenerator
         }
     }
 
-    public static class Bla
+    public static class Utils
     {
         public static string GetReferencedAssembly(this Dictionary<string, string> dictionary, string assemblyName, string projectName)
         {

@@ -28,8 +28,6 @@ namespace Signum.TSGenerator
 
         public static string Process(StringBuilder sb, Options options)
         {
-            options.EntitiesVariable = options.AssemblyName == "Signum.Entities" ? "" : options.References.Single(r => r.AssemblyName == "Signum.Entities").VariableName + ".";
-
             var assembly = Assembly.LoadFrom(options.AssemblyFullPath);
             options.References.ForEach(r => Assembly.LoadFrom(r.AssemblyFullPath));
 
@@ -100,10 +98,20 @@ namespace Signum.TSGenerator
                                       text = MessageInTypeScript(type, options),
                                   }).ToList();
 
+            var queryResult = (from type in assembly.ExportedTypes
+                               where type.IsEnum && type.Name.EndsWith("Query")
+                               select new
+                               {
+                                   ns = type.Namespace,
+                                   type,
+                                   text = MessageInTypeScript(type, options),
+                               }).ToList();
+
             var namespaces = entityResults
                 .Concat(interfacesResults)
                 .Concat(enumResult)
                 .Concat(messageResults)
+                .Concat(queryResult)
                 .Concat(symbolResults)
                 .Concat(extrnalEnums)
                 .GroupBy(a => a.ns)
@@ -163,6 +171,7 @@ namespace Signum.TSGenerator
                 value = constantValue + 1;
             }
             sb.AppendLine(@"}");
+            sb.AppendLine($"export const {type.Name}_Type = new EnumType<{type.Name}>(\"{type.Name}\", {type.Name});");
 
             return sb.ToString();
         }
@@ -176,7 +185,23 @@ namespace Signum.TSGenerator
             foreach (var field in fields)
             {
                 string context = $"By type {type.Name} and field {field.Name}";
-                sb.AppendLine($"    export const {field.Name} = \"{type.Name}.{field.Name}\"");
+                sb.AppendLine($"    export const {field.Name} = new MessageKey(\"{type.Name}\", \"{field.Name}\");");
+            }
+            sb.AppendLine(@"}");
+
+            return sb.ToString();
+        }
+
+        private static string QueryInTypeScript(Type type, Options options)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"export module {type.Name} {{");
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static);
+
+            foreach (var field in fields)
+            {
+                string context = $"By type {type.Name} and field {field.Name}";
+                sb.AppendLine($"    export const {field.Name} = new QueryKey(\"{type.Name}\", \"{field.Name}\");");
             }
             sb.AppendLine(@"}");
 
@@ -193,7 +218,7 @@ namespace Signum.TSGenerator
             {
                 string context = $"By type {type.Name} and field {field.Name}";
                 var propertyType = TypeScriptName(field.FieldType, type, options, context);
-                sb.AppendLine($"    export const {field.Name} : {propertyType} = {{ key: \"{type.Name}.{field.Name}\" }};");
+                sb.AppendLine($"    export const {field.Name} : {propertyType} = registerSymbol({{ key: \"{type.Name}.{field.Name}\" }});");
             }
             sb.AppendLine(@"}");
 
@@ -204,7 +229,7 @@ namespace Signum.TSGenerator
         {
             StringBuilder sb = new StringBuilder();
             if (!type.IsAbstract)
-                sb.AppendLine($"export const {type.Name}: {options.EntitiesVariable}Type<{type.Name}> = \"{type.Name}\";");
+                sb.AppendLine($"export const {type.Name}_Type = new Type<{type.Name}>(\"{type.Name}\");");
 
             List<string> baseTypes = new List<string>();
             if (type.BaseType != null)
@@ -398,9 +423,6 @@ namespace Signum.TSGenerator
         public string BaseNamespace;
         public List<Reference> References = new List<Reference>();
 
-        internal string EntitiesVariable;
-
-
         public Options(string assemblyFullPath)
         {
             this.AssemblyFullPath = assemblyFullPath;
@@ -416,15 +438,20 @@ namespace Signum.TSGenerator
 
     public class Reference
     {
-        public Reference(string assemblyFullPath)
+        public string VariableName;
+        
+        string assemblyFullPath;
+        public string AssemblyFullPath
         {
-            this.AssemblyFullPath = assemblyFullPath;
-            this.AssemblyName = Path.GetFileNameWithoutExtension(assemblyFullPath);
+            get { return assemblyFullPath; }
+            set
+            {
+                assemblyFullPath = value;
+                if (assemblyFullPath != null)
+                    this.AssemblyName = Path.GetFileNameWithoutExtension(assemblyFullPath);
+            }
         }
-
-        public string AssemblyFullPath;
         public string AssemblyName;
         public string BaseNamespace;
-        public string VariableName;
     }
 }

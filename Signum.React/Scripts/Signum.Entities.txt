@@ -1,7 +1,7 @@
 ﻿//Assembly: Signum.Entities.dll
 //BaseNamespace: Signum.Entities
 
-
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
 
 export interface ModifiableEntity {
     ToString?: string;
@@ -43,3 +43,4 @@ export type DeleteSymbol<T extends IEntity> = OperationSymbol;
 export type ConstructSymbol_Simple<T extends Entity> = OperationSymbol;
 export type ConstructSymbol_From<T extends Entity, F extends IEntity> = OperationSymbol;
 export type ConstructSymbol_FromMany<T extends Entity, F extends IEntity> = OperationSymbol; 
+
