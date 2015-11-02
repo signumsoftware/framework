@@ -51,6 +51,7 @@ namespace Signum.Entities.UserQueries
             }
         }
 
+
         [NotNullable, PreserveOrder]
         public MList<QueryFilterEntity> Filters { get; set; } = new MList<QueryFilterEntity>();
 

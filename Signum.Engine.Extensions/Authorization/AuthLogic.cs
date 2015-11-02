@@ -345,6 +345,11 @@ namespace Signum.Engine.Authorization
             return roles.Value.IndirectlyRelatedTo(RoleEntity.Current.ToLite(), true);
         }
 
+        public static HashSet<Lite<RoleEntity>> RolesFromRole(Lite<RoleEntity> role)
+        {
+            return roles.Value.IndirectlyRelatedTo(role, true);
+        }
+
         internal static int Rank(Lite<RoleEntity> role)
         {
             return roles.Value.IndirectlyRelatedTo(role).Count;
