@@ -22,7 +22,7 @@ namespace Signum.Web
     public static class ContextualItemsHelper
     {
         public static bool SelectedItemsMenuInSearchPage = true;
-        public static event Func<SelectedItemsMenuContext, List<IMenuItem>> GetContextualItemsForLites;
+        public static event Func<SelectedItemsMenuContext, MenuItemBlock> GetContextualItemsForLites;
 
         public static List<IMenuItem> GetContextualItemListForLites(SelectedItemsMenuContext ctx)
         {
@@ -31,21 +31,28 @@ namespace Signum.Web
             {
                 if (GetContextualItemsForLites != null)
                 {
-                    foreach (var d in GetContextualItemsForLites.GetInvocationListTyped())
+                    foreach (var block in GetContextualItemsForLites.GetInvocationListTyped().Select(d=>d(ctx)).NotNull().OrderBy(a=>a.Order))
                     {
-                        var newItems = d(ctx);
+                        if (items.Any() && block.Items.NotNull().Any())
+                            items.Add(new MenuItemSeparator());
 
-                        if (newItems != null)
-                        {
-                            if (items.Any() && newItems.NotNull().Any())
-                                items.Add(new MenuItemSeparator());
+                        if (block.Header.HasText())
+                            items.Add(new MenuItemHeader(block.Header));
 
-                            items.AddRange(newItems.NotNull());
-                        }
+                        items.AddRange(block.Items.NotNull());
                     }
                 }
             }
             return items;
         }
     }
+
+    public class MenuItemBlock
+    {
+        public int Order;
+        public string Header; 
+        public IEnumerable<IMenuItem> Items;
+             
+    }
+
 }

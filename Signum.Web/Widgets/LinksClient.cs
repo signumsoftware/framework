@@ -41,7 +41,7 @@ namespace Signum.Web
 
     static class QuickLinkContextualMenu
     {
-        internal static List<IMenuItem> ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
+        internal static MenuItemBlock ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
         {
             if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count > 1)
                 return null;
@@ -49,12 +49,8 @@ namespace Signum.Web
             List<QuickLink> quickLinks = LinksClient.GetForEntity(ctx.Lites[0], null, ctx.Prefix, ctx.QueryName, ctx.Url);
             if (quickLinks.IsNullOrEmpty())
                 return null;
-
-            List<IMenuItem> menuItems = new List<IMenuItem>();
-            menuItems.Add(new MenuItemHeader(QuickLinkMessage.Quicklinks.NiceToString()));
-            menuItems.AddRange(quickLinks);
-
-            return menuItems;
+            
+            return new MenuItemBlock { Header = QuickLinkMessage.Quicklinks.NiceToString(), Items = quickLinks };
         }
     }
 

@@ -310,7 +310,7 @@ export function openPopup(entityHtml : Entities.EntityHtml) : Promise<void> {
 }
 
 export function markCells(prefix: string) {
-    $("tr.active").addClass("sf-entity-ctxmenu-success");
+    Finder.getFor(prefix).then(sc=>sc.markSelectedAsSuccess());
     notifyExecuted();
 }
 
