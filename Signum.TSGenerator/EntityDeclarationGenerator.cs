@@ -415,6 +415,7 @@ namespace Signum.TSGenerator
         }
     }
 
+    [Serializable]
     public class Options
     {
         public string AssemblyName;
@@ -436,6 +437,7 @@ namespace Signum.TSGenerator
         }
     }
 
+    [Serializable]
     public class Reference
     {
         public string VariableName;

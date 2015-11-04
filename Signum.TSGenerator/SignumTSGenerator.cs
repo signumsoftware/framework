@@ -19,10 +19,35 @@ namespace Signum.TSGenerator
 
         public override bool Execute()
         {
-            var refs = References.Split(';').ToDictionary(a => Path.GetFileName(a));
-
             Log.LogMessage($"Reading {TemplateFile}");
-            var file = File.ReadAllText(TemplateFile);
+
+            string result;
+            AppDomain domain = AppDomain.CreateDomain("reflectionRomain");
+            try
+            {
+                dynamic obj = domain.CreateInstanceFromAndUnwrap(this.GetType().Assembly.Location, "Signum.TSGenerator.ProxyGenerator");
+                result = obj.Process(TemplateFile, References, this.BuildEngine.ProjectFileOfTaskNode);
+            }
+            finally
+            {
+                AppDomain.Unload(domain);
+            }
+
+            var targetFile = Path.ChangeExtension(TemplateFile, ".ts");
+            Log.LogMessage($"Writing {targetFile}");
+            File.WriteAllText(targetFile, result);
+
+            return true;
+        }
+    }
+
+    public class ProxyGenerator: MarshalByRefObject
+    {
+        public string Process(string templateFile, string referenceList, string projectFile)
+        {
+            var refs = referenceList.Split(';').ToDictionary(a => Path.GetFileName(a));
+
+            var file = File.ReadAllText(templateFile);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
 
@@ -38,30 +63,26 @@ namespace Signum.TSGenerator
                 .Select(var => new Reference
                 {
                     VariableName = var,
-                    AssemblyFullPath = refs.GetReferencedAssembly(parameters.ConsumeParameter(var + ".Assembly"), this.BuildEngine.ProjectFileOfTaskNode),
+                    AssemblyFullPath = refs.GetReferencedAssembly(parameters.ConsumeParameter(var + ".Assembly"), projectFile),
                     BaseNamespace = parameters.ConsumeParameter(var + ".BaseNamespace"),
                 }).ToList();
 
-            var options = new Options(refs.GetReferencedAssembly(parameters.ConsumeParameter("Assembly"), this.BuildEngine.ProjectFileOfTaskNode))
+            var options = new Options(refs.GetReferencedAssembly(parameters.ConsumeParameter("Assembly"), projectFile))
             {
                 BaseNamespace = parameters.ConsumeParameter("BaseNamespace"),
                 References = references,
             };
-            
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(@"//////////////////////////////////");
             sb.AppendLine(@"//Auto-generated. Do NOT modify!//");
             sb.AppendLine(@"//////////////////////////////////");
 
             sb.AppendLine(file);
-            
+
             EntityDeclarationGenerator.Process(sb, options);
 
-            var targetFile = Path.ChangeExtension(TemplateFile, ".ts");
-            Log.LogMessage($"Writing {targetFile}");
-            File.WriteAllText(targetFile, sb.ToString());
-
-            return true;
+            return sb.ToString();
         }
     }
 
