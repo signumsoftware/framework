@@ -12,9 +12,10 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Entities.Reflection;
-using System.ComponentModel;  
+using System.ComponentModel;
 using System.Collections;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities
 {
@@ -138,6 +139,15 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
 
             return null;
         }
+
+        public string Key()
+        {
+            if (IsByAll)
+                return "[ALL]";
+
+            return Types.ToString(TypeEntity.GetCleanName, ", ");
+        }
+
 
         public override string ToString()
         {

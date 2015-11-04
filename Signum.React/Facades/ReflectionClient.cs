@@ -67,11 +67,17 @@ namespace Signum.React.Facades
                                     IsCollection = p.PropertyInfo?.PropertyType.IsMList() ?? false,
                                     IsLite = p.PropertyInfo?.PropertyType.CleanMList().IsLite() ?? false,
                                     IsNullable = p.PropertyInfo?.PropertyType.IsNullable() ?? false,
-                                    Type = GetPropertyType(p.PropertyInfo.Name == nameof(Entity.Id) && p.Parent.PropertyRouteType == PropertyRouteType.Root ? PrimaryKey.Type(type) : p.Type)
+                                    Type = IsId(p) ? TypeScriptType(PrimaryKey.Type(type)) :
+                                            p.TryGetImplementations()?.Key() ?? TypeScriptType(p.Type)
                                 })
                           })).ToDictionary("entities");
 
             return result;
+        }
+
+        private static bool IsId(PropertyRoute p)
+        {
+            return p.PropertyInfo.Name == nameof(Entity.Id) && p.Parent.PropertyRouteType == PropertyRouteType.Root;
         }
 
         private static Dictionary<string, TypeInfoTS> GetEnums()
@@ -130,7 +136,7 @@ namespace Signum.React.Facades
             return ((Symbol)v);
         }
 
-        private static string GetPropertyType(Type type)
+        private static string TypeScriptType(Type type)
         {
             type = CleanMList(type);
 
