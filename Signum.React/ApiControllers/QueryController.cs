@@ -15,8 +15,7 @@ namespace Signum.React.ApiControllers
         [Route("api/query/description/{queryName}")]
         public QueryDescription GetQuery(string queryName)
         {
-            var qn = QueryLogic.TryToQueryName(queryName);
-
+            var qn = QueryLogic.ToQueryName(queryName);
             return DynamicQueryManager.Current.QueryDescription(qn);
         }
     }
