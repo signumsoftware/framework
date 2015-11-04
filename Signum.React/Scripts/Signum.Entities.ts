@@ -362,6 +362,18 @@ export namespace Basics {
         exception?: Lite<ExceptionEntity>;
     }
     
+    export const PropertyRouteEntity_Type = new Type<PropertyRouteEntity>("PropertyRouteEntity");
+    export interface PropertyRouteEntity extends Entity {
+        path?: string;
+        rootType?: TypeEntity;
+    }
+    
+    export const QueryEntity_Type = new Type<QueryEntity>("QueryEntity");
+    export interface QueryEntity extends Entity {
+        name?: string;
+        key?: string;
+    }
+    
     export interface SemiSymbol extends Entity {
         key?: string;
         name?: string;

@@ -136,6 +136,8 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="ApiControllers\QueryController.cs" />
+    <Compile Include="ApiControllers\ReflectionController.cs" />
+    <Compile Include="Facades\ReflectionClient.cs" />
     <Compile Include="Facades\ServerBuilder.cs" />
     <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="PortableAreas\EmbeddedFilesRespository.cs" />
@@ -157,14 +159,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Extensions\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
-      <Project>{ba7fa363-61a1-41b1-945b-9b9c7bbcd357}</Project>
-      <Name>Signum.Engine.Extensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Extensions\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
-      <Project>{7d851227-5294-4beb-990e-56b4fbb7a148}</Project>
-      <Name>Signum.Entities.Extensions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
       <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
       <Name>Signum.Engine</Name>

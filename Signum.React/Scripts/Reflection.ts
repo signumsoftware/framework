@@ -16,36 +16,29 @@ export interface TypeInfo
 {
     kind: KindOfType;
     name: string;
-    baseTypeName?: string;
     niceName?: string;
     nicePluralName?: string;
-    allowed?: Allowed;
-
-    properties: { [name: string]: PropertyInfo }
+    members?: { [name: string]: MemberInfo };
+    mixins?: { [name: string]: string };
 }
 
-export interface PropertyInfo {
+export interface MemberInfo {
     name: string,
     niceName: string;
-    allowed?: Allowed
     isCollection?: boolean;
     isLite?: boolean; 
-    propertyTypeName?: string; //properties
-    unit?: string; //properties
-    format?: string; //properties
+    isNullable?: boolean; 
+    type?: string; 
+    unit?: string; 
+    format?: string; 
     id?: any; //symbols
-}
-
-export enum Allowed {
-    None = 0,
-    Read = 1,
-    Modify = 2,
 }
 
 export enum KindOfType {
     Entity,
     Enum,
     Message,
+    Query,
     SymbolContainer, 
 }
 
@@ -60,7 +53,7 @@ export function setInitialTypes(types: TypeInfo[])
     _types = types.toObject(t=> t.name);
 
     symbols.forEach(s=> {
-        s.id = _types[s.key.before(".")].properties[s.key.after(".")].id;
+        s.id = _types[s.key.before(".")].members[s.key.after(".")].id;
     });
 }
 
@@ -84,8 +77,8 @@ export class Type<T> {
         return typeInfo(this.type);
     }
 
-    propertyInfo(lambdaToProperty: (v: T) => any): PropertyInfo {
-        return this.typeInfo().properties[lambdaBody(lambdaToProperty)];
+    propertyInfo(lambdaToProperty: (v: T) => any): MemberInfo {
+        return this.typeInfo().members[lambdaBody(lambdaToProperty)];
     }
 
     niceName() {
@@ -119,7 +112,7 @@ export class EnumType<T> {
 
         var valueStr = this.converter[<any>value];
 
-        return this.typeInfo().properties[valueStr].niceName;
+        return this.typeInfo().members[valueStr].niceName;
     }
 }
 
@@ -129,8 +122,8 @@ export class MessageKey {
         public type: string,
         public name: string) { }
 
-    propertyInfo(): PropertyInfo {
-        return typeInfo(this.type).properties[this.name] 
+    propertyInfo(): MemberInfo {
+        return typeInfo(this.type).members[this.name] 
     }
 
     niceName(): string {
@@ -144,16 +137,12 @@ export class QueryKey {
         public type: string,
         public name: string) { }
 
-    propertyInfo(): PropertyInfo {
-        return typeInfo(this.type).properties[this.name] 
+    propertyInfo(): MemberInfo {
+        return typeInfo(this.type).members[this.name] 
     }
 
     niceName(): string {
         return this.propertyInfo().niceName;
-    }
-
-    isAllowed() {
-        return this.propertyInfo().allowed == Allowed.Modify;
     }
 }
 

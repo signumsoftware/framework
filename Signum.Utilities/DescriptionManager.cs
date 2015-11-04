@@ -337,9 +337,12 @@ namespace Signum.Utilities
             return true;
         }
 
+        public static Action Invalidated;
         public static void Invalidate()
         {
             localizations.Clear();
+
+            Invalidated?.Invoke();
         }
 
         internal static string DefaultTypeDescription(Type type)
@@ -513,7 +516,7 @@ namespace Signum.Utilities
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-        static IEnumerable<MemberInfo> GetMembers(Type type)
+        public static IEnumerable<MemberInfo> GetMembers(Type type)
         {
             if (type.IsEnum)
                 return EnumFieldCache.Get(type).Values;
