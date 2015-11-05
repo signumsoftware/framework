@@ -548,7 +548,7 @@ namespace Signum.Engine.Maps
             Type type = route.RootType;
 
             if (!Tables.ContainsKey(type))
-                return Implementations.By(route.Type.CleanType());
+                return Schema.Current.Settings.GetImplementations(route);
 
             Field field = TryFindField(Table(type), route.Members);
             //if (field == null)

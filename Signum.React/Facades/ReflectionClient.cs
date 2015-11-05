@@ -38,7 +38,7 @@ namespace Signum.React.Facades
             {
                 if (!EntityAssemblies.Keys.Any(a => DescriptionManager.GetLocalizedAssembly(a, ci) != null))
                     return GetTypeInfoTS(culture.Parent ?? CultureInfo.GetCultureInfo("en"));
-                
+
                 var result = new Dictionary<string, TypeInfoTS>();
                 result.AddRange(GetEntities(), "typeInfo");
                 result.AddRange(GetSymbolContainers(), "typeInfo");
@@ -49,7 +49,12 @@ namespace Signum.React.Facades
 
         private static Dictionary<string, TypeInfoTS> GetEntities()
         {
-            var result = (from type in TypeLogic.TypeToEntity.Keys
+            var models = (from a in EntityAssemblies
+                          from type in a.Key.GetTypes()
+                          where typeof(ModelEntity).IsAssignableFrom(type) && !type.IsAbstract && a.Value.Contains(type.Namespace)
+                          select type).ToList();
+
+            var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
                           where !type.IsEnumEntity()
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                           select KVP.Create(GetTypeName(type), new TypeInfoTS

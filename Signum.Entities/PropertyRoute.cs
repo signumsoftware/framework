@@ -379,7 +379,8 @@ namespace Signum.Entities
             PropertyRoute root = PropertyRoute.Root(type);
             List<PropertyRoute> result = new List<PropertyRoute>();
 
-            result.Add(root.Add(piId)); 
+            if (type.IsEntity())
+                result.Add(root.Add(piId)); 
 
             foreach (PropertyInfo pi in Reflector.PublicInstancePropertiesInOrder(type))
             {
