@@ -236,7 +236,7 @@ namespace Signum.Engine.Templating
 
         public override void Foreach(TemplateParameters p, Action forEachElement)
         {
-            var groups = p.Rows.GroupBy(r => r[p.Columns[ParsedToken.QueryToken]]).ToList();
+            var groups = p.Rows.GroupBy(r => r[p.Columns[ParsedToken.QueryToken]], TemplateUtils.SemiStructuralEqualityComparer.Comparer).ToList();
             if (groups.Count == 1 && groups[0].Key == null)
                 return;
 

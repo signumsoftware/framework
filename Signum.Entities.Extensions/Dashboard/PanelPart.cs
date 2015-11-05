@@ -122,7 +122,9 @@ namespace Signum.Entities.Dashboard
         [NotNullable]
         [NotNullValidator]
         public UserQueryEntity UserQuery { get; set; }
-
+        
+        public bool AllowSelection { get; set; }
+        
         public override string ToString()
         {
             return UserQuery?.ToString();
