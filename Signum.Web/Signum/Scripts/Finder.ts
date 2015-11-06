@@ -680,6 +680,10 @@ export class SearchControl {
         return SearchControl.getSelectedItems(this.options.prefix);
     }
 
+    markSelectedAsSuccess() {
+        this.prefix.child('tblResults').get().find("tr.active").addClass("sf-entity-ctxmenu-success");
+    }
+
     selectedItemsLiteKeys(): string {
         return SearchControl.liteKeys(this.selectedItems());
     }
