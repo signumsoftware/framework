@@ -179,12 +179,18 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Scripts\Signum.Entities.txt" />
-    <TypeScriptCompile Include="Scripts\Service.ts" />
+    <TypeScriptCompile Include="Scripts\EntitySettings.ts" />
+    <TypeScriptCompile Include="Scripts\Finder.ts" />
+    <TypeScriptCompile Include="Scripts\FindOptions.ts" />
+    <TypeScriptCompile Include="Scripts\QuerySettings.tsx" />
+    <TypeScriptCompile Include="Scripts\Navigator.ts" />
+    <TypeScriptCompile Include="Scripts\Services.ts" />
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
       <DependentUpon>Signum.Entities.txt</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Typings\es6-promise\es6-promise.d.ts" />
     <TypeScriptCompile Include="Scripts\Globals.ts" />
+    <TypeScriptCompile Include="Typings\react-widgets\react-widgets.d.ts" />
     <TypeScriptCompile Include="Typings\react-router\react-router.d.ts" />
     <TypeScriptCompile Include="Views\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />

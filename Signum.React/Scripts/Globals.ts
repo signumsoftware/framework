@@ -1,14 +1,28 @@
 ﻿
-function getValues<V>(obj: { [name: string]: V }): V[] {
-    var result: V[] = [];
+function hasFlag(value: number, flag: number): boolean {
+    return (value & flag) == flag;
+}
 
-    for (var name in obj) {
-        if (obj.hasOwnProperty(name)) {
-            result.push(obj[name]);
+module Dic {
+
+    export function getValues<V>(obj: { [key: string]: V }): V[] {
+        var result: V[] = [];
+
+        for (var name in obj) {
+            if (obj.hasOwnProperty(name)) {
+                result.push(obj[name]);
+            }
         }
+
+        return result;
     }
 
-    return result;
+    export function addOrThrow<V>(dic: { [key: string]: V }, key: string, value: V, errorContext?: string) {
+        if (dic[key])
+            throw new Error(`Key ${key} already added` + (errorContext ? "in " + errorContext : ""));
+
+        dic[key] = value;
+    }
 }
 
 interface Array<T> {
@@ -21,6 +35,10 @@ interface Array<T> {
     flatMap<R>(selector: (element: T) => R[]): R[];
     max(): T;
     min(): T;
+    first(errorContext: string) : T;
+    firstOrNull(errorContext: string): T;
+    single(errorContext: string): T;
+    singleOrNull(errorContext: string): T;
 }
 
 
@@ -123,12 +141,52 @@ Array.prototype.min = function () {
 };
 
 
+Array.prototype.first = function (errorContext) {
+
+    if (this.length == 0)
+        throw new Error("No " + errorContext + " found");
+
+    return this[0];
+};
+
+
+Array.prototype.firstOrNull = function (errorContext) {
+
+    if (this.length == 0)
+        return null;
+
+    return this[0];
+};
+
+Array.prototype.single = function (errorContext) {
+
+    if (this.length == 0)
+        throw new Error("No " + errorContext + " found");
+
+    if (this.length > 1)
+        throw new Error("More than one " + errorContext + " found");
+
+    return this[0];
+};
+
+Array.prototype.singleOrNull = function (errorContext) {
+
+    if (this.length == 0)
+        return null;
+
+    if (this.length > 1)
+        throw new Error("More than one " + errorContext + " found");
+
+    return this[0];
+};
+
 interface String {
     hasText(): boolean;
     contains(str: string): boolean;
     startsWith(str: string): boolean;
     endsWith(str: string): boolean;
     format(...parameters: any[]): string;
+    formatHtml(...parameters: any[]): string;
     replaceAll(from: string, to: string);
     after(separator: string): string;
     before(separator: string): string;
@@ -161,25 +219,32 @@ String.prototype.format = function () {
 
     var args = arguments;
 
-    var getValue = function (key) {
-        if (args == null || typeof args === 'undefined') return null;
-
-        var value = args[key];
-        var type = typeof value;
-
-        return type === 'string' || type === 'number' ? value : null;
-    };
-
     return this.replace(regex, function (match) {
         //match will look like {sample-match}
         //key will be 'sample-match';
         var key = match.substr(1, match.length - 2);
-
-        var value = getValue(key);
-
-        return value != null ? value : match;
+        
+        return args[key];
     });
 };
+
+String.prototype.formatHtml = function () {
+    var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
+
+    var args = arguments;
+
+    var parts = this.split(regex);
+
+    var result = [];
+    for (let i = 0; i < parts.length - 4; i += 4) {
+        result.push(parts[i]);
+        result.push(args[parts[i + 1]]);
+    }
+    result.push(parts[parts.length - 1]);
+
+    return parts;
+};
+
 
 String.prototype.replaceAll = function (from, to) {
     return this.split(from).join(to)

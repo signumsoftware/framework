@@ -12,7 +12,7 @@ export interface IEntity {
     id?: any;
     isNew?: boolean;
     ticks?: number;
-    ToString?: string;
+    toStr?: string;
 }
 
 export interface Entity extends ModifiableEntity, IEntity {
@@ -29,11 +29,11 @@ export interface MListElement<T> {
     element?: T;
 }
 
-export interface Lite<T> {
+export interface Lite<T extends IEntity> {
     entity?: T;
-    _type?: string;
+    EntityType?: string;
     id?: any;
-    ToString?: string;
+    toStr?: string;
 }
 
 export type Type<T extends ModifiableEntity> = string;

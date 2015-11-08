@@ -1,5 +1,6 @@
 ﻿/// <reference path="globals.ts" />
-import { baseUrl } from 'Framework/Signum.React/Scripts/Service'
+
+
 
 
 export class PropertyRoute {
@@ -11,6 +12,19 @@ export class PropertyRoute {
     } 
 }
 
+export function getEnumInfo(enumTypeName: string, enumId: number) {
+
+    var ti = typeInfo(enumTypeName);
+
+    if (!ti || ti.kind != KindOfType.Enum)
+        throw new Error(`${enumTypeName} is not an Enum`);
+
+    if (!ti.membersById)
+        ti.membersById = Dic.getValues(ti.members).toObject(a=> a.id);
+
+    return ti.membersById[enumId];
+}
+
 
 export interface TypeInfo
 {
@@ -18,7 +32,10 @@ export interface TypeInfo
     name: string;
     niceName?: string;
     nicePluralName?: string;
+    entityKind?: EntityKind;
+    entityData?: EntityData;
     members?: { [name: string]: MemberInfo };
+    membersById?: { [name: string]: MemberInfo };
     mixins?: { [name: string]: string };
 }
 
@@ -40,6 +57,81 @@ export enum KindOfType {
     Message,
     Query,
     SymbolContainer, 
+}
+
+export enum EntityKind {
+    /// <summary>
+    /// Doesn't make sense to view it from other entity, since there's not to much to see. Not editable. 
+    /// Not SaveProtected
+    /// ie: PermissionSymbol
+    /// </summary>
+    SystemString,
+
+    /// <summary>
+    /// Not editable.
+    /// Not SaveProtected
+    /// ie: ExceptionEntity
+    /// </summary>
+    System,
+
+    /// <summary>
+    /// An entity that connects two entitities to implement a N to N relationship in a symetric way (no MLists)
+    /// Not SaveProtected, not vieable, not creable (override on SearchControl) 
+    /// ie: DiscountProductEntity
+    /// </summary>
+    Relational,
+
+
+    /// <summary>
+    /// Doesn't make sense to view it from other entity, since there's not to much to see. 
+    /// SaveProtected
+    /// ie: CountryEntity
+    /// </summary>
+    String,
+
+    /// <summary>
+    /// Used and shared by other entities, can be created from other entity. 
+    /// SaveProtected
+    /// ie: CustomerEntity (can create new while creating the order)
+    /// </summary>
+    Shared,
+
+    /// <summary>
+    /// Used and shared by other entities, but too big to create it from other entity.
+    /// SaveProtected
+    /// ie: OrderEntity
+    /// </summary>
+    Main,
+
+    /// <summary>
+    /// Entity that belongs to just one entity and should be saved together, but that can not be implemented as EmbeddedEntity (usually to enable polymorphisim)
+    /// Not SaveProtected
+    /// ie :ProductExtensionEntity
+    /// </summary>
+    Part,
+
+    /// <summary>
+    /// Entity that can be created on the fly and saved with the parent entity, but could also be shared with other entities to save space. 
+    /// Not SaveProtected
+    /// ie: AddressEntity
+    /// </summary>
+    SharedPart,
+}
+
+export enum EntityData {
+    /// <summary>
+    /// Entity created for business definition
+    /// By default ordered by id Ascending
+    /// ie: ProductEntity, OperationEntity, PermissionEntity, CountryEntity...  
+    /// </summary>
+    Master,
+
+    /// <summary>
+    /// Entity created while the business is running
+    /// By default is ordered by id Descending
+    /// ie: OrderEntity, ExceptionEntity, OperationLogEntity...
+    /// </summary>
+    Transactional
 }
 
 var _types: { [name: string]: TypeInfo };
@@ -68,13 +160,16 @@ export function lambdaBody(lambda: Function): string
 //Operation -> niceToString()
 //Enum -> niceName
 
+export interface IType {
+    typeName: string;
+}
 
-export class Type<T> {
+export class Type<T> implements IType {
     constructor(
-        public type: string) { }
+        public typeName: string) { }
 
     typeInfo(): TypeInfo {
-        return typeInfo(this.type);
+        return typeInfo(this.typeName);
     }
 
     propertyInfo(lambdaToProperty: (v: T) => any): MemberInfo {
@@ -126,7 +221,7 @@ export class MessageKey {
         return typeInfo(this.type).members[this.name] 
     }
 
-    niceName(): string {
+    niceToString(): string {
         return this.propertyInfo().niceName;
     }
 }
