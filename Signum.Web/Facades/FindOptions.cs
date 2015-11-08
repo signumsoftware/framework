@@ -463,13 +463,6 @@ namespace Signum.Web
         }
     }
 
-    public enum FilterMode
-    {
-        Visible,
-        Hidden,
-        AlwaysHidden
-    }
-
     public class ColumnOption
     {
         public ColumnOption()
