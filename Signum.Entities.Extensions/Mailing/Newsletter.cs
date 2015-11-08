@@ -83,6 +83,7 @@ namespace Signum.Entities.Mailing
         public Lite<NewsletterEntity> Newsletter { get; set; }
     }
 
+    [AutoInit]
     public static class NewsletterProcess
     {
         public static ProcessAlgorithmSymbol SendNewsletter;

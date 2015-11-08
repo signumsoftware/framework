@@ -65,6 +65,7 @@ namespace Signum.Entities.Mailing
         public static ConstructSymbol<Pop3ReceptionEntity>.From<Pop3ConfigurationEntity> ReceiveEmails;
     }
 
+    [AutoInit]
     public static class Pop3ConfigurationAction
     {
         public static SimpleTaskSymbol ReceiveAllActivePop3Configurations;
