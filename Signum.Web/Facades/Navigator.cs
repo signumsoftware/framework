@@ -681,9 +681,7 @@ namespace Signum.Web
 
             return true;
         }
-
-        public event Func<Type, bool> IsFindable;
-
+        
         internal protected virtual bool OnIsFindable(Type type)
         {
             if(!Finder.IsFindable(type))
@@ -692,13 +690,6 @@ namespace Signum.Web
             EntitySettings es = EntitySettings.TryGetC(type);
             if (es != null && !es.OnIsFindable())
                 return false;
-
-            if (IsFindable != null)
-                foreach (var isCreable in IsFindable.GetInvocationListTyped())
-                {
-                    if (!isCreable(type))
-                        return false;
-                }
 
             return true;
         }
