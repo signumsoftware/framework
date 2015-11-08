@@ -247,7 +247,7 @@ export namespace Authorization {
     export const PropertyAllowed_Type = new EnumType<PropertyAllowed>("PropertyAllowed", PropertyAllowed);
     
     export const PropertyAllowedRule_Type = new Type<PropertyAllowedRule>("PropertyAllowedRule");
-    export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, PropertyAllowed> {
+    export interface PropertyAllowedRule extends AllowedRuleCoerced<Entities.Basics.PropertyRouteEntity, PropertyAllowed> {
     }
     
     export const PropertyRulePack_Type = new Type<PropertyRulePack>("PropertyRulePack");
@@ -255,7 +255,7 @@ export namespace Authorization {
     }
     
     export const QueryAllowedRule_Type = new Type<QueryAllowedRule>("QueryAllowedRule");
-    export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity, boolean> {
+    export interface QueryAllowedRule extends AllowedRuleCoerced<Entities.Basics.QueryEntity, boolean> {
     }
     
     export const QueryRulePack_Type = new Type<QueryRulePack>("QueryRulePack");
@@ -301,11 +301,11 @@ export namespace Authorization {
     }
     
     export const RulePropertyEntity_Type = new Type<RulePropertyEntity>("RulePropertyEntity");
-    export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntity, PropertyAllowed> {
+    export interface RulePropertyEntity extends RuleEntity<Entities.Basics.PropertyRouteEntity, PropertyAllowed> {
     }
     
     export const RuleQueryEntity_Type = new Type<RuleQueryEntity>("RuleQueryEntity");
-    export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, boolean> {
+    export interface RuleQueryEntity extends RuleEntity<Entities.Basics.QueryEntity, boolean> {
     }
     
     export const RuleTypeConditionEntity_Type = new Type<RuleTypeConditionEntity>("RuleTypeConditionEntity");
@@ -429,18 +429,6 @@ export namespace Basics {
         years?: number;
         months?: number;
         days?: number;
-    }
-    
-    export const PropertyRouteEntity_Type = new Type<PropertyRouteEntity>("PropertyRouteEntity");
-    export interface PropertyRouteEntity extends Entities.Entity {
-        path?: string;
-        rootType?: Entities.Basics.TypeEntity;
-    }
-    
-    export const QueryEntity_Type = new Type<QueryEntity>("QueryEntity");
-    export interface QueryEntity extends Entities.Entity {
-        name?: string;
-        key?: string;
     }
     
     export const TypeConditionSymbol_Type = new Type<TypeConditionSymbol>("TypeConditionSymbol");
@@ -589,7 +577,7 @@ export namespace Chart {
     
     export const UserChartEntity_Type = new Type<UserChartEntity>("UserChartEntity");
     export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
-        query?: Basics.QueryEntity;
+        query?: Entities.Basics.QueryEntity;
         entityType?: Entities.Lite<Entities.Basics.TypeEntity>;
         owner?: Entities.Lite<Entities.Entity>;
         displayName?: string;
@@ -871,7 +859,7 @@ export namespace Excel {
     
     export const ExcelReportEntity_Type = new Type<ExcelReportEntity>("ExcelReportEntity");
     export interface ExcelReportEntity extends Entities.Entity {
-        query?: Basics.QueryEntity;
+        query?: Entities.Basics.QueryEntity;
         displayName?: string;
         file?: Files.EmbeddedFileEntity;
     }
@@ -1129,7 +1117,7 @@ export namespace Help {
     
     export const PropertyRouteHelpEntity_Type = new Type<PropertyRouteHelpEntity>("PropertyRouteHelpEntity");
     export interface PropertyRouteHelpEntity extends Entities.EmbeddedEntity {
-        property?: Basics.PropertyRouteEntity;
+        property?: Entities.Basics.PropertyRouteEntity;
         description?: string;
     }
     
@@ -1141,7 +1129,7 @@ export namespace Help {
     
     export const QueryHelpEntity_Type = new Type<QueryHelpEntity>("QueryHelpEntity");
     export interface QueryHelpEntity extends Entities.Entity {
-        query?: Basics.QueryEntity;
+        query?: Entities.Basics.QueryEntity;
         culture?: Basics.CultureInfoEntity;
         description?: string;
         columns?: Entities.MList<QueryColumnHelpEntity>;
@@ -1358,7 +1346,7 @@ export namespace Mailing {
         name?: string;
         editableMessage?: boolean;
         disableAuthorization?: boolean;
-        query?: Basics.QueryEntity;
+        query?: Entities.Basics.QueryEntity;
         systemEmail?: SystemEmailEntity;
         sendDifferentMessages?: boolean;
         from?: EmailTemplateContactEntity;
@@ -1432,7 +1420,7 @@ export namespace Mailing {
         displayFrom?: string;
         subject?: string;
         text?: string;
-        query?: Basics.QueryEntity;
+        query?: Entities.Basics.QueryEntity;
     }
     
     export module NewsletterOperation {
@@ -1443,12 +1431,20 @@ export namespace Mailing {
         export const Clone : Entities.ConstructSymbol_From<NewsletterEntity, NewsletterEntity> = registerSymbol({ key: "NewsletterOperation.Clone" });
     }
     
+    export module NewsletterProcess {
+        export const SendNewsletter : Processes.ProcessAlgorithmSymbol = registerSymbol({ key: "NewsletterProcess.SendNewsletter" });
+    }
+    
     export enum NewsletterState {
         Created,
         Saved,
         Sent,
     }
     export const NewsletterState_Type = new EnumType<NewsletterState>("NewsletterState", NewsletterState);
+    
+    export module Pop3ConfigurationAction {
+        export const ReceiveAllActivePop3Configurations : Scheduler.SimpleTaskSymbol = registerSymbol({ key: "Pop3ConfigurationAction.ReceiveAllActivePop3Configurations" });
+    }
     
     export const Pop3ConfigurationEntity_Type = new Type<Pop3ConfigurationEntity>("Pop3ConfigurationEntity");
     export interface Pop3ConfigurationEntity extends Entities.Entity, Scheduler.ITaskEntity {
@@ -2028,7 +2024,7 @@ export namespace Translation {
     export interface TranslatedInstanceEntity extends Entities.Entity {
         culture?: Basics.CultureInfoEntity;
         instance?: Entities.Lite<Entities.Entity>;
-        propertyRoute?: Basics.PropertyRouteEntity;
+        propertyRoute?: Entities.Basics.PropertyRouteEntity;
         rowId?: string;
         translatedText?: string;
         originalText?: string;
@@ -2170,7 +2166,7 @@ export namespace UserQueries {
     
     export const UserQueryEntity_Type = new Type<UserQueryEntity>("UserQueryEntity");
     export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
-        query?: Basics.QueryEntity;
+        query?: Entities.Basics.QueryEntity;
         entityType?: Entities.Lite<Entities.Basics.TypeEntity>;
         owner?: Entities.Lite<Entities.Entity>;
         displayName?: string;
@@ -2241,7 +2237,7 @@ export namespace Word {
     export const WordTemplateEntity_Type = new Type<WordTemplateEntity>("WordTemplateEntity");
     export interface WordTemplateEntity extends Entities.Entity {
         name?: string;
-        query?: Basics.QueryEntity;
+        query?: Entities.Basics.QueryEntity;
         systemWordTemplate?: SystemWordTemplateEntity;
         culture?: Basics.CultureInfoEntity;
         active?: boolean;
