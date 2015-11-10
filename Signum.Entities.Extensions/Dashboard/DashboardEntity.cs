@@ -76,7 +76,7 @@ namespace Signum.Entities.Dashboard
                         return DashboardMessage.Part0IsTooLarge.NiceToString(part);
 
                     var other = Parts.TakeWhile(p => p != part)
-                        .FirstOrDefault(a => a.Row == part.Row && a.ColumnInterval().Overlap(part.ColumnInterval()));
+                        .FirstOrDefault(a => a.Row == part.Row && a.ColumnInterval().Overlaps(part.ColumnInterval()));
 
                     if (other != null)
                         return DashboardMessage.Part0OverlapsWith1.NiceToString(part, other);
