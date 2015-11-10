@@ -567,5 +567,11 @@ namespace Signum.Engine
                 return tr.Commit(list.Count);
             }
         }
+
+        public static T GetSetTicks<T>(this T entity) where T :Entity
+        {
+            entity.Ticks = entity.InDBEntity(e => e.Ticks);
+            return entity;
+        }
     }
 }
