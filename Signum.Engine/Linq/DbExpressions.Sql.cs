@@ -276,7 +276,7 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             if (Name.HasText())
-                return "{0} AS {1}".FormatWith(Expression.ToString(), Name);
+                return "{0} = {1}".FormatWith(Name, Expression.ToString());
 
             return Expression.ToString();
         }
@@ -444,10 +444,10 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "SELECT {0}{1}{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".FormatWith(
+            return "SELECT {0}{1}\r\n{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".FormatWith(
                 IsDistinct ? "DISTINCT " : "",
                 Top?.Let(t => "TOP {0} ".FormatWith(t.ToString())),
-                Columns.ToString(", "),
+                Columns.ToString(c => c.ToString().Indent(4) ,",\r\n"),
                 From?.Let(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
                 Where?.Let(a => "WHERE " + a.ToString() + "\r\n"),
                 OrderBy.Any() ? ("ORDER BY " + OrderBy.ToString(" ,") + "\r\n") : null,

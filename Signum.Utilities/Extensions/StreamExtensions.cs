@@ -76,6 +76,9 @@ namespace Signum.Utilities
         public static R Using<T, R>(this T disposable, Func<T, R> function)
             where T : IDisposable
         {
+            //using (disposable)
+            //    return function(disposable);
+
             try
             {
                 return function(disposable);

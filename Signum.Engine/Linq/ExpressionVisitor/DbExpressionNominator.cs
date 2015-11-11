@@ -945,6 +945,25 @@ namespace Signum.Engine.Linq
             return null;
         }
 
+        private Expression TryCharIndex(Expression expression, Expression subExpression, Func<Expression, Expression> compare)
+        {
+            if (expression.IsNull())
+                return Add(Expression.Constant(false));
+            
+            Expression newSubExpression = Visit(subExpression);
+            Expression newExpression = Visit(expression);
+            
+            if (Has(newSubExpression) && Has(newExpression))
+            {
+                SqlFunctionExpression result = new SqlFunctionExpression(typeof(int), null, SqlFunction.CHARINDEX.ToString(), new[] { newExpression, newSubExpression });
+
+                Add(result);
+
+                return Add(compare(result));
+            }
+            return null;
+        }
+
         protected override Expression VisitMember(MemberExpression m)
         {
             if (m.Expression.Type.IsNullable() && (m.Member.Name == "Value" || m.Member.Name == "HasValue"))
@@ -1057,9 +1076,14 @@ namespace Signum.Engine.Linq
                 case "string.Trim": return TrySqlTrim(m.Object);
                 case "string.Replace": return TrySqlFunction(null, SqlFunction.REPLACE, m.Type, m.Object, m.GetArgument("oldValue"), m.GetArgument("newValue"));
                 case "string.Substring": return TrySqlFunction(null, SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), new SqlConstantExpression(1)), m.TryGetArgument("length") ?? new SqlConstantExpression(int.MaxValue));
-                case "string.Contains": return TryLike(m.Object, Expression.Add(Expression.Add(new SqlConstantExpression("%"), m.GetArgument("value"), c), new SqlConstantExpression("%"), c));
-                case "string.StartsWith": return TryLike(m.Object, Expression.Add(m.GetArgument("value"), new SqlConstantExpression("%"), c));
-                case "string.EndsWith": return TryLike(m.Object, Expression.Add(new SqlConstantExpression("%"), m.GetArgument("value"), c));
+                case "string.Contains": return TryCharIndex(m.GetArgument("value"), m.Object, index => Expression.GreaterThanOrEqual(index, new SqlConstantExpression(1)));
+                case "string.StartsWith": return TryCharIndex(m.GetArgument("value"), m.Object, index => Expression.Equal(index, new SqlConstantExpression(1)));
+                case "string.EndsWith": return TryCharIndex(m.GetArgument("value"), m.Object, index => Expression.Equal(index,
+                   Expression.Add(
+                       Expression.Subtract(
+                           TrySqlFunction(null, SqlFunction.LEN, typeof(int), m.Object), 
+                           TrySqlFunction(null, SqlFunction.LEN, typeof(int), m.GetArgument("value"))),
+                       new SqlConstantExpression(1))));
 
                 case "StringExtensions.Start": return TrySqlFunction(null, SqlFunction.LEFT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
                 case "StringExtensions.End": return TrySqlFunction(null, SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));

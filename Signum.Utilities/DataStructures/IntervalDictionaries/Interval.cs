@@ -37,7 +37,7 @@ namespace Signum.Utilities.DataStructures
 
 
         [MethodExpander(typeof(OverlapMethodExpander))]
-        public bool Overlap(Interval<T> other)
+        public bool Overlaps(Interval<T> other)
         {
             return !((max.CompareTo(other.min) <= 0) || (other.max.CompareTo(min) <= 0));
         }
@@ -186,7 +186,7 @@ namespace Signum.Utilities.DataStructures
 
 
         [MethodExpander(typeof(OverlapNullableMethodExpander))]
-        public bool Overlap(NullableInterval<T> other)
+        public bool Overlaps(NullableInterval<T> other)
         {
             return !(
                 (max.HasValue && other.min.HasValue && max.Value.CompareTo(other.min.Value) <= 0) || 
@@ -194,7 +194,7 @@ namespace Signum.Utilities.DataStructures
                 );
         }
 
-        public bool Overlap(Interval<T> other)
+        public bool Overlaps(Interval<T> other)
         {
             if (max.HasValue && max.Value.CompareTo(other.Min) <= 0)
                 return false;

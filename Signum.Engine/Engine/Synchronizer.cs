@@ -21,10 +21,10 @@ namespace Signum.Engine
             where O : class
             where N : class
         {
-            HashSet<K> set = new HashSet<K>();
-            set.UnionWith(oldDictionary.Keys);
-            set.UnionWith(newDictionary.Keys);
-            foreach (var key in set)
+            HashSet<K> keys = new HashSet<K>();
+            keys.UnionWith(oldDictionary.Keys);
+            keys.UnionWith(newDictionary.Keys);
+            foreach (var key in keys)
             {
                 var oldVal = oldDictionary.TryGetC(key);
                 var newVal = newDictionary.TryGetC(key);

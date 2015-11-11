@@ -482,7 +482,7 @@ namespace Signum.Web.Operations
              new ContextualOperationContext<Entity>(ctx, oi, (ContextualOperationSettings<Entity>)settings, (EntityOperationSettings<Entity>)entitySettings));
 
 
-        public virtual List<IMenuItem> ContextualItemsHelper_GetConstructorFromManyMenuItems(SelectedItemsMenuContext ctx)
+        public virtual MenuItemBlock ContextualItemsHelper_GetConstructorFromManyMenuItems(SelectedItemsMenuContext ctx)
         {
             if (ctx.Lites.IsNullOrEmpty())
                 return null;
@@ -502,14 +502,12 @@ namespace Signum.Web.Operations
 
             if (menuItems.IsEmpty())
                 return null;
-
-            menuItems.Insert(0, new MenuItemHeader(SearchMessage.Create.NiceToString()));
-
-            return menuItems;
+            
+            return new MenuItemBlock { Header = SearchMessage.Create.NiceToString(), Items = menuItems };
         }
 
 
-        public virtual List<IMenuItem> ContextualItemsHelper_GetEntityOperationMenuItem(SelectedItemsMenuContext ctx)
+        public virtual MenuItemBlock ContextualItemsHelper_GetEntityOperationMenuItem(SelectedItemsMenuContext ctx)
         {
             if (ctx.Lites.IsNullOrEmpty())
                 return null;
@@ -574,10 +572,8 @@ namespace Signum.Web.Operations
 
             if (menuItems.IsEmpty())
                 return null;
-
-            menuItems.Insert(0, new MenuItemHeader(SearchMessage.Operation.NiceToString()));
-
-            return menuItems;
+            
+            return new MenuItemBlock { Header = SearchMessage.Operation.NiceToString(), Items = menuItems };
         }
 
 
