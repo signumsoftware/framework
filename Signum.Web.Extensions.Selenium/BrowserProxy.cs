@@ -106,7 +106,7 @@ namespace Signum.Web.Selenium
             var element = Selenium.WaitElementPresent(By.CssSelector("a.sf-user, .sf-login"));
             if (element.HasClass("sf-login"))
                 return null;
-            
+
             var result = (string)Selenium.ExecuteScript("return $('.sf-user span').text()");
 
             return result;

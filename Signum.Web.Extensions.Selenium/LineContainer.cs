@@ -150,7 +150,7 @@ namespace Signum.Web.Selenium
         public static V EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : ModifiableEntity
         {
-            var lite = lineContainer.EntityLine(property).LiteValue;
+            var lite = lineContainer.EntityCombo(property).LiteValue;
 
             return lite is V ? (V)lite : (V)(object)lite.Retrieve();
         }

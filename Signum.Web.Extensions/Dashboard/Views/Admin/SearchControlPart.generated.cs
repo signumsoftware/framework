@@ -67,7 +67,7 @@ WriteLiteral("\r\n");
 
             
             #line 6 "..\..\Dashboard\Views\Admin\SearchControlPart.cshtml"
- using(var tc = Html.TypeContext<UserQueryPartEntity>())
+ using (var tc = Html.TypeContext<UserQueryPartEntity>())
 {
     
             
@@ -83,6 +83,20 @@ Write(Html.EntityLine(tc, pp => pp.UserQuery, el => el.Create = false));
             
             #line 8 "..\..\Dashboard\Views\Admin\SearchControlPart.cshtml"
                                                                      
+    
+            
+            #line default
+            #line hidden
+            
+            #line 9 "..\..\Dashboard\Views\Admin\SearchControlPart.cshtml"
+Write(Html.ValueLine(tc, pp => pp.AllowSelection));
+
+            
+            #line default
+            #line hidden
+            
+            #line 9 "..\..\Dashboard\Views\Admin\SearchControlPart.cshtml"
+                                                
 }
             
             #line default

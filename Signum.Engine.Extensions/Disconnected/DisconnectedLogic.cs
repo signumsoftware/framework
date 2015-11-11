@@ -122,6 +122,9 @@ namespace Signum.Engine.Disconnected
             if (DisconnectedLogic.OfflineMode)
                 return null;
 
+            if (!arg.Interactive  && arg.SchemaOnly) // Is ImportManager
+                return null;
+
             return Schema.Current.Tables.Values
                 .Where(t => GetStrategy(t.Type).Upload != Upload.None)
                 .SelectMany(t => t.TablesMList().Cast<ITable>().PreAnd(t))
@@ -134,7 +137,7 @@ namespace Signum.Engine.Disconnected
         static string ValidateDisconnectedMachine(DisconnectedMachineEntity dm, PropertyInfo pi, bool isMin)
         {
             var conflicts = Database.Query<DisconnectedMachineEntity>()
-                .Where(e => e.SeedInterval.Overlap(dm.SeedInterval) && e != dm)
+                .Where(e => e.SeedInterval.Overlaps(dm.SeedInterval) && e != dm)
                 .Select(e => new { e.SeedInterval, Machine = e.ToLite() })
                 .ToList();
 

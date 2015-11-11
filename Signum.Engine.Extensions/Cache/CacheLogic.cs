@@ -248,11 +248,12 @@ namespace Signum.Engine.Cache
                     //http://rusanu.com/2007/11/10/when-it-rains-it-pours/
                     var staleServices = (from s in Database.View<SysServiceQueues>()
                                          where s.activation_procedure != null && !Database.View<SysProcedures>().Any(p => "[dbo].[" + p.name + "]" == s.activation_procedure)
-                                         select s.name).ToList();
+                                         select new ObjectName(new SchemaName(null, s.Schema().name), s.name)).ToList();
 
                     foreach (var s in staleServices)
                     {
-                        TryDropService(s);
+                        TryDropService(s.Name);
+                        TryDropQueue(s);
                     }
                 }
 
@@ -297,8 +298,7 @@ namespace Signum.Engine.Cache
                 started = true;
             }
         }
-
-        [DebuggerStepThrough]
+        
         private static void TryDropService(string s)
         {
             try
@@ -307,7 +307,23 @@ namespace Signum.Engine.Cache
                 {
                     con.Open();
                     new SqlCommand("DROP SERVICE [{0}]".FormatWith(s), con).ExecuteNonQuery();
-                    new SqlCommand("DROP QUEUE [{0}]".FormatWith(s), con).ExecuteNonQuery();
+                }
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number != 15151)
+                    throw;
+            }
+        }
+
+        private static void TryDropQueue(ObjectName s)
+        {
+            try
+            {
+                using (var con = (SqlConnection)Connector.Current.CreateConnection())
+                {
+                    con.Open();
+                    new SqlCommand("DROP QUEUE {0}".FormatWith(s), con).ExecuteNonQuery();
                 }
             }
             catch (SqlException ex)

@@ -14,6 +14,7 @@ using Signum.Entities.ViewLog;
 using Signum.Entities.DynamicQuery;
 using System.IO;
 using Signum.Utilities.ExpressionTrees;
+using System.Data.Common;
 
 namespace Signum.Engine.ViewLog
 {
@@ -62,8 +63,21 @@ namespace Signum.Engine.ViewLog
                 }
 
                 DynamicQueryManager.Current.QueryExecuted += Current_QueryExecuted;
+                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
             }
         }
+
+
+        static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
+        {
+            var t = Schema.Current.Table<ViewLogEntity>();
+            var f = ((FieldImplementedByAll)Schema.Current.Field((ViewLogEntity vl) => vl.Target)).ColumnType;
+
+            var param = Connector.Current.ParameterBuilder.CreateReferenceParameter("@id", arg.Id, t.PrimaryKey);
+
+            return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".FormatWith(t.Name, f.Name, param.ParameterName), new List<DbParameter> { param });
+        }
+
 
         static IDisposable Current_QueryExecuted(DynamicQueryManager.ExecuteType type, object queryName, BaseQueryRequest request)
         {
@@ -108,7 +122,7 @@ namespace Signum.Engine.ViewLog
         {
             var viewLog = new ViewLogEntity
             {
-                Target = (Lite<Entity>)entity,
+                Target = (Lite<Entity>)entity.Clone(),
                 User = UserHolder.Current.ToLite(),
                 ViewAction = viewAction,
             };
