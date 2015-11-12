@@ -644,6 +644,15 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_LabelID)").Select(a => a.Label.Name).ToList();
         }
+
+        [TestMethod]
+        public void SelectAverageBool()
+        {
+            Expression<Func<AlbumEntity, bool>> selector = a => a.Id > 10;
+            Expression<Func<AlbumEntity, double>> selectorDouble = Expression.Lambda<Func<AlbumEntity, double>>(Expression.Convert(selector.Body, typeof(double)), selector.Parameters.SingleEx());
+
+            var list = Database.Query<AlbumEntity>().Average(selectorDouble);
+        }
     }
 
     public static class AuthorExtensions
