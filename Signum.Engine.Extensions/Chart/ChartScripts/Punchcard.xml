@@ -5,19 +5,24 @@
     <Column DisplayName="Vertical Axis" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Size" ColumnType="Magnitude" IsOptional="true" />
     <Column DisplayName="Color" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Opacity" ColumnType="Magnitude" IsOptional="true" />
+    <Column DisplayName="Inner Size" ColumnType="Magnitude" IsOptional="true" />
   </Columns>
   <Parameters>
     <Parameter Name="XMargin" Type="Number" ValueDefinition="110" />
     <Parameter Name="XSort" Type="Enum" ValueDefinition="Ascending|Descending|None" />
     <Parameter Name="YSort" Type="Enum" ValueDefinition="Ascending|Descending|None" />
+    <Parameter Name="Shape" Type="Enum" ValueDefinition="Circle | Rectangle | ProgressBar" />
     <Parameter Name="SizeScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Log | Sqrt" />
-    <Parameter Name="Shape" Type="Enum" ValueDefinition="Circle | Rectangle" />
     <Parameter Name="ColorScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Sqrt  | Log" />
     <Parameter Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
-    <Parameter Name="ColorOpacity" Type="Number" ValueDefinition=".4" />
     <Parameter Name="StrokeColor" Type="String" ValueDefinition="gray" />
-    <Parameter Name="FillColor" Type="String" ValueDefinition="gray" />
     <Parameter Name="StrokeWidth" Type="Number" ValueDefinition="2" />
+    <Parameter Name="FillColor" Type="String" ValueDefinition="gray" />
+    <Parameter Name="FillOpacity" Type="Number" ValueDefinition=".4" />
+    <Parameter Name="OpacityScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Log | Sqrt" />
+    <Parameter Name="InnerSizeType" Type="Enum" ValueDefinition="Absolute | Relative" />
+    <Parameter Name="InnerFillColor" Type="String" ValueDefinition="red" />
     <Parameter Name="NumberOpacity" Type="Number" ValueDefinition="0.8" />
     <Parameter Name="NumberColor" Type="String" ValueDefinition="white" />
   </Parameters>
@@ -94,14 +99,28 @@
     color = function(v){return colorQuantizer(scaleFunc(v)); }
   }
   
-  chart.append('svg:g').attr('class', 'x-line').attr('transform',  translate(xRule.start('content') + x.rangeBand() / 2, yRule.start('content')))
+  var opacity = null;
+  if(data.columns.c4.token != null)
+  {
+   	
+    opacity = scaleFor(data.columns.c4, data.rows.map(function(r){return r.c4;}), 0, 1, data.parameters["OpacityScale"]);
+  }
+  
+  var shape = data.parameters["Shape"];
+  var innerSize = null
+  if(data.columns.c5.token != null)
+  {
+  	innerSize = scaleFor(data.columns.c5, data.rows.map(function(r){return r.c5;}), 0, 100, data.parameters["OpacityScale"]);
+  }
+  
+  chart.append('svg:g').attr('class', 'x-line').attr('transform',  translate(xRule.start('content') + x.rangeBand() / (shape == "ProgressBar" ? 1 : 2), yRule.start('content')))
     .enterData(dim0, 'line', 'y-line')
      .attr('y2',  yRule.size('content'))
       .attr('x1', function (d) { return x(d); })
       .attr('x2', function (d) { return x(d); })
     .style('stroke', 'LightGray');
   
-  chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.start('ticks')))
+  chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + x.rangeBand() / (shape == "ProgressBar" ? 1 : 2), yRule.start('ticks')))
     .enterData(dim0, 'line', 'x-tick')
       .attr('y2',  yRule.size('ticks'))
       .attr('x1', function (d) { return x(d); })
@@ -128,7 +147,7 @@
   
 
   
-  chart.append('svg:g').attr('class', 'y-line').attr('transform', translate(xRule.start('content'), yRule.end('content') - y.rangeBand() / 2))
+  chart.append('svg:g').attr('class', 'y-line').attr('transform', translate(xRule.start('content'), yRule.end('content') - y.rangeBand() / (shape == "ProgressBar" ? 1 : 2)))
     .enterData(dim1, 'line', 'y-line')
     .attr('x2', xRule.size('content'))
     .attr('y1', function (t) { return -y(t); })
@@ -159,77 +178,108 @@
     .attr('dominant-baseline', 'middle')
     .text(data.columns.c1.title);
   
-   var isCircle =  data.parameters["Shape"] == "Circle";
   
+  
+  
+ 
   var groups = chart.enterData(data.rows, 'g').attr('data-click', function(r) { return getClickKeys(r, data.columns); });
   
-  var shapes = groups.append(isCircle ? 'circle': 'rect', 'punch').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content') - y.rangeBand() / 2))
-      .filter(function(r) {return r != undefined;})
-      .attr('fill', function(r) { return color == null? (data.parameters["FillColor"] || 'black'):  color(r.c3); })
-      .attr('fill-opacity', data.parameters["ColorOpacity"])
-      .attr('stroke', function(r) { return data.parameters["StrokeColor"] || (color == null? 'black': color(r.c3)); })
-      .attr('stroke-width',  data.parameters["StrokeWidth"])
-      .attr("shape-rendering","initial");
   
-  if(isCircle)
+  function configureShape(column, rowValue, domain, extra)
   {
-     var circleSize = Math.min(x.rangeBand(), y.rangeBand()) * 0.45;
-     var area = data.columns.c2.token == null? null : scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, circleSize * circleSize, data.parameters["SizeScale"]);
-    
-     shapes.attr('cx', function(r, i) { return x(r.c0); })
-      .attr('cy', function(r) { return -y(r.c1); })
-      .attr('r', function(r) { return area == null? circleSize: Math.sqrt(area(r.c2)); });
-    
-  }else{
-    
-     var area = data.columns.c2.token == null? null : scaleFor(data.columns.c2, data.rows.map(function(r){return r.c2;}), 0, x.rangeBand() * y.rangeBand(), data.parameters["SizeScale"]); 
-     var ratio = x.rangeBand() / y.rangeBand();
-     var recWidth = function(r) { return area == null? x.rangeBand(): Math.sqrt(area(r.c2) * ratio); };
-     var recHeight = function(r) { return area == null? y.rangeBand(): Math.sqrt(area(r.c2) / ratio); };
-     
-    shapes.attr('x', function(r, i) { return x(r.c0) - recWidth(r) / 2; })
-      .attr('y', function(r) { return -y(r.c1) - recHeight(r) / 2; })
-      .attr('width', recWidth)
-      .attr('height', recHeight);
-    
-  }
   
-  
-  if(data.parameters["NumberOpacity"] > 0)
-  {
-      var two = data.columns.c2.token != null && data.columns.c3.token != null;
-    
-    if(data.columns.c2.token != null)
+    var shapes = groups.append(shape == "Circle" ? 'circle': 'rect', 'punch').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content') - y.rangeBand() / 2))
+        .filter(function(r) {return r != undefined;})      
+        .attr('fill-opacity', function(r) {return data.parameters["FillOpacity"]* (opacity != null ? opacity(r.c4) : 1);})
+        .attr("shape-rendering","initial");
+
+
+    if(shape == "Circle")
     {
-      groups.append('text').attr('class', 'punch').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content') - y.rangeBand() / 2))
-      .attr('x', function(r, i) { return x(r.c0); })
-      .attr('y', function(r) { return -y(r.c1) + (two? -10: 0); })
-      .attr('fill', 'white')
-      .attr('dominant-baseline', 'central')
-      .attr('opacity', function(r){ return data.parameters["NumberOpacity"]* area(r.c2) / 500;})
-      .attr('text-anchor', 'middle')
-      .attr('font-weight', 'bold')
-      .text(function (r) { return r.c2; });
+       var circleSize = Math.min(x.rangeBand(), y.rangeBand()) * 0.45; 
+       var area = column.token == null? function(){return circleSize * circleSize;} : scaleFor(column, domain, 0, circleSize * circleSize, data.parameters["SizeScale"]);
+       extra.numberOpacity = function(r) { return area(r) / 500; };
+
+       shapes.attr('cx', function(r, i) { return x(r.c0); })
+        .attr('cy', function(r) { return -y(r.c1); })
+        .attr('r', function(r) { return  Math.sqrt(area(rowValue(r))); });
+
+    } else if(shape == "Rectangle") {
+
+       var area = column.token == null? function(){return x.rangeBand() * y.rangeBand();} : scaleFor(column, domain, 0, x.rangeBand() * y.rangeBand(), data.parameters["SizeScale"]); 
+       var ratio = x.rangeBand() / y.rangeBand();
+       var recWidth = function(r) { return  Math.sqrt(area(rowValue(r)) * ratio); };
+       var recHeight = function(r) { return Math.sqrt(area(rowValue(r)) / ratio); };
+       extra.numberOpacity = function(r) { return area(r) / 500; };
+
+      shapes.attr('x', function(r, i) { return x(r.c0) - recWidth(r) / 2; })
+        .attr('y', function(r) { return -y(r.c1) - recHeight(r) / 2; })
+        .attr('width', recWidth)
+        .attr('height', recHeight);
+
+    } else if(shape == "ProgressBar") {
+
+       var recWidth = column.token == null? function(){return x.rangeBand();} : scaleFor(column, domain, 0, x.rangeBand(), data.parameters["SizeScale"]); 
+       extra.numberOpacity = function(r) { return 1; };
+
+      shapes.attr('x', function(r, i) { return x(r.c0) - x.rangeBand() / 2; })
+        .attr('y', function(r) { return -y(r.c1) - y.rangeBand() / 2; })
+        .attr('width', function(r) { return recWidth(rowValue(r));})
+        .attr('height', y.rangeBand());    
     }
     
-     if(data.columns.c3.token != null)
-     {
-       groups.append('text').attr('class', 'punch').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content') - y.rangeBand() / 2))
-        .attr('x', function(r, i) { return x(r.c0); })
-        .attr('y', function(r) { return -y(r.c1) + (two? 10: 0); })
-        .attr('fill', data.parameters["NumberColor"] )
-        .attr('dominant-baseline', 'central')
-       .attr('opacity', function(r){ return data.parameters["NumberOpacity"] * area(r.c2) / 500;})
-        .attr('text-anchor', 'middle')
-        .attr('font-weight', 'bold')
-        .text(function (r) { return  r.c3; });
-     }
+    return shapes;
+ }
+  
+ var extra = {};
+  configureShape(data.columns.c2, function(r) { return r.c2; }, data.rows.map(function(r) { return r.c2; }), extra)
+   .attr('fill', function(r) { return color == null? (data.parameters["FillColor"] || 'black'):  color(r.c3); })
+   .attr('stroke', function(r) { return data.parameters["StrokeColor"] || (color == null? 'black': color(r.c3)); })
+   .attr('stroke-width',  data.parameters["StrokeWidth"])
+   .attr('stroke-opacity', function(r){return(opacity != null ? opacity(r.c4) : 1); });
+  
+  
+ var isRelative = data.parameters["InnerSizeType"] == "Relative"; 
+ if(data.columns.c5.token != null)
+ {  
+   var fun = !isRelative ? function(r) { return r.c5; } :
+   		data.columns.c2.token != null ?  function(r) { return r.c5 * r.c2; }:
+        function(r)  { return r.c5; } ;
+   var domain = !isRelative ? data.rows.map(function(r) { return r.c5; }) :
+   		data.columns.c2.token != null ?  data.rows.map(function(r) { return r.c2; }):
+   	    [1]
+   
+    configureShape(data.columns.c5, fun, domain, {})
+      .attr('fill', data.parameters["InnerFillColor"] || 'black')
+ }
+  
+ 
+  function percentage(v) { return Math.floor(v * 10000)/100 + "%";} 
+  
+  if(data.parameters["NumberOpacity"] > 0)
+  { 
+      groups.append('text').attr('class', 'punch').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content') - y.rangeBand() / 2))
+      .attr('x', function(r, i) { return x(r.c0); })
+      .attr('y', function(r) { return -y(r.c1) })
+      .attr('fill', data.parameters["NumberColor"])
+      .attr('dominant-baseline', 'central')
+      .attr('opacity', function(r){ return data.parameters["NumberOpacity"] * extra.numberOpacity(r.c2);})
+      .attr('text-anchor', 'middle')
+      .attr('font-weight', 'bold')
+      .text(function (r) { 
+        return data.columns.c2.token != null ? r.c2 : 
+               data.columns.c3.token != null ? r.c3 :
+               data.columns.c4.token != null ? r.c4 :
+               data.columns.c5.token != null ? (isRelative? percentage(r.c5) : r.c5) :null; });
+ 
   }
   
   groups.append('svg:title')
       .text(function(r) { return r.c0.niceToString() + ', ' + r.c1.niceToString() + 
-        (data.columns.c2.token == null? "" : ("\n" + data.columns.c2.title +": " +r.c2.niceToString()) ) +
-        (data.columns.c3.token == null? "" : ("\n" +  data.columns.c3.title +": " +r.c3.niceToString()) ); });
+        (data.columns.c2.token == null? "" : ("\n" +  data.columns.c2.title +": " + r.c2.niceToString())) +
+        (data.columns.c3.token == null? "" : ("\n" +  data.columns.c3.title +": " + r.c3.niceToString())) +
+        (data.columns.c4.token == null? "" : ("\n" +  data.columns.c4.title +": " + r.c4.niceToString())) +
+        (data.columns.c5.token == null? "" : ("\n" +  data.columns.c5.title +": " + (isRelative? percentage(r.c5) : r.c5.niceToString()))); });
   
   chart.append('svg:g').attr('class', 'x-axis').attr('transform', translate(xRule.start('content'), yRule.end('content')))
     .append('svg:line')
