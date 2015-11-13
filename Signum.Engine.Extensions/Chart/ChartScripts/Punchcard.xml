@@ -106,21 +106,21 @@
     opacity = scaleFor(data.columns.c4, data.rows.map(function(r){return r.c4;}), 0, 1, data.parameters["OpacityScale"]);
   }
   
-  
+  var shape = data.parameters["Shape"];
   var innerSize = null
   if(data.columns.c5.token != null)
   {
   	innerSize = scaleFor(data.columns.c5, data.rows.map(function(r){return r.c5;}), 0, 100, data.parameters["OpacityScale"]);
   }
   
-  chart.append('svg:g').attr('class', 'x-line').attr('transform',  translate(xRule.start('content') + x.rangeBand() / 2, yRule.start('content')))
+  chart.append('svg:g').attr('class', 'x-line').attr('transform',  translate(xRule.start('content') + x.rangeBand() / (shape == "ProgressBar" ? 1 : 2), yRule.start('content')))
     .enterData(dim0, 'line', 'y-line')
      .attr('y2',  yRule.size('content'))
       .attr('x1', function (d) { return x(d); })
       .attr('x2', function (d) { return x(d); })
     .style('stroke', 'LightGray');
   
-  chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.start('ticks')))
+  chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content') + x.rangeBand() / (shape == "ProgressBar" ? 1 : 2), yRule.start('ticks')))
     .enterData(dim0, 'line', 'x-tick')
       .attr('y2',  yRule.size('ticks'))
       .attr('x1', function (d) { return x(d); })
@@ -147,7 +147,7 @@
   
 
   
-  chart.append('svg:g').attr('class', 'y-line').attr('transform', translate(xRule.start('content'), yRule.end('content') - y.rangeBand() / 2))
+  chart.append('svg:g').attr('class', 'y-line').attr('transform', translate(xRule.start('content'), yRule.end('content') - y.rangeBand() / (shape == "ProgressBar" ? 1 : 2)))
     .enterData(dim1, 'line', 'y-line')
     .attr('x2', xRule.size('content'))
     .attr('y1', function (t) { return -y(t); })
@@ -179,7 +179,7 @@
     .text(data.columns.c1.title);
   
   
-  var shape = data.parameters["Shape"];
+  
   
  
   var groups = chart.enterData(data.rows, 'g').attr('data-click', function(r) { return getClickKeys(r, data.columns); });
