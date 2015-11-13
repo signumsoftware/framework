@@ -17,13 +17,22 @@
         <h2>thrown @Model.Exception.GetType().Name</h2>
     }
     <div class="error-region">
-        @if (exceptionEntity != null) 
-        { 
+        @if (exceptionEntity != null)
+        {
             <p>
                 <span>Link: </span>
-                <a href="@Navigator.NavigateRoute(exceptionEntity)">@request.Scheme://@request.Authority@Navigator.NavigateRoute(exceptionEntity)</a>
+                @if (Navigator.IsNavigable(exceptionEntity, null))
+                {
+                    <a href="@Navigator.NavigateRoute(exceptionEntity)">@request.Scheme://@request.Authority@Navigator.NavigateRoute(exceptionEntity)</a>
+                }
+                else
+                {
+                    <code>@request.Scheme://@request.Authority@Navigator.NavigateRoute(exceptionEntity)</code>
+                }
+               
             </p>
         }
+
         <p>
             <span>Controller: </span>
             <code>@Model.ControllerName</code>

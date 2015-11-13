@@ -116,9 +116,9 @@ namespace Signum.Utilities
     class ExpandNone : IMethodExpander 
     {
         static MethodInfo miAnyEnumerable = ReflectionTools.GetMethodInfo(() => Enumerable.Any((IEnumerable<string>)null)).GetGenericMethodDefinition();
-        static MethodInfo miAnyQueryable = ReflectionTools.GetMethodInfo(() =>Enumerable.Any((IQueryable<string>)null)).GetGenericMethodDefinition();
+        static MethodInfo miAnyQueryable = ReflectionTools.GetMethodInfo(() =>Queryable.Any((IQueryable<string>)null)).GetGenericMethodDefinition();
         static MethodInfo miAnyEnumerableWithPredicate = ReflectionTools.GetMethodInfo(() =>Enumerable.Any((IEnumerable<string>)null, null)).GetGenericMethodDefinition();
-        static MethodInfo miAnyQueryableWithPredicate  = ReflectionTools.GetMethodInfo(() =>Enumerable.Any((IQueryable<string>)null, null)).GetGenericMethodDefinition();
+        static MethodInfo miAnyQueryableWithPredicate  = ReflectionTools.GetMethodInfo(() => Queryable.Any((IQueryable<string>)null, null)).GetGenericMethodDefinition();
 
         public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
         {

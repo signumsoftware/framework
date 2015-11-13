@@ -54,7 +54,7 @@ namespace Signum.Utilities.DataStructures
                 if (index != -1)
                 {
                     Interval<K> previousInt = dic.Keys[index];
-                    if (previousInt.Overlap(interval))
+                    if (previousInt.Overlaps(interval))
                         throw new ArgumentException("Interval {0} overlaps with the exisiting one {1} (value {2})".FormatWith(interval, previousInt, value));
                 }
 
@@ -62,7 +62,7 @@ namespace Signum.Utilities.DataStructures
                 if (next < dic.Count)
                 {
                     Interval<K> nextInt = dic.Keys[next];
-                    if (nextInt.Overlap(interval))
+                    if (nextInt.Overlaps(interval))
                         throw new ArgumentException(String.Format("Interval {0} overlaps with the exisiting one {1}", interval, nextInt));
                 }
             }
@@ -117,11 +117,11 @@ namespace Signum.Utilities.DataStructures
 
             if (indexMin == -1)
                 indexMin = 0;
-            else if (!dic.Keys[indexMin].Overlap(interval))
+            else if (!dic.Keys[indexMin].Overlaps(interval))
                 indexMin++;
 
             int indexMax = PossibleIndex(interval.Max);
-            if (indexMax != -1 && !dic.Keys[indexMax].Overlap(interval))
+            if (indexMax != -1 && !dic.Keys[indexMax].Overlaps(interval))
                 indexMax--;
 
             for (int i = indexMin; i <= indexMax; i++)

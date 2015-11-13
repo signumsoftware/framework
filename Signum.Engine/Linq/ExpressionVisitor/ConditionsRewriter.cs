@@ -158,6 +158,14 @@ namespace Signum.Engine.Linq
             return base.VisitUnary(u);
         }
 
+        protected internal override Expression VisitSqlCast(SqlCastExpression castExpr)
+        {
+            var expression = MakeSqlValue(Visit(castExpr.Expression));
+            if (expression != castExpr.Expression)
+                return new SqlCastExpression(castExpr.Type, expression, castExpr.SqlDbType);
+            return castExpr;
+        }
+
 
         private bool IsTrue(Expression operand)
         {
