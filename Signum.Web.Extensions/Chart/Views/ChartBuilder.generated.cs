@@ -323,73 +323,74 @@ WriteLiteral("                                    ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n                            </th>\r\n                            <th");
+WriteLiteral("\r\n                                </th>\r\n                                <th");
 
 WriteLiteral(" class=\"\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                                ");
+WriteLiteral("                                    ");
 
             
             #line 56 "..\..\Chart\Views\ChartBuilder.cshtml"
-                           Write(ChartMessage.Chart_Group.NiceToString());
+                               Write(ChartMessage.Chart_Group.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        </th>\r\n                        <th");
+WriteLiteral("\r\n                                </th>\r\n                                <th");
 
 WriteLiteral(" class=\"sf-chart-token-wide\"");
 
-WriteLiteral(">\r\n                            Token\r\n                        </th>\r\n            " +
-"        </tr>\r\n                </thead>\r\n                <tbody>\r\n");
+WriteLiteral(">\r\n                                    Token\r\n                                </t" +
+"h>\r\n                            </tr>\r\n                        </thead>\r\n       " +
+"                 <tbody>\r\n");
 
             
             #line 64 "..\..\Chart\Views\ChartBuilder.cshtml"
-                    
+                            
             
             #line default
             #line hidden
             
             #line 64 "..\..\Chart\Views\ChartBuilder.cshtml"
-                     foreach (var column in chart.TypeElementContext(a => a.Columns))
+                             foreach (var column in chart.TypeElementContext(a => a.Columns))
                     {
-                        
+                            
             
             #line default
             #line hidden
             
             #line 66 "..\..\Chart\Views\ChartBuilder.cshtml"
-                   Write(Html.HiddenRuntimeInfo(column));
+                       Write(Html.HiddenRuntimeInfo(column));
 
             
             #line default
             #line hidden
             
             #line 66 "..\..\Chart\Views\ChartBuilder.cshtml"
-                                                       
-                        
+                                                           
+                            
             
             #line default
             #line hidden
             
             #line 67 "..\..\Chart\Views\ChartBuilder.cshtml"
-                   Write(Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryDescription] = queryDescription));
+                       Write(Html.EmbeddedControl(column, c => c, ec => ec.ViewData[ViewDataKeys.QueryDescription] = queryDescription));
 
             
             #line default
             #line hidden
             
             #line 67 "..\..\Chart\Views\ChartBuilder.cshtml"
-                                                                                                                                  
+                                                                                                                                      
                     }
 
             
             #line default
             #line hidden
-WriteLiteral("                </tbody>\r\n            </table>\r\n        </div>\r\n        <textarea" +
-"");
+WriteLiteral("                        </tbody>\r\n                    </table>\r\n                <" +
+"/div>\r\n                <textarea");
 
 WriteLiteral(" class=\"sf-chart-currentScript\"");
 
@@ -399,7 +400,7 @@ WriteLiteral(" data-url=\"");
 
             
             #line 72 "..\..\Chart\Views\ChartBuilder.cshtml"
-                                                                           Write(Navigator.NavigateRoute(chart.Value.ChartScript));
+                                                                                   Write(Navigator.NavigateRoute(chart.Value.ChartScript));
 
             
             #line default
@@ -408,20 +409,20 @@ WriteLiteral("\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("            ");
+WriteLiteral("                    ");
 
             
             #line 73 "..\..\Chart\Views\ChartBuilder.cshtml"
-       Write(chart.Value.ChartScript.Script);
+               Write(chart.Value.ChartScript.Script);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n        </textarea>\r\n    </div>\r\n    <div");
+WriteLiteral("\r\n                </textarea>\r\n            </div>\r\n            <div");
 
-WriteLiteral(" class=\"panel panel-default\"");
+WriteLiteral(" class=\"sf-chart-parameters panel panel-default\"");
 
-WriteLiteral(">\r\n        <div");
+WriteLiteral(">\r\n                <div");
 
 WriteLiteral(" class=\"panel-body form-vertical\"");
 
@@ -429,19 +430,19 @@ WriteLiteral(">\r\n");
 
             
             #line 78 "..\..\Chart\Views\ChartBuilder.cshtml"
-            
+                    
             
             #line default
             #line hidden
             
             #line 78 "..\..\Chart\Views\ChartBuilder.cshtml"
-             foreach (var gr in chart.TypeElementContext(c => c.Parameters).OrderBy(c => chart.Value.Parameters.IndexOf(c.Value)).GroupsOf(6))
-            {
+                     foreach (var gr in chart.TypeElementContext(c => c.Parameters).OrderBy(c => chart.Value.Parameters.IndexOf(c.Value)).GroupsOf(6))
+                    {
 
             
             #line default
             #line hidden
-WriteLiteral("                <div");
+WriteLiteral("                        <div");
 
 WriteLiteral(" class=\"row\"");
 
@@ -449,64 +450,64 @@ WriteLiteral(">\r\n");
 
             
             #line 81 "..\..\Chart\Views\ChartBuilder.cshtml"
-                    
+                            
             
             #line default
             #line hidden
             
             #line 81 "..\..\Chart\Views\ChartBuilder.cshtml"
-                     foreach (var pc in gr)
-                    {
-                        pc.FormGroupStyle = FormGroupStyle.Basic;
+                             foreach (var pc in gr)
+                            {
+                                pc.FormGroupStyle = FormGroupStyle.Basic;
 
             
             #line default
             #line hidden
-WriteLiteral("                        <div");
+WriteLiteral("                                <div");
 
 WriteLiteral(" class=\"col-sm-2\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                            ");
+WriteLiteral("                                    ");
 
             
             #line 85 "..\..\Chart\Views\ChartBuilder.cshtml"
-                       Write(Html.HiddenLine(pc, ct => ct.Name));
+                               Write(Html.HiddenLine(pc, ct => ct.Name));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n");
 
-WriteLiteral("                            ");
+WriteLiteral("                                    ");
 
             
             #line 86 "..\..\Chart\Views\ChartBuilder.cshtml"
-                       Write(Html.ValueLine(pc, ct => ct.Value, vl => ChartClient.SetupParameter(vl, pc.Value)));
+                               Write(Html.ValueLine(pc, ct => ct.Value, vl => ChartClient.SetupParameter(vl, pc.Value)));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        </div>\r\n");
+WriteLiteral("\r\n                                </div>\r\n");
 
             
             #line 88 "..\..\Chart\Views\ChartBuilder.cshtml"
+                            }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                        </div>\r\n");
+
+            
+            #line 90 "..\..\Chart\Views\ChartBuilder.cshtml"
                     }
 
             
             #line default
             #line hidden
-WriteLiteral("                </div>\r\n");
-
-            
-            #line 90 "..\..\Chart\Views\ChartBuilder.cshtml"
-            }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("        </div>\r\n    </div>\r\n</div>\r\n</div>\r\n");
+WriteLiteral("                </div>\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
 
             
             #line 95 "..\..\Chart\Views\ChartBuilder.cshtml"

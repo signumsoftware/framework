@@ -414,7 +414,7 @@ export class ChartRequest {
 
             var url = this.options.openUrl;
 
-            var options = this.chartControl.find(":input").not(this.chartControl.find(".sf-filters-list :input")).serializeObject();
+            var options = this.chartControl.find(":input").not(this.chartControl.find(".sf-filters-list :input, .sf-chart-parameters :input")).serializeObject();
             options["webQueryName"] = this.options.webQueryName;
             options["orders"] = this.serializeOrders();
             options["filters"] = this.filterBuilder.serializeFilters();
