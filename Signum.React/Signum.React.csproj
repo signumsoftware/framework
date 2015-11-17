@@ -188,11 +188,12 @@
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
       <DependentUpon>Signum.Entities.txt</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Templates\SearchControl\SearchControl.tsx" />
     <TypeScriptCompile Include="Typings\es6-promise\es6-promise.d.ts" />
     <TypeScriptCompile Include="Scripts\Globals.ts" />
     <TypeScriptCompile Include="Typings\react-widgets\react-widgets.d.ts" />
     <TypeScriptCompile Include="Typings\react-router\react-router.d.ts" />
-    <TypeScriptCompile Include="Views\Exception.tsx" />
+    <TypeScriptCompile Include="Templates\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
     <TypeScriptCompile Include="Scripts\Reflection.ts" />
     <TypeScriptCompile Include="Scripts\TypeContext.ts" />
