@@ -1,8 +1,5 @@
 ﻿/// <reference path="globals.ts" />
 
-
-
-
 export class PropertyRoute {
 
     parent: PropertyRoute;
@@ -24,7 +21,6 @@ export function getEnumInfo(enumTypeName: string, enumId: number) {
 
     return ti.membersById[enumId];
 }
-
 
 export interface TypeInfo
 {

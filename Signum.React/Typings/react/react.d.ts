@@ -1,6 +1,6 @@
-// Type definitions for React v0.13.1 (external module)
+// Type definitions for React v0.14.0 (external module)
 // Project: http://facebook.github.io/react/
-// Definitions by: Asana <https://asana.com>, AssureSign <http://www.assuresign.com>, Microsoft <https://microsoft.com>
+// Definitions by: Asana <https://asana.com>, AssureSign <http://www.assuresign.com>, Microsoft <https://microsoft.com>, Signum Software <http://wwww.signumsoftware.com>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 declare module __React {
@@ -98,29 +98,10 @@ declare module __React {
         props?: P,
         ...children: ReactNode[]): ReactElement<P>;
 
-    function render<P>(
-        element: DOMElement<P>,
-        container: Element,
-        callback?: () => any): DOMComponent<P>;
-    function render<P, S>(
-        element: ClassicElement<P>,
-        container: Element,
-        callback?: () => any): ClassicComponent<P, S>;
-    function render<P, S>(
-        element: ReactElement<P>,
-        container: Element,
-        callback?: () => any): Component<P, S>;
 
-    function unmountComponentAtNode(container: Element): boolean;
-    function renderToString(element: ReactElement<any>): string;
-    function renderToStaticMarkup(element: ReactElement<any>): string;
+
     function isValidElement(object: {}): boolean;
-    function initializeTouchEvents(shouldUseTouch: boolean): void;
 
-    function findDOMNode<TElement extends Element>(
-        componentOrElement: Component<any, any> | Element): TElement;
-    function findDOMNode(
-        componentOrElement: Component<any, any> | Element): Element;
 
     var DOM: ReactDOM;
     var PropTypes: ReactPropTypes;
@@ -141,18 +122,14 @@ declare module __React {
         state: S;
         context: {};
         refs: {
-            [key: string]: Component<any, any>
+            [key: string]: Element
         };
     }
 
     interface ClassicComponent<P, S> extends Component<P, S> {
         replaceState(nextState: S, callback?: () => any): void;
-        getDOMNode<TElement extends Element>(): TElement;
-        getDOMNode(): Element;
         isMounted(): boolean;
         getInitialState?(): S;
-        setProps(nextProps: P, callback?: () => any): void;
-        replaceProps(nextProps: P, callback?: () => any): void;
     }
 
     interface DOMComponent<P> extends ClassicComponent<P, any> {
@@ -420,9 +397,11 @@ declare module __React {
         autoComplete?: boolean;
         autoFocus?: boolean;
         autoPlay?: boolean;
+        capture?: boolean;
         cellPadding?: number | string;
         cellSpacing?: number | string;
         charSet?: string;
+        challenge?: string;
         checked?: boolean;
         classID?: string;
         className?: string;
@@ -444,7 +423,6 @@ declare module __React {
         download?: any;
         draggable?: boolean;
         encType?: string;
-        for?: string;
         form?: string;
         formAction?: string;
         formEncType?: string;
@@ -462,6 +440,11 @@ declare module __React {
         httpEquiv?: string;
         icon?: string;
         id?: string;
+        inputMode?: string;
+        integrity?: string;
+        is?: string;
+        keyParams?: string;
+        keyType?: string;
         label?: string;
         lang?: string;
         list?: string;
@@ -476,6 +459,7 @@ declare module __React {
         mediaGroup?: string;
         method?: string;
         min?: number | string;
+        minLength?: number | string;
         multiple?: boolean;
         muted?: boolean;
         name?: string;
@@ -510,6 +494,7 @@ declare module __React {
         start?: number;
         step?: number | string;
         style?: CSSProperties;
+        summary?: string;
         tabIndex?: number;
         target?: string;
         title?: string;
@@ -518,14 +503,19 @@ declare module __React {
         value?: string;
         width?: number | string;
         wmode?: string;
+        wrap?: string;
 
         // Non-standard Attributes
         autoCapitalize?: boolean;
         autoCorrect?: boolean;
-        property?: string;
+        autoSave?: boolean;
+        color?: string;
         itemProp?: string;
         itemScope?: boolean;
         itemType?: string;
+        itemID?: string;
+        itemRef?: string;
+        results?: string;
         unselectable?: boolean;
     }
 
@@ -537,6 +527,7 @@ declare module __React {
     interface SVGAttributes extends DOMAttributes {
         ref?: string | ((component: SVGComponent) => void);
 
+        clipPath?: string;
         cx?: number | string;
         cy?: number | string;
         d?: string;
@@ -766,6 +757,7 @@ declare module __React {
         forEach(children: ReactNode, fn: (child: ReactChild, index: number) => any): void;
         count(children: ReactNode): number;
         only(children: ReactNode): ReactChild;
+        toArray(children: ReactNode): ReactElement<any>[]
     }
 
     //
@@ -799,6 +791,42 @@ declare module __React {
 
 declare module "react" {
     export = __React;
+}
+
+declare module __ReactDOM {
+
+    function render<P>(
+        element: __React.DOMElement< P >,
+        container: Element,
+        callback?: () => any): __React.DOMComponent<P>;
+    function render<P, S>(
+        element: __React.ClassicElement<P>,
+        container: Element,
+        callback?: () => any): __React.ClassicComponent<P, S>;
+    function render<P, S>(
+        element: __React.ReactElement<P>,
+        container: Element,
+        callback?: () => any): __React.Component<P, S>;
+
+    function unmountComponentAtNode(container: Element): boolean;
+
+    function findDOMNode<TElement extends Element>(
+        componentOrElement: __React.Component<any, any> | Element): TElement;
+    function findDOMNode(
+        componentOrElement: __React.Component<any, any> | Element): Element;
+}
+
+declare module "react-dom" {
+    export = __ReactDOM;
+}
+
+declare module __ReactDOMServer {
+    function renderToString(element: __React.ReactElement<any>): string;
+    function renderToStaticMarkup(element: __React.ReactElement<any>): string;
+}
+
+declare module "react-dom-server" {
+    export = __ReactDOMServer;
 }
 
 declare module JSX {

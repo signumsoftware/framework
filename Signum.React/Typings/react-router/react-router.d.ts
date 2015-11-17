@@ -4,6 +4,7 @@
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 ///<reference path='../react/react.d.ts' />
+/// <reference path="../history/history.d.ts" />
 
 declare module ReactRouter {
     import React = __React;
@@ -40,45 +41,59 @@ declare module ReactRouter {
     //
     // Route Configuration
     // ----------------------------------------------------------------------
-    // DefaultRoute
-    interface DefaultRouteProp {
-        name?: string;
-        handler: React.ComponentClass<any>;
+    // IndexRoute
+    interface IndexRouteProp {
+        component?: React.ComponentClass<any>;
+        components?: { [name: string]: React.ComponentClass<any> };
+        getComponent?: (location: string, callback: (error: string, component: React.ComponentClass<any>) => void) => void;
+        getComponents?: (location: string, callback: (error: string, components: { [name: string]: React.ComponentClass<any> }) => void) => void;
+        onEnter?: (nextState: string, replaceState: string, callback: Function) => void;
+        onLeave?: () => void;
     }
-    interface DefaultRoute extends React.ReactElement<DefaultRouteProp> {}
-    interface DefaultRouteClass extends React.ComponentClass<DefaultRouteProp> {}
-
-    // NotFoundRoute
-    interface NotFoundRouteProp {
-        name?: string;
-        handler: React.ComponentClass<any>;
-    }
-    interface NotFoundRoute extends React.ReactElement<NotFoundRouteProp> {}
-    interface NotFoundRouteClass extends React.ComponentClass<NotFoundRouteProp> {}
-
-    // Redirect
-    interface RedirectProp {
-        path?: string;
-        from?: string;
-        to?: string;
-    }
-    interface Redirect extends React.ReactElement<RedirectProp> {}
-    interface RedirectClass extends React.ComponentClass<RedirectProp> {}
+    interface IndexRoute extends React.ReactElement<IndexRouteProp> {}
+    interface IndexRouteClass extends React.ComponentClass<IndexRouteProp> { }
 
     // Route
-    interface RouteProp {
-        name?: string;
+    interface RouteProp extends IndexRouteProp{
         path?: string;
-        handler?: React.ComponentClass<any>;
-        ignoreScrollBehavior?: boolean;
     }
-    interface Route extends React.ReactElement<RouteProp> {}
-    interface RouteClass extends React.ComponentClass<RouteProp> {}
+    interface Route extends React.ReactElement<RouteProp> { }
+    interface RouteClass extends React.ComponentClass<RouteProp> { }
 
-    var DefaultRoute: DefaultRouteClass;
-    var NotFoundRoute: NotFoundRouteClass;
-    var Redirect: RedirectClass;
+    // IndexRedirect
+    interface IndexRedirectProp {
+        to?: string;
+        query?: string;
+    }
+    interface IndexRedirect extends React.ReactElement<IndexRedirectProp> { }
+    interface IndexRedirectClass extends React.ComponentClass<IndexRedirectProp> { }
+
+
+    // Redirect
+    interface RedirectProp extends IndexRedirectProp {
+        from?: string;
+    }
+    interface Redirect extends React.ReactElement<RedirectProp> { }
+    interface RedirectClass extends React.ComponentClass<RedirectProp> { }
+
+    var IndexRoute: IndexRouteClass;
     var Route: RouteClass;
+    var IndexRedirect: IndexRedirectClass;
+    var Redirect: RedirectClass;
+  
+
+    interface RouterProp {
+        routes?: Route[];
+        children?: Route[];
+        history?: ReactHistory.History;
+        createElement?: (component: React.ComponentClass<any>, props: any) => React.Component<any, any>;
+    }
+
+    interface Router extends React.ReactElement<RouterProp> { }
+    interface RouterClass extends React.ComponentClass<RouterProp> { }
+
+
+    var Router: RouterClass;
 
     interface CreateRouteOptions {
         name?: string;
@@ -117,6 +132,8 @@ declare module ReactRouter {
         activeClassName?: string;
         activeStyle?: {};
         to: string;
+        hash?: string;
+        state?: any;
         params?: {};
         query?: {};
     }
@@ -129,52 +146,19 @@ declare module ReactRouter {
     interface LinkClass extends React.ComponentClass<LinkProp> {}
 
     // RouteHandler
-    interface RouteHandlerProp { }
-    interface RouteHandlerChildContext {
-        routeDepth: number;
-    }
-    interface RouteHandler extends React.ReactElement<RouteHandlerProp> {
-        getChildContext(): RouteHandlerChildContext;
-        getRouteDepth(): number;
-        createChildRouteHandler(props: {}): RouteHandler;
-    }
-    interface RouteHandlerClass extends React.ComponentClass<RouteHandlerProp> {}
+
 
     var Link: LinkClass;
-    var RouteHandler: RouteHandlerClass;
 
-
-    //
-    // Top-Level
-    // ----------------------------------------------------------------------
-    interface Router extends React.ReactElement<any> {
-        run(callback: RouterRunCallback): void;
+    interface HandlerProps {
+        isTransitioning?: boolean;
+        location?: {};
+        params?: any;
+        route?: Route;
+        routeParams: any;
+        children: any;
     }
-
-    interface RouterState {
-        path: string;
-        action: string;
-        pathname: string;
-        params: {};
-        query: {};
-        routes: Route[];
-    }
-
-    interface RouterCreateOption {
-        routes: Route;
-        location?: LocationBase;
-        scrollBehavior?: ScrollBehaviorBase;
-        onError?: (error: any) => void;
-        onAbort?: (error: any) => void;
-    }
-
-    type RouterRunCallback = (Handler: RouteClass, state: RouterState) => void;
-
-    function create(options: RouterCreateOption): Router;
-    function run(routes: Route, callback: RouterRunCallback): Router;
-    function run(routes: Route, location: LocationBase | string, callback: RouterRunCallback): Router;
-
-
+    
     //
     // Location
     // ----------------------------------------------------------------------
@@ -241,17 +225,7 @@ declare module ReactRouter {
 
     var Navigation: Navigation;
     var State: State;
-
-
-    //
-    // History
-    // ----------------------------------------------------------------------
-    interface History {
-        back(): void;
-        length: number;
-    }
-    var History: History;
-
+    
 
     //
     // Context
@@ -278,23 +252,23 @@ declare module "react-router" {
 
 declare module __React {
 
-  // for DefaultRoute
+  // for IndexRoute
   function createElement(
-    type: ReactRouter.DefaultRouteClass,
-    props: ReactRouter.DefaultRouteProp,
-    ...children: __React.ReactNode[]): ReactRouter.DefaultRoute;
+    type: ReactRouter.IndexRouteClass,
+    props: ReactRouter.IndexRouteProp,
+    ...children: __React.ReactNode[]): ReactRouter.IndexRoute;
+
+  // for IndexRedirect
+  function createElement(
+      type: ReactRouter.IndexRedirectClass,
+      props: ReactRouter.IndexRedirectProp,
+      ...children: __React.ReactNode[]): ReactRouter.IndexRedirect;
 
   // for Link
   function createElement(
     type: ReactRouter.LinkClass,
     props: ReactRouter.LinkProp,
     ...children: __React.ReactNode[]): ReactRouter.Link;
-
-  // for NotFoundRoute
-  function createElement(
-    type: ReactRouter.NotFoundRouteClass,
-    props: ReactRouter.NotFoundRouteProp,
-    ...children: __React.ReactNode[]): ReactRouter.NotFoundRoute;
 
   // for Redirect
   function createElement(
@@ -307,32 +281,27 @@ declare module __React {
     type: ReactRouter.RouteClass,
     props: ReactRouter.RouteProp,
     ...children: __React.ReactNode[]): ReactRouter.Route;
-
-  // for RouteHandler
-  function createElement(
-    type: ReactRouter.RouteHandlerClass,
-    props: ReactRouter.RouteHandlerProp,
-    ...children: __React.ReactNode[]): ReactRouter.RouteHandler;
 }
 
 declare module "react/addons" {
-  // for DefaultRoute
+
+  // for IndexRoute
   function createElement(
-    type: ReactRouter.DefaultRouteClass,
-    props: ReactRouter.DefaultRouteProp,
-    ...children: __React.ReactNode[]): ReactRouter.DefaultRoute;
+      type: ReactRouter.IndexRouteClass,
+      props: ReactRouter.IndexRouteProp,
+      ...children: __React.ReactNode[]): ReactRouter.IndexRoute;
+
+  // for IndexRedirect
+  function createElement(
+      type: ReactRouter.IndexRedirectClass,
+      props: ReactRouter.IndexRedirectProp,
+      ...children: __React.ReactNode[]): ReactRouter.IndexRedirect;
 
   // for Link
   function createElement(
     type: ReactRouter.LinkClass,
     props: ReactRouter.LinkProp,
     ...children: __React.ReactNode[]): ReactRouter.Link;
-
-  // for NotFoundRoute
-  function createElement(
-    type: ReactRouter.NotFoundRouteClass,
-    props: ReactRouter.NotFoundRouteProp,
-    ...children: __React.ReactNode[]): ReactRouter.NotFoundRoute;
 
   // for Redirect
   function createElement(
@@ -345,10 +314,4 @@ declare module "react/addons" {
     type: ReactRouter.RouteClass,
     props: ReactRouter.RouteProp,
     ...children: __React.ReactNode[]): ReactRouter.Route;
-
-  // for RouteHandler
-  function createElement(
-    type: ReactRouter.RouteHandlerClass,
-    props: ReactRouter.RouteHandlerProp,
-    ...children: __React.ReactNode[]): ReactRouter.RouteHandler;
 }

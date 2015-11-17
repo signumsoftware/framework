@@ -5,11 +5,14 @@ import * as JQuery from "jquery"
 
 var $ = JQuery;
 
-export var baseUrl = "";
+export function baseUrl(): string
+{
+    return window["__baseUrl"];
+}
 
 export function ajaxPost(settings: JQueryAjaxSettings): Promise<any> {
 
-    settings.url = baseUrl + settings.url;
+    settings.url = baseUrl() + settings.url;
 
     return new Promise<any>((resolve, reject) => {
         settings.success = resolve;
@@ -21,7 +24,7 @@ export function ajaxPost(settings: JQueryAjaxSettings): Promise<any> {
 
 export function ajaxGet(settings: JQueryAjaxSettings): Promise<any> {
 
-    settings.url = baseUrl + settings.url;
+    settings.url = baseUrl() + settings.url;
 
     return new Promise<any>((resolve, reject) => {
         settings.success = resolve;

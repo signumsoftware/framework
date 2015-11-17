@@ -1,4 +1,9 @@
-﻿
+﻿/// <reference path="../typings/react/react.d.ts" />
+/// <reference path="../typings/react-router/react-router.d.ts" />
+/// <reference path="../typings/react-widgets/react-widgets.d.ts" />
+/// <reference path="../typings/history/history.d.ts" />
+/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
+
 function hasFlag(value: number, flag: number): boolean {
     return (value & flag) == flag;
 }
@@ -22,6 +27,18 @@ module Dic {
             throw new Error(`Key ${key} already added` + (errorContext ? "in " + errorContext : ""));
 
         dic[key] = value;
+    }
+
+    export function copy<T>(object: T): T {
+        var objectCopy = <T>{};
+
+        for (var key in object) {
+            if (object.hasOwnProperty(key)) {
+                objectCopy[key] = object[key];
+            }
+        }
+
+        return objectCopy;
     }
 }
 

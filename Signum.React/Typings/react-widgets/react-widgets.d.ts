@@ -7,8 +7,8 @@
 
 declare module ReactWidgets {
     import React = __React;
-    
-    export interface DropDownListProps {
+
+    export interface DropDownListProps extends React.Props<DropdownListClass> {
         value?: any;
         onChange?: (value: any) => void;
         onSelect?: (value: any) => void;
@@ -39,12 +39,12 @@ declare module ReactWidgets {
             emptyFilter?: string | ((props: DropDownListProps) => string); //Default "The filter returned no results"
         };
     }
+    export interface DropdownList extends React.ReactElement<DropDownListProps> { }
+    export interface DropdownListClass extends React.ComponentClass<DropDownListProps> { }
+    var DropdownList: DropdownListClass;
+    
 
-    export interface DropdownList extends React.ReactElement<DropDownListProps> {
-
-    }
-
-    export interface ComboboxProps {
+    export interface ComboboxProps extends React.ReactElement<ComboboxClass> {
         value?: any;
         onChange?: (value: any) => void;
         onSelect?: (value: any) => void;
@@ -71,12 +71,11 @@ declare module ReactWidgets {
             emptyFilter?: string | ((props: ComboboxProps) => string); //Default "The filter returned no results"
         };
     }
+    export interface Combobox  extends React.ReactElement<ComboboxProps> { }
+    export interface ComboboxClass extends React.ReactElement<ComboboxProps> { }
+    var Combobox: ComboboxClass; 
 
-    export interface Combobox  extends React.ReactElement<ComboboxProps> {
-
-    }
-
-    export interface NumberPickerProps {
+    export interface NumberPickerProps extends React.Props<NumberPickerClass> {
         value?: number;
         onChange?: (value: number) => void;
         parse?: ((string: string, culture: string) => number) | string[];
@@ -91,12 +90,11 @@ declare module ReactWidgets {
             decrement?: string;
         };
     }
+    export interface NumberPicker extends React.ReactElement<NumberPickerProps> { }
+    export interface NumberPickerClass extends React.ComponentClass<NumberPickerProps> { }
+    var NumberPicker: NumberPickerClass; 
 
-    export interface NumberPicker extends React.ReactElement<NumberPickerProps> {
-
-    }
-
-    export interface MultiselectProps {
+    export interface MultiselectProps extends React.Props<MultiselectClass> {
         value?: any[];
         onChange?: (values: any[]) => void;
         onSelect?: (value: any) => void;
@@ -127,12 +125,11 @@ declare module ReactWidgets {
             emptyFilter?: string | ((props: DropDownListProps) => string); //Default "The filter returned no results"
         };
     }
+    export interface Multiselect extends React.ReactElement<MultiselectProps> { }
+    export interface MultiselectClass extends React.ComponentClass<MultiselectProps> { }
+    var Multiselect: MultiselectClass; 
 
-    export interface Multiselect extends React.ReactElement<MultiselectProps> {
-
-    }
-
-    export interface SelectListProps {
+    export interface SelectListProps extends React.Props<SelectListClass>  {
         value?: any|any[];
         onChange?: (values: any | any[]) => void;
         data?: any[];
@@ -152,13 +149,11 @@ declare module ReactWidgets {
             emptyList?: string | ((props: SelectListProps) => string); //Default "There are no items in the list"
         };
     }
+    export interface SelectList extends React.ReactElement<SelectListProps> {   }
+    export interface SelectListClass extends React.ComponentClass<SelectListProps> { }
+    var SelectList: SelectListClass; 
 
-    export interface SelectList extends React.ReactElement<SelectListProps> {
-
-    }
-
-
-    export interface CalendarProps {
+    export interface CalendarProps extends React.Props<CalendarClass> {
         value?: Date;
         onChange?: (value: Date) => void;
         onNavigate?: (value: Date, direction: string, view: string) => void;
@@ -182,12 +177,12 @@ declare module ReactWidgets {
             moveForward?: string; //Default "navigate forward";
         };
     }
+    export interface Calendar extends React.ReactElement<CalendarProps> {    }
+    export interface CalendarClass extends React.ComponentClass<CalendarProps> {    }
+    var Calendar: CalendarClass; 
 
-    export class Calendar extends React.Component<CalendarProps, any> {
 
-    }
-
-    export interface DatePickeProps  {
+    export interface DatePickeProps extends React.Props<DatePickerClass> {
         value?: Date;
         onChange?: (value: Date, dateStr: string) => void;
         onSelect?: (value: Date) => void;
@@ -224,10 +219,10 @@ declare module ReactWidgets {
             moveForward?: string; //Default "navigate forward";
         };
     }
+    export interface DatePicker extends React.ReactElement<DatePickeProps> {    }
+    export interface DatePickerClass extends React.ComponentClass<DatePickeProps> { }
+    var DatePicker: DatePickerClass; 
 
-    export interface DatePicker extends React.ReactElement<DatePickeProps> {
-
-    }
 }
 
 declare module "react-widgets" {
