@@ -90,7 +90,7 @@
       .entries(data.rows)
       .map(function(g){return g.values;});
      
-     title = data.columns.c2.title + " by " + data.columns.c1.title
+     title = data.columns.c2.title + " / " + data.columns.c1.title
    }
  
   
