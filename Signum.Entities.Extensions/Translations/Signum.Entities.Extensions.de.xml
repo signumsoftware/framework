@@ -1598,7 +1598,7 @@
     <Member Name="ViewUserQuery" Description="Benutzer-Abfrage anzeigen" />
   </Type>
   <Type Name="UserState" Description="Benutzerstatus">
-    <Member Name="Disabled" Description="Behinderte" />
+    <Member Name="Disabled" Description="Deaktiviert" />
     <Member Name="New" Description="Neu" />
     <Member Name="Saved" Description="Gespeichert" />
   </Type>

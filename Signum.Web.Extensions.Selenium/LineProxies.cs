@@ -833,7 +833,7 @@ namespace Signum.Web.Selenium
 
         public By CheckBoxLocator(Lite<Entity> lite)
         {
-            return By.CssSelector("#" + this.Prefix + " input[value='" + RuntimeInfoProxy.FromLite(lite) + "']");
+            return By.CssSelector("#" + this.Prefix + " input[value^='" + RuntimeInfoProxy.FromLite(lite) + "']");
         }
 
         public List<Lite<Entity>> GetDataElements()

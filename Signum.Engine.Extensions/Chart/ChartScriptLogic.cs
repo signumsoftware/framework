@@ -61,6 +61,13 @@ namespace Signum.Engine.Chart
                     Name = cs.Name,
                     GroupBy = cs.GroupBy,
                     Icon = cs.Icon,
+                    Parameters = cs.Parameters.Select(par => new ChartScriptParameterEntity
+                    {
+                        ColumnIndex = par.ColumnIndex,
+                        Name = par.Name,
+                        Type = par.Type,
+                        ValueDefinition = par.ValueDefinition
+                    }).ToMList(),
                     Columns = cs.Columns.Select(col => new ChartScriptColumnEntity
                     {
                         ColumnType = col.ColumnType,
