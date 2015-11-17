@@ -1,4 +1,6 @@
-﻿export interface CountOptions {
+﻿import { TypeReference, PropertyRoute } from 'Framework/Signum.React/Scripts/Reflection';
+
+export interface CountOptions {
     queryName: any;
     filterOptions?: FilterOptions[];
 }
@@ -132,4 +134,19 @@ export enum PaginationMode {
     All,
     Firsts,
     Paginate
+}
+
+
+export interface QueryDescription {
+    queryName: any;
+    columns: { [name: string]: ColumnDescription };
+}
+
+export interface ColumnDescription {
+    name: string;
+    type: TypeReference;
+    unit?: string;
+    format?: string;
+    propertyRoutes: PropertyRoute[];
+    displayName: string;
 }

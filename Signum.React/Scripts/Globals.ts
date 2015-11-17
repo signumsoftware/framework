@@ -204,6 +204,9 @@ interface String {
     endsWith(str: string): boolean;
     format(...parameters: any[]): string;
     formatHtml(...parameters: any[]): string;
+    forGengerAndNumber(number: number): string;
+    forGengerAndNumber(gender: string): string;
+    forGengerAndNumber(gender: any, number: number): string;
     replaceAll(from: string, to: string);
     after(separator: string): string;
     before(separator: string): string;
@@ -261,6 +264,64 @@ String.prototype.formatHtml = function () {
 
     return parts;
 };
+
+//String.prototype.forGengerAndNumber = (gender: any, number: number){
+
+//    if (isNaN(parseFloat(gender)) && !number) {
+//        number = gender;
+//        gender  = null;
+//    }
+
+
+
+
+
+
+//    if (gender == null && number == null)
+//        return this;
+
+
+
+//    function GetPart(textToReplace: string, prefixes: string[]): string {
+//        return Regex.Replace(textToReplace,
+//              @"\[(?<part>[^\|\]]+)(\|(?<part>[^\|\]]+))*\]", m => {
+//            var captures = m.Groups["part"].Captures.OfType<Capture>();
+
+//            foreach(var pr in prefixes)
+//            {
+//                Capture capture = captures.FirstOrDefault(c => c.Value.StartsWith(pr));
+//                if (capture != null)
+//                    return capture.Value.RemoveStart(pr.Length);
+//            }
+
+//            return "";
+//        }
+
+//    }
+             
+
+//        if (number == null)
+//            return GetPart(genderAwareText, gender + ":");
+
+//        if (gender == null) {
+//            if (number.Value == 1)
+//                return GetPart(genderAwareText, "1:");
+
+//            return GetPart(genderAwareText, number.Value + ":", ":");
+//        }
+
+//        if (number.Value == 1)
+//            return GetPart(genderAwareText, "1" + gender.Value + ":", "1:");
+
+//        return GetPart(genderAwareText, gender.Value + number.Value + ":", gender.Value + ":", number.Value + ":", ":");
+    
+     
+//};  
+
+
+function isNumber(n: any): boolean {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
 
 
 String.prototype.replaceAll = function (from, to) {

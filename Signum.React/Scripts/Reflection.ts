@@ -38,13 +38,18 @@ export interface TypeInfo
 export interface MemberInfo {
     name: string,
     niceName: string;
-    isCollection?: boolean;
-    isLite?: boolean; 
-    isNullable?: boolean; 
-    type?: string; 
+    type: TypeReference;
     unit?: string; 
     format?: string; 
     id?: any; //symbols
+}
+
+export interface TypeReference {
+    isCollection?: boolean;
+    isLite?: boolean;
+    isNullable?: boolean;
+    type?: string;
+    implementations?: string[];
 }
 
 export enum KindOfType {
