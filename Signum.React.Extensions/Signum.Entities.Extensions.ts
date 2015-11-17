@@ -700,6 +700,7 @@ export namespace Dashboard {
     export const UserQueryPartEntity_Type = new Type<UserQueryPartEntity>("UserQueryPartEntity");
     export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
         userQuery?: UserQueries.UserQueryEntity;
+        allowSelection?: boolean;
         requiresTitle?: boolean;
     }
     

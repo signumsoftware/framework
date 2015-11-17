@@ -176,8 +176,9 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Auth\Scripts\AuthClient.ts" />
+    <TypeScriptCompile Include="Auth\Scripts\AuthClient.tsx" />
     <TypeScriptCompile Include="Auth\Templates\Login.tsx" />
+    <TypeScriptCompile Include="Auth\Templates\LoginUserControl.tsx" />
     <TypeScriptCompile Include="Signum.Entities.Extensions.ts">
       <DependentUpon>Signum.Entities.Extensions.txt</DependentUpon>
     </TypeScriptCompile>

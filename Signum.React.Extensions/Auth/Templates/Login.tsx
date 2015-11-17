@@ -1,21 +1,12 @@
-﻿/// <reference path="../../../../framework/signum.react/typings/react/react.d.ts" />
-/// <reference path="../../../../framework/signum.react/typings/react-widgets/react-widgets.d.ts" />
+﻿/// <reference path="../../framework/signum.react/scripts/globals.ts" />
 
 import * as React from 'react'
 import { Calendar } from 'react-widgets'
 import { Authorization } from 'Signum.Entities.Extensions'
-import * as AuthClient from '../Extensions/Signum.React.Extensions/Auth/Scripts/AuthClient'
+import * as AuthClient from 'Extensions/Signum.React.Extensions/Auth/Scripts/AuthClient'
 
 var AuthMessage = Authorization.AuthMessage;
-
-interface IsLoginProps {
-    isSingleSignOn: boolean;
-    userIdentity: boolean;
-    userTicket: boolean;
-}
-
-
-export default class Login extends React.Component<IsLoginProps, {}> {
+export default class Login extends React.Component<{ name: string }, { }> {
 
     componentDidMount() {
 
@@ -27,8 +18,8 @@ export default class Login extends React.Component<IsLoginProps, {}> {
                 <div className="col-sm-offset-4">
                      <h2>Login</h2>
                      <p>
-                        {this.props.isSingleSignOn ?
-                            AuthMessage.Welcome0.niceToString().formatHtml(<code>{this.props.userIdentity}</code>) :
+                        {AuthClient.IsSingleSignOn ?
+                            AuthMessage.Welcome0.niceToString().formatHtml(<code>{"ActiveDomainIdentity"}</code>) :
                             AuthMessage.IntroduceYourUserNameAndPassword.niceToString()
                         }
                       </p>
