@@ -397,7 +397,12 @@ namespace Signum.Web.Selenium
 
         public Lite<IEntity> LiteValue
         {
-            get { return RuntimeInfo().ToLite(); }
+            get
+            {
+                var text = Selenium.FindElement(ComboLocator).SelectElement().AllSelectedOptions.SingleOrDefaultEx()?.Text;
+
+                return RuntimeInfo().ToLite(text);
+            }
             set
             {
                 Selenium.FindElement(ComboLocator).SelectElement().SelectByValue(value == null ? "" : value.Key());
