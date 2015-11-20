@@ -2,36 +2,38 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Signum.React.Facades;
 using Signum.React.PortableAreas;
 using Signum.Utilities;
 
 namespace Signum.React
 {
-    public class ServerBuilder
+    public static class AssemblyAreas
     {
-        public ServerBuilder()
+        public static void RegisterFrameworkArea()
         {
-            RegisterArea(typeof(ServerBuilder), "signum");
+            RegisterArea(typeof(AssemblyAreas), "signum");
+            RefletionCache.Start();
         }
 
-        public static void RegisterArea(Type clientType,
+        public static void RegisterArea(Type controllerType,
             string areaName = null,
             string controllerNamespace = null,
             string resourcesNamespace = null)
         {
             if (areaName == null)
-                areaName = clientType.Namespace.AfterLast('.');
+                areaName = controllerType.Namespace.AfterLast('.');
 
             if (areaName.Start(1) == "/")
                 throw new SystemException("Invalid start character / in {0}".FormatWith(areaName));
 
             if (controllerNamespace == null)
-                controllerNamespace = clientType.Namespace;
+                controllerNamespace = controllerType.Namespace;
 
             if (resourcesNamespace == null)
-                resourcesNamespace = clientType.Namespace;
+                resourcesNamespace = controllerType.Namespace;
 
-            var assembly = clientType.Assembly;
+            var assembly = controllerType.Assembly;
             
             //SignumControllerFactory.RegisterControllersIn(assembly, controllerNamespace, areaName);
 

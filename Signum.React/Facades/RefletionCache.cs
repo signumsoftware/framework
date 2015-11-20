@@ -15,14 +15,14 @@ using Signum.Utilities;
 
 namespace Signum.React.Facades
 {
-    public static class ReflectionClient
+    public static class RefletionCache
     {
         public static ConcurrentDictionary<CultureInfo, Dictionary<string, TypeInfoTS>> cache =
          new ConcurrentDictionary<CultureInfo, Dictionary<string, TypeInfoTS>>();
 
         public static Dictionary<Assembly, HashSet<string>> EntityAssemblies;
 
-        public static void Start()
+        internal static void Start()
         {
             DescriptionManager.Invalidated += () => cache.Clear();
 
@@ -63,6 +63,8 @@ namespace Signum.React.Facades
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               NicePluralName = descOptions.HasFlag(DescriptionOptions.PluralDescription) ? type.NicePluralName() : null,
                               Gender = descOptions.HasFlag(DescriptionOptions.Gender) ? type.GetGender().ToString() : null,
+                              EntityKind = EntityKindCache.GetEntityKind(type),
+                              EntityData = EntityKindCache.GetEntityData(type),
                               Members = PropertyRoute.GenerateRoutes(type)
                                 .ToDictionary(p => p.PropertyString(), p => new MemberInfo
                                 {
@@ -202,6 +204,10 @@ namespace Signum.React.Facades
         public string NicePluralName { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "gender")]
         public string Gender { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityKind")]
+        public EntityKind? EntityKind { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityData")]
+        public EntityData? EntityData { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
         public Dictionary<string, MemberInfo> Members { get; set; }
     }

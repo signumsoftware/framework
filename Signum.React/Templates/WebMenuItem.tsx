@@ -17,7 +17,7 @@ export interface WebMenuItemProps extends React.Props<WebMenuItem>
 }
 
 
-export class WebMenuItem extends React.Component<WebMenuItemProps, { visible?: boolean }> {
+export default class WebMenuItem extends React.Component<WebMenuItemProps, { visible?: boolean }> {
 
     componentWillMount() {
 

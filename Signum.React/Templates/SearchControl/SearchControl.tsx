@@ -3,6 +3,7 @@ import * as React from 'react'
 import { QuerySettings } from 'framework/signum.react/Scripts/QuerySettings'
 import { ResultTable, FindOptions, FilterOptions, QueryDescription } from 'framework/signum.react/Scripts/FindOptions'
 import { SearchMessage, JavascriptMessage } from 'framework/signum.react/Scripts/Signum.Entities'
+import * as Reflection from 'framework/signum.react/Scripts/Reflection'
 
 
 export interface SimpleFilterBuilderProps {
@@ -58,7 +59,7 @@ export class SearchControl extends React.Component<SearchControlProps, SearchCon
                     onClick={() => this.toggleFilters() }
                     title={ fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() }><span className="glyphicon glyphicon glyphicon-filter"></span></a >}
                 <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "") } onClick={() => this.search() }>{SearchMessage.Search.niceToString() } </button>
-                {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={}><span className="glyphicon glyphicon-plus"></span></a>}
+                {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={this.createTitle()}><span className="glyphicon glyphicon-plus"></span></a>}
             </div>;
     }
 
@@ -66,7 +67,13 @@ export class SearchControl extends React.Component<SearchControlProps, SearchCon
 
         var entityColType = this.state.queryDescription.columns["Entity"].type;
 
-        return SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber().FormatWith(this.state.IsByAll ? "?" : implementations.Types.CommaOr(a => a.NiceName())); 
+        if (entityColType.type == Reflection.IsByAll)
+            return SearchMessage.CreateNew0_G.niceToString().forGengerAndNumber("m", 1).formatWith("?");
+
+        var types = entityColType.type.split(",").map(name => Reflection.typeInfo(name).niceName).join();
+        var gender = Reflection.typeInfo(entityColType.type.split(",").first()).gender;
+
+        return SearchMessage.CreateNew0_G.niceToString().forGengerAndNumber(gender).formatWith(types); 
     }
 }
 

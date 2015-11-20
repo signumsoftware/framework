@@ -1,4 +1,5 @@
 ﻿/// <reference path="../typings/react/react.d.ts" />
+/// <reference path="../typings/react/react-dom.d.ts" />
 /// <reference path="../typings/react-router/react-router.d.ts" />
 /// <reference path="../typings/react-widgets/react-widgets.d.ts" />
 /// <reference path="../typings/history/history.d.ts" />
@@ -52,10 +53,10 @@ interface Array<T> {
     flatMap<R>(selector: (element: T) => R[]): R[];
     max(): T;
     min(): T;
-    first(errorContext: string) : T;
-    firstOrNull(errorContext: string): T;
-    single(errorContext: string): T;
-    singleOrNull(errorContext: string): T;
+    first(errorContext?: string): T;
+    firstOrNull(): T;
+    single(errorContext?: string): T;
+    singleOrNull(errorContext?: string): T;
 }
 
 
@@ -117,7 +118,7 @@ Array.prototype.toObject = function (keySelector: (element: any) => any): any {
         var key = keySelector(item);
 
         if (obj[key])
-            throw new Error("Repeated key {0}".format(key));
+            throw new Error("Repeated key {0}".formatWith(key));
 
         obj[key] = item;
     });
@@ -161,13 +162,13 @@ Array.prototype.min = function () {
 Array.prototype.first = function (errorContext) {
 
     if (this.length == 0)
-        throw new Error("No " + errorContext + " found");
+        throw new Error("No " + (errorContext || "element") + " found");
 
     return this[0];
 };
 
 
-Array.prototype.firstOrNull = function (errorContext) {
+Array.prototype.firstOrNull = function () {
 
     if (this.length == 0)
         return null;
@@ -178,10 +179,10 @@ Array.prototype.firstOrNull = function (errorContext) {
 Array.prototype.single = function (errorContext) {
 
     if (this.length == 0)
-        throw new Error("No " + errorContext + " found");
+        throw new Error("No " + (errorContext || "element")  + " found");
 
     if (this.length > 1)
-        throw new Error("More than one " + errorContext + " found");
+        throw new Error("More than one " + (errorContext || "element")  + " found");
 
     return this[0];
 };
@@ -192,7 +193,7 @@ Array.prototype.singleOrNull = function (errorContext) {
         return null;
 
     if (this.length > 1)
-        throw new Error("More than one " + errorContext + " found");
+        throw new Error("More than one " + (errorContext || "element")  + " found");
 
     return this[0];
 };
@@ -202,7 +203,7 @@ interface String {
     contains(str: string): boolean;
     startsWith(str: string): boolean;
     endsWith(str: string): boolean;
-    format(...parameters: any[]): string;
+    formatWith(...parameters: any[]): string;
     formatHtml(...parameters: any[]): string;
     forGengerAndNumber(number: number): string;
     forGengerAndNumber(gender: string): string;
@@ -234,7 +235,7 @@ String.prototype.endsWith = function (str) {
     return this.lastIndexOf(str) === (this.length - str.length);
 }
 
-String.prototype.format = function () {
+String.prototype.formatWith = function () {
     var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
     var args = arguments;
@@ -243,7 +244,7 @@ String.prototype.format = function () {
         //match will look like {sample-match}
         //key will be 'sample-match';
         var key = match.substr(1, match.length - 2);
-        
+
         return args[key];
     });
 };
@@ -265,58 +266,48 @@ String.prototype.formatHtml = function () {
     return parts;
 };
 
-//String.prototype.forGengerAndNumber = (gender: any, number: number){
+String.prototype.forGengerAndNumber = function (gender: any, number?: number) {
 
-//    if (isNaN(parseFloat(gender)) && !number) {
-//        number = gender;
-//        gender  = null;
-//    }
+    if (isNaN(parseFloat(gender)) && !number) {
+        number = gender;
+        gender = null;
+    }
 
+    if (gender == null && number == null)
+        return this;
 
+    function replacePart(textToReplace: string, ...prefixes: string[]): string {
+        return textToReplace.replace(/\[[^\]\|]+(\|[^\]\|]+)*\]/g, m => {
+            var captures = m.substr(1, m.length - 2).split("|");
 
+            for (var pr in prefixes) {
+                var capture = captures.filter(c => c.startsWith(pr)).firstOrNull();
+                if (capture != null)
+                    return capture.substr(pr.Length);
+            }
 
-
-
-//    if (gender == null && number == null)
-//        return this;
-
-
-
-//    function GetPart(textToReplace: string, prefixes: string[]): string {
-//        return Regex.Replace(textToReplace,
-//              @"\[(?<part>[^\|\]]+)(\|(?<part>[^\|\]]+))*\]", m => {
-//            var captures = m.Groups["part"].Captures.OfType<Capture>();
-
-//            foreach(var pr in prefixes)
-//            {
-//                Capture capture = captures.FirstOrDefault(c => c.Value.StartsWith(pr));
-//                if (capture != null)
-//                    return capture.Value.RemoveStart(pr.Length);
-//            }
-
-//            return "";
-//        }
-
-//    }
+            return "";
+        });
+    }
              
 
-//        if (number == null)
-//            return GetPart(genderAwareText, gender + ":");
+    if (number == null)
+        return replacePart(this, gender + ":");
 
-//        if (gender == null) {
-//            if (number.Value == 1)
-//                return GetPart(genderAwareText, "1:");
+    if (gender == null) {
+        if (number == 1)
+            return replacePart(this, "1:");
 
-//            return GetPart(genderAwareText, number.Value + ":", ":");
-//        }
+        return replacePart(this, number + ":", ":");
+    }
 
-//        if (number.Value == 1)
-//            return GetPart(genderAwareText, "1" + gender.Value + ":", "1:");
+    if (number == 1)
+        return replacePart(this, "1" + gender.Value + ":", "1:");
 
-//        return GetPart(genderAwareText, gender.Value + number.Value + ":", gender.Value + ":", number.Value + ":", ":");
-    
-     
-//};  
+    return replacePart(this, gender.Value + number + ":", gender.Value + ":", number + ":", ":");
+
+
+};
 
 
 function isNumber(n: any): boolean {
@@ -331,7 +322,7 @@ String.prototype.replaceAll = function (from, to) {
 String.prototype.before = function (separator) {
     var index = this.indexOf(separator);
     if (index == -1)
-        throw Error("{0} not found".format(separator));
+        throw Error("{0} not found".formatWith(separator));
 
     return this.substring(0, index);
 };
@@ -339,7 +330,7 @@ String.prototype.before = function (separator) {
 String.prototype.after = function (separator) {
     var index = this.indexOf(separator);
     if (index == -1)
-        throw Error("{0} not found".format(separator));
+        throw Error("{0} not found".formatWith(separator));
 
     return this.substring(index + separator.length);
 };
@@ -363,7 +354,7 @@ String.prototype.tryAfter = function (separator) {
 String.prototype.beforeLast = function (separator) {
     var index = this.lastIndexOf(separator);
     if (index == -1)
-        throw Error("{0} not found".format(separator));
+        throw Error("{0} not found".formatWith(separator));
 
     return this.substring(0, index);
 };
@@ -371,7 +362,7 @@ String.prototype.beforeLast = function (separator) {
 String.prototype.afterLast = function (separator) {
     var index = this.lastIndexOf(separator);
     if (index == -1)
-        throw Error("{0} not found".format(separator));
+        throw Error("{0} not found".formatWith(separator));
 
     return this.substring(index + separator.length);
 };

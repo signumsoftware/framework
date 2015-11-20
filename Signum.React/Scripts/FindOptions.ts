@@ -68,6 +68,12 @@ export class QueryToken {
 
 }
 
+export enum PaginationMode {
+    All,
+    Firsts,
+    Paginate
+}
+
 export enum ColumnOptionsMode {
     Add,
     Remove,
@@ -130,11 +136,6 @@ export interface Pagination {
     currentPage?: number;
 }
 
-export enum PaginationMode {
-    All,
-    Firsts,
-    Paginate
-}
 
 
 export interface QueryDescription {
