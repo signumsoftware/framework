@@ -136,18 +136,40 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Auth\ApiControllers\AuthController.cs" />
-    <Compile Include="Auth\UserTicketClient.cs" />
+    <Compile Include="AuthorizationArea.cs" />
+    <Compile Include="Authorization\AuthController.cs" />
+    <Compile Include="Authorization\UserTicketClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum.Entities.Extensions.txt" />
+    <None Include="Authorization\Signum.Entities.Authorization.t4s" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Basics\Signum.Entities.Basics.t4s" />
+    <Content Include="Mailing\Signum.Entities.Mailing.t4s" />
+    <Content Include="Processes\Signum.Entities.Processes.t4s" />
+    <Content Include="Scheduler\Signum.Entities.Scheduler.t4s" />
+    <Content Include="Files\Signum.Entities.Files.t4s" />
+    <Content Include="UserAssets\Signum.Entities.UserAssets.t4s" />
+    <Content Include="Chart\Signum.Entities.Chart.t4s" />
+    <Content Include="UserQueries\Signum.Entities.UserQueries.t4s" />
+    <Content Include="Word\Signum.Entities.Word.t4s" />
+    <Content Include="Notes\Signum.Entities.Notes.t4s" />
+    <Content Include="Alerts\Signum.Entities.Alerts.t4s" />
+    <Content Include="Dashboard\Signum.Entities.Dashboard.t4s" />
+    <Content Include="DiffLog\Signum.Entities.DiffLog.t4s" />
+    <Content Include="Disconnected\Signum.Entities.Disconnected.t4s" />
+    <Content Include="Excel\Signum.Entities.Excel.t4s" />
+    <Content Include="Help\Signum.Entities.Help.t4s" />
+    <Content Include="Isolation\Signum.Entities.Isolation.t4s" />
+    <Content Include="Migrations\Signum.Entities.Migrations.t4s" />
+    <Content Include="SMS\Signum.Entities.SMS.t4s" />
+    <Content Include="Translation\Signum.Entities.Translation.t4s" />
+    <Content Include="ViewLog\Signum.Entities.ViewLog.t4s" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">
@@ -157,6 +179,10 @@
     <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
       <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
       <Name>Signum.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Framework\Signum.React\Signum.React.csproj">
+      <Project>{c6fd211b-db43-4338-ae80-cd5d6be15922}</Project>
+      <Name>Signum.React</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
@@ -176,11 +202,74 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Auth\Scripts\AuthClient.tsx" />
-    <TypeScriptCompile Include="Auth\Templates\Login.tsx" />
-    <TypeScriptCompile Include="Auth\Templates\LoginUserControl.tsx" />
-    <TypeScriptCompile Include="Signum.Entities.Extensions.ts">
-      <DependentUpon>Signum.Entities.Extensions.txt</DependentUpon>
+    <TypeScriptCompile Include="Alerts\Signum.Entities.Alerts.ts">
+      <DependentUpon>Signum.Entities.Alerts.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Authorization\AuthClient.tsx" />
+    <TypeScriptCompile Include="Authorization\Signum.Entities.Authorization.ts">
+      <DependentUpon>Signum.Entities.Authorization.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Authorization\Templates\Login.tsx" />
+    <TypeScriptCompile Include="Authorization\Templates\LoginUserControl.tsx" />
+    <TypeScriptCompile Include="Basics\Signum.Entities.Basics.ts">
+      <DependentUpon>Signum.Entities.Basics.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Chart\Signum.Entities.Chart.ts">
+      <DependentUpon>Signum.Entities.Chart.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Dashboard\Signum.Entities.Dashboard.ts">
+      <DependentUpon>Signum.Entities.Dashboard.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="DiffLog\Signum.Entities.DiffLog.ts">
+      <DependentUpon>Signum.Entities.DiffLog.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Disconnected\Signum.Entities.Disconnected.ts">
+      <DependentUpon>Signum.Entities.Disconnected.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Excel\Signum.Entities.Excel.ts">
+      <DependentUpon>Signum.Entities.Excel.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Files\Signum.Entities.Files.ts">
+      <DependentUpon>Signum.Entities.Files.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Help\Signum.Entities.Help.ts">
+      <DependentUpon>Signum.Entities.Help.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Isolation\Signum.Entities.Isolation.ts">
+      <DependentUpon>Signum.Entities.Isolation.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
+      <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Migrations\Signum.Entities.Migrations.ts">
+      <DependentUpon>Signum.Entities.Migrations.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Notes\Signum.Entities.Notes.ts">
+      <DependentUpon>Signum.Entities.Notes.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Processes\Signum.Entities.Processes.ts">
+      <DependentUpon>Signum.Entities.Processes.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Scheduler\Signum.Entities.Scheduler.ts">
+      <DependentUpon>Signum.Entities.Scheduler.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="SMS\Signum.Entities.SMS.ts">
+      <DependentUpon>Signum.Entities.SMS.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Translation\Signum.Entities.Translation.ts">
+      <DependentUpon>Signum.Entities.Translation.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="UserAssets\Signum.Entities.UserAssets.ts">
+      <DependentUpon>Signum.Entities.UserAssets.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="UserQueries\Signum.Entities.UserQueries.ts">
+      <DependentUpon>Signum.Entities.UserQueries.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="ViewLog\Signum.Entities.ViewLog.ts">
+      <DependentUpon>Signum.Entities.ViewLog.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Word\Signum.Entities.Word.ts">
+      <DependentUpon>Signum.Entities.Word.t4s</DependentUpon>
     </TypeScriptCompile>
   </ItemGroup>
   <ItemGroup />
@@ -194,7 +283,7 @@
     <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>System</TypeScriptModuleKind>
+    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
     <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
     <TypeScriptOutFile />
     <TypeScriptOutDir />
@@ -208,7 +297,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v12.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <Target Name="BeforeBuild">
     <ItemGroup>
-      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.ts;**\*.map" />
+      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.ts;**\*.map;**\*.js" />
     </ItemGroup>
   </Target>
   <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
@@ -225,7 +314,7 @@
           <IISUrl>
           </IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
-          <UseCustomServer>True</UseCustomServer>
+          <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>http://google.com</CustomServerUrl>
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
@@ -241,7 +330,7 @@
   </Target>
   <UsingTask TaskName="SignumTSGenerator" AssemblyFile="..\..\Framework\Signum.TSGenerator\Binaries\Signum.TSGenerator.dll" />
   <Target Name="GenerateSignumTS">
-    <SignumTSGenerator TemplateFile="Signum.Entities.Extensions.txt" References="@(ReferencePath)" />
+    <SignumTSGenerator References="@(ReferencePath)" />
   </Target>
   <PropertyGroup>
     <CompileTypeScriptDependsOn>

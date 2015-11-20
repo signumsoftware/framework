@@ -1,8 +1,6 @@
 ﻿//Assembly: Signum.Entities.Extensions.dll
-//BaseNamespace: Signum.Entities
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
 
 //Entities.Assembly: Signum.Entities.dll
-//Entities.BaseNamespace: Signum.Entities
 import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
