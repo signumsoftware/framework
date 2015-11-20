@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Signum.TSGenerator
 {
@@ -35,7 +36,9 @@ namespace Signum.TSGenerator
 
             Cache = new TypeCache(entities);
 
-            var entityResults = (from type in assembly.ExportedTypes
+            var exportedTypes = assembly.ExportedTypes.Where(a => a.Namespace.StartsWith(options.BaseNamespace)).ToList();
+
+            var entityResults = (from type in exportedTypes
                                  where type.IsClass && (type.InTypeScript() ?? Cache.ModifiableEntity.IsAssignableFrom(type))
                                  select new
                                  {
@@ -44,7 +47,7 @@ namespace Signum.TSGenerator
                                      text = EntityInTypeScript(type, options),
                                  }).ToList();
 
-            var interfacesResults = (from type in assembly.ExportedTypes
+            var interfacesResults = (from type in exportedTypes
                                      where type.IsInterface &&
                                      (type.InTypeScript() ?? Cache.IEntity.IsAssignableFrom(type))
                                      select new
@@ -60,7 +63,7 @@ namespace Signum.TSGenerator
                              where pt.IsEnum
                              select pt).Distinct().ToList();
 
-            var symbolResults = (from type in assembly.ExportedTypes
+            var symbolResults = (from type in exportedTypes
                                  where type.IsClass && type.IsStaticClass() && type.ContainsAttribute("AutoInitAttribute")
                                  && (type.InTypeScript() ?? true)
                                  select new
@@ -70,7 +73,7 @@ namespace Signum.TSGenerator
                                      text = SymbolInTypeScript(type, options),
                                  }).ToList();
 
-            var enumResult = (from type in assembly.ExportedTypes
+            var enumResult = (from type in exportedTypes
                               where type.IsEnum &&
                               (type.InTypeScript() ?? usedEnums.Contains(type))
                               select new
@@ -89,7 +92,7 @@ namespace Signum.TSGenerator
                                     text = EnumInTypeScript(type, options),
                                 }).ToList();
 
-            var messageResults = (from type in assembly.ExportedTypes
+            var messageResults = (from type in exportedTypes
                                   where type.IsEnum && type.Name.EndsWith("Message")
                                   select new
                                   {
@@ -98,7 +101,7 @@ namespace Signum.TSGenerator
                                       text = MessageInTypeScript(type, options),
                                   }).ToList();
 
-            var queryResult = (from type in assembly.ExportedTypes
+            var queryResult = (from type in exportedTypes
                                where type.IsEnum && type.Name.EndsWith("Query")
                                select new
                                {
@@ -355,14 +358,14 @@ namespace Signum.TSGenerator
             }
             else
             {
-                var assembly = options.References.SingleOrDefault(r => r.AssemblyName == type.Assembly.GetName().Name);
+                var assembly = options.References.SingleOrDefault(r => r.AssemblyName == type.Assembly.GetName().Name && type.Namespace.StartsWith(r.BaseNamespace));
 
                 if (assembly == null)
                 {
                     if (type.GetInterfaces().Contains(typeof(IEnumerable)))
                         return "Array";
 
-                    throw new InvalidOperationException($"{errorContext}:  Type {type.ToString()} is declared in the assembly '{type.Assembly.GetName().Name}' buy the assembly is not refered");
+                    throw new InvalidOperationException($"{errorContext}:  Type {type.ToString()} is declared in the assembly '{type.Assembly.GetName().Name}.dll' and namespace '{type.Namespace}', but there is no reference to them.");
                 }
 
                 var ns = RemoveNamespace(type.Namespace, assembly.BaseNamespace);
@@ -453,6 +456,9 @@ namespace Signum.TSGenerator
                     this.AssemblyName = Path.GetFileNameWithoutExtension(assemblyFullPath);
             }
         }
+
+        public Match Match { get; internal set; }
+
         public string AssemblyName;
         public string BaseNamespace;
     }

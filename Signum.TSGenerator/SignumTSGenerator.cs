@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
@@ -12,32 +13,44 @@ namespace Signum.TSGenerator
     public class SignumTSGenerator : Task
     {
         [Required]
-        public string TemplateFile { get; set; }
-
-        [Required]
         public string References { get; set; }
 
         public override bool Execute()
         {
-            Log.LogMessage($"Reading {TemplateFile}");
-
-            string result;
             AppDomain domain = AppDomain.CreateDomain("reflectionRomain");
             try
             {
                 dynamic obj = domain.CreateInstanceFromAndUnwrap(this.GetType().Assembly.Location, "Signum.TSGenerator.ProxyGenerator");
-                result = obj.Process(TemplateFile, References, this.BuildEngine.ProjectFileOfTaskNode);
+
+                foreach (var file in Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.t4s", SearchOption.AllDirectories))
+                {
+                    try
+                    {
+                        Log.LogMessage($"Reading {file}");
+
+                        string result = obj.Process(file, References, this.BuildEngine.ProjectFileOfTaskNode);
+
+                        var targetFile = Path.ChangeExtension(file, ".ts");
+                        Log.LogMessage($"Writing {targetFile}");
+                        File.WriteAllText(targetFile, result);
+                    }
+                    catch (LoggerException ex)
+                    {
+                        Log.LogError(null, ex.ErrorCode, ex.HelpKeyword, file, (int)ex.Data["LineNumber"], 0, 0, 0, ex.Message);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogError(null, null, null, file, 0, 0, 0, 0, ex.Message);
+                    }
+                }
+
             }
             finally
             {
                 AppDomain.Unload(domain);
             }
 
-            var targetFile = Path.ChangeExtension(TemplateFile, ".ts");
-            Log.LogMessage($"Writing {targetFile}");
-            File.WriteAllText(targetFile, result);
-
-            return true;
+            return !Log.HasLoggedErrors;
         }
     }
 
@@ -47,29 +60,38 @@ namespace Signum.TSGenerator
         {
             var refs = referenceList.Split(';').ToDictionary(a => Path.GetFileName(a));
 
-            var file = File.ReadAllText(templateFile);
+            var fileContent = File.ReadAllText(templateFile);
 
             Dictionary<string, string> parameters = new Dictionary<string, string>();
 
-            file = Regex.Replace(file, @"//(?<key>\w*(\.\w*)?):\s*(?<value>.*?)\s*$\n", m =>
+            fileContent = Regex.Replace(fileContent, @"//(?<key>\w*(\.\w*)?):\s*(?<value>.*?)\s*$\n", m =>
             {
-                parameters.Add(m.Groups["key"].Value, m.Groups["value"].Value);
+                var key = m.Groups["key"].Value;
+
+                if (parameters.ContainsKey(key))
+                    throw new LoggerException($"Meta-Comment '{key}' is repeated") { Data = { ["LineNumber"] = Utils.SetLineNumbers(m, fileContent) } };
+
+                parameters.Add(key, m.Groups["value"].Value);
                 return "";
             }, RegexOptions.Multiline);
 
-            var imports = Regex.Matches(file, @"import \* as (?<variable>\w+) from '.*?'").Cast<Match>().Select(a => a.Groups["variable"].Value).ToList();
+   
+            var references = (from Match m in Regex.Matches(fileContent, @"import \* as (?<variable>\w+) from '(?<path>.+?)'")
+                              let var = m.Groups["variable"].Value
+                              select new Reference
+                              {
+                                  Match = m,
+                                  VariableName = var,
+                                  AssemblyFullPath = refs.GetReferencedAssembly(parameters.ConsumeParameter(var + ".Assembly"), projectFile),
+                                  BaseNamespace = parameters.TryConsumeParameter(var + ".BaseNamespace") ?? Path.GetFileName(m.Groups["path"].Value),
+                              }).ToList();
 
-            var references = imports
-                .Select(var => new Reference
-                {
-                    VariableName = var,
-                    AssemblyFullPath = refs.GetReferencedAssembly(parameters.ConsumeParameter(var + ".Assembly"), projectFile),
-                    BaseNamespace = parameters.ConsumeParameter(var + ".BaseNamespace"),
-                }).ToList();
+            AssertNoDuplicate(references, r => r.VariableName, "VariableName", fileContent);
+            AssertNoDuplicate(references, r => r.AssemblyFullPath + "/" + r.BaseNamespace, "AssemlyFullPath and BaseNamespace", fileContent);
 
             var options = new Options(refs.GetReferencedAssembly(parameters.ConsumeParameter("Assembly"), projectFile))
             {
-                BaseNamespace = parameters.ConsumeParameter("BaseNamespace"),
+                BaseNamespace = parameters.TryConsumeParameter("BaseNamespace") ?? Path.GetFileNameWithoutExtension(templateFile),
                 References = references,
             };
 
@@ -78,11 +100,25 @@ namespace Signum.TSGenerator
             sb.AppendLine(@"//Auto-generated. Do NOT modify!//");
             sb.AppendLine(@"//////////////////////////////////");
 
-            sb.AppendLine(file);
+            sb.AppendLine(fileContent);
 
             EntityDeclarationGenerator.Process(sb, options);
 
             return sb.ToString();
+        }
+
+        private void AssertNoDuplicate(List<Reference> references, Func<Reference, string> selector, string typeOfthing, string fileContent)
+        {
+            HashSet<string> already = new HashSet<string>();
+            foreach (var r in references)
+            {
+                var key = selector(r);
+
+                if(already.Contains(key))
+                    throw new LoggerException($"Duplicated {typeOfthing} '{key}'") { Data = { ["LineNumber"] = Utils.SetLineNumbers(r.Match, fileContent) } };
+
+                already.Add(key);
+            }
         }
     }
 
@@ -104,6 +140,23 @@ namespace Signum.TSGenerator
                 throw new InvalidOperationException($"No parameter '{key}' found. Write something like //{key}: yourValue");
 
             return value;
+        }
+
+        public static V TryConsumeParameter<K, V>(this Dictionary<K, V> dictionary, K key) where V : class
+        {
+            V value;
+            if (!dictionary.TryGetValue(key, out value))
+                return null;
+
+            
+            return value;
+        }
+
+        public static int SetLineNumbers(Match m, string file)
+        {
+            var subStr = file.Substring(0, m.Index);
+
+            return subStr.Count(c => c == '\n') + 1;
         }
     }
 }
