@@ -11,6 +11,8 @@ namespace Signum.Utilities
 {
     public static class StringExtensions
     {
+        static readonly Expression<Func<string, bool>> HasTextExpression = str => (str ?? "").Length > 0;
+        [ExpressionField("HasTextExpression")]
         public static bool HasText(this string str)
         {
             return !string.IsNullOrEmpty(str);
