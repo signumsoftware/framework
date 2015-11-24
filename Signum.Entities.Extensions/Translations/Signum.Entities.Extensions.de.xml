@@ -64,6 +64,9 @@
     <Member Name="GlobalEvent" Description="Globales Ereignis" />
     <Member Name="MachineName" Description="Computername" />
   </Type>
+  <Type Name="AsyncEmailSenderPermission">
+    <Member Name="ViewAsyncEmailSenderPanel" Description="E-Mail-Absender Ansichtsbereich async" />
+  </Type>
   <Type Name="AuthAdminMessage">
     <Member Name="_0of1" Description="{0} von {1}" />
     <Member Name="Allow" Description="Erlauben" />
@@ -116,6 +119,7 @@
     <Member Name="Login_Repeat" Description="Wiederholen Sie:" />
     <Member Name="Login_UserName" Description="Benutzername:" />
     <Member Name="Login_UserName_Watermark" Description="Benutzer" />
+    <Member Name="LoginWithAnotherUser" Description="Loggen Sie sich mit einem anderen Benutzer ein" />
     <Member Name="Logout" Description="Logout" />
     <Member Name="NewPassword" Description="Neues Passwort" />
     <Member Name="NotAllowedToSaveThis0WhileOffline" Description="{0} kann nicht offline gespeichert werden " />
@@ -152,6 +156,7 @@
     <Member Name="Username0IsNotValid" Description="Anwendername {0} ist ungültig" />
     <Member Name="UserNameMustHaveAValue" Description="Sie müssen den Benutzernamen eingeben" />
     <Member Name="View" Description="Ansehen" />
+    <Member Name="Welcome0" Description="Willkommen {0}" />
     <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Sie haben die Erstellung eines Kontos beantragt. Um dieses zu bestätigen, klicken Sie bitte unten auf den folgenden Link:" />
     <Member Name="WeWillSendYouAnEmailWithALinkToResetYourPassword" Description="Wir senden Ihnen eine E-Mail mit einem Link zum Zurücksetzen Ihres Passworts." />
     <Member Name="YouMustRepeatTheNewPassword" Description="Sie müssen das neue Passwort wiederholen" />
@@ -183,9 +188,6 @@
   </Type>
   <Type Name="ChartColumnEntity" Description="Diagrammspalte">
     <Member Name="DisplayName" Description="Anzeigename" />
-    <Member Name="Parameter1" Description="Parameter1" />
-    <Member Name="Parameter2" Description="Parameter2" />
-    <Member Name="Parameter3" Description="Parameter3" />
     <Member Name="ScriptColumn" Description="Skriptspalte" />
     <Member Name="Token" Description="Token" />
   </Type>
@@ -199,6 +201,7 @@
     <Member Name="Magnitude" Description="Größe" />
     <Member Name="Positionable" Description="Positionierbar" />
     <Member Name="Real" Description="Real" />
+    <Member Name="RealGroupable" Description="Echte gruppierbare" />
     <Member Name="String" Description="String" />
   </Type>
   <Type Name="ChartMessage">
@@ -231,12 +234,18 @@
     <Member Name="EditUserChart" Description="Benutzerdiagramm bearbeiten" />
     <Member Name="MyCharts" Description="Meine Charts" />
     <Member Name="NewPalette" Description="Neue Palette" />
+    <Member Name="Preview" Description="Vorschau" />
     <Member Name="SavePalette" Description="Palette speichern" />
     <Member Name="ViewPalette" Description="Palette anzeigen" />
   </Type>
   <Type Name="ChartPaletteModel" Description="Diagrammpalette">
     <Member Name="Colors" Description="Farben" />
     <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="ChartParameterEntity" Description="Diagramm-parameter">
+    <Member Name="Name" Description="Name" />
+    <Member Name="ScriptParameter" Description="Skriptparameter" />
+    <Member Name="Value" Description="Wert" />
   </Type>
   <Type Name="ChartParameterType" Description="Typ des Diagrammparameters">
     <Member Name="Enum" Description="Enum" />
@@ -254,6 +263,7 @@
     <Member Name="Invalidator" Description="Invalidator" />
     <Member Name="Multiplications" Description="Multiplikationen" />
     <Member Name="Orders" Description="Reihenfolge" />
+    <Member Name="Parameters" Description="Parameter" />
     <Member Name="QueryName" Description="Abfrage-Name" />
   </Type>
   <Type Name="ChartScriptColumnEntity" Description="Diagramm-Skript-Spalte">
@@ -261,9 +271,6 @@
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="IsGroupKey" Description="Ist Gruppenschlüssel" />
     <Member Name="IsOptional" Description="Ist optional" />
-    <Member Name="Parameter1" Description="Parameter1" />
-    <Member Name="Parameter2" Description="Parameter2" />
-    <Member Name="Parameter3" Description="Parameter3" />
   </Type>
   <Type Name="ChartScriptEntity" Description="Diagrammskript" PluralDescription="Diagrammskripte">
     <Member Name="Columns" Description="Spalten" />
@@ -271,6 +278,7 @@
     <Member Name="GroupBy" Description="Gruppiert um" />
     <Member Name="Icon" Description="Symbol" />
     <Member Name="Name" Description="Name" />
+    <Member Name="Parameters" Description="Parameter" />
     <Member Name="Script" Description="Skript" />
   </Type>
   <Type Name="ChartScriptOperation">
@@ -279,6 +287,7 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="ChartScriptParameterEntity" Description="Diagrammscriptparameter">
+    <Member Name="ColumnIndex" Description="Spaltenindex" />
     <Member Name="Name" Description="Name" />
     <Member Name="Type" Description="Typ" />
     <Member Name="ValueDefinition" Description="Wertedefinition" />
@@ -346,6 +355,11 @@
     <Member Name="Days" Description="Tage" />
     <Member Name="Months" Description="Monate" />
     <Member Name="Years" Description="Jahre" />
+  </Type>
+  <Type Name="DefaultState">
+    <Member Name="All" Description="Alle" />
+    <Member Name="End" Description="Ende" />
+    <Member Name="Start" Description="Start" />
   </Type>
   <Type Name="DiffLogMessage">
     <Member Name="CurrentEntity" Description="Aktuelle Entität" />
@@ -465,7 +479,11 @@
     <Member Name="LinkedResource" Description="Verknüpfte Ressource" />
   </Type>
   <Type Name="EmailConfigurationEntity" Description="E-Mail-Konfiguration">
+    <Member Name="AsyncSenderPeriod" Description="Async Absender Periode" />
+    <Member Name="AvoidSendingEmailsOlderThan" Description="Vermeiden sie das senden von E-Mails die älter sind als" />
+    <Member Name="ChunkSizeSendingEmails" Description="Chunk-Größe, die Emails versenden" />
     <Member Name="DefaultCulture" Description="Standardkultur" />
+    <Member Name="MaxEmailSendRetries" Description="Max E-mail sendungswiederholungen" />
     <Member Name="OverrideEmailAddress" Description="E-Mail-Adresse überschreiben" />
     <Member Name="ReciveEmails" Description="E-Mails empfangen" />
     <Member Name="SendEmails" Description="E-Mails senen" />
@@ -491,14 +509,16 @@
     <Member Name="Attachments" Description="Anhänge" />
     <Member Name="Body" Description="Körper" />
     <Member Name="BodyHash" Description="Körper-hash" />
-    <Member Name="CreationTime" Description="Erstellungsdatum" />
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="EditableMessage" Description="Bearbeitbare Nachricht" />
     <Member Name="Exception" Description="Ausnahme" />
     <Member Name="From" Description="Von" />
     <Member Name="IsBodyHtml" Description="Ist Körper html" />
     <Member Name="Package" Description="Paket" />
+    <Member Name="ProcessIdentifier" Description="Prozess-ID" />
     <Member Name="ReceptionNotified" Description="Empfang bestätigt" />
     <Member Name="Recipients" Description="Empfänger" />
+    <Member Name="SendRetries" Description="Sendungswiederholungen" />
     <Member Name="Sent" Description="Gesendet" />
     <Member Name="State" Description="Status" />
     <Member Name="Subject" Description="Betreff" />
@@ -521,8 +541,10 @@
     <Member Name="CreateMail" Description="Mail erstellen" />
     <Member Name="CreateMailFromTemplate" Description="E-Mail aus Vorlage erstellen" />
     <Member Name="Delete" Description="Löschen" />
+    <Member Name="ReadyToSend" Description="Zum Senden bereit" />
     <Member Name="ReSend" Description="Nochmal senden" />
     <Member Name="ReSendEmails" Description="E-Mails nochmal senden" />
+    <Member Name="Save" Description="Speichern" />
     <Member Name="Send" Description="Senden" />
   </Type>
   <Type Name="EmailMessageProcess">
@@ -530,8 +552,12 @@
   </Type>
   <Type Name="EmailMessageState" Description="E-Mailstatus">
     <Member Name="Created" Description="Erstellt" />
+    <Member Name="Draft" Description="Entwurf " />
+    <Member Name="Outdated" Description="Veraltet" />
+    <Member Name="ReadyToSend" Description="Zum Senden bereit" />
     <Member Name="Received" Description="Empfangen" />
     <Member Name="ReceptionNotified" Description="Empfang bestätigt" />
+    <Member Name="RecruitedForSending" Description="Rekrutiert für den Versand" />
     <Member Name="Sent" Description="Gesendet" />
     <Member Name="SentException" Description="Sendungsausnahme" />
   </Type>
@@ -624,6 +650,17 @@
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
   </Type>
+  <Type Name="EmbeddedFilePathEntity" Description="Eingebettete Datei-Pfad">
+    <Member Name="BinaryFile" Description="Binärdatei" />
+    <Member Name="CalculatedDirectory" Description="Berechnetes Verzeichnis" />
+    <Member Name="FileLength" Description="Dateilänge" />
+    <Member Name="FileLengthString" Description="Dateigröße string" />
+    <Member Name="FileName" Description="Dateiname" />
+    <Member Name="FileType" Description="Dateityp" />
+    <Member Name="FullPhysicalPath" Description="Vollständiger Physischer Pfad" />
+    <Member Name="FullWebPath" Description="Vollständige Web-Pfad" />
+    <Member Name="Sufix" Description="Suffix" />
+  </Type>
   <Type Name="EntityAction" Description="Entity-Aktion">
     <Member Name="Different" Description="Verschiedene" />
     <Member Name="Identical" Description="Identische" />
@@ -687,6 +724,7 @@
   </Type>
   <Type Name="FilePathEntity" Description="Datei-Pfad">
     <Member Name="BinaryFile" Description="Binärdatei" />
+    <Member Name="CalculatedDirectory" Description="Berechnetes Verzeichnis" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="FileLength" Description="Dateilänge" />
     <Member Name="FileLengthString" Description="Dateigröße" />
@@ -843,6 +881,22 @@
   <Type Name="LinkListPartEntity" Description="Link-Listenelement">
     <Member Name="Links" Description="Links" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
+  <Type Name="MapMessage">
+    <Member Name="Color" Description="Farbe" />
+    <Member Name="Columns" Description="Spalten" />
+    <Member Name="Filter" Description="Filter" />
+    <Member Name="Map" Description="Karte" />
+    <Member Name="Namespace" Description="Namespace" />
+    <Member Name="Press0ToExploreEachTable" Description="Drücken Sie {0}, um jede Tabelle zu erkunden" />
+    <Member Name="Press0ToExploreStatesAndOperations" Description="Drücken Sie {0}, um Status und Operationen zu erkunden" />
+    <Member Name="Rows" Description="Zeilen" />
+    <Member Name="State" Description="Status" />
+    <Member Name="StateColor" Description="Statusfarbe" />
+    <Member Name="TableSize" Description="Tabellengröße" />
+  </Type>
+  <Type Name="MapPermission">
+    <Member Name="ViewMap" Description="Karte anzeigen" />
   </Type>
   <Type Name="MergeStrategy" Description="Zusammenführstrategie">
     <Member Name="Intersection" Description="Schnittmenge" />
@@ -1352,8 +1406,9 @@
   </Type>
   <Type Name="SMSUpdatePackageEntity" Description="SMS-Updatepaket" PluralDescription="SMS-Updatepakete" Gender="n" />
   <Type Name="SmtpConfigurationEntity" Description="Smtp-Konfiguration">
-    <Member Name="AditionalRecipients" Description="Zusätzliche Empfänger" />
+    <Member Name="AdditionalRecipients" Description="Zusätzlicher Empfänger" />
     <Member Name="DefaultFrom" Description="Standard von" />
+    <Member Name="DeliveryFormat" Description="Lieferformat" />
     <Member Name="DeliveryMethod" Description="Übermittlungsmethode" />
     <Member Name="Name" Description="Name" />
     <Member Name="Network" Description="Netzwerk" />
@@ -1525,6 +1580,7 @@
     <Member Name="Invalidator" Description="Invalidator" />
     <Member Name="Orders" Description="Reihenfolge" />
     <Member Name="Owner" Description="Eigentümer" />
+    <Member Name="Parameters" Description="Parameter" />
     <Member Name="Query" Description="Abfrage" />
   </Type>
   <Type Name="UserChartOperation">
@@ -1579,6 +1635,7 @@
     <Member Name="AreYouSureToRemove0" Description="Sind Sie sicher, dass Sie &quot;{0}&quot; entfernen möchten?" />
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="MyQueries" Description="Meine Abfragen" />
+    <Member Name="Preview" Description="Vorschau" />
     <Member Name="RemoveUserQuery" Description="Benutzerabfrage entfernen?" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="Der Filtervorgang {0} ist nicht kompatibel mit {1}" />
     <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um aktuelle Entität Filtern" />
@@ -1591,6 +1648,7 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="UserQueryPartEntity" Description="Benutzerabfrageteil" PluralDescription="Benutzerabfrageteile" Gender="n">
+    <Member Name="AllowSelection" Description="Auswahl erlauben" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>
@@ -1609,6 +1667,7 @@
     <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="ViewLogEntity" Description="Anzeigerotokoll" PluralDescription="Anzeigerotokolle" Gender="n">
+    <Member Name="Data" Description="Daten" />
     <Member Name="Duration" Description="Dauer" />
     <Member Name="EndDate" Description="Enddatum" />
     <Member Name="StartDate" Description="Startdatum" />
