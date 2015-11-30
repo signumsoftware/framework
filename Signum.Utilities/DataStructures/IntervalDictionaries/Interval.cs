@@ -35,6 +35,12 @@ namespace Signum.Utilities.DataStructures
             return min.CompareTo(value) <= 0 && value.CompareTo(max) < 0;
         }
 
+        public bool Contains(Interval<T> other)
+        {
+            return min.CompareTo(other.min) <= 0 && max.CompareTo(other.max) >= 0;
+        }
+
+
 
         [MethodExpander(typeof(OverlapMethodExpander))]
         public bool Overlap(Interval<T> other)
