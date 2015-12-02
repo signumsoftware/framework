@@ -397,9 +397,14 @@ namespace Signum.Engine.Word
             }
         }
 
-        public static void Regenerate(WordTemplateEntity template)
+        public static bool Regenerate(WordTemplateEntity template)
         {
-            Regenerate(template, null).ExecuteLeaves();
+            var result = Regenerate(template, null);
+            if (result == null)
+                return false;
+            
+            result.ExecuteLeaves();
+            return true;
         }
 
         private static SqlPreCommand Regenerate(WordTemplateEntity template, Replacements replacements)
