@@ -68,5 +68,34 @@ namespace Signum.Test
                 return "$$";
             }
         }
+
+
+        [TestMethod]
+        public void ForNumber()
+        {
+            var cats = "{0} Cat[s]";
+
+            Assert.AreEqual("0 Cats", cats.ForGenderAndNumber(number: 0).FormatWith(0));
+            Assert.AreEqual("1 Cat", cats.ForGenderAndNumber(number: 1).FormatWith(1));
+            Assert.AreEqual("2 Cats", cats.ForGenderAndNumber(number: 2).FormatWith(2));
+
+            Assert.AreEqual("0 Cats", cats.ForGenderAndNumber(number: 0).FormatWith(0));
+            Assert.AreEqual("1 Cat", cats.ForGenderAndNumber(number: 1).FormatWith(1));
+            Assert.AreEqual("2 Cats", cats.ForGenderAndNumber(number: 2).FormatWith(2));
+        }
+
+        [TestMethod]
+        public void ForGenderAndNumber()
+        {
+            var manWoman = "{0} [1m:Man|m:Men|1f:Woman|f:Women]";
+
+            Assert.AreEqual("0 Men", manWoman.ForGenderAndNumber(gender: 'm', number: 0).FormatWith(0));
+            Assert.AreEqual("1 Man", manWoman.ForGenderAndNumber(gender: 'm', number: 1).FormatWith(1));
+            Assert.AreEqual("2 Men", manWoman.ForGenderAndNumber(gender: 'm', number: 2).FormatWith(2));
+
+            Assert.AreEqual("0 Women", manWoman.ForGenderAndNumber(gender: 'f', number: 0).FormatWith(0));
+            Assert.AreEqual("1 Woman", manWoman.ForGenderAndNumber(gender: 'f', number: 1).FormatWith(1));
+            Assert.AreEqual("2 Women", manWoman.ForGenderAndNumber(gender: 'f', number: 2).FormatWith(2));
+        }
     }
 }
