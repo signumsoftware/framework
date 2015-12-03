@@ -226,7 +226,7 @@ namespace Signum.Engine.Mailing
                     CanConstruct = et => 
                     {
                         if (et.SystemEmail != null && SystemEmailLogic.RequiresExtraParameters(et.SystemEmail))
-                            return EmailMessageMessage._01requiresExtraParameters.NiceToString(typeof(SystemEmailEntity).NicePluralName(), et.SystemEmail);
+                            return EmailMessageMessage._01requiresExtraParameters.NiceToString(typeof(SystemEmailEntity).NiceName(), et.SystemEmail);
 
                         if (et.SendDifferentMessages)
                             return ValidationMessage._0IsSet.NiceToString(ReflectionTools.GetPropertyInfo(() => et.SendDifferentMessages).NiceName());
