@@ -47,9 +47,9 @@
     <Member Name="DistinctTo" Description="anders als" />
     <Member Name="EqualTo" Description="gleich" />
     <Member Name="GreaterThan" Description="größer als" />
-    <Member Name="GreaterThanOrEqual" Description="größer als oder gleich" />
+    <Member Name="GreaterThanOrEqualTo" Description="Größer oder gleich" />
     <Member Name="LessThan" Description="weniger als" />
-    <Member Name="LessThanOrEqual" Description="kleiner oder gleich" />
+    <Member Name="LessThanOrEqualTo" Description="Kleiner oder gleich" />
   </Type>
   <Type Name="ConnectionMessage">
     <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Eine Verbindung mit dem Server ist erforderlich, um fortzufahren" />
@@ -252,6 +252,7 @@
   </Type>
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} als {1})" />
+    <Member Name="_0Steps1" Description="{0} Schritt {1}" />
     <Member Name="And" Description=" und " />
     <Member Name="AnyEntity" Description="Jede Einheit" />
     <Member Name="As0" Description="Als {0}" />
@@ -276,6 +277,7 @@
     <Member Name="Number" Description="Nummer" />
     <Member Name="Of" Description=" von " />
     <Member Name="Second" Description="Sekunde" />
+    <Member Name="Step0" Description="Schritt {0}" />
     <Member Name="Text" Description="Text" />
     <Member Name="WeekNumber" Description="Wochennummer" />
     <Member Name="Year" Description="Jahr" />
@@ -283,6 +285,12 @@
   <Type Name="QuickLinkMessage">
     <Member Name="No0Found" Description="Keine(n) {0} gefunden" />
     <Member Name="Quicklinks" Description="Quick links" />
+  </Type>
+  <Type Name="RoundingType">
+    <Member Name="Ceil" Description="Decke" />
+    <Member Name="Floor" Description="Boden" />
+    <Member Name="Round" Description="Runde" />
+    <Member Name="RoundMiddle" Description="Runde Mitte" />
   </Type>
   <Type Name="SearchMessage">
     <Member Name="_01of2Results_N" Description="{0} - {1} von {2} Ergebnis[sen]." />
@@ -353,9 +361,9 @@
   <Type Name="ValidationMessage">
     <Member Name="_0DoesNotHaveAValid1Format" Description="{0} hat kein gültiges {1}-Format" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} hat ein ungültiges Format" />
+    <Member Name="_0HasAPrecissionOf1InsteadOf2" Description="{0} hat eine genauigkeit von {1} statt {2}" />
     <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} hat mehr als {1} Dezimalstellen" />
     <Member Name="_0HasSomeRepeatedElements1" Description="{0} hat einige wiederholte Elemente: {1}" />
-    <Member Name="_0HasToBe1Than2" Description="{0} muss {1} {2} sein" />
     <Member Name="_0HasToBeBetween1And2" Description="{0} muss zwischen {1} und {2} sein" />
     <Member Name="_0HasToBeLowercase" Description="{0} muss kleingeschrieben sein" />
     <Member Name="_0HasToBeUppercase" Description="{0} muss großgeschrieben sein" />
@@ -368,11 +376,15 @@
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
     <Member Name="_0IsNotSet" Description="{0} ist nicht festgesetzt" />
     <Member Name="_0IsSet" Description="{0} wird gesetzt" />
+    <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2}" />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
     <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer sein als {1}" />
     <Member Name="_0ShouldBeNull" Description="{0} sollte leer sein" />
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} sollte leer sein, wenn {1} nicht festgesetzt ist" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} sollte leer sein, wenn {1} festgesetzt ist" />
+    <Member Name="_0ShouldNotHaveBreakLines" Description="{0} sollten keine neuen Zeilen aufweisen." />
+    <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} darf keine abschließende Leerzeichen haben." />
+    <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} sollten keinen Leerzeichen an erster stelle haben" />
     <Member Name="Be" Description="sein " />
     <Member Name="BeA0_G" Description="ei[m:n|f:ne|n:n] {0} sein" />
     <Member Name="BeBetween0And1" Description="zwischen {0} und {1} sein" />
