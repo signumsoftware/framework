@@ -93,6 +93,8 @@ namespace Signum.Entities.Word
         [Description("Type {0} does not have a property with name {1}")]
         Type0DoesNotHaveAPropertyWithName1,
         ChooseAReportTemplate,
+        [Description("{0} {1} requires extra parameters")]
+        _01RequiresExtraParameters,
     }
 
     [Serializable]

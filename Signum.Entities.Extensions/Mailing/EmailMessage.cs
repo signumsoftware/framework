@@ -398,7 +398,9 @@ namespace Signum.Entities.Mailing
         DefaultFromIsMandatory,
         From,
         To,
-        Attachments
+        Attachments,
+        [Description("{0} {1} requires extra parameters")]
+        _01requiresExtraParameters
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]

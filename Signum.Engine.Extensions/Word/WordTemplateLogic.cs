@@ -97,7 +97,7 @@ namespace Signum.Engine.Word
                     CanExecute = et =>
                     {
                         if (et.SystemWordTemplate != null && SystemWordTemplateLogic.RequiresExtraParameters(et.SystemWordTemplate))
-                            return "SystemWordTemplate ({0}) requires extra parameters".FormatWith(et.SystemWordTemplate);
+                            return WordTemplateMessage._01RequiresExtraParameters.NiceToString(typeof(SystemWordTemplateEntity).NiceName(), et.SystemWordTemplate);
 
                         return null;
                     },
