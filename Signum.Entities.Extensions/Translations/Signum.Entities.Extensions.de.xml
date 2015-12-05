@@ -527,6 +527,7 @@
     <Member Name="UniqueIdentifier" Description="Einzigartiger Identifikator" />
   </Type>
   <Type Name="EmailMessageMessage">
+    <Member Name="_01requiresExtraParameters" Description="{0} {1} erfordert zusätzliche Parameter" />
     <Member Name="Attachments" Description="Anhänge" />
     <Member Name="DefaultFromIsMandatory" Description="Standardmäßig von ist obligatorisch" />
     <Member Name="ExceptionMessages" Description="Ausnahmenachrichten" />
@@ -1697,6 +1698,7 @@
     <Member Name="WordTransformer" Description="Word-Transformator" />
   </Type>
   <Type Name="WordTemplateMessage">
+    <Member Name="_01RequiresExtraParameters" Description="{0} {1} erfordert zusätzliche Parameter" />
     <Member Name="ChooseAReportTemplate" Description="Wählen Sie eine Berichtsvorlage" />
     <Member Name="ModelShouldBeSetToUseModel0" Description="Modell sollte angegeben werden, um Modell {0} zu benutzen" />
     <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Typ {0} verfügt nicht über eine Eigenschaft mit dem Namen {1}" />
