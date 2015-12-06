@@ -1,9 +1,12 @@
 ﻿/// <reference path="../typings/react/react.d.ts" />
 /// <reference path="../typings/react/react-dom.d.ts" />
 /// <reference path="../typings/react-router/react-router.d.ts" />
+/// <reference path="../typings/react-router/history.d.ts" />
+/// <reference path="../typings/react-bootstrap/react-bootstrap.d.ts" />
+/// <reference path="../typings/react-router-bootstrap/react-router-bootstrap.d.ts" />
 /// <reference path="../typings/react-widgets/react-widgets.d.ts" />
-/// <reference path="../typings/history/history.d.ts" />
 /// <reference path="../typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../typings/requirejs/require.d.ts" />
 
 function hasFlag(value: number, flag: number): boolean {
     return (value & flag) == flag;

@@ -140,6 +140,8 @@
     <Compile Include="Facades\RefletionCache.cs" />
     <Compile Include="Facades\AssemblyAreas.cs" />
     <Compile Include="Facades\WebApiSessionFactory.cs" />
+    <Compile Include="Json\EntityJsonConverter.cs" />
+    <Compile Include="Json\LiteJsonConverter.cs" />
     <Compile Include="PortableAreas\EmbeddedFilesRespository.cs" />
     <Compile Include="PortableAreas\FileRepositoryManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -182,6 +184,7 @@
     <TypeScriptCompile Include="Scripts\EntitySettings.ts" />
     <TypeScriptCompile Include="Scripts\Finder.ts" />
     <TypeScriptCompile Include="Scripts\FindOptions.ts" />
+    <TypeScriptCompile Include="Scripts\Modals.tsx" />
     <TypeScriptCompile Include="Scripts\QuerySettings.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.ts" />
     <TypeScriptCompile Include="Scripts\Services.ts" />
@@ -193,7 +196,6 @@
     <TypeScriptCompile Include="Scripts\Globals.ts" />
     <TypeScriptCompile Include="Typings\react-router\history.d.ts" />
     <TypeScriptCompile Include="Typings\react-bootstrap\react-bootstrap.d.ts" />
-    <TypeScriptCompile Include="Templates\WebMenuItem.tsx" />
     <TypeScriptCompile Include="Templates\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
     <TypeScriptCompile Include="Scripts\Reflection.ts" />

@@ -1,5 +1,7 @@
 ﻿/// <reference path="globals.ts" />
 
+import {ajaxPost, ajaxGet} from 'Framework/Signum.React/Scripts/Services';
+
 export class PropertyRoute {
 
     parent: PropertyRoute;
@@ -76,7 +78,11 @@ export enum EntityData {
     Transactional
 }
 
-var _types: { [name: string]: TypeInfo };
+interface TypeInfoDictionary {
+    [name: string]: TypeInfo
+}
+
+var _types: TypeInfoDictionary;
 
 
 export const  IsByAll = "[ALL]";
@@ -85,14 +91,19 @@ export function typeInfo(name: string): TypeInfo {
     return _types[name];
 }
 
-export function setInitialTypes(types: TypeInfo[])
-{
-    _types = types.toObject(t=> t.name);
+export function loadTypes(): Promise<void> {
 
-    symbols.forEach(s=> {
-        s.id = _types[s.key.before(".")].members[s.key.after(".")].id;
+    return ajaxGet<TypeInfoDictionary>({ url: "/api/reflection/types" }).then((types) => {
+
+        _types = types;
+
+        earySymbols.forEach(s=> setSymbolId(s));
+
+        earySymbols = null;
     });
 }
+
+
 
 export function lambdaBody(lambda: Function): string
 {
@@ -180,9 +191,35 @@ export class QueryKey {
     }
 }
 
-var symbols: { key?: string, id?: any }[] = [];
+interface ISymbol {
+    key?: string;
+    id?: any;
+}
 
-export function registerSymbol<T extends { key?: string, id?: any }>(symbol: T): T {
-    symbols.push(symbol);
+var earySymbols: ISymbol[] = [];
+
+function setSymbolId(s: ISymbol) {
+
+    var type = _types[s.key.before(".")];
+
+    if (!type)
+        return;
+
+    var member = type.members[s.key.after(".")];
+
+    if (!member)
+        return
+
+    s.id = s.id;
+}
+
+
+export function registerSymbol<T extends ISymbol>(symbol: T): T {
+
+    if (_types)
+        setSymbolId(symbol);
+    else
+        earySymbols.push(symbol);
+
     return symbol;
 } 

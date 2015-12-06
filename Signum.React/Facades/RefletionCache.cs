@@ -63,8 +63,8 @@ namespace Signum.React.Facades
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               NicePluralName = descOptions.HasFlag(DescriptionOptions.PluralDescription) ? type.NicePluralName() : null,
                               Gender = descOptions.HasFlag(DescriptionOptions.Gender) ? type.GetGender().ToString() : null,
-                              EntityKind = EntityKindCache.GetEntityKind(type),
-                              EntityData = EntityKindCache.GetEntityData(type),
+                              EntityKind = type.IsIEntity() ? EntityKindCache.GetEntityKind(type) : (EntityKind?)null,
+                              EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               Members = PropertyRoute.GenerateRoutes(type)
                                 .ToDictionary(p => p.PropertyString(), p => new MemberInfo
                                 {

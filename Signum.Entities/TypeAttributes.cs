@@ -77,7 +77,7 @@ namespace Signum.Entities
             return dictionary.GetOrAdd(type, t =>
             {
                 if (!t.IsIEntity())
-                    throw new InvalidOperationException("{0} should be a non-abstrat Entity");
+                    throw new InvalidOperationException("{0} should be a non-abstrat Entity".FormatWith(type.TypeName()));
                 
                 return t.GetCustomAttribute<EntityKindAttribute>(true);
             });

@@ -1,5 +1,4 @@
-﻿import { History } from 'history';
-import { baseUrl } from 'Framework/Signum.React/Scripts/Services';
+﻿import { baseUrl } from 'Framework/Signum.React/Scripts/Services';
 import { IEntity, Lite } from 'Framework/Signum.React/Scripts/Signum.Entities';
 import { Type, IType, EntityKind } from 'Framework/Signum.React/Scripts/Reflection';
 import { EntitySettingsBase, EntitySettings, EmbeddedEntitySettings} from 'Framework/Signum.React/Scripts/EntitySettings';
@@ -9,7 +8,7 @@ import * as Finder from 'Framework/Signum.React/Scripts/Finder';
 export var NotFound: __React.ComponentClass<any>;
 
 export var currentUser: IEntity;
-export var currentHistory: History;
+export var currentHistory: HistoryModule.History & HistoryModule.HistoryQueries;
 
 
 export function navigateRoute(entity: IEntity);

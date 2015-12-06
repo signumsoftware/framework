@@ -1,35 +1,100 @@
-﻿/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
-/// <reference path="../typings/jquery/jquery.d.ts" />
+﻿/// <reference path="../typings/whatwg-fetch/whatwg-fetch.d.ts" />
 
-import * as JQuery from "jquery"
+export interface AjaxOptions {
+    url: string;
+    avoidNotifyPendingRequests?: boolean;
+    avoidThrowError?: boolean;
+    avoidShowError?: boolean;
 
-var $ = JQuery;
+    mode?: string | RequestMode;
+    credentials?: string | RequestCredentials;
+    cache?: string | RequestCache;
+}
 
 export function baseUrl(): string
 {
-    return window["__baseUrl"];
+    return window["__baseUrl"] as string;
 }
 
-export function ajaxPost(settings: JQueryAjaxSettings): Promise<any> {
-
-    settings.url = baseUrl() + settings.url;
-
-    return new Promise<any>((resolve, reject) => {
-        settings.success = resolve;
-        settings.error = (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => reject({ jqXHR: jqXHR, textStatus: textStatus, errorThrow: errorThrow });
-        settings.type = "POST";
-        $.ajax(settings);
-    });
+export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
+    return wrapRequest(options, () =>
+        fetch(baseUrl() + options.url, {
+            method: "GET",
+            headers: {
+                'Accept': 'application/json',
+            },
+            mode: options.mode,
+            credentials: options.credentials,
+            cache: options.cache
+        })).then(resp=> resp.json<T>());
 }
 
-export function ajaxGet(settings: JQueryAjaxSettings): Promise<any> {
+export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
 
-    settings.url = baseUrl() + settings.url;
-
-    return new Promise<any>((resolve, reject) => {
-        settings.success = resolve;
-        settings.error = (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => reject({ jqXHR: jqXHR, textStatus: textStatus, errorThrow: errorThrow });
-        settings.type = "GET";
-        $.ajax(settings);
-    });
+    return wrapRequest(options, () =>
+        fetch(baseUrl() + options.url, {
+            method: "POST",
+            credentials: options.credentials || "same-origin",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            mode: options.mode,
+            cache: options.cache,
+            body: JSON.stringify(data),
+        })).then(resp=> resp.json<T>());
 }
+
+
+export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response>
+{
+    var promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
+
+    if (!options.avoidThrowError)
+        promise = promise.then(throwError);
+
+    if (!options.avoidShowError)
+        promise = promise.catch((error: any) =>
+        {
+            showError(error);
+            throw error;
+            return null as Response;
+        });
+
+    return promise;
+}
+
+
+export var notifyPendingRequests: (pendingRequests: number) => void = () => { };
+var pendingRequests: number = 0;
+function onPendingRequest(makeCall: ()=>Promise<Response>) {
+    
+    notifyPendingRequests(pendingRequests++);
+
+    return makeCall().then(
+        resp=> { notifyPendingRequests(pendingRequests--); return resp; },
+        error => { notifyPendingRequests(pendingRequests--); throw error; });
+}
+
+
+function throwError(response: Response): Response | Promise<Response> {
+    if (response.status >= 200 && response.status < 300) {
+        return response;
+    } else {
+        return response.json().then<Response>(json=> {
+            throw new ServiceError(response.statusText, json);
+            return null;
+        });
+    }
+}
+
+export class ServiceError {
+    constructor(public statusText: string, public body: any) {
+    }
+
+    toString() {
+        return this.statusText + "\r\n" + JSON.stringify(this.body);
+    }
+}
+
+export var showError = (error: any) => alert(error);
