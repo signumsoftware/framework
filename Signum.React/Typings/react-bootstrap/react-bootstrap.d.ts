@@ -838,9 +838,16 @@ declare module "react-bootstrap" {
         onKeyUp?: Function; // TODO: Add more specific type 
         onKeyPress?: Function; // TODO: Add more specific type 
         value?: any; // TODO: Add more specific type
-        wrapperClassName?: string; 
+        wrapperClassName?: string;
+        standalone?: boolean;
     }
-    interface Input extends React.ReactElement<InputProps> { }
+    interface Input extends React.ReactElement<InputProps>
+    {
+        getValue(): string;
+        getChecked(): boolean;
+        getInputDOMNode(): Element;
+
+    }
     interface InputClass extends React.ComponentClass<InputProps> { }
     var Input: InputClass;
 
