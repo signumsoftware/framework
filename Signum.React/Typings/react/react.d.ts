@@ -112,7 +112,7 @@ declare namespace __React {
     // Component API
     // ----------------------------------------------------------------------
 
-    type ReactInstance = Component<any, any> | ReactElement<any> | Element;
+    type ReactInstance = Component<any, any> | Element;
 
     // Base component for plain JS classes
     class Component<P, S> implements ComponentLifecycle<P, S> {
@@ -151,7 +151,7 @@ declare namespace __React {
     }
 
     interface ComponentClass<P> {
-        new (props?: P, context?: any): Component<P, any>;
+        new(props?: P, context?: any): Component<P, any>;
         propTypes?: ValidationMap<P>;
         contextTypes?: ValidationMap<any>;
         childContextTypes?: ValidationMap<any>;
@@ -159,7 +159,7 @@ declare namespace __React {
     }
 
     interface ClassicComponentClass<P> extends ComponentClass<P> {
-        new (props?: P, context?: any): ClassicComponent<P, any>;
+        new(props?: P, context?: any): ClassicComponent<P, any>;
         getDefaultProps?(): P;
         displayName?: string;
     }
@@ -503,13 +503,13 @@ declare namespace __React {
         appearance?: any;
 
         /**
-         * Determines whether or not the ìbackî side of a transformed element is visible when facing the viewer.
+         * Determines whether or not the ‚Äúback‚Äù side of a transformed element is visible when facing the viewer.
          */
         backfaceVisibility?: any;
 
         /**
          * This property describes how the element's background images should blend with each other and the element's background color.
-         * The value is a list of blend modes that corresponds to each background image. Each element in the list will apply to the corresponding element of background-image. If a property doesnít have enough comma-separated values to match the number of layers, the UA must calculate its used value by repeating the list of values until there are enough.
+         * The value is a list of blend modes that corresponds to each background image. Each element in the list will apply to the corresponding element of background-image. If a property doesn‚Äôt have enough comma-separated values to match the number of layers, the UA must calculate its used value by repeating the list of values until there are enough.
          */
         backgroundBlendMode?: any;
 
@@ -571,10 +571,10 @@ declare namespace __React {
         borderCollapse?: any;
 
         /**
-         * The CSS border-color property sets the color of an element's four borders. This property can have from one to four values, made up of the elementary properties:     ï       border-top-color
-         *      ï       border-right-color
-         *      ï       border-bottom-color
-         *      ï       border-left-color The default color is the currentColor of each of these values.
+         * The CSS border-color property sets the color of an element's four borders. This property can have from one to four values, made up of the elementary properties:     ‚Ä¢       border-top-color
+         *      ‚Ä¢       border-right-color
+         *      ‚Ä¢       border-bottom-color
+         *      ‚Ä¢       border-left-color The default color is the currentColor of each of these values.
          * If you provide one value, it sets the color for the element. Two values set the horizontal and vertical values, respectively. Providing three values sets the top, vertical, and bottom values, in that order. Four values set all for sides: top, right, bottom, and left, in that order.
          */
         borderColor?: any;
@@ -595,7 +595,7 @@ declare namespace __React {
         borderImageWidth?: any;
 
         /**
-         * Shorthand property that defines the border-width, border-style and border-color of an element's left border in a single declaration. Note that you can use the corresponding longhand properties to set specific individual properties of the left border ó border-left-width, border-left-style and border-left-color.
+         * Shorthand property that defines the border-width, border-style and border-color of an element's left border in a single declaration. Note that you can use the corresponding longhand properties to set specific individual properties of the left border ‚Äî border-left-width, border-left-style and border-left-color.
          */
         borderLeft?: any;
 
@@ -616,7 +616,7 @@ declare namespace __React {
         borderLeftWidth?: any;
 
         /**
-         * Shorthand property that defines the border-width, border-style and border-color of an element's right border in a single declaration. Note that you can use the corresponding longhand properties to set specific individual properties of the right border ó border-right-width, border-right-style and border-right-color.
+         * Shorthand property that defines the border-width, border-style and border-color of an element's right border in a single declaration. Note that you can use the corresponding longhand properties to set specific individual properties of the right border ‚Äî border-right-width, border-right-style and border-right-color.
          */
         borderRight?: any;
 
@@ -647,7 +647,7 @@ declare namespace __React {
         borderStyle?: any;
 
         /**
-         * Shorthand property that defines the border-width, border-style and border-color of an element's top border in a single declaration. Note that you can use the corresponding longhand properties to set specific individual properties of the top border ó border-top-width, border-top-style and border-top-color.
+         * Shorthand property that defines the border-width, border-style and border-color of an element's top border in a single declaration. Note that you can use the corresponding longhand properties to set specific individual properties of the top border ‚Äî border-top-width, border-top-style and border-top-color.
          */
         borderTop?: any;
 
@@ -822,13 +822,13 @@ declare namespace __React {
         display?: any;
 
         /**
-         * The ëfillí property paints the interior of the given graphical element. The area to be painted consists of any areas inside the outline of the shape. To determine the inside of the shape, all subpaths are considered, and the interior is determined according to the rules associated with the current value of the ëfill-ruleí property. The zero-width geometric outline of a shape is included in the area to be painted.
+         * The ‚Äòfill‚Äô property paints the interior of the given graphical element. The area to be painted consists of any areas inside the outline of the shape. To determine the inside of the shape, all subpaths are considered, and the interior is determined according to the rules associated with the current value of the ‚Äòfill-rule‚Äô property. The zero-width geometric outline of a shape is included in the area to be painted.
          */
         fill?: any;
 
         /**
-         * The ëfill-ruleí property indicates the algorithm which is to be used to determine what parts of the canvas are included inside the shape. For a simple, non-intersecting path, it is intuitively clear what region lies "inside"; however, for a more complex path, such as a path that intersects itself or where one subpath encloses another, the interpretation of "inside" is not so obvious.
-         * The ëfill-ruleí property provides two options for how the inside of a shape is determined:
+         * The ‚Äòfill-rule‚Äô property indicates the algorithm which is to be used to determine what parts of the canvas are included inside the shape. For a simple, non-intersecting path, it is intuitively clear what region lies "inside"; however, for a more complex path, such as a path that intersects itself or where one subpath encloses another, the interpretation of "inside" is not so obvious.
+         * The ‚Äòfill-rule‚Äô property provides two options for how the inside of a shape is determined:
          */
         fillRule?: any;
 
@@ -956,7 +956,7 @@ declare namespace __React {
         gridRow?: any;
 
         /**
-         * Determines a grid itemís placement by specifying the block-end. A grid item's placement in a grid area consists of a grid position and a grid span. The grid-row-end property (with grid-row-start, grid-column-start, and grid-column-end) determines a grid item's placement by specifying the grid lines of a grid item's grid area.
+         * Determines a grid item‚Äôs placement by specifying the block-end. A grid item's placement in a grid area consists of a grid position and a grid span. The grid-row-end property (with grid-row-start, grid-column-start, and grid-column-end) determines a grid item's placement by specifying the grid lines of a grid item's grid area.
          */
         gridRowEnd?: any;
 
@@ -974,12 +974,12 @@ declare namespace __React {
         gridTemplateAreas?: any;
 
         /**
-         * Specifies (with grid-template-rows) the line names and track sizing functions of the grid. Each sizing function can be specified as a length, a percentage of the grid containerís size, a measurement of the contents occupying the column or row, or a fraction of the free space in the grid.
+         * Specifies (with grid-template-rows) the line names and track sizing functions of the grid. Each sizing function can be specified as a length, a percentage of the grid container‚Äôs size, a measurement of the contents occupying the column or row, or a fraction of the free space in the grid.
          */
         gridTemplateColumns?: any;
 
         /**
-         * Specifies (with grid-template-columns) the line names and track sizing functions of the grid. Each sizing function can be specified as a length, a percentage of the grid containerís size, a measurement of the contents occupying the column or row, or a fraction of the free space in the grid.
+         * Specifies (with grid-template-columns) the line names and track sizing functions of the grid. Each sizing function can be specified as a length, a percentage of the grid container‚Äôs size, a measurement of the contents occupying the column or row, or a fraction of the free space in the grid.
          */
         gridTemplateRows?: any;
 
@@ -994,7 +994,7 @@ declare namespace __React {
         hyphenateLimitChars?: any;
 
         /**
-         * Indicates the maximum number of successive hyphenated lines in an element. The ëno-limití value means that there is no limit.
+         * Indicates the maximum number of successive hyphenated lines in an element. The ‚Äòno-limit‚Äô value means that there is no limit.
          */
         hyphenateLimitLines?: any;
 
@@ -1152,8 +1152,8 @@ declare namespace __React {
 
         /**
          * The CSS outline property is a shorthand property for setting one or more of the individual outline properties outline-style, outline-width and outline-color in a single rule. In most cases the use of this shortcut is preferable and more convenient.
-         * Outlines differ from borders in the following ways:  ï       Outlines do not take up space, they are drawn above the content.
-         *      ï       Outlines may be non-rectangular. They are rectangular in Gecko/Firefox. Internet Explorer attempts to place the smallest contiguous outline around all elements or shapes that are indicated to have an outline. Opera draws a non-rectangular shape around a construct.
+         * Outlines differ from borders in the following ways:  ‚Ä¢       Outlines do not take up space, they are drawn above the content.
+         *      ‚Ä¢       Outlines may be non-rectangular. They are rectangular in Gecko/Firefox. Internet Explorer attempts to place the smallest contiguous outline around all elements or shapes that are indicated to have an outline. Opera draws a non-rectangular shape around a construct.
          */
         outline?: any;
 
@@ -1370,7 +1370,7 @@ declare namespace __React {
         textDecorationOverline?: any;
 
         /**
-         * Specifies what parts of an elementís content are skipped over when applying any text decoration.
+         * Specifies what parts of an element‚Äôs content are skipped over when applying any text decoration.
          */
         textDecorationSkip?: any;
 
@@ -1439,7 +1439,7 @@ declare namespace __React {
         textLineThroughWidth?: any;
 
         /**
-         * The text-overflow shorthand CSS property determines how overflowed content that is not displayed is signaled to the users. It can be clipped, display an ellipsis ('Ö', U+2026 HORIZONTAL ELLIPSIS) or a Web author-defined string. It covers the two long-hand properties text-overflow-mode and text-overflow-ellipsis
+         * The text-overflow shorthand CSS property determines how overflowed content that is not displayed is signaled to the users. It can be clipped, display an ellipsis ('‚Ä¶', U+2026 HORIZONTAL ELLIPSIS) or a Web author-defined string. It covers the two long-hand properties text-overflow-mode and text-overflow-ellipsis
          */
         textOverflow?: any;
 
@@ -1536,7 +1536,7 @@ declare namespace __React {
         transition?: any;
 
         /**
-         * Defines when the transition will start. A value of ë0sí means the transition will execute as soon as the property is changed. Otherwise, the value specifies an offset from the moment the property is changed, and the transition will delay execution by that offset.
+         * Defines when the transition will start. A value of ‚Äò0s‚Äô means the transition will execute as soon as the property is changed. Otherwise, the value specifies an offset from the moment the property is changed, and the transition will delay execution by that offset.
          */
         transitionDelay?: any;
 
