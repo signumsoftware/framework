@@ -2,24 +2,34 @@
 
 import * as React from 'react'
 import { Link } from 'react-router'
-import { AuthMessage } from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
+import { NavDropdown, MenuItem, NavItem } from 'react-bootstrap'
+import { LinkContainer } from 'react-router-bootstrap'
+import { AuthMessage, UserEntity } from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
 import * as AuthClient from 'Extensions/Signum.React.Extensions/Authorization/AuthClient'
-import WebMenuItem from 'Framework/Signum.React/Templates/WebMenuItem'
 
-export default class LoginUserControl extends React.Component<{}, {}> {
+export default class LoginUserControl extends React.Component<{}, { user: UserEntity }> {
 
-    componentDidMount() {
+    constructor(props) {
+        super(props);
+        this.state = { user: AuthClient.currentUser() };
+    }
 
+    componentWillMount() {
+        document.addEventListener(AuthClient.CurrentUserChangedEvent,
+            () => this.setState({ user: AuthClient.currentUser() }));
+
+        if (!this.state.user)
+            AuthClient.Api.currentUser().then(u=> AuthClient.setCurrentUser(u));
     }
 
     render() {
 
-        if (!AuthClient.currentUser())
-            return <Link to={"auth/login"} className="sf-login"></Link>;
+        if (!this.state.user)
+            return <LinkContainer to={"auth/login"}><NavItem  className="sf-login">{AuthMessage.Login.niceToString() }</NavItem></LinkContainer>;
 
-        return <WebMenuItem liAtts={{ className: "sf-user" }} text={AuthClient.currentUser().userName}>
-            <WebMenuItem text={AuthMessage.ChangePassword.niceToString() } link={"auth/changPassword"} />
-            <WebMenuItem text={AuthMessage.Logout.niceToString() } link={"auth/logout"} />
-            </WebMenuItem>;
+        return <NavDropdown className="sf-user" title={this.state.user.userName}>
+          <LinkContainer to={"auth/changPassword"}><MenuItem>{AuthMessage.ChangePassword.niceToString() }</MenuItem></LinkContainer>
+          <MenuItem onSelect={() => AuthClient.logout() }>{AuthMessage.Logout.niceToString() }</MenuItem>
+            </NavDropdown>;
     }
 }

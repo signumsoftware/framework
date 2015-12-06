@@ -23,17 +23,17 @@ namespace Signum.React.Auth
         [Route("api/auth/login"), HttpPost]
         public LoginResponse Login([FromBody]LoginRequest data)
         {
-            if (string.IsNullOrEmpty(data.Username))
+            if (string.IsNullOrEmpty(data.userName))
                 throw LoginError("Username", AuthMessage.UserNameMustHaveAValue.NiceToString());
 
-            if (string.IsNullOrEmpty(data.Password))
+            if (string.IsNullOrEmpty(data.password))
                 throw LoginError("Password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             // Attempt to login
             UserEntity user = null;
             try
             {
-                user = AuthLogic.Login(data.Username, Security.EncodePassword(data.Password));
+                user = AuthLogic.Login(data.userName, Security.EncodePassword(data.password));
             }
             catch (IncorrectUsernameException)
             {
@@ -52,7 +52,7 @@ namespace Signum.React.Auth
 
             UserEntity.Current = user;
 
-            if (data.RememberMe == true)
+            if (data.rememberMe == true)
             {
                 UserTicketClient.SaveCookie();
             }
@@ -61,7 +61,13 @@ namespace Signum.React.Auth
 
             string message = AuthLogic.OnLoginMessage();
 
-            return new LoginResponse { Message = message };
+            return new LoginResponse { message = message, userEntity = user };
+        }
+
+        [Route("api/auth/currentUser")]
+        public UserEntity GetCurrentUser()
+        {
+            return UserEntity.Current;
         }
 
         internal static void OnUserPreLogin(ApiController controller, UserEntity user)
@@ -80,14 +86,15 @@ namespace Signum.React.Auth
 
         public class LoginRequest
         {
-            public string Username { get; set; }
-            public string Password { get; set; }
-            public bool? RememberMe { get; set; }
+            public string userName { get; set; }
+            public string password { get; set; }
+            public bool? rememberMe { get; set; }
         }
 
         public class LoginResponse
         {
-            public string Message { get; set; }
+            public string message { get; set; }
+            public UserEntity userEntity { get; set; }
         }
 
         public static void AddUserSession(UserEntity user)
