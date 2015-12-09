@@ -3178,7 +3178,7 @@ namespace Signum.Engine.Linq
             var bindings = (from kvp in embedded.FieldEmbedded.EmbeddedFields
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi,
-                                !(fi.FieldType.IsByRef || fi.FieldType.IsNullable()) ? dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") :
+                                !(fi.FieldType.IsClass || fi.FieldType.IsNullable()) ? dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") :
                                 (dic.TryGetC(fi.Name) ?? Expression.Constant(null, fi.FieldType)))
                             ).ToReadOnly();
 

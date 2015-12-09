@@ -1146,7 +1146,16 @@ namespace Signum.Engine.Linq
                         return Visit(m.GetArgument("value"));
                     }
                 case "StringExtensions.Etc": return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
-                default: return null; 
+
+
+                case "decimal.Parse": return Add(new SqlCastExpression(typeof(decimal), m.GetArgument("s")));
+                case "double.Parse": return Add(new SqlCastExpression(typeof(double), m.GetArgument("s")));
+                case "float.Parse": return Add(new SqlCastExpression(typeof(float), m.GetArgument("s")));
+                case "byte.Parse": return Add(new SqlCastExpression(typeof(byte), m.GetArgument("s")));
+                case "short.Parse": return Add(new SqlCastExpression(typeof(short), m.GetArgument("s")));
+                case "int.Parse": return Add(new SqlCastExpression(typeof(int), m.GetArgument("s")));
+                case "long.Parse": return Add(new SqlCastExpression(typeof(long), m.GetArgument("s")));
+                default: return null;
             }
         }
 
