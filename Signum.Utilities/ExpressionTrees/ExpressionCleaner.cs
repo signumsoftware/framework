@@ -169,7 +169,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return null;
 
             if (efa.Name == "auto")
-                throw new InvalidOperationException($"The {nameof(ExpressionFieldAttribute)} for {mi.DeclaringType.TypeName()}.{mi.MemberName()} has the default value 'auto'.\r\nMaybe Signum.MSBuildTask is not runing in assemby {mi.DeclaringType.Assembly.GetName().Name}?");
+                throw new InvalidOperationException($"The {nameof(ExpressionFieldAttribute)} for {mi.DeclaringType.TypeName()}.{mi.MemberName()} has the default value 'auto'.\r\nMaybe Signum.MSBuildTask is not running in assemby {mi.DeclaringType.Assembly.GetName().Name}?");
 
             Type type = mi.DeclaringType;
             FieldInfo fi = type.GetField(efa.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
