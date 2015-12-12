@@ -56,7 +56,7 @@ namespace Signum.Engine.Excel
         public static List<Lite<ExcelReportEntity>> GetExcelReports(object queryName)
         {
             return (from er in Database.Query<ExcelReportEntity>()
-                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName)
+                    where er.Query.Key == QueryUtils.GetKey(queryName)
                     select er.ToLite()).ToList();
         }
 

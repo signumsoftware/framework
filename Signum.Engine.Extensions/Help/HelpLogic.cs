@@ -373,7 +373,7 @@ namespace Signum.Engine.Help
             if (dic.IsEmpty())
                 return null;
 
-            var queriesByKey = DynamicQueryManager.Current.GetQueryNames().ToDictionary(a => QueryUtils.GetQueryUniqueKey(a));
+            var queryKeys = DynamicQueryManager.Current.GetQueryNames().ToDictionary(a => QueryUtils.GetKey(a));
 
             var table = Schema.Current.Table<QueryHelpEntity>();
 
@@ -381,7 +381,7 @@ namespace Signum.Engine.Help
 
             return dic.Select(qh =>
             {
-                object queryName = queriesByKey.TryGetC(replace.TryGetC(qh.Query.Key) ?? qh.Query.Key);
+                object queryName = queryKeys.TryGetC(replace.TryGetC(qh.Query.Key) ?? qh.Query.Key);
 
                 if (queryName == null)
                     return null; //PreDeleteSqlSync
@@ -390,7 +390,7 @@ namespace Signum.Engine.Help
                 {
                     var columns = DynamicQueryManager.Current.GetQuery(queryName).Core.Value.StaticColumns;
 
-                    Synchronizer.SynchronizeReplacing(replacements, "ColumnsOfQuery:" + QueryUtils.GetQueryUniqueKey(queryName),
+                    Synchronizer.SynchronizeReplacing(replacements, "ColumnsOfQuery:" + QueryUtils.GetKey(queryName),
                         columns.ToDictionary(a => a.Name),
                         qh.Columns.ToDictionary(a => a.ColumnName),
                         null,
@@ -417,7 +417,7 @@ namespace Signum.Engine.Help
             if (dic.IsEmpty())
                 return null;
 
-            var queriesByKey = DynamicQueryManager.Current.GetQueryNames().ToDictionary(a => QueryUtils.GetQueryUniqueKey(a));
+            var queryKeys = DynamicQueryManager.Current.GetQueryNames().ToDictionary(a => QueryUtils.GetKey(a));
 
             var table = Schema.Current.Table<OperationHelpEntity>();
 

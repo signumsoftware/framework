@@ -17,7 +17,7 @@ export function start(options: { routes: JSX.Element[], userTicket: boolean, res
     resetPassword = options.resetPassword;
 
     options.routes.push(<Route path="auth">
-        <Route path="login" getComponent={asyncLoad("Extensions/Signum.React.Extensions/Authorization/Templates/Login")} />
+        <Route path="login" getComponent={Navigator.asyncLoad("Extensions/Signum.React.Extensions/Authorization/Templates/Login")} />
         <Route path="about" />
         </Route>);
 }
@@ -54,14 +54,6 @@ export function onLogin() {
     Navigator.currentHistory.push("/");
 }
 
-
-function asyncLoad(path: string): (location: HistoryModule.Location, cb: (error: any, component?: ReactRouter.RouteComponent) => void) => void {
-    return (location, callback) => {
-        require([path], Comp => {
-            callback(null, (Comp as any)["default"]);
-        });
-    };
-}
 
 export module Api {
 

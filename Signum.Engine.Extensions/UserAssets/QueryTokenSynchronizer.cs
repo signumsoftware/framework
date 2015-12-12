@@ -145,7 +145,7 @@ namespace Signum.Engine.UserAssets
 
         static string QueryKey(object tokenList)
         {
-            return "tokens-Query-" + QueryUtils.GetCleanName(tokenList);
+            return "tokens-Query-" + QueryUtils.GetKey(tokenList);
         }
 
         static string TypeKey(Type type)
