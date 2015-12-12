@@ -15,19 +15,20 @@ namespace Signum.React.Auth
 {
     public class AuthController : ApiController
     {
-        public static bool MergeInvalidUsernameAndPasswordMessages = true;
+        public static bool MergeInvalidUsernameAndPasswordMessages = false;
 
         public static event Action<ApiController, UserEntity> UserPreLogin;
         public static event Action<UserEntity> UserLogged;
+        public static event Action UserLoggingOut;
 
         [Route("api/auth/login"), HttpPost]
         public LoginResponse Login([FromBody]LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
-                throw LoginError("Username", AuthMessage.UserNameMustHaveAValue.NiceToString());
+                throw LoginError("userName", AuthMessage.UserNameMustHaveAValue.NiceToString());
 
             if (string.IsNullOrEmpty(data.password))
-                throw LoginError("Password", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                throw LoginError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             // Attempt to login
             UserEntity user = null;
@@ -35,13 +36,22 @@ namespace Signum.React.Auth
             {
                 user = AuthLogic.Login(data.userName, Security.EncodePassword(data.password));
             }
-            catch (IncorrectUsernameException)
+            catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException)
             {
-                ModelState.AddModelError("Username", MergeInvalidUsernameAndPasswordMessages ?
-                    AuthMessage.InvalidUsernameOrPassword.NiceToString() :
-                    AuthMessage.InvalidUsername.NiceToString());
-
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
+                if (MergeInvalidUsernameAndPasswordMessages)
+                {
+                    ModelState.AddModelError("userName", AuthMessage.InvalidUsernameOrPassword.NiceToString());
+                    ModelState.AddModelError("password", AuthMessage.InvalidUsernameOrPassword.NiceToString());
+                    throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
+                }
+                else if (e is IncorrectUsernameException)
+                {
+                    throw LoginError("userName", AuthMessage.InvalidUsername.NiceToString());
+                }
+                else if(e is IncorrectPasswordException)
+                {
+                    throw LoginError("password", AuthMessage.InvalidPassword.NiceToString());
+                }
             }
             catch (IncorrectPasswordException)
             {
@@ -68,6 +78,19 @@ namespace Signum.React.Auth
         public UserEntity GetCurrentUser()
         {
             return UserEntity.Current;
+        }
+
+        [Route("api/auth/logout"), HttpPost]
+        public void Logout()
+        {
+            var httpContext = System.Web.HttpContext.Current;
+
+            if (UserLoggingOut != null)
+                UserLoggingOut();
+
+            UserTicketClient.RemoveCookie();
+
+            httpContext.Session.Abandon();
         }
 
         internal static void OnUserPreLogin(ApiController controller, UserEntity user)

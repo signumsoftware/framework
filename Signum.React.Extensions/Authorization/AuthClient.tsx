@@ -36,17 +36,24 @@ export function setCurrentUser(user: UserEntity) {
 }
 
 
-export var logoutNavigationTarget = "";
-
 export function logout() {
 
     Api.logout().then(() => {
 
         setCurrentUser(null);
 
-        Navigator.currentHistory.push(logoutNavigationTarget);
+        onLogout();
     });
 }
+
+export function onLogout() {
+    Navigator.currentHistory.push("/");
+}
+
+export function onLogin() {
+    Navigator.currentHistory.push("/");
+}
+
 
 function asyncLoad(path: string): (location: HistoryModule.Location, cb: (error: any, component?: ReactRouter.RouteComponent) => void) => void {
     return (location, callback) => {
