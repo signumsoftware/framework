@@ -13,7 +13,7 @@ namespace Signum.React.ApiControllers
     public class QueryController : ApiController
     {
         [Route("api/query/description/{queryName}")]
-        public QueryDescription GetQuery(string queryName)
+        public QueryDescription GetQueryDescription(string queryName)
         {
             var qn = QueryLogic.ToQueryName(queryName);
             return DynamicQueryManager.Current.QueryDescription(qn);

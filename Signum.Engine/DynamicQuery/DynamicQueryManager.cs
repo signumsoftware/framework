@@ -49,7 +49,7 @@ namespace Signum.Engine.DynamicQuery
             var property = type.GetProperty("Entity", BindingFlags.Instance | BindingFlags.Public);
 
             if (property == null)
-                throw new InvalidOperationException("Entity property not found on query {0}".FormatWith(QueryUtils.GetQueryUniqueKey(queryName)));
+                throw new InvalidOperationException("Entity property not found on query {0}".FormatWith(QueryUtils.GetKey(queryName)));
 
             return Implementations.By(property.PropertyType.CleanType());
         }
@@ -79,7 +79,7 @@ namespace Signum.Engine.DynamicQuery
         T Execute<T>(ExecuteType executeType, object queryName, BaseQueryRequest request, Func<DynamicQueryBucket, T> executor)
         {
             using (ExecutionMode.UserInterface())
-            using (HeavyProfiler.Log(executeType.ToString(), () => QueryUtils.GetQueryUniqueKey(queryName)))
+            using (HeavyProfiler.Log(executeType.ToString(), () => QueryUtils.GetKey(queryName)))
             {
                 try
                 {

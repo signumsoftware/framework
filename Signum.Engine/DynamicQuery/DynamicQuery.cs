@@ -45,14 +45,14 @@ namespace Signum.Engine.DynamicQuery
 
                 core.QueryName = QueryName;
 
-                core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column on {0}".FormatWith(QueryUtils.GetQueryUniqueKey(QueryName)));
+                core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column on {0}".FormatWith(QueryUtils.GetKey(QueryName)));
 
                 core.EntityColumnFactory().Implementations = entityImplementations;
 
                 var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIEntity()).ToString(a => a.Name, ", ");
 
                 if (errors.HasText())
-                    throw new InvalidOperationException("Column {0} of {1} does not have implementations deffined. Use Column extension method".FormatWith(errors, QueryUtils.GetQueryUniqueKey(QueryName)));
+                    throw new InvalidOperationException("Column {0} of {1} does not have implementations deffined. Use Column extension method".FormatWith(errors, QueryUtils.GetKey(QueryName)));
 
                 return core;
             });
@@ -126,7 +126,7 @@ namespace Signum.Engine.DynamicQuery
 
         public ColumnDescriptionFactory EntityColumnFactory()
         {
-            return StaticColumns.Where(c => c.IsEntity).SingleEx(() => "Entity column on {0}".FormatWith(QueryUtils.GetQueryUniqueKey(QueryName)));
+            return StaticColumns.Where(c => c.IsEntity).SingleEx(() => "Entity column on {0}".FormatWith(QueryUtils.GetKey(QueryName)));
         }
 
         public virtual Expression Expression
@@ -140,7 +140,7 @@ namespace Signum.Engine.DynamicQuery
             string allowed = entity.IsAllowed();
             if (allowed != null)
                 throw new InvalidOperationException(
-                    "Not authorized to see Entity column on {0} because {1}".FormatWith(QueryUtils.GetQueryUniqueKey(QueryName), allowed));
+                    "Not authorized to see Entity column on {0} because {1}".FormatWith(QueryUtils.GetKey(QueryName), allowed));
 
             var columns = StaticColumns.Where(f => f.IsAllowed() == null).Select(f => f.BuildColumnDescription()).ToList();
 

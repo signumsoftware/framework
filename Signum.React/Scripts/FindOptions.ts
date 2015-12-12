@@ -23,33 +23,38 @@ export interface FindOptions {
 
 export interface FilterOptions {
     columnName: string;
-    token: QueryToken;
-    frozen: string;
+    token?: QueryToken;
+    frozen?: string;
     operation: FilterOperation;
     value: any;
 }
 
+
 export enum FilterOperation {
-    EqualTo,
-    DistinctTo,
-    GreaterThan,
-    GreaterThanOrEqual,
-    LessThan,
-    LessThanOrEqual,
-    Contains,
-    StartsWith,
-    EndsWith,
-    Like,
-    NotContains,
-    NotStartsWith,
-    NotEndsWith,
-    NotLike,
-    IsIn,
-}
+    EqualTo = "EqualTo" as any,
+    DistinctTo= "DistinctTo" as any,
+    GreaterThan= "GreaterThan"  as any,
+    GreaterThanOrEqual= "GreaterThanOrEqual" as any,
+    LessThan= "LessThan"  as any,
+    LessThanOrEqual= "LessThanOrEqual" as any,
+    Contains= "Contains" as any,
+    StartsWith= "StartsWith" as any,
+    EndsWith= "EndsWith" as any,
+    Like= "Like" as any,
+    NotContains= "NotContains" as any,
+    NotStartsWith= "NotStartsWith" as any,
+    NotEndsWith= "NotEndsWith" as any,
+    NotLike= "NotLike" as any,
+    IsIn= "IsIn" as any,
+};
+
+
+
+
 
 export interface OrderOption {
     columnName: string;
-    token: QueryToken;
+    token?: QueryToken;
     orderType: OrderType;
 }
 
@@ -60,12 +65,8 @@ export enum OrderType {
 
 export interface ColumnOptions {
     columnName: string;
-    token: QueryToken;
+    token?: QueryToken;
     displayName: string;
-}
-
-export class QueryToken {
-
 }
 
 export enum PaginationMode {
@@ -75,9 +76,9 @@ export enum PaginationMode {
 }
 
 export enum ColumnOptionsMode {
-    Add,
-    Remove,
-    Replace,
+    Add = "Add" as any,
+    Remove = "Remove" as any,
+    Replace = "Replace" as any,
 }
 
 export var DefaultPagination: Pagination = {
@@ -105,8 +106,8 @@ export interface QueryToken {
     key: string;
     format?: string;
     unit?: string;
+    type: TypeReference;
     filterType: FilterType;
-    typeName: string;
     fullKey: string;
     hasAllOrAny?: boolean;
 }
@@ -146,6 +147,7 @@ export interface QueryDescription {
 export interface ColumnDescription {
     name: string;
     type: TypeReference;
+    filterType: FilterType;
     unit?: string;
     format?: string;
     propertyRoutes: PropertyRoute[];

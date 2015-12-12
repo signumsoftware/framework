@@ -51,7 +51,7 @@ export interface TypeReference {
     isCollection?: boolean;
     isLite?: boolean;
     isNullable?: boolean;
-    type?: string;
+    name?: string;
 }
 
 export enum KindOfType {
@@ -85,17 +85,64 @@ interface TypeInfoDictionary {
 var _types: TypeInfoDictionary;
 
 
+var _queryNiceNames: {
+    [queryKey: string]: string
+};
+
 export const  IsByAll = "[ALL]";
 
 export function typeInfo(name: string): TypeInfo {
     return _types[name];
 }
 
+
+export function queryNiceName(queryName: any) {
+    
+    if (queryName instanceof Type)
+        return (queryName as Type<any>).nicePluralName();
+
+    if (queryName instanceof QueryKey)
+        return (queryName as QueryKey).niceName();
+
+    var queryKey = queryName as string;
+
+    var ti = _types[queryKey];
+
+    if (ti)
+        return ti.nicePluralName;
+
+    return _queryNiceNames[queryKey] || queryName;
+
+}
+
+export function queryKey(queryName: any): string {
+    if (queryName instanceof Type)
+        return (queryName as Type<any>).typeName;
+
+    if (queryName instanceof QueryKey)
+        return (queryName as QueryKey).name;
+
+    if (typeof queryName == "string")
+        return queryName as string;
+
+    throw new Error("unexpected queryName type");
+
+}
+
+
 export function loadTypes(): Promise<void> {
 
     return ajaxGet<TypeInfoDictionary>({ url: "/api/reflection/types" }).then((types) => {
+        
+        Dic.foreach(types, (k, t) => {
+            t.name = k;
+            if (t.members)
+                Dic.foreach(t.members, (k2, t2) => t2.name = k2);
+        });
 
         _types = types;
+
+        _queryNiceNames = Dic.getValues(types).filter(t=> t.kind == KindOfType.Query).flatMap(a=> Dic.getValues(a.members)).toObject(m=> m.name, m=> m.niceName);
 
         earySymbols.forEach(s=> setSymbolId(s));
 

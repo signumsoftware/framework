@@ -1,4 +1,6 @@
-﻿import { baseUrl } from 'Framework/Signum.React/Scripts/Services';
+﻿import * as React from "react"
+import { Router, Route, Redirect, IndexRoute } from "react-router"
+import { baseUrl } from 'Framework/Signum.React/Scripts/Services';
 import { IEntity, Lite } from 'Framework/Signum.React/Scripts/Signum.Entities';
 import { Type, IType, EntityKind } from 'Framework/Signum.React/Scripts/Reflection';
 import { EntitySettingsBase, EntitySettings, EmbeddedEntitySettings} from 'Framework/Signum.React/Scripts/EntitySettings';
@@ -10,6 +12,10 @@ export var NotFound: __React.ComponentClass<any>;
 export var currentUser: IEntity;
 export var currentHistory: HistoryModule.History & HistoryModule.HistoryQueries;
 
+export function start(options: { routes: JSX.Element[] }) {
+    options.routes.push(<Route path="view/:type/:id" getComponent={asyncLoad("Southwind.React/Templates/SearchControl/SearchControl") } ></Route>);
+    options.routes.push(<Route path="create/:type" getComponent={asyncLoad("Southwind.React/Templates/SearchControl/SearchControl") } ></Route>);
+}
 
 export function navigateRoute(entity: IEntity);
 export function navigateRoute(lite: Lite<IEntity>);
@@ -85,4 +91,18 @@ export function isNavigable(typeOrEntity: IType | IEntity, partialViewName: stri
     return es != null && es.onIsNavigable(partialViewName, isSearch) &&
         isViewableEvent.every(f=> f(typeOrEntity));
 }
+
+export function asyncLoad(path: string | ((loc: HistoryModule.Location) => string)):(location: HistoryModule.Location, cb: (error: any, component?: ReactRouter.RouteComponent) => void) => void {
+    return (location, callback) => {
+
+        var finalPath = typeof path == "string" ? path as string :
+            (path as ((loc: HistoryModule.Location) => string))(location);
+
+        require([finalPath], Comp => {
+            callback(null, (Comp as any)["default"]);
+        });
+    };
+}
+
+
 

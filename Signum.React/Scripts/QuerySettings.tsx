@@ -32,7 +32,7 @@ export var GlobalFormatRules: FormatRule[] = [
     {
         name: "Enum",
         isApplicable: col=> col.token.filterType == FilterType.Enum,
-        formatter: col=>new CellFormatter(cel => getEnumInfo(col.token.typeName, cel).niceName)
+        formatter: col=> new CellFormatter(cel => getEnumInfo(col.token.type.name, cel).niceName)
     },
     {
         name: "Lite",

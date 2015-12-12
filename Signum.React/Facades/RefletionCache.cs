@@ -71,11 +71,14 @@ namespace Signum.React.Facades
                                     NiceName = p.PropertyInfo?.NiceName(),
                                     Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                     Unit = p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName,
-                                    IsCollection = p.PropertyInfo?.PropertyType.IsMList() ?? false,
-                                    IsLite = p.PropertyInfo?.PropertyType.CleanMList().IsLite() ?? false,
-                                    IsNullable = p.PropertyInfo?.PropertyType.IsNullable() ?? false,
-                                    Type = IsId(p) ? TypeScriptType(PrimaryKey.Type(type)) :
+                                    Type = new TypeReference
+                                    {
+                                        IsCollection = p.PropertyInfo?.PropertyType.IsMList() ?? false,
+                                        IsLite = p.PropertyInfo?.PropertyType.CleanMList().IsLite() ?? false,
+                                        IsNullable = p.PropertyInfo?.PropertyType.IsNullable() ?? false,
+                                        Name = IsId(p) ? TypeScriptType(PrimaryKey.Type(type)) :
                                             p.TryGetImplementations()?.Key() ?? TypeScriptType(p.Type)
+                                    }
                                 })
                           })).ToDictionary("entities");
 
@@ -214,8 +217,20 @@ namespace Signum.React.Facades
 
     public class MemberInfo
     {
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "type")]
+        public TypeReference Type { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
         public string NiceName { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "unit")]
+        public string Unit { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]
+        public string Format { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
+        public object Id { get; set; }
+    }
+
+    public class TypeReference
+    {
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isCollection")]
         public bool IsCollection { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLite")]
@@ -223,13 +238,7 @@ namespace Signum.React.Facades
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isNullable")]
         public bool IsNullable { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "type")]
-        public string Type { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "unit")]
-        public string Unit { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]
-        public string Format { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
-        public object Id { get; set; }
+        public string Name { get; set; }
     }
 
     public enum KindOfType

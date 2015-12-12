@@ -26,6 +26,28 @@ module Dic {
         return result;
     }
 
+    export function getKeys(obj: { [key: string]: any }): string[] {
+        var result: string[] = [];
+
+        for (var name in obj) {
+            if (obj.hasOwnProperty(name)) {
+                result.push(name);
+            }
+        }
+
+        return result;
+    }
+
+    export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void) {
+
+        for (var name in obj) {
+            if (obj.hasOwnProperty(name)) {
+                action(name, obj[name]);
+            }
+        }
+    }
+
+
     export function addOrThrow<V>(dic: { [key: string]: V }, key: string, value: V, errorContext?: string) {
         if (dic[key])
             throw new Error(`Key ${key} already added` + (errorContext ? "in " + errorContext : ""));
@@ -52,6 +74,7 @@ interface Array<T> {
     orderBy<V>(keySelector: (element: T) => V): T[];
     orderByDescending<V>(keySelector: (element: T) => V): T[];
     toObject(keySelector: (element: T) => string): { [key: string]: T };
+    toObject<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T };
     flatMap<R>(selector: (element: T) => R[]): R[];
     max(): T;
@@ -114,7 +137,7 @@ Array.prototype.orderByDescending = function (keySelector: (element: any) => any
     return cloned;
 };
 
-Array.prototype.toObject = function (keySelector: (element: any) => any): any {
+Array.prototype.toObject = function (keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
     var obj = {};
 
     (<Array<any>>this).forEach(item=> {
@@ -123,7 +146,8 @@ Array.prototype.toObject = function (keySelector: (element: any) => any): any {
         if (obj[key])
             throw new Error("Repeated key {0}".formatWith(key));
 
-        obj[key] = item;
+
+        obj[key] = valueSelector ? valueSelector(item) : item;
     });
 
     return obj;

@@ -44,6 +44,34 @@ export type ConstructSymbol_Simple<T extends Entity> = OperationSymbol;
 export type ConstructSymbol_From<T extends Entity, F extends IEntity> = OperationSymbol;
 export type ConstructSymbol_FromMany<T extends Entity, F extends IEntity> = OperationSymbol; 
 
+export function toLite<T extends IEntity>(entity: T) : Lite<T> {
+    return {
+	   EntityType : entity.Type,
+	   id :entity.id,
+	   toStr :entity.toStr,
+	}
+}
+
+export function toLiteFat<T extends IEntity>(entity: T) : Lite<T> {
+    return {
+	   entity : entity,
+	   EntityType  :entity.Type,
+	   id :entity.id,
+	   toStr :entity.toStr,
+	}
+}
+
+export function liteKey(lite: Lite<IEntity>) {
+    return lite.EntityType + ";" + (lite.id || "");
+}
+
+export function parseLite(lite: string) : Lite<IEntity> {
+    return {
+        EntityType: lite.before(";"),
+        id :  lite.after(";"),
+    };
+}
+
 
 export module CalendarMessage {
     export const Today = new MessageKey("CalendarMessage", "Today");
@@ -370,7 +398,6 @@ export namespace Basics {
     
     export const QueryEntity_Type = new Type<QueryEntity>("QueryEntity");
     export interface QueryEntity extends Entity {
-        name?: string;
         key?: string;
     }
     

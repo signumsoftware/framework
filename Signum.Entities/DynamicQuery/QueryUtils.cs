@@ -14,18 +14,7 @@ namespace Signum.Entities.DynamicQuery
 {
     public static class QueryUtils
     {
-        public static string GetQueryUniqueKey(object queryName)
-        {
-            if (queryName is Type)
-                queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
-
-            return
-                queryName is Type ? ((Type)queryName).FullName :
-                queryName is Enum ? "{0}.{1}".FormatWith(queryName.GetType().Name, queryName.ToString()) :
-                queryName.ToString();
-        }
-
-        public static string GetCleanName(object queryName)
+        public static string GetKey(object queryName)
         {
             if (queryName is Type)
                 queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
@@ -322,14 +311,14 @@ namespace Signum.Entities.DynamicQuery
             QueryToken result = SubToken(null, qd, options, firstPart);
 
             if (result == null)
-                throw new FormatException("Column {0} not found on query {1}".FormatWith(firstPart, QueryUtils.GetCleanName(qd.QueryName)));
+                throw new FormatException("Column {0} not found on query {1}".FormatWith(firstPart, QueryUtils.GetKey(qd.QueryName)));
 
             foreach (var part in parts.Skip(1))
             {
                 var newResult = SubToken(result, qd, options, part);
 
                 if (newResult == null)
-                    throw new FormatException("Token with key '{0}' not found on {1} of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetCleanName(qd.QueryName)));
+                    throw new FormatException("Token with key '{0}' not found on {1} of query {2}".FormatWith(part, result.FullKey(), QueryUtils.GetKey(qd.QueryName)));
 
                 result = newResult;
             }

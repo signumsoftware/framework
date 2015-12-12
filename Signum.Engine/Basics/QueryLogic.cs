@@ -64,22 +64,22 @@ namespace Signum.Engine.Basics
 
         public static object ToQueryName(this QueryEntity query)
         {
-            return QueryNames.GetOrThrow(query.Key, "QueryName with unique name {0} not found");
+            return QueryNames.GetOrThrow(query.Key, "QueryName with key {0} not found");
         }
 
-        public static object ToQueryName(string uniqueQueryName)
+        public static object ToQueryName(string queryKey)
         {
-            return QueryNames.GetOrThrow(uniqueQueryName, "QueryName with unique name {0} not found");
+            return QueryNames.GetOrThrow(queryKey, "QueryName with unique name {0} not found");
         }
 
-        public static object TryToQueryName(string uniqueQueryName)
+        public static object TryToQueryName(string queryKey)
         {
-            return QueryNames.TryGetC(uniqueQueryName);
+            return QueryNames.TryGetC(queryKey);
         }
 
         private static Dictionary<string, object> CreateQueryNames()
         {
-            return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryUniqueKey(qn), "queryName");
+            return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetKey(qn), "queryName");
         }
 
         static IEnumerable<QueryEntity> GenerateQueries()
@@ -87,8 +87,7 @@ namespace Signum.Engine.Basics
             return DynamicQueryManager.Current.GetQueryNames()
                 .Select(qn => new QueryEntity
                 {
-                    Key = QueryUtils.GetQueryUniqueKey(qn),
-                    Name = QueryUtils.GetCleanName(qn)
+                    Key = QueryUtils.GetKey(qn)
                 });
         }
 
@@ -131,7 +130,6 @@ namespace Signum.Engine.Basics
                     (fn, s, c) =>
                     {
                         c.Key = s.Key;
-                        c.Name = s.Name;
                         return table.UpdateSqlSync(c);
                     }, Spacing.Double);
         }
