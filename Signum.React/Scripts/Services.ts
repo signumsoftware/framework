@@ -4,11 +4,17 @@ export interface AjaxOptions {
     url: string;
     avoidNotifyPendingRequests?: boolean;
     avoidThrowError?: boolean;
-    avoidShowError?: boolean;
+    showError?: ShowError;
 
     mode?: string | RequestMode;
     credentials?: string | RequestCredentials;
     cache?: string | RequestCache;
+}
+
+export enum ShowError {
+    Never,
+    Default,
+    Always,
 }
 
 export function baseUrl(): string
@@ -17,7 +23,7 @@ export function baseUrl(): string
 }
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
-    return wrapRequest(options, () =>
+    return wrapRequest<T>(options, () =>
         fetch(baseUrl() + options.url, {
             method: "GET",
             headers: {
@@ -26,12 +32,12 @@ export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
             mode: options.mode,
             credentials: options.credentials,
             cache: options.cache
-        })).then(resp=> resp.json<T>());
+        }));
 }
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
 
-    return wrapRequest(options, () =>
+    return wrapRequest<T>(options, () =>
         fetch(baseUrl() + options.url, {
             method: "POST",
             credentials: options.credentials || "same-origin",
@@ -42,26 +48,29 @@ export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
             mode: options.mode,
             cache: options.cache,
             body: JSON.stringify(data),
-        })).then(resp=> resp.json<T>());
+        }));
 }
 
 
-export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response>
+export function wrapRequest<T>(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<T>
 {
     var promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
 
     if (!options.avoidThrowError)
         promise = promise.then(throwError);
 
-    if (!options.avoidShowError)
+    if (options.showError != ShowError.Never)
         promise = promise.catch((error: any) =>
         {
-            showError(error);
+            if (options.showError == ShowError.Always || !(error instanceof ValidationError))
+                showError(error);
+
             throw error;
             return null as Response;
         });
 
-    return promise;
+    return promise.then(a=>
+        a.status == 204 ? null : a.json<T>());
 }
 
 
@@ -82,7 +91,10 @@ function throwError(response: Response): Response | Promise<Response> {
         return response;
     } else {
         return response.json().then<Response>(json=> {
-            throw new ServiceError(response.statusText, json);
+            if (json.ModelState)
+                throw new ValidationError(response.statusText, json);
+            else
+                throw new ServiceError(response.statusText, json);
             return null;
         });
     }
@@ -95,6 +107,24 @@ export class ServiceError {
     toString() {
         return this.statusText + "\r\n" + JSON.stringify(this.body);
     }
+}
+
+export class ValidationError {
+    modelState: ModelState;
+    message: string;
+
+    constructor(public statusText: string, json: { Message: string, ModelState: ModelState }) {
+        this.message = json.Message;
+        this.modelState = json.ModelState;
+    }
+
+    toString() {
+        return this.statusText + "\r\n" + this.message;
+    }
+}
+
+export interface ModelState {
+    [field: string]: string;
 }
 
 export var showError = (error: any) => alert(error);

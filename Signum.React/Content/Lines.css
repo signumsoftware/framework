@@ -445,3 +445,10 @@ ul.dropdown-menu > li > a.disabled
         min-width: 730px;
     }
 }
+
+.help-block {
+    display: block;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    color: #737373;
+}
