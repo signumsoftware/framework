@@ -23,21 +23,21 @@ export interface MultipleSMSModel extends Entities.ModelEntity {
     certified?: boolean;
 }
 
+export module SMSCharactersMessage {
+    export const Insert = new MessageKey("SMSCharactersMessage", "Insert");
+    export const Message = new MessageKey("SMSCharactersMessage", "Message");
+    export const RemainingCharacters = new MessageKey("SMSCharactersMessage", "RemainingCharacters");
+    export const RemoveNonValidCharacters = new MessageKey("SMSCharactersMessage", "RemoveNonValidCharacters");
+    export const StatusCanNotBeUpdatedForNonSentMessages = new MessageKey("SMSCharactersMessage", "StatusCanNotBeUpdatedForNonSentMessages");
+    export const TheTemplateMustBeActiveToConstructSMSMessages = new MessageKey("SMSCharactersMessage", "TheTemplateMustBeActiveToConstructSMSMessages");
+    export const TheTextForTheSMSMessageExceedsTheLengthLimit = new MessageKey("SMSCharactersMessage", "TheTextForTheSMSMessageExceedsTheLengthLimit");
+    export const Language = new MessageKey("SMSCharactersMessage", "Language");
+    export const Replacements = new MessageKey("SMSCharactersMessage", "Replacements");
+}
+
 export const SMSConfigurationEntity_Type = new Type<SMSConfigurationEntity>("SMSConfigurationEntity");
 export interface SMSConfigurationEntity extends Entities.EmbeddedEntity {
     defaultCulture?: Basics.CultureInfoEntity;
-}
-
-export module SmsMessage {
-    export const Insert = new MessageKey("SmsMessage", "Insert");
-    export const Message = new MessageKey("SmsMessage", "Message");
-    export const RemainingCharacters = new MessageKey("SmsMessage", "RemainingCharacters");
-    export const RemoveNonValidCharacters = new MessageKey("SmsMessage", "RemoveNonValidCharacters");
-    export const StatusCanNotBeUpdatedForNonSentMessages = new MessageKey("SmsMessage", "StatusCanNotBeUpdatedForNonSentMessages");
-    export const TheTemplateMustBeActiveToConstructSMSMessages = new MessageKey("SmsMessage", "TheTemplateMustBeActiveToConstructSMSMessages");
-    export const TheTextForTheSMSMessageExceedsTheLengthLimit = new MessageKey("SmsMessage", "TheTextForTheSMSMessageExceedsTheLengthLimit");
-    export const Language = new MessageKey("SmsMessage", "Language");
-    export const Replacements = new MessageKey("SmsMessage", "Replacements");
 }
 
 export const SMSMessageEntity_Type = new Type<SMSMessageEntity>("SMSMessageEntity");

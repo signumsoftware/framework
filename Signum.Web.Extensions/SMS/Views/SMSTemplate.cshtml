@@ -43,7 +43,7 @@
         </div>
         <div class="col-sm-5">
             <fieldset>
-                <legend>@SmsMessage.Replacements.NiceToString()</legend>
+                <legend>@SMSCharactersMessage.Replacements.NiceToString()</legend>
 
                 @Html.EntityCombo(tc, s => s.AssociatedType, ec =>
         {
@@ -54,7 +54,7 @@
         })
 
                 @(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").Class("form-control").ToHtml())
-                <input type="button" class="btn sf-button" id="sfInsertLiteral" value="@SmsMessage.Insert.NiceToString()" />
+                <input type="button" class="btn sf-button" id="sfInsertLiteral" value="@SMSCharactersMessage.Insert.NiceToString()" />
 
             </fieldset>
         </div>

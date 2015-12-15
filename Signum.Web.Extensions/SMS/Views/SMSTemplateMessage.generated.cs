@@ -100,7 +100,7 @@ WriteLiteral("        ");
             #line 11 "..\..\SMS\Views\SMSTemplateMessage.cshtml"
    Write(Html.EntityCombo(tc, e => e.CultureInfo, vl =>
         {
-            vl.LabelText = SmsMessage.Language.NiceToString();
+            vl.LabelText = SMSCharactersMessage.Language.NiceToString();
         }));
 
             
@@ -135,7 +135,7 @@ WriteLiteral(">\r\n                <p>\r\n                    <span>");
 
             
             #line 26 "..\..\SMS\Views\SMSTemplateMessage.cshtml"
-                     Write(SmsMessage.RemainingCharacters.NiceToString());
+                     Write(SMSCharactersMessage.RemainingCharacters.NiceToString());
 
             
             #line default
@@ -151,14 +151,14 @@ WriteLiteral(" type=\"button\"");
 
 WriteLiteral(" class=\"btn sf-button sf-sms-remove-chars\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1181), Tuple.Create("\"", 1240)
+WriteAttribute("value", Tuple.Create(" value=\"", 1201), Tuple.Create("\"", 1270)
             
             #line 30 "..\..\SMS\Views\SMSTemplateMessage.cshtml"
-      , Tuple.Create(Tuple.Create("", 1189), Tuple.Create<System.Object, System.Int32>(SmsMessage.RemoveNonValidCharacters.NiceToString()
+      , Tuple.Create(Tuple.Create("", 1209), Tuple.Create<System.Object, System.Int32>(SMSCharactersMessage.RemoveNonValidCharacters.NiceToString()
             
             #line default
             #line hidden
-, 1189), false)
+, 1209), false)
 );
 
 WriteLiteral(" />\r\n            </div>\r\n        </div>\r\n    </div>\r\n");

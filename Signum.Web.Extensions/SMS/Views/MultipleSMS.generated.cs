@@ -115,7 +115,7 @@ WriteLiteral(">\r\n            <p>\r\n                <span>");
 
             
             #line 22 "..\..\SMS\Views\MultipleSMS.cshtml"
-                 Write(SmsMessage.RemainingCharacters.NiceToString());
+                 Write(SMSCharactersMessage.RemainingCharacters.NiceToString());
 
             
             #line default

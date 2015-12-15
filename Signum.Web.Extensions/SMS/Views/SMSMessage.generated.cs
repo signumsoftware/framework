@@ -199,7 +199,7 @@ WriteLiteral(">\r\n                <p><span>");
 
             
             #line 38 "..\..\SMS\Views\SMSMessage.cshtml"
-                    Write(SmsMessage.RemainingCharacters.NiceToString());
+                    Write(SMSCharactersMessage.RemainingCharacters.NiceToString());
 
             
             #line default
@@ -218,14 +218,14 @@ WriteLiteral("></span></p>\r\n            </div>\r\n");
             #line hidden
             
             #line 40 "..\..\SMS\Views\SMSMessage.cshtml"
-       Write(Html.FormGroup(e, "", "", new HtmlTag("input").Attr("type", "button").Attr("value", SmsMessage.RemoveNonValidCharacters.NiceToString()).Class("btn sf-button sf-sms-remove-chars").ToHtml()));
+       Write(Html.FormGroup(e, "", "", new HtmlTag("input").Attr("type", "button").Attr("value", SMSCharactersMessage.RemoveNonValidCharacters.NiceToString()).Class("btn sf-button sf-sms-remove-chars").ToHtml()));
 
             
             #line default
             #line hidden
             
             #line 40 "..\..\SMS\Views\SMSMessage.cshtml"
-                                                                                                                                                                                                         
+                                                                                                                                                                                                                   
         }
 
             

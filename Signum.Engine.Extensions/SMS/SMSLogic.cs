@@ -376,7 +376,7 @@ namespace Signum.Engine.SMS
                 switch (onExceeded)
                 {
                     case MessageLengthExceeded.NotAllowed:
-                        throw new ApplicationException(SmsMessage.TheTextForTheSMSMessageExceedsTheLengthLimit.NiceToString());
+                        throw new ApplicationException(SMSCharactersMessage.TheTextForTheSMSMessageExceedsTheLengthLimit.NiceToString());
                     case MessageLengthExceeded.Allowed:
                         break;
                     case MessageLengthExceeded.TextPruning:
@@ -548,7 +548,7 @@ namespace Signum.Engine.SMS
 
             new ConstructFrom<SMSTemplateEntity>(SMSMessageOperation.CreateSMSFromSMSTemplate)
             {
-                CanConstruct = t => !t.Active ? SmsMessage.TheTemplateMustBeActiveToConstructSMSMessages.NiceToString() : null,
+                CanConstruct = t => !t.Active ? SMSCharactersMessage.TheTemplateMustBeActiveToConstructSMSMessages.NiceToString() : null,
                 ToStates = { SMSMessageState.Created },
                 Construct = (t, args) =>
                 {
@@ -596,7 +596,7 @@ namespace Signum.Engine.SMS
 
             new Graph<SMSMessageEntity>.Execute(SMSMessageOperation.UpdateStatus)
             {
-                CanExecute = m => m.State != SMSMessageState.Created ? null : SmsMessage.StatusCanNotBeUpdatedForNonSentMessages.NiceToString(),
+                CanExecute = m => m.State != SMSMessageState.Created ? null : SMSCharactersMessage.StatusCanNotBeUpdatedForNonSentMessages.NiceToString(),
                 Execute = (sms, args) =>
                 {
                     var func = args.TryGetArgC<Func<SMSMessageEntity, SMSMessageState>>();
