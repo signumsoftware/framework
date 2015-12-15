@@ -122,7 +122,7 @@ namespace Signum.Web.Help
 
                 var jsType = new
                 {
-                    QueryName = QueryUtils.GetQueryUniqueKey(query.QueryName),
+                    QueryName = QueryUtils.GetKey(query.QueryName),
                     Info = query.Info,
                     Columns = query.Columns,
                 };

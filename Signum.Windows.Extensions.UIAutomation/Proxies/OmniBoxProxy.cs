@@ -29,7 +29,7 @@ namespace Signum.Windows.UIAutomation
         {
             var omniboxName = QueryUtils.GetNiceName(queryName).ToOmniboxPascal();
 
-            return new SearchWindowProxy(SelectCapture(omniboxName, "Q:" + QueryUtils.GetQueryUniqueKey(queryName), className: "SearchWindow")); 
+            return new SearchWindowProxy(SelectCapture(omniboxName, "Q:" + QueryUtils.GetKey(queryName), className: "SearchWindow")); 
         }
 
         public NormalWindowProxy<T> SelectEntity<T>(Lite<T> lite) where T : Entity

@@ -274,7 +274,7 @@ namespace Signum.Web.Selenium
 
         public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
         {
-            string query = QueryUtils.GetQueryUniqueKey(queryName);
+            string query = QueryUtils.GetKey(queryName);
 
             var prefix = (string)lineContainer.Selenium.ExecuteScript("return $('div.sf-search-control[data-queryname=\"{0}\"]').data('prefix')".FormatWith(query));
 

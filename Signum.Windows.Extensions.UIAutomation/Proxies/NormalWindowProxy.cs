@@ -380,12 +380,12 @@ namespace Signum.Windows.UIAutomation
 
         public static SearchWindowProxy QuickLinkExplore(this LeftPanelProxy left, object queryName)
         {
-            return left.QuickLinkCapture(QueryUtils.GetQueryUniqueKey(queryName)).ToSearchWindow(); 
+            return left.QuickLinkCapture(QueryUtils.GetKey(queryName)).ToSearchWindow(); 
         }
 
         public static NormalWindowProxy<T> QuickLinkNavigate<T>(this LeftPanelProxy left) where T : Entity
         {
-            return left.QuickLinkCapture(QueryUtils.GetQueryUniqueKey(typeof(T).FullName)).ToNormalWindow<T>();
+            return left.QuickLinkCapture(QueryUtils.GetKey(typeof(T).FullName)).ToNormalWindow<T>();
         }
     }
 

@@ -971,7 +971,7 @@ WriteLiteral(">[q:");
 
             
             #line 176 "..\..\Help\Views\ViewEntity.cshtml"
-                                                     Write(QueryUtils.GetQueryUniqueKey(mq.Key));
+                                                     Write(QueryUtils.GetKey(mq.Key));
 
             
             #line default

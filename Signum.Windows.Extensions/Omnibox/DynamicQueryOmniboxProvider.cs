@@ -118,7 +118,7 @@ namespace Signum.Windows.Omnibox
 
         public override string GetName(DynamicQueryOmniboxResult result)
         {
-            return "Q:" + QueryUtils.GetQueryUniqueKey(result.QueryName);
+            return "Q:" + QueryUtils.GetKey(result.QueryName);
         }
     }
 }

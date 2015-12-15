@@ -173,7 +173,7 @@
                             @Html.HiddenRuntimeInfo(qctx, a => a.Query)                                    
                             <h3 id="@HelpUrls.IdQuery(mq.Key)">@QueryUtils.GetNiceName(mq.Key)</h3>
                             <div class="queryName">
-                                <code class='shortcut'>[q:@QueryUtils.GetQueryUniqueKey(mq.Key)]</code>
+                                <code class='shortcut'>[q:@QueryUtils.GetKey(mq.Key)]</code>
                                 <span class="info">
                                     @Html.WikiParse(mq.Value.Info, HelpWiki.DefaultWikiSettings)
                                 </span>
