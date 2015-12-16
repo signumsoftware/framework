@@ -1,16 +1,27 @@
 ﻿import { TypeReference, PropertyRoute } from 'Framework/Signum.React/Scripts/Reflection';
+import { Lite, IEntity, DynamicQuery } from 'Framework/Signum.React/Scripts/Signum.Entities';
+
+import PaginationMode = DynamicQuery.PaginationMode;
+import OrderType = DynamicQuery.OrderType;
+import FilterOperation = DynamicQuery.FilterOperation;
+import FilterType = DynamicQuery.FilterType;
+import ColumnOptionsMode = DynamicQuery.ColumnOptionsMode;
+import UniqueType = DynamicQuery.UniqueType;
+
+export {PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType};
 
 export interface CountOptions {
     queryName: any;
-    filterOptions?: FilterOptions[];
+    filterOptions?: FilterOption[];
 }
 
 export interface FindOptions {
     queryName: any;
-    filterOptions?: FilterOptions[];
+    filterOptions?: FilterOption[];
     orderOptions?: OrderOption[];
     columnOptionsMode?: ColumnOptionsMode;
-    columnOptions?: ColumnOptions[];
+    columnOptions?: ColumnOption[];
+    pagination?: Pagination
 
     searchOnLoad?: boolean;
     showHeader?: boolean;
@@ -19,35 +30,16 @@ export interface FindOptions {
     showFooter?: boolean;
     create?: boolean;
     navigate?: boolean;
+    contextMenu?: boolean;
 }
 
-export interface FilterOptions {
+export interface FilterOption {
     columnName: string;
     token?: QueryToken;
     frozen?: string;
     operation: FilterOperation;
     value: any;
 }
-
-
-export enum FilterOperation {
-    EqualTo = "EqualTo" as any,
-    DistinctTo= "DistinctTo" as any,
-    GreaterThan= "GreaterThan"  as any,
-    GreaterThanOrEqual= "GreaterThanOrEqual" as any,
-    LessThan= "LessThan"  as any,
-    LessThanOrEqual= "LessThanOrEqual" as any,
-    Contains= "Contains" as any,
-    StartsWith= "StartsWith" as any,
-    EndsWith= "EndsWith" as any,
-    Like= "Like" as any,
-    NotContains= "NotContains" as any,
-    NotStartsWith= "NotStartsWith" as any,
-    NotEndsWith= "NotEndsWith" as any,
-    NotLike= "NotLike" as any,
-    IsIn= "IsIn" as any,
-};
-
 
 
 
@@ -58,28 +50,13 @@ export interface OrderOption {
     orderType: OrderType;
 }
 
-export enum OrderType {
-    Ascending,
-    Descending
-}
 
-export interface ColumnOptions {
+export interface ColumnOption {
     columnName: string;
     token?: QueryToken;
     displayName: string;
 }
 
-export enum PaginationMode {
-    All,
-    Firsts,
-    Paginate
-}
-
-export enum ColumnOptionsMode {
-    Add = "Add" as any,
-    Remove = "Remove" as any,
-    Replace = "Replace" as any,
-}
 
 export var DefaultPagination: Pagination = {
     mode: PaginationMode.Paginate,
@@ -89,15 +66,12 @@ export var DefaultPagination: Pagination = {
 
 
 export enum FindMode {
-    Find,
-    Explore
+    Find = <any>"Find",
+    Explore = <any>"Explore"
 }
 
 
-export interface Column {
-    displayName: string;
-    token: QueryToken;
-}
+
 
 
 export interface QueryToken {
@@ -112,23 +86,46 @@ export interface QueryToken {
     hasAllOrAny?: boolean;
 }
 
-export enum FilterType {
-    Integer,
-    Decimal,
-    String,
-    DateTime,
-    Lite,
-    Embedded,
-    Boolean,
-    Enum,
-    Guid,
+export function toQueryToken(cd: ColumnDescription): QueryToken {
+    return {
+        toString: cd.displayName,
+        niceName: cd.displayName,
+        key: cd.name,
+        fullKey: cd.name,
+        unit: cd.unit,
+        type: cd.type,
+        filterType: cd.filterType,
+    };
+}
+
+export interface QueryRequest {
+    queryKey: string;
+    filters: { token: string; operation: FilterOperation; value: any }[];
+    orders: { token: string; orderType: OrderType }[];
+    columns: { token: string; displayName: string }[];
+    pagination: Pagination;
+}
+
+
+
+export interface ResultColumn {
+    displayName: string;
+    token: QueryToken;
 }
 
 export interface ResultTable {
-    entityColumn: Column;
-    columns: Column[];
-    rows: any[];
+    queryKey: string;
+    entityColumn: string;
+    columns: string[];
+    rows: ResultRow[];
     pagination: Pagination
+    totalElements: number;
+}
+
+
+export interface ResultRow {
+    entity: Lite<IEntity>;
+    columns: any[];
 }
 
 export interface Pagination {
@@ -137,10 +134,30 @@ export interface Pagination {
     currentPage?: number;
 }
 
+export module PaginateMath {
+    export function startElementIndex(p: Pagination) {
+        return (p.elementsPerPage * (p.currentPage - 1)) + 1;
+    }
+
+    export function endElementIndex(p: Pagination, rows: number) {
+        return startElementIndex(p) + rows - 1;
+    }
+
+    export function totalPages(p: Pagination, totalElements: number) {
+        return (totalElements + p.elementsPerPage - 1) / p.elementsPerPage; //Round up
+    }
+
+    export function maxElementIndex(p: Pagination) {
+        return (p.elementsPerPage * (p.currentPage + 1)) - 1;
+    }
+}
+
+
+
 
 
 export interface QueryDescription {
-    queryName: any;
+    queryKey: any;
     columns: { [name: string]: ColumnDescription };
 }
 
@@ -150,6 +167,6 @@ export interface ColumnDescription {
     filterType: FilterType;
     unit?: string;
     format?: string;
-    propertyRoutes: PropertyRoute[];
     displayName: string;
 }
+

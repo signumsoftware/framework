@@ -19,14 +19,14 @@ export interface ValueLineProps extends LineBaseProps {
 }
 
 export enum ValueLineType {
-    Boolean,
-    Enum,
-    DateTime,
-    TimeSpan,
-    TextBox,
-    TextArea,
-    Number,
-    Color
+    Boolean = "Boolean" as any,
+    Enum = "Enum" as any,
+    DateTime = "DateTime" as any,
+    TimeSpan = "TimeSpan" as any,
+    TextBox = "TextBox" as any,
+    TextArea = "TextArea" as any,
+    Number = "Number" as any,
+    Color = "Color" as any,
 }
 
 export class ValueLine extends LineBase<ValueLineProps, {}> {

@@ -1,60 +1,105 @@
-﻿import {IEntity, Lite} from 'Framework/Signum.React/Scripts/Signum.Entities';
-import {Pagination, Column, FilterType} from 'Framework/Signum.React/Scripts/FindOptions';
+﻿import {IEntity, Lite, EntityControlMessage, liteKey} from 'Framework/Signum.React/Scripts/Signum.Entities';
+import {Pagination, ResultColumn, FilterType, ResultTable, ResultRow, PaginationMode, ColumnOption} from 'Framework/Signum.React/Scripts/FindOptions';
 import {typeInfo, getEnumInfo} from 'Framework/Signum.React/Scripts/Reflection';
-import {navigateRoute} from 'Framework/Signum.React/Scripts/Navigator';
+import {navigateRoute, isNavigable} from 'Framework/Signum.React/Scripts/Navigator';
 import * as React from 'react';
 import { Link  } from 'react-router';
 
-export class QuerySettings {
+
+
+
+export var defaultPagination: Pagination = {
+    mode: PaginationMode.Paginate,
+    elementsPerPage: 20,
+    currentPage: 1,
+}; 
+
+export interface QuerySettings {
     queryName: any;
-    pagination: Pagination;
-    isFindable: boolean = true;
-    defaultOrderColumn: string = "Id";
-    
-    console(queryName: any) {
-        this.queryName = queryName;
-    }
+    pagination?: Pagination;
+    defaultOrderColumn?: string;
+    formatters?: { [columnName: string]: CellFormatter };
+    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes;
+    entityFormatter?: EntityFormatter;
 }
 
 export interface FormatRule {
     name: string;
-    formatter: (column: Column) => CellFormatter;
-    isApplicable: (column: Column) => boolean;
+    formatter: (column: ColumnOption) => CellFormatter;
+    isApplicable: (column: ColumnOption) => boolean;
+}
+
+export class CellFormatter {
+    constructor(
+        public formatter: (cell: any) => React.ReactNode,
+        public textAllign = "left") {
+    }
 }
 
 
-export var GlobalFormatRules: FormatRule[] = [
+export var FormatRules: FormatRule[] = [
     {
         name: "Object",
         isApplicable: col=> true,
-        formatter: col=> new CellFormatter(cel => cel)
+        formatter: col=> new CellFormatter(cell => cell ? (cell.ToString || cell.toString()) : null)
     },
     {
         name: "Enum",
         isApplicable: col=> col.token.filterType == FilterType.Enum,
-        formatter: col=> new CellFormatter(cel => getEnumInfo(col.token.type.name, cel).niceName)
+        formatter: col=> new CellFormatter(cell => getEnumInfo(col.token.type.name, cell).niceName)
     },
     {
         name: "Lite",
         isApplicable: col=> col.token.filterType == FilterType.Lite,
-        formatter: col=> new CellFormatter((cel: Lite<IEntity>) => cel && <Link to={navigateRoute(cel) }>{cel.toString}</Link>)
+        formatter: col=> new CellFormatter((cell: Lite<IEntity>) => cell && <Link to={navigateRoute(cell) }>{cell.toStr}</Link>)
     },
     {
         name: "Guid",
         isApplicable: col=> col.token.filterType == FilterType.Guid,
-        formatter: col=> new CellFormatter((cel: string) => cel && (cel.substr(0, 5) + "…" + cel.substring(cel.length - 5)))
+        formatter: col=> new CellFormatter((cell: string) => cell && (cell.substr(0, 5) + "…" + cell.substring(cell.length - 5)))
     },
     {
         name: "DateTime",
         isApplicable: col=> col.token.filterType == FilterType.DateTime,
-        formatter: col=> new CellFormatter((cel: string) => cel && (cel.substr(0, 5) + "…" + cel.substring(cel.length - 5)))
+        formatter: col=> new CellFormatter((cell: string) => cell && cell.toString())
+    },
+    {
+        name: "Number",
+        isApplicable: col=> col.token.filterType == FilterType.Integer || col.token.filterType == FilterType.Decimal,
+        formatter: col=> new CellFormatter((cell: number) => cell && cell.toString())
+    },
+    {
+        name: "Number with Unit",
+        isApplicable: col=> (col.token.filterType == FilterType.Integer || col.token.filterType == FilterType.Decimal) && !!col.token.unit,
+        formatter: col=> new CellFormatter((cell: number) => cell && cell.toString() + " " + col.token.unit)
+    },
+    {
+        name: "Bool",
+        isApplicable: col=> col.token.filterType == FilterType.Boolean,
+        formatter: col=> new CellFormatter((cell: boolean) => cell == null ? null : <input type="checkbox" disabled={true} checked={cell}/>)
     },
 ];
 
-export class CellFormatter {
-    constructor(
-        public formatter: (cell: any) => any,
-        public textAllign = "left") {
-    }
+
+
+export interface EntityFormatRule {
+    name: string;
+    formatter: EntityFormatter;
+    isApplicable: (row: ResultRow) => boolean;
 }
+
+
+export type EntityFormatter = (row: ResultRow) => React.ReactNode;
+
+export var EntityFormatRules: EntityFormatRule[] = [
+    {
+        name: "View",
+        isApplicable: row=> true,
+        formatter: row=> !isNavigable(row.entity, null, true) ? null :
+            <Link to={navigateRoute(row.entity) } title={row.entity.toStr} data-entity-link={liteKey(row.entity) }>
+                {EntityControlMessage.View.niceToString() }
+                </Link>
+    },
+];
+
 

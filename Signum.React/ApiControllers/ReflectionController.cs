@@ -18,7 +18,7 @@ namespace Signum.React.ApiControllers
         [Route("api/reflection/types"), HttpGet]
         public Dictionary<string, TypeInfoTS> Types()
         {
-            return RefletionCache.GetTypeInfoTS(CultureInfo.CurrentUICulture);
+            return ReflectionCache.GetTypeInfoTS(CultureInfo.CurrentUICulture);
         }
     }
 }

@@ -12,10 +12,11 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.React.ApiControllers;
 using Signum.Utilities;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.React.Facades
 {
-    public static class RefletionCache
+    public static class ReflectionCache
     {
         public static ConcurrentDictionary<CultureInfo, Dictionary<string, TypeInfoTS>> cache =
          new ConcurrentDictionary<CultureInfo, Dictionary<string, TypeInfoTS>>();
@@ -27,6 +28,7 @@ namespace Signum.React.Facades
             DescriptionManager.Invalidated += () => cache.Clear();
 
             EntityAssemblies = TypeLogic.TypeToEntity.Keys.AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace).ToHashSet());
+            EntityAssemblies[typeof(PaginationMode).Assembly].Add(typeof(PaginationMode).Namespace);
         }
         
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
@@ -66,19 +68,12 @@ namespace Signum.React.Facades
                               EntityKind = type.IsIEntity() ? EntityKindCache.GetEntityKind(type) : (EntityKind?)null,
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               Members = PropertyRoute.GenerateRoutes(type)
-                                .ToDictionary(p => p.PropertyString(), p => new MemberInfo
+                                .ToDictionary(p => p.PropertyString(), p => new MemberInfoTS
                                 {
                                     NiceName = p.PropertyInfo?.NiceName(),
                                     Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                     Unit = p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName,
-                                    Type = new TypeReference
-                                    {
-                                        IsCollection = p.PropertyInfo?.PropertyType.IsMList() ?? false,
-                                        IsLite = p.PropertyInfo?.PropertyType.CleanMList().IsLite() ?? false,
-                                        IsNullable = p.PropertyInfo?.PropertyType.IsNullable() ?? false,
-                                        Name = IsId(p) ? TypeScriptType(PrimaryKey.Type(type)) :
-                                            p.TryGetImplementations()?.Key() ?? TypeScriptType(p.Type)
-                                    }
+                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type): p.PropertyInfo?.PropertyType, p.TryGetImplementations())
                                 })
                           })).ToDictionary("entities");
 
@@ -104,7 +99,7 @@ namespace Signum.React.Facades
                           {
                               Kind = kind,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
-                              Members = type.GetFields(staticFlags).ToDictionary(m => m.Name, m => new MemberInfo
+                              Members = type.GetFields(staticFlags).ToDictionary(m => m.Name, m => new MemberInfoTS
                               {
                                   NiceName = m.NiceName(),
                               }),
@@ -126,7 +121,7 @@ namespace Signum.React.Facades
                           select KVP.Create(GetTypeName(type), new TypeInfoTS
                           {
                               Kind = KindOfType.SymbolContainer,
-                              Members = type.GetFields(staticFlags).Where(f => GetSymbol(f).IdOrNull.HasValue).ToDictionary(m => m.Name, m => new MemberInfo
+                              Members = type.GetFields(staticFlags).Where(f => GetSymbol(f).IdOrNull.HasValue).ToDictionary(m => m.Name, m => new MemberInfoTS
                               {
                                   NiceName = m.NiceName(),
                                   Id = GetSymbol(m).Id.Object
@@ -146,23 +141,83 @@ namespace Signum.React.Facades
             return ((Symbol)v);
         }
 
+        public static string GetTypeName(Type t)
+        {
+            if (typeof(ModifiableEntity).IsAssignableFrom(t))
+                return TypeLogic.TryGetCleanName(t) ?? t.Name;
+
+            return t.Name;
+        }
+    }
+
+    public class TypeInfoTS
+    {
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "kind")]
+        public KindOfType Kind { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
+        public string NiceName { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "nicePluralName")]
+        public string NicePluralName { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "gender")]
+        public string Gender { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityKind")]
+        public EntityKind? EntityKind { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityData")]
+        public EntityData? EntityData { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
+        public Dictionary<string, MemberInfoTS> Members { get; set; }
+    }
+
+    public class MemberInfoTS
+    {
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "type")]
+        public TypeReferenceTS Type { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
+        public string NiceName { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "unit")]
+        public string Unit { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]
+        public string Format { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
+        public object Id { get; set; }
+    }
+
+    public class TypeReferenceTS
+    {
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isCollection")]
+        public bool IsCollection { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLite")]
+        public bool IsLite { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isNullable")]
+        public bool IsNullable { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "name")]
+        public string Name { get; set; }
+
+        public TypeReferenceTS(Type type, Implementations? implementations)
+        {
+            this.IsCollection = type.IsMList();
+            this.IsLite = CleanMList(type).IsLite();
+            this.IsNullable = type.IsNullable();
+            this.Name = implementations?.Key() ?? TypeScriptType(type);
+        }
+
         private static string TypeScriptType(Type type)
         {
             type = CleanMList(type);
 
             type = type.UnNullify().CleanType();
 
-            return BasicType(type) ?? GetTypeName(type) ?? "any";
+            return BasicType(type) ?? ReflectionCache.GetTypeName(type) ?? "any";
         }
 
-        private static Type CleanMList(this Type type)
+        private static Type CleanMList(Type type)
         {
             if (type.IsMList())
                 type = type.ElementType();
             return type;
         }
 
-        private static string BasicType(Type type)
+        public static string BasicType(Type type)
         {
             if (type.IsEnum)
                 return null;
@@ -188,57 +243,6 @@ namespace Signum.React.Facades
             return null;
         }
 
-        private static string GetTypeName(Type t)
-        {
-            if (typeof(ModifiableEntity).IsAssignableFrom(t))
-                return TypeLogic.TryGetCleanName(t) ?? t.Name;
-
-            return t.Name;
-        }
-    }
-
-    public class TypeInfoTS
-    {
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "kind")]
-        public KindOfType Kind { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
-        public string NiceName { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "nicePluralName")]
-        public string NicePluralName { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "gender")]
-        public string Gender { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityKind")]
-        public EntityKind? EntityKind { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityData")]
-        public EntityData? EntityData { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
-        public Dictionary<string, MemberInfo> Members { get; set; }
-    }
-
-    public class MemberInfo
-    {
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "type")]
-        public TypeReference Type { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
-        public string NiceName { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "unit")]
-        public string Unit { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]
-        public string Format { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
-        public object Id { get; set; }
-    }
-
-    public class TypeReference
-    {
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isCollection")]
-        public bool IsCollection { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLite")]
-        public bool IsLite { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isNullable")]
-        public bool IsNullable { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "type")]
-        public string Name { get; set; }
     }
 
     public enum KindOfType

@@ -72,6 +72,18 @@ export function parseLite(lite: string) : Lite<IEntity> {
     };
 }
 
+import { typeInfo } from 'Framework/Signum.React/Scripts/Reflection' 
+export function is<T extends IEntity>(a: Lite<T> | T, b: Lite<T> | T) {
+
+    if (a.id != b.id)
+        return false;
+
+    var aType = typeInfo((a as T).Type || (a as Lite<T>).EntityType);
+    var bType = typeInfo((a as T).Type || (a as Lite<T>).EntityType);
+
+    return aType == bType;
+}
+
 
 export module CalendarMessage {
     export const Today = new MessageKey("CalendarMessage", "Today");
@@ -420,54 +432,54 @@ export namespace Basics {
 export namespace DynamicQuery {
 
     export enum ColumnOptionsMode {
-        Add,
-        Remove,
-        Replace,
+        Add = "Add" as any,
+        Remove = "Remove" as any,
+        Replace = "Replace" as any,
     }
     export const ColumnOptionsMode_Type = new EnumType<ColumnOptionsMode>("ColumnOptionsMode", ColumnOptionsMode);
     
     export enum FilterOperation {
-        EqualTo,
-        DistinctTo,
-        GreaterThan,
-        GreaterThanOrEqual,
-        LessThan,
-        LessThanOrEqual,
-        Contains,
-        StartsWith,
-        EndsWith,
-        Like,
-        NotContains,
-        NotStartsWith,
-        NotEndsWith,
-        NotLike,
-        IsIn,
+        EqualTo = "EqualTo" as any,
+        DistinctTo = "DistinctTo" as any,
+        GreaterThan = "GreaterThan" as any,
+        GreaterThanOrEqual = "GreaterThanOrEqual" as any,
+        LessThan = "LessThan" as any,
+        LessThanOrEqual = "LessThanOrEqual" as any,
+        Contains = "Contains" as any,
+        StartsWith = "StartsWith" as any,
+        EndsWith = "EndsWith" as any,
+        Like = "Like" as any,
+        NotContains = "NotContains" as any,
+        NotStartsWith = "NotStartsWith" as any,
+        NotEndsWith = "NotEndsWith" as any,
+        NotLike = "NotLike" as any,
+        IsIn = "IsIn" as any,
     }
     export const FilterOperation_Type = new EnumType<FilterOperation>("FilterOperation", FilterOperation);
     
     export enum FilterType {
-        Integer,
-        Decimal,
-        String,
-        DateTime,
-        Lite,
-        Embedded,
-        Boolean,
-        Enum,
-        Guid,
+        Integer = "Integer" as any,
+        Decimal = "Decimal" as any,
+        String = "String" as any,
+        DateTime = "DateTime" as any,
+        Lite = "Lite" as any,
+        Embedded = "Embedded" as any,
+        Boolean = "Boolean" as any,
+        Enum = "Enum" as any,
+        Guid = "Guid" as any,
     }
     export const FilterType_Type = new EnumType<FilterType>("FilterType", FilterType);
     
     export enum OrderType {
-        Ascending,
-        Descending,
+        Ascending = "Ascending" as any,
+        Descending = "Descending" as any,
     }
     export const OrderType_Type = new EnumType<OrderType>("OrderType", OrderType);
     
     export enum PaginationMode {
-        All,
-        Firsts,
-        Paginate,
+        All = "All" as any,
+        Firsts = "Firsts" as any,
+        Paginate = "Paginate" as any,
     }
     export const PaginationMode_Type = new EnumType<PaginationMode>("PaginationMode", PaginationMode);
     
@@ -505,12 +517,12 @@ export namespace DynamicQuery {
     }
     
     export enum UniqueType {
-        First,
-        FirstOrDefault,
-        Single,
-        SingleOrDefault,
-        SingleOrMany,
-        Only,
+        First = "First" as any,
+        FirstOrDefault = "FirstOrDefault" as any,
+        Single = "Single" as any,
+        SingleOrDefault = "SingleOrDefault" as any,
+        SingleOrMany = "SingleOrMany" as any,
+        Only = "Only" as any,
     }
     export const UniqueType_Type = new EnumType<UniqueType>("UniqueType", UniqueType);
     

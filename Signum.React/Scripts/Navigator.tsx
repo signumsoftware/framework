@@ -1,8 +1,7 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
-import { baseUrl } from 'Framework/Signum.React/Scripts/Services';
 import { IEntity, Lite } from 'Framework/Signum.React/Scripts/Signum.Entities';
-import { Type, IType, EntityKind } from 'Framework/Signum.React/Scripts/Reflection';
+import { PseudoType, EntityKind, TypeInfo, typeInfo } from 'Framework/Signum.React/Scripts/Reflection';
 import { EntitySettingsBase, EntitySettings, EmbeddedEntitySettings} from 'Framework/Signum.React/Scripts/EntitySettings';
 import * as Finder from 'Framework/Signum.React/Scripts/Finder';
 
@@ -12,6 +11,8 @@ export var NotFound: __React.ComponentClass<any>;
 export var currentUser: IEntity;
 export var currentHistory: HistoryModule.History & HistoryModule.HistoryQueries;
 
+
+
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="view/:type/:id" getComponent={asyncLoad("Southwind.React/Templates/SearchControl/SearchControl") } ></Route>);
     options.routes.push(<Route path="create/:type" getComponent={asyncLoad("Southwind.React/Templates/SearchControl/SearchControl") } ></Route>);
@@ -19,7 +20,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export function navigateRoute(entity: IEntity);
 export function navigateRoute(lite: Lite<IEntity>);
-export function navigateRoute(type: IType, id: any);
+export function navigateRoute(type: PseudoType, id: any);
 export function navigateRoute(typeOfEntity: any, id: any = null) {
     var typeName: string;
     if ((typeOfEntity as IEntity).Type) {
@@ -31,10 +32,10 @@ export function navigateRoute(typeOfEntity: any, id: any = null) {
         id = (typeOfEntity as Lite<IEntity>).id;
     }
     else {
-        typeName = (typeOfEntity as IType).typeName;
+        typeName = typeInfo(typeOfEntity as PseudoType).name;
     }
-    
-    return baseUrl + "/View/" + typeName + "/" + id;
+
+    return "/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id;
 }
 
 
@@ -46,36 +47,42 @@ export function addSettings(...settings: EntitySettingsBase[])
 }
 
 
-export var isCreableEvent: Array<(t: IType) => boolean> = [];
+export var isCreableEvent: Array<(t: TypeInfo) => boolean> = [];
 
-export function isCreable(type: IType, isSearch?: boolean) {
-    var es = entitySettings[type.typeName];
+export function isCreable(type: PseudoType, isSearch?: boolean) {
+
+    var ti = typeInfo(type);
+
+    var es = entitySettings[ti.name];
     if (!es)
         return true;
 
     if (isSearch != null && !es.onIsCreable(isSearch))
         return false;
 
-    return isCreableEvent.every(f=> f(type));
+    return isCreableEvent.every(f=> f(ti));
 }
 
-export var isFindableEvent: Array<(t: IType) => boolean> = []; 
+export var isFindableEvent: Array<(t: TypeInfo) => boolean> = []; 
 
-export function isFindable(type: IType, isSearch?: boolean) {
+export function isFindable(type: PseudoType, isSearch?: boolean) {
+
+    var ti = typeInfo(type)
+
     if (!Finder.isFindable(type))
         return false;
 
-    var es = entitySettings[type.typeName];
+    var es = entitySettings[ti.name];
     if (es && !es.onIsFindable())
         return false;
 
     return true;
 }
 
-export var isViewableEvent: Array<(t: IType | IEntity) => boolean> = []; 
+export var isViewableEvent: Array<(t: TypeInfo | IEntity) => boolean> = []; 
 
-export function isViewable(typeOrEntity: IType | IEntity, partialViewName: string): boolean{
-    var typeName = (typeOrEntity as IType).typeName || (typeOrEntity as IEntity).Type;
+export function isViewable(typeOrEntity: PseudoType | IEntity, partialViewName: string): boolean{
+    var typeName = (typeOrEntity as IEntity).Type || typeInfo(typeOrEntity as PseudoType).name;
 
     var es = entitySettings[typeName];
 
@@ -83,8 +90,8 @@ export function isViewable(typeOrEntity: IType | IEntity, partialViewName: strin
     isViewableEvent.every(f=> f(typeOrEntity));
 }
 
-export function isNavigable(typeOrEntity: IType | IEntity, partialViewName: string, isSearch: boolean = false): boolean {
-    var typeName = (typeOrEntity as IType).typeName || (typeOrEntity as IEntity).Type;
+export function isNavigable(typeOrEntity: PseudoType | IEntity, partialViewName: string, isSearch: boolean = false): boolean {
+    var typeName = (typeOrEntity as IEntity).Type || typeInfo(typeOrEntity as PseudoType).name;
 
     var es = entitySettings[typeName];
 
@@ -92,7 +99,7 @@ export function isNavigable(typeOrEntity: IType | IEntity, partialViewName: stri
         isViewableEvent.every(f=> f(typeOrEntity));
 }
 
-export function asyncLoad(path: string | ((loc: HistoryModule.Location) => string)):(location: HistoryModule.Location, cb: (error: any, component?: ReactRouter.RouteComponent) => void) => void {
+export function asyncLoad(path: string | ((loc: HistoryModule.Location) => string)) : (location: HistoryModule.Location, cb: (error: any, component?: ReactRouter.RouteComponent) => void) => void {
     return (location, callback) => {
 
         var finalPath = typeof path == "string" ? path as string :

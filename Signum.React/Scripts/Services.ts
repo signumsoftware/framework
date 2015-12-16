@@ -30,7 +30,7 @@ export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
                 'Accept': 'application/json',
             },
             mode: options.mode,
-            credentials: options.credentials,
+            credentials: options.credentials || "same-origin",
             cache: options.cache
         }));
 }

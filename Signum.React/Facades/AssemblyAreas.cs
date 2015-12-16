@@ -13,7 +13,7 @@ namespace Signum.React
         public static void RegisterFrameworkArea()
         {
             RegisterArea(typeof(AssemblyAreas), "signum");
-            RefletionCache.Start();
+            ReflectionCache.Start();
         }
 
         public static void RegisterArea(Type controllerType,

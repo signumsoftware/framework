@@ -37,6 +37,17 @@ module Dic {
 
         return result;
     }
+    
+    export function map<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V) => R) : R[] {
+
+        var result: R[] = [];
+        for (var name in obj) {
+            if (obj.hasOwnProperty(name)) {
+                result.push(selector(name, obj[name]));
+            }
+        }
+        return result;
+    }
 
     export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void) {
 
@@ -76,11 +87,14 @@ interface Array<T> {
     toObject(keySelector: (element: T) => string): { [key: string]: T };
     toObject<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T };
+    toObjectDistinct<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     flatMap<R>(selector: (element: T) => R[]): R[];
     max(): T;
     min(): T;
     first(errorContext?: string): T;
     firstOrNull(): T;
+    last(errorContext?: string): T;
+    lastOrNull(): T;
     single(errorContext?: string): T;
     singleOrNull(errorContext?: string): T;
 }
@@ -153,13 +167,13 @@ Array.prototype.toObject = function (keySelector: (element: any) => any, valueSe
     return obj;
 };
 
-Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any): any {
+Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
     var obj = {};
 
     (<Array<any>>this).forEach(item=> {
         var key = keySelector(item);
 
-        obj[key] = item;
+        obj[key] = valueSelector ? valueSelector(item) : item;
     });
 
     return obj;
@@ -203,6 +217,23 @@ Array.prototype.firstOrNull = function () {
     return this[0];
 };
 
+Array.prototype.last = function (errorContext) {
+
+    if (this.length == 0)
+        throw new Error("No " + (errorContext || "element") + " found");
+
+    return this[this.length - 1];
+};
+
+
+Array.prototype.lastOrNull = function () {
+
+    if (this.length == 0)
+        return null;
+
+    return this[this.length - 1];
+};
+
 Array.prototype.single = function (errorContext) {
 
     if (this.length == 0)
@@ -224,6 +255,24 @@ Array.prototype.singleOrNull = function (errorContext) {
 
     return this[0];
 };
+
+interface ArrayConstructor {
+
+    range(min: number, max: number): number[];
+}
+
+
+Array.range = function (min, max) {
+
+    var lenth = max - min;
+
+    var result = new Array(length);
+    for (var i = 0; i < max; i++) {
+        result[i] = min + i;
+    }
+
+    return result;
+}
 
 interface String {
     hasText(): boolean;
@@ -417,3 +466,25 @@ if (typeof String.prototype.trim !== 'function') {
 }
 
 
+function extend<O>(out: O): O;
+function extend<O, U>(out: O, arg1: U): O & U;
+function extend<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
+function extend<O, U, V>(out: O, ...args: Object[]): any;
+function extend(out) {
+    out = out || {};
+
+    for (var i = 1; i < arguments.length; i++) {
+
+        var a = arguments[i];
+
+        if (!a)
+            continue;
+
+        for (var key in a) {
+            if (a.hasOwnProperty(key) && a[key] !== undefined)
+                out[key] = a[key];
+        }
+    }
+
+    return out;
+};

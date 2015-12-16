@@ -8,7 +8,7 @@ export class PropertyRoute {
 
     add(property: (val: any) => any): PropertyRoute {
         return null;
-    } 
+    }
 }
 
 export function getEnumInfo(enumTypeName: string, enumId: number) {
@@ -19,13 +19,12 @@ export function getEnumInfo(enumTypeName: string, enumId: number) {
         throw new Error(`${enumTypeName} is not an Enum`);
 
     if (!ti.membersById)
-        ti.membersById = Dic.getValues(ti.members).toObject(a=> a.id);
+        ti.membersById = Dic.getValues(ti.members).toObject(a=> a.name);
 
     return ti.membersById[enumId];
 }
 
-export interface TypeInfo
-{
+export interface TypeInfo {
     kind: KindOfType;
     name: string;
     niceName?: string;
@@ -42,8 +41,8 @@ export interface MemberInfo {
     name: string,
     niceName: string;
     type: TypeReference;
-    unit?: string; 
-    format?: string; 
+    unit?: string;
+    format?: string;
     id?: any; //symbols
 }
 
@@ -55,27 +54,27 @@ export interface TypeReference {
 }
 
 export enum KindOfType {
-    Entity,
-    Enum,
-    Message,
-    Query,
-    SymbolContainer, 
+    Entity = "Entity" as any,
+    Enum = "Enum" as any,
+    Message = "Message" as any,
+    Query = "Query" as any,
+    SymbolContainer = "SymbolContainer" as any,
 }
 
 export enum EntityKind {
-    SystemString,
-    System,
-    Relational,
-    String,
-    Shared,
-    Main,
-    Part,
-    SharedPart,
+    SystemString = "SystemString" as any,
+    System = "System" as any,
+    Relational = "Relational" as any,
+    String = "String" as any,
+    Shared = "Shared" as any,
+    Main = "Main" as any,
+    Part = "Part" as any,
+    SharedPart = "SharedPart" as any,
 }
 
 export enum EntityData {
-    Master,
-    Transactional
+    Master = "Master" as any,
+    Transactional = "Transactional" as any,
 }
 
 interface TypeInfoDictionary {
@@ -85,33 +84,65 @@ interface TypeInfoDictionary {
 var _types: TypeInfoDictionary;
 
 
-var _queryNiceNames: {
-    [queryKey: string]: string
+var _queryNames: {
+    [queryKey: string]: {
+        name: string, niceName: string
+    }
 };
 
-export const  IsByAll = "[ALL]";
+export type PseudoType = IType | TypeInfo | string;
 
-export function typeInfo(name: string): TypeInfo {
-    return _types[name];
+export function typeInfo(type: PseudoType): TypeInfo {
+
+    if ((type as TypeInfo).kind != null)
+        return type as TypeInfo;
+
+    if ((type as IType).typeName)
+        return _types[((type as IType).typeName).toLowerCase()];
+
+    if (typeof type == "string")
+        return _types[(type as string).toLowerCase()];
+
+    throw new Error("Unexpected type: " + type);
 }
 
 
+export const IsByAll = "[ALL]";
+export function typeInfos(typeReference: TypeReference): TypeInfo[] {
+    if (typeReference.name == IsByAll)
+        return [];
+
+    return typeReference.name.split(", ").map(typeInfo);
+
+}
+
 export function queryNiceName(queryName: any) {
-    
+
+    if ((queryName as TypeInfo).kind != null)
+        return (queryName as TypeInfo).nicePluralName;
+
     if (queryName instanceof Type)
         return (queryName as Type<any>).nicePluralName();
 
     if (queryName instanceof QueryKey)
         return (queryName as QueryKey).niceName();
 
-    var queryKey = queryName as string;
 
-    var ti = _types[queryKey];
+    if (typeof queryName == "string") {
+        var str = queryName as string;
 
-    if (ti)
-        return ti.nicePluralName;
+        var type = _types[str.toLowerCase()];
+        if (type)
+            return type.nicePluralName;
 
-    return _queryNiceNames[queryKey] || queryName;
+        var qn = _queryNames[str.toLowerCase()];
+        if (qn)
+            return qn.niceName;
+
+        return str;
+    }
+
+    throw new Error("unexpected queryName type");
 
 }
 
@@ -120,10 +151,21 @@ export function queryKey(queryName: any): string {
         return (queryName as Type<any>).typeName;
 
     if (queryName instanceof QueryKey)
-        return (queryName as QueryKey).name;
+        return (queryName as QueryKey).name; 
 
-    if (typeof queryName == "string")
-        return queryName as string;
+    if (typeof queryName == "string") {
+        var str = queryName as string;
+
+        var type = _types[str.toLowerCase()];
+        if (type)
+            return type.name;
+
+        var qn = _queryNames[str.toLowerCase()];
+        if (qn)
+            return qn.name;
+
+        return str;
+    }
 
     throw new Error("unexpected queryName type");
 
@@ -133,16 +175,18 @@ export function queryKey(queryName: any): string {
 export function loadTypes(): Promise<void> {
 
     return ajaxGet<TypeInfoDictionary>({ url: "/api/reflection/types" }).then((types) => {
-        
+
         Dic.foreach(types, (k, t) => {
             t.name = k;
             if (t.members)
                 Dic.foreach(t.members, (k2, t2) => t2.name = k2);
         });
 
-        _types = types;
+        _types = Dic.getValues(types).toObject(a=> a.name.toLowerCase());
 
-        _queryNiceNames = Dic.getValues(types).filter(t=> t.kind == KindOfType.Query).flatMap(a=> Dic.getValues(a.members)).toObject(m=> m.name, m=> m.niceName);
+        _queryNames = Dic.getValues(types).filter(t=> t.kind == KindOfType.Query)
+            .flatMap(a=> Dic.getValues(a.members))
+            .toObject(m=> m.name.toLocaleLowerCase(), m=> ({ name: m.name, niceName: m.niceName }));
 
         earySymbols.forEach(s=> setSymbolId(s));
 
@@ -152,8 +196,7 @@ export function loadTypes(): Promise<void> {
 
 
 
-export function lambdaBody(lambda: Function): string
-{
+export function lambdaBody(lambda: Function): string {
     return lambda.toString().after("return ").after(".").before(";");
 }
 
@@ -183,7 +226,7 @@ export class Type<T> implements IType {
 
     nicePropertyName(lambdaToProperty: (v: T) => any): string {
         return this.propertyInfo(lambdaToProperty).niceName;
-    } 
+    }
 }
 
 
@@ -191,7 +234,7 @@ export class EnumType<T> {
     constructor(
         public type: string,
         public converter: { [value: number]: string }
-        ) { }
+    ) { }
 
     typeInfo(): TypeInfo {
         return typeInfo(this.type);
@@ -215,7 +258,7 @@ export class MessageKey {
         public name: string) { }
 
     propertyInfo(): MemberInfo {
-        return typeInfo(this.type).members[this.name] 
+        return typeInfo(this.type).members[this.name]
     }
 
     niceToString(): string {
@@ -230,7 +273,7 @@ export class QueryKey {
         public name: string) { }
 
     propertyInfo(): MemberInfo {
-        return typeInfo(this.type).members[this.name] 
+        return typeInfo(this.type).members[this.name]
     }
 
     niceName(): string {
@@ -247,7 +290,7 @@ var earySymbols: ISymbol[] = [];
 
 function setSymbolId(s: ISymbol) {
 
-    var type = _types[s.key.before(".")];
+    var type = _types[s.key.before(".").toLowerCase()];
 
     if (!type)
         return;
@@ -257,7 +300,7 @@ function setSymbolId(s: ISymbol) {
     if (!member)
         return
 
-    s.id = s.id;
+    s.id = member.id;
 }
 
 

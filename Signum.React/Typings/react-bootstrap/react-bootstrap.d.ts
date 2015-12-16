@@ -78,8 +78,8 @@ declare module "react-bootstrap" {
         id?: string | number;
         navItem?: boolean;
         noCaret?: boolean;
-        onClick?: Function;  // TODO: Add more specifc type 
-        onSelect?: Function; // TODO: Add more specific type 
+        onClick?: React.MouseEventHandler; 
+        onSelect?: React.ReactEventHandler;
         pullRight?: boolean;
         title?: any; // TODO: Add more specific type
     }
@@ -99,8 +99,8 @@ declare module "react-bootstrap" {
         dropup?: boolean;
         href?: string;
         id?: string;
-        onClick?: Function;  // TODO: Add more specific type 
-        onSelect?: Function; // TODO: Add more specific type 
+        onClick?: React.MouseEventHandler;  
+        onSelect?: React.ReactEventHandler; 
         pullRight?: boolean;
         target?: string;
         title?: any; // TODO: Add more specific type
@@ -120,7 +120,7 @@ declare module "react-bootstrap" {
         eventKey?: any;
         header?: boolean;
         href?: string;
-        onSelect?: Function;
+        onSelect?: React.ReactEventHandler;
         target?: string;
         title?: string;
     }
@@ -142,8 +142,8 @@ declare module "react-bootstrap" {
         footer?: any; // TODO: Add more specific type
         header?: any; // TODO: Add more specific type
         id?: string;
-        onSelect?: Function; // TODO: Add more specific type 
-        onClick?: Function; // TODO: Add more specific type 
+        onSelect?: React.ReactEventHandler; // TODO: Add more specific type 
+        onClick?: React.MouseEventHandler; // TODO: Add more specific type 
     }
     interface Panel extends React.ReactElement<PanelProps> { }
     interface PanelClass extends React.ComponentClass<PanelProps> { }
@@ -162,7 +162,7 @@ declare module "react-bootstrap" {
         footer?: any; // TODO: Add more specific type
         header?: any; // TODO: Add more specific type
         id?: string;
-        onSelect?: Function; // TODO: Add more specific type 
+        onSelect?: React.ReactEventHandler; // TODO: Add more specific type 
     }
     interface Accordion extends React.ReactElement<AccordionProps> { }
     interface AccordionClass extends React.ComponentClass<AccordionProps> { }
@@ -178,7 +178,7 @@ declare module "react-bootstrap" {
         bsStyle?: string;
         className?: string;
         defaultActiveKey?: any;
-        onSelect?: Function;
+        onSelect?: React.ReactEventHandler;
     }
     interface PanelGroup extends React.ReactElement<PanelGroupProps> { }
     interface PanelGroupClass extends React.ComponentClass<PanelGroupProps> { }
@@ -396,7 +396,7 @@ declare module "react-bootstrap" {
         id?: string;
         justified?: boolean;
         navbar?: boolean;
-        onSelect?: Function;
+        onSelect?: React.ReactEventHandler;
         pullRight?: boolean;
         right?: boolean;
         stacked?: boolean;
@@ -427,8 +427,8 @@ declare module "react-bootstrap" {
         inverse?: boolean;
         linkId?: string;
         navExpanded?: boolean;
-        onClick?: Function;
-        onSelect?: Function;
+        onClick?: React.MouseEventHandler;
+        onSelect?: React.ReactEventHandler;
         onToggle?: Function;
         role?: string;
         staticTop?: boolean;
@@ -527,7 +527,7 @@ declare module "react-bootstrap" {
         bsStyle?: string;
         defaultActiveKey?: any;
         id?: string | number;
-        onSelect?: Function;
+        onSelect?: React.ReactEventHandler;
         paneWidth?: any; // TODO: Add more specific type 
         position?: string;
         tabWidth?: any; // TODO: Add more specific type
@@ -555,7 +555,7 @@ declare module "react-bootstrap" {
     // ----------------------------------------
     interface PagerProps extends React.Props<PagerClass> {
         className?: string;
-        onSelect?: Function;
+        onSelect?: React.ReactEventHandler;
     }
     interface Pager extends React.ReactElement<PagerProps> { }
     interface PagerClass extends React.ComponentClass<PagerProps> { }
@@ -570,7 +570,7 @@ declare module "react-bootstrap" {
         eventKey?: any;
         href?: string;
         next?: boolean;
-        onSelect?: Function;
+        onSelect?: React.ReactEventHandler;
         previous?: boolean;
         target?: string;
         title?: string;
@@ -594,7 +594,7 @@ declare module "react-bootstrap" {
         last?: boolean;
         maxButtons?: number;
         next?: boolean;
-        onSelect?: Function;
+        onSelect?: React.ReactEventHandler;
         prev?: boolean;
     }
     interface Pagination extends React.ReactElement<PaginationProps> { }
@@ -630,7 +630,7 @@ declare module "react-bootstrap" {
         indicators?: boolean;
         interval?: number;
         nextIcon?: any; // TODO: Add more specific type
-        onSelect?: Function;
+        onSelect?: React.ReactEventHandler;
         onSlideEnd?: Function;
         pauseOnHover?: boolean;
         prevIcon?: any; // TODO: Add more specific type
@@ -749,7 +749,7 @@ declare module "react-bootstrap" {
         href?: string;
         key?: any; // TODO: Add more specific type 
         listItem?: boolean;
-        onClick?: Function; // TODO: Add more specific type 
+        onClick?: React.MouseEventHandler; // TODO: Add more specific type 
         target?: string;
     }
     interface ListGroupItem extends React.ReactElement<ListGroupItemProps> { }
@@ -900,7 +900,7 @@ declare module "react-bootstrap" {
         label?: any; // TODO: Add more specific type 
         labelClassName?: string;
         multiple?: boolean;
-        onClick?: Function; // TODO: Add more specific type 
+        onClick?: React.MouseEventHandler; // TODO: Add more specific type 
         type?: string;
         value?: any; // TODO: Add more specific type
         wrapperClassName?: string;

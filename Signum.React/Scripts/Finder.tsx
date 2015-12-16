@@ -2,7 +2,7 @@
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { baseUrl, ajaxGet, ajaxPost } from 'Framework/Signum.React/Scripts/Services';
 import { QuerySettings } from 'Framework/Signum.React/Scripts/QuerySettings';
-import { FindOptions, FilterOptions, OrderOption, ColumnOptions, QueryToken, FilterOperation, OrderType, ColumnOptionsMode, QueryDescription, ColumnDescription, FilterType } from 'Framework/Signum.React/Scripts/FindOptions';
+import { FindOptions, FilterOption, OrderOption, ColumnOption, QueryToken, FilterOperation, OrderType, ColumnOptionsMode, QueryDescription, ColumnDescription, FilterType, ResultTable, QueryRequest } from 'Framework/Signum.React/Scripts/FindOptions';
 import { IEntity, Lite, toLite, liteKey, parseLite } from 'Framework/Signum.React/Scripts/Signum.Entities';
 import { Type, IType, EntityKind, QueryKey, queryNiceName, queryKey, TypeReference } from 'Framework/Signum.React/Scripts/Reflection';
 import * as Navigator from 'Framework/Signum.React/Scripts/Navigator';
@@ -52,11 +52,16 @@ export function getQueryDescription(queryName: any): Promise<QueryDescription>{
     if (queryDescriptionCache[key])
         return Promise.resolve(queryDescriptionCache[key]);
 
-    return ajaxGet<QueryDescription>({ url: "api/query/description/" + queryKey(queryName) })
+    return ajaxGet<QueryDescription>({ url: "/api/query/description/" + key })
         .then(qd => {
             queryDescriptionCache[key] = qd;
             return qd;
         });
+}
+
+
+export function search(request: QueryRequest): Promise<ResultTable> {    
+    return ajaxPost<ResultTable>({ url: "/api/query/search"}, request);
 }
 
 
@@ -85,30 +90,30 @@ export function findOptionsPath(queryName: any): string
         showFilterButton: fo.showFilterButton,
         showFilters: fo.showFilters,
         showFooter: fo.showFooter,
-        showHeader: fo.showHeader
+        showHeader: fo.showHeader,
     };
 
     return Navigator.currentHistory.createPath("/Find/" + queryKey(fo.queryName), query);
 }
 
-export function parseFindOptionsPath(queryName: string, query: any): Promise<FindOptions> {
-
+export function parseFindOptionsPath(queryName: string, query: any): FindOptions {
+    
     var result = {
         queryName: queryName,
         filterOptions: Decoder.decodeFilters(query.filters),
         orderOptions: Decoder.decodeOrders(query.orders),
         columnOptions: Decoder.decodeColumns(query.columns),
-        columnOptionsMode: query.columnOptions || ColumnOptionsMode.Add,
+        columnOptionsMode: query.columnOptions,
         create: parseBoolean(query.create),
         navigate: parseBoolean(query.navigate),
         searchOnLoad: parseBoolean(query.searchOnLoad),
         showFilterButton: parseBoolean(query.showFilterButton),
         showFilters: parseBoolean(query.showFilters),
         showFooter: parseBoolean(query.showFooter),
-        showHeader: parseBoolean(query.showHeader)
+        showHeader: parseBoolean(query.showHeader),
     };
 
-    return parseTokens(result);
+    return result;
 }
 
 
@@ -116,21 +121,21 @@ export function parseFindOptionsPath(queryName: string, query: any): Promise<Fin
 
 export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
 
-    var completer = new TokenCompleter();
+    var completer = new TokenCompleter(findOptions.queryName);
 
     if (findOptions.filterOptions)
-        findOptions.filterOptions.forEach(fo=> completer.complete(fo).then(_=> parseValue(fo)));
+        findOptions.filterOptions.forEach(fo=> completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll).then(_=> parseValue(fo)));
 
     if (findOptions.orderOptions)
-        findOptions.orderOptions.forEach(fo=> completer.complete(fo));
+        findOptions.orderOptions.forEach(fo=> completer.complete(fo, SubTokensOptions.CanElement));
 
     if (findOptions.columnOptions)
-        findOptions.columnOptions.forEach(fo=> completer.complete(fo));
+        findOptions.columnOptions.forEach(fo=> completer.complete(fo, SubTokensOptions.CanElement));
 
     return completer.finish().then(a=> findOptions);
 }
 
-function parseValue(fo: FilterOptions) {
+function parseValue(fo: FilterOption) {
     switch (filterType(fo.token)) {
         case FilterType.Boolean: fo.value = parseBoolean(fo.value);
         case FilterType.Integer: fo.value = parseInt(fo.value) || null;
@@ -159,20 +164,25 @@ function calculateFilterType(typeRef: TypeReference): FilterType {
     return FilterType.Boolean;
 }
 
+export enum SubTokensOptions {
+    CanAggregate = 1,
+    CanAnyAll = 2,
+    CanElement = 4,
+}
 
 
 class TokenCompleter
 {
-    queryName: any;
+    constructor(public queryName: any) { }
 
-    tokensToRequest: { [fullKey: string]: ({ promise: Promise<QueryToken>, resolve: (action: QueryToken) => void }) };
+    tokensToRequest: { [fullKey: string]: ({ options: SubTokensOptions, promise: Promise<QueryToken>, resolve: (action: QueryToken) => void }) };
 
 
-    complete(tokenContainer: { columnName: string, token?: QueryToken }) : Promise<void> {
+    complete(tokenContainer: { columnName: string, token?: QueryToken }, options: SubTokensOptions) : Promise<void> {
         if (tokenContainer.token)
             return;
 
-        return this.request(tokenContainer.columnName)
+        return this.request(tokenContainer.columnName, options)
             .then(token => { tokenContainer.token = token; });
     }
 
@@ -190,7 +200,7 @@ class TokenCompleter
         };
     }
 
-    request(fullKey: string): Promise<QueryToken> {
+    request(fullKey: string, options: SubTokensOptions): Promise<QueryToken> {
 
         if (!fullKey.contains("."))
             return getQueryDescription(this.queryName).then(qd=> this.simpleQueryToken(qd.columns[fullKey]));
@@ -200,7 +210,7 @@ class TokenCompleter
         if (bucket)
             return bucket.promise;
 
-        bucket = { promise: null, resolve: null };
+        bucket = { promise: null, resolve: null, options: options };
 
         bucket.promise = new Promise<QueryToken>((resolve, reject) => {
             bucket.resolve = resolve;
@@ -213,10 +223,13 @@ class TokenCompleter
     finish(): Promise<void> {
         var request = {
             queryKey: queryKey(this.queryName),
-            tokens: Dic.getKeys(this.tokensToRequest)
+            tokens: Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }))
         }; 
+
+        if (request.tokens.length == 0)
+            return Promise.resolve(null);
         
-        return ajaxPost<QueryToken[]>({ url: "api/query/parseTokens" }, request).then(tokens=> {
+        return ajaxPost<QueryToken[]>({ url: "/api/query/parseTokens" }, request).then(tokens=> {
             tokens.forEach(t=> this.tokensToRequest[t.fullKey].resolve(t));
         });
     }
@@ -232,12 +245,12 @@ function parseBoolean(value: any): boolean
     if (value === "false" || value === false)
         return false;
 
-    return null;
+    return undefined;
 }
 
 module Encoder {
 
-    export function encodeFilters(filterOptions: FilterOptions[]) {
+    export function encodeFilters(filterOptions: FilterOption[]) {
         return !filterOptions ? null : filterOptions.map(fo=> getTokenString(fo) + "," + FilterOperation[fo.operation] + "," + stringValue(fo.value));
     }
 
@@ -245,7 +258,7 @@ module Encoder {
         return !orderOptions ? null : orderOptions.map(oo=> (oo.orderType == OrderType.Descending ? "-" : "") + getTokenString(oo));
     }
 
-    export function encodeColumns(columnOptions: ColumnOptions[]) {
+    export function encodeColumns(columnOptions: ColumnOption[]) {
         return !columnOptions ? null : columnOptions.map(co=> getTokenString(co) + (co.displayName ? ("," + co.displayName) : ""));
     }
 
@@ -275,23 +288,23 @@ module Decoder {
     }
 
 
-    export function decodeFilters(filters: string | string[]): FilterOptions[] {
+    export function decodeFilters(filters: string | string[]): FilterOption[] {
 
         if (!filters)
-            return null;
+            return undefined;
         
         return asArray(filters).map(val=> val.split(","))
             .map(vals=> ({
                 columnName: vals[0],
                 operation: vals[1] as any,
                 value: vals[2]
-            }) as FilterOptions);
+            }) as FilterOption);
     }
 
     export function decodeOrders(orders: string | string[]): OrderOption[] {
         
         if (!orders)
-            return null;
+            return undefined;
 
         return asArray(orders).map(val=> ({
             orderType: val[0] == "-" ? OrderType.Descending : OrderType.Ascending,
@@ -299,15 +312,15 @@ module Decoder {
         }));
     }
 
-    export function decodeColumns(columns: string | string[]): ColumnOptions[]{
+    export function decodeColumns(columns: string | string[]): ColumnOption[]{
 
         if (!columns)
-            return null;
+            return undefined;
 
         return asArray(columns).map(val=> ({
             columnName: val[0].tryBefore(",") || val[0],
             displayName: val[0].tryAfter(",")
-        }) as ColumnOptions);
+        }) as ColumnOption);
     }
 
     export function getEntity(value: any): string {
@@ -328,6 +341,17 @@ module Decoder {
 function getTokenString(tokenContainer: { columnName: string, token?: QueryToken }) {
     return tokenContainer.token ? tokenContainer.token.fullKey : tokenContainer.columnName;
 }
+
+
+export module ButtonBarQuery {
+
+    export function getButtonBarElements(queryKey: string) {
+        return null;
+    }
+
+}
+
+
 
 
 
