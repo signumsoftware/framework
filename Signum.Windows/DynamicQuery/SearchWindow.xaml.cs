@@ -213,7 +213,7 @@ namespace Signum.Windows
             else
                 this.QueryNameTitle = "- " + this.QueryNameTitle;
 
-            AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
+            AutomationProperties.SetName(this, QueryUtils.GetKey(QueryName));
         }
 
         void ButtonsChanged()

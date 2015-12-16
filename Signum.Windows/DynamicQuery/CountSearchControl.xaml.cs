@@ -189,7 +189,7 @@ namespace Signum.Windows
 
             FilterOption.SetFilterTokens(FilterOptions, qd);
 
-            AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
+            AutomationProperties.SetName(this, QueryUtils.GetKey(QueryName));
 
             Search();
 

@@ -338,7 +338,7 @@ namespace Signum.Windows
 
             entityColumn = Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
             if (entityColumn == null)
-                throw new InvalidOperationException("Entity Column not found on {0}".FormatWith(QueryUtils.GetQueryUniqueKey(QueryName)));
+                throw new InvalidOperationException("Entity Column not found on {0}".FormatWith(QueryUtils.GetKey(QueryName)));
         }
 
         ColumnDescription entityColumn;
@@ -466,7 +466,7 @@ namespace Signum.Windows
 
             UpdateVisibility();
 
-            AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
+            AutomationProperties.SetName(this, QueryUtils.GetKey(QueryName));
 
             foreach (var item in FilterOptions)
             {

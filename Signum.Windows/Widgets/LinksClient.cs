@@ -236,7 +236,7 @@ namespace Signum.Windows
 
         public override string Name
         {
-            get { return QueryUtils.GetQueryUniqueKey(Options.QueryName); }
+            get { return QueryUtils.GetKey(Options.QueryName); }
         }
     }
 

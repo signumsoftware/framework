@@ -22,7 +22,7 @@
      class="sf-search-control SF-control-container" 
      data-prefix="@Model.Prefix" 
      data-find-url="@Finder.FindRoute(findOptions.QueryName)" 
-     data-queryName="@QueryUtils.GetQueryUniqueKey(findOptions.QueryName)" 
+     data-queryName="@QueryUtils.GetKey(findOptions.QueryName)" 
      >
     @if (settings.SimpleFilterBuilder != null)
     {
