@@ -158,20 +158,10 @@ namespace Signum.TSGenerator
             sb.AppendLine($"export enum {type.Name} {{");
 
             var fields = type.GetFields(BindingFlags.Static | BindingFlags.Public);
-
-            long value = 0;
             foreach (var field in fields)
             {
                 string context = $"By type {type.Name} and field {field.Name}";
-
-                var constantValue = Convert.ToInt64(field.GetValue(null));
-
-                if (value == constantValue)
-                    sb.AppendLine($"    {field.Name},");
-                else
-                    sb.AppendLine($"    {field.Name} = {constantValue},");
-
-                value = constantValue + 1;
+                sb.AppendLine($"    {field.Name} = \"{field.Name}\" as any,");
             }
             sb.AppendLine(@"}");
             sb.AppendLine($"export const {type.Name}_Type = new EnumType<{type.Name}>(\"{type.Name}\", {type.Name});");
