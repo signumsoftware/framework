@@ -10,8 +10,8 @@ import * as Basics from 'Extensions/Signum.React.Extensions/Basics/Signum.Entiti
 import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization' 
 
 export enum TranslatedCultureAction {
-    Translate,
-    Read,
+    Translate = "Translate" as any,
+    Read = "Read" as any,
 }
 export const TranslatedCultureAction_Type = new EnumType<TranslatedCultureAction>("TranslatedCultureAction", TranslatedCultureAction);
 

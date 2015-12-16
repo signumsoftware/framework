@@ -153,21 +153,21 @@ export module TaskOperation {
 }
 
 export enum TypeEvent {
-    Start,
-    Stop,
+    Start = "Start" as any,
+    Stop = "Stop" as any,
 }
 export const TypeEvent_Type = new EnumType<TypeEvent>("TypeEvent", TypeEvent);
 
 export namespace External {
 
     export enum DayOfWeek {
-        Sunday,
-        Monday,
-        Tuesday,
-        Wednesday,
-        Thursday,
-        Friday,
-        Saturday,
+        Sunday = "Sunday" as any,
+        Monday = "Monday" as any,
+        Tuesday = "Tuesday" as any,
+        Wednesday = "Wednesday" as any,
+        Thursday = "Thursday" as any,
+        Friday = "Friday" as any,
+        Saturday = "Saturday" as any,
     }
     export const DayOfWeek_Type = new EnumType<DayOfWeek>("DayOfWeek", DayOfWeek);
     

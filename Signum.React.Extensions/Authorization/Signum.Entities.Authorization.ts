@@ -118,9 +118,9 @@ export module AuthMessage {
 }
 
 export enum AuthThumbnail {
-    All,
-    Mix,
-    None,
+    All = "All" as any,
+    Mix = "Mix" as any,
+    None = "None" as any,
 }
 export const AuthThumbnail_Type = new EnumType<AuthThumbnail>("AuthThumbnail", AuthThumbnail);
 
@@ -144,15 +144,15 @@ export interface LastAuthRulesImportEntity extends Entities.Entity {
 }
 
 export enum MergeStrategy {
-    Union,
-    Intersection,
+    Union = "Union" as any,
+    Intersection = "Intersection" as any,
 }
 export const MergeStrategy_Type = new EnumType<MergeStrategy>("MergeStrategy", MergeStrategy);
 
 export enum OperationAllowed {
-    None,
-    DBOnly,
-    Allow,
+    None = "None" as any,
+    DBOnly = "DBOnly" as any,
+    Allow = "Allow" as any,
 }
 export const OperationAllowed_Type = new EnumType<OperationAllowed>("OperationAllowed", OperationAllowed);
 
@@ -188,9 +188,9 @@ export interface PermissionSymbol extends Entities.Symbol {
 }
 
 export enum PropertyAllowed {
-    None,
-    Read,
-    Modify,
+    None = "None" as any,
+    Read = "Read" as any,
+    Modify = "Modify" as any,
 }
 export const PropertyAllowed_Type = new EnumType<PropertyAllowed>("PropertyAllowed", PropertyAllowed);
 
@@ -282,16 +282,16 @@ export module SessionLogPermission {
 }
 
 export enum TypeAllowed {
-    None,
-    DBReadUINone = 4,
-    Read,
-    DBModifyUINone = 8,
-    DBModifyUIRead,
-    Modify,
-    DBCreateUINone = 12,
-    DBCreateUIRead,
-    DBCreateUIModify,
-    Create,
+    None = "None" as any,
+    DBReadUINone = "DBReadUINone" as any,
+    Read = "Read" as any,
+    DBModifyUINone = "DBModifyUINone" as any,
+    DBModifyUIRead = "DBModifyUIRead" as any,
+    Modify = "Modify" as any,
+    DBCreateUINone = "DBCreateUINone" as any,
+    DBCreateUIRead = "DBCreateUIRead" as any,
+    DBCreateUIModify = "DBCreateUIModify" as any,
+    Create = "Create" as any,
 }
 export const TypeAllowed_Type = new EnumType<TypeAllowed>("TypeAllowed", TypeAllowed);
 
@@ -343,9 +343,9 @@ export module UserOperation {
 }
 
 export enum UserState {
-    New = -1,
-    Saved,
-    Disabled,
+    New = "New" as any,
+    Saved = "Saved" as any,
+    Disabled = "Disabled" as any,
 }
 export const UserState_Type = new EnumType<UserState>("UserState", UserState);
 

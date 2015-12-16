@@ -89,15 +89,15 @@ export module ProcessPermission {
 }
 
 export enum ProcessState {
-    Created,
-    Planned,
-    Canceled,
-    Queued,
-    Executing,
-    Suspending,
-    Suspended,
-    Finished,
-    Error,
+    Created = "Created" as any,
+    Planned = "Planned" as any,
+    Canceled = "Canceled" as any,
+    Queued = "Queued" as any,
+    Executing = "Executing" as any,
+    Suspending = "Suspending" as any,
+    Suspended = "Suspended" as any,
+    Finished = "Finished" as any,
+    Error = "Error" as any,
 }
 export const ProcessState_Type = new EnumType<ProcessState>("ProcessState", ProcessState);
 

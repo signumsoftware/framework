@@ -28,9 +28,9 @@ export interface DisconnectedExportEntity extends Entities.Entity {
 }
 
 export enum DisconnectedExportState {
-    InProgress,
-    Completed,
-    Error,
+    InProgress = "InProgress" as any,
+    Completed = "Completed" as any,
+    Error = "Error" as any,
 }
 export const DisconnectedExportState_Type = new EnumType<DisconnectedExportState>("DisconnectedExportState", DisconnectedExportState);
 
@@ -58,9 +58,9 @@ export interface DisconnectedImportEntity extends Entities.Entity {
 }
 
 export enum DisconnectedImportState {
-    InProgress,
-    Completed,
-    Error,
+    InProgress = "InProgress" as any,
+    Completed = "Completed" as any,
+    Error = "Error" as any,
 }
 export const DisconnectedImportState_Type = new EnumType<DisconnectedImportState>("DisconnectedImportState", DisconnectedImportState);
 
@@ -90,10 +90,10 @@ export module DisconnectedMachineOperation {
 }
 
 export enum DisconnectedMachineState {
-    Connected,
-    Disconnected,
-    Faulted,
-    Fixed,
+    Connected = "Connected" as any,
+    Disconnected = "Disconnected" as any,
+    Faulted = "Faulted" as any,
+    Fixed = "Fixed" as any,
 }
 export const DisconnectedMachineState_Type = new EnumType<DisconnectedMachineState>("DisconnectedMachineState", DisconnectedMachineState);
 

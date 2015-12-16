@@ -27,9 +27,9 @@ export interface CountUserQueryElementEntity extends Entities.EmbeddedEntity {
 }
 
 export enum DashboardEmbedededInEntity {
-    None,
-    Top,
-    Bottom,
+    None = "None" as any,
+    Top = "Top" as any,
+    Bottom = "Bottom" as any,
 }
 export const DashboardEmbedededInEntity_Type = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity", DashboardEmbedededInEntity);
 
@@ -94,12 +94,12 @@ export interface PanelPartEntity extends Entities.EmbeddedEntity {
 }
 
 export enum PanelStyle {
-    Default,
-    Primary,
-    Success,
-    Info,
-    Warning,
-    Danger,
+    Default = "Default" as any,
+    Primary = "Primary" as any,
+    Success = "Success" as any,
+    Info = "Info" as any,
+    Warning = "Warning" as any,
+    Danger = "Danger" as any,
 }
 export const PanelStyle_Type = new EnumType<PanelStyle>("PanelStyle", PanelStyle);
 

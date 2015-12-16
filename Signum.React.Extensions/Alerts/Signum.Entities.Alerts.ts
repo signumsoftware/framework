@@ -40,9 +40,9 @@ export module AlertOperation {
 }
 
 export enum AlertState {
-    New,
-    Saved,
-    Attended,
+    New = "New" as any,
+    Saved = "Saved" as any,
+    Attended = "Attended" as any,
 }
 export const AlertState_Type = new EnumType<AlertState>("AlertState", AlertState);
 

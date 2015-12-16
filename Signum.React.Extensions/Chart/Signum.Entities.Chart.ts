@@ -26,17 +26,17 @@ export interface ChartColumnEntity extends Entities.EmbeddedEntity {
 }
 
 export enum ChartColumnType {
-    Integer = 1,
-    Real,
-    Date = 4,
-    DateTime = 8,
-    String = 16,
-    Lite = 32,
-    Enum = 64,
-    RealGroupable = 128,
-    Groupable = 268435701,
-    Magnitude = 268435587,
-    Positionable = 268435663,
+    Integer = "Integer" as any,
+    Real = "Real" as any,
+    Date = "Date" as any,
+    DateTime = "DateTime" as any,
+    String = "String" as any,
+    Lite = "Lite" as any,
+    Enum = "Enum" as any,
+    RealGroupable = "RealGroupable" as any,
+    Groupable = "Groupable" as any,
+    Magnitude = "Magnitude" as any,
+    Positionable = "Positionable" as any,
 }
 export const ChartColumnType_Type = new EnumType<ChartColumnType>("ChartColumnType", ChartColumnType);
 
@@ -89,9 +89,9 @@ export interface ChartParameterEntity extends Entities.EmbeddedEntity {
 }
 
 export enum ChartParameterType {
-    Enum,
-    Number,
-    String,
+    Enum = "Enum" as any,
+    Number = "Number" as any,
+    String = "String" as any,
 }
 export const ChartParameterType_Type = new EnumType<ChartParameterType>("ChartParameterType", ChartParameterType);
 
@@ -133,9 +133,9 @@ export interface ChartScriptParameterEntity extends Entities.EmbeddedEntity {
 }
 
 export enum GroupByChart {
-    Always,
-    Optional,
-    Never,
+    Always = "Always" as any,
+    Optional = "Optional" as any,
+    Never = "Never" as any,
 }
 export const GroupByChart_Type = new EnumType<GroupByChart>("GroupByChart", GroupByChart);
 

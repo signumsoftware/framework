@@ -7,9 +7,9 @@ import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities'
 
 import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization' 
 export enum EntityAction {
-    Identical,
-    Different,
-    New,
+    Identical = "Identical" as any,
+    Different = "Different" as any,
+    New = "New" as any,
 }
 export const EntityAction_Type = new EnumType<EntityAction>("EntityAction", EntityAction);
 

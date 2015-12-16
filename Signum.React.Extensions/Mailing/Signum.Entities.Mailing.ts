@@ -21,8 +21,8 @@ export module AsyncEmailSenderPermission {
 }
 
 export enum CertFileType {
-    CertFile,
-    SignedFile,
+    CertFile = "CertFile" as any,
+    SignedFile = "SignedFile" as any,
 }
 export const CertFileType_Type = new EnumType<CertFileType>("CertFileType", CertFileType);
 
@@ -47,8 +47,8 @@ export interface EmailAttachmentEntity extends Entities.EmbeddedEntity {
 }
 
 export enum EmailAttachmentType {
-    Attachment,
-    LinkedResource,
+    Attachment = "Attachment" as any,
+    LinkedResource = "LinkedResource" as any,
 }
 export const EmailAttachmentType_Type = new EnumType<EmailAttachmentType>("EmailAttachmentType", EmailAttachmentType);
 
@@ -138,15 +138,15 @@ export module EmailMessageProcess {
 }
 
 export enum EmailMessageState {
-    Created,
-    Draft,
-    ReadyToSend,
-    RecruitedForSending,
-    Sent,
-    SentException,
-    ReceptionNotified,
-    Received,
-    Outdated,
+    Created = "Created" as any,
+    Draft = "Draft" as any,
+    ReadyToSend = "ReadyToSend" as any,
+    RecruitedForSending = "RecruitedForSending" as any,
+    Sent = "Sent" as any,
+    SentException = "SentException" as any,
+    ReceptionNotified = "ReceptionNotified" as any,
+    Received = "Received" as any,
+    Outdated = "Outdated" as any,
 }
 export const EmailMessageState_Type = new EnumType<EmailMessageState>("EmailMessageState", EmailMessageState);
 
@@ -176,9 +176,9 @@ export interface EmailRecipientEntity extends EmailAddressEntity {
 }
 
 export enum EmailRecipientKind {
-    To,
-    Cc,
-    Bcc,
+    To = "To" as any,
+    Cc = "Cc" as any,
+    Bcc = "Bcc" as any,
 }
 export const EmailRecipientKind_Type = new EnumType<EmailRecipientKind>("EmailRecipientKind", EmailRecipientKind);
 
@@ -284,9 +284,9 @@ export module NewsletterProcess {
 }
 
 export enum NewsletterState {
-    Created,
-    Saved,
-    Sent,
+    Created = "Created" as any,
+    Saved = "Saved" as any,
+    Sent = "Sent" as any,
 }
 export const NewsletterState_Type = new EnumType<NewsletterState>("NewsletterState", NewsletterState);
 
@@ -361,15 +361,15 @@ export interface SystemEmailEntity extends Entities.Entity {
 export namespace External {
 
     export enum SmtpDeliveryFormat {
-        SevenBit,
-        International,
+        SevenBit = "SevenBit" as any,
+        International = "International" as any,
     }
     export const SmtpDeliveryFormat_Type = new EnumType<SmtpDeliveryFormat>("SmtpDeliveryFormat", SmtpDeliveryFormat);
     
     export enum SmtpDeliveryMethod {
-        Network,
-        SpecifiedPickupDirectory,
-        PickupDirectoryFromIis,
+        Network = "Network" as any,
+        SpecifiedPickupDirectory = "SpecifiedPickupDirectory" as any,
+        PickupDirectoryFromIis = "PickupDirectoryFromIis" as any,
     }
     export const SmtpDeliveryMethod_Type = new EnumType<SmtpDeliveryMethod>("SmtpDeliveryMethod", SmtpDeliveryMethod);
     

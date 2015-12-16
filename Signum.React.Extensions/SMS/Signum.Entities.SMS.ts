@@ -10,9 +10,9 @@ import * as Basics from 'Extensions/Signum.React.Extensions/Basics/Signum.Entiti
 import * as Processes from 'Extensions/Signum.React.Extensions/Processes/Signum.Entities.Processes' 
 
 export enum MessageLengthExceeded {
-    NotAllowed,
-    Allowed,
-    TextPruning,
+    NotAllowed = "NotAllowed" as any,
+    Allowed = "Allowed" as any,
+    TextPruning = "TextPruning" as any,
 }
 export const MessageLengthExceeded_Type = new EnumType<MessageLengthExceeded>("MessageLengthExceeded", MessageLengthExceeded);
 
@@ -75,10 +75,10 @@ export module SMSMessageProcess {
 }
 
 export enum SMSMessageState {
-    Created,
-    Sent,
-    Delivered,
-    Failed,
+    Created = "Created" as any,
+    Sent = "Sent" as any,
+    Delivered = "Delivered" as any,
+    Failed = "Failed" as any,
 }
 export const SMSMessageState_Type = new EnumType<SMSMessageState>("SMSMessageState", SMSMessageState);
 
