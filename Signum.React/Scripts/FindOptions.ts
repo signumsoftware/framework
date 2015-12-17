@@ -144,7 +144,7 @@ export module PaginateMath {
     }
 
     export function totalPages(p: Pagination, totalElements: number) {
-        return (totalElements + p.elementsPerPage - 1) / p.elementsPerPage; //Round up
+        return Math.ceil(totalElements / p.elementsPerPage); //Round up
     }
 
     export function maxElementIndex(p: Pagination) {

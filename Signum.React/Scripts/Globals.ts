@@ -264,10 +264,10 @@ interface ArrayConstructor {
 
 Array.range = function (min, max) {
 
-    var lenth = max - min;
+    var length = max - min;
 
     var result = new Array(length);
-    for (var i = 0; i < max; i++) {
+    for (var i = 0; i < length; i++) {
         result[i] = min + i;
     }
 
@@ -280,10 +280,10 @@ interface String {
     startsWith(str: string): boolean;
     endsWith(str: string): boolean;
     formatWith(...parameters: any[]): string;
-    formatHtml(...parameters: any[]): string;
-    forGengerAndNumber(number: number): string;
-    forGengerAndNumber(gender: string): string;
-    forGengerAndNumber(gender: any, number: number): string;
+    formatHtml(...parameters: any[]): any[];
+    forGenderAndNumber(number: number): string;
+    forGenderAndNumber(gender: string): string;
+    forGenderAndNumber(gender: any, number: number): string;
     replaceAll(from: string, to: string);
     after(separator: string): string;
     before(separator: string): string;
@@ -339,27 +339,28 @@ String.prototype.formatHtml = function () {
     }
     result.push(parts[parts.length - 1]);
 
-    return parts;
+    return result;
 };
 
-String.prototype.forGengerAndNumber = function (gender: any, number?: number) {
+String.prototype.forGenderAndNumber = function (gender: any, number?: number) {
 
-    if (isNaN(parseFloat(gender)) && !number) {
+    if (!number && !isNaN(parseFloat(gender))) {
         number = gender;
         gender = null;
     }
 
-    if (gender == null && number == null)
+    if ((gender == null || gender == "") && number == null)
         return this;
 
     function replacePart(textToReplace: string, ...prefixes: string[]): string {
         return textToReplace.replace(/\[[^\]\|]+(\|[^\]\|]+)*\]/g, m => {
             var captures = m.substr(1, m.length - 2).split("|");
 
-            for (var pr in prefixes) {
+            for (var i = 0; i < prefixes.length; i++){
+                var pr = prefixes[i];
                 var capture = captures.filter(c => c.startsWith(pr)).firstOrNull();
                 if (capture != null)
-                    return capture.substr(pr.Length);
+                    return capture.substr(pr.length);
             }
 
             return "";
@@ -374,7 +375,7 @@ String.prototype.forGengerAndNumber = function (gender: any, number?: number) {
         if (number == 1)
             return replacePart(this, "1:");
 
-        return replacePart(this, number + ":", ":");
+        return replacePart(this, number + ":", ":", "");
     }
 
     if (number == 1)
