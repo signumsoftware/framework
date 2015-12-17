@@ -120,6 +120,7 @@ export module EmailMessageMessage {
     export const From = new MessageKey("EmailMessageMessage", "From");
     export const To = new MessageKey("EmailMessageMessage", "To");
     export const Attachments = new MessageKey("EmailMessageMessage", "Attachments");
+    export const _01requiresExtraParameters = new MessageKey("EmailMessageMessage", "_01requiresExtraParameters");
 }
 
 export module EmailMessageOperation {
