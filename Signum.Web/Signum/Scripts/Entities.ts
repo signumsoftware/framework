@@ -111,19 +111,21 @@ export class EntityValue {
     }
 
     public static fromKey(key: string): EntityValue {
-        if (SF.isEmpty(key))
+
+        var ri = RuntimeInfo.fromKey(key);
+
+        if (!ri)
             return null;
 
-        var index = key.indexOf(";");
-        if (index == -1)
+        var firstIndex = key.indexOf(";");
+        if (firstIndex == -1)
             throw Error("{0} not found".format(";"));
 
-        index = key.indexOf(";");
-
-        if (index == -1)
+        var secondIndex = key.indexOf(";", firstIndex + 1);
+        if (secondIndex == -1)
             return new EntityValue(RuntimeInfo.parse(key));
 
-        return new EntityValue(RuntimeInfo.parse(key.substr(0, index)), key.substr(index + 1));
+        return new EntityValue(RuntimeInfo.parse(key.substr(0, secondIndex)), key.substr(secondIndex + 1));
     }
 
     isLoaded() {

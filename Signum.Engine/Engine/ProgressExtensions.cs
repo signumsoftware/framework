@@ -16,6 +16,44 @@ namespace Signum.Engine
     {
         public static StopOnExceptionDelegate StopOnException = null;
 
+        public static void ProgressForeach<T>(this IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
+        {
+            LogWriter writer = GetLogWriter(null);
+
+            IProgressInfo pi;
+
+            var enumerator = collection.ToProgressEnumerator(out pi);
+
+            if (!Console.IsOutputRedirected)
+                SafeConsole.WriteSameLine(pi.ToString());
+
+            foreach (var item in enumerator)
+            {
+                using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                    try
+                    {
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            action(item);
+                            tr.Commit();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                        writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+
+                        if (StopOnException != null && StopOnException(elementID(item), null, e))
+                            throw;
+                    }
+
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.WriteSameLine(pi.ToString());
+            }
+            if (!Console.IsOutputRedirected)
+                SafeConsole.ClearSameLine();
+        }
+
         public static void ProgressForeach<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             using (StreamWriter log = TryOpenAutoFlush(fileName))
@@ -42,6 +80,46 @@ namespace Signum.Engine
                                 action(item, writer);
                                 tr.Commit();
                             }
+                        }
+                        catch (Exception e)
+                        {
+                            writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                            writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+
+                            if (StopOnException != null && StopOnException(elementID(item), fileName, e))
+                                throw;
+                        }
+
+                    if (!Console.IsOutputRedirected)
+                        SafeConsole.WriteSameLine(pi.ToString());
+                }
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.ClearSameLine();
+            }
+        }
+
+        public static void ProgressForeachNonTransactional<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
+        {
+            using (StreamWriter log = TryOpenAutoFlush(fileName))
+            {
+                if (log != null)
+                    log.AutoFlush = true;
+
+                LogWriter writer = GetLogWriter(log);
+
+                IProgressInfo pi;
+
+                var enumerator = collection.ToProgressEnumerator(out pi);
+
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.WriteSameLine(pi.ToString());
+
+                foreach (var item in enumerator)
+                {
+                    using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                        try
+                        {
+                            action(item, writer);
                         }
                         catch (Exception e)
                         {
@@ -143,8 +221,6 @@ namespace Signum.Engine
                 SafeConsole.ClearSameLine();
             }
         }
-
-       
 
         public static void ProgressForeachParallelDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
