@@ -329,9 +329,15 @@ namespace Signum.Engine.Mailing
                 throw new Exception(exceptions.ToString("\r\n\r\n"));
         }
 
-        public static void Regenerate(EmailTemplateEntity et)
+        public static bool Regenerate(EmailTemplateEntity et)
         {
-            EmailTemplateParser.Regenerate(et, null, Schema.Current.Table<EmailTemplateEntity>()).ExecuteLeaves();
+            var leaves = EmailTemplateParser.Regenerate(et, null, Schema.Current.Table<EmailTemplateEntity>());
+            
+            if (leaves == null)
+                return false;
+            
+            leaves.ExecuteLeaves();
+            return true;
         }
     }
 }

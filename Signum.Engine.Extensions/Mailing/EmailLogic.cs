@@ -226,10 +226,10 @@ namespace Signum.Engine.Mailing
                     CanConstruct = et => 
                     {
                         if (et.SystemEmail != null && SystemEmailLogic.RequiresExtraParameters(et.SystemEmail))
-                            return "SystemEmail ({1}) requires extra parameters ".FormatWith(et.SystemEmail);
+                            return EmailMessageMessage._01requiresExtraParameters.NiceToString(typeof(SystemEmailEntity).NiceName(), et.SystemEmail);
 
                         if (et.SendDifferentMessages)
-                            return "Cannot create email becaue {0} has SendDifferentMessages set";
+                            return ValidationMessage._0IsSet.NiceToString(ReflectionTools.GetPropertyInfo(() => et.SendDifferentMessages).NiceName());
 
                         return null;
                     },

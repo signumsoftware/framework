@@ -224,7 +224,6 @@
     <Content Include="Chart\ChartScripts\Columns.xml" />
     <Content Include="Chart\ChartScripts\Force graph.xml" />
     <Content Include="Chart\ChartScripts\Line.xml" />
-    <Content Include="Chart\ChartScripts\Table.xml" />
     <Content Include="Chart\ChartScripts\MultiBars.xml" />
     <Content Include="Chart\ChartScripts\MultiColumns.xml" />
     <Content Include="Chart\ChartScripts\MultiLines.xml" />
