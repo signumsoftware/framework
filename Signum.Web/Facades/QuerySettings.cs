@@ -47,7 +47,7 @@ namespace Signum.Web
         public EntityFormatter EntityFormatter { get; set; }
         public RowAttributes RowAttributes { get; set; }
         public List<ColumnOption> HiddenColumns { get; set; }
-        public SimpleFilterBuilder SimpleFilterBuilder { get; set; }
+        public Func<HtmlHelper, Context, QueryDescription, FindOptions, SimpleFilterBuilder> SimpleFilterBuilder { get; set; }
 
         static QuerySettings()
         {
@@ -153,10 +153,10 @@ namespace Signum.Web
 
     public class SimpleFilterBuilder
     {
-        public Func<HtmlHelper, Context, QueryDescription, MvcHtmlString> Control { get; set; }
-        public Func<UrlHelper, string> Url { get; set; }
+        public MvcHtmlString Control { get; set; }
+        public string Url { get; set; }
 
-        public SimpleFilterBuilder(Func<HtmlHelper, Context, QueryDescription, MvcHtmlString> control, Func<UrlHelper, string> url)
+        public SimpleFilterBuilder(MvcHtmlString control, string url)
         {
             this.Control = control;
             this.Url = url;

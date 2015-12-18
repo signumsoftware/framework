@@ -13,8 +13,11 @@
     Implementations implementations = entityColumn.Implementations.Value;
     var settings = Finder.QuerySettings(findOptions.QueryName);
     findOptions.Pagination = findOptions.Pagination ?? settings.Pagination ?? FindOptions.DefaultPagination;
-    
+
     ViewData[ViewDataKeys.FindOptions] = findOptions;
+
+    var sfb = settings.SimpleFilterBuilder == null ? null :
+        settings.SimpleFilterBuilder(Html, Model, queryDescription, findOptions);
 
     var prefix = Model.Compose("sfSearchControl");
 }
@@ -24,11 +27,11 @@
      data-find-url="@Finder.FindRoute(findOptions.QueryName)" 
      data-queryName="@QueryUtils.GetQueryUniqueKey(findOptions.QueryName)" 
      >
-    @if (settings.SimpleFilterBuilder != null)
+    @if (sfb != null)
     {
         findOptions.ShowFilters = false;
         <div id="@Model.Compose("simpleFilerBuilder")" class="form-horizontal">
-            @settings.SimpleFilterBuilder.Control(Html, Model, queryDescription)
+            @sfb.Control
         </div>
     }
 
@@ -149,5 +152,5 @@
     require(["@JsModule.Finder"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"),
         @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString())),
         @Html.Json(implementations.ToJsTypeInfos(isSearch : true, prefix: prefix)),
-        @Html.Json(settings.SimpleFilterBuilder == null ? null : settings.SimpleFilterBuilder.Url(Url))).ready();});
+        @Html.Json(sfb == null ? null : sfb.Url)).ready();});
 </script>
