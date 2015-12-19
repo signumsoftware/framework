@@ -13,7 +13,7 @@ export class PropertyRoute {
 
 export function getEnumInfo(enumTypeName: string, enumId: number) {
 
-    var ti = typeInfo(enumTypeName);
+    var ti = getTypeInfo(enumTypeName);
 
     if (!ti || ti.kind != KindOfType.Enum)
         throw new Error(`${enumTypeName} is not an Enum`);
@@ -92,7 +92,7 @@ var _queryNames: {
 
 export type PseudoType = IType | TypeInfo | string;
 
-export function typeInfo(type: PseudoType): TypeInfo {
+export function getTypeInfo(type: PseudoType): TypeInfo {
 
     if ((type as TypeInfo).kind != null)
         return type as TypeInfo;
@@ -108,15 +108,15 @@ export function typeInfo(type: PseudoType): TypeInfo {
 
 
 export const IsByAll = "[ALL]";
-export function typeInfos(typeReference: TypeReference): TypeInfo[] {
+export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
     if (typeReference.name == IsByAll)
         return [];
 
-    return typeReference.name.split(", ").map(typeInfo);
+    return typeReference.name.split(", ").map(getTypeInfo);
 
 }
 
-export function queryNiceName(queryName: any) {
+export function getQueryNiceName(queryName: any) {
 
     if ((queryName as TypeInfo).kind != null)
         return (queryName as TypeInfo).nicePluralName;
@@ -146,7 +146,7 @@ export function queryNiceName(queryName: any) {
 
 }
 
-export function queryKey(queryName: any): string {
+export function getQueryKey(queryName: any): string {
     if (queryName instanceof Type)
         return (queryName as Type<any>).typeName;
 
@@ -196,7 +196,7 @@ export function loadTypes(): Promise<void> {
 
 
 
-export function lambdaBody(lambda: Function): string {
+export function getLambdaBody(lambda: Function): string {
     return lambda.toString().after("return ").after(".").before(";");
 }
 
@@ -209,11 +209,11 @@ export class Type<T> implements IType {
         public typeName: string) { }
 
     typeInfo(): TypeInfo {
-        return typeInfo(this.typeName);
+        return getTypeInfo(this.typeName);
     }
 
     propertyInfo(lambdaToProperty: (v: T) => any): MemberInfo {
-        return this.typeInfo().members[lambdaBody(lambdaToProperty)];
+        return this.typeInfo().members[getLambdaBody(lambdaToProperty)];
     }
 
     niceName() {
@@ -237,7 +237,7 @@ export class EnumType<T> {
     ) { }
 
     typeInfo(): TypeInfo {
-        return typeInfo(this.type);
+        return getTypeInfo(this.type);
     }
 
     niceName(value?: T): string {
@@ -258,7 +258,7 @@ export class MessageKey {
         public name: string) { }
 
     propertyInfo(): MemberInfo {
-        return typeInfo(this.type).members[this.name]
+        return getTypeInfo(this.type).members[this.name]
     }
 
     niceToString(): string {
@@ -273,7 +273,7 @@ export class QueryKey {
         public name: string) { }
 
     propertyInfo(): MemberInfo {
-        return typeInfo(this.type).members[this.name]
+        return getTypeInfo(this.type).members[this.name]
     }
 
     niceName(): string {

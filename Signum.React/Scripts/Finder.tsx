@@ -4,7 +4,7 @@ import { baseUrl, ajaxGet, ajaxPost } from 'Framework/Signum.React/Scripts/Servi
 import { QuerySettings } from 'Framework/Signum.React/Scripts/QuerySettings';
 import { FindOptions, FilterOption, OrderOption, ColumnOption, QueryToken, FilterOperation, OrderType, ColumnOptionsMode, QueryDescription, ColumnDescription, FilterType, ResultTable, QueryRequest } from 'Framework/Signum.React/Scripts/FindOptions';
 import { IEntity, Lite, toLite, liteKey, parseLite } from 'Framework/Signum.React/Scripts/Signum.Entities';
-import { Type, IType, EntityKind, QueryKey, queryNiceName, queryKey, TypeReference } from 'Framework/Signum.React/Scripts/Reflection';
+import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference } from 'Framework/Signum.React/Scripts/Reflection';
 import * as Navigator from 'Framework/Signum.React/Scripts/Navigator';
 
 
@@ -35,11 +35,11 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 export function addSettings(...settings: QuerySettings[]) {
-    settings.forEach(s=> Dic.addOrThrow(querySettings, queryKey(s.queryName), s));
+    settings.forEach(s=> Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
 export function getQuerySettings(queryName: any): QuerySettings {
-    return querySettings[queryKey(queryName)];
+    return querySettings[getQueryKey(queryName)];
 }
 
 
@@ -47,7 +47,7 @@ var queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
 
 export function getQueryDescription(queryName: any): Promise<QueryDescription>{
 
-    var key = queryKey(queryName);
+    var key = getQueryKey(queryName);
 
     if (queryDescriptionCache[key])
         return Promise.resolve(queryDescriptionCache[key]);
@@ -75,7 +75,7 @@ export function findOptionsPath(queryName: any): string
 {
     var fo = queryName as FindOptions;
     if (!fo.queryName)
-        return Navigator.currentHistory.createPath("/Find/" + queryKey(queryName)); 
+        return Navigator.currentHistory.createPath("/Find/" + getQueryKey(queryName)); 
     
     var base = findOptionsPath(fo.queryName);
 
@@ -93,7 +93,7 @@ export function findOptionsPath(queryName: any): string
         showHeader: fo.showHeader,
     };
 
-    return Navigator.currentHistory.createPath("/Find/" + queryKey(fo.queryName), query);
+    return Navigator.currentHistory.createPath("/Find/" + getQueryKey(fo.queryName), query);
 }
 
 export function parseFindOptionsPath(queryName: string, query: any): FindOptions {
@@ -222,7 +222,7 @@ class TokenCompleter
 
     finish(): Promise<void> {
         var request = {
-            queryKey: queryKey(this.queryName),
+            queryKey: getQueryKey(this.queryName),
             tokens: Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }))
         }; 
 

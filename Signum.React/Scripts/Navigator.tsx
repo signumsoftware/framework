@@ -1,7 +1,7 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { IEntity, Lite } from 'Framework/Signum.React/Scripts/Signum.Entities';
-import { PseudoType, EntityKind, TypeInfo, typeInfo } from 'Framework/Signum.React/Scripts/Reflection';
+import { PseudoType, EntityKind, TypeInfo, getTypeInfo } from 'Framework/Signum.React/Scripts/Reflection';
 import { EntitySettingsBase, EntitySettings, EmbeddedEntitySettings} from 'Framework/Signum.React/Scripts/EntitySettings';
 import * as Finder from 'Framework/Signum.React/Scripts/Finder';
 
@@ -32,7 +32,7 @@ export function navigateRoute(typeOfEntity: any, id: any = null) {
         id = (typeOfEntity as Lite<IEntity>).id;
     }
     else {
-        typeName = typeInfo(typeOfEntity as PseudoType).name;
+        typeName = getTypeInfo(typeOfEntity as PseudoType).name;
     }
 
     return "/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id;
@@ -51,7 +51,7 @@ export var isCreableEvent: Array<(t: TypeInfo) => boolean> = [];
 
 export function isCreable(type: PseudoType, isSearch?: boolean) {
 
-    var ti = typeInfo(type);
+    var ti = getTypeInfo(type);
 
     var es = entitySettings[ti.name];
     if (!es)
@@ -67,7 +67,7 @@ export var isFindableEvent: Array<(t: TypeInfo) => boolean> = [];
 
 export function isFindable(type: PseudoType, isSearch?: boolean) {
 
-    var ti = typeInfo(type)
+    var ti = getTypeInfo(type)
 
     if (!Finder.isFindable(type))
         return false;
@@ -82,7 +82,7 @@ export function isFindable(type: PseudoType, isSearch?: boolean) {
 export var isViewableEvent: Array<(t: TypeInfo | IEntity) => boolean> = []; 
 
 export function isViewable(typeOrEntity: PseudoType | IEntity, partialViewName: string): boolean{
-    var typeName = (typeOrEntity as IEntity).Type || typeInfo(typeOrEntity as PseudoType).name;
+    var typeName = (typeOrEntity as IEntity).Type || getTypeInfo(typeOrEntity as PseudoType).name;
 
     var es = entitySettings[typeName];
 
@@ -91,7 +91,7 @@ export function isViewable(typeOrEntity: PseudoType | IEntity, partialViewName: 
 }
 
 export function isNavigable(typeOrEntity: PseudoType | IEntity, partialViewName: string, isSearch: boolean = false): boolean {
-    var typeName = (typeOrEntity as IEntity).Type || typeInfo(typeOrEntity as PseudoType).name;
+    var typeName = (typeOrEntity as IEntity).Type || getTypeInfo(typeOrEntity as PseudoType).name;
 
     var es = entitySettings[typeName];
 

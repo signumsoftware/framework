@@ -1,6 +1,6 @@
 ﻿import {IEntity, Lite, EntityControlMessage, liteKey} from 'Framework/Signum.React/Scripts/Signum.Entities';
 import {Pagination, ResultColumn, FilterType, ResultTable, ResultRow, PaginationMode, ColumnOption} from 'Framework/Signum.React/Scripts/FindOptions';
-import {typeInfo, getEnumInfo} from 'Framework/Signum.React/Scripts/Reflection';
+import {getTypeInfo, getEnumInfo} from 'Framework/Signum.React/Scripts/Reflection';
 import {navigateRoute, isNavigable} from 'Framework/Signum.React/Scripts/Navigator';
 import * as React from 'react';
 import { Link  } from 'react-router';
@@ -12,7 +12,10 @@ export var defaultPagination: Pagination = {
     mode: PaginationMode.Paginate,
     elementsPerPage: 20,
     currentPage: 1,
-}; 
+};
+
+
+export const defaultOrderColumn: string = "Id";
 
 export interface QuerySettings {
     queryName: any;
