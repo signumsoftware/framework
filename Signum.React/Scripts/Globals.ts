@@ -7,6 +7,7 @@
 /// <reference path="../typings/react-widgets/react-widgets.d.ts" />
 /// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 /// <reference path="../typings/requirejs/require.d.ts" />
+/// <reference path="../typings/moment/moment.d.ts" />
 
 function hasFlag(value: number, flag: number): boolean {
     return (value & flag) == flag;

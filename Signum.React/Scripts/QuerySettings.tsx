@@ -1,11 +1,10 @@
 ﻿import {IEntity, Lite, EntityControlMessage, liteKey} from 'Framework/Signum.React/Scripts/Signum.Entities';
 import {Pagination, ResultColumn, FilterType, ResultTable, ResultRow, PaginationMode, ColumnOption} from 'Framework/Signum.React/Scripts/FindOptions';
-import {getTypeInfo, getEnumInfo} from 'Framework/Signum.React/Scripts/Reflection';
+import {getTypeInfo, getEnumInfo, toMomentFormat} from 'Framework/Signum.React/Scripts/Reflection';
 import {navigateRoute, isNavigable} from 'Framework/Signum.React/Scripts/Navigator';
 import * as React from 'react';
 import { Link  } from 'react-router';
-
-
+import * as moment from 'moment';
 
 
 export var defaultPagination: Pagination = {
@@ -64,7 +63,10 @@ export var FormatRules: FormatRule[] = [
     {
         name: "DateTime",
         isApplicable: col=> col.token.filterType == FilterType.DateTime,
-        formatter: col=> new CellFormatter((cell: string) => cell && cell.toString())
+        formatter: col=> {
+            var momentFormat = toMomentFormat(col.token.format);
+            return new CellFormatter((cell: string) => cell == null || cell == "" ? "" : moment(cell).format(momentFormat))
+        }
     },
     {
         name: "Number",
@@ -82,6 +84,7 @@ export var FormatRules: FormatRule[] = [
         formatter: col=> new CellFormatter((cell: boolean) => cell == null ? null : <input type="checkbox" disabled={true} checked={cell}/>)
     },
 ];
+
 
 
 

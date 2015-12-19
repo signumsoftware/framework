@@ -71,9 +71,6 @@ export enum FindMode {
 }
 
 
-
-
-
 export interface QueryToken {
     toString: string;
     niceName: string;
@@ -93,6 +90,7 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
         key: cd.name,
         fullKey: cd.name,
         unit: cd.unit,
+        format: cd.format,
         type: cd.type,
         filterType: cd.filterType,
     };

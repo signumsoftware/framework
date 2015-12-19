@@ -46,6 +46,29 @@ export interface MemberInfo {
     id?: any; //symbols
 }
 
+//https://msdn.microsoft.com/en-us/library/az4se3k1%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396
+//http://momentjs.com/docs/#/displaying/format/
+export function toMomentFormat(format: string): any {
+
+    switch (format) {
+        case "d": return "L"; // or "l"
+        case "D": return "LL";
+        case "f":
+        case "F": return "LLLL";
+        case "g": return "L LT";
+        case "G": return "L LTS";
+        case "M":
+        case "m": return "D MMM";
+        case "u":
+        case "s": return moment.ISO_8601;
+        case "t": return "LT";
+        case "T": return "LTS";
+        case "y": return "LTS";
+        case "Y": return "MMMM YYY";
+        default: format;
+    }
+}
+
 export interface TypeReference {
     isCollection?: boolean;
     isLite?: boolean;
