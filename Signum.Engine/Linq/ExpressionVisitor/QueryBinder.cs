@@ -1977,7 +1977,7 @@ namespace Signum.Engine.Linq
             }
 
             var entityTable = table as Table;
-            if(entityTable.Ticks != null && assignments.None(b => b.Column == entityTable.Ticks.Name))
+            if(entityTable != null && entityTable.Ticks != null && assignments.None(b => b.Column == entityTable.Ticks.Name))
             {
                 assignments.Add(new ColumnAssignment(entityTable.Ticks.Name, Expression.Constant(0L, typeof(long))));
             }
