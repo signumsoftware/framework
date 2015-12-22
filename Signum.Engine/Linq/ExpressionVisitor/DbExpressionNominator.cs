@@ -12,6 +12,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using Signum.Engine.Maps;
 using System.Data;
+using System.Globalization;
 using Signum.Entities.Reflection;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
@@ -1095,7 +1096,13 @@ namespace Signum.Engine.Linq
                 case "DateTimeExtensions.YearsTo": return TryDatePartTo(new SqlEnumExpression(SqlEnums.year), m.GetArgument("start"), m.GetArgument("end"));
                 case "DateTimeExtensions.MonthsTo": return TryDatePartTo(new SqlEnumExpression(SqlEnums.month), m.GetArgument("start"), m.GetArgument("end"));
 
-                case "DateTimeExtensions.WeekNumber": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.week), m.Arguments.Single());
+                case "DateTimeExtensions.WeekNumber":
+                {
+                    if (CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule == CalendarWeekRule.FirstFourDayWeek)
+                        return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.iso_week), m.Arguments.Single());
+
+                    return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.week), m.Arguments.Single());
+                }
 
                 case "Math.Sign": return TrySqlFunction(null, SqlFunction.SIGN, m.Type, m.GetArgument("value"));
                 case "Math.Abs": return TrySqlFunction(null, SqlFunction.ABS, m.Type, m.GetArgument("value"));
