@@ -22,6 +22,10 @@ export interface Entity extends ModifiableEntity, IEntity {
 export interface MixinEntity extends ModifiableEntity {
 }
 
+export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>) {
+    return entity.mixins[type.typeName] as M;
+}
+
 export type MList<T> = Array<MListElement<T>>;
 
 export interface MListElement<T> {
@@ -94,6 +98,7 @@ export module ConnectionMessage {
     export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");
 }
 
+export const CorruptMixin_Type = new Type<CorruptMixin>("CorruptMixin");
 export interface CorruptMixin extends MixinEntity {
     corrupt?: boolean;
 }

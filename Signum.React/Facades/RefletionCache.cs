@@ -184,6 +184,8 @@ namespace Signum.React.Facades
 
     public class TypeReferenceTS
     {
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isEnum")]
+        public bool IsEnum { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isCollection")]
         public bool IsCollection { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLite")]
@@ -196,8 +198,11 @@ namespace Signum.React.Facades
         public TypeReferenceTS(Type type, Implementations? implementations)
         {
             this.IsCollection = type.IsMList();
-            this.IsLite = CleanMList(type).IsLite();
-            this.IsNullable = type.IsNullable();
+
+            var clean = CleanMList(type);
+            this.IsLite = clean.IsLite();
+            this.IsNullable = clean.IsNullable();
+            this.IsEnum = clean.IsEnum;
             this.Name = implementations?.Key() ?? TypeScriptType(type);
         }
 
@@ -233,10 +238,10 @@ namespace Signum.React.Facades
                 case TypeCode.Int32:
                 case TypeCode.UInt32:
                 case TypeCode.Int64:
-                case TypeCode.UInt64:
+                case TypeCode.UInt64: return "number";
                 case TypeCode.Single:
                 case TypeCode.Double:
-                case TypeCode.Decimal: return "number";
+                case TypeCode.Decimal: return "decimal";
                 case TypeCode.DateTime: return "datetime";
                 case TypeCode.String: return "string";
             }

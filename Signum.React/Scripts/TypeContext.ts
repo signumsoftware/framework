@@ -1,19 +1,18 @@
-﻿import { PropertyRoute } from 'Framework/Signum.React/Scripts/Reflection'
+﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, createSetter } from 'Framework/Signum.React/Scripts/Reflection'
 
-export class TypeContext<T> {
+export class StyleContext {
+    private styleOptions: StyleOptions;
+    parent: StyleContext;
 
-    constructor(parent: TypeContext<any>, value: T, propertyRoute: PropertyRoute, styleOptions: StyleOptions) {
-        this.value = value;
-        this.propertyRoute = propertyRoute;
+    constructor(parent: StyleContext, styleOptions: StyleOptions) {
+        this.parent = parent;
         this.styleOptions = styleOptions;
+
+        if (styleOptions.labelColumns && !styleOptions.valueColumns)
+            styleOptions.valueColumns = StyleContext.bsColumnsInvert(styleOptions.labelColumns);
     }
 
-    parent: TypeContext<any>;
-    value: T;
-    propertyRoute: PropertyRoute;
-    private styleOptions: StyleOptions;
-
-    get formGroupStyle(): FromGroupStyle {
+    get formGroupStyle(): FormGroupStyle {
         return this.styleOptions.formGroupStyle != null ? this.styleOptions.formGroupStyle : this.parent.formGroupStyle;
     }
 
@@ -29,28 +28,38 @@ export class TypeContext<T> {
     get placeholderLabels(): boolean {
         return this.styleOptions.placeholderLabels != null ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
     }
-
+    
     get labelColumns(): BsColumns {
         return this.styleOptions.labelColumns != null ? this.styleOptions.labelColumns : this.parent.labelColumns;
+    }
+
+    get labelColumnsCss(): string {
+        return StyleContext.bsColumnsCss(this.labelColumns);
     }
 
     get valueColumns(): BsColumns {
         return this.styleOptions.valueColumns != null ? this.styleOptions.valueColumns : this.parent.valueColumns;
     }
 
+    get valueColumnsCss(): string {
+        return StyleContext.bsColumnsCss(this.valueColumns);
+    }
+
     get readOnly(): boolean {
         return this.styleOptions.readOnly != null ? this.styleOptions.readOnly : this.parent.readOnly;
     }
 
-    subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R> {
 
-        if (styleOptions && styleOptions.labelColumns && !styleOptions.valueColumns)
-            styleOptions.valueColumns = TypeContext.invert(styleOptions.labelColumns);
-
-        return new TypeContext<R>(this, property(this.value), this.propertyRoute.add(property), styleOptions);
+    static bsColumnsCss(bsColumns: BsColumns) {
+        return [
+            (bsColumns.xs ? "col-xs-" + bsColumns.xs : ""),
+            (bsColumns.sm ? "col-sm-" + bsColumns.sm : ""),
+            (bsColumns.md ? "col-md-" + bsColumns.md : ""),
+            (bsColumns.lg ? "col-lg-" + bsColumns.lg : ""),
+        ].filter(a=> a != "").join(" ");
     }
 
-    private static invert(bs: BsColumns): BsColumns {
+    static bsColumnsInvert(bs: BsColumns): BsColumns {
         return {
             xs: bs.xs ? (12 - bs.xs) : undefined,
             sm: bs.sm ? (12 - bs.sm) : undefined,
@@ -60,9 +69,10 @@ export class TypeContext<T> {
     }
 }
 
+
 export interface StyleOptions {
 
-    formGroupStyle?: FromGroupStyle;
+    formGroupStyle?: FormGroupStyle;
     formGroupSize?: FormGroupSize;
     placeholderLabels?: boolean;
     formControlStaticAsFormControlReadonly?: boolean;
@@ -71,7 +81,7 @@ export interface StyleOptions {
     readOnly?: boolean;
 }
 
-export enum FromGroupStyle {
+export enum FormGroupStyle {
     /// Unaffected by FormGroupSize
     None,
     
@@ -100,3 +110,38 @@ export enum FormGroupSize {
     Small,
     ExtraSmall,
 }
+
+export class TypeContext<T> extends StyleContext {
+
+    propertyRoute: PropertyRoute;
+    setValue: (val: T) => void;
+    private _value: T;
+
+    get value() {
+        return this._value;
+    }
+
+    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, value: T) {
+        super(parent, styleOptions);
+        this.propertyRoute = propertyRoute;
+        this.value = value;
+    }
+
+    
+    subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R> {
+
+        var route = this.propertyRoute.add(property);
+
+        var value = property(this.value);
+
+        var result = new TypeContext<R>(this, styleOptions, route, value);
+
+        result.setValue = value => createSetter(property)(this.value, value);
+
+        return result;
+    }
+}
+
+
+
+

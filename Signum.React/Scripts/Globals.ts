@@ -78,6 +78,29 @@ module Dic {
 
         return objectCopy;
     }
+
+    export function extend<O>(out: O): O;
+    export function extend<O, U>(out: O, arg1: U): O & U;
+    export function extend<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
+    export function extend<O, U, V>(out: O, ...args: Object[]): any;
+    export function extend(out) {
+        out = out || {};
+
+        for (var i = 1; i < arguments.length; i++) {
+
+            var a = arguments[i];
+
+            if (!a)
+                continue;
+
+            for (var key in a) {
+                if (a.hasOwnProperty(key) && a[key] !== undefined)
+                    out[key] = a[key];
+            }
+        }
+
+        return out;
+    };
 }
 
 interface Array<T> {
@@ -468,25 +491,8 @@ if (typeof String.prototype.trim !== 'function') {
 }
 
 
-function extend<O>(out: O): O;
-function extend<O, U>(out: O, arg1: U): O & U;
-function extend<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
-function extend<O, U, V>(out: O, ...args: Object[]): any;
-function extend(out) {
-    out = out || {};
 
-    for (var i = 1; i < arguments.length; i++) {
 
-        var a = arguments[i];
-
-        if (!a)
-            continue;
-
-        for (var key in a) {
-            if (a.hasOwnProperty(key) && a[key] !== undefined)
-                out[key] = a[key];
-        }
-    }
-
-    return out;
-};
+function classes(...classNames: string[]) {
+    return classNames.filter(a=> a != null && a != "").join(" ");
+}

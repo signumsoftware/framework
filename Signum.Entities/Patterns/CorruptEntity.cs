@@ -7,7 +7,7 @@ using Signum.Utilities;
 namespace Signum.Entities
 {
     [Serializable]
-    public abstract class CorruptMixin : MixinEntity
+    public class CorruptMixin : MixinEntity
     {
         CorruptMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) { }
 

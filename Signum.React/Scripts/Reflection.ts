@@ -2,14 +2,6 @@
 
 import {ajaxPost, ajaxGet} from 'Framework/Signum.React/Scripts/Services';
 
-export class PropertyRoute {
-
-    parent: PropertyRoute;
-
-    add(property: (val: any) => any): PropertyRoute {
-        return null;
-    }
-}
 
 export function getEnumInfo(enumTypeName: string, enumId: number) {
 
@@ -34,7 +26,7 @@ export interface TypeInfo {
     entityData?: EntityData;
     members?: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
-    mixins?: { [name: string]: string };
+    mixins?: { [name: string]: string; };
 }
 
 export interface MemberInfo {
@@ -70,10 +62,11 @@ export function toMomentFormat(format: string): any {
 }
 
 export interface TypeReference {
+    name?: string;
     isCollection?: boolean;
     isLite?: boolean;
     isNullable?: boolean;
-    name?: string;
+    isEnum?: boolean;
 }
 
 export enum KindOfType {
@@ -218,10 +211,72 @@ export function loadTypes(): Promise<void> {
 }
 
 
+export function createSetter(lambda: (obj: any) => any): (obj: any, value: any) => void {
 
-export function getLambdaBody(lambda: Function): string {
-    return lambda.toString().after("return ").after(".").before(";");
+    var lambdaMatch = functionRegex.exec((lambda as any).toString());
+
+    if (lambdaMatch == null)
+        throw Error("invalid function");
+
+    var parameter = lambdaMatch[1];
+    var body = lambdaMatch[2];
+
+    var m = memberRegex.exec(body);
+
+    if (m == null)
+        return null;
+
+    return eval(`function(${parameter} , value){ ${m[1]}.${m[2]} = value;}`);
 }
+
+
+var functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*return\s*(.*)\s*;\s*}$/;
+var memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
+var mixinRegex = /^getMixin\((.*),\s*([$a-zA-Z_][0-9a-zA-Z_$]*_Type)\s*\)$/
+
+
+export function getLambdaMembers(lambda: Function): LambdaMember[]{
+    
+    var lambdaMatch = functionRegex.exec((lambda as any).toString());
+
+    if (lambdaMatch == null)
+        throw Error("invalid function");
+
+    var parameter = lambdaMatch[1];
+    var body = lambdaMatch[2];
+    var result: LambdaMember[] = [];
+
+    while (body != parameter) {
+        var m = memberRegex.exec(body);
+
+        if (m != null) {
+            result.push({ name: m[2], type: LambdaMemberType.Member });
+            body = m[1];
+        }
+
+        m = mixinRegex.exec(body);
+
+        if (m != null) {
+            result.push({ name: m[2], type: LambdaMemberType.Mixin });
+            body = m[1];
+        }
+    }
+
+    return result.reverse();
+}
+
+
+interface LambdaMember {
+    name: string;
+    type: LambdaMemberType
+}
+
+enum LambdaMemberType {
+    Member,
+    Mixin,
+}
+
+
 
 export interface IType {
     typeName: string;
@@ -236,7 +291,11 @@ export class Type<T> implements IType {
     }
 
     propertyInfo(lambdaToProperty: (v: T) => any): MemberInfo {
-        return this.typeInfo().members[getLambdaBody(lambdaToProperty)];
+        return PropertyRoute.root(this).add(lambdaToProperty).member;
+    }
+
+    propertyRoute(lambdaToProperty: (v: T) => any): PropertyRoute {
+        return PropertyRoute.root(this).add(lambdaToProperty);
     }
 
     niceName() {
@@ -336,3 +395,82 @@ export function registerSymbol<T extends ISymbol>(symbol: T): T {
 
     return symbol;
 } 
+
+export class PropertyRoute {
+    
+    propertyRouteType: PropertyRouteType;
+    parent: PropertyRoute; //!Root
+    type: TypeInfo; //Root
+    member: MemberInfo; //Member
+    mixinName: string; //Mixin
+    
+    constructor(parent: PropertyRoute, propertyRouteType: PropertyRouteType, type: TypeInfo, member: MemberInfo, mixinName: string) {
+
+        this.propertyRouteType = propertyRouteType;
+        this.parent = parent; //!Root
+        this.type = type; //Root
+        this.member = member; //Field or Property
+        this.mixinName = mixinName; //Mixin
+    }
+
+
+    static root(type: PseudoType) {
+        return new PropertyRoute(null, PropertyRouteType.Root, getTypeInfo(type), null, null);
+    }
+
+    add(property: (val: any) => any): PropertyRoute {
+        var members = getLambdaMembers(property);
+
+        var current: PropertyRoute = this;
+        members.forEach(m=> current = current.addMember(m));
+
+        return current;
+    }
+
+    get rootType() {
+        return this.type || this.parent.rootType;
+    }
+
+    propertyPath() {
+        switch (this.propertyRouteType) {
+            case PropertyRouteType.Root: throw new Error("Root has no PropertyString");
+            case PropertyRouteType.Field: return this.member.name;
+            case PropertyRouteType.Mixin: return "[" + this.mixinName + "]";
+            case PropertyRouteType.MListItems: return this.parent.propertyPath() + "/";
+            case PropertyRouteType.LiteEntity: return this.parent.propertyPath() + ".entity";
+        }
+    }
+   
+
+    addMember(member: LambdaMember): PropertyRoute {
+
+        if (member.type == LambdaMemberType.Member) {
+            var memberName = this.parent.propertyRouteType == PropertyRouteType.Root ? member.name :
+                this.parent.propertyRouteType == PropertyRouteType.MListItems ? this.parent.propertyPath() + member.name :
+                    this.parent.propertyPath() + "/" + member.name;
+
+            var m = this.type.members[memberName];
+            if (!m)
+                throw new Error(`member '${memberName}' not found`)
+
+            return new PropertyRoute(this, PropertyRouteType.Field, null, m, null);
+        }
+
+        if (member.type == LambdaMemberType.Mixin) {
+            if (this.propertyRouteType != PropertyRouteType.Root)
+                throw new Error("invalid mixin at this stage");
+
+            return new PropertyRoute(this, PropertyRouteType.Mixin, null, null, member.name);
+        }
+
+        throw new Error("not implemented");
+    }
+}
+
+export enum PropertyRouteType {
+    Root,
+    Field,
+    Mixin,
+    LiteEntity,
+    MListItems,
+}
