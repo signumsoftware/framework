@@ -631,6 +631,7 @@ namespace Signum.Engine.Linq
         second,
         millisecond,
         dayofyear,
+        iso_week
     }
 
 
