@@ -211,7 +211,9 @@ namespace Signum.TSGenerator
             {
                 string context = $"By type {type.Name} and field {field.Name}";
                 var propertyType = TypeScriptName(field.FieldType, type, options, context);
-                sb.AppendLine($"    export const {field.Name} : {propertyType} = registerSymbol({{ key: \"{type.Name}.{field.Name}\" }});");
+
+                var cleanType = field.FieldType.IsInterface && field.FieldType.GetInterface("IOperationSymbolContainer") != null ? "Operation" : CleanTypeName(field.FieldType);
+                sb.AppendLine($"    export const {field.Name} : {propertyType} = registerSymbol({{ Type: \"{cleanType}\", key: \"{type.Name}.{field.Name}\" }});");
             }
             sb.AppendLine(@"}");
 
@@ -222,7 +224,7 @@ namespace Signum.TSGenerator
         {
             StringBuilder sb = new StringBuilder();
             if (!type.IsAbstract)
-                sb.AppendLine($"export const {type.Name}_Type = new Type<{type.Name}>(\"{type.Name}\");");
+                sb.AppendLine($"export const {type.Name}_Type = new Type<{type.Name}>(\"{ CleanTypeName(type) }\");");
 
             List<string> baseTypes = new List<string>();
             if (type.BaseType != null)
@@ -246,6 +248,28 @@ namespace Signum.TSGenerator
             sb.AppendLine(@"}");
 
             return sb.ToString();
+        }
+
+        static string CleanTypeName(Type t)
+        {
+            if (t.Name.EndsWith("Entity"))
+                return t.Name.RemoveSuffix("Entity");
+
+            if (t.Name.EndsWith("Model"))
+                return t.Name.RemoveSuffix("Model");
+
+            if (t.Name.EndsWith("Symbol"))
+                return t.Name.RemoveSuffix("Symbol");
+
+            return t.Name;
+        }
+
+        static string RemoveSuffix(this string text, string postfix)
+        {
+            if (text.EndsWith(postfix) && text != postfix)
+                return text.Substring(0, text.Length - postfix.Length);
+
+            return text;
         }
 
         private static IEnumerable<PropertyInfo> GetProperties(Type type, bool declaredOnly)

@@ -4,11 +4,12 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
 
 export interface ModifiableEntity {
+    Type: string;
     ToString?: string;
 }
 
 export interface IEntity {
-    Type?: string;
+    Type: string;
     id?: any;
     isNew?: boolean;
     ticks?: number;
@@ -35,7 +36,7 @@ export interface MListElement<T> {
 
 export interface Lite<T extends IEntity> {
     entity?: T;
-    EntityType?: string;
+    EntityType: string;
     id?: any;
     toStr?: string;
 }
@@ -88,6 +89,12 @@ export function is<T extends IEntity>(a: Lite<T> | T, b: Lite<T> | T) {
     return aType == bType;
 }
 
+
+export enum BooleanEnum {
+    False = "False" as any,
+    True = "True" as any,
+}
+export const BooleanEnum_Type = new EnumType<BooleanEnum>("BooleanEnum", BooleanEnum);
 
 export module CalendarMessage {
     export const Today = new MessageKey("CalendarMessage", "Today");
@@ -220,7 +227,7 @@ export module OperationMessage {
     export const Logs = new MessageKey("OperationMessage", "Logs");
 }
 
-export const OperationSymbol_Type = new Type<OperationSymbol>("OperationSymbol");
+export const OperationSymbol_Type = new Type<OperationSymbol>("Operation");
 export interface OperationSymbol extends Symbol {
 }
 
@@ -352,12 +359,12 @@ export module VoidEnumMessage {
 
 export namespace Basics {
 
-    export const ColorEntity_Type = new Type<ColorEntity>("ColorEntity");
+    export const ColorEntity_Type = new Type<ColorEntity>("Color");
     export interface ColorEntity extends EmbeddedEntity {
         argb?: number;
     }
     
-    export const DeleteLogParametersEntity_Type = new Type<DeleteLogParametersEntity>("DeleteLogParametersEntity");
+    export const DeleteLogParametersEntity_Type = new Type<DeleteLogParametersEntity>("DeleteLogParameters");
     export interface DeleteLogParametersEntity extends EmbeddedEntity {
         deleteLogsWithMoreThan?: number;
         dateLimit?: string;
@@ -365,7 +372,7 @@ export namespace Basics {
         maxChunks?: number;
     }
     
-    export const ExceptionEntity_Type = new Type<ExceptionEntity>("ExceptionEntity");
+    export const ExceptionEntity_Type = new Type<ExceptionEntity>("Exception");
     export interface ExceptionEntity extends Entity {
         creationDate?: string;
         exceptionType?: string;
@@ -396,7 +403,7 @@ export namespace Basics {
     export interface IUserEntity extends IEntity {
     }
     
-    export const OperationLogEntity_Type = new Type<OperationLogEntity>("OperationLogEntity");
+    export const OperationLogEntity_Type = new Type<OperationLogEntity>("OperationLog");
     export interface OperationLogEntity extends Entity {
         target?: Lite<IEntity>;
         origin?: Lite<IEntity>;
@@ -407,13 +414,13 @@ export namespace Basics {
         exception?: Lite<ExceptionEntity>;
     }
     
-    export const PropertyRouteEntity_Type = new Type<PropertyRouteEntity>("PropertyRouteEntity");
+    export const PropertyRouteEntity_Type = new Type<PropertyRouteEntity>("PropertyRoute");
     export interface PropertyRouteEntity extends Entity {
         path?: string;
         rootType?: TypeEntity;
     }
     
-    export const QueryEntity_Type = new Type<QueryEntity>("QueryEntity");
+    export const QueryEntity_Type = new Type<QueryEntity>("Query");
     export interface QueryEntity extends Entity {
         key?: string;
     }
@@ -423,7 +430,7 @@ export namespace Basics {
         name?: string;
     }
     
-    export const TypeEntity_Type = new Type<TypeEntity>("TypeEntity");
+    export const TypeEntity_Type = new Type<TypeEntity>("Type");
     export interface TypeEntity extends Entity {
         fullClassName?: string;
         cleanName?: string;

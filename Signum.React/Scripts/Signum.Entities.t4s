@@ -3,11 +3,12 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
 
 export interface ModifiableEntity {
+    Type: string;
     ToString?: string;
 }
 
 export interface IEntity {
-    Type?: string;
+    Type: string;
     id?: any;
     isNew?: boolean;
     ticks?: number;
@@ -34,7 +35,7 @@ export interface MListElement<T> {
 
 export interface Lite<T extends IEntity> {
     entity?: T;
-    EntityType?: string;
+    EntityType: string;
     id?: any;
     toStr?: string;
 }

@@ -272,6 +272,7 @@ ul.nav-tabs
 .form-xs .form-control-static
 {
     height: 20px;
+    min-height: inherit;
 }
 
 .form-xs input[type=checkbox].form-control
@@ -331,6 +332,7 @@ ul.nav-tabs
 .form-sm .form-control-static
 {
     height: 26px;
+    min-height: inherit;
 }
 
 .form-sm input[type=checkbox].form-control

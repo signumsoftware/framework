@@ -364,7 +364,8 @@ export class QueryKey {
 }
 
 interface ISymbol {
-    key?: string;
+    Type: string; 
+    key: string;
     id?: any;
 }
 
@@ -445,11 +446,11 @@ export class PropertyRoute {
     addMember(member: LambdaMember): PropertyRoute {
 
         if (member.type == LambdaMemberType.Member) {
-            var memberName = this.parent.propertyRouteType == PropertyRouteType.Root ? member.name :
-                this.parent.propertyRouteType == PropertyRouteType.MListItems ? this.parent.propertyPath() + member.name :
-                    this.parent.propertyPath() + "/" + member.name;
+            var memberName = this.propertyRouteType == PropertyRouteType.Root ? member.name :
+                this.propertyRouteType == PropertyRouteType.MListItems ? this.propertyPath() + member.name :
+                    this.propertyPath() + "." + member.name;
 
-            var m = this.type.members[memberName];
+            var m = this.type.members[memberName.firstUpper()];
             if (!m)
                 throw new Error(`member '${memberName}' not found`)
 

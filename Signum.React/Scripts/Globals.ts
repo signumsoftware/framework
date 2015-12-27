@@ -317,6 +317,9 @@ interface String {
     beforeLast(separator: string): string;
     tryAfterLast(separator: string): string;
     tryBeforeLast(separator: string): string;
+
+    firstUpper(): string;
+    firstLower(): string;
 }
 
 String.prototype.hasText = function () {
@@ -484,6 +487,14 @@ String.prototype.tryAfterLast = function (separator) {
     return this.substring(index + separator.length);
 };
 
+String.prototype.firstUpper = function () {
+    return (this[0] as string).toUpperCase() + this.substring(1);
+};
+
+String.prototype.firstLower = function () {
+    return (this[0] as string).toLowerCase() + this.substring(1);
+};
+
 if (typeof String.prototype.trim !== 'function') {
     String.prototype.trim = function () {
         return this.replace(/^\s+|\s+$/, '');
@@ -495,4 +506,31 @@ if (typeof String.prototype.trim !== 'function') {
 
 function classes(...classNames: string[]) {
     return classNames.filter(a=> a != null && a != "").join(" ");
+}
+
+declare module moment {
+    interface Moment {
+        fromUserInterface();
+        toUserInterface();
+        
+    }
+
+    interface MomentStatic {
+        smartNow();
+    }
+}
+
+
+function asumeGlobalUtcMode(moment: moment.MomentStatic, utcMode: boolean) {
+    if (utcMode) {
+        moment.fn.fromUserInterface = function () { return this.utc(); };
+        moment.fn.toUserInterface = function () { return this.local(); };
+        moment.smartNow = function () { return moment.utc(); };
+    }
+
+    else {
+        moment.fn.fromUserInterface = function () { return this; };
+        moment.fn.toUserInterface = function () { return this; };
+        moment.smartNow = function () { return moment(); };
+    }
 }

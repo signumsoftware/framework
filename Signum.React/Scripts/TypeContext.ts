@@ -1,16 +1,49 @@
 ﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, createSetter } from 'Framework/Signum.React/Scripts/Reflection'
 
+export enum FormGroupStyle {
+    /// Unaffected by FormGroupSize
+    None,
+    
+    /// Requires form-vertical container
+    Basic,
+
+    /// Requires form-vertical container
+    BasicDown,
+
+    /// Requires form-vertical / form-inline container
+    SrOnly,
+
+    /// Requires form-horizontal (default),  affected by LabelColumns / ValueColumns
+    LabelColumns,
+}
+
+export enum FormGroupSize {
+    Normal,
+    Small,
+    ExtraSmall,
+}
+
 export class StyleContext {
     private styleOptions: StyleOptions;
     parent: StyleContext;
 
     constructor(parent: StyleContext, styleOptions: StyleOptions) {
-        this.parent = parent;
-        this.styleOptions = styleOptions;
+        this.parent = parent || StyleContext.default;
+        this.styleOptions = styleOptions || {};
 
-        if (styleOptions.labelColumns && !styleOptions.valueColumns)
-            styleOptions.valueColumns = StyleContext.bsColumnsInvert(styleOptions.labelColumns);
+        if (this.styleOptions.labelColumns && !this.styleOptions.valueColumns)
+            this.styleOptions.valueColumns = StyleContext.bsColumnsInvert(this.styleOptions.labelColumns);
     }
+
+    static default: StyleContext = new StyleContext(null,
+    {
+        formGroupStyle : FormGroupStyle.LabelColumns,
+        formGroupSize : FormGroupSize.Small,
+        labelColumns: { sm: 2 },
+        readOnly : false,
+        placeholderLabels : false,
+        formControlStaticAsFormControlReadonly : false,
+    });
 
     get formGroupStyle(): FormGroupStyle {
         return this.styleOptions.formGroupStyle != null ? this.styleOptions.formGroupStyle : this.parent.formGroupStyle;
@@ -27,6 +60,10 @@ export class StyleContext {
 
     get placeholderLabels(): boolean {
         return this.styleOptions.placeholderLabels != null ? this.styleOptions.placeholderLabels : this.parent.placeholderLabels;
+    }
+
+    get formControlStaticAsFormControlReadonly(): boolean {
+        return this.styleOptions.formControlStaticAsFormControlReadonly != null ? this.styleOptions.formControlStaticAsFormControlReadonly : this.parent.formControlStaticAsFormControlReadonly;
     }
     
     get labelColumns(): BsColumns {
@@ -46,7 +83,8 @@ export class StyleContext {
     }
 
     get readOnly(): boolean {
-        return this.styleOptions.readOnly != null ? this.styleOptions.readOnly : this.parent.readOnly;
+        return this.styleOptions.readOnly != null ? this.styleOptions.readOnly :
+            this.parent ? this.parent.readOnly : false;
     }
 
 
@@ -81,22 +119,7 @@ export interface StyleOptions {
     readOnly?: boolean;
 }
 
-export enum FormGroupStyle {
-    /// Unaffected by FormGroupSize
-    None,
-    
-    /// Requires form-vertical container
-    Basic,
 
-    /// Requires form-vertical container
-    BasicDown,
-
-    /// Requires form-vertical / form-inline container
-    SrOnly,
-
-    /// Requires form-horizontal (default),  affected by LabelColumns / ValueColumns
-    LabelColumns,
-}
 
 export interface BsColumns {
     xs?: number;
@@ -105,11 +128,7 @@ export interface BsColumns {
     lg?: number;
 }
 
-export enum FormGroupSize {
-    Normal,
-    Small,
-    ExtraSmall,
-}
+
 
 export class TypeContext<T> extends StyleContext {
 
@@ -124,21 +143,25 @@ export class TypeContext<T> extends StyleContext {
     constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, value: T) {
         super(parent, styleOptions);
         this.propertyRoute = propertyRoute;
-        this.value = value;
+        this._value = value;
     }
 
     
     subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R> {
 
-        var route = this.propertyRoute.add(property);
+        var subRoute = this.propertyRoute.add(property);
 
-        var value = property(this.value);
+        var subValue = property(this.value);
 
-        var result = new TypeContext<R>(this, styleOptions, route, value);
+        var result = new TypeContext<R>(this, styleOptions, subRoute, subValue);
 
-        result.setValue = value => createSetter(property)(this.value, value);
+        result.setValue = v => createSetter(property)(this.value, v);
 
         return result;
+    }
+
+    niceName(property: (val: T) => any) {
+        return this.propertyRoute.add(property).member.niceName;
     }
 }
 

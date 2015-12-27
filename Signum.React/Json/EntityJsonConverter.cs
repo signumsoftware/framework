@@ -74,7 +74,7 @@ namespace Signum.React.Json
 
             if (!(mod is MixinEntity))
             {
-                writer.WritePropertyName("ToString");
+                writer.WritePropertyName("toStr");
                 serializer.Serialize(writer, mod.ToString());
             }
 

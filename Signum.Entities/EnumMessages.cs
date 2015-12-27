@@ -109,7 +109,7 @@ Lose changes?")]
         View,
     }
 
-    [DescriptionOptions(DescriptionOptions.Members)]
+    [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
     public enum BooleanEnum
     {
         [Description("No")]

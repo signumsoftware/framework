@@ -15,11 +15,12 @@
     {
         ViewBag.Title = modifiable?.ToString();
     }
-    <span class="sf-entity-title">@(ViewBag.Title)</span>
+    <span class="sf-entity-title">@(ViewBag.Title)</span>,
     <br />
     <small class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(modifiable)</small>
 </h3>
-@Html.RenderWidgets(wc)
+@Html.RenderWidgets(wc
+    )
 <div class="sf-button-bar">
     @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     {

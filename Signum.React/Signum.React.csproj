@@ -135,6 +135,7 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="ApiControllers\EntityController.cs" />
     <Compile Include="ApiControllers\QueryController.cs" />
     <Compile Include="ApiControllers\ReflectionController.cs" />
     <Compile Include="Facades\RefletionCache.cs" />
@@ -181,23 +182,25 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="Scripts\Signum.Entities.t4s" />
-    <TypeScriptCompile Include="Scripts\EntitySettings.ts" />
+    <TypeScriptCompile Include="Exceptions\ExceptionClient.tsx" />
     <TypeScriptCompile Include="Scripts\Finder.tsx" />
     <TypeScriptCompile Include="Scripts\FindOptions.ts" />
+    <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
-    <TypeScriptCompile Include="Scripts\QuerySettings.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.tsx" />
     <TypeScriptCompile Include="Scripts\Services.ts" />
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
       <DependentUpon>Signum.Entities.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Scripts\Lines\ValueLine.tsx" />
     <TypeScriptCompile Include="Typings\es6-promise\es6-promise.d.ts" />
     <TypeScriptCompile Include="Scripts\Globals.ts" />
     <TypeScriptCompile Include="Typings\moment\moment-node.d.ts" />
     <TypeScriptCompile Include="Typings\moment\moment.d.ts" />
     <TypeScriptCompile Include="Typings\react-router\history.d.ts" />
     <TypeScriptCompile Include="Typings\react-bootstrap\react-bootstrap.d.ts" />
-    <TypeScriptCompile Include="Templates\Exception.tsx" />
+    <TypeScriptCompile Include="Exceptions\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
     <TypeScriptCompile Include="Scripts\Reflection.ts" />
     <TypeScriptCompile Include="Scripts\TypeContext.ts" />
