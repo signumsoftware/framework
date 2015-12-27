@@ -10,26 +10,26 @@ import * as UserQueries from 'Extensions/Signum.React.Extensions/UserQueries/Sig
 import * as UserAssets from 'Extensions/Signum.React.Extensions/UserAssets/Signum.Entities.UserAssets' 
 
 import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization' 
-export const QueryColumnEntity_Type = new Type<QueryColumnEntity>("QueryColumnEntity");
+export const QueryColumnEntity_Type = new Type<QueryColumnEntity>("QueryColumn");
 export interface QueryColumnEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
     displayName?: string;
 }
 
-export const QueryFilterEntity_Type = new Type<QueryFilterEntity>("QueryFilterEntity");
+export const QueryFilterEntity_Type = new Type<QueryFilterEntity>("QueryFilter");
 export interface QueryFilterEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
     operation?: Entities.DynamicQuery.FilterOperation;
     valueString?: string;
 }
 
-export const QueryOrderEntity_Type = new Type<QueryOrderEntity>("QueryOrderEntity");
+export const QueryOrderEntity_Type = new Type<QueryOrderEntity>("QueryOrder");
 export interface QueryOrderEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
     orderType?: Entities.DynamicQuery.OrderType;
 }
 
-export const UserQueryEntity_Type = new Type<UserQueryEntity>("UserQueryEntity");
+export const UserQueryEntity_Type = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     query?: Entities.Basics.QueryEntity;
     entityType?: Entities.Lite<Entities.Basics.TypeEntity>;
@@ -64,11 +64,11 @@ export module UserQueryMessage {
 }
 
 export module UserQueryOperation {
-    export const Save : Entities.ExecuteSymbol<UserQueryEntity> = registerSymbol({ key: "UserQueryOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<UserQueryEntity> = registerSymbol({ key: "UserQueryOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<UserQueryEntity> = registerSymbol({ Type: "Operation", key: "UserQueryOperation.Save" });
+    export const Delete : Entities.DeleteSymbol<UserQueryEntity> = registerSymbol({ Type: "Operation", key: "UserQueryOperation.Delete" });
 }
 
 export module UserQueryPermission {
-    export const ViewUserQuery : Authorization.PermissionSymbol = registerSymbol({ key: "UserQueryPermission.ViewUserQuery" });
+    export const ViewUserQuery : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "UserQueryPermission.ViewUserQuery" });
 }
 

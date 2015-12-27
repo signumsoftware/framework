@@ -12,13 +12,13 @@ import * as UserQueries from 'Extensions/Signum.React.Extensions/UserQueries/Sig
 import * as UserAssets from 'Extensions/Signum.React.Extensions/UserAssets/Signum.Entities.UserAssets' 
 
 import * as Files from 'Extensions/Signum.React.Extensions/Files/Signum.Entities.Files' 
-export const ChartColorEntity_Type = new Type<ChartColorEntity>("ChartColorEntity");
+export const ChartColorEntity_Type = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
     related?: Entities.Lite<Entities.Entity>;
     color?: Entities.Basics.ColorEntity;
 }
 
-export const ChartColumnEntity_Type = new Type<ChartColumnEntity>("ChartColumnEntity");
+export const ChartColumnEntity_Type = new Type<ChartColumnEntity>("ChartColumn");
 export interface ChartColumnEntity extends Entities.EmbeddedEntity {
     scriptColumn?: ChartScriptColumnEntity;
     token?: UserAssets.QueryTokenEntity;
@@ -75,13 +75,13 @@ export module ChartMessage {
     export const Preview = new MessageKey("ChartMessage", "Preview");
 }
 
-export const ChartPaletteModel_Type = new Type<ChartPaletteModel>("ChartPaletteModel");
+export const ChartPaletteModel_Type = new Type<ChartPaletteModel>("ChartPalette");
 export interface ChartPaletteModel extends Entities.ModelEntity {
     type?: Entities.Basics.TypeEntity;
     colors?: Entities.MList<ChartColorEntity>;
 }
 
-export const ChartParameterEntity_Type = new Type<ChartParameterEntity>("ChartParameterEntity");
+export const ChartParameterEntity_Type = new Type<ChartParameterEntity>("ChartParameter");
 export interface ChartParameterEntity extends Entities.EmbeddedEntity {
     scriptParameter?: ChartScriptParameterEntity;
     name?: string;
@@ -96,10 +96,10 @@ export enum ChartParameterType {
 export const ChartParameterType_Type = new EnumType<ChartParameterType>("ChartParameterType", ChartParameterType);
 
 export module ChartPermission {
-    export const ViewCharting : Authorization.PermissionSymbol = registerSymbol({ key: "ChartPermission.ViewCharting" });
+    export const ViewCharting : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "ChartPermission.ViewCharting" });
 }
 
-export const ChartScriptColumnEntity_Type = new Type<ChartScriptColumnEntity>("ChartScriptColumnEntity");
+export const ChartScriptColumnEntity_Type = new Type<ChartScriptColumnEntity>("ChartScriptColumn");
 export interface ChartScriptColumnEntity extends Entities.EmbeddedEntity {
     displayName?: string;
     isOptional?: boolean;
@@ -107,7 +107,7 @@ export interface ChartScriptColumnEntity extends Entities.EmbeddedEntity {
     isGroupKey?: boolean;
 }
 
-export const ChartScriptEntity_Type = new Type<ChartScriptEntity>("ChartScriptEntity");
+export const ChartScriptEntity_Type = new Type<ChartScriptEntity>("ChartScript");
 export interface ChartScriptEntity extends Entities.Entity {
     name?: string;
     icon?: Entities.Lite<Files.FileEntity>;
@@ -119,12 +119,12 @@ export interface ChartScriptEntity extends Entities.Entity {
 }
 
 export module ChartScriptOperation {
-    export const Save : Entities.ExecuteSymbol<ChartScriptEntity> = registerSymbol({ key: "ChartScriptOperation.Save" });
-    export const Clone : Entities.ConstructSymbol_From<ChartScriptEntity, ChartScriptEntity> = registerSymbol({ key: "ChartScriptOperation.Clone" });
-    export const Delete : Entities.DeleteSymbol<ChartScriptEntity> = registerSymbol({ key: "ChartScriptOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<ChartScriptEntity> = registerSymbol({ Type: "Operation", key: "ChartScriptOperation.Save" });
+    export const Clone : Entities.ConstructSymbol_From<ChartScriptEntity, ChartScriptEntity> = registerSymbol({ Type: "Operation", key: "ChartScriptOperation.Clone" });
+    export const Delete : Entities.DeleteSymbol<ChartScriptEntity> = registerSymbol({ Type: "Operation", key: "ChartScriptOperation.Delete" });
 }
 
-export const ChartScriptParameterEntity_Type = new Type<ChartScriptParameterEntity>("ChartScriptParameterEntity");
+export const ChartScriptParameterEntity_Type = new Type<ChartScriptParameterEntity>("ChartScriptParameter");
 export interface ChartScriptParameterEntity extends Entities.EmbeddedEntity {
     name?: string;
     type?: ChartParameterType;
@@ -139,7 +139,7 @@ export enum GroupByChart {
 }
 export const GroupByChart_Type = new EnumType<GroupByChart>("GroupByChart", GroupByChart);
 
-export const UserChartEntity_Type = new Type<UserChartEntity>("UserChartEntity");
+export const UserChartEntity_Type = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     query?: Entities.Basics.QueryEntity;
     entityType?: Entities.Lite<Entities.Basics.TypeEntity>;
@@ -156,7 +156,7 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
 }
 
 export module UserChartOperation {
-    export const Save : Entities.ExecuteSymbol<UserChartEntity> = registerSymbol({ key: "UserChartOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<UserChartEntity> = registerSymbol({ key: "UserChartOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<UserChartEntity> = registerSymbol({ Type: "Operation", key: "UserChartOperation.Save" });
+    export const Delete : Entities.DeleteSymbol<UserChartEntity> = registerSymbol({ Type: "Operation", key: "UserChartOperation.Delete" });
 }
 

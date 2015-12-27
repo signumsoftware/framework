@@ -17,7 +17,7 @@ import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization
 
 import * as Files from 'Extensions/Signum.React.Extensions/Files/Signum.Entities.Files' 
 export module AsyncEmailSenderPermission {
-    export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol({ key: "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel" });
+    export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel" });
 }
 
 export enum CertFileType {
@@ -26,20 +26,20 @@ export enum CertFileType {
 }
 export const CertFileType_Type = new EnumType<CertFileType>("CertFileType", CertFileType);
 
-export const ClientCertificationFileEntity_Type = new Type<ClientCertificationFileEntity>("ClientCertificationFileEntity");
+export const ClientCertificationFileEntity_Type = new Type<ClientCertificationFileEntity>("ClientCertificationFile");
 export interface ClientCertificationFileEntity extends Entities.EmbeddedEntity {
     fullFilePath?: string;
     certFileType?: CertFileType;
 }
 
-export const EmailAddressEntity_Type = new Type<EmailAddressEntity>("EmailAddressEntity");
+export const EmailAddressEntity_Type = new Type<EmailAddressEntity>("EmailAddress");
 export interface EmailAddressEntity extends Entities.EmbeddedEntity {
     emailOwner?: Entities.Lite<IEmailOwnerEntity>;
     emailAddress?: string;
     displayName?: string;
 }
 
-export const EmailAttachmentEntity_Type = new Type<EmailAttachmentEntity>("EmailAttachmentEntity");
+export const EmailAttachmentEntity_Type = new Type<EmailAttachmentEntity>("EmailAttachment");
 export interface EmailAttachmentEntity extends Entities.EmbeddedEntity {
     type?: EmailAttachmentType;
     file?: Files.EmbeddedFilePathEntity;
@@ -52,7 +52,7 @@ export enum EmailAttachmentType {
 }
 export const EmailAttachmentType_Type = new EnumType<EmailAttachmentType>("EmailAttachmentType", EmailAttachmentType);
 
-export const EmailConfigurationEntity_Type = new Type<EmailConfigurationEntity>("EmailConfigurationEntity");
+export const EmailConfigurationEntity_Type = new Type<EmailConfigurationEntity>("EmailConfiguration");
 export interface EmailConfigurationEntity extends Entities.EmbeddedEntity {
     defaultCulture?: Basics.CultureInfoEntity;
     urlLeft?: string;
@@ -66,16 +66,16 @@ export interface EmailConfigurationEntity extends Entities.EmbeddedEntity {
 }
 
 export module EmailFileType {
-    export const Attachment : Files.FileTypeSymbol = registerSymbol({ key: "EmailFileType.Attachment" });
+    export const Attachment : Files.FileTypeSymbol = registerSymbol({ Type: "FileType", key: "EmailFileType.Attachment" });
 }
 
-export const EmailMasterTemplateEntity_Type = new Type<EmailMasterTemplateEntity>("EmailMasterTemplateEntity");
+export const EmailMasterTemplateEntity_Type = new Type<EmailMasterTemplateEntity>("EmailMasterTemplate");
 export interface EmailMasterTemplateEntity extends Entities.Entity {
     name?: string;
     messages?: Entities.MList<EmailMasterTemplateMessageEntity>;
 }
 
-export const EmailMasterTemplateMessageEntity_Type = new Type<EmailMasterTemplateMessageEntity>("EmailMasterTemplateMessageEntity");
+export const EmailMasterTemplateMessageEntity_Type = new Type<EmailMasterTemplateMessageEntity>("EmailMasterTemplateMessage");
 export interface EmailMasterTemplateMessageEntity extends Entities.EmbeddedEntity {
     masterTemplate?: EmailMasterTemplateEntity;
     cultureInfo?: Basics.CultureInfoEntity;
@@ -83,11 +83,11 @@ export interface EmailMasterTemplateMessageEntity extends Entities.EmbeddedEntit
 }
 
 export module EmailMasterTemplateOperation {
-    export const Create : Entities.ConstructSymbol_Simple<EmailMasterTemplateEntity> = registerSymbol({ key: "EmailMasterTemplateOperation.Create" });
-    export const Save : Entities.ExecuteSymbol<EmailMasterTemplateEntity> = registerSymbol({ key: "EmailMasterTemplateOperation.Save" });
+    export const Create : Entities.ConstructSymbol_Simple<EmailMasterTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailMasterTemplateOperation.Create" });
+    export const Save : Entities.ExecuteSymbol<EmailMasterTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailMasterTemplateOperation.Save" });
 }
 
-export const EmailMessageEntity_Type = new Type<EmailMessageEntity>("EmailMessageEntity");
+export const EmailMessageEntity_Type = new Type<EmailMessageEntity>("EmailMessage");
 export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
     recipients?: Entities.MList<EmailRecipientEntity>;
     target?: Entities.Lite<Entities.Entity>;
@@ -124,18 +124,18 @@ export module EmailMessageMessage {
 }
 
 export module EmailMessageOperation {
-    export const Save : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol({ key: "EmailMessageOperation.Save" });
-    export const ReadyToSend : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol({ key: "EmailMessageOperation.ReadyToSend" });
-    export const Send : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol({ key: "EmailMessageOperation.Send" });
-    export const ReSend : Entities.ConstructSymbol_From<EmailMessageEntity, EmailMessageEntity> = registerSymbol({ key: "EmailMessageOperation.ReSend" });
-    export const ReSendEmails : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, EmailMessageEntity> = registerSymbol({ key: "EmailMessageOperation.ReSendEmails" });
-    export const CreateMail : Entities.ConstructSymbol_Simple<EmailMessageEntity> = registerSymbol({ key: "EmailMessageOperation.CreateMail" });
-    export const CreateMailFromTemplate : Entities.ConstructSymbol_From<EmailMessageEntity, EmailTemplateEntity> = registerSymbol({ key: "EmailMessageOperation.CreateMailFromTemplate" });
-    export const Delete : Entities.DeleteSymbol<EmailMessageEntity> = registerSymbol({ key: "EmailMessageOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.Save" });
+    export const ReadyToSend : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.ReadyToSend" });
+    export const Send : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.Send" });
+    export const ReSend : Entities.ConstructSymbol_From<EmailMessageEntity, EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.ReSend" });
+    export const ReSendEmails : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.ReSendEmails" });
+    export const CreateMail : Entities.ConstructSymbol_Simple<EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.CreateMail" });
+    export const CreateMailFromTemplate : Entities.ConstructSymbol_From<EmailMessageEntity, EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.CreateMailFromTemplate" });
+    export const Delete : Entities.DeleteSymbol<EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.Delete" });
 }
 
 export module EmailMessageProcess {
-    export const SendEmails : Processes.ProcessAlgorithmSymbol = registerSymbol({ key: "EmailMessageProcess.SendEmails" });
+    export const SendEmails : Processes.ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "EmailMessageProcess.SendEmails" });
 }
 
 export enum EmailMessageState {
@@ -151,12 +151,12 @@ export enum EmailMessageState {
 }
 export const EmailMessageState_Type = new EnumType<EmailMessageState>("EmailMessageState", EmailMessageState);
 
-export const EmailPackageEntity_Type = new Type<EmailPackageEntity>("EmailPackageEntity");
+export const EmailPackageEntity_Type = new Type<EmailPackageEntity>("EmailPackage");
 export interface EmailPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
     name?: string;
 }
 
-export const EmailReceptionInfoEntity_Type = new Type<EmailReceptionInfoEntity>("EmailReceptionInfoEntity");
+export const EmailReceptionInfoEntity_Type = new Type<EmailReceptionInfoEntity>("EmailReceptionInfo");
 export interface EmailReceptionInfoEntity extends Entities.EmbeddedEntity {
     uniqueId?: string;
     reception?: Entities.Lite<Pop3ReceptionEntity>;
@@ -171,7 +171,7 @@ export interface EmailReceptionMixin extends Entities.MixinEntity {
     receptionInfo?: EmailReceptionInfoEntity;
 }
 
-export const EmailRecipientEntity_Type = new Type<EmailRecipientEntity>("EmailRecipientEntity");
+export const EmailRecipientEntity_Type = new Type<EmailRecipientEntity>("EmailRecipient");
 export interface EmailRecipientEntity extends EmailAddressEntity {
     kind?: EmailRecipientKind;
 }
@@ -183,14 +183,14 @@ export enum EmailRecipientKind {
 }
 export const EmailRecipientKind_Type = new EnumType<EmailRecipientKind>("EmailRecipientKind", EmailRecipientKind);
 
-export const EmailTemplateContactEntity_Type = new Type<EmailTemplateContactEntity>("EmailTemplateContactEntity");
+export const EmailTemplateContactEntity_Type = new Type<EmailTemplateContactEntity>("EmailTemplateContact");
 export interface EmailTemplateContactEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
     emailAddress?: string;
     displayName?: string;
 }
 
-export const EmailTemplateEntity_Type = new Type<EmailTemplateEntity>("EmailTemplateEntity");
+export const EmailTemplateEntity_Type = new Type<EmailTemplateEntity>("EmailTemplate");
 export interface EmailTemplateEntity extends Entities.Entity {
     name?: string;
     editableMessage?: boolean;
@@ -223,7 +223,7 @@ export module EmailTemplateMessage {
     export const TokenMustBeA0 = new MessageKey("EmailTemplateMessage", "TokenMustBeA0");
 }
 
-export const EmailTemplateMessageEntity_Type = new Type<EmailTemplateMessageEntity>("EmailTemplateMessageEntity");
+export const EmailTemplateMessageEntity_Type = new Type<EmailTemplateMessageEntity>("EmailTemplateMessage");
 export interface EmailTemplateMessageEntity extends Entities.EmbeddedEntity {
     template?: EmailTemplateEntity;
     cultureInfo?: Basics.CultureInfoEntity;
@@ -232,14 +232,14 @@ export interface EmailTemplateMessageEntity extends Entities.EmbeddedEntity {
 }
 
 export module EmailTemplateOperation {
-    export const CreateEmailTemplateFromSystemEmail : Entities.ConstructSymbol_From<EmailTemplateEntity, SystemEmailEntity> = registerSymbol({ key: "EmailTemplateOperation.CreateEmailTemplateFromSystemEmail" });
-    export const Create : Entities.ConstructSymbol_Simple<EmailTemplateEntity> = registerSymbol({ key: "EmailTemplateOperation.Create" });
-    export const Save : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol({ key: "EmailTemplateOperation.Save" });
-    export const Enable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol({ key: "EmailTemplateOperation.Enable" });
-    export const Disable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol({ key: "EmailTemplateOperation.Disable" });
+    export const CreateEmailTemplateFromSystemEmail : Entities.ConstructSymbol_From<EmailTemplateEntity, SystemEmailEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.CreateEmailTemplateFromSystemEmail" });
+    export const Create : Entities.ConstructSymbol_Simple<EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.Create" });
+    export const Save : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.Save" });
+    export const Enable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.Enable" });
+    export const Disable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.Disable" });
 }
 
-export const EmailTemplateRecipientEntity_Type = new Type<EmailTemplateRecipientEntity>("EmailTemplateRecipientEntity");
+export const EmailTemplateRecipientEntity_Type = new Type<EmailTemplateRecipientEntity>("EmailTemplateRecipient");
 export interface EmailTemplateRecipientEntity extends EmailTemplateContactEntity {
     kind?: EmailRecipientKind;
 }
@@ -253,7 +253,7 @@ export module EmailTemplateViewMessage {
 export interface IEmailOwnerEntity extends Entities.IEntity {
 }
 
-export const NewsletterDeliveryEntity_Type = new Type<NewsletterDeliveryEntity>("NewsletterDeliveryEntity");
+export const NewsletterDeliveryEntity_Type = new Type<NewsletterDeliveryEntity>("NewsletterDelivery");
 export interface NewsletterDeliveryEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
     sent?: boolean;
     sendDate?: string;
@@ -261,7 +261,7 @@ export interface NewsletterDeliveryEntity extends Entities.Entity, Processes.IPr
     newsletter?: Entities.Lite<NewsletterEntity>;
 }
 
-export const NewsletterEntity_Type = new Type<NewsletterEntity>("NewsletterEntity");
+export const NewsletterEntity_Type = new Type<NewsletterEntity>("Newsletter");
 export interface NewsletterEntity extends Entities.Entity, Processes.IProcessDataEntity {
     name?: string;
     state?: NewsletterState;
@@ -273,15 +273,15 @@ export interface NewsletterEntity extends Entities.Entity, Processes.IProcessDat
 }
 
 export module NewsletterOperation {
-    export const Save : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol({ key: "NewsletterOperation.Save" });
-    export const Send : Entities.ConstructSymbol_From<Processes.ProcessEntity, NewsletterEntity> = registerSymbol({ key: "NewsletterOperation.Send" });
-    export const AddRecipients : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol({ key: "NewsletterOperation.AddRecipients" });
-    export const RemoveRecipients : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol({ key: "NewsletterOperation.RemoveRecipients" });
-    export const Clone : Entities.ConstructSymbol_From<NewsletterEntity, NewsletterEntity> = registerSymbol({ key: "NewsletterOperation.Clone" });
+    export const Save : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol({ Type: "Operation", key: "NewsletterOperation.Save" });
+    export const Send : Entities.ConstructSymbol_From<Processes.ProcessEntity, NewsletterEntity> = registerSymbol({ Type: "Operation", key: "NewsletterOperation.Send" });
+    export const AddRecipients : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol({ Type: "Operation", key: "NewsletterOperation.AddRecipients" });
+    export const RemoveRecipients : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol({ Type: "Operation", key: "NewsletterOperation.RemoveRecipients" });
+    export const Clone : Entities.ConstructSymbol_From<NewsletterEntity, NewsletterEntity> = registerSymbol({ Type: "Operation", key: "NewsletterOperation.Clone" });
 }
 
 export module NewsletterProcess {
-    export const SendNewsletter : Processes.ProcessAlgorithmSymbol = registerSymbol({ key: "NewsletterProcess.SendNewsletter" });
+    export const SendNewsletter : Processes.ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "NewsletterProcess.SendNewsletter" });
 }
 
 export enum NewsletterState {
@@ -292,10 +292,10 @@ export enum NewsletterState {
 export const NewsletterState_Type = new EnumType<NewsletterState>("NewsletterState", NewsletterState);
 
 export module Pop3ConfigurationAction {
-    export const ReceiveAllActivePop3Configurations : Scheduler.SimpleTaskSymbol = registerSymbol({ key: "Pop3ConfigurationAction.ReceiveAllActivePop3Configurations" });
+    export const ReceiveAllActivePop3Configurations : Scheduler.SimpleTaskSymbol = registerSymbol({ Type: "SimpleTask", key: "Pop3ConfigurationAction.ReceiveAllActivePop3Configurations" });
 }
 
-export const Pop3ConfigurationEntity_Type = new Type<Pop3ConfigurationEntity>("Pop3ConfigurationEntity");
+export const Pop3ConfigurationEntity_Type = new Type<Pop3ConfigurationEntity>("Pop3Configuration");
 export interface Pop3ConfigurationEntity extends Entities.Entity, Scheduler.ITaskEntity {
     active?: boolean;
     port?: number;
@@ -309,11 +309,11 @@ export interface Pop3ConfigurationEntity extends Entities.Entity, Scheduler.ITas
 }
 
 export module Pop3ConfigurationOperation {
-    export const Save : Entities.ExecuteSymbol<Pop3ConfigurationEntity> = registerSymbol({ key: "Pop3ConfigurationOperation.Save" });
-    export const ReceiveEmails : Entities.ConstructSymbol_From<Pop3ReceptionEntity, Pop3ConfigurationEntity> = registerSymbol({ key: "Pop3ConfigurationOperation.ReceiveEmails" });
+    export const Save : Entities.ExecuteSymbol<Pop3ConfigurationEntity> = registerSymbol({ Type: "Operation", key: "Pop3ConfigurationOperation.Save" });
+    export const ReceiveEmails : Entities.ConstructSymbol_From<Pop3ReceptionEntity, Pop3ConfigurationEntity> = registerSymbol({ Type: "Operation", key: "Pop3ConfigurationOperation.ReceiveEmails" });
 }
 
-export const Pop3ReceptionEntity_Type = new Type<Pop3ReceptionEntity>("Pop3ReceptionEntity");
+export const Pop3ReceptionEntity_Type = new Type<Pop3ReceptionEntity>("Pop3Reception");
 export interface Pop3ReceptionEntity extends Entities.Entity {
     pop3Configuration?: Entities.Lite<Pop3ConfigurationEntity>;
     startDate?: string;
@@ -322,13 +322,13 @@ export interface Pop3ReceptionEntity extends Entities.Entity {
     exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
 }
 
-export const Pop3ReceptionExceptionEntity_Type = new Type<Pop3ReceptionExceptionEntity>("Pop3ReceptionExceptionEntity");
+export const Pop3ReceptionExceptionEntity_Type = new Type<Pop3ReceptionExceptionEntity>("Pop3ReceptionException");
 export interface Pop3ReceptionExceptionEntity extends Entities.Entity {
     reception?: Entities.Lite<Pop3ReceptionEntity>;
     exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
 }
 
-export const SmtpConfigurationEntity_Type = new Type<SmtpConfigurationEntity>("SmtpConfigurationEntity");
+export const SmtpConfigurationEntity_Type = new Type<SmtpConfigurationEntity>("SmtpConfiguration");
 export interface SmtpConfigurationEntity extends Entities.Entity {
     name?: string;
     deliveryFormat?: External.SmtpDeliveryFormat;
@@ -340,10 +340,10 @@ export interface SmtpConfigurationEntity extends Entities.Entity {
 }
 
 export module SmtpConfigurationOperation {
-    export const Save : Entities.ExecuteSymbol<SmtpConfigurationEntity> = registerSymbol({ key: "SmtpConfigurationOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<SmtpConfigurationEntity> = registerSymbol({ Type: "Operation", key: "SmtpConfigurationOperation.Save" });
 }
 
-export const SmtpNetworkDeliveryEntity_Type = new Type<SmtpNetworkDeliveryEntity>("SmtpNetworkDeliveryEntity");
+export const SmtpNetworkDeliveryEntity_Type = new Type<SmtpNetworkDeliveryEntity>("SmtpNetworkDelivery");
 export interface SmtpNetworkDeliveryEntity extends Entities.EmbeddedEntity {
     host?: string;
     port?: number;
@@ -354,7 +354,7 @@ export interface SmtpNetworkDeliveryEntity extends Entities.EmbeddedEntity {
     clientCertificationFiles?: Entities.MList<ClientCertificationFileEntity>;
 }
 
-export const SystemEmailEntity_Type = new Type<SystemEmailEntity>("SystemEmailEntity");
+export const SystemEmailEntity_Type = new Type<SystemEmailEntity>("SystemEmail");
 export interface SystemEmailEntity extends Entities.Entity {
     fullClassName?: string;
 }

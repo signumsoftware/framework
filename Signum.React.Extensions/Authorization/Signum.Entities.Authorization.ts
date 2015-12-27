@@ -132,13 +132,13 @@ export interface BaseRulePack<T> extends Entities.ModelEntity {
 }
 
 export module BasicPermission {
-    export const AdminRules : PermissionSymbol = registerSymbol({ key: "BasicPermission.AdminRules" });
-    export const AutomaticUpgradeOfProperties : PermissionSymbol = registerSymbol({ key: "BasicPermission.AutomaticUpgradeOfProperties" });
-    export const AutomaticUpgradeOfQueries : PermissionSymbol = registerSymbol({ key: "BasicPermission.AutomaticUpgradeOfQueries" });
-    export const AutomaticUpgradeOfOperations : PermissionSymbol = registerSymbol({ key: "BasicPermission.AutomaticUpgradeOfOperations" });
+    export const AdminRules : PermissionSymbol = registerSymbol({ Type: "Permission", key: "BasicPermission.AdminRules" });
+    export const AutomaticUpgradeOfProperties : PermissionSymbol = registerSymbol({ Type: "Permission", key: "BasicPermission.AutomaticUpgradeOfProperties" });
+    export const AutomaticUpgradeOfQueries : PermissionSymbol = registerSymbol({ Type: "Permission", key: "BasicPermission.AutomaticUpgradeOfQueries" });
+    export const AutomaticUpgradeOfOperations : PermissionSymbol = registerSymbol({ Type: "Permission", key: "BasicPermission.AutomaticUpgradeOfOperations" });
 }
 
-export const LastAuthRulesImportEntity_Type = new Type<LastAuthRulesImportEntity>("LastAuthRulesImportEntity");
+export const LastAuthRulesImportEntity_Type = new Type<LastAuthRulesImportEntity>("LastAuthRulesImport");
 export interface LastAuthRulesImportEntity extends Entities.Entity {
     date?: string;
 }
@@ -164,7 +164,7 @@ export const OperationRulePack_Type = new Type<OperationRulePack>("OperationRule
 export interface OperationRulePack extends BaseRulePack<OperationAllowedRule> {
 }
 
-export const PasswordExpiresIntervalEntity_Type = new Type<PasswordExpiresIntervalEntity>("PasswordExpiresIntervalEntity");
+export const PasswordExpiresIntervalEntity_Type = new Type<PasswordExpiresIntervalEntity>("PasswordExpiresInterval");
 export interface PasswordExpiresIntervalEntity extends Entities.Entity {
     days?: number;
     daysWarning?: number;
@@ -172,7 +172,7 @@ export interface PasswordExpiresIntervalEntity extends Entities.Entity {
 }
 
 export module PasswordExpiresIntervalOperation {
-    export const Save : Entities.ExecuteSymbol<PasswordExpiresIntervalEntity> = registerSymbol({ key: "PasswordExpiresIntervalOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<PasswordExpiresIntervalEntity> = registerSymbol({ Type: "Operation", key: "PasswordExpiresIntervalOperation.Save" });
 }
 
 export const PermissionAllowedRule_Type = new Type<PermissionAllowedRule>("PermissionAllowedRule");
@@ -183,7 +183,7 @@ export const PermissionRulePack_Type = new Type<PermissionRulePack>("PermissionR
 export interface PermissionRulePack extends BaseRulePack<PermissionAllowedRule> {
 }
 
-export const PermissionSymbol_Type = new Type<PermissionSymbol>("PermissionSymbol");
+export const PermissionSymbol_Type = new Type<PermissionSymbol>("Permission");
 export interface PermissionSymbol extends Entities.Symbol {
 }
 
@@ -210,7 +210,7 @@ export const QueryRulePack_Type = new Type<QueryRulePack>("QueryRulePack");
 export interface QueryRulePack extends BaseRulePack<QueryAllowedRule> {
 }
 
-export const ResetPasswordRequestEntity_Type = new Type<ResetPasswordRequestEntity>("ResetPasswordRequestEntity");
+export const ResetPasswordRequestEntity_Type = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");
 export interface ResetPasswordRequestEntity extends Entities.Entity {
     code?: string;
     user?: UserEntity;
@@ -218,7 +218,7 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
     lapsed?: boolean;
 }
 
-export const RoleEntity_Type = new Type<RoleEntity>("RoleEntity");
+export const RoleEntity_Type = new Type<RoleEntity>("Role");
 export interface RoleEntity extends Entities.Entity {
     name?: string;
     mergeStrategy?: MergeStrategy;
@@ -226,8 +226,8 @@ export interface RoleEntity extends Entities.Entity {
 }
 
 export module RoleOperation {
-    export const Save : Entities.ExecuteSymbol<RoleEntity> = registerSymbol({ key: "RoleOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<RoleEntity> = registerSymbol({ key: "RoleOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<RoleEntity> = registerSymbol({ Type: "Operation", key: "RoleOperation.Save" });
+    export const Delete : Entities.DeleteSymbol<RoleEntity> = registerSymbol({ Type: "Operation", key: "RoleOperation.Delete" });
 }
 
 export module RoleQuery {
@@ -240,34 +240,34 @@ export interface RuleEntity<R, A> extends Entities.Entity {
     allowed?: A;
 }
 
-export const RuleOperationEntity_Type = new Type<RuleOperationEntity>("RuleOperationEntity");
+export const RuleOperationEntity_Type = new Type<RuleOperationEntity>("RuleOperation");
 export interface RuleOperationEntity extends RuleEntity<Entities.OperationSymbol, OperationAllowed> {
 }
 
-export const RulePermissionEntity_Type = new Type<RulePermissionEntity>("RulePermissionEntity");
+export const RulePermissionEntity_Type = new Type<RulePermissionEntity>("RulePermission");
 export interface RulePermissionEntity extends RuleEntity<PermissionSymbol, boolean> {
 }
 
-export const RulePropertyEntity_Type = new Type<RulePropertyEntity>("RulePropertyEntity");
+export const RulePropertyEntity_Type = new Type<RulePropertyEntity>("RuleProperty");
 export interface RulePropertyEntity extends RuleEntity<Entities.Basics.PropertyRouteEntity, PropertyAllowed> {
 }
 
-export const RuleQueryEntity_Type = new Type<RuleQueryEntity>("RuleQueryEntity");
+export const RuleQueryEntity_Type = new Type<RuleQueryEntity>("RuleQuery");
 export interface RuleQueryEntity extends RuleEntity<Entities.Basics.QueryEntity, boolean> {
 }
 
-export const RuleTypeConditionEntity_Type = new Type<RuleTypeConditionEntity>("RuleTypeConditionEntity");
+export const RuleTypeConditionEntity_Type = new Type<RuleTypeConditionEntity>("RuleTypeCondition");
 export interface RuleTypeConditionEntity extends Entities.EmbeddedEntity {
     condition?: Basics.TypeConditionSymbol;
     allowed?: TypeAllowed;
 }
 
-export const RuleTypeEntity_Type = new Type<RuleTypeEntity>("RuleTypeEntity");
+export const RuleTypeEntity_Type = new Type<RuleTypeEntity>("RuleType");
 export interface RuleTypeEntity extends RuleEntity<Entities.Basics.TypeEntity, TypeAllowed> {
     conditions?: Entities.MList<RuleTypeConditionEntity>;
 }
 
-export const SessionLogEntity_Type = new Type<SessionLogEntity>("SessionLogEntity");
+export const SessionLogEntity_Type = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
     user?: Entities.Lite<UserEntity>;
     sessionStart?: string;
@@ -278,7 +278,7 @@ export interface SessionLogEntity extends Entities.Entity {
 }
 
 export module SessionLogPermission {
-    export const TrackSession : PermissionSymbol = registerSymbol({ key: "SessionLogPermission.TrackSession" });
+    export const TrackSession : PermissionSymbol = registerSymbol({ Type: "Permission", key: "SessionLogPermission.TrackSession" });
 }
 
 export enum TypeAllowed {
@@ -320,7 +320,7 @@ export const TypeRulePack_Type = new Type<TypeRulePack>("TypeRulePack");
 export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
 }
 
-export const UserEntity_Type = new Type<UserEntity>("UserEntity");
+export const UserEntity_Type = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Entities.Basics.IUserEntity {
     userName?: string;
     passwordHash?: string;
@@ -334,12 +334,12 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
 }
 
 export module UserOperation {
-    export const Create : Entities.ConstructSymbol_Simple<UserEntity> = registerSymbol({ key: "UserOperation.Create" });
-    export const SaveNew : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ key: "UserOperation.SaveNew" });
-    export const Save : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ key: "UserOperation.Save" });
-    export const Enable : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ key: "UserOperation.Enable" });
-    export const Disable : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ key: "UserOperation.Disable" });
-    export const SetPassword : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ key: "UserOperation.SetPassword" });
+    export const Create : Entities.ConstructSymbol_Simple<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.Create" });
+    export const SaveNew : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.SaveNew" });
+    export const Save : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.Save" });
+    export const Enable : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.Enable" });
+    export const Disable : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.Disable" });
+    export const SetPassword : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.SetPassword" });
 }
 
 export enum UserState {
@@ -349,7 +349,7 @@ export enum UserState {
 }
 export const UserState_Type = new EnumType<UserState>("UserState", UserState);
 
-export const UserTicketEntity_Type = new Type<UserTicketEntity>("UserTicketEntity");
+export const UserTicketEntity_Type = new Type<UserTicketEntity>("UserTicket");
 export interface UserTicketEntity extends Entities.Entity {
     user?: Entities.Lite<UserEntity>;
     ticket?: string;

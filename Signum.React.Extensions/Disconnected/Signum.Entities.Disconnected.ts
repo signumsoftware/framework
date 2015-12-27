@@ -9,7 +9,7 @@ export interface DisconnectedCreatedMixin extends Entities.MixinEntity {
     disconnectedCreated?: boolean;
 }
 
-export const DisconnectedExportEntity_Type = new Type<DisconnectedExportEntity>("DisconnectedExportEntity");
+export const DisconnectedExportEntity_Type = new Type<DisconnectedExportEntity>("DisconnectedExport");
 export interface DisconnectedExportEntity extends Entities.Entity {
     creationDate?: string;
     machine?: Entities.Lite<DisconnectedMachineEntity>;
@@ -34,14 +34,14 @@ export enum DisconnectedExportState {
 }
 export const DisconnectedExportState_Type = new EnumType<DisconnectedExportState>("DisconnectedExportState", DisconnectedExportState);
 
-export const DisconnectedExportTableEntity_Type = new Type<DisconnectedExportTableEntity>("DisconnectedExportTableEntity");
+export const DisconnectedExportTableEntity_Type = new Type<DisconnectedExportTableEntity>("DisconnectedExportTable");
 export interface DisconnectedExportTableEntity extends Entities.EmbeddedEntity {
     type?: Entities.Lite<Entities.Basics.TypeEntity>;
     copyTable?: number;
     errors?: string;
 }
 
-export const DisconnectedImportEntity_Type = new Type<DisconnectedImportEntity>("DisconnectedImportEntity");
+export const DisconnectedImportEntity_Type = new Type<DisconnectedImportEntity>("DisconnectedImport");
 export interface DisconnectedImportEntity extends Entities.Entity {
     creationDate?: string;
     machine?: Entities.Lite<DisconnectedMachineEntity>;
@@ -64,7 +64,7 @@ export enum DisconnectedImportState {
 }
 export const DisconnectedImportState_Type = new EnumType<DisconnectedImportState>("DisconnectedImportState", DisconnectedImportState);
 
-export const DisconnectedImportTableEntity_Type = new Type<DisconnectedImportTableEntity>("DisconnectedImportTableEntity");
+export const DisconnectedImportTableEntity_Type = new Type<DisconnectedImportTableEntity>("DisconnectedImportTable");
 export interface DisconnectedImportTableEntity extends Entities.EmbeddedEntity {
     type?: Entities.Lite<Entities.Basics.TypeEntity>;
     copyTable?: number;
@@ -74,7 +74,7 @@ export interface DisconnectedImportTableEntity extends Entities.EmbeddedEntity {
     insertedOrUpdated?: number;
 }
 
-export const DisconnectedMachineEntity_Type = new Type<DisconnectedMachineEntity>("DisconnectedMachineEntity");
+export const DisconnectedMachineEntity_Type = new Type<DisconnectedMachineEntity>("DisconnectedMachine");
 export interface DisconnectedMachineEntity extends Entities.Entity {
     creationDate?: string;
     machineName?: string;
@@ -84,9 +84,9 @@ export interface DisconnectedMachineEntity extends Entities.Entity {
 }
 
 export module DisconnectedMachineOperation {
-    export const Save : Entities.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol({ key: "DisconnectedMachineOperation.Save" });
-    export const UnsafeUnlock : Entities.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol({ key: "DisconnectedMachineOperation.UnsafeUnlock" });
-    export const FixImport : Entities.ConstructSymbol_From<DisconnectedImportEntity, DisconnectedMachineEntity> = registerSymbol({ key: "DisconnectedMachineOperation.FixImport" });
+    export const Save : Entities.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol({ Type: "Operation", key: "DisconnectedMachineOperation.Save" });
+    export const UnsafeUnlock : Entities.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol({ Type: "Operation", key: "DisconnectedMachineOperation.UnsafeUnlock" });
+    export const FixImport : Entities.ConstructSymbol_From<DisconnectedImportEntity, DisconnectedMachineEntity> = registerSymbol({ Type: "Operation", key: "DisconnectedMachineOperation.FixImport" });
 }
 
 export enum DisconnectedMachineState {

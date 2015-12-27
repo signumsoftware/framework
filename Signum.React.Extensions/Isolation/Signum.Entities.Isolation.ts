@@ -4,7 +4,7 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
 
 import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
-export const IsolationEntity_Type = new Type<IsolationEntity>("IsolationEntity");
+export const IsolationEntity_Type = new Type<IsolationEntity>("Isolation");
 export interface IsolationEntity extends Entities.Entity {
     name?: string;
 }
@@ -21,6 +21,6 @@ export interface IsolationMixin extends Entities.MixinEntity {
 }
 
 export module IsolationOperation {
-    export const Save : Entities.ExecuteSymbol<IsolationEntity> = registerSymbol({ key: "IsolationOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<IsolationEntity> = registerSymbol({ Type: "Operation", key: "IsolationOperation.Save" });
 }
 

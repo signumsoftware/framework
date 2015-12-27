@@ -16,7 +16,7 @@ export enum MessageLengthExceeded {
 }
 export const MessageLengthExceeded_Type = new EnumType<MessageLengthExceeded>("MessageLengthExceeded", MessageLengthExceeded);
 
-export const MultipleSMSModel_Type = new Type<MultipleSMSModel>("MultipleSMSModel");
+export const MultipleSMSModel_Type = new Type<MultipleSMSModel>("MultipleSMS");
 export interface MultipleSMSModel extends Entities.ModelEntity {
     message?: string;
     from?: string;
@@ -35,12 +35,12 @@ export module SMSCharactersMessage {
     export const Replacements = new MessageKey("SMSCharactersMessage", "Replacements");
 }
 
-export const SMSConfigurationEntity_Type = new Type<SMSConfigurationEntity>("SMSConfigurationEntity");
+export const SMSConfigurationEntity_Type = new Type<SMSConfigurationEntity>("SMSConfiguration");
 export interface SMSConfigurationEntity extends Entities.EmbeddedEntity {
     defaultCulture?: Basics.CultureInfoEntity;
 }
 
-export const SMSMessageEntity_Type = new Type<SMSMessageEntity>("SMSMessageEntity");
+export const SMSMessageEntity_Type = new Type<SMSMessageEntity>("SMSMessage");
 export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
     template?: Entities.Lite<SMSTemplateEntity>;
     message?: string;
@@ -59,19 +59,19 @@ export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLin
 }
 
 export module SMSMessageOperation {
-    export const Send : Entities.ExecuteSymbol<SMSMessageEntity> = registerSymbol({ key: "SMSMessageOperation.Send" });
-    export const UpdateStatus : Entities.ExecuteSymbol<SMSMessageEntity> = registerSymbol({ key: "SMSMessageOperation.UpdateStatus" });
-    export const CreateUpdateStatusPackage : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, SMSMessageEntity> = registerSymbol({ key: "SMSMessageOperation.CreateUpdateStatusPackage" });
-    export const CreateSMSFromSMSTemplate : Entities.ConstructSymbol_From<SMSMessageEntity, SMSTemplateEntity> = registerSymbol({ key: "SMSMessageOperation.CreateSMSFromSMSTemplate" });
-    export const CreateSMSWithTemplateFromEntity : Entities.ConstructSymbol_From<SMSMessageEntity, Entities.Entity> = registerSymbol({ key: "SMSMessageOperation.CreateSMSWithTemplateFromEntity" });
-    export const CreateSMSFromEntity : Entities.ConstructSymbol_From<SMSMessageEntity, Entities.Entity> = registerSymbol({ key: "SMSMessageOperation.CreateSMSFromEntity" });
-    export const SendSMSMessages : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, Entities.Entity> = registerSymbol({ key: "SMSMessageOperation.SendSMSMessages" });
-    export const SendSMSMessagesFromTemplate : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, Entities.Entity> = registerSymbol({ key: "SMSMessageOperation.SendSMSMessagesFromTemplate" });
+    export const Send : Entities.ExecuteSymbol<SMSMessageEntity> = registerSymbol({ Type: "Operation", key: "SMSMessageOperation.Send" });
+    export const UpdateStatus : Entities.ExecuteSymbol<SMSMessageEntity> = registerSymbol({ Type: "Operation", key: "SMSMessageOperation.UpdateStatus" });
+    export const CreateUpdateStatusPackage : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, SMSMessageEntity> = registerSymbol({ Type: "Operation", key: "SMSMessageOperation.CreateUpdateStatusPackage" });
+    export const CreateSMSFromSMSTemplate : Entities.ConstructSymbol_From<SMSMessageEntity, SMSTemplateEntity> = registerSymbol({ Type: "Operation", key: "SMSMessageOperation.CreateSMSFromSMSTemplate" });
+    export const CreateSMSWithTemplateFromEntity : Entities.ConstructSymbol_From<SMSMessageEntity, Entities.Entity> = registerSymbol({ Type: "Operation", key: "SMSMessageOperation.CreateSMSWithTemplateFromEntity" });
+    export const CreateSMSFromEntity : Entities.ConstructSymbol_From<SMSMessageEntity, Entities.Entity> = registerSymbol({ Type: "Operation", key: "SMSMessageOperation.CreateSMSFromEntity" });
+    export const SendSMSMessages : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, Entities.Entity> = registerSymbol({ Type: "Operation", key: "SMSMessageOperation.SendSMSMessages" });
+    export const SendSMSMessagesFromTemplate : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, Entities.Entity> = registerSymbol({ Type: "Operation", key: "SMSMessageOperation.SendSMSMessagesFromTemplate" });
 }
 
 export module SMSMessageProcess {
-    export const Send : Processes.ProcessAlgorithmSymbol = registerSymbol({ key: "SMSMessageProcess.Send" });
-    export const UpdateStatus : Processes.ProcessAlgorithmSymbol = registerSymbol({ key: "SMSMessageProcess.UpdateStatus" });
+    export const Send : Processes.ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "SMSMessageProcess.Send" });
+    export const UpdateStatus : Processes.ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "SMSMessageProcess.UpdateStatus" });
 }
 
 export enum SMSMessageState {
@@ -86,11 +86,11 @@ export interface SMSPackageEntity extends Entities.Entity, Processes.IProcessDat
     name?: string;
 }
 
-export const SMSSendPackageEntity_Type = new Type<SMSSendPackageEntity>("SMSSendPackageEntity");
+export const SMSSendPackageEntity_Type = new Type<SMSSendPackageEntity>("SMSSendPackage");
 export interface SMSSendPackageEntity extends SMSPackageEntity {
 }
 
-export const SMSTemplateEntity_Type = new Type<SMSTemplateEntity>("SMSTemplateEntity");
+export const SMSTemplateEntity_Type = new Type<SMSTemplateEntity>("SMSTemplate");
 export interface SMSTemplateEntity extends Entities.Entity {
     name?: string;
     certified?: boolean;
@@ -113,7 +113,7 @@ export module SMSTemplateMessage {
     export const NewCulture = new MessageKey("SMSTemplateMessage", "NewCulture");
 }
 
-export const SMSTemplateMessageEntity_Type = new Type<SMSTemplateMessageEntity>("SMSTemplateMessageEntity");
+export const SMSTemplateMessageEntity_Type = new Type<SMSTemplateMessageEntity>("SMSTemplateMessage");
 export interface SMSTemplateMessageEntity extends Entities.EmbeddedEntity {
     template?: SMSTemplateEntity;
     cultureInfo?: Basics.CultureInfoEntity;
@@ -121,11 +121,11 @@ export interface SMSTemplateMessageEntity extends Entities.EmbeddedEntity {
 }
 
 export module SMSTemplateOperation {
-    export const Create : Entities.ConstructSymbol_Simple<SMSTemplateEntity> = registerSymbol({ key: "SMSTemplateOperation.Create" });
-    export const Save : Entities.ExecuteSymbol<SMSTemplateEntity> = registerSymbol({ key: "SMSTemplateOperation.Save" });
+    export const Create : Entities.ConstructSymbol_Simple<SMSTemplateEntity> = registerSymbol({ Type: "Operation", key: "SMSTemplateOperation.Create" });
+    export const Save : Entities.ExecuteSymbol<SMSTemplateEntity> = registerSymbol({ Type: "Operation", key: "SMSTemplateOperation.Save" });
 }
 
-export const SMSUpdatePackageEntity_Type = new Type<SMSUpdatePackageEntity>("SMSUpdatePackageEntity");
+export const SMSUpdatePackageEntity_Type = new Type<SMSUpdatePackageEntity>("SMSUpdatePackage");
 export interface SMSUpdatePackageEntity extends SMSPackageEntity {
 }
 

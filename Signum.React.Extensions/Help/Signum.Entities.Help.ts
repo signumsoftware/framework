@@ -9,7 +9,7 @@ import * as Basics from 'Extensions/Signum.React.Extensions/Basics/Signum.Entiti
 
 import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization' 
 
-export const AppendixHelpEntity_Type = new Type<AppendixHelpEntity>("AppendixHelpEntity");
+export const AppendixHelpEntity_Type = new Type<AppendixHelpEntity>("AppendixHelp");
 export interface AppendixHelpEntity extends Entities.Entity {
     uniqueName?: string;
     culture?: Basics.CultureInfoEntity;
@@ -18,10 +18,10 @@ export interface AppendixHelpEntity extends Entities.Entity {
 }
 
 export module AppendixHelpOperation {
-    export const Save : Entities.ExecuteSymbol<AppendixHelpEntity> = registerSymbol({ key: "AppendixHelpOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<AppendixHelpEntity> = registerSymbol({ Type: "Operation", key: "AppendixHelpOperation.Save" });
 }
 
-export const EntityHelpEntity_Type = new Type<EntityHelpEntity>("EntityHelpEntity");
+export const EntityHelpEntity_Type = new Type<EntityHelpEntity>("EntityHelp");
 export interface EntityHelpEntity extends Entities.Entity {
     type?: Entities.Basics.TypeEntity;
     culture?: Basics.CultureInfoEntity;
@@ -33,7 +33,7 @@ export interface EntityHelpEntity extends Entities.Entity {
 }
 
 export module EntityHelpOperation {
-    export const Save : Entities.ExecuteSymbol<EntityHelpEntity> = registerSymbol({ key: "EntityHelpOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<EntityHelpEntity> = registerSymbol({ Type: "Operation", key: "EntityHelpOperation.Save" });
 }
 
 export module HelpKindMessage {
@@ -91,7 +91,7 @@ export module HelpMessage {
 }
 
 export module HelpPermissions {
-    export const ViewHelp : Authorization.PermissionSymbol = registerSymbol({ key: "HelpPermissions.ViewHelp" });
+    export const ViewHelp : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "HelpPermissions.ViewHelp" });
 }
 
 export module HelpSearchMessage {
@@ -130,7 +130,7 @@ export module HelpSyntaxMessage {
     export const TranslateFrom = new MessageKey("HelpSyntaxMessage", "TranslateFrom");
 }
 
-export const NamespaceHelpEntity_Type = new Type<NamespaceHelpEntity>("NamespaceHelpEntity");
+export const NamespaceHelpEntity_Type = new Type<NamespaceHelpEntity>("NamespaceHelp");
 export interface NamespaceHelpEntity extends Entities.Entity {
     name?: string;
     culture?: Basics.CultureInfoEntity;
@@ -139,10 +139,10 @@ export interface NamespaceHelpEntity extends Entities.Entity {
 }
 
 export module NamespaceHelpOperation {
-    export const Save : Entities.ExecuteSymbol<NamespaceHelpEntity> = registerSymbol({ key: "NamespaceHelpOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<NamespaceHelpEntity> = registerSymbol({ Type: "Operation", key: "NamespaceHelpOperation.Save" });
 }
 
-export const OperationHelpEntity_Type = new Type<OperationHelpEntity>("OperationHelpEntity");
+export const OperationHelpEntity_Type = new Type<OperationHelpEntity>("OperationHelp");
 export interface OperationHelpEntity extends Entities.Entity {
     operation?: Entities.OperationSymbol;
     culture?: Basics.CultureInfoEntity;
@@ -150,22 +150,22 @@ export interface OperationHelpEntity extends Entities.Entity {
 }
 
 export module OperationHelpOperation {
-    export const Save : Entities.ExecuteSymbol<OperationHelpEntity> = registerSymbol({ key: "OperationHelpOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<OperationHelpEntity> = registerSymbol({ Type: "Operation", key: "OperationHelpOperation.Save" });
 }
 
-export const PropertyRouteHelpEntity_Type = new Type<PropertyRouteHelpEntity>("PropertyRouteHelpEntity");
+export const PropertyRouteHelpEntity_Type = new Type<PropertyRouteHelpEntity>("PropertyRouteHelp");
 export interface PropertyRouteHelpEntity extends Entities.EmbeddedEntity {
     property?: Entities.Basics.PropertyRouteEntity;
     description?: string;
 }
 
-export const QueryColumnHelpEntity_Type = new Type<QueryColumnHelpEntity>("QueryColumnHelpEntity");
+export const QueryColumnHelpEntity_Type = new Type<QueryColumnHelpEntity>("QueryColumnHelp");
 export interface QueryColumnHelpEntity extends Entities.EmbeddedEntity {
     columnName?: string;
     description?: string;
 }
 
-export const QueryHelpEntity_Type = new Type<QueryHelpEntity>("QueryHelpEntity");
+export const QueryHelpEntity_Type = new Type<QueryHelpEntity>("QueryHelp");
 export interface QueryHelpEntity extends Entities.Entity {
     query?: Entities.Basics.QueryEntity;
     culture?: Basics.CultureInfoEntity;
@@ -175,6 +175,6 @@ export interface QueryHelpEntity extends Entities.Entity {
 }
 
 export module QueryHelpOperation {
-    export const Save : Entities.ExecuteSymbol<QueryHelpEntity> = registerSymbol({ key: "QueryHelpOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<QueryHelpEntity> = registerSymbol({ Type: "Operation", key: "QueryHelpOperation.Save" });
 }
 

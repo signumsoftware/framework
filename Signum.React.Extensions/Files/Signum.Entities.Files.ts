@@ -4,14 +4,14 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
 
 import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
-export const EmbeddedFileEntity_Type = new Type<EmbeddedFileEntity>("EmbeddedFileEntity");
+export const EmbeddedFileEntity_Type = new Type<EmbeddedFileEntity>("EmbeddedFile");
 export interface EmbeddedFileEntity extends Entities.EmbeddedEntity {
     fileName?: string;
     binaryFile?: string;
     fullWebPath?: string;
 }
 
-export const EmbeddedFilePathEntity_Type = new Type<EmbeddedFilePathEntity>("EmbeddedFilePathEntity");
+export const EmbeddedFilePathEntity_Type = new Type<EmbeddedFilePathEntity>("EmbeddedFilePath");
 export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
     fileName?: string;
     binaryFile?: string;
@@ -24,7 +24,7 @@ export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
     fullWebPath?: string;
 }
 
-export const FileEntity_Type = new Type<FileEntity>("FileEntity");
+export const FileEntity_Type = new Type<FileEntity>("File");
 export interface FileEntity extends Entities.ImmutableEntity {
     fileName?: string;
     hash?: string;
@@ -48,7 +48,7 @@ export module FileMessage {
     export const OnlyOneFileIsSupported = new MessageKey("FileMessage", "OnlyOneFileIsSupported");
 }
 
-export const FilePathEntity_Type = new Type<FilePathEntity>("FilePathEntity");
+export const FilePathEntity_Type = new Type<FilePathEntity>("FilePath");
 export interface FilePathEntity extends Entities.Patterns.LockableEntity {
     creationDate?: string;
     fileName?: string;
@@ -63,10 +63,10 @@ export interface FilePathEntity extends Entities.Patterns.LockableEntity {
 }
 
 export module FilePathOperation {
-    export const Save : Entities.ExecuteSymbol<FilePathEntity> = registerSymbol({ key: "FilePathOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<FilePathEntity> = registerSymbol({ Type: "Operation", key: "FilePathOperation.Save" });
 }
 
-export const FileTypeSymbol_Type = new Type<FileTypeSymbol>("FileTypeSymbol");
+export const FileTypeSymbol_Type = new Type<FileTypeSymbol>("FileType");
 export interface FileTypeSymbol extends Entities.Symbol {
 }
 

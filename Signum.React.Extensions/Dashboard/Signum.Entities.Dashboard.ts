@@ -13,13 +13,13 @@ import * as UserAssets from 'Extensions/Signum.React.Extensions/UserAssets/Signu
 
 import * as Chart from 'Extensions/Signum.React.Extensions/Chart/Signum.Entities.Chart' 
 
-export const CountSearchControlPartEntity_Type = new Type<CountSearchControlPartEntity>("CountSearchControlPartEntity");
+export const CountSearchControlPartEntity_Type = new Type<CountSearchControlPartEntity>("CountSearchControlPart");
 export interface CountSearchControlPartEntity extends Entities.Entity, IPartEntity {
     userQueries?: Entities.MList<CountUserQueryElementEntity>;
     requiresTitle?: boolean;
 }
 
-export const CountUserQueryElementEntity_Type = new Type<CountUserQueryElementEntity>("CountUserQueryElementEntity");
+export const CountUserQueryElementEntity_Type = new Type<CountUserQueryElementEntity>("CountUserQueryElement");
 export interface CountUserQueryElementEntity extends Entities.EmbeddedEntity {
     label?: string;
     userQuery?: UserQueries.UserQueryEntity;
@@ -33,7 +33,7 @@ export enum DashboardEmbedededInEntity {
 }
 export const DashboardEmbedededInEntity_Type = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity", DashboardEmbedededInEntity);
 
-export const DashboardEntity_Type = new Type<DashboardEntity>("DashboardEntity");
+export const DashboardEntity_Type = new Type<DashboardEntity>("Dashboard");
 export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     entityType?: Entities.Lite<Entities.Basics.TypeEntity>;
     embeddedInEntity?: DashboardEmbedededInEntity;
@@ -57,33 +57,33 @@ export module DashboardMessage {
 }
 
 export module DashboardOperation {
-    export const Create : Entities.ConstructSymbol_Simple<DashboardEntity> = registerSymbol({ key: "DashboardOperation.Create" });
-    export const Save : Entities.ExecuteSymbol<DashboardEntity> = registerSymbol({ key: "DashboardOperation.Save" });
-    export const Clone : Entities.ConstructSymbol_From<DashboardEntity, DashboardEntity> = registerSymbol({ key: "DashboardOperation.Clone" });
-    export const Delete : Entities.DeleteSymbol<DashboardEntity> = registerSymbol({ key: "DashboardOperation.Delete" });
+    export const Create : Entities.ConstructSymbol_Simple<DashboardEntity> = registerSymbol({ Type: "Operation", key: "DashboardOperation.Create" });
+    export const Save : Entities.ExecuteSymbol<DashboardEntity> = registerSymbol({ Type: "Operation", key: "DashboardOperation.Save" });
+    export const Clone : Entities.ConstructSymbol_From<DashboardEntity, DashboardEntity> = registerSymbol({ Type: "Operation", key: "DashboardOperation.Clone" });
+    export const Delete : Entities.DeleteSymbol<DashboardEntity> = registerSymbol({ Type: "Operation", key: "DashboardOperation.Delete" });
 }
 
 export module DashboardPermission {
-    export const ViewDashboard : Authorization.PermissionSymbol = registerSymbol({ key: "DashboardPermission.ViewDashboard" });
+    export const ViewDashboard : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "DashboardPermission.ViewDashboard" });
 }
 
 export interface IPartEntity extends Entities.IEntity {
     requiresTitle?: boolean;
 }
 
-export const LinkElementEntity_Type = new Type<LinkElementEntity>("LinkElementEntity");
+export const LinkElementEntity_Type = new Type<LinkElementEntity>("LinkElement");
 export interface LinkElementEntity extends Entities.EmbeddedEntity {
     label?: string;
     link?: string;
 }
 
-export const LinkListPartEntity_Type = new Type<LinkListPartEntity>("LinkListPartEntity");
+export const LinkListPartEntity_Type = new Type<LinkListPartEntity>("LinkListPart");
 export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
     links?: Entities.MList<LinkElementEntity>;
     requiresTitle?: boolean;
 }
 
-export const PanelPartEntity_Type = new Type<PanelPartEntity>("PanelPartEntity");
+export const PanelPartEntity_Type = new Type<PanelPartEntity>("PanelPart");
 export interface PanelPartEntity extends Entities.EmbeddedEntity {
     title?: string;
     row?: number;
@@ -103,14 +103,14 @@ export enum PanelStyle {
 }
 export const PanelStyle_Type = new EnumType<PanelStyle>("PanelStyle", PanelStyle);
 
-export const UserChartPartEntity_Type = new Type<UserChartPartEntity>("UserChartPartEntity");
+export const UserChartPartEntity_Type = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
     userChart?: Chart.UserChartEntity;
     showData?: boolean;
     requiresTitle?: boolean;
 }
 
-export const UserQueryPartEntity_Type = new Type<UserQueryPartEntity>("UserQueryPartEntity");
+export const UserQueryPartEntity_Type = new Type<UserQueryPartEntity>("UserQueryPart");
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
     userQuery?: UserQueries.UserQueryEntity;
     allowSelection?: boolean;

@@ -15,7 +15,7 @@ export enum TranslatedCultureAction {
 }
 export const TranslatedCultureAction_Type = new EnumType<TranslatedCultureAction>("TranslatedCultureAction", TranslatedCultureAction);
 
-export const TranslatedInstanceEntity_Type = new Type<TranslatedInstanceEntity>("TranslatedInstanceEntity");
+export const TranslatedInstanceEntity_Type = new Type<TranslatedInstanceEntity>("TranslatedInstance");
 export interface TranslatedInstanceEntity extends Entities.Entity {
     culture?: Basics.CultureInfoEntity;
     instance?: Entities.Lite<Entities.Entity>;
@@ -57,11 +57,11 @@ export module TranslationMessage {
 }
 
 export module TranslationPermission {
-    export const TranslateCode : Authorization.PermissionSymbol = registerSymbol({ key: "TranslationPermission.TranslateCode" });
-    export const TranslateInstances : Authorization.PermissionSymbol = registerSymbol({ key: "TranslationPermission.TranslateInstances" });
+    export const TranslateCode : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "TranslationPermission.TranslateCode" });
+    export const TranslateInstances : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "TranslationPermission.TranslateInstances" });
 }
 
-export const TranslationReplacementEntity_Type = new Type<TranslationReplacementEntity>("TranslationReplacementEntity");
+export const TranslationReplacementEntity_Type = new Type<TranslationReplacementEntity>("TranslationReplacement");
 export interface TranslationReplacementEntity extends Entities.Entity {
     cultureInfo?: Basics.CultureInfoEntity;
     wrongTranslation?: string;
@@ -69,24 +69,24 @@ export interface TranslationReplacementEntity extends Entities.Entity {
 }
 
 export module TranslationReplacementOperation {
-    export const Save : Entities.ExecuteSymbol<TranslationReplacementEntity> = registerSymbol({ key: "TranslationReplacementOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<TranslationReplacementEntity> = registerSymbol({ key: "TranslationReplacementOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<TranslationReplacementEntity> = registerSymbol({ Type: "Operation", key: "TranslationReplacementOperation.Save" });
+    export const Delete : Entities.DeleteSymbol<TranslationReplacementEntity> = registerSymbol({ Type: "Operation", key: "TranslationReplacementOperation.Delete" });
 }
 
-export const TranslatorUserCultureEntity_Type = new Type<TranslatorUserCultureEntity>("TranslatorUserCultureEntity");
+export const TranslatorUserCultureEntity_Type = new Type<TranslatorUserCultureEntity>("TranslatorUserCulture");
 export interface TranslatorUserCultureEntity extends Entities.EmbeddedEntity {
     culture?: Basics.CultureInfoEntity;
     action?: TranslatedCultureAction;
 }
 
-export const TranslatorUserEntity_Type = new Type<TranslatorUserEntity>("TranslatorUserEntity");
+export const TranslatorUserEntity_Type = new Type<TranslatorUserEntity>("TranslatorUser");
 export interface TranslatorUserEntity extends Entities.Entity {
     user?: Entities.Lite<Entities.Basics.IUserEntity>;
     cultures?: Entities.MList<TranslatorUserCultureEntity>;
 }
 
 export module TranslatorUserOperation {
-    export const Save : Entities.ExecuteSymbol<TranslatorUserEntity> = registerSymbol({ key: "TranslatorUserOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<TranslatorUserEntity> = registerSymbol({ key: "TranslatorUserOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<TranslatorUserEntity> = registerSymbol({ Type: "Operation", key: "TranslatorUserOperation.Save" });
+    export const Delete : Entities.DeleteSymbol<TranslatorUserEntity> = registerSymbol({ Type: "Operation", key: "TranslatorUserOperation.Delete" });
 }
 

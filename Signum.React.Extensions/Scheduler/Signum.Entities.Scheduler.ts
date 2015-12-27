@@ -6,25 +6,25 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/
 import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
 
 import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization' 
-export const ApplicationEventLogEntity_Type = new Type<ApplicationEventLogEntity>("ApplicationEventLogEntity");
+export const ApplicationEventLogEntity_Type = new Type<ApplicationEventLogEntity>("ApplicationEventLog");
 export interface ApplicationEventLogEntity extends Entities.Entity {
     machineName?: string;
     date?: string;
     globalEvent?: TypeEvent;
 }
 
-export const HolidayCalendarEntity_Type = new Type<HolidayCalendarEntity>("HolidayCalendarEntity");
+export const HolidayCalendarEntity_Type = new Type<HolidayCalendarEntity>("HolidayCalendar");
 export interface HolidayCalendarEntity extends Entities.Entity {
     name?: string;
     holidays?: Entities.MList<HolidayEntity>;
 }
 
 export module HolidayCalendarOperation {
-    export const Save : Entities.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol({ key: "HolidayCalendarOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<HolidayCalendarEntity> = registerSymbol({ key: "HolidayCalendarOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol({ Type: "Operation", key: "HolidayCalendarOperation.Save" });
+    export const Delete : Entities.DeleteSymbol<HolidayCalendarEntity> = registerSymbol({ Type: "Operation", key: "HolidayCalendarOperation.Delete" });
 }
 
-export const HolidayEntity_Type = new Type<HolidayEntity>("HolidayEntity");
+export const HolidayEntity_Type = new Type<HolidayEntity>("Holiday");
 export interface HolidayEntity extends Entities.EmbeddedEntity {
     date?: string;
     name?: string;
@@ -36,7 +36,7 @@ export interface IScheduleRuleEntity extends Entities.IEntity {
 export interface ITaskEntity extends Entities.IEntity {
 }
 
-export const ScheduledTaskEntity_Type = new Type<ScheduledTaskEntity>("ScheduledTaskEntity");
+export const ScheduledTaskEntity_Type = new Type<ScheduledTaskEntity>("ScheduledTask");
 export interface ScheduledTaskEntity extends Entities.Entity {
     rule?: IScheduleRuleEntity;
     task?: ITaskEntity;
@@ -46,7 +46,7 @@ export interface ScheduledTaskEntity extends Entities.Entity {
     applicationName?: string;
 }
 
-export const ScheduledTaskLogEntity_Type = new Type<ScheduledTaskLogEntity>("ScheduledTaskLogEntity");
+export const ScheduledTaskLogEntity_Type = new Type<ScheduledTaskLogEntity>("ScheduledTaskLog");
 export interface ScheduledTaskLogEntity extends Entities.Entity {
     scheduledTask?: ScheduledTaskEntity;
     user?: Entities.Lite<Entities.Basics.IUserEntity>;
@@ -60,8 +60,8 @@ export interface ScheduledTaskLogEntity extends Entities.Entity {
 }
 
 export module ScheduledTaskOperation {
-    export const Save : Entities.ExecuteSymbol<ScheduledTaskEntity> = registerSymbol({ key: "ScheduledTaskOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<ScheduledTaskEntity> = registerSymbol({ key: "ScheduledTaskOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<ScheduledTaskEntity> = registerSymbol({ Type: "Operation", key: "ScheduledTaskOperation.Save" });
+    export const Delete : Entities.DeleteSymbol<ScheduledTaskEntity> = registerSymbol({ Type: "Operation", key: "ScheduledTaskOperation.Delete" });
 }
 
 export module SchedulerMessage {
@@ -98,10 +98,10 @@ export module SchedulerMessage {
 }
 
 export module SchedulerPermission {
-    export const ViewSchedulerPanel : Authorization.PermissionSymbol = registerSymbol({ key: "SchedulerPermission.ViewSchedulerPanel" });
+    export const ViewSchedulerPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "SchedulerPermission.ViewSchedulerPanel" });
 }
 
-export const ScheduleRuleDailyEntity_Type = new Type<ScheduleRuleDailyEntity>("ScheduleRuleDailyEntity");
+export const ScheduleRuleDailyEntity_Type = new Type<ScheduleRuleDailyEntity>("ScheduleRuleDaily");
 export interface ScheduleRuleDailyEntity extends ScheduleRuleDayEntity {
 }
 
@@ -109,17 +109,17 @@ export interface ScheduleRuleDayEntity extends Entities.Entity, IScheduleRuleEnt
     startingOn?: string;
 }
 
-export const ScheduleRuleHourlyEntity_Type = new Type<ScheduleRuleHourlyEntity>("ScheduleRuleHourlyEntity");
+export const ScheduleRuleHourlyEntity_Type = new Type<ScheduleRuleHourlyEntity>("ScheduleRuleHourly");
 export interface ScheduleRuleHourlyEntity extends Entities.Entity, IScheduleRuleEntity {
     eachHours?: number;
 }
 
-export const ScheduleRuleMinutelyEntity_Type = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutelyEntity");
+export const ScheduleRuleMinutelyEntity_Type = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
 export interface ScheduleRuleMinutelyEntity extends Entities.Entity, IScheduleRuleEntity {
     eachMinutes?: number;
 }
 
-export const ScheduleRuleWeekDaysEntity_Type = new Type<ScheduleRuleWeekDaysEntity>("ScheduleRuleWeekDaysEntity");
+export const ScheduleRuleWeekDaysEntity_Type = new Type<ScheduleRuleWeekDaysEntity>("ScheduleRuleWeekDays");
 export interface ScheduleRuleWeekDaysEntity extends ScheduleRuleDayEntity {
     monday?: boolean;
     tuesday?: boolean;
@@ -132,12 +132,12 @@ export interface ScheduleRuleWeekDaysEntity extends ScheduleRuleDayEntity {
     holiday?: boolean;
 }
 
-export const ScheduleRuleWeeklyEntity_Type = new Type<ScheduleRuleWeeklyEntity>("ScheduleRuleWeeklyEntity");
+export const ScheduleRuleWeeklyEntity_Type = new Type<ScheduleRuleWeeklyEntity>("ScheduleRuleWeekly");
 export interface ScheduleRuleWeeklyEntity extends ScheduleRuleDayEntity {
     dayOfTheWeek?: External.DayOfWeek;
 }
 
-export const SimpleTaskSymbol_Type = new Type<SimpleTaskSymbol>("SimpleTaskSymbol");
+export const SimpleTaskSymbol_Type = new Type<SimpleTaskSymbol>("SimpleTask");
 export interface SimpleTaskSymbol extends Entities.Symbol, ITaskEntity {
 }
 
@@ -148,8 +148,8 @@ export module TaskMessage {
 }
 
 export module TaskOperation {
-    export const ExecuteSync : Entities.ConstructSymbol_From<Entities.IEntity, ITaskEntity> = registerSymbol({ key: "TaskOperation.ExecuteSync" });
-    export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol({ key: "TaskOperation.ExecuteAsync" });
+    export const ExecuteSync : Entities.ConstructSymbol_From<Entities.IEntity, ITaskEntity> = registerSymbol({ Type: "Operation", key: "TaskOperation.ExecuteSync" });
+    export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol({ Type: "Operation", key: "TaskOperation.ExecuteAsync" });
 }
 
 export enum TypeEvent {

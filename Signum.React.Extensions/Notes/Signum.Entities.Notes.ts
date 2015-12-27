@@ -4,7 +4,7 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
 
 import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
-export const NoteEntity_Type = new Type<NoteEntity>("NoteEntity");
+export const NoteEntity_Type = new Type<NoteEntity>("Note");
 export interface NoteEntity extends Entities.Entity {
     title?: string;
     target?: Entities.Lite<Entities.Entity>;
@@ -26,15 +26,15 @@ export module NoteMessage {
 }
 
 export module NoteOperation {
-    export const CreateNoteFromEntity : Entities.ConstructSymbol_From<NoteEntity, Entities.Entity> = registerSymbol({ key: "NoteOperation.CreateNoteFromEntity" });
-    export const Save : Entities.ExecuteSymbol<NoteEntity> = registerSymbol({ key: "NoteOperation.Save" });
+    export const CreateNoteFromEntity : Entities.ConstructSymbol_From<NoteEntity, Entities.Entity> = registerSymbol({ Type: "Operation", key: "NoteOperation.CreateNoteFromEntity" });
+    export const Save : Entities.ExecuteSymbol<NoteEntity> = registerSymbol({ Type: "Operation", key: "NoteOperation.Save" });
 }
 
-export const NoteTypeEntity_Type = new Type<NoteTypeEntity>("NoteTypeEntity");
+export const NoteTypeEntity_Type = new Type<NoteTypeEntity>("NoteType");
 export interface NoteTypeEntity extends Entities.Basics.SemiSymbol {
 }
 
 export module NoteTypeOperation {
-    export const Save : Entities.ExecuteSymbol<NoteTypeEntity> = registerSymbol({ key: "NoteTypeOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<NoteTypeEntity> = registerSymbol({ Type: "Operation", key: "NoteTypeOperation.Save" });
 }
 

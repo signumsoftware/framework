@@ -12,16 +12,16 @@ import * as Files from 'Extensions/Signum.React.Extensions/Files/Signum.Entities
 import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization' 
 
 
-export const SystemWordTemplateEntity_Type = new Type<SystemWordTemplateEntity>("SystemWordTemplateEntity");
+export const SystemWordTemplateEntity_Type = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
 export interface SystemWordTemplateEntity extends Entities.Entity {
     fullClassName?: string;
 }
 
-export const WordConverterSymbol_Type = new Type<WordConverterSymbol>("WordConverterSymbol");
+export const WordConverterSymbol_Type = new Type<WordConverterSymbol>("WordConverter");
 export interface WordConverterSymbol extends Entities.Symbol {
 }
 
-export const WordTemplateEntity_Type = new Type<WordTemplateEntity>("WordTemplateEntity");
+export const WordTemplateEntity_Type = new Type<WordTemplateEntity>("WordTemplate");
 export interface WordTemplateEntity extends Entities.Entity {
     name?: string;
     query?: Entities.Basics.QueryEntity;
@@ -45,16 +45,16 @@ export module WordTemplateMessage {
 }
 
 export module WordTemplateOperation {
-    export const Save : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol({ key: "WordTemplateOperation.Save" });
-    export const CreateWordReport : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol({ key: "WordTemplateOperation.CreateWordReport" });
-    export const CreateWordTemplateFromSystemWordTemplate : Entities.ConstructSymbol_From<WordTemplateEntity, SystemWordTemplateEntity> = registerSymbol({ key: "WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate" });
+    export const Save : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol({ Type: "Operation", key: "WordTemplateOperation.Save" });
+    export const CreateWordReport : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol({ Type: "Operation", key: "WordTemplateOperation.CreateWordReport" });
+    export const CreateWordTemplateFromSystemWordTemplate : Entities.ConstructSymbol_From<WordTemplateEntity, SystemWordTemplateEntity> = registerSymbol({ Type: "Operation", key: "WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate" });
 }
 
 export module WordTemplatePermission {
-    export const GenerateReport : Authorization.PermissionSymbol = registerSymbol({ key: "WordTemplatePermission.GenerateReport" });
+    export const GenerateReport : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "WordTemplatePermission.GenerateReport" });
 }
 
-export const WordTransformerSymbol_Type = new Type<WordTransformerSymbol>("WordTransformerSymbol");
+export const WordTransformerSymbol_Type = new Type<WordTransformerSymbol>("WordTransformer");
 export interface WordTransformerSymbol extends Entities.Symbol {
 }
 

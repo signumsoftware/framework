@@ -22,7 +22,7 @@ export module ExcelMessage {
     export const CreateNew = new MessageKey("ExcelMessage", "CreateNew");
 }
 
-export const ExcelReportEntity_Type = new Type<ExcelReportEntity>("ExcelReportEntity");
+export const ExcelReportEntity_Type = new Type<ExcelReportEntity>("ExcelReport");
 export interface ExcelReportEntity extends Entities.Entity {
     query?: Entities.Basics.QueryEntity;
     displayName?: string;
@@ -30,7 +30,7 @@ export interface ExcelReportEntity extends Entities.Entity {
 }
 
 export module ExcelReportOperation {
-    export const Save : Entities.ExecuteSymbol<ExcelReportEntity> = registerSymbol({ key: "ExcelReportOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<ExcelReportEntity> = registerSymbol({ key: "ExcelReportOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<ExcelReportEntity> = registerSymbol({ Type: "Operation", key: "ExcelReportOperation.Save" });
+    export const Delete : Entities.DeleteSymbol<ExcelReportEntity> = registerSymbol({ Type: "Operation", key: "ExcelReportOperation.Delete" });
 }
 
