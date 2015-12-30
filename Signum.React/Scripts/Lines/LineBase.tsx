@@ -42,7 +42,6 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
 
 export interface FormControlStaticProps extends React.Props<FormControlStatic> {
-    text?: React.ReactChild;
     controlId?: string;
     ctx: StyleContext;
     className?: string
@@ -55,7 +54,7 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
 
         return <p id={ this.props.controlId }
             className = {(ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static") + " " + this.props.className}>
-            { this.props.text }
+            { this.props.children }
             </p>
     }
 
@@ -65,9 +64,16 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
 export interface LineBaseProps {
     ctx: TypeContext<any>;
     labelText?: string;
+    visible?: boolean;
+    hideIfNull?: boolean;
 }
 
-export class LineBase<P extends LineBaseProps, S> extends React.Component<P, S> {
+export abstract class LineBase<P extends LineBaseProps, S> extends React.Component<P, S> {
+    render() {
+        return this.renderInternal();
+    }
+
+    abstract renderInternal(): JSX.Element;
 }
 
 

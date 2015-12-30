@@ -186,7 +186,7 @@
     <TypeScriptCompile Include="Scripts\Finder.tsx" />
     <TypeScriptCompile Include="Scripts\FindOptions.ts" />
     <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityControls.tsx" />
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.tsx" />
     <TypeScriptCompile Include="Scripts\Services.ts" />

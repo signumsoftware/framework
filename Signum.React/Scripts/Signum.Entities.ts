@@ -5,7 +5,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/
 
 export interface ModifiableEntity {
     Type: string;
-    ToString?: string;
+    toStr?: string;
 }
 
 export interface IEntity {

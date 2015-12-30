@@ -68,8 +68,13 @@ export function search(request: QueryRequest): Promise<ResultTable> {
 
 
 
+export var isFindableEvent: Array<(queryKey: string) => boolean> = [];
+
 export function isFindable(queryName: any): boolean {
-    throw new Error("not implemented");
+
+    var queryKey = getQueryKey(queryName);
+
+    return isFindableEvent.every(f=> f(queryKey));
 }
 
 export function findOptionsPath(findOptions: FindOptions): string;

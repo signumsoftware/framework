@@ -3,8 +3,8 @@ import * as moment from 'moment'
 import { Input, Tab } from 'react-bootstrap'
 //import { DatePicker } from 'react-widgets'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from 'Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo} from 'Framework/Signum.React/Scripts/Reflection'
-import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic} from 'Framework/Signum.React/Scripts/Lines/LineBase'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo } from 'Framework/Signum.React/Scripts/Reflection'
+import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from 'Framework/Signum.React/Scripts/Lines/LineBase'
 
 
 export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
@@ -53,13 +53,18 @@ export class ValueLine extends LineBase<ValueLineProps, {}> {
         this.forceUpdate();
     };
 
-    render() {
+    renderInternal() {
 
-        var props = Dic.extend({}, this.props);
+        var props = { ctx: this.props.ctx } as ValueLineProps;
 
         props.valueLineType = props.valueLineType || this.calculateValueLineType();
 
         runTasks(this, props);
+
+        props = Dic.extend(props, this.props);
+
+        if (props.visible == false || props.hideIfNull && props.ctx.value == null)
+            return null;
 
         return ValueLine.renderers[props.valueLineType](this, props);
 
@@ -169,7 +174,9 @@ function internalComboBox(vl: ValueLine, props: ValueLineProps, typeInfo: TypeIn
     if (props.ctx.readOnly)
         return <FormGroup ctx={props.ctx} title={props.labelText}>
             { ValueLine.withUnit(props.unitText,
-                <FormControlStatic ctx={props.ctx} text={props.ctx.value == null ? null : items.filter(a=> a.name == props.ctx.value).single().niceName}/>) }
+                <FormControlStatic ctx={props.ctx}>
+                    {props.ctx.value == null ? null : items.filter(a=> a.name == props.ctx.value).single().niceName}
+                    </FormControlStatic>) }
             </FormGroup>;
 
     return <FormGroup ctx={props.ctx} title={props.labelText}>
@@ -185,7 +192,7 @@ function internalComboBox(vl: ValueLine, props: ValueLineProps, typeInfo: TypeIn
 ValueLine.renderers[ValueLineType.TextBox as any] = (vl, props) => {
     if (props.ctx.readOnly)
         return <FormGroup ctx={props.ctx} title={props.labelText}>
-             { ValueLine.withUnit(props.unitText, <FormControlStatic ctx={props.ctx} text={props.ctx.value}/>) }
+             { ValueLine.withUnit(props.unitText, <FormControlStatic ctx={props.ctx}>{props.ctx.value}</FormControlStatic>) }
             </FormGroup>;
 
     return <FormGroup ctx={props.ctx} title={props.labelText}>
@@ -200,7 +207,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl, props) => {
 
     if (props.ctx.readOnly)
         return <FormGroup ctx={props.ctx} title={props.labelText}>
-             { ValueLine.withUnit(props.unitText, <FormControlStatic ctx={props.ctx} text={moment(props.ctx.value).format(props.formatText) }/>) }
+             { ValueLine.withUnit(props.unitText, <FormControlStatic ctx={props.ctx}>{moment(props.ctx.value).format(props.formatText) }</FormControlStatic>) }
             </FormGroup>;
 
     return <FormGroup ctx={props.ctx} title={props.labelText}>
@@ -221,7 +228,7 @@ ValueLine.renderers[ValueLineType.Decimal as any] = (vl, props) => {
 function numericTextBox(vl: ValueLine, props: ValueLineProps, handleKeyDown: React.KeyboardEventHandler) {
     if (props.ctx.readOnly)
         return <FormGroup ctx={props.ctx} title={props.labelText}>
-             { ValueLine.withUnit(props.unitText, <FormControlStatic ctx={props.ctx} text={props.ctx.value} />) }
+             { ValueLine.withUnit(props.unitText, <FormControlStatic ctx={props.ctx}>{props.ctx.value}</FormControlStatic>) }
             </FormGroup>;
 
     return <FormGroup ctx={props.ctx} title={props.labelText}>
@@ -236,7 +243,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl, props) => {
 
     if (props.ctx.readOnly)
         return <FormGroup ctx={props.ctx} title={props.labelText}>
-             { ValueLine.withUnit(props.unitText, <FormControlStatic ctx={props.ctx} text={moment(props.ctx.value).format(props.formatText) }/>) }
+             { ValueLine.withUnit(props.unitText, <FormControlStatic ctx={props.ctx}>{moment(props.ctx.value).format(props.formatText) }</FormControlStatic>) }
             </FormGroup>;
 
     return <FormGroup ctx={props.ctx} title={props.labelText}>

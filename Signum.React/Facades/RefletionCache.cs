@@ -192,6 +192,8 @@ namespace Signum.React.Facades
         public bool IsLite { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isNullable")]
         public bool IsNullable { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isEmbedded")]
+        public bool IsEmbedded { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "name")]
         public string Name { get; set; }
 
@@ -203,6 +205,7 @@ namespace Signum.React.Facades
             this.IsLite = clean.IsLite();
             this.IsNullable = clean.IsNullable();
             this.IsEnum = clean.IsEnum;
+            this.IsEmbedded = clean.IsEmbeddedEntity();
             this.Name = implementations?.Key() ?? TypeScriptType(type);
         }
 

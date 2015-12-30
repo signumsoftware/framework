@@ -67,6 +67,7 @@ export interface TypeReference {
     isLite?: boolean;
     isNullable?: boolean;
     isEnum?: boolean;
+    isEmbedded?: boolean;
 }
 
 export enum KindOfType {
@@ -167,7 +168,7 @@ export function getQueryKey(queryName: any): string {
         return (queryName as Type<any>).typeName;
 
     if (queryName instanceof QueryKey)
-        return (queryName as QueryKey).name; 
+        return (queryName as QueryKey).name;
 
     if (typeof queryName == "string") {
         var str = queryName as string;
@@ -184,9 +185,7 @@ export function getQueryKey(queryName: any): string {
     }
 
     throw new Error("unexpected queryName type");
-
 }
-
 
 export function loadTypes(): Promise<void> {
 

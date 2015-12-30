@@ -266,7 +266,7 @@ namespace Signum.Web
         {
             return new HtmlTag(elementType, itemContext.Compose("btnUp"))
                 .Class(btn ? "btn btn-default" : null)
-                .Class("sf-line-button move-up")
+                .Class("sf-line-button move-up") 
                 .Attr("onclick", entityListBase.SFControlThen("moveUp('{0}', event)".FormatWith(itemContext.Prefix)))
                 .Attr("title", JavascriptMessage.moveUp.NiceToString())
                 .InnerHtml(new HtmlTag("span").Class("glyphicon " + (isVertical ? "glyphicon-chevron-up" : "glyphicon-chevron-left")));

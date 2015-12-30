@@ -13,7 +13,7 @@ export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, L
 import { ValueLine, ValueLineType, ValueLineProps } from 'Framework/Signum.React/Scripts/Lines/ValueLine'
 export { ValueLine, ValueLineType, ValueLineProps};
 
-import { EntityLine, EntityLineProps} from 'Framework/Signum.React/Scripts/Lines/EntityBase'
+import { EntityLine, EntityLineProps} from 'Framework/Signum.React/Scripts/Lines/EntityControls'
 export { EntityLine, EntityLineProps };
 
 

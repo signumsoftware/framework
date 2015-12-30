@@ -93,8 +93,7 @@ export function isViewable(typeOrEntity: PseudoType | ModifiableEntity, partialV
 
     var es = entitySettings[typeInfo.name];
 
-    return es != null && es.onIsViewable(partialViewName)
-    isViewableEvent.every(f=> f(typeInfo, entity));
+    return es != null && es.onIsViewable(partialViewName) && isViewableEvent.every(f=> f(typeInfo, entity));
 }
 
 export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, partialViewName: string, isSearch: boolean = false): boolean {
@@ -105,8 +104,7 @@ export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, partial
 
     var es = entitySettings[typeInfo.name];
 
-    return es != null && es.onIsNavigable(partialViewName, isSearch) &&
-        isViewableEvent.every(f=> f(typeInfo, entity));
+    return es != null && es.onIsNavigable(partialViewName, isSearch) && isViewableEvent.every(f=> f(typeInfo, entity));
 }
 
 export function asyncLoad(path: string | ((loc: HistoryModule.Location) => string)):
