@@ -121,6 +121,10 @@ interface Array<T> {
     lastOrNull(): T;
     single(errorContext?: string): T;
     singleOrNull(errorContext?: string): T;
+    contains(element: T): boolean;
+    remove(element: T): boolean;
+    removeAt(index: number);
+    insertAt(index: number, element: T);
 }
 
 
@@ -278,6 +282,28 @@ Array.prototype.singleOrNull = function (errorContext) {
         throw new Error("More than one " + (errorContext || "element")  + " found");
 
     return this[0];
+};
+
+Array.prototype.contains = function (element) {
+    return (this as Array<any>).indexOf(element) != -1;
+};
+
+Array.prototype.removeAt = function (index) {
+    (this as Array<any>).splice(index, 1);
+};
+
+Array.prototype.remove = function (element) {
+
+    var index = (this as Array<any>).indexOf(element);
+    if (index == -1)
+        return false;
+
+    (this as Array<any>).splice(index, 1);
+    return true;
+};
+
+Array.prototype.insertAt = function (index, element) {
+    (this as Array<any>).splice(0, 0, element);
 };
 
 interface ArrayConstructor {
