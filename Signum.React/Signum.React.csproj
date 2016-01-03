@@ -185,6 +185,7 @@
     <TypeScriptCompile Include="Exceptions\ExceptionClient.tsx" />
     <TypeScriptCompile Include="Scripts\Finder.tsx" />
     <TypeScriptCompile Include="Scripts\FindOptions.ts" />
+    <TypeScriptCompile Include="Scripts\Lines\Typeahead.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityControls.tsx" />
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
