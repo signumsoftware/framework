@@ -989,5 +989,7 @@ namespace Signum.Entities
         _0ShouldBeGreaterThan1,
         [Description("{0} has a precission of {1} instead of {2}")]
         _0HasAPrecissionOf1InsteadOf2,
+        [Description("{0} should be of type {1}")]
+        _0ShouldBeOfType1,
     }
 }
