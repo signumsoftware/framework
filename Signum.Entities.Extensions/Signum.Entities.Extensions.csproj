@@ -113,6 +113,7 @@
     <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationEntity.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
+    <Compile Include="Mailing\EmailReport.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
     <Compile Include="Mailing\SystemEmail.cs" />
     <Compile Include="Map\MapMessage.cs" />
