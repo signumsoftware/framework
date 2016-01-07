@@ -57,6 +57,7 @@ namespace Signum.Engine.Mailing
                         IsBodyHtml = template.IsBodyHtml,
                         EditableMessage = template.EditableMessage,
                         Template = template.ToLite(),
+                        Attachments = template.Attachments.SelectMany(g => EmailTemplateLogic.GenerateAttachment.Invoke(g, template, entity)).ToMList()
                     };
 
                     CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault().ToCultureInfo();

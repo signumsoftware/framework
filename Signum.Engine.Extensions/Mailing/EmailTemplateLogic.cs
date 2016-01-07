@@ -45,6 +45,9 @@ namespace Signum.Engine.Mailing
         }
         
         public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy;
+        
+        public static Polymorphic<Func<IAttachmentGeneratorEntity, EmailTemplateEntity, IEntity, List<EmailAttachmentEntity>>> GenerateAttachment = 
+            new Polymorphic<Func<IAttachmentGeneratorEntity, EmailTemplateEntity, IEntity, List<EmailAttachmentEntity>>>();
 
         public static Func<EmailTemplateEntity, SmtpConfigurationEntity> GetSmtpConfiguration;
 
