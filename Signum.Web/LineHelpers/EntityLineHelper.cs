@@ -120,9 +120,6 @@ namespace Signum.Web
             if (!entityLine.Autocomplete)
                 return helper.FormControlStatic(entityLine, entityLine.Compose(EntityBaseKeys.ToStr), null, null);
 
-            if (entityLine.Implementations.Value.IsByAll)
-                throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
-
             var htmlAttr = new Dictionary<string, object>
             {
                 {"class", "form-control sf-entity-autocomplete"},

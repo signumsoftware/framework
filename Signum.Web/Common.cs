@@ -200,7 +200,7 @@ namespace Signum.Web
                 }
             }
 
-            throw new InvalidCastException("Impossible to convert objet {0} from type {1} to type {2}".FormatWith(obj, objType, type));
+            throw new InvalidCastException("Impossible to convert object '{0}' from type '{1}' to type '{2}'".FormatWith(obj, objType.TypeName(), type.TypeName()));
         }
     }
 }
