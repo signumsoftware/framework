@@ -66,5 +66,17 @@ namespace Signum.Web.UserQueries
                 FindOptions.DefaultPagination,
                 withoutFilters: false /*Implement Simple Filter Builder*/);
         }
+
+        [HttpPost]
+        public JsonResult GetUserQueryImplementations()
+        {
+            var userQuery = Lite.Parse<UserQueryEntity>(Request["userQuery"]);
+
+            var entityType = userQuery.InDB(a=>a.EntityType.Entity)?.ToType();
+
+            return new JsonResult { Data = entityType == null ? 
+                new JsExtensions.JsTypeInfo[0] : 
+                Implementations.By(entityType).ToJsTypeInfos(isSearch: false, prefix: "") };
+        }
     }
 }

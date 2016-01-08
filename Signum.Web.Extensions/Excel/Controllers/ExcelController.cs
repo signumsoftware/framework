@@ -23,7 +23,7 @@ using Signum.Engine.Excel;
 
 namespace Signum.Web.Excel
 {
-    public class ReportController : Controller
+    public class ExcelController : Controller
     {
         [HttpPost]
         public ActionResult ToExcelPlain(QueryRequest request)

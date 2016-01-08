@@ -288,6 +288,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Excel\Views\ExcelAttachment.generated.cs">
+      <DependentUpon>ExcelAttachment.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Help\HelpTranslator.cs" />
     <Compile Include="Files\Views\FilePath.generated.cs">
       <AutoGen>True</AutoGen>
@@ -987,7 +992,7 @@
       <DependentUpon>QueryOrder.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Excel\ExcelClient.cs" />
-    <Compile Include="Excel\Controllers\ReportController.cs" />
+    <Compile Include="Excel\Controllers\ExcelController.cs" />
     <Compile Include="Scheduler\SchedulerClient.cs" />
     <Compile Include="Combine\CombineController.cs" />
     <Compile Include="Combine\CombineClient.cs" />
@@ -1549,6 +1554,10 @@
     <Content Include="Mailing\Views\EmailReport.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>EmailReport.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Excel\Views\ExcelAttachment.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ExcelAttachment.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
