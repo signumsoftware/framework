@@ -36,18 +36,14 @@ namespace Signum.Engine.Mailing
                         e.Target,
                     });
 
-
                 Validator.PropertyValidator((EmailReportEntity er) => er.Target).StaticPropertyValidation += (er, pi) =>
                 {
-                    if (er.EmailTemplate != null && er.Target == null && er.EmailTemplate.Retrieve().Query != null)
+                    Implementations? implementations = er.EmailTemplate == null ? null : GetImplementations(er.EmailTemplate);
+                    if (implementations != null && er.Target == null)
                         return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
-                    var queryName = er.EmailTemplate.Retrieve().Query.ToQueryName();
-                    var entityColumn = DynamicQueryManager.Current.QueryDescription(queryName).Columns.Single(a => a.IsEntity);
-                    var implementations = entityColumn.Implementations.Value;
-
-                    if (!implementations.Types.Contains(er.Target.EntityType))
-                        return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), implementations.Types.CommaOr(t => t.NiceName()));
+                    if (!implementations.Value.Types.Contains(er.Target.EntityType))
+                        return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), implementations.Value.Types.CommaOr(t => t.NiceName()));
 
                     return null;
                 };
@@ -68,6 +64,18 @@ namespace Signum.Engine.Mailing
                     return email.ToLite();
                 });
             }
+        }
+
+        public static Implementations? GetImplementations(Lite<EmailTemplateEntity> template)
+        {
+            var queryName = template.InDB(a=>a.Query)?.ToQueryName();
+
+            if (queryName == null)
+                return null;
+
+            var entityColumn = DynamicQueryManager.Current.QueryDescription(queryName).Columns.Single(a => a.IsEntity);
+            var implementations = entityColumn.Implementations.Value;
+            return implementations;
         }
     }
 }

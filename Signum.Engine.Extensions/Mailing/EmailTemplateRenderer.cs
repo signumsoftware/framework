@@ -65,7 +65,7 @@ namespace Signum.Engine.Mailing
                     EmailTemplateMessageEntity message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
 
                     if (message == null)
-                        throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {0} (or Default)".FormatWith(template, ci));
+                        throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {1} (or Default)".FormatWith(template, ci));
 
                     email.Subject = SubjectNode(message).Print(
                         new EmailTemplateParameters(entity, ci, dicTokenColumn, currentRows)
@@ -214,7 +214,7 @@ namespace Signum.Engine.Mailing
 
                         List<EmailOwnerData> groups = currentRows.Select(r => (EmailOwnerData)r[owner]).Distinct().ToList();
 
-                        if (groups.Count == 1 && groups[0]?.Owner == null)
+                        if (groups.Count == 1 && groups[0]?.Email == null)
                             return new List<EmailOwnerRecipientData>();
 
                         return groups.Where(g => g.Email.HasText()).Select(g => new EmailOwnerRecipientData(g) { Kind = tr.Kind }).ToList();
@@ -239,7 +239,7 @@ namespace Signum.Engine.Mailing
 
                 var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]).ToList();
 
-                if (groups.Count == 1 && groups[0].Key?.Owner == null)
+                if (groups.Count == 1 && groups[0].Key?.Email == null)
                 {
                     yield return new List<EmailOwnerRecipientData>();
                 }

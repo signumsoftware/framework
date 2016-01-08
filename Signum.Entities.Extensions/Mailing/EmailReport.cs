@@ -11,7 +11,7 @@ using Signum.Entities.Scheduler;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class EmailReportEntity : Entity, ITaskEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

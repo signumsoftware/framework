@@ -52,7 +52,7 @@ namespace Signum.Web.Mailing
             return new QueryTokenEntity(QueryUtils.Parse(tokenString, qd, SubTokensOptions.CanElement));
         }
 
-        public static void Start(bool smtpConfig, bool newsletter, bool pop3Config, Type[] quickLinkFrom)
+        public static void Start(bool smtpConfig, bool newsletter, bool pop3Config, bool emailReport, Type[] quickLinkFrom)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -162,6 +162,12 @@ namespace Signum.Web.Mailing
                         }
                     });
                 }
+
+                if (emailReport)
+                    Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<EmailReportEntity> { PartialViewName = e => ViewPrefix.FormatWith("EmailReport") }
+                });
 
                 if (pop3Config)
                     Navigator.AddSettings(new List<EntitySettings>

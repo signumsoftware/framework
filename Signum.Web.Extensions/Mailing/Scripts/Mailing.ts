@@ -260,7 +260,6 @@ export function activateIFrame($iframe: JQuery) {
     });
 }
 
-
 export function createMailFromTemplate(options: Operations.EntityOperationOptions, event : MouseEvent, findOptions: Finder.FindOptions, url: string) {
     Finder.find(findOptions).then(entity => {
         if (entity == null)
@@ -272,7 +271,6 @@ export function createMailFromTemplate(options: Operations.EntityOperationOption
         Operations.constructFromDefault(options, event);
     });
 }
-
 
 export function removeRecipients(options: Operations.EntityOperationOptions, newsletterDeliveryFindOptions: Finder.FindOptions, url: string) {
     Finder.findMany(newsletterDeliveryFindOptions).then(entities => {
@@ -286,4 +284,28 @@ export function removeRecipients(options: Operations.EntityOperationOptions, new
     });
 }
 
+export function attachEmailReportTemplate(el: Lines.EntityLine, targetId: string, controllerUrl: string) {
 
+    function refreshImplementations(templateRI: Entities.RuntimeInfo) {
+        targetId.get().toggle(!!templateRI);
+
+        if (templateRI)
+            SF.ajaxPost({ url: controllerUrl, data: { template: templateRI.key() } }).then((types: Entities.TypeInfo[])=> {
+
+                targetId.get().toggle(!!types.length);
+
+                targetId.get().SFControl<Lines.EntityLine>().then(el2=> {
+
+                    if (el2.getRuntimeInfo() && !types.some(t=> t.name == el2.getRuntimeInfo().type))
+                        el2.setEntity(null);
+                    el2.options.types = types;
+                    el2.options.create = false;
+                    el2.options.find = true;
+                });
+            });
+    }
+
+    refreshImplementations(el.getRuntimeInfo());
+    el.entityChanged = (entity) => refreshImplementations(entity ? entity.runtimeInfo : null);
+
+}

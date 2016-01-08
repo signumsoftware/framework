@@ -1,0 +1,10 @@
+﻿@using Signum.Entities.Mailing
+@using Signum.Web.Mailing
+@using (var sc = Html.TypeContext<EmailReportEntity>())
+{
+    @Html.ValueLine(sc,s=>s.Name)
+    @Html.EntityLine(sc, s => s.EmailTemplate, el => el.AttachFunction = MailingClient.Module["attachEmailReportTemplate"](el,
+    sc.SubContextPrefix(a => a.Target),
+    Url.Action((MailingController c) => c.GetEmailTemplateEntityImplementations())))
+    @Html.EntityLine(sc, s => s.Target, el => { el.Autocomplete = true; el.Find = true; })
+}
