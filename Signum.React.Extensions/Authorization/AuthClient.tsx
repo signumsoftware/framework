@@ -5,21 +5,25 @@ import { Route } from 'react-router'
 import { Type, IType, EntityKind } from 'Framework/Signum.React/Scripts/Reflection';
 import { ajaxPost, ajaxGet } from 'Framework/Signum.React/Scripts/Services';
 import * as Navigator from 'Framework/Signum.React/Scripts/Navigator';
-import { UserEntity } from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
+import { UserEntity, UserEntity_Type } from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
 import Login from 'Extensions/Signum.React.Extensions/Authorization/Templates/Login';
 
 export var userTicket: boolean;
 export var resetPassword: boolean;
 
 
+export var viewPrefix = "Extensions/Signum.React.Extensions/Authorization/Templates/";
+
 export function start(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean }) {
     userTicket = options.userTicket;
     resetPassword = options.resetPassword;
 
     options.routes.push(<Route path="auth">
-        <Route path="login" getComponent={Navigator.asyncLoad("Extensions/Signum.React.Extensions/Authorization/Templates/Login")} />
+        <Route path="login" getComponent={Navigator.asyncLoad(viewPrefix + "Login")} />
         <Route path="about" />
         </Route>);
+
+    Navigator.addSettings(new Navigator.EntitySettings(UserEntity_Type, u=> viewPrefix + "User")); 
 }
 
 
