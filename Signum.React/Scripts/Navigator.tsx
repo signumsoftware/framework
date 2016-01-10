@@ -1,8 +1,9 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { ajaxGet, ajaxPost } from 'Framework/Signum.React/Scripts/Services';
-import { IEntity, Lite, Entity, ModifiableEntity } from 'Framework/Signum.React/Scripts/Signum.Entities';
-import { PseudoType, EntityKind, TypeInfo, getTypeInfo, IType, Type } from 'Framework/Signum.React/Scripts/Reflection';
+import { openModal } from 'Framework/Signum.React/Scripts/Modals';
+import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity } from 'Framework/Signum.React/Scripts/Signum.Entities';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, getTypeInfo, IType, Type } from 'Framework/Signum.React/Scripts/Reflection';
 import * as Finder from 'Framework/Signum.React/Scripts/Finder';
 
 
@@ -106,6 +107,14 @@ export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, partial
 
     return es != null && es.onIsNavigable(partialViewName, isSearch) && isViewableEvent.every(f=> f(typeInfo, entity));
 }
+
+export function viewEmbedded<T extends EmbeddedEntity>(entity: T): Promise<T> {
+    return null;
+}
+
+export function view<T extends IEntity>(entityPack: T | Lite<T>, propertyRoute?: PropertyRoute): Promise<T> {
+    return null;
+} 
 
 export function asyncLoad(path: string | ((loc: HistoryModule.Location) => string)):
     (location: HistoryModule.Location, cb: (error: any, component?: ReactRouter.RouteComponent) => void) => void {

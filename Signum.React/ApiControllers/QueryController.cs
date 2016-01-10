@@ -15,6 +15,14 @@ namespace Signum.React.ApiControllers
 {
     public class QueryController : ApiController
     {
+        [Route("api/query/findLiteLike"), HttpPost]
+        public List<Lite<Entity>> FindLiteLike(string types, string subString, int count)
+        {
+            var implementations = Implementations.By(types.Split(',').Select(TypeLogic.GetType).ToArray());
+
+            return AutocompleteUtils.FindLiteLike(implementations, subString, count);
+        }
+
         [Route("api/query/description/{queryName}")]
         public QueryDescriptionTS GetQueryDescription(string queryName)
         {

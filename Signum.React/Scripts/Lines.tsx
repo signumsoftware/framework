@@ -13,7 +13,7 @@ export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, L
 import { ValueLine, ValueLineType, ValueLineProps } from 'Framework/Signum.React/Scripts/Lines/ValueLine'
 export { ValueLine, ValueLineType, ValueLineProps};
 
-import { EntityLine, EntityLineProps} from 'Framework/Signum.React/Scripts/Lines/EntityControls'
+import { EntityLine, EntityLineProps} from  'Southwind.React/Templates/EntityControls'//'Framework/Signum.React/Scripts/Lines/EntityControls'
 export { EntityLine, EntityLineProps };
 
 
@@ -36,28 +36,28 @@ Tasks.push(taskSetNiceName);
 Tasks.push(taskSetUnit);
 Tasks.push(taskSetFormat);
 
-export function taskSetNiceName(lineBase: LineBase<any, any>, props: LineBaseProps) {
-    if (!props.labelText && props.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
-        props.labelText = props.ctx.propertyRoute.member.niceName;
+export function taskSetNiceName(lineBase: LineBase<any>, state: LineBaseProps) {
+    if (!state.labelText && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+        state.labelText = state.ctx.propertyRoute.member.niceName;
     }
 }
 
-export function taskSetUnit(lineBase: LineBase<any, any>, props: LineBaseProps) {
+export function taskSetUnit(lineBase: LineBase<any>, state: LineBaseProps) {
     if (lineBase instanceof ValueLine) {
-        var vProps = props as ValueLineProps;
+        var vProps = state as ValueLineProps;
 
-        if (!vProps.unitText && props.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
-            vProps.unitText = props.ctx.propertyRoute.member.unit;
+        if (!vProps.unitText && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+            vProps.unitText = state.ctx.propertyRoute.member.unit;
         }
     }
 }
 
-export function taskSetFormat(lineBase: LineBase<any, any>, props: LineBaseProps) {
+export function taskSetFormat(lineBase: LineBase<any>, state: LineBaseProps) {
     if (lineBase instanceof ValueLine) {
-        var vProps = props as ValueLineProps;
+        var vProps = state as ValueLineProps;
 
-        if (!vProps.unitText && props.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
-            vProps.formatText = props.ctx.propertyRoute.member.unit;
+        if (!vProps.unitText && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+            vProps.formatText = state.ctx.propertyRoute.member.unit;
         }
     }
 }

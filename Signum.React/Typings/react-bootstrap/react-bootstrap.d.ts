@@ -241,12 +241,28 @@ declare module "react-bootstrap" {
     // ----------------------------------------
     interface ModalProps extends React.Props<ModalClass> {
         // Required
-        onHide: Function;
+        onHide: () => void;
+        onShown?: () => void;
+
+        onEscapeKeyUp?: () => void;
+        onBackdropClick?: () => void;
+
+        onEnter?: () => void;
+        onEntering?: () => void;
+        onEntered?: () => void;
+
+        onExit?: () => void;
+        onExiting?: () => void;
+        onExited?: () => void;
+
 
         // Optional
         animation?: boolean;
         autoFocus?: boolean;
         backdrop?: boolean | string;
+        backdropStyle?: React.CSSProperties;
+        backdropClassName?: string;
+        backdropTransitionTimeout?: number;
         bsSize?: string;
         container?: any; // TODO: Add more specific type
         dialogClassName?: string;

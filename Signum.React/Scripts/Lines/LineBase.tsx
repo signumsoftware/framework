@@ -3,7 +3,7 @@ import * as React from 'react'
 import * as moment from 'moment'
 import { Input, Tab } from 'react-bootstrap'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from 'Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo} from 'Framework/Signum.React/Scripts/Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference} from 'Framework/Signum.React/Scripts/Reflection'
 
 
 
@@ -63,22 +63,51 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
 
 export interface LineBaseProps {
     ctx: TypeContext<any>;
+    type?: TypeReference;
     labelText?: string;
     visible?: boolean;
     hideIfNull?: boolean;
 }
 
-export abstract class LineBase<P extends LineBaseProps, S> extends React.Component<P, S> {
+export abstract class LineBase<P extends LineBaseProps> extends React.Component<P, P> {
+
+    constructor(props: P) {
+        super(props);
+
+        this.state = this.calculateState(props);
+    }
+
+    componentWillReceiveProps(nextProps: P, nextContext: any) {
+        this.setState(this.calculateState(nextProps));
+    }
+
+
     render() {
+
+        if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == null)
+            return null;
+
         return this.renderInternal();
+    }
+
+    calculateState(props: P): P {
+        var state = { ctx: props.ctx, type: (props.type || props.ctx.propertyRoute.member.type) } as LineBaseProps as P;
+        this.calculateDefaultState(state);
+        runTasks(this, state);
+        Dic.extend(state, props);
+        return state;
+    }
+
+    calculateDefaultState(state: P) {
+
     }
 
     abstract renderInternal(): JSX.Element;
 }
 
 
-export var Tasks: ((lineBase: LineBase<any, any>, lineBaseProps: LineBaseProps) => void)[] = [];
+export var Tasks: ((lineBase: LineBase<LineBaseProps>, state: LineBaseProps) => void)[] = [];
 
-export function runTasks(lineBase: LineBase<any, any>, lineBaseProps: LineBaseProps) {
-    Tasks.forEach(t=> t(lineBase, lineBaseProps));
+export function runTasks(lineBase: LineBase<LineBaseProps>, state: LineBaseProps) {
+    Tasks.forEach(t=> t(lineBase, state));
 }

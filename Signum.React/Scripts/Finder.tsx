@@ -2,30 +2,11 @@
 import * as moment from "moment"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { ajaxGet, ajaxPost } from 'Framework/Signum.React/Scripts/Services';
-import { getTypeInfo, getEnumInfo, toMomentFormat} from 'Framework/Signum.React/Scripts/Reflection';
-import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation, QueryToken,
-ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn, ResultTable, ResultRow, OrderOption, OrderType } from 'Framework/Signum.React/Scripts/FindOptions';
-import { IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage } from 'Framework/Signum.React/Scripts/Signum.Entities';
-import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference } from 'Framework/Signum.React/Scripts/Reflection';
+import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation, QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn, ResultTable, ResultRow, OrderOption, OrderType } from 'Framework/Signum.React/Scripts/FindOptions';
+import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage } from 'Framework/Signum.React/Scripts/Signum.Entities';
+import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference, getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from 'Framework/Signum.React/Scripts/Reflection';
 import {navigateRoute, isNavigable, currentHistory, asyncLoad } from 'Framework/Signum.React/Scripts/Navigator';
 import { Link  } from 'react-router';
-
-//export function navigateRoute(typeOfEntity: any, id: any = null) {
-//    var typeName: string;
-//    if ((typeOfEntity as IEntity).Type) {
-//        typeName = (typeOfEntity as IEntity).Type;
-//        id = (typeOfEntity as IEntity).id;
-//    }
-//    else if ((typeOfEntity as Lite<IEntity>).EntityType) {
-//        typeName = (typeOfEntity as Lite<IEntity>).EntityType;
-//        id = (typeOfEntity as Lite<IEntity>).id;
-//    }
-//    else {
-//        typeName = (typeOfEntity as IType).typeName;
-//    }
-
-//    return baseUrl + "/View/" + typeName + "/" + id;
-//}
 
 
 export var querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -66,6 +47,11 @@ export function search(request: QueryRequest): Promise<ResultTable> {
     return ajaxPost<ResultTable>({ url: "/api/query/search"}, request);
 }
 
+export function findLiteLike(request: {types: string, subString: string, count: number}): Promise<Lite<IEntity>[]> {
+    return ajaxPost<Lite<IEntity>[]>({
+        url: currentHistory.createPath("/api/query/findLiteLike", request)
+    }, null);
+}
 
 
 export var isFindableEvent: Array<(queryKey: string) => boolean> = [];
@@ -75,6 +61,20 @@ export function isFindable(queryName: any): boolean {
     var queryKey = getQueryKey(queryName);
 
     return isFindableEvent.every(f=> f(queryKey));
+}
+
+export function find<T extends Entity>(type: Type<T>): Promise<Lite<T>>;
+export function find(findOptions: FindOptions): Promise<Lite<IEntity>>;
+export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<IEntity>> {
+
+    if (!(findOptions as FindOptions).queryName)
+        findOptions = { queryName: findOptions } as FindOptions
+
+    return new Promise((resolve) => {
+        require(["Southwind.React/Templates/SearchControl/SearchPopup"], (SearchPopup) => {
+            SearchPopup.default.open(findOptions).then(lite=> resolve(lite));
+        });
+    });
 }
 
 export function findOptionsPath(findOptions: FindOptions): string;

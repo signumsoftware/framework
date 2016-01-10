@@ -144,7 +144,6 @@ export function getQueryNiceName(queryName: any) {
     if (queryName instanceof QueryKey)
         return (queryName as QueryKey).niceName();
 
-
     if (typeof queryName == "string") {
         var str = queryName as string;
 
@@ -164,6 +163,9 @@ export function getQueryNiceName(queryName: any) {
 }
 
 export function getQueryKey(queryName: any): string {
+    if ((queryName as TypeInfo).kind != null)
+        return (queryName as TypeInfo).name;
+
     if (queryName instanceof Type)
         return (queryName as Type<any>).typeName;
 
@@ -209,8 +211,41 @@ export function loadTypes(): Promise<void> {
     });
 }
 
+export interface IBinding {
+    getValue(): any;
+    setValue(val: any) :void;
+}
 
-export function createSetter(lambda: (obj: any) => any): (obj: any, value: any) => void {
+export class Binding implements IBinding {
+
+    constructor(
+        public memberName: string,
+        public parentValue: any) {
+    }
+
+    getValue() {       
+        return this.parentValue[this.memberName];
+    }
+    setValue(val: any) {
+        return this.parentValue[this.memberName] = val;
+    }
+}
+
+export class ReadonlyBinding implements IBinding {
+    constructor(
+        public value: any) {
+    }
+
+    getValue() {
+        return this.value;
+    }
+    setValue(val: any) {
+        throw new Error("Readonly Binding");
+    }
+}
+
+
+export function createBinding(parentValue: any, lambda: (obj: any) => any): IBinding {
 
     var lambdaMatch = functionRegex.exec((lambda as any).toString());
 
@@ -220,12 +255,19 @@ export function createSetter(lambda: (obj: any) => any): (obj: any, value: any) 
     var parameter = lambdaMatch[1];
     var body = lambdaMatch[2];
 
+    if (parameter == body)
+        return new ReadonlyBinding(parentValue);
+
     var m = memberRegex.exec(body);
 
     if (m == null)
         return null;
 
-    return eval(`function(${parameter} , value){ ${m[1]}.${m[2]} = value;}`);
+
+    var realParentValue = m[1] == parameter ? parentValue :
+        eval(`(function(${parameter}){ return ${m[1]};})`)(parentValue);
+
+    return new Binding(m[2], realParentValue);
 }
 
 

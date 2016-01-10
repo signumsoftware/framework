@@ -145,6 +145,7 @@
     <Compile Include="Json\LiteJsonConverter.cs" />
     <Compile Include="PortableAreas\EmbeddedFilesRespository.cs" />
     <Compile Include="PortableAreas\FileRepositoryManager.cs" />
+    <Compile Include="PortableAreas\StaticContentResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controllers\ResourcesController.cs" />
   </ItemGroup>
@@ -187,7 +188,6 @@
     <TypeScriptCompile Include="Scripts\FindOptions.ts" />
     <TypeScriptCompile Include="Scripts\Lines\Typeahead.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityControls.tsx" />
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.tsx" />
     <TypeScriptCompile Include="Scripts\Services.ts" />

@@ -1,4 +1,4 @@
-﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, createSetter } from 'Framework/Signum.React/Scripts/Reflection'
+﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, createBinding } from 'Framework/Signum.React/Scripts/Reflection'
 
 export enum FormGroupStyle {
     /// Unaffected by FormGroupSize
@@ -133,17 +133,20 @@ export interface BsColumns {
 export class TypeContext<T> extends StyleContext {
 
     propertyRoute: PropertyRoute;
-    setValue: (val: T) => void;
-    private _value: T;
+    binding: IBinding;
 
     get value() {
-        return this._value;
+        return this.binding.getValue();
     }
 
-    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, value: T) {
+    set value(val: T) {
+        this.binding.setValue(val);
+    }
+
+    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding) {
         super(parent, styleOptions);
         this.propertyRoute = propertyRoute;
-        this._value = value;
+        this.binding = binding;
     }
 
     
@@ -151,11 +154,9 @@ export class TypeContext<T> extends StyleContext {
 
         var subRoute = this.propertyRoute.add(property);
 
-        var subValue = property(this.value);
+        var binding = createBinding(this.value, property);
 
-        var result = new TypeContext<R>(this, styleOptions, subRoute, subValue);
-
-        result.setValue = v => createSetter(property)(this.value, v);
+        var result = new TypeContext<R>(this, styleOptions, subRoute, binding);
 
         return result;
     }

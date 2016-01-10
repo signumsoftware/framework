@@ -3,58 +3,71 @@
 import * as Services from 'Framework/Signum.React/Scripts/Services';
 
 import * as React from 'react'
-import {Modal} from 'react-bootstrap'
 
-var singeltone: GlobalModalsContainer;
 
-export class GlobalModalsContainer extends React.Component<{}, { modals: Modal[] }> {
 
-    constructor() {
-        super({});
+export interface IModalProps {
+    onExited?: (val: any) => void;
+}
+
+
+var singletone: GlobalModalContainer;
+export class GlobalModalContainer extends React.Component<{}, { modals: React.ReactElement<IModalProps>[]
+}> {
+    constructor(props) {
+        super(props);
         this.state = { modals: [] };
-        singeltone = this;
+        singletone = this;
     }
 
     render() {
-        return (<div className="sf-global-modals-container">{this.state.modals}</div>);
+        return <div className="sf-modal-container">{this.state.modals}</div>
     }
 }
 
-export function openPopup(modal: Modal): Promise<void> {
 
-    var newModal: Modal;
+export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T> {
 
-    var oldHide = modal.props.onHide;
+    return new Promise<T>((resolve) => {
 
-    return new Promise<void>((resolve, reject) => {
+        var cloned;
+        var onExited = (val : T) => {
+            singletone.state.modals.remove(cloned);
+            singletone.forceUpdate();
+            resolve(val);
+        }
 
-        var hide = () => {
-            if (oldHide)
-                oldHide();
-            singeltone.state.modals.pop();
-            singeltone.forceUpdate(() => resolve(null));
-        };
+        cloned = React.cloneElement(modal, { onExited: onExited, key: singletone.state.modals.length } as any);
 
-        newModal = React.cloneElement(modal, { show: true, onHide: hide });
-
-        singeltone.state.modals.push(newModal);
-        singeltone.forceUpdate();
+        singletone.state.modals.push(cloned);
+        singletone.forceUpdate();
     });
 }
 
-export function errorModal(error: any): Promise<void> {
+//export function errorModal(error: any): Promise<void> {
 
-    var modal = <Modal onHide={null}>
-          <Modal.Header closeButton>
-            <Modal.Title>Modal heading</Modal.Title>
-              </Modal.Header>
-          <Modal.Body>
+//    var modal = <Modal onHide={null}>
+//          <Modal.Header closeButton>
+//            <Modal.Title>Modal heading</Modal.Title>
+//              </Modal.Header>
+//          <Modal.Body>
 
 
-            <h4>Overflowing text to show scroll behavior</h4>
-            <p>Cras mattis consectetur purus sit amet fermentum.Cras justo odio, dapibus ac facilisis in, egestas eget quam.Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>
-              </Modal.Body>
-        </Modal>;
+//            <h4>Overflowing text to show scroll behavior</h4>
+//            <p>Cras mattis consectetur purus sit amet fermentum.Cras justo odio, dapibus ac facilisis in, egestas eget quam.Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>
+//              </Modal.Body>
+//        </Modal>;
     
-    return openPopup(modal);
+//    return openModal(modal);
+//}
+
+
+
+export interface SelectValueProps extends IModalProps {
+    values: any[];
+}
+
+
+export function selectValue<T>(values: T[], toString: (val: T) => string) {
+    return null;
 }

@@ -204,7 +204,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     render() {
         return <div>
-            <input type="text" ref="input" {...this.props.inputAttrs}
+            <input type="text" autoComplete="off" ref="input" {...this.props.inputAttrs}
                 onFocus={this.handleFocus}
                 onBlur={this.handleBlur}
                 onKeyUp={this.handleKeyUp}

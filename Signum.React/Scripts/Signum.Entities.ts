@@ -49,7 +49,11 @@ export type ConstructSymbol_Simple<T extends Entity> = OperationSymbol;
 export type ConstructSymbol_From<T extends Entity, F extends IEntity> = OperationSymbol;
 export type ConstructSymbol_FromMany<T extends Entity, F extends IEntity> = OperationSymbol; 
 
-export function toLite<T extends IEntity>(entity: T) : Lite<T> {
+export function toLite<T extends IEntity>(entity: T, fat?: boolean): Lite<T> {
+
+    if (fat)
+        return toLiteFat(entity);
+
     return {
        EntityType : entity.Type,
        id :entity.id,
@@ -57,7 +61,7 @@ export function toLite<T extends IEntity>(entity: T) : Lite<T> {
     }
 }
 
-export function toLiteFat<T extends IEntity>(entity: T) : Lite<T> {
+export function toLiteFat<T extends IEntity>(entity: T): Lite<T> {
     return {
        entity : entity,
        EntityType  :entity.Type,
