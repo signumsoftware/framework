@@ -33,15 +33,13 @@ export class EntityComponent<T> extends React.Component<{ ctx: TypeContext<T> },
 }
 
 Tasks.push(taskSetNiceName);
-Tasks.push(taskSetUnit);
-Tasks.push(taskSetFormat);
-
 export function taskSetNiceName(lineBase: LineBase<any>, state: LineBaseProps) {
     if (!state.labelText && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
         state.labelText = state.ctx.propertyRoute.member.niceName;
     }
 }
 
+Tasks.push(taskSetUnit);
 export function taskSetUnit(lineBase: LineBase<any>, state: LineBaseProps) {
     if (lineBase instanceof ValueLine) {
         var vProps = state as ValueLineProps;
@@ -52,12 +50,20 @@ export function taskSetUnit(lineBase: LineBase<any>, state: LineBaseProps) {
     }
 }
 
+Tasks.push(taskSetFormat);
 export function taskSetFormat(lineBase: LineBase<any>, state: LineBaseProps) {
     if (lineBase instanceof ValueLine) {
         var vProps = state as ValueLineProps;
 
-        if (!vProps.unitText && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
-            vProps.formatText = state.ctx.propertyRoute.member.unit;
+        if (!vProps.formatText && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+            vProps.formatText = state.ctx.propertyRoute.member.format;
         }
+    }
+}
+
+Tasks.push(taskSetReadOnly);
+export function taskSetReadOnly(lineBase: LineBase<any>, state: LineBaseProps) {
+    if (!state.ctx.readOnly && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field && state.ctx.propertyRoute.member.isReadOnly) {
+        state.ctx.readOnly = true;
     }
 }

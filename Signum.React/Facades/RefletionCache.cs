@@ -72,6 +72,7 @@ namespace Signum.React.Facades
                                 {
                                     NiceName = p.PropertyInfo?.NiceName(),
                                     Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
+                                    IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
                                     Unit = p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName,
                                     Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type): p.PropertyInfo?.PropertyType, p.TryGetImplementations())
                                 })
@@ -174,6 +175,8 @@ namespace Signum.React.Facades
         public TypeReferenceTS Type { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
         public string NiceName { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isReadOnly")]
+        public bool IsReadOnly { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "unit")]
         public string Unit { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]

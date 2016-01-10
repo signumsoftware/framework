@@ -33,6 +33,7 @@ export interface MemberInfo {
     name: string,
     niceName: string;
     type: TypeReference;
+    isReadOnly?: boolean;
     unit?: string;
     format?: string;
     id?: any; //symbols

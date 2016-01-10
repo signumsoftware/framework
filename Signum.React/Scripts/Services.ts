@@ -1,6 +1,7 @@
 ﻿/// <reference path="../typings/whatwg-fetch/whatwg-fetch.d.ts" />
 
 export interface AjaxOptions {
+    avoidBaseUrl?: boolean;
     url: string;
     avoidNotifyPendingRequests?: boolean;
     avoidThrowError?: boolean;
@@ -17,14 +18,22 @@ export enum ShowError {
     Always,
 }
 
-export function baseUrl(): string
-{
-    return window["__baseUrl"] as string;
+export function baseUrl(options: AjaxOptions): string {
+    if (options.avoidBaseUrl)
+        return options.url;
+
+
+    var baseUrl = window["__baseUrl"] as string;
+
+    if (!baseUrl || options.url.startsWith(baseUrl)) //HACK: Too smart?
+        return options.url;
+
+    return baseUrl + options.url;
 }
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
     return wrapRequest<T>(options, () =>
-        fetch(baseUrl() + options.url, {
+        fetch(baseUrl(options), {
             method: "GET",
             headers: {
                 'Accept': 'application/json',
@@ -38,7 +47,7 @@ export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
 
     return wrapRequest<T>(options, () =>
-        fetch(baseUrl() + options.url, {
+        fetch(baseUrl(options), {
             method: "POST",
             credentials: options.credentials || "same-origin",
             headers: {

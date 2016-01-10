@@ -1,9 +1,9 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { Input, Tab } from 'react-bootstrap'
-//import { DatePicker } from 'react-widgets'
+import { DatePicker } from 'react-widgets'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from 'Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference } from 'Framework/Signum.React/Scripts/Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat } from 'Framework/Signum.React/Scripts/Reflection'
 import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from 'Framework/Signum.React/Scripts/Lines/LineBase'
 
 
@@ -30,12 +30,12 @@ export enum ValueLineType {
 
 
 export class ValueLine extends LineBase<ValueLineProps> {
-    
+
     calculateDefaultState(state: ValueLineProps) {
         state.valueLineType = this.calculateValueLineType(state.type);
     }
 
-    calculateValueLineType(t : TypeReference): ValueLineType {
+    calculateValueLineType(t: TypeReference): ValueLineType {
 
         if (t.isCollection || t.isLite)
             throw new Error("not implemented");
@@ -206,12 +206,12 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
 
     if (s.ctx.readOnly)
         return <FormGroup ctx={s.ctx} title={s.labelText}>
-             { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{moment(s.ctx.value).format(s.formatText) }</FormControlStatic>) }
+             { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>;
 
     return <FormGroup ctx={s.ctx} title={s.labelText}>
             <input type="textarea" className="form-control" value={s.ctx.value} onChange={vl.handleInputOnChange}
-            placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>
+                placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>
         </FormGroup>;
 };
 
@@ -247,14 +247,14 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
 
     if (s.ctx.readOnly)
         return <FormGroup ctx={s.ctx} title={s.labelText}>
-             { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{moment(s.ctx.value).format(s.formatText) }</FormControlStatic>) }
+             { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{moment(s.ctx.value).format(toMomentFormat(s.formatText)) }</FormControlStatic>) }
             </FormGroup>;
 
     return <FormGroup ctx={s.ctx} title={s.labelText}>
          { ValueLine.withUnit(s.unitText,
-            <input type="text" className="form-control" value={s.ctx.value} onChange={vl.handleInputOnChange}
-                placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>
+             <DatePicker value={s.ctx.value} onChange={vl.handleDatePickerOnChange} format={toMomentFormat(s.formatText) }/>
+             //<input type="text" className="form-control" value={s.ctx.value} onChange={vl.handleInputOnChange}
+             //    placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>
          ) }
-        {/*<DatePicker value={s.ctx.value} onChange={vl.handleDatePickerOnChange} />*/}
         </FormGroup>;
 };

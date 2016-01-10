@@ -87,6 +87,10 @@ export class StyleContext {
             this.parent ? this.parent.readOnly : false;
     }
 
+    set readOnly(value: boolean) {
+        this.styleOptions.readOnly = value;
+    }
+
 
     static bsColumnsCss(bsColumns: BsColumns) {
         return [

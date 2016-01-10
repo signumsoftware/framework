@@ -47,10 +47,10 @@ export function search(request: QueryRequest): Promise<ResultTable> {
     return ajaxPost<ResultTable>({ url: "/api/query/search"}, request);
 }
 
-export function findLiteLike(request: {types: string, subString: string, count: number}): Promise<Lite<IEntity>[]> {
-    return ajaxPost<Lite<IEntity>[]>({
-        url: currentHistory.createPath("/api/query/findLiteLike", request)
-    }, null);
+export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<IEntity>[]> {
+    return ajaxGet<Lite<IEntity>[]>({
+        url: currentHistory.createHref("api/query/findLiteLike", request)
+    });
 }
 
 
