@@ -56,7 +56,7 @@ namespace Signum.React.PortableAreas
             if (actualResourceName == null)
                 throw new FileNotFoundException("{0} not found".FormatWith(file));
 
-            return new FileStreamResult(this.Assembly.GetManifestResourceStream(actualResourceName), MimeMapping.GetMimeMapping(file)) { FileDownloadName = file };
+            return new StaticContentResult(this.Assembly.GetManifestResourceStream(actualResourceName).ReadAllBytes(), file, this.Assembly.CompilationDate());
         }
 
         public bool FileExists(string file)
