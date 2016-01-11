@@ -109,7 +109,7 @@ namespace Signum.Engine
 
         public bool IsInsert { get; private set; }
 
-        static Regex indexRegex = new Regex(@"""FK_(?<table>[^_]+)_(?<field>[^_""]+)""");
+        static Regex indexRegex = new Regex(@"['""]FK_(?<table>[^_]+)_(?<field>[^_""]+)['""]");
 
         static Regex referedTable = new Regex(@"table ""(?<referedTable>.+?)""");
 
