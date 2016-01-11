@@ -478,9 +478,14 @@ namespace Signum.Engine
         }
 
         public static int BulkInsert<T>(IEnumerable<T> entities,
-            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false, int? timeout = null)
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, bool validateFirst = false, int? timeout = null, string message = null)
             where T : Entity
         {
+
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering { typeof(T).TypeName()}" : message,
+                    () => BulkInsert(entities, options, validateFirst, timeout, message: null));
+
             if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
                 throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
 
@@ -540,9 +545,15 @@ namespace Signum.Engine
         public static int BulkInsertMList<E, V>(Expression<Func<E, MList<V>>> mListProperty,
             IEnumerable<MListElement<E, V>> entities,
             SqlBulkCopyOptions options = SqlBulkCopyOptions.Default, 
-            int? timeout = null)
+            int? timeout = null, 
+            string message = null)
             where E : Entity
         {
+
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering MList<{ typeof(V).TypeName()}> in { typeof(E).TypeName()}" : message,
+                    () => BulkInsertMList(mListProperty, entities, options, timeout, message: null));
+
             if (options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
                 throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
 

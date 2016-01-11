@@ -158,19 +158,21 @@ namespace Signum.Utilities
             return cs.Choose(question);
         }
 
-        public static void WaitRows(string startingText, Func<int> updateOrDelete)
+        public static int WaitRows(string startingText, Func<int> updateOrDelete)
         {
-            SafeConsole.WriteColor(ConsoleColor.Gray, startingText); 
+            SafeConsole.WriteColor(ConsoleColor.Gray, startingText);
+            int result = 0;
             WaitExecute(() =>
             {
-                int result = updateOrDelete();
+                result = updateOrDelete();
 
                 lock (SafeConsole.SyncKey)
                 {
                     SafeConsole.WriteColor(ConsoleColor.White, " {0} ", result);
                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "rows afected");
                 }
-            }); 
+            });
+            return result;
         }
 
         public static T WaitQuery<T>(string startingText, Func<T> query)
