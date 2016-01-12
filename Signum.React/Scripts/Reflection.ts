@@ -24,6 +24,7 @@ export interface TypeInfo {
     gender?: string;
     entityKind?: EntityKind;
     entityData?: EntityData;
+    isLowPopupation?: boolean;
     members?: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
     mixins?: { [name: string]: string; };
@@ -34,6 +35,7 @@ export interface MemberInfo {
     niceName: string;
     type: TypeReference;
     isReadOnly?: boolean;
+    isIgnored?: boolean;
     unit?: string;
     format?: string;
     id?: any; //symbols
@@ -212,41 +214,41 @@ export function loadTypes(): Promise<void> {
     });
 }
 
-export interface IBinding {
-    getValue(): any;
-    setValue(val: any) :void;
+export interface IBinding<T> {
+    getValue(): T;
+    setValue(val: T) :void;
 }
 
-export class Binding implements IBinding {
+export class Binding<T> implements IBinding<T> {
 
     constructor(
         public memberName: string,
         public parentValue: any) {
     }
 
-    getValue() {       
+    getValue() : T {       
         return this.parentValue[this.memberName];
     }
-    setValue(val: any) {
+    setValue(val: T) {
         return this.parentValue[this.memberName] = val;
     }
 }
 
-export class ReadonlyBinding implements IBinding {
+export class ReadonlyBinding<T> implements IBinding<T> {
     constructor(
-        public value: any) {
+        public value: T) {
     }
 
     getValue() {
         return this.value;
     }
-    setValue(val: any) {
+    setValue(val: T) {
         throw new Error("Readonly Binding");
     }
 }
 
 
-export function createBinding(parentValue: any, lambda: (obj: any) => any): IBinding {
+export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBinding<T> {
 
     var lambdaMatch = functionRegex.exec((lambda as any).toString());
 
@@ -257,7 +259,7 @@ export function createBinding(parentValue: any, lambda: (obj: any) => any): IBin
     var body = lambdaMatch[2];
 
     if (parameter == body)
-        return new ReadonlyBinding(parentValue);
+        return new ReadonlyBinding<T>(parentValue as T);
 
     var m = memberRegex.exec(body);
 
@@ -268,7 +270,7 @@ export function createBinding(parentValue: any, lambda: (obj: any) => any): IBin
     var realParentValue = m[1] == parameter ? parentValue :
         eval(`(function(${parameter}){ return ${m[1]};})`)(parentValue);
 
-    return new Binding(m[2], realParentValue);
+    return new Binding<T>(m[2], realParentValue);
 }
 
 

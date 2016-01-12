@@ -2,8 +2,8 @@
 import * as moment from "moment"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { ajaxGet, ajaxPost } from 'Framework/Signum.React/Scripts/Services';
-import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation, QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn, ResultTable, ResultRow, OrderOption, OrderType } from 'Framework/Signum.React/Scripts/FindOptions';
-import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage } from 'Framework/Signum.React/Scripts/Signum.Entities';
+import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation, QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn, ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions } from 'Framework/Signum.React/Scripts/FindOptions';
+import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from 'Framework/Signum.React/Scripts/Signum.Entities';
 import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference, getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from 'Framework/Signum.React/Scripts/Reflection';
 import {navigateRoute, isNavigable, currentHistory, asyncLoad } from 'Framework/Signum.React/Scripts/Navigator';
 import { Link  } from 'react-router';
@@ -26,32 +26,6 @@ export function getQuerySettings(queryName: any): QuerySettings {
 }
 
 
-var queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
-
-export function getQueryDescription(queryName: any): Promise<QueryDescription>{
-
-    var key = getQueryKey(queryName);
-
-    if (queryDescriptionCache[key])
-        return Promise.resolve(queryDescriptionCache[key]);
-
-    return ajaxGet<QueryDescription>({ url: "/api/query/description/" + key })
-        .then(qd => {
-            queryDescriptionCache[key] = qd;
-            return qd;
-        });
-}
-
-
-export function search(request: QueryRequest): Promise<ResultTable> {    
-    return ajaxPost<ResultTable>({ url: "/api/query/search"}, request);
-}
-
-export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<IEntity>[]> {
-    return ajaxGet<Lite<IEntity>[]>({
-        url: currentHistory.createHref("api/query/findLiteLike", request)
-    });
-}
 
 
 export var isFindableEvent: Array<(queryKey: string) => boolean> = [];
@@ -142,6 +116,67 @@ export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
     return completer.finish().then(a=> findOptions);
 }
 
+class TokenCompleter {
+    constructor(public queryName: any) { }
+
+    tokensToRequest: { [fullKey: string]: ({ options: SubTokensOptions, promise: Promise<QueryToken>, resolve: (action: QueryToken) => void }) };
+
+
+    complete(tokenContainer: { columnName: string, token?: QueryToken }, options: SubTokensOptions): Promise<void> {
+        if (tokenContainer.token)
+            return;
+
+        return this.request(tokenContainer.columnName, options)
+            .then(token => { tokenContainer.token = token; });
+    }
+
+    simpleQueryToken(queryColumn: ColumnDescription): QueryToken {
+
+        return {
+            type: queryColumn.type,
+            format: queryColumn.format,
+            niceName: queryColumn.displayName,
+            fullKey: queryColumn.name,
+            key: queryColumn.name,
+            unit: queryColumn.unit,
+            toString: queryColumn.displayName,
+            filterType: queryColumn.filterType,
+        };
+    }
+
+    request(fullKey: string, options: SubTokensOptions): Promise<QueryToken> {
+
+        if (!fullKey.contains("."))
+            return API.getQueryDescription(this.queryName).then(qd=> this.simpleQueryToken(qd.columns[fullKey]));
+
+        var bucket = this.tokensToRequest[fullKey];
+
+        if (bucket)
+            return bucket.promise;
+
+        bucket = { promise: null, resolve: null, options: options };
+
+        bucket.promise = new Promise<QueryToken>((resolve, reject) => {
+            bucket.resolve = resolve;
+        });
+
+        return bucket.promise;
+    }
+
+
+    finish(): Promise<void> {
+        var queryKey = getQueryKey(this.queryName);
+        var tokens = Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }));
+
+        if (tokens.length == 0)
+            return Promise.resolve(null);
+        
+        return API.parseTokens(queryKey, tokens).then(parsedTokens=> {
+            parsedTokens.forEach(t=> this.tokensToRequest[t.fullKey].resolve(t));
+        });
+    }
+}
+
 function parseValue(fo: FilterOption) {
     switch (filterType(fo.token)) {
         case FilterType.Boolean: fo.value = parseBoolean(fo.value);
@@ -171,77 +206,47 @@ function calculateFilterType(typeRef: TypeReference): FilterType {
     return FilterType.Boolean;
 }
 
-export enum SubTokensOptions {
-    CanAggregate = 1,
-    CanAnyAll = 2,
-    CanElement = 4,
-}
 
+export module API {
 
-class TokenCompleter
-{
-    constructor(public queryName: any) { }
+    var queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
 
-    tokensToRequest: { [fullKey: string]: ({ options: SubTokensOptions, promise: Promise<QueryToken>, resolve: (action: QueryToken) => void }) };
+    export function getQueryDescription(queryName: any): Promise<QueryDescription> {
 
+        var key = getQueryKey(queryName);
 
-    complete(tokenContainer: { columnName: string, token?: QueryToken }, options: SubTokensOptions) : Promise<void> {
-        if (tokenContainer.token)
-            return;
+        if (queryDescriptionCache[key])
+            return Promise.resolve(queryDescriptionCache[key]);
 
-        return this.request(tokenContainer.columnName, options)
-            .then(token => { tokenContainer.token = token; });
+        return ajaxGet<QueryDescription>({ url: "/api/query/description/" + key })
+            .then(qd => {
+                queryDescriptionCache[key] = qd;
+                return qd;
+            });
     }
 
-    simpleQueryToken(queryColumn: ColumnDescription): QueryToken{
 
-        return {
-            type: queryColumn.type,
-            format: queryColumn.format,
-            niceName: queryColumn.displayName,
-            fullKey: queryColumn.name,
-            key: queryColumn.name,
-            unit: queryColumn.unit,
-            toString: queryColumn.displayName,
-            filterType: queryColumn.filterType,
-        };
+    export function search(request: QueryRequest): Promise<ResultTable> {
+        return ajaxPost<ResultTable>({ url: "/api/query/search" }, request);
     }
 
-    request(fullKey: string, options: SubTokensOptions): Promise<QueryToken> {
-
-        if (!fullKey.contains("."))
-            return getQueryDescription(this.queryName).then(qd=> this.simpleQueryToken(qd.columns[fullKey]));
-        
-        var bucket = this.tokensToRequest[fullKey];
-
-        if (bucket)
-            return bucket.promise;
-
-        bucket = { promise: null, resolve: null, options: options };
-
-        bucket.promise = new Promise<QueryToken>((resolve, reject) => {
-            bucket.resolve = resolve;
+    export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<IEntity>[]> {
+        return ajaxGet<Lite<IEntity>[]>({
+            url: currentHistory.createHref("api/query/findLiteLike", request)
         });
-
-        return bucket.promise;
     }
 
+    export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
+        return ajaxPost<QueryToken[]>({ url: "/api/query/parseTokens" }, { queryKey, tokens });
+    }
 
-    finish(): Promise<void> {
-        var request = {
-            queryKey: getQueryKey(this.queryName),
-            tokens: Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }))
-        }; 
-
-        if (request.tokens.length == 0)
-            return Promise.resolve(null);
-        
-        return ajaxPost<QueryToken[]>({ url: "/api/query/parseTokens" }, request).then(tokens=> {
-            tokens.forEach(t=> this.tokensToRequest[t.fullKey].resolve(t));
+    export function subTokens(queryKey: string, token: QueryToken, options: SubTokensOptions): Promise<QueryToken[]>{
+        return ajaxPost<QueryToken[]>({ url: "/api/query/subTokens" }, { queryKey, token: token == null ? null:  token.fullKey, options }).then(list=> {
+            list.forEach(t=> t.parent = token);
+            return list;
         });
     }
 }
-
 
 function parseBoolean(value: any): boolean
 {
@@ -395,7 +400,7 @@ export var formatRules: FormatRule[] = [
     {
         name: "Object",
         isApplicable: col=> true,
-        formatter: col=> new CellFormatter(cell => cell ? (cell.ToString || cell.toString()) : null)
+        formatter: col=> new CellFormatter(cell => cell ? (cell.toStr || cell.toString()) : null)
     },
     {
         name: "Enum",
@@ -407,6 +412,7 @@ export var formatRules: FormatRule[] = [
         isApplicable: col=> col.token.filterType == FilterType.Lite,
         formatter: col=> new CellFormatter((cell: Lite<IEntity>) => cell && <Link to={navigateRoute(cell) }>{cell.toStr}</Link>)
     },
+
     {
         name: "Guid",
         isApplicable: col=> col.token.filterType == FilterType.Guid,

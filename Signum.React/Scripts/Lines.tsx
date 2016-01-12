@@ -13,8 +13,8 @@ export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, L
 import { ValueLine, ValueLineType, ValueLineProps } from 'Framework/Signum.React/Scripts/Lines/ValueLine'
 export { ValueLine, ValueLineType, ValueLineProps};
 
-import { EntityLine, EntityLineProps} from  'Southwind.React/Templates/EntityControls'//'Framework/Signum.React/Scripts/Lines/EntityControls'
-export { EntityLine, EntityLineProps };
+import { EntityBase, EntityBaseProps, EntityLine, EntityLineProps, EntityCombo, EntityComboProps, EntityListBase, EntityListBaseProps } from  'Southwind.React/Templates/EntityControls'//'Framework/Signum.React/Scripts/Lines/EntityControls'
+export { EntityBase, EntityBaseProps, EntityLine, EntityLineProps, EntityCombo, EntityComboProps, EntityListBase, EntityListBaseProps };
 
 
 export class EntityComponent<T> extends React.Component<{ ctx: TypeContext<T> }, {}>{

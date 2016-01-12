@@ -67,6 +67,7 @@ namespace Signum.React.Facades
                               Gender = descOptions.HasFlag(DescriptionOptions.Gender) ? type.GetGender().ToString() : null,
                               EntityKind = type.IsIEntity() ? EntityKindCache.GetEntityKind(type) : (EntityKind?)null,
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
+                              IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                               Members = PropertyRoute.GenerateRoutes(type)
                                 .ToDictionary(p => p.PropertyString(), p => new MemberInfoTS
                                 {
@@ -103,6 +104,7 @@ namespace Signum.React.Facades
                               Members = type.GetFields(staticFlags).ToDictionary(m => m.Name, m => new MemberInfoTS
                               {
                                   NiceName = m.NiceName(),
+                                  IsIgnored = kind == KindOfType.Enum && m.HasAttribute<IgnoreAttribute>()
                               }),
                           })).ToDictionary("enums");
 
@@ -165,6 +167,8 @@ namespace Signum.React.Facades
         public EntityKind? EntityKind { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "entityData")]
         public EntityData? EntityData { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLowPopulation")]
+        public bool IsLowPopulation { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
         public Dictionary<string, MemberInfoTS> Members { get; set; }
     }
@@ -181,6 +185,8 @@ namespace Signum.React.Facades
         public string Unit { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "format")]
         public string Format { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isIgnored")]
+        public bool IsIgnored { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
         public object Id { get; set; }
     }

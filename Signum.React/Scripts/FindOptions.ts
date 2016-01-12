@@ -36,7 +36,7 @@ export interface FindOptions {
 export interface FilterOption {
     columnName: string;
     token?: QueryToken;
-    frozen?: string;
+    frozen?: boolean;
     operation: FilterOperation;
     value: any;
 }
@@ -70,6 +70,11 @@ export enum FindMode {
     Explore = <any>"Explore"
 }
 
+export enum SubTokensOptions {
+    CanAggregate = 1,
+    CanAnyAll = 2,
+    CanElement = 4,
+}
 
 export interface QueryToken {
     toString: string;
@@ -81,6 +86,7 @@ export interface QueryToken {
     filterType: FilterType;
     fullKey: string;
     hasAllOrAny?: boolean;
+    parent?: QueryToken;
 }
 
 export function toQueryToken(cd: ColumnDescription): QueryToken {
@@ -103,8 +109,6 @@ export interface QueryRequest {
     columns: { token: string; displayName: string }[];
     pagination: Pagination;
 }
-
-
 
 export interface ResultColumn {
     displayName: string;
@@ -155,7 +159,7 @@ export module PaginateMath {
 
 
 export interface QueryDescription {
-    queryKey: any;
+    queryKey: string;
     columns: { [name: string]: ColumnDescription };
 }
 
@@ -168,3 +172,77 @@ export interface ColumnDescription {
     displayName: string;
 }
 
+
+
+export var filterOperations: { [a: string]: FilterOperation[] } = {};
+filterOperations[FilterType.String as any] = [
+    FilterOperation.Contains,
+    FilterOperation.EqualTo,
+    FilterOperation.StartsWith,
+    FilterOperation.EndsWith,
+    FilterOperation.Like,
+    FilterOperation.NotContains,
+    FilterOperation.DistinctTo,
+    FilterOperation.NotStartsWith,
+    FilterOperation.NotEndsWith,
+    FilterOperation.NotLike,
+    FilterOperation.IsIn
+];
+
+filterOperations[FilterType.DateTime as any] = [
+    FilterOperation.EqualTo,
+    FilterOperation.DistinctTo,
+    FilterOperation.GreaterThan,
+    FilterOperation.GreaterThanOrEqual,
+    FilterOperation.LessThan,
+    FilterOperation.LessThanOrEqual,
+    FilterOperation.IsIn
+];
+
+filterOperations[FilterType.Integer as any] = [
+    FilterOperation.EqualTo,
+    FilterOperation.DistinctTo,
+    FilterOperation.GreaterThan,
+    FilterOperation.GreaterThanOrEqual,
+    FilterOperation.LessThan,
+    FilterOperation.LessThanOrEqual,
+    FilterOperation.IsIn
+];
+
+filterOperations[FilterType.Decimal as any] = [
+    FilterOperation.EqualTo,
+    FilterOperation.DistinctTo,
+    FilterOperation.GreaterThan,
+    FilterOperation.GreaterThanOrEqual,
+    FilterOperation.LessThan,
+    FilterOperation.LessThanOrEqual,
+    FilterOperation.IsIn
+];
+
+filterOperations[FilterType.Enum as any] = [
+    FilterOperation.EqualTo,
+    FilterOperation.DistinctTo,
+    FilterOperation.IsIn
+];
+
+filterOperations[FilterType.Guid as any] = [
+    FilterOperation.EqualTo,
+    FilterOperation.DistinctTo,
+    FilterOperation.IsIn
+];
+
+filterOperations[FilterType.Lite as any] = [
+    FilterOperation.EqualTo,
+    FilterOperation.DistinctTo,
+    FilterOperation.IsIn
+];
+
+filterOperations[FilterType.Embedded as any] = [
+    FilterOperation.EqualTo,
+    FilterOperation.DistinctTo,
+];
+
+filterOperations[FilterType.Boolean as any] = [
+    FilterOperation.EqualTo,
+    FilterOperation.DistinctTo,
+];

@@ -36,10 +36,22 @@ namespace Signum.React.ApiControllers
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
 
-
             var tokens = request.tokens.Select(tr => QueryUtils.Parse(tr.token, qd, tr.options)).ToList();
 
-            return tokens.Select(qt => new QueryTokenTS(qt)).ToList();
+            return tokens.Select(qt => new QueryTokenTS(qt, recursive: true)).ToList();
+        }
+
+        public class TokenRequest
+        {
+            public string token;
+            public SubTokensOptions options;
+        }
+
+        public class ParseTokensRequest
+        {
+            public string queryKey;
+            public List<TokenRequest> tokens;
+
         }
 
         [Route("api/query/subTokens"), HttpPost]
@@ -48,12 +60,19 @@ namespace Signum.React.ApiControllers
             var qn = QueryLogic.ToQueryName(request.queryKey);
             var qd = DynamicQueryManager.Current.QueryDescription(qn);
 
-            var token = QueryUtils.Parse(request.token, qd, request.options);
+            var token = request.token == null ? null: QueryUtils.Parse(request.token, qd, request.options);
 
 
             var tokens = QueryUtils.SubTokens(token, qd, request.options);
 
-            return tokens.Select(qt => new QueryTokenTS(qt)).ToList();
+            return tokens.Select(qt => new QueryTokenTS(qt, recursive: false)).ToList();
+        }
+
+        public class SubTokensRequest
+        {
+            public string queryKey;
+            public string token;
+            public SubTokensOptions options;
         }
 
         [Route("api/query/search"), HttpPost]
@@ -210,29 +229,14 @@ namespace Signum.React.ApiControllers
         }
     }
 
-    public class ParseTokensRequest
-    {
-        public string queryKey;
-        public List<TokenRequest> tokens;
+ 
 
-    }
 
-    public class SubTokensRequest
-    {
-        public string queryKey;
-        public string token;
-        public SubTokensOptions options;
-    }
 
-    public class TokenRequest
-    {
-        public string token;
-        public SubTokensOptions options;
-    }
 
     public class QueryTokenTS
     {
-        public QueryTokenTS(QueryToken qt)
+        public QueryTokenTS(QueryToken qt, bool recursive)
         {
             this.toString = qt.ToString();
             this.niceName = qt.NiceName();
@@ -241,6 +245,8 @@ namespace Signum.React.ApiControllers
             this.type = new TypeReferenceTS(qt.Type, qt.GetImplementations());
             this.format = qt.Format;
             this.unit = qt.Unit;
+            if (recursive && qt.Parent != null)
+                this.parent = new QueryTokenTS(qt.Parent, recursive);
         }
 
         public string toString;
@@ -250,7 +256,6 @@ namespace Signum.React.ApiControllers
         public TypeReferenceTS type; 
         public string format;
         public string unit;
-
-
+        public QueryTokenTS parent; 
     }
 }

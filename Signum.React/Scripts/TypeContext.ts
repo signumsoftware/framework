@@ -137,7 +137,7 @@ export interface BsColumns {
 export class TypeContext<T> extends StyleContext {
 
     propertyRoute: PropertyRoute;
-    binding: IBinding;
+    binding: IBinding<T>;
 
     get value() {
         return this.binding.getValue();
@@ -147,7 +147,7 @@ export class TypeContext<T> extends StyleContext {
         this.binding.setValue(val);
     }
 
-    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding) {
+    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>) {
         super(parent, styleOptions);
         this.propertyRoute = propertyRoute;
         this.binding = binding;

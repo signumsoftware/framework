@@ -44,7 +44,7 @@ declare module ReactWidgets {
     var DropdownList: DropdownListClass;
     
 
-    export interface ComboboxProps extends React.ReactElement<ComboboxClass> {
+    export interface ComboboxProps extends React.Props<ComboboxClass> {
         value?: any;
         onChange?: (value: any) => void;
         onSelect?: (value: any) => void;
@@ -72,7 +72,7 @@ declare module ReactWidgets {
         };
     }
     export interface Combobox  extends React.ReactElement<ComboboxProps> { }
-    export interface ComboboxClass extends React.ReactElement<ComboboxProps> { }
+    export interface ComboboxClass extends React.ComponentClass<ComboboxProps> { }
     var Combobox: ComboboxClass; 
 
     export interface NumberPickerProps extends React.Props<NumberPickerClass> {
