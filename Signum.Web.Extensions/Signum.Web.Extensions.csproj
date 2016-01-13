@@ -1413,10 +1413,10 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PackageOperation.generated.cs</LastGenOutput>
     </Content>
-    <EmbeddedResource Include="Disconnected\Views\DisconnectedImport.cshtml">
+    <Content Include="Disconnected\Views\DisconnectedImport.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DisconnectedImport.generated.cs</LastGenOutput>
-    </EmbeddedResource>
+    </Content>
     <Content Include="Disconnected\Views\DisconnectedMachine.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DisconnectedMachine.generated.cs</LastGenOutput>
@@ -1663,7 +1663,8 @@
     <Content Include="Excel\Views\Web.config" />
     <Content Include="Scheduler\Views\Web.config" />
     <TypeScriptCompile Include="Word\Scripts\Word.ts" />
-  </ItemGroup>
+  
+</ItemGroup>
   <ItemGroup>
     <Content Include="AuthAdmin\Views\Web.config" />
     <None Include="Auth\Views\ChangePassword.cshtml">
