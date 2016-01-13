@@ -29,7 +29,7 @@ namespace Signum.Web.Excel
         public static bool ToExcelPlain { get; private set; }
         public static bool ExcelReport { get; private set; }
 
-        public static void Start(bool toExcelPlain, bool excelReport, bool userQueryExcel)
+        public static void Start(bool toExcelPlain, bool excelReport, bool excelAttachment)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -53,7 +53,7 @@ namespace Signum.Web.Excel
                 if (toExcelPlain || excelReport)
                     ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
 
-                if (userQueryExcel)
+                if (excelAttachment)
                     Navigator.AddSetting(new EntitySettings<ExcelAttachmentEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ExcelAttachment") });
             }
         }
