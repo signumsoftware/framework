@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { Input, Tab } from 'react-bootstrap'
-import { DatePicker } from 'react-widgets'
+import { DateTimePicker } from 'react-widgets'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from 'Framework/Signum.React/Scripts/TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat } from 'Framework/Signum.React/Scripts/Reflection'
 import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from 'Framework/Signum.React/Scripts/Lines/LineBase'
@@ -69,13 +69,13 @@ export class ValueLine extends LineBase<ValueLineProps> {
 
         var input = e.currentTarget as HTMLInputElement;
         var val = input.type == "checkbox" || input.type == "radio" ? input.checked : input.value;
-        this.state.ctx.value(val);
+        this.state.ctx.value = val;
         this.forceUpdate();
 
     };
 
     handleDatePickerOnChange = (date: Date, str: string) => {
-        this.state.ctx.value(str);
+        this.state.ctx.value = str;
         this.forceUpdate();
     };
 
@@ -252,7 +252,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
 
     return <FormGroup ctx={s.ctx} title={s.labelText}>
          { ValueLine.withUnit(s.unitText,
-             <DatePicker value={s.ctx.value} onChange={vl.handleDatePickerOnChange} format={toMomentFormat(s.formatText) }/>
+             <DateTimePicker value={s.ctx.value} onChange={vl.handleDatePickerOnChange} format={toMomentFormat(s.formatText) }/>
              //<input type="text" className="form-control" value={s.ctx.value} onChange={vl.handleInputOnChange}
              //    placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>
          ) }

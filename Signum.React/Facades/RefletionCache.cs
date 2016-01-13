@@ -208,9 +208,9 @@ namespace Signum.React.Facades
 
         public TypeReferenceTS(Type type, Implementations? implementations)
         {
-            this.IsCollection = type.IsMList();
-
-            var clean = CleanMList(type);
+            this.IsCollection = type != typeof(string) && type.ElementType() != null;
+            
+            var clean = type == typeof(string) ? type :  (type.ElementType() ?? type);
             this.IsLite = clean.IsLite();
             this.IsNullable = clean.IsNullable();
             this.IsEnum = clean.IsEnum;

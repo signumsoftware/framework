@@ -45,6 +45,7 @@ declare module ReactWidgets {
     
 
     export interface ComboboxProps extends React.Props<ComboboxClass> {
+        className?: string; 
         value?: any;
         onChange?: (value: any) => void;
         onSelect?: (value: any) => void;
@@ -182,7 +183,7 @@ declare module ReactWidgets {
     var Calendar: CalendarClass; 
 
 
-    export interface DatePickeProps extends React.Props<DatePickerClass> {
+    export interface DatePickeProps extends React.Props<DateTimePickerClass> {
         value?: Date;
         onChange?: (value: Date, dateStr: string) => void;
         onSelect?: (value: Date) => void;
@@ -219,12 +220,21 @@ declare module ReactWidgets {
             moveForward?: string; //Default "navigate forward";
         };
     }
-    export interface DatePicker extends React.ReactElement<DatePickeProps> {    }
-    export interface DatePickerClass extends React.ComponentClass<DatePickeProps> { }
-    var DatePicker: DatePickerClass; 
+    export interface DateTimePicker extends React.ReactElement<DatePickeProps> {    }
+    export interface DateTimePickerClass extends React.ComponentClass<DatePickeProps> { }
+    var DateTimePicker: DateTimePickerClass; 
+
+    export function setDateLocalizer(localizer: any);
+    export function setNumberLocalizer(localizer: any);
 
 }
 
 declare module "react-widgets" {
     export = ReactWidgets;
 }
+
+declare var momentLocalizer: (value: any) => void;
+declare module "react-widgets-moment" {
+    export = momentLocalizer;
+}
+

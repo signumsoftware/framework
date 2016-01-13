@@ -34,7 +34,9 @@ export class EntityComponent<T> extends React.Component<{ ctx: TypeContext<T> },
 
 Tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any>, state: LineBaseProps) {
-    if (!state.labelText && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+    if (!state.labelText &&
+        state.ctx.propertyRoute &&
+        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
         state.labelText = state.ctx.propertyRoute.member.niceName;
     }
 }
@@ -44,7 +46,9 @@ export function taskSetUnit(lineBase: LineBase<any>, state: LineBaseProps) {
     if (lineBase instanceof ValueLine) {
         var vProps = state as ValueLineProps;
 
-        if (!vProps.unitText && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+        if (!vProps.unitText &&
+            state.ctx.propertyRoute &&
+            state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
             vProps.unitText = state.ctx.propertyRoute.member.unit;
         }
     }
@@ -55,7 +59,9 @@ export function taskSetFormat(lineBase: LineBase<any>, state: LineBaseProps) {
     if (lineBase instanceof ValueLine) {
         var vProps = state as ValueLineProps;
 
-        if (!vProps.formatText && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+        if (!vProps.formatText &&
+            state.ctx.propertyRoute &&
+            state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
             vProps.formatText = state.ctx.propertyRoute.member.format;
         }
     }
@@ -63,7 +69,10 @@ export function taskSetFormat(lineBase: LineBase<any>, state: LineBaseProps) {
 
 Tasks.push(taskSetReadOnly);
 export function taskSetReadOnly(lineBase: LineBase<any>, state: LineBaseProps) {
-    if (!state.ctx.readOnly && state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field && state.ctx.propertyRoute.member.isReadOnly) {
+    if (!state.ctx.readOnly &&
+        state.ctx.propertyRoute &&
+        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
+        state.ctx.propertyRoute.member.isReadOnly) {
         state.ctx.readOnly = true;
     }
 }

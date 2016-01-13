@@ -126,7 +126,6 @@ export function getTypeInfo(type: PseudoType): TypeInfo {
     throw new Error("Unexpected type: " + type);
 }
 
-
 export const IsByAll = "[ALL]";
 export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
     if (typeReference.name == IsByAll)

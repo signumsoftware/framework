@@ -243,6 +243,7 @@ namespace Signum.React.ApiControllers
             this.key = qt.Key;
             this.fullKey = qt.FullKey();
             this.type = new TypeReferenceTS(qt.Type, qt.GetImplementations());
+            this.filterType = QueryUtils.TryGetFilterType(qt.Type);
             this.format = qt.Format;
             this.unit = qt.Unit;
             if (recursive && qt.Parent != null)
@@ -253,7 +254,8 @@ namespace Signum.React.ApiControllers
         public string niceName;
         public string key;
         public string fullKey;
-        public TypeReferenceTS type; 
+        public TypeReferenceTS type;
+        public FilterType? filterType;
         public string format;
         public string unit;
         public QueryTokenTS parent; 
