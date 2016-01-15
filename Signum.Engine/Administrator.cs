@@ -540,6 +540,35 @@ namespace Signum.Engine
             return dt;
         }
 
+        public static int BulkInsertMListFromEntities<E, V>(List<E> entities, 
+            Expression<Func<E, MList<V>>> mListProperty,
+            SqlBulkCopyOptions options = SqlBulkCopyOptions.Default,
+            int? timeout = null,
+            string message = null)
+            where E : Entity
+        {
+            try {
+                var func = mListProperty.Compile();
+
+                var mlists = (from e in entities
+                              from mle in func(e).Select((iw, i) => new MListElement<E, V>
+                              {
+                                  Order = i,
+                                  Element = iw,
+                                  Parent = e,
+                              })
+                              select mle).ToList();
+
+                return Administrator.BulkInsertMList(mListProperty, mlists, options, timeout, message);
+            }
+            catch(InvalidOperationException e) when (e.Message.Contains("has no Id"))
+            {
+                throw new InvalidOperationException($"{nameof(BulkInsertMListFromEntities)} requires that you set the Id of the entities manually using {nameof(UnsafeEntityExtensions.SetId)}");
+
+                throw;
+            }
+        }
+
 
 
         public static int BulkInsertMList<E, V>(Expression<Func<E, MList<V>>> mListProperty,
