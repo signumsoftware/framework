@@ -421,6 +421,7 @@ namespace Signum.Utilities
                 Start = long.Parse(xLog.Attribute("Start").Value),
                 End = long.Parse(xLog.Attribute("End").Value),
                 AdditionalData = xLog.Attribute("AdditionalData")?.Value,
+                Depth = parent == null ? 0 : parent.Depth + 1
             };
 
             if (xLog.Element("Log") != null)
