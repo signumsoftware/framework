@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using Signum.Entities.Scheduler;
+using Signum.Entities.UserQueries;
+using Signum.Entities.Processes;
 
 namespace Signum.Entities.Mailing
 {
@@ -23,7 +25,9 @@ namespace Signum.Entities.Mailing
         public Lite<EmailTemplateEntity> EmailTemplate { get; set; }
 
         [ImplementedByAll]
-        public Lite<Entity> Target { get; set; }
+        public Lite<Entity> UniqueTarget { get; set; }
+
+        public Lite<UserQueryEntity> TargetsFromUserQuery { get; set; }
 
         static Expression<Func<EmailReportEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]

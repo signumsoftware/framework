@@ -62,8 +62,7 @@ namespace Signum.Entities.Processes
         public Entity Target { get; set; }
 
         [ImplementedByAll]
-        public Lite<Entity> Result //ConstructFrom only!
-        { get; set; }
+        public Lite<Entity> Result { get; set; } //ConstructFrom only!
 
         public DateTime? FinishTime { get; set; }
     }

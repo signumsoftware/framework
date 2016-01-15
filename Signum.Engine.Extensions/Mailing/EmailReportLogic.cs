@@ -5,14 +5,20 @@ using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Engine.Scheduler;
 using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
+using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Entities.UserQueries;
+using Signum.Engine.UserQueries;
+using Signum.Entities.Processes;
+using Signum.Engine.Processes;
 
 namespace Signum.Engine.Mailing
 {
@@ -33,16 +39,32 @@ namespace Signum.Engine.Mailing
                         e.Id,
                         e.Name,
                         e.EmailTemplate,
-                        e.Target,
+                        e.UniqueTarget,
                     });
 
-                Validator.PropertyValidator((EmailReportEntity er) => er.Target).StaticPropertyValidation += (er, pi) =>
+                Validator.PropertyValidator((EmailReportEntity er) => er.UniqueTarget).StaticPropertyValidation += (er, pi) =>
                 {
-                    Implementations? implementations = er.EmailTemplate == null ? null : GetImplementations(er.EmailTemplate);
-                    if (implementations != null && er.Target == null)
+                    if (er.UniqueTarget != null && er.TargetsFromUserQuery != null)
+                        return ValidationMessage._0And1CanNotBeSetAtTheSameTime.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(()=> er.TargetsFromUserQuery).NiceName());
+
+                    Implementations? implementations = er.EmailTemplate == null ? null : GetImplementations(er.EmailTemplate.InDB(a => a.Query));
+                    if (implementations != null && er.UniqueTarget == null && er.TargetsFromUserQuery != null)
                         return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
-                    if (!implementations.Value.Types.Contains(er.Target.EntityType))
+                    if (!implementations.Value.Types.Contains(er.UniqueTarget.EntityType))
+                        return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), implementations.Value.Types.CommaOr(t => t.NiceName()));
+
+                    return null;
+                };
+
+                Validator.PropertyValidator((EmailReportEntity er) => er.TargetsFromUserQuery).StaticPropertyValidation += (EmailReportEntity er, PropertyInfo pi) =>
+                {
+                    Implementations? implementations = er.EmailTemplate == null ? null : GetImplementations(er.EmailTemplate.InDB(a => a.Query));
+                    if (implementations != null && er.TargetsFromUserQuery == null && er.UniqueTarget != null)
+                        return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+                    var uqImplementations = GetImplementations(er.TargetsFromUserQuery.InDB(a => a.Query));
+                    if (!implementations.Value.Types.Intersect(uqImplementations.Value.Types).Any())
                         return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), implementations.Value.Types.CommaOr(t => t.NiceName()));
 
                     return null;
@@ -57,24 +79,44 @@ namespace Signum.Engine.Mailing
 
                 SchedulerLogic.ExecuteTask.Register((EmailReportEntity er) =>
                 {
-                    var email = EmailTemplateLogic.CreateEmailMessage(er.EmailTemplate, er.Target?.Retrieve()).SingleEx();
+                    if (er.UniqueTarget != null)
+                    {
+                        var email = EmailTemplateLogic.CreateEmailMessage(er.EmailTemplate, er.UniqueTarget?.Retrieve()).SingleEx();
+                        email.SendMailAsync();
+                        return email.ToLite();
+                    }
+                    else
+                    {
+                        var qr = er.TargetsFromUserQuery.Retrieve().ToQueryRequest();
+                        qr.Columns.Clear();
+                        var result = DynamicQueryManager.Current.ExecuteQuery(qr);
 
-                    EmailLogic.SendMail(email);
+                        var entities = result.Rows.Select(a => a.Entity).ToList();
+                        if (entities.IsEmpty())
+                            return null;
 
-                    return email.ToLite();
+                        return EmailPackageLogic.SendMultipleEmailsAsync(er.EmailTemplate, entities).Execute(ProcessOperation.Execute).ToLite();
+                    }
                 });
             }
         }
 
-        public static Implementations? GetImplementations(Lite<EmailTemplateEntity> template)
+        public static Implementations? GetImplementations(QueryEntity query)
         {
-            var queryName = template.InDB(a=>a.Query)?.ToQueryName();
+            if (query == null)
+                return null;
+
+            var queryName = query?.ToQueryName();
 
             if (queryName == null)
                 return null;
 
             var entityColumn = DynamicQueryManager.Current.QueryDescription(queryName).Columns.Single(a => a.IsEntity);
             var implementations = entityColumn.Implementations.Value;
+
+            if (implementations.IsByAll)
+                throw new InvalidOperationException("ByAll implementations not supported");
+
             return implementations;
         }
     }
