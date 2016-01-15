@@ -119,6 +119,9 @@ namespace Signum.Engine.Mailing
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
                 var emails = template.CreateEmailMessage(line.Target).ToList();
+                foreach (var email in emails)
+                    email.SendMailAsync();
+
                 line.Result = emails.Only()?.ToLite();
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();

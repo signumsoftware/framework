@@ -349,8 +349,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailMasterTemplateMessage.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\Views\EmailReport.generated.cs">
-      <DependentUpon>EmailReport.cshtml</DependentUpon>
+    <Compile Include="Mailing\Views\SendEmailTask.generated.cs">
+      <DependentUpon>SendEmailTask.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
@@ -1551,9 +1551,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>OperationMap.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Mailing\Views\EmailReport.cshtml">
+    <Content Include="Mailing\Views\SendEmailTask.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>EmailReport.generated.cs</LastGenOutput>
+      <LastGenOutput>SendEmailTask.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Excel\Views\ExcelAttachment.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1663,8 +1663,7 @@
     <Content Include="Excel\Views\Web.config" />
     <Content Include="Scheduler\Views\Web.config" />
     <TypeScriptCompile Include="Word\Scripts\Word.ts" />
-  
-</ItemGroup>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="AuthAdmin\Views\Web.config" />
     <None Include="Auth\Views\ChangePassword.cshtml">

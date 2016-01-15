@@ -164,17 +164,21 @@ namespace Signum.Web.Mailing
                 }
 
                 if (emailReport)
-                    Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<EmailReportEntity> { PartialViewName = e => ViewPrefix.FormatWith("EmailReport") }
-                });
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<SendEmailTaskEntity> { PartialViewName = e => ViewPrefix.FormatWith("SendEmailTask") }
+                    });
+                }
 
                 if (pop3Config)
-                    Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<Pop3ConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Configuration") },
-                    new EntitySettings<Pop3ReceptionEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Reception") },
-                });
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<Pop3ConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Configuration") },
+                        new EntitySettings<Pop3ReceptionEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Reception") },
+                    });
+                }
 
                 if (quickLinkFrom != null)
                 {

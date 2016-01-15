@@ -60,7 +60,7 @@ namespace Signum.Web.Mailing
         {
             var template = Lite.Parse<EmailTemplateEntity>(Request["template"]);
 
-            var implementations = EmailReportLogic.GetImplementations(template.InDB(a => a.Query));
+            var implementations = SendEmailTaskLogic.GetImplementations(template.InDB(a => a.Query));
 
             return new JsonResult
             {

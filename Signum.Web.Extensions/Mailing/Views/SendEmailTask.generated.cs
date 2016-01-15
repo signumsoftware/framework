@@ -28,7 +28,7 @@ namespace ASP
     using System.Web.WebPages;
     using Signum.Entities;
     
-    #line 1 "..\..\Mailing\Views\EmailReport.cshtml"
+    #line 1 "..\..\Mailing\Views\SendEmailTask.cshtml"
     using Signum.Entities.Mailing;
     
     #line default
@@ -36,45 +36,45 @@ namespace ASP
     using Signum.Utilities;
     using Signum.Web;
     
-    #line 2 "..\..\Mailing\Views\EmailReport.cshtml"
+    #line 2 "..\..\Mailing\Views\SendEmailTask.cshtml"
     using Signum.Web.Mailing;
     
     #line default
     #line hidden
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/EmailReport.cshtml")]
-    public partial class _Mailing_Views_EmailReport_cshtml : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/SendEmailTask.cshtml")]
+    public partial class _Mailing_Views_SendEmailTask_cshtml : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public _Mailing_Views_EmailReport_cshtml()
+        public _Mailing_Views_SendEmailTask_cshtml()
         {
         }
         public override void Execute()
         {
             
-            #line 3 "..\..\Mailing\Views\EmailReport.cshtml"
- using (var sc = Html.TypeContext<EmailReportEntity>())
+            #line 3 "..\..\Mailing\Views\SendEmailTask.cshtml"
+ using (var sc = Html.TypeContext<SendEmailTaskEntity>())
 {
     
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Mailing\Views\EmailReport.cshtml"
-Write(Html.ValueLine(sc,s=>s.Name));
+            #line 5 "..\..\Mailing\Views\SendEmailTask.cshtml"
+Write(Html.ValueLine(sc, s => s.Name));
 
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Mailing\Views\EmailReport.cshtml"
-                                 
+            #line 5 "..\..\Mailing\Views\SendEmailTask.cshtml"
+                                    
     
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Mailing\Views\EmailReport.cshtml"
+            #line 6 "..\..\Mailing\Views\SendEmailTask.cshtml"
 Write(Html.EntityLine(sc, s => s.EmailTemplate, el => el.AttachFunction = MailingClient.Module["attachEmailReportTemplate"](el,
     sc.SubContextPrefix(a => a.UniqueTarget),
     Url.Action((MailingController c) => c.GetEmailTemplateEntityImplementations()))));
@@ -83,35 +83,35 @@ Write(Html.EntityLine(sc, s => s.EmailTemplate, el => el.AttachFunction = Mailin
             #line default
             #line hidden
             
-            #line 8 "..\..\Mailing\Views\EmailReport.cshtml"
+            #line 8 "..\..\Mailing\Views\SendEmailTask.cshtml"
                                                                                     
     
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\EmailReport.cshtml"
+            #line 9 "..\..\Mailing\Views\SendEmailTask.cshtml"
 Write(Html.EntityLine(sc, s => s.TargetsFromUserQuery));
 
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\EmailReport.cshtml"
+            #line 9 "..\..\Mailing\Views\SendEmailTask.cshtml"
                                                      
     
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Mailing\Views\EmailReport.cshtml"
+            #line 10 "..\..\Mailing\Views\SendEmailTask.cshtml"
 Write(Html.EntityLine(sc, s => s.UniqueTarget, el => { el.Autocomplete = true; el.Find = true; }));
 
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Mailing\Views\EmailReport.cshtml"
+            #line 10 "..\..\Mailing\Views\SendEmailTask.cshtml"
                                                                                                 
 }
 

@@ -23,16 +23,16 @@ using Signum.Engine.Processes;
 namespace Signum.Engine.Mailing
 {
 
-    public static class EmailReportLogic
+    public static class SendEmailTaskLogic
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<EmailReportEntity>();
+                sb.Include<SendEmailTaskEntity>();
 
-                dqm.RegisterQuery(typeof(EmailReportEntity), () =>
-                    from e in Database.Query<EmailReportEntity>()
+                dqm.RegisterQuery(typeof(SendEmailTaskEntity), () =>
+                    from e in Database.Query<SendEmailTaskEntity>()
                     select new
                     {
                         Entity = e,
@@ -42,42 +42,48 @@ namespace Signum.Engine.Mailing
                         e.UniqueTarget,
                     });
 
-                Validator.PropertyValidator((EmailReportEntity er) => er.UniqueTarget).StaticPropertyValidation += (er, pi) =>
+                Validator.PropertyValidator((SendEmailTaskEntity er) => er.UniqueTarget).StaticPropertyValidation += (er, pi) =>
                 {
                     if (er.UniqueTarget != null && er.TargetsFromUserQuery != null)
                         return ValidationMessage._0And1CanNotBeSetAtTheSameTime.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(()=> er.TargetsFromUserQuery).NiceName());
 
                     Implementations? implementations = er.EmailTemplate == null ? null : GetImplementations(er.EmailTemplate.InDB(a => a.Query));
-                    if (implementations != null && er.UniqueTarget == null && er.TargetsFromUserQuery != null)
+                    if (implementations != null && er.UniqueTarget == null && er.TargetsFromUserQuery == null)
                         return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
-                    if (!implementations.Value.Types.Contains(er.UniqueTarget.EntityType))
-                        return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), implementations.Value.Types.CommaOr(t => t.NiceName()));
+                    if (er.UniqueTarget != null)
+                    {
+                        if (!implementations.Value.Types.Contains(er.UniqueTarget.EntityType))
+                            return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), implementations.Value.Types.CommaOr(t => t.NiceName()));
+                    }
 
                     return null;
                 };
 
-                Validator.PropertyValidator((EmailReportEntity er) => er.TargetsFromUserQuery).StaticPropertyValidation += (EmailReportEntity er, PropertyInfo pi) =>
+                Validator.PropertyValidator((SendEmailTaskEntity er) => er.TargetsFromUserQuery).StaticPropertyValidation += (SendEmailTaskEntity er, PropertyInfo pi) =>
                 {
                     Implementations? implementations = er.EmailTemplate == null ? null : GetImplementations(er.EmailTemplate.InDB(a => a.Query));
-                    if (implementations != null && er.TargetsFromUserQuery == null && er.UniqueTarget != null)
+                    if (implementations != null && er.TargetsFromUserQuery == null && er.UniqueTarget == null)
                         return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
-                    var uqImplementations = GetImplementations(er.TargetsFromUserQuery.InDB(a => a.Query));
-                    if (!implementations.Value.Types.Intersect(uqImplementations.Value.Types).Any())
-                        return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), implementations.Value.Types.CommaOr(t => t.NiceName()));
+                    if (er.TargetsFromUserQuery != null)
+                    {
+                        var uqImplementations = GetImplementations(er.TargetsFromUserQuery.InDB(a => a.Query));
+                        if (!implementations.Value.Types.Intersect(uqImplementations.Value.Types).Any())
+                            return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), implementations.Value.Types.CommaOr(t => t.NiceName()));
+                    }
 
                     return null;
                 };
 
-                new Graph<EmailReportEntity>.Execute(EmailReportOperation.Save)
+                new Graph<SendEmailTaskEntity>.Execute(SendEmailTaskOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (e, _) => { }
                 }.Register();
 
-                SchedulerLogic.ExecuteTask.Register((EmailReportEntity er) =>
+                SchedulerLogic.ExecuteTask.Register((SendEmailTaskEntity er) =>
                 {
                     if (er.UniqueTarget != null)
                     {
