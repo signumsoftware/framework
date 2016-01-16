@@ -1,17 +1,14 @@
-﻿.sf-search-footer
-{
+﻿.sf-search-footer {
     min-height: 50px;
 }
 
-.sf-search-footer div
-{
-    float: left;
-    width: 33%;
-}
+    .sf-search-footer div {
+        float: left;
+        width: 33%;
+    }
 
-table.sf-search-results > thead
-{
-    white-space:nowrap;
+table.sf-search-results > thead {
+    white-space: nowrap;
 }
 
 table.sf-search-results > tbody > tr > td {
@@ -19,80 +16,67 @@ table.sf-search-results > tbody > tr > td {
     vertical-align: middle;
 }
 
-.sf-query-button-bar
-{
+.sf-query-button-bar {
     margin-bottom: 10px;
 }
 
 /*Drag and drop*/
 
-th.drag-left
-{
+th.drag-left {
     box-shadow: inset #AAA 3px 0px 0px 0px;
 }
 
-th.drag-right
-{
+th.drag-right {
     box-shadow: inset #AAA -3px 0px 0px 0px;
 }
 
-.sf-search-results > thead > tr > th
-{
+.sf-search-results > thead > tr > th {
     text-align: center;
     border-left: 1px solid #eee;
-    border-right: 1px solid #eee;  
+    border-right: 1px solid #eee;
 }
 
-.sf-search-results > thead > tr > th > span 
-{
-      white-space: pre;
-}
+    .sf-search-results > thead > tr > th > span {
+        white-space: pre;
+    }
 
-.sf-search-results > tbody > tr > td
-{
+.sf-search-results > tbody > tr > td {
     padding-left: 10px;
     padding-right: 10px;
 }
 
 /*Pagination*/
 
-.sf-pagination-center
-{
+.sf-pagination-center {
     text-align: center;
 }
 
-.sf-pagination-right
-{
+.sf-pagination-right {
     text-align: right;
 }
 
-div.sf-pagination-right > ul.pagination
-{
+div.sf-pagination-right > ul.pagination {
     margin: 0px;
 }
 
-div.sf-pagination-right > ul.pagination > li > a,
-div.sf-pagination-right > ul.pagination > li > span
-{
-    padding: 0px 6px;
-}
+    div.sf-pagination-right > ul.pagination > li > a,
+    div.sf-pagination-right > ul.pagination > li > span {
+        padding: 0px 6px;
+    }
 
-div.sf-pagination-right > ul.pagination > .disabled > a,
-div.sf-pagination-right > ul.pagination > .disabled > span
-{
-    cursor: default;
-}
+    div.sf-pagination-right > ul.pagination > .disabled > a,
+    div.sf-pagination-right > ul.pagination > .disabled > span {
+        cursor: default;
+    }
 
-#divSearchPage .sf-search-footer
-{
+#divSearchPage .sf-search-footer {
     margin-top: 10px;
 }
 
 
 /* Multiply */
 
-.sf-td-multiply.alert
-{
+.sf-td-multiply.alert {
     padding: 4px 10px;
     margin: 3px 0px;
 }
@@ -100,21 +84,18 @@ div.sf-pagination-right > ul.pagination > .disabled > span
 
 
 .sf-search-results-container {
-    overflow-x:auto;
+    overflow-x: auto;
 }
 
-.sf-popup-fullscreen
-{
-    font-size:18px;
+.sf-popup-fullscreen {
+    font-size: 18px;
 }
 
-.table-hover > tbody > tr:hover.sf-search-footer > td
-{
-    background-color:transparent;
+.table-hover > tbody > tr:hover.sf-search-footer > td {
+    background-color: transparent;
 }
 
-span.token-builder > select.form-control
-{
+span.token-builder > select.form-control {
     width: auto;
     display: inline;
     height: 30px;
@@ -122,41 +103,36 @@ span.token-builder > select.form-control
     margin: 2px 0px;
 }
 
-.sf-query-token-part  {
+.sf-query-token-part {
     display: inline-block;
+    margin-right: 1px;
 }
 
     .sf-query-token-part .rw-popup-container {
         min-width: 200px;
     }
 
-.sf-filters-body .btn-sm
-{
+.sf-filters-body .btn-sm {
     margin-top: -2px;
 }
 
-.panel-heading.sf-filters-body
-{
+.panel-heading.sf-filters-body {
     padding: 3px 5px;
 }
 
-.panel-body.sf-filters-list
-{
+.panel-body.sf-filters-list {
     padding: 5px;
 }
 
-.sf-explanation
-{
+.sf-explanation {
     margin: 10px;
 }
 
-.sf-filters-list > table.table
-{
-    margin-bottom:0px;
+.sf-filters-list > table.table {
+    margin-bottom: 0px;
 }
 
-.sf-filter-token
-{
+.sf-filter-token {
     border: 1px solid #bbb;
     border-radius: 6px;
     padding: 0px 3px;
@@ -165,60 +141,50 @@ span.token-builder > select.form-control
     background-color: #F5F5F5;
 }
 
-div.panel.sf-filters
-{
+div.panel.sf-filters {
     margin: 0px 0px 4px 0px;
 }
 
-div.sf-filters-list table.table
-{
-    width:auto;
+div.sf-filters-list table.table {
+    width: auto;
 }
 
 
 
-.caret.caret-reversed
-{
+.caret.caret-reversed {
     border-top-width: 0;
     border-bottom: 4px solid #000000;
 }
 
 /* SORTER */
 
-.sf-header-sort.l3
-{
-    opacity:0.20;
+.sf-header-sort.l3 {
+    opacity: 0.20;
 }
 
-.sf-header-sort.l2
-{
-    opacity:0.40;
+.sf-header-sort.l2 {
+    opacity: 0.40;
 }
 
-.sf-header-sort.l1
-{
-    opacity:0.60;
+.sf-header-sort.l1 {
+    opacity: 0.60;
 }
 
-.sf-header-sort.l0
-{
+.sf-header-sort.l0 {
 }
 
-.sf-header-sort.asc
-{
+.sf-header-sort.asc {
     border-top-width: 0;
     border-bottom: 8px solid;
 }
 
-.sf-header-sort.desc
-{
+.sf-header-sort.desc {
     border-bottom-width: 0;
     border-top: 8px solid;
 }
 
 .sf-header-sort.desc,
-.sf-header-sort.asc
-{
+.sf-header-sort.asc {
     display: inline-block;
     width: 0;
     height: 0;
@@ -231,60 +197,52 @@ div.sf-filters-list table.table
 /* Context Menu */
 
 .sf-tm-selected-loading,
-.sf-search-ctxitem-no-results
-{
-    text-align: center
+.sf-search-ctxitem-no-results {
+    text-align: center;
 }
 
 /*  Search Popup */
 
-.sf-search-popup .modal-footer
-{
+.sf-search-popup .modal-footer {
     padding: 10px;
 }
 
-.sf-search-popup .modal-body
-{  
+.sf-search-popup .modal-body {
     padding: 10px;
     padding-bottom: 0px;
 }
 
-.sf-search-results
-{
-    margin-bottom: 0px
+.sf-search-results {
+    margin-bottom: 0px;
 }
 
 
 /* check box */
 
 input[type=checkbox].sf-td-selection,
-th.sf-th-selection > input[type=checkbox]
-{
+th.sf-th-selection > input[type=checkbox] {
     width: 16px;
     height: 16px;
 }
 
 
-span.guid{
-    color:gray;
-    white-space:nowrap;
+span.guid {
+    color: gray;
+    white-space: nowrap;
 }
 
 /* sf-entity-ctxmenu-success */
 
-tr.sf-entity-ctxmenu-success
-{
+tr.sf-entity-ctxmenu-success {
     opacity: .5;
 }
 
 /*Count search*/
 
-.count-search
-{
+.count-search {
     margin-right: 4px;
 }
 
-ul.sf-context-menu li a:not([disabled])
-{
-    cursor:pointer;
+ul.sf-context-menu li a:not([disabled]) {
+    cursor: pointer;
 }

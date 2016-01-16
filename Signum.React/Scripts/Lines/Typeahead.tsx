@@ -45,7 +45,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
         return [
             val.substr(0, index),
-            <strong>{val.substr(index, query.length) }</strong>,
+            <strong key={0}>{val.substr(index, query.length) }</strong>,
             val.substr(index + query.length)
         ];
     }

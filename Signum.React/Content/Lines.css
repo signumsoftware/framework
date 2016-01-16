@@ -237,42 +237,6 @@ ul.nav-tabs {
     padding: 0px 3px;
 }
 
-.form-xs .rw-input {
-    padding: 0px 3px;
-    height: 18px;
-}
-
-.form-xs .rw-select.rw-btn, 
-.form-xs .rw-select>.rw-btn  {
-    line-height: 18px;
-    width: 1.5em;
-}
-
-.form-xs .rw-dropdownlist>.rw-input {
-    line-height: 18px;
-}
-
-.rw-select.rw-btn, .rw-select>.rw-btn {
-    height: 100%;
-    vertical-align: middle;
-    outline: 0;
-}
-
-.form-xs .rw-combobox, 
-.form-xs .rw-datetimepicker, 
-.form-xs .rw-numberpicker, 
-.form-xs .rw-dropdownlist{
-    padding-right:1.5em;
-    line-height: 18px;
-}
-
-.form-xs .rw-datetimepicker.rw-has-both>.rw-select {
-    width: 3.2em;
-}
-
-.form-xs .rw-datetimepicker.rw-has-both {
-    padding-right: 3.2em;
-}
 
 .form-xs .form-control:not(textarea),
 .form-xs .form-control-static {
@@ -290,6 +254,37 @@ ul.nav-tabs {
 .form-xs .input-group .input-group-addon {
     padding: 0px 3px;
     height: 20px;
+}
+
+.form-xs .rw-input {
+    padding: 0px 3px;
+    height: 18px;
+}
+
+.form-xs .rw-select.rw-btn, 
+.form-xs .rw-select>.rw-btn  {
+    line-height: 18px;
+    width: 1.5em;
+}
+
+.form-xs .rw-dropdownlist>.rw-input {
+    line-height: 18px;
+}
+
+.form-xs .rw-combobox, 
+.form-xs .rw-datetimepicker, 
+.form-xs .rw-numberpicker, 
+.form-xs .rw-dropdownlist{
+    padding-right:1.5em;
+    line-height: 18px;
+}
+
+.form-xs .rw-datetimepicker.rw-has-both>.rw-select {
+    width: 3.2em;
+}
+
+.form-xs .rw-datetimepicker.rw-has-both {
+    padding-right: 3.2em;
 }
 
 .form-xs .sf-strip {
@@ -344,6 +339,37 @@ ul.nav-tabs {
 .form-sm .input-group .btn,
 .form-sm .input-group .input-group-addon {
     padding: 2px 4px;
+}
+
+.form-sm .rw-input {
+    padding: 3px 6px;
+    height: 24px;
+}
+
+.form-sm .rw-select.rw-btn, 
+.form-sm .rw-select>.rw-btn  {
+    line-height: 24px;
+    width: 1.5em;
+}
+
+.form-sm .rw-dropdownlist>.rw-input {
+    line-height: 19px;
+}
+
+.form-sm .rw-combobox, 
+.form-sm .rw-datetimepicker, 
+.form-sm .rw-numberpicker, 
+.form-sm .rw-dropdownlist{
+    padding-right:1.5em;
+    line-height: 24px;
+}
+
+.form-sm .rw-datetimepicker.rw-has-both>.rw-select {
+    width: 3.2em;
+}
+
+.form-sm .rw-datetimepicker.rw-has-both {
+    padding-right: 3.2em;
 }
 
 .form-sm .sf-strip {

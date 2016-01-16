@@ -10,6 +10,8 @@ using Signum.Entities.DynamicQuery;
 using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Entities;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Signum.React.ApiControllers
 {
@@ -18,7 +20,7 @@ namespace Signum.React.ApiControllers
         [Route("api/query/findLiteLike"), HttpGet]
         public List<Lite<Entity>> FindLiteLike([FromUri]string types, [FromUri]string subString, [FromUri]int count)
         {
-            var implementations = Implementations.By(types.Split(',').Select(TypeLogic.GetType).ToArray());
+            var implementations = Implementations.By(types.Split(',').Select(a => TypeLogic.GetType(a.Trim())).ToArray());
 
             return AutocompleteUtils.FindLiteLike(implementations, subString, count);
         }
@@ -128,7 +130,7 @@ namespace Signum.React.ApiControllers
             return new QueryRequest
             {
                 QueryName = qn,
-                Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd)).ToList(),
+                Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
                 Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd)).ToList(),
                 Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd)).ToList(),
                 Pagination = this.pagination.ToPagination()
@@ -153,9 +155,17 @@ namespace Signum.React.ApiControllers
         public FilterOperation operation;
         public object value;
 
-        internal Filter ToFilter(QueryDescription qd)
+        internal Filter ToFilter(QueryDescription qd, bool canAggregate)
         {
-            return new Filter(QueryUtils.Parse(token, qd, SubTokensOptions.CanElement), operation, value);
+            var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+            var parsedToken = QueryUtils.Parse(token, qd, options);
+            var expectedValueType = operation == FilterOperation.IsIn ? typeof(IEnumerable<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
+            
+            var val = value is JToken ?
+                 ((JToken)value).ToObject(expectedValueType, JsonSerializer.Create(GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings)) :
+                 value;
+
+            return new Filter(parsedToken, operation, val);
         }
     }
 

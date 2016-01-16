@@ -42,7 +42,7 @@ namespace Signum.React.Json
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            reader.Read();
+            //reader.Read();
             Assert(reader, JsonToken.StartObject);
 
             string toString = null;
@@ -56,7 +56,7 @@ namespace Signum.React.Json
                 switch ((string)reader.Value)
                 {
                     case "toStr": toString = reader.ReadAsString(); break;
-                    case "id": idObj = reader.Value; break;
+                    case "id": idObj = reader.ReadAsString(); break;
                     case "EntityType": typeStr = reader.ReadAsString(); break;
                     case "entity": entity = (Entity)serializer.Deserialize(reader, typeof(Entity)); break;
                     default: throw new InvalidOperationException("unexpected property " + (string)reader.Value);

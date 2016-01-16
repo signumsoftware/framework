@@ -108,7 +108,7 @@ namespace Signum.Entities.DynamicQuery
         public override string NiceName()
         {
             if (!CollectionElementType.IsElement())
-                throw new InvalidOperationException("NiceName not supported for {0}".FormatWith(CollectionElementType));
+                return null;
 
             Type parentElement = elementType.CleanType();
 

@@ -33,6 +33,18 @@ namespace Signum.Entities
         
     }
 
+    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
+    public sealed class ImportInTypeScriptAttribute : Attribute
+    {
+        public Type Type { get; set; }
+        public string ForNamesace { get; set; }
+        public ImportInTypeScriptAttribute(Type type, string forNamespace)
+        {
+            this.Type = type;
+            this.ForNamesace = forNamespace;
+        }
+    }
+
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class CleanTypeNameAttribute: Attribute
     {

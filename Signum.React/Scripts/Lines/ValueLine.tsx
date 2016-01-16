@@ -250,6 +250,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     var momentFormat = toMomentFormat(s.formatText);
 
     var m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601()) : null;
+    var showTime = momentFormat != "L" && momentFormat != "LL";
 
     if (s.ctx.readOnly)
         return <FormGroup ctx={s.ctx} title={s.labelText}>
@@ -258,7 +259,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
 
     return <FormGroup ctx={s.ctx} title={s.labelText}>
          { ValueLine.withUnit(s.unitText,
-            <DateTimePicker value={m && m.toDate() } onChange={vl.handleDatePickerOnChange} format={momentFormat}/>
+            <DateTimePicker value={m && m.toDate() } onChange={vl.handleDatePickerOnChange} format={momentFormat} time={showTime}/>
          ) }
         </FormGroup>;
 };

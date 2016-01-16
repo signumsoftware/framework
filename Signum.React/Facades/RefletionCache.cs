@@ -42,18 +42,29 @@ namespace Signum.React.Facades
                     return GetTypeInfoTS(culture.Parent ?? CultureInfo.GetCultureInfo("en"));
 
                 var result = new Dictionary<string, TypeInfoTS>();
-                result.AddRange(GetEntities(), "typeInfo");
-                result.AddRange(GetSymbolContainers(), "typeInfo");
-                result.AddRange(GetEnums(), "typeInfo");
+
+                var allTypes = GetTypes();
+                result.AddRange(GetEntities(allTypes), "typeInfo");
+                result.AddRange(GetSymbolContainers(allTypes), "typeInfo");
+                result.AddRange(GetEnums(allTypes), "typeInfo");
                 return result;
             });
         }
 
-        private static Dictionary<string, TypeInfoTS> GetEntities()
+        public static IEnumerable<Type> GetTypes()
         {
-            var models = (from a in EntityAssemblies
-                          from type in a.Key.GetTypes()
-                          where typeof(ModelEntity).IsAssignableFrom(type) && !type.IsAbstract && a.Value.Contains(type.Namespace)
+            return EntityAssemblies.SelectMany(kvp =>
+            {
+                var normalTypes = kvp.Key.GetTypes().Where(t => kvp.Value.Contains(t.Namespace));
+                var importedTypes = kvp.Key.GetCustomAttributes<ImportInTypeScriptAttribute>().Where(a => kvp.Value.Contains(a.ForNamesace)).Select(a => a.Type);
+                return normalTypes.Concat(importedTypes).ToList();
+            });
+        }
+
+        private static Dictionary<string, TypeInfoTS> GetEntities(IEnumerable<Type> allTypes)
+        {
+            var models = (from type in allTypes
+                          where typeof(ModelEntity).IsAssignableFrom(type) && !type.IsAbstract
                           select type).ToList();
 
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
@@ -87,12 +98,10 @@ namespace Signum.React.Facades
             return p.PropertyInfo.Name == nameof(Entity.Id) && p.Parent.PropertyRouteType == PropertyRouteType.Root;
         }
 
-        private static Dictionary<string, TypeInfoTS> GetEnums()
+        private static Dictionary<string, TypeInfoTS> GetEnums(IEnumerable<Type> allTypes)
         {
-            var result = (from a in EntityAssemblies
-                          from type in a.Key.GetTypes()
+            var result = (from type in allTypes
                           where type.IsEnum
-                          where a.Value.Contains(type.Namespace)
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                           where descOptions != DescriptionOptions.None
                           let kind = type.Name.EndsWith("Query") ? KindOfType.Query :
@@ -111,12 +120,10 @@ namespace Signum.React.Facades
             return result;
         }
 
-        private static Dictionary<string, TypeInfoTS> GetSymbolContainers()
+        private static Dictionary<string, TypeInfoTS> GetSymbolContainers(IEnumerable<Type> allTypes)
         {
-            var result = (from a in EntityAssemblies
-                          from type in a.Key.GetTypes()
+            var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
-                          where a.Value.Contains(type.Namespace)
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                           where descOptions != DescriptionOptions.None
                           let kind = type.Name.EndsWith("Query") ? KindOfType.Query :
@@ -213,7 +220,7 @@ namespace Signum.React.Facades
             var clean = type == typeof(string) ? type :  (type.ElementType() ?? type);
             this.IsLite = clean.IsLite();
             this.IsNullable = clean.IsNullable();
-            this.IsEnum = clean.IsEnum;
+            this.IsEnum = clean.UnNullify().IsEnum;
             this.IsEmbedded = clean.IsEmbeddedEntity();
             this.Name = implementations?.Key() ?? TypeScriptType(type);
         }
