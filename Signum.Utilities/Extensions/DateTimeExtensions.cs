@@ -390,7 +390,7 @@ namespace Signum.Utilities
         {
             var cc = CultureInfo.CurrentCulture;
 
-            return cc.Calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstDay, cc.DateTimeFormat.FirstDayOfWeek); 
+            return cc.Calendar.GetWeekOfYear(dateTime, cc.DateTimeFormat.CalendarWeekRule, cc.DateTimeFormat.FirstDayOfWeek); 
         }
     }
 

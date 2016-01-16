@@ -991,5 +991,7 @@ namespace Signum.Entities
         _0HasAPrecissionOf1InsteadOf2,
         [Description("{0} should be of type {1}")]
         _0ShouldBeOfType1,
+        [Description("{0} and {1} can not be set at the same time")]
+        _0And1CanNotBeSetAtTheSameTime,
     }
 }
