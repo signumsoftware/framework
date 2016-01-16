@@ -20,7 +20,7 @@ namespace Signum.Entities.DynamicQuery
             get { return queryName; }
         }
 
-        internal ColumnToken(ColumnDescription column, object queryName)
+        public ColumnToken(ColumnDescription column, object queryName)
             : base(null)
         {
             if (column == null)

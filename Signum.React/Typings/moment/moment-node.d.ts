@@ -466,7 +466,7 @@ declare module moment {
         /**
          * Constant used to enable explicit ISO_8601 format parsing.
          */
-        ISO_8601(): void;
+        ISO_8601(): string;
 
         defaultFormat: string;
     }

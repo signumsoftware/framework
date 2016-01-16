@@ -205,7 +205,7 @@ namespace Signum.React.ApiControllers
         public QueryDescriptionTS(QueryDescription queryDescription)
         {
             this.queryKey = QueryUtils.GetKey(queryDescription.QueryName);
-            this.columns = queryDescription.Columns.ToDictionary(a => a.Name, a => new ColumnDescriptionTS(a));
+            this.columns = queryDescription.Columns.ToDictionary(a => a.Name, a => new ColumnDescriptionTS(a, queryDescription.QueryName));
         }
     }
 
@@ -213,27 +213,28 @@ namespace Signum.React.ApiControllers
     {
         public string name;
         public TypeReferenceTS type;
+        public string typeColor; 
+        public string niceTypeName; 
         public FilterType filterType;
         public string unit;
         public string format;
         public string displayName; 
 
-        public ColumnDescriptionTS(ColumnDescription a)
+        public ColumnDescriptionTS(ColumnDescription a, object queryName)
         {
+            var token = new ColumnToken(a, queryName);
+
             this.name = a.Name;
             this.type = new TypeReferenceTS(a.Type, a.Implementations);
             this.filterType = QueryUtils.GetFilterType(a.Type);
+            this.typeColor = token.TypeColor;
+            this.niceTypeName = token.NiceTypeName;
             this.unit = a.Unit;
             this.format = a.Format;
             this.displayName = a.DisplayName;
         }
     }
-
- 
-
-
-
-
+    
     public class QueryTokenTS
     {
         public QueryTokenTS(QueryToken qt, bool recursive)
@@ -246,6 +247,8 @@ namespace Signum.React.ApiControllers
             this.filterType = QueryUtils.TryGetFilterType(qt.Type);
             this.format = qt.Format;
             this.unit = qt.Unit;
+            this.typeColor = qt.TypeColor;
+            this.niceTypeName = qt.NiceTypeName;
             if (recursive && qt.Parent != null)
                 this.parent = new QueryTokenTS(qt.Parent, recursive);
         }
@@ -254,6 +257,8 @@ namespace Signum.React.ApiControllers
         public string niceName;
         public string key;
         public string fullKey;
+        public string typeColor;
+        public string niceTypeName;
         public TypeReferenceTS type;
         public FilterType? filterType;
         public string format;

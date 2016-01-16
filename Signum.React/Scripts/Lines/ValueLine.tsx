@@ -75,7 +75,9 @@ export class ValueLine extends LineBase<ValueLineProps> {
     };
 
     handleDatePickerOnChange = (date: Date, str: string) => {
-        this.state.ctx.value = str;
+
+        var m = moment(date);
+        this.state.ctx.value = m.isValid() ? m.format(moment.ISO_8601()) : null;
         this.forceUpdate();
     };
 
@@ -245,16 +247,18 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
 
     var s = vl.state;
 
+    var momentFormat = toMomentFormat(s.formatText);
+
+    var m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601()) : null;
+
     if (s.ctx.readOnly)
         return <FormGroup ctx={s.ctx} title={s.labelText}>
-             { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{moment(s.ctx.value).format(toMomentFormat(s.formatText)) }</FormControlStatic>) }
+             { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
             </FormGroup>;
 
     return <FormGroup ctx={s.ctx} title={s.labelText}>
          { ValueLine.withUnit(s.unitText,
-             <DateTimePicker value={s.ctx.value} onChange={vl.handleDatePickerOnChange} format={toMomentFormat(s.formatText) }/>
-             //<input type="text" className="form-control" value={s.ctx.value} onChange={vl.handleInputOnChange}
-             //    placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>
+            <DateTimePicker value={m && m.toDate() } onChange={vl.handleDatePickerOnChange} format={momentFormat}/>
          ) }
         </FormGroup>;
 };

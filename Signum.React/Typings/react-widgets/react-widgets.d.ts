@@ -15,12 +15,12 @@ declare module ReactWidgets {
         data?: any[];
         valueField?: string;
         textField?: string | ((value: any) => string);
-        valueComponent?: React.ReactElement<any>;
-        itemComponent?: React.ReactElement<any>;
+        valueComponent?: React.ComponentClass<any>;
+        itemComponent?: React.ComponentClass<any>;
         disabled?: boolean | any[];
         readonly?: boolean | any[];
         groupBy?: string | ((value: any) => string);
-        groupComponent?: React.ReactElement<any>;
+        groupComponent?: React.ComponentClass<any>;
         placeholder?: string;
         searchTerm?: string;
         onSearch?: (searchTerm: string) => void;
@@ -52,11 +52,11 @@ declare module ReactWidgets {
         data?: any[];
         valueField?: string;
         textField?: string | ((value: any) => string);
-        itemComponent?: React.ReactElement<any>;
+        itemComponent?: React.ComponentClass<any>;
         disabled?: boolean | any[];
         readonly?: boolean | any[];
         groupBy?: string | ((value: any) => string);
-        groupComponent?: React.ReactElement<any>;
+        groupComponent?: React.ComponentClass<any>;
         suggest?: boolean;
         filter?: boolean | string | ((dataItem: any, searchTerm: string) => boolean);
         caseSensitive?: boolean;
@@ -103,10 +103,10 @@ declare module ReactWidgets {
         data?: any[];
         valueField?: string; //id
         textField?: string | ((value: any) => string); //description
-        tagComponent?: React.ReactElement<any>;
-        itemComponent?: React.ReactElement<any>;
+        tagComponent?: React.ComponentClass<any>;
+        itemComponent?: React.ComponentClass<any>;
         groupBy?: string | ((value: any) => string); 
-        groupComponent?: React.ReactElement<any>;
+        groupComponent?: React.ComponentClass<any>;
         placeholder?: string;
         searchTerm?: string;
         onSearch?: (searchTerm: string) => void;
@@ -137,9 +137,9 @@ declare module ReactWidgets {
         valueField?: string; //id
         textField?: string | ((value: any) => string); //description
         multiple?: boolean;
-        itemComponent?: React.ReactElement<any>;
+        itemComponent?: React.ComponentClass<any>;
         groupBy?: string | ((value: any) => string);
-        groupComponent?: React.ReactElement<any>;
+        groupComponent?: React.ComponentClass<any>;
         onMove?: (list: HTMLElement, focusedNode: HTMLElement, focusedItem: any) => void;
         busy?: boolean;
         duration?: number;
@@ -161,7 +161,7 @@ declare module ReactWidgets {
         min?: Date;
         max?: Date;
         footer?: boolean;
-        dayComponent?: React.ReactElement<any>;
+        dayComponent?: React.ComponentClass<any>;
         initalView?: string; //"month" | "year" | "decade" | "century";
         finalView?: string; //"month" | "year" | "decade" | "century";
         headerFormat?: string; 
@@ -198,7 +198,7 @@ declare module ReactWidgets {
         step?: number; //minutes
         parse?: ((str: string) => Date) | string[];
         footer?: boolean;
-        dayComponent?: React.ReactElement<any>;
+        dayComponent?: React.ComponentClass<any>;
         initalView?: string; //"month" | "year" | "decade" | "century";
         finalView?: string; //"month" | "year" | "decade" | "century";
         open?: boolean | string; //false "calendar" "time"

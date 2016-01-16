@@ -83,6 +83,8 @@ export interface QueryToken {
     format?: string;
     unit?: string;
     type: TypeReference;
+    typeColor: string;
+    niceTypeName: string;
     filterType: FilterType;
     fullKey: string;
     hasAllOrAny?: boolean;
@@ -98,6 +100,8 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
         unit: cd.unit,
         format: cd.format,
         type: cd.type,
+        typeColor: cd.typeColor,
+        niceTypeName: cd.niceTypeName,
         filterType: cd.filterType,
     };
 }
@@ -167,6 +171,8 @@ export interface ColumnDescription {
     name: string;
     type: TypeReference;
     filterType: FilterType;
+    typeColor: string;
+    niceTypeName: string;
     unit?: string;
     format?: string;
     displayName: string;

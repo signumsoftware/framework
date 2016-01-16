@@ -122,6 +122,14 @@ span.token-builder > select.form-control
     margin: 2px 0px;
 }
 
+.sf-query-token-part  {
+    display: inline-block;
+}
+
+    .sf-query-token-part .rw-popup-container {
+        min-width: 200px;
+    }
+
 .sf-filters-body .btn-sm
 {
     margin-top: -2px;

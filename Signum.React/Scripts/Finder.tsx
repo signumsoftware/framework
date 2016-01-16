@@ -2,9 +2,16 @@
 import * as moment from "moment"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { ajaxGet, ajaxPost } from 'Framework/Signum.React/Scripts/Services';
-import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation, QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn, ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions } from 'Framework/Signum.React/Scripts/FindOptions';
+
+import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation,
+QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn,
+ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken } from 'Framework/Signum.React/Scripts/FindOptions';
+
 import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from 'Framework/Signum.React/Scripts/Signum.Entities';
-import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference, getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from 'Framework/Signum.React/Scripts/Reflection';
+
+import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference,
+getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from 'Framework/Signum.React/Scripts/Reflection';
+
 import {navigateRoute, isNavigable, currentHistory, asyncLoad } from 'Framework/Signum.React/Scripts/Navigator';
 import { Link  } from 'react-router';
 
@@ -130,24 +137,11 @@ class TokenCompleter {
             .then(token => { tokenContainer.token = token; });
     }
 
-    simpleQueryToken(queryColumn: ColumnDescription): QueryToken {
-
-        return {
-            type: queryColumn.type,
-            format: queryColumn.format,
-            niceName: queryColumn.displayName,
-            fullKey: queryColumn.name,
-            key: queryColumn.name,
-            unit: queryColumn.unit,
-            toString: queryColumn.displayName,
-            filterType: queryColumn.filterType,
-        };
-    }
 
     request(fullKey: string, options: SubTokensOptions): Promise<QueryToken> {
 
         if (!fullKey.contains("."))
-            return API.getQueryDescription(this.queryName).then(qd=> this.simpleQueryToken(qd.columns[fullKey]));
+            return API.getQueryDescription(this.queryName).then(qd=> toQueryToken(qd.columns[fullKey]));
 
         var bucket = this.tokensToRequest[fullKey];
 

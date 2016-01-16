@@ -536,8 +536,8 @@ function classes(...classNames: string[]) {
 
 declare module moment {
     interface Moment {
-        fromUserInterface();
-        toUserInterface();
+        fromUserInterface(): Moment;
+        toUserInterface(): Moment;
         
     }
 
@@ -560,3 +560,13 @@ function asumeGlobalUtcMode(moment: moment.MomentStatic, utcMode: boolean) {
         moment.smartNow = function () { return moment(); };
     }
 }
+
+function areEqual<T>(a: T, b: T, field: (value: T) => any) {
+    if (a == null)
+        return b == null;
+
+    if (b == null)
+        return false;
+
+    return field(a) == field(b);
+} 

@@ -174,6 +174,7 @@ namespace Signum.Test.LinqProvider
             if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
                 return;
 
+
             var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
  
             Debug.WriteLine(nodes.Select(n => n.GetAncestor(0).InSql()).ToString(", "));
