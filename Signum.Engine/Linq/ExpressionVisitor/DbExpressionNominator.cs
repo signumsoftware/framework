@@ -966,6 +966,21 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitMember(MemberExpression m)
         {
+            if (m.Expression.Type.Namespace == "System.Data.SqlTypes" && (m.Member.Name == "Value" || m.Member.Name == "IsNull"))
+            {
+                Expression expression = this.Visit(m.Expression);
+                Expression nullable;
+                if (m.Member.Name == "Value")
+                    nullable = Expression.Convert(expression, m.Type.UnNullify());
+                else
+                    nullable = new IsNullExpression(expression);
+
+                if (Has(expression))
+                    return Add(nullable);
+
+                return nullable;
+            }
+
             if (m.Expression.Type.IsNullable() && (m.Member.Name == "Value" || m.Member.Name == "HasValue"))
             {
                 Expression expression = this.Visit(m.Expression);
