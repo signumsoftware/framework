@@ -544,6 +544,21 @@ export namespace DynamicQuery {
     
 }
 
+export namespace External {
+
+    export enum DayOfWeek {
+        Sunday = "Sunday" as any,
+        Monday = "Monday" as any,
+        Tuesday = "Tuesday" as any,
+        Wednesday = "Wednesday" as any,
+        Thursday = "Thursday" as any,
+        Friday = "Friday" as any,
+        Saturday = "Saturday" as any,
+    }
+    export const DayOfWeek_Type = new EnumType<DayOfWeek>("DayOfWeek", DayOfWeek);
+    
+}
+
 export namespace Patterns {
 
     export module EntityMessage {

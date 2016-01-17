@@ -15,12 +15,14 @@ namespace Signum.TSGenerator
         {
             public Type ModifiableEntity;
             public Type InTypeScriptAttribute;
+            public Type ImportInTypeScriptAttribute;
             public Type IEntity;
 
             public TypeCache(Assembly entities)
             {
                 ModifiableEntity = entities.GetType("Signum.Entities.ModifiableEntity", throwOnError: true);
                 InTypeScriptAttribute = entities.GetType("Signum.Entities.InTypeScriptAttribute", throwOnError: true);
+                ImportInTypeScriptAttribute = entities.GetType("Signum.Entities.ImportInTypeScriptAttribute", throwOnError: true);
                 IEntity = entities.GetType("Signum.Entities.IEntity", throwOnError: true);
             }
         }
@@ -37,7 +39,8 @@ namespace Signum.TSGenerator
             Cache = new TypeCache(entities);
 
             var exportedTypes = assembly.ExportedTypes.Where(a => a.Namespace.StartsWith(options.BaseNamespace)).ToList();
-
+            var imported = assembly.GetCustomAttributes(Cache.ImportInTypeScriptAttribute).Select(a => (Type)((dynamic)a).Type).ToList();
+            
             var entityResults = (from type in exportedTypes
                                  where type.IsClass && (type.InTypeScript() ?? Cache.ModifiableEntity.IsAssignableFrom(type))
                                  select new
@@ -74,8 +77,7 @@ namespace Signum.TSGenerator
                                  }).ToList();
 
             var enumResult = (from type in exportedTypes
-                              where type.IsEnum &&
-                              (type.InTypeScript() ?? usedEnums.Contains(type))
+                              where type.IsEnum && (type.InTypeScript() ??  usedEnums.Contains(type))
                               select new
                               {
                                   ns = type.Namespace,
@@ -83,7 +85,7 @@ namespace Signum.TSGenerator
                                   text = EnumInTypeScript(type, options),
                               }).ToList();
 
-            var extrnalEnums = (from type in usedEnums
+            var extrnalEnums = (from type in usedEnums.Concat(imported)
                                 where options.IsExternal(type)
                                 select new
                                 {

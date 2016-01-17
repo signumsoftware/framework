@@ -382,6 +382,9 @@ namespace Signum.Utilities
             if (def != null)
                 return type.IsGenericTypeDefinition ? def.Value & DescriptionOptions.Members : def.Value;
 
+            if (type == typeof(DayOfWeek))
+                return DescriptionOptions.Members;
+
             return DescriptionOptions.None;
         }
 

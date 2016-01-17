@@ -303,7 +303,7 @@ Array.prototype.remove = function (element) {
 };
 
 Array.prototype.insertAt = function (index, element) {
-    (this as Array<any>).splice(0, 0, element);
+    (this as Array<any>).splice(index, 0, element);
 };
 
 interface ArrayConstructor {

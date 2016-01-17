@@ -67,6 +67,7 @@ export interface LineBaseProps {
     labelText?: string;
     visible?: boolean;
     hideIfNull?: boolean;
+    onValueChanged?: (val: any) => void;
 }
 
 export abstract class LineBase<P extends LineBaseProps> extends React.Component<P, P> {
@@ -81,6 +82,10 @@ export abstract class LineBase<P extends LineBaseProps> extends React.Component<
         this.setState(this.calculateState(nextProps));
     }
 
+    setValue(val: any) {
+        this.props.ctx.value = val;
+        this.forceUpdate();
+    }
 
     render() {
 
