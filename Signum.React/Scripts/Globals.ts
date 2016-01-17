@@ -125,6 +125,7 @@ interface Array<T> {
     remove(element: T): boolean;
     removeAt(index: number);
     insertAt(index: number, element: T);
+    clone(): T[];
 }
 
 
@@ -304,6 +305,10 @@ Array.prototype.remove = function (element) {
 
 Array.prototype.insertAt = function (index, element) {
     (this as Array<any>).splice(index, 0, element);
+};
+
+Array.prototype.clone = function () {
+    return (this as Array<any>).slice(0);
 };
 
 interface ArrayConstructor {
