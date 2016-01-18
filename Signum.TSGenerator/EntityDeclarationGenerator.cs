@@ -40,7 +40,9 @@ namespace Signum.TSGenerator
 
             var exportedTypes = assembly.ExportedTypes.Where(a => a.Namespace.StartsWith(options.BaseNamespace)).ToList();
             var imported = assembly.GetCustomAttributes(Cache.ImportInTypeScriptAttribute).Select(a => (Type)((dynamic)a).Type).ToList();
-            
+            var importedMessage = imported.Where(a => a.Name.EndsWith("Message")).ToList();
+            var importedEnums = imported.Except(importedMessage).ToList();
+
             var entityResults = (from type in exportedTypes
                                  where type.IsClass && (type.InTypeScript() ?? Cache.ModifiableEntity.IsAssignableFrom(type))
                                  select new
@@ -85,14 +87,21 @@ namespace Signum.TSGenerator
                                   text = EnumInTypeScript(type, options),
                               }).ToList();
 
-            var extrnalEnums = (from type in usedEnums.Concat(imported)
-                                where options.IsExternal(type)
+            var extrnalEnums = (from type in usedEnums.Where(options.IsExternal).Concat(importedEnums)
                                 select new
                                 {
                                     ns = options.BaseNamespace + ".External",
                                     type,
                                     text = EnumInTypeScript(type, options),
                                 }).ToList();
+
+            var externalMessages = (from type in importedMessage
+                                    select new
+                                    {
+                                        ns = options.BaseNamespace + ".External",
+                                        type,
+                                        text = MessageInTypeScript(type, options),
+                                    }).ToList(); 
 
             var messageResults = (from type in exportedTypes
                                   where type.IsEnum && type.Name.EndsWith("Message")
@@ -119,6 +128,7 @@ namespace Signum.TSGenerator
                 .Concat(queryResult)
                 .Concat(symbolResults)
                 .Concat(extrnalEnums)
+                .Concat(externalMessages)
                 .GroupBy(a => a.ns)
                 .OrderBy(a => a.Key);
 

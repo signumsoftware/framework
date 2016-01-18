@@ -548,6 +548,13 @@ export namespace DynamicQuery {
 
 export namespace External {
 
+    export module CollectionMessage {
+        export const And = new MessageKey("CollectionMessage", "And");
+        export const Or = new MessageKey("CollectionMessage", "Or");
+        export const No0Found = new MessageKey("CollectionMessage", "No0Found");
+        export const MoreThanOne0Found = new MessageKey("CollectionMessage", "MoreThanOne0Found");
+    }
+    
     export enum DayOfWeek {
         Sunday = "Sunday" as any,
         Monday = "Monday" as any,

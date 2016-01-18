@@ -31,3 +31,4 @@ using System;
 [assembly: DefaultAssemblyCulture("en")]
 
 [assembly: ImportInTypeScript(typeof(DayOfWeek), "Signum.Entities")]
+[assembly: ImportInTypeScript(typeof(CollectionMessage), "Signum.Entities")]

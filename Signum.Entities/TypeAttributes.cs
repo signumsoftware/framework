@@ -33,7 +33,7 @@ namespace Signum.Entities
         
     }
 
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class ImportInTypeScriptAttribute : Attribute
     {
         public Type Type { get; set; }
