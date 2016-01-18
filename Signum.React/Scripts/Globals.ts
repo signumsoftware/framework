@@ -138,6 +138,7 @@ interface Array<T> {
     removeAt(index: number);
     insertAt(index: number, element: T);
     clone(): T[];
+    joinComma(lastSeparator: string);
 }
 
 
@@ -321,6 +322,22 @@ Array.prototype.insertAt = function (index, element) {
 
 Array.prototype.clone = function () {
     return (this as Array<any>).slice(0);
+};
+
+Array.prototype.joinComma = function (lastSeparator: string) {
+    var array = this as any[];
+
+    if (array.length == 0)
+        return "";
+
+    if (array.length == 1)
+        return array[0] == null ? "" : array[0].toString(); 
+
+    var lastIndex = array.length - 1;
+
+    var rest = array.slice(0, lastIndex).join(", ");
+
+    return rest + lastSeparator + (array[lastIndex] == null ? "" : array[lastIndex].toString()); 
 };
 
 interface ArrayConstructor {
@@ -537,6 +554,7 @@ String.prototype.firstUpper = function () {
 String.prototype.firstLower = function () {
     return (this[0] as string).toLowerCase() + this.substring(1);
 };
+
 
 if (typeof String.prototype.trim !== 'function') {
     String.prototype.trim = function () {
