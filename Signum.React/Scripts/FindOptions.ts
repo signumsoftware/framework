@@ -88,8 +88,23 @@ export interface QueryToken {
     niceTypeName: string;
     filterType: FilterType;
     fullKey: string;
-    hasAllOrAny?: boolean;
+    queryTokenType?: QueryTokenType;
     parent?: QueryToken;
+}
+
+export enum QueryTokenType {
+    Aggregate = "Aggregate" as any,
+    Element = "Element" as any,
+    AnyOrAll = "AnyOrAll" as any,
+}
+
+export function getTokenParents(token: QueryToken): QueryToken[] {
+    var result = [];
+    while (token != null) {
+        result.insertAt(0, token);
+        token = token.parent;
+    }
+    return result;
 }
 
 export function toQueryToken(cd: ColumnDescription): QueryToken {

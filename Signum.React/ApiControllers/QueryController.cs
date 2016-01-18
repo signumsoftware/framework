@@ -259,8 +259,31 @@ namespace Signum.React.ApiControllers
             this.unit = qt.Unit;
             this.typeColor = qt.TypeColor;
             this.niceTypeName = qt.NiceTypeName;
+            this.queryTokenType = GetQueryTokenType(qt);
             if (recursive && qt.Parent != null)
                 this.parent = new QueryTokenTS(qt.Parent, recursive);
+        }
+
+        private QueryTokenType? GetQueryTokenType(QueryToken qt)
+        {
+            if (qt is AggregateToken)
+                return QueryTokenType.Aggregate;
+
+            var ce = qt as CollectionElementToken;
+            if (ce != null)
+            {
+                switch (ce.CollectionElementType)
+                {
+                    case CollectionElementType.Element:
+                    case CollectionElementType.Element2:
+                    case CollectionElementType.Element3:
+                        return QueryTokenType.Element;
+                    default:
+                        return QueryTokenType.AnyOrAll;
+                }
+            }
+
+            return null;
         }
 
         public string toString;
@@ -269,10 +292,18 @@ namespace Signum.React.ApiControllers
         public string fullKey;
         public string typeColor;
         public string niceTypeName;
+        public QueryTokenType? queryTokenType; 
         public TypeReferenceTS type;
         public FilterType? filterType;
         public string format;
         public string unit;
         public QueryTokenTS parent; 
+    }
+
+    public enum QueryTokenType
+    {
+        Aggregate,
+        Element,
+        AnyOrAll, 
     }
 }
