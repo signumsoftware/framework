@@ -228,6 +228,8 @@ Lose changes?")]
         openTab,
         [Description("Rename column")]
         renameColumn,
+        [Description("Edit column")]
+        editColumn,
         [Description("Enter the new column name")]
         enterTheNewColumnName,
         [Description("Error")]

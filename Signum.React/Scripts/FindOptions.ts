@@ -28,6 +28,7 @@ export interface FindOptions {
     showFilters?: boolean;
     showFilterButton?: boolean;
     showFooter?: boolean;
+    allowChangeColumns?: boolean;
     create?: boolean;
     navigate?: boolean;
     contextMenu?: boolean;

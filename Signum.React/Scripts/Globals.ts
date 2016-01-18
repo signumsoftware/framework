@@ -101,6 +101,18 @@ module Dic {
 
         return out;
     };
+
+     /**  Waiting for https://github.com/Microsoft/TypeScript/issues/2103 */
+    export function without<T>(obj: T, toRemove: {}) : T {
+        var result = {};
+
+        for (var key in obj) {
+            if (toRemove.hasOwnProperty(key) && !toRemove.hasOwnProperty(key))
+                result[key] = obj[key];
+        }
+
+        return result as T;
+    }
 }
 
 interface Array<T> {
@@ -574,4 +586,54 @@ function areEqual<T>(a: T, b: T, field: (value: T) => any) {
         return false;
 
     return field(a) == field(b);
-} 
+}
+
+
+module DomUtils {
+    export function matches(elem: HTMLElement, selector: string): boolean
+    {
+        // Vendor-specific implementations of `Element.prototype.matches()`.
+        var proto = Element.prototype as any;
+        var nativeMatches = proto.matches ||
+            proto.webkitMatchesSelector ||
+            proto.mozMatchesSelector ||
+            proto.msMatchesSelector ||
+            proto.oMatchesSelector;
+
+        if (!elem || elem.nodeType !== 1) {
+            return false;
+        }
+
+        var parentElem = elem.parentNode as HTMLElement;
+
+        // use native 'matches'
+        if (nativeMatches) {
+            return nativeMatches.call(elem, selector);
+        }
+
+        // native support for `matches` is missing and a fallback is required
+        var nodes = parentElem.querySelectorAll(selector);
+        var len = nodes.length;
+
+        for (var i = 0; i < len; i++) {
+            if (nodes[i] === elem) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    export function closest(element: HTMLElement, selector: string, context?: Node): HTMLElement {
+        context = context || document;
+        // guard against orphans
+        while (!matches(element, selector)) {
+            if (element == context)
+                return null;
+
+            element = element.parentNode as HTMLElement;
+        }
+
+        return element;
+    }
+}

@@ -79,6 +79,7 @@ export function findOptionsPath(queryName: any): string
         showFilters: fo.showFilters,
         showFooter: fo.showFooter,
         showHeader: fo.showHeader,
+        allowChangeColumns: fo.allowChangeColumns,
     };
 
     return currentHistory.createPath("/Find/" + getQueryKey(fo.queryName), query);

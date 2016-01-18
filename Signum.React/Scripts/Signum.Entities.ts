@@ -150,6 +150,7 @@ export module JavascriptMessage {
     export const addFilter = new MessageKey("JavascriptMessage", "addFilter");
     export const openTab = new MessageKey("JavascriptMessage", "openTab");
     export const renameColumn = new MessageKey("JavascriptMessage", "renameColumn");
+    export const editColumn = new MessageKey("JavascriptMessage", "editColumn");
     export const enterTheNewColumnName = new MessageKey("JavascriptMessage", "enterTheNewColumnName");
     export const error = new MessageKey("JavascriptMessage", "error");
     export const executed = new MessageKey("JavascriptMessage", "executed");
