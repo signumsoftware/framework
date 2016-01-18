@@ -256,6 +256,8 @@ Lose changes?")]
         popupErrors,
         [Description("There are errors in the entity")]
         popupErrorsStop,
+        [Description("Insert column")]
+        insertColumn,
         [Description("Remove column")]
         removeColumn,
         [Description("Move left")]

@@ -81,6 +81,11 @@ div.sf-pagination-right > ul.pagination {
     margin: 3px 0px;
 }
 
+.sf-column-editor {
+    background: #eee;
+    padding: 8px;
+    border-radius: 4px;
+}
 
 
 .sf-search-results-container {

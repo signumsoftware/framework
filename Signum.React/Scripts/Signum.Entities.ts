@@ -164,6 +164,7 @@ export module JavascriptMessage {
     export const selectOnlyOneElement = new MessageKey("JavascriptMessage", "selectOnlyOneElement");
     export const popupErrors = new MessageKey("JavascriptMessage", "popupErrors");
     export const popupErrorsStop = new MessageKey("JavascriptMessage", "popupErrorsStop");
+    export const insertColumn = new MessageKey("JavascriptMessage", "insertColumn");
     export const removeColumn = new MessageKey("JavascriptMessage", "removeColumn");
     export const reorderColumn_MoveLeft = new MessageKey("JavascriptMessage", "reorderColumn_MoveLeft");
     export const reorderColumn_MoveRight = new MessageKey("JavascriptMessage", "reorderColumn_MoveRight");
