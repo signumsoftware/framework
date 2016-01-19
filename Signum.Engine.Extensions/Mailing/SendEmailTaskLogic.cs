@@ -87,7 +87,7 @@ namespace Signum.Engine.Mailing
                 {
                     if (er.UniqueTarget != null)
                     {
-                        var email = EmailTemplateLogic.CreateEmailMessage(er.EmailTemplate, er.UniqueTarget?.Retrieve()).SingleEx();
+                        var email = er.EmailTemplate.CreateEmailMessage(er.UniqueTarget?.Retrieve()).SingleEx();
                         email.SendMailAsync();
                         return email.ToLite();
                     }
