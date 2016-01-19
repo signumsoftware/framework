@@ -1263,10 +1263,10 @@
     <Member Name="ScheduleRuleWeekDaysDN_At" Description="an" />
     <Member Name="ScheduleRuleWeekDaysDN_ButHoliday" Description="aber Feiertage" />
     <Member Name="ScheduleRuleWeekDaysDN_Calendar" Description="Kalender" />
-    <Member Name="ScheduleRuleWeekDaysDN_F" Description="F" />
+    <Member Name="ScheduleRuleWeekDaysDN_F" Description="Fr" />
     <Member Name="ScheduleRuleWeekDaysDN_Friday" Description="Freitag" />
     <Member Name="ScheduleRuleWeekDaysDN_Holiday" Description="Feiertag" />
-    <Member Name="ScheduleRuleWeekDaysDN_M" Description="M" />
+    <Member Name="ScheduleRuleWeekDaysDN_M" Description="Mo" />
     <Member Name="ScheduleRuleWeekDaysDN_Monday" Description="Montag" />
     <Member Name="ScheduleRuleWeekDaysDN_S" Description="So" />
     <Member Name="ScheduleRuleWeekDaysDN_Sa" Description="Sa" />
@@ -1276,7 +1276,7 @@
     <Member Name="ScheduleRuleWeekDaysDN_Th" Description="Do" />
     <Member Name="ScheduleRuleWeekDaysDN_Thursday" Description="Donnerstag" />
     <Member Name="ScheduleRuleWeekDaysDN_Tuesday" Description="Dienstag" />
-    <Member Name="ScheduleRuleWeekDaysDN_W" Description="M" />
+    <Member Name="ScheduleRuleWeekDaysDN_W" Description="Mi" />
     <Member Name="ScheduleRuleWeekDaysDN_Wednesday" Description="Mittwoch" />
     <Member Name="ScheduleRuleWeekDaysEntity" Description="Tage der Woche" />
     <Member Name="ScheduleRuleWeeklyDN_DayOfTheWeek" Description="Tag der Woche" />

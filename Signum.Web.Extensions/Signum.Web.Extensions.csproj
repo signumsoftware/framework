@@ -856,16 +856,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ScheduledTask.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\ScheduleRuleDaily.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ScheduleRuleDaily.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Scheduler\Views\ScheduleRuleHourly.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ScheduleRuleHourly.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Scheduler\Views\ScheduleRuleMinutely.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -876,10 +866,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ScheduleRuleWeekDays.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\ScheduleRuleWeekly.generated.cs">
+    <Compile Include="Scheduler\Views\ScheduleRuleMonths.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ScheduleRuleWeekly.cshtml</DependentUpon>
+      <DependentUpon>ScheduleRuleMonths.cshtml</DependentUpon>
     </Compile>
     <Compile Include="SMS\Controllers\SMSController.cs" />
     <Compile Include="SMS\SMSClient.cs" />
@@ -1596,10 +1586,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduleRuleMinutely.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Scheduler\Views\ScheduleRuleHourly.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ScheduleRuleHourly.generated.cs</LastGenOutput>
-    </Content>
     <Content Include="Scheduler\Views\SimpleTask.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SimpleTask.generated.cs</LastGenOutput>
@@ -1608,17 +1594,13 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SchedulerPanel.generated.cs</LastGenOutput>
     </Content>
-    <None Include="Scheduler\Views\ScheduleRuleDaily.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ScheduleRuleDaily.generated.cs</LastGenOutput>
-    </None>
     <None Include="Scheduler\Views\ScheduleRuleWeekDays.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduleRuleWeekDays.generated.cs</LastGenOutput>
     </None>
-    <None Include="Scheduler\Views\ScheduleRuleWeekly.cshtml">
+    <None Include="Scheduler\Views\ScheduleRuleMonths.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ScheduleRuleWeekly.generated.cs</LastGenOutput>
+      <LastGenOutput>ScheduleRuleMonths.generated.cs</LastGenOutput>
     </None>
     <None Include="Scheduler\Views\ScheduledTask.cshtml">
       <Generator>RazorGenerator</Generator>
