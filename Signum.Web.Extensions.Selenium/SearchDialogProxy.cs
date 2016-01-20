@@ -116,14 +116,14 @@ namespace Signum.Web.Selenium
             this.SearchControl = new SearchControlProxy(selenium, "");
         }
 
-        public NormalPage<T> Create<T>() where T : ModifiableEntity
+        public PopupControl<T> Create<T>() where T : ModifiableEntity
         {
             Selenium.FindElement(SearchControl.CreateButtonLocator).Click();
 
-            return new NormalPage<T>(Selenium).WaitLoaded();
+            return new PopupControl<T>(Selenium, "Temp").WaitVisible();
         }
-
-        public NormalPage<T> CreateChoose<T>() where T : ModifiableEntity
+        
+        public PopupControl<T> CreateChoose<T>() where T : ModifiableEntity
         {
             Selenium.FindElement(SearchControl.CreateButtonLocator).Click();
 
@@ -135,7 +135,7 @@ namespace Signum.Web.Selenium
 
             ChooserPopup.ChooseButton(Selenium, SearchControl.Prefix, typeof(T));
 
-            return new NormalPage<T>(Selenium).WaitLoaded();
+            return new PopupControl<T>(Selenium, "Temp").WaitVisible();
         }
 
         public void Dispose()
@@ -648,13 +648,25 @@ namespace Signum.Web.Selenium
             return RowLocator(rowIndex).CombineCss(" > td:nth-child({0}) > a".FormatWith(allowSelection ? 2 : 1));
         }
 
-        public NormalPage<T> EntityClick<T>(Lite<T> lite, bool allowSelection = true) where T : Entity
+        public PopupControl<T> EntityClick<T>(Lite<T> lite, bool allowSelection = true) where T : Entity
+        {
+            Selenium.FindElement(EntityLinkLocator(lite, allowSelection)).Click();
+            return new PopupControl<T>(Selenium, this.PrefixUnderscore + "nav").WaitVisible();
+        }
+
+        public PopupControl<T> EntityClick<T>(int rowIndex, bool allowSelection = true) where T : Entity
+        {
+            Selenium.FindElement(EntityLinkLocator(rowIndex, allowSelection)).Click();
+            return new PopupControl<T>(Selenium, this.PrefixUnderscore + "nav").WaitVisible();
+        }
+
+        public NormalPage<T> EntityClickNormalPage<T>(Lite<T> lite, bool allowSelection = true) where T : Entity
         {
             Selenium.FindElement(EntityLinkLocator(lite, allowSelection)).Click();
             return new NormalPage<T>(Selenium).WaitLoaded();
         }
 
-        public NormalPage<T> EntityClick<T>(int rowIndex, bool allowSelection = true) where T : Entity
+        public NormalPage<T> EntityClickNormalPage<T>(int rowIndex, bool allowSelection = true) where T : Entity
         {
             Selenium.FindElement(EntityLinkLocator(rowIndex, allowSelection)).Click();
             return new NormalPage<T>(Selenium).WaitLoaded();
