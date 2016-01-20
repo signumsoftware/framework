@@ -312,11 +312,7 @@ export function reloadMain(entityHtml: Entities.EntityHtml) {
 
 export function closePopup(prefix: string): void {
 
-    var tempDivId = prefix.child("Temp");
-
-    var tempDiv = $("#" + tempDivId);
-
-    tempDiv.modal("hide");//should remove automatically
+    prefix.child("panelPopup").get().modal("hide"); //should remove automatically
 }
 
 export function reloadPopup(entityHtml: Entities.EntityHtml) {
