@@ -18,38 +18,15 @@ namespace Signum.Engine
     {
         public static Func<SchemaName, bool> DropSchema = s => !s.Name.Contains(@"\"); 
 
-        public static SqlPreCommand SynchronizeSchemasScript(Replacements replacements)
-        {
-            HashSet<SchemaName> model = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
-            HashSet<SchemaName> database = new HashSet<SchemaName>();
-            foreach (var db in Schema.Current.DatabaseNames())
-            {
-                using (Administrator.OverrideDatabaseInSysViews(db))
-                {
-                    var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(SqlBuilder.SystemSchemas);
-
-                    database.AddRange(schemaNames.Select(sn => new SchemaName(db, sn)));
-                }
-            }
-
-            using (replacements.WithReplacedDatabaseName())
-                return Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas",
-                    model.ToDictionary(a => a.ToString()),
-                    database.ToDictionary(a => a.ToString()),
-                    (_, newSN) => SqlBuilder.CreateSchema(newSN),
-                    (_, oldSN) => DropSchema(oldSN) ? SqlBuilder.DropSchema(oldSN) :  null,
-                    (_, newSN, oldSN) => newSN.Equals(oldSN) ? null :
-                        SqlPreCommand.Combine(Spacing.Simple, SqlBuilder.DropSchema(oldSN), SqlBuilder.CreateSchema(newSN)),
-                    Spacing.Double);
-        }
-
         public static Action<Dictionary<string, DiffTable>> SimplifyDiffTables; 
 
         public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
         {
             Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables().ToDictionary(a => a.Name.ToString(), "schema tables");
+            HashSet<SchemaName> modelSchemas = Schema.Current.GetDatabaseTables().Select(a => a.Name.Schema).Where(a => !SqlBuilder.SystemSchemas.Contains(a.Name)).ToHashSet();
 
             Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(Schema.Current.DatabaseNames());
+            HashSet<SchemaName> databaseSchemas = DefaultGetSchemas(Schema.Current.DatabaseNames());
 
             if (SimplifyDiffTables != null) 
                 SimplifyDiffTables(database);
@@ -88,9 +65,19 @@ namespace Signum.Engine
 
                 return !dixColumns.All(kvp => dif.Columns.GetOrThrow(kvp.Key).ColumnEquals(mix.Columns.SingleEx(c => c.Name == kvp.Key), ignorePrimaryKey: true));
             };
+            
+              
 
             using (replacements.WithReplacedDatabaseName())
             {
+                SqlPreCommand createSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas",
+                    modelSchemas.ToDictionary(a => a.ToString()),
+                    databaseSchemas.ToDictionary(a => a.ToString()),
+                    (_, newSN) => SqlBuilder.CreateSchema(newSN),
+                    null,
+                    (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : SqlBuilder.CreateSchema(newSN),
+                    Spacing.Double);
+
                 //use database without replacements to just remove indexes
                 SqlPreCommand dropStatistics =
                     Synchronizer.SynchronizeScript(model, database,
@@ -239,8 +226,31 @@ namespace Signum.Engine
                         return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
                     }, Spacing.Double);
 
-                return SqlPreCommand.Combine(Spacing.Triple, dropStatistics, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
+                SqlPreCommand dropSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas",
+                  modelSchemas.ToDictionary(a => a.ToString()),
+                  databaseSchemas.ToDictionary(a => a.ToString()),
+                  null,
+                  (_, oldSN) => DropSchema(oldSN) ? SqlBuilder.DropSchema(oldSN) : null,
+                  (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : SqlBuilder.DropSchema(oldSN),
+                  Spacing.Double);
+
+                return SqlPreCommand.Combine(Spacing.Triple, createSchemas, dropStatistics, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices, dropSchemas);
             }
+        }
+
+        private static HashSet<SchemaName> DefaultGetSchemas(List<DatabaseName> list)
+        {
+            HashSet<SchemaName> result = new HashSet<SchemaName>();
+            foreach (var db in list)
+            {
+                using (Administrator.OverrideDatabaseInSysViews(db))
+                {
+                    var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(SqlBuilder.SystemSchemas);
+
+                    result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn)));
+                }
+            }
+            return result;
         }
 
         private static SqlPreCommand AlterTableAddColumnDefault(ITable table, IColumn column, Replacements rep)
