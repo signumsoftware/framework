@@ -155,7 +155,7 @@ namespace Signum.Utilities
             if (index == -1)
                 return null;
 
-            return str.Substring(index + 1);
+            return str.Substring(index + separator.Length);
         }
 
 
@@ -192,7 +192,7 @@ namespace Signum.Utilities
             if (index == -1)
                 throw NotFound(str, separator);
 
-            return str.Substring(index + 1);
+            return str.Substring(index + separator.Length);
         }
 
         public static string TryBeforeLast(this string str, char separator)
@@ -240,12 +240,9 @@ namespace Signum.Utilities
             if (index == -1)
                 return null;
 
-            return str.Substring(index + 1);
+            return str.Substring(index + separator.Length);
         }
-
-
-
-
+        
         public static string Between(this string str, string firstSeparator, string secondSeparator = null)
         {
             if (secondSeparator == null)
@@ -408,8 +405,7 @@ namespace Signum.Utilities
 
             return result;
         }
-
-
+        
         public static string PadChopRight(this string str, int length)
         {
             str = str ?? "";
@@ -563,8 +559,7 @@ namespace Signum.Utilities
 
             return result;
         }
-
-
+        
         public static string FirstUpper(this string str)
         {
             if (str.HasText() && char.IsLower(str[0]))
