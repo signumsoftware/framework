@@ -162,7 +162,8 @@ namespace Signum.Entities.Authorization
         Allow,
         Deny,
 
-        Overriden
+        Overriden,
+        NoRoles
     }
 
 }

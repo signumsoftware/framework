@@ -208,6 +208,7 @@
     <TypeScriptCompile Include="Authorization\Signum.Entities.Authorization.ts">
       <DependentUpon>Signum.Entities.Authorization.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Authorization\Templates\Role.tsx" />
     <TypeScriptCompile Include="Authorization\Templates\User.tsx" />
     <TypeScriptCompile Include="Authorization\Templates\Login.tsx" />
     <TypeScriptCompile Include="Authorization\Templates\LoginUserControl.tsx" />

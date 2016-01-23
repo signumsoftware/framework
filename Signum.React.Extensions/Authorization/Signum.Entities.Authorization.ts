@@ -28,6 +28,7 @@ export module AuthAdminMessage {
     export const Allow = new MessageKey("AuthAdminMessage", "Allow");
     export const Deny = new MessageKey("AuthAdminMessage", "Deny");
     export const Overriden = new MessageKey("AuthAdminMessage", "Overriden");
+    export const NoRoles = new MessageKey("AuthAdminMessage", "NoRoles");
 }
 
 export module AuthEmailMessage {

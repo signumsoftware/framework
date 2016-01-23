@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { AuthMessage, UserEntity } from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
-import { ValueLine, ValueLineType, EntityComponent, EntityLine, FormGroup } from 'Framework/Signum.React/Scripts/Lines'
+import { ValueLine, ValueLineType, EntityComponent, EntityLine, EntityCombo, FormGroup } from 'Framework/Signum.React/Scripts/Lines'
 
 export default class User extends EntityComponent<UserEntity> {
 
@@ -26,7 +26,7 @@ export default class User extends EntityComponent<UserEntity> {
                     </div>}
             <EntityLine ctx={this.subCtx(e => e.role) } />
             <ValueLine ctx={this.subCtx(e => e.email) } />
-            <EntityLine ctx={this.subCtx(e => e.cultureInfo) } />
+            <EntityCombo ctx={this.subCtx(e => e.cultureInfo) }/>
             <ValueLine ctx={this.subCtx(e => e.passwordNeverExpires, { labelColumns: { sm: 4 } }) } />
             <ValueLine ctx={this.subCtx(e => e.passwordSetDate, { labelColumns: { sm: 4 } }) } />
                 </div>);

@@ -5,7 +5,7 @@ import { Route } from 'react-router'
 import { Type, IType, EntityKind } from 'Framework/Signum.React/Scripts/Reflection';
 import { ajaxPost, ajaxGet } from 'Framework/Signum.React/Scripts/Services';
 import * as Navigator from 'Framework/Signum.React/Scripts/Navigator';
-import { UserEntity, UserEntity_Type } from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
+import { UserEntity, UserEntity_Type, RoleEntity_Type } from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
 import Login from 'Extensions/Signum.React.Extensions/Authorization/Templates/Login';
 
 export var userTicket: boolean;
@@ -23,7 +23,8 @@ export function start(options: { routes: JSX.Element[], userTicket: boolean, res
         <Route path="about" />
         </Route>);
 
-    Navigator.addSettings(new Navigator.EntitySettings(UserEntity_Type, u=> viewPrefix + "User")); 
+    Navigator.addSettings(new Navigator.EntitySettings(UserEntity_Type, u=> viewPrefix + "User"));
+    Navigator.addSettings(new Navigator.EntitySettings(RoleEntity_Type, u=> viewPrefix + "Role")); 
 }
 
 
