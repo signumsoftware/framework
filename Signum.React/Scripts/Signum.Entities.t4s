@@ -49,6 +49,10 @@ export type ConstructSymbol_From<T extends Entity, F extends IEntity> = Operatio
 export type ConstructSymbol_FromMany<T extends Entity, F extends IEntity> = OperationSymbol; 
 
 export function toLite<T extends IEntity>(entity: T, fat?: boolean) : Lite<T> {
+
+    if(entity == null)
+		return null;
+
     if(fat)
        return toLiteFat(entity);
 
@@ -61,7 +65,11 @@ export function toLite<T extends IEntity>(entity: T, fat?: boolean) : Lite<T> {
 }
 
 export function toLiteFat<T extends IEntity>(entity: T) : Lite<T> {
-    return {
+    
+    if(entity == null)
+		return null;
+	
+	return {
        entity : entity,
        EntityType  :entity.Type,
        id :entity.id,
@@ -70,7 +78,11 @@ export function toLiteFat<T extends IEntity>(entity: T) : Lite<T> {
 }
 
 export function liteKey(lite: Lite<IEntity>) {
-    return lite.EntityType + ";" + (lite.id || "");
+    
+    if(lite == null)
+		return null;
+	
+	return lite.EntityType + ";" + (lite.id || "");
 }
 
 export function parseLite(lite: string) : Lite<IEntity> {
@@ -82,6 +94,9 @@ export function parseLite(lite: string) : Lite<IEntity> {
 
 import { getTypeInfo } from 'Framework/Signum.React/Scripts/Reflection' 
 export function is<T extends IEntity>(a: Lite<T> | T, b: Lite<T> | T) {
+
+	if(!!a != !!b)
+		return false;
 
     if (a.id != b.id)
         return false;

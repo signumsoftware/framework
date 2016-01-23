@@ -12,7 +12,7 @@ import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage
 import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference,
 getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from 'Framework/Signum.React/Scripts/Reflection';
 
-import {navigateRoute, isNavigable, currentHistory, asyncLoad } from 'Framework/Signum.React/Scripts/Navigator';
+import {navigateRoute, isNavigable, currentHistory, asyncLoad, requireComponent } from 'Framework/Signum.React/Scripts/Navigator';
 import { Link  } from 'react-router';
 
 
@@ -51,11 +51,8 @@ export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<IEntit
     if (!(findOptions as FindOptions).queryName)
         findOptions = { queryName: findOptions } as FindOptions
 
-    return new Promise((resolve) => {
-        require(["Southwind.React/Templates/SearchControl/SearchPopup"], (SearchPopup) => {
-            SearchPopup.default.open(findOptions).then(lite=> resolve(lite));
-        });
-    });
+    return requireComponent("Southwind.React/Templates/SearchControl/SearchPopup")
+        .then(SearchPopup => (SearchPopup as any).open(findOptions))
 }
 
 export function findOptionsPath(findOptions: FindOptions): string;
@@ -228,6 +225,12 @@ export module API {
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<IEntity>[]> {
         return ajaxGet<Lite<IEntity>[]>({
             url: currentHistory.createHref("api/query/findLiteLike", request)
+        });
+    }
+
+    export function findAllLites(request: { types: string }): Promise<Lite<IEntity>[]> {
+        return ajaxGet<Lite<IEntity>[]>({
+            url: currentHistory.createHref("api/query/findAllLites", request)
         });
     }
 
@@ -405,7 +408,8 @@ export var formatRules: FormatRule[] = [
     {
         name: "Lite",
         isApplicable: col=> col.token.filterType == FilterType.Lite,
-        formatter: col=> new CellFormatter((cell: Lite<IEntity>) => cell && <Link to={navigateRoute(cell) }>{cell.toStr}</Link>)
+        formatter: col=> new CellFormatter((cell: Lite<IEntity>) => !cell ? null :
+            isNavigable((cell as Lite<any>).EntityType, null) ? <Link to={navigateRoute(cell) }>{cell.toStr}</Link> : cell.toStr)
     },
 
     {

@@ -75,8 +75,7 @@ export function wrapRequest<T>(options: AjaxOptions, makeCall: () => Promise<Res
                 showError(error);
 
             throw error;
-            return null as Response;
-        });
+        }) as any;
 
     return promise.then(a=>
         a.status == 204 ? null : a.json<T>());
@@ -99,13 +98,12 @@ function throwError(response: Response): Response | Promise<Response> {
     if (response.status >= 200 && response.status < 300) {
         return response;
     } else {
-        return response.json().then<Response>(json=> {
+        return response.json().then(json=> {
             if (json.ModelState)
                 throw new ValidationError(response.statusText, json);
             else
                 throw new ServiceError(response.statusText, json);
-            return null;
-        });
+        }) as any;
     }
 }
 

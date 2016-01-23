@@ -20,9 +20,22 @@ namespace Signum.React.ApiControllers
         [Route("api/query/findLiteLike"), HttpGet]
         public List<Lite<Entity>> FindLiteLike([FromUri]string types, [FromUri]string subString, [FromUri]int count)
         {
-            var implementations = Implementations.By(types.Split(',').Select(a => TypeLogic.GetType(a.Trim())).ToArray());
+            Implementations implementations = ParseImplementations(types);
 
             return AutocompleteUtils.FindLiteLike(implementations, subString, count);
+        }
+
+        [Route("api/query/findAllLites"), HttpGet]
+        public List<Lite<Entity>> FindAllLites([FromUri]string types)
+        {
+            Implementations implementations = ParseImplementations(types);
+
+            return AutocompleteUtils.FindAllLite(implementations);
+        }
+
+        private static Implementations ParseImplementations(string types)
+        {
+            return Implementations.By(types.Split(',').Select(a => TypeLogic.GetType(a.Trim())).ToArray());
         }
 
         [Route("api/query/description/{queryName}")]

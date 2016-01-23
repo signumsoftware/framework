@@ -2,8 +2,8 @@
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { ajaxGet, ajaxPost } from 'Framework/Signum.React/Scripts/Services';
 import { openModal } from 'Framework/Signum.React/Scripts/Modals';
-import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity } from 'Framework/Signum.React/Scripts/Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type } from 'Framework/Signum.React/Scripts/Reflection';
+import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage } from 'Framework/Signum.React/Scripts/Signum.Entities';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo } from 'Framework/Signum.React/Scripts/Reflection';
 import * as Finder from 'Framework/Signum.React/Scripts/Finder';
 
 
@@ -30,6 +30,16 @@ export function getTypeName(pseudoType: IType | TypeInfo | string) {
         return pseudoType as string;
 
     throw new Error("Unexpected pseudoType " + pseudoType);
+}
+
+
+export function getTypeTitel(entity: Entity) {
+
+    var typeInfo = getTypeInfo(entity.Type)
+
+    return entity.isNew ?
+        LiteMessage.New_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName) :
+        typeInfo.niceName + " " + entity.id;
 }
 
 
@@ -122,12 +132,25 @@ export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, partial
     return es != null && es.onIsNavigable(partialViewName, isSearch) && isViewableEvent.every(f=> f(typeName, entity));
 }
 
-export function viewEmbedded<T extends EmbeddedEntity>(entity: T): Promise<T> {
-    return null;
+export interface ViewOptions {
+    entity: Lite<IEntity> | ModifiableEntity;
+    propertyRoute?: PropertyRoute;
+    readOnly?: boolean;
+    showOperations?: boolean;
+    saveProtected?: boolean;
+    partialViewName?: string;
 }
 
-export function view<T extends IEntity>(entityPack: T | Lite<T>, propertyRoute?: PropertyRoute): Promise<T> {
-    return null;
+export function view(options: ViewOptions): Promise<ModifiableEntity>;
+export function view<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<T>;
+export function view<T extends IEntity>(entity: Lite<T>): Promise<T>
+export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity>
+{
+    var options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } :
+        (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } : entityOrOptions;
+    
+    return requireComponent("Southwind.React/Templates/NormalPopup")
+        .then(NormalPopup => (NormalPopup as any).open(options));
 } 
 
 export function asyncLoad(path: string | ((loc: HistoryModule.Location) => string)):
@@ -138,11 +161,26 @@ export function asyncLoad(path: string | ((loc: HistoryModule.Location) => strin
             (path as ((loc: HistoryModule.Location) => string))(location);
 
         require([finalPath], Mod => {
+
+            if (!Mod["default"])
+                throw new Error(`The file '${finalPath}' should contain just a 'export default'`);
+
             callback(null, (Mod as any)["default"]);
         });
     };
 }
 
+export function requireComponent(partialViewName: string): Promise<React.ComponentClass<any>> {
+    return new Promise<React.ComponentClass<any>>((resolve) => {
+        require([partialViewName], Com=> {
+
+            if (!Com["default"])
+                throw new Error(`The partialView '${partialViewName}' should contain a 'export default'`);
+
+            resolve(Com["default"]);
+        });
+    });
+}
 
 export interface WidgetsContext {
     entity?: Entity;
@@ -171,6 +209,7 @@ export interface ButtonsContext {
 export function renderButtons(ctx: ButtonsContext): React.ReactFragment {
     return null;
 }
+
 
 export module API {
 

@@ -13,8 +13,21 @@ export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, L
 import { ValueLine, ValueLineType, ValueLineProps } from 'Framework/Signum.React/Scripts/Lines/ValueLine'
 export { ValueLine, ValueLineType, ValueLineProps};
 
-import { EntityBase, EntityBaseProps, EntityLine, EntityLineProps, EntityCombo, EntityComboProps, EntityListBase, EntityListBaseProps } from  'Southwind.React/Templates/EntityControls'//'Framework/Signum.React/Scripts/Lines/EntityControls'
-export { EntityBase, EntityBaseProps, EntityLine, EntityLineProps, EntityCombo, EntityComboProps, EntityListBase, EntityListBaseProps };
+import { EntityBase, EntityBaseProps } from  'Southwind.React/Templates/EntityControls/EntityBase'
+export { EntityBase, EntityBaseProps };
+
+import { EntityLine, EntityLineProps } from  'Southwind.React/Templates/EntityControls/EntityLine'
+export { EntityLine, EntityLineProps };
+
+import { EntityCombo, EntityComboProps } from  'Southwind.React/Templates/EntityControls/EntityCombo'
+export { EntityCombo, EntityComboProps };
+
+import { EntityListBase, EntityListBaseProps } from  'Southwind.React/Templates/EntityControls/EntityListBase'
+export { EntityListBase, EntityListBaseProps };
+
+
+import { EntityList, EntityListProps } from  'Southwind.React/Templates/EntityControls/EntityList'
+export { EntityList, EntityListProps };
 
 
 export class EntityComponent<T> extends React.Component<{ ctx: TypeContext<T> }, {}>{

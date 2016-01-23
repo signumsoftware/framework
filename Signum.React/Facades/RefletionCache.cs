@@ -83,6 +83,7 @@ namespace Signum.React.Facades
                                 .ToDictionary(p => p.PropertyString(), p => new MemberInfoTS
                                 {
                                     NiceName = p.PropertyInfo?.NiceName(),
+                                    TypeNiceName = GetTypeNiceName(p.PropertyInfo?.PropertyType),
                                     Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                     IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
                                     Unit = p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName,
@@ -91,6 +92,13 @@ namespace Signum.React.Facades
                           })).ToDictionary("entities");
 
             return result;
+        }
+
+        static string GetTypeNiceName(Type type)
+        {
+            if(type.IsModifiableEntity() && !type.IsEntity())
+                return type.NiceName();
+            return null;
         }
 
         private static bool IsId(PropertyRoute p)
@@ -186,6 +194,8 @@ namespace Signum.React.Facades
         public TypeReferenceTS Type { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "niceName")]
         public string NiceName { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "typeNiceName")]
+        public string TypeNiceName { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isReadOnly")]
         public bool IsReadOnly { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "unit")]

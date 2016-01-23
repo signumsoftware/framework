@@ -189,6 +189,7 @@
     <TypeScriptCompile Include="Scripts\Lines\Typeahead.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
+    <TypeScriptCompile Include="Scripts\Constructor.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.tsx" />
     <TypeScriptCompile Include="Scripts\Services.ts" />
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
