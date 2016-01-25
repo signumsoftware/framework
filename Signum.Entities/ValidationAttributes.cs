@@ -160,15 +160,20 @@ namespace Signum.Entities
 
     public abstract class RegexValidatorAttribute : ValidatorAttribute
     {
-        Regex regex;
+        Regex[] regexList;
         public RegexValidatorAttribute(Regex regex)
         {
-            this.regex = regex;
+            this.regexList = new[] { regex };
+        }
+
+        public RegexValidatorAttribute(Regex[] regex)
+        {
+            this.regexList = regex;
         }
 
         public RegexValidatorAttribute(string regexExpresion)
         {
-            this.regex = new Regex(regexExpresion);
+            this.regexList = new[] { new Regex(regexExpresion) };
         }
 
         public abstract string FormatName
@@ -182,7 +187,7 @@ namespace Signum.Entities
             if (string.IsNullOrEmpty(str))
                 return null;
 
-            if (regex.IsMatch(str))
+            if (regexList.Any(a => a.IsMatch(str)))
                 return null;
 
             return ValidationMessage._0DoesNotHaveAValid1Format.NiceToString().FormatWith("{0}", FormatName);
@@ -264,7 +269,7 @@ namespace Signum.Entities
 
     public class URLValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex URLRegex = new Regex(
+        public static readonly Regex AbsoluteUrlRegex = new Regex(
               "^(https?://)"
             + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" //user@ 
             + @"(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP- 199.194.52.184 
@@ -276,8 +281,23 @@ namespace Signum.Entities
             + "((/?)|" // a slash isn't required if there is no file name 
             + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$", RegexOptions.IgnoreCase);
 
-        public URLValidatorAttribute()
-            : base(URLRegex)
+        public static readonly Regex SiteRelativeRegex = new Regex(
+            "^(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase);
+
+        public static readonly Regex AspNetRelativeRegex = new Regex(
+            "^~(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase);
+
+
+        public static readonly Regex DocumentRelativeRegex = new Regex(
+            "^[0-9a-z_!~*'().;?:@&=+$,%#-](/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase);
+
+        public URLValidatorAttribute(bool absolute = true, bool siteRelative = false, bool aspNetSiteRelative = false, bool documentRelative = false)
+            : base(new []{
+                absolute ? AbsoluteUrlRegex: null,
+                siteRelative ? SiteRelativeRegex: null,
+                aspNetSiteRelative ? AspNetRelativeRegex: null,
+                documentRelative ? DocumentRelativeRegex: null,
+            }.NotNull().ToArray())
         {
         }
 
