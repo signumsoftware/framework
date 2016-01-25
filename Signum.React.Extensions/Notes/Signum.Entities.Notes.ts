@@ -1,9 +1,10 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+
 export const NoteEntity_Type = new Type<NoteEntity>("Note");
 export interface NoteEntity extends Entities.Entity {
     title?: string;

@@ -1,11 +1,11 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-import * as Files from 'Extensions/Signum.React.Extensions/Files/Signum.Entities.Files' 
+import * as Files from '../Files/Signum.Entities.Files' 
 
 
 export module ExcelMessage {

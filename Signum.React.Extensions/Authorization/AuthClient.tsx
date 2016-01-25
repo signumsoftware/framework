@@ -2,29 +2,30 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import { Type, IType, EntityKind } from 'Framework/Signum.React/Scripts/Reflection';
-import { ajaxPost, ajaxGet } from 'Framework/Signum.React/Scripts/Services';
-import * as Navigator from 'Framework/Signum.React/Scripts/Navigator';
-import { UserEntity, UserEntity_Type, RoleEntity_Type } from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
-import Login from 'Extensions/Signum.React.Extensions/Authorization/Templates/Login';
+import { Type, IType, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection';
+import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { addSettings, EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import { UserEntity, UserEntity_Type, RoleEntity_Type } from './Signum.Entities.Authorization'
+import Login from './Login/Login';
 
 export var userTicket: boolean;
 export var resetPassword: boolean;
 
 
-export var viewPrefix = "Extensions/Signum.React.Extensions/Authorization/Templates/";
+export var viewPrefix = "";
 
 export function start(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean }) {
     userTicket = options.userTicket;
     resetPassword = options.resetPassword;
 
     options.routes.push(<Route path="auth">
-        <Route path="login" getComponent={Navigator.asyncLoad(viewPrefix + "Login")} />
+        <Route path="login" getComponent={(loc, cb) => require(["./Login/Login"], (Comp) => cb(Comp.default)) } />
         <Route path="about" />
         </Route>);
-
-    Navigator.addSettings(new Navigator.EntitySettings(UserEntity_Type, u=> viewPrefix + "User"));
-    Navigator.addSettings(new Navigator.EntitySettings(RoleEntity_Type, u=> viewPrefix + "Role")); 
+    
+    addSettings(new EntitySettings(UserEntity_Type, e=> new Promise(resolve => require(['./Templates/User'], resolve))));
+    addSettings(new EntitySettings(RoleEntity_Type, e=> new Promise(resolve => require(['./Templates/Role'], resolve))));
 }
 
 

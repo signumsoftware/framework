@@ -1,13 +1,11 @@
-﻿/// <reference path="../../../../framework/signum.react/scripts/globals.ts" />
-
-import * as React from 'react'
+﻿import * as React from 'react'
 import { Grid, Row, Col, Input, Button } from 'react-bootstrap'
 import { Link } from 'react-router'
 import { Calendar } from 'react-widgets'
-import * as Navigator from 'Framework/Signum.React/Scripts/Navigator'
-import { ModelState, ValidationError } from 'Framework/Signum.React/Scripts/Services'
-import { AuthMessage } from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
-import * as AuthClient from 'Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { ModelState, ValidationError } from '../../../../Framework/Signum.React/Scripts/Services'
+import { AuthMessage } from '../Signum.Entities.Authorization'
+import * as AuthClient from '../AuthClient'
 
 
 

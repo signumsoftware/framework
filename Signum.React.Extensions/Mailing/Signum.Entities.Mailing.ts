@@ -1,21 +1,22 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-import * as Processes from 'Extensions/Signum.React.Extensions/Processes/Signum.Entities.Processes' 
+import * as Processes from '../Processes/Signum.Entities.Processes' 
 
-import * as Scheduler from 'Extensions/Signum.React.Extensions/Scheduler/Signum.Entities.Scheduler' 
+import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler' 
 
-import * as UserAssets from 'Extensions/Signum.React.Extensions/UserAssets/Signum.Entities.UserAssets' 
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets' 
 
-import * as Basics from 'Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics' 
+import * as Basics from '../Basics/Signum.Entities.Basics' 
 
-import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization' 
+import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
-import * as Files from 'Extensions/Signum.React.Extensions/Files/Signum.Entities.Files' 
+import * as Files from '../Files/Signum.Entities.Files' 
+
 export module AsyncEmailSenderPermission {
     export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel" });
 }

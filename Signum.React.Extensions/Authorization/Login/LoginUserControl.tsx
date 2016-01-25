@@ -4,8 +4,8 @@ import * as React from 'react'
 import { Link } from 'react-router'
 import { NavDropdown, MenuItem, NavItem } from 'react-bootstrap'
 import { LinkContainer } from 'react-router-bootstrap'
-import { AuthMessage, UserEntity } from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization'
-import * as AuthClient from 'Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
+import * as AuthClient from '../AuthClient'
 
 export default class LoginUserControl extends React.Component<{}, { user: UserEntity }> {
 

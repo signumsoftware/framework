@@ -1,13 +1,14 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-import * as Basics from 'Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics' 
+import * as Basics from '../Basics/Signum.Entities.Basics' 
 
-import * as Mailing from 'Extensions/Signum.React.Extensions/Mailing/Signum.Entities.Mailing' 
+import * as Mailing from '../Mailing/Signum.Entities.Mailing' 
+
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
     allowedBase?: A;
     allowed?: A;

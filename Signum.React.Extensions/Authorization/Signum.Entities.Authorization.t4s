@@ -1,12 +1,12 @@
 ﻿//Assembly: Signum.Entities.Extensions.dll
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
 //Entities.Assembly: Signum.Entities.dll
-import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
 //Basics.Assembly: Signum.Entities.Extensions.dll
-import * as Basics from 'Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics' 
+import * as Basics from '../Basics/Signum.Entities.Basics' 
 
 //Mailing.Assembly: Signum.Entities.Extensions.dll
-import * as Mailing from 'Extensions/Signum.React.Extensions/Mailing/Signum.Entities.Mailing' 
+import * as Mailing from '../Mailing/Signum.Entities.Mailing' 

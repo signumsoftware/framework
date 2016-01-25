@@ -1,17 +1,18 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization' 
+import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
-import * as UserQueries from 'Extensions/Signum.React.Extensions/UserQueries/Signum.Entities.UserQueries' 
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
 
-import * as UserAssets from 'Extensions/Signum.React.Extensions/UserAssets/Signum.Entities.UserAssets' 
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets' 
 
-import * as Files from 'Extensions/Signum.React.Extensions/Files/Signum.Entities.Files' 
+import * as Files from '../Files/Signum.Entities.Files' 
+
 export const ChartColorEntity_Type = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
     related?: Entities.Lite<Entities.Entity>;

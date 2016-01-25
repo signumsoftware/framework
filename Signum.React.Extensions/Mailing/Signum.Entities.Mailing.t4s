@@ -1,24 +1,24 @@
 ﻿//Assembly: Signum.Entities.Extensions.dll
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
 //Entities.Assembly: Signum.Entities.dll
-import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
 //Processes.Assembly: Signum.Entities.Extensions.dll
-import * as Processes from 'Extensions/Signum.React.Extensions/Processes/Signum.Entities.Processes' 
+import * as Processes from '../Processes/Signum.Entities.Processes' 
 
 //Scheduler.Assembly: Signum.Entities.Extensions.dll
-import * as Scheduler from 'Extensions/Signum.React.Extensions/Scheduler/Signum.Entities.Scheduler' 
+import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler' 
 
 //UserAssets.Assembly: Signum.Entities.Extensions.dll
-import * as UserAssets from 'Extensions/Signum.React.Extensions/UserAssets/Signum.Entities.UserAssets' 
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets' 
 
 //Basics.Assembly: Signum.Entities.Extensions.dll
-import * as Basics from 'Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics' 
+import * as Basics from '../Basics/Signum.Entities.Basics' 
 
 //Authorization.Assembly: Signum.Entities.Extensions.dll
-import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization' 
+import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
 //Files.Assembly: Signum.Entities.Extensions.dll
-import * as Files from 'Extensions/Signum.React.Extensions/Files/Signum.Entities.Files' 
+import * as Files from '../Files/Signum.Entities.Files' 

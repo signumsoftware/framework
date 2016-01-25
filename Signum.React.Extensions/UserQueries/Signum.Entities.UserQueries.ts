@@ -1,15 +1,16 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-import * as UserQueries from 'Extensions/Signum.React.Extensions/UserQueries/Signum.Entities.UserQueries' 
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
 
-import * as UserAssets from 'Extensions/Signum.React.Extensions/UserAssets/Signum.Entities.UserAssets' 
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets' 
 
-import * as Authorization from 'Extensions/Signum.React.Extensions/Authorization/Signum.Entities.Authorization' 
+import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
+
 export const QueryColumnEntity_Type = new Type<QueryColumnEntity>("QueryColumn");
 export interface QueryColumnEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;

@@ -1,12 +1,12 @@
 ﻿//Assembly: Signum.Entities.Extensions.dll
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
 //Entities.Assembly: Signum.Entities.dll
-import * as Entities from 'Framework/Signum.React/Scripts/Signum.Entities' 
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
 //Basics.Assembly: Signum.Entities.Extensions.dll
-import * as Basics from 'Extensions/Signum.React.Extensions/Basics/Signum.Entities.Basics' 
+import * as Basics from '../Basics/Signum.Entities.Basics' 
 
 //Processes.Assembly: Signum.Entities.Extensions.dll
-import * as Processes from 'Extensions/Signum.React.Extensions/Processes/Signum.Entities.Processes' 
+import * as Processes from '../Processes/Signum.Entities.Processes' 

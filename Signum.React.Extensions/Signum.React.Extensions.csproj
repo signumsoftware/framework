@@ -136,7 +136,6 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthorizationArea.cs" />
     <Compile Include="Authorization\AuthController.cs" />
     <Compile Include="Authorization\UserTicketClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -210,8 +209,8 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Authorization\Templates\Role.tsx" />
     <TypeScriptCompile Include="Authorization\Templates\User.tsx" />
-    <TypeScriptCompile Include="Authorization\Templates\Login.tsx" />
-    <TypeScriptCompile Include="Authorization\Templates\LoginUserControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Login\Login.tsx" />
+    <TypeScriptCompile Include="Authorization\Login\LoginUserControl.tsx" />
     <TypeScriptCompile Include="Basics\Signum.Entities.Basics.ts">
       <DependentUpon>Signum.Entities.Basics.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -286,7 +285,7 @@
     <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
+    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
     <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
     <TypeScriptOutFile />
     <TypeScriptOutDir />
