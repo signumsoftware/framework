@@ -1,6 +1,7 @@
 ﻿/// <reference path="globals.ts" />
 
-import {ajaxPost, ajaxGet} from 'Framework/Signum.React/Scripts/Services';
+import { Dic } from './Globals';
+import {ajaxPost, ajaxGet} from './Services';
 
 
 export function getEnumInfo(enumTypeName: string, enumId: number) {

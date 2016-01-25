@@ -1,10 +1,13 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
-import { ajaxGet, ajaxPost } from 'Framework/Signum.React/Scripts/Services';
-import { openModal } from 'Framework/Signum.React/Scripts/Modals';
-import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage } from 'Framework/Signum.React/Scripts/Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo } from 'Framework/Signum.React/Scripts/Reflection';
-import * as Finder from 'Framework/Signum.React/Scripts/Finder';
+import { Dic, hasFlag } from './Globals';
+import { ajaxGet, ajaxPost } from './Services';
+import { openModal } from './Modals';
+import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage } from './Signum.Entities';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo } from './Reflection';
+import { TypeContext } from './TypeContext';
+import * as Finder from './Finder';
+import NormalPopup from './NormalPage/NormalPopup';
 
 
 export var NotFound: __React.ComponentClass<any>;
@@ -15,8 +18,8 @@ export var currentHistory: HistoryModule.History & HistoryModule.HistoryQueries;
 
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="view/:type/:id" getComponent={asyncLoad("Southwind.React/Templates/NormalPage") } ></Route>);
-    options.routes.push(<Route path="create/:type" getComponent={asyncLoad("Southwind.React/Templates/NormalPage") } ></Route>);
+    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./NormalPage/NormalPage"], (Comp) => cb(null, Comp.default)) } ></Route>);
+    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./NormalPage/NormalPage"], (Comp) => cb(null, Comp.default))} ></Route>);
 }
 
 export function getTypeName(pseudoType: IType | TypeInfo | string) {
@@ -111,17 +114,17 @@ export function isFindable(type: PseudoType, isSearch?: boolean) {
 
 export var isViewableEvent: Array<(typeName: string, entity?: ModifiableEntity) => boolean> = []; 
 
-export function isViewable(typeOrEntity: PseudoType | ModifiableEntity, partialViewName: string): boolean{
+export function isViewable(typeOrEntity: PseudoType | ModifiableEntity, customView = false): boolean{
     var entity = (typeOrEntity as ModifiableEntity).Type ? typeOrEntity as ModifiableEntity : null;
 
     var typeName = entity ? entity.Type : getTypeName(typeOrEntity as PseudoType);
 
     var es = entitySettings[typeName];
 
-    return es != null && es.onIsViewable(partialViewName) && isViewableEvent.every(f=> f(typeName, entity));
+    return es != null && es.onIsViewable(customView) && isViewableEvent.every(f=> f(typeName, entity));
 }
 
-export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, partialViewName: string, isSearch: boolean = false): boolean {
+export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customView = false, isSearch = false): boolean {
 
     var entity = (typeOrEntity as ModifiableEntity).Type ? typeOrEntity as Entity : null;
 
@@ -129,7 +132,7 @@ export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, partial
 
     var es = entitySettings[typeName];
 
-    return es != null && es.onIsNavigable(partialViewName, isSearch) && isViewableEvent.every(f=> f(typeName, entity));
+    return es != null && es.onIsNavigable(customView, isSearch) && isViewableEvent.every(f=> f(typeName, entity));
 }
 
 export interface ViewOptions {
@@ -138,7 +141,7 @@ export interface ViewOptions {
     readOnly?: boolean;
     showOperations?: boolean;
     saveProtected?: boolean;
-    partialViewName?: string;
+    compoenent?: EntityComponent<any>;
 }
 
 export function view(options: ViewOptions): Promise<ModifiableEntity>;
@@ -146,41 +149,18 @@ export function view<T extends ModifiableEntity>(entity: T, propertyRoute?: Prop
 export function view<T extends IEntity>(entity: Lite<T>): Promise<T>
 export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity>
 {
-    var options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } :
-        (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } : entityOrOptions;
-    
-    return requireComponent("Southwind.React/Templates/NormalPopup")
-        .then(NormalPopup => (NormalPopup as any).open(options));
-} 
+    var options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } as ViewOptions :
+        (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } as ViewOptions :
+            entityOrOptions as ViewOptions;
 
-export function asyncLoad(path: string | ((loc: HistoryModule.Location) => string)):
-    (location: HistoryModule.Location, cb: (error: any, component?: ReactRouter.RouteComponent) => void) => void {
-    return (location, callback) => {
-
-        var finalPath = typeof path == "string" ? path as string :
-            (path as ((loc: HistoryModule.Location) => string))(location);
-
-        require([finalPath], Mod => {
-
-            if (!Mod["default"])
-                throw new Error(`The file '${finalPath}' should contain just a 'export default'`);
-
-            callback(null, (Mod as any)["default"]);
-        });
-    };
-}
-
-export function requireComponent(partialViewName: string): Promise<React.ComponentClass<any>> {
-    return new Promise<React.ComponentClass<any>>((resolve) => {
-        require([partialViewName], Com=> {
-
-            if (!Com["default"])
-                throw new Error(`The partialView '${partialViewName}' should contain a 'export default'`);
-
-            resolve(Com["default"]);
+    return new Promise<ModifiableEntity>((resolve) => {
+        require(["./NormalPage/NormalPopup"], function (NP: typeof NormalPopup) {
+            NP.open(options).then(resolve);
         });
     });
-}
+} 
+
+
 
 export interface WidgetsContext {
     entity?: Entity;
@@ -273,16 +253,21 @@ export abstract class EntitySettingsBase {
 
     abstract onIsCreable(isSearch: boolean): boolean;
     abstract onIsFindable(): boolean;
-    abstract onIsViewable(partialViewName: string): boolean;
-    abstract onIsNavigable(partialViewName: string, isSearch: boolean): boolean;
+    abstract onIsViewable(customView: boolean): boolean;
+    abstract onIsNavigable(customView: boolean, isSearch: boolean): boolean;
     abstract onIsReadonly(): boolean;
 
-    abstract onPartialView(entity: ModifiableEntity): string;
-
+    abstract onGetComponentDefault(entity: ModifiableEntity): Promise<EntityComponent<any>>;
 
     constructor(type: IType) {
         this.type = type;
     }
+}
+
+
+export interface EntityComponent<T> extends React.ComponentClass<{ ctx: TypeContext<T> }> 
+{
+
 }
 
 export class EntitySettings<T extends Entity> extends EntitySettingsBase {
@@ -294,13 +279,13 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
     isNavigable: EntityWhen;
     isReadOnly: boolean;
 
-    partialViewName: (entity: T) => string;
+    getComponent: (entity: T) => Promise<{ default: EntityComponent<T> }>;
 
-    constructor(type: Type<T>, partialViewName: (entity: T) => string,
+    constructor(type: Type<T>, getComponent: (entity: T) => Promise<{ default: EntityComponent<T> }>,
         options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean }) {
         super(type);
 
-        this.partialViewName = partialViewName;
+        this.getComponent = getComponent;
 
         switch (type.typeInfo().entityKind) {
             case EntityKind.SystemString:
@@ -379,16 +364,16 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
         return this.isFindable;
     }
 
-    onIsViewable(partialViewName: string): boolean {
-        if (!this.partialViewName && !partialViewName)
+    onIsViewable(customView: boolean): boolean {
+        if (!this.getComponent && !customView)
             return false;
 
         return this.isViewable;
     }
 
-    onIsNavigable(partialViewName: string, isSearch: boolean): boolean {
+    onIsNavigable(customView: boolean, isSearch: boolean): boolean {
 
-        if (!this.partialViewName && !partialViewName)
+        if (!this.getComponent && !customView)
             return false;
 
         return hasFlag(this.isNavigable, isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
@@ -399,8 +384,8 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
     }
 
 
-    onPartialView(entity: ModifiableEntity): string{
-        return this.partialViewName(entity as T);
+    onGetComponentDefault(entity: ModifiableEntity): Promise<EntityComponent<T>>{
+        return this.getComponent(entity as T).then(a=> a.default);
     }
     
 }
@@ -408,15 +393,17 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
 export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySettingsBase {
     public type: Type<T>;
 
-    partialViewName: (entity: T) => string;
+    getComponent: (entity: T) => Promise<{ default: EntityComponent<T> }>;
 
     isCreable: boolean;
     isViewable: boolean;
     isReadOnly: boolean;
 
-    constructor(type: Type<T>, partialViewName: (entity: T) => string,
+    constructor(type: Type<T>, getComponent: (entity: T) => Promise<{ default: EntityComponent<T> }>,
         options?: { isCreable?: boolean; isViewable?: boolean; isReadOnly?: boolean }) {
         super(type);
+
+        this.getComponent = getComponent;
 
         Dic.extend(this, options);
     }
@@ -432,14 +419,14 @@ export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySe
         return false;
     }
 
-    onIsViewable(partialViewName: string): boolean {
-        if (!partialViewName && !partialViewName)
+    onIsViewable(customView: boolean): boolean {
+        if (!this.getComponent && !customView)
             return false;
 
         return this.isViewable;
     }
 
-    onIsNavigable(partialViewName: string, isSearch: boolean): boolean {
+    onIsNavigable(customView: boolean, isSearch: boolean): boolean {
         return false;
     }
 
@@ -447,8 +434,8 @@ export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySe
         return this.isReadOnly;
     }
 
-    onPartialView(entity: ModifiableEntity): string {
-        return this.partialViewName(entity as T);
+    onGetComponentDefault(entity: ModifiableEntity): Promise<EntityComponent<T>> {
+        return this.getComponent(entity as T).then(a=> a.default);;
     }
 }
 

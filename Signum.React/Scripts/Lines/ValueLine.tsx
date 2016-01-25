@@ -1,10 +1,11 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
-import { Input, Tab } from 'react-bootstrap'
+import { classes, Dic } from '../Globals'
 import { DateTimePicker } from 'react-widgets'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from 'Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat } from 'Framework/Signum.React/Scripts/Reflection'
-import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from 'Framework/Signum.React/Scripts/Lines/LineBase'
+import 'react-widgets/lib/less/react-widgets.less';
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat } from '../Reflection'
+import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from '../Lines/LineBase'
 
 
 export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {

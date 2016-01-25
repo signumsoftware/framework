@@ -1,4 +1,4 @@
-﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, createBinding } from 'Framework/Signum.React/Scripts/Reflection'
+﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, createBinding } from './Reflection'
 
 export enum FormGroupStyle {
     /// Unaffected by FormGroupSize

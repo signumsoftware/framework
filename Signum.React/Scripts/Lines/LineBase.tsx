@@ -1,11 +1,12 @@
 ﻿
 import * as React from 'react'
 import * as moment from 'moment'
+import { classes, Dic } from '../Globals'
 import { Input, Tab } from 'react-bootstrap'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from 'Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference} from 'Framework/Signum.React/Scripts/Reflection'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference} from '../Reflection'
 
-
+require("!style!css!./Lines.css");
 
 export interface FormGroupProps extends React.Props<FormGroup> {
     title?: React.ReactChild;
@@ -83,7 +84,9 @@ export abstract class LineBase<P extends LineBaseProps> extends React.Component<
     }
 
     setValue(val: any) {
-        this.props.ctx.value = val;
+        this.state.ctx.value = val;
+        if (this.state.onValueChanged)
+            this.state.onValueChanged(val);
         this.forceUpdate();
     }
 

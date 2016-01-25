@@ -45,6 +45,7 @@ declare namespace ReactRouter {
         route?: PlainRoute
         routeParams?: R
         routes?: PlainRoute[]
+        children?: React.ReactElement<any>
     }
 
     type RouteComponents = { [key: string]: RouteComponent }
@@ -74,7 +75,8 @@ declare namespace ReactRouter {
     }
 
     type History = HistoryBase & H.HistoryQueries & HistoryRoutes
-
+    const browserHistory: History;
+    const hashHistory: History;
 
     /* components */
 
@@ -131,6 +133,8 @@ declare namespace ReactRouter {
         getComponents?: (location: H.Location, cb: (error: any, components?: RouteComponents) => void) => void
         onEnter?: EnterHook
         onLeave?: LeaveHook
+        getIndexRoute?: (location: H.Location, cb: (error: any, indexRoute: RouteConfig) => void) => void
+        getChildRoutes?: (location: H.Location, cb: (error: any, childRoutes: RouteConfig) => void) => void
     }
     interface Route extends React.ComponentClass<RouteProps> {}
     interface RouteElement extends React.ReactElement<RouteProps> {}
@@ -218,6 +222,8 @@ declare namespace ReactRouter {
 
     function createRoutes(routes: RouteConfig): PlainRoute[]
 
+
+    function useRouterHistory<T>(from: HistoryModule.CreateHistory<T>): HistoryModule.CreateHistory<T>
 
     interface MatchArgs {
         routes?: RouteConfig
@@ -310,6 +316,14 @@ declare module "react-router/lib/useRoutes" {
 
 }
 
+declare module "react-router/lib/useRouterHistory" {
+
+    export default ReactRouter.useRouterHistory
+
+}
+
+
+
 declare module "react-router/lib/PatternUtils" {
 
 	export function formatPattern(pattern: string, params: {}): string;
@@ -367,6 +381,13 @@ declare module "react-router/lib/PropTypes" {
 
 }
 
+declare module "react-router/lib/browserHistory" {
+  export default ReactRouter.browserHistory;
+}
+
+declare module "react-router/lib/hashHistory" {
+  export default ReactRouter.hashHistory;
+}
 
 declare module "react-router/lib/match" {
 
@@ -397,7 +418,13 @@ declare module "react-router" {
 
     import RouteContext from "react-router/lib/RouteContext"
 
+    import browserHistory from "react-router/lib/browserHistory"
+
+    import hashHistory from "react-router/lib/hashHistory"
+
     import useRoutes from "react-router/lib/useRoutes"
+
+    import useRouterHistory from "react-router/lib/useRouterHistory"
 
     import { createRoutes } from "react-router/lib/RouteUtils"
 
@@ -437,9 +464,12 @@ declare module "react-router" {
         Redirect,
         Route,
         History,
+        browserHistory,
+        hashHistory,
         Lifecycle,
         RouteContext,
         useRoutes,
+        useRouterHistory,
         createRoutes,
         formatPattern,
         RoutingContext,

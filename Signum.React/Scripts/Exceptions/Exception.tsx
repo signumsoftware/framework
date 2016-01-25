@@ -1,11 +1,9 @@
-﻿/// <reference path="../typings/react/react.d.ts" />
-
-import * as React from 'react'
+﻿import * as React from 'react'
 import * as moment from 'moment'
 import {Tabs, Tab} from 'react-bootstrap'
-import { Basics, getMixin, CorruptMixin_Type } from 'Framework/Signum.React/Scripts/Signum.Entities'
-import { TypeContext } from 'Framework/Signum.React/Scripts/TypeContext'
-import { ValueLine, ValueLineType, EntityComponent, EntityLine } from 'Framework/Signum.React/Scripts/Lines'
+import { Basics, getMixin, CorruptMixin_Type } from '../Signum.Entities'
+import { TypeContext } from '../TypeContext'
+import { ValueLine, ValueLineType, EntityComponent, EntityLine } from '../Lines'
 
 export default class Exception extends EntityComponent<Basics.ExceptionEntity> {
     render() {
@@ -15,7 +13,7 @@ export default class Exception extends EntityComponent<Basics.ExceptionEntity> {
     <div className="row">
         <div className="col-sm-6">
             <ValueLine ctx={sc.subCtx(f => f.environment) } />
-            <ValueLine ctx={sc.subCtx(f => f.creationDate) } unitText={moment(this.props.ctx.value.creationDate).toUserInterface().fromNow() } />
+            <ValueLine ctx={sc.subCtx(f => f.creationDate) } unitText={moment(this.value.creationDate).toUserInterface().fromNow() } />
             <EntityLine ctx={sc.subCtx(f => f.user) } />
             <ValueLine ctx={sc.subCtx(f => f.version) } />
             <ValueLine ctx={sc.subCtx(f => f.threadId) } />

@@ -1,6 +1,6 @@
 ﻿/// <reference path="globals.ts" />
 
-import * as Services from 'Framework/Signum.React/Scripts/Services';
+import * as Services from './Services';
 
 import * as React from 'react'
 

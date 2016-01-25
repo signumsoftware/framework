@@ -1,18 +1,20 @@
 ﻿import * as React from "react"
 import * as moment from "moment"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
-import { ajaxGet, ajaxPost } from 'Framework/Signum.React/Scripts/Services';
+import { Dic } from './Globals'
+import { ajaxGet, ajaxPost } from './Services';
 
 import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation,
 QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn,
-ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken } from 'Framework/Signum.React/Scripts/FindOptions';
+ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken } from './FindOptions';
 
-import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from 'Framework/Signum.React/Scripts/Signum.Entities';
+import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from './Signum.Entities';
 
 import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference,
-getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from 'Framework/Signum.React/Scripts/Reflection';
+getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from './Reflection';
 
-import {navigateRoute, isNavigable, currentHistory, asyncLoad, requireComponent } from 'Framework/Signum.React/Scripts/Navigator';
+import {navigateRoute, isNavigable, currentHistory } from './Navigator';
+import SearchPopup from './SearchControl/SearchPopup';
 import { Link  } from 'react-router';
 
 
@@ -20,7 +22,7 @@ export var querySettings: { [queryKey: string]: QuerySettings } = {};
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="find">
-        <Route path=":queryName" getComponent={asyncLoad("Southwind.React/Templates/SearchControl/SearchPage") } />
+        <Route path=":queryName" getComponent={ (loc, cb) => require(["./SearchControl/SearchPage"], (Comp) => cb(null, Comp.default)) } />
         </Route>);
 }
 
@@ -48,11 +50,28 @@ export function find<T extends Entity>(type: Type<T>): Promise<Lite<T>>;
 export function find(findOptions: FindOptions): Promise<Lite<IEntity>>;
 export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<IEntity>> {
 
-    if (!(findOptions as FindOptions).queryName)
-        findOptions = { queryName: findOptions } as FindOptions
+    var fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
+        { queryName: findOptions } as FindOptions;
+    
+    return new Promise<Lite<IEntity>>((resolve) => {
+        require(["./SearchControl/SearchPopup"], function (SP: { default: typeof SearchPopup }) {
+            SP.default.open(fo).then(resolve);
+        });
+    });
+}
 
-    return requireComponent("Southwind.React/Templates/SearchControl/SearchPopup")
-        .then(SearchPopup => (SearchPopup as any).open(findOptions))
+export function findMany<T extends Entity>(type: Type<T>): Promise<Lite<T>[]>;
+export function findMany(findOptions: FindOptions): Promise<Lite<IEntity>[]>;
+export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEntity>[]> {
+
+    var fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
+        { queryName: findOptions } as FindOptions;
+
+    return new Promise<Lite<IEntity>[]>((resolve) => {
+        require(["./SearchControl/SearchPopup"], function (SP: { default: typeof SearchPopup }) {
+            SP.default.openMany(fo).then(resolve);
+        });
+    });
 }
 
 export function findOptionsPath(findOptions: FindOptions): string;

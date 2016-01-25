@@ -1,147 +1,4 @@
-﻿/// <reference path="../typings/react/react.d.ts" />
-/// <reference path="../typings/react/react-dom.d.ts" />
-/// <reference path="../typings/react-router/react-router.d.ts" />
-/// <reference path="../typings/react-router/history.d.ts" />
-/// <reference path="../typings/react-bootstrap/react-bootstrap.d.ts" />
-/// <reference path="../typings/react-router-bootstrap/react-router-bootstrap.d.ts" />
-/// <reference path="../typings/react-widgets/react-widgets.d.ts" />
-/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
-/// <reference path="../typings/requirejs/require.d.ts" />
-/// <reference path="../typings/moment/moment.d.ts" />
-
-function hasFlag(value: number, flag: number): boolean {
-    return (value & flag) == flag;
-}
-
-module Dic {
-
-    export function getValues<V>(obj: { [key: string]: V }): V[] {
-        var result: V[] = [];
-
-        for (var name in obj) {
-            if (obj.hasOwnProperty(name)) {
-                result.push(obj[name]);
-            }
-        }
-
-        return result;
-    }
-
-    export function getKeys(obj: { [key: string]: any }): string[] {
-        var result: string[] = [];
-
-        for (var name in obj) {
-            if (obj.hasOwnProperty(name)) {
-                result.push(name);
-            }
-        }
-
-        return result;
-    }
-    
-    export function map<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V) => R) : R[] {
-
-        var result: R[] = [];
-        for (var name in obj) {
-            if (obj.hasOwnProperty(name)) {
-                result.push(selector(name, obj[name]));
-            }
-        }
-        return result;
-    }
-
-    export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void) {
-
-        for (var name in obj) {
-            if (obj.hasOwnProperty(name)) {
-                action(name, obj[name]);
-            }
-        }
-    }
-
-
-    export function addOrThrow<V>(dic: { [key: string]: V }, key: string, value: V, errorContext?: string) {
-        if (dic[key])
-            throw new Error(`Key ${key} already added` + (errorContext ? "in " + errorContext : ""));
-
-        dic[key] = value;
-    }
-
-    export function copy<T>(object: T): T {
-        var objectCopy = <T>{};
-
-        for (var key in object) {
-            if (object.hasOwnProperty(key)) {
-                objectCopy[key] = object[key];
-            }
-        }
-
-        return objectCopy;
-    }
-
-    export function extend<O>(out: O): O;
-    export function extend<O, U>(out: O, arg1: U): O & U;
-    export function extend<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
-    export function extend<O, U, V>(out: O, ...args: Object[]): any;
-    export function extend(out) {
-        out = out || {};
-
-        for (var i = 1; i < arguments.length; i++) {
-
-            var a = arguments[i];
-
-            if (!a)
-                continue;
-
-            for (var key in a) {
-                if (a.hasOwnProperty(key) && a[key] !== undefined)
-                    out[key] = a[key];
-            }
-        }
-
-        return out;
-    };
-
-     /**  Waiting for https://github.com/Microsoft/TypeScript/issues/2103 */
-    export function without<T>(obj: T, toRemove: {}) : T {
-        var result = {};
-
-        for (var key in obj) {
-            if (toRemove.hasOwnProperty(key) && !toRemove.hasOwnProperty(key))
-                result[key] = obj[key];
-        }
-
-        return result as T;
-    }
-}
-
-interface Array<T> {
-    groupByArray(keySelector: (element: T) => string): { key: string; elements: T[] }[];
-    groupByObject(keySelector: (element: T) => string): { [key: string]: T[] };
-    orderBy<V>(keySelector: (element: T) => V): T[];
-    orderByDescending<V>(keySelector: (element: T) => V): T[];
-    toObject(keySelector: (element: T) => string): { [key: string]: T };
-    toObject<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
-    toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T };
-    toObjectDistinct<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
-    flatMap<R>(selector: (element: T) => R[]): R[];
-    max(): T;
-    min(): T;
-    first(errorContext?: string): T;
-    firstOrNull(): T;
-    last(errorContext?: string): T;
-    lastOrNull(): T;
-    single(errorContext?: string): T;
-    singleOrNull(errorContext?: string): T;
-    contains(element: T): boolean;
-    remove(element: T): boolean;
-    removeAt(index: number);
-    insertAt(index: number, element: T);
-    clone(): T[];
-    joinComma(lastSeparator: string);
-}
-
-
+﻿
 Array.prototype.groupByArray = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
     var result: { key: string; elements: any[] }[] = [];
     var objectGrouped = this.groupByObject(keySelector);
@@ -340,11 +197,6 @@ Array.prototype.joinComma = function (lastSeparator: string) {
     return rest + lastSeparator + (array[lastIndex] == null ? "" : array[lastIndex].toString()); 
 };
 
-interface ArrayConstructor {
-
-    range(min: number, max: number): number[];
-}
-
 
 Array.range = function (min, max) {
 
@@ -356,30 +208,6 @@ Array.range = function (min, max) {
     }
 
     return result;
-}
-
-interface String {
-    hasText(): boolean;
-    contains(str: string): boolean;
-    startsWith(str: string): boolean;
-    endsWith(str: string): boolean;
-    formatWith(...parameters: any[]): string;
-    formatHtml(...parameters: any[]): any[];
-    forGenderAndNumber(number: number): string;
-    forGenderAndNumber(gender: string): string;
-    forGenderAndNumber(gender: any, number: number): string;
-    replaceAll(from: string, to: string);
-    after(separator: string): string;
-    before(separator: string): string;
-    tryAfter(separator: string): string;
-    tryBefore(separator: string): string;
-    afterLast(separator: string): string;
-    beforeLast(separator: string): string;
-    tryAfterLast(separator: string): string;
-    tryBeforeLast(separator: string): string;
-
-    firstUpper(): string;
-    firstLower(): string;
 }
 
 String.prototype.hasText = function () {
@@ -474,7 +302,7 @@ String.prototype.forGenderAndNumber = function (gender: any, number?: number) {
 };
 
 
-function isNumber(n: any): boolean {
+export function isNumber(n: any): boolean {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
@@ -565,38 +393,121 @@ if (typeof String.prototype.trim !== 'function') {
 
 
 
-function classes(...classNames: string[]) {
+export function hasFlag(value: number, flag: number): boolean {
+    return (value & flag) == flag;
+}
+
+export module Dic {
+
+    export function getValues<V>(obj: { [key: string]: V }): V[] {
+        var result: V[] = [];
+
+        for (var name in obj) {
+            if (obj.hasOwnProperty(name)) {
+                result.push(obj[name]);
+            }
+        }
+
+        return result;
+    }
+
+    export function getKeys(obj: { [key: string]: any }): string[] {
+        var result: string[] = [];
+
+        for (var name in obj) {
+            if (obj.hasOwnProperty(name)) {
+                result.push(name);
+            }
+        }
+
+        return result;
+    }
+
+    export function map<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V) => R): R[] {
+
+        var result: R[] = [];
+        for (var name in obj) {
+            if (obj.hasOwnProperty(name)) {
+                result.push(selector(name, obj[name]));
+            }
+        }
+        return result;
+    }
+
+    export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void) {
+
+        for (var name in obj) {
+            if (obj.hasOwnProperty(name)) {
+                action(name, obj[name]);
+            }
+        }
+    }
+
+
+    export function addOrThrow<V>(dic: { [key: string]: V }, key: string, value: V, errorContext?: string) {
+        if (dic[key])
+            throw new Error(`Key ${key} already added` + (errorContext ? "in " + errorContext : ""));
+
+        dic[key] = value;
+    }
+
+    export function copy<T>(object: T): T {
+        var objectCopy = <T>{};
+
+        for (var key in object) {
+            if (object.hasOwnProperty(key)) {
+                objectCopy[key] = object[key];
+            }
+        }
+
+        return objectCopy;
+    }
+
+    export function extend<O>(out: O): O;
+    export function extend<O, U>(out: O, arg1: U): O & U;
+    export function extend<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
+    export function extend<O, U, V>(out: O, ...args: Object[]): any;
+    export function extend(out) {
+        out = out || {};
+
+        for (var i = 1; i < arguments.length; i++) {
+
+            var a = arguments[i];
+
+            if (!a)
+                continue;
+
+            for (var key in a) {
+                if (a.hasOwnProperty(key) && a[key] !== undefined)
+                    out[key] = a[key];
+            }
+        }
+
+        return out;
+    };
+
+    /**  Waiting for https://github.com/Microsoft/TypeScript/issues/2103 */
+    export function without<T>(obj: T, toRemove: {}): T {
+        var result = {};
+
+        for (var key in obj) {
+            if (toRemove.hasOwnProperty(key) && !toRemove.hasOwnProperty(key))
+                result[key] = obj[key];
+        }
+
+        return result as T;
+    }
+}
+
+
+
+export function classes(...classNames: string[]) {
     return classNames.filter(a=> a != null && a != "").join(" ");
 }
 
-declare module moment {
-    interface Moment {
-        fromUserInterface(): Moment;
-        toUserInterface(): Moment;
-        
-    }
-
-    interface MomentStatic {
-        smartNow();
-    }
-}
 
 
-function asumeGlobalUtcMode(moment: moment.MomentStatic, utcMode: boolean) {
-    if (utcMode) {
-        moment.fn.fromUserInterface = function () { return this.utc(); };
-        moment.fn.toUserInterface = function () { return this.local(); };
-        moment.smartNow = function () { return moment.utc(); };
-    }
-
-    else {
-        moment.fn.fromUserInterface = function () { return this; };
-        moment.fn.toUserInterface = function () { return this; };
-        moment.smartNow = function () { return moment(); };
-    }
-}
-
-function areEqual<T>(a: T, b: T, field: (value: T) => any) {
+export function areEqual<T>(a: T, b: T, field: (value: T) => any) {
     if (a == null)
         return b == null;
 
@@ -606,10 +517,8 @@ function areEqual<T>(a: T, b: T, field: (value: T) => any) {
     return field(a) == field(b);
 }
 
-
-module DomUtils {
-    export function matches(elem: HTMLElement, selector: string): boolean
-    {
+export module DomUtils {
+    export function matches(elem: HTMLElement, selector: string): boolean {
         // Vendor-specific implementations of `Element.prototype.matches()`.
         var proto = Element.prototype as any;
         var nativeMatches = proto.matches ||

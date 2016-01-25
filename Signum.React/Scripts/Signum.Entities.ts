@@ -1,7 +1,7 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from 'Framework/Signum.React/Scripts/Reflection' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection' 
 
 export interface ModifiableEntity {
     Type: string;
@@ -30,8 +30,8 @@ export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>) {
 export type MList<T> = Array<MListElement<T>>;
 
 export interface MListElement<T> {
+    element: T;
     rowId?: any;
-    element?: T;
 }
 
 export interface Lite<T extends IEntity> {
@@ -93,7 +93,7 @@ export function parseLite(lite: string) : Lite<IEntity> {
     };
 }
 
-import { getTypeInfo } from 'Framework/Signum.React/Scripts/Reflection' 
+import { getTypeInfo } from './Reflection' 
 export function is<T extends IEntity>(a: Lite<T> | T, b: Lite<T> | T) {
 
 	if(!!a != !!b)

@@ -139,22 +139,18 @@
     <Compile Include="ApiControllers\QueryController.cs" />
     <Compile Include="ApiControllers\ReflectionController.cs" />
     <Compile Include="Facades\RefletionCache.cs" />
-    <Compile Include="Facades\AssemblyAreas.cs" />
+    <Compile Include="Facades\SignumControllerFactory.cs" />
     <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="Json\EntityJsonConverter.cs" />
     <Compile Include="Json\LiteJsonConverter.cs" />
-    <Compile Include="PortableAreas\EmbeddedFilesRespository.cs" />
-    <Compile Include="PortableAreas\FileRepositoryManager.cs" />
-    <Compile Include="PortableAreas\StaticContentResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Controllers\ResourcesController.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\Lines.css" />
-    <Content Include="Content\NormalPage.css" />
-    <Content Include="Content\Notify.css" />
-    <Content Include="Content\Search.css" />
-    <Content Include="Content\Widgets.css" />
+    <Content Include="Scripts\Lines\Lines.css" />
+    <Content Include="Scripts\NormalPage\NormalPage.css" />
+    <Content Include="Scripts\Notify.css" />
+    <Content Include="Scripts\SearchControl\Search.css" />
+    <Content Include="Scripts\NormalPage\Widgets.css" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -183,7 +179,14 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="Scripts\Signum.Entities.t4s" />
-    <TypeScriptCompile Include="Exceptions\ExceptionClient.tsx" />
+    <TypeScriptCompile Include="Scripts\ConfigureReactWidgets.ts" />
+    <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
+    <TypeScriptCompile Include="Scripts\Globals.d.ts" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityLine.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityListBase.tsx" />
     <TypeScriptCompile Include="Scripts\Finder.tsx" />
     <TypeScriptCompile Include="Scripts\FindOptions.ts" />
     <TypeScriptCompile Include="Scripts\Lines\Typeahead.tsx" />
@@ -191,6 +194,18 @@
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
     <TypeScriptCompile Include="Scripts\Constructor.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.tsx" />
+    <TypeScriptCompile Include="Scripts\NormalPage\NormalPage.tsx" />
+    <TypeScriptCompile Include="Scripts\NormalPage\NormalPopup.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\ColumnEditor.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\ContextualItems.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\FilterBuilder.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\MultipliedMessage.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\PaginationSelector.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\QueryTokenBuilder.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\SearchControl.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\SearchPage.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\SearchPopup.tsx" />
+    <TypeScriptCompile Include="Scripts\SelectorPopup.tsx" />
     <TypeScriptCompile Include="Scripts\Services.ts" />
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
       <DependentUpon>Signum.Entities.t4s</DependentUpon>
@@ -202,7 +217,7 @@
     <TypeScriptCompile Include="Typings\moment\moment.d.ts" />
     <TypeScriptCompile Include="Typings\react-router\history.d.ts" />
     <TypeScriptCompile Include="Typings\react-bootstrap\react-bootstrap.d.ts" />
-    <TypeScriptCompile Include="Exceptions\Exception.tsx" />
+    <TypeScriptCompile Include="Scripts\Exceptions\Exception.tsx" />
     <TypeScriptCompile Include="Scripts\Lines.tsx" />
     <TypeScriptCompile Include="Scripts\Reflection.ts" />
     <TypeScriptCompile Include="Scripts\TypeContext.ts" />
@@ -212,7 +227,6 @@
     <TypeScriptCompile Include="Typings\react-widgets\react-widgets.d.ts" />
     <TypeScriptCompile Include="Typings\react\react-dom.d.ts" />
     <TypeScriptCompile Include="Typings\react\react.d.ts" />
-    <TypeScriptCompile Include="Typings\requirejs\require.d.ts" />
     <TypeScriptCompile Include="Typings\whatwg-fetch\whatwg-fetch.d.ts" />
   </ItemGroup>
   <PropertyGroup>
@@ -225,7 +239,7 @@
     <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
+    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
     <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
     <TypeScriptOutFile />
     <TypeScriptOutDir />

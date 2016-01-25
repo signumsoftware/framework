@@ -1,32 +1,29 @@
 ﻿/// <reference path="globals.ts" />
 
 import * as React from 'react'
-import * as moment from 'moment'
-import { Input, Tab } from 'react-bootstrap'
-//import { DatePicker } from 'react-widgets'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from 'Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo} from 'Framework/Signum.React/Scripts/Reflection'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from './TypeContext'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo} from './Reflection'
 
-import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, Tasks} from 'Framework/Signum.React/Scripts/Lines/LineBase'
+import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, Tasks} from './Lines/LineBase'
 export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, Tasks};
 
-import { ValueLine, ValueLineType, ValueLineProps } from 'Framework/Signum.React/Scripts/Lines/ValueLine'
+import { ValueLine, ValueLineType, ValueLineProps } from './Lines/ValueLine'
 export { ValueLine, ValueLineType, ValueLineProps};
 
-import { EntityBase, EntityBaseProps } from  'Southwind.React/Templates/EntityControls/EntityBase'
+import { EntityBase, EntityBaseProps } from  './Lines/EntityBase'
 export { EntityBase, EntityBaseProps };
 
-import { EntityLine, EntityLineProps } from  'Southwind.React/Templates/EntityControls/EntityLine'
+import { EntityLine, EntityLineProps } from  './Lines/EntityLine'
 export { EntityLine, EntityLineProps };
 
-import { EntityCombo, EntityComboProps } from  'Southwind.React/Templates/EntityControls/EntityCombo'
+import { EntityCombo, EntityComboProps } from  './Lines/EntityCombo'
 export { EntityCombo, EntityComboProps };
 
-import { EntityListBase, EntityListBaseProps } from  'Southwind.React/Templates/EntityControls/EntityListBase'
+import { EntityListBase, EntityListBaseProps } from  './Lines/EntityListBase'
 export { EntityListBase, EntityListBaseProps };
 
 
-import { EntityList, EntityListProps } from  'Southwind.React/Templates/EntityControls/EntityList'
+import { EntityList, EntityListProps } from  './Lines/EntityList'
 export { EntityList, EntityListProps };
 
 

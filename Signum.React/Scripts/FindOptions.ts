@@ -1,5 +1,5 @@
-﻿import { TypeReference, PropertyRoute } from 'Framework/Signum.React/Scripts/Reflection';
-import { Lite, IEntity, DynamicQuery } from 'Framework/Signum.React/Scripts/Signum.Entities';
+﻿import { TypeReference, PropertyRoute } from './Reflection';
+import { Lite, IEntity, DynamicQuery } from './Signum.Entities';
 
 import PaginationMode = DynamicQuery.PaginationMode;
 import OrderType = DynamicQuery.OrderType;
