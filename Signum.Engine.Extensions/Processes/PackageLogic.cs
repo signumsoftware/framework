@@ -53,9 +53,10 @@ namespace Signum.Engine.Processes
                         pl.Package,
                         pl.Id,
                         pl.Target,
+                        pl.Result,
                         pl.FinishTime,
                         LastProcess = p,
-                        Exception = pl.Exception(p)
+                        Exception = pl.Exception(p),
                     });
 
 

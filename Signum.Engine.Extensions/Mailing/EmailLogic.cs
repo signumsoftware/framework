@@ -49,12 +49,12 @@ namespace Signum.Engine.Mailing
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null, null, null, null)));
         }
 
         public static Func<EmailMessageEntity, SmtpClient> GetSmtpClient;
         
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEntity> getConfiguration, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration,  Func<EmailMessageEntity, SmtpClient> getSmtpClient = null)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationEntity> getConfiguration, Func<EmailTemplateEntity, SmtpConfigurationEntity> getSmtpConfiguration,  Func<EmailMessageEntity, SmtpClient> getSmtpClient = null, FileTypeAlgorithm attachment = null)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {   
@@ -69,6 +69,8 @@ namespace Signum.Engine.Mailing
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailLogic.GetSmtpClient = getSmtpClient;
                 EmailTemplateLogic.Start(sb, dqm, getSmtpConfiguration);
+                if (attachment != null)
+                    FileTypeLogic.Register(EmailFileType.Attachment, attachment);
 
                 Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb, dqm));
 
@@ -237,10 +239,7 @@ namespace Signum.Engine.Mailing
                     {
                         var entity = args.GetArg<Entity>();
 
-                        ISystemEmail systemEmail = et.SystemEmail == null ? null :
-                            (ISystemEmail)SystemEmailLogic.GetEntityConstructor(et.SystemEmail.ToType()).Invoke(new[] { entity });
-
-                        return et.ToLite().CreateEmailMessage(entity, systemEmail).Single();
+                        return et.ToLite().CreateEmailMessage(entity).Single();
                     }
                 }.Register();
 

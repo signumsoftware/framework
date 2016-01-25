@@ -45,6 +45,9 @@ namespace Signum.Engine.Mailing
         }
         
         public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy;
+        
+        public static Polymorphic<Func<IAttachmentGeneratorEntity, EmailTemplateEntity, IEntity, List<EmailAttachmentEntity>>> GenerateAttachment = 
+            new Polymorphic<Func<IAttachmentGeneratorEntity, EmailTemplateEntity, IEntity, List<EmailAttachmentEntity>>>();
 
         public static Func<EmailTemplateEntity, SmtpConfigurationEntity> GetSmtpConfiguration;
 
@@ -210,6 +213,9 @@ namespace Signum.Engine.Mailing
         public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, IEntity entity, ISystemEmail systemEmail = null)
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
+
+            if (template.SystemEmail != null && systemEmail == null)
+                systemEmail = (ISystemEmail)SystemEmailLogic.GetEntityConstructor(template.SystemEmail.ToType()).Invoke(new[] { entity });
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
                 return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();

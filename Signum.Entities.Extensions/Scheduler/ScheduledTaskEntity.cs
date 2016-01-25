@@ -14,7 +14,10 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ScheduledTaskEntity : Entity
     {
-        [ImplementedBy(typeof(ScheduleRuleDailyEntity), typeof(ScheduleRuleWeeklyEntity), typeof(ScheduleRuleWeekDaysEntity), typeof(ScheduleRuleMinutelyEntity), typeof(ScheduleRuleHourlyEntity))]
+        [ImplementedBy(
+            typeof(ScheduleRuleMinutelyEntity), 
+            typeof(ScheduleRuleWeekDaysEntity), 
+            typeof(ScheduleRuleMonthsEntity))]
         [NotNullValidator]
         public IScheduleRuleEntity Rule { get; set; }
 

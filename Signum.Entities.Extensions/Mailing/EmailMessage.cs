@@ -371,7 +371,9 @@ namespace Signum.Entities.Mailing
     [AutoInit]
     public static class EmailMessageProcess
     {
+        public static readonly ProcessAlgorithmSymbol CreateEmailsSendAsync;
         public static ProcessAlgorithmSymbol SendEmails;
+
     }
 
     [AutoInit]

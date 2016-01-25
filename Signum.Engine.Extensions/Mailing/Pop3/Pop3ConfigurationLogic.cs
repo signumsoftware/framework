@@ -65,13 +65,11 @@ namespace Signum.Engine.Mailing.Pop3
 
         public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client, FileTypeAlgorithm attachment)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 GetPop3Client = getPop3Client;
-
-                FileTypeLogic.Register(EmailFileType.Attachment, attachment);
 
                 MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
 

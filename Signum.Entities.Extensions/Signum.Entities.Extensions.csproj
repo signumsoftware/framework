@@ -100,6 +100,7 @@
     <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
     <Compile Include="DiffLog\DiffLogMixin.cs" />
     <Compile Include="DiffLog\Services.cs" />
+    <Compile Include="Excel\ExcelAttachmentEntity.cs" />
     <Compile Include="Files\EmbeddedFile.cs" />
     <Compile Include="Files\FileUtils.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationEntity.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
+    <Compile Include="Mailing\SendEmailTask.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
     <Compile Include="Mailing\SystemEmail.cs" />
     <Compile Include="Map\MapMessage.cs" />

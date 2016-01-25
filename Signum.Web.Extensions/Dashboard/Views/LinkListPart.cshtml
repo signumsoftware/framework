@@ -9,7 +9,7 @@
         @foreach (LinkElementEntity link in Model.Value.Links)
         {
             <li>
-                @Html.Href(link.Link, link.Label.DefaultText(link.Link))
+                @Html.Href(Url.Content(link.Link), link.Label.DefaultText(link.Link))
             </li>
         }
     </ul>

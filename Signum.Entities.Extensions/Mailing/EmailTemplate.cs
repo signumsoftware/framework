@@ -15,6 +15,7 @@ using Signum.Entities.Translation;
 using System.Reflection;
 using Signum.Entities.UserAssets;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Entities.Mailing
 {
@@ -53,6 +54,9 @@ namespace Signum.Entities.Mailing
         [NotNullValidator, NoRepeatValidator]
         public MList<EmailTemplateRecipientEntity> Recipients { get; set; } = new MList<EmailTemplateRecipientEntity>();
 
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator, ImplementedBy()]
+        public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
         public Lite<EmailMasterTemplateEntity> MasterTemplate { get; set; }
 
@@ -237,6 +241,11 @@ namespace Signum.Entities.Mailing
         {
             return CultureInfo?.ToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
         }
+    }
+
+    public interface IAttachmentGeneratorEntity : IEntity
+    {
+        
     }
 
     [AutoInit]

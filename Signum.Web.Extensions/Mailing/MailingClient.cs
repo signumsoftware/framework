@@ -52,7 +52,7 @@ namespace Signum.Web.Mailing
             return new QueryTokenEntity(QueryUtils.Parse(tokenString, qd, SubTokensOptions.CanElement));
         }
 
-        public static void Start(bool smtpConfig, bool newsletter, bool pop3Config, Type[] quickLinkFrom)
+        public static void Start(bool smtpConfig, bool newsletter, bool pop3Config, bool emailReport, Type[] quickLinkFrom)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -163,12 +163,22 @@ namespace Signum.Web.Mailing
                     });
                 }
 
-                if (pop3Config)
-                    Navigator.AddSettings(new List<EntitySettings>
+                if (emailReport)
                 {
-                    new EntitySettings<Pop3ConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Configuration") },
-                    new EntitySettings<Pop3ReceptionEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Reception") },
-                });
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<SendEmailTaskEntity> { PartialViewName = e => ViewPrefix.FormatWith("SendEmailTask") }
+                    });
+                }
+
+                if (pop3Config)
+                {
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<Pop3ConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Configuration") },
+                        new EntitySettings<Pop3ReceptionEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Reception") },
+                    });
+                }
 
                 if (quickLinkFrom != null)
                 {

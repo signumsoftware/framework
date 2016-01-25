@@ -29,7 +29,7 @@ namespace Signum.Web.Excel
         public static bool ToExcelPlain { get; private set; }
         public static bool ExcelReport { get; private set; }
 
-        public static void Start(bool toExcelPlain, bool excelReport)
+        public static void Start(bool toExcelPlain, bool excelReport, bool excelAttachment)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -46,17 +46,15 @@ namespace Signum.Web.Excel
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryEntity)))
                         Navigator.Manager.EntitySettings.Add(typeof(QueryEntity), new EntitySettings<QueryEntity>());
 
-                    
-                    Navigator.AddSettings(new List<EntitySettings>{
-                        new EntitySettings<ExcelReportEntity> 
-                        { 
-                            PartialViewName = _ => ViewPrefix.FormatWith("ExcelReport"),
-                        }
-                    });
+
+                    Navigator.AddSetting(new EntitySettings<ExcelReportEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ExcelReport") });
                 }
 
                 if (toExcelPlain || excelReport)
-                    ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName); 
+                    ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
+
+                if (excelAttachment)
+                    Navigator.AddSetting(new EntitySettings<ExcelAttachmentEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ExcelAttachment") });
             }
         }
 
@@ -64,11 +62,11 @@ namespace Signum.Web.Excel
         {
             if (ctx.Prefix.HasText())
                 return null;
-            
-            if (ExcelReport) 
+
+            if (ExcelReport)
             {
                 var items = new List<IMenuItem>();
-                
+
                 if (ToExcelPlain)
                     items.Add(PlainExcel(ctx).ToMenuItem());
 
@@ -85,34 +83,34 @@ namespace Signum.Web.Excel
                         {
                             Title = report.ToString(),
                             Text = report.ToString(),
-                            OnClick = Module["toExcelReport"](ctx.Prefix, ctx.Url.Action("ExcelReport", "Report"), report.Key()),
+                            OnClick = Module["toExcelReport"](ctx.Prefix, ctx.Url.Action("ExcelReport", "Excel"), report.Key()),
                         });
                     }
                 }
 
                 items.Add(new MenuItemSeparator());
 
-                var current =  QueryLogic.GetQueryEntity(ctx.QueryName).ToLite().Key();
+                var current = QueryLogic.GetQueryEntity(ctx.QueryName).ToLite().Key();
 
                 items.Add(new MenuItem(ctx.Prefix, "qbReportAdminister")
                 {
                     Title = ExcelMessage.Administer.NiceToString(),
                     Text = ExcelMessage.Administer.NiceToString(),
-                    OnClick = Module["administerExcelReports"](ctx.Prefix, Finder.ResolveWebQueryName(typeof(ExcelReportEntity)),current),
+                    OnClick = Module["administerExcelReports"](ctx.Prefix, Finder.ResolveWebQueryName(typeof(ExcelReportEntity)), current),
                 });
 
                 items.Add(new MenuItem(ctx.Prefix, "qbReportCreate")
                 {
                     Title = ExcelMessage.CreateNew.NiceToString(),
                     Text = ExcelMessage.CreateNew.NiceToString(),
-                    OnClick = Module["createExcelReports"](ctx.Prefix, ctx.Url.Action("Create", "Report"),current),
+                    OnClick = Module["createExcelReports"](ctx.Prefix, ctx.Url.Action("Create", "Excel"), current),
                 });
 
                 return new ToolBarButton[]
                 {
                     new ToolBarDropDown(ctx.Prefix, "tmExcel")
-                    { 
-                        Title = "Excel", 
+                    {
+                        Title = "Excel",
                         Text = "Excel",
                         Items = items
                     }
@@ -133,7 +131,7 @@ namespace Signum.Web.Excel
             {
                 Title = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
-                OnClick = Module["toPlainExcel"](ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report"))
+                OnClick = Module["toPlainExcel"](ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Excel"))
             };
         }
 

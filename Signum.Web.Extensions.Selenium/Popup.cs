@@ -130,6 +130,10 @@ namespace Signum.Web.Selenium
         }
 
 
+        public void WaitNotVisible()
+        {
+            Selenium.WaitElementNotVisible(PopupLocator);
+        }
     }
 
     public class ChooserPopup : Popup
@@ -281,6 +285,7 @@ namespace Signum.Web.Selenium
         {
             return this.RuntimeInfo().IdOrNull.HasValue;
         }
+
     }
 
 

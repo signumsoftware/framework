@@ -83,10 +83,15 @@ namespace Signum.Web.Selenium
             container.ButtonClick(symbol.Symbol.KeyWeb());
         }
 
-        public static void ExecuteAjax<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol)
+        public static void ExecuteAjax<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false)
             where T : Entity
         {
-            container.WaitReload(() => container.OperationClick(symbol));
+            container.WaitReload(() =>
+            {
+                container.OperationClick(symbol);
+                if (consumeAlert)
+                    container.Selenium.ConsumeAlert();
+            });
         }
 
         public static void WaitReload(this IEntityButtonContainer container, Action action)
@@ -105,14 +110,24 @@ namespace Signum.Web.Selenium
             container.WaitLoadedAndId();
         }
 
-        public static SearchPageProxy DeleteSubmit<T>(this IEntityButtonContainer<T> container, DeleteSymbol<T> symbol)
+        public static SearchPageProxy DeleteSubmit<T>(this NormalPage<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
+         where T : Entity
+        {
+            container.OperationClick(symbol);
+            if (consumeAlert)
+                container.Selenium.ConsumeAlert();
+
+            return new SearchPageProxy(container.Selenium).WaitLoaded();
+        }
+
+        public static void DeleteAjax<T>(this PopupControl<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
               where T : Entity
         {
             container.OperationClick(symbol);
-            container.Selenium.ConsumeAlert();
+            if (consumeAlert)
+                container.Selenium.ConsumeAlert();
 
-
-            return new SearchPageProxy(container.Selenium).WaitLoaded();
+            container.WaitNotVisible();
         }
 
         public static NormalPage<T> ConstructFromNormalPageSaved<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)

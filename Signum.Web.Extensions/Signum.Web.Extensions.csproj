@@ -65,8 +65,8 @@
       <Private>True</Private>
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Activities" />
@@ -288,6 +288,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Excel\Views\ExcelAttachment.generated.cs">
+      <DependentUpon>ExcelAttachment.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Help\HelpTranslator.cs" />
     <Compile Include="Files\Views\FilePath.generated.cs">
       <AutoGen>True</AutoGen>
@@ -343,6 +348,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailMasterTemplateMessage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\SendEmailTask.generated.cs">
+      <DependentUpon>SendEmailTask.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Mailing\Views\Pop3Reception.generated.cs">
       <DependentUpon>Pop3Reception.cshtml</DependentUpon>
@@ -846,16 +856,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ScheduledTask.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\ScheduleRuleDaily.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ScheduleRuleDaily.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Scheduler\Views\ScheduleRuleHourly.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ScheduleRuleHourly.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Scheduler\Views\ScheduleRuleMinutely.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -866,10 +866,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ScheduleRuleWeekDays.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\ScheduleRuleWeekly.generated.cs">
+    <Compile Include="Scheduler\Views\ScheduleRuleMonths.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ScheduleRuleWeekly.cshtml</DependentUpon>
+      <DependentUpon>ScheduleRuleMonths.cshtml</DependentUpon>
     </Compile>
     <Compile Include="SMS\Controllers\SMSController.cs" />
     <Compile Include="SMS\SMSClient.cs" />
@@ -982,7 +982,7 @@
       <DependentUpon>QueryOrder.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Excel\ExcelClient.cs" />
-    <Compile Include="Excel\Controllers\ReportController.cs" />
+    <Compile Include="Excel\Controllers\ExcelController.cs" />
     <Compile Include="Scheduler\SchedulerClient.cs" />
     <Compile Include="Combine\CombineController.cs" />
     <Compile Include="Combine\CombineClient.cs" />
@@ -1403,10 +1403,10 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PackageOperation.generated.cs</LastGenOutput>
     </Content>
-    <EmbeddedResource Include="Disconnected\Views\DisconnectedImport.cshtml">
+    <Content Include="Disconnected\Views\DisconnectedImport.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DisconnectedImport.generated.cs</LastGenOutput>
-    </EmbeddedResource>
+    </Content>
     <Content Include="Disconnected\Views\DisconnectedMachine.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DisconnectedMachine.generated.cs</LastGenOutput>
@@ -1541,6 +1541,14 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>OperationMap.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="Mailing\Views\SendEmailTask.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SendEmailTask.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Excel\Views\ExcelAttachment.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ExcelAttachment.generated.cs</LastGenOutput>
+    </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Times.generated.cs</LastGenOutput>
@@ -1578,10 +1586,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduleRuleMinutely.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Scheduler\Views\ScheduleRuleHourly.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ScheduleRuleHourly.generated.cs</LastGenOutput>
-    </Content>
     <Content Include="Scheduler\Views\SimpleTask.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SimpleTask.generated.cs</LastGenOutput>
@@ -1590,17 +1594,13 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SchedulerPanel.generated.cs</LastGenOutput>
     </Content>
-    <None Include="Scheduler\Views\ScheduleRuleDaily.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ScheduleRuleDaily.generated.cs</LastGenOutput>
-    </None>
     <None Include="Scheduler\Views\ScheduleRuleWeekDays.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduleRuleWeekDays.generated.cs</LastGenOutput>
     </None>
-    <None Include="Scheduler\Views\ScheduleRuleWeekly.cshtml">
+    <None Include="Scheduler\Views\ScheduleRuleMonths.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ScheduleRuleWeekly.generated.cs</LastGenOutput>
+      <LastGenOutput>ScheduleRuleMonths.generated.cs</LastGenOutput>
     </None>
     <None Include="Scheduler\Views\ScheduledTask.cshtml">
       <Generator>RazorGenerator</Generator>
