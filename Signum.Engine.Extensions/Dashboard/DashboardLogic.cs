@@ -18,6 +18,7 @@ using Signum.Entities.Chart;
 using Signum.Entities.Basics;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Engine.Dashboard
 {
@@ -32,7 +33,7 @@ namespace Signum.Engine.Dashboard
             {
                 PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
 
-                UserAssetsImporter.UserAssetNames.Add("Dashboard", typeof(DashboardEntity));
+                UserAssetsImporter.RegisterName<DashboardEntity>("Dashboard");
 
                 UserAssetsImporter.PartNames.AddRange(new Dictionary<string, Type>
                 {
