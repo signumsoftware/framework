@@ -1,0 +1,11 @@
+﻿@using Signum.Entities.Mailing
+@using Signum.Web.Mailing
+@using (var sc = Html.TypeContext<SendEmailTaskEntity>())
+{
+    @Html.ValueLine(sc, s => s.Name)
+    @Html.EntityLine(sc, s => s.EmailTemplate, el => el.AttachFunction = MailingClient.Module["attachEmailReportTemplate"](el,
+    sc.SubContextPrefix(a => a.UniqueTarget),
+    Url.Action((MailingController c) => c.GetEmailTemplateEntityImplementations())))
+    @Html.EntityLine(sc, s => s.TargetsFromUserQuery)
+    @Html.EntityLine(sc, s => s.UniqueTarget, el => { el.Autocomplete = true; el.Find = true; })
+}

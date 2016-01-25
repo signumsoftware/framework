@@ -239,10 +239,7 @@ namespace Signum.Engine.Mailing
                     {
                         var entity = args.GetArg<Entity>();
 
-                        ISystemEmail systemEmail = et.SystemEmail == null ? null :
-                            (ISystemEmail)SystemEmailLogic.GetEntityConstructor(et.SystemEmail.ToType()).Invoke(new[] { entity });
-
-                        return et.ToLite().CreateEmailMessage(entity, systemEmail).Single();
+                        return et.ToLite().CreateEmailMessage(entity).Single();
                     }
                 }.Register();
 

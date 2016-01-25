@@ -110,14 +110,24 @@ namespace Signum.Web.Selenium
             container.WaitLoadedAndId();
         }
 
-        public static SearchPageProxy DeleteSubmit<T>(this IEntityButtonContainer<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
-              where T : Entity
+        public static SearchPageProxy DeleteSubmit<T>(this NormalPage<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
+         where T : Entity
         {
             container.OperationClick(symbol);
             if (consumeAlert)
                 container.Selenium.ConsumeAlert();
 
             return new SearchPageProxy(container.Selenium).WaitLoaded();
+        }
+
+        public static void DeleteAjax<T>(this PopupControl<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
+              where T : Entity
+        {
+            container.OperationClick(symbol);
+            if (consumeAlert)
+                container.Selenium.ConsumeAlert();
+
+            container.WaitNotVisible();
         }
 
         public static NormalPage<T> ConstructFromNormalPageSaved<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)

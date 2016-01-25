@@ -22,7 +22,8 @@ namespace Signum.Entities.Scheduler
         {
             DateTime candidate = now.TrimToMinutes();
 
-            candidate = candidate.AddMinutes(-(candidate.Minute % EachMinutes));
+            if (this.IsAligned)
+                candidate = candidate.AddMinutes(-(candidate.Minute % EachMinutes));
 
             if (candidate < now)
                 candidate = candidate.AddMinutes(EachMinutes);
@@ -30,129 +31,22 @@ namespace Signum.Entities.Scheduler
             return candidate;
         }
         
-        [NumberBetweenValidator(1, 60)]
         public int EachMinutes { get; set; }
+
+        public bool IsAligned => EachMinutes < 60 && (60 % EachMinutes == 0);
 
         public override string ToString()
         {
             return SchedulerMessage.Each0Minutes.NiceToString().FormatWith(EachMinutes.ToString());
         }
 
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Name == nameof(EachMinutes))
-            {
-                if ((60 % EachMinutes) != 0)
-                    return SchedulerMessage._0IsNotMultiple1.NiceToString().FormatWith(pi.NiceName(), 60);
-            }
-
-            return base.PropertyValidation(pi);
-        }
     }
 
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleHourlyEntity : Entity, IScheduleRuleEntity
-    {
-        public DateTime Next(DateTime now)
-        {
-            DateTime candidate = now.TrimToHours();
-
-            candidate = candidate.AddHours(-(candidate.Hour % EachHours));
-
-            if (candidate < now)
-                candidate = candidate.AddHours(EachHours);
-
-            return candidate;
-        }
-
-        [NumberBetweenValidator(1, 24)]
-        public int EachHours { get; set; }
-
-        public override string ToString()
-        {
-            return SchedulerMessage.Each0Hours.NiceToString().FormatWith(EachHours.ToString());
-        }
-
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Name == nameof(EachHours))
-            {
-                if ((24 % EachHours) != 0)
-                    return SchedulerMessage._0IsNotMultiple1.NiceToString().FormatWith(pi.NiceName(), 24);
-            }
-
-            return base.PropertyValidation(pi);
-        }
-    }
-
-
-
-
-    [Serializable]
-    public abstract class ScheduleRuleDayEntity : Entity, IScheduleRuleEntity
+    public class ScheduleRuleWeekDaysEntity :  Entity, IScheduleRuleEntity
     {
         public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;
 
-        public abstract DateTime Next(DateTime now);
-
-        protected DateTime BaseNext(DateTime now)
-        {
-            DateTime result = DateTimeExtensions.Max(now.Date, StartingOn.Date).Add(StartingOn.TimeOfDay);
-
-            if (result < now)
-                result = result.AddDays(1);
-
-            return result;
-        }
-
-        public override string ToString()
-        {
-            return StartingOn.ToUserInterface().ToShortTimeString();
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleDailyEntity : ScheduleRuleDayEntity
-    {
-        public override string ToString()
-        {
-            return SchedulerMessage.ScheduleRuleDailyDN_Everydayat.NiceToString() + base.ToString();
-        }
-
-        public override DateTime Next(DateTime now)
-        {
-            return BaseNext(now);
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleWeeklyEntity : ScheduleRuleDayEntity
-    {
-        public DayOfWeek DayOfTheWeek { get; set; }
-
-        public override string ToString()
-        {
-            return "{0} {1} {2}".FormatWith(
-                CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)DayOfTheWeek],
-                SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
-                base.ToString());
-        }
-
-
-        public override DateTime Next(DateTime now)
-        {
-            DateTime result = BaseNext(now);
-
-            while (result.DayOfWeek != DayOfTheWeek)
-                result = result.AddDays(1);
-
-            return result;
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleWeekDaysEntity : ScheduleRuleDayEntity
-    {
         public bool Monday { get; set; }
 
         public bool Tuesday { get; set; }
@@ -171,9 +65,12 @@ namespace Signum.Entities.Scheduler
 
         public bool Holiday { get; set; }
 
-        public override DateTime Next(DateTime now)
+        public DateTime Next(DateTime now)
         {
-            DateTime result = BaseNext(now);
+            DateTime result = DateTimeExtensions.Max(now.Date, StartingOn.Date).Add(StartingOn.TimeOfDay);
+
+            if (result < now)
+                result = result.AddDays(1);
 
             while (!IsAllowed(result.Date))
                 result = result.AddDays(1);
@@ -199,6 +96,14 @@ namespace Signum.Entities.Scheduler
             }
         }
 
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(Monday) && !(Monday || Tuesday || Wednesday || Thursday || Friday || Saturday || Sunday || Holiday))
+                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+            return base.PropertyValidation(pi);
+        }
+
         public override string ToString()
         {
             return "{0} {1} {2} {3}".FormatWith(
@@ -211,14 +116,80 @@ namespace Signum.Entities.Scheduler
                 (Sunday ? SchedulerMessage.ScheduleRuleWeekDaysDN_S.NiceToString() : ""),
                 (Calendar != null ? (Holiday ? SchedulerMessage.ScheduleRuleWeekDaysDN_AndHoliday.NiceToString() : SchedulerMessage.ScheduleRuleWeekDaysDN_ButHoliday.NiceToString()) : null),
                 SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
-                base.ToString());
+                StartingOn.ToUserInterface().ToShortTimeString());
+        }
+    }
+
+
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    public class ScheduleRuleMonthsEntity : Entity, IScheduleRuleEntity
+    {
+        public DateTime StartingOn { get; set; } = TimeZoneManager.Now.Date;
+
+        public bool January { get; set; }
+        public bool February { get; set; }
+        public bool March { get; set; }
+        public bool April { get; set; }
+        public bool May { get; set; }
+        public bool June { get; set; }
+        public bool July { get; set; }
+        public bool August{ get; set; }
+        public bool September { get; set; }
+        public bool October { get; set; }
+        public bool November { get; set; }
+        public bool December { get; set; }
+        
+        public DateTime Next(DateTime now)
+        {
+            DateTime result = DateTimeExtensions.Max(now.Date, StartingOn.Date).MonthStart().AddDays(StartingOn.Day).Add(StartingOn.TimeOfDay);
+
+            if (result < now)
+                result = result.AddMonths(1);
+
+            while (!IsAllowed(result.Month))
+                result = result.AddMonths(1);
+
+            return result;
+        }
+
+        bool IsAllowed(int month)
+        {
+            switch (month)
+            {
+                case 1: return January;
+                case 2: return February;
+                case 3: return March;
+                case 4: return April;
+                case 5: return May;
+                case 6: return June;
+                case 7: return July;
+                case 8: return August;
+                case 9: return September;
+                case 10: return October;
+                case 11: return November;
+                case 12: return December;
+                default: throw new InvalidOperationException();
+            }
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(January) && !(0.To(12).Any(i => IsAllowed(i + 1))))
+                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+            return base.PropertyValidation(pi);
+        }
+
+        public override string ToString()
+        {
+            var monthNames = 0.To(12).Where(i => IsAllowed(i + 1)).CommaAnd(i => CultureInfo.CurrentCulture.DateTimeFormat.MonthNames[i]);
+
+            return SchedulerMessage.Day0At1In2.NiceToString(StartingOn.Day, StartingOn.ToUserInterface().ToShortTimeString(), monthNames);
         }
     }
 
     public enum SchedulerMessage
     {
-        [Description("{0} is not multiple of {1}")]
-        _0IsNotMultiple1,
         [Description("Each {0} hours")]
         Each0Hours,
         [Description("Each {0} minutes")]
@@ -276,7 +247,9 @@ namespace Signum.Entities.Scheduler
         [Description("Weekly")]
         ScheduleRuleWeeklyEntity,
         [Description("Day of the week")]
-        ScheduleRuleWeeklyDN_DayOfTheWeek
+        ScheduleRuleWeeklyDN_DayOfTheWeek,
+        [Description("Day {0} at {1} in {2}")]
+        Day0At1In2
     }
 
 }

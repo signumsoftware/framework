@@ -77,7 +77,7 @@ namespace Signum.Engine.UserQueries
             }
         }
 
-        internal static QueryRequest GetQueryRequest(UserQueryEntity userQuery)
+        public static QueryRequest ToQueryRequest(this UserQueryEntity userQuery)
         {
             var qr = new QueryRequest();
 

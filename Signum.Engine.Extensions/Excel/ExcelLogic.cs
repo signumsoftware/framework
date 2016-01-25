@@ -84,7 +84,7 @@ namespace Signum.Engine.Excel
 
                     using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
                     {
-                        QueryRequest request = UserQueryLogic.GetQueryRequest(uqe.UserQuery.Retrieve());
+                        QueryRequest request = UserQueryLogic.ToQueryRequest(uqe.UserQuery.Retrieve());
 
                         var bytes = ExcelLogic.ExecutePlainExcel(request);
 
@@ -92,8 +92,8 @@ namespace Signum.Engine.Excel
                         {
                             new EmailAttachmentEntity
                             {
-                                File = new Entities.Files.EmbeddedFilePathEntity(EmailFileType.Attachment, uqe.FileName, bytes),
-                                Type = EmailAttachmentType.Attachment
+                                File = Files.EmbeddedFilePathLogic.SaveFile(new Entities.Files.EmbeddedFilePathEntity(EmailFileType.Attachment, uqe.FileName, bytes)),
+                                Type = EmailAttachmentType.Attachment,
                             }
                         };
                     }

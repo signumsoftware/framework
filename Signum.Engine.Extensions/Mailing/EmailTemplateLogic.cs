@@ -214,6 +214,9 @@ namespace Signum.Engine.Mailing
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
 
+            if (template.SystemEmail != null && systemEmail == null)
+                systemEmail = (ISystemEmail)SystemEmailLogic.GetEntityConstructor(template.SystemEmail.ToType()).Invoke(new[] { entity });
+
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
                 return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();
         }

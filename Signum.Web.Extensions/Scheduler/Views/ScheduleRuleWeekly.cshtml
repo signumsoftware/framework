@@ -1,8 +1,0 @@
-﻿@using Signum.Engine
-@using Signum.Entities.Scheduler
-
-@using (var e = Html.TypeContext<ScheduleRuleWeeklyEntity>())
-{
-    @Html.ValueLine(e, f => f.DayOfTheWeek)
-    @Html.ValueLine(e, f => f.StartingOn)
-}

@@ -1,0 +1,31 @@
+﻿@using Signum.Engine
+@using Signum.Entities.Scheduler
+
+@using (var e = Html.TypeContext<ScheduleRuleMonthsEntity>())
+{
+    e.LabelColumns = new BsColumn(4);
+    <div class="row">
+        <div class="col-sm-3">
+            @Html.ValueLine(e, f => f.January)
+            @Html.ValueLine(e, f => f.February)
+            @Html.ValueLine(e, f => f.March)
+        </div>
+        <div class="col-sm-3">
+            @Html.ValueLine(e, f => f.April)
+            @Html.ValueLine(e, f => f.March)
+            @Html.ValueLine(e, f => f.June)
+        </div>
+        <div class="col-sm-3">
+            @Html.ValueLine(e, f => f.July)
+            @Html.ValueLine(e, f => f.August)
+            @Html.ValueLine(e, f => f.September)
+        </div>
+        <div class="col-sm-3">
+            @Html.ValueLine(e, f => f.October)
+            @Html.ValueLine(e, f => f.November)
+            @Html.ValueLine(e, f => f.December)
+        </div>
+    </div>
+
+    @Html.ValueLine(e, f => f.StartingOn)
+}

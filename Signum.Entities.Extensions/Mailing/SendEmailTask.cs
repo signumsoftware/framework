@@ -8,11 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using Signum.Entities.Scheduler;
+using Signum.Entities.UserQueries;
+using Signum.Entities.Processes;
 
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
-    public class EmailReportEntity : Entity, ITaskEntity
+    public class SendEmailTaskEntity : Entity, ITaskEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -23,9 +25,11 @@ namespace Signum.Entities.Mailing
         public Lite<EmailTemplateEntity> EmailTemplate { get; set; }
 
         [ImplementedByAll]
-        public Lite<Entity> Target { get; set; }
+        public Lite<Entity> UniqueTarget { get; set; }
 
-        static Expression<Func<EmailReportEntity, string>> ToStringExpression = @this => @this.Name;
+        public Lite<UserQueryEntity> TargetsFromUserQuery { get; set; }
+
+        static Expression<Func<SendEmailTaskEntity, string>> ToStringExpression = @this => @this.Name;
         [ExpressionField]
         public override string ToString()
         {
@@ -34,8 +38,8 @@ namespace Signum.Entities.Mailing
     }
 
     [AutoInit]
-    public static class EmailReportOperation
+    public static class SendEmailTaskOperation
     {
-        public static readonly ExecuteSymbol<EmailReportEntity> Save;
+        public static readonly ExecuteSymbol<SendEmailTaskEntity> Save;
     }
 }
