@@ -119,22 +119,27 @@ namespace Signum.Engine.Authorization
 
         public static bool IsAuthorized(this PermissionSymbol permissionSymbol)
         {
+            AssertRegistered(permissionSymbol);
+
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal || cache == null)
                 return true;
 
             return cache.GetAllowed(RoleEntity.Current.ToLite(), permissionSymbol);
         }
-
+        
         public static bool IsAuthorized(this PermissionSymbol permissionSymbol, Lite<RoleEntity> role)
         {
-            //if (permissionSymbol == BasicPermission.AutomaticUpgradeOfOperations ||
-            //  permissionSymbol == BasicPermission.AutomaticUpgradeOfProperties ||
-            //  permissionSymbol == BasicPermission.AutomaticUpgradeOfQueries)
-            //    return true;
+            AssertRegistered(permissionSymbol);
 
             return cache.GetAllowed(role, permissionSymbol);
         }
 
+        private static void AssertRegistered(PermissionSymbol permissionSymbol)
+        {
+            if (!permissions.Contains(permissionSymbol))
+                throw new InvalidOperationException($"The permission '{permissionSymbol}' has not been registered");
+        }
+        
         public static DefaultDictionary<PermissionSymbol, bool> ServicePermissionRules()
         {
             return cache.GetDefaultDictionary();

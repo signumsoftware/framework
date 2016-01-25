@@ -142,6 +142,7 @@
     <Compile Include="Isolation\IsolationLogic.cs" />
     <Compile Include="Mailing\AsyncEmailSenderLogic.cs" />
     <Compile Include="Mailing\EmailReportLogic.cs" />
+    <Compile Include="Map\MapLogic.cs" />
     <Compile Include="Templating\CommonTemplate.cs" />
     <Compile Include="Mailing\EmailMasterTemplateLogic.cs" />
     <Compile Include="Mailing\EmailTemplateParser.Nodes.cs" />
