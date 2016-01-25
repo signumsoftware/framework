@@ -18,7 +18,7 @@ namespace Signum.Entities
     {
         public static Exception ArgumentNullException(Type argumentType, string argumentName)
         {
-            return new ArgumentNullException(argumentName, $"The argument '{argumentName}' of type '{argumentType.TypeName()}' is null. \r\nAre you missing an [AutoInit] attribute?");
+            return new ArgumentNullException(argumentName, $"The argument '{argumentName}' of type '{argumentType.TypeName()}' is null. Are you missing an [AutoInit] attribute?");
         }
     }
 

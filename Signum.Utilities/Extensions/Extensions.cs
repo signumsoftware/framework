@@ -262,7 +262,6 @@ namespace Signum.Utilities
             return t;
         }
 
-        #region Map Try Do TryDo
         public static R Let<T, R>(this T t, Func<T, R> func)
         {
             return func(t);
@@ -273,7 +272,6 @@ namespace Signum.Utilities
             action(t);
             return t;
         }
-        #endregion
 
         public static IEnumerable<int> To(this int start, int endNotIncluded)
         {

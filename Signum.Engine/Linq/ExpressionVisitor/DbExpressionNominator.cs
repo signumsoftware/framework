@@ -12,6 +12,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using Signum.Engine.Maps;
 using System.Data;
+using System.Globalization;
 using Signum.Entities.Reflection;
 using Microsoft.SqlServer.Types;
 using Microsoft.SqlServer.Server;
@@ -1128,7 +1129,13 @@ namespace Signum.Engine.Linq
                 case "DateTimeExtensions.YearsTo": return TryDatePartTo(new SqlEnumExpression(SqlEnums.year), m.GetArgument("start"), m.GetArgument("end"));
                 case "DateTimeExtensions.MonthsTo": return TryDatePartTo(new SqlEnumExpression(SqlEnums.month), m.GetArgument("start"), m.GetArgument("end"));
 
-                case "DateTimeExtensions.WeekNumber": return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.week), m.Arguments.Single());
+                case "DateTimeExtensions.WeekNumber":
+                {
+                    if (CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule == CalendarWeekRule.FirstFourDayWeek)
+                        return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.iso_week), m.Arguments.Single());
+
+                    return TrySqlFunction(null, SqlFunction.DATEPART, m.Type, new SqlEnumExpression(SqlEnums.week), m.Arguments.Single());
+                }
 
                 case "Math.Sign": return TrySqlFunction(null, SqlFunction.SIGN, m.Type, m.GetArgument("value"));
                 case "Math.Abs": return TrySqlFunction(null, SqlFunction.ABS, m.Type, m.GetArgument("value"));
@@ -1161,7 +1168,16 @@ namespace Signum.Engine.Linq
                         return Visit(m.GetArgument("value"));
                     }
                 case "StringExtensions.Etc": return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
-                default: return null; 
+
+
+                case "decimal.Parse": return Add(new SqlCastExpression(typeof(decimal), m.GetArgument("s")));
+                case "double.Parse": return Add(new SqlCastExpression(typeof(double), m.GetArgument("s")));
+                case "float.Parse": return Add(new SqlCastExpression(typeof(float), m.GetArgument("s")));
+                case "byte.Parse": return Add(new SqlCastExpression(typeof(byte), m.GetArgument("s")));
+                case "short.Parse": return Add(new SqlCastExpression(typeof(short), m.GetArgument("s")));
+                case "int.Parse": return Add(new SqlCastExpression(typeof(int), m.GetArgument("s")));
+                case "long.Parse": return Add(new SqlCastExpression(typeof(long), m.GetArgument("s")));
+                default: return null;
             }
         }
 

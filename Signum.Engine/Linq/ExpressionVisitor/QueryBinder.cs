@@ -1976,6 +1976,12 @@ namespace Signum.Engine.Linq
                 map.Remove(param);
             }
 
+            var entityTable = table as Table;
+            if(entityTable != null && entityTable.Ticks != null && assignments.None(b => b.Column == entityTable.Ticks.Name))
+            {
+                assignments.Add(new ColumnAssignment(entityTable.Ticks.Name, Expression.Constant(0L, typeof(long))));
+            }
+
             var result = new CommandAggregateExpression(new CommandExpression[]
             { 
                 new InsertSelectExpression(table, pr.Select, assignments),
@@ -3178,7 +3184,7 @@ namespace Signum.Engine.Linq
             var bindings = (from kvp in embedded.FieldEmbedded.EmbeddedFields
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi,
-                                !(fi.FieldType.IsByRef || fi.FieldType.IsNullable()) ? dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") :
+                                !(fi.FieldType.IsClass || fi.FieldType.IsNullable()) ? dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") :
                                 (dic.TryGetC(fi.Name) ?? Expression.Constant(null, fi.FieldType)))
                             ).ToReadOnly();
 
