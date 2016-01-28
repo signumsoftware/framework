@@ -355,7 +355,7 @@ namespace Signum.Web.Operations
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order : 0,
 
                 Text = ctx.OperationSettings?.Text ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.OperationSymbol.NiceToString() : group.SimplifyName(ctx.OperationInfo.OperationSymbol.NiceToString())),
-                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)),
+                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) ?? DefaultClick(ctx) : DefaultClick(ctx)),
                 HtmlProps = { { "data-operation", ctx.OperationInfo.OperationSymbol.Key } },
 
                 Tag = ctx,
@@ -623,7 +623,7 @@ namespace Signum.Web.Operations
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order : 0,
 
                 Text = ctx.OperationSettings?.Text ?? ctx.OperationInfo.OperationSymbol.NiceToString(),
-                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) : defaultClick(ctx)),
+                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.HasClick) ? ctx.OperationSettings.OnClick(ctx) ?? defaultClick(ctx) : defaultClick(ctx)),
 
                 Tag = ctx,
             };

@@ -556,7 +556,7 @@ namespace Signum.Engine.CodeGeneration
 
             WriteAttributeTag(sb, GetFieldAttributes(table, col, relatedEntity));
             WriteAttributeTag(sb, GetPropertyAttributes(table, col, relatedEntity));
-            sb.AppendLine("public {0} {1} { get; {2}set; }".FormatWith(type, fieldName.FirstUpper(), IsReadonly(table, col) ? "private" : null));
+            sb.AppendLine("public {0} {1} {{ get; {2}set; }}".FormatWith(type, fieldName.FirstUpper(), IsReadonly(table, col) ? "private" : null));
 
             return sb.ToString();
         }
