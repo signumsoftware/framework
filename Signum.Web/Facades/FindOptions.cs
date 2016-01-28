@@ -66,6 +66,7 @@ namespace Signum.Web
         }
 
         public static Pagination DefaultPagination = new Pagination.Paginate(20, 1);
+        public static Func<object, PaginationMode, int?, bool> IsPaginationAllowed = (queryKey, pagination, elements) => true;
 
         Pagination pagination;
         public Pagination Pagination

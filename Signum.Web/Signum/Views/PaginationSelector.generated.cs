@@ -197,12 +197,12 @@ WriteLiteral(">\r\n");
             #line 46 "..\..\Signum\Views\PaginationSelector.cshtml"
           
             var currentMode = pagination.GetMode();
-            var modes = EnumExtensions.GetValues<PaginationMode>().Select(pm => new SelectListItem
+            var modes = EnumExtensions.GetValues<PaginationMode>().Where(p => FindOptions.IsPaginationAllowed(p, null)).Select(pm => new SelectListItem
             {
                 Text = pm.NiceToString(),
                 Value = pm.ToString(),
                 Selected = currentMode == pm
-            }).ToList();   
+            }).ToList();
         
             
             #line default
@@ -231,8 +231,8 @@ WriteLiteral("\r\n\r\n");
          if (!(pagination is Pagination.All))
         {
             var currentElements = pagination.GetElementsPerPage();
-            var elements = new List<int> { 5, 10, 20, 50, 100, 200 }.Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i == currentElements }).ToList();
-            
+            var elements = new List<int> { 5, 10, 20, 50, 100, 200 }.Where(num => FindOptions.IsPaginationAllowed(currentMode, num)).Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i == currentElements }).ToList();
+
             
             
             #line default
@@ -280,24 +280,24 @@ WriteLiteral("            <input");
 
 WriteLiteral(" type=\"hidden\"");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3516), Tuple.Create("\"", 3547)
+WriteAttribute("id", Tuple.Create(" id=\"", 3618), Tuple.Create("\"", 3649)
             
             #line 74 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 3521), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfPage")
+, Tuple.Create(Tuple.Create("", 3623), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfPage")
             
             #line default
             #line hidden
-, 3521), false)
+, 3623), false)
 );
 
-WriteAttribute("value", Tuple.Create(" value=\"", 3548), Tuple.Create("\"", 3577)
+WriteAttribute("value", Tuple.Create(" value=\"", 3650), Tuple.Create("\"", 3679)
             
             #line 74 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 3556), Tuple.Create<System.Object, System.Int32>(paginate.CurrentPage
+, Tuple.Create(Tuple.Create("", 3658), Tuple.Create<System.Object, System.Int32>(paginate.CurrentPage
             
             #line default
             #line hidden
-, 3556), false)
+, 3658), false)
 );
 
 WriteLiteral(" />\r\n");
@@ -308,14 +308,14 @@ WriteLiteral(" class=\"pagination\"");
 
 WriteLiteral(">\r\n                <li");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 3639), Tuple.Create("\"", 3697)
+WriteAttribute("class", Tuple.Create(" class=\"", 3741), Tuple.Create("\"", 3799)
             
             #line 76 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 3647), Tuple.Create<System.Object, System.Int32>((paginate.CurrentPage <= 1) ? "disabled" : null
+, Tuple.Create(Tuple.Create("", 3749), Tuple.Create<System.Object, System.Int32>((paginate.CurrentPage <= 1) ? "disabled" : null
             
             #line default
             #line hidden
-, 3647), false)
+, 3749), false)
 );
 
 WriteLiteral(" ><a");
@@ -556,14 +556,14 @@ WriteLiteral("</a></li> \r\n");
             #line hidden
 WriteLiteral("\r\n                <li");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 4942), Tuple.Create("\"", 5019)
+WriteAttribute("class", Tuple.Create(" class=\"", 5044), Tuple.Create("\"", 5121)
             
             #line 110 "..\..\Signum\Views\PaginationSelector.cshtml"
-, Tuple.Create(Tuple.Create("", 4950), Tuple.Create<System.Object, System.Int32>(resultTable.TotalPages <= paginate.CurrentPage ? "disabled" : null
+, Tuple.Create(Tuple.Create("", 5052), Tuple.Create<System.Object, System.Int32>(resultTable.TotalPages <= paginate.CurrentPage ? "disabled" : null
             
             #line default
             #line hidden
-, 4950), false)
+, 5052), false)
 );
 
 WriteLiteral("><a");
