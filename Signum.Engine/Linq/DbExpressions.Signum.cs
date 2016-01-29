@@ -423,7 +423,7 @@ namespace Signum.Engine.Linq
         public MListProjectionExpression(Type type, ProjectionExpression projection)
             : base(DbExpressionType.MListProjection, type)
         {
-            if (!projection.Type.ElementType().IsInstantiationOf(typeof(MList<>.RowIdValue)))
+            if (!projection.Type.ElementType().IsInstantiationOf(typeof(MList<>.RowIdElement)))
                 throw new ArgumentException("projector should be collation of RowIdValue");
 
             this.Projection = projection;

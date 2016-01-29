@@ -104,7 +104,7 @@ namespace Signum.Engine.Linq
         {
             return new LazyChildProjection<K, V>
             {
-                ProjectorExpression = ProjectionBuilder.Build<KeyValuePair<K, MList<V>.RowIdValue>>(projector, scope),
+                ProjectorExpression = ProjectionBuilder.Build<KeyValuePair<K, MList<V>.RowIdElement>>(projector, scope),
             };
         }
         

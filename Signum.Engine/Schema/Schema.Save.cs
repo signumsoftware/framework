@@ -809,7 +809,7 @@ namespace Signum.Engine.Maps
 
                             var row = pair.MList.InnerList[pair.Index]; 
 
-                            parameters.AddRange(UpdateParameters(pair.Entity, row.RowId.Value, row.Value, pair.Index, pair.Forbidden, i.ToString()));
+                            parameters.AddRange(UpdateParameters(pair.Entity, row.RowId.Value, row.Element, pair.Index, pair.Forbidden, i.ToString()));
                         }
                         new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
                     };
@@ -852,7 +852,7 @@ namespace Signum.Engine.Maps
                         for (int i = 0; i < num; i++)
                         {
                             var pair = list[i];
-                            result.AddRange(InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Value, pair.Index, pair.Forbidden, i.ToString()));
+                            result.AddRange(InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Element, pair.Index, pair.Forbidden, i.ToString()));
                         }
 
                         DataTable dt = new SqlPreCommandSimple(sqlMulti, result).ExecuteDataTable();
@@ -958,7 +958,7 @@ namespace Signum.Engine.Maps
                                 if(row.RowId.HasValue)
                                 {
                                     if(hasOrder  && row.OldIndex != i ||
-                                       isEmbeddedEntity && ((ModifiableEntity)(object)row.Value).IsGraphModified)
+                                       isEmbeddedEntity && ((ModifiableEntity)(object)row.Element).IsGraphModified)
                                     {
                                         toUpdate.Add(new MListUpdate(ef, collection, i));
                                     }

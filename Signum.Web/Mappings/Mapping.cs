@@ -916,16 +916,16 @@ namespace Signum.Web
 
                         var oldValue = dic.GetOrThrow(rowId, "No RowID {0} found");
 
-                        itemCtx.Value = oldValue.Value;
+                        itemCtx.Value = oldValue.Element;
                         itemCtx.Value = ElementMapping(itemCtx);
 
                         ctx.AddChild(itemCtx);
 
                         if (itemCtx.Value != null)
                         {
-                            var val = itemCtx.SupressChange ? oldValue.Value : itemCtx.Value;
+                            var val = itemCtx.SupressChange ? oldValue.Element : itemCtx.Value;
 
-                            if (oldValue.Value.Equals(val))
+                            if (oldValue.Element.Equals(val))
                                 newList.Add(new MList<S>.RowIdValue(val, rowId, oldValue.OldIndex));
                             else
                                 newList.Add(new MList<S>.RowIdValue(val));
@@ -947,8 +947,8 @@ namespace Signum.Web
                     if (ctx.Value == null)
                         mlistPriv = ctx.Value = new MList<S>();
 
-                    var added = newList.Select(a=>a.Value).Except(mlistPriv.InnerList.Select(a=>a.Value)).ToList();
-                    var removed = mlistPriv.InnerList.Select(a=>a.Value).Except(newList.Select(a=>a.Value)).ToList();
+                    var added = newList.Select(a=>a.Element).Except(mlistPriv.InnerList.Select(a=>a.Element)).ToList();
+                    var removed = mlistPriv.InnerList.Select(a=>a.Element).Except(newList.Select(a=>a.Element)).ToList();
 
                     mlistPriv.InnerList.Clear();
                     mlistPriv.InnerList.AddRange(newList);
@@ -993,7 +993,7 @@ namespace Signum.Web
             for (int i = 0; i < newList.Count; i++)
             {
                 if (newList[i].RowId != oldList[i].RowId ||
-                   !object.Equals(newList[i].Value, oldList[i].Value))
+                   !object.Equals(newList[i].Element, oldList[i].Element))
                     return false;
             }
 

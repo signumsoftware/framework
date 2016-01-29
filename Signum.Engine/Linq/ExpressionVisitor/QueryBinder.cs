@@ -2474,7 +2474,7 @@ namespace Signum.Engine.Linq
             var where = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(mle.BackID, relationalTable.BackColumnExpression(tableAlias)));
 
             var projectType = withRowId ?
-                typeof(IEnumerable<>).MakeGenericType(typeof(MList<>.RowIdValue).MakeGenericType(mle.Type.ElementType())) :
+                typeof(IEnumerable<>).MakeGenericType(typeof(MList<>.RowIdElement).MakeGenericType(mle.Type.ElementType())) :
                 mle.Type;
 
             var proj = new ProjectionExpression(

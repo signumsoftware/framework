@@ -21,7 +21,7 @@ namespace Signum.Web
 
             for (int i = 0; i < innerList.Count; i++)
             {
-                var econtext = new TypeElementContext<S>(innerList[i].Value, typeContext, i, innerList[i].RowId);
+                var econtext = new TypeElementContext<S>(innerList[i].Element, typeContext, i, innerList[i].RowId);
                 yield return econtext;
             }
         }

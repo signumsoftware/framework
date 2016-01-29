@@ -170,7 +170,7 @@ namespace Signum.Test
 
                 var song = innerList[0];
 
-                album.Songs.Remove(song.Value);
+                album.Songs.Remove(song.Element);
                 //Delete
                 album.Save();
 

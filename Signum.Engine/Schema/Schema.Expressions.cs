@@ -127,7 +127,7 @@ namespace Signum.Engine.Maps
 
             var type = this.Field.FieldType;
 
-            var ci = typeof(MList<>.RowIdValue).MakeGenericType(type).GetConstructor(new[] { type, typeof(PrimaryKey), typeof(int?) });
+            var ci = typeof(MList<>.RowIdElement).MakeGenericType(type).GetConstructor(new[] { type, typeof(PrimaryKey), typeof(int?) });
 
             var order =  Order == null ? (Expression)Expression.Constant(null, typeof(int?)) : OrderExpression(tableAlias).Nullify();
 

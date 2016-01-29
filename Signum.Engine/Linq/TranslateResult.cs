@@ -81,7 +81,7 @@ namespace Signum.Engine.Linq
         public LookupToken Token { get; set; }
 
         public SqlPreCommandSimple Command { get; set; }
-        internal Expression<Func<IProjectionRow, KeyValuePair<K, MList<V>.RowIdValue>>> ProjectorExpression;
+        internal Expression<Func<IProjectionRow, KeyValuePair<K, MList<V>.RowIdElement>>> ProjectorExpression;
 
         public void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
         {
@@ -93,9 +93,9 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("SQL", () => Command.Sql))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(Command))
             {
-                ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdValue>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdValue>>(reader, ProjectorExpression, lookups, retriever);
+                ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, MList<V>.RowIdElement>>(reader, ProjectorExpression, lookups, retriever);
 
-                IEnumerable<KeyValuePair<K, MList<V>.RowIdValue>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, MList<V>.RowIdValue>>(enumerator);
+                IEnumerable<KeyValuePair<K, MList<V>.RowIdElement>> enumerabe = new ProjectionRowEnumerable<KeyValuePair<K, MList<V>.RowIdElement>>(enumerator);
 
                 try
                 {
@@ -105,7 +105,7 @@ namespace Signum.Engine.Linq
                         var results = lookUp[kvp.Key];
 
                         ((IMListPrivate<V>)kvp.Value).InnerList.AddRange(results);
-                        ((IMListPrivate<V>)kvp.Value).InnerListModified(results.Select(a => a.Value).ToList(), null);
+                        ((IMListPrivate<V>)kvp.Value).InnerListModified(results.Select(a => a.Element).ToList(), null);
                         retriever.ModifiablePostRetrieving(kvp.Value);
                     }
                 }
