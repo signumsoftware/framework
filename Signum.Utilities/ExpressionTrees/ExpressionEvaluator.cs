@@ -106,14 +106,13 @@ namespace Signum.Utilities.ExpressionTrees
             }
             catch (TargetInvocationException ex)
             {
-                Action savestack = Delegate.CreateDelegate(typeof(Action), ex.InnerException, "InternalPreserveStackTrace", false, false) as Action;
-
-                if (savestack != null)
-                    savestack();
+                ex.InnerException.PreserveStackTrace();
 
                 throw ex.InnerException;
             }
         }
+
+       
 
         public struct MethodKey : IEquatable<MethodKey>
         {
