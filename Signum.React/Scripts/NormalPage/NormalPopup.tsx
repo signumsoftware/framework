@@ -4,7 +4,7 @@ import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-boot
 import { openModal, IModalProps } from '../Modals'
 import * as Navigator from '../Navigator'
 import { TypeContext, StyleOptions } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, toLite } from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString } from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding } from '../Reflection'
 
 require("!style!css!./NormalPage.css");
@@ -26,7 +26,8 @@ interface NormalPopupState {
     validationErrors?: { [key: string]: string };
     component?: Navigator.EntityComponent<any>;
     entitySettings?: Navigator.EntitySettingsBase;
-    typeInfo?: TypeInfo;
+    propertyRoute?: PropertyRoute;
+    savedEntity?: string;
     show?: boolean;
 }
 
@@ -54,29 +55,46 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
 
         var typeName = (this.props.entity as Lite<Entity>).EntityType || (this.props.entity as ModifiableEntity).Type; 
 
+        var entitySettings = Navigator.getSettings(typeName);
+
         var typeInfo = getTypeInfo(typeName);
+        
+        var pr = typeInfo ? PropertyRoute.root(typeInfo) : this.props.propertyRoute;
 
-        var entitySettings = Navigator.getSettings(typeInfo.name);
+        if (!pr)
+            throw new Error("propertyRoute is mandatory for embeddedEntities");
 
-        return { entitySettings: entitySettings, typeInfo: typeInfo, entity: null, show: true };
+        return {
+            entitySettings: entitySettings,
+            propertyRoute: pr,
+            entity: null,
+            show: true
+        };
     }
 
     loadEntity(props: NormalPopupProps) : Promise<void> {
+        
+        var entity = (this.props.entity as ModifiableEntity).Type ?
+            this.props.entity as ModifiableEntity :
+            (this.props.entity as Lite<Entity>).entity;
 
-        var ti = this.state.typeInfo;
+        if (entity != null && (!getTypeInfo(entity.Type) || !this.props.showOperations)) {
 
-        var entity = (this.props.entity as ModifiableEntity).Type ? this.props.entity as ModifiableEntity : null;
-
-        if (entity != null && !this.props.showOperations) {
-
-            this.setState({ entity: entity } as NormalPopupState);
-
-            return Promise.resolve(null);
+            this.setEntity(entity, null);
+            return Promise.resolve();
 
         } else {
             return Navigator.API.fetchEntityPack(entity ? toLite(entity) : this.props.entity as Lite<Entity>)
-                .then(pack=> this.setState({ entity: entity || pack.entity,  canExecute: pack.canExecute }));
+                .then(pack=> this.setEntity(entity || pack.entity, pack.canExecute));
         }
+    }
+
+    setEntity(e: ModifiableEntity, canExecute: { [key: string]: string }): void {
+        this.setState({
+            entity: e,
+            savedEntity: JSON.stringify(e),
+            canExecute: canExecute
+        });
     }
 
     loadComponent() {
@@ -92,10 +110,14 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
     handleOkClicked = (val: any) => {
         this.okClicked = true;
         this.setState({ show: false });
-
     }
 
     handleCancelClicked = () => {
+        if (JSON.stringify(this.state.entity) != this.state.savedEntity) {
+            if (!confirm(NormalWindowMessage.LoseChanges.niceToString()))
+                return;
+        }
+
         this.setState({ show: false });
     }
 
@@ -108,13 +130,13 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
         var styleOptions: StyleOptions = {
             readOnly: this.props.readOnly != null ? this.props.readOnly : this.state.entitySettings.onIsReadonly()
         };
-        var ctx = new TypeContext<Entity>(null, styleOptions, this.props.propertyRoute || PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(this.state.entity));
+        var ctx = new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(this.state.entity));
 
         return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
             <Modal.Header closeButton={this.props.isNavigate}>
                 {!this.props.isNavigate && <ButtonToolbar style={{ float: "right" }}>
-                    <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary">{JavascriptMessage.ok.niceToString() }</Button>
-                    <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default">{JavascriptMessage.cancel.niceToString() }</Button>
+                    <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString() }</Button>
+                    <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</Button>
                     </ButtonToolbar>}
                 {this.renderTitle() }
                 </Modal.Header>
@@ -135,11 +157,14 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
 
     renderTitle() {
 
+        if (this.state.entity == null)
+            return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
+
         var pr = this.props.propertyRoute;
         
 
         return <h4>
-            <span className="sf-entity-title">{this.props.title || (this.state.entity && this.state.entity.toStr) }</span>
+            <span className="sf-entity-title">{this.props.title || (this.state.entity && getToString(this.state.entity)) }</span>
             {this.renderExpandLink() }
                <br />
                     <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitel(this.state.entity) }</small>

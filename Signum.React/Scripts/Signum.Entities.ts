@@ -47,7 +47,48 @@ export type ExecuteSymbol<T extends IEntity> = OperationSymbol;
 export type DeleteSymbol<T extends IEntity> = OperationSymbol;
 export type ConstructSymbol_Simple<T extends Entity> = OperationSymbol;
 export type ConstructSymbol_From<T extends Entity, F extends IEntity> = OperationSymbol;
-export type ConstructSymbol_FromMany<T extends Entity, F extends IEntity> = OperationSymbol; 
+export type ConstructSymbol_FromMany<T extends Entity, F extends IEntity> = OperationSymbol;
+
+export var toStringDictionary: { [name: string]: (entity: ModifiableEntity) => string } = {};
+
+export function registerToString<T extends ModifiableEntity>(type: Type<T>, toStringFunc: (e: T) => string) {
+    toStringDictionary[type.typeName] = toStringFunc;
+}
+
+function geOrCreateToStringFunction(type: string) {
+    var f = toStringDictionary[type];
+    if (f != null || f === null)
+        return f; 
+
+    var ti = getTypeInfo(type);
+
+    try {
+        f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
+    } catch (e) {
+        f = null;
+    }
+
+    toStringDictionary[type] = f;
+
+    return f;
+}
+
+export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>) 
+{
+    if (entityOrLite == null)
+        return null;
+
+    var lite = entityOrLite as Lite<Entity>;
+    if (lite.EntityType) 
+        return lite.entity ? getToString(lite.entity) : lite.toStr;
+
+    var entity = entityOrLite as ModifiableEntity;
+    var toStr = geOrCreateToStringFunction(entity.Type);
+    if (toStr)
+        return toStr(entity);
+
+    return entity.toStr || entity.Type;
+}
 
 export function toLite<T extends IEntity>(entity: T, fat?: boolean) : Lite<T> {
 
@@ -57,11 +98,10 @@ export function toLite<T extends IEntity>(entity: T, fat?: boolean) : Lite<T> {
     if(fat)
        return toLiteFat(entity);
 
-
     return {
        EntityType : entity.Type,
-       id :entity.id,
-       toStr :entity.toStr,
+       id: entity.id,
+       toStr: getToString(entity),
     }
 }
 
@@ -73,8 +113,8 @@ export function toLiteFat<T extends IEntity>(entity: T) : Lite<T> {
 	return {
        entity : entity,
        EntityType  :entity.Type,
-       id :entity.id,
-       toStr :entity.toStr,
+       id: entity.id,
+       toStr: getToString(entity),
     }
 }
 
@@ -372,6 +412,8 @@ export module ValidationMessage {
     export const BeInThePast = new MessageKey("ValidationMessage", "BeInThePast");
     export const _0ShouldBeGreaterThan1 = new MessageKey("ValidationMessage", "_0ShouldBeGreaterThan1");
     export const _0HasAPrecissionOf1InsteadOf2 = new MessageKey("ValidationMessage", "_0HasAPrecissionOf1InsteadOf2");
+    export const _0ShouldBeOfType1 = new MessageKey("ValidationMessage", "_0ShouldBeOfType1");
+    export const _0And1CanNotBeSetAtTheSameTime = new MessageKey("ValidationMessage", "_0And1CanNotBeSetAtTheSameTime");
 }
 
 export module VoidEnumMessage {

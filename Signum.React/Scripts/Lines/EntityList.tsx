@@ -13,11 +13,16 @@ import { EntityListBase, EntityListBaseProps} from './EntityListBase'
 
 export interface EntityListProps extends EntityListBaseProps {
     selectedIndex?: number;
+    size?: number;
 }
 
 
 export abstract class EntityList extends EntityListBase<EntityListProps>
-{   
+{
+    static defaultProps: EntityListProps = {
+        size: 5
+    };
+
     moveUp(index: number) {
         super.moveUp(index);
         this.setState({ selectedIndex: this.state.selectedIndex - 1 } as any);
@@ -26,6 +31,10 @@ export abstract class EntityList extends EntityListBase<EntityListProps>
     moveDown(index: number) {
         super.moveDown(index);
         this.setState({ selectedIndex: this.state.selectedIndex + 1 } as any);
+    }
+
+    handleOnSelect = (e: React.FormEvent) => {
+        this.setState({ selectedIndex: (e.currentTarget as HTMLSelectElement).selectedIndex });
     }
 
     renderInternal() {
@@ -38,7 +47,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps>
         return <FormGroup ctx={s.ctx} title={s.labelText}>
             <div className="SF-entity-line">
                 <div className="input-group">
-                    <select className="form-control" size={6}>
+                    <select className="form-control" size={this.props.size} onChange={this.handleOnSelect}>
                        {s.ctx.value.map((e, i) => <option  key={i} title={this.getTitle(e.element) }>{e.element.toStr}</option>) }
                         </select>
                     <span className="input-group-btn btn-group-vertical">
@@ -79,9 +88,11 @@ export abstract class EntityList extends EntityListBase<EntityListProps>
         var selectedIndex = this.state.selectedIndex;
         var entity = ctx.value[selectedIndex].element;
 
+        var pr = ctx.propertyRoute.add(a=> a[0]);
+
         var onView = this.state.onView ?
-            this.state.onView(entity, ctx.propertyRoute) :
-            this.defaultView(entity);
+            this.state.onView(entity, pr) :
+            this.defaultView(entity, pr);
 
         onView.then(e => {
             if (e == null)

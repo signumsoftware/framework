@@ -18,7 +18,7 @@ export interface EntityListBaseProps extends EntityBaseProps {
     move?: boolean;
     onFindMany?: () => Promise<(ModifiableEntity | Lite<IEntity>)[]>;
 
-    ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
+    ctx?: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
 }
 
 
@@ -86,9 +86,11 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
             if (!this.state.viewOnCreate)
                 return Promise.resolve(e);
 
+            var pr = this.state.ctx.propertyRoute.add(a=> a[0]);
+
             return this.state.onView ?
-                this.state.onView(e, this.state.ctx.propertyRoute) :
-                this.defaultView(e);
+                this.state.onView(e, pr) :
+                this.defaultView(e, pr);
 
         }).then(e=> {
 

@@ -7,7 +7,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
-import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 
@@ -89,13 +89,13 @@ export class EntityLine extends EntityBase<EntityLineProps> {
         var s = this.state;
 
         if (s.ctx.readOnly)
-            return <FormControlStatic ctx={s.ctx}>{s.ctx.value.toStr }</FormControlStatic>
+            return <FormControlStatic ctx={s.ctx}>{getToString(s.ctx.value) }</FormControlStatic>
 
         if (s.navigate && s.view) {
             return <a href="#" onClick={this.handleViewClick}
                 className="form-control btn-default sf-entity-line-entity"
                 title={JavascriptMessage.navigate.niceToString() }>
-                {s.ctx.value.toStr }
+                {  s.ctx.value.toStr }
                 </a>;
         } else {
             return <span className="form-control btn-default sf-entity-line-entity">

@@ -7,7 +7,7 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
-import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey } from '../Signum.Entities'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
 import Typeahead from '../Lines/Typeahead'
 import SelectorPopup from '../SelectorPopup'
@@ -76,18 +76,20 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
             if (isLite == tr.isLite)
                 return Promise.resolve(entityOrLite);
 
-            if (isLite)
-                return Navigator.API.fetchEntity(entityOrLite as Lite<IEntity>);
+            if (isLite) {
+                var lite = entityOrLite as Lite<IEntity>;
+                return lite.entity ? Promise.resolve(lite.entity) : Navigator.API.fetchEntity(lite);
+            }
             
             var entity = entityOrLite as Entity; 
 
-            return Promise.resolve(toLite(entity, true));
+            return Promise.resolve(toLiteFat(entity));
         }
     }
 
 
-    defaultView(value: ModifiableEntity | Lite<IEntity>): Promise<ModifiableEntity> {
-        return Navigator.view({ entity: value, propertyRoute: this.state.ctx.propertyRoute });
+    defaultView(value: ModifiableEntity | Lite<IEntity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
+        return Navigator.view({ entity: value, propertyRoute: propertyRoute });
     }
     
 
@@ -98,7 +100,7 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
 
         var onView = this.state.onView ?
             this.state.onView(entity, ctx.propertyRoute) :
-            this.defaultView(entity);
+            this.defaultView(entity, ctx.propertyRoute);
 
         onView.then(e => {
             if (e == null)
@@ -152,7 +154,7 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
 
             return this.state.onView ?
                 this.state.onView(e, this.state.ctx.propertyRoute) :
-                this.defaultView(e);
+                this.defaultView(e, this.state.ctx.propertyRoute);
         }).then(e=> {
 
             if (!e)

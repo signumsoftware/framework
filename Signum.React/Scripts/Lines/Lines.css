@@ -244,6 +244,11 @@ ul.nav-tabs {
     min-height: inherit;
 }
 
+.form-xs select[multiple], 
+.form-xs select[size] {
+    height: auto;
+}
+
 .form-xs input[type=checkbox].form-control {
     height: 16px;
     margin-top: 9px;
@@ -324,11 +329,17 @@ ul.nav-tabs {
     padding: 3px 6px;
 }
 
-    .form-sm .form-control:not(textarea),
-    .form-sm .form-control-static {
-        height: 26px;
-        min-height: inherit;
-    }
+.form-sm .form-control:not(textarea),
+.form-sm .form-control-static {
+    height: 26px;
+    min-height: inherit;
+}
+
+.form-sm select[multiple], 
+.form-sm select[size] {
+    height: auto;
+}
+
 
 .form-sm input[type=checkbox].form-control {
     height: 16px;

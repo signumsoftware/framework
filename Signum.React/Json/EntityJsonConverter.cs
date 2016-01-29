@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Signum.Engine.Basics;
+using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -65,6 +66,12 @@ namespace Signum.React.Json
 
                 writer.WritePropertyName("id");
                 serializer.Serialize(writer, entity.IdOrNull == null ? null : entity.Id.Object);
+                
+                if (Schema.Current.Table(entity.GetType()).Ticks != null)
+                {
+                    writer.WritePropertyName("ticks");
+                    serializer.Serialize(writer, entity.Ticks);
+                }
             }
             else
             {
@@ -103,46 +110,9 @@ namespace Signum.React.Json
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            reader.Read();
             Assert(reader, JsonToken.StartObject);
 
-            string toString = null;
-            object idObj = null;
-            string typeStr = null;
-            Entity entity = null;
-
-            reader.Read();
-            while (reader.TokenType == JsonToken.PropertyName)
-            {
-                switch ((string)reader.Value)
-                {
-                    case "toStr": toString = reader.ReadAsString(); break;
-                    case "id": idObj = reader.Value; break;
-                    case "EntityType": typeStr = reader.ReadAsString(); break;
-                    case "entity": entity = (Entity)serializer.Deserialize(reader, typeof(Entity)); break;
-                    default: throw new InvalidOperationException("unexpected property " + (string)reader.Value);
-                }
-
-                reader.Read();
-            }
-
-            Type type = TypeLogic.GetType(typeStr);
-
-            PrimaryKey? id = idObj == null ? (PrimaryKey?)null :
-                new PrimaryKey((IComparable)ReflectionTools.ChangeType(idObj, PrimaryKey.PrimaryKeyType.GetValue(type)));
-
-            if (entity == null)
-                return Lite.Create(type, id.Value, toString);
-
-            var result = entity.ToLite(entity.IsNew, toString);
-
-            if (result.EntityType != type)
-                throw new InvalidOperationException("Types don't match");
-
-            if (result.Id != id)
-                throw new InvalidOperationException("Id's don't match");
-
-            return result;
+            throw new NotImplementedException();
         }
 
         private static void Assert(JsonReader reader, JsonToken expected)

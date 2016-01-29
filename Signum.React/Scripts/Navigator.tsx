@@ -4,7 +4,7 @@ import { Dic, hasFlag } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage } from './Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo  } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import NormalPopup from './NormalPage/NormalPopup';
@@ -135,6 +135,8 @@ export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customV
     return es != null && es.onIsNavigable(customView, isSearch) && isViewableEvent.every(f=> f(typeName, entity));
 }
 
+
+
 export interface ViewOptions {
     entity: Lite<IEntity> | ModifiableEntity;
     propertyRoute?: PropertyRoute;
@@ -154,8 +156,8 @@ export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Enti
             entityOrOptions as ViewOptions;
 
     return new Promise<ModifiableEntity>((resolve) => {
-        require(["./NormalPage/NormalPopup"], function (NP: typeof NormalPopup) {
-            NP.open(options).then(resolve);
+        require(["./NormalPage/NormalPopup"], function (NP: { default: typeof NormalPopup }) {
+            NP.default.open(options).then(resolve);
         });
     });
 } 
@@ -257,13 +259,14 @@ export abstract class EntitySettingsBase {
     abstract onIsNavigable(customView: boolean, isSearch: boolean): boolean;
     abstract onIsReadonly(): boolean;
 
+    getToString: (entity: ModifiableEntity) => string;
+
     abstract onGetComponentDefault(entity: ModifiableEntity): Promise<EntityComponent<any>>;
 
     constructor(type: IType) {
         this.type = type;
     }
 }
-
 
 export interface EntityComponent<T> extends React.ComponentClass<{ ctx: TypeContext<T> }> 
 {
@@ -279,9 +282,11 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
     isNavigable: EntityWhen;
     isReadOnly: boolean;
 
+    getToString: (entity: T) => string;
+
     getComponent: (entity: T) => Promise<{ default: EntityComponent<T> }>;
 
-    constructor(type: Type<T>, getComponent: (entity: T) => Promise<{ default: EntityComponent<T> }>,
+    constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
         options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean }) {
         super(type);
 
@@ -399,7 +404,9 @@ export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySe
     isViewable: boolean;
     isReadOnly: boolean;
 
-    constructor(type: Type<T>, getComponent: (entity: T) => Promise<{ default: EntityComponent<T> }>,
+    getToString: (entity: T) => string;
+
+    constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
         options?: { isCreable?: boolean; isViewable?: boolean; isReadOnly?: boolean }) {
         super(type);
 

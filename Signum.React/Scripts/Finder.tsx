@@ -180,7 +180,7 @@ class TokenCompleter {
         var tokens = Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }));
 
         if (tokens.length == 0)
-            return Promise.resolve(null);
+            return Promise.resolve();
         
         return API.parseTokens(queryKey, tokens).then(parsedTokens=> {
             parsedTokens.forEach(t=> this.tokensToRequest[t.fullKey].resolve(t));

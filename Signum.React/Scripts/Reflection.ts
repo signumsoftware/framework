@@ -25,6 +25,7 @@ export interface TypeInfo {
     gender?: string;
     entityKind?: EntityKind;
     entityData?: EntityData;
+    toStringFunction?: string;
     isLowPopupation?: boolean;
     members?: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
@@ -67,7 +68,7 @@ export function toMomentFormat(format: string): any {
 }
 
 export interface TypeReference {
-    name?: string;
+    name: string;
     isCollection?: boolean;
     isLite?: boolean;
     isNullable?: boolean;
@@ -277,6 +278,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 
 var functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*return\s*(.*)\s*;\s*}$/;
 var memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
+var indexRegex = /^(.*)\[(\d+)\]$/;
 var mixinRegex = /^getMixin\((.*),\s*([$a-zA-Z_][0-9a-zA-Z_$]*_Type)\s*\)$/
 
 
@@ -296,6 +298,13 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
         if (m != null) {
             result.push({ name: m[2], type: LambdaMemberType.Member });
+            body = m[1];
+        }
+
+        m = indexRegex.exec(body);
+
+        if (m != null) {
+            result.push({ name: m[2], type: LambdaMemberType.Indexer });
             body = m[1];
         }
 
@@ -319,6 +328,7 @@ interface LambdaMember {
 enum LambdaMemberType {
     Member,
     Mixin,
+    Indexer,
 }
 
 
@@ -335,12 +345,12 @@ export class Type<T> implements IType {
         return getTypeInfo(this.typeName);
     }
 
-    propertyInfo(lambdaToProperty: (v: T) => any): MemberInfo {
-        return PropertyRoute.root(this).add(lambdaToProperty).member;
+    memberInfo(lambdaToProperty: (v: T) => any): MemberInfo {
+        return PropertyRoute.root(this.typeInfo()).add(lambdaToProperty).member;
     }
 
     propertyRoute(lambdaToProperty: (v: T) => any): PropertyRoute {
-        return PropertyRoute.root(this).add(lambdaToProperty);
+        return PropertyRoute.root(this.typeInfo()).add(lambdaToProperty);
     }
 
     niceName() {
@@ -352,7 +362,7 @@ export class Type<T> implements IType {
     }
 
     nicePropertyName(lambdaToProperty: (v: T) => any): string {
-        return this.propertyInfo(lambdaToProperty).niceName;
+        return this.memberInfo(lambdaToProperty).niceName;
     }
 }
 
@@ -446,22 +456,38 @@ export class PropertyRoute {
     
     propertyRouteType: PropertyRouteType;
     parent: PropertyRoute; //!Root
-    type: TypeInfo; //Root
+    rootType: TypeInfo; //Root
     member: MemberInfo; //Member
     mixinName: string; //Mixin
     
-    constructor(parent: PropertyRoute, propertyRouteType: PropertyRouteType, type: TypeInfo, member: MemberInfo, mixinName: string) {
 
-        this.propertyRouteType = propertyRouteType;
-        this.parent = parent; //!Root
-        this.type = type; //Root
-        this.member = member; //Field or Property
-        this.mixinName = mixinName; //Mixin
+    static root(typeInfo: TypeInfo) {
+        return new PropertyRoute(null, PropertyRouteType.Root, typeInfo, null, null);
     }
 
+    static member(parent: PropertyRoute, member: MemberInfo) {
+        return new PropertyRoute(parent, PropertyRouteType.Field, null, member, null);
+    }
 
-    static root(type: PseudoType) {
-        return new PropertyRoute(null, PropertyRouteType.Root, getTypeInfo(type), null, null);
+    static mixin(parent: PropertyRoute, mixinName: string) {
+        return new PropertyRoute(parent, PropertyRouteType.Mixin, null, null, mixinName);
+    }
+
+    static mlistItem(parent: PropertyRoute) {
+        return new PropertyRoute(parent, PropertyRouteType.MListItem, null, null, null);
+    }
+
+    static liteEntity(parent: PropertyRoute) {
+        return new PropertyRoute(parent, PropertyRouteType.LiteEntity, null, null, null);
+    }
+
+    constructor(parent: PropertyRoute, propertyRouteType: PropertyRouteType, rootType: TypeInfo, member: MemberInfo, mixinName: string) {
+
+        this.propertyRouteType = propertyRouteType;
+        this.parent = parent;
+        this.rootType = rootType;
+        this.member = member;
+        this.mixinName = mixinName;
     }
 
     add(property: (val: any) => any): PropertyRoute {
@@ -473,8 +499,29 @@ export class PropertyRoute {
         return current;
     }
 
-    get rootType() {
-        return this.type || this.parent.rootType;
+    findRootType() {
+        return this.rootType || this.parent.findRootType();
+    }
+
+    typeReference(): TypeReference {
+        switch (this.propertyRouteType) {
+            case PropertyRouteType.Root: return { name: this.rootType.name };
+            case PropertyRouteType.Field: return this.member.type;
+            case PropertyRouteType.Mixin: throw new Error("mixins can not be used alone");
+            case PropertyRouteType.MListItem: return Dic.extend({}, this.parent.typeReference(), { isCollection: false });
+            case PropertyRouteType.LiteEntity: return Dic.extend({}, this.parent.typeReference(), { isLite: false });
+        }
+    }
+
+    closestTypeInfo(): TypeInfo {
+        switch (this.propertyRouteType) {
+            case PropertyRouteType.Root: return this.rootType;
+
+            case PropertyRouteType.Field: return this.parent.closestTypeInfo();
+            case PropertyRouteType.Mixin: throw this.parent.closestTypeInfo();
+            case PropertyRouteType.MListItem: return this.parent.closestTypeInfo();
+            case PropertyRouteType.LiteEntity: return this.parent.closestTypeInfo();
+        }
     }
 
     propertyPath() {
@@ -482,41 +529,75 @@ export class PropertyRoute {
             case PropertyRouteType.Root: throw new Error("Root has no PropertyString");
             case PropertyRouteType.Field: return this.member.name;
             case PropertyRouteType.Mixin: return "[" + this.mixinName + "]";
-            case PropertyRouteType.MListItems: return this.parent.propertyPath() + "/";
+            case PropertyRouteType.MListItem: return this.parent.propertyPath() + "/";
             case PropertyRouteType.LiteEntity: return this.parent.propertyPath() + ".entity";
         }
     }
+
+    
    
 
     addMember(member: LambdaMember): PropertyRoute {
 
         if (member.type == LambdaMemberType.Member) {
+
+            var ref = this.typeReference();
+            if (ref.isLite) {
+                if (member.name != "entity")
+                    throw new Error("Entity expected");
+
+                return PropertyRoute.liteEntity(this);    
+            }
+
+            if (this.propertyRouteType != PropertyRouteType.Root) {
+                var ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations");
+                if (ti) {
+                    var m = ti.members[member.name];
+                    if (!m)
+                        throw new Error(`member '${memberName}' not found`);
+
+                    return PropertyRoute.member(PropertyRoute.root(ti), m);
+                }
+            }
+
             var memberName = this.propertyRouteType == PropertyRouteType.Root ? member.name :
-                this.propertyRouteType == PropertyRouteType.MListItems ? this.propertyPath() + member.name :
+                this.propertyRouteType == PropertyRouteType.MListItem ? this.propertyPath() + member.name :
                     this.propertyPath() + "." + member.name;
 
-            var m = this.type.members[memberName.firstUpper()];
+            var m = this.closestTypeInfo().members[memberName.firstUpper()];
             if (!m)
                 throw new Error(`member '${memberName}' not found`)
 
-            return new PropertyRoute(this, PropertyRouteType.Field, null, m, null);
+            return PropertyRoute.member(this, m);
         }
 
         if (member.type == LambdaMemberType.Mixin) {
             if (this.propertyRouteType != PropertyRouteType.Root)
                 throw new Error("invalid mixin at this stage");
 
-            return new PropertyRoute(this, PropertyRouteType.Mixin, null, null, member.name);
+            return PropertyRoute.mixin(this, member.name);
+        }
+
+
+        if (member.type == LambdaMemberType.Indexer) {
+            if (this.propertyRouteType != PropertyRouteType.Field)
+                throw new Error("invalid mixin at this stage");
+
+            return PropertyRoute.mlistItem(this);
         }
 
         throw new Error("not implemented");
     }
+
+    toString() {
+        return `(${this.findRootType().name}).${this.propertyPath()}`;
+    }
 }
 
 export enum PropertyRouteType {
-    Root,
-    Field,
-    Mixin,
-    LiteEntity,
-    MListItems,
+    Root = "Root" as any,
+    Field = "Field" as any,
+    Mixin = "Mixin" as any,
+    LiteEntity = "LiteEnity" as any,
+    MListItem = "MListItem" as any,
 }

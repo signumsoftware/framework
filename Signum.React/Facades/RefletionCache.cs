@@ -13,6 +13,9 @@ using Signum.Entities.Reflection;
 using Signum.React.ApiControllers;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
+using Signum.Utilities.ExpressionTrees;
+using System.Linq.Expressions;
+using Signum.Utilities.Reflection;
 
 namespace Signum.React.Facades
 {
@@ -61,6 +64,8 @@ namespace Signum.React.Facades
             });
         }
 
+        static MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
+
         private static Dictionary<string, TypeInfoTS> GetEntities(IEnumerable<Type> allTypes)
         {
             var models = (from type in allTypes
@@ -79,6 +84,7 @@ namespace Signum.React.Facades
                               EntityKind = type.IsIEntity() ? EntityKindCache.GetEntityKind(type) : (EntityKind?)null,
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
+                              ToStringFunction = ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
                               Members = PropertyRoute.GenerateRoutes(type)
                                 .ToDictionary(p => p.PropertyString(), p => new MemberInfoTS
                                 {
@@ -92,6 +98,58 @@ namespace Signum.React.Facades
                           })).ToDictionary("entities");
 
             return result;
+        }
+
+        private static string ToJavascript(LambdaExpression lambdaExpression)
+        {
+            if (lambdaExpression == null)
+                return null;
+
+            var body = ToJavascriptBody(lambdaExpression.Parameters.Single(), lambdaExpression.Body);
+
+            if (body == null)
+                return null;
+
+            return "function(e){ return " + body + "; }"; 
+        }
+
+        private static string ToJavascriptBody(ParameterExpression param, Expression body)
+        {
+            if (param == body)
+                return "e";
+
+            if (body.NodeType == ExpressionType.MemberAccess)
+            {
+                var a = ToJavascriptBody(param, ((MemberExpression)body).Expression);
+
+                if (a == null)
+                    return null;
+
+                return a + "." + ((MemberExpression)body).Member.Name.FirstLower();
+            }
+
+            if (body.NodeType == ExpressionType.Add)
+            {
+                var a = ToJavascriptBody(param, ((BinaryExpression)body).Left);
+                var b = ToJavascriptBody(param, ((BinaryExpression)body).Right);
+
+                if (a != null && b != null)
+                    return "(" + a + " + " + b + ")";
+
+                return null;
+            }
+
+            if (body.NodeType == ExpressionType.Call && ((MethodCallExpression)body).Method.Name == "ToString")
+            {
+                var a = ToJavascriptBody(param, ((MethodCallExpression)body).Object);
+
+                if (a == null)
+                    return null;
+
+                return a + ".toString()";
+            }
+
+            return null;
         }
 
         static string GetTypeNiceName(Type type)
@@ -184,6 +242,8 @@ namespace Signum.React.Facades
         public EntityData? EntityData { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLowPopulation")]
         public bool IsLowPopulation { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "toStringFunction")]
+        public string ToStringFunction { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
         public Dictionary<string, MemberInfoTS> Members { get; set; }
     }

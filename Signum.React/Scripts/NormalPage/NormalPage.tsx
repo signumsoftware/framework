@@ -3,9 +3,9 @@ import * as React from 'react'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
-import { Entity, Lite, is, toLite, LiteMessage } from '../Signum.Entities'
+import { Entity, Lite, is, toLite, LiteMessage, getToString } from '../Signum.Entities'
 import { TypeContext, StyleOptions } from '../TypeContext'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding } from '../Reflection'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
 
 require("!style!css!./NormalPage.css");
 
@@ -14,6 +14,7 @@ interface NormalPageProps extends ReactRouter.RouteComponentProps<{}, { type: st
     component?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
     title?: string;
 }
+
 
 interface NormalPageState {
     entity?: Entity;
@@ -43,7 +44,7 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
         this.loadEntity(props)
             .then(() => this.loadComponent());
     }
-    
+
     calculateState(props: NormalPageProps) {
         var typeInfo = getTypeInfo(props.routeParams.type);
 
@@ -52,11 +53,11 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
         return { entitySettings: entitySettings, typeInfo: typeInfo, entity: null };
     }
 
-    loadEntity(props: NormalPageProps) : Promise<void> {
+    loadEntity(props: NormalPageProps): Promise<void> {
 
         var ti = this.state.typeInfo;
 
-        var id = ti.members["Id"].type == "number" &&
+        var id = ti.members["Id"].type.name == "number" &&
             this.props.routeParams.id != "" ? parseInt(props.routeParams.id) : props.routeParams.id;
 
         var lite: Lite<Entity> = {
@@ -65,7 +66,7 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
         };
 
         return Navigator.API.fetchEntityPack(lite)
-            .then(pack=> this.setState({ entity: pack.entity, canExecute: pack.canExecute }));
+            .then(pack => this.setState({ entity: pack.entity, canExecute: pack.canExecute }));
     }
 
     loadComponent(): Promise<void> {
@@ -73,21 +74,21 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
         var promise = this.props.component ? Promise.resolve(this.props.component) :
             this.state.entitySettings.onGetComponentDefault(this.state.entity);
 
-        return promise.then(c=>
+        return promise.then(c =>
             this.setState({ component: c }));
     }
-    
-    render() {     
+
+    render() {
         return (<div id="divMainPage" data-isnew={this.props.routeParams.id == null} className="form-horizontal">
-            {this.renderEntityControl()}
-            </div>);
+            {this.renderEntityControl() }
+        </div>);
     }
 
     renderEntityControl() {
 
         if (!this.state.entity)
             return null;
-        
+
 
         var styleOptions: StyleOptions = {
             readOnly: this.state.entitySettings.onIsReadonly()
@@ -95,29 +96,31 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
 
         var ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(this.state.entity));
 
-        return (<div className="normal-control">
-            {this.renderTitle(this.state.typeInfo) }
-            {Navigator.renderWidgets({ entity: this.state.entity }) }
-            <div className="btn-toolbar sf-button-bar">
-                {Navigator.renderButtons({ entity: this.state.entity, canExecute: this.state.canExecute }) }
+        return (
+            <div className="normal-control">
+                {this.renderTitle(this.state.typeInfo) }
+                {Navigator.renderWidgets({ entity: this.state.entity }) }
+                <div className="btn-toolbar sf-button-bar">
+                    {Navigator.renderButtons({ entity: this.state.entity, canExecute: this.state.canExecute }) }
                 </div>
-            {this.renderValidationErrors() }
-        {Navigator.renderEmbeddedWidgets({ entity: this.state.entity }, Navigator.EmbeddedWidgetPosition.Top) }
-            <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
-                     {this.state.component && React.createElement(this.state.component, { ctx: ctx }) }
+                {this.renderValidationErrors() }
+                {Navigator.renderEmbeddedWidgets({ entity: this.state.entity }, Navigator.EmbeddedWidgetPosition.Top) }
+                <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
+                    {this.state.component && React.createElement(this.state.component, { ctx: ctx }) }
                 </div>
-                  {Navigator.renderEmbeddedWidgets({ entity: this.state.entity }, Navigator.EmbeddedWidgetPosition.Bottom) }
+                {Navigator.renderEmbeddedWidgets({ entity: this.state.entity }, Navigator.EmbeddedWidgetPosition.Bottom) }
             </div>);
     }
 
 
     renderTitle(typeInfo: TypeInfo) {
 
-        return <h3>
-                <span className="sf-entity-title">{ this.props.title || this.state.entity.toStr}</span>
+        return (
+            <h3>
+                <span className="sf-entity-title">{ this.props.title || getToString(this.state.entity)}</span>
                 <br/>
-                <small className="sf-type-nice-name">{Navigator.getTypeTitel(this.state.entity)}</small>
-            </h3>
+                <small className="sf-type-nice-name">{Navigator.getTypeTitel(this.state.entity) }</small>
+            </h3>);
 
     }
 
@@ -126,8 +129,8 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
             return null;
 
         return <ul className="validaton-summary alert alert-danger">
-            {Dic.getValues(this.state.validationErrors).map(error=> <li>{error}</li>) }
-            </ul>;
+            {Dic.getValues(this.state.validationErrors).map(error => <li>{error}</li>) }
+        </ul>;
     }
 }
 

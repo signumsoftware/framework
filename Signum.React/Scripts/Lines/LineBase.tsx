@@ -63,12 +63,12 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
 
 
 export interface LineBaseProps {
-    ctx: TypeContext<any>;
+    ctx?: TypeContext<any>;
     type?: TypeReference;
     labelText?: string;
     visible?: boolean;
     hideIfNull?: boolean;
-    onValueChanged?: (val: any) => void;
+    onChange?: (val: any) => void;
 }
 
 export abstract class LineBase<P extends LineBaseProps> extends React.Component<P, P> {
@@ -85,8 +85,8 @@ export abstract class LineBase<P extends LineBaseProps> extends React.Component<
 
     setValue(val: any) {
         this.state.ctx.value = val;
-        if (this.state.onValueChanged)
-            this.state.onValueChanged(val);
+        if (this.state.onChange)
+            this.state.onChange(val);
         this.forceUpdate();
     }
 
