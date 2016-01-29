@@ -525,12 +525,19 @@ namespace Signum.Engine.Templating
 
         internal static object Getter(MemberInfo member, object systemEmail)
         {
-            var pi = member as PropertyInfo;
+            try
+            {
+                var pi = member as PropertyInfo;
 
-            if (pi != null)
-                return pi.GetValue(systemEmail, null);
+                if (pi != null)
+                    return pi.GetValue(systemEmail, null);
 
-            return ((FieldInfo)member).GetValue(systemEmail);
+                return ((FieldInfo)member).GetValue(systemEmail);
+            }
+            catch (TargetInvocationException e)
+            {
+                throw e.InnerException;
+            }
         }
 
         public override string Format
@@ -728,12 +735,19 @@ namespace Signum.Engine.Templating
 
         internal static object Getter(MemberInfo member, object value)
         {
-            var pi = member as PropertyInfo;
+            try
+            {
+                var pi = member as PropertyInfo;
 
-            if (pi != null)
-                return pi.GetValue(value, null);
+                if (pi != null)
+                    return pi.GetValue(value, null);
 
-            return ((FieldInfo)member).GetValue(value);
+                return ((FieldInfo)member).GetValue(value);
+            }
+            catch (TargetInvocationException e)
+            {
+                throw e.InnerException;
+            }
         }
 
         public override string Format
