@@ -134,7 +134,7 @@ namespace Signum.Utilities
 
         public static void PreserveStackTrace(this Exception ex)
         {
-            Action savestack = Delegate.CreateDelegate(typeof(Action), ex.InnerException, "InternalPreserveStackTrace", false, false) as Action;
+            Action savestack = Delegate.CreateDelegate(typeof(Action), ex, "InternalPreserveStackTrace", false, false) as Action;
 
             if (savestack != null)
                 savestack();
