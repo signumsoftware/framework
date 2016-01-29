@@ -99,10 +99,7 @@ namespace Signum.Web
                         break;
                 }
             }
-
-            if (!FindOptions.IsPaginationAllowed(fo.QueryName, fo.Pagination.GetMode(), fo.Pagination.GetElementsPerPage()))
-                throw new UnauthorizedAccessException("This pagination mode is not authorized");
-
+            
             if (parameters.AllKeys.Contains("searchOnLoad"))
                 fo.SearchOnLoad = bool.Parse(parameters["searchOnLoad"]);
 
