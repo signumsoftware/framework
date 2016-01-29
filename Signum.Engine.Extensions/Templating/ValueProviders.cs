@@ -536,6 +536,8 @@ namespace Signum.Engine.Templating
             }
             catch (TargetInvocationException e)
             {
+                e.InnerException.PreserveStackTrace();
+
                 throw e.InnerException;
             }
         }
@@ -746,6 +748,8 @@ namespace Signum.Engine.Templating
             }
             catch (TargetInvocationException e)
             {
+                e.InnerException.PreserveStackTrace();
+
                 throw e.InnerException;
             }
         }
