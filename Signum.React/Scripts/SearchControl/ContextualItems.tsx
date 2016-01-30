@@ -57,9 +57,11 @@ export class ContextMenu extends React.Component<ContextMenuProps, { }> {
 
         var style: React.CSSProperties = { left: position.pageX + "px", top: position.pageY + "px", zIndex: 9999, display: "block", position: "absolute" }; 
 
-        var ul = <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
-            {this.props.children}
-            </ul>;
+        var ul = (
+            <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
+                {this.props.children}
+            </ul>
+        );
 
         return ul;
 

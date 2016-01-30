@@ -50,28 +50,30 @@ export default class SearchPopup extends React.Component<SearchPopupProps, { sho
 
         var okEnabled = this.props.isMany ? this.selectedEntites.length > 0 : this.selectedEntites.length == 1;
 
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
-            <Modal.Header closeButton={this.props.findMode == FindMode.Explore}>
-                { this.props.findMode == FindMode.Find &&
-                <div className="btn-toolbar" style={{ float: "right" }}>
+        return (
+            <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
+                <Modal.Header closeButton={this.props.findMode == FindMode.Explore}>
+                    { this.props.findMode == FindMode.Find &&
+                        <div className="btn-toolbar" style={{ float: "right" }}>
                             <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" disabled={!okEnabled} onClick={this.handleOkClicked}>
-                            {JavascriptMessage.ok.niceToString() }
-                                </button>
+                                {JavascriptMessage.ok.niceToString() }
+                            </button>
 
                             <button className ="btn btn-default sf-entity-button sf-close-button sf-cancel-button" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</button>
-                    </div>}
-                <h4>
-                    <span className="sf-entity-title"> {this.props.title}</span>
-                    <a className ="sf-popup-fullscreen" href="#">
-                    <span className="glyphicon glyphicon-new-window"></span>
+                        </div>}
+                    <h4>
+                        <span className="sf-entity-title"> {this.props.title}</span>
+                        <a className ="sf-popup-fullscreen" href="#">
+                            <span className="glyphicon glyphicon-new-window"></span>
                         </a>
                     </h4>
                 </Modal.Header>
 
-            <Modal.Body>
-                <SearchControl avoidFullScreenButton={true} findOptions={this.props.findOptions} onSelectionChanged={this.handleSelectionChanged} />
+                <Modal.Body>
+                    <SearchControl avoidFullScreenButton={true} findOptions={this.props.findOptions} onSelectionChanged={this.handleSelectionChanged} />
                 </Modal.Body>
-            </Modal>;
+            </Modal>
+        );
     }
 
     static open(findOptions: FindOptions, title?: string): Promise<Lite<Entity>> {

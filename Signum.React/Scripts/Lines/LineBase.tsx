@@ -28,9 +28,11 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
             ctx.formGroupStyle == FormGroupStyle.LabelColumns && ("control-label " + ctx.labelColumnsCss));
 
 
-        var label = <label htmlFor={this.props.controlId} {...this.props.labelProps } className= { labelClasses } >
-            { this.props.title }
-            </label>;
+        var label = (
+            <label htmlFor={this.props.controlId} {...this.props.labelProps } className= { labelClasses } >
+                { this.props.title }
+            </label>
+        );
 
         return <div className={ "form-group " + this.props.ctx.formGroupSizeCss }>
             { ctx.formGroupStyle != FormGroupStyle.BasicDown && label }

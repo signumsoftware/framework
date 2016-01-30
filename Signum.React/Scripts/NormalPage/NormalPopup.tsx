@@ -132,26 +132,28 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
         };
         var ctx = new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(this.state.entity));
 
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
-            <Modal.Header closeButton={this.props.isNavigate}>
-                {!this.props.isNavigate && <ButtonToolbar style={{ float: "right" }}>
-                    <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString() }</Button>
-                    <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</Button>
+        return (
+            <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
+                <Modal.Header closeButton={this.props.isNavigate}>
+                    {!this.props.isNavigate && <ButtonToolbar style={{ float: "right" }}>
+                        <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString() }</Button>
+                        <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</Button>
                     </ButtonToolbar>}
-                {this.renderTitle() }
+                    {this.renderTitle() }
                 </Modal.Header>
 
-            <Modal.Body>
-                   {Navigator.renderWidgets({ entity: this.state.entity }) }
+                <Modal.Body>
+                    {Navigator.renderWidgets({ entity: this.state.entity }) }
                     <div className="btn-toolbar sf-button-bar">
-                {Navigator.renderButtons({ entity: this.state.entity, canExecute: this.state.canExecute }) }
-                        </div>
+                        {Navigator.renderButtons({ entity: this.state.entity, canExecute: this.state.canExecute }) }
+                    </div>
 
-                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
-                    {this.state.component && React.createElement(this.state.component, { ctx: ctx }) }
-                     </div>
+                    <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
+                        {this.state.component && React.createElement(this.state.component, { ctx: ctx }) }
+                    </div>
                 </Modal.Body>
-            </Modal>;
+            </Modal>
+        );
     }
 
 
@@ -163,12 +165,14 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
         var pr = this.props.propertyRoute;
         
 
-        return <h4>
-            <span className="sf-entity-title">{this.props.title || (this.state.entity && getToString(this.state.entity)) }</span>
-            {this.renderExpandLink() }
-               <br />
-                    <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitel(this.state.entity) }</small>
-            </h4>;
+        return (
+            <h4>
+                <span className="sf-entity-title">{this.props.title || (this.state.entity && getToString(this.state.entity)) }</span>
+                {this.renderExpandLink() }
+                <br />
+                <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitel(this.state.entity) }</small>
+            </h4>
+        );
     }
 
     renderExpandLink() {
@@ -182,9 +186,11 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
         if (ti == null || !Navigator.isNavigable(ti, null)) //Embedded
             return null;
 
-        return <a href={Navigator.navigateRoute(entity) } className="sf-popup-fullscreen">
-            <span className="glyphicon glyphicon-new-window"></span>
-            </a>;
+        return (
+            <a href={Navigator.navigateRoute(entity) } className="sf-popup-fullscreen">
+                <span className="glyphicon glyphicon-new-window"></span>
+            </a>
+        );
     }
 
     static open(options: Navigator.ViewOptions): Promise<Entity> {

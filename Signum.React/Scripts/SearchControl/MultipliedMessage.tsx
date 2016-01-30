@@ -32,9 +32,11 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
             getTypeInfos(this.props.mainType).map(a=> a.nicePluralName).joinComma(External.CollectionMessage.And.niceToString()),
             tokens.map(a=> a.parent.niceName).joinComma(External.CollectionMessage.And.niceToString()))
 
-        return <div className="sf-td-multiply alert alert-warning">
+        return (
+            <div className="sf-td-multiply alert alert-warning">
                 <span className="glyphicon glyphicon-exclamation-sign" />{ "\u00A0" + message}
-            </div>;
+            </div>
+        );
     }
 
 }

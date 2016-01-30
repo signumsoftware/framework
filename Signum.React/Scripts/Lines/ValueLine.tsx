@@ -81,10 +81,12 @@ export class ValueLine extends LineBase<ValueLineProps> {
         if (!unit)
             return input;
 
-        return <div className="input-group">
-            {input}
-            <span className="input-group-addon">{unit}</span>
-            </div>;
+        return (
+            <div className="input-group">
+                {input}
+                <span className="input-group-addon">{unit}</span>
+            </div>
+        );
     }
 
     static isNumber(e: React.KeyboardEvent) {
@@ -129,17 +131,21 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     };
 
     if (s.inlineCheckBox) {
-        return <div className="checkbox">
-            <label>
-                <input type="checkbox" checked={s.ctx.value } onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}/>
-                {s.labelText}
+        return (
+            <div className="checkbox">
+                <label>
+                    <input type="checkbox" checked={s.ctx.value } onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}/>
+                    {s.labelText}
                 </label>
-            </div>;
+            </div>
+        );
     }
     else {
-        return <FormGroup ctx={s.ctx} title={s.labelText}>
-            <input type="checkbox" checked={s.ctx.value } onChange={handleCheckboxOnChange} className="form-control" disabled={s.ctx.readOnly}/>
+        return (
+            <FormGroup ctx={s.ctx} title={s.labelText}>
+                <input type="checkbox" checked={s.ctx.value } onChange={handleCheckboxOnChange} className="form-control" disabled={s.ctx.readOnly}/>
             </FormGroup>
+        );
     }
 };
 
@@ -160,12 +166,14 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
         items = [{ name: "", niceName: " - " } as MemberInfo].concat(items);
 
     if (s.ctx.readOnly)
-        return <FormGroup ctx={s.ctx} title={s.labelText}>
-            { ValueLine.withUnit(s.unitText,
-                <FormControlStatic ctx={s.ctx}>
-                    {s.ctx.value == null ? null : items.filter(a=> a.name == s.ctx.value).single().niceName}
+        return (
+            <FormGroup ctx={s.ctx} title={s.labelText}>
+                { ValueLine.withUnit(s.unitText,
+                    <FormControlStatic ctx={s.ctx}>
+                        {s.ctx.value == null ? null : items.filter(a => a.name == s.ctx.value).single().niceName}
                     </FormControlStatic>) }
-            </FormGroup>;
+            </FormGroup>
+        );
 
 
     var handleEnumOnChange = (e: React.SyntheticEvent) => {
@@ -174,13 +182,15 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
         vl.setValue(val == "" ? null : val);
     };
 
-    return <FormGroup ctx={s.ctx} title={s.labelText}>
-        { ValueLine.withUnit(s.unitText,
-            <select value= { s.ctx.value } className= "form-control" onChange={handleEnumOnChange}>
-                {items.map((mi, i)=> <option key={i} value={mi.name}>{mi.niceName}</option>) }
+    return (
+        <FormGroup ctx={s.ctx} title={s.labelText}>
+            { ValueLine.withUnit(s.unitText,
+                <select value= { s.ctx.value } className= "form-control" onChange={handleEnumOnChange}>
+                    {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) }
                 </select>)
-        }
-        </FormGroup>;
+            }
+        </FormGroup>
+    );
 
 }
 
@@ -189,21 +199,25 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
     var s = vl.state;
 
     if (s.ctx.readOnly)
-        return <FormGroup ctx={s.ctx} title={s.labelText}>
-             { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
-            </FormGroup>;
+        return (
+            <FormGroup ctx={s.ctx} title={s.labelText}>
+                { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+            </FormGroup>
+        );
 
     var handleTextOnChange = (e: React.SyntheticEvent) => {
         var input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.value);
     };
 
-    return <FormGroup ctx={s.ctx} title={s.labelText}>
-        { ValueLine.withUnit(s.unitText,
-            <input type="text" className="form-control" value={s.ctx.value} onChange={handleTextOnChange}
-                placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>
-        ) }
-        </FormGroup>;
+    return (
+        <FormGroup ctx={s.ctx} title={s.labelText}>
+            { ValueLine.withUnit(s.unitText,
+                <input type="text" className="form-control" value={s.ctx.value} onChange={handleTextOnChange}
+                    placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>)
+            }
+        </FormGroup>
+    );
 };
 
 ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
@@ -211,19 +225,23 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
     var s = vl.state;
 
     if (s.ctx.readOnly)
-        return <FormGroup ctx={s.ctx} title={s.labelText}>
-             { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
-            </FormGroup>;
+        return (
+            <FormGroup ctx={s.ctx} title={s.labelText}>
+                { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+            </FormGroup>
+        );
 
     var handleTextOnChange = (e: React.SyntheticEvent) => {
         var input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.value);
     };
 
-    return <FormGroup ctx={s.ctx} title={s.labelText}>
+    return (
+        <FormGroup ctx={s.ctx} title={s.labelText}>
             <input type="textarea" className="form-control" value={s.ctx.value} onChange={handleTextOnChange}
                 placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>
-        </FormGroup>;
+        </FormGroup>
+    );
 };
 
 ValueLine.renderers[ValueLineType.Number as any] = (vl) => {
@@ -240,21 +258,25 @@ function numericTextBox(vl: ValueLine, handleKeyDown: React.KeyboardEventHandler
     var s = vl.state;
 
     if (s.ctx.readOnly)
-        return <FormGroup ctx={s.ctx} title={s.labelText}>
-             { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
-            </FormGroup>;
+        return (
+            <FormGroup ctx={s.ctx} title={s.labelText}>
+                { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
+            </FormGroup>
+        );
 
     var handleOnChange = (e: React.SyntheticEvent) => {
         var input = e.currentTarget as HTMLInputElement;
         vl.setValue(parseFloat(input.value));
     };
 
-    return <FormGroup ctx={s.ctx} title={s.labelText}>
-        { ValueLine.withUnit(s.unitText,
-            <input type="textarea" className="form-control numeric" value={s.ctx.value} onChange={handleOnChange}
-                placeholder={s.ctx.placeholderLabels ? s.labelText : null} onKeyDown={handleKeyDown}/>
-        ) }
-        </FormGroup>;
+    return (
+        <FormGroup ctx={s.ctx} title={s.labelText}>
+            { ValueLine.withUnit(s.unitText,
+                <input type="textarea" className="form-control numeric" value={s.ctx.value} onChange={handleOnChange}
+                    placeholder={s.ctx.placeholderLabels ? s.labelText : null} onKeyDown={handleKeyDown}/>
+            ) }
+        </FormGroup>
+    );
 }
 
 ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
@@ -267,9 +289,11 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     var showTime = momentFormat != "L" && momentFormat != "LL";
 
     if (s.ctx.readOnly)
-        return <FormGroup ctx={s.ctx} title={s.labelText}>
-             { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
-            </FormGroup>;
+        return (
+            <FormGroup ctx={s.ctx} title={s.labelText}>
+                { ValueLine.withUnit(s.unitText, <FormControlStatic ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
+            </FormGroup>
+        );
 
     var handleDatePickerOnChange = (date: Date, str: string) => {
 
@@ -278,9 +302,11 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
         vl.forceUpdate();
     };
 
-    return <FormGroup ctx={s.ctx} title={s.labelText}>
-         { ValueLine.withUnit(s.unitText,
-            <DateTimePicker value={m && m.toDate() } onChange={handleDatePickerOnChange} format={momentFormat} time={showTime}/>
-         ) }
-        </FormGroup>;
+    return (
+        <FormGroup ctx={s.ctx} title={s.labelText}>
+            { ValueLine.withUnit(s.unitText,
+                <DateTimePicker value={m && m.toDate() } onChange={handleDatePickerOnChange} format={momentFormat} time={showTime}/>
+            ) }
+        </FormGroup>
+    );
 };

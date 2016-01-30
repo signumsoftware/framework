@@ -24,7 +24,7 @@ export interface EntityBaseProps extends LineBaseProps {
     onView?: (entity: ModifiableEntity | Lite<IEntity>, pr: PropertyRoute) => Promise<ModifiableEntity>;
     onCreate?: () => Promise<ModifiableEntity | Lite<IEntity>>;
     onFind?: () => Promise<ModifiableEntity | Lite<IEntity>>;
-    onRemove?: (entity: ModifiableEntity| Lite<IEntity>) => Promise<boolean>;
+    onRemove?: (entity: ModifiableEntity | Lite<IEntity>) => Promise<boolean>;
 
     component?: Navigator.EntityComponent<any>;
 }
@@ -38,24 +38,24 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
 
         state.create = type.isEmbedded ? Navigator.isCreable(type.name, false) :
             type.name == IsByAll ? false :
-                getTypeInfos(type).some(ti=> Navigator.isCreable(ti, false));
+                getTypeInfos(type).some(ti => Navigator.isCreable(ti, false));
 
         state.view = type.isEmbedded ? Navigator.isViewable(type.name, !!state.component) :
             type.name == IsByAll ? true :
-                getTypeInfos(type).some(ti=> Navigator.isViewable(ti, !!state.component));
+                getTypeInfos(type).some(ti => Navigator.isViewable(ti, !!state.component));
 
         state.navigate = type.isEmbedded ? Navigator.isNavigable(type.name, !!state.component) :
             type.name == IsByAll ? true :
-                getTypeInfos(type).some(ti=> Navigator.isNavigable(ti, !!state.component));
+                getTypeInfos(type).some(ti => Navigator.isNavigable(ti, !!state.component));
 
         state.find = type.isEmbedded ? false :
             type.name == IsByAll ? false :
-                getTypeInfos(type).some(ti=> Navigator.isFindable(ti));
+                getTypeInfos(type).some(ti => Navigator.isFindable(ti));
 
         state.viewOnCreate = true;
         state.remove = true;
     }
-    
+
     convert(entityOrLite: ModifiableEntity | Lite<IEntity>): Promise<ModifiableEntity | Lite<IEntity>> {
 
         var tr = this.state.type;
@@ -80,8 +80,8 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
                 var lite = entityOrLite as Lite<IEntity>;
                 return lite.entity ? Promise.resolve(lite.entity) : Navigator.API.fetchEntity(lite);
             }
-            
-            var entity = entityOrLite as Entity; 
+
+            var entity = entityOrLite as Entity;
 
             return Promise.resolve(toLiteFat(entity));
         }
@@ -91,7 +91,7 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
     defaultView(value: ModifiableEntity | Lite<IEntity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
         return Navigator.view({ entity: value, propertyRoute: propertyRoute });
     }
-    
+
 
     handleViewClick = (event: React.SyntheticEvent) => {
 
@@ -114,11 +114,13 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
         if (!this.state.view)
             return null;
 
-        return <a className={classes("sf-line-button", "sf-view", btn ? "btn btn-default" : null) }
-            onClick={this.handleViewClick}
-            title={EntityControlMessage.View.niceToString() }>
-            <span className="glyphicon glyphicon-arrow-right"/>
-            </a>;
+        return (
+            <a className={classes("sf-line-button", "sf-view", btn ? "btn btn-default" : null) }
+                onClick={this.handleViewClick}
+                title={EntityControlMessage.View.niceToString() }>
+                <span className="glyphicon glyphicon-arrow-right"/>
+            </a>
+        );
     }
 
     chooseType(predicate: (ti: TypeInfo) => boolean): Promise<string> {
@@ -130,7 +132,7 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
         var tis = getTypeInfos(t).filter(predicate);
 
         return SelectorPopup.chooseType<TypeInfo>(tis)
-            .then(ti=> ti ? ti.name : null);
+            .then(ti => ti ? ti.name : null);
     }
 
     defaultCreate(): Promise<ModifiableEntity | Lite<IEntity>> {
@@ -139,12 +141,11 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
             .then(typeName => typeName ? Constructor.construct(typeName) : null);
     }
 
-    handleCreateClick = (event: React.SyntheticEvent) =>
-    {
+    handleCreateClick = (event: React.SyntheticEvent) => {
         var onCreate = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
-        onCreate.then(e=> {
+        onCreate.then(e => {
 
             if (e == null)
                 return null;
@@ -155,7 +156,7 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
             return this.state.onView ?
                 this.state.onView(e, this.state.ctx.propertyRoute) :
                 this.defaultView(e, this.state.ctx.propertyRoute);
-        }).then(e=> {
+        }).then(e => {
 
             if (!e)
                 return;
@@ -168,42 +169,46 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
         if (!this.state.create || this.state.ctx.readOnly)
             return null;
 
-        return <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : null) }
-            onClick={this.handleCreateClick}
-            title={EntityControlMessage.Create.niceToString() }>
-            <span className="glyphicon glyphicon-plus"/>
-            </a>;
+        return (
+            <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : null) }
+                onClick={this.handleCreateClick}
+                title={EntityControlMessage.Create.niceToString() }>
+                <span className="glyphicon glyphicon-plus"/>
+            </a>
+        );
     }
 
 
     defaultFind(): Promise<ModifiableEntity | Lite<IEntity>> {
         return this.chooseType(Finder.isFindable)
-            .then(qn=> qn == null ? null : Finder.find({ queryName: qn } as FindOptions));
+            .then(qn => qn == null ? null : Finder.find({ queryName: qn } as FindOptions));
     }
     handleFindClick = (event: React.SyntheticEvent) => {
         var result = this.state.onFind ? this.state.onFind() : this.defaultFind();
 
-        result.then(entity=> {
+        result.then(entity => {
             if (!entity)
                 return;
 
-            this.convert(entity).then(e=> this.setValue(e));
+            this.convert(entity).then(e => this.setValue(e));
         });
     };
     renderFindButton(btn: boolean) {
         if (!this.state.find || this.state.ctx.readOnly)
             return null;
 
-        return <a className={classes("sf-line-button", "sf-find", btn ? "btn btn-default" : null) }
-            onClick={this.handleFindClick}
-            title={EntityControlMessage.Find.niceToString() }>
-            <span className="glyphicon glyphicon-search"/>
-            </a>;
+        return (
+            <a className={classes("sf-line-button", "sf-find", btn ? "btn btn-default" : null) }
+                onClick={this.handleFindClick}
+                title={EntityControlMessage.Find.niceToString() }>
+                <span className="glyphicon glyphicon-search"/>
+            </a>
+        );
     }
 
     handleRemoveClick = (event: React.SyntheticEvent) => {
         (this.state.onRemove ? this.state.onRemove(this.props.ctx.value) : Promise.resolve(true))
-            .then(result=> {
+            .then(result => {
                 if (result == false)
                     return;
 
@@ -214,11 +219,13 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
         if (!this.state.remove || this.state.ctx.readOnly)
             return null;
 
-        return <a className={classes("sf-line-button", "sf-remove", btn ? "btn btn-default" : null) }
-            onClick={this.handleRemoveClick}
-            title={EntityControlMessage.Remove.niceToString() }>
-            <span className="glyphicon glyphicon-remove"/>
-            </a>;
+        return (
+            <a className={classes("sf-line-button", "sf-remove", btn ? "btn btn-default" : null) }
+                onClick={this.handleRemoveClick}
+                title={EntityControlMessage.Remove.niceToString() }>
+                <span className="glyphicon glyphicon-remove"/>
+            </a>
+        );
     }
 }
 

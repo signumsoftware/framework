@@ -5,5 +5,5 @@ import { getMixin, Basics } from '../Signum.Entities'
 import { addSettings, EntitySettings } from '../Navigator'
 
 export function start(options: { routes: JSX.Element[] }) {
-    addSettings(new EntitySettings(Basics.ExceptionEntity_Type, e=> new Promise(resolve => require(['./Exception'], resolve))));
+    addSettings(new EntitySettings(Basics.ExceptionEntity_Type, e => new Promise(resolve => require(['./Exception'], resolve))));
 }

@@ -36,18 +36,20 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps, {}>
     render() {
         var co = this.props.columnOption;
 
-        return <div className="sf-column-editor form-xs">
-            <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
-             <QueryTokenBuilder
-                 queryToken={co.token}
-                 onTokenChange={this.handleTokenChanged}
-                 queryKey={this.props.queryDescription.queryKey}
-                 subTokenOptions={this.props.subTokensOptions}
-                 readOnly={false}/>
-          <input className="form-control"
-              value={co.displayName}
-              onChange={this.handleOnChange} />
-            </div>;
+        return (
+            <div className="sf-column-editor form-xs">
+                <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
+                <QueryTokenBuilder
+                    queryToken={co.token}
+                    onTokenChange={this.handleTokenChanged}
+                    queryKey={this.props.queryDescription.queryKey}
+                    subTokenOptions={this.props.subTokensOptions}
+                    readOnly={false}/>
+                <input className="form-control"
+                    value={co.displayName}
+                    onChange={this.handleOnChange} />
+            </div>
+        );
     }
 
 }

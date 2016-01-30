@@ -20,7 +20,7 @@ export interface EntityComboProps extends EntityBaseProps {
 }
 
 export class EntityCombo extends EntityBase<EntityComboProps> {
-    
+
 
     calculateDefaultState(state: EntityComboProps) {
         state.remove = false;
@@ -41,14 +41,14 @@ export class EntityCombo extends EntityBase<EntityComboProps> {
 
     handleOnChange = (event: React.FormEvent) => {
         var current = event.currentTarget as HTMLSelectElement;
-        
+
         if (current.value != liteKey(this.getLite())) {
             if (!current.value) {
                 this.setValue(null);
             } else {
-                var lite = this.state.data.filter(a=> liteKey(a) == current.value).single();
+                var lite = this.state.data.filter(a => liteKey(a) == current.value).single();
 
-                this.convert(lite).then(v=> this.setValue(v));
+                this.convert(lite).then(v => this.setValue(v));
             }
         }
     }
@@ -73,24 +73,26 @@ export class EntityCombo extends EntityBase<EntityComboProps> {
         var lite = this.getLite();
 
         var elements: Lite<Entity>[] = [null].concat(s.data);
-        if (lite && !elements.some(a=> is(a, lite)))
+        if (lite && !elements.some(a => is(a, lite)))
             elements.insertAt(1, lite);
 
-        return <FormGroup ctx={s.ctx} title={s.labelText}>
-            <div className="SF-entity-combo">
-                <div className="input-group">
-                <select className="form-control" onChange={this.handleOnChange} value={liteKey(lite) || "" }>
-                      {elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? e.toStr : " - "}</option>) }
-                    </select>
-                    <span className="input-group-btn">
-                        {!hasValue && this.renderCreateButton(true) }
-                        {!hasValue && this.renderFindButton(true) }
-                        {hasValue && this.renderViewButton(true) }
-                        {hasValue && this.renderRemoveButton(true) }
+        return (
+            <FormGroup ctx={s.ctx} title={s.labelText}>
+                <div className="SF-entity-combo">
+                    <div className="input-group">
+                        <select className="form-control" onChange={this.handleOnChange} value={liteKey(lite) || "" }>
+                            {elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? e.toStr : " - "}</option>) }
+                        </select>
+                        <span className="input-group-btn">
+                            {!hasValue && this.renderCreateButton(true) }
+                            {!hasValue && this.renderFindButton(true) }
+                            {hasValue && this.renderViewButton(true) }
+                            {hasValue && this.renderRemoveButton(true) }
                         </span>
                     </div>
                 </div>
-            </FormGroup>;
+            </FormGroup>
+        );
     }
 }
 

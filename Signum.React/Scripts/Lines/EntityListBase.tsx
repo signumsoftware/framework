@@ -23,8 +23,7 @@ export interface EntityListBaseProps extends EntityBaseProps {
 
 
 export abstract class EntityListBase<T extends EntityListBaseProps> extends EntityBase<T>
-{   
-
+{
     calculateDefaultState(props: T) {
 
         if (props.onFind)
@@ -48,12 +47,14 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
     renderMoveUp(btn: boolean, index: number) {
         if (!this.state.move || this.state.ctx.readOnly)
             return null;
-        
-        return <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : null) }
-            onClick={() => this.moveUp(index)}
-            title={EntityControlMessage.MoveUp.niceToString() }>
-            <span className="glyphicon glyphicon-chevron-up"/>
-            </a>;
+
+        return (
+            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : null) }
+                onClick={() => this.moveUp(index) }
+                title={EntityControlMessage.MoveUp.niceToString() }>
+                <span className="glyphicon glyphicon-chevron-up"/>
+            </a>
+        );
     }
 
     moveDown(index: number) {
@@ -67,18 +68,19 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
         if (!this.state.move || this.state.ctx.readOnly)
             return null;
 
-        return <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : null) }
-            onClick={() => this.moveDown(index) }
-            title={EntityControlMessage.MoveUp.niceToString() }>
-            <span className="glyphicon glyphicon-chevron-down"/>
-            </a>;
+        return (
+            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : null) }
+                onClick={() => this.moveDown(index) }
+                title={EntityControlMessage.MoveUp.niceToString() }>
+                <span className="glyphicon glyphicon-chevron-down"/>
+            </a>);
     }
 
     handleCreateClick = (event: React.SyntheticEvent) => {
         var onCreate = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
-        onCreate.then(e=> {
+        onCreate.then(e => {
 
             if (e == null)
                 return null;
@@ -86,13 +88,13 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
             if (!this.state.viewOnCreate)
                 return Promise.resolve(e);
 
-            var pr = this.state.ctx.propertyRoute.add(a=> a[0]);
+            var pr = this.state.ctx.propertyRoute.add(a => a[0]);
 
             return this.state.onView ?
                 this.state.onView(e, pr) :
                 this.defaultView(e, pr);
 
-        }).then(e=> {
+        }).then(e => {
 
             if (!e)
                 return;
@@ -107,23 +109,23 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
 
     defaultFindMany(): Promise<(ModifiableEntity | Lite<IEntity>)[]> {
         return this.chooseType(Finder.isFindable)
-            .then(qn=> qn == null ? null : Finder.findMany({ queryName: qn } as FindOptions));
+            .then(qn => qn == null ? null : Finder.findMany({ queryName: qn } as FindOptions));
     }
-    
+
 
     handleFindClick = (event: React.SyntheticEvent) => {
         var result = this.state.onFindMany ? this.state.onFindMany() : this.defaultFindMany();
 
-        result.then(lites=> {
+        result.then(lites => {
             if (!lites)
                 return;
 
-            Promise.all(lites.map(a=> this.convert(a))).then(entites=> {
+            Promise.all(lites.map(a => this.convert(a))).then(entites => {
                 var list = this.props.ctx.value;
-                entites.forEach(e=> list.push({ element: e, rowId: null }));
+                entites.forEach(e => list.push({ element: e, rowId: null }));
                 this.setValue(list);
             });
         });
     };
-    
+
 }

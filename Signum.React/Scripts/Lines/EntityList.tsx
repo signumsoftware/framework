@@ -44,33 +44,35 @@ export abstract class EntityList extends EntityListBase<EntityListProps>
 
         var hasSelected = s.selectedIndex != null;
 
-        return <FormGroup ctx={s.ctx} title={s.labelText}>
-            <div className="SF-entity-line">
-                <div className="input-group">
-                    <select className="form-control" size={this.props.size} onChange={this.handleOnSelect}>
-                       {s.ctx.value.map((e, i) => <option  key={i} title={this.getTitle(e.element) }>{e.element.toStr}</option>) }
+        return (
+            <FormGroup ctx={s.ctx} title={s.labelText}>
+                <div className="SF-entity-line">
+                    <div className="input-group">
+                        <select className="form-control" size={this.props.size} onChange={this.handleOnSelect}>
+                            {s.ctx.value.map((e, i) => <option  key={i} title={this.getTitle(e.element) }>{e.element.toStr}</option>) }
                         </select>
-                    <span className="input-group-btn btn-group-vertical">
-                        { this.renderCreateButton(true) }
-                        { this.renderFindButton(true) }
-                        { hasSelected && this.renderViewButton(true) }
-                        { hasSelected && this.renderRemoveButton(true) }
-                        { hasSelected && this.state.move && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex) }
-                        { hasSelected && this.state.move && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex) }
+                        <span className="input-group-btn btn-group-vertical">
+                            { this.renderCreateButton(true) }
+                            { this.renderFindButton(true) }
+                            { hasSelected && this.renderViewButton(true) }
+                            { hasSelected && this.renderRemoveButton(true) }
+                            { hasSelected && this.state.move && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex) }
+                            { hasSelected && this.state.move && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex) }
                         </span>
                     </div>
                 </div>
-            </FormGroup>;
+            </FormGroup>
+        );
     }
 
     handleRemoveClick = (event: React.SyntheticEvent) => {
         var s = this.state;
 
         (s.onRemove ? s.onRemove(s.ctx.value[s.selectedIndex].element) : Promise.resolve(true))
-            .then(result=> {
+            .then(result => {
                 if (result == false)
                     return;
-                
+
                 s.ctx.value.removeAt(s.selectedIndex);
                 if (s.ctx.value.length == s.selectedIndex)
                     s.selectedIndex--;
@@ -88,7 +90,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps>
         var selectedIndex = this.state.selectedIndex;
         var entity = ctx.value[selectedIndex].element;
 
-        var pr = ctx.propertyRoute.add(a=> a[0]);
+        var pr = ctx.propertyRoute.add(a => a[0]);
 
         var onView = this.state.onView ?
             this.state.onView(entity, pr) :
@@ -116,7 +118,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps>
         var type = pr && pr.member && pr.member.typeNiceName || (e as Lite<Entity>).EntityType || (e as ModifiableEntity).Type;
 
         var id = (e as Lite<Entity>).id || (e as Entity).id;
-        
+
         return type + (id ? " " + id : "");
     }
 }

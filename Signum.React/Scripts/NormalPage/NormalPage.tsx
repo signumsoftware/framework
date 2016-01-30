@@ -79,9 +79,11 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
     }
 
     render() {
-        return (<div id="divMainPage" data-isnew={this.props.routeParams.id == null} className="form-horizontal">
-            {this.renderEntityControl() }
-        </div>);
+        return (
+            <div id="divMainPage" data-isnew={this.props.routeParams.id == null} className="form-horizontal">
+                {this.renderEntityControl() }
+            </div>
+        );
     }
 
     renderEntityControl() {
@@ -109,7 +111,8 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
                     {this.state.component && React.createElement(this.state.component, { ctx: ctx }) }
                 </div>
                 {Navigator.renderEmbeddedWidgets({ entity: this.state.entity }, Navigator.EmbeddedWidgetPosition.Bottom) }
-            </div>);
+            </div>
+        );
     }
 
 
@@ -117,20 +120,22 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
 
         return (
             <h3>
-                <span className="sf-entity-title">{ this.props.title || getToString(this.state.entity)}</span>
+                <span className="sf-entity-title">{ this.props.title || getToString(this.state.entity) }</span>
                 <br/>
                 <small className="sf-type-nice-name">{Navigator.getTypeTitel(this.state.entity) }</small>
-            </h3>);
-
+            </h3>
+        );
     }
 
     renderValidationErrors() {
         if (!this.state.validationErrors || Dic.getKeys(this.state.validationErrors).length == 0)
             return null;
 
-        return <ul className="validaton-summary alert alert-danger">
-            {Dic.getValues(this.state.validationErrors).map(error => <li>{error}</li>) }
-        </ul>;
+        return (
+            <ul className="validaton-summary alert alert-danger">
+                {Dic.getValues(this.state.validationErrors).map(error => <li>{error}</li>) }
+            </ul>
+        );
     }
 }
 

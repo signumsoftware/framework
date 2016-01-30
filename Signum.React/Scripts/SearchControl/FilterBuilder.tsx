@@ -40,38 +40,40 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
     render() {
 
 
-        return (<div className="panel panel-default sf-filters form-xs">
-            <div className="panel-body sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-                { <table className="table table-condensed">
+        return (
+            <div className="panel panel-default sf-filters form-xs">
+                <div className="panel-body sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
+                    { <table className="table table-condensed">
                         <thead>
                             <tr>
                                 <th></th>
                                 <th className="sf-filter-field-header">{ SearchMessage.Field.niceToString() }</th>
                                 <th>{ SearchMessage.Operation.niceToString() }</th>
                                 <th>{ SearchMessage.Value.niceToString() }</th>
-                                </tr>
-                            </thead>
+                            </tr>
+                        </thead>
                         <tbody>
-                                 {this.props.filterOptions.map((f, i)=> <FilterComponent filter={f} key={i}
-                                     onDeleteFilter={this.handlerDeleteFilter}
-                                     subTokenOptions={this.props.subTokensOptions}
-                                     queryDescription={this.props.queryDescription}
-                                     tokenChanged ={this.props.tokenChanged} />) }
-                                        <tr >
-                                            <td colSpan={4}>
-                                                <a title={SearchMessage.AddFilter.niceToString() }
-                                                className="sf-line-button sf-create"
-                                                onClick={this.handlerNewFilter}>
-                                                <span className="glyphicon glyphicon-plus"/> {SearchMessage.AddFilter.niceToString() }
-                                                </a>
-                                            </td>
-                                        </tr>
-                            </tbody>
+                            {this.props.filterOptions.map((f, i) => <FilterComponent filter={f} key={i}
+                                onDeleteFilter={this.handlerDeleteFilter}
+                                subTokenOptions={this.props.subTokensOptions}
+                                queryDescription={this.props.queryDescription}
+                                tokenChanged ={this.props.tokenChanged} />) }
+                            <tr >
+                                <td colSpan={4}>
+                                    <a title={SearchMessage.AddFilter.niceToString() }
+                                        className="sf-line-button sf-create"
+                                        onClick={this.handlerNewFilter}>
+                                        <span className="glyphicon glyphicon-plus"/> {SearchMessage.AddFilter.niceToString() }
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
                     </table>
-                }
+                    }
                 </div>
 
-            </div>);
+            </div>
+        );
     }
 }
 
@@ -122,34 +124,36 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     render() {
         var f = this.props.filter;
 
-        return <tr>
-            <td>
-                {!f.frozen &&
-                <a title={SearchMessage.DeleteFilter.niceToString() }
-                    className="sf-line-button sf-remove"
-                    onClick={this.handleDeleteFilter}>
-                    <span className="glyphicon glyphicon-remove"/>
-                    </a>}
+        return (
+            <tr>
+                <td>
+                    {!f.frozen &&
+                        <a title={SearchMessage.DeleteFilter.niceToString() }
+                            className="sf-line-button sf-remove"
+                            onClick={this.handleDeleteFilter}>
+                            <span className="glyphicon glyphicon-remove"/>
+                        </a>}
                 </td>
-            <td>
-                <QueryTokenBuilder
-                    queryToken={f.token}
-                    onTokenChange={this.handleTokenChanged}
-                    queryKey={ this.props.queryDescription.queryKey }
-                    subTokenOptions={this.props.subTokenOptions}
-                    readOnly={f.frozen}/></td>
-            <td>
-                {f.token && f.operation &&
-                <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
-                    { filterOperations[f.token.filterType]
-                        .map((ft, i)=> <option key={i} value={ft as any}>{ DynamicQuery.FilterOperation_Type.niceName(ft) }</option>) }
-                    </select> }
+                <td>
+                    <QueryTokenBuilder
+                        queryToken={f.token}
+                        onTokenChange={this.handleTokenChanged}
+                        queryKey={ this.props.queryDescription.queryKey }
+                        subTokenOptions={this.props.subTokenOptions}
+                        readOnly={f.frozen}/></td>
+                <td>
+                    {f.token && f.operation &&
+                        <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
+                            { filterOperations[f.token.filterType]
+                                .map((ft, i) => <option key={i} value={ft as any}>{ DynamicQuery.FilterOperation_Type.niceName(ft) }</option>) }
+                        </select> }
                 </td>
 
-             <td>
-                 {f.token && f.operation && this.renderValue() }
-                 </td>
+                <td>
+                    {f.token && f.operation && this.renderValue() }
+                </td>
             </tr>
+        );
     }
 
     renderValue() {

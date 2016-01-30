@@ -40,10 +40,10 @@ export class EntityLine extends EntityBase<EntityLineProps> {
 
     handleOnSelect = (lite: Lite<IEntity>, event: React.SyntheticEvent) => {
         this.convert(lite)
-            .then(entity=> this.setValue(entity));
+            .then(entity => this.setValue(entity));
         return lite.toStr;
     }
-    
+
     renderInternal() {
 
         var s = this.state;
@@ -59,10 +59,10 @@ export class EntityLine extends EntityBase<EntityLineProps> {
                         {!hasValue && this.renderFindButton(true) }
                         {hasValue && this.renderViewButton(true) }
                         {hasValue && this.renderRemoveButton(true) }
-                        </span>
-                    </div>
+                    </span>
                 </div>
-            </FormGroup>;
+            </div>
+        </FormGroup>;
     }
 
     renderAutoComplete() {
@@ -80,7 +80,7 @@ export class EntityLine extends EntityBase<EntityLineProps> {
     }
 
     renderItem = (item: Lite<IEntity>, query: string) => {
-        return 
+        return
     }
 
 
@@ -92,15 +92,19 @@ export class EntityLine extends EntityBase<EntityLineProps> {
             return <FormControlStatic ctx={s.ctx}>{getToString(s.ctx.value) }</FormControlStatic>
 
         if (s.navigate && s.view) {
-            return <a href="#" onClick={this.handleViewClick}
-                className="form-control btn-default sf-entity-line-entity"
-                title={JavascriptMessage.navigate.niceToString() }>
-                {  s.ctx.value.toStr }
-                </a>;
+            return (
+                <a href="#" onClick={this.handleViewClick}
+                    className="form-control btn-default sf-entity-line-entity"
+                    title={JavascriptMessage.navigate.niceToString() }>
+                    {  s.ctx.value.toStr }
+                </a>
+            );
         } else {
-            return <span className="form-control btn-default sf-entity-line-entity">
-                {s.ctx.value.toStr }
-                </span>;
+            return (
+                <span className="form-control btn-default sf-entity-line-entity">
+                    {s.ctx.value.toStr }
+                </span>
+            );
         }
     }
 }

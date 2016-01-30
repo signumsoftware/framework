@@ -27,15 +27,17 @@ export default class QueryTokenBuilder extends React.Component<QueryTokenBuilder
         var tokenList = getTokenParents(this.props.queryToken);
         tokenList.push(null);
         
-        return (<div>
-            {tokenList.map((a, i) => <QueryTokenPart key={i}
-                queryKey={this.props.queryKey}
-                readOnly={this.props.readOnly}
-                onTokenSelected={this.props.onTokenChange}
-                subTokenOptions={this.props.subTokenOptions}
-                parentToken={i == 0 ? null : tokenList[i - 1]}
-                selectedToken={a} />) }
-            </div>);
+        return (
+            <div>
+                {tokenList.map((a, i) => <QueryTokenPart key={i}
+                    queryKey={this.props.queryKey}
+                    readOnly={this.props.readOnly}
+                    onTokenSelected={this.props.onTokenChange}
+                    subTokenOptions={this.props.subTokenOptions}
+                    parentToken={i == 0 ? null : tokenList[i - 1]}
+                    selectedToken={a} />) }
+            </div>
+        );
     }
 }
 
@@ -86,20 +88,22 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
         if (this.state.data != null && this.state.data.length == 0)
             return null;
 
-        return <div className="sf-query-token-part">
-            <DropdownList
-                disabled={this.props.readOnly}
-                filter="contains"
-                data={this.state.data || []}
-                value={this.props.selectedToken}
-                onChange={this.handleOnChange}
-                valueField="fullKey"
-                textField="toString"
-                valueComponent={QueryTokenItem}
-                itemComponent={QueryTokenOptionalItem}
-                busy={!this.props.readOnly && this.state.data == null}
-                />
-            </div>;
+        return (
+            <div className="sf-query-token-part">
+                <DropdownList
+                    disabled={this.props.readOnly}
+                    filter="contains"
+                    data={this.state.data || []}
+                    value={this.props.selectedToken}
+                    onChange={this.handleOnChange}
+                    valueField="fullKey"
+                    textField="toString"
+                    valueComponent={QueryTokenItem}
+                    itemComponent={QueryTokenOptionalItem}
+                    busy={!this.props.readOnly && this.state.data == null}
+                    />
+            </div>
+        );
     }
 }
 
@@ -109,11 +113,13 @@ export class QueryTokenItem extends React.Component<{ item: QueryToken }, {}> {
         if (this.props.item == null)
             return null;
 
-        return <span
-            style= {{ color: this.props.item.typeColor }}
-            title={this.props.item.niceTypeName}>
-            { this.props.item.toString }
-            </span>;
+        return (
+            <span
+                style= {{ color: this.props.item.typeColor }}
+                title={this.props.item.niceTypeName}>
+                { this.props.item.toString }
+            </span>
+        );
     }
 }
   
