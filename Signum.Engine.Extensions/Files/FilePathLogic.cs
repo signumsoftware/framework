@@ -92,8 +92,7 @@ namespace Signum.Engine.Files
                         }
                     }
                 }.Register();
-
-                OperationLogic.SetProtectedSave<FilePathEntity>(false);
+                
 
                 sb.AddUniqueIndex<FilePathEntity>(f => new { f.Sufix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
 
