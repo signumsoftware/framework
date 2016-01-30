@@ -20,7 +20,7 @@ export function start(options: { routes: JSX.Element[], userTicket: boolean, res
     resetPassword = options.resetPassword;
 
     options.routes.push(<Route path="auth">
-        <Route path="login" getComponent={(loc, cb) => require(["./Login/Login"], (Comp) => cb(Comp.default)) } />
+        <Route path="login" getComponent={(loc, cb) => require(["./Login/Login"], (Comp) => cb(null, Comp.default)) } />
         <Route path="about" />
         </Route>);
     

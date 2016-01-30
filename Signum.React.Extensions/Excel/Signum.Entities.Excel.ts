@@ -7,6 +7,21 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 import * as Files from '../Files/Signum.Entities.Files' 
 
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
+
+import * as Mailing from '../Mailing/Signum.Entities.Mailing' 
+
+
+export const ExcelAttachmentEntity_Type = new Type<ExcelAttachmentEntity>("ExcelAttachment");
+export interface ExcelAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
+    fileName?: string;
+    userQuery?: Entities.Lite<UserQueries.UserQueryEntity>;
+    related?: Entities.Lite<Entities.Entity>;
+}
+
+export module ExcelAttachmentOperation {
+    export const Save : Entities.ExecuteSymbol<ExcelAttachmentEntity> = registerSymbol({ Type: "Operation", key: "ExcelAttachmentOperation.Save" });
+}
 
 export module ExcelMessage {
     export const Data = new MessageKey("ExcelMessage", "Data");

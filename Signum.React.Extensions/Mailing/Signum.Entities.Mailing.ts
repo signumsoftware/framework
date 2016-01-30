@@ -17,6 +17,8 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 import * as Files from '../Files/Signum.Entities.Files' 
 
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
+
 export module AsyncEmailSenderPermission {
     export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel" });
 }
@@ -136,6 +138,7 @@ export module EmailMessageOperation {
 }
 
 export module EmailMessageProcess {
+    export const CreateEmailsSendAsync : Processes.ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "EmailMessageProcess.CreateEmailsSendAsync" });
     export const SendEmails : Processes.ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "EmailMessageProcess.SendEmails" });
 }
 
@@ -201,6 +204,7 @@ export interface EmailTemplateEntity extends Entities.Entity {
     sendDifferentMessages?: boolean;
     from?: EmailTemplateContactEntity;
     recipients?: Entities.MList<EmailTemplateRecipientEntity>;
+    attachments?: Entities.MList<IAttachmentGeneratorEntity>;
     masterTemplate?: Entities.Lite<EmailMasterTemplateEntity>;
     isBodyHtml?: boolean;
     messages?: Entities.MList<EmailTemplateMessageEntity>;
@@ -249,6 +253,9 @@ export module EmailTemplateViewMessage {
     export const InsertMessageContent = new MessageKey("EmailTemplateViewMessage", "InsertMessageContent");
     export const Insert = new MessageKey("EmailTemplateViewMessage", "Insert");
     export const Language = new MessageKey("EmailTemplateViewMessage", "Language");
+}
+
+export interface IAttachmentGeneratorEntity extends Entities.IEntity {
 }
 
 export interface IEmailOwnerEntity extends Entities.IEntity {
@@ -327,6 +334,18 @@ export const Pop3ReceptionExceptionEntity_Type = new Type<Pop3ReceptionException
 export interface Pop3ReceptionExceptionEntity extends Entities.Entity {
     reception?: Entities.Lite<Pop3ReceptionEntity>;
     exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
+}
+
+export const SendEmailTaskEntity_Type = new Type<SendEmailTaskEntity>("SendEmailTask");
+export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEntity {
+    name?: string;
+    emailTemplate?: Entities.Lite<EmailTemplateEntity>;
+    uniqueTarget?: Entities.Lite<Entities.Entity>;
+    targetsFromUserQuery?: Entities.Lite<UserQueries.UserQueryEntity>;
+}
+
+export module SendEmailTaskOperation {
+    export const Save : Entities.ExecuteSymbol<SendEmailTaskEntity> = registerSymbol({ Type: "Operation", key: "SendEmailTaskOperation.Save" });
 }
 
 export const SmtpConfigurationEntity_Type = new Type<SmtpConfigurationEntity>("SmtpConfiguration");

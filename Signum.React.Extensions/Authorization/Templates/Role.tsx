@@ -5,17 +5,17 @@ import { AuthMessage, RoleEntity, AuthAdminMessage, MergeStrategy } from '../Sig
 import { ValueLine, ValueLineType, EntityComponent, EntityLine, EntityCombo, EntityList } from '../../../../Framework/Signum.React/Scripts/Lines'
 
 export default class Role extends EntityComponent<RoleEntity> {
-    
+
     render() {
         return (<div>
             <ValueLine ctx={this.subCtx(e => e.name) } />
-            <ValueLine ctx={this.subCtx(e => e.mergeStrategy) } unitText={this.rolesMessage() } />
-            <EntityList ctx={this.subCtx(e => e.roles) }/>
-            </div>);
+            <ValueLine ctx={this.subCtx(e => e.mergeStrategy) } unitText={this.rolesMessage() } onChange={() => this.forceUpdate() } />
+            <EntityList ctx={this.subCtx(e => e.roles) } onChange={() => this.forceUpdate() }/>
+        </div>);
     }
 
     rolesMessage(): string {
-        return AuthAdminMessage.NoRoles.niceToString() + "-> " +
+        return AuthAdminMessage.NoRoles.niceToString() + " ⇒ " +
             (this.value.mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).niceToString();
     }
 }

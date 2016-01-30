@@ -8,3 +8,9 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 //Files.Assembly: Signum.Entities.Extensions.dll
 import * as Files from '../Files/Signum.Entities.Files' 
 
+//UserQueries.Assembly: Signum.Entities.Extensions.dll
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
+
+//Mailing.Assembly: Signum.Entities.Extensions.dll
+import * as Mailing from '../Mailing/Signum.Entities.Mailing' 
+

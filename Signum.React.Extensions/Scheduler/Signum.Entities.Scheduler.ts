@@ -66,7 +66,6 @@ export module ScheduledTaskOperation {
 }
 
 export module SchedulerMessage {
-    export const _0IsNotMultiple1 = new MessageKey("SchedulerMessage", "_0IsNotMultiple1");
     export const Each0Hours = new MessageKey("SchedulerMessage", "Each0Hours");
     export const Each0Minutes = new MessageKey("SchedulerMessage", "Each0Minutes");
     export const ScheduleRuleDailyEntity = new MessageKey("SchedulerMessage", "ScheduleRuleDailyEntity");
@@ -96,32 +95,39 @@ export module SchedulerMessage {
     export const ScheduleRuleWeekDaysDN_Wednesday = new MessageKey("SchedulerMessage", "ScheduleRuleWeekDaysDN_Wednesday");
     export const ScheduleRuleWeeklyEntity = new MessageKey("SchedulerMessage", "ScheduleRuleWeeklyEntity");
     export const ScheduleRuleWeeklyDN_DayOfTheWeek = new MessageKey("SchedulerMessage", "ScheduleRuleWeeklyDN_DayOfTheWeek");
+    export const Day0At1In2 = new MessageKey("SchedulerMessage", "Day0At1In2");
 }
 
 export module SchedulerPermission {
     export const ViewSchedulerPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "SchedulerPermission.ViewSchedulerPanel" });
 }
 
-export const ScheduleRuleDailyEntity_Type = new Type<ScheduleRuleDailyEntity>("ScheduleRuleDaily");
-export interface ScheduleRuleDailyEntity extends ScheduleRuleDayEntity {
-}
-
-export interface ScheduleRuleDayEntity extends Entities.Entity, IScheduleRuleEntity {
-    startingOn?: string;
-}
-
-export const ScheduleRuleHourlyEntity_Type = new Type<ScheduleRuleHourlyEntity>("ScheduleRuleHourly");
-export interface ScheduleRuleHourlyEntity extends Entities.Entity, IScheduleRuleEntity {
-    eachHours?: number;
-}
-
 export const ScheduleRuleMinutelyEntity_Type = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
 export interface ScheduleRuleMinutelyEntity extends Entities.Entity, IScheduleRuleEntity {
     eachMinutes?: number;
+    isAligned?: boolean;
+}
+
+export const ScheduleRuleMonthsEntity_Type = new Type<ScheduleRuleMonthsEntity>("ScheduleRuleMonths");
+export interface ScheduleRuleMonthsEntity extends Entities.Entity, IScheduleRuleEntity {
+    startingOn?: string;
+    january?: boolean;
+    february?: boolean;
+    march?: boolean;
+    april?: boolean;
+    may?: boolean;
+    june?: boolean;
+    july?: boolean;
+    august?: boolean;
+    september?: boolean;
+    october?: boolean;
+    november?: boolean;
+    december?: boolean;
 }
 
 export const ScheduleRuleWeekDaysEntity_Type = new Type<ScheduleRuleWeekDaysEntity>("ScheduleRuleWeekDays");
-export interface ScheduleRuleWeekDaysEntity extends ScheduleRuleDayEntity {
+export interface ScheduleRuleWeekDaysEntity extends Entities.Entity, IScheduleRuleEntity {
+    startingOn?: string;
     monday?: boolean;
     tuesday?: boolean;
     wednesday?: boolean;
@@ -131,11 +137,6 @@ export interface ScheduleRuleWeekDaysEntity extends ScheduleRuleDayEntity {
     sunday?: boolean;
     calendar?: HolidayCalendarEntity;
     holiday?: boolean;
-}
-
-export const ScheduleRuleWeeklyEntity_Type = new Type<ScheduleRuleWeeklyEntity>("ScheduleRuleWeekly");
-export interface ScheduleRuleWeeklyEntity extends ScheduleRuleDayEntity {
-    dayOfTheWeek?: External.DayOfWeek;
 }
 
 export const SimpleTaskSymbol_Type = new Type<SimpleTaskSymbol>("SimpleTask");
@@ -158,19 +159,4 @@ export enum TypeEvent {
     Stop = "Stop" as any,
 }
 export const TypeEvent_Type = new EnumType<TypeEvent>("TypeEvent", TypeEvent);
-
-export namespace External {
-
-    export enum DayOfWeek {
-        Sunday = "Sunday" as any,
-        Monday = "Monday" as any,
-        Tuesday = "Tuesday" as any,
-        Wednesday = "Wednesday" as any,
-        Thursday = "Thursday" as any,
-        Friday = "Friday" as any,
-        Saturday = "Saturday" as any,
-    }
-    export const DayOfWeek_Type = new EnumType<DayOfWeek>("DayOfWeek", DayOfWeek);
-    
-}
 

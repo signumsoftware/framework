@@ -22,3 +22,6 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 //Files.Assembly: Signum.Entities.Extensions.dll
 import * as Files from '../Files/Signum.Entities.Files' 
+
+//UserQueries.Assembly: Signum.Entities.Extensions.dll
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
