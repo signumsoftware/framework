@@ -99,7 +99,7 @@ namespace Signum.Web
                         break;
                 }
             }
-
+            
             if (parameters.AllKeys.Contains("searchOnLoad"))
                 fo.SearchOnLoad = bool.Parse(parameters["searchOnLoad"]);
 

@@ -60,11 +60,6 @@ namespace Signum.Windows.Operations
             return Manager.HasConstructOperationsAllowedAndVisible(type);
         }
 
-        public static bool SaveProtected(Type type)
-        {
-            return Manager.SaveProtected(type);
-        }
-
         public static readonly DependencyProperty ConstructFromOperationKeyProperty =
             DependencyProperty.RegisterAttached("ConstructFromOperationKey", typeof(OperationSymbol), typeof(OperationClient), new UIPropertyMetadata(null));
         public static OperationSymbol GetConstructFromOperationKey(DependencyObject obj)
@@ -382,19 +377,6 @@ namespace Signum.Windows.Operations
             }
 
             return operations.Select(coc => EntityOperationMenuItemConsturctor.Construct(coc)).OrderBy(Common.GetOrder);
-        }
-
-
-        static HashSet<Type> SaveProtectedCache;
-        protected internal virtual bool SaveProtected(Type type)
-        {
-            if (!type.IsIEntity())
-                return false;
-
-            if (SaveProtectedCache == null)
-                SaveProtectedCache = Server.Return((IOperationServer o) => o.GetSaveProtectedTypes());
-
-            return SaveProtectedCache.Contains(type);
         }
 
         internal bool HasConstructOperationsAllowedAndVisible(Type type)

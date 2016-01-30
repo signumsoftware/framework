@@ -53,48 +53,17 @@ namespace Signum.Engine.Operations
         {
             get { return operations.OverridenValues.SelectMany(a => a.Keys).ToHashSet(); }
         }
-
-
-        static readonly Polymorphic<Tuple<bool>> saveProtectedTypes = new Polymorphic<Tuple<bool>>(PolymorphicMerger.InheritanceAndInterfaces, typeof(IEntity));
-
+        
         static readonly Variable<ImmutableStack<Type>> allowedTypes = Statics.ThreadVariable<ImmutableStack<Type>>("saveOperationsAllowedTypes");
 
         public static bool AllowSaveGlobally { get; set; }
 
-        public static bool IsSaveProtectedAllowed(Type type)
+        public static bool IsSaveAllowedInContext(Type type)
         {
-            if (AllowSaveGlobally)
-                return true;
-
             var stack = allowedTypes.Value;
             return (stack != null && stack.Contains(type));
         }
-
-        public static bool IsSaveProtected(Type type)
-        {
-            if (!typeof(IEntity).IsAssignableFrom(type))
-                return false;
-
-            var tuple = saveProtectedTypes.TryGetValue(type);
-
-            return tuple != null && tuple.Item1;
-        }
-
-        public static HashSet<Type> GetSaveProtectedTypes()
-        {
-            return TypeLogic.TypeToEntity.Keys.Where(IsSaveProtected).ToHashSet();
-        }
         
-        public static void SetProtectedSave<T>(bool? isProtected) where T : IEntity
-        {
-            SetProtectedSave(typeof(T), isProtected);
-        }
-
-        public static void SetProtectedSave(Type type, bool? isProtected)
-        {
-            saveProtectedTypes.SetDefinition(type, isProtected == null ? null : Tuple.Create(isProtected.Value));
-        }
-
         public static IDisposable AllowSave<T>() where T : class, IEntity
         {
             return AllowSave(typeof(T));
@@ -164,39 +133,29 @@ namespace Signum.Engine.Operations
 
         static void OperationLogic_Initializing()
         {
+            var types = Schema.Current.Tables.Keys
+                .Where(t => EntityKindCache.GetAttribute(t) == null)
+                .Select(a => "'" + a.TypeName() + "'")
+                .CommaAnd();
+
+            if (types.HasText())
+                throw new InvalidOperationException($"{0} has not EntityTypeAttribute".FormatWith(types));
+
             var errors = (from t in Schema.Current.Tables.Keys
-                          let et = EntityKindCache.TryGetAttribute(t)
-                          let sp = IsSaveProtected(t)
-                          select et == null ? "{0} has no EntityTypeAttribute set".FormatWith(t.FullName) :
-                          sp != RequiresSaveProtected(et.EntityKind) ? "\t{0} is {1} but is {2}'save protected'".FormatWith(t.TypeName(), et.EntityKind, sp ? "" : "NOT ") :
-                          null).NotNull().OrderBy().ToString("\r\n");
+                          let attr = EntityKindCache.GetAttribute(t)
+                          where attr.RequiresSaveOperation && !HasExecuteNoLite(t)
+                          select attr.IsRequiresSaveOperationOverriden ?
+                            "'{0}' has '{1}' set to true, but no operation for saving has been implemented.".FormatWith(t.TypeName(), nameof(attr.RequiresSaveOperation)) :
+                            "'{0}' is 'EntityKind.{1}', but no operation for saving has been implemented.".FormatWith(t.TypeName(), attr.EntityKind)).ToList();
 
-            if (errors.HasText())
-                throw new InvalidOperationException("EntityKind - OperationLogic inconsistencies: \r\n" + errors + "\r\nNote: An entity type becomes 'save protected' when a Save operation is defined for it");
+            if (errors.Any())
+                throw new InvalidOperationException(errors.ToString("\r\n") +  @"
+Consider the following options:
+    * Implement an operation for saving using 'save' snippet.
+    * Change the EntityKind to a more appropiated one. 
+    * Exceptionally, override the property EntityTypeAttribute.RequiresSaveOperation for your particular entity.");
         }
 
-        private static bool RequiresSaveProtected(EntityKind entityType)
-        {
-            switch (entityType)
-            {
-                case EntityKind.SystemString:
-                case EntityKind.System:
-                case EntityKind.Relational:
-                    return false;
-
-                case EntityKind.String:
-                case EntityKind.Shared:
-                case EntityKind.Main:
-                    return true;
-
-                case EntityKind.Part:
-                case EntityKind.SharedPart:                
-                    return false;
-
-                default:
-                    throw new InvalidOperationException("Unexpected {0}".FormatWith(entityType)); 
-            }
-        }
         static SqlPreCommand Operation_PreDeleteSqlSync(Entity arg)
         {
             var t = Schema.Current.Table<OperationLogEntity>();
@@ -220,8 +179,7 @@ namespace Signum.Engine.Operations
         static void EntityEventsGlobal_Saving(Entity ident)
         {
             if (ident.IsGraphModified && 
-                IsSaveProtected(ident.GetType()) && 
-                !IsSaveProtectedAllowed(ident.GetType()))
+                EntityKindCache.RequiresSaveOperation(ident.GetType()) && !AllowSaveGlobally && !IsSaveAllowedInContext(ident.GetType()))
                 throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".FormatWith(
                     ident.GetType().Name,
                     operations.GetValue(ident.GetType()).Values
@@ -275,11 +233,11 @@ namespace Signum.Engine.Operations
             operations.GetOrAddDefinition(operation.OverridenType).AddOrThrow(operation.OperationSymbol, operation, "Operation {0} has already been registered");
 
             operationsFromKey.Reset();
+        }
 
-            if (IsExecuteNoLite(operation))
-            {
-                SetProtectedSave(operation.OverridenType, true);
-            }
+        private static bool HasExecuteNoLite(Type entityType)
+        {
+            return TypeOperations(entityType).Any(IsExecuteNoLite);
         }
 
         private static bool IsExecuteNoLite(IOperation operation)

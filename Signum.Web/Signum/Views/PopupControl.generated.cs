@@ -134,7 +134,7 @@ WriteLiteral(">×</button>\r\n");
                 }
                 else
                 {
-                    var saveProtected = (bool)ViewData[ViewDataKeys.SaveProtected]; 
+                    var saveProtected = (bool)ViewData[ViewDataKeys.RequiresSaveOperation]; 
 
             
             #line default
