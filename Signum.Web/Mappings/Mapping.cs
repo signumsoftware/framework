@@ -900,10 +900,10 @@ namespace Signum.Web
 
                 IMListPrivate<S> mlistPriv = ctx.Value;
 
-                var dic = mlistPriv == null ? new Dictionary<PrimaryKey, MList<S>.RowIdValue>() :
+                var dic = mlistPriv == null ? new Dictionary<PrimaryKey, MList<S>.RowIdElement>() :
                     mlistPriv.InnerList.Where(a => a.RowId.HasValue).ToDictionary(a => a.RowId.Value, a => a);
 
-                var newList = new List<MList<S>.RowIdValue>();
+                var newList = new List<MList<S>.RowIdElement>();
                 foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
                 {
                     Debug.Assert(!itemCtx.Empty());
@@ -926,9 +926,9 @@ namespace Signum.Web
                             var val = itemCtx.SupressChange ? oldValue.Element : itemCtx.Value;
 
                             if (oldValue.Element.Equals(val))
-                                newList.Add(new MList<S>.RowIdValue(val, rowId, oldValue.OldIndex));
+                                newList.Add(new MList<S>.RowIdElement(val, rowId, oldValue.OldIndex));
                             else
-                                newList.Add(new MList<S>.RowIdValue(val));
+                                newList.Add(new MList<S>.RowIdElement(val));
                         }
                     }
                     else
@@ -936,7 +936,7 @@ namespace Signum.Web
                         itemCtx.Value = ElementMapping(itemCtx);
                         ctx.AddChild(itemCtx);
                         if (itemCtx.Value != null && !itemCtx.SupressChange)
-                            newList.Add(new MList<S>.RowIdValue(itemCtx.Value));
+                            newList.Add(new MList<S>.RowIdElement(itemCtx.Value));
                     }
                 }
 
@@ -977,7 +977,7 @@ namespace Signum.Web
             return tryField.TableMList.PrimaryKey.Type;
         }
 
-        private bool AreEqual(List<MList<S>.RowIdValue> newList, List<MList<S>.RowIdValue> oldList)
+        private bool AreEqual(List<MList<S>.RowIdElement> newList, List<MList<S>.RowIdElement> oldList)
         {
             if (newList.IsNullOrEmpty() && oldList.IsNullOrEmpty())
                 return true;
