@@ -568,11 +568,11 @@ namespace Signum.Engine.Translation
         public readonly T Value;
         public readonly PrimaryKey RowId;
 
-        internal TranslatableElement(Lite<Entity> entity, PropertyRoute route, MList<T>.RowIdValue item)
+        internal TranslatableElement(Lite<Entity> entity, PropertyRoute route, MList<T>.RowIdElement item)
         {
             this.Lite = entity;
             this.ElementRoute = route;
-            this.Value = item.Value;
+            this.Value = item.Element;
             this.RowId = item.RowId.Value;
         }
     }
