@@ -34,18 +34,18 @@ Classifies the role of the entity in the system:
 
 The decision you take will affect the default in the user interface and operations:
 
-|               |SaveProtected	|IsCreable    |	IsViewable	|IsNavigable| IsReadOnly
-|--------------:|:-------------:|:-----------:|:-----------:|:---------:|:-----------:
-| SystemString	|	            | 	          |      	    |	        | ✓
-| System	    |	            | 	          |✓           |Always	    | ✓
-| Relational	|	            | 	          |             |     	    | ✓
-| String	    |✓	            | IsSearch    |	            |IsSearch	| 
-| Shared	    |✓	            | Always	  |✓	        |Always	    | 
-| Main	        |✓	            | IsSearch    |✓	        |Always	    | 
-| Part	        |	            | IsLine	  |✓	        |    	    | 
-| SharedPart	|	            | IsLine	  |✓	        |Always	    | 
+|               |RequiresSaveOperation	|IsCreable    |	IsViewable	|IsNavigable| IsReadOnly
+|--------------:|:---------------------:|:-----------:|:-----------:|:---------:|:-----------:
+| SystemString	|	                    | 	          |      	    |	        | ✓
+| System	    |	                    | 	          |✓	        |Always	    | ✓
+| Relational	|	                    | 	          |             |     	    | ✓
+| String	    |✓	                    | IsSearch    |	            |IsSearch	| 
+| Shared	    |✓	                    | Always	  |✓	        |Always	    | 
+| Main	        |✓	                    | IsSearch    |✓	        |Always	    | 
+| Part	        |	                    | IsLine	  |✓	        |    	    | 
+| SharedPart	|	                    | IsLine	  |✓	        |Always	    | 
 
-* `SaveProtected`: Requires the entity to define a `Save` [Operation](../Signum.Engine/Operations.md). System entities are not save protected because are created by the system, and parts because can be saved as part of their parents. 
+* `RequiresSaveOperation`: Requires the entity to define a `Save` [Operation](../Signum.Engine/Operations.md). System entities are not save protected because are created by the system, and parts because can be saved as part of their parents. 
 
 * `IsCreable`: Shows the create (+) button in the user interface. System entities can not be manually created, and `String` and `Main` only in `SearchControl`, while `Part` and `SharedPart` only make sense to create them on-the-fly on the parent entity. 
 

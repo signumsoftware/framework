@@ -343,7 +343,7 @@ namespace Signum.Windows
             {
                 Entity ident = (Entity)result;
 
-                bool saveProtected = ((ViewOptions)options).SaveProtected ?? OperationClient.SaveProtected(ident.GetType());
+                bool saveProtected = ((ViewOptions)options).RequiresSaveOperation ?? EntityKindCache.RequiresSaveOperation(ident.GetType());
 
                 if (GraphExplorer.HasChanges(ident))
                 {
@@ -379,8 +379,8 @@ namespace Signum.Windows
                 Common.SetIsReadOnly(win, true);
 
             if (options is ViewOptions)
-                win.SaveProtected = ((ViewOptions)options).SaveProtected ??
-                    (typeof(Entity).IsAssignableFrom(entityType) && OperationClient.SaveProtected(entityType)); //Matters even on Ok
+                win.SaveProtected = ((ViewOptions)options).RequiresSaveOperation ??
+                    (typeof(Entity).IsAssignableFrom(entityType) && EntityKindCache.RequiresSaveOperation(entityType)); //Matters even on Ok
 
             if (TaskNormalWindow != null)
                 TaskNormalWindow(win, entity);

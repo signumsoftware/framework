@@ -39,7 +39,7 @@ namespace Signum.Web
         public const string InPopup = "sfIsPopup";
         public const string AvoidFullScreenButton = "sfAvoidFullScreenButton";
         public const string ShowOperations = "sfShowOperations";
-        public const string SaveProtected = "sfSaveProtected";
+        public const string RequiresSaveOperation = "sfRequiresSaveOperation";
         public const string FiltersVisible = "sfFiltersVisible";
         public const string ShowAddColumn = "sfShowAddColumn";
         public static string ShowFooter = "sfShowFooter";
