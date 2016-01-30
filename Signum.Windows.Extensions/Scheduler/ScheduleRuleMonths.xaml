@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="Signum.Windows.Scheduler.ScheduleRuleMonths"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
+    xmlns:m2 ="clr-namespace:Signum.Windows.Extensions"
+    xmlns:sws="clr-namespace:Signum.Windows.Scheduler"
+    m:Common.TypeContext="{x:Type d:ScheduleRuleMonthsEntity}"
+    Padding="2">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+                <m:DesignTimeResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+    <StackPanel>
+
+        <Grid m:Common.MinLabelWidth="70">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+          
+            <m:ValueLine m:Common.Route="January" Grid.Row="0" />
+            <m:ValueLine m:Common.Route="February" Grid.Row="1"/>
+            <m:ValueLine m:Common.Route="March" Grid.Row="2"/>
+            
+            <m:ValueLine m:Common.Route="April" Grid.Row="0" Grid.Column="1" />
+            <m:ValueLine m:Common.Route="May" Grid.Row="1" Grid.Column="1" />
+            <m:ValueLine m:Common.Route="June" Grid.Row="2" Grid.Column="1" />
+            
+            <m:ValueLine m:Common.Route="July" Grid.Row="0" Grid.Column="2" />
+            <m:ValueLine m:Common.Route="August" Grid.Row="1" Grid.Column="2" />
+            <m:ValueLine m:Common.Route="September" Grid.Row="2" Grid.Column="2" />
+
+            <m:ValueLine m:Common.Route="October" Grid.Row="0" Grid.Column="3" />
+            <m:ValueLine m:Common.Route="November" Grid.Row="1" Grid.Column="3" />
+            <m:ValueLine m:Common.Route="December" Grid.Row="2" Grid.Column="3" />
+        </Grid>
+        <m:ValueLine m:Common.Route="StartingOn"/>
+    </StackPanel>
+</UserControl>

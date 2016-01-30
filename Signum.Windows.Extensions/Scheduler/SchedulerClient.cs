@@ -27,12 +27,10 @@ namespace Signum.Windows.Scheduler
 
                     new EntitySettings<SimpleTaskSymbol> { View = e => new SimpleTask(), Icon = Image("simpleTask.png") },
                     new EntitySettings<ScheduledTaskLogEntity> { View = e => new ScheduledTaskLog(), Icon = Image("scheduledTaskLog.png") },
-
-                    new EntitySettings<ScheduleRuleDailyEntity> { View = e => new ScheduleRuleDaily() },
-                    new EntitySettings<ScheduleRuleWeeklyEntity> { View = e => new ScheduleRuleWeekly() },
+                    
+                    new EntitySettings<ScheduleRuleMonthsEntity> { View = e => new ScheduleRuleMonths() },
                     new EntitySettings<ScheduleRuleWeekDaysEntity> { View = e => new ScheduleRuleWeekDays() },
                     new EntitySettings<ScheduleRuleMinutelyEntity> { View = e => new ScheduleRuleMinutely() },
-                    new EntitySettings<ScheduleRuleHourlyEntity> { View = e => new ScheduleRuleHourly() },
                     new EntitySettings<HolidayCalendarEntity> { View = e => new HolidayCalendar() },
                 });
 
