@@ -59,8 +59,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
@@ -338,8 +338,8 @@
     <Compile Include="Scheduler\ScheduleRuleMinutely.xaml.cs">
       <DependentUpon>ScheduleRuleMinutely.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\ScheduleRuleHourly.xaml.cs">
-      <DependentUpon>ScheduleRuleHourly.xaml</DependentUpon>
+    <Compile Include="Scheduler\ScheduleRuleMonths.xaml.cs">
+      <DependentUpon>ScheduleRuleMonths.xaml</DependentUpon>
     </Compile>
     <Compile Include="SMS\MultipleSMS.xaml.cs">
       <DependentUpon>MultipleSMS.xaml</DependentUpon>
@@ -404,14 +404,8 @@
       <DependentUpon>ScheduledTask.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scheduler\SchedulerClient.cs" />
-    <Compile Include="Scheduler\ScheduleRuleDaily.xaml.cs">
-      <DependentUpon>ScheduleRuleDaily.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Scheduler\ScheduleRuleWeekDays.xaml.cs">
       <DependentUpon>ScheduleRuleWeekDays.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Scheduler\ScheduleRuleWeekly.xaml.cs">
-      <DependentUpon>ScheduleRuleWeekly.xaml</DependentUpon>
     </Compile>
     <Compile Include="Shapes\Arrow.cs" />
     <Compile Include="SMS\SMSClient.cs" />
@@ -761,7 +755,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Scheduler\ScheduleRuleHourly.xaml">
+    <Page Include="Scheduler\ScheduleRuleMonths.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -833,19 +827,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Scheduler\ScheduleRuleDaily.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Scheduler\ScheduleRuleWeekDays.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Scheduler\ScheduleRuleWeekly.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
