@@ -7,11 +7,13 @@ import { ValueLine, ValueLineType, EntityComponent, EntityLine, EntityCombo, Ent
 export default class Role extends EntityComponent<RoleEntity> {
 
     render() {
-        return (<div>
-            <ValueLine ctx={this.subCtx(e => e.name) } />
-            <ValueLine ctx={this.subCtx(e => e.mergeStrategy) } unitText={this.rolesMessage() } onChange={() => this.forceUpdate() } />
-            <EntityList ctx={this.subCtx(e => e.roles) } onChange={() => this.forceUpdate() }/>
-        </div>);
+        return (
+            <div>
+                <ValueLine ctx={this.subCtx(e => e.name) } />
+                <ValueLine ctx={this.subCtx(e => e.mergeStrategy) } unitText={this.rolesMessage() } onChange={() => this.forceUpdate() } />
+                <EntityList ctx={this.subCtx(e => e.roles) } onChange={() => this.forceUpdate() }/>
+            </div>
+        );
     }
 
     rolesMessage(): string {

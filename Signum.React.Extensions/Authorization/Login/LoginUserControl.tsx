@@ -19,7 +19,7 @@ export default class LoginUserControl extends React.Component<{}, { user: UserEn
             () => this.setState({ user: AuthClient.currentUser() }));
 
         if (!this.state.user)
-            AuthClient.Api.currentUser().then(u=> AuthClient.setCurrentUser(u));
+            AuthClient.Api.currentUser().then(u => AuthClient.setCurrentUser(u));
     }
 
     render() {
@@ -27,9 +27,10 @@ export default class LoginUserControl extends React.Component<{}, { user: UserEn
         if (!this.state.user)
             return <LinkContainer to={"auth/login"}><NavItem  className="sf-login">{AuthMessage.Login.niceToString() }</NavItem></LinkContainer>;
 
-        return <NavDropdown className="sf-user" title={this.state.user.userName} id="sfUserDropDown">
-          <LinkContainer to={"auth/changPassword"}><MenuItem>{AuthMessage.ChangePassword.niceToString() }</MenuItem></LinkContainer>
-          <MenuItem onSelect={() => AuthClient.logout() }>{AuthMessage.Logout.niceToString() }</MenuItem>
-            </NavDropdown>;
+        return (
+            <NavDropdown className="sf-user" title={this.state.user.userName} id="sfUserDropDown">
+                <LinkContainer to={"auth/changPassword"}><MenuItem>{AuthMessage.ChangePassword.niceToString() }</MenuItem></LinkContainer>
+                <MenuItem onSelect={() => AuthClient.logout() }>{AuthMessage.Logout.niceToString() }</MenuItem>
+            </NavDropdown>);
     }
 }

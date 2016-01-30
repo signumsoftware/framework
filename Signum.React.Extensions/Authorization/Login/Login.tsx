@@ -44,13 +44,14 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
 
 
 
-        return <form onSubmit={(e) => this.handleLogin(e) }>
+        return (
+            <form onSubmit={(e) => this.handleLogin(e) }>
                 <Row>
-                <Col smOffset={4} sm={6}>
-                     <h2>Login</h2>
-                     <p>{ AuthMessage.IntroduceYourUserNameAndPassword.niceToString() }</p>
+                    <Col smOffset={4} sm={6}>
+                        <h2>Login</h2>
+                        <p>{ AuthMessage.IntroduceYourUserNameAndPassword.niceToString() }</p>
                     </Col>
-                    </Row>
+                </Row>
                 <div className="form-horizontal">
 
                     <Input ref="userName" type="text" label={AuthMessage.Username.niceToString() } placeholder={AuthMessage.Username.niceToString() }
@@ -68,20 +69,21 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                         hasFeedback/>
 
                     {AuthClient.userTicket &&
-                    <Input ref="rememberMe" type="checkbox" label={AuthMessage.RememberMe.niceToString() } wrapperClassName="col-sm-offset-4 col-sm-6"/>}
-                    </div>
+                        <Input ref="rememberMe" type="checkbox" label={AuthMessage.RememberMe.niceToString() } wrapperClassName="col-sm-offset-4 col-sm-6"/>}
+                </div>
                 <Row>
                     <Col smOffset={4} sm={6}>
-                            <Button ref="login" bsStyle="primary" type="submit">{AuthMessage.Login.niceToString() }</Button>
+                        <Button ref="login" bsStyle="primary" type="submit">{AuthMessage.Login.niceToString() }</Button>
 
-                { AuthClient.resetPassword &&
-                <div>
-                <Link to="auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString() }</Link>
-                    </div>
-                }
-                        </Col>
-                    </Row>
-            </form>;
+                        { AuthClient.resetPassword &&
+                            <div>
+                                <Link to="auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString() }</Link>
+                            </div>
+                        }
+                    </Col>
+                </Row>
+            </form>
+        );
     }
 
     error(field: string) {

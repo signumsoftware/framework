@@ -14,22 +14,23 @@ export default class User extends EntityComponent<UserEntity> {
         var ph = this.subCtx(a=> a.passwordHash);
         return (
             <div>
-            <ValueLine ctx={this.subCtx(e => e.state, { readOnly: true }) } />
-            <ValueLine ctx={this.subCtx(e => e.userName) } />
+                <ValueLine ctx={this.subCtx(e => e.state, { readOnly: true }) } />
+                <ValueLine ctx={this.subCtx(e => e.userName) } />
                 {this.value.isNew && <div>
                     <FormGroup ctx={ph} labelProps={AuthMessage.ChangePasswordAspx_NewPassword}>
                         <input type="password" ref="newPass" className="form-control" onChange={this.handlePasswordChange}/>
-                        </FormGroup>
+                    </FormGroup>
                     <FormGroup ctx={ph} labelProps={AuthMessage.ChangePasswordAspx_ConfirmNewPassword}>
                         <input type="password" ref="newPass2" className="form-control" onChange={this.handlePasswordChange}/>
-                        </FormGroup>
-                    </div>}
-            <EntityLine ctx={this.subCtx(e => e.role) } />
-            <ValueLine ctx={this.subCtx(e => e.email) } />
-            <EntityCombo ctx={this.subCtx(e => e.cultureInfo) }/>
-            <ValueLine ctx={this.subCtx(e => e.passwordNeverExpires, { labelColumns: { sm: 4 } }) } />
-            <ValueLine ctx={this.subCtx(e => e.passwordSetDate, { labelColumns: { sm: 4 } }) } />
-                </div>);
+                    </FormGroup>
+                </div>}
+                <EntityLine ctx={this.subCtx(e => e.role) } />
+                <ValueLine ctx={this.subCtx(e => e.email) } />
+                <EntityCombo ctx={this.subCtx(e => e.cultureInfo) }/>
+                <ValueLine ctx={this.subCtx(e => e.passwordNeverExpires, { labelColumns: { sm: 4 } }) } />
+                <ValueLine ctx={this.subCtx(e => e.passwordSetDate, { labelColumns: { sm: 4 } }) } />
+            </div>
+        );
     }
 }
 
