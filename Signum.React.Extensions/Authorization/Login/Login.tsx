@@ -21,9 +21,9 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
 
         e.preventDefault();
 
-        var rememberMe = this.refs["rememberMe"] as Input;
+        const rememberMe = this.refs["rememberMe"] as Input;
 
-        var request: AuthClient.Api.LoginRequest = {
+        const request: AuthClient.Api.LoginRequest = {
             userName: (this.refs["userName"] as Input).getValue(),
             password: (this.refs["password"] as Input).getValue(),
             rememberMe: rememberMe ? rememberMe.getChecked() : null,

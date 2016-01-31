@@ -11,7 +11,7 @@ export default class User extends EntityComponent<UserEntity> {
     }
 
     render() {
-        var ph = this.subCtx(a=> a.passwordHash);
+        const ph = this.subCtx(a=> a.passwordHash);
         return (
             <div>
                 <ValueLine ctx={this.subCtx(e => e.state, { readOnly: true }) } />

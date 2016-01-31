@@ -9,8 +9,8 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { UserEntity, UserEntity_Type, RoleEntity_Type } from './Signum.Entities.Authorization'
 import Login from './Login/Login';
 
-export var userTicket: boolean;
-export var resetPassword: boolean;
+export let userTicket: boolean;
+export let resetPassword: boolean;
 
 
 export var viewPrefix = "";
