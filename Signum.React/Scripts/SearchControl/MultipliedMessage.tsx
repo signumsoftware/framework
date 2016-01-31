@@ -13,9 +13,9 @@ import { TypeContext, FormGroupStyle } from '../TypeContext'
 export default class MultipliedMessage extends React.Component<{ findOptions: FindOptions, mainType : TypeReference }, {}>  {
 
     render() {
-        var fo = this.props.findOptions;
+        const fo = this.props.findOptions;
 
-        var tokensObj = fo.columnOptions.map(a=> a.token)
+        const tokensObj = fo.columnOptions.map(a=> a.token)
             .concat(fo.filterOptions.filter(a=> a.operation != null).map(a=> a.token))
             .concat(fo.orderOptions.map(a=> a.token))
             .filter(a=> a != null)
@@ -23,12 +23,12 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
             .filter(a=> a.queryTokenType == QueryTokenType.Element)
             .toObjectDistinct(a=> a.fullKey);
 
-        var tokens = Dic.getValues(tokensObj);
+        const tokens = Dic.getValues(tokensObj);
 
         if (tokens.length == 0)
             return null;
 
-        var message = ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.niceToString().formatWith(
+        const message = ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.niceToString().formatWith(
             getTypeInfos(this.props.mainType).map(a=> a.nicePluralName).joinComma(External.CollectionMessage.And.niceToString()),
             tokens.map(a=> a.parent.niceName).joinComma(External.CollectionMessage.And.niceToString()))
 

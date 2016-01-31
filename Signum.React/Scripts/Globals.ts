@@ -1,8 +1,8 @@
 ﻿
 Array.prototype.groupByArray = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
-    var result: { key: string; elements: any[] }[] = [];
-    var objectGrouped = this.groupByObject(keySelector);
-    for (var prop in objectGrouped) {
+    const result: { key: string; elements: any[] }[] = [];
+    const objectGrouped = this.groupByObject(keySelector);
+    for (const prop in objectGrouped) {
         if (objectGrouped.hasOwnProperty(prop))
             result.push({ key: prop, elements: objectGrouped[prop] });
     }
@@ -10,11 +10,11 @@ Array.prototype.groupByArray = function (keySelector: (element: any) => string):
 };
 
 Array.prototype.groupByObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
-    var result: { [key: string]: any[] } = {};
+    const result: { [key: string]: any[] } = {};
 
-    for (var i = 0; i < this.length; i++) {
-        var element: any = this[i];
-        var key = keySelector(element);
+    for (let i = 0; i < this.length; i++) {
+        const element: any = this[i];
+        const key = keySelector(element);
         if (!result[key])
             result[key] = [];
         result[key].push(element);
@@ -23,10 +23,10 @@ Array.prototype.groupByObject = function (keySelector: (element: any) => string)
 };
 
 Array.prototype.orderBy = function (keySelector: (element: any) => any): any[] {
-    var cloned = (<any[]>this).slice(0);
+    const cloned = (<any[]>this).slice(0);
     cloned.sort((e1, e2) => {
-        var v1 = keySelector(e1);
-        var v2 = keySelector(e2);
+        const v1 = keySelector(e1);
+        const v2 = keySelector(e2);
         if (v1 > v2)
             return 1;
         if (v1 < v2)
@@ -37,10 +37,10 @@ Array.prototype.orderBy = function (keySelector: (element: any) => any): any[] {
 };
 
 Array.prototype.orderByDescending = function (keySelector: (element: any) => any): any[] {
-    var cloned = (<any[]>this).slice(0);
+    const cloned = (<any[]>this).slice(0);
     cloned.sort((e1, e2) => {
-        var v1 = keySelector(e1);
-        var v2 = keySelector(e2);
+        const v1 = keySelector(e1);
+        const v2 = keySelector(e2);
         if (v1 < v2)
             return 1;
         if (v1 > v2)
@@ -51,10 +51,10 @@ Array.prototype.orderByDescending = function (keySelector: (element: any) => any
 };
 
 Array.prototype.toObject = function (keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
-    var obj = {};
+    const obj = {};
 
     (<Array<any>>this).forEach(item=> {
-        var key = keySelector(item);
+        const key = keySelector(item);
 
         if (obj[key])
             throw new Error("Repeated key {0}".formatWith(key));
@@ -67,10 +67,10 @@ Array.prototype.toObject = function (keySelector: (element: any) => any, valueSe
 };
 
 Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
-    var obj = {};
+    const obj = {};
 
     (<Array<any>>this).forEach(item=> {
-        var key = keySelector(item);
+        const key = keySelector(item);
 
         obj[key] = valueSelector ? valueSelector(item) : item;
     });
@@ -80,7 +80,7 @@ Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any,
 
 Array.prototype.flatMap = function (selector: (element: any) => any[]): any {
 
-    var array = [];
+    const array = [];
 
     (<Array<any>>this).forEach(item=>
         selector(item).forEach(item2 =>
@@ -165,7 +165,7 @@ Array.prototype.removeAt = function (index) {
 
 Array.prototype.remove = function (element) {
 
-    var index = (this as Array<any>).indexOf(element);
+    const index = (this as Array<any>).indexOf(element);
     if (index == -1)
         return false;
 
@@ -182,7 +182,7 @@ Array.prototype.clone = function () {
 };
 
 Array.prototype.joinComma = function (lastSeparator: string) {
-    var array = this as any[];
+    const array = this as any[];
 
     if (array.length == 0)
         return "";
@@ -190,9 +190,9 @@ Array.prototype.joinComma = function (lastSeparator: string) {
     if (array.length == 1)
         return array[0] == null ? "" : array[0].toString(); 
 
-    var lastIndex = array.length - 1;
+    const lastIndex = array.length - 1;
 
-    var rest = array.slice(0, lastIndex).join(", ");
+    const rest = array.slice(0, lastIndex).join(", ");
 
     return rest + lastSeparator + (array[lastIndex] == null ? "" : array[lastIndex].toString()); 
 };
@@ -200,10 +200,10 @@ Array.prototype.joinComma = function (lastSeparator: string) {
 
 Array.range = function (min, max) {
 
-    var length = max - min;
+    const length = max - min;
 
-    var result = new Array(length);
-    for (var i = 0; i < length; i++) {
+    const result = new Array(length);
+    for (let i = 0; i < length; i++) {
         result[i] = min + i;
     }
 
@@ -227,27 +227,27 @@ String.prototype.endsWith = function (str) {
 }
 
 String.prototype.formatWith = function () {
-    var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
+    const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
-    var args = arguments;
+    const args = arguments;
 
     return this.replace(regex, function (match) {
         //match will look like {sample-match}
         //key will be 'sample-match';
-        var key = match.substr(1, match.length - 2);
+        const key = match.substr(1, match.length - 2);
 
         return args[key];
     });
 };
 
 String.prototype.formatHtml = function () {
-    var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
+    const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
-    var args = arguments;
+    const args = arguments;
 
-    var parts = this.split(regex);
+    const parts = this.split(regex);
 
-    var result = [];
+    const result = [];
     for (let i = 0; i < parts.length - 4; i += 4) {
         result.push(parts[i]);
         result.push(args[parts[i + 1]]);
@@ -269,11 +269,11 @@ String.prototype.forGenderAndNumber = function (gender: any, number?: number) {
 
     function replacePart(textToReplace: string, ...prefixes: string[]): string {
         return textToReplace.replace(/\[[^\]\|]+(\|[^\]\|]+)*\]/g, m => {
-            var captures = m.substr(1, m.length - 2).split("|");
+            const captures = m.substr(1, m.length - 2).split("|");
 
-            for (var i = 0; i < prefixes.length; i++){
-                var pr = prefixes[i];
-                var capture = captures.filter(c => c.startsWith(pr)).firstOrNull();
+            for (let i = 0; i < prefixes.length; i++){
+                const pr = prefixes[i];
+                const capture = captures.filter(c => c.startsWith(pr)).firstOrNull();
                 if (capture != null)
                     return capture.substr(pr.length);
             }
@@ -312,7 +312,7 @@ String.prototype.replaceAll = function (from, to) {
 };
 
 String.prototype.before = function (separator) {
-    var index = this.indexOf(separator);
+    const index = this.indexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
 
@@ -320,7 +320,7 @@ String.prototype.before = function (separator) {
 };
 
 String.prototype.after = function (separator) {
-    var index = this.indexOf(separator);
+    const index = this.indexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
 
@@ -328,7 +328,7 @@ String.prototype.after = function (separator) {
 };
 
 String.prototype.tryBefore = function (separator) {
-    var index = this.indexOf(separator);
+    const index = this.indexOf(separator);
     if (index == -1)
         return null;
 
@@ -336,7 +336,7 @@ String.prototype.tryBefore = function (separator) {
 };
 
 String.prototype.tryAfter = function (separator) {
-    var index = this.indexOf(separator);
+    const index = this.indexOf(separator);
     if (index == -1)
         return null;
 
@@ -344,7 +344,7 @@ String.prototype.tryAfter = function (separator) {
 };
 
 String.prototype.beforeLast = function (separator) {
-    var index = this.lastIndexOf(separator);
+    const index = this.lastIndexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
 
@@ -352,7 +352,7 @@ String.prototype.beforeLast = function (separator) {
 };
 
 String.prototype.afterLast = function (separator) {
-    var index = this.lastIndexOf(separator);
+    const index = this.lastIndexOf(separator);
     if (index == -1)
         throw Error("{0} not found".formatWith(separator));
 
@@ -360,7 +360,7 @@ String.prototype.afterLast = function (separator) {
 };
 
 String.prototype.tryBeforeLast = function (separator) {
-    var index = this.lastIndexOf(separator);
+    const index = this.lastIndexOf(separator);
     if (index == -1)
         return null;
 
@@ -368,7 +368,7 @@ String.prototype.tryBeforeLast = function (separator) {
 };
 
 String.prototype.tryAfterLast = function (separator) {
-    var index = this.lastIndexOf(separator);
+    const index = this.lastIndexOf(separator);
     if (index == -1)
         return null;
 
@@ -400,9 +400,9 @@ export function hasFlag(value: number, flag: number): boolean {
 export module Dic {
 
     export function getValues<V>(obj: { [key: string]: V }): V[] {
-        var result: V[] = [];
+        const result: V[] = [];
 
-        for (var name in obj) {
+        for (const name in obj) {
             if (obj.hasOwnProperty(name)) {
                 result.push(obj[name]);
             }
@@ -412,9 +412,9 @@ export module Dic {
     }
 
     export function getKeys(obj: { [key: string]: any }): string[] {
-        var result: string[] = [];
+        const result: string[] = [];
 
-        for (var name in obj) {
+        for (const name in obj) {
             if (obj.hasOwnProperty(name)) {
                 result.push(name);
             }
@@ -425,8 +425,8 @@ export module Dic {
 
     export function map<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V) => R): R[] {
 
-        var result: R[] = [];
-        for (var name in obj) {
+        const result: R[] = [];
+        for (const name in obj) {
             if (obj.hasOwnProperty(name)) {
                 result.push(selector(name, obj[name]));
             }
@@ -436,7 +436,7 @@ export module Dic {
 
     export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void) {
 
-        for (var name in obj) {
+        for (const name in obj) {
             if (obj.hasOwnProperty(name)) {
                 action(name, obj[name]);
             }
@@ -452,9 +452,9 @@ export module Dic {
     }
 
     export function copy<T>(object: T): T {
-        var objectCopy = <T>{};
+        const objectCopy = <T>{};
 
-        for (var key in object) {
+        for (const key in object) {
             if (object.hasOwnProperty(key)) {
                 objectCopy[key] = object[key];
             }
@@ -470,14 +470,14 @@ export module Dic {
     export function extend(out) {
         out = out || {};
 
-        for (var i = 1; i < arguments.length; i++) {
+        for (let i = 1; i < arguments.length; i++) {
 
-            var a = arguments[i];
+            const a = arguments[i];
 
             if (!a)
                 continue;
 
-            for (var key in a) {
+            for (const key in a) {
                 if (a.hasOwnProperty(key) && a[key] !== undefined)
                     out[key] = a[key];
             }
@@ -488,9 +488,9 @@ export module Dic {
 
     /**  Waiting for https://github.com/Microsoft/TypeScript/issues/2103 */
     export function without<T>(obj: T, toRemove: {}): T {
-        var result = {};
+        const result = {};
 
-        for (var key in obj) {
+        for (const key in obj) {
             if (toRemove.hasOwnProperty(key) && !toRemove.hasOwnProperty(key))
                 result[key] = obj[key];
         }
@@ -520,8 +520,8 @@ export function areEqual<T>(a: T, b: T, field: (value: T) => any) {
 export module DomUtils {
     export function matches(elem: HTMLElement, selector: string): boolean {
         // Vendor-specific implementations of `Element.prototype.matches()`.
-        var proto = Element.prototype as any;
-        var nativeMatches = proto.matches ||
+        const proto = Element.prototype as any;
+        const nativeMatches = proto.matches ||
             proto.webkitMatchesSelector ||
             proto.mozMatchesSelector ||
             proto.msMatchesSelector ||
@@ -531,7 +531,7 @@ export module DomUtils {
             return false;
         }
 
-        var parentElem = elem.parentNode as HTMLElement;
+        const parentElem = elem.parentNode as HTMLElement;
 
         // use native 'matches'
         if (nativeMatches) {
@@ -539,10 +539,10 @@ export module DomUtils {
         }
 
         // native support for `matches` is missing and a fallback is required
-        var nodes = parentElem.querySelectorAll(selector);
-        var len = nodes.length;
+        const nodes = parentElem.querySelectorAll(selector);
+        const len = nodes.length;
 
-        for (var i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
             if (nodes[i] === elem) {
                 return true;
             }

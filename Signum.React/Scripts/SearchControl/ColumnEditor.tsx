@@ -34,7 +34,7 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps, {}>
     }
 
     render() {
-        var co = this.props.columnOption;
+        const co = this.props.columnOption;
 
         return (
             <div className="sf-column-editor form-xs">

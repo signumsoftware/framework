@@ -31,7 +31,7 @@ export default class SearchPage extends React.Component<SearchPageProps, { findO
 
     render() {
 
-        var fo = this.state.findOptions;
+        const fo = this.state.findOptions;
 
         return (
             <div id="divSearchPage">

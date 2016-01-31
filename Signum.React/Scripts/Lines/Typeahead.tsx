@@ -39,7 +39,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     static highlightedText = (val: string, query: string) => {
 
-        var index = val.toLowerCase().indexOf(query.toLowerCase());
+        const index = val.toLowerCase().indexOf(query.toLowerCase());
         if (index == -1)
             return val as React.ReactNode;
 
@@ -92,7 +92,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
         //this.setState({ shown: true, items: null });
                
-        var query = this.input.value;
+        const query = this.input.value;
         this.props.getItems(query).then(items=> this.setState({
             items: items,
             shown: true,
@@ -140,16 +140,19 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
                 break;
 
             case 38: // up arrow
-                e.preventDefault();
-                var newIndex = ((this.state.selectedIndex || 0) - 1 + this.state.items.length) % this.state.items.length;
-                this.setState({ selectedIndex: newIndex });
-                break;
-
+                {
+                    e.preventDefault();
+                    const newIndex = ((this.state.selectedIndex || 0) - 1 + this.state.items.length) % this.state.items.length;
+                    this.setState({ selectedIndex: newIndex });
+                    break;
+                }
             case 40: // down arrow
-                e.preventDefault();
-                var newIndex = ((this.state.selectedIndex || 0) + 1) % this.state.items.length;
-                this.setState({ selectedIndex: newIndex });
-                break;
+                {
+                    e.preventDefault();
+                    const newIndex = ((this.state.selectedIndex || 0) + 1) % this.state.items.length;
+                    this.setState({ selectedIndex: newIndex });
+                    break;
+                }
         }
 
         e.stopPropagation();
@@ -204,7 +207,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     onMenuLoad = (ul: HTMLUListElement) => {
 
-        var rec = this.input.getBoundingClientRect();
+        const rec = this.input.getBoundingClientRect();
         if (ul) {
             ul.style.top = (rec.height) + "px";
             ul.style.left = "0px";

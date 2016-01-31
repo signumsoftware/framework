@@ -39,10 +39,10 @@ export abstract class EntityList extends EntityListBase<EntityListProps>
 
     renderInternal() {
 
-        var s = this.state;
-        var list = this.state.ctx.value;
+        const s = this.state;
+        const list = this.state.ctx.value;
 
-        var hasSelected = s.selectedIndex != null;
+        const hasSelected = s.selectedIndex != null;
 
         return (
             <FormGroup ctx={s.ctx} title={s.labelText}>
@@ -66,7 +66,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps>
     }
 
     handleRemoveClick = (event: React.SyntheticEvent) => {
-        var s = this.state;
+        const s = this.state;
 
         (s.onRemove ? s.onRemove(s.ctx.value[s.selectedIndex].element) : Promise.resolve(true))
             .then(result => {
@@ -86,13 +86,13 @@ export abstract class EntityList extends EntityListBase<EntityListProps>
 
     handleViewClick = (event: React.SyntheticEvent) => {
 
-        var ctx = this.state.ctx;
-        var selectedIndex = this.state.selectedIndex;
-        var entity = ctx.value[selectedIndex].element;
+        const ctx = this.state.ctx;
+        const selectedIndex = this.state.selectedIndex;
+        const entity = ctx.value[selectedIndex].element;
 
-        var pr = ctx.propertyRoute.add(a => a[0]);
+        const pr = ctx.propertyRoute.add(a => a[0]);
 
-        var onView = this.state.onView ?
+        const onView = this.state.onView ?
             this.state.onView(entity, pr) :
             this.defaultView(entity, pr);
 
@@ -113,11 +113,11 @@ export abstract class EntityList extends EntityListBase<EntityListProps>
 
     getTitle(e: Lite<Entity> | ModifiableEntity) {
 
-        var pr = this.props.ctx.propertyRoute;
+        const pr = this.props.ctx.propertyRoute;
 
-        var type = pr && pr.member && pr.member.typeNiceName || (e as Lite<Entity>).EntityType || (e as ModifiableEntity).Type;
+        const type = pr && pr.member && pr.member.typeNiceName || (e as Lite<Entity>).EntityType || (e as ModifiableEntity).Type;
 
-        var id = (e as Lite<Entity>).id || (e as Entity).id;
+        const id = (e as Lite<Entity>).id || (e as Entity).id;
 
         return type + (id ? " " + id : "");
     }

@@ -156,11 +156,11 @@ export class TypeContext<T> extends StyleContext {
     
     subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R> {
 
-        var subRoute = this.propertyRoute.add(property);
+        const subRoute = this.propertyRoute.add(property);
 
-        var binding = createBinding(this.value, property);
+        const binding = createBinding(this.value, property);
 
-        var result = new TypeContext<R>(this, styleOptions, subRoute, binding);
+        const result = new TypeContext<R>(this, styleOptions, subRoute, binding);
 
         return result;
     }

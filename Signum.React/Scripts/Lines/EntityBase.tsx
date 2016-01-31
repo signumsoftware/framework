@@ -34,7 +34,7 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
 {
     calculateDefaultState(state: EntityBaseProps) {
 
-        var type = state.type;
+        const type = state.type;
 
         state.create = type.isEmbedded ? Navigator.isCreable(type.name, false) :
             type.name == IsByAll ? false :
@@ -58,10 +58,10 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
 
     convert(entityOrLite: ModifiableEntity | Lite<IEntity>): Promise<ModifiableEntity | Lite<IEntity>> {
 
-        var tr = this.state.type;
+        const tr = this.state.type;
 
-        var isLite = (entityOrLite as Lite<IEntity>).EntityType != null;
-        var entityType = (entityOrLite as Lite<IEntity>).EntityType || (entityOrLite as ModifiableEntity).Type;
+        const isLite = (entityOrLite as Lite<IEntity>).EntityType != null;
+        const entityType = (entityOrLite as Lite<IEntity>).EntityType || (entityOrLite as ModifiableEntity).Type;
 
 
         if (tr.isEmbedded) {
@@ -77,11 +77,11 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
                 return Promise.resolve(entityOrLite);
 
             if (isLite) {
-                var lite = entityOrLite as Lite<IEntity>;
+                const lite = entityOrLite as Lite<IEntity>;
                 return lite.entity ? Promise.resolve(lite.entity) : Navigator.API.fetchEntity(lite);
             }
 
-            var entity = entityOrLite as Entity;
+            const entity = entityOrLite as Entity;
 
             return Promise.resolve(toLiteFat(entity));
         }
@@ -95,10 +95,10 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
 
     handleViewClick = (event: React.SyntheticEvent) => {
 
-        var ctx = this.state.ctx;
-        var entity = ctx.value;
+        const ctx = this.state.ctx;
+        const entity = ctx.value;
 
-        var onView = this.state.onView ?
+        const onView = this.state.onView ?
             this.state.onView(entity, ctx.propertyRoute) :
             this.defaultView(entity, ctx.propertyRoute);
 
@@ -124,12 +124,12 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
     }
 
     chooseType(predicate: (ti: TypeInfo) => boolean): Promise<string> {
-        var t = this.state.type;
+        const t = this.state.type;
 
         if (t.isEmbedded)
             return Promise.resolve(t.name);
 
-        var tis = getTypeInfos(t).filter(predicate);
+        const tis = getTypeInfos(t).filter(predicate);
 
         return SelectorPopup.chooseType<TypeInfo>(tis)
             .then(ti => ti ? ti.name : null);
@@ -142,7 +142,7 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
     }
 
     handleCreateClick = (event: React.SyntheticEvent) => {
-        var onCreate = this.props.onCreate ?
+        const onCreate = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
         onCreate.then(e => {
@@ -184,7 +184,7 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
             .then(qn => qn == null ? null : Finder.find({ queryName: qn } as FindOptions));
     }
     handleFindClick = (event: React.SyntheticEvent) => {
-        var result = this.state.onFind ? this.state.onFind() : this.defaultFind();
+        const result = this.state.onFind ? this.state.onFind() : this.defaultFind();
 
         result.then(entity => {
             if (!entity)

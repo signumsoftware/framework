@@ -59,7 +59,7 @@ export interface ColumnOption {
 }
 
 
-export var DefaultPagination: Pagination = {
+export const DefaultPagination: Pagination = {
     mode: PaginationMode.Paginate,
     elementsPerPage: 20,
     currentPage: 1
@@ -99,7 +99,7 @@ export enum QueryTokenType {
 }
 
 export function getTokenParents(token: QueryToken): QueryToken[] {
-    var result = [];
+    const result = [];
     while (token != null) {
         result.insertAt(0, token);
         token = token.parent;
@@ -196,7 +196,7 @@ export interface ColumnDescription {
 
 
 
-export var filterOperations: { [a: string]: FilterOperation[] } = {};
+export const filterOperations: { [a: string]: FilterOperation[] } = {};
 filterOperations[FilterType.String as any] = [
     FilterOperation.Contains,
     FilterOperation.EqualTo,

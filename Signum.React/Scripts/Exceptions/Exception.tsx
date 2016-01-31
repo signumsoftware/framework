@@ -7,7 +7,7 @@ import { ValueLine, ValueLineType, EntityComponent, EntityLine } from '../Lines'
 
 export default class Exception extends EntityComponent<Basics.ExceptionEntity> {
     render() {
-        var sc = this.subCtx(a => a, { labelColumns: { sm: 4 } });
+        const sc = this.subCtx(a => a, { labelColumns: { sm: 4 } });
         return (
             <div>
                 <div className="row">
@@ -44,7 +44,7 @@ export default class Exception extends EntityComponent<Basics.ExceptionEntity> {
     }
 
     codeTab(eventKey: number, property: (ex: Basics.ExceptionEntity) => any) {
-        var tc = this.subCtx(property);
+        const tc = this.subCtx(property);
 
         if (!tc.value || tc.value == "")
             return null;

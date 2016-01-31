@@ -19,16 +19,16 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
     render() {
 
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
 
         if (ctx.formGroupStyle == FormGroupStyle.None)
             return this.props.children as React.ReactElement<any>;
 
-        var labelClasses = classes(ctx.formGroupStyle == FormGroupStyle.SrOnly && "sr-only",
+        const labelClasses = classes(ctx.formGroupStyle == FormGroupStyle.SrOnly && "sr-only",
             ctx.formGroupStyle == FormGroupStyle.LabelColumns && ("control-label " + ctx.labelColumnsCss));
 
 
-        var label = (
+        const label = (
             <label htmlFor={this.props.controlId} {...this.props.labelProps } className= { labelClasses } >
                 { this.props.title }
             </label>
@@ -53,7 +53,7 @@ export interface FormControlStaticProps extends React.Props<FormControlStatic> {
 export class FormControlStatic extends React.Component<FormControlStaticProps, {}>
 {
     render() {
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
 
         return <p id={ this.props.controlId }
             className = {(ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static") + " " + this.props.className}>
@@ -101,7 +101,7 @@ export abstract class LineBase<P extends LineBaseProps> extends React.Component<
     }
 
     calculateState(props: P): P {
-        var state = { ctx: props.ctx, type: (props.type || props.ctx.propertyRoute.member.type) } as LineBaseProps as P;
+        const state = { ctx: props.ctx, type: (props.type || props.ctx.propertyRoute.member.type) } as LineBaseProps as P;
         this.calculateDefaultState(state);
         runTasks(this, state);
         Dic.extend(state, props);
@@ -116,7 +116,7 @@ export abstract class LineBase<P extends LineBaseProps> extends React.Component<
 }
 
 
-export var Tasks: ((lineBase: LineBase<LineBaseProps>, state: LineBaseProps) => void)[] = [];
+export const Tasks: ((lineBase: LineBase<LineBaseProps>, state: LineBaseProps) => void)[] = [];
 
 export function runTasks(lineBase: LineBase<LineBaseProps>, state: LineBaseProps) {
     Tasks.forEach(t=> t(lineBase, state));

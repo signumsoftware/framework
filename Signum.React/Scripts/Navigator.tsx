@@ -10,10 +10,10 @@ import * as Finder from './Finder';
 import NormalPopup from './NormalPage/NormalPopup';
 
 
-export var NotFound: __React.ComponentClass<any>;
+export let NotFound: __React.ComponentClass<any>;
 
-export var currentUser: IEntity;
-export var currentHistory: HistoryModule.History & HistoryModule.HistoryQueries;
+export let currentUser: IEntity;
+export let currentHistory: HistoryModule.History & HistoryModule.HistoryQueries;
 
 
 
@@ -38,7 +38,7 @@ export function getTypeName(pseudoType: IType | TypeInfo | string) {
 
 export function getTypeTitel(entity: Entity) {
 
-    var typeInfo = getTypeInfo(entity.Type)
+    const typeInfo = getTypeInfo(entity.Type)
 
     return entity.isNew ?
         LiteMessage.New_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName) :
@@ -50,7 +50,7 @@ export function navigateRoute(entity: IEntity);
 export function navigateRoute(lite: Lite<IEntity>);
 export function navigateRoute(type: PseudoType, id: any);
 export function navigateRoute(typeOfEntity: any, id: any = null) {
-    var typeName: string;
+    let typeName: string;
     if ((typeOfEntity as IEntity).Type) {
         typeName = (typeOfEntity as IEntity).Type;
         id = (typeOfEntity as IEntity).id;
@@ -66,7 +66,7 @@ export function navigateRoute(typeOfEntity: any, id: any = null) {
     return "/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id;
 }
 
-export var entitySettings: { [type: string]: EntitySettingsBase } = {};
+export const entitySettings: { [type: string]: EntitySettingsBase } = {};
 
 export function addSettings(...settings: EntitySettingsBase[]) {
     settings.forEach(s=> Dic.addOrThrow(entitySettings, s.type.typeName, s));
@@ -74,19 +74,19 @@ export function addSettings(...settings: EntitySettingsBase[]) {
 
 
 export function getSettings(type: PseudoType): EntitySettingsBase {
-    var typeName = getTypeName(type);
+    const typeName = getTypeName(type);
 
     return entitySettings[typeName];
 }
 
 
-export var isCreableEvent: Array<(typeName: string) => boolean> = [];
+export const isCreableEvent: Array<(typeName: string) => boolean> = [];
 
 export function isCreable(type: PseudoType, isSearch?: boolean) {
 
-    var typeName = getTypeName(type);
+    const typeName = getTypeName(type);
 
-    var es = entitySettings[typeName];
+    const es = entitySettings[typeName];
     if (!es)
         return true;
 
@@ -96,41 +96,41 @@ export function isCreable(type: PseudoType, isSearch?: boolean) {
     return isCreableEvent.every(f=> f(typeName));
 }
 
-export var isFindableEvent: Array<(typeName: string) => boolean> = []; 
+export const isFindableEvent: Array<(typeName: string) => boolean> = []; 
 
 export function isFindable(type: PseudoType, isSearch?: boolean) {
 
-    var typeName = getTypeName(type);
+    const typeName = getTypeName(type);
 
     if (!Finder.isFindable(typeName))
         return false;
 
-    var es = entitySettings[typeName];
+    const es = entitySettings[typeName];
     if (es && !es.onIsFindable())
         return false;
 
     return true;
 }
 
-export var isViewableEvent: Array<(typeName: string, entity?: ModifiableEntity) => boolean> = []; 
+export const isViewableEvent: Array<(typeName: string, entity?: ModifiableEntity) => boolean> = []; 
 
 export function isViewable(typeOrEntity: PseudoType | ModifiableEntity, customView = false): boolean{
-    var entity = (typeOrEntity as ModifiableEntity).Type ? typeOrEntity as ModifiableEntity : null;
+    const entity = (typeOrEntity as ModifiableEntity).Type ? typeOrEntity as ModifiableEntity : null;
 
-    var typeName = entity ? entity.Type : getTypeName(typeOrEntity as PseudoType);
+    const typeName = entity ? entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-    var es = entitySettings[typeName];
+    const es = entitySettings[typeName];
 
     return es != null && es.onIsViewable(customView) && isViewableEvent.every(f=> f(typeName, entity));
 }
 
 export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customView = false, isSearch = false): boolean {
 
-    var entity = (typeOrEntity as ModifiableEntity).Type ? typeOrEntity as Entity : null;
+    const entity = (typeOrEntity as ModifiableEntity).Type ? typeOrEntity as Entity : null;
 
-    var typeName = entity ? entity.Type : getTypeName(typeOrEntity as PseudoType);
+    const typeName = entity ? entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-    var es = entitySettings[typeName];
+    const es = entitySettings[typeName];
 
     return es != null && es.onIsNavigable(customView, isSearch) && isViewableEvent.every(f=> f(typeName, entity));
 }
@@ -151,7 +151,7 @@ export function view<T extends ModifiableEntity>(entity: T, propertyRoute?: Prop
 export function view<T extends IEntity>(entity: Lite<T>): Promise<T>
 export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity>
 {
-    var options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } as ViewOptions :
+    const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } as ViewOptions :
         (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } as ViewOptions :
             entityOrOptions as ViewOptions;
 
@@ -200,10 +200,10 @@ export module API {
     export function fetchEntity<T extends Entity>(type: string, id: any): Promise<Entity>;
     export function fetchEntity(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<Entity> {
 
-        var typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
-        var id = (typeOrLite as Lite<any>).id || id;
+        const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
+        let idVal = (typeOrLite as Lite<any>).id || id;
 
-        return ajaxGet<Entity>({ url: "/api/entity/" + typeName + "/" + id });
+        return ajaxGet<Entity>({ url: "/api/entity/" + typeName + "/" + idVal });
     }
 
 
@@ -212,16 +212,16 @@ export module API {
     export function fetchEntityPack(type: PseudoType, id: any): Promise<EntityPack<Entity>>;
     export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<EntityPack<Entity>> {
 
-        var typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
-        var id = (typeOrLite as Lite<any>).id || id;
+        const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
+        let idVal = (typeOrLite as Lite<any>).id || id;
 
-        return ajaxGet<EntityPack<Entity>>({ url: "/api/entityPack/" + typeName + "/" + id });
+        return ajaxGet<EntityPack<Entity>>({ url: "/api/entityPack/" + typeName + "/" + idVal });
     }
 
 
     export function fetchOperationInfos(type: PseudoType): Promise<Array<OperationInfo>> {
 
-        var typeName = getTypeName(type as PseudoType);
+        const typeName = getTypeName(type as PseudoType);
 
         return ajaxGet<Array<OperationInfo>>({ url: "/api/operations/" + typeName });
 

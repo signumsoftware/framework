@@ -24,7 +24,7 @@ interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
 export default class QueryTokenBuilder extends React.Component<QueryTokenBuilderProps, {}>  {
     render() {
 
-        var tokenList = getTokenParents(this.props.queryToken);
+        const tokenList = getTokenParents(this.props.queryToken);
         tokenList.push(null);
         
         return (

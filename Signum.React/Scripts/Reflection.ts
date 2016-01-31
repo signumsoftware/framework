@@ -6,7 +6,7 @@ import {ajaxPost, ajaxGet} from './Services';
 
 export function getEnumInfo(enumTypeName: string, enumId: number) {
 
-    var ti = getTypeInfo(enumTypeName);
+    const ti = getTypeInfo(enumTypeName);
 
     if (!ti || ti.kind != KindOfType.Enum)
         throw new Error(`${enumTypeName} is not an Enum`);
@@ -30,6 +30,8 @@ export interface TypeInfo {
     members?: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
     mixins?: { [name: string]: string; };
+
+    operations?: { [name: string]: OperationInfo };
 }
 
 export interface MemberInfo {
@@ -104,10 +106,10 @@ interface TypeInfoDictionary {
     [name: string]: TypeInfo
 }
 
-var _types: TypeInfoDictionary;
+let _types: TypeInfoDictionary;
 
 
-var _queryNames: {
+let _queryNames: {
     [queryKey: string]: {
         name: string, niceName: string
     }
@@ -150,13 +152,13 @@ export function getQueryNiceName(queryName: any) {
         return (queryName as QueryKey).niceName();
 
     if (typeof queryName == "string") {
-        var str = queryName as string;
+        const str = queryName as string;
 
-        var type = _types[str.toLowerCase()];
+        const type = _types[str.toLowerCase()];
         if (type)
             return type.nicePluralName;
 
-        var qn = _queryNames[str.toLowerCase()];
+        const qn = _queryNames[str.toLowerCase()];
         if (qn)
             return qn.niceName;
 
@@ -178,13 +180,13 @@ export function getQueryKey(queryName: any): string {
         return (queryName as QueryKey).name;
 
     if (typeof queryName == "string") {
-        var str = queryName as string;
+        const str = queryName as string;
 
-        var type = _types[str.toLowerCase()];
+        const type = _types[str.toLowerCase()];
         if (type)
             return type.name;
 
-        var qn = _queryNames[str.toLowerCase()];
+        const qn = _queryNames[str.toLowerCase()];
         if (qn)
             return qn.name;
 
@@ -210,9 +212,9 @@ export function loadTypes(): Promise<void> {
             .flatMap(a=> Dic.getValues(a.members))
             .toObject(m=> m.name.toLocaleLowerCase(), m=> ({ name: m.name, niceName: m.niceName }));
 
-        earySymbols.forEach(s=> setSymbolId(s));
+        earlySymbols.forEach(s=> setSymbolId(s));
 
-        earySymbols = null;
+        earlySymbols = null;
     });
 }
 
@@ -252,49 +254,49 @@ export class ReadonlyBinding<T> implements IBinding<T> {
 
 export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBinding<T> {
 
-    var lambdaMatch = functionRegex.exec((lambda as any).toString());
+    const lambdaMatch = functionRegex.exec((lambda as any).toString());
 
     if (lambdaMatch == null)
         throw Error("invalid function");
 
-    var parameter = lambdaMatch[1];
-    var body = lambdaMatch[2];
+    const parameter = lambdaMatch[1];
+    const body = lambdaMatch[2];
 
     if (parameter == body)
         return new ReadonlyBinding<T>(parentValue as T);
 
-    var m = memberRegex.exec(body);
+    const m = memberRegex.exec(body);
 
     if (m == null)
         return null;
 
 
-    var realParentValue = m[1] == parameter ? parentValue :
+    const realParentValue = m[1] == parameter ? parentValue :
         eval(`(function(${parameter}){ return ${m[1]};})`)(parentValue);
 
     return new Binding<T>(m[2], realParentValue);
 }
 
 
-var functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*return\s*(.*)\s*;\s*}$/;
-var memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
-var indexRegex = /^(.*)\[(\d+)\]$/;
-var mixinRegex = /^getMixin\((.*),\s*([$a-zA-Z_][0-9a-zA-Z_$]*_Type)\s*\)$/
+const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*return\s*(.*)\s*;\s*}$/;
+const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
+const indexRegex = /^(.*)\[(\d+)\]$/;
+const mixinRegex = /^getMixin\((.*),\s*([$a-zA-Z_][0-9a-zA-Z_$]*_Type)\s*\)$/
 
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
     
-    var lambdaMatch = functionRegex.exec((lambda as any).toString());
+    const lambdaMatch = functionRegex.exec((lambda as any).toString());
 
     if (lambdaMatch == null)
         throw Error("invalid function");
 
-    var parameter = lambdaMatch[1];
-    var body = lambdaMatch[2];
-    var result: LambdaMember[] = [];
+    const parameter = lambdaMatch[1];
+    let body = lambdaMatch[2];
+    const result: LambdaMember[] = [];
 
     while (body != parameter) {
-        var m = memberRegex.exec(body);
+        let m = memberRegex.exec(body);
 
         if (m != null) {
             result.push({ name: m[2], type: LambdaMemberType.Member });
@@ -382,7 +384,7 @@ export class EnumType<T> {
         if (value == null)
             return this.typeInfo().niceName;
 
-        var valueStr = this.converter[<any>value];
+        const valueStr = this.converter[<any>value];
 
         return this.typeInfo().members[valueStr].niceName;
     }
@@ -424,16 +426,16 @@ interface ISymbol {
     id?: any;
 }
 
-var earySymbols: ISymbol[] = [];
+let earlySymbols: ISymbol[] = [];
 
 function setSymbolId(s: ISymbol) {
 
-    var type = _types[s.key.before(".").toLowerCase()];
+    const type = _types[s.key.before(".").toLowerCase()];
 
     if (!type)
         return;
 
-    var member = type.members[s.key.after(".")];
+    const member = type.members[s.key.after(".")];
 
     if (!member)
         return
@@ -447,7 +449,7 @@ export function registerSymbol<T extends ISymbol>(symbol: T): T {
     if (_types)
         setSymbolId(symbol);
     else
-        earySymbols.push(symbol);
+        earlySymbols.push(symbol);
 
     return symbol;
 } 
@@ -491,9 +493,9 @@ export class PropertyRoute {
     }
 
     add(property: (val: any) => any): PropertyRoute {
-        var members = getLambdaMembers(property);
+        const members = getLambdaMembers(property);
 
-        var current: PropertyRoute = this;
+        let current: PropertyRoute = this;
         members.forEach(m=> current = current.addMember(m));
 
         return current;
@@ -541,7 +543,7 @@ export class PropertyRoute {
 
         if (member.type == LambdaMemberType.Member) {
 
-            var ref = this.typeReference();
+            const ref = this.typeReference();
             if (ref.isLite) {
                 if (member.name != "entity")
                     throw new Error("Entity expected");
@@ -550,21 +552,21 @@ export class PropertyRoute {
             }
 
             if (this.propertyRouteType != PropertyRouteType.Root) {
-                var ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations");
+                const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations");
                 if (ti) {
-                    var m = ti.members[member.name];
+                    const m = ti.members[member.name];
                     if (!m)
-                        throw new Error(`member '${memberName}' not found`);
+                        throw new Error(`member '${member.name}' not found`);
 
                     return PropertyRoute.member(PropertyRoute.root(ti), m);
                 }
             }
 
-            var memberName = this.propertyRouteType == PropertyRouteType.Root ? member.name :
+            const memberName = this.propertyRouteType == PropertyRouteType.Root ? member.name :
                 this.propertyRouteType == PropertyRouteType.MListItem ? this.propertyPath() + member.name :
                     this.propertyPath() + "." + member.name;
 
-            var m = this.closestTypeInfo().members[memberName.firstUpper()];
+            const m = this.closestTypeInfo().members[memberName.firstUpper()];
             if (!m)
                 throw new Error(`member '${memberName}' not found`)
 

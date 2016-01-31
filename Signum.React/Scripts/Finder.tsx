@@ -18,7 +18,7 @@ import SearchPopup from './SearchControl/SearchPopup';
 import { Link  } from 'react-router';
 
 
-export var querySettings: { [queryKey: string]: QuerySettings } = {};
+export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="find">
@@ -37,11 +37,11 @@ export function getQuerySettings(queryName: any): QuerySettings {
 
 
 
-export var isFindableEvent: Array<(queryKey: string) => boolean> = [];
+export const isFindableEvent: Array<(queryKey: string) => boolean> = [];
 
 export function isFindable(queryName: any): boolean {
 
-    var queryKey = getQueryKey(queryName);
+    const queryKey = getQueryKey(queryName);
 
     return isFindableEvent.every(f=> f(queryKey));
 }
@@ -50,7 +50,7 @@ export function find<T extends Entity>(type: Type<T>): Promise<Lite<T>>;
 export function find(findOptions: FindOptions): Promise<Lite<IEntity>>;
 export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<IEntity>> {
 
-    var fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
+    const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions } as FindOptions;
     
     return new Promise<Lite<IEntity>>((resolve) => {
@@ -64,7 +64,7 @@ export function findMany<T extends Entity>(type: Type<T>): Promise<Lite<T>[]>;
 export function findMany(findOptions: FindOptions): Promise<Lite<IEntity>[]>;
 export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEntity>[]> {
 
-    var fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
+    const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions } as FindOptions;
 
     return new Promise<Lite<IEntity>[]>((resolve) => {
@@ -77,13 +77,13 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEn
 export function findOptionsPath(findOptions: FindOptions): string;
 export function findOptionsPath(queryName: any): string
 {
-    var fo = queryName as FindOptions;
+    const fo = queryName as FindOptions;
     if (!fo.queryName)
         return currentHistory.createPath("/Find/" + getQueryKey(queryName)); 
     
-    var base = findOptionsPath(fo.queryName);
+    const base = findOptionsPath(fo.queryName);
 
-    var query = {
+    const query = {
         filters: Encoder.encodeFilters(fo.filterOptions),
         orders: Encoder.encodeOrders(fo.orderOptions),
         columns: Encoder.encodeColumns(fo.columnOptions),
@@ -103,7 +103,7 @@ export function findOptionsPath(queryName: any): string
 
 export function parseFindOptionsPath(queryName: string, query: any): FindOptions {
     
-    var result = {
+    const result = {
         queryName: queryName,
         filterOptions: Decoder.decodeFilters(query.filters),
         orderOptions: Decoder.decodeOrders(query.orders),
@@ -126,7 +126,7 @@ export function parseFindOptionsPath(queryName: string, query: any): FindOptions
 
 export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
 
-    var completer = new TokenCompleter(findOptions.queryName);
+    const completer = new TokenCompleter(findOptions.queryName);
 
     if (findOptions.filterOptions)
         findOptions.filterOptions.forEach(fo=> completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll).then(_=> parseValue(fo)));
@@ -176,8 +176,8 @@ class TokenCompleter {
 
 
     finish(): Promise<void> {
-        var queryKey = getQueryKey(this.queryName);
-        var tokens = Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }));
+        const queryKey = getQueryKey(this.queryName);
+        const tokens = Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }));
 
         if (tokens.length == 0)
             return Promise.resolve();
@@ -220,11 +220,11 @@ function calculateFilterType(typeRef: TypeReference): FilterType {
 
 export module API {
 
-    var queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
+    const queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
 
     export function getQueryDescription(queryName: any): Promise<QueryDescription> {
 
-        var key = getQueryKey(queryName);
+        const key = getQueryKey(queryName);
 
         if (queryDescriptionCache[key])
             return Promise.resolve(queryDescriptionCache[key]);
@@ -381,7 +381,7 @@ export module ButtonBarQuery {
 }
 
 
-export var defaultPagination: Pagination = {
+export const defaultPagination: Pagination = {
     mode: PaginationMode.Paginate,
     elementsPerPage: 20,
     currentPage: 1,
@@ -413,7 +413,7 @@ export class CellFormatter {
 }
 
 
-export var formatRules: FormatRule[] = [
+export const formatRules: FormatRule[] = [
     {
         name: "Object",
         isApplicable: col=> true,
@@ -440,7 +440,7 @@ export var formatRules: FormatRule[] = [
         name: "DateTime",
         isApplicable: col=> col.token.filterType == FilterType.DateTime,
         formatter: col=> {
-            var momentFormat = toMomentFormat(col.token.format);
+            const momentFormat = toMomentFormat(col.token.format);
             return new CellFormatter((cell: string) => cell == null || cell == "" ? "" : moment(cell).format(momentFormat))
         }
     },
@@ -473,7 +473,7 @@ export interface EntityFormatRule {
 
 export type EntityFormatter = (row: ResultRow) => React.ReactNode;
 
-export var entityFormatRules: EntityFormatRule[] = [
+export const entityFormatRules: EntityFormatRule[] = [
     {
         name: "View",
         isApplicable: row=> true,

@@ -11,7 +11,7 @@ export interface IModalProps {
 }
 
 
-var singletone: GlobalModalContainer;
+let singletone: GlobalModalContainer;
 export class GlobalModalContainer extends React.Component<{}, { modals: React.ReactElement<IModalProps>[]
 }> {
     constructor(props) {
@@ -30,8 +30,8 @@ export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T>
 
     return new Promise<T>((resolve) => {
 
-        var cloned;
-        var onExited = (val : T) => {
+        let cloned;
+        const onExited = (val : T) => {
             singletone.state.modals.remove(cloned);
             singletone.forceUpdate();
             resolve(val);
@@ -46,7 +46,7 @@ export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T>
 
 //export function errorModal(error: any): Promise<void> {
 
-//    var modal = <Modal onHide={null}>
+//    const modal = <Modal onHide={null}>
 //          <Modal.Header closeButton>
 //            <Modal.Title>Modal heading</Modal.Title>
 //              </Modal.Header>

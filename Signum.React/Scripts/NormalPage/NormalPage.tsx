@@ -46,21 +46,21 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
     }
 
     calculateState(props: NormalPageProps) {
-        var typeInfo = getTypeInfo(props.routeParams.type);
+        const typeInfo = getTypeInfo(props.routeParams.type);
 
-        var entitySettings = Navigator.getSettings(typeInfo.name);
+        const entitySettings = Navigator.getSettings(typeInfo.name);
 
         return { entitySettings: entitySettings, typeInfo: typeInfo, entity: null };
     }
 
     loadEntity(props: NormalPageProps): Promise<void> {
 
-        var ti = this.state.typeInfo;
+        const ti = this.state.typeInfo;
 
-        var id = ti.members["Id"].type.name == "number" &&
+        const id = ti.members["Id"].type.name == "number" &&
             this.props.routeParams.id != "" ? parseInt(props.routeParams.id) : props.routeParams.id;
 
-        var lite: Lite<Entity> = {
+        const lite: Lite<Entity> = {
             EntityType: ti.name,
             id: id,
         };
@@ -71,7 +71,7 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
 
     loadComponent(): Promise<void> {
 
-        var promise = this.props.component ? Promise.resolve(this.props.component) :
+        const promise = this.props.component ? Promise.resolve(this.props.component) :
             this.state.entitySettings.onGetComponentDefault(this.state.entity);
 
         return promise.then(c =>
@@ -92,11 +92,11 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
             return null;
 
 
-        var styleOptions: StyleOptions = {
+        const styleOptions: StyleOptions = {
             readOnly: this.state.entitySettings.onIsReadonly()
         };
 
-        var ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(this.state.entity));
+        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(this.state.entity));
 
         return (
             <div className="normal-control">

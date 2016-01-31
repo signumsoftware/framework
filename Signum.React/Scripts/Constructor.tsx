@@ -11,7 +11,7 @@ export function construct<T extends ModifiableEntity>(type: Type<T>): Promise<T>
 export function construct(type: string): Promise<ModifiableEntity>;
 export function construct(type: string | Type<any>): Promise<ModifiableEntity> {
 
-    var typeName = (type as Type<any>).typeName || type as string;
+    const typeName = (type as Type<any>).typeName || type as string;
 
     return Promise.resolve({ Type: typeName } as ModifiableEntity);
 }

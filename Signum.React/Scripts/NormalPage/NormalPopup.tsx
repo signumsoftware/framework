@@ -53,13 +53,13 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
 
     calculateState(props: NormalPopupState) {
 
-        var typeName = (this.props.entity as Lite<Entity>).EntityType || (this.props.entity as ModifiableEntity).Type; 
+        const typeName = (this.props.entity as Lite<Entity>).EntityType || (this.props.entity as ModifiableEntity).Type; 
 
-        var entitySettings = Navigator.getSettings(typeName);
+        const entitySettings = Navigator.getSettings(typeName);
 
-        var typeInfo = getTypeInfo(typeName);
+        const typeInfo = getTypeInfo(typeName);
         
-        var pr = typeInfo ? PropertyRoute.root(typeInfo) : this.props.propertyRoute;
+        const pr = typeInfo ? PropertyRoute.root(typeInfo) : this.props.propertyRoute;
 
         if (!pr)
             throw new Error("propertyRoute is mandatory for embeddedEntities");
@@ -74,7 +74,7 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
 
     loadEntity(props: NormalPopupProps) : Promise<void> {
         
-        var entity = (this.props.entity as ModifiableEntity).Type ?
+        const entity = (this.props.entity as ModifiableEntity).Type ?
             this.props.entity as ModifiableEntity :
             (this.props.entity as Lite<Entity>).entity;
 
@@ -99,7 +99,7 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
 
     loadComponent() {
 
-        var promise = this.props.component ? Promise.resolve(this.props.component) :
+        const promise = this.props.component ? Promise.resolve(this.props.component) :
             this.state.entitySettings.onGetComponentDefault(this.state.entity); 
 
         return promise
@@ -127,10 +127,10 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
 
     render() {
 
-        var styleOptions: StyleOptions = {
+        const styleOptions: StyleOptions = {
             readOnly: this.props.readOnly != null ? this.props.readOnly : this.state.entitySettings.onIsReadonly()
         };
-        var ctx = new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(this.state.entity));
+        const ctx = new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(this.state.entity));
 
         return (
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
@@ -162,7 +162,7 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
         if (this.state.entity == null)
             return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
 
-        var pr = this.props.propertyRoute;
+        const pr = this.props.propertyRoute;
         
 
         return (
@@ -176,12 +176,12 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
     }
 
     renderExpandLink() {
-        var entity = this.state.entity;
+        const entity = this.state.entity;
 
         if (entity == null)
             return null;
 
-        var ti = getTypeInfo(entity.Type);
+        const ti = getTypeInfo(entity.Type);
 
         if (ti == null || !Navigator.isNavigable(ti, null)) //Embedded
             return null;

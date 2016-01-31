@@ -33,11 +33,11 @@ export default class PaginationSelector extends React.Component<PaginationSelect
 
     renderLeft(): React.ReactNode {
 
-        var resultTable = this.props.resultTable;
+        const resultTable = this.props.resultTable;
         if (!resultTable)
             return "\u00a0";
 
-        var pagination = this.props.pagination;
+        const pagination = this.props.pagination;
 
         switch (pagination.mode) {
 
@@ -69,9 +69,9 @@ export default class PaginationSelector extends React.Component<PaginationSelect
 
     handleMode = (e: React.SyntheticEvent) => {
 
-        var mode = (e.currentTarget as HTMLInputElement).value as any as PaginationMode
+        const mode = (e.currentTarget as HTMLInputElement).value as any as PaginationMode
 
-        var p: Pagination = {
+        const p: Pagination = {
             mode: mode,
             elementsPerPage: mode != PaginationMode.All ? Finder.defaultPagination.elementsPerPage : null,
             currentPage: mode == PaginationMode.Paginate ? 1 : null
@@ -81,12 +81,12 @@ export default class PaginationSelector extends React.Component<PaginationSelect
     }
 
     handleElementsPerPage = (e: React.SyntheticEvent) => {
-        var p = Dic.extend({}, this.props.pagination, { elementsPerPage: parseInt((e.currentTarget as HTMLInputElement).value) });
+        const p = Dic.extend({}, this.props.pagination, { elementsPerPage: parseInt((e.currentTarget as HTMLInputElement).value) });
         this.props.onPagination(p);
     }
 
     handlePageClick = (e: React.SyntheticEvent, page: { eventKey: number }) => {
-        var p = Dic.extend({}, this.props.pagination, { currentPage: page.eventKey });
+        const p = Dic.extend({}, this.props.pagination, { currentPage: page.eventKey });
         this.props.onPagination(p);
     }
 
@@ -106,11 +106,11 @@ export default class PaginationSelector extends React.Component<PaginationSelect
     }
     
     renderRight(): React.ReactNode {
-        var resultTable = this.props.resultTable;
+        const resultTable = this.props.resultTable;
         if (!resultTable || resultTable.pagination.mode != PaginationMode.Paginate)
             return "\u00a0";
 
-        var totalPages = PaginateMath.totalPages(resultTable.pagination, resultTable.totalElements);
+        const totalPages = PaginateMath.totalPages(resultTable.pagination, resultTable.totalElements);
 
 
         return (

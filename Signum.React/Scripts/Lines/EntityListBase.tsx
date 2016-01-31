@@ -37,9 +37,9 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
     }
 
     moveUp(index: number) {
-        var list = this.props.ctx.value;
+        const list = this.props.ctx.value;
 
-        var entity = list[index]
+        const entity = list[index]
         list.removeAt(index);
         list.insertAt(index - 1, entity);
         this.setValue(list);
@@ -58,8 +58,8 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
     }
 
     moveDown(index: number) {
-        var list = this.props.ctx.value;
-        var entity = list[index]
+        const list = this.props.ctx.value;
+        const entity = list[index]
         list.removeAt(index);
         list.insertAt(index + 1, entity);
         this.setValue(list);
@@ -77,7 +77,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
     }
 
     handleCreateClick = (event: React.SyntheticEvent) => {
-        var onCreate = this.props.onCreate ?
+        const onCreate = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
         onCreate.then(e => {
@@ -88,7 +88,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
             if (!this.state.viewOnCreate)
                 return Promise.resolve(e);
 
-            var pr = this.state.ctx.propertyRoute.add(a => a[0]);
+            const pr = this.state.ctx.propertyRoute.add(a => a[0]);
 
             return this.state.onView ?
                 this.state.onView(e, pr) :
@@ -100,7 +100,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
                 return;
 
             this.convert(e).then(m => {
-                var list = this.props.ctx.value;
+                const list = this.props.ctx.value;
                 list.push({ element: e, rowId: null });
                 this.setValue(list);
             });
@@ -114,14 +114,14 @@ export abstract class EntityListBase<T extends EntityListBaseProps> extends Enti
 
 
     handleFindClick = (event: React.SyntheticEvent) => {
-        var result = this.state.onFindMany ? this.state.onFindMany() : this.defaultFindMany();
+        const result = this.state.onFindMany ? this.state.onFindMany() : this.defaultFindMany();
 
         result.then(lites => {
             if (!lites)
                 return;
 
             Promise.all(lites.map(a => this.convert(a))).then(entites => {
-                var list = this.props.ctx.value;
+                const list = this.props.ctx.value;
                 entites.forEach(e => list.push({ element: e, rowId: null }));
                 this.setValue(list);
             });

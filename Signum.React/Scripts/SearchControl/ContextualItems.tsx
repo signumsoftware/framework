@@ -15,15 +15,15 @@ export interface ContextualItemsContext {
     queryDescription: QueryDescription;
 }
 
-export var onContextualItems: ((ctx: ContextualItemsContext) => Promise<MenuItemBlock>)[] = [];
+export const onContextualItems: ((ctx: ContextualItemsContext) => Promise<MenuItemBlock>)[] = [];
 
 export function getContextualItems(ctx: ContextualItemsContext): Promise<React.ReactElement<any>[]> {
    
-    var blockPromises = onContextualItems.map(func => func(ctx));
+    const blockPromises = onContextualItems.map(func => func(ctx));
 
     return Promise.all(blockPromises).then(blocks => {
 
-        var result: React.ReactElement<any>[] = []
+        const result: React.ReactElement<any>[] = []
         blocks.forEach(block=> {
 
             if (block == null || block.menuItems == null || block.menuItems.length == 0)
@@ -52,12 +52,12 @@ export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAt
 export class ContextMenu extends React.Component<ContextMenuProps, { }> {
     render() {
 
-        var { position } = this.props;
-        var props = Dic.without(this.props, { position, ref: null });
+        const { position } = this.props;
+        const props = Dic.without(this.props, { position, ref: null });
 
-        var style: React.CSSProperties = { left: position.pageX + "px", top: position.pageY + "px", zIndex: 9999, display: "block", position: "absolute" }; 
+        const style: React.CSSProperties = { left: position.pageX + "px", top: position.pageY + "px", zIndex: 9999, display: "block", position: "absolute" }; 
 
-        var ul = (
+        const ul = (
             <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
                 {this.props.children}
             </ul>

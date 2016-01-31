@@ -23,7 +23,7 @@ export function baseUrl(options: AjaxOptions): string {
         return options.url;
 
 
-    var baseUrl = window["__baseUrl"] as string;
+    const baseUrl = window["__baseUrl"] as string;
 
     if (!baseUrl || options.url.startsWith(baseUrl)) //HACK: Too smart?
         return options.url;
@@ -63,7 +63,7 @@ export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
 
 export function wrapRequest<T>(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<T>
 {
-    var promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
+    let promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
 
     if (!options.avoidThrowError)
         promise = promise.then(throwError);
@@ -82,8 +82,8 @@ export function wrapRequest<T>(options: AjaxOptions, makeCall: () => Promise<Res
 }
 
 
-export var notifyPendingRequests: (pendingRequests: number) => void = () => { };
-var pendingRequests: number = 0;
+export const notifyPendingRequests: (pendingRequests: number) => void = () => { };
+let pendingRequests: number = 0;
 function onPendingRequest(makeCall: ()=>Promise<Response>) {
     
     notifyPendingRequests(pendingRequests++);
@@ -134,4 +134,4 @@ export interface ModelState {
     [field: string]: string;
 }
 
-export var showError = (error: any) => alert(error);
+export const showError = (error: any) => alert(error);

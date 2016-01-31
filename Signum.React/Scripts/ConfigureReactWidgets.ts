@@ -6,7 +6,7 @@ export function configure(){
 
     if (typeof moment !== 'function') throw new TypeError('You must provide a valid moment object');
 
-    var localField = typeof moment().locale === 'function' ? 'locale' : 'lang',
+    const localField = typeof moment().locale === 'function' ? 'locale' : 'lang',
         hasLocaleData = !!moment.localeData;
 
     if (!hasLocaleData) throw new TypeError('The Moment localizer depends on the `localeData` api, please provide a moment object v2.2.0 or higher');
@@ -23,7 +23,7 @@ export function configure(){
         return moment(date).add(100, 'year').add(-1, 'millisecond').toDate();
     }
 
-    var localizer = {
+    const localizer = {
         formats: {
             date: 'L',
             time: 'LT',

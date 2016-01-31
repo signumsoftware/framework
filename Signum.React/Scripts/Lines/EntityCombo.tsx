@@ -40,13 +40,13 @@ export class EntityCombo extends EntityBase<EntityComboProps> {
     }
 
     handleOnChange = (event: React.FormEvent) => {
-        var current = event.currentTarget as HTMLSelectElement;
+        const current = event.currentTarget as HTMLSelectElement;
 
         if (current.value != liteKey(this.getLite())) {
             if (!current.value) {
                 this.setValue(null);
             } else {
-                var lite = this.state.data.filter(a => liteKey(a) == current.value).single();
+                const lite = this.state.data.filter(a => liteKey(a) == current.value).single();
 
                 this.convert(lite).then(v => this.setValue(v));
             }
@@ -54,7 +54,7 @@ export class EntityCombo extends EntityBase<EntityComboProps> {
     }
 
     getLite() {
-        var v = this.state.ctx.value;
+        const v = this.state.ctx.value;
         if (v == null)
             return null;
 
@@ -66,13 +66,13 @@ export class EntityCombo extends EntityBase<EntityComboProps> {
 
     renderInternal() {
 
-        var s = this.state;
+        const s = this.state;
 
-        var hasValue = !!s.ctx.value;
+        const hasValue = !!s.ctx.value;
 
-        var lite = this.getLite();
+        const lite = this.getLite();
 
-        var elements: Lite<Entity>[] = [null].concat(s.data);
+        const elements: Lite<Entity>[] = [null].concat(s.data);
         if (lite && !elements.some(a => is(a, lite)))
             elements.insertAt(1, lite);
 

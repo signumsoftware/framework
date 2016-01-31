@@ -94,7 +94,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
 
     handleTokenChanged = (newToken: QueryToken) => {
 
-        var f = this.props.filter;
+        const f = this.props.filter;
         
         if (newToken == null) {
             f.operation = null;
@@ -103,7 +103,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         else {
 
             if (!areEqual(f.token, newToken, a=> a.filterType)) {
-                var operations = filterOperations[newToken.filterType];
+                const operations = filterOperations[newToken.filterType];
                 f.operation = operations && operations.firstOrNull();
                 f.value = null;
             }
@@ -122,7 +122,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     }
 
     render() {
-        var f = this.props.filter;
+        const f = this.props.filter;
 
         return (
             <tr>
@@ -157,9 +157,9 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     }
 
     renderValue() {
-        var f = this.props.filter;
+        const f = this.props.filter;
 
-        var ctx = new TypeContext<any>(null, { formGroupStyle: FormGroupStyle.None, readOnly: f.frozen }, null, new Binding<any>("value", f));
+        const ctx = new TypeContext<any>(null, { formGroupStyle: FormGroupStyle.None, readOnly: f.frozen }, null, new Binding<any>("value", f));
 
         switch (f.token.filterType) {
             case FilterType.Lite:
@@ -170,10 +170,10 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
             case FilterType.Embedded:
                 return <EntityLine ctx={ctx} type={f.token.type} create={false} autoComplete={false} />;
             case FilterType.Enum:
-                var ti = getTypeInfos(f.token.type).single();
+                const ti = getTypeInfos(f.token.type).single();
                 if (!ti)
                     throw new Error(`EnumType ${f.token.type.name} not found`);
-                var members = Dic.getValues(ti.members).filter(a=> !a.isIgnored);
+                const members = Dic.getValues(ti.members).filter(a=> !a.isIgnored);
                 return <ValueLine ctx={ctx} type={f.token.type} formatText={f.token.format} unitText={f.token.unit} comboBoxItems={members}/>;
             default:
                 return <ValueLine ctx={ctx} type={f.token.type} formatText={f.token.format} unitText={f.token.unit}/>;

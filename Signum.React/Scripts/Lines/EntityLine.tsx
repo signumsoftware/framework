@@ -22,7 +22,7 @@ export interface EntityLineProps extends EntityBaseProps {
     autoCompleteRenderItem?: (lite: Lite<IEntity>, query: string) => React.ReactNode;
 }
 
-var a = 2;
+const a = 2;
 
 export class EntityLine extends EntityBase<EntityLineProps> {
 
@@ -46,9 +46,9 @@ export class EntityLine extends EntityBase<EntityLineProps> {
 
     renderInternal() {
 
-        var s = this.state;
+        const s = this.state;
 
-        var hasValue = !!s.ctx.value;
+        const hasValue = !!s.ctx.value;
 
         return <FormGroup ctx={s.ctx} title={s.labelText}>
             <div className="SF-entity-line">
@@ -67,7 +67,7 @@ export class EntityLine extends EntityBase<EntityLineProps> {
 
     renderAutoComplete() {
 
-        var s = this.state;
+        const s = this.state;
 
         if (!s.autoComplete || s.ctx.readOnly)
             return <FormControlStatic ctx={s.ctx}></FormControlStatic>;
@@ -86,7 +86,7 @@ export class EntityLine extends EntityBase<EntityLineProps> {
 
     renderLink() {
 
-        var s = this.state;
+        const s = this.state;
 
         if (s.ctx.readOnly)
             return <FormControlStatic ctx={s.ctx}>{getToString(s.ctx.value) }</FormControlStatic>

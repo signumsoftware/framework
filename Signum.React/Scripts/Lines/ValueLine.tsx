@@ -90,7 +90,7 @@ export class ValueLine extends LineBase<ValueLineProps> {
     }
 
     static isNumber(e: React.KeyboardEvent) {
-        var c = e.keyCode;
+        const c = e.keyCode;
         return ((c >= 48 && c <= 57) /*0-9*/ ||
             (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
             (c == 8) /*BackSpace*/ ||
@@ -109,7 +109,7 @@ export class ValueLine extends LineBase<ValueLineProps> {
     }
 
     static isDecimal(e: React.KeyboardEvent) {
-        var c = e.keyCode;
+        const c = e.keyCode;
         return (this.isNumber(e) ||
             (c == 110) /*NumPad Decimal*/ ||
             (c == 190) /*.*/ ||
@@ -119,14 +119,14 @@ export class ValueLine extends LineBase<ValueLineProps> {
 }
 
 ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
-    var s = vl.state;
+    const s = vl.state;
 
     if (s.type.isNullable) {
         return internalComboBox(vl, getTypeInfo("BooleanEnum"));
     }
 
-    var handleCheckboxOnChange = (e: React.SyntheticEvent) => {
-        var input = e.currentTarget as HTMLInputElement;
+    const handleCheckboxOnChange = (e: React.SyntheticEvent) => {
+        const input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.checked);
     };
 
@@ -157,9 +157,9 @@ ValueLine.renderers[ValueLineType.Enum as any] = (vl) => {
 
 function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
 
-    var s = vl.state;
+    const s = vl.state;
 
-    var items = s.comboBoxItems || Dic.getValues(typeInfo.members);
+    let items = s.comboBoxItems || Dic.getValues(typeInfo.members);
 
 
     if (s.type.isNullable || s.ctx.value == null)
@@ -176,9 +176,9 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
         );
 
 
-    var handleEnumOnChange = (e: React.SyntheticEvent) => {
-        var input = e.currentTarget as HTMLInputElement;
-        var val = input.value;
+    const handleEnumOnChange = (e: React.SyntheticEvent) => {
+        const input = e.currentTarget as HTMLInputElement;
+        const val = input.value;
         vl.setValue(val == "" ? null : val);
     };
 
@@ -196,7 +196,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
 
 ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
 
-    var s = vl.state;
+    const s = vl.state;
 
     if (s.ctx.readOnly)
         return (
@@ -205,8 +205,8 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
             </FormGroup>
         );
 
-    var handleTextOnChange = (e: React.SyntheticEvent) => {
-        var input = e.currentTarget as HTMLInputElement;
+    const handleTextOnChange = (e: React.SyntheticEvent) => {
+        const input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.value);
     };
 
@@ -222,7 +222,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
 
 ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
 
-    var s = vl.state;
+    const s = vl.state;
 
     if (s.ctx.readOnly)
         return (
@@ -231,8 +231,8 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
             </FormGroup>
         );
 
-    var handleTextOnChange = (e: React.SyntheticEvent) => {
-        var input = e.currentTarget as HTMLInputElement;
+    const handleTextOnChange = (e: React.SyntheticEvent) => {
+        const input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.value);
     };
 
@@ -255,7 +255,7 @@ ValueLine.renderers[ValueLineType.Decimal as any] = (vl) => {
 
 function numericTextBox(vl: ValueLine, handleKeyDown: React.KeyboardEventHandler) {
 
-    var s = vl.state;
+    const s = vl.state;
 
     if (s.ctx.readOnly)
         return (
@@ -264,8 +264,8 @@ function numericTextBox(vl: ValueLine, handleKeyDown: React.KeyboardEventHandler
             </FormGroup>
         );
 
-    var handleOnChange = (e: React.SyntheticEvent) => {
-        var input = e.currentTarget as HTMLInputElement;
+    const handleOnChange = (e: React.SyntheticEvent) => {
+        const input = e.currentTarget as HTMLInputElement;
         vl.setValue(parseFloat(input.value));
     };
 
@@ -281,12 +281,12 @@ function numericTextBox(vl: ValueLine, handleKeyDown: React.KeyboardEventHandler
 
 ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
 
-    var s = vl.state;
+    const s = vl.state;
 
-    var momentFormat = toMomentFormat(s.formatText);
+    const momentFormat = toMomentFormat(s.formatText);
 
-    var m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601()) : null;
-    var showTime = momentFormat != "L" && momentFormat != "LL";
+    const m = s.ctx.value ? moment(s.ctx.value, moment.ISO_8601()) : null;
+    const showTime = momentFormat != "L" && momentFormat != "LL";
 
     if (s.ctx.readOnly)
         return (
@@ -295,9 +295,9 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
             </FormGroup>
         );
 
-    var handleDatePickerOnChange = (date: Date, str: string) => {
+    const handleDatePickerOnChange = (date: Date, str: string) => {
 
-        var m = moment(date);
+        const m = moment(date);
         vl.state.ctx.value = m.isValid() ? m.format(moment.ISO_8601()) : null;
         vl.forceUpdate();
     };
