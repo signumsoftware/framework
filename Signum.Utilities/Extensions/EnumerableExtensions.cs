@@ -703,6 +703,48 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static List<T> WithMinList<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+               where V : IComparable<V>
+        {
+            List<T> result = new List<T>();
+            V max = default(V);
+
+            foreach (var item in collection)
+            {
+                V val = valueSelector(item);
+                int comp = 0;
+                if (result.Count == 0 || (comp = val.CompareTo(max)) <= 0)
+                {
+                    if (comp < 0)
+                        result.Clear();
+                    result.Add(item);
+                    max = val;
+                }
+            }
+            return result;
+        }
+
+        public static List<T> WithMaxList<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
+               where V : IComparable<V>
+        {
+            List<T> result = new List<T>();
+            V max = default(V);
+
+            foreach (var item in collection)
+            {
+                V val = valueSelector(item);
+                int comp = 0;
+                if (result.Count == 0 || (comp = val.CompareTo(max)) >= 0)
+                {
+                    if (comp > 0)
+                        result.Clear();
+                    result.Add(item);
+                    max = val;
+                }               
+            }
+            return result;
+        }
+
         public static MinMax<T> WithMinMaxPair<T, V>(this IEnumerable<T> collection, Func<T, V> valueSelector)
         where V : IComparable<V>
         {
