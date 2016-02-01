@@ -36,7 +36,7 @@ namespace Signum.Windows
 
         public PropertyRoute PropertyRoute { get; set; }
 
-        public bool? SaveProtected { get; set; }
+        public bool? RequiresSaveOperation { get; set; }
 
         public AllowErrors AllowErrors { get; set; }
 

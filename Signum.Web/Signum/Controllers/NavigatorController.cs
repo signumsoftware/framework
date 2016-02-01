@@ -100,7 +100,7 @@ namespace Signum.Web.Controllers
                 PartialViewName = partialViewName,
                 ReadOnly = readOnly,
                 ShowOperations = showOperations ?? true,
-                SaveProtected = saveProtected
+                RequiresSaveOperation = saveProtected
             });
         }
 
@@ -204,7 +204,7 @@ namespace Signum.Web.Controllers
                     {
                         PartialViewName = partialViewName,
                         ReadOnly = readOnly,
-                        SaveProtected = saveProtected,
+                        RequiresSaveOperation = saveProtected,
                         ShowOperations = showOperations
                     });
                 case VisualConstructStyle.PopupNavigate:

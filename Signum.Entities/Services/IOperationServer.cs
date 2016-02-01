@@ -30,9 +30,6 @@ namespace Signum.Services
         bool HasConstructOperations(Type entityType);
 
         [OperationContract, NetDataContract]
-        HashSet<Type> GetSaveProtectedTypes();
-
-        [OperationContract, NetDataContract]
         Entity ExecuteOperation(IEntity entity, OperationSymbol operationSymbol, params object[] args);
 
         [OperationContract, NetDataContract]
