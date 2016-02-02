@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Services;
 using Signum.Utilities;
+using Signum.React.Facades;
 
 namespace Signum.React.Auth
 {
@@ -20,6 +21,24 @@ namespace Signum.React.Auth
         public static event Action<ApiController, UserEntity> UserPreLogin;
         public static event Action<UserEntity> UserLogged;
         public static event Action UserLoggingOut;
+
+
+        public static void Start()
+        {
+            ReflectionCache.GetContext = () => new
+            {
+                Culture = ReflectionCache.GetCurrentValidCulture(),
+                Role = RoleEntity.Current,
+            };
+        }
+
+
+        [Route("api/auth/basicTypes"), HttpGet]
+        public Dictionary<string, TypeInfoTS> BasicTypes()
+        {
+            return ReflectionCache.GetEnums(new[] { typeof(AuthMessage) });
+        }
+
 
         [Route("api/auth/login"), HttpPost]
         public LoginResponse Login([FromBody]LoginRequest data)

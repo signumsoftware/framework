@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import { Type, IType, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection';
+import { Type, IType, EntityKind, TypeInfoDictionary } from '../../../Framework/Signum.React/Scripts/Reflection';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { addSettings, EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -13,22 +13,21 @@ export let userTicket: boolean;
 export let resetPassword: boolean;
 
 
-export var viewPrefix = "";
+
+
 
 export function start(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean }) {
     userTicket = options.userTicket;
     resetPassword = options.resetPassword;
-    
+
     options.routes.push(<Route path="auth">
         <Route path="login" getComponent={(loc, cb) => require(["./Login/Login"], (Comp) => cb(null, Comp.default)) } />
         <Route path="about" />
-        </Route>);
-    
-    addSettings(new EntitySettings(UserEntity_Type, e=> new Promise(resolve => require(['./Templates/User'], resolve))));
-    addSettings(new EntitySettings(RoleEntity_Type, e=> new Promise(resolve => require(['./Templates/Role'], resolve))));
+    </Route>);
+
+    addSettings(new EntitySettings(UserEntity_Type, e => new Promise(resolve => require(['./Templates/User'], resolve))));
+    addSettings(new EntitySettings(RoleEntity_Type, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
 }
-
-
 
 export function currentUser(): UserEntity {
     return Navigator.currentUser as UserEntity;
@@ -78,12 +77,16 @@ export module Api {
         return ajaxPost<LoginResponse>({ url: "/api/auth/login" }, loginRequest);
     }
 
-    export function currentUser(): Promise<UserEntity> {
+    export function retrieveCurrentUser(): Promise<UserEntity> {
         return ajaxGet<UserEntity>({ url: "/api/auth/currentUser", cache: "no-cache" });
     }
 
     export function logout(): Promise<void> {
         return ajaxPost<void>({ url: "/api/auth/logout" }, null);
+    }
+
+    export function basicTypes(): Promise<TypeInfoDictionary> {
+        return ajaxGet<TypeInfoDictionary>({ url: "/api/auth/basicTypes" });
     }
 }
 

@@ -19,7 +19,7 @@ export default class LoginUserControl extends React.Component<{}, { user: UserEn
             () => this.setState({ user: AuthClient.currentUser() }));
 
         if (!this.state.user)
-            AuthClient.Api.currentUser().then(u => AuthClient.setCurrentUser(u));
+            AuthClient.Api.retrieveCurrentUser().then(u => AuthClient.setCurrentUser(u));
     }
 
     render() {
