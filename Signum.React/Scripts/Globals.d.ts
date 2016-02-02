@@ -5,6 +5,7 @@
 /// <reference path="../typings/react-bootstrap/react-bootstrap.d.ts" />
 /// <reference path="../typings/react-router-bootstrap/react-router-bootstrap.d.ts" />
 /// <reference path="../typings/react-widgets/react-widgets.d.ts" />
+/// <reference path="../typings/numeraljs/numeraljs.d.ts" />
 /// <reference path="../typings/moment/moment.d.ts" />
 /// <reference path="../typings/bluebird/bluebird.d.ts" />
 

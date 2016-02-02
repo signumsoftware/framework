@@ -177,11 +177,10 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Typings\react\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="Scripts\Signum.Entities.t4s" />
+    <Content Include="tsconfig.json" />
     <TypeScriptCompile Include="Scripts\ConfigureReactWidgets.ts" />
     <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
@@ -218,6 +217,7 @@
     <TypeScriptCompile Include="Typings\bluebird\bluebird.d.ts" />
     <TypeScriptCompile Include="Typings\moment\moment-node.d.ts" />
     <TypeScriptCompile Include="Typings\moment\moment.d.ts" />
+    <TypeScriptCompile Include="Typings\numeraljs\numeraljs.d.ts" />
     <TypeScriptCompile Include="Typings\react-router\history.d.ts" />
     <TypeScriptCompile Include="Typings\react-bootstrap\react-bootstrap.d.ts" />
     <TypeScriptCompile Include="Scripts\Exceptions\Exception.tsx" />
@@ -228,6 +228,8 @@
     <TypeScriptCompile Include="Typings\react-router-bootstrap\react-router-bootstrap.d.ts" />
     <TypeScriptCompile Include="Typings\react-router\react-router.d.ts" />
     <TypeScriptCompile Include="Typings\react-widgets\react-widgets.d.ts" />
+    <TypeScriptCompile Include="Typings\react\react-dom.d.ts" />
+    <TypeScriptCompile Include="Typings\react\react.d.ts" />
     <TypeScriptCompile Include="Typings\whatwg-fetch\whatwg-fetch.d.ts" />
   </ItemGroup>
   <PropertyGroup>
