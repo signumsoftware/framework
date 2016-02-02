@@ -241,6 +241,7 @@ namespace Signum.Entities
         }
     }
 
+    [InTypeScript(true)]
     public enum OperationType
     {
         Execute,
@@ -249,5 +250,4 @@ namespace Signum.Entities
         ConstructorFrom,
         ConstructorFromMany
     }
-
 }

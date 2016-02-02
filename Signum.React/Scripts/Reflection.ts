@@ -17,6 +17,9 @@ export function getEnumInfo(enumTypeName: string, enumId: number) {
     return ti.membersById[enumId];
 }
 
+
+
+
 export interface TypeInfo {
     kind: KindOfType;
     name: string;
@@ -44,6 +47,23 @@ export interface MemberInfo {
     unit?: string;
     format?: string;
     id?: any; //symbols
+}
+
+export interface OperationInfo {
+    key: string,
+    niceName: string;
+    operationType: OperationType;
+    allowNew: boolean;
+    lite: boolean;
+    hasCanExecute: boolean;
+}
+
+export enum OperationType {
+    Execute = "Execute" as any,
+    Delete = "Delete" as any,
+    Constructor = "Constructor" as any,
+    ConstructorFrom = "ConstructorFrom" as any,
+    ConstructorFromMany = "ConstructorFromMany" as any
 }
 
 //https://msdn.microsoft.com/en-us/library/az4se3k1%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396
@@ -102,11 +122,11 @@ export enum EntityData {
     Transactional = "Transactional" as any,
 }
 
-interface TypeInfoDictionary {
+export interface TypeInfoDictionary {
     [name: string]: TypeInfo
 }
 
-let _types: TypeInfoDictionary;
+let _types: TypeInfoDictionary = {};
 
 
 let _queryNames: {
@@ -196,26 +216,34 @@ export function getQueryKey(queryName: any): string {
     throw new Error("unexpected queryName type");
 }
 
-export function loadTypes(): Promise<void> {
+export function requestTypes(): Promise<TypeInfoDictionary> {
+    return ajaxGet<TypeInfoDictionary>({ url: "/api/reflection/types" });
+}
 
-    return ajaxGet<TypeInfoDictionary>({ url: "/api/reflection/types" }).then((types) => {
+export function setTypes(types: TypeInfoDictionary) {
 
-        Dic.foreach(types, (k, t) => {
-            t.name = k;
-            if (t.members)
-                Dic.foreach(t.members, (k2, t2) => t2.name = k2);
-        });
-
-        _types = Dic.getValues(types).toObject(a=> a.name.toLowerCase());
-
-        _queryNames = Dic.getValues(types).filter(t=> t.kind == KindOfType.Query)
-            .flatMap(a=> Dic.getValues(a.members))
-            .toObject(m=> m.name.toLocaleLowerCase(), m=> ({ name: m.name, niceName: m.niceName }));
-
-        earlySymbols.forEach(s=> setSymbolId(s));
-
-        earlySymbols = null;
+    Dic.foreach(types, (k, t) => {
+        t.name = k;
+        if (t.members)
+            Dic.foreach(t.members, (k2, t2) => t2.name = k2);
     });
+
+    _types = Dic.getValues(types).toObject(a => a.name.toLowerCase());
+
+    Dic.foreach(types, (k, t) => {
+        
+        if (t.operations)
+            Dic.foreach(t.operations, (k2, t2) => {
+                t2.key = k2;
+                t2.niceName = _types[k2.before(".").toLowerCase()].members[k2.after(".")].niceName;
+            });
+    });
+
+    _queryNames = Dic.getValues(types).filter(t => t.kind == KindOfType.Query)
+        .flatMap(a => Dic.getValues(a.members))
+        .toObject(m => m.name.toLocaleLowerCase(), m => ({ name: m.name, niceName: m.niceName }));
+
+    missingSymbols = missingSymbols.filter(s => !setSymbolId(s));
 }
 
 export interface IBinding<T> {
@@ -426,33 +454,33 @@ interface ISymbol {
     id?: any;
 }
 
-let earlySymbols: ISymbol[] = [];
+let missingSymbols: ISymbol[] = [];
 
-function setSymbolId(s: ISymbol) {
+function setSymbolId(s: ISymbol): boolean {
 
     const type = _types[s.key.before(".").toLowerCase()];
 
     if (!type)
-        return;
+        return false;
 
     const member = type.members[s.key.after(".")];
 
     if (!member)
-        return
+        return false;
 
     s.id = member.id;
+
+    return true;
 }
 
 
 export function registerSymbol<T extends ISymbol>(symbol: T): T {
 
-    if (_types)
-        setSymbolId(symbol);
-    else
-        earlySymbols.push(symbol);
+    if (!setSymbolId(symbol))
+        missingSymbols.push(symbol);
 
     return symbol;
-} 
+}
 
 export class PropertyRoute {
     

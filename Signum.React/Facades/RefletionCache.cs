@@ -16,13 +16,26 @@ using Signum.Entities.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
+using Signum.Engine.Operations;
 
 namespace Signum.React.Facades
 {
     public static class ReflectionCache
     {
-        public static ConcurrentDictionary<CultureInfo, Dictionary<string, TypeInfoTS>> cache =
-         new ConcurrentDictionary<CultureInfo, Dictionary<string, TypeInfoTS>>();
+
+        public static Func<object> GetContext = GetCurrentValidCulture;
+
+        public static object GetCurrentValidCulture()
+        {
+            var ci = CultureInfo.CurrentCulture;
+            while (ci != null && !EntityAssemblies.Keys.Any(a => DescriptionManager.GetLocalizedAssembly(a, ci) != null))
+                ci = ci.Parent;
+
+            return ci ?? CultureInfo.GetCultureInfo("en");
+        }
+
+        public static ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>> cache =
+         new ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>>();
 
         public static Dictionary<Assembly, HashSet<string>> EntityAssemblies;
 
@@ -37,13 +50,10 @@ namespace Signum.React.Facades
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-        internal static Dictionary<string, TypeInfoTS> GetTypeInfoTS(CultureInfo culture)
+        internal static Dictionary<string, TypeInfoTS> GetTypeInfoTS()
         {
-            return cache.GetOrAdd(culture, ci =>
+            return cache.GetOrAdd(GetContext(), ci =>
             {
-                if (!EntityAssemblies.Keys.Any(a => DescriptionManager.GetLocalizedAssembly(a, ci) != null))
-                    return GetTypeInfoTS(culture.Parent ?? CultureInfo.GetCultureInfo("en"));
-
                 var result = new Dictionary<string, TypeInfoTS>();
 
                 var allTypes = GetTypes();
@@ -66,11 +76,13 @@ namespace Signum.React.Facades
 
         static MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
 
-        private static Dictionary<string, TypeInfoTS> GetEntities(IEnumerable<Type> allTypes)
+        public static Dictionary<string, TypeInfoTS> GetEntities(IEnumerable<Type> allTypes)
         {
             var models = (from type in allTypes
                           where typeof(ModelEntity).IsAssignableFrom(type) && !type.IsAbstract
                           select type).ToList();
+
+            var a = Schema.Current;
 
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
                           where !type.IsEnumEntity()
@@ -85,6 +97,7 @@ namespace Signum.React.Facades
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                               ToStringFunction = ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
+
                               Members = PropertyRoute.GenerateRoutes(type)
                                 .ToDictionary(p => p.PropertyString(), p => new MemberInfoTS
                                 {
@@ -93,8 +106,12 @@ namespace Signum.React.Facades
                                     Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                     IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
                                     Unit = p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName,
-                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type): p.PropertyInfo?.PropertyType, p.TryGetImplementations())
-                                })
+                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type) : p.PropertyInfo?.PropertyType, p.TryGetImplementations())
+                                }),
+
+                              Operations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
+                                .ToDictionary(oi => oi.OperationSymbol.Key, oi => new OperationInfoTS(oi))
+
                           })).ToDictionary("entities");
 
             return result;
@@ -164,7 +181,7 @@ namespace Signum.React.Facades
             return p.PropertyInfo.Name == nameof(Entity.Id) && p.Parent.PropertyRouteType == PropertyRouteType.Root;
         }
 
-        private static Dictionary<string, TypeInfoTS> GetEnums(IEnumerable<Type> allTypes)
+        public static Dictionary<string, TypeInfoTS> GetEnums(IEnumerable<Type> allTypes)
         {
             var result = (from type in allTypes
                           where type.IsEnum
@@ -186,7 +203,7 @@ namespace Signum.React.Facades
             return result;
         }
 
-        private static Dictionary<string, TypeInfoTS> GetSymbolContainers(IEnumerable<Type> allTypes)
+        public static Dictionary<string, TypeInfoTS> GetSymbolContainers(IEnumerable<Type> allTypes)
         {
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
@@ -246,6 +263,8 @@ namespace Signum.React.Facades
         public string ToStringFunction { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
         public Dictionary<string, MemberInfoTS> Members { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "operations")]
+        public Dictionary<string, OperationInfoTS> Operations { get; set; }
     }
 
     public class MemberInfoTS
@@ -266,6 +285,26 @@ namespace Signum.React.Facades
         public bool IsIgnored { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
         public object Id { get; set; }
+    }
+
+    public class OperationInfoTS
+    {
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "operationType")]
+        private OperationType OperationType;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore,  NullValueHandling = NullValueHandling.Ignore, PropertyName = "allowsNew")]
+        private bool? AllowsNew;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasCanExecute")]
+        private bool? HasCanExecute;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "lite")]
+        private bool? Lite;
+        
+        public OperationInfoTS(OperationInfo oper)
+        {
+            this.AllowsNew = oper.AllowsNew;
+            this.HasCanExecute = oper.HasCanExecute;
+            this.OperationType = oper.OperationType;
+            this.Lite = oper.Lite;
+        }
     }
 
     public class TypeReferenceTS

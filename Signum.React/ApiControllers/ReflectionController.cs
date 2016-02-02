@@ -10,6 +10,7 @@ using System.Web.Http;
 using Signum.Entities;
 using Signum.React.Facades;
 using Signum.Utilities;
+using Signum.Engine;
 
 namespace Signum.React.ApiControllers
 {
@@ -18,7 +19,7 @@ namespace Signum.React.ApiControllers
         [Route("api/reflection/types"), HttpGet]
         public Dictionary<string, TypeInfoTS> Types()
         {
-            return ReflectionCache.GetTypeInfoTS(CultureInfo.CurrentUICulture);
+            return ReflectionCache.GetTypeInfoTS();
         }
     }
 }

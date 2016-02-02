@@ -292,6 +292,15 @@ export const OperationSymbol_Type = new Type<OperationSymbol>("Operation");
 export interface OperationSymbol extends Symbol {
 }
 
+export enum OperationType {
+    Execute = "Execute" as any,
+    Delete = "Delete" as any,
+    Constructor = "Constructor" as any,
+    ConstructorFrom = "ConstructorFrom" as any,
+    ConstructorFromMany = "ConstructorFromMany" as any,
+}
+export const OperationType_Type = new EnumType<OperationType>("OperationType", OperationType);
+
 export module PaginationMessage {
     export const All = new MessageKey("PaginationMessage", "All");
 }
