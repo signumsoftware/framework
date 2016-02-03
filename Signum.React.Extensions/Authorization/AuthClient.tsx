@@ -12,11 +12,7 @@ import Login from './Login/Login';
 export let userTicket: boolean;
 export let resetPassword: boolean;
 
-
-
-
-
-export function start(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean }) {
+export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean }) {
     userTicket = options.userTicket;
     resetPassword = options.resetPassword;
 
@@ -24,7 +20,9 @@ export function start(options: { routes: JSX.Element[], userTicket: boolean, res
         <Route path="login" getComponent={(loc, cb) => require(["./Login/Login"], (Comp) => cb(null, Comp.default)) } />
         <Route path="about" />
     </Route>);
+}
 
+export function startAdmin() {
     addSettings(new EntitySettings(UserEntity_Type, e => new Promise(resolve => require(['./Templates/User'], resolve))));
     addSettings(new EntitySettings(RoleEntity_Type, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
 }
@@ -83,10 +81,6 @@ export module Api {
 
     export function logout(): Promise<void> {
         return ajaxPost<void>({ url: "/api/auth/logout" }, null);
-    }
-
-    export function basicTypes(): Promise<TypeInfoDictionary> {
-        return ajaxGet<TypeInfoDictionary>({ url: "/api/auth/basicTypes" });
     }
 }
 

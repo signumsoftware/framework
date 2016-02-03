@@ -33,13 +33,6 @@ namespace Signum.React.Auth
         }
 
 
-        [Route("api/auth/basicTypes"), HttpGet]
-        public Dictionary<string, TypeInfoTS> BasicTypes()
-        {
-            return ReflectionCache.GetEnums(new[] { typeof(AuthMessage) });
-        }
-
-
         [Route("api/auth/login"), HttpPost]
         public LoginResponse Login([FromBody]LoginRequest data)
         {
