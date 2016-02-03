@@ -99,21 +99,70 @@ export interface Rectangle extends Point{
 }
 
 
-export function createMap(mapId: string, svgMapId: string, filterId: string, colorId : string, map: MapInfo) {
+export interface ParsedQueryString {
+    filter?: string;
+    color?: string;
+    tables: { [tableName: string]: { x: number; y: number } }
+}
+
+function getParseQuery(): ParsedQueryString {
+    var query = window.location.search.substring(1);
+    if (!query)
+        return null;
+    
+    var result: ParsedQueryString = { tables: {} };
+    var vars = query.split('&');
+    for (var i = 0; i < vars.length; i++) {
+        var name = vars[i].before('=');
+        var value = decodeURIComponent(vars[i].after("="));
+
+        if (name == "filter")
+            result.filter = value;
+        else if (name == "color")
+            result.color = value;
+        else {           
+            result.tables[name] = {
+                x: parseFloat(value.before(",")),
+                y: parseFloat(value.after(",")),
+            };
+        }
+    }
+
+    return result;
+}
+
+function getStringQuery(filter: string, color: string, allTables: ITableInfo[], width: number, height: number) {
+
+    var result = "filter=" + filter + "&" +
+        "color=" + color + "&" +
+        allTables.filter(a=> a.fixed)
+        .map(a=> a.tableName + "=" + encodeURIComponent(
+            (a.x / width).toPrecision(4) + "," +
+            (a.y / height).toPrecision(4)))
+        .join("&");
+
+    return window.location.origin + window.location.pathname + "?" + result;
+}
+
+export function createMap(mapId: string, svgMapId: string, filterId: string, colorId : string, fullScreenId: string, map: MapInfo) {
 
     var getProvider: (value: string, nodes: ITableInfo[]) => Promise<ColorProvider> = window["getProvider"];
 
-    var div = mapId.get();
-    var filter = filterId.get();
-    var colorCombo = colorId.get();
+    var divElement = mapId.get();
+    var filterElement = filterId.get();
+    var colorComboElement = colorId.get();
+    var fullScreenElement = fullScreenId.get();
 
-    div.closest(".container").removeClass("container").addClass("container-fluid");
+   
+    
+    divElement.closest(".container").removeClass("container").addClass("container-fluid");
 
-    div.css("width", "100%");
-    div.css("height",(window.innerHeight - 200) + "px");
+    divElement.css("width", "100%");
+    divElement.css("height",(window.innerHeight - 200) + "px");
 
-    var width = div.width(),
-        height = div.height();
+    var width = divElement.width();
+    var height = divElement.height();
+    
 
     map.tables.forEach(t=> t.mlistTables.forEach(ml=> {
         ml.entityKind = t.entityKind;
@@ -123,7 +172,27 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
     }));
 
     var allNodes = (<ITableInfo[]>map.tables).concat(map.tables.flatMap(t=> t.mlistTables));
+    
+    var parsedQuery = getParseQuery();
+    if (parsedQuery) {
 
+        filterElement.val(parsedQuery.filter);
+        colorComboElement.val(parsedQuery.color);
+
+        allNodes.forEach(a=> {
+            var c = parsedQuery.tables[a.tableName];
+            if (c) {
+                a.x = c.x * width;
+                a.y = c.y * height;
+                a.fixed = true;
+            }
+        });
+    }
+
+    fullScreenElement.click(() => {
+        window.open(getStringQuery(filterElement.val(), colorComboElement.val(), allNodes, width, height));
+    });
+    
     var nodesDic = allNodes.toObject(g=> g.tableName);
 
     map.relations.forEach(a=> {
@@ -158,7 +227,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
     function restart() {
 
-        var val = (<string>filter.val()).toLowerCase();
+        var val = (<string>filterElement.val()).toLowerCase();
         
         var parts = val.match(/[+-]?((\w+)|\*)/g);
 
@@ -210,7 +279,6 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
     var svg = d3.select("#" + svgMapId)
         .attr("width", width)
         .attr("height", height);
-
 
     var link = svg.append("svg:g").attr("class", "links").selectAll(".link")
         .data(allLinks)
@@ -289,12 +357,20 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
         label.style("font-weight", d=> d == selectedTable ? "bold" : null);
     }
 
-    filter.keyup(() => {
+
+    function showHideNodes() {
+        nodeGroup.style("display", n => nodes.indexOf(n) == -1 ? "none" : "inline");
+        link.style("display", r => links.indexOf(r) == -1 ? "none" : "inline");
+    } 
+    
+    filterElement.keyup(() => {
         restart();
         selectedLinks();
-        nodeGroup.style("display", n=> nodes.indexOf(n) == -1 ? "none" : "inline");
-        link.style("display", r=> links.indexOf(r) == -1 ? "none" : "inline");
+        showHideNodes();
     });
+
+    if (filterElement.val())
+        showHideNodes();
 
     label.attr("transform", d=> "translate(" + d.width / 2 + ", 0)");
 
@@ -302,7 +378,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
     function drawColor() {
 
-        var colorVal = colorCombo.val();
+        var colorVal = colorComboElement.val();
 
         getProvider(colorVal, nodes).then(cp=> {
             node.style("fill", cp.getFill)
@@ -316,7 +392,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
     drawColor();
 
-    colorCombo.change(() => drawColor());
+    colorComboElement.change(() => drawColor());
 
     force.on("tick", function () {
 
@@ -333,19 +409,23 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
             d.y = d.ny;
         });
 
-        link.each(rel=> {
+        var visibleLink = link.filter(f=> links.indexOf(f) != -1);
+
+        visibleLink.each(rel=> {
             rel.sourcePoint = calculatePoint(<ITableInfo>rel.source, rel.target);
             rel.targetPoint = calculatePoint(<ITableInfo>rel.target, rel.source);
         });
 
-        link.attr("x1", l=> l.sourcePoint.x)
-            .attr("y1", l=> l.sourcePoint.y)
-            .attr("x2", l=> l.targetPoint.x)
-            .attr("y2", l=> l.targetPoint.y);
+        visibleLink.attr("x1", l => l.sourcePoint.x)
+            .attr("y1", l => l.sourcePoint.y)
+            .attr("x2", l => l.targetPoint.x)
+            .attr("y2", l => l.targetPoint.y);
 
-        nodeGroup.attr("transform", d => "translate(" + (d.x - d.width / 2) + ", " + (d.y - d.height / 2) + ")");
+        nodeGroup.filter(d=> nodes.indexOf(d) != -1)
+            .attr("transform", d => "translate(" +
+                (d.x - d.width / 2) + ", " +
+                (d.y - d.height / 2) + ")");
     });
-
 
 
     function gravity() {

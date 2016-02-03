@@ -197,7 +197,19 @@ WriteLiteral("        ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </span>\r\n</div>\r\n\r\n<div");
+WriteLiteral("\r\n    </span>\r\n    <a");
+
+WriteLiteral(" id=\"sfFullScreen\"");
+
+WriteLiteral(" class=\"sf-popup-fullscreen\"");
+
+WriteLiteral(" href=\"#\"");
+
+WriteLiteral(">\r\n        <span");
+
+WriteLiteral(" class=\"glyphicon glyphicon-new-window\"");
+
+WriteLiteral("></span>\r\n    </a>\r\n</div>\r\n\r\n<div");
 
 WriteLiteral(" id=\"map\"");
 
@@ -276,13 +288,13 @@ WriteLiteral(" d=\"M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0\"");
 WriteLiteral(" />\r\n            </marker>  \r\n            \r\n");
 
             
-            #line 45 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 48 "..\..\Maps\Views\SchemaMap.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 45 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 48 "..\..\Maps\Views\SchemaMap.cshtml"
              foreach(var cp in colorProviders.Where(c=>c.Defs != null))
             {
                 
@@ -290,14 +302,14 @@ WriteLiteral(" />\r\n            </marker>  \r\n            \r\n");
             #line default
             #line hidden
             
-            #line 47 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 50 "..\..\Maps\Views\SchemaMap.cshtml"
            Write(cp.Defs);
 
             
             #line default
             #line hidden
             
-            #line 47 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 50 "..\..\Maps\Views\SchemaMap.cshtml"
                         ;
             } 
 
@@ -309,13 +321,13 @@ WriteLiteral("        </defs>\r\n    </svg>\r\n</div>\r\n<script>\r\n    functio
 ") {\r\n");
 
             
-            #line 56 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 59 "..\..\Maps\Views\SchemaMap.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 56 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 59 "..\..\Maps\Views\SchemaMap.cshtml"
                  foreach (var cp in colorProviders)
                 {
 
@@ -327,7 +339,7 @@ WriteLiteral("                    ");
 WriteLiteral("case \"");
 
             
-            #line 58 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 61 "..\..\Maps\Views\SchemaMap.cshtml"
                            Write(cp.Name);
 
             
@@ -336,7 +348,7 @@ WriteLiteral("case \"");
 WriteLiteral("\": \r\n                    require([\'");
 
             
-            #line 59 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 62 "..\..\Maps\Views\SchemaMap.cshtml"
                          Write(cp.GetJsProvider.Module);
 
             
@@ -345,7 +357,7 @@ WriteLiteral("\": \r\n                    require([\'");
 WriteLiteral("\'], function(mod) { \r\n                        resolve(mod.");
 
             
-            #line 60 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 63 "..\..\Maps\Views\SchemaMap.cshtml"
                                 Write(cp.GetJsProvider.FunctionName);
 
             
@@ -354,7 +366,7 @@ WriteLiteral("\'], function(mod) { \r\n                        resolve(mod.");
 WriteLiteral("(");
 
             
-            #line 60 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 63 "..\..\Maps\Views\SchemaMap.cshtml"
                                                                 Write(Html.Raw(cp.GetJsProvider.Arguments.ToString(a=>a == MapClient.NodesConstant ? "nodes" : 
                                                              JsonConvert.SerializeObject(a, cp.GetJsProvider.JsonSerializerSettings),", ")));
 
@@ -366,7 +378,7 @@ WriteLiteral(")) \r\n                    }); break\r\n                    ");
 WriteLiteral("\r\n");
 
             
-            #line 64 "..\..\Maps\Views\SchemaMap.cshtml"
+            #line 67 "..\..\Maps\Views\SchemaMap.cshtml"
                 }
 
             
@@ -377,8 +389,8 @@ WriteLiteral("            }\r\n        });\r\n    }\r\n\r\n\r\n");
 WriteLiteral("    ");
 
             
-            #line 70 "..\..\Maps\Views\SchemaMap.cshtml"
-Write(MapClient.SchemaModule["createMap"]("map", "svgMap", "filter", "color", Model, "getProvider"));
+            #line 73 "..\..\Maps\Views\SchemaMap.cshtml"
+Write(MapClient.SchemaModule["createMap"]("map", "svgMap", "filter", "color", "sfFullScreen",  Model, "getProvider"));
 
             
             #line default
