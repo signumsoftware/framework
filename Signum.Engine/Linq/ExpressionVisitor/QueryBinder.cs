@@ -1492,7 +1492,7 @@ namespace Signum.Engine.Linq
                                 return result;
                         }
 
-                        return new EntityExpression(t, new PrimaryKeyExpression(Expression.Convert(null, PrimaryKey.Type(t).Nullify())), null, null, null, false);
+                        return new EntityExpression(t, new PrimaryKeyExpression(new SqlConstantExpression(null, PrimaryKey.Type(t).Nullify())), null, null, null, false);
                     }), t));
 
                 var stra = expressions.Values.OfType<ImplementedByExpression>().Select(a => a.Strategy).Distinct().Only(); //Default Union
