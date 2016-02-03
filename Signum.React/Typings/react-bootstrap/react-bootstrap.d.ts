@@ -4,12 +4,12 @@
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 ///<reference path="../react/react.d.ts"/>
-    
+
+// Import React 
+
+
 declare module "react-bootstrap" {
-    // Import React 
     import React = require("react");
-
-
     // <Button />
     // ----------------------------------------
     interface ButtonProps extends React.Props<ButtonClass>, React.HTMLAttributes {
@@ -979,4 +979,18 @@ declare module "react-bootstrap" {
     interface Fade extends React.ReactElement<FadeProps> { }
     interface FadeClass extends React.ComponentClass<FadeProps> { }
     var Fade: FadeClass;
+}
+
+
+declare module "react-overlays/lib/RootCloseWrapper"
+{
+    import React = require("react");
+    interface RootCloseWrapperProps {
+        onRootClose: () => void;
+    }
+
+    interface RootCloseWrapper extends React.ReactElement<RootCloseWrapperProps> { }
+    interface RootCloseWrapperClass extends React.ComponentClass<RootCloseWrapperProps> { }
+    var RootCloseWrapper: RootCloseWrapperClass;
+    export = RootCloseWrapper;
 }

@@ -4,6 +4,8 @@ import { MenuItem, Overlay } from 'react-bootstrap'
 import { Dic, classes } from '../Globals'
 import { QueryDescription, } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
+import * as RootCloseWrapper from 'react-overlays/lib/RootCloseWrapper'
+
 
 export interface MenuItemBlock {
     header: string;
@@ -18,13 +20,13 @@ export interface ContextualItemsContext {
 export const onContextualItems: ((ctx: ContextualItemsContext) => Promise<MenuItemBlock>)[] = [];
 
 export function getContextualItems(ctx: ContextualItemsContext): Promise<React.ReactElement<any>[]> {
-   
+
     const blockPromises = onContextualItems.map(func => func(ctx));
 
     return Promise.all(blockPromises).then(blocks => {
 
         const result: React.ReactElement<any>[] = []
-        blocks.forEach(block=> {
+        blocks.forEach(block => {
 
             if (block == null || block.menuItems == null || block.menuItems.length == 0)
                 return;
@@ -49,23 +51,21 @@ export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAt
     onHide: () => void;
 }
 
-export class ContextMenu extends React.Component<ContextMenuProps, { }> {
+export class ContextMenu extends React.Component<ContextMenuProps, {}> {
     render() {
 
         const { position } = this.props;
         const props = Dic.without(this.props, { position, ref: null });
 
-        const style: React.CSSProperties = { left: position.pageX + "px", top: position.pageY + "px", zIndex: 9999, display: "block", position: "absolute" }; 
+        const style: React.CSSProperties = { left: position.pageX + "px", top: position.pageY + "px", zIndex: 9999, display: "block", position: "absolute" };
 
-        const ul = (
-            <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
-                {this.props.children}
-            </ul>
+        const ul = (           
+                <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
+                    {this.props.children}
+                </ul>
         );
 
-        return ul;
-
-        //return <Overlay show={this.props.position != null} rootClose={true} onHide={this.props.onHide}>result </Overlay>;
+        return <RootCloseWrapper onRootClose={this.props.onHide}>{ul}</RootCloseWrapper>;
     }
 }
 
