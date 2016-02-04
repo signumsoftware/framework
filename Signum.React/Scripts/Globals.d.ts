@@ -27,7 +27,7 @@ interface Array<T> {
     toObject<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T };
     toObjectDistinct<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
-    flatMap<R>(selector: (element: T) => R[]): R[];
+    flatMap<R>(selector: (element: T, index: number, array : T[]) => R[]): R[];
     max(): T;
     min(): T;
     first(errorContext?: string): T;

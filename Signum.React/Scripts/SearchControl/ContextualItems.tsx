@@ -59,10 +59,10 @@ export class ContextMenu extends React.Component<ContextMenuProps, {}> {
 
         const style: React.CSSProperties = { left: position.pageX + "px", top: position.pageY + "px", zIndex: 9999, display: "block", position: "absolute" };
 
-        const ul = (           
-                <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
-                    {this.props.children}
-                </ul>
+        const ul = (
+            <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
+                {this.props.children}
+            </ul>
         );
 
         return <RootCloseWrapper onRootClose={this.props.onHide}>{ul}</RootCloseWrapper>;

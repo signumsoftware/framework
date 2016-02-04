@@ -17,8 +17,7 @@ interface NormalPageProps extends ReactRouter.RouteComponentProps<{}, { type: st
 
 
 interface NormalPageState {
-    entity?: Entity;
-    canExecute?: { [key: string]: string };
+    pack?: Navigator.EntityPack<Entity>;
     validationErrors?: { [key: string]: string };
     component?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
     entitySettings?: Navigator.EntitySettingsBase;
@@ -66,13 +65,13 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
         };
 
         return Navigator.API.fetchEntityPack(lite)
-            .then(pack => this.setState({ entity: pack.entity, canExecute: pack.canExecute }));
+            .then(pack => this.setState({ pack }));
     }
 
     loadComponent(): Promise<void> {
 
         const promise = this.props.component ? Promise.resolve(this.props.component) :
-            this.state.entitySettings.onGetComponentDefault(this.state.entity);
+            this.state.entitySettings.onGetComponent(this.state.pack.entity);
 
         return promise.then(c =>
             this.setState({ component: c }));
@@ -88,7 +87,9 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
 
     renderEntityControl() {
 
-        if (!this.state.entity)
+        const entity = this.state.pack.entity;
+
+        if (!entity)
             return null;
 
 
@@ -96,21 +97,25 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
             readOnly: this.state.entitySettings.onIsReadonly()
         };
 
-        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(this.state.entity));
-
+        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity));
+        
         return (
             <div className="normal-control">
                 {this.renderTitle(this.state.typeInfo) }
-                {Navigator.renderWidgets({ entity: this.state.entity }) }
+                {Navigator.renderWidgets({ entity: entity }) }
                 <div className="btn-toolbar sf-button-bar">
-                    {Navigator.renderButtons({ entity: this.state.entity, canExecute: this.state.canExecute }) }
+                    { Navigator.renderButtons({
+                        pack: this.state.pack,
+                        component: this.state.component,
+                        showOperations: this.props.showOperations,
+                    }) }
                 </div>
                 {this.renderValidationErrors() }
-                {Navigator.renderEmbeddedWidgets({ entity: this.state.entity }, Navigator.EmbeddedWidgetPosition.Top) }
+                {Navigator.renderEmbeddedWidgets({ entity: entity }, Navigator.EmbeddedWidgetPosition.Top) }
                 <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
                     {this.state.component && React.createElement(this.state.component, { ctx: ctx }) }
                 </div>
-                {Navigator.renderEmbeddedWidgets({ entity: this.state.entity }, Navigator.EmbeddedWidgetPosition.Bottom) }
+                {Navigator.renderEmbeddedWidgets({ entity: entity }, Navigator.EmbeddedWidgetPosition.Bottom) }
             </div>
         );
     }
@@ -118,11 +123,13 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
 
     renderTitle(typeInfo: TypeInfo) {
 
+        const entity = this.state.pack.entity;
+
         return (
             <h3>
-                <span className="sf-entity-title">{ this.props.title || getToString(this.state.entity) }</span>
+                <span className="sf-entity-title">{ this.props.title || getToString(entity) }</span>
                 <br/>
-                <small className="sf-type-nice-name">{Navigator.getTypeTitel(this.state.entity) }</small>
+                <small className="sf-type-nice-name">{Navigator.getTypeTitel(entity) }</small>
             </h3>
         );
     }

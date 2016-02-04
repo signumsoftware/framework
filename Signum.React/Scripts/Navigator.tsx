@@ -183,13 +183,16 @@ export enum EmbeddedWidgetPosition {
 }
 
 export interface ButtonsContext {
-    entity?: Entity;
-    lite?: Lite<Entity>;
-    canExecute: { [key: string]: string }
+    pack: EntityPack<Entity>;
+    component: EntityComponent<ModifiableEntity>;
+    showOperations: Boolean;
 }
 
-export function renderButtons(ctx: ButtonsContext): React.ReactFragment {
-    return null;
+export var onButtonBarRender: Array<(ctx: ButtonsContext) => Array<React.ReactChild>> = [];
+
+export function renderButtons(ctx: ButtonsContext): Array<React.ReactChild> {
+
+    return onButtonBarRender.flatMap(f => f(ctx));
 }
 
 
@@ -242,7 +245,7 @@ export enum OperationType {
     ConstructorFromMany
 }
 
-export interface EntityPack<T extends Entity> {
+export interface EntityPack<T extends ModifiableEntity> {
     entity: T
     canExecute: { [key: string]: string };
 }
@@ -261,7 +264,7 @@ export abstract class EntitySettingsBase {
 
     getToString: (entity: ModifiableEntity) => string;
 
-    abstract onGetComponentDefault(entity: ModifiableEntity): Promise<EntityComponent<any>>;
+    abstract onGetComponent(entity: ModifiableEntity): Promise<EntityComponent<any>>;
 
     constructor(type: IType) {
         this.type = type;
@@ -389,7 +392,7 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
     }
 
 
-    onGetComponentDefault(entity: ModifiableEntity): Promise<EntityComponent<T>>{
+    onGetComponent(entity: ModifiableEntity): Promise<EntityComponent<T>>{
         return this.getComponent(entity as T).then(a=> a.default);
     }
     
@@ -441,7 +444,7 @@ export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySe
         return this.isReadOnly;
     }
 
-    onGetComponentDefault(entity: ModifiableEntity): Promise<EntityComponent<T>> {
+    onGetComponent(entity: ModifiableEntity): Promise<EntityComponent<T>> {
         return this.getComponent(entity as T).then(a=> a.default);;
     }
 }

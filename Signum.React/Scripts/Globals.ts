@@ -78,12 +78,11 @@ Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any,
     return obj;
 };
 
-Array.prototype.flatMap = function (selector: (element: any) => any[]): any {
+Array.prototype.flatMap = function (selector: (element: any, index: number, array: any[]) => any[]): any {
 
     const array = [];
-
-    (<Array<any>>this).forEach(item=>
-        selector(item).forEach(item2 =>
+    (<Array<any>>this).forEach((item, index, array) =>
+        selector(item, index, array).forEach(item2 =>
             array.push(item2)
         ));
 

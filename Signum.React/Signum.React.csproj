@@ -195,9 +195,11 @@
     <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
     <TypeScriptCompile Include="Scripts\Constructor.tsx" />
+    <TypeScriptCompile Include="Scripts\Operations.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.tsx" />
     <TypeScriptCompile Include="Scripts\NormalPage\NormalPage.tsx" />
     <TypeScriptCompile Include="Scripts\NormalPage\NormalPopup.tsx" />
+    <TypeScriptCompile Include="Scripts\Operations\EntityOperations.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ColumnEditor.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextualItems.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\FilterBuilder.tsx" />

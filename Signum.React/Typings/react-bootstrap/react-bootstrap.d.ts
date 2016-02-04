@@ -21,7 +21,6 @@ declare module "react-bootstrap" {
         bsStyle?: string; //"default", "primary", "success", "info", "warning", "danger", "link"
         bsSize?: string; //"xsmall", "small", "medium", "large", "xs", "sm", "md", "lg"     
         componentClass?: string;
-        disable?: boolean;
         href?: string;
         navDropdown?: boolean;  
         navItem?: boolean;

@@ -20,7 +20,7 @@ using Signum.Engine.Operations;
 
 namespace Signum.React.Facades
 {
-    public static class ReflectionCache
+    public static class ReflectionServer
     {
 
         public static Func<object> GetContext = GetCurrentValidCulture;
@@ -49,6 +49,42 @@ namespace Signum.React.Facades
         
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
+
+        public static Action<TypeInfoTS, Type> AddTypeExtension;
+        static TypeInfoTS OnAddTypeExtension(TypeInfoTS ti, Type t)
+        {
+            if (ti == null)
+                return ti;
+
+            foreach (var a in AddTypeExtension.GetInvocationListTyped())
+                a(ti, t);
+
+            return ti;
+        }
+
+        public static Action<MemberInfoTS, PropertyRoute> AddMemberExtension;
+        static MemberInfoTS OnAddMemberExtra(MemberInfoTS mi, PropertyRoute m)
+        {
+            if (AddMemberExtension == null)
+                return mi;
+
+            foreach (var a in AddMemberExtension.GetInvocationListTyped())
+                a(mi, m);
+
+            return mi;
+        }
+
+        public static Action<OperationInfoTS, OperationInfo> AddOperationExtension;
+        static OperationInfoTS OnAddOperationExtension(OperationInfoTS oi, OperationInfo o)
+        {
+            if (AddOperationExtension == null)
+                return oi;
+
+            foreach (var a in AddOperationExtension.GetInvocationListTyped())
+                a(oi, o);
+
+            return oi;
+        }
 
         internal static Dictionary<string, TypeInfoTS> GetTypeInfoTS()
         {
@@ -87,7 +123,7 @@ namespace Signum.React.Facades
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
                           where !type.IsEnumEntity()
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
-                          select KVP.Create(GetTypeName(type), new TypeInfoTS
+                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.Entity,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
@@ -99,7 +135,7 @@ namespace Signum.React.Facades
                               ToStringFunction = ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
 
                               Members = PropertyRoute.GenerateRoutes(type)
-                                .ToDictionary(p => p.PropertyString(), p => new MemberInfoTS
+                                .ToDictionary(p => p.PropertyString(), p => OnAddMemberExtra(new MemberInfoTS
                                 {
                                     NiceName = p.PropertyInfo?.NiceName(),
                                     TypeNiceName = GetTypeNiceName(p.PropertyInfo?.PropertyType),
@@ -107,12 +143,12 @@ namespace Signum.React.Facades
                                     IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
                                     Unit = p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName,
                                     Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type) : p.PropertyInfo?.PropertyType, p.TryGetImplementations())
-                                }),
+                                }, p)),
 
                               Operations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
-                                .ToDictionary(oi => oi.OperationSymbol.Key, oi => new OperationInfoTS(oi))
+                                .ToDictionary(oi => oi.OperationSymbol.Key, oi => OnAddOperationExtension(new OperationInfoTS(oi), oi))
 
-                          })).ToDictionary("entities");
+                          }, type))).ToDictionary("entities");
 
             return result;
         }
@@ -265,6 +301,9 @@ namespace Signum.React.Facades
         public Dictionary<string, MemberInfoTS> Members { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "operations")]
         public Dictionary<string, OperationInfoTS> Operations { get; set; }
+
+        [JsonExtensionData]
+        public Dictionary<string, object> Extension { get; set; }
     }
 
     public class MemberInfoTS
@@ -285,6 +324,9 @@ namespace Signum.React.Facades
         public bool IsIgnored { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
         public object Id { get; set; }
+
+        [JsonExtensionData]
+        public Dictionary<string, object> Extension { get; set; }
     }
 
     public class OperationInfoTS
@@ -297,7 +339,10 @@ namespace Signum.React.Facades
         private bool? HasCanExecute;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "lite")]
         private bool? Lite;
-        
+
+        [JsonExtensionData]
+        public Dictionary<string, object> Extension { get; set; }
+
         public OperationInfoTS(OperationInfo oper)
         {
             this.AllowsNew = oper.AllowsNew;
@@ -340,7 +385,7 @@ namespace Signum.React.Facades
 
             type = type.UnNullify().CleanType();
 
-            return BasicType(type) ?? ReflectionCache.GetTypeName(type) ?? "any";
+            return BasicType(type) ?? ReflectionServer.GetTypeName(type) ?? "any";
         }
 
         private static Type CleanMList(Type type)
