@@ -1,9 +1,11 @@
 ﻿@{
-    this.ViewBag.Title = "Error"; 
-    
+    this.ViewBag.Title = "Error";
+
     var exceptionEntity = Signum.Engine.Basics.ExceptionLogic.GetExceptionEntity(Model.Exception);
 
     var request = Url.RequestContext.HttpContext.Request.Url;
+
+   
 }
 @model HandleErrorInfo 
 <div id="main-home">
@@ -19,9 +21,20 @@
     <div class="error-region">
         @if (exceptionEntity != null)
         {
+            var viewable = false;
+
+            try
+            {
+                viewable = exceptionEntity != null && Navigator.IsNavigable(exceptionEntity, null);
+            }
+            catch
+            {
+
+            }
+
             <p>
                 <span>Link: </span>
-                @if (Navigator.IsNavigable(exceptionEntity, null))
+                @if (viewable)
                 {
                     <a href="@Navigator.NavigateRoute(exceptionEntity)">@request.Scheme://@request.Authority@Navigator.NavigateRoute(exceptionEntity)</a>
                 }
