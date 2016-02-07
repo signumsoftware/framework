@@ -25,9 +25,9 @@ namespace Signum.React.Auth
 
         public static void Start()
         {
-            ReflectionCache.GetContext = () => new
+            ReflectionServer.GetContext = () => new
             {
-                Culture = ReflectionCache.GetCurrentValidCulture(),
+                Culture = ReflectionServer.GetCurrentValidCulture(),
                 Role = RoleEntity.Current,
             };
         }
