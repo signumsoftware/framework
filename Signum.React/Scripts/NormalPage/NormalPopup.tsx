@@ -3,27 +3,30 @@ import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../Modals'
 import * as Navigator from '../Navigator'
+import { EntityComponent, EntityComponentProps } from '../Lines'
+import ButtonBar from './ButtonBar'
+
 import { TypeContext, StyleOptions } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString } from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack } from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding } from '../Reflection'
 
 require("!style!css!./NormalPage.css");
 
 interface NormalPopupProps extends React.Props<NormalPopup>, IModalProps {
     title?: string;
-    entity?: Lite<Entity> | Entity;
+    entityOrPack?: Lite<ModifiableEntity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
     showOperations?: boolean;
     saveProtected?: boolean;
-    component?: Navigator.EntityComponent<any>;
+    component?: React.ComponentClass<EntityComponentProps<Entity>>;
     isNavigate?: boolean;
     readOnly?: boolean
 }
 
 interface NormalPopupState {
-    pack?: Navigator.EntityPack<ModifiableEntity>;
+    pack?: EntityPack<ModifiableEntity>;
     validationErrors?: { [key: string]: string };
-    component?: Navigator.EntityComponent<any>;
+    component?: React.ComponentClass<EntityComponentProps<Entity>>;
     entitySettings?: Navigator.EntitySettingsBase;
     propertyRoute?: PropertyRoute;
     savedEntity?: string;
@@ -52,12 +55,14 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
 
     calculateState(props: NormalPopupState) {
 
-        const typeName = (this.props.entity as Lite<Entity>).EntityType || (this.props.entity as ModifiableEntity).Type; 
+        const typeName = (this.props.entityOrPack as Lite<Entity>).EntityType ||
+            (this.props.entityOrPack as ModifiableEntity).Type ||
+            (this.props.entityOrPack as EntityPack<ModifiableEntity>).entity.Type;
 
         const entitySettings = Navigator.getSettings(typeName);
 
         const typeInfo = getTypeInfo(typeName);
-        
+
         const pr = typeInfo ? PropertyRoute.root(typeInfo) : this.props.propertyRoute;
 
         if (!pr)
@@ -71,24 +76,29 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
         };
     }
 
-    loadEntity(props: NormalPopupProps) : Promise<void> {
-        
-        const entity = (this.props.entity as ModifiableEntity).Type ?
-            this.props.entity as ModifiableEntity :
-            (this.props.entity as Lite<Entity>).entity;
+    loadEntity(props: NormalPopupProps): Promise<void> {
+
+        if ((this.props.entityOrPack as EntityPack<ModifiableEntity>).canExecute) {
+            this.setPack(this.props.entityOrPack as EntityPack<ModifiableEntity>);
+            return Promise.resolve(null);
+        }
+
+        const entity = (this.props.entityOrPack as ModifiableEntity).Type ?
+            this.props.entityOrPack as ModifiableEntity :
+            (this.props.entityOrPack as Lite<Entity>).entity;
 
         if (entity != null && (!getTypeInfo(entity.Type) || !this.props.showOperations)) {
 
             this.setPack({ entity, canExecute: {} });
-            return Promise.resolve();
+            return Promise.resolve(null);
 
         } else {
-            return Navigator.API.fetchEntityPack(entity ? toLite(entity) : this.props.entity as Lite<Entity>)
+            return Navigator.API.fetchEntityPack(entity ? toLite(entity) : this.props.entityOrPack as Lite<Entity>)
                 .then(pack => this.setPack({ entity: entity || pack.entity, canExecute: pack.canExecute }));
         }
     }
 
-    setPack(pack: Navigator.EntityPack<ModifiableEntity>): void {
+    setPack(pack: EntityPack<ModifiableEntity>): void {
         this.setState({
             pack: pack,
             savedEntity: JSON.stringify(pack.entity),
@@ -98,10 +108,10 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
     loadComponent() {
 
         const promise = this.props.component ? Promise.resolve(this.props.component) :
-            this.state.entitySettings.onGetComponent(this.state.pack.entity); 
+            this.state.entitySettings.onGetComponent(this.state.pack.entity);
 
         return promise
-            .then(c=> this.setState({ component: c }));
+            .then(c => this.setState({ component: c }));
     }
 
     okClicked: boolean;
@@ -125,49 +135,48 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
 
     render() {
 
+        var pack = this.state.pack;
+
         const styleOptions: StyleOptions = {
             readOnly: this.props.readOnly != null ? this.props.readOnly : this.state.entitySettings.onIsReadonly()
         };
-        const ctx = new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(this.state.pack.entity));
+
+        var component: EntityComponent<Entity> = this.state.component && React.createElement(this.state.component, {
+            ctx: new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity))
+        }) as any;
 
         return (
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
                 <Modal.Header closeButton={this.props.isNavigate}>
                     {!this.props.isNavigate && <ButtonToolbar style={{ float: "right" }}>
-                        <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString() }</Button>
-                        <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</Button>
+                        <Button className="sf-entity-button sf-close-button sf-ok-button" bsStyle="primary" disabled={!pack} onClick={this.handleOkClicked}>{JavascriptMessage.ok.niceToString() }</Button>
+                        <Button className="sf-entity-button sf-close-button sf-cancel-button" bsStyle="default" disabled={!pack} onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</Button>
                     </ButtonToolbar>}
                     {this.renderTitle() }
                 </Modal.Header>
 
-                <Modal.Body>
-                    {Navigator.renderWidgets({ entity: this.state.pack.entity }) }
-                    <div className="btn-toolbar sf-button-bar">
-                        {Navigator.renderButtons({
-                            pack: this.state.pack,
-                            component: this.state.component,
-                            showOperations: this.props.showOperations
-                        }) }
-                    </div>
-
-                    <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
-                        {this.state.component && React.createElement(this.state.component, { ctx: ctx }) }
-                    </div>
-                </Modal.Body>
+                {this.state.pack &&
+                    <Modal.Body>
+                        {Navigator.renderWidgets({ entity: pack.entity }) }
+                        <ButtonBar component={component} pack={this.state.pack} showOperations={this.props.showOperations} />
+                        <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
+                        { component }
+                        </div>
+                    </Modal.Body>
+                }
             </Modal>
         );
     }
 
 
     renderTitle() {
+        
+        if (!this.state.pack)
+            return <h3>{JavascriptMessage.loading.niceToString() }</h3>;
 
         const entity = this.state.pack.entity;
-
-        if (entity == null)
-            return <h3>{JavascriptMessage.loading.niceToString()}</h3>;
-
         const pr = this.props.propertyRoute;
-        
+
         return (
             <h4>
                 <span className="sf-entity-title">{this.props.title || getToString(entity) }</span>
@@ -199,10 +208,10 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
     static open(options: Navigator.ViewOptions): Promise<Entity> {
 
         return openModal<Entity>(<NormalPopup
-            entity={options.entity}
+            entityOrPack={options.entity}
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}
-            component={options.compoenent}
+            component={options.component}
             showOperations={options.showOperations}
             saveProtected={options.saveProtected}/>);
     }

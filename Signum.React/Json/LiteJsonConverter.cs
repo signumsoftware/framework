@@ -42,11 +42,10 @@ namespace Signum.React.Json
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            //reader.Read();
-            Assert(reader, JsonToken.StartObject);
+            reader.Assert(JsonToken.StartObject);
 
             string toString = null;
-            object idObj = null;
+            string idObj = null;
             string typeStr = null;
             Entity entity = null;
 
@@ -65,10 +64,11 @@ namespace Signum.React.Json
                 reader.Read();
             }
 
+            reader.Assert(JsonToken.EndObject);
+
             Type type = TypeLogic.GetType(typeStr);
 
-            PrimaryKey? id = idObj == null ? (PrimaryKey?)null :
-                new PrimaryKey((IComparable)ReflectionTools.ChangeType(idObj, PrimaryKey.PrimaryKeyType.GetValue(type)));
+            PrimaryKey? id = idObj == null ? (PrimaryKey?)null : PrimaryKey.Parse(idObj, type);
 
             if (entity == null)
                 return Lite.Create(type, id.Value, toString);
@@ -81,13 +81,7 @@ namespace Signum.React.Json
             if (result.Id != id)
                 throw new InvalidOperationException("Id's don't match");
 
-            return result;
-        }
-
-        private static void Assert(JsonReader reader, JsonToken expected)
-        {
-            if (reader.TokenType != expected)
-                throw new InvalidOperationException("expected {0} but {1} found".FormatWith(expected, reader.TokenType));
+           return result;
         }
     }
 

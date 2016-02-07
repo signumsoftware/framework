@@ -9,6 +9,7 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../Type
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
 import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey } from '../Signum.Entities'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
+import { EntityComponentProps } from '../Lines'
 import Typeahead from '../Lines/Typeahead'
 import SelectorPopup from '../SelectorPopup'
 
@@ -26,7 +27,7 @@ export interface EntityBaseProps extends LineBaseProps {
     onFind?: () => Promise<ModifiableEntity | Lite<IEntity>>;
     onRemove?: (entity: ModifiableEntity | Lite<IEntity>) => Promise<boolean>;
 
-    component?: Navigator.EntityComponent<any>;
+    component?: React.ComponentClass<EntityComponentProps<any>>;
 }
 
 

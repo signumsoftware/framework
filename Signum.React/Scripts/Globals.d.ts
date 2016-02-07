@@ -7,7 +7,7 @@
 /// <reference path="../typings/react-widgets/react-widgets.d.ts" />
 /// <reference path="../typings/numeraljs/numeraljs.d.ts" />
 /// <reference path="../typings/moment/moment.d.ts" />
-/// <reference path="../typings/bluebird/bluebird.d.ts" />
+/// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
 
 

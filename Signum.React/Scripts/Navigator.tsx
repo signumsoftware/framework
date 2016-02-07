@@ -3,9 +3,10 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic, hasFlag } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
-import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage } from './Signum.Entities';
+import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack } from './Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo  } from './Reflection';
 import { TypeContext } from './TypeContext';
+import { EntityComponent, EntityComponentProps} from './Lines';
 import * as Finder from './Finder';
 import NormalPopup from './NormalPage/NormalPopup';
 
@@ -138,12 +139,12 @@ export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customV
 
 
 export interface ViewOptions {
-    entity: Lite<IEntity> | ModifiableEntity;
+    entity: Lite<IEntity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
     showOperations?: boolean;
     saveProtected?: boolean;
-    compoenent?: EntityComponent<any>;
+    component?: React.ComponentClass<EntityComponentProps<any>>;
 }
 
 export function view(options: ViewOptions): Promise<ModifiableEntity>;
@@ -153,6 +154,7 @@ export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Enti
 {
     const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } as ViewOptions :
         (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } as ViewOptions :
+        (entityOrOptions as EntityPack<ModifiableEntity>).entity ? { entity: entityOrOptions } as ViewOptions :
             entityOrOptions as ViewOptions;
 
     return new Promise<ModifiableEntity>((resolve) => {
@@ -182,18 +184,6 @@ export enum EmbeddedWidgetPosition {
     Bottom,
 }
 
-export interface ButtonsContext {
-    pack: EntityPack<Entity>;
-    component: EntityComponent<ModifiableEntity>;
-    showOperations: Boolean;
-}
-
-export var onButtonBarRender: Array<(ctx: ButtonsContext) => Array<React.ReactChild>> = [];
-
-export function renderButtons(ctx: ButtonsContext): Array<React.ReactChild> {
-
-    return onButtonBarRender.flatMap(f => f(ctx));
-}
 
 
 export module API {
@@ -220,34 +210,6 @@ export module API {
 
         return ajaxGet<EntityPack<Entity>>({ url: "/api/entityPack/" + typeName + "/" + idVal });
     }
-
-
-    export function fetchOperationInfos(type: PseudoType): Promise<Array<OperationInfo>> {
-
-        const typeName = getTypeName(type as PseudoType);
-
-        return ajaxGet<Array<OperationInfo>>({ url: "/api/operations/" + typeName });
-
-    }
-
-}
-
-export interface OperationInfo {
-    key: string;
-    operationType: OperationType,
-}
-
-export enum OperationType {
-    Execute,
-    Delete,
-    Constructor,
-    ConstructorFrom,
-    ConstructorFromMany
-}
-
-export interface EntityPack<T extends ModifiableEntity> {
-    entity: T
-    canExecute: { [key: string]: string };
 }
 
 
@@ -262,18 +224,13 @@ export abstract class EntitySettingsBase {
     abstract onIsNavigable(customView: boolean, isSearch: boolean): boolean;
     abstract onIsReadonly(): boolean;
 
-    getToString: (entity: ModifiableEntity) => string;
+    getToString: (entity: ModifiableEntity) => string; 
 
-    abstract onGetComponent(entity: ModifiableEntity): Promise<EntityComponent<any>>;
+    abstract onGetComponent(entity: ModifiableEntity): Promise<React.ComponentClass<EntityComponentProps<any>>>;
 
     constructor(type: IType) {
         this.type = type;
     }
-}
-
-export interface EntityComponent<T> extends React.ComponentClass<{ ctx: TypeContext<T> }> 
-{
-
 }
 
 export class EntitySettings<T extends Entity> extends EntitySettingsBase {
@@ -287,7 +244,7 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
 
     getToString: (entity: T) => string;
 
-    getComponent: (entity: T) => Promise<{ default: EntityComponent<T> }>;
+    getComponent: (entity: T) => Promise<{ default: React.ComponentClass<EntityComponentProps<T>> }>;
 
     constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
         options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean }) {
@@ -392,7 +349,7 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
     }
 
 
-    onGetComponent(entity: ModifiableEntity): Promise<EntityComponent<T>>{
+    onGetComponent(entity: ModifiableEntity): Promise<React.ComponentClass<EntityComponentProps<T>>>{
         return this.getComponent(entity as T).then(a=> a.default);
     }
     
@@ -401,7 +358,7 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
 export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySettingsBase {
     public type: Type<T>;
 
-    getComponent: (entity: T) => Promise<{ default: EntityComponent<T> }>;
+    getComponent: (entity: T) => Promise<{ default: React.ComponentClass<EntityComponentProps<T>> }>;
 
     isCreable: boolean;
     isViewable: boolean;
@@ -444,7 +401,7 @@ export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySe
         return this.isReadOnly;
     }
 
-    onGetComponent(entity: ModifiableEntity): Promise<EntityComponent<T>> {
+    onGetComponent(entity: ModifiableEntity): Promise<React.ComponentClass<EntityComponentProps<T>>> {
         return this.getComponent(entity as T).then(a=> a.default);;
     }
 }

@@ -35,41 +35,8 @@ namespace Signum.React.ApiControllers
             var primaryKey = PrimaryKey.Parse(id, entityType);
 
             var entity = Database.Retrieve(entityType, primaryKey);
-            
-            var canExecutes = OperationLogic.ServiceCanExecute(entity);
 
-            return new EntityPackTS
-            {
-                entity = entity,
-                canExecute = canExecutes.ToDictionary(a => a.Key.Key, a => a.Value)
-            };
+            return EntitesServer.GetEntityPack(entity);
         }
-
-        [Route("api/operations/{type}")]
-        public List<OperationInfoTS> GetOperationInfo(string type)
-        {
-            var entityType = TypeLogic.GetType(type);
-            var operationInfos = OperationLogic.ServiceGetOperationInfos(entityType);
-
-            return operationInfos.Select(o => new OperationInfoTS
-            {
-                key = o.OperationSymbol.Key,
-                allowNews = o.AllowsNew,
-                operationType = o.OperationType,
-            }).ToList();
-        }
-    }
-
-    public class EntityPackTS
-    {
-        public Entity entity;
-        public Dictionary<string, string> canExecute; 
-    }
-
-    public class OperationInfoTS
-    {
-        public string key;
-        public bool? allowNews;
-        public OperationType operationType;
     }
 }

@@ -2,8 +2,10 @@
 import * as React from 'react'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
+import ButtonBar from './ButtonBar'
+import { EntityComponent, EntityComponentProps } from '../Lines'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
-import { Entity, Lite, is, toLite, LiteMessage, getToString } from '../Signum.Entities'
+import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, JavascriptMessage } from '../Signum.Entities'
 import { TypeContext, StyleOptions } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
 
@@ -11,15 +13,15 @@ require("!style!css!./NormalPage.css");
 
 interface NormalPageProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string }> {
     showOperations?: boolean;
-    component?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
+    component?: React.ComponentClass<EntityComponentProps<Entity>>;
     title?: string;
 }
 
 
 interface NormalPageState {
-    pack?: Navigator.EntityPack<Entity>;
-    validationErrors?: { [key: string]: string };
-    component?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
+    pack?: EntityPack<Entity>;
+    modelState?: ModelState;
+    component?: React.ComponentClass<EntityComponentProps<Entity>>;
     entitySettings?: Navigator.EntitySettingsBase;
     typeInfo?: TypeInfo;
 }
@@ -73,8 +75,8 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
         const promise = this.props.component ? Promise.resolve(this.props.component) :
             this.state.entitySettings.onGetComponent(this.state.pack.entity);
 
-        return promise.then(c =>
-            this.setState({ component: c }));
+        return promise
+            .then(c => this.setState({ component: c }));
     }
 
     render() {
@@ -86,42 +88,44 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
     }
 
     renderEntityControl() {
+        
+        if (!this.state.pack) {
+            return (
+                <div className="normal-control">
+                    {this.renderTitle() }
+                </div>
+            );
+        }
 
         const entity = this.state.pack.entity;
-
-        if (!entity)
-            return null;
-
 
         const styleOptions: StyleOptions = {
             readOnly: this.state.entitySettings.onIsReadonly()
         };
 
         const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity));
-        
+
+        var component: EntityComponent<Entity> = this.state.component && React.createElement(this.state.component, { ctx: ctx }) as any;
+
         return (
             <div className="normal-control">
-                {this.renderTitle(this.state.typeInfo) }
+                {this.renderTitle() }
                 {Navigator.renderWidgets({ entity: entity }) }
-                <div className="btn-toolbar sf-button-bar">
-                    { Navigator.renderButtons({
-                        pack: this.state.pack,
-                        component: this.state.component,
-                        showOperations: this.props.showOperations,
-                    }) }
-                </div>
-                {this.renderValidationErrors() }
+                <ButtonBar component={component} pack={this.state.pack} showOperations={this.props.showOperations} />
+                <ValidationErrors modelState={this.state.modelState}/>
                 {Navigator.renderEmbeddedWidgets({ entity: entity }, Navigator.EmbeddedWidgetPosition.Top) }
                 <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
-                    {this.state.component && React.createElement(this.state.component, { ctx: ctx }) }
+                    {component}
                 </div>
                 {Navigator.renderEmbeddedWidgets({ entity: entity }, Navigator.EmbeddedWidgetPosition.Bottom) }
             </div>
         );
     }
+    
+    renderTitle() {
 
-
-    renderTitle(typeInfo: TypeInfo) {
+        if (!this.state.pack)
+            return <h3>{JavascriptMessage.loading.niceToString() }</h3>;
 
         const entity = this.state.pack.entity;
 
@@ -133,14 +137,21 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
             </h3>
         );
     }
+}
 
-    renderValidationErrors() {
-        if (!this.state.validationErrors || Dic.getKeys(this.state.validationErrors).length == 0)
+
+export class ValidationErrors extends React.Component<{ modelState: ModelState }, void>
+{
+    render() {
+
+        var modelState = this.props.modelState;
+
+        if (!modelState || Dic.getKeys(modelState).length == 0)
             return null;
 
         return (
             <ul className="validaton-summary alert alert-danger">
-                {Dic.getValues(this.state.validationErrors).map(error => <li>{error}</li>) }
+                { Dic.getValues(modelState).map(error => <li>{error}</li>) }
             </ul>
         );
     }

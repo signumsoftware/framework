@@ -396,7 +396,6 @@ export class Type<T> implements IType {
     }
 }
 
-
 export class EnumType<T> {
     constructor(
         public type: string,
@@ -428,8 +427,10 @@ export class MessageKey {
         return getTypeInfo(this.type).members[this.name]
     }
 
-    niceToString(): string {
-        return this.propertyInfo().niceName;
+    niceToString(args?: any[]): string {
+        var msg = this.propertyInfo().niceName;
+
+        return args ? msg.formatWith(args) : msg;
     }
 }
 

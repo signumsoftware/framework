@@ -135,13 +135,16 @@
     <Compile Include="..\Signum.Utilities\Properties\Version.cs">
       <Link>Properties\Version.cs</Link>
     </Compile>
+    <Compile Include="ApiControllers\OperationController.cs" />
     <Compile Include="ApiControllers\EntityController.cs" />
     <Compile Include="ApiControllers\QueryController.cs" />
     <Compile Include="ApiControllers\ReflectionController.cs" />
-    <Compile Include="Facades\RefletionCache.cs" />
+    <Compile Include="Facades\EntitesServer.cs" />
+    <Compile Include="Facades\ReflectionServer.cs" />
     <Compile Include="Facades\SignumControllerFactory.cs" />
     <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="Json\EntityJsonConverter.cs" />
+    <Compile Include="Json\JsonSerializerExtensions.cs" />
     <Compile Include="Json\MListJsonConverter.cs" />
     <Compile Include="Json\LiteJsonConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -195,6 +198,7 @@
     <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
     <TypeScriptCompile Include="Scripts\Constructor.tsx" />
+    <TypeScriptCompile Include="Scripts\NormalPage\ButtonBar.tsx" />
     <TypeScriptCompile Include="Scripts\Operations.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.tsx" />
     <TypeScriptCompile Include="Scripts\NormalPage\NormalPage.tsx" />
@@ -216,7 +220,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\Lines\ValueLine.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.ts" />
-    <TypeScriptCompile Include="Typings\bluebird\bluebird.d.ts" />
+    <TypeScriptCompile Include="Typings\es6-promise\es6-promise.d.ts" />
     <TypeScriptCompile Include="Typings\moment\moment-node.d.ts" />
     <TypeScriptCompile Include="Typings\moment\moment.d.ts" />
     <TypeScriptCompile Include="Typings\numeraljs\numeraljs.d.ts" />

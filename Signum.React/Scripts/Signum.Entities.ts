@@ -41,6 +41,16 @@ export interface Lite<T extends IEntity> {
     toStr?: string;
 }
 
+export interface ModelState {
+    [field: string]: string;
+}
+
+export interface EntityPack<T extends ModifiableEntity> {
+    entity: T
+    canExecute: { [key: string]: string };
+}
+
+
 export type Type<T extends ModifiableEntity> = string;
 
 export type ExecuteSymbol<T extends IEntity> = OperationSymbol;
@@ -97,6 +107,9 @@ export function toLite<T extends IEntity>(entity: T, fat?: boolean) : Lite<T> {
 
     if(fat)
        return toLiteFat(entity);
+
+	if(!entity.id)
+		throw new Error(`The ${entity.Type} has no Id`);
 
     return {
        EntityType : entity.Type,

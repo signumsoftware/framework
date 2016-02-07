@@ -314,7 +314,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "") } onClick={this.handleSearch}>{SearchMessage.Search.niceToString() } </button>
                 {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={this.createTitle() }><span className="glyphicon glyphicon-plus"></span></a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton() }
-                {Finder.ButtonBarQuery.getButtonBarElements(fo.queryName) }
+                {Finder.ButtonBarQuery.getContextBarElements(fo.queryName) }
                 {this.props.avoidFullScreenButton != true &&
                     <a className="sf-query-button btn btn-default" href="#">
                         <span className="glyphicon glyphicon-new-window"></span>

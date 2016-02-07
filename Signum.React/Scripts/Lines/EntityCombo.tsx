@@ -76,19 +76,26 @@ export class EntityCombo extends EntityBase<EntityComboProps> {
         if (lite && !elements.some(a => is(a, lite)))
             elements.insertAt(1, lite);
 
+        var buttons = (
+            <span className="input-group-btn">
+                {!hasValue && this.renderCreateButton(true) }
+                {!hasValue && this.renderFindButton(true) }
+                {hasValue && this.renderViewButton(true) }
+                {hasValue && this.renderRemoveButton(true) }
+            </span>
+        );
+
+        if (!buttons.props.children.some(a => a))
+            buttons = null;
+
         return (
             <FormGroup ctx={s.ctx} title={s.labelText}>
                 <div className="SF-entity-combo">
-                    <div className="input-group">
+                    <div className={buttons ? "input-group" : null}>
                         <select className="form-control" onChange={this.handleOnChange} value={liteKey(lite) || "" }>
                             {elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? e.toStr : " - "}</option>) }
                         </select>
-                        <span className="input-group-btn">
-                            {!hasValue && this.renderCreateButton(true) }
-                            {!hasValue && this.renderFindButton(true) }
-                            {hasValue && this.renderViewButton(true) }
-                            {hasValue && this.renderRemoveButton(true) }
-                        </span>
+                        {buttons}
                     </div>
                 </div>
             </FormGroup>

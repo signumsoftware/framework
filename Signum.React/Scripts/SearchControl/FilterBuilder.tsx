@@ -23,10 +23,11 @@ interface FilterBuilderProps extends React.Props<FilterBuilder> {
 export default class FilterBuilder extends React.Component<FilterBuilderProps, { }>  {
 
     handlerNewFilter = () => {
+
         this.props.filterOptions.push({
             token: this.props.lastToken,
             columnName: null,
-            operation: null,
+            operation: !this.props.lastToken ? null : (filterOperations[this.props.lastToken.filterType] || []).firstOrNull(),
             value: null,
         });
         this.forceUpdate();
@@ -63,7 +64,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
                                     <a title={SearchMessage.AddFilter.niceToString() }
                                         className="sf-line-button sf-create"
                                         onClick={this.handlerNewFilter}>
-                                        <span className="glyphicon glyphicon-plus"/> {SearchMessage.AddFilter.niceToString() }
+                                        <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{SearchMessage.AddFilter.niceToString() }
                                     </a>
                                 </td>
                             </tr>

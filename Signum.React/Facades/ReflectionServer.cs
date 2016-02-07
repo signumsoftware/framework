@@ -331,7 +331,7 @@ namespace Signum.React.Facades
 
     public class OperationInfoTS
     {
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "operationType")]
+        [JsonProperty(PropertyName = "operationType")]
         private OperationType OperationType;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore,  NullValueHandling = NullValueHandling.Ignore, PropertyName = "allowsNew")]
         private bool? AllowsNew;

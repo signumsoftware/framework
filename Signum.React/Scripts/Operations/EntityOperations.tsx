@@ -1,22 +1,24 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
-import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage,
-    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage } from '../Signum.Entities';
+import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite,
+    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString } from '../Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType  } from '../Reflection';
 import * as Navigator from '../Navigator';
+import { ButtonsContext } from '../NormalPage/ButtonBar';
 import { EntityComponent }  from '../Lines';
-import { operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup, CreateGroup } from '../Operations'
+import { ajaxPost, ValidationError }  from '../Services';
+import { operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup, CreateGroup, API } from '../Operations'
 
 
-export function getButtonBarElements(ctx: Navigator.ButtonsContext): Array<React.ReactChild> {
+export function getButtonBarElements(ctx: ButtonsContext): Array<React.ReactElement<any>> {
     const ti = getTypeInfo(ctx.pack.entity.Type);
 
     if (ti == null)
         return null;
 
     const operations = operationInfos(ti)
-        .filter(oi => isEntityOperation(oi.operationType) && oi.allowNew || !ctx.pack.entity.isNew)
+        .filter(oi => isEntityOperation(oi.operationType) && (oi.allowNew || !ctx.pack.entity.isNew))
         .map(oi => {
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity>;
 
@@ -47,19 +49,21 @@ export function getButtonBarElements(ctx: Navigator.ButtonsContext): Array<React
     });
 
 
+
     var result = groups.flatMap((gr, i) => {
         if (gr.key == "") {
             return gr.elements.map((eoc, j) => ({
-                order: eoc.settings && eoc.settings.order,
+                order: eoc.settings && eoc.settings.order != null ? eoc.settings.order : 0,
                 button: createDefaultButton(eoc, null, false, i + "-" + j)
             }));
         } else {
             var group = getDefaultGroup(gr.elements[0]);
 
+
             return [{
-                order: group.order,
+                order: group.order != null ? group.order : 100,
                 button: (
-                    <DropdownButton title={group.text} data-key={group.key} key={i}>
+                    <DropdownButton title={group.text() } data-key={group.key} key={i} id={group.key}>
                         { gr.elements
                             .orderBy(a => a.settings && a.settings.order)
                             .map((eoc, j) => createDefaultButton(eoc, group, true, j))
@@ -91,24 +95,134 @@ function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityO
             eoc.operationInfo.niceName;
 
     var bsStyle = eoc.settings && eoc.settings.style || autoStyleFunction(eoc.operationInfo);
-
-    var onClick = eoc.settings && eoc.settings.onClick ? () => eoc.settings.onClick(eoc) : () => defaultClick(eoc);
-
+    
     var btn = !asMenuItem ?
-        <Button bsStyle={bsStyle} disabled={!!eoc.canExecute} onClick={onClick} data-operation={eoc.operationInfo.key} key={key}>{text}</Button> :
-        <MenuItem className={"btn-" + bsStyle} disabled={!!eoc.canExecute} onClick={onClick} data-operation={eoc.operationInfo.key} key={key}>{text}</MenuItem>;
+        <Button bsStyle={bsStyle} disabled={!!eoc.canExecute} onClick={() => onClick(eoc)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button> :
+        <MenuItem className={"btn-" + bsStyle} disabled={!!eoc.canExecute} onClick={() => onClick(eoc)} data-operation={eoc.operationInfo.key} key={key}>{text}</MenuItem>;
 
     if (!eoc.canExecute)
         return btn;
 
-    const tooltip = <Tooltip>{eoc.canExecute}</Tooltip>;
+    const tooltip = <Tooltip id={"tooltip_" + eoc.operationInfo.key.replace(".", "_") }>{eoc.canExecute}</Tooltip>;
 
     return <OverlayTrigger placement="bottom" overlay={tooltip}>{btn}</OverlayTrigger>;
 }
 
-function defaultClick(eoc: EntityOperationContext<Entity>) {
+function onClick(eoc: EntityOperationContext<Entity>): void{
 
+    if (eoc.settings && eoc.settings.onClick)
+        return eoc.settings.onClick(eoc);
+
+    if (eoc.operationInfo.lite) {
+        switch (eoc.operationInfo.operationType) {
+            case OperationType.ConstructorFrom: defaultConstructFromLite(eoc); return;
+            case OperationType.Execute: defaultExecuteEntity(eoc); return;
+            case OperationType.Delete: defaultDeleteEntity(eoc); return;
+        }
+    } else {
+        switch (eoc.operationInfo.operationType) {
+            case OperationType.ConstructorFrom: defaultConstructFromEntity(eoc); return;
+            case OperationType.Execute: defaultExecuteEntity(eoc); return;
+            case OperationType.Delete: defaultDeleteEntity(eoc); return;
+        }
+    }
+
+    throw new Error("Unexpected OperationType");
 }
+
+
+export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+
+    if (!confirmInNecessary(eoc))
+        return;
+
+    return API.constructFromEntity(eoc.entity, eoc.operationInfo.key, null)
+        .then(pack => Navigator.view(pack).then(a => true))
+        .catch(e => catchValidationError(e, eoc.component));
+}
+
+export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+
+    if (!confirmInNecessary(eoc))
+        return;
+
+    return API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, null)
+        .then(pack => Navigator.view(pack).then(a => true))
+        .catch(e => catchValidationError(e, eoc.component));
+}
+
+function catchValidationError(error: any, component: EntityComponent<Entity>) {
+    if (error instanceof ValidationError) {
+        component.setError((error as ValidationError).modelState);
+        return false;
+    }
+
+    throw error;
+}
+
+
+export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+
+    if (!confirmInNecessary(eoc))
+        return;
+
+    return API.executeEntity(eoc.entity, eoc.operationInfo.key, null)
+        .then(pack => { eoc.component.onReload(pack); return true; })
+        .catch(e => catchValidationError(e, eoc.component));
+}
+
+export function defaultExecuteLite(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+
+    if (!confirmInNecessary(eoc))
+        return;
+
+    return API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, null)
+        .then(pack => { eoc.component.onReload(pack); return true; })
+        .catch(e => catchValidationError(e, eoc.component));
+}
+
+export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+
+    if (!confirmInNecessary(eoc))
+        return;
+
+    return API.deleteEntity(eoc.entity, eoc.operationInfo.key, null)
+        .then(() => { eoc.component.onClose(); return true; })
+        .catch(e => catchValidationError(e, eoc.component));
+}
+
+export function defaultDeleteLite(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+
+    if (!confirmInNecessary(eoc))
+        return;
+
+    return API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, null)
+        .then(() => { eoc.component.onClose(); return true; })
+        .catch(e => catchValidationError(e, eoc.component));
+}
+
+
+export function confirmInNecessary(eoc: EntityOperationContext<Entity>): boolean {
+
+    var confirmMessage = getConfirmMessage(eoc);
+
+    return confirmMessage == null || confirm(confirmMessage);
+}
+
+function getConfirmMessage(eoc: EntityOperationContext<Entity>) {
+    if (eoc.settings && eoc.settings.confirmMessage === null)
+        return null;
+
+    if (eoc.settings && eoc.settings.confirmMessage != null)
+        return eoc.settings.confirmMessage(eoc);
+
+    //eoc.settings.confirmMessage === undefined
+    if (eoc.operationInfo.operationType == OperationType.Delete)
+        return OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.niceToString(getToString(eoc.entity));
+
+    return null;
+}
+
 
 export function autoStyleFunction(oi: OperationInfo) {
     return oi.operationType == OperationType.Delete ? "danger" :

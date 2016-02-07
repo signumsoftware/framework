@@ -178,9 +178,9 @@ class TokenCompleter {
     finish(): Promise<void> {
         const queryKey = getQueryKey(this.queryName);
         const tokens = Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }));
-
+        
         if (tokens.length == 0)
-            return Promise.resolve();
+            return Promise.resolve(null);
         
         return API.parseTokens(queryKey, tokens).then(parsedTokens=> {
             parsedTokens.forEach(t=> this.tokensToRequest[t.fullKey].resolve(t));
@@ -374,7 +374,7 @@ function getTokenString(tokenContainer: { columnName: string, token?: QueryToken
 
 export module ButtonBarQuery {
 
-    export function getButtonBarElements(queryKey: string) {
+    export function getContextBarElements(queryKey: string) {
         return null;
     }
 

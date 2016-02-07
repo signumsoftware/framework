@@ -1,4 +1,5 @@
 ﻿/// <reference path="../typings/whatwg-fetch/whatwg-fetch.d.ts" />
+import { ModelState } from './Signum.Entities'
 
 export interface AjaxOptions {
     avoidBaseUrl?: boolean;
@@ -107,8 +108,9 @@ function throwError(response: Response): Response | Promise<Response> {
     }
 }
 
-export class ServiceError {
+export class ServiceError extends Error {
     constructor(public statusText: string, public body: any) {
+        super(statusText)
     }
 
     toString() {
@@ -116,11 +118,12 @@ export class ServiceError {
     }
 }
 
-export class ValidationError {
+export class ValidationError extends Error {
     modelState: ModelState;
     message: string;
 
     constructor(public statusText: string, json: { Message: string, ModelState: ModelState }) {
+        super(statusText)
         this.message = json.Message;
         this.modelState = json.ModelState;
     }
@@ -130,8 +133,6 @@ export class ValidationError {
     }
 }
 
-export interface ModelState {
-    [field: string]: string;
-}
+
 
 export const showError = (error: any) => alert(error);

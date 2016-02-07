@@ -50,16 +50,23 @@ export class EntityLine extends EntityBase<EntityLineProps> {
 
         const hasValue = !!s.ctx.value;
 
+        var buttons = (
+            <span className="input-group-btn">
+                {!hasValue && this.renderCreateButton(true) }
+                {!hasValue && this.renderFindButton(true) }
+                {hasValue && this.renderViewButton(true) }
+                {hasValue && this.renderRemoveButton(true) }
+            </span>
+        );
+
+        if (!buttons.props.children.some(a => a))
+            buttons = null;
+
         return <FormGroup ctx={s.ctx} title={s.labelText}>
             <div className="SF-entity-line">
-                <div className="input-group">
+                <div className={buttons ? "input-group" : null}>
                     { hasValue ? this.renderLink() : this.renderAutoComplete() }
-                    <span className="input-group-btn">
-                        {!hasValue && this.renderCreateButton(true) }
-                        {!hasValue && this.renderFindButton(true) }
-                        {hasValue && this.renderViewButton(true) }
-                        {hasValue && this.renderRemoveButton(true) }
-                    </span>
+                    {buttons}
                 </div>
             </div>
         </FormGroup>;

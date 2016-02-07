@@ -80,13 +80,13 @@ Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any,
 
 Array.prototype.flatMap = function (selector: (element: any, index: number, array: any[]) => any[]): any {
 
-    const array = [];
+    const result = [];
     (<Array<any>>this).forEach((item, index, array) =>
         selector(item, index, array).forEach(item2 =>
-            array.push(item2)
+            result.push(item2)
         ));
 
-    return array;
+    return result;
 };
 
 Array.prototype.max = function () {
