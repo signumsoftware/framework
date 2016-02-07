@@ -31,11 +31,13 @@ export class EntityCombo extends EntityBase<EntityComboProps> {
         if (!state.data) {
             if (this.state && this.state.type.name == state.type.name)
                 state.data = this.state.data;
+        }
+    }
 
-            if (!state.data) {
-                Finder.API.findAllLites({ types: state.type.name })
-                    .then(data => this.setState({ data: data } as any));
-            }
+    componentDidMount() {
+        if (!this.state.data) {
+            Finder.API.findAllLites({ types: this.state.type.name })
+                .then(data => this.setState({ data: data } as any));
         }
     }
 

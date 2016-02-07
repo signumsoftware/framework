@@ -993,3 +993,33 @@ declare module "react-overlays/lib/RootCloseWrapper"
     var RootCloseWrapper: RootCloseWrapperClass;
     export = RootCloseWrapper;
 }
+
+declare module "react-overlays/lib/Transition"
+{
+    import React = require("react");
+    interface TransitionProps {
+        timeout?: number;
+        transitionAppear?: boolean;
+        unmountOnExit?: boolean;
+
+        in?: boolean;
+
+        className?: string;
+        exitedClassName?: string;
+        exitingClassName?: string;
+        enteredClassName?: string;
+        enteringClassName?: string;
+
+        onEnter?: () => void;
+        onEntering?: () => void;
+        onEntered?: () => void;
+        onExit?: () => void;
+        onExiting?: () => void;
+        onExited?: () => void;
+    }
+
+    interface Transition  extends React.ReactElement<TransitionProps> { }
+    interface TransitionClass extends React.ComponentClass<TransitionProps> { }
+    var Transition: TransitionClass;
+    export default Transition;
+}

@@ -1,0 +1,42 @@
+﻿/* top message */
+#sfNotify {
+    font-size: 12px;
+    left: 50%;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    z-index: 100000;
+    transform: translateX(-50%);
+}
+
+    #sfNotify span.notify {
+        font-weight: bold;
+        overflow: hidden;
+        text-align: center;
+        white-space: nowrap;
+        padding: 4px;
+        opacity: 0;
+        -webkit-transition: opacity 200ms linear;
+        -o-transition: opacity 200ms linear;
+        transition: opacity 200ms linear;
+    }
+
+        #sfNotify span.notify.in {
+            opacity: 1;
+        }
+
+        #sfNotify span.notify.loading {
+            background-color: #B6E2F3;
+        }
+
+        #sfNotify span.notify.error {
+            background-color: #ffafaf;
+        }
+
+        #sfNotify span.notify.warning {
+            background-color: #fff1a8;
+        }
+
+        #sfNotify span.notify.success {
+            background-color: #97E371;
+        }

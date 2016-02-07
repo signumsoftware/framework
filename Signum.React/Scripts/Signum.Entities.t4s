@@ -4,15 +4,17 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflecti
 
 export interface ModifiableEntity {
     Type: string;
-    toStr?: string;
+    toStr?: string;	
+    modified? : boolean;
 }
 
 export interface IEntity {
     Type: string;
     id?: any;
     isNew?: boolean;
-    ticks?: number;
+    ticks?: string; //max value
     toStr?: string;
+    modified? : boolean;
 }
 
 export interface Entity extends ModifiableEntity, IEntity {
@@ -102,13 +104,13 @@ export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>)
 export function toLite<T extends IEntity>(entity: T, fat?: boolean) : Lite<T> {
 
     if(entity == null)
-		return null;
+        return null;
 
     if(fat)
        return toLiteFat(entity);
 
-	if(!entity.id)
-		throw new Error(`The ${entity.Type} has no Id`);
+    if(!entity.id)
+        throw new Error(`The ${entity.Type} has no Id`);
 
     return {
        EntityType : entity.Type,
@@ -120,9 +122,9 @@ export function toLite<T extends IEntity>(entity: T, fat?: boolean) : Lite<T> {
 export function toLiteFat<T extends IEntity>(entity: T) : Lite<T> {
     
     if(entity == null)
-		return null;
-	
-	return {
+        return null;
+    
+    return {
        entity : entity,
        EntityType  :entity.Type,
        id: entity.id,
@@ -133,9 +135,9 @@ export function toLiteFat<T extends IEntity>(entity: T) : Lite<T> {
 export function liteKey(lite: Lite<IEntity>) {
     
     if(lite == null)
-		return null;
-	
-	return lite.EntityType + ";" + (lite.id || "");
+        return null;
+    
+    return lite.EntityType + ";" + (lite.id || "");
 }
 
 export function parseLite(lite: string) : Lite<IEntity> {
@@ -148,8 +150,8 @@ export function parseLite(lite: string) : Lite<IEntity> {
 import { getTypeInfo } from './Reflection' 
 export function is<T extends IEntity>(a: Lite<T> | T, b: Lite<T> | T) {
 
-	if(!!a != !!b)
-		return false;
+    if(!!a != !!b)
+        return false;
 
     if (a.id != b.id)
         return false;

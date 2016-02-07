@@ -27,6 +27,7 @@ using System;
 
 [assembly: InternalsVisibleTo("Signum.Engine")]
 [assembly: InternalsVisibleTo("Signum.Web")]
+[assembly: InternalsVisibleTo("Signum.React")]
 
 [assembly: DefaultAssemblyCulture("en")]
 

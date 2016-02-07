@@ -23,7 +23,23 @@ namespace Signum.React.Json
         public static Dictionary<string, PropertyConverter> GetPropertyConverters(Type type)
         {
             return PropertyConverters.GetOrAdd(type, _t =>
-            Validator.GetPropertyValidators(_t).Values.Select(pv => new PropertyConverter(_t, pv)).ToDictionary(a => a.PropertyValidator.PropertyInfo.Name.FirstLower()));
+                Validator.GetPropertyValidators(_t).Values
+                .Where(pv => ShouldSerialize(pv.PropertyInfo))
+                .Select(pv => new PropertyConverter(_t, pv))
+                .ToDictionary(a => a.PropertyValidator.PropertyInfo.Name.FirstLower())
+            );
+        }
+
+        static bool ShouldSerialize(PropertyInfo pi)
+        {
+            var ts = pi.GetCustomAttribute<InTypeScriptAttribute>();
+            if (ts != null)
+                return ts.InTypeScript;
+
+            if (pi.HasAttribute<HiddenPropertyAttribute>() || pi.HasAttribute<ExpressionFieldAttribute>())
+                return false;
+
+            return true;
         }
 
         public readonly IPropertyValidator PropertyValidator;
@@ -64,28 +80,31 @@ namespace Signum.React.Json
             if (entity != null)
             {
                 writer.WritePropertyName("Type");
-                serializer.Serialize(writer, TypeLogic.TryGetCleanName(mod.GetType()));
+                writer.WriteValue(TypeLogic.TryGetCleanName(mod.GetType()));
 
                 writer.WritePropertyName("id");
-                serializer.Serialize(writer, entity.IdOrNull == null ? null : entity.Id.Object);
+                writer.WriteValue(entity.IdOrNull == null ? null : entity.Id.Object);
                 
                 if (Schema.Current.Table(entity.GetType()).Ticks != null)
                 {
                     writer.WritePropertyName("ticks");
-                    serializer.Serialize(writer, entity.Ticks);
+                    writer.WriteValue(entity.Ticks.ToString());
                 }
             }
             else
             {
                 writer.WritePropertyName("Type");
-                serializer.Serialize(writer, mod.GetType().Name);
+                writer.WriteValue(mod.GetType().Name);
             }
-
+            
             if (!(mod is MixinEntity))
             {
                 writer.WritePropertyName("toStr");
-                serializer.Serialize(writer, mod.ToString());
+                writer.WriteValue(mod.ToString());
             }
+            
+            writer.WritePropertyName("modified");
+            writer.WriteValue(mod.Modified == ModifiedState.Modified || mod.Modified == ModifiedState.SelfModified);
 
             foreach (var kvp in PropertyConverter.GetPropertyConverters(value.GetType()))
             {
@@ -135,27 +154,56 @@ namespace Signum.React.Json
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
+            if (reader.TokenType == JsonToken.Null)
+                return null;
+
             reader.Assert(JsonToken.StartObject);
 
-            ModifiableEntity entity = GetEntity(reader, objectType, existingValue, serializer);
+            ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer);
 
-            var pr = JsonSerializerExtensions.CurrentPropertyRoute ?? PropertyRoute.Root(entity.GetType());
+            var pr = JsonSerializerExtensions.CurrentPropertyRoute ?? PropertyRoute.Root(mod.GetType());
 
-            var dic = PropertyConverter.GetPropertyConverters(entity.GetType());
+            var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
 
             while (reader.TokenType == JsonToken.PropertyName)
             {
-                PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
+                if ((string)reader.Value == "mixins")
+                {
+                    var entity = (Entity)mod;
+                    reader.Read();
+                    reader.Assert(JsonToken.StartObject);
 
-                reader.Read();
-                SetProperty(reader, serializer, entity, pc, pr);
+                    reader.Read();
+                    while (reader.TokenType == JsonToken.PropertyName)
+                    {
+                        var mixin = entity[(string)reader.Value];
 
-                reader.Read();
+                        reader.Read();
+
+                        using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr.Add(mixin.GetType())))
+                            serializer.DeserializeValue(reader, mixin.GetType(), mixin);
+
+                        reader.Read();
+                    }
+
+                    reader.Assert(JsonToken.EndObject);
+                    reader.Read();
+                }
+                else
+                {
+
+                    PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
+
+                    reader.Read();
+                    SetProperty(reader, serializer, mod, pc, pr);
+
+                    reader.Read();
+                }
             }
 
             reader.Assert(JsonToken.EndObject);
 
-            return entity;
+            return mod;
         }
 
         
@@ -167,13 +215,19 @@ namespace Signum.React.Json
             var pi = pc.PropertyValidator.PropertyInfo;
 
             var pr = parentRoute.Add(pi);
-
-            AssertCanWrite(pr);
+           
             using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
             {
                 object newValue = serializer.DeserializeValue(reader, pi.PropertyType, oldValue);
 
-                pc.SetValue(entity, newValue);
+                if (entity.IsGraphModified) //Only apply changes if the client notifies it, to avoid regressions
+                {
+                    if (!object.Equals(newValue, oldValue))
+                    {
+                        AssertCanWrite(pr);
+                        pc.SetValue(entity, newValue);
+                    }
+                }
             }
         }
 
@@ -211,15 +265,21 @@ namespace Signum.React.Json
                         if (identityInfo.Ticks != null)
                             existingEntity.Ticks = identityInfo.Ticks.Value;
 
+                        if (identityInfo.Modified == true)
+                            existingEntity.SetSelfModified();
+
                         return existingEntity;
                     }
                 }
 
-                var entity = Database.Retrieve(type, id);
+                var retrievedEntity = Database.Retrieve(type, id);
                 if (identityInfo.Ticks != null)
-                    entity.Ticks = identityInfo.Ticks.Value;
+                    retrievedEntity.Ticks = identityInfo.Ticks.Value;
 
-                return entity;
+                if (identityInfo.Modified == true)
+                    retrievedEntity.SetSelfModified();
+
+                return retrievedEntity;
             }
             else //Embedded
             {
@@ -246,6 +306,7 @@ namespace Signum.React.Json
                     case "isNew": info.IsNew = reader.ReadAsBoolean(); break;
                     case "Type": info.Type = reader.ReadAsString(); break;
                     case "ticks": info.Ticks = long.Parse(reader.ReadAsString()); break;
+                    case "modified": info.Modified = bool.Parse(reader.ReadAsString()); break;
                     default: return info;
                 }
 
@@ -262,6 +323,7 @@ namespace Signum.React.Json
         {
             public string Id;
             public bool? IsNew;
+            public bool? Modified; 
             public string Type;
             public string ToStr;
             public long? Ticks;
@@ -288,7 +350,7 @@ namespace Signum.React.Json
             var type = TypeLogic.TryGetType(typeStr);
             if (type == null)
             {
-                if (typeStr == objectType.Name)
+                if (typeStr != objectType.Name)
                     throw new JsonSerializationException($"Type '{typeStr}' is not an Entity and is not the expected type ('{objectType.TypeName()}')");
 
                 return objectType;

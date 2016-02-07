@@ -3,16 +3,16 @@ import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../Modals'
 import * as Navigator from '../Navigator'
-import { EntityComponent, EntityComponentProps } from '../Lines'
+import { EntityFrame, EntityComponentProps } from '../Lines'
 import ButtonBar from './ButtonBar'
 
 import { TypeContext, StyleOptions } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack } from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState } from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding } from '../Reflection'
 
-require("!style!css!./NormalPage.css");
+require("!style!css!./Frames.css");
 
-interface NormalPopupProps extends React.Props<NormalPopup>, IModalProps {
+interface PopupFrameProps extends React.Props<PopupFrame>, IModalProps {
     title?: string;
     entityOrPack?: Lite<ModifiableEntity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
@@ -23,9 +23,9 @@ interface NormalPopupProps extends React.Props<NormalPopup>, IModalProps {
     readOnly?: boolean
 }
 
-interface NormalPopupState {
+interface PopupFrameState {
     pack?: EntityPack<ModifiableEntity>;
-    validationErrors?: { [key: string]: string };
+    modelState?: ModelState;
     component?: React.ComponentClass<EntityComponentProps<Entity>>;
     entitySettings?: Navigator.EntitySettingsBase;
     propertyRoute?: PropertyRoute;
@@ -33,9 +33,9 @@ interface NormalPopupState {
     show?: boolean;
 }
 
-export default class NormalPopup extends React.Component<NormalPopupProps, NormalPopupState>  {
+export default class PopupFrame extends React.Component<PopupFrameProps, PopupFrameState>  {
 
-    static defaultProps: NormalPopupProps = {
+    static defaultProps: PopupFrameProps = {
         showOperations: true,
         component: null,
     }
@@ -53,7 +53,7 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
             .then(() => this.loadComponent());
     }
 
-    calculateState(props: NormalPopupState) {
+    calculateState(props: PopupFrameState) {
 
         const typeName = (this.props.entityOrPack as Lite<Entity>).EntityType ||
             (this.props.entityOrPack as ModifiableEntity).Type ||
@@ -76,7 +76,11 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
         };
     }
 
-    loadEntity(props: NormalPopupProps): Promise<void> {
+    clone(obj: any) {
+        return JSON.parse(JSON.stringify(obj));
+    }
+
+    loadEntity(props: PopupFrameProps): Promise<void> {
 
         if ((this.props.entityOrPack as EntityPack<ModifiableEntity>).canExecute) {
             this.setPack(this.props.entityOrPack as EntityPack<ModifiableEntity>);
@@ -89,12 +93,15 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
 
         if (entity != null && (!getTypeInfo(entity.Type) || !this.props.showOperations)) {
 
-            this.setPack({ entity, canExecute: {} });
+            this.setPack({ entity: this.clone(entity), canExecute: {} });
             return Promise.resolve(null);
 
         } else {
             return Navigator.API.fetchEntityPack(entity ? toLite(entity) : this.props.entityOrPack as Lite<Entity>)
-                .then(pack => this.setPack({ entity: entity || pack.entity, canExecute: pack.canExecute }));
+                .then(pack => this.setPack({
+                    entity: entity ? this.clone(entity) : pack.entity,
+                    canExecute: pack.canExecute
+                }));
         }
     }
 
@@ -141,9 +148,11 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
             readOnly: this.props.readOnly != null ? this.props.readOnly : this.state.entitySettings.onIsReadonly()
         };
 
-        var component: EntityComponent<Entity> = this.state.component && React.createElement(this.state.component, {
-            ctx: new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity))
-        }) as any;
+        var frame: EntityFrame<Entity> = {
+            onReload: pack => this.setPack(pack),
+            onClose: () => this.props.onExited(null),
+            setError: modelState => this.setState({ modelState }),
+        };
 
         return (
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
@@ -158,9 +167,12 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
                 {this.state.pack &&
                     <Modal.Body>
                         {Navigator.renderWidgets({ entity: pack.entity }) }
-                        <ButtonBar component={component} pack={this.state.pack} showOperations={this.props.showOperations} />
+                        <ButtonBar frame={frame} pack={this.state.pack} showOperations={this.props.showOperations} />
                         <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
-                        { component }
+                        { this.state.component && React.createElement(this.state.component, {
+                            ctx: new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity)),
+                            frame: frame
+                        }) }
                         </div>
                     </Modal.Body>
                 }
@@ -207,7 +219,7 @@ export default class NormalPopup extends React.Component<NormalPopupProps, Norma
 
     static open(options: Navigator.ViewOptions): Promise<Entity> {
 
-        return openModal<Entity>(<NormalPopup
+        return openModal<Entity>(<PopupFrame
             entityOrPack={options.entity}
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}

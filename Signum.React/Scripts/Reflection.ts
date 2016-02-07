@@ -1,6 +1,7 @@
 ﻿/// <reference path="globals.ts" />
 
 import { Dic } from './Globals';
+import { ModifiableEntity, Entity, Lite, MListElement } from './Signum.Entities';
 import {ajaxPost, ajaxGet} from './Services';
 
 
@@ -262,7 +263,12 @@ export class Binding<T> implements IBinding<T> {
         return this.parentValue[this.memberName];
     }
     setValue(val: T) {
-        return this.parentValue[this.memberName] = val;
+        var oldVal = this.parentValue[this.memberName];
+        this.parentValue[this.memberName] = val;        
+
+        if (oldVal != val && (this.parentValue as ModifiableEntity).Type) {
+            (this.parentValue as ModifiableEntity).modified = true;
+        }   
     }
 }
 
@@ -631,4 +637,73 @@ export enum PropertyRouteType {
     Mixin = "Mixin" as any,
     LiteEntity = "LiteEnity" as any,
     MListItem = "MListItem" as any,
+}
+
+
+export class GraphExplorer {
+
+    //cycle detection
+    private modified = [];
+    private notModified = [];
+
+    propagateModified(...args: any[]) {
+        args.forEach(a => this.isModified(a));
+    }
+
+    isModified(obj: any): boolean {
+
+        if (obj == null)
+            return false;
+
+        var t = typeof obj;
+        if (t != "object")
+            return false;
+
+        if (this.modified.contains(obj))
+            return true;
+
+        if (this.notModified.contains(obj))
+            return false;
+
+        var result = this.isModifiableObject(obj);
+
+        (result ? this.modified : this.notModified).push(obj);
+
+        return result;
+    }
+
+    private static specialProperties = ["Type", "id", "isNew", "ticks", "toStr", "modified"];
+
+    private isModifiableObject(obj: Object) {
+
+        if (obj instanceof Date)
+            return false;
+
+        if (obj instanceof Array)
+            return obj.some(o => this.isModified(o));
+
+        var mle = obj as MListElement<any>;
+        if (mle.rowId)
+            return mle.rowId == null || this.isModified(mle.rowId);
+
+        var lite = obj as Lite<Entity>
+        if (lite.EntityType)
+            return lite.entity != null && this.isModified(lite.entity);
+
+        var mod = obj as ModifiableEntity;
+        if (mod.Type == null)
+            return false;
+
+        if ((mod as Entity).isNew)
+            mod.modified = true;
+
+        for (var p in obj) {
+            if (obj.hasOwnProperty(p) && !GraphExplorer.specialProperties.contains(p)) {
+                if (this.isModified(p))
+                    mod.modified = true;
+            }
+        }
+
+        return mod.modified;
+    }
 }

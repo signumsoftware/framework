@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
-import { EntityComponent } from '../Lines'
+import { EntityFrame } from '../Lines'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions } from '../TypeContext'
@@ -9,7 +9,7 @@ import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } f
 
 export interface ButtonsContext {
     pack: EntityPack<Entity>;
-    component: EntityComponent<ModifiableEntity>;
+    frame: EntityFrame<ModifiableEntity>;
     showOperations: boolean;
 }
 

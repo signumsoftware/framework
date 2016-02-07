@@ -29,11 +29,16 @@ export { EntityListBase, EntityListBaseProps };
 import { EntityList, EntityListProps } from  './Lines/EntityList'
 export { EntityList, EntityListProps };
 
-export interface EntityComponentProps<T extends ModifiableEntity> {
-    ctx: TypeContext<T>;
+export interface EntityFrame<T extends ModifiableEntity> {
     onReload: (pack: EntityPack<T>) => void;
     setError: (modelState: ModelState) => void;
     onClose: () => void;
+}
+
+
+export interface EntityComponentProps<T extends ModifiableEntity> {
+    ctx: TypeContext<T>;
+    frame: EntityFrame<T>;
 }
 
 export class EntityComponent<T extends ModifiableEntity> extends React.Component<EntityComponentProps<T>, {}>{
@@ -48,18 +53,6 @@ export class EntityComponent<T extends ModifiableEntity> extends React.Component
 
     niceName(property: (val: T) => any) {
         return this.props.ctx.niceName(property);
-    }
-
-    onReload(pack: EntityPack<T>) {
-        this.props.onReload(pack);
-    }
-
-    setError(modelState: ModelState) {
-        this.props.setError(modelState);
-    }
-
-    onClose() {
-        this.props.onClose();
     }
 }
 

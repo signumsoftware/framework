@@ -1,6 +1,7 @@
 ﻿/// <reference path="../typings/whatwg-fetch/whatwg-fetch.d.ts" />
 import { ModelState } from './Signum.Entities'
 
+
 export interface AjaxOptions {
     avoidBaseUrl?: boolean;
     url: string;
@@ -83,15 +84,15 @@ export function wrapRequest<T>(options: AjaxOptions, makeCall: () => Promise<Res
 }
 
 
-export const notifyPendingRequests: (pendingRequests: number) => void = () => { };
+export var notifyPendingRequests: (pendingRequests: number) => void = () => { };
 let pendingRequests: number = 0;
 function onPendingRequest(makeCall: ()=>Promise<Response>) {
     
-    notifyPendingRequests(pendingRequests++);
+    notifyPendingRequests(++pendingRequests);
 
     return makeCall().then(
-        resp=> { notifyPendingRequests(pendingRequests--); return resp; },
-        error => { notifyPendingRequests(pendingRequests--); throw error; });
+        resp=> { notifyPendingRequests(--pendingRequests); return resp; },
+        error => { notifyPendingRequests(--pendingRequests); throw error; });
 }
 
 

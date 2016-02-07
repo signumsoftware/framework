@@ -1,12 +1,14 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
-import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite,
+import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString } from '../Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType  } from '../Reflection';
+import {classes} from '../Globals';
 import * as Navigator from '../Navigator';
-import { ButtonsContext } from '../NormalPage/ButtonBar';
-import { EntityComponent }  from '../Lines';
+import { ButtonsContext } from '../Frames/ButtonBar';
+import Notify from '../Frames/Notify';
+import { EntityFrame }  from '../Lines';
 import { ajaxPost, ValidationError }  from '../Services';
 import { operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup, CreateGroup, API } from '../Operations'
 
@@ -24,7 +26,7 @@ export function getButtonBarElements(ctx: ButtonsContext): Array<React.ReactElem
 
             const eoc: EntityOperationContext<Entity> = {
                 entity: ctx.pack.entity,
-                component: ctx.component as any as EntityComponent<Entity>,
+                frame: ctx.frame,
                 canExecute: ctx.pack.canExecute[oi.key],
                 operationInfo: oi,
                 settings: eos
@@ -95,10 +97,12 @@ function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityO
             eoc.operationInfo.niceName;
 
     var bsStyle = eoc.settings && eoc.settings.style || autoStyleFunction(eoc.operationInfo);
-    
+
+    var disabled = !!eoc.canExecute;
+
     var btn = !asMenuItem ?
-        <Button bsStyle={bsStyle} disabled={!!eoc.canExecute} onClick={() => onClick(eoc)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button> :
-        <MenuItem className={"btn-" + bsStyle} disabled={!!eoc.canExecute} onClick={() => onClick(eoc)} data-operation={eoc.operationInfo.key} key={key}>{text}</MenuItem>;
+        <Button bsStyle={bsStyle} className={disabled ? "disabled" : null} onClick={disabled? null : () => onClick(eoc) } data-operation={eoc.operationInfo.key} key={key}>{text}</Button> :
+        <MenuItem className={classes("btn-" + bsStyle, disabled ? "disabled" : null) } onClick={disabled ? null : () => onClick(eoc) } data-operation={eoc.operationInfo.key} key={key}>{text}</MenuItem>;
 
     if (!eoc.canExecute)
         return btn;
@@ -130,6 +134,10 @@ function onClick(eoc: EntityOperationContext<Entity>): void{
     throw new Error("Unexpected OperationType");
 }
 
+export function notifySuccess() {
+    Notify.singletone.notifyTimeout({ text: JavascriptMessage.executed.niceToString(), type: "success" });
+    return true;
+}
 
 export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>): Promise<boolean> {
 
@@ -137,8 +145,8 @@ export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>):
         return;
 
     return API.constructFromEntity(eoc.entity, eoc.operationInfo.key, null)
-        .then(pack => Navigator.view(pack).then(a => true))
-        .catch(e => catchValidationError(e, eoc.component));
+        .then(pack => Navigator.view(pack).then(a => notifySuccess()))
+        .catch(e => catchValidationError(e, eoc.frame));
 }
 
 export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>): Promise<boolean> {
@@ -147,13 +155,13 @@ export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>): P
         return;
 
     return API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, null)
-        .then(pack => Navigator.view(pack).then(a => true))
-        .catch(e => catchValidationError(e, eoc.component));
+        .then(pack => Navigator.view(pack).then(a => notifySuccess()))
+        .catch(e => catchValidationError(e, eoc.frame));
 }
 
-function catchValidationError(error: any, component: EntityComponent<Entity>) {
+function catchValidationError(error: any, frame: EntityFrame<Entity>) {
     if (error instanceof ValidationError) {
-        component.setError((error as ValidationError).modelState);
+        frame.setError((error as ValidationError).modelState);
         return false;
     }
 
@@ -167,8 +175,8 @@ export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>): Promi
         return;
 
     return API.executeEntity(eoc.entity, eoc.operationInfo.key, null)
-        .then(pack => { eoc.component.onReload(pack); return true; })
-        .catch(e => catchValidationError(e, eoc.component));
+        .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
+        .catch(e => catchValidationError(e, eoc.frame));
 }
 
 export function defaultExecuteLite(eoc: EntityOperationContext<Entity>): Promise<boolean> {
@@ -177,8 +185,8 @@ export function defaultExecuteLite(eoc: EntityOperationContext<Entity>): Promise
         return;
 
     return API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, null)
-        .then(pack => { eoc.component.onReload(pack); return true; })
-        .catch(e => catchValidationError(e, eoc.component));
+        .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
+        .catch(e => catchValidationError(e, eoc.frame));
 }
 
 export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>): Promise<boolean> {
@@ -187,8 +195,8 @@ export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>): Promis
         return;
 
     return API.deleteEntity(eoc.entity, eoc.operationInfo.key, null)
-        .then(() => { eoc.component.onClose(); return true; })
-        .catch(e => catchValidationError(e, eoc.component));
+        .then(() => { eoc.frame.onClose(); return notifySuccess(); })
+        .catch(e => catchValidationError(e, eoc.frame));
 }
 
 export function defaultDeleteLite(eoc: EntityOperationContext<Entity>): Promise<boolean> {
@@ -197,8 +205,8 @@ export function defaultDeleteLite(eoc: EntityOperationContext<Entity>): Promise<
         return;
 
     return API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, null)
-        .then(() => { eoc.component.onClose(); return true; })
-        .catch(e => catchValidationError(e, eoc.component));
+        .then(() => { eoc.frame.onClose(); return notifySuccess(); })
+        .catch(e => catchValidationError(e, eoc.frame));
 }
 
 

@@ -151,10 +151,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\Lines\Lines.css" />
-    <Content Include="Scripts\NormalPage\NormalPage.css" />
-    <Content Include="Scripts\Notify.css" />
+    <Content Include="Scripts\Frames\Frames.css" />
+    <Content Include="Scripts\Frames\Notify.css" />
     <Content Include="Scripts\SearchControl\Search.css" />
-    <Content Include="Scripts\NormalPage\Widgets.css" />
+    <Content Include="Scripts\Frames\Widgets.css" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -186,6 +186,7 @@
     <Content Include="tsconfig.json" />
     <TypeScriptCompile Include="Scripts\ConfigureReactWidgets.ts" />
     <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\Notify.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
@@ -198,11 +199,11 @@
     <TypeScriptCompile Include="Scripts\Lines\LineBase.tsx" />
     <TypeScriptCompile Include="Scripts\Modals.tsx" />
     <TypeScriptCompile Include="Scripts\Constructor.tsx" />
-    <TypeScriptCompile Include="Scripts\NormalPage\ButtonBar.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\ButtonBar.tsx" />
     <TypeScriptCompile Include="Scripts\Operations.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.tsx" />
-    <TypeScriptCompile Include="Scripts\NormalPage\NormalPage.tsx" />
-    <TypeScriptCompile Include="Scripts\NormalPage\NormalPopup.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\PageFrame.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\PopupFrame.tsx" />
     <TypeScriptCompile Include="Scripts\Operations\EntityOperations.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ColumnEditor.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextualItems.tsx" />

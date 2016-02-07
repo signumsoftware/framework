@@ -8,7 +8,7 @@ import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeIn
 import { TypeContext } from './TypeContext';
 import { EntityComponent, EntityComponentProps} from './Lines';
 import * as Finder from './Finder';
-import NormalPopup from './NormalPage/NormalPopup';
+import PopupFrame from './Frames/PopupFrame';
 
 
 export let NotFound: __React.ComponentClass<any>;
@@ -19,8 +19,8 @@ export let currentHistory: HistoryModule.History & HistoryModule.HistoryQueries;
 
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./NormalPage/NormalPage"], (Comp) => cb(null, Comp.default)) } ></Route>);
-    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./NormalPage/NormalPage"], (Comp) => cb(null, Comp.default))} ></Route>);
+    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default)) } ></Route>);
+    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default))} ></Route>);
 }
 
 export function getTypeName(pseudoType: IType | TypeInfo | string) {
@@ -158,7 +158,7 @@ export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Enti
             entityOrOptions as ViewOptions;
 
     return new Promise<ModifiableEntity>((resolve) => {
-        require(["./NormalPage/NormalPopup"], function (NP: { default: typeof NormalPopup }) {
+        require(["./Frames/PopupFrame"], function (NP: { default: typeof PopupFrame }) {
             NP.default.open(options).then(resolve);
         });
     });

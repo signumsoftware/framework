@@ -2,23 +2,24 @@
 import * as React from 'react'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
+import * as Finder from '../Finder'
 import ButtonBar from './ButtonBar'
-import { EntityComponent, EntityComponentProps } from '../Lines'
+import { EntityComponent, EntityComponentProps, EntityFrame } from '../Lines'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, JavascriptMessage } from '../Signum.Entities'
 import { TypeContext, StyleOptions } from '../TypeContext'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos,  } from '../Reflection'
 
-require("!style!css!./NormalPage.css");
+require("!style!css!./Frames.css");
 
-interface NormalPageProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string }> {
+interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string }> {
     showOperations?: boolean;
     component?: React.ComponentClass<EntityComponentProps<Entity>>;
     title?: string;
 }
 
 
-interface NormalPageState {
+interface PageFrameState {
     pack?: EntityPack<Entity>;
     modelState?: ModelState;
     component?: React.ComponentClass<EntityComponentProps<Entity>>;
@@ -26,9 +27,9 @@ interface NormalPageState {
     typeInfo?: TypeInfo;
 }
 
-export default class NormalPage extends React.Component<NormalPageProps, NormalPageState> {
+export default class PageFrame extends React.Component<PageFrameProps, PageFrameState> {
 
-    static defaultProps: NormalPageProps = {
+    static defaultProps: PageFrameProps = {
         showOperations: true,
         component: null,
     }
@@ -46,7 +47,7 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
             .then(() => this.loadComponent());
     }
 
-    calculateState(props: NormalPageProps) {
+    calculateState(props: PageFrameProps) {
         const typeInfo = getTypeInfo(props.routeParams.type);
 
         const entitySettings = Navigator.getSettings(typeInfo.name);
@@ -54,7 +55,7 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
         return { entitySettings: entitySettings, typeInfo: typeInfo, entity: null };
     }
 
-    loadEntity(props: NormalPageProps): Promise<void> {
+    loadEntity(props: PageFrameProps): Promise<void> {
 
         const ti = this.state.typeInfo;
 
@@ -87,6 +88,13 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
         );
     }
 
+    onClose() {
+        if (Finder.isFindable(this.state.pack.entity.Type))
+            Navigator.currentHistory.push(Finder.findOptionsPath(this.state.pack.entity.Type));
+        else
+            Navigator.currentHistory.push("/");
+    }
+
     renderEntityControl() {
         
         if (!this.state.pack) {
@@ -105,17 +113,21 @@ export default class NormalPage extends React.Component<NormalPageProps, NormalP
 
         const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity));
 
-        var component: EntityComponent<Entity> = this.state.component && React.createElement(this.state.component, { ctx: ctx }) as any;
+        var frame: EntityFrame<Entity> = {
+            onReload: pack => this.setState({ pack }),
+            onClose: () => this.onClose(),
+            setError: ms => this.setState({ modelState: ms }),
+        };
 
         return (
             <div className="normal-control">
                 {this.renderTitle() }
                 {Navigator.renderWidgets({ entity: entity }) }
-                <ButtonBar component={component} pack={this.state.pack} showOperations={this.props.showOperations} />
+                <ButtonBar frame={frame} pack={this.state.pack} showOperations={this.props.showOperations} />
                 <ValidationErrors modelState={this.state.modelState}/>
                 {Navigator.renderEmbeddedWidgets({ entity: entity }, Navigator.EmbeddedWidgetPosition.Top) }
                 <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
-                    {component}
+                    {this.state.component && React.createElement<EntityComponentProps<Entity>>(this.state.component, { ctx: ctx, frame: frame })}
                 </div>
                 {Navigator.renderEmbeddedWidgets({ entity: entity }, Navigator.EmbeddedWidgetPosition.Bottom) }
             </div>

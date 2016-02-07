@@ -75,11 +75,12 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEn
 }
 
 export function findOptionsPath(findOptions: FindOptions): string;
-export function findOptionsPath(queryName: any): string
+export function findOptionsPath(queryName: any): string;
+export function findOptionsPath(queryNameOrFindOptions: any): string
 {
-    const fo = queryName as FindOptions;
+    const fo = queryNameOrFindOptions as FindOptions;
     if (!fo.queryName)
-        return currentHistory.createPath("/Find/" + getQueryKey(queryName)); 
+        return currentHistory.createPath("/Find/" + getQueryKey(queryNameOrFindOptions)); 
     
     const base = findOptionsPath(fo.queryName);
 
