@@ -269,10 +269,14 @@ namespace Signum.Utilities
 
     public static class ConsoleSwitchExtensions
     {
-        public static T ChooseConsole<T>(this List<T> collection, Func<T, string> getString = null) where T : class
+        public static T ChooseConsole<T>(this IEnumerable<T> collection, Func<T, string> getString = null, string message = null) where T : class
         {
+
+            if (message != null)
+                Console.WriteLine(message);
+
             var cs = new ConsoleSwitch<int, T>();
-            cs.Load(collection, getString);
+            cs.Load(collection.ToList(), getString);
             return cs.Choose();
         }
 
