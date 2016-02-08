@@ -505,6 +505,20 @@ export function classes(...classNames: string[]) {
 }
 
 
+export function combineFunction<F extends Function>(func1: F, func2: F) : F {
+    if (!func1)
+        return func2;
+
+    if (!func2)
+        return func1;
+
+    return function combined(...args) {
+        func1.apply(this, args);
+        func2.apply(this, args);
+    } as any;
+}
+
+
 
 export function areEqual<T>(a: T, b: T, field: (value: T) => any) {
     if (a == null)

@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { MenuItem, Overlay } from 'react-bootstrap'
-import { Dic, classes } from '../Globals'
+import { Dic, classes, combineFunction } from '../Globals'
 import { QueryDescription, } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import * as RootCloseWrapper from 'react-overlays/lib/RootCloseWrapper'
@@ -59,9 +59,12 @@ export class ContextMenu extends React.Component<ContextMenuProps, {}> {
 
         const style: React.CSSProperties = { left: position.pageX + "px", top: position.pageY + "px", zIndex: 9999, display: "block", position: "absolute" };
 
+        var childrens = React.Children.map(this.props.children,
+            (c: React.ReactElement<any>) => React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, this.props.onHide) })); 
+
         const ul = (
             <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
-                {this.props.children}
+                {childrens}
             </ul>
         );
 
