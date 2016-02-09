@@ -8,7 +8,7 @@ using System.Web;
 
 namespace Signum.React.Facades
 {
-    public static class EntitesServer
+    public static class EntityServer
     {
         public static EntityPackTS GetEntityPack(Entity entity)
         {

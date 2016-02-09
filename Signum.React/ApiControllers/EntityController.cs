@@ -36,7 +36,7 @@ namespace Signum.React.ApiControllers
 
             var entity = Database.Retrieve(entityType, primaryKey);
 
-            return EntitesServer.GetEntityPack(entity);
+            return EntityServer.GetEntityPack(entity);
         }
     }
 }
