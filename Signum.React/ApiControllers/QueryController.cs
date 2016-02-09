@@ -91,40 +91,12 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/query/search"), HttpPost]
-        public ResultTableTS Search(QueryRequestTS request)
+        public ResultTable Search(QueryRequestTS request)
         {
             var resultTable = DynamicQueryManager.Current.ExecuteQuery(request.ToQueryRequest());
 
-            return new ResultTableTS(resultTable);
+            return resultTable;
         }
-    }
-
-    public class ResultTableTS
-    {
-        public string entityColumn;
-        public List<string> columns;
-        public PaginationTS pagination;
-        public int? totalElements;
-        public List<ResultRowTS> rows;
-
-        public ResultTableTS(ResultTable resultTable)
-        {
-            this.pagination = new PaginationTS(resultTable.Pagination);
-            this.entityColumn = "Entity";
-            this.columns = resultTable.Columns.Select(c => c.Column.Token.FullKey()).ToList();
-            this.rows = resultTable.Rows.Select(r => new ResultRowTS
-            {
-                entity = (Lite<IEntity>)r[resultTable.entityColumn],
-                columns = resultTable.Columns.Select(c=>r[c]).ToList(),
-            }).ToList();
-            this.totalElements = resultTable.TotalElements;
-        }
-    }
-
-    public class ResultRowTS
-    {
-        public Lite<IEntity> entity;
-        public List<object> columns;
     }
 
     public class QueryRequestTS
