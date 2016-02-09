@@ -145,6 +145,7 @@
     <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="Json\EntityJsonConverter.cs" />
     <Compile Include="Json\JsonSerializerExtensions.cs" />
+    <Compile Include="Json\ResultTableConverter.cs" />
     <Compile Include="Json\MListJsonConverter.cs" />
     <Compile Include="Json\LiteJsonConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -190,6 +191,7 @@
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityLineDetail.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityLine.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />

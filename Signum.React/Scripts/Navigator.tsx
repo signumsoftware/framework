@@ -187,8 +187,6 @@ export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | L
     });
 } 
 
-
-
 export interface WidgetsContext {
     entity?: Entity;
     lite?: Lite<Entity>;

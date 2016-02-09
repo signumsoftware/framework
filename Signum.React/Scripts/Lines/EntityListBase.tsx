@@ -22,9 +22,9 @@ export interface EntityListBaseProps extends EntityBaseProps {
 }
 
 
-export abstract class EntityListBase<T extends EntityListBaseProps> extends EntityBase<T>
+export abstract class EntityListBase<T extends EntityListBaseProps, S extends EntityListBaseProps> extends EntityBase<T, S>
 {
-    calculateDefaultState(props: T) {
+    calculateDefaultState(props: S) {
 
         if (props.onFind)
             throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);

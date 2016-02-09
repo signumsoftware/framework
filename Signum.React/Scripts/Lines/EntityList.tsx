@@ -12,12 +12,16 @@ import { EntityListBase, EntityListBaseProps} from './EntityListBase'
 
 
 export interface EntityListProps extends EntityListBaseProps {
+    size?: number;
+}
+
+export interface EntityListState extends EntityListBaseProps {
     selectedIndex?: number;
     size?: number;
 }
 
 
-export abstract class EntityList extends EntityListBase<EntityListProps>
+export abstract class EntityList extends EntityListBase<EntityListProps, EntityListState>
 {
     static defaultProps: EntityListProps = {
         size: 5

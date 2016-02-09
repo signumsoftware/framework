@@ -30,7 +30,7 @@ export enum ValueLineType {
 }
 
 
-export class ValueLine extends LineBase<ValueLineProps> {
+export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     calculateDefaultState(state: ValueLineProps) {
         state.valueLineType = this.calculateValueLineType(state.type);

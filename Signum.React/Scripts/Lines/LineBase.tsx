@@ -73,7 +73,7 @@ export interface LineBaseProps {
     onChange?: (val: any) => void;
 }
 
-export abstract class LineBase<P extends LineBaseProps> extends React.Component<P, P> {
+export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps> extends React.Component<P, S> {
 
     constructor(props: P) {
         super(props);
@@ -100,24 +100,23 @@ export abstract class LineBase<P extends LineBaseProps> extends React.Component<
         return this.renderInternal();
     }
 
-    calculateState(props: P): P {
-        const state = { ctx: props.ctx, type: (props.type || props.ctx.propertyRoute.member.type) } as LineBaseProps as P;
+    calculateState(props: P): S {
+        const state = { ctx: props.ctx, type: (props.type || props.ctx.propertyRoute.member.type) } as LineBaseProps as S;
         this.calculateDefaultState(state);
         runTasks(this, state);
         Dic.extend(state, props);
         return state;
     }
 
-    calculateDefaultState(state: P) {
-
+    calculateDefaultState(state: S) {
     }
 
     abstract renderInternal(): JSX.Element;
 }
 
 
-export const Tasks: ((lineBase: LineBase<LineBaseProps>, state: LineBaseProps) => void)[] = [];
+export const Tasks: ((lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) => void)[] = [];
 
-export function runTasks(lineBase: LineBase<LineBaseProps>, state: LineBaseProps) {
+export function runTasks(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
     Tasks.forEach(t=> t(lineBase, state));
 }

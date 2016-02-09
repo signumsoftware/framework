@@ -19,7 +19,7 @@ export interface EntityComboProps extends EntityBaseProps {
     data?: Lite<Entity>[];
 }
 
-export class EntityCombo extends EntityBase<EntityComboProps> {
+export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> {
 
 
     calculateDefaultState(state: EntityComboProps) {

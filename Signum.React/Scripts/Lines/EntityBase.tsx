@@ -31,9 +31,21 @@ export interface EntityBaseProps extends LineBaseProps {
 }
 
 
-export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
+export interface EntityBaseState extends LineBaseProps {
+    view?: boolean;
+    viewOnCreate?: boolean;
+    navigate?: boolean;
+    create?: boolean;
+    find?: boolean;
+    remove?: boolean;
+
+    component?: React.ComponentClass<EntityComponentProps<any>>;
+}
+
+
+export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseState> extends LineBase<T, S>
 {
-    calculateDefaultState(state: EntityBaseProps) {
+    calculateDefaultState(state: S) {
 
         const type = state.type;
 
@@ -99,8 +111,8 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
         const ctx = this.state.ctx;
         const entity = ctx.value;
 
-        const onView = this.state.onView ?
-            this.state.onView(entity, ctx.propertyRoute) :
+        const onView = this.props.onView ?
+            this.props.onView(entity, ctx.propertyRoute) :
             this.defaultView(entity, ctx.propertyRoute);
 
         onView.then(e => {
@@ -154,8 +166,8 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
             if (!this.state.viewOnCreate)
                 return Promise.resolve(e);
 
-            return this.state.onView ?
-                this.state.onView(e, this.state.ctx.propertyRoute) :
+            return this.props.onView ?
+                this.props.onView(e, this.state.ctx.propertyRoute) :
                 this.defaultView(e, this.state.ctx.propertyRoute);
         }).then(e => {
 
@@ -185,7 +197,7 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
             .then(qn => qn == null ? null : Finder.find({ queryName: qn } as FindOptions));
     }
     handleFindClick = (event: React.SyntheticEvent) => {
-        const result = this.state.onFind ? this.state.onFind() : this.defaultFind();
+        const result = this.props.onFind ? this.props.onFind() : this.defaultFind();
 
         result.then(entity => {
             if (!entity)
@@ -208,7 +220,7 @@ export abstract class EntityBase<T extends EntityBaseProps> extends LineBase<T>
     }
 
     handleRemoveClick = (event: React.SyntheticEvent) => {
-        (this.state.onRemove ? this.state.onRemove(this.props.ctx.value) : Promise.resolve(true))
+        (this.props.onRemove ? this.props.onRemove(this.props.ctx.value) : Promise.resolve(true))
             .then(result => {
                 if (result == false)
                     return;

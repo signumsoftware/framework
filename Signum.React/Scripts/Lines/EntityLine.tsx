@@ -22,21 +22,30 @@ export interface EntityLineProps extends EntityBaseProps {
     autoCompleteRenderItem?: (lite: Lite<IEntity>, query: string) => React.ReactNode;
 }
 
+export interface EntityLineState extends EntityBaseProps {
+
+    ctx: TypeContext<ModifiableEntity | Lite<IEntity>>;
+
+    autoComplete?: boolean;
+}
+
 const a = 2;
 
-export class EntityLine extends EntityBase<EntityLineProps> {
+export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     calculateDefaultState(state: EntityLineProps) {
         super.calculateDefaultState(state);
-        state.autoComplete = !state.type.isEmbedded && state.type.name != IsByAll;
-        state.autoCompleteGetItems = (query) => Finder.API.findLiteLike({
-            types: state.type.name,
-            subString: query,
-            count: 5
-        });
-
-        state.autoCompleteRenderItem = (lite, query) => Typeahead.highlightedText(lite.toStr, query);
+        state.autoComplete = state.autoComplete != null ? state.autoComplete : !state.type.isEmbedded && state.type.name != IsByAll;
     }
+    
+    defaultAutoCompleteGetItems = (query: string) => Finder.API.findLiteLike({
+        types: this.state.type.name,
+        subString: query,
+        count: 5
+    });
+
+    defaultAutCompleteRenderItem = (lite, query) => Typeahead.highlightedText(lite.toStr, query);
+    
 
     handleOnSelect = (lite: Lite<IEntity>, event: React.SyntheticEvent) => {
         this.convert(lite)
@@ -62,34 +71,31 @@ export class EntityLine extends EntityBase<EntityLineProps> {
         if (!buttons.props.children.some(a => a))
             buttons = null;
 
-        return <FormGroup ctx={s.ctx} title={s.labelText}>
-            <div className="SF-entity-line">
-                <div className={buttons ? "input-group" : null}>
-                    { hasValue ? this.renderLink() : this.renderAutoComplete() }
-                    {buttons}
+        return (
+            <FormGroup ctx={s.ctx} title={s.labelText}>
+                <div className="SF-entity-line">
+                    <div className={buttons ? "input-group" : null}>
+                        { hasValue ? this.renderLink() : this.renderAutoComplete() }
+                        {buttons}
+                    </div>
                 </div>
-            </div>
-        </FormGroup>;
+            </FormGroup>
+        );
     }
 
     renderAutoComplete() {
+        
+        if (!this.state.autoComplete || this.state.ctx.readOnly)
+            return <FormControlStatic ctx={this.state.ctx}></FormControlStatic>;
 
-        const s = this.state;
-
-        if (!s.autoComplete || s.ctx.readOnly)
-            return <FormControlStatic ctx={s.ctx}></FormControlStatic>;
-
-        return <Typeahead
-            inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
-            getItems={s.autoCompleteGetItems}
-            renderItem={s.autoCompleteRenderItem}
-            onSelect={this.handleOnSelect}/>;
+        return (
+            <Typeahead
+                inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                getItems={this.props.autoCompleteGetItems || this.defaultAutoCompleteGetItems}
+                renderItem={this.props.autoCompleteRenderItem || this.defaultAutCompleteRenderItem}
+                onSelect={this.handleOnSelect}/>
+        );
     }
-
-    renderItem = (item: Lite<IEntity>, query: string) => {
-        return
-    }
-
 
     renderLink() {
 

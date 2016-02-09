@@ -57,7 +57,7 @@ export class EntityComponent<T extends ModifiableEntity> extends React.Component
 }
 
 Tasks.push(taskSetNiceName);
-export function taskSetNiceName(lineBase: LineBase<any>, state: LineBaseProps) {
+export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (!state.labelText &&
         state.ctx.propertyRoute &&
         state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
@@ -66,7 +66,7 @@ export function taskSetNiceName(lineBase: LineBase<any>, state: LineBaseProps) {
 }
 
 Tasks.push(taskSetUnit);
-export function taskSetUnit(lineBase: LineBase<any>, state: LineBaseProps) {
+export function taskSetUnit(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (lineBase instanceof ValueLine) {
         const vProps = state as ValueLineProps;
 
@@ -79,7 +79,7 @@ export function taskSetUnit(lineBase: LineBase<any>, state: LineBaseProps) {
 }
 
 Tasks.push(taskSetFormat);
-export function taskSetFormat(lineBase: LineBase<any>, state: LineBaseProps) {
+export function taskSetFormat(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (lineBase instanceof ValueLine) {
         const vProps = state as ValueLineProps;
 
@@ -92,7 +92,7 @@ export function taskSetFormat(lineBase: LineBase<any>, state: LineBaseProps) {
 }
 
 Tasks.push(taskSetReadOnly);
-export function taskSetReadOnly(lineBase: LineBase<any>, state: LineBaseProps) {
+export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (!state.ctx.readOnly &&
         state.ctx.propertyRoute &&
         state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
