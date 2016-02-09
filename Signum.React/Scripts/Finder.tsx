@@ -15,7 +15,7 @@ getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from './Reflection';
 
 import {navigateRoute, isNavigable, currentHistory } from './Navigator';
 import SearchPopup from './SearchControl/SearchPopup';
-import { Link  } from 'react-router';
+import EntityLink from './SearchControl/EntityLink';
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -427,9 +427,8 @@ export const formatRules: FormatRule[] = [
     },
     {
         name: "Lite",
-        isApplicable: col=> col.token.filterType == FilterType.Lite,
-        formatter: col=> new CellFormatter((cell: Lite<IEntity>) => !cell ? null :
-            isNavigable((cell as Lite<any>).EntityType, null) ? <Link to={navigateRoute(cell) }>{cell.toStr}</Link> : cell.toStr)
+        isApplicable: col => col.token.filterType == FilterType.Lite,
+        formatter: col => new CellFormatter((cell: Lite<IEntity>) => !cell ? null : <EntityLink lite={cell}/>)
     },
 
     {
@@ -478,12 +477,11 @@ export const entityFormatRules: EntityFormatRule[] = [
     {
         name: "View",
         isApplicable: row=> true,
-        formatter: row=> !isNavigable(row.entity.EntityType, null, true) ? null :
-            <Link to={navigateRoute(row.entity) } title={row.entity.toStr} data-entity-link={liteKey(row.entity) }>
-                {EntityControlMessage.View.niceToString() }
-                </Link>
+        formatter: row => !isNavigable(row.entity.EntityType, null, true) ? null :
+            <EntityLink lite={row.entity}>{EntityControlMessage.View.niceToString() }</EntityLink>
     },
 ];
+
 
 
 

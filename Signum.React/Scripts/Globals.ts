@@ -576,4 +576,19 @@ export module DomUtils {
 
         return element;
     }
+
+    export function offsetParent(element: HTMLElement): HTMLElement {
+
+        var isRelativeOrAbsolute = (str: string) => str === "relative" || str === "absolute";
+
+        // guard against orphans
+        while (!isRelativeOrAbsolute(window.getComputedStyle(element).position)) {
+            if (element.parentNode == document)
+                return null;
+
+            element = element.parentNode as HTMLElement;
+        }
+
+        return element;
+    }
 }

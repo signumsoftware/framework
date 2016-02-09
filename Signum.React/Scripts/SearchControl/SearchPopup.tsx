@@ -62,7 +62,7 @@ export default class SearchPopup extends React.Component<SearchPopupProps, { sho
                             <button className ="btn btn-default sf-entity-button sf-close-button sf-cancel-button" onClick={this.handleCancelClicked}>{JavascriptMessage.cancel.niceToString() }</button>
                         </div>}
                     <h4>
-                        <span className="sf-entity-title"> {this.props.title}</span>
+                        <span className="sf-entity-title"> {this.props.title}</span>&nbsp;
                         <a className ="sf-popup-fullscreen" href="#">
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a>

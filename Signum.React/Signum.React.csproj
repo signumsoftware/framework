@@ -191,6 +191,7 @@
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityLine.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityListBase.tsx" />
     <TypeScriptCompile Include="Scripts\Finder.tsx" />

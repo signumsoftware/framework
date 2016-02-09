@@ -8,7 +8,7 @@ import ButtonBar from './ButtonBar'
 
 import { TypeContext, StyleOptions } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState } from '../Signum.Entities'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding } from '../Reflection'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer } from '../Reflection'
 
 require("!style!css!./Frames.css");
 
@@ -43,7 +43,11 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
     constructor(props) {
         super(props);
         this.state = this.calculateState(props);
-        this.loadEntity(props)
+
+    }
+
+    componentWillMount() {
+        this.loadEntity(this.props)
             .then(() => this.loadComponent());
     }
 
@@ -123,17 +127,37 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
 
     okClicked: boolean;
     handleOkClicked = (val: any) => {
+        if (this.hasChanges() && this.props.saveProtected) {
+            alert(JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString());
+            return;
+        }
+
         this.okClicked = true;
         this.setState({ show: false });
     }
 
     handleCancelClicked = () => {
-        if (JSON.stringify(this.state.pack.entity) != this.state.savedEntity) {
+        
+        if (this.state.pack.entity.modified) {
             if (!confirm(NormalWindowMessage.LoseChanges.niceToString()))
                 return;
         }
 
         this.setState({ show: false });
+    }
+
+    hasChanges() {
+
+        var entity = this.state.pack.entity;
+
+        new GraphExplorer().propagateModified(entity);
+
+        var hasChanges = JSON.stringify(entity) != this.state.savedEntity;
+        
+        if (hasChanges != entity.modified)
+            throw new Error(`The entity.modified=${this.state.pack.entity.modified} but ${hasChanges ? "has" : "has no"} changes`);
+
+        return entity.modified;
     }
 
     handleOnExited = () => {
@@ -217,7 +241,7 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
         );
     }
 
-    static open(options: Navigator.ViewOptions): Promise<Entity> {
+    static openView(options: Navigator.ViewOptions): Promise<Entity> {
 
         return openModal<Entity>(<PopupFrame
             entityOrPack={options.entity}
@@ -225,7 +249,20 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
             propertyRoute={options.propertyRoute}
             component={options.component}
             showOperations={options.showOperations}
-            saveProtected={options.saveProtected}/>);
+            saveProtected={options.saveProtected}
+            isNavigate={false}/>);
+    }
+
+    static openNavigate(options: Navigator.NavigateOptions): Promise<void> {
+
+        return openModal<void>(<PopupFrame
+            entityOrPack={options.entity}
+            readOnly={options.readOnly}
+            propertyRoute={null}
+            component={options.component}
+            showOperations={null}
+            saveProtected={null}
+            isNavigate={true}/>);
     }
 }
 

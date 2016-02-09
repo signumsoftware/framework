@@ -159,7 +159,30 @@ export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Enti
 
     return new Promise<ModifiableEntity>((resolve) => {
         require(["./Frames/PopupFrame"], function (NP: { default: typeof PopupFrame }) {
-            NP.default.open(options).then(resolve);
+            NP.default.openView(options).then(resolve);
+        });
+    });
+}
+
+
+export interface NavigateOptions {
+    entity: Lite<IEntity> | ModifiableEntity | EntityPack<ModifiableEntity>;
+    readOnly?: boolean;
+    component?: React.ComponentClass<EntityComponentProps<any>>;
+}
+
+export function navigate(options: NavigateOptions): Promise<ModifiableEntity>;
+export function navigate<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<T>;
+export function navigate<T extends IEntity>(entity: Lite<T>): Promise<T>
+export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity> {
+    const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } as NavigateOptions :
+        (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } as NavigateOptions :
+            (entityOrOptions as EntityPack<ModifiableEntity>).entity ? { entity: entityOrOptions } as NavigateOptions :
+                entityOrOptions as NavigateOptions;
+
+    return new Promise<ModifiableEntity>((resolve) => {
+        require(["./Frames/PopupFrame"], function (NP: { default: typeof PopupFrame }) {
+            NP.default.openView(options).then(resolve);
         });
     });
 } 

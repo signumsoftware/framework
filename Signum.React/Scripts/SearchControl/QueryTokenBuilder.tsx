@@ -56,10 +56,12 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
     constructor(props: QueryTokenPartProps) {
         super(props);
 
-        this.state = { data: null };
+        this.state = { data: null };      
+    }
 
-        if (!props.readOnly)
-            this.requestSubTokens(props);
+    componentWillMount() {
+        if (!this.props.readOnly)
+            this.requestSubTokens(this.props);
     }
 
     componentWillReceiveProps(newProps: QueryTokenPartProps) {
@@ -68,7 +70,6 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
             this.requestSubTokens(newProps);
         }
     }
-
 
     requestSubTokens(props: QueryTokenPartProps) {
         Finder.API.subTokens(props.queryKey, props.parentToken, props.subTokenOptions).then(tokens=>

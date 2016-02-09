@@ -215,8 +215,14 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         const tr = td.parentNode as HTMLElement;
         const rowIndex = tr.getAttribute("data-row-index") && parseInt(tr.getAttribute("data-row-index"));
 
+
+        var op = DomUtils.offsetParent(this.refs["container"] as HTMLElement);
+
         this.state.contextualMenu = {
-            position: { pageX: event.pageX, pageY: event.pageY },
+            position: {
+                pageX: event.pageX - (op ? op.getBoundingClientRect().left : 0),
+                pageY: event.pageY - (op ? op.getBoundingClientRect().top : 0)
+            },
             columnIndex,
             rowIndex,
             columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : null
@@ -261,7 +267,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         const SFB = this.props.simpleFilterBuilder;
 
         return (
-            <div className="sf-search-control SF-control-container">
+            <div className="sf-search-control SF-control-container" ref="container">
                 {SFB && <div className="simple-filter-builder"><SFB findOptions={fo}/></div> }
                 {fo.showHeader && fo.showFilters && <FilterBuilder
                     queryDescription={this.state.queryDescription}
