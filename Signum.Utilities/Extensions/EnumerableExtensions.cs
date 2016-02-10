@@ -1138,18 +1138,35 @@ namespace Signum.Utilities
             var extra = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
             var missing = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
 
-            if (extra.Count != 0)
-                if (missing.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Missing: {2}".FormatWith(action, extra.ToString(", "), missing.ToString(", ")));
-                else
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}".FormatWith(action, extra.ToString(", ")));
-            else
-                if (missing.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Missing: {1}".FormatWith(action, missing.ToString(", ")));
+
+            
+            string errorMessage = GetErrorMessage(action, extra, missing);
+            if (errorMessage != null)
+            {
+                //if you're Synchronizing, just continue!
+                throw new InvalidOperationException(errorMessage);
+            }
 
             return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }
 
+        private static string GetErrorMessage<K>(string action, List<K> extra, List<K> missing)
+        {
+            if (extra.Count != 0)
+            {
+                if (missing.Count != 0)
+                    return "Error {0}\r\n Extra: {1}\r\n Missing: {2}".FormatWith(action, extra.ToString(", "), missing.ToString(", "));
+                else
+                    return "Error {0}\r\n Extra: {1}".FormatWith(action, extra.ToString(", "));
+            }
+            else
+            {
+                if (missing.Count != 0)
+                    return "Error {0}\r\n Missing: {1}".FormatWith(action, missing.ToString(", "));
+                else
+                    return null;
+            }
+        }
 
         public static JoinStrictResult<C, S, R> JoinStrict<K, C, S, R>(
             IEnumerable<C> currentCollection,
