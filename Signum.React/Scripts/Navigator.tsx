@@ -150,11 +150,10 @@ export interface ViewOptions {
 export function view(options: ViewOptions): Promise<ModifiableEntity>;
 export function view<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<T>;
 export function view<T extends IEntity>(entity: Lite<T>): Promise<T>
-export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity>
+export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Entity>, propertyRoute?: PropertyRoute): Promise<ModifiableEntity>
 {
-    const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } as ViewOptions :
-        (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } as ViewOptions :
-        (entityOrOptions as EntityPack<ModifiableEntity>).entity ? { entity: entityOrOptions } as ViewOptions :
+    const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions as ModifiableEntity, propertyRoute: propertyRoute } as ViewOptions :
+        (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions as Lite<Entity> } as ViewOptions :
             entityOrOptions as ViewOptions;
 
     return new Promise<ModifiableEntity>((resolve) => {
@@ -208,6 +207,18 @@ export enum EmbeddedWidgetPosition {
 
 
 export module API {
+
+    export function fillToStrings<T extends Entity>(lites: Lite<T>[]): Promise<void> {
+
+        var realLites = lites.filter(a => a.toStr == null && a.entity == null);
+
+        if (!realLites.length)
+            return Promise.resolve<void>();
+
+        return ajaxPost<string[]>({ url: "/api/entityToStrings" }, realLites).then((strs) => {
+            realLites.forEach((l, i) => l.toStr = strs[i]);
+        });
+    }
 
     export function fetchEntity<T extends Entity>(lite: Lite<T>): Promise<T>;
     export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;

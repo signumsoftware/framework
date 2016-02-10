@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import * as Reflection from '../Reflection'
-import SearchControl from './SearchControl'
+import { default as SearchControl, ExternalFullScreenButton} from './SearchControl'
 
 
 
@@ -13,21 +13,25 @@ interface SearchPageProps extends ReactRouter.RouteComponentProps<{}, { queryNam
 
 }
 
-export default class SearchPage extends React.Component<SearchPageProps, { findOptions?: FindOptions }> {
+export default class SearchPage extends React.Component<SearchPageProps, { findOptions?: FindOptions, }> {
+
+    externalButton: ExternalFullScreenButton = { onClick: null };
 
     constructor(props) {
         super(props);
         this.state = this.calculateState(this.props);
     }
 
+
     componentWillReceiveProps(nextProps: SearchPageProps) {
         this.setState(this.calculateState(nextProps));
     }
 
     calculateState(props: SearchPageProps) {
-        return { findOptions: Dic.extend({ showFilters: true }, Finder.parseFindOptionsPath(props.routeParams.queryName, props.location.query)) };
+        return {
+            findOptions: Dic.extend({ showFilters: true }, Finder.parseFindOptionsPath(props.routeParams.queryName, props.location.query)),
+        };
     }
-
 
     render() {
 
@@ -37,11 +41,11 @@ export default class SearchPage extends React.Component<SearchPageProps, { findO
             <div id="divSearchPage">
                 <h2>
                     <span className="sf-entity-title">{Reflection.getQueryNiceName(fo.queryName) }</span>&nbsp;
-                    <a className="sf-popup-fullscreen" href="#">
+                    <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.externalButton.onClick(e) }>
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>
                 </h2>
-                <SearchControl avoidFullScreenButton={true} findOptions={fo} />
+                <SearchControl externalFullScreenButton={this.externalButton} findOptions={fo} />
             </div>
         );
     }

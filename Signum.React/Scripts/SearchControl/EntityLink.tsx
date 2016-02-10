@@ -37,7 +37,7 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
 
         var avoidPopup = s != null && s.avoidPopup;
 
-        if (avoidPopup || event.ctrlKey || event.button == 2)
+        if (avoidPopup || event.ctrlKey || event.button == 1)
             return;
 
         event.preventDefault();

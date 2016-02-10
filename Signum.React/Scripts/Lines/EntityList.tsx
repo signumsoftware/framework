@@ -88,7 +88,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
             });
     };
 
-    handleViewClick = (event: React.SyntheticEvent) => {
+    handleViewClick = (event: React.MouseEvent) => {
 
         const ctx = this.state.ctx;
         const selectedIndex = this.state.selectedIndex;
@@ -96,9 +96,11 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
 
         const pr = ctx.propertyRoute.add(a => a[0]);
 
+        var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+
         const onView = this.state.onView ?
-            this.state.onView(entity, pr) :
-            this.defaultView(entity, pr);
+            this.state.onView(entity, pr, openWindow) :
+            this.defaultView(entity, pr, openWindow);
 
         onView.then(e => {
             if (e == null)

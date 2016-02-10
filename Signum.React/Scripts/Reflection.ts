@@ -12,14 +12,8 @@ export function getEnumInfo(enumTypeName: string, enumId: number) {
     if (!ti || ti.kind != KindOfType.Enum)
         throw new Error(`${enumTypeName} is not an Enum`);
 
-    if (!ti.membersById)
-        ti.membersById = Dic.getValues(ti.members).toObject(a=> a.name);
-
     return ti.membersById[enumId];
 }
-
-
-
 
 export interface TypeInfo {
     kind: KindOfType;
@@ -225,24 +219,38 @@ export function setTypes(types: TypeInfoDictionary) {
 
     Dic.foreach(types, (k, t) => {
         t.name = k;
-        if (t.members)
+        if (t.members) {
             Dic.foreach(t.members, (k2, t2) => t2.name = k2);
+            Object.freeze(t.members);
+
+            if (t.kind == KindOfType.Enum) {
+                t.membersById = Dic.getValues(t.members).toObject(a => a.name);
+                Object.freeze(t.membersById);
+            }
+        }
+
+        Object.freeze(t);
     });
 
     _types = Dic.getValues(types).toObject(a => a.name.toLowerCase());
+    Object.freeze(_types);
 
     Dic.foreach(types, (k, t) => {
-        
-        if (t.operations)
+        if (t.operations) {
             Dic.foreach(t.operations, (k2, t2) => {
                 t2.key = k2;
                 t2.niceName = _types[k2.before(".").toLowerCase()].members[k2.after(".")].niceName;
             });
+
+            Object.freeze(t.operations);
+        }
     });
 
     _queryNames = Dic.getValues(types).filter(t => t.kind == KindOfType.Query)
         .flatMap(a => Dic.getValues(a.members))
-        .toObject(m => m.name.toLocaleLowerCase(), m => ({ name: m.name, niceName: m.niceName }));
+        .toObject(m => m.name.toLocaleLowerCase(), m => Object.freeze({ name: m.name, niceName: m.niceName }));
+
+    Object.freeze(_queryNames);
 
     missingSymbols = missingSymbols.filter(s => !setSymbolId(s));
 }

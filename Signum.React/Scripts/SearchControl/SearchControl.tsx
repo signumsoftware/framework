@@ -22,12 +22,15 @@ export interface SimpleFilterBuilderProps {
     findOptions: FindOptions;
 }
 
+export interface ExternalFullScreenButton {
+    onClick?: React.EventHandler<React.MouseEvent>;
+}
 
 export interface SearchControlProps extends React.Props<SearchControl> {
     allowSelection?: boolean
     findOptions: FindOptions;
     simpleFilterBuilder?: React.ComponentClass<SimpleFilterBuilderProps>;
-    avoidFullScreenButton?: boolean;
+    externalFullScreenButton?: ExternalFullScreenButton;
     showContextMenu?: boolean;
     onSelectionChanged?: (entity: Lite<IEntity>[]) => void
 }
@@ -79,12 +82,21 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             selectedMenuItems: null,
             usedRows: [],
         };
+
+        if (props.externalFullScreenButton) {
+            props.externalFullScreenButton.onClick = this.handleFullScreenClick;
+        }
+
         this.initialLoad(this.props.findOptions);
     }
 
     componentWillReceiveProps(newProps: SearchControlProps) {
         if (JSON.stringify(this.props.findOptions) == JSON.stringify(newProps.findOptions))
             return;
+
+        if (newProps.externalFullScreenButton) {
+            newProps.externalFullScreenButton.onClick = this.handleFullScreenClick;
+        }
 
         if (this.props.findOptions.queryName != newProps.findOptions.queryName)
             this.initialLoad(newProps.findOptions);
@@ -93,6 +105,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     initialLoad(propsFindOptions: FindOptions) {
+
+        
+
         Finder.API.getQueryDescription(propsFindOptions.queryName).then(qd=> {
 
             this.setState({
@@ -125,7 +140,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             filterOptions: []
         }, propsFindOptions);
 
-        findOptions.columnOptions = SearchControl.mergeColumns(Dic.getValues(qd.columns), findOptions.columnOptionsMode, findOptions.columnOptions)
+        findOptions.columnOptions = Finder.mergeColumns(Dic.getValues(qd.columns), findOptions.columnOptionsMode, findOptions.columnOptions)
         if (!findOptions.orderOptions.length) {
 
             const defaultOrder = this.state.querySettings && this.state.querySettings.defaultOrderColumn || Finder.defaultOrderColumn;
@@ -161,21 +176,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         return fo.showHeader && (fo.showFilterButton || fo.showFilters)
     }
 
-    static mergeColumns(columns: ColumnDescription[], mode: ColumnOptionsMode, columnOptions: ColumnOption[]): ColumnOption[] {
 
-        switch (mode) {
-            case ColumnOptionsMode.Add:
-                return columns.filter(cd=> cd.name != "Entity").map(cd=> ({ columnName: cd.name, token: toQueryToken(cd), displayName: cd.displayName }) as ColumnOption)
-                    .concat(columnOptions);
-
-            case ColumnOptionsMode.Remove:
-                return columns.filter(cd=> cd.name != "Entity" && !columnOptions.some(a=> a.token.fullKey == cd.name))
-                    .map(cd=> ({ columnName: cd.name, token: toQueryToken(cd), displayName: cd.displayName }) as ColumnOption);
-
-            case ColumnOptionsMode.Replace:
-                return columnOptions;
-        }
-    }
     
     // MAIN
 
@@ -299,10 +300,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         );
     }
 
-  
-
     // TOOLBAR
-
     handleToggleFilters = () => {
         this.state.findOptions.showFilters = !this.state.findOptions.showFilters;
         this.forceUpdate();
@@ -321,14 +319,36 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={this.createTitle() }><span className="glyphicon glyphicon-plus"></span></a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton() }
                 {Finder.ButtonBarQuery.getContextBarElements(fo.queryName) }
-                {this.props.avoidFullScreenButton != true &&
-                    <a className="sf-query-button btn btn-default" href="#">
+                {!this.props.externalFullScreenButton &&
+                    <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a> }
             </div>
         );
     }
 
+    handleFullScreenClick = (ev: React.MouseEvent) => {
+
+        ev.preventDefault();
+
+        var fo = this.state.findOptions;
+
+
+        var pair = Finder.smartColumns(fo.columnOptions, Dic.getValues(this.state.queryDescription.columns));
+
+        var path = Finder.findOptionsPath({
+            queryName: fo.queryName,
+            filterOptions: fo.filterOptions,
+            orderOptions: fo.orderOptions,
+            columnOptions: pair.columns,
+            columnOptionsMode: pair.mode,
+        } as FindOptions);
+
+        if (ev.ctrlKey || ev.button == 1)
+            window.open(path);
+        else
+            Navigator.currentHistory.push(path);
+    };
 
     createTitle() {
 

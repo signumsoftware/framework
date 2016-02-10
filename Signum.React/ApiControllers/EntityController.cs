@@ -38,5 +38,14 @@ namespace Signum.React.ApiControllers
 
             return EntityServer.GetEntityPack(entity);
         }
+
+        [Route("api/entityToStrings"), HttpPost]
+        public string[] EntityToStrings(Lite<Entity>[] lites)
+        {
+            if (lites == null || lites.Length == 0)
+                throw new ArgumentNullException(nameof(lites));
+
+            return lites.Select(a => Database.GetToStr(a.EntityType, a.Id)).ToArray();
+        }
     }
 }

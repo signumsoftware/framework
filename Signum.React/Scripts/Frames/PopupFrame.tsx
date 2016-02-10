@@ -215,7 +215,7 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
 
         return (
             <h4>
-                <span className="sf-entity-title">{this.props.title || getToString(entity) }</span>
+                <span className="sf-entity-title">{this.props.title || getToString(entity) }</span>&nbsp;
                 {this.renderExpandLink() }
                 <br />
                 <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitel(entity) }</small>

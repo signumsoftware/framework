@@ -6,7 +6,7 @@ import { openModal, IModalProps } from '../Modals';
 import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import * as Reflection from '../Reflection'
-import { default as SearchControl, SearchControlProps} from './SearchControl'
+import { default as SearchControl, SearchControlProps, ExternalFullScreenButton} from './SearchControl'
 
 
 interface SearchPopupProps extends React.Props<SearchPopup>, IModalProps {
@@ -16,12 +16,15 @@ interface SearchPopupProps extends React.Props<SearchPopup>, IModalProps {
     title?: string;
 }
 
-export default class SearchPopup extends React.Component<SearchPopupProps, { show: boolean }>  {
+export default class SearchPopup extends React.Component<SearchPopupProps, { show: boolean; externalButton?: ExternalFullScreenButton }>  {
 
     constructor(props) {
         super(props);
 
-        this.state = { show: true };
+        this.state = {
+            show: true,
+            externalButton: { onClick: null }
+        };
     }
 
     selectedEntites: Lite<Entity>[] = [];
@@ -63,14 +66,14 @@ export default class SearchPopup extends React.Component<SearchPopupProps, { sho
                         </div>}
                     <h4>
                         <span className="sf-entity-title"> {this.props.title}</span>&nbsp;
-                        <a className ="sf-popup-fullscreen" href="#">
+                        <a className ="sf-popup-fullscreen" href="#" onClick={(e) => this.state.externalButton.onClick(e) }>
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a>
                     </h4>
                 </Modal.Header>
 
                 <Modal.Body>
-                    <SearchControl avoidFullScreenButton={true} findOptions={this.props.findOptions} onSelectionChanged={this.handleSelectionChanged} />
+                    <SearchControl externalFullScreenButton={this.state.externalButton} findOptions={this.props.findOptions} onSelectionChanged={this.handleSelectionChanged} />
                 </Modal.Body>
             </Modal>
         );

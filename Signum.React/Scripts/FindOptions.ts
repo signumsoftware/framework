@@ -55,7 +55,7 @@ export interface OrderOption {
 export interface ColumnOption {
     columnName: string;
     token?: QueryToken;
-    displayName: string;
+    displayName?: string;
 }
 
 

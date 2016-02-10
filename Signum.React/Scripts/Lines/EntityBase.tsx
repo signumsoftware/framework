@@ -22,7 +22,7 @@ export interface EntityBaseProps extends LineBaseProps {
     find?: boolean;
     remove?: boolean;
 
-    onView?: (entity: ModifiableEntity | Lite<IEntity>, pr: PropertyRoute) => Promise<ModifiableEntity>;
+    onView?: (entity: ModifiableEntity | Lite<IEntity>, pr: PropertyRoute, openWindow: boolean) => Promise<ModifiableEntity>;
     onCreate?: () => Promise<ModifiableEntity | Lite<IEntity>>;
     onFind?: () => Promise<ModifiableEntity | Lite<IEntity>>;
     onRemove?: (entity: ModifiableEntity | Lite<IEntity>) => Promise<boolean>;
@@ -101,19 +101,28 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    defaultView(value: ModifiableEntity | Lite<IEntity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
-        return Navigator.view({ entity: value, propertyRoute: propertyRoute });
+    defaultView(value: ModifiableEntity | Lite<IEntity>, propertyRoute: PropertyRoute, openWindow: boolean): Promise<ModifiableEntity> {
+
+        if (openWindow) {
+            var route = Navigator.navigateRoute(value as Lite<IEntity> /*or Entity*/);
+            window.open(route);
+            return Promise.resolve(null);
+        } else {
+            return Navigator.view({ entity: value, propertyRoute: propertyRoute });
+        }
     }
 
 
-    handleViewClick = (event: React.SyntheticEvent) => {
+    handleViewClick = (event: React.MouseEvent) => {
 
         const ctx = this.state.ctx;
         const entity = ctx.value;
 
+        var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+
         const onView = this.props.onView ?
-            this.props.onView(entity, ctx.propertyRoute) :
-            this.defaultView(entity, ctx.propertyRoute);
+            this.props.onView(entity, ctx.propertyRoute, openWindow) :
+            this.defaultView(entity, ctx.propertyRoute, openWindow);
 
         onView.then(e => {
             if (e == null)
@@ -167,8 +176,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 return Promise.resolve(e);
 
             return this.props.onView ?
-                this.props.onView(e, this.state.ctx.propertyRoute) :
-                this.defaultView(e, this.state.ctx.propertyRoute);
+                this.props.onView(e, this.state.ctx.propertyRoute, false) :
+                this.defaultView(e, this.state.ctx.propertyRoute, false);
+
         }).then(e => {
 
             if (!e)
