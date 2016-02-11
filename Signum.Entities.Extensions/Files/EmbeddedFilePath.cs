@@ -21,11 +21,11 @@ namespace Signum.Entities.Files
             this.FileType = fileType;
         }
 
-        public EmbeddedFilePathEntity(FileTypeSymbol fileType, string path)
+        public EmbeddedFilePathEntity(FileTypeSymbol fileType, string readFileFrom)
             : this(fileType)
         {
-            this.FileName = Path.GetFileName(path);
-            this.BinaryFile = File.ReadAllBytes(path);
+            this.FileName = Path.GetFileName(readFileFrom);
+            this.BinaryFile = File.ReadAllBytes(readFileFrom);
         }
 
         public EmbeddedFilePathEntity(FileTypeSymbol fileType, string fileName, byte[] fileData)
@@ -72,7 +72,7 @@ namespace Signum.Entities.Files
 
         [NotNullable, SqlDbType(Size = 260)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260)]
-        public string Sufix { get; set; }
+        public string Suffix { get; set; }
 
         [Ignore]
         public string CalculatedDirectory { get; set; }
@@ -94,7 +94,7 @@ namespace Signum.Entities.Files
                 if (prefixPair == null)
                     throw new InvalidOperationException("prefixPair not set");
 
-                return Path.Combine(prefixPair.PhysicalPrefix, Sufix);
+                return Path.Combine(prefixPair.PhysicalPrefix, Suffix);
             }
         }
 
@@ -105,7 +105,7 @@ namespace Signum.Entities.Files
                 if (prefixPair == null)
                     throw new InvalidOperationException("prefixPair not set");
 
-                return string.IsNullOrEmpty(prefixPair.WebPrefix) ? null : prefixPair.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Sufix.Replace("\\", "/"));
+                return string.IsNullOrEmpty(prefixPair.WebPrefix) ? null : prefixPair.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
             }
         }
 
