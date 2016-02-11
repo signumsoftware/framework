@@ -115,16 +115,22 @@ namespace Signum.Engine.Migrations
                 SafeConsole.WriteLineColor(ConsoleColor.Red, str);
                 return false;
             }
-            
 
-            if (migrations.SkipWhile(a=>a.IsExecuted).Any(a=>a.IsExecuted))
+
+            if (migrations.SkipWhile(a => a.IsExecuted).Any(a => a.IsExecuted))
             {
                 var str = "Possible merge conflict. There are old migrations in the folder that have not been executed!. You need to manually discard one migration branch.";
                 if (autoRun)
                     throw new InvalidOperationException(str);
 
                 SafeConsole.WriteLineColor(ConsoleColor.Red, str);
-                return false;
+                Console.WriteLine();
+                Console.Write("Write '");
+                SafeConsole.WriteColor(ConsoleColor.White, "force");
+                Console.WriteLine("' to execute them anyway");
+
+                if (Console.ReadLine() != "force")
+                    return false;
             }
 
             var last = migrations.LastOrDefault() ?? null;
@@ -162,7 +168,7 @@ namespace Signum.Engine.Migrations
 
                 try
                 {
-                    foreach (var item in migrations.AsEnumerable().SkipWhile(a => a.IsExecuted))
+                    foreach (var item in migrations.AsEnumerable().Where(a => !a.IsExecuted))
                     {
                         Draw(migrations, item);
 
@@ -204,12 +210,12 @@ namespace Signum.Engine.Migrations
                 try
                 {   
                     for (pos = 0; pos < parts.Length; pos++)
-			        {
+                    {
                         if (autoRun)
                             Executor.ExecuteNonQuery(parts[pos]);
                         else
                             SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, parts.Length), () => Executor.ExecuteNonQuery(parts[pos]));
-			        }
+                    }
                 }
                 catch (SqlException e)
                 {
