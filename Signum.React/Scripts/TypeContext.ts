@@ -1,4 +1,5 @@
-﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, createBinding } from './Reflection'
+﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, createBinding, subModelState } from './Reflection'
+import { ModelState } from './Signum.Entities'
 
 export enum FormGroupStyle {
     /// Unaffected by FormGroupSize
@@ -138,6 +139,7 @@ export class TypeContext<T> extends StyleContext {
 
     propertyRoute: PropertyRoute;
     binding: IBinding<T>;
+    modelState: ModelState;
 
     get value() {
         return this.binding.getValue();
@@ -147,26 +149,39 @@ export class TypeContext<T> extends StyleContext {
         this.binding.setValue(val);
     }
 
-    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>) {
+    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>, modelState: ModelState) {
         super(parent, styleOptions);
         this.propertyRoute = propertyRoute;
         this.binding = binding;
+        this.modelState = modelState;
     }
 
     
     subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R> {
 
-        const subRoute = this.propertyRoute.add(property);
+        const lambdaMembers = getLambdaMembers(property);
+
+        const subRoute = lambdaMembers.reduce<PropertyRoute>((pr, m) => pr.addMember(m), this.propertyRoute);
+
+        const subMS = lambdaMembers.reduce<ModelState>((ms, m) => subModelState(ms, m), this.modelState);
 
         const binding = createBinding(this.value, property);
 
-        const result = new TypeContext<R>(this, styleOptions, subRoute, binding);
+        const result = new TypeContext<R>(this, styleOptions, subRoute, binding, subMS);
 
         return result;
     }
 
     niceName(property: (val: T) => any) {
         return this.propertyRoute.add(property).member.niceName;
+    }
+
+    hasError(): boolean {
+        return this.modelState && (this.modelState[""] != null); 
+    }
+
+    hasErrorClass(): string {
+        return this.hasError() ? "has-error" : null;
     }
 }
 

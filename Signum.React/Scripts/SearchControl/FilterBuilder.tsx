@@ -160,7 +160,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     renderValue() {
         const f = this.props.filter;
 
-        const ctx = new TypeContext<any>(null, { formGroupStyle: FormGroupStyle.None, readOnly: f.frozen }, null, new Binding<any>("value", f));
+        const ctx = new TypeContext<any>(null, { formGroupStyle: FormGroupStyle.None, readOnly: f.frozen }, null, new Binding<any>("value", f), null);
 
         switch (f.token.filterType) {
             case FilterType.Lite:

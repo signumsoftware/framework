@@ -1,7 +1,7 @@
 ﻿/// <reference path="globals.ts" />
 
 import { Dic } from './Globals';
-import { ModifiableEntity, Entity, Lite, MListElement } from './Signum.Entities';
+import { ModifiableEntity, Entity, Lite, MListElement, ModelState } from './Signum.Entities';
 import {ajaxPost, ajaxGet} from './Services';
 
 
@@ -48,7 +48,7 @@ export interface OperationInfo {
     key: string,
     niceName: string;
     operationType: OperationType;
-    allowNew: boolean;
+    allowsNew: boolean;
     lite: boolean;
     hasCanExecute: boolean;
 }
@@ -364,12 +364,46 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 }
 
 
-interface LambdaMember {
+export function subModelState(modelState: ModelState, lambdaMember: LambdaMember, assertAll: boolean = false): ModelState {
+
+    if (modelState == null)
+        return null;
+
+    var result: ModelState; 
+    
+    var prefix = lambdaMember.type == LambdaMemberType.Member ? lambdaMember.name :
+        lambdaMember.type == LambdaMemberType.Mixin ? "mixins." + lambdaMember.name :
+            lambdaMember.type == LambdaMemberType.Indexer ? "[" + lambdaMember.name + "]" : null;
+
+    for (var a in modelState) {
+        if (modelState.hasOwnProperty(a)) {
+            if (a == prefix) {
+                if (result == null)
+                    result = {};
+                result[""] = modelState[a];
+            }
+            else if (a.startsWith(prefix + ".")) {
+                if (result == null)
+                    result = {};
+                result[a.after(prefix + ".")] = modelState[a];
+            }
+            else {
+                if (assertAll)
+                    throw new Error(modelState[1]);
+            }
+        }
+    }
+
+    return result;
+}
+
+
+export interface LambdaMember {
     name: string;
     type: LambdaMemberType
 }
 
-enum LambdaMemberType {
+export enum LambdaMemberType {
     Member,
     Mixin,
     Indexer,

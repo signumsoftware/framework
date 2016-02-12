@@ -11,7 +11,7 @@ require("!style!css!./Lines.css");
 export interface FormGroupProps extends React.Props<FormGroup> {
     title?: React.ReactChild;
     controlId?: string;
-    ctx: StyleContext;
+    ctx: TypeContext<any>;
     labelProps?: React.HTMLProps<HTMLLabelElement>;
 }
 
@@ -34,12 +34,13 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
             </label>
         );
 
-        return <div className={ "form-group " + this.props.ctx.formGroupSizeCss }>
+        return <div className={ classes("form-group", this.props.ctx.formGroupSizeCss, ctx.hasErrorClass()) }>
             { ctx.formGroupStyle != FormGroupStyle.BasicDown && label }
-        {
-        ctx.formGroupStyle == FormGroupStyle.LabelColumns ? (<div className={ this.props.ctx.valueColumnsCss } > { this.props.children } </div>) : this.props.children}
-            {ctx.formGroupStyle == FormGroupStyle.BasicDown && label }
-            </div>;
+            {
+                ctx.formGroupStyle == FormGroupStyle.LabelColumns ? (<div className={ this.props.ctx.valueColumnsCss } > { this.props.children } </div>) : this.props.children}
+            {ctx.formGroupStyle == FormGroupStyle.BasicDown && label
+            }
+        </div>;
     }
 }
 
@@ -58,7 +59,7 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
         return <p id={ this.props.controlId }
             className = {(ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static") + " " + this.props.className}>
             { this.props.children }
-            </p>
+        </p>
     }
 
 }
@@ -118,5 +119,5 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 export const Tasks: ((lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) => void)[] = [];
 
 export function runTasks(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
-    Tasks.forEach(t=> t(lineBase, state));
+    Tasks.forEach(t => t(lineBase, state));
 }

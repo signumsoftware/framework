@@ -188,6 +188,7 @@
     <TypeScriptCompile Include="Scripts\ConfigureReactWidgets.ts" />
     <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Notify.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\ValidationErrors.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />

@@ -6,12 +6,12 @@ export interface ModifiableEntity {
     Type: string;
     toStr?: string;	
     modified? : boolean;
+    isNew?: boolean;
 }
 
 export interface IEntity {
     Type: string;
     id?: any;
-    isNew?: boolean;
     ticks?: string; //max value
     toStr?: string;
     modified? : boolean;

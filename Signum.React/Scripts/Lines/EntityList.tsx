@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
+import { classes } from '../Globals'
 import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -99,8 +100,8 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
 
         const onView = this.state.onView ?
-            this.state.onView(entity, pr, openWindow) :
-            this.defaultView(entity, pr, openWindow);
+            this.state.onView(entity, pr) :
+            this.defaultView(entity, pr);
 
         onView.then(e => {
             if (e == null)

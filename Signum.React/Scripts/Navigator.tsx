@@ -6,8 +6,9 @@ import { openModal } from './Modals';
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack } from './Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo  } from './Reflection';
 import { TypeContext } from './TypeContext';
-import { EntityComponent, EntityComponentProps} from './Lines';
+import { EntityComponent, EntityComponentProps } from './Lines';
 import * as Finder from './Finder';
+import { needsCanExecute } from './Operations/EntityOperations';
 import PopupFrame from './Frames/PopupFrame';
 
 
@@ -23,7 +24,7 @@ export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default))} ></Route>);
 }
 
-export function getTypeName(pseudoType: IType | TypeInfo | string) {
+export function getTypeName(pseudoType: IType | TypeInfo | string): string {
     if ((pseudoType as IType).typeName)
         return (pseudoType as IType).typeName;
 
@@ -40,10 +41,11 @@ export function getTypeName(pseudoType: IType | TypeInfo | string) {
 export function getTypeTitel(entity: Entity) {
 
     const typeInfo = getTypeInfo(entity.Type)
+    
+    if (entity.isNew)
+        return LiteMessage.New_G.niceToString().forGenderAndNumber(typeInfo.gender) + " " + typeInfo.niceName;
 
-    return entity.isNew ?
-        LiteMessage.New_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName) :
-        typeInfo.niceName + " " + entity.id;
+    return typeInfo.niceName + " " + entity.id;
 }
 
 
@@ -64,7 +66,7 @@ export function navigateRoute(typeOfEntity: any, id: any = null) {
         typeName = getTypeName(typeOfEntity as PseudoType);
     }
 
-    return "/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id;
+    return currentHistory.createHref("/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id);
 }
 
 export const entitySettings: { [type: string]: EntitySettingsBase } = {};
@@ -204,6 +206,26 @@ export enum EmbeddedWidgetPosition {
     Bottom,
 }
 
+export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, showOperations: boolean): Promise<EntityPack<ModifiableEntity>> {
+    if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
+        return Promise.resolve(entityOrEntityPack);
+
+    const entity = (entityOrEntityPack as ModifiableEntity).Type ?
+        entityOrEntityPack as ModifiableEntity :
+        (entityOrEntityPack as Lite<Entity>).entity;
+
+    if (entity == null)
+        return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
+
+    if (!showOperations && !needsCanExecute(entity))
+        return Promise.resolve({ entity: cloneEntity(entity), canExecute: null });
+
+    return API.fetchCanExecute(entity);
+}
+
+function cloneEntity(obj: any) {
+    return JSON.parse(JSON.stringify(obj));
+}
 
 
 export module API {
@@ -241,6 +263,12 @@ export module API {
         let idVal = (typeOrLite as Lite<any>).id || id;
 
         return ajaxGet<EntityPack<Entity>>({ url: "/api/entityPack/" + typeName + "/" + idVal });
+    }
+
+
+    export function fetchCanExecute<T extends Entity>(entity: T): Promise<EntityPack<T>> {
+
+        return ajaxPost<EntityPack<Entity>>({ url: "/api/entityPackEntity" }, entity);
     }
 }
 

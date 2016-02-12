@@ -67,9 +67,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         allowSelection: true,
         avoidFullScreenButton: false
     };
-
-    // INIT
-
+    
     constructor(props: SearchControlProps) {
         super(props);
         this.state = {
@@ -86,7 +84,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         if (props.externalFullScreenButton) {
             props.externalFullScreenButton.onClick = this.handleFullScreenClick;
         }
+    }
 
+    componentWillMount() {
         this.initialLoad(this.props.findOptions);
     }
 

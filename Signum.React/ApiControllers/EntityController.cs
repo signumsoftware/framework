@@ -39,6 +39,12 @@ namespace Signum.React.ApiControllers
             return EntityServer.GetEntityPack(entity);
         }
 
+        [Route("api/entityPackEntity"), HttpPost]
+        public EntityPackTS GetEntityPackEntity(Entity entity)
+        { 
+            return EntityServer.GetEntityPack(entity);
+        }
+
         [Route("api/entityToStrings"), HttpPost]
         public string[] EntityToStrings(Lite<Entity>[] lites)
         {

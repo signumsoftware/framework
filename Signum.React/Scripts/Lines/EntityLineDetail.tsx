@@ -1,11 +1,12 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
+import { classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding } from '../Reflection'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, subModelState, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { EntityComponentProps, EntityFrame } from '../Lines'
 import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
@@ -69,7 +70,7 @@ export class EntityLineDetail extends EntityBase<EntityLineDetailProps, EntityLi
      
 
         return (
-            <fieldset className="sf-entity-line-details">
+            <fieldset className={classes("sf-entity-line-details", s.ctx.hasErrorClass())}>
                 <legend>
                     <div>
                         <span>{s.labelText}</span>
@@ -93,7 +94,9 @@ export class EntityLineDetail extends EntityBase<EntityLineDetailProps, EntityLi
 
         var pr = this.state.type.isEmbedded ? this.state.ctx.propertyRoute : PropertyRoute.root(getTypeInfo(this.state.fullEntity.Type));
 
-        var ctx = new TypeContext(this.state.ctx, null, pr, new ReadonlyBinding(this.state.fullEntity));
+        var ms = this.state.type.isLite ? subModelState(this.state.ctx.modelState, { name: "entity", type: LambdaMemberType.Member }) : this.state.ctx.modelState;
+
+        var ctx = new TypeContext(this.state.ctx, null, pr, new ReadonlyBinding(this.state.fullEntity), ms);
         
         var frame: EntityFrame<ModifiableEntity> = {
             onClose: () => { },

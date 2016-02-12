@@ -8,7 +8,9 @@ import { EntityComponent, EntityComponentProps, EntityFrame } from '../Lines'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, JavascriptMessage } from '../Signum.Entities'
 import { TypeContext, StyleOptions } from '../TypeContext'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos,  } from '../Reflection'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, } from '../Reflection'
+import { GlobalModalContainer} from '../Modals'
+import ValidationErrors from './ValidationErrors'
 
 require("!style!css!./Frames.css");
 
@@ -37,14 +39,19 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     constructor(props) {
         super(props);
         this.state = this.calculateState(props);
-        this.loadEntity(props)
+
+    }
+
+    componentWillMount() {
+        this.loadEntity(this.props)
             .then(() => this.loadComponent());
     }
 
     componentWillReceiveProps(props) {
-        this.setState(this.calculateState(props));
-        this.loadEntity(props)
-            .then(() => this.loadComponent());
+        this.setState(this.calculateState(props), () => {
+            this.loadEntity(props)
+                .then(() => this.loadComponent());
+        });
     }
 
     calculateState(props: PageFrameProps) {
@@ -52,7 +59,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
         const entitySettings = Navigator.getSettings(typeInfo.name);
 
-        return { entitySettings: entitySettings, typeInfo: typeInfo, entity: null };
+        return { entitySettings: entitySettings, typeInfo: typeInfo, component: null, modelState: null, pack: null } as PageFrameState;
     }
 
     loadEntity(props: PageFrameProps): Promise<void> {
@@ -111,10 +118,10 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             readOnly: this.state.entitySettings.onIsReadonly()
         };
 
-        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity));
+        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity), this.state.modelState);
 
         var frame: EntityFrame<Entity> = {
-            onReload: pack => this.setState({ pack }),
+            onReload: pack => this.setState({ pack, modelState : null }),
             onClose: () => this.onClose(),
             setError: ms => this.setState({ modelState: ms }),
         };
@@ -130,6 +137,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
                     {this.state.component && React.createElement<EntityComponentProps<Entity>>(this.state.component, { ctx: ctx, frame: frame })}
                 </div>
                 {Navigator.renderEmbeddedWidgets({ entity: entity }, Navigator.EmbeddedWidgetPosition.Bottom) }
+                <GlobalModalContainer/>
             </div>
         );
     }
@@ -151,23 +159,6 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 }
 
-
-export class ValidationErrors extends React.Component<{ modelState: ModelState }, void>
-{
-    render() {
-
-        var modelState = this.props.modelState;
-
-        if (!modelState || Dic.getKeys(modelState).length == 0)
-            return null;
-
-        return (
-            <ul className="validaton-summary alert alert-danger">
-                { Dic.getValues(modelState).map(error => <li>{error}</li>) }
-            </ul>
-        );
-    }
-}
 
 
 

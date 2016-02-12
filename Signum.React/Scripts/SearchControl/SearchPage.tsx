@@ -5,6 +5,7 @@ import * as Finder from '../Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import * as Reflection from '../Reflection'
+import { GlobalModalContainer } from '../Modals'
 import { default as SearchControl, ExternalFullScreenButton} from './SearchControl'
 
 
@@ -46,6 +47,7 @@ export default class SearchPage extends React.Component<SearchPageProps, { findO
                     </a>
                 </h2>
                 <SearchControl externalFullScreenButton={this.externalButton} findOptions={fo} />
+                <GlobalModalContainer/>
             </div>
         );
     }

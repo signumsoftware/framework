@@ -9,12 +9,14 @@ import ButtonBar from './ButtonBar'
 import { TypeContext, StyleOptions } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState } from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer } from '../Reflection'
+import ValidationErrors from './ValidationErrors'
+import { needsCanExecute } from '../Operations/EntityOperations'
 
 require("!style!css!./Frames.css");
 
 interface PopupFrameProps extends React.Props<PopupFrame>, IModalProps {
     title?: string;
-    entityOrPack?: Lite<ModifiableEntity> | ModifiableEntity | EntityPack<ModifiableEntity>;
+    entityOrPack?: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
     showOperations?: boolean;
     saveProtected?: boolean;
@@ -47,13 +49,16 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
     }
 
     componentWillMount() {
-        this.loadEntity(this.props)
+        Navigator.toEntityPack(this.props.entityOrPack, this.props.showOperations)
+            .then(ep => this.setPack(ep))
             .then(() => this.loadComponent());
     }
 
     componentWillReceiveProps(props) {
         this.setState(this.calculateState(props));
-        this.loadEntity(props)
+
+        Navigator.toEntityPack(props.entityOrPack, this.props.showOperations)
+            .then(ep => this.setPack(ep))
             .then(() => this.loadComponent());
     }
 
@@ -80,39 +85,13 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
         };
     }
 
-    clone(obj: any) {
-        return JSON.parse(JSON.stringify(obj));
-    }
 
-    loadEntity(props: PopupFrameProps): Promise<void> {
-
-        if ((this.props.entityOrPack as EntityPack<ModifiableEntity>).canExecute) {
-            this.setPack(this.props.entityOrPack as EntityPack<ModifiableEntity>);
-            return Promise.resolve(null);
-        }
-
-        const entity = (this.props.entityOrPack as ModifiableEntity).Type ?
-            this.props.entityOrPack as ModifiableEntity :
-            (this.props.entityOrPack as Lite<Entity>).entity;
-
-        if (entity != null && (!getTypeInfo(entity.Type) || !this.props.showOperations)) {
-
-            this.setPack({ entity: this.clone(entity), canExecute: {} });
-            return Promise.resolve(null);
-
-        } else {
-            return Navigator.API.fetchEntityPack(entity ? toLite(entity) : this.props.entityOrPack as Lite<Entity>)
-                .then(pack => this.setPack({
-                    entity: entity ? this.clone(entity) : pack.entity,
-                    canExecute: pack.canExecute
-                }));
-        }
-    }
 
     setPack(pack: EntityPack<ModifiableEntity>): void {
         this.setState({
             pack: pack,
             savedEntity: JSON.stringify(pack.entity),
+            modelState: null,
         });
     }
 
@@ -192,9 +171,10 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
                     <Modal.Body>
                         {Navigator.renderWidgets({ entity: pack.entity }) }
                         <ButtonBar frame={frame} pack={this.state.pack} showOperations={this.props.showOperations} />
+                        <ValidationErrors modelState={this.state.modelState}/>
                         <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
                         { this.state.component && React.createElement(this.state.component, {
-                            ctx: new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity)),
+                            ctx: new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity), this.state.modelState),
                             frame: frame
                         }) }
                         </div>
@@ -235,10 +215,22 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
             return null;
 
         return (
-            <a href={Navigator.navigateRoute(entity) } className="sf-popup-fullscreen">
+            <a href={ Navigator.navigateRoute(entity) } className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
                 <span className="glyphicon glyphicon-new-window"></span>
             </a>
         );
+    }
+
+    handlePopupFullScreen = (e: React.MouseEvent) => {
+
+        if (e.ctrlKey || e.buttons) {
+
+        } else {
+
+            Navigator.currentHistory.push(Navigator.navigateRoute(this.state.pack.entity));
+
+            e.preventDefault();
+        }
     }
 
     static openView(options: Navigator.ViewOptions): Promise<Entity> {

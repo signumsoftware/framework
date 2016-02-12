@@ -84,7 +84,13 @@ namespace Signum.React.Json
 
                 writer.WritePropertyName("id");
                 writer.WriteValue(entity.IdOrNull == null ? null : entity.Id.Object);
-                
+
+                if (entity.IsNew)
+                {
+                    writer.WritePropertyName("isNew");
+                    writer.WriteValue(true);
+                }
+
                 if (Schema.Current.Table(entity.GetType()).Ticks != null)
                 {
                     writer.WritePropertyName("ticks");

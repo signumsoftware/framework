@@ -11,13 +11,13 @@ export interface IModalProps {
 }
 
 
-let singletone: GlobalModalContainer;
+let current: GlobalModalContainer;
 export class GlobalModalContainer extends React.Component<{}, { modals: React.ReactElement<IModalProps>[]
 }> {
     constructor(props) {
         super(props);
         this.state = { modals: [] };
-        singletone = this;
+        current = this;
     }
 
     render() {
@@ -29,18 +29,17 @@ export class GlobalModalContainer extends React.Component<{}, { modals: React.Re
 export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T> {
 
     return new Promise<T>((resolve) => {
-
         let cloned;
         const onExited = (val : T) => {
-            singletone.state.modals.remove(cloned);
-            singletone.forceUpdate();
+            current.state.modals.remove(cloned);
+            current.forceUpdate();
             resolve(val);
         }
 
-        cloned = React.cloneElement(modal, { onExited: onExited, key: singletone.state.modals.length } as any);
+        cloned = React.cloneElement(modal, { onExited: onExited, key: current.state.modals.length } as any);
 
-        singletone.state.modals.push(cloned);
-        singletone.forceUpdate();
+        current.state.modals.push(cloned);
+        current.forceUpdate();
     });
 }
 

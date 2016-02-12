@@ -3,7 +3,7 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString } from '../Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType  } from '../Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, subModelState, LambdaMemberType  } from '../Reflection';
 import {classes} from '../Globals';
 import * as Navigator from '../Navigator';
 import { ButtonsContext } from '../Frames/ButtonBar';
@@ -20,7 +20,7 @@ export function getButtonBarElements(ctx: ButtonsContext): Array<React.ReactElem
         return null;
 
     const operations = operationInfos(ti)
-        .filter(oi => isEntityOperation(oi.operationType) && (oi.allowNew || !ctx.pack.entity.isNew))
+        .filter(oi => isEntityOperation(oi.operationType) && (oi.allowsNew || !ctx.pack.entity.isNew))
         .map(oi => {
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity>;
 
@@ -49,8 +49,6 @@ export function getButtonBarElements(ctx: ButtonsContext): Array<React.ReactElem
 
         return group.key;
     });
-
-
 
     var result = groups.flatMap((gr, i) => {
         if (gr.key == "") {
@@ -120,8 +118,8 @@ function onClick(eoc: EntityOperationContext<Entity>): void{
     if (eoc.operationInfo.lite) {
         switch (eoc.operationInfo.operationType) {
             case OperationType.ConstructorFrom: defaultConstructFromLite(eoc); return;
-            case OperationType.Execute: defaultExecuteEntity(eoc); return;
-            case OperationType.Delete: defaultDeleteEntity(eoc); return;
+            case OperationType.Execute: defaultExecuteLite(eoc); return;
+            case OperationType.Delete: defaultDeleteLite(eoc); return;
         }
     } else {
         switch (eoc.operationInfo.operationType) {
@@ -161,7 +159,10 @@ export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>): P
 
 function catchValidationError(error: any, frame: EntityFrame<Entity>) {
     if (error instanceof ValidationError) {
-        frame.setError((error as ValidationError).modelState);
+        var model = (error as ValidationError).modelState;
+        model = subModelState(model, { name: "request", type: LambdaMemberType.Member }, true); 
+        model = subModelState(model, { name: "entity", type: LambdaMemberType.Member }, true);
+        frame.setError(model);
         return false;
     }
 
@@ -242,4 +243,15 @@ function isEntityOperation(operationType: OperationType) {
     return operationType == OperationType.ConstructorFrom ||
         operationType == OperationType.Execute ||
         operationType == OperationType.Delete;
+}
+
+
+export function needsCanExecute(entity: ModifiableEntity) {
+
+    var ti = getTypeInfo(entity.Type);
+
+    if (!ti)
+        return false;
+
+    return operationInfos(ti).some(a => a.hasCanExecute && isEntityOperation(a.operationType) && (a.allowsNew || !entity.isNew));
 }

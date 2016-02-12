@@ -92,24 +92,24 @@ namespace Signum.React.ApiControllers
 
         public class ConstructOperationRequest
         {
-            public string operationKey;
-            public string type;
-            public object[] args;
+            public string operationKey { get; set; }
+            public string type { get; set; }
+            public object[] args { get; set; }
         }
 
 
         public class EntityOperationRequest
         {
-            public string operationKey;
-            public Entity entity;
-            public object[] args;
+            public string operationKey { get; set; }
+            public Entity entity { get; set; }
+            public object[] args { get; set; }
         }
 
         public class LiteOperationRequest
         {
-            public string operationKey;
-            public Lite<Entity> lite;
-            public object[] args;
+            public string operationKey { get; set; }
+            public Lite<Entity> lite { get; set; }
+            public object[] args { get; set; }
         }
 
         [Route("api/operation/constructFromMany"), HttpPost, ValidateModel]
@@ -178,15 +178,15 @@ namespace Signum.React.ApiControllers
 
         public class MultiOperationRequest
         {
-            public string operationKey;
-            public string type;
-            public Lite<Entity>[] lites;
-            public object[] args;
+            public string operationKey { get; set; }
+            public string type { get; set; }
+            public Lite<Entity>[] lites { get; set; }
+            public object[] args { get; set; }
         }
 
         public class MultiOperationResponse
         {
-            public Dictionary<string, string> errors; 
+            public Dictionary<string, string> errors { get; set; }
         }
     }
 

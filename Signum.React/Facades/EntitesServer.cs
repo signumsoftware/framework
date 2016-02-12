@@ -24,7 +24,7 @@ namespace Signum.React.Facades
 
     public class EntityPackTS
     {
-        public Entity entity;
-        public Dictionary<string, string> canExecute;
+        public Entity entity { get; set; }
+        public Dictionary<string, string> canExecute { get; set; }
     }
 }

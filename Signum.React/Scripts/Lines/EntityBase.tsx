@@ -22,7 +22,7 @@ export interface EntityBaseProps extends LineBaseProps {
     find?: boolean;
     remove?: boolean;
 
-    onView?: (entity: ModifiableEntity | Lite<IEntity>, pr: PropertyRoute, openWindow: boolean) => Promise<ModifiableEntity>;
+    onView?: (entity: ModifiableEntity | Lite<IEntity>, pr: PropertyRoute) => Promise<ModifiableEntity>;
     onCreate?: () => Promise<ModifiableEntity | Lite<IEntity>>;
     onFind?: () => Promise<ModifiableEntity | Lite<IEntity>>;
     onRemove?: (entity: ModifiableEntity | Lite<IEntity>) => Promise<boolean>;
@@ -101,15 +101,11 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    defaultView(value: ModifiableEntity | Lite<IEntity>, propertyRoute: PropertyRoute, openWindow: boolean): Promise<ModifiableEntity> {
+    defaultView(value: ModifiableEntity | Lite<IEntity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
 
-        if (openWindow) {
-            var route = Navigator.navigateRoute(value as Lite<IEntity> /*or Entity*/);
-            window.open(route);
-            return Promise.resolve(null);
-        } else {
+    
             return Navigator.view({ entity: value, propertyRoute: propertyRoute });
-        }
+        
     }
 
 
@@ -119,17 +115,23 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         const entity = ctx.value;
 
         var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+        if (openWindow) {
+            event.preventDefault();
+            var route = Navigator.navigateRoute(entity as Lite<IEntity> /*or Entity*/);
+            window.open(route);
+        }
+        else {
+            const onView = this.props.onView ?
+                this.props.onView(entity, ctx.propertyRoute) :
+                this.defaultView(entity, ctx.propertyRoute);
 
-        const onView = this.props.onView ?
-            this.props.onView(entity, ctx.propertyRoute, openWindow) :
-            this.defaultView(entity, ctx.propertyRoute, openWindow);
+            onView.then(e => {
+                if (e == null)
+                    return;
 
-        onView.then(e => {
-            if (e == null)
-                return;
-
-            this.convert(e).then(m => this.setValue(m));
-        });
+                this.convert(e).then(m => this.setValue(m));
+            });
+        }
     }
 
     renderViewButton(btn: boolean) {
@@ -160,7 +162,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     defaultCreate(): Promise<ModifiableEntity | Lite<IEntity>> {
 
         return this.chooseType(Navigator.isCreable)
-            .then(typeName => typeName ? Constructor.construct(typeName) : null);
+            .then(typeName => typeName ? Constructor.construct(typeName) : null)
+            .then(e => e ? e.entity : null);
     }
 
     handleCreateClick = (event: React.SyntheticEvent) => {
@@ -176,8 +179,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 return Promise.resolve(e);
 
             return this.props.onView ?
-                this.props.onView(e, this.state.ctx.propertyRoute, false) :
-                this.defaultView(e, this.state.ctx.propertyRoute, false);
+                this.props.onView(e, this.state.ctx.propertyRoute) :
+                this.defaultView(e, this.state.ctx.propertyRoute);
 
         }).then(e => {
 
