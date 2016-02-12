@@ -89,7 +89,7 @@ namespace Signum.Utilities
 
                     Console.WriteLine();
 
-                    return GetValue(line);
+                    return GetValue(line.Trim());
                 }
 
                 return null;             
@@ -146,7 +146,7 @@ namespace Signum.Utilities
         public WithDescription<V>[] ChooseMultipleWithDescription(string endMessage, string[] args = null)
         {
             if (args != null)
-                return args.ToString(" ").Split(',').SelectMany(GetValuesRange).ToArray();
+                return args.ToString(" ").SplitNoEmpty(',').SelectMany(GetValuesRange).ToArray();
 
         retry:
             try
@@ -165,7 +165,7 @@ namespace Signum.Utilities
 
                 Console.WriteLine();
 
-                return line.Split(',').SelectMany(GetValuesRange).ToArray();
+                return line.SplitNoEmpty(',').SelectMany(GetValuesRange).ToArray();
             }
             catch (Exception e)
             {
@@ -178,8 +178,8 @@ namespace Signum.Utilities
         {
             if (line.Contains('-'))
             {
-                int? from = line.Before('-')?.Let(s => s.HasText() ? GetIndex(s) : (int?)null);
-                int? to = line.After('-')?.Let(s => s.HasText() ? GetIndex(s) : (int?)null);
+                int? from = line.Before('-')?.Let(s => s.HasText() ? GetIndex(s.Trim()) : (int?)null);
+                int? to = line.After('-')?.Let(s => s.HasText() ? GetIndex(s.Trim()) : (int?)null);
 
                 if (from == null && to == null)
                     return Enumerable.Empty<WithDescription<V>>();
@@ -194,7 +194,7 @@ namespace Signum.Utilities
             }
             else
             {
-                return new[] { GetValue(line) };
+                return new[] { GetValue(line.Trim()) };
             }
         }
 
