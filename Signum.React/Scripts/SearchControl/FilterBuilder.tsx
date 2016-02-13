@@ -47,7 +47,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
                     { <table className="table table-condensed">
                         <thead>
                             <tr>
-                                <th></th>
+                                <th style={{ minWidth: "24px" }}></th>
                                 <th className="sf-filter-field-header">{ SearchMessage.Field.niceToString() }</th>
                                 <th>{ SearchMessage.Operation.niceToString() }</th>
                                 <th>{ SearchMessage.Value.niceToString() }</th>

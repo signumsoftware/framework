@@ -489,6 +489,9 @@ namespace Signum.Web.Operations
 
             var type = ctx.Lites.Select(a => a.EntityType).Distinct().Only();
 
+            if (type == null)
+                return null;
+
             List<IMenuItem> menuItems =
                (from oi in OperationInfos(type)
                 where oi.OperationType == OperationType.ConstructorFromMany

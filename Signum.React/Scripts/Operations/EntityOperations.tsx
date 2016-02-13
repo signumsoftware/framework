@@ -10,10 +10,11 @@ import { ButtonsContext } from '../Frames/ButtonBar';
 import Notify from '../Frames/Notify';
 import { EntityFrame }  from '../Lines';
 import { ajaxPost, ValidationError }  from '../Services';
-import { operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup, CreateGroup, API } from '../Operations'
+import { operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
+    CreateGroup, API, isEntityOperation, autoStyleFunction } from '../Operations'
 
 
-export function getButtonBarElements(ctx: ButtonsContext): Array<React.ReactElement<any>> {
+export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any>> {
     const ti = getTypeInfo(ctx.pack.entity.Type);
 
     if (ti == null)
@@ -221,7 +222,7 @@ export function confirmInNecessary(eoc: EntityOperationContext<Entity>): boolean
 function getConfirmMessage(eoc: EntityOperationContext<Entity>) {
     if (eoc.settings && eoc.settings.confirmMessage === null)
         return null;
-
+  
     if (eoc.settings && eoc.settings.confirmMessage != null)
         return eoc.settings.confirmMessage(eoc);
 
@@ -233,17 +234,7 @@ function getConfirmMessage(eoc: EntityOperationContext<Entity>) {
 }
 
 
-export function autoStyleFunction(oi: OperationInfo) {
-    return oi.operationType == OperationType.Delete ? "danger" :
-        oi.operationType == OperationType.Execute && oi.key.endsWith(".Save") ? "primary" : "default";
-}
 
-
-function isEntityOperation(operationType: OperationType) {
-    return operationType == OperationType.ConstructorFrom ||
-        operationType == OperationType.Execute ||
-        operationType == OperationType.Delete;
-}
 
 
 export function needsCanExecute(entity: ModifiableEntity) {

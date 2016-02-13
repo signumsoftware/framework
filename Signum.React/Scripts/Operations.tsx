@@ -10,14 +10,18 @@ import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeIn
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import * as Navigator from './Navigator';
+import * as ContexualItems from './SearchControl/ContextualItems';
 import ButtonBar from './Frames/ButtonBar';
 import { EntityFrame }  from './Lines';
-import { getButtonBarElements }  from './Operations/EntityOperations';
+import { getEntityOperationButtons }  from './Operations/EntityOperations';
+import { getConstructFromManyContextualItems, getEntityOperationsContextualItems }  from './Operations/ContextualOperations';
+import { ContextualItemsContext }  from './SearchControl/ContextualItems';
 
 export function start() {
-    ButtonBar.onButtonBarRender.push(getButtonBarElements);
+    ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
+    ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
+    ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
 }
-
 
 export const operationSettings: { [operationKey: string]: OperationSettings } = {};
 
@@ -65,19 +69,21 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
 }
 
 export interface ContextualOperationContext<T extends Entity> {
-    entity: Lite<T>[];
+    context: ContextualItemsContext
     operationInfo: OperationInfo;
     settings: ContextualOperationSettings<T>;
     entityOperationSettings: EntityOperationSettings<T>;
     canExecute: string;
-    queryKey: string;
 }
 
 export class ContextualOperationSettings<T extends Entity> extends OperationSettings {
 
     isVisible: (ctx: ContextualOperationContext<T>) => boolean;
+    hideOnCanExecute: boolean;
     confirmMessage: (ctx: ContextualOperationContext<T>) => string;
-    onClick: (ctx: ContextualOperationContext<T>) => void;
+    onClick: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
+    style: string;
+    order: number;
 
     constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | ConstructSymbol_FromMany<any, T>) {
         super(operationSymbol);
@@ -131,7 +137,17 @@ export interface EntityOperationGroup {
     order?: number;
 }
 
+export function autoStyleFunction(oi: OperationInfo) {
+    return oi.operationType == OperationType.Delete ? "danger" :
+        oi.operationType == OperationType.Execute && oi.key.endsWith(".Save") ? "primary" : "default";
+}
 
+
+export function isEntityOperation(operationType: OperationType) {
+    return operationType == OperationType.ConstructorFrom ||
+        operationType == OperationType.Execute ||
+        operationType == OperationType.Delete;
+}
 
 export namespace API {
 
@@ -189,14 +205,18 @@ export namespace API {
         return ajaxPost<ErrorReport>({ url: "/api/operation/deleteMultiple" }, { lites: lites, operationKey: getKey(operationKey), args: args } as MultiOperationRequest);
     }
 
+    export interface ErrorReport {
+        errors: { [liteKey: string]: string; }
+    }
+
+
+  
+
     function getKey(operationKey: string | OperationSymbol) {
         return (operationKey as OperationSymbol).key || operationKey as string;
     }
 
 
-    export interface ErrorReport {
-        [liteKey: string]: string;
-    }
 
     interface MultiOperationRequest {
         operationKey: string;
@@ -224,6 +244,15 @@ export namespace API {
         lite: Lite<Entity>;
         type?: string;
         args: any[];
+    }
+
+
+    export function stateCanExecutes<T extends Entity>(lites: Lite<T>[], operationKeys: string[]): Promise<CanExecutesResponse> {
+        return ajaxPost<CanExecutesResponse>({ url: "/api/operation/stateCanExecutes" }, { lites, operationKeys });
+    }
+
+    export interface CanExecutesResponse {
+        canExecutes: { [operationKey: string]: string };
     }
 }
 

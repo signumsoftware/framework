@@ -143,11 +143,13 @@
     <Compile Include="Facades\ReflectionServer.cs" />
     <Compile Include="Facades\SignumControllerFactory.cs" />
     <Compile Include="Facades\WebApiSessionFactory.cs" />
-    <Compile Include="Json\EntityJsonConverter.cs" />
-    <Compile Include="Json\JsonSerializerExtensions.cs" />
-    <Compile Include="Json\ResultTableConverter.cs" />
-    <Compile Include="Json\MListJsonConverter.cs" />
-    <Compile Include="Json\LiteJsonConverter.cs" />
+    <Compile Include="JsonConverters\EntityJsonConverter.cs" />
+    <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
+    <Compile Include="JsonModelValidators\OriginalDefaultBodyModelValidator.cs" />
+    <Compile Include="JsonConverters\ResultTableConverter.cs" />
+    <Compile Include="JsonConverters\MListJsonConverter.cs" />
+    <Compile Include="JsonConverters\LiteJsonConverter.cs" />
+    <Compile Include="JsonModelValidators\SignumBodyModelValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -194,6 +196,8 @@
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityLineDetail.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityLine.tsx" />
+    <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\ContextMenu.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityListBase.tsx" />

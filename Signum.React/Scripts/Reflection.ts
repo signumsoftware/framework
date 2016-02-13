@@ -51,6 +51,7 @@ export interface OperationInfo {
     allowsNew: boolean;
     lite: boolean;
     hasCanExecute: boolean;
+    hasStates: boolean;
 }
 
 export enum OperationType {

@@ -90,6 +90,7 @@ namespace Signum.React.ApiControllers
             OperationLogic.ServiceDelete(request.lite, operation, request.args);
         }
 
+
         public class ConstructOperationRequest
         {
             public string operationKey { get; set; }
@@ -165,6 +166,7 @@ namespace Signum.React.ApiControllers
                 try
                 {
                     action(lite);
+                    errors.Add(lite.Key(), "");
                 }
                 catch (Exception e)
                 {
@@ -187,6 +189,25 @@ namespace Signum.React.ApiControllers
         public class MultiOperationResponse
         {
             public Dictionary<string, string> errors { get; set; }
+        }
+
+        [Route("api/operation/stateCanExecutes"), HttpPost, ValidateModel]
+        public StateCanExecuteResponse StateCanExecutes(StateCanExecuteRequest request)
+        {
+            var result = OperationLogic.GetContextualCanExecute(request.lites, request.operationKeys.Select(SymbolLogic<OperationSymbol>.ToSymbol).ToList());
+            
+            return new StateCanExecuteResponse { canExecutes = result.SelectDictionary(a => a.Key, v => v) };
+        }
+
+        public class StateCanExecuteRequest
+        {
+            public string[] operationKeys { get; set; }
+            public Lite<Entity>[] lites { get; set; }
+        }
+
+        public class StateCanExecuteResponse
+        {
+            public Dictionary<string, string> canExecutes { get; set; }
         }
     }
 

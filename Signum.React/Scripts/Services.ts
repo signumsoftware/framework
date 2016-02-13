@@ -103,6 +103,8 @@ function throwError(response: Response): Response | Promise<Response> {
         return response.json().then(json=> {
             if (json.ModelState)
                 throw new ValidationError(response.statusText, json);
+            else if (json.Message)
+                throw new ApplicationError(response.statusText, json);
             else
                 throw new ServiceError(response.statusText, json);
         }) as any;
@@ -116,6 +118,19 @@ export class ServiceError extends Error {
 
     toString() {
         return this.statusText + "\r\n" + JSON.stringify(this.body);
+    }
+}
+
+export class ApplicationError extends Error {
+    message: string;
+
+    constructor(public statusText: string, json: { Message: string }) {
+        super(statusText)
+        this.message = json.Message;
+    }
+
+    toString() {
+        return this.statusText + "\r\n" + this.message;
     }
 }
 

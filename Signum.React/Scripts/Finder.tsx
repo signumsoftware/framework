@@ -465,7 +465,7 @@ export interface FormatRule {
 
 export class CellFormatter {
     constructor(
-        public formatter: (cell: any) => React.ReactNode,
+        public formatter: (cell: any) => React.ReactChild,
         public textAllign = "left") {
     }
 }
@@ -528,7 +528,7 @@ export interface EntityFormatRule {
 }
 
 
-export type EntityFormatter = (row: ResultRow) => React.ReactNode;
+export type EntityFormatter = (row: ResultRow) => React.ReactChild;
 
 export const entityFormatRules: EntityFormatRule[] = [
     {

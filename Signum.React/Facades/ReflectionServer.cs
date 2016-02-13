@@ -337,6 +337,8 @@ namespace Signum.React.Facades
         private bool? AllowsNew;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasCanExecute")]
         private bool? HasCanExecute;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "hasStates")]
+        private bool? HasStates;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = "lite")]
         private bool? Lite;
 
@@ -347,6 +349,7 @@ namespace Signum.React.Facades
         {
             this.AllowsNew = oper.AllowsNew;
             this.HasCanExecute = oper.HasCanExecute;
+            this.HasStates = oper.HasStates;
             this.OperationType = oper.OperationType;
             this.Lite = oper.Lite;
         }

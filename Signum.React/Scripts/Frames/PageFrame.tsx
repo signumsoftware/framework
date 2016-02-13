@@ -91,6 +91,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         return (
             <div id="divMainPage" data-isnew={this.props.routeParams.id == null} className="form-horizontal">
                 {this.renderEntityControl() }
+                <GlobalModalContainer/>
             </div>
         );
     }
@@ -137,7 +138,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
                     {this.state.component && React.createElement<EntityComponentProps<Entity>>(this.state.component, { ctx: ctx, frame: frame })}
                 </div>
                 {Navigator.renderEmbeddedWidgets({ entity: entity }, Navigator.EmbeddedWidgetPosition.Bottom) }
-                <GlobalModalContainer/>
+               
             </div>
         );
     }
