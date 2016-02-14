@@ -74,6 +74,20 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEn
     });
 }
 
+export function explore<T extends Entity>(type: Type<T>): Promise<void>;
+export function explore(findOptions: FindOptions): Promise<void>;
+export function explore(findOptions: FindOptions | Type<any>): Promise<void> {
+
+    const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
+        { queryName: findOptions } as FindOptions;
+
+    return new Promise<void>((resolve) => {
+        require(["./SearchControl/SearchPopup"], function (SP: { default: typeof SearchPopup }) {
+            SP.default.explore(fo).then(resolve);
+        });
+    });
+}
+
 export function findOptionsPath(findOptions: FindOptions): string;
 export function findOptionsPath(queryName: any): string;
 export function findOptionsPath(queryNameOrFindOptions: any): string

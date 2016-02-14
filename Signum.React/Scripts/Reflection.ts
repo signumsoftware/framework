@@ -25,6 +25,7 @@ export interface TypeInfo {
     entityData?: EntityData;
     toStringFunction?: string;
     isLowPopupation?: boolean;
+    requiresSaveOperation?: boolean;
     members?: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
     mixins?: { [name: string]: string; };
@@ -133,6 +134,20 @@ let _queryNames: {
 
 export type PseudoType = IType | TypeInfo | string;
 
+export function getTypeName(pseudoType: IType | TypeInfo | string): string {
+    if ((pseudoType as IType).typeName)
+        return (pseudoType as IType).typeName;
+
+    if ((pseudoType as TypeInfo).name)
+        return (pseudoType as TypeInfo).name;
+
+    if (typeof pseudoType == "string")
+        return pseudoType as string;
+
+    throw new Error("Unexpected pseudoType " + pseudoType);
+}
+
+
 export function getTypeInfo(type: PseudoType): TypeInfo {
 
     if ((type as TypeInfo).kind != null)
@@ -230,6 +245,9 @@ export function setTypes(types: TypeInfoDictionary) {
             }
         }
 
+        if (t.requiresSaveOperation == null && t.entityKind)
+            t.requiresSaveOperation = calculateRequiresSaveOperation(t.entityKind);
+
         Object.freeze(t);
     });
 
@@ -254,6 +272,22 @@ export function setTypes(types: TypeInfoDictionary) {
     Object.freeze(_queryNames);
 
     missingSymbols = missingSymbols.filter(s => !setSymbolId(s));
+}
+
+
+function calculateRequiresSaveOperation(entityKind: EntityKind): boolean 
+{
+    switch (entityKind) {
+        case EntityKind.SystemString: return false;
+        case EntityKind.System: return false;
+        case EntityKind.Relational: return false;
+        case EntityKind.String: return true;
+        case EntityKind.Shared: return true;
+        case EntityKind.Main: return true;
+        case EntityKind.Part: return false;
+        case EntityKind.SharedPart: return false;
+        default: throw new Error("Unexpeced entityKind");
+    }
 }
 
 export interface IBinding<T> {

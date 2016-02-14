@@ -233,7 +233,8 @@ ul.nav-tabs {
 
 /*form xs*/
 
-.form-xs .form-control {
+.form-xs .form-control,
+.form-xs .form-control-static {
     padding: 0px 3px;
 }
 
@@ -325,7 +326,8 @@ ul.nav-tabs {
 
 /*form sm*/
 
-.form-sm .form-control {
+.form-sm .form-control,
+.form-sm .form-control-static {
     padding: 3px 6px;
 }
 

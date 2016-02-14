@@ -8,7 +8,8 @@ import { EntityComponent, EntityComponentProps, EntityFrame } from '../Lines'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, JavascriptMessage } from '../Signum.Entities'
 import { TypeContext, StyleOptions } from '../TypeContext'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, } from '../Reflection'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
+import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
 import { GlobalModalContainer} from '../Modals'
 import ValidationErrors from './ValidationErrors'
 
@@ -104,7 +105,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     renderEntityControl() {
-        
+
         if (!this.state.pack) {
             return (
                 <div className="normal-control">
@@ -122,27 +123,34 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity), this.state.modelState);
 
         var frame: EntityFrame<Entity> = {
-            onReload: pack => this.setState({ pack, modelState : null }),
+            onReload: pack => this.setState({ pack, modelState: null }),
             onClose: () => this.onClose(),
             setError: ms => this.setState({ modelState: ms }),
         };
 
+        var wc: WidgetContext = {
+            ctx: ctx,
+            pack: this.state.pack,
+        };
+
+        var embeddedWidgets = renderEmbeddedWidgets(wc);
+
         return (
             <div className="normal-control">
-                {this.renderTitle() }
-                {Navigator.renderWidgets({ entity: entity }) }
+                { this.renderTitle() }
+                { renderWidgets(wc) }
                 <ButtonBar frame={frame} pack={this.state.pack} showOperations={this.props.showOperations} />
                 <ValidationErrors modelState={this.state.modelState}/>
-                {Navigator.renderEmbeddedWidgets({ entity: entity }, Navigator.EmbeddedWidgetPosition.Top) }
+                { embeddedWidgets.top }
                 <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
-                    {this.state.component && React.createElement<EntityComponentProps<Entity>>(this.state.component, { ctx: ctx, frame: frame })}
+                    {this}
+                    {this.state.component && React.createElement<EntityComponentProps<Entity>>(this.state.component, { ctx: ctx, frame: frame }) }
                 </div>
-                {Navigator.renderEmbeddedWidgets({ entity: entity }, Navigator.EmbeddedWidgetPosition.Bottom) }
-               
+                { embeddedWidgets.bottom }
             </div>
         );
     }
-    
+
     renderTitle() {
 
         if (!this.state.pack)

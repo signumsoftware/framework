@@ -96,6 +96,14 @@ export default class SearchPopup extends React.Component<SearchPopupProps, { sho
             isMany={true}
             title={title || Reflection.getQueryNiceName(findOptions.queryName) } />);
     }
+
+    static explore(findOptions: FindOptions, title?: string): Promise<void> {
+
+        return openModal<void>(<SearchPopup findOptions={findOptions}
+            findMode={FindMode.Explore}
+            isMany={true}
+            title={title || Reflection.getQueryNiceName(findOptions.queryName) } />);
+    }
 }
 
 

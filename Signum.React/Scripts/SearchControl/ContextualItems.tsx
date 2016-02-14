@@ -24,7 +24,7 @@ export interface MarkRowsDictionary {
 
 export const onContextualItems: ((ctx: ContextualItemsContext) => Promise<MenuItemBlock>)[] = [];
 
-export function getContextualItems(ctx: ContextualItemsContext): Promise<React.ReactElement<any>[]> {
+export function renderContextualItems(ctx: ContextualItemsContext): Promise<React.ReactElement<any>[]> {
 
     const blockPromises = onContextualItems.map(func => func(ctx));
 

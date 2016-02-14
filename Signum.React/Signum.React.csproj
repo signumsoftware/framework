@@ -191,12 +191,14 @@
     <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Notify.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\ValidationErrors.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityLineDetail.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityLine.tsx" />
     <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
+    <TypeScriptCompile Include="Scripts\QuickLinks.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextMenu.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\EntityLink.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityList.tsx" />

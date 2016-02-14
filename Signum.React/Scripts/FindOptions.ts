@@ -1,4 +1,5 @@
 ﻿import { TypeReference, PropertyRoute } from './Reflection';
+import { Dic } from './Globals';
 import { Lite, IEntity, DynamicQuery } from './Signum.Entities';
 
 import PaginationMode = DynamicQuery.PaginationMode;
@@ -15,8 +16,14 @@ export interface CountOptions {
     filterOptions?: FilterOption[];
 }
 
+
+
+
 export interface FindOptions {
     queryName: any;
+    simpleColumnName?: string;
+    simpleValue?: any;
+
     filterOptions?: FilterOption[];
     orderOptions?: OrderOption[];
     columnOptionsMode?: ColumnOptionsMode;
@@ -32,6 +39,34 @@ export interface FindOptions {
     create?: boolean;
     navigate?: boolean;
     contextMenu?: boolean;
+}
+
+export function expandSimpleColumnName(findOptions: FindOptions) {
+
+    if (!findOptions.simpleColumnName)
+        return findOptions; 
+
+    var fo = Dic.extend({}, findOptions) as FindOptions;
+
+    fo.filterOptions = [
+        { columnName: fo.simpleColumnName, operation: FilterOperation.EqualTo, value: fo.simpleValue, frozen: true },
+        ...(fo.filterOptions || [])
+    ];
+    
+    if (!fo.simpleColumnName.contains(".") && fo.columnOptionsMode == null || fo.columnOptionsMode == ColumnOptionsMode.Remove) {
+        fo.columnOptions = [
+            { columnName: fo.simpleColumnName },
+            ...(fo.columnOptions || [])
+        ];
+    }
+
+    if (fo.searchOnLoad == null)
+        fo.searchOnLoad = true;
+
+    fo.simpleColumnName = null;
+    fo.simpleValue = null;
+
+    return fo;
 }
 
 export interface FilterOption {

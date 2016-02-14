@@ -5,7 +5,7 @@ import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstr
 import { Dic, DomUtils } from '../Globals'
 import * as Finder from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
-    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken } from '../FindOptions'
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandSimpleColumnName } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, IEntity, liteKey, is } from '../Signum.Entities'
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData} from '../Reflection'
 import * as Navigator from '../Navigator'
@@ -13,7 +13,7 @@ import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
-import { getContextualItems, ContextualItemsContext, MarkRowsDictionary } from './ContextualItems'
+import { renderContextualItems, ContextualItemsContext, MarkRowsDictionary } from './ContextualItems'
 import { ContextMenu } from './ContextMenu'
 
 
@@ -121,8 +121,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         const qd = this.state.queryDescription;
 
-        const ti = getTypeInfos(qd.columns["Entity"].type)
-
+        const ti = getTypeInfos(qd.columns["Entity"].type);
+        
         const findOptions = Dic.extend({
             searchOnLoad: true,
             showHeader: true,
@@ -137,7 +137,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             columnOptions: [],
             orderOptions: [],
             filterOptions: []
-        }, propsFindOptions);
+        },  expandSimpleColumnName(propsFindOptions));
 
         findOptions.columnOptions = Finder.mergeColumns(Dic.getValues(qd.columns), findOptions.columnOptionsMode, findOptions.columnOptions)
         if (!findOptions.orderOptions.length) {
@@ -376,7 +376,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             markRows: this.markRows
         };
 
-        getContextualItems(options)
+        renderContextualItems(options)
             .then(menuItems => this.setState({ currentMenuItems: menuItems }));
     }
 

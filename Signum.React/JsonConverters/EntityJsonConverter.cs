@@ -70,7 +70,10 @@ namespace Signum.React.Json
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var pr = JsonSerializerExtensions.CurrentPropertyRoute ?? PropertyRoute.Root(value.GetType());
+            var pr = JsonSerializerExtensions.CurrentPropertyRoute;
+
+            if (pr == null || typeof(IEntity).IsAssignableFrom(pr.Type))
+                pr = PropertyRoute.Root(value.GetType());
 
             ModifiableEntity mod = (ModifiableEntity)value;
 

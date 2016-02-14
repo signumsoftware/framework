@@ -4,7 +4,7 @@ import { Dic, hasFlag } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack } from './Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo  } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName  } from './Reflection';
 import { TypeContext } from './TypeContext';
 import { EntityComponent, EntityComponentProps } from './Lines';
 import * as Finder from './Finder';
@@ -22,19 +22,6 @@ export let currentHistory: HistoryModule.History & HistoryModule.HistoryQueries;
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default)) } ></Route>);
     options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default))} ></Route>);
-}
-
-export function getTypeName(pseudoType: IType | TypeInfo | string): string {
-    if ((pseudoType as IType).typeName)
-        return (pseudoType as IType).typeName;
-
-    if ((pseudoType as TypeInfo).name)
-        return (pseudoType as TypeInfo).name;
-
-    if (typeof pseudoType == "string")
-        return pseudoType as string;
-
-    throw new Error("Unexpected pseudoType " + pseudoType);
 }
 
 
@@ -145,7 +132,7 @@ export interface ViewOptions {
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
     showOperations?: boolean;
-    saveProtected?: boolean;
+    requiresSaveOperation?: boolean;
     component?: React.ComponentClass<EntityComponentProps<any>>;
 }
 
@@ -187,24 +174,6 @@ export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | L
         });
     });
 } 
-
-export interface WidgetsContext {
-    entity?: Entity;
-    lite?: Lite<Entity>;
-}
-
-export function renderWidgets(ctx: WidgetsContext): React.ReactFragment {
-    return null;
-}
-
-export function renderEmbeddedWidgets(ctx: WidgetsContext, position: EmbeddedWidgetPosition): React.ReactFragment {
-    return null;
-}
-
-export enum EmbeddedWidgetPosition {
-    Top, 
-    Bottom,
-}
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, showOperations: boolean): Promise<EntityPack<ModifiableEntity>> {
     if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)

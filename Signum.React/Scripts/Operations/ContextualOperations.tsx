@@ -213,7 +213,7 @@ function createContextualButton(coc: ContextualOperationContext<Entity>, default
     if (!coc.canExecute)
         return menuItem;
 
-    const tooltip = <Tooltip id={"tooltip_" + coc.operationInfo.key.replace(".", "_") })>{coc.canExecute}</Tooltip>;
+    const tooltip = <Tooltip id={"tooltip_" + coc.operationInfo.key.replace(".", "_") }>{coc.canExecute}</Tooltip>;
 
     return <OverlayTrigger placement="right" overlay={tooltip} >{menuItem}</OverlayTrigger>;
 }

@@ -14,7 +14,7 @@ namespace Signum.React.Json
     {
         public override bool CanConvert(Type objectType)
         {
-            return typeof(Lite<Entity>).IsAssignableFrom(objectType);
+            return typeof(Lite<IEntity>).IsAssignableFrom(objectType);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -57,7 +57,10 @@ namespace Signum.React.Json
                     case "toStr": toString = reader.ReadAsString(); break;
                     case "id": idObj = reader.ReadAsString(); break;
                     case "EntityType": typeStr = reader.ReadAsString(); break;
-                    case "entity": entity = (Entity)serializer.Deserialize(reader, typeof(Entity)); break;
+                    case "entity":
+                        reader.Read();
+                        entity = (Entity)serializer.Deserialize(reader, typeof(Entity));
+                        break;
                     default: throw new InvalidOperationException("unexpected property " + (string)reader.Value);
                 }
 

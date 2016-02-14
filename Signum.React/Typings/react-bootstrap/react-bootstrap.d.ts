@@ -100,6 +100,57 @@ declare module "react-bootstrap" {
     interface SplitButtonClass extends React.ComponentClass<SplitButtonProps> { }
     var SplitButton: SplitButtonClass;
 
+    // <Dropdown />
+    // ----------------------------------------
+    interface DropdownProps extends React.Props<DropdownClass>, React.HTMLAttributes {
+        bsClass?: string;
+        bsStyle?: string;
+        bsSize?: string;
+        componentClass?: string;
+        dropup?: boolean;
+        navItem?: boolean;
+        noCaret?: boolean;
+        onClose?: (isOpen: boolean) => any;
+        onToggle?: (isOpen: boolean) => any;
+        defaultOpen?: boolean;
+        open?: boolean;
+        pullRight?: boolean;
+        role?: string;
+        title?: any; // TODO: Add more specific type
+    }
+    interface Dropdown extends React.ReactElement<DropdownProps> { }
+    interface DropdownClass extends React.ComponentClass<DropdownProps>
+    {
+        Toggle: DropdownToggleClass;
+        Menu: DropdownMenuClass;
+    }
+    var Dropdown: DropdownClass;
+
+
+    // <DropdownToggle />
+    // ----------------------------------------
+    interface DropdownToggleProps extends React.Props<DropdownToggleClass>, React.HTMLAttributes {
+        bsRole?: string;
+        noCaret?: boolean;
+        open?: boolean;
+        title?: string;
+        useAnchor?: boolean;        
+    }
+    interface DropdownToggle extends React.ReactElement<DropdownToggleProps> { }
+    interface DropdownToggleClass extends React.ComponentClass<DropdownToggleProps> { }
+
+    // <DropdownMenu />
+    // ----------------------------------------
+    interface DropdownMenuProps extends React.Props<DropdownMenuClass>, React.HTMLAttributes {
+        onClose?: (isOpen: boolean) => any;
+        onSelect?: React.ReactEventHandler; 
+        open?: boolean;
+        pullRight?: boolean;
+        labelledBy?: number | string;
+    }
+    interface DropdownMenu extends React.ReactElement<DropdownMenuProps> { }
+    interface DropdownMenuClass extends React.ComponentClass<DropdownMenuProps> { }
+
 
     // <MenuItem />
     // ----------------------------------------
@@ -111,7 +162,7 @@ declare module "react-bootstrap" {
         eventKey?: any;
         header?: boolean;
         href?: string;
-        onClick?: React.ReactEventHandler;
+        onClick?: React.MouseEventHandler;
         onKeyDown?: React.ReactEventHandler;
         onSelect?: React.ReactEventHandler;
         target?: string;

@@ -5,11 +5,12 @@ import { Dic, hasFlag } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, OperationMessage, EntityPack,
-    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol } from './Signum.Entities';
+    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, Basics } from './Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, GraphExplorer  } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import * as Navigator from './Navigator';
+import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import ButtonBar from './Frames/ButtonBar';
 import { EntityFrame }  from './Lines';
@@ -21,6 +22,11 @@ export function start() {
     ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
     ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
     ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
+    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
+        queryName: Basics.OperationLogEntity_Type,
+        simpleColumnName: "Target",
+        simpleValue: ctx.lite
+    }, { isVisible: getTypeInfo(ctx.lite.EntityType).requiresSaveOperation }));
 }
 
 export const operationSettings: { [operationKey: string]: OperationSettings } = {};

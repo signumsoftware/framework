@@ -10,6 +10,7 @@ import { TypeContext, StyleOptions } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState } from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
+import { renderWidgets, WidgetContext } from './Widgets'
 import { needsCanExecute } from '../Operations/EntityOperations'
 
 require("!style!css!./Frames.css");
@@ -19,7 +20,7 @@ interface PopupFrameProps extends React.Props<PopupFrame>, IModalProps {
     entityOrPack?: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
     showOperations?: boolean;
-    saveProtected?: boolean;
+    requiresSaveOperation?: boolean;
     component?: React.ComponentClass<EntityComponentProps<Entity>>;
     isNavigate?: boolean;
     readOnly?: boolean
@@ -106,7 +107,7 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
 
     okClicked: boolean;
     handleOkClicked = (val: any) => {
-        if (this.hasChanges() && this.props.saveProtected) {
+        if (this.hasChanges() && this.props.requiresSaveOperation) {
             alert(JavascriptMessage.saveChangesBeforeOrPressCancel.niceToString());
             return;
         }
@@ -147,16 +148,6 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
 
         var pack = this.state.pack;
 
-        const styleOptions: StyleOptions = {
-            readOnly: this.props.readOnly != null ? this.props.readOnly : this.state.entitySettings.onIsReadonly()
-        };
-
-        var frame: EntityFrame<Entity> = {
-            onReload: pack => this.setPack(pack),
-            onClose: () => this.props.onExited(null),
-            setError: modelState => this.setState({ modelState }),
-        };
-
         return (
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
                 <Modal.Header closeButton={this.props.isNavigate}>
@@ -166,21 +157,39 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
                     </ButtonToolbar>}
                     {this.renderTitle() }
                 </Modal.Header>
-
-                {this.state.pack &&
-                    <Modal.Body>
-                        {Navigator.renderWidgets({ entity: pack.entity }) }
-                        <ButtonBar frame={frame} pack={this.state.pack} showOperations={this.props.showOperations} />
-                        <ValidationErrors modelState={this.state.modelState}/>
-                        <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
-                        { this.state.component && React.createElement(this.state.component, {
-                            ctx: new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity), this.state.modelState),
-                            frame: frame
-                        }) }
-                        </div>
-                    </Modal.Body>
-                }
+                {pack && this.renderBody() }  
             </Modal>
+        );
+    }
+
+    renderBody() {
+
+        var frame: EntityFrame<Entity> = {
+            onReload: pack => this.setPack(pack),
+            onClose: () => this.props.onExited(null),
+            setError: modelState => this.setState({ modelState }),
+        };
+
+        const styleOptions: StyleOptions = {
+            readOnly: this.props.readOnly != null ? this.props.readOnly : this.state.entitySettings.onIsReadonly()
+        };
+
+        var pack = this.state.pack;
+
+        var ctx =  new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity), this.state.modelState);
+
+        return (
+            <Modal.Body>
+                {renderWidgets({ ctx: ctx, pack: pack }) }
+                <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />
+                <ValidationErrors modelState={this.state.modelState}/>
+                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
+                    { this.state.component && React.createElement(this.state.component, {
+                        ctx: ctx,
+                        frame: frame
+                    }) }
+                </div>
+            </Modal.Body>
         );
     }
 
@@ -241,7 +250,7 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
             propertyRoute={options.propertyRoute}
             component={options.component}
             showOperations={options.showOperations}
-            saveProtected={options.saveProtected}
+            requiresSaveOperation={options.requiresSaveOperation}
             isNavigate={false}/>);
     }
 
@@ -253,7 +262,7 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
             propertyRoute={null}
             component={options.component}
             showOperations={null}
-            saveProtected={null}
+            requiresSaveOperation={null}
             isNavigate={true}/>);
     }
 }
