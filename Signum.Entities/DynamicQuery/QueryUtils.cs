@@ -118,7 +118,8 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.NotStartsWith,
                     FilterOperation.NotEndsWith,
                     FilterOperation.NotLike,
-                    FilterOperation.IsIn
+                    FilterOperation.IsIn,
+                    FilterOperation.IsNotIn
                 }
             },
             { 
@@ -130,7 +131,8 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.GreaterThanOrEqual,
                     FilterOperation.LessThan,
                     FilterOperation.LessThanOrEqual,
-                    FilterOperation.IsIn
+                    FilterOperation.IsIn,
+                    FilterOperation.IsNotIn,
                 }
             },
             { 
@@ -142,7 +144,8 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.GreaterThanOrEqual,
                     FilterOperation.LessThan,
                     FilterOperation.LessThanOrEqual,
-                    FilterOperation.IsIn
+                    FilterOperation.IsIn,
+                    FilterOperation.IsNotIn,
                 }
             },
             { 
@@ -154,7 +157,8 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.GreaterThanOrEqual,
                     FilterOperation.LessThan,
                     FilterOperation.LessThanOrEqual,
-                    FilterOperation.IsIn
+                    FilterOperation.IsIn,
+                    FilterOperation.IsNotIn,
                 }
             },
             { 
@@ -162,7 +166,8 @@ namespace Signum.Entities.DynamicQuery
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo, 
-                    FilterOperation.IsIn
+                    FilterOperation.IsIn,
+                    FilterOperation.IsNotIn,
                 }
             },
             { 
@@ -170,7 +175,8 @@ namespace Signum.Entities.DynamicQuery
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo, 
-                    FilterOperation.IsIn
+                    FilterOperation.IsIn,
+                    FilterOperation.IsNotIn,
                 }
             },
             { 
@@ -178,7 +184,8 @@ namespace Signum.Entities.DynamicQuery
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo,
-                    FilterOperation.IsIn
+                    FilterOperation.IsIn,
+                    FilterOperation.IsNotIn,
                 }
             },
             { 
@@ -493,6 +500,11 @@ namespace Signum.Entities.DynamicQuery
                 return Expression.Coalesce(left, Expression.Constant(""));
 
             return left;
+        }
+
+        public static bool IsList(this FilterOperation fo)
+        {
+            return fo == FilterOperation.IsIn || fo == FilterOperation.IsNotIn;
         }
     }
 

@@ -144,7 +144,7 @@ namespace Signum.React.ApiControllers
         {
             var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
             var parsedToken = QueryUtils.Parse(token, qd, options);
-            var expectedValueType = operation == FilterOperation.IsIn ? typeof(IEnumerable<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
+            var expectedValueType = operation.IsList() ? typeof(IEnumerable<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
             
             var val = value is JToken ?
                  ((JToken)value).ToObject(expectedValueType, JsonSerializer.Create(GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings)) :

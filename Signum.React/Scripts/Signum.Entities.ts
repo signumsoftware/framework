@@ -553,6 +553,7 @@ export namespace DynamicQuery {
         NotEndsWith = "NotEndsWith" as any,
         NotLike = "NotLike" as any,
         IsIn = "IsIn" as any,
+        IsNotIn = "IsNotIn" as any,
     }
     export const FilterOperation_Type = new EnumType<FilterOperation>("FilterOperation", FilterOperation);
     

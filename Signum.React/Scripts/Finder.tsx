@@ -5,8 +5,8 @@ import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation,
-QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn,
-ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken } from './FindOptions';
+    QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn,
+    ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken, isList } from './FindOptions';
 
 import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from './Signum.Entities';
 
@@ -209,13 +209,23 @@ export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
 
     var promises: Promise<any>[] = [];
 
-    var lites: Lite<any>[] = [];
+    var needToStr: Lite<any>[] = [];
 
     if (findOptions.filterOptions)
         promises.push(...findOptions.filterOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll).then(_ => {
-            parseValue(fo);
-            if (fo.token.type.isLite && !(fo.value as Lite<string>).toStr)
-                lites.push(fo.value);
+            if (isList(fo.operation)) {
+                if (!Array.isArray(fo.value))
+                    fo.value = [fo.value];
+
+                fo.value = (fo.value as any[]).map(v => parseValue(fo.token, v, needToStr));
+            }
+
+            else {
+                if (Array.isArray(fo.value))
+                    throw new Error("Unespected array for operation " + fo.operation);
+
+                fo.value = parseValue(fo.token, fo.value, needToStr);
+            }
         })));
 
     if (findOptions.orderOptions)
@@ -227,7 +237,7 @@ export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
     completer.trigger();
 
     return Promise.all(promises)
-        .then(a => !lites.length ? null : NavAPI.fillToStrings(lites))
+        .then(a => !needToStr.length ? null : NavAPI.fillToStrings(needToStr))
         .then(() => findOptions);
 }
 
@@ -279,21 +289,39 @@ class TokenCompleter {
     }
 }
 
-function parseValue(fo: FilterOption) {
-    switch (filterType(fo.token)) {
-        case FilterType.Boolean: fo.value = parseBoolean(fo.value);
-        case FilterType.Integer: fo.value = parseInt(fo.value) || null;
-        case FilterType.Decimal: fo.value = parseFloat(fo.value) || null;
+function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
+    switch (filterType(token)) {
+        case FilterType.Boolean: return parseBoolean(val);
+        case FilterType.Integer: return parseInt(val) || null;
+        case FilterType.Decimal: return parseFloat(val) || null;
         case FilterType.Lite:
             {
-                if (typeof fo.value == "string") {
-                    fo.value = parseLite(fo.value);
-                }
+                var lite = convertToLite(val);
 
-                if ((fo.value as Entity).Type)
-                    fo.value = toLite(fo.value as Entity);
+                if (lite && !lite.toStr)
+                    needToStr.push(lite);
+
+                return lite;
             }
     }
+
+    return val;
+}
+
+function convertToLite(val: any): Lite<Entity> {
+    if (val == null || val == "")
+        return null; 
+
+    if ((val as Lite<Entity>).EntityType)
+        return val as Lite<Entity>;
+
+    if ((val as Entity).Type)
+        return toLite(val as Entity);
+
+    if (typeof val == "string")
+        return parseLite(val);
+
+    throw new Error(`Impossible to convert ${val} to Lite`); 
 }
 
 function filterType(queryToken: QueryToken) {
@@ -366,7 +394,7 @@ export module API {
 module Encoder {
 
     export function encodeFilters(filterOptions: FilterOption[]): string[] {
-        return !filterOptions ? null : filterOptions.map(fo=> getTokenString(fo) + "," + FilterOperation[fo.operation] + "," + stringValue(fo.value));
+        return !filterOptions ? null : filterOptions.map(fo => getTokenString(fo) + "~" + FilterOperation[fo.operation] + "~" + stringValue(fo.value));
     }
 
     export function encodeOrders(orderOptions: OrderOption[]): string[] {
@@ -374,7 +402,7 @@ module Encoder {
     }
 
     export function encodeColumns(columnOptions: ColumnOption[]): string[] {
-        return !columnOptions ? null : columnOptions.map(co=> getTokenString(co) + (co.displayName ? ("," + co.displayName) : ""));
+        return !columnOptions ? null : columnOptions.map(co => getTokenString(co) + (co.displayName ? ("~" +  scapeTilde(co.displayName)) : ""));
     }
 
     export function stringValue(value: any): string {
@@ -382,13 +410,23 @@ module Encoder {
         if (!value)
             return value;
 
+        if (Array.isArray(value))
+            return (value as any[]).map(a => stringValue(a)).join("~");
+
         if (value.Type)
             value = toLite(value as IEntity);
 
         if (value.EntityType)
             return liteKey(value as Lite<IEntity>);
+        
+        return scapeTilde(value.toString());
+    }
 
-        return value.toString();
+    function scapeTilde(str: string) {
+        if (str == null)
+            return null;
+
+        return str.replace("~", "#|#");
     }
 }
 
@@ -408,12 +446,23 @@ module Decoder {
         if (!filters)
             return undefined;
         
-        return asArray(filters).map(val=> val.split(","))
-            .map(vals=> ({
-                columnName: vals[0],
-                operation: vals[1] as any,
-                value: vals[2]
-            }) as FilterOption);
+        return asArray(filters).map(val => {
+            var parts = val.split("~");
+
+            return {
+                columnName: parts[0],
+                operation: parts[1] as any as FilterOperation,
+                value: parts.length == 3 ? unscapeTildes(parts[2]) :
+                    parts.slice(2).map(a => unscapeTildes(a))
+            } as FilterOption;
+        });
+    }
+
+    function unscapeTildes(str: string) {
+        if (!str)
+            return str;
+
+        return str.replace("#|#", "~");
     }
 
     export function decodeOrders(orders: string | string[]): OrderOption[] {
@@ -433,8 +482,8 @@ module Decoder {
             return undefined;
 
         return asArray(columns).map(val=> ({
-            columnName: val.tryBefore(",") || val,
-            displayName: val.tryAfter(",")
+            columnName: val.tryBefore("~") || val,
+            displayName: unscapeTildes(val.tryAfter("~"))
         }) as ColumnOption);
     }
 }

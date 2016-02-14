@@ -4,7 +4,7 @@ import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { Dic, areEqual } from '../Globals'
 import { openModal, IModalProps } from '../Modals';
-import { FilterOperation, FilterOption, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType } from '../FindOptions'
+import { FilterOperation, FilterOption, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity, DynamicQuery } from '../Signum.Entities'
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
 import { Binding, IsByAll, getTypeInfos } from '../Reflection'
@@ -20,7 +20,7 @@ interface FilterBuilderProps extends React.Props<FilterBuilder> {
     lastToken: QueryToken;
 }
 
-export default class FilterBuilder extends React.Component<FilterBuilderProps, { }>  {
+export default class FilterBuilder extends React.Component<FilterBuilderProps, {}>  {
 
     handlerNewFilter = () => {
 
@@ -44,32 +44,33 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
         return (
             <div className="panel panel-default sf-filters form-xs">
                 <div className="panel-body sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-                    { <table className="table table-condensed">
-                        <thead>
-                            <tr>
-                                <th style={{ minWidth: "24px" }}></th>
-                                <th className="sf-filter-field-header">{ SearchMessage.Field.niceToString() }</th>
-                                <th>{ SearchMessage.Operation.niceToString() }</th>
-                                <th>{ SearchMessage.Value.niceToString() }</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {this.props.filterOptions.map((f, i) => <FilterComponent filter={f} key={i}
-                                onDeleteFilter={this.handlerDeleteFilter}
-                                subTokenOptions={this.props.subTokensOptions}
-                                queryDescription={this.props.queryDescription}
-                                tokenChanged ={this.props.tokenChanged} />) }
-                            <tr >
-                                <td colSpan={4}>
-                                    <a title={SearchMessage.AddFilter.niceToString() }
-                                        className="sf-line-button sf-create"
-                                        onClick={this.handlerNewFilter}>
-                                        <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{SearchMessage.AddFilter.niceToString() }
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    {
+                        <table className="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <th style={{ minWidth: "24px" }}></th>
+                                    <th className="sf-filter-field-header">{ SearchMessage.Field.niceToString() }</th>
+                                    <th>{ SearchMessage.Operation.niceToString() }</th>
+                                    <th>{ SearchMessage.Value.niceToString() }</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.props.filterOptions.map((f, i) => <FilterComponent filter={f} key={i}
+                                    onDeleteFilter={this.handlerDeleteFilter}
+                                    subTokenOptions={this.props.subTokensOptions}
+                                    queryDescription={this.props.queryDescription}
+                                    tokenChanged ={this.props.tokenChanged} />) }
+                                <tr >
+                                    <td colSpan={4}>
+                                        <a title={SearchMessage.AddFilter.niceToString() }
+                                            className="sf-line-button sf-create"
+                                            onClick={this.handlerNewFilter}>
+                                            <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{SearchMessage.AddFilter.niceToString() }
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     }
                 </div>
 
@@ -96,17 +97,17 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     handleTokenChanged = (newToken: QueryToken) => {
 
         const f = this.props.filter;
-        
+
         if (newToken == null) {
             f.operation = null;
             f.value = null;
         }
         else {
 
-            if (!areEqual(f.token, newToken, a=> a.filterType)) {
+            if (!areEqual(f.token, newToken, a => a.filterType)) {
                 const operations = filterOperations[newToken.filterType];
                 f.operation = operations && operations.firstOrNull();
-                f.value = null;
+                f.value = isList(f.operation) ? [null] : null;
             }
         }
         f.token = newToken;
@@ -117,8 +118,14 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     }
 
 
+
     handleChangeOperation = (event: React.FormEvent) => {
-        this.props.filter.operation = (event.currentTarget as HTMLSelectElement).value as any;
+        var operation = (event.currentTarget as HTMLSelectElement).value as any;
+        if (isList(operation) != isList(this.props.filter.operation))
+            this.props.filter.value = isList(operation) ? [this.props.filter.value] : this.props.filter.value[0];
+        
+        this.props.filter.operation = operation;
+
         this.forceUpdate();
     }
 
@@ -160,26 +167,98 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     renderValue() {
         const f = this.props.filter;
 
+        if (isList(f.operation))
+            return <MultiValue values={f.value} createAppropiateControl={this.handleCreateAppropiateControl} frozen={this.props.filter.frozen}/>;
+
         const ctx = new TypeContext<any>(null, { formGroupStyle: FormGroupStyle.None, readOnly: f.frozen }, null, new Binding<any>("value", f), null);
 
-        switch (f.token.filterType) {
+        return this.handleCreateAppropiateControl(ctx);
+    }
+
+    handleCreateAppropiateControl = (ctx: TypeContext<any>): React.ReactElement<any> => {
+
+        var token = this.props.filter.token;
+
+        switch (token.filterType) {
             case FilterType.Lite:
-                if (f.token.type.name == IsByAll || getTypeInfos(f.token.type).some(ti=> !ti.isLowPopupation))
-                    return <EntityLine ctx={ctx} type={f.token.type} create={false} />;
+                if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopupation))
+                    return <EntityLine ctx={ctx} type={token.type} create={false} />;
                 else
-                    return <EntityCombo ctx={ctx} type={f.token.type} create={false}/>
+                    return <EntityCombo ctx={ctx} type={token.type} create={false}/>
             case FilterType.Embedded:
-                return <EntityLine ctx={ctx} type={f.token.type} create={false} autoComplete={false} />;
+                return <EntityLine ctx={ctx} type={token.type} create={false} autoComplete={false} />;
             case FilterType.Enum:
-                const ti = getTypeInfos(f.token.type).single();
+                const ti = getTypeInfos(token.type).single();
                 if (!ti)
-                    throw new Error(`EnumType ${f.token.type.name} not found`);
-                const members = Dic.getValues(ti.members).filter(a=> !a.isIgnored);
-                return <ValueLine ctx={ctx} type={f.token.type} formatText={f.token.format} unitText={f.token.unit} comboBoxItems={members}/>;
+                    throw new Error(`EnumType ${token.type.name} not found`);
+                const members = Dic.getValues(ti.members).filter(a => !a.isIgnored);
+                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members}/>;
             default:
-                return <ValueLine ctx={ctx} type={f.token.type} formatText={f.token.format} unitText={f.token.unit}/>;
+                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit}/>;
         }
     }
+}
+
+
+export interface MultiValueProps {
+    values: any[],
+    createAppropiateControl: (ctx: TypeContext<any>) => React.ReactElement<any>;
+    frozen: boolean;
+}
+
+export class MultiValue extends React.Component<MultiValueProps, void> {
+
+    handleDeleteValue = (index: number) => {
+
+        this.props.values.removeAt(index);
+        this.forceUpdate();
+
+    }
+
+    handleAddValue = () => {
+        this.props.values.push(null);
+        this.forceUpdate();
+    }
+
+    render() {
+        return (
+            <table className="table table-condensed" style={{ marginBottom: "0px" }}>
+                <tbody>
+                    {
+                        this.props.values.map((v, i) =>
+                            <tr key={i}>
+                                <td>
+                                    {!this.props.frozen &&
+                                        <a title={SearchMessage.DeleteFilter.niceToString() }
+                                            className="sf-line-button sf-remove"
+                                            onClick={() => this.handleDeleteValue(i) }>
+                                            <span className="glyphicon glyphicon-remove"/>
+                                        </a>}
+                                </td>
+                                <td>
+                                    {this.props.createAppropiateControl(new TypeContext<any>(null,
+                                        {
+                                            formGroupStyle: FormGroupStyle.None, readOnly: this.props.frozen
+                                        }, null, new Binding<any>(i, this.props.values), null)) }
+                                </td>
+                            </tr>)
+                    }
+                    <tr >
+                        <td colSpan={4}>
+                            <a title={SearchMessage.AddFilter.niceToString() }
+                                className="sf-line-button sf-create"
+                                onClick={this.handleAddValue}>
+                                <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{SearchMessage.AddFilter.niceToString() }
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        );
+
+    }
+
 }
 
 

@@ -229,6 +229,9 @@ export interface ColumnDescription {
     displayName: string;
 }
 
+export function isList(fo: FilterOperation) {
+    return fo == FilterOperation.IsIn || fo == FilterOperation.IsNotIn;
+}
 
 
 export const filterOperations: { [a: string]: FilterOperation[] } = {};
@@ -243,7 +246,8 @@ filterOperations[FilterType.String as any] = [
     FilterOperation.NotStartsWith,
     FilterOperation.NotEndsWith,
     FilterOperation.NotLike,
-    FilterOperation.IsIn
+    FilterOperation.IsIn,
+    FilterOperation.IsNotIn
 ];
 
 filterOperations[FilterType.DateTime as any] = [
@@ -253,7 +257,8 @@ filterOperations[FilterType.DateTime as any] = [
     FilterOperation.GreaterThanOrEqual,
     FilterOperation.LessThan,
     FilterOperation.LessThanOrEqual,
-    FilterOperation.IsIn
+    FilterOperation.IsIn,
+    FilterOperation.IsNotIn
 ];
 
 filterOperations[FilterType.Integer as any] = [
@@ -263,7 +268,8 @@ filterOperations[FilterType.Integer as any] = [
     FilterOperation.GreaterThanOrEqual,
     FilterOperation.LessThan,
     FilterOperation.LessThanOrEqual,
-    FilterOperation.IsIn
+    FilterOperation.IsIn,
+    FilterOperation.IsNotIn
 ];
 
 filterOperations[FilterType.Decimal as any] = [
@@ -273,25 +279,29 @@ filterOperations[FilterType.Decimal as any] = [
     FilterOperation.GreaterThanOrEqual,
     FilterOperation.LessThan,
     FilterOperation.LessThanOrEqual,
-    FilterOperation.IsIn
+    FilterOperation.IsIn,
+    FilterOperation.IsNotIn
 ];
 
 filterOperations[FilterType.Enum as any] = [
     FilterOperation.EqualTo,
     FilterOperation.DistinctTo,
-    FilterOperation.IsIn
+    FilterOperation.IsIn,
+    FilterOperation.IsNotIn
 ];
 
 filterOperations[FilterType.Guid as any] = [
     FilterOperation.EqualTo,
     FilterOperation.DistinctTo,
-    FilterOperation.IsIn
+    FilterOperation.IsIn,
+    FilterOperation.IsNotIn
 ];
 
 filterOperations[FilterType.Lite as any] = [
     FilterOperation.EqualTo,
     FilterOperation.DistinctTo,
-    FilterOperation.IsIn
+    FilterOperation.IsIn,
+    FilterOperation.IsNotIn
 ];
 
 filterOperations[FilterType.Embedded as any] = [

@@ -298,16 +298,16 @@ export interface IBinding<T> {
 export class Binding<T> implements IBinding<T> {
 
     constructor(
-        public memberName: string,
+        public member: string | number,
         public parentValue: any) {
     }
 
     getValue() : T {       
-        return this.parentValue[this.memberName];
+        return this.parentValue[this.member];
     }
     setValue(val: T) {
-        var oldVal = this.parentValue[this.memberName];
-        this.parentValue[this.memberName] = val;        
+        var oldVal = this.parentValue[this.member];
+        this.parentValue[this.member] = val;        
 
         if (oldVal != val && (this.parentValue as ModifiableEntity).Type) {
             (this.parentValue as ModifiableEntity).modified = true;

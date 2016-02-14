@@ -271,6 +271,7 @@ ul.nav-tabs {
 .form-xs .rw-select>.rw-btn  {
     line-height: 18px;
     width: 1.5em;
+    border-top:0px;
 }
 
 .form-xs .rw-dropdownlist>.rw-input {
@@ -363,6 +364,7 @@ ul.nav-tabs {
 .form-sm .rw-select>.rw-btn  {
     line-height: 24px;
     width: 1.5em;
+    border-top:0px;
 }
 
 .form-sm .rw-dropdownlist>.rw-input {
