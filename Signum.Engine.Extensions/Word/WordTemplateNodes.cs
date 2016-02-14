@@ -636,7 +636,7 @@ namespace Signum.Engine.Word
             this.ValueProvider.Synchronize(sc, "@any");
 
             if (Operation != null)
-                sc.SynchronizeValue(this.ValueProvider.Type, ref Value, Operation == FilterOperation.IsIn);
+                sc.SynchronizeValue(this.ValueProvider.Type, ref Value, Operation.Value.IsList());
 
             using (sc.NewScope())
             {
@@ -812,7 +812,7 @@ namespace Signum.Engine.Word
             this.ValueProvider.Synchronize(sc, "@if");
 
             if (Operation != null)
-                sc.SynchronizeValue(this.ValueProvider.Type, ref Value, Operation == FilterOperation.IsIn);
+                sc.SynchronizeValue(this.ValueProvider.Type, ref Value, Operation.Value.IsList());
 
             using (sc.NewScope())
             {

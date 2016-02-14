@@ -70,7 +70,7 @@ namespace Signum.Engine.Templating
 
                 Expression token = Expression.Constant(obj, type);
 
-                Expression value = Expression.Constant(FilterValueConverter.Parse(valueString, type, operation == FilterOperation.IsIn), type);
+                Expression value = Expression.Constant(FilterValueConverter.Parse(valueString, type, operation.Value.IsList()), type);
 
                 Expression newBody = QueryUtils.GetCompareExpression(operation.Value, token, value, inMemory: true);
                 var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
@@ -174,7 +174,7 @@ namespace Signum.Engine.Templating
                 return;
 
             object rubish;
-            string error = FilterValueConverter.TryParse(valueString, Type, out rubish, Operation == FilterOperation.IsIn);
+            string error = FilterValueConverter.TryParse(valueString, Type, out rubish, Operation.Value.IsList());
             
             if (error.HasText())
                 addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), error));
@@ -300,7 +300,7 @@ namespace Signum.Engine.Templating
             {
                 var type = this.Type;
 
-                object val = FilterValueConverter.Parse(stringValue, type, operation == FilterOperation.IsIn);
+                object val = FilterValueConverter.Parse(stringValue, type, operation.Value.IsList());
 
                 Expression value = Expression.Constant(val, type);
 
