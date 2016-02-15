@@ -83,7 +83,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
             return Promise.resolve(entityOrLite as ModifiableEntity);
         } else {
-            if (tr.name != IsByAll && !tr.name.split(',').contains(entityType))
+            if (tr.name != IsByAll && !tr.name.split(',').map(a => a.trim()).contains(entityType))
                 throw new Error(`Impossible to convert '${entityType}' to '${tr.name}'`);
 
             if (isLite == tr.isLite)

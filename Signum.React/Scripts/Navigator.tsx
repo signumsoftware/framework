@@ -10,7 +10,7 @@ import { EntityComponent, EntityComponentProps } from './Lines';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
 import PopupFrame from './Frames/PopupFrame';
-
+import { ViewReplacer } from  './Frames/ReactVisitor'
 
 export let NotFound: __React.ComponentClass<any>;
 
@@ -56,14 +56,16 @@ export function navigateRoute(typeOfEntity: any, id: any = null) {
     return currentHistory.createHref("/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id);
 }
 
-export const entitySettings: { [type: string]: EntitySettingsBase } = {};
+export const entitySettings: { [type: string]: EntitySettingsBase<any> } = {};
 
-export function addSettings(...settings: EntitySettingsBase[]) {
+export function addSettings(...settings: EntitySettingsBase<any>[]) {
     settings.forEach(s=> Dic.addOrThrow(entitySettings, s.type.typeName, s));
 }
 
 
-export function getSettings(type: PseudoType): EntitySettingsBase {
+export function getSettings<T extends ModifiableEntity>(type: Type<T>): EntitySettingsBase<T>;
+export function getSettings(type: PseudoType): EntitySettingsBase<any>;
+export function getSettings(type: PseudoType): EntitySettingsBase<any> {
     const typeName = getTypeName(type);
 
     return entitySettings[typeName];
@@ -242,10 +244,10 @@ export module API {
 }
 
 
-export abstract class EntitySettingsBase {
-    public type: IType;
+export abstract class EntitySettingsBase<T extends ModifiableEntity> {
+    type: Type<T>;
 
-    public avoidPopup: boolean;
+    avoidPopup: boolean;
 
     abstract onIsCreable(isSearch: boolean): boolean;
     abstract onIsFindable(): boolean;
@@ -253,17 +255,30 @@ export abstract class EntitySettingsBase {
     abstract onIsNavigable(customView: boolean, isSearch: boolean): boolean;
     abstract onIsReadonly(): boolean;
 
-    getToString: (entity: ModifiableEntity) => string; 
+    getToString: (entity: T) => string;
 
-    abstract onGetComponent(entity: ModifiableEntity): Promise<React.ComponentClass<EntityComponentProps<any>>>;
+    getComponent: (entity: T) => Promise<{ default: React.ComponentClass<EntityComponentProps<T>> }>;
 
-    constructor(type: IType) {
+    onGetComponent(entity: ModifiableEntity): Promise<React.ComponentClass<EntityComponentProps<T>>> {
+        return this.getComponent(entity as T).then(a => a.default);
+    }
+
+    viewOverrides: Array<(replacer: ViewReplacer<T>) => void>;
+
+    overrideView(override: (replacer: ViewReplacer<T>) => void) {
+        if (this.viewOverrides == null)
+            this.viewOverrides = [];
+
+        this.viewOverrides.push(override);
+    }
+    
+    constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>) {
         this.type = type;
+        this.getComponent = getComponent;
     }
 }
 
-export class EntitySettings<T extends Entity> extends EntitySettingsBase {
-    public type: Type<T>;
+export class EntitySettings<T extends Entity> extends EntitySettingsBase<T> {    
 
     isCreable: EntityWhen;
     isFindable: boolean;
@@ -271,15 +286,9 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
     isNavigable: EntityWhen;
     isReadOnly: boolean;
 
-    getToString: (entity: T) => string;
-
-    getComponent: (entity: T) => Promise<{ default: React.ComponentClass<EntityComponentProps<T>> }>;
-
     constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
         options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean }) {
-        super(type);
-
-        this.getComponent = getComponent;
+        super(type, getComponent);
 
         switch (type.typeInfo().entityKind) {
             case EntityKind.SystemString:
@@ -376,30 +385,17 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase {
     onIsReadonly(): boolean {
         return this.isReadOnly;
     }
-
-
-    onGetComponent(entity: ModifiableEntity): Promise<React.ComponentClass<EntityComponentProps<T>>>{
-        return this.getComponent(entity as T).then(a=> a.default);
-    }
-    
 }
 
-export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySettingsBase {
-    public type: Type<T>;
-
-    getComponent: (entity: T) => Promise<{ default: React.ComponentClass<EntityComponentProps<T>> }>;
+export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySettingsBase<T> {
 
     isCreable: boolean;
     isViewable: boolean;
     isReadOnly: boolean;
-
-    getToString: (entity: T) => string;
-
+    
     constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
         options?: { isCreable?: boolean; isViewable?: boolean; isReadOnly?: boolean }) {
-        super(type);
-
-        this.getComponent = getComponent;
+        super(type, getComponent);
 
         Dic.extend(this, options);
     }

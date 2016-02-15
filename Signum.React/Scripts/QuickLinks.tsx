@@ -94,17 +94,19 @@ export class QuickLinkWidget extends React.Component<{ quickLinks: QuickLink[] }
     render() {
 
         var a = (
-            <a className={classes("badge", "sf-widgets-active", "sf-quicklinks") }
+            <a 
+                className={classes("badge", "sf-widgets-active", "sf-quicklinks") }
                 title={QuickLinkMessage.Quicklinks.niceToString() }
                 role="button"
                 href="#"
-                data-toggle="dropdown"  onClick={e => e.preventDefault() } >
+                data-toggle="dropdown"
+                onClick={e => e.preventDefault() } >
                 {this.props.quickLinks.length}
             </a >
         );
 
         return (
-            <Dropdown>
+            <Dropdown id="quickLinksWidget" pullRight>
                 {React.cloneElement(a, { "bsRole": "toggle" }) }
                 <Dropdown.Menu>
                     { this.props.quickLinks.orderBy(a => a.order).map((a, i) => a.toMenuItem(i)) }

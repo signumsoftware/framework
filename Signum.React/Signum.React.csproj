@@ -191,6 +191,7 @@
     <TypeScriptCompile Include="Scripts\Exceptions\ExceptionClient.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Notify.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\ValidationErrors.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\ReactVisitor.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />

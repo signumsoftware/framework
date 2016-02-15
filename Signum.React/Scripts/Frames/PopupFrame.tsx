@@ -30,7 +30,7 @@ interface PopupFrameState {
     pack?: EntityPack<ModifiableEntity>;
     modelState?: ModelState;
     component?: React.ComponentClass<EntityComponentProps<Entity>>;
-    entitySettings?: Navigator.EntitySettingsBase;
+    entitySettings?: Navigator.EntitySettingsBase<any>;
     propertyRoute?: PropertyRoute;
     savedEntity?: string;
     show?: boolean;

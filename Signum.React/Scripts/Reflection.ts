@@ -1,6 +1,4 @@
-﻿/// <reference path="globals.ts" />
-
-import { Dic } from './Globals';
+﻿import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState } from './Signum.Entities';
 import {ajaxPost, ajaxGet} from './Services';
 
@@ -347,9 +345,13 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
     if (m == null)
         return null;
 
+    var newBody = m[1];
 
+    newBody = newBody.replace(partialMixinRegex,
+        (...m) => `${m[2]}.mixins["${m[4]}"]`);
+    
     const realParentValue = m[1] == parameter ? parentValue :
-        eval(`(function(${parameter}){ return ${m[1]};})`)(parentValue);
+        eval(`(function(${parameter}){ return ${newBody};})`)(parentValue);
 
     return new Binding<T>(m[2], realParentValue);
 }
@@ -358,8 +360,8 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*return\s*(.*)\s*;\s*}$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
-const mixinRegex = /^getMixin\((.*),\s*([$a-zA-Z_][0-9a-zA-Z_$]*_Type)\s*\)$/
-
+const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)_Type\s*\)$/
+const partialMixinRegex = /(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)_Type\s*\)/
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
     
@@ -373,25 +375,20 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
     const result: LambdaMember[] = [];
 
     while (body != parameter) {
-        let m = memberRegex.exec(body);
-
-        if (m != null) {
+        let m: RegExpExecArray;
+        if (m = memberRegex.exec(body)) {
             result.push({ name: m[2], type: LambdaMemberType.Member });
             body = m[1];
         }
-
-        m = indexRegex.exec(body);
-
-        if (m != null) {
+        else if (m = indexRegex.exec(body)) {
             result.push({ name: m[2], type: LambdaMemberType.Indexer });
             body = m[1];
         }
-
-        m = mixinRegex.exec(body);
-
-        if (m != null) {
-            result.push({ name: m[2], type: LambdaMemberType.Mixin });
-            body = m[1];
+        else if (m = mixinRegex.exec(body)) {
+            result.push({ name: m[4], type: LambdaMemberType.Mixin });
+            body = m[2];
+        } else {
+            throw new Error(`Unexpected body in Property Route ${body}`);
         }
     }
 
@@ -573,7 +570,6 @@ export class PropertyRoute {
     rootType: TypeInfo; //Root
     member: MemberInfo; //Member
     mixinName: string; //Mixin
-    
 
     static root(typeInfo: TypeInfo) {
         return new PropertyRoute(null, PropertyRouteType.Root, typeInfo, null, null);
@@ -632,7 +628,7 @@ export class PropertyRoute {
             case PropertyRouteType.Root: return this.rootType;
 
             case PropertyRouteType.Field: return this.parent.closestTypeInfo();
-            case PropertyRouteType.Mixin: throw this.parent.closestTypeInfo();
+            case PropertyRouteType.Mixin: return this.parent.closestTypeInfo();
             case PropertyRouteType.MListItem: return this.parent.closestTypeInfo();
             case PropertyRouteType.LiteEntity: return this.parent.closestTypeInfo();
         }
@@ -648,22 +644,20 @@ export class PropertyRoute {
         }
     }
 
-    
-   
-
     addMember(member: LambdaMember): PropertyRoute {
 
         if (member.type == LambdaMemberType.Member) {
 
-            const ref = this.typeReference();
-            if (ref.isLite) {
-                if (member.name != "entity")
-                    throw new Error("Entity expected");
+            if (this.propertyRouteType == PropertyRouteType.Field) {
+                const ref = this.typeReference();
 
-                return PropertyRoute.liteEntity(this);    
-            }
+                if (ref.isLite) {
+                    if (member.name != "entity")
+                        throw new Error("Entity expected");
 
-            if (this.propertyRouteType != PropertyRouteType.Root) {
+                    return PropertyRoute.liteEntity(this);
+                }
+          
                 const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations");
                 if (ti) {
                     const m = ti.members[member.name];
@@ -674,11 +668,11 @@ export class PropertyRoute {
                 }
             }
 
-            const memberName = this.propertyRouteType == PropertyRouteType.Root ? member.name :
-                this.propertyRouteType == PropertyRouteType.MListItem ? this.propertyPath() + member.name :
-                    this.propertyPath() + "." + member.name;
+            const memberName = this.propertyRouteType == PropertyRouteType.Root ? member.name.firstUpper() :
+                this.propertyRouteType == PropertyRouteType.MListItem ? this.propertyPath() + member.name.firstUpper() :
+                    this.propertyPath() + "." + member.name.firstUpper();
 
-            const m = this.closestTypeInfo().members[memberName.firstUpper()];
+            const m = this.closestTypeInfo().members[memberName];
             if (!m)
                 throw new Error(`member '${memberName}' not found`)
 

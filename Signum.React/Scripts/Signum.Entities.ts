@@ -330,6 +330,7 @@ export module SearchMessage {
     export const Field = new MessageKey("SearchMessage", "Field");
     export const AddColumn = new MessageKey("SearchMessage", "AddColumn");
     export const AddFilter = new MessageKey("SearchMessage", "AddFilter");
+    export const AddValue = new MessageKey("SearchMessage", "AddValue");
     export const DeleteFilter = new MessageKey("SearchMessage", "DeleteFilter");
     export const Filters = new MessageKey("SearchMessage", "Filters");
     export const Find = new MessageKey("SearchMessage", "Find");
