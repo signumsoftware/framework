@@ -278,7 +278,7 @@ namespace Signum.Windows
             if (Token == null || Value is Func<object>)
                 return;
 
-            if (Operation == FilterOperation.IsIn)
+            if (Operation.IsList())
             {
                 RealValue = Value;
                 return;

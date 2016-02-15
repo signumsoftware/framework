@@ -238,17 +238,18 @@ export class MultiValue extends React.Component<MultiValueProps, void> {
                                 <td>
                                     {this.props.createAppropiateControl(new TypeContext<any>(null,
                                         {
-                                            formGroupStyle: FormGroupStyle.None, readOnly: this.props.frozen
+                                            formGroupStyle: FormGroupStyle.None,
+                                            readOnly: this.props.frozen
                                         }, null, new Binding<any>(i, this.props.values), null)) }
                                 </td>
                             </tr>)
                     }
                     <tr >
                         <td colSpan={4}>
-                            <a title={SearchMessage.AddFilter.niceToString() }
+                            <a title={SearchMessage.AddValue.niceToString() }
                                 className="sf-line-button sf-create"
                                 onClick={this.handleAddValue}>
-                                <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{SearchMessage.AddFilter.niceToString() }
+                                <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{SearchMessage.AddValue.niceToString() }
                             </a>
                         </td>
                     </tr>

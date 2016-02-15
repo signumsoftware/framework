@@ -26,7 +26,7 @@ interface PageFrameState {
     pack?: EntityPack<Entity>;
     modelState?: ModelState;
     component?: React.ComponentClass<EntityComponentProps<Entity>>;
-    entitySettings?: Navigator.EntitySettingsBase;
+    entitySettings?: Navigator.EntitySettingsBase<any>;
     typeInfo?: TypeInfo;
 }
 
@@ -143,7 +143,6 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
                 <ValidationErrors modelState={this.state.modelState}/>
                 { embeddedWidgets.top }
                 <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
-                    {this}
                     {this.state.component && React.createElement<EntityComponentProps<Entity>>(this.state.component, { ctx: ctx, frame: frame }) }
                 </div>
                 { embeddedWidgets.bottom }

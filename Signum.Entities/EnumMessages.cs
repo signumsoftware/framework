@@ -126,6 +126,8 @@ Lose changes?")]
         AddColumn,
         [Description("Add filter")]
         AddFilter,
+        [Description("Add value")]
+        AddValue,
         [Description("Delete filter")]
         DeleteFilter,
         Filters,

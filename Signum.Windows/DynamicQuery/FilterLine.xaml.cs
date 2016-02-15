@@ -54,7 +54,7 @@ namespace Signum.Windows
 
             var newValue = e.AddedItems.Cast<FilterOperation?>().SingleOrDefault();
 
-            if (newValue == FilterOperation.IsIn)
+            if (newValue.HasValue && newValue.Value.IsList())
             {
                 if (!(f.Value is IList))
                 {
@@ -82,7 +82,7 @@ namespace Signum.Windows
 
             valueContainer.Children.Clear();
 
-            if (f.Operation != FilterOperation.IsIn)
+            if (!f.Operation.IsList())
             {
                 FillLite(f.RealValue as Lite<IEntity>);
 
