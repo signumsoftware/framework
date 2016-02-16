@@ -3,7 +3,7 @@
 @using Signum.Engine
 @model Context
 
-@{ 
+@{
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Implementations implementations = entityColumn.Implementations.Value;
@@ -19,7 +19,7 @@
 }
 
 @if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
-{ 
+{
     <tr class="extract">
         <td>
             <div class="sf-td-multiply alert alert-warning">
@@ -33,26 +33,31 @@
 @foreach (var row in queryResult.Rows)
 {
     Lite<IEntity> entityField = row.Entity;
-    <tr data-entity="@entityField.Key()" @(rowAttributes == null ? null : rowAttributes(Html, row))>
+    <tr data-entity="@(entityField?.Key() ?? "")" @(rowAttributes == null ? null : rowAttributes(Html, row))>
         @if (allowSelection)
         {
-            <td style="text-align:center">@Html.CheckBox(
-                    Model.Compose("rowSelection", row.Index.ToString()),
-                        new
-                        {
-                            @class = "sf-td-selection",
-                            value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.EntityType) + "__" + entityField.ToString()
-                        })</td>
+            <td style="text-align:center">@if (entityField != null)
+                {
+                    @Html.CheckBox(Model.Compose("rowSelection", row.Index.ToString()),
+                    new
+                    {
+                        @class = "sf-td-selection",
+                        value = entityField.Id.ToString() + "__" + Navigator.ResolveWebTypeName(entityField.EntityType) + "__" + entityField.ToString()
+                    })
+                }</td>
         }
         @if (navigable)
         {
-            <td>@((entityFormatter ?? QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(row)).Formatter)(Html, row))</td>
+            <td>@if (entityField != null)
+                {
+                    @((entityFormatter ?? QuerySettings.EntityFormatRules.Last(fr => fr.IsApplyable(row)).Formatter)(Html, row))
+                }</td>
         }
-        @foreach (var col in queryResult.Columns.Where(a=>a.Column.IsVisible))
+        @foreach (var col in queryResult.Columns.Where(a => a.Column.IsVisible))
         {
             var value = row[col];
             var ft = formatters[col.Index];
-            
+
             <td @ft.WriteDataAttribute(value) style="@(ft.TextAlign == null ? null : "text-align:" + ft.TextAlign)">@ft.Formatter(Html, value)</td>
         }
     </tr>
