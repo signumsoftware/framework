@@ -2,11 +2,12 @@
 
 import * as React from 'react'
 import { Route } from 'react-router'
-import { Type, IType, EntityKind, TypeInfoDictionary } from '../../../Framework/Signum.React/Scripts/Reflection';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { addSettings, EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { UserEntity, UserEntity_Type, RoleEntity_Type } from './Signum.Entities.Authorization'
+import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
+import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import { UserEntity, UserEntity_Type, UserOperation, RoleEntity_Type } from './Signum.Entities.Authorization'
 import Login from './Login/Login';
 
 export let userTicket: boolean;
@@ -23,8 +24,8 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 }
 
 export function startAdmin() {
-    addSettings(new EntitySettings(UserEntity_Type, e => new Promise(resolve => require(['./Templates/User'], resolve))));
-    addSettings(new EntitySettings(RoleEntity_Type, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
+    Navigator.addSettings(new EntitySettings(UserEntity_Type, e => new Promise(resolve => require(['./Templates/User'], resolve))));
+    Navigator.addSettings(new EntitySettings(RoleEntity_Type, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
 }
 
 export function currentUser(): UserEntity {
