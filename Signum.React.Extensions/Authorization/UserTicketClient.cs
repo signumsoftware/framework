@@ -5,14 +5,14 @@ using System.Web;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Utilities;
+using Signum.React.Authorization;
 
 namespace Signum.React.Auth
 {
-    public class UserTicketClient
+    public class UserTicketServer
     {
-        //public static string CookieName = "sfUser";
-        public static Func<string> CookieNameFunc = () => "sfUser";
-        public static string CookieName { get { return CookieNameFunc(); } }
+        public static Func<string> OnCookieName = () => "sfUser";
+        public static string CookieName { get { return OnCookieName(); } }
 
         public static bool LoginFromCookie()
         {
@@ -30,14 +30,14 @@ namespace Signum.React.Auth
                            System.Web.HttpContext.Current.Request.UserHostAddress,
                            ref ticketText);
 
-                    AuthController.OnUserPreLogin(null, user);
+                    AuthServer.OnUserPreLogin(null, user);
 
                     System.Web.HttpContext.Current.Response.Cookies.Add(new HttpCookie(CookieName, ticketText)
                     {
                         Expires = DateTime.UtcNow.Add(UserTicketLogic.ExpirationInterval),
                     });
 
-                    AuthController.AddUserSession(user);
+                    AuthServer.AddUserSession(user);
                     return true;
                 }
                 catch

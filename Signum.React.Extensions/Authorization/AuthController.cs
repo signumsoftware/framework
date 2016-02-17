@@ -11,28 +11,12 @@ using Signum.Entities.Authorization;
 using Signum.Services;
 using Signum.Utilities;
 using Signum.React.Facades;
+using Signum.React.Authorization;
 
 namespace Signum.React.Auth
 {
     public class AuthController : ApiController
     {
-        public static bool MergeInvalidUsernameAndPasswordMessages = false;
-
-        public static event Action<ApiController, UserEntity> UserPreLogin;
-        public static event Action<UserEntity> UserLogged;
-        public static event Action UserLoggingOut;
-
-
-        public static void Start()
-        {
-            ReflectionServer.GetContext = () => new
-            {
-                Culture = ReflectionServer.GetCurrentValidCulture(),
-                Role = RoleEntity.Current,
-            };
-        }
-
-
         [Route("api/auth/login"), HttpPost]
         public LoginResponse Login([FromBody]LoginRequest data)
         {
@@ -50,7 +34,7 @@ namespace Signum.React.Auth
             }
             catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException)
             {
-                if (MergeInvalidUsernameAndPasswordMessages)
+                if (AuthServer.MergeInvalidUsernameAndPasswordMessages)
                 {
                     ModelState.AddModelError("userName", AuthMessage.InvalidUsernameOrPassword.NiceToString());
                     ModelState.AddModelError("password", AuthMessage.InvalidUsernameOrPassword.NiceToString());
@@ -67,7 +51,7 @@ namespace Signum.React.Auth
             }
             catch (IncorrectPasswordException)
             {
-                throw LoginError("password", MergeInvalidUsernameAndPasswordMessages ?
+                throw LoginError("password", AuthServer.MergeInvalidUsernameAndPasswordMessages ?
                     AuthMessage.InvalidUsernameOrPassword.NiceToString() :
                     AuthMessage.InvalidPassword.NiceToString());
             }
@@ -76,10 +60,10 @@ namespace Signum.React.Auth
 
             if (data.rememberMe == true)
             {
-                UserTicketClient.SaveCookie();
+                UserTicketServer.SaveCookie();
             }
 
-            AddUserSession(user);
+            AuthServer.AddUserSession(user);
 
             string message = AuthLogic.OnLoginMessage();
 
@@ -96,23 +80,15 @@ namespace Signum.React.Auth
         public void Logout()
         {
             var httpContext = System.Web.HttpContext.Current;
+            
+            AuthServer.UserLoggingOut?.Invoke();
 
-            if (UserLoggingOut != null)
-                UserLoggingOut();
-
-            UserTicketClient.RemoveCookie();
+            UserTicketServer.RemoveCookie();
 
             httpContext.Session.Abandon();
         }
 
-        internal static void OnUserPreLogin(ApiController controller, UserEntity user)
-        {
-            if (UserPreLogin != null)
-            {
-                UserPreLogin(controller, user);
-            }
-        }
-
+       
         private HttpResponseException LoginError(string field, string error)
         {
             ModelState.AddModelError(field, error);
@@ -132,12 +108,6 @@ namespace Signum.React.Auth
             public UserEntity userEntity { get; set; }
         }
 
-        public static void AddUserSession(UserEntity user)
-        {
-            UserEntity.Current = user;
 
-            if (UserLogged != null)
-                UserLogged(user);
-        }
     }
 }

@@ -6,7 +6,7 @@ import { ValueLine, ValueLineType, EntityComponent, EntityLine, EntityCombo, Ent
 
 export default class Role extends EntityComponent<RoleEntity> {
 
-    render() {
+    renderEntity() {
         return (
             <div>
                 <ValueLine ctx={this.subCtx(e => e.name) } />
@@ -18,7 +18,7 @@ export default class Role extends EntityComponent<RoleEntity> {
 
     rolesMessage(): string {
         return AuthAdminMessage.NoRoles.niceToString() + " ⇒ " +
-            (this.value.mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).niceToString();
+            (this.entity.mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).niceToString();
     }
 }
 
