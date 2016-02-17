@@ -28,7 +28,7 @@ namespace Signum.React.ApiControllers
 
             var entity = OperationLogic.ServiceConstruct(type, operation, request.args);
 
-            return EntityServer.GetEntityPack(entity);
+            return SignumServer.GetEntityPack(entity);
         }
 
         [Route("api/operation/constructFromEntity"), HttpPost, ValidateModel]
@@ -38,7 +38,7 @@ namespace Signum.React.ApiControllers
 
             var entity = OperationLogic.ServiceConstructFrom(request.entity, operation, request.args);
 
-            return EntityServer.GetEntityPack(entity);
+            return SignumServer.GetEntityPack(entity);
         }
 
         [Route("api/operation/constructFromLite"), HttpPost, ValidateModel]
@@ -48,7 +48,7 @@ namespace Signum.React.ApiControllers
 
             var entity = OperationLogic.ServiceConstructFromLite(request.lite, operation, request.args);
 
-            return EntityServer.GetEntityPack(entity);
+            return SignumServer.GetEntityPack(entity);
         }
 
       
@@ -59,7 +59,7 @@ namespace Signum.React.ApiControllers
 
             var entity = OperationLogic.ServiceExecute(request.entity, operation, request.args);
 
-            return EntityServer.GetEntityPack(entity);
+            return SignumServer.GetEntityPack(entity);
         }
 
 
@@ -70,7 +70,7 @@ namespace Signum.React.ApiControllers
 
             var entity = OperationLogic.ServiceExecuteLite(request.lite, operation, request.args);
 
-            return EntityServer.GetEntityPack(entity);
+            return SignumServer.GetEntityPack(entity);
         }
 
         [Route("api/operation/deleteEntity"), HttpPost, ValidateModel]
@@ -122,7 +122,7 @@ namespace Signum.React.ApiControllers
 
             var entity = OperationLogic.ServiceConstructFromMany(request.lites, type, operation, request.args);
 
-            return EntityServer.GetEntityPack(entity);
+            return SignumServer.GetEntityPack(entity);
         }
 
         [Route("api/operation/constructFromMultiple"), HttpPost, ValidateModel]

@@ -46,6 +46,16 @@ namespace Signum.React.Json
         public readonly Func<object, object> GetValue;
         public readonly Action<object, object> SetValue;
 
+
+        public Action<ReadJsonPropertyContext> CustomReadJsonProperty { get; set; }
+        public Action<WriteJsonPropertyContext> CustomWriteJsonProperty { get; set; }
+
+        public bool AvoidValidate { get; set; }
+
+        public PropertyConverter()
+        {
+        }
+
         public PropertyConverter(Type type, IPropertyValidator pv)
         {
             this.PropertyValidator = pv;
@@ -59,6 +69,26 @@ namespace Signum.React.Json
         }
     }
 
+    public class ReadJsonPropertyContext
+    {
+        public JsonReader JsonReader { get; internal set; }
+        public JsonSerializer JsonSerializer { get; internal set; }
+
+        public PropertyConverter PropertyConverter { get; internal set; }
+        public ModifiableEntity Entity { get; internal set; }
+        public PropertyRoute ParentPropertyRoute { get; internal set; }
+    }
+
+    public class WriteJsonPropertyContext
+    {
+        public ModifiableEntity Entity { get; internal set; }
+        public string LowerCaseName { get; internal set; }
+        public PropertyConverter PropertyConverter { get; internal set; }
+        public PropertyRoute ParentPropertyRoute { get; internal set; }
+
+        public JsonWriter JsonWriter { get; internal set; }
+        public JsonSerializer JsonSerializer { get; internal set; }
+    }
 
     public class EntityJsonConverter : JsonConverter
     {
@@ -117,7 +147,7 @@ namespace Signum.React.Json
 
             foreach (var kvp in PropertyConverter.GetPropertyConverters(value.GetType()))
             {
-                WriteProperty(writer, serializer, mod, kvp.Key, kvp.Value, pr);
+                WriteJsonProperty(writer, serializer, mod, kvp.Key, kvp.Value, pr);
             }
 
             if (entity != null && entity.Mixins.Any())
@@ -145,19 +175,34 @@ namespace Signum.React.Json
 
         public static Func<PropertyRoute, string> CanReadPropertyRoute;
 
-        public virtual void WriteProperty(JsonWriter writer, JsonSerializer serializer, ModifiableEntity mod, string lowerCaseName, PropertyConverter pv, PropertyRoute route)
+        public void WriteJsonProperty(JsonWriter writer, JsonSerializer serializer, ModifiableEntity mod, string lowerCaseName, PropertyConverter pc, PropertyRoute route)
         {
-            var pr = route.Add(pv.PropertyValidator.PropertyInfo);
-
-            string error = CanReadPropertyRoute?.Invoke(pr);
-
-            if (error != null)
-                return;
-
-            using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
+            if (pc.CustomWriteJsonProperty != null)
             {
-                writer.WritePropertyName(lowerCaseName);
-                serializer.Serialize(writer, pv.GetValue(mod));
+                pc.CustomWriteJsonProperty(new WriteJsonPropertyContext
+                {
+                    JsonWriter = writer,
+                    JsonSerializer = serializer,
+                    LowerCaseName = lowerCaseName,
+                    Entity = mod,
+                    ParentPropertyRoute = route,
+                    PropertyConverter = pc
+                });
+            }
+            else
+            {
+                var pr = route.Add(pc.PropertyValidator.PropertyInfo);
+
+                string error = CanReadPropertyRoute?.Invoke(pr);
+
+                if (error != null)
+                    return;
+
+                using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
+                {
+                    writer.WritePropertyName(lowerCaseName);
+                    serializer.Serialize(writer, pc.GetValue(mod));
+                }
             }
         }
 
@@ -204,7 +249,7 @@ namespace Signum.React.Json
                     PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
 
                     reader.Read();
-                    SetProperty(reader, serializer, mod, pc, pr);
+                    ReadJsonProperty(reader, serializer, mod, pc, pr);
 
                     reader.Read();
                 }
@@ -215,30 +260,47 @@ namespace Signum.React.Json
             return mod;
         }
 
-        
 
-        public virtual void SetProperty(JsonReader reader, JsonSerializer serializer, ModifiableEntity entity, PropertyConverter pc, PropertyRoute parentRoute)
+
+        public void ReadJsonProperty(JsonReader reader, JsonSerializer serializer, ModifiableEntity entity, PropertyConverter pc, PropertyRoute parentRoute)
         {
-            object oldValue = pc.GetValue(entity);
-
-            var pi = pc.PropertyValidator.PropertyInfo;
-
-            var pr = parentRoute.Add(pi);
-           
-            using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
+            if (pc.CustomReadJsonProperty != null)
             {
-                object newValue = serializer.DeserializeValue(reader, pi.PropertyType, oldValue);
-
-                if (entity.IsGraphModified) //Only apply changes if the client notifies it, to avoid regressions
+                pc.CustomReadJsonProperty(new ReadJsonPropertyContext
                 {
-                    if (!object.Equals(newValue, oldValue))
+                    JsonReader = reader,
+                    JsonSerializer = serializer,
+                    Entity = entity,
+                    ParentPropertyRoute = parentRoute,
+                    PropertyConverter = pc,
+                });
+            }
+            else
+            {
+
+                object oldValue = pc.GetValue(entity);
+
+                var pi = pc.PropertyValidator.PropertyInfo;
+
+                var pr = parentRoute.Add(pi);
+
+                using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr))
+                {
+                    object newValue = serializer.DeserializeValue(reader, pi.PropertyType, oldValue);
+
+                    if (entity.IsGraphModified) //Only apply changes if the client notifies it, to avoid regressions
                     {
-                        AssertCanWrite(pr);
-                        pc.SetValue(entity, newValue);
+                        if (!object.Equals(newValue, oldValue))
+                        {
+                            AssertCanWrite(pr);
+                            pc.SetValue(entity, newValue);
+                        }
                     }
                 }
             }
         }
+
+     
 
         public static Func<PropertyRoute, string> CanWritePropertyRoute;
         public static void AssertCanWrite(PropertyRoute pr)
@@ -248,7 +310,7 @@ namespace Signum.React.Json
                 throw new UnauthorizedAccessException(error);
         }
 
-        public virtual ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             IdentityInfo identityInfo = ReadIdentityInfo(reader);
 
@@ -302,7 +364,7 @@ namespace Signum.React.Json
             }
         }
 
-        public virtual IdentityInfo ReadIdentityInfo(JsonReader reader)
+        public IdentityInfo ReadIdentityInfo(JsonReader reader)
         {
             IdentityInfo info = new IdentityInfo();
             reader.Read();
@@ -354,7 +416,7 @@ namespace Signum.React.Json
             }
         }
 
-        public virtual Type GetEntityType(string typeStr, Type objectType)
+        public Type GetEntityType(string typeStr, Type objectType)
         {
             var type = TypeLogic.TryGetType(typeStr);
             if (type == null)

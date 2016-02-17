@@ -155,7 +155,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         const tis = getTypeInfos(t).filter(predicate);
 
-        return SelectorPopup.chooseType<TypeInfo>(tis)
+        return SelectorPopup.chooseType(tis)
             .then(ti => ti ? ti.name : null);
     }
 

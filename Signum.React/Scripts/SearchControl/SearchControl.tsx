@@ -9,13 +9,14 @@ import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, Co
 import { SearchMessage, JavascriptMessage, Lite, IEntity, liteKey, is } from '../Signum.Entities'
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData} from '../Reflection'
 import * as Navigator from '../Navigator'
+import * as Constructor from '../Constructor'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
 import { renderContextualItems, ContextualItemsContext, MarkRowsDictionary } from './ContextualItems'
 import { ContextMenu } from './ContextMenu'
-
+import SelectorPopup from '../SelectorPopup'
 
 require("!style!css!./Search.css");
 
@@ -122,7 +123,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         const qd = this.state.queryDescription;
 
         const ti = getTypeInfos(qd.columns["Entity"].type);
-        
+
         const findOptions = Dic.extend({
             searchOnLoad: true,
             showHeader: true,
@@ -137,7 +138,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             columnOptions: [],
             orderOptions: [],
             filterOptions: []
-        },  expandSimpleColumnName(propsFindOptions));
+        }, expandSimpleColumnName(propsFindOptions));
 
         findOptions.columnOptions = Finder.mergeColumns(Dic.getValues(qd.columns), findOptions.columnOptionsMode, findOptions.columnOptions)
         if (!findOptions.orderOptions.length) {
@@ -317,7 +318,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                     onClick={this.handleToggleFilters}
                     title={ fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() }><span className="glyphicon glyphicon glyphicon-filter"></span></a >}
                 <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "") } onClick={this.handleSearch}>{SearchMessage.Search.niceToString() } </button>
-                {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={this.createTitle() }><span className="glyphicon glyphicon-plus"></span></a>}
+                {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={this.createTitle() } onClick={this.handleCreate}>
+                    <span className="glyphicon glyphicon-plus"></span>
+                </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton() }
                 {Finder.ButtonBarQuery.getContextBarElements(fo.queryName) }
                 {!this.props.externalFullScreenButton &&
@@ -326,6 +329,40 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                     </a> }
             </div>
         );
+    }
+
+
+    chooseType() {
+
+        const tis = getTypeInfos(this.state.queryDescription.columns["Entity"].type)
+            .filter(ti => Navigator.isCreable(ti));
+
+        return SelectorPopup.chooseType(tis)
+            .then(ti => ti ? ti.name : null);    
+    }
+
+    handleCreate = (ev: React.MouseEvent) => {
+
+        if (!this.state.findOptions.create)
+            return;
+
+        this.chooseType().then(tn => {
+            if (tn == null)
+                return;
+
+            Constructor.construct(tn).then(e => {
+                if (e == null)
+                    return;
+
+                if (ev.button == 2 || ev.ctrlKey) {
+
+                }
+                else
+                {
+                    Navigator.navigate(e);
+                }
+            });
+        });
     }
 
     handleFullScreenClick = (ev: React.MouseEvent) => {
@@ -754,8 +791,6 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
             if (!mark || mark.message == "")
                 return tr;
-
-          
         });
     }
 

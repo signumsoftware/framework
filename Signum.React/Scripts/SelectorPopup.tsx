@@ -60,12 +60,15 @@ export default class SelectorPopup extends React.Component<SelectorPopupProps, {
         if (options.length == 1)
             return Promise.resolve(options.single());
 
+        if (options.length == 0)
+            return Promise.resolve(null);
+
         return openModal<T>(<SelectorPopup
             options={options.map(a=> ({ value: a, displayName: display(a) }))}
             title={title || SelectorMessage.PleaseSelectAnElement.niceToString() } />);
     }
 
-    static chooseType<T>(options: Reflection.TypeInfo[], title?: string): Promise<Reflection.TypeInfo> {
+    static chooseType(options: Reflection.TypeInfo[], title?: string): Promise<Reflection.TypeInfo> {
 
         return SelectorPopup.chooseElement(options,
             a => a.niceName,

@@ -36,13 +36,13 @@ namespace Signum.React.ApiControllers
 
             var entity = Database.Retrieve(entityType, primaryKey);
 
-            return EntityServer.GetEntityPack(entity);
+            return SignumServer.GetEntityPack(entity);
         }
 
         [Route("api/entityPackEntity"), HttpPost]
         public EntityPackTS GetEntityPackEntity(Entity entity)
         { 
-            return EntityServer.GetEntityPack(entity);
+            return SignumServer.GetEntityPack(entity);
         }
 
         [Route("api/entityToStrings"), HttpPost]

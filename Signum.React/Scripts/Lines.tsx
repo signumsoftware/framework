@@ -41,12 +41,17 @@ export interface EntityComponentProps<T extends ModifiableEntity> {
 
 export abstract class EntityComponent<T extends ModifiableEntity> extends React.Component<EntityComponentProps<T>, {}>{
 
-    get value() {
+    get entity() {
         return this.props.ctx.value;
     }
 
-    subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R> {
-        return this.props.ctx.subCtx(property, styleOptions);
+    subCtx(styleOptions?: StyleOptions): TypeContext<T>
+    subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R>
+    subCtx(propertyOrStyleOptions: ((val: T) => any) | StyleOptions, styleOptions?: StyleOptions): TypeContext<any> {
+        if (typeof propertyOrStyleOptions != "function")
+            return this.props.ctx.subCtx(propertyOrStyleOptions as StyleOptions);
+        else
+            return this.props.ctx.subCtx(propertyOrStyleOptions as ((val: T) => any), styleOptions);
     }
 
     niceName(property: (val: T) => any) {

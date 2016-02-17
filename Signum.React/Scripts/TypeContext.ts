@@ -128,7 +128,7 @@ export interface StyleOptions {
 
 export interface BsColumns {
     xs?: number;
-    sm?: number;
+    sm: number;
     md?: number;
     lg?: number;
 }
@@ -156,8 +156,14 @@ export class TypeContext<T> extends StyleContext {
         this.modelState = modelState;
     }
 
-    
-    subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R> {
+    subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R>
+    subCtx(styleOptions?: StyleOptions): TypeContext<T>     
+    subCtx(propertyOrStyleOptions: ((val: T) => any) | StyleOptions, styleOptions?: StyleOptions): TypeContext<any>
+    {
+        if (typeof propertyOrStyleOptions != "function")
+            return new TypeContext<T>(this, propertyOrStyleOptions, this.propertyRoute, this.binding, this.modelState);
+        
+        const property = propertyOrStyleOptions as ((val: T) => any);
 
         const lambdaMembers = getLambdaMembers(property);
 
@@ -167,7 +173,7 @@ export class TypeContext<T> extends StyleContext {
 
         const binding = createBinding(this.value, property);
 
-        const result = new TypeContext<R>(this, styleOptions, subRoute, binding, subMS);
+        const result = new TypeContext<any>(this, styleOptions, subRoute, binding, subMS);
 
         return result;
     }

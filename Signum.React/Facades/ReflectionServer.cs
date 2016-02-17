@@ -39,7 +39,7 @@ namespace Signum.React.Facades
 
         public static Dictionary<Assembly, HashSet<string>> EntityAssemblies;
 
-        public static void Start()
+        internal static void Start()
         {
             DescriptionManager.Invalidated += () => cache.Clear();
 

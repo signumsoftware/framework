@@ -40,6 +40,9 @@ namespace Signum.React.Json
             validationContext.KeyBuilders.Push(propertyScope);
             foreach (var kvp in PropertyConverter.GetPropertyConverters(mod.GetType()))
             {
+                if (kvp.Value.AvoidValidate)
+                    continue;
+
                 propertyScope.PropertyName = kvp.Key;
                 if (SignumValidate(validationContext, kvp.Value.GetValue(mod)) ?? true)
                 {

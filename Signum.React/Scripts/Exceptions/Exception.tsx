@@ -6,14 +6,14 @@ import { TypeContext } from '../TypeContext'
 import { ValueLine, ValueLineType, EntityComponent, EntityLine } from '../Lines'
 
 export default class Exception extends EntityComponent<Basics.ExceptionEntity> {
-    render() {
+    renderEntity() {
         const sc = this.subCtx(a => a, { labelColumns: { sm: 4 } });
         return (
             <div>
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueLine ctx={sc.subCtx(f => f.environment) } />
-                        <ValueLine ctx={sc.subCtx(f => f.creationDate) } unitText={moment(this.value.creationDate).toUserInterface().fromNow() } />
+                        <ValueLine ctx={sc.subCtx(f => f.creationDate) } unitText={moment(this.entity.creationDate).toUserInterface().fromNow() } />
                         <EntityLine ctx={sc.subCtx(f => f.user) } />
                         <ValueLine ctx={sc.subCtx(f => f.version) } />
                         <ValueLine ctx={sc.subCtx(f => f.threadId) } />
@@ -30,8 +30,8 @@ export default class Exception extends EntityComponent<Basics.ExceptionEntity> {
                 </div>
                 <ValueLine ctx={this.subCtx(f => f.requestUrl) } />
                 <ValueLine ctx={this.subCtx(f => f.urlReferer) } />
-                <h3 style={ { color: "rgb(139, 0, 0)" } }>{this.value.exceptionType}</h3>
-                <pre><code>{this.value.exceptionMessage}</code></pre>
+                <h3 style={ { color: "rgb(139, 0, 0)" } }>{this.entity.exceptionType}</h3>
+                <pre><code>{this.entity.exceptionMessage}</code></pre>
                 <Tabs>
                     { this.codeTab(0, a => a.stackTrace) }
                     { this.codeTab(1, a => a.data) }

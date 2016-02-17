@@ -80,7 +80,7 @@ export function isCreable(type: PseudoType, isSearch?: boolean) {
 
     const es = entitySettings[typeName];
     if (!es)
-        return true;
+        return false;
 
     if (isSearch != null && !es.onIsCreable(isSearch))
         return false;
