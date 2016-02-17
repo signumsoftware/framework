@@ -48,7 +48,9 @@ export function operationInfos(ti: TypeInfo) {
     return Dic.getValues(ti.operations).filter(isOperationAllowed);
 }
 
-
+/**
+ * Operation Settings
+ */
 export abstract class OperationSettings {
 
     text: () => string;
@@ -59,19 +61,63 @@ export abstract class OperationSettings {
     }
 }
 
-export interface ConstructorOperationContext<T extends Entity> {
-    operationInfo: OperationInfo;
-    settings: ConstructorOperationSettings<T>
-}
 
+
+/**
+ * Constructor Operation Settings
+ */
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
     isVisible: (ctx: ConstructorOperationContext<T>) => boolean;
     onConstruct: (ctx: ConstructorOperationContext<T>) => Promise<T>;
 
-    constructor(operationSymbol: ConstructSymbol_Simple<T>) {
-        super(operationSymbol)
+    constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
+        super(operationSymbol);
+
+        Dic.extend(this, options);
     }
+}
+ 
+export interface ConstructorOperationOptions<T extends Entity> {
+    text?: () => string;
+    isVisible?: (ctx: ConstructorOperationContext<T>) => boolean;
+    onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<T>;
+}
+
+export interface ConstructorOperationContext<T extends Entity> {
+    operationInfo: OperationInfo;
+    settings: ConstructorOperationSettings<T>
+}
+
+
+
+/**
+ * Contextual Operation Settings
+ */
+export class ContextualOperationSettings<T extends Entity> extends OperationSettings {
+
+    isVisible: (ctx: ContextualOperationContext<T>) => boolean;
+    hideOnCanExecute: boolean;
+    confirmMessage: (ctx: ContextualOperationContext<T>) => string;
+    onClick: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
+    style: string;
+    order: number;
+
+    constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
+        super(operationSymbol);
+
+        Dic.extend(this, options);
+    }
+}
+
+export interface ContextualOperationOptions<T extends Entity> {
+    text: () => string;
+    isVisible: (ctx: ContextualOperationContext<T>) => boolean;
+    hideOnCanExecute: boolean;
+    confirmMessage: (ctx: ContextualOperationContext<T>) => string;
+    onClick: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
+    style: string;
+    order: number;
 }
 
 export interface ContextualOperationContext<T extends Entity> {
@@ -82,19 +128,7 @@ export interface ContextualOperationContext<T extends Entity> {
     canExecute: string;
 }
 
-export class ContextualOperationSettings<T extends Entity> extends OperationSettings {
 
-    isVisible: (ctx: ContextualOperationContext<T>) => boolean;
-    hideOnCanExecute: boolean;
-    confirmMessage: (ctx: ContextualOperationContext<T>) => string;
-    onClick: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
-    style: string;
-    order: number;
-
-    constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | ConstructSymbol_FromMany<any, T>) {
-        super(operationSymbol);
-    }
-}
 
 export interface EntityOperationContext<T extends Entity> {
     frame: EntityFrame<T>;
@@ -117,9 +151,28 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     order: number;
     style: string;
 
-    constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>) {
+    constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
         super(operationSymbol)
+
+        Dic.extend(this, options);
+
+        this.contextual = options.contextual ? new ContextualOperationSettings(operationSymbol, options.contextual) : null;
+        this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol, options.contextualFromMany) : null;
     }
+}
+
+export interface EntityOperationOptions<T extends Entity> {
+    contextual?: ContextualOperationOptions<T>;
+    contextualFromMany?: ContextualOperationOptions<T>;
+
+    text?: () => string;
+    isVisible?: (ctx: EntityOperationContext<T>) => boolean;
+    confirmMessage?: (ctx: EntityOperationContext<T>) => string;
+    onClick?: (ctx: EntityOperationContext<T>) => void;
+    hideOnCanExecute?: boolean;
+    group?: EntityOperationGroup;
+    order?: number;
+    style?: string;
 }
 
 

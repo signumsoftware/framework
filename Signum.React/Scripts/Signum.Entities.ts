@@ -53,13 +53,14 @@ export interface EntityPack<T extends ModifiableEntity> {
 }
 
 
-export type Type<T extends ModifiableEntity> = string;
 
-export type ExecuteSymbol<T extends IEntity> = OperationSymbol;
-export type DeleteSymbol<T extends IEntity> = OperationSymbol;
-export type ConstructSymbol_Simple<T extends Entity> = OperationSymbol;
-export type ConstructSymbol_From<T extends Entity, F extends IEntity> = OperationSymbol;
-export type ConstructSymbol_FromMany<T extends Entity, F extends IEntity> = OperationSymbol;
+//The interfaces add no real members, they are there just to force TS structural typing
+
+export interface ExecuteSymbol<T extends IEntity> extends OperationSymbol { _execute_?: T /*TRICK*/ };
+export interface DeleteSymbol<T extends IEntity> extends OperationSymbol { _delete_?: T /*TRICK*/ };
+export interface ConstructSymbol_Simple<T extends Entity> extends OperationSymbol { _construct_?: T /*TRICK*/ };
+export interface ConstructSymbol_From<T extends Entity, F extends IEntity> extends OperationSymbol { _constructFrom_?: T, _from_?: F /*TRICK*/ };
+export interface ConstructSymbol_FromMany<T extends Entity, F extends IEntity> extends OperationSymbol {  _constructFromMany_?: T, _from_?: F /*TRICK*/ };
 
 export var toStringDictionary: { [name: string]: (entity: ModifiableEntity) => string } = {};
 

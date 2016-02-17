@@ -99,7 +99,7 @@ namespace Signum.Engine.CodeGeneration
         {
             var assembly = Assembly.Load(Assembly.GetEntryAssembly().GetReferencedAssemblies().Single(a => a.Name == this.SolutionName + ".Entities"));
 
-            return assembly.GetTypes().Where(t => t.IsModifiableEntity() && !t.IsAbstract).ToList();
+            return assembly.GetTypes().Where(t => t.IsModifiableEntity() && !t.IsAbstract && !typeof(MixinEntity).IsAssignableFrom(t)).ToList();
         }
 
         protected virtual string WriteClientFile(Module mod)

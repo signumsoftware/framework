@@ -19,7 +19,7 @@ namespace Signum.Engine.CodeGeneration
         public static WebCodeGenerator Web = new WebCodeGenerator();
         public static WindowsCodeGenerator Windows = new WindowsCodeGenerator();
         public static ReactCodeGenerator React = new ReactCodeGenerator();
-        public static ReactCodeTransformer ReactTransformer = new ReactCodeTransformer();
+        public static ReactCodeConverter ReactTransformer = new ReactCodeConverter();
 
         public static void GenerateCodeConsole()
         {
