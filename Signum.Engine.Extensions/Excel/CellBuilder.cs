@@ -16,14 +16,14 @@ namespace Signum.Engine.Excel
 {
     public enum TemplateCells
     {
+        Title,
         Header,
-
         Date,
         DateTime,
         Text,
         General,
         Number,
-        Decimal
+        Decimal,
     }
 
     public class CellBuilder

@@ -50,35 +50,35 @@ namespace Signum.Engine.Excel
                 {
                     DefaultStyles = new Dictionary<TemplateCells, UInt32Value>
                     {
-                        { TemplateCells.Header, worksheet.FindCell("A1").StyleIndex },
-
-                        { TemplateCells.Date, worksheet.FindCell("B2").StyleIndex },
-                        { TemplateCells.DateTime, worksheet.FindCell("C2").StyleIndex },
-                        { TemplateCells.Text, worksheet.FindCell("D2").StyleIndex },
-                        { TemplateCells.General, worksheet.FindCell("E2").StyleIndex },
-                        { TemplateCells.Number, worksheet.FindCell("F2").StyleIndex },
-                        { TemplateCells.Decimal, worksheet.FindCell("G2").StyleIndex },
+                        { TemplateCells.Title, worksheet.FindCell("A1").StyleIndex },
+                        { TemplateCells.Header, worksheet.FindCell("A2").StyleIndex },
+                        { TemplateCells.Date, worksheet.FindCell("B3").StyleIndex },
+                        { TemplateCells.DateTime, worksheet.FindCell("C3").StyleIndex },
+                        { TemplateCells.Text, worksheet.FindCell("D3").StyleIndex },
+                        { TemplateCells.General, worksheet.FindCell("E3").StyleIndex },
+                        { TemplateCells.Number, worksheet.FindCell("F3").StyleIndex },
+                        { TemplateCells.Decimal, worksheet.FindCell("G3").StyleIndex },
                     }
                 };
             }
         }
         
-        public static byte[] WritePlainExcel(ResultTable results)
+        public static byte[] WritePlainExcel(ResultTable results,string title)
         {
             using (MemoryStream ms = new MemoryStream())
             {
-                WritePlainExcel(results, ms);
+                WritePlainExcel(results, ms,title);
                 return ms.ToArray(); 
             }
         }
 
-        public static void WritePlainExcel(ResultTable results, string fileName)
+        public static void WritePlainExcel(ResultTable results, string fileName,string title)
         {
             using (FileStream fs = File.Create(fileName))
-                WritePlainExcel(results, fs);
+                WritePlainExcel(results, fs,title);
         }
 
-        static void WritePlainExcel(ResultTable results, Stream stream)
+        static void WritePlainExcel(ResultTable results, Stream stream, string title)
         {
             stream.WriteAllBytes(Template);
 
@@ -104,9 +104,12 @@ namespace Signum.Engine.Excel
                         BestFit = true,
                         CustomWidth = true
                     }).ToArray()));
-
+               
                 worksheetPart.Worksheet.Append(new Sequence<Row>()
                 {
+                    (from a in title
+                   select CellBuilder.Cell(title,TemplateCells.Title)).ToRow(),
+
                     (from c in results.Columns
                     select CellBuilder.Cell(c.Column.DisplayName, TemplateCells.Header)).ToRow(),
 

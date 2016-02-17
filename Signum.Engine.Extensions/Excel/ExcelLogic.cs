@@ -86,7 +86,7 @@ namespace Signum.Engine.Excel
                     {
                         QueryRequest request = UserQueryLogic.ToQueryRequest(uqe.UserQuery.Retrieve());
 
-                        var bytes = ExcelLogic.ExecutePlainExcel(request);
+                        var bytes = ExcelLogic.ExecutePlainExcel(request, uqe.Title);
 
                         return new List<EmailAttachmentEntity>
                         {
@@ -120,11 +120,11 @@ namespace Signum.Engine.Excel
             return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
         }
 
-        public static byte[] ExecutePlainExcel(QueryRequest request)
+        public static byte[] ExecutePlainExcel(QueryRequest request, string title)
         {
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
 
-            return PlainExcelGenerator.WritePlainExcel(queryResult);
+            return PlainExcelGenerator.WritePlainExcel(queryResult, title);
         }
     }
 }

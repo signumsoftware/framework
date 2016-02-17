@@ -32,7 +32,7 @@ namespace Signum.Web.Excel
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().FormatWith(request.QueryName));
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
-            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult);
+            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(request.QueryName));
 
             return File(binaryFile, MimeType.FromExtension(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + ".xlsx");
         }
