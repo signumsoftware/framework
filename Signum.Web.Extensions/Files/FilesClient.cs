@@ -231,7 +231,7 @@ namespace Signum.Web.Files
 
                     RegisterDownloadUrlConstructor<EmbeddedFilePathEntity>(fp =>
                     {
-                        return RouteHelper.New().Action((FileController fc) => fc.DownloadEmbedded(fp.FileType.ToLite(), fp.Sufix, fp.FileName));
+                        return RouteHelper.New().Action((FileController fc) => fc.DownloadEmbedded(fp.FileType.ToLite(), fp.Suffix, fp.FileName));
                     });
 
                     Navigator.AddSettings(new List<EntitySettings>
@@ -282,7 +282,7 @@ namespace Signum.Web.Files
                
                 QuerySettings.FormatRules.Add(new FormatterRule("WebImage",
                        col => col.Type == typeof(WebImage),
-                       col => new CellFormatter((help, obj) => ((WebImage)obj).FullWebPath == null ? null :
+                       col => new CellFormatter((help, obj) => ((WebImage)obj)?.FullWebPath == null ? null :
                            new HtmlTag("img")
                            .Attr("src", RouteHelper.New().Content(((WebImage)obj).FullWebPath))
                            .Attr("alt", typeof(WebImage).NiceName())
@@ -291,8 +291,8 @@ namespace Signum.Web.Files
 
                 QuerySettings.FormatRules.Add(new FormatterRule("WebDownload",
                        col => col.Type == typeof(WebDownload),
-                       col => new CellFormatter((help, obj) => ((WebDownload)obj).FullWebPath == null ? null :
-                          new MvcHtmlString("<a href='{0}'>{1}</a>".FormatWith(RouteHelper.New().Content(((WebDownload)obj).FullWebPath), typeof(WebDownload).NiceName()))) { TextAlign = "center" }
+                       col => new CellFormatter((help, obj) =>  ((WebDownload)obj)?.FullWebPath == null ? null :
+                          new MvcHtmlString("<a href='{0}'>{1}</a>".FormatWith(RouteHelper.New().Content(((WebDownload)obj).FullWebPath), ((WebDownload)obj).FileName ?? typeof(WebDownload).NiceName()))) { TextAlign = "center" }
                 ));
 
             }

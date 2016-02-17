@@ -112,7 +112,7 @@ namespace Signum.Web.Files
         {
             var virtualFile = new EmbeddedFilePathEntity(lite.Retrieve())
             {
-                Sufix = suffix,
+                Suffix = suffix,
                 FileName = fileName
             };
 

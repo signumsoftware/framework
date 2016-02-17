@@ -18,7 +18,7 @@ namespace Signum.Entities.Files
 
         void SetPrefixPair(PrefixPair prefixPair);
 
-        string Sufix { get; set; }
+        string Suffix { get; set; }
     }
 
     public interface IFile
@@ -64,5 +64,6 @@ namespace Signum.Entities.Files
     public class WebDownload
     {
         public string FullWebPath;
+        public string FileName;
     }
 }

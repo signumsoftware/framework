@@ -111,7 +111,7 @@ Write(Html.EntityLine(e, f => f.FileType));
             #line hidden
             
             #line 8 "..\..\Files\Views\FilePath.cshtml"
-Write(Html.ValueLine(e, f => f.Sufix));
+Write(Html.ValueLine(e, f => f.Suffix));
 
             
             #line default

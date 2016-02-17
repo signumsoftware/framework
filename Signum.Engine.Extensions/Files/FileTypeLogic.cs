@@ -75,10 +75,10 @@ namespace Signum.Engine.Files
                     fp.SetPrefixPair(alg.GetPrefixPair(fp));
 
                     int i = 2;
-                    fp.Sufix = sufix;
+                    fp.Suffix = sufix;
                     while (alg.RenameOnCollision && File.Exists(fp.FullPhysicalPath))
                     {
-                        fp.Sufix = alg.RenameAlgorithm(sufix, i);
+                        fp.Suffix = alg.RenameAlgorithm(sufix, i);
                         i++;
                     }
 

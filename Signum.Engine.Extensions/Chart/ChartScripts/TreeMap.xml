@@ -17,7 +17,7 @@
   
   var color = d3.scale.category20c($.map(data.rows, function(v) { return v.c0; }));  
 
-  var dic = data.rows.toObject(function(r){return r.c0.key;});
+  var dic = data.rows.toObjectDistinct(function(r){return r.c0.key;});
   
    var folders =  data.rows
    .filter(function(r){return !!r.c2;})

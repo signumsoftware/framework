@@ -34,7 +34,7 @@ namespace Signum.Engine.UserQueries
 
                 PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
 
-                UserAssetsImporter.UserAssetNames.Add("UserQuery", typeof(UserQueryEntity));
+                UserAssetsImporter.RegisterName<UserQueryEntity>("UserQuery");
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 

@@ -306,7 +306,6 @@ namespace Signum.Engine.Help
                     Lite = false,
                     Execute = (e, _) => { },
                 }.Register();
-                OperationLogic.SetProtectedSave<QueryHelpEntity>(false);
 
                 new Graph<OperationHelpEntity>.Execute(OperationHelpOperation.Save)
                 {
@@ -314,7 +313,6 @@ namespace Signum.Engine.Help
                     Lite = false,
                     Execute = (e, _) => { },
                 }.Register();
-                OperationLogic.SetProtectedSave<OperationHelpEntity>(false);
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 

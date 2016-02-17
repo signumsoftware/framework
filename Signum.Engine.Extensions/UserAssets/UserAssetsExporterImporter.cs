@@ -21,6 +21,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities.UserAssets;
 using Signum.Entities.UserQueries;
+using Signum.Engine.Authorization;
 
 namespace Signum.Engine.UserAssets
 {
@@ -261,6 +262,12 @@ namespace Signum.Engine.UserAssets
                 return result;
 
             return new T { Guid = guid };
+        }
+
+        public static void RegisterName<T>(string userAssetName) where T : IUserAssetEntity
+        {
+            PermissionAuthLogic.RegisterPermissions(UserAssetPermission.UserAssetsToXML);
+            UserAssetNames.Add(userAssetName, typeof(T));
         }
     }
 }

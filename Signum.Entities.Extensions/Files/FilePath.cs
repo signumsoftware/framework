@@ -80,7 +80,7 @@ namespace Signum.Entities.Files
 
         [NotNullable, SqlDbType(Size = 260)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 260)]
-        public string Sufix { get; set; }
+        public string Suffix { get; set; }
 
         [Ignore]
         public string CalculatedDirectory { get; set; }
@@ -102,7 +102,7 @@ namespace Signum.Entities.Files
                 if (prefixPair == null)
                     throw new InvalidOperationException("prefixPair not set");
 
-                return Path.Combine(prefixPair.PhysicalPrefix, Sufix);
+                return Path.Combine(prefixPair.PhysicalPrefix, Suffix);
             }
         }
 
@@ -113,7 +113,7 @@ namespace Signum.Entities.Files
                 if (prefixPair == null)
                     throw new InvalidOperationException("prefixPair not set");
 
-                return string.IsNullOrEmpty(prefixPair.WebPrefix) ? null : prefixPair.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Sufix.Replace("\\", "/"));
+                return string.IsNullOrEmpty(prefixPair.WebPrefix) ? null : prefixPair.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
             }
         }
 
