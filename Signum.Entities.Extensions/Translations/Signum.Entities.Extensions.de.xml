@@ -684,10 +684,9 @@
   <Type Name="ExcelAttachmentEntity" Description="Excel-Anlage">
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Related" Description="In Beziehung mit" />
+    <Member Name="Template" Description="Vorlage" />
+    <Member Name="Title" Description="Titel" />
     <Member Name="UserQuery" Description="Benutzer-Abfrage" />
-  </Type>
-  <Type Name="ExcelAttachmentOperation">
-    <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="ExcelMessage">
     <Member Name="Administer" Description="Verwalten" />
@@ -855,7 +854,9 @@
     <Member Name="Date" Description="Datum" />
     <Member Name="Name" Description="Name" />
   </Type>
-  <Type Name="IAttachmentGeneratorEntity" />
+  <Type Name="IAttachmentGeneratorEntity">
+    <Member Name="Template" Description="Vorlage" />
+  </Type>
   <Type Name="IEmailOwnerEntity">
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
   </Type>
