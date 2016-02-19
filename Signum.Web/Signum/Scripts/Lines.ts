@@ -696,7 +696,7 @@ export class EntityListBase extends EntityBase {
             return null;
         }).then(
             prefix => { this.freeReservedPrefix(itemPrefix); return prefix; },
-            error => { this.freeReservedPrefix(itemPrefix); throw error; return ""; });
+            (error): string => { this.freeReservedPrefix(itemPrefix); throw error; });
     }
 
     addEntitySpecific(entityValue: Entities.EntityValue, itemPrefix: string) {
@@ -822,7 +822,7 @@ export class EntityListBase extends EntityBase {
             return null;
         }).then(
             prefix => { prefixes.forEach(this.freeReservedPrefix); return prefix; },
-            error => { prefixes.forEach(this.freeReservedPrefix); throw error; return ""; });
+            (error): string => { prefixes.forEach(this.freeReservedPrefix); throw error; });
     }
 
     onFinding(prefix: string, event: MouseEvent): Promise<Entities.EntityValue> {
