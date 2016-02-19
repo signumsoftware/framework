@@ -264,6 +264,9 @@ namespace Signum.TSGenerator
 
         static string CleanTypeName(Type t)
         {
+            if (!Cache.IEntity.IsAssignableFrom(t))
+                return t.Name;
+
             if (t.Name.EndsWith("Entity"))
                 return t.Name.RemoveSuffix("Entity");
 
