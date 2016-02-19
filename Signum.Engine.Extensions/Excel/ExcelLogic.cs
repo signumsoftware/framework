@@ -19,12 +19,13 @@ using Signum.Engine.Mailing;
 using Signum.Entities.Mailing;
 using Signum.Engine.UserQueries;
 using Signum.Entities.UserAssets;
+using System.Reflection;
 
 namespace Signum.Engine.Excel
 {
     public static class ExcelLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool excelReport, bool userQueryExcel)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool excelReport)
         {
             if (excelReport)
             {
@@ -55,63 +56,9 @@ namespace Signum.Engine.Excel
                     Delete = (er, _) => { er.Delete(); }
                 }.Register();
             }
-
-            if (userQueryExcel)
-            {
-                sb.Include<ExcelAttachmentEntity>();
-                dqm.RegisterQuery(typeof(ExcelAttachmentEntity), () =>
-                    from s in Database.Query<ExcelAttachmentEntity>()
-                    select new
-                    {
-                        Entity = s,
-                        s.Id,
-                        s.FileName,
-                        s.UserQuery,
-                        s.Related,
-                    });
-
-                new Graph<ExcelAttachmentEntity>.Execute(ExcelAttachmentOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (er, _) => { }
-                }.Register();
-
-
-                EmailTemplateLogic.FillAttachmentTokens.Register((ExcelAttachmentEntity uqe, EmailTemplateLogic.FillAttachmentTokenContext ctx) =>
-                {
-                    if (uqe.FileName != null)
-                        EmailTemplateParser.Parse(uqe.FileName, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
-
-                    if (uqe.Title != null)
-                        EmailTemplateParser.Parse(uqe.Title, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
-                });
-
-                EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity uqe, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
-                {
-                    var finalEntity = uqe.Related?.Retrieve() ?? (Entity)ctx.Entity;
-
-                    using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
-                    {
-                        QueryRequest request = UserQueryLogic.ToQueryRequest(uqe.UserQuery.Retrieve());
-
-                        var title = EmailTemplateParser.Parse(uqe.Title, ctx.QueryDescription, ctx.ModelType).Print(ctx.EmailTemplateParameters);
-                        var fileName = EmailTemplateParser.Parse(uqe.FileName, ctx.QueryDescription, ctx.ModelType).Print(ctx.EmailTemplateParameters);
-
-                        var bytes = ExcelLogic.ExecutePlainExcel(request, title);
-                        
-                        return new List<EmailAttachmentEntity>
-                        {
-                            new EmailAttachmentEntity
-                            {
-                                File = Files.EmbeddedFilePathLogic.SaveFile(new Entities.Files.EmbeddedFilePathEntity(EmailFileType.Attachment, fileName, bytes)),
-                                Type = EmailAttachmentType.Attachment,
-                            }
-                        };
-                    }
-                });
-            }
         }
+
+      
 
         public static List<Lite<ExcelReportEntity>> GetExcelReports(object queryName)
         {

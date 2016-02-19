@@ -14,17 +14,42 @@ using Signum.Entities.Mailing;
 
 namespace Signum.Entities.Excel
 {
-    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class ExcelAttachmentEntity : Entity, IAttachmentGeneratorEntity
     {
-        [NotNullable, SqlDbType(Size = 100), FileNameValidator]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string FileName { get; set; } = "Report.xlsx";
+        [NotNullable, SqlDbType(Size = 100)]
+        string fileName;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
+        public string FileName
+        {
+            get { return fileName; }
+            set
+            {
+                if (Set(ref fileName, value))
+                    FileNameNode = null;
+            }
+        }
+
+        [Ignore]
+        internal object FileNameNode;
 
         [SqlDbType(Size = 50)]
+        string title;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
-        public string Title { get; set; }
-        
+        public string Title
+        {
+            get { return title; }
+            set
+            {
+                if (Set(ref title, value))
+                    TitleNode = null;
+            }
+        }
+
+
+        [Ignore]
+        internal object TitleNode;
+
         [NotNullable]
         [NotNullValidator]
         public Lite<UserQueryEntity> UserQuery { get; set; }
@@ -32,17 +57,15 @@ namespace Signum.Entities.Excel
         [ImplementedByAll]
         public Lite<Entity> Related { get; set; }
 
+
+        [Ignore]
+        public EmailTemplateEntity Template { get; set; }
+
         static Expression<Func<ExcelAttachmentEntity, string>> ToStringExpression = @this => @this.FileName;
         [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
-    }
-
-    [AutoInit]
-    public static class ExcelAttachmentOperation
-    {
-        public static readonly ExecuteSymbol<ExcelAttachmentEntity> Save;
     }
 }

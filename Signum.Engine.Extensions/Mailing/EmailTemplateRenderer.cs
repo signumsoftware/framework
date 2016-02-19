@@ -64,11 +64,12 @@ namespace Signum.Engine.Mailing
                         {
                             QueryDescription = this.qd,
                             ModelType = template.SystemEmail.ToType(),
+                            SystemEmail = systemEmail,
                             CurrentRows = currentRows,
-                            Dictionary = dicTokenColumn,
-                            SystemEmail = systemEmail
+                            ResultColumns = dicTokenColumn,
                             Entity = entity, 
                             Template = template,
+                            Culture = ci,
                         })).ToMList()
                     };
 

@@ -18,6 +18,7 @@ using Signum.Entities.UserQueries;
 using Signum.Web.Chart;
 using Signum.Entities.Excel;
 using Signum.Engine.Excel;
+using Signum.Entities.Mailing;
 
 namespace Signum.Web.Excel
 {
@@ -54,7 +55,20 @@ namespace Signum.Web.Excel
                     ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
 
                 if (excelAttachment)
-                    Navigator.AddSetting(new EntitySettings<ExcelAttachmentEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ExcelAttachment") });
+                {
+                    var es = new EntitySettings<ExcelAttachmentEntity>
+                    {
+                        PartialViewName = _ => ViewPrefix.FormatWith("ExcelAttachment")
+                    };
+
+                    es.MappingMain = es.MappingLine = new EntityMapping<ExcelAttachmentEntity>(true)
+                        .SetProperty(etm => etm.Template, ctx =>
+                        {
+                            return (EmailTemplateEntity)ctx.Parent.Parent?.Parent.Parent.UntypedValue;
+                        });
+
+                    Navigator.AddSetting(es);
+                }
             }
         }
 

@@ -66,7 +66,10 @@ namespace Signum.Engine.Mailing
             public Type ModelType;
             public EmailTemplateEntity Template;
             public IEntity Entity;
-            public EmailTemplateParameters EmailTemplateParameters;
+            public ISystemEmail SystemEmail;
+            public CultureInfo Culture;
+            public Dictionary<QueryToken, ResultColumn> ResultColumns;
+            public IEnumerable<ResultRow> CurrentRows;
         }
 
 
@@ -202,7 +205,7 @@ namespace Signum.Engine.Mailing
             return null;
         }
 
-        private static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateEntity template, string text, out string errorMessage)
+        public static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateEntity template, string text, out string errorMessage)
         {
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
