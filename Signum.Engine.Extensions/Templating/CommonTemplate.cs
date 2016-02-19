@@ -20,9 +20,28 @@ namespace Signum.Engine.Templating
     {
         public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[((?<type>[\w]):)?(?<token>[^\]\}]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
-        public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
+        public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>(\\\]|\\\:|[^\:])+)(\:(?<format>.*))?");
         public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>.+?)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
 
+
+        public struct SplittedToken
+        {
+            public string Token;
+            public string Format; 
+        }
+
+        public static SplittedToken? SplitToken(string fullToken)
+        {
+            var tok = TemplateUtils.TokenFormatRegex.Match(fullToken);
+            if (tok == null)
+                return null;
+
+            return new SplittedToken
+            {
+                Token = tok.Groups["token"].Value.Replace(@"\:", ":"),
+                Format = tok.Groups["format"].Value.DefaultText("").Replace(@"\:", ":").DefaultText(null)
+            };
+        }
 
         public static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {

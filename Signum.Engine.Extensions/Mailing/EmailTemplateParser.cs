@@ -126,7 +126,8 @@ namespace Signum.Engine.Mailing
 
             void ParseInternal()
             {
-                try {
+                try
+                {
                     this.mainBlock = new BlockNode(null);
                     this.stack = new Stack<BlockNode>();
                     this.errors = new List<TemplateError>();
@@ -156,14 +157,14 @@ namespace Signum.Engine.Mailing
                         {
                             case "":
                             case "raw":
-                                var tok = TemplateUtils.TokenFormatRegex.Match(token);
-                                if (!tok.Success)
+                                var s = TemplateUtils.SplitToken(token);
+                                if (s == null)
                                     AddError(true, "{0} has invalid format".FormatWith(token));
                                 else
                                 {
-                                    var t = TryParseValueProvider(type, tok.Groups["token"].Value, dec);
+                                    var t = TryParseValueProvider(type, s.Value.Token, dec);
 
-                                    stack.Peek().Nodes.Add(new ValueNode(t, tok.Groups["format"].Value.DefaultText(null), isRaw: keyword.Contains("raw")));
+                                    stack.Peek().Nodes.Add(new ValueNode(t, s.Value.Format, isRaw: keyword.Contains("raw")));
 
                                     DeclareVariable(t);
                                 }
