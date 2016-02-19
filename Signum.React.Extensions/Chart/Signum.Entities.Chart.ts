@@ -19,7 +19,7 @@ export interface ChartColorEntity extends Entities.Entity {
     color?: Entities.Basics.ColorEntity;
 }
 
-export const ChartColumnEntity_Type = new Type<ChartColumnEntity>("ChartColumn");
+export const ChartColumnEntity_Type = new Type<ChartColumnEntity>("ChartColumnEntity");
 export interface ChartColumnEntity extends Entities.EmbeddedEntity {
     scriptColumn?: ChartScriptColumnEntity;
     token?: UserAssets.QueryTokenEntity;
@@ -76,13 +76,13 @@ export module ChartMessage {
     export const Preview = new MessageKey("ChartMessage", "Preview");
 }
 
-export const ChartPaletteModel_Type = new Type<ChartPaletteModel>("ChartPalette");
+export const ChartPaletteModel_Type = new Type<ChartPaletteModel>("ChartPaletteModel");
 export interface ChartPaletteModel extends Entities.ModelEntity {
     type?: Entities.Basics.TypeEntity;
     colors?: Entities.MList<ChartColorEntity>;
 }
 
-export const ChartParameterEntity_Type = new Type<ChartParameterEntity>("ChartParameter");
+export const ChartParameterEntity_Type = new Type<ChartParameterEntity>("ChartParameterEntity");
 export interface ChartParameterEntity extends Entities.EmbeddedEntity {
     scriptParameter?: ChartScriptParameterEntity;
     name?: string;
@@ -100,7 +100,7 @@ export module ChartPermission {
     export const ViewCharting : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "ChartPermission.ViewCharting" });
 }
 
-export const ChartScriptColumnEntity_Type = new Type<ChartScriptColumnEntity>("ChartScriptColumn");
+export const ChartScriptColumnEntity_Type = new Type<ChartScriptColumnEntity>("ChartScriptColumnEntity");
 export interface ChartScriptColumnEntity extends Entities.EmbeddedEntity {
     displayName?: string;
     isOptional?: boolean;
@@ -125,7 +125,7 @@ export module ChartScriptOperation {
     export const Delete : Entities.DeleteSymbol<ChartScriptEntity> = registerSymbol({ Type: "Operation", key: "ChartScriptOperation.Delete" });
 }
 
-export const ChartScriptParameterEntity_Type = new Type<ChartScriptParameterEntity>("ChartScriptParameter");
+export const ChartScriptParameterEntity_Type = new Type<ChartScriptParameterEntity>("ChartScriptParameterEntity");
 export interface ChartScriptParameterEntity extends Entities.EmbeddedEntity {
     name?: string;
     type?: ChartParameterType;

@@ -25,7 +25,7 @@ export module HolidayCalendarOperation {
     export const Delete : Entities.DeleteSymbol<HolidayCalendarEntity> = registerSymbol({ Type: "Operation", key: "HolidayCalendarOperation.Delete" });
 }
 
-export const HolidayEntity_Type = new Type<HolidayEntity>("Holiday");
+export const HolidayEntity_Type = new Type<HolidayEntity>("HolidayEntity");
 export interface HolidayEntity extends Entities.EmbeddedEntity {
     date?: string;
     name?: string;

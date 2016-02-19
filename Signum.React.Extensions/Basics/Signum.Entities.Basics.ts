@@ -15,7 +15,7 @@ export module CultureInfoOperation {
     export const Save : Entities.ExecuteSymbol<CultureInfoEntity> = registerSymbol({ Type: "Operation", key: "CultureInfoOperation.Save" });
 }
 
-export const DateSpanEntity_Type = new Type<DateSpanEntity>("DateSpan");
+export const DateSpanEntity_Type = new Type<DateSpanEntity>("DateSpanEntity");
 export interface DateSpanEntity extends Entities.EmbeddedEntity {
     years?: number;
     months?: number;

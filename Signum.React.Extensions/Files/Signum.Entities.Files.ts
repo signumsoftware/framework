@@ -5,14 +5,14 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-export const EmbeddedFileEntity_Type = new Type<EmbeddedFileEntity>("EmbeddedFile");
+export const EmbeddedFileEntity_Type = new Type<EmbeddedFileEntity>("EmbeddedFileEntity");
 export interface EmbeddedFileEntity extends Entities.EmbeddedEntity {
     fileName?: string;
     binaryFile?: string;
     fullWebPath?: string;
 }
 
-export const EmbeddedFilePathEntity_Type = new Type<EmbeddedFilePathEntity>("EmbeddedFilePath");
+export const EmbeddedFilePathEntity_Type = new Type<EmbeddedFilePathEntity>("EmbeddedFilePathEntity");
 export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
     fileName?: string;
     binaryFile?: string;

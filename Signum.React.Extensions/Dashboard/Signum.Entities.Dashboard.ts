@@ -19,7 +19,7 @@ export interface CountSearchControlPartEntity extends Entities.Entity, IPartEnti
     requiresTitle?: boolean;
 }
 
-export const CountUserQueryElementEntity_Type = new Type<CountUserQueryElementEntity>("CountUserQueryElement");
+export const CountUserQueryElementEntity_Type = new Type<CountUserQueryElementEntity>("CountUserQueryElementEntity");
 export interface CountUserQueryElementEntity extends Entities.EmbeddedEntity {
     label?: string;
     userQuery?: UserQueries.UserQueryEntity;
@@ -71,7 +71,7 @@ export interface IPartEntity extends Entities.IEntity {
     requiresTitle?: boolean;
 }
 
-export const LinkElementEntity_Type = new Type<LinkElementEntity>("LinkElement");
+export const LinkElementEntity_Type = new Type<LinkElementEntity>("LinkElementEntity");
 export interface LinkElementEntity extends Entities.EmbeddedEntity {
     label?: string;
     link?: string;
@@ -83,7 +83,7 @@ export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
     requiresTitle?: boolean;
 }
 
-export const PanelPartEntity_Type = new Type<PanelPartEntity>("PanelPart");
+export const PanelPartEntity_Type = new Type<PanelPartEntity>("PanelPartEntity");
 export interface PanelPartEntity extends Entities.EmbeddedEntity {
     title?: string;
     row?: number;

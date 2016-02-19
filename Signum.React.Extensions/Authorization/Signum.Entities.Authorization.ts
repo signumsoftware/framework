@@ -258,7 +258,7 @@ export const RuleQueryEntity_Type = new Type<RuleQueryEntity>("RuleQuery");
 export interface RuleQueryEntity extends RuleEntity<Entities.Basics.QueryEntity, boolean> {
 }
 
-export const RuleTypeConditionEntity_Type = new Type<RuleTypeConditionEntity>("RuleTypeCondition");
+export const RuleTypeConditionEntity_Type = new Type<RuleTypeConditionEntity>("RuleTypeConditionEntity");
 export interface RuleTypeConditionEntity extends Entities.EmbeddedEntity {
     condition?: Basics.TypeConditionSymbol;
     allowed?: TypeAllowed;

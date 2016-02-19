@@ -153,13 +153,13 @@ export module OperationHelpOperation {
     export const Save : Entities.ExecuteSymbol<OperationHelpEntity> = registerSymbol({ Type: "Operation", key: "OperationHelpOperation.Save" });
 }
 
-export const PropertyRouteHelpEntity_Type = new Type<PropertyRouteHelpEntity>("PropertyRouteHelp");
+export const PropertyRouteHelpEntity_Type = new Type<PropertyRouteHelpEntity>("PropertyRouteHelpEntity");
 export interface PropertyRouteHelpEntity extends Entities.EmbeddedEntity {
     property?: Entities.Basics.PropertyRouteEntity;
     description?: string;
 }
 
-export const QueryColumnHelpEntity_Type = new Type<QueryColumnHelpEntity>("QueryColumnHelp");
+export const QueryColumnHelpEntity_Type = new Type<QueryColumnHelpEntity>("QueryColumnHelpEntity");
 export interface QueryColumnHelpEntity extends Entities.EmbeddedEntity {
     columnName?: string;
     description?: string;

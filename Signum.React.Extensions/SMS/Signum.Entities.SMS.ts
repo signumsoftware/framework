@@ -16,7 +16,7 @@ export enum MessageLengthExceeded {
 }
 export const MessageLengthExceeded_Type = new EnumType<MessageLengthExceeded>("MessageLengthExceeded", MessageLengthExceeded);
 
-export const MultipleSMSModel_Type = new Type<MultipleSMSModel>("MultipleSMS");
+export const MultipleSMSModel_Type = new Type<MultipleSMSModel>("MultipleSMSModel");
 export interface MultipleSMSModel extends Entities.ModelEntity {
     message?: string;
     from?: string;
@@ -35,7 +35,7 @@ export module SMSCharactersMessage {
     export const Replacements = new MessageKey("SMSCharactersMessage", "Replacements");
 }
 
-export const SMSConfigurationEntity_Type = new Type<SMSConfigurationEntity>("SMSConfiguration");
+export const SMSConfigurationEntity_Type = new Type<SMSConfigurationEntity>("SMSConfigurationEntity");
 export interface SMSConfigurationEntity extends Entities.EmbeddedEntity {
     defaultCulture?: Basics.CultureInfoEntity;
 }
@@ -113,7 +113,7 @@ export module SMSTemplateMessage {
     export const NewCulture = new MessageKey("SMSTemplateMessage", "NewCulture");
 }
 
-export const SMSTemplateMessageEntity_Type = new Type<SMSTemplateMessageEntity>("SMSTemplateMessage");
+export const SMSTemplateMessageEntity_Type = new Type<SMSTemplateMessageEntity>("SMSTemplateMessageEntity");
 export interface SMSTemplateMessageEntity extends Entities.EmbeddedEntity {
     template?: SMSTemplateEntity;
     cultureInfo?: Basics.CultureInfoEntity;

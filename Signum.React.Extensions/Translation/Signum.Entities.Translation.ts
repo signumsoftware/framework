@@ -73,7 +73,7 @@ export module TranslationReplacementOperation {
     export const Delete : Entities.DeleteSymbol<TranslationReplacementEntity> = registerSymbol({ Type: "Operation", key: "TranslationReplacementOperation.Delete" });
 }
 
-export const TranslatorUserCultureEntity_Type = new Type<TranslatorUserCultureEntity>("TranslatorUserCulture");
+export const TranslatorUserCultureEntity_Type = new Type<TranslatorUserCultureEntity>("TranslatorUserCultureEntity");
 export interface TranslatorUserCultureEntity extends Entities.EmbeddedEntity {
     culture?: Basics.CultureInfoEntity;
     action?: TranslatedCultureAction;

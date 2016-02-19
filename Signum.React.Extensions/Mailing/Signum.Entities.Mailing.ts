@@ -29,20 +29,20 @@ export enum CertFileType {
 }
 export const CertFileType_Type = new EnumType<CertFileType>("CertFileType", CertFileType);
 
-export const ClientCertificationFileEntity_Type = new Type<ClientCertificationFileEntity>("ClientCertificationFile");
+export const ClientCertificationFileEntity_Type = new Type<ClientCertificationFileEntity>("ClientCertificationFileEntity");
 export interface ClientCertificationFileEntity extends Entities.EmbeddedEntity {
     fullFilePath?: string;
     certFileType?: CertFileType;
 }
 
-export const EmailAddressEntity_Type = new Type<EmailAddressEntity>("EmailAddress");
+export const EmailAddressEntity_Type = new Type<EmailAddressEntity>("EmailAddressEntity");
 export interface EmailAddressEntity extends Entities.EmbeddedEntity {
     emailOwner?: Entities.Lite<IEmailOwnerEntity>;
     emailAddress?: string;
     displayName?: string;
 }
 
-export const EmailAttachmentEntity_Type = new Type<EmailAttachmentEntity>("EmailAttachment");
+export const EmailAttachmentEntity_Type = new Type<EmailAttachmentEntity>("EmailAttachmentEntity");
 export interface EmailAttachmentEntity extends Entities.EmbeddedEntity {
     type?: EmailAttachmentType;
     file?: Files.EmbeddedFilePathEntity;
@@ -55,7 +55,7 @@ export enum EmailAttachmentType {
 }
 export const EmailAttachmentType_Type = new EnumType<EmailAttachmentType>("EmailAttachmentType", EmailAttachmentType);
 
-export const EmailConfigurationEntity_Type = new Type<EmailConfigurationEntity>("EmailConfiguration");
+export const EmailConfigurationEntity_Type = new Type<EmailConfigurationEntity>("EmailConfigurationEntity");
 export interface EmailConfigurationEntity extends Entities.EmbeddedEntity {
     defaultCulture?: Basics.CultureInfoEntity;
     urlLeft?: string;
@@ -78,7 +78,7 @@ export interface EmailMasterTemplateEntity extends Entities.Entity {
     messages?: Entities.MList<EmailMasterTemplateMessageEntity>;
 }
 
-export const EmailMasterTemplateMessageEntity_Type = new Type<EmailMasterTemplateMessageEntity>("EmailMasterTemplateMessage");
+export const EmailMasterTemplateMessageEntity_Type = new Type<EmailMasterTemplateMessageEntity>("EmailMasterTemplateMessageEntity");
 export interface EmailMasterTemplateMessageEntity extends Entities.EmbeddedEntity {
     masterTemplate?: EmailMasterTemplateEntity;
     cultureInfo?: Basics.CultureInfoEntity;
@@ -160,7 +160,7 @@ export interface EmailPackageEntity extends Entities.Entity, Processes.IProcessD
     name?: string;
 }
 
-export const EmailReceptionInfoEntity_Type = new Type<EmailReceptionInfoEntity>("EmailReceptionInfo");
+export const EmailReceptionInfoEntity_Type = new Type<EmailReceptionInfoEntity>("EmailReceptionInfoEntity");
 export interface EmailReceptionInfoEntity extends Entities.EmbeddedEntity {
     uniqueId?: string;
     reception?: Entities.Lite<Pop3ReceptionEntity>;
@@ -175,7 +175,7 @@ export interface EmailReceptionMixin extends Entities.MixinEntity {
     receptionInfo?: EmailReceptionInfoEntity;
 }
 
-export const EmailRecipientEntity_Type = new Type<EmailRecipientEntity>("EmailRecipient");
+export const EmailRecipientEntity_Type = new Type<EmailRecipientEntity>("EmailRecipientEntity");
 export interface EmailRecipientEntity extends EmailAddressEntity {
     kind?: EmailRecipientKind;
 }
@@ -187,7 +187,7 @@ export enum EmailRecipientKind {
 }
 export const EmailRecipientKind_Type = new EnumType<EmailRecipientKind>("EmailRecipientKind", EmailRecipientKind);
 
-export const EmailTemplateContactEntity_Type = new Type<EmailTemplateContactEntity>("EmailTemplateContact");
+export const EmailTemplateContactEntity_Type = new Type<EmailTemplateContactEntity>("EmailTemplateContactEntity");
 export interface EmailTemplateContactEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
     emailAddress?: string;
@@ -228,7 +228,7 @@ export module EmailTemplateMessage {
     export const TokenMustBeA0 = new MessageKey("EmailTemplateMessage", "TokenMustBeA0");
 }
 
-export const EmailTemplateMessageEntity_Type = new Type<EmailTemplateMessageEntity>("EmailTemplateMessage");
+export const EmailTemplateMessageEntity_Type = new Type<EmailTemplateMessageEntity>("EmailTemplateMessageEntity");
 export interface EmailTemplateMessageEntity extends Entities.EmbeddedEntity {
     template?: EmailTemplateEntity;
     cultureInfo?: Basics.CultureInfoEntity;
@@ -244,7 +244,7 @@ export module EmailTemplateOperation {
     export const Disable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.Disable" });
 }
 
-export const EmailTemplateRecipientEntity_Type = new Type<EmailTemplateRecipientEntity>("EmailTemplateRecipient");
+export const EmailTemplateRecipientEntity_Type = new Type<EmailTemplateRecipientEntity>("EmailTemplateRecipientEntity");
 export interface EmailTemplateRecipientEntity extends EmailTemplateContactEntity {
     kind?: EmailRecipientKind;
 }
@@ -363,7 +363,7 @@ export module SmtpConfigurationOperation {
     export const Save : Entities.ExecuteSymbol<SmtpConfigurationEntity> = registerSymbol({ Type: "Operation", key: "SmtpConfigurationOperation.Save" });
 }
 
-export const SmtpNetworkDeliveryEntity_Type = new Type<SmtpNetworkDeliveryEntity>("SmtpNetworkDelivery");
+export const SmtpNetworkDeliveryEntity_Type = new Type<SmtpNetworkDeliveryEntity>("SmtpNetworkDeliveryEntity");
 export interface SmtpNetworkDeliveryEntity extends Entities.EmbeddedEntity {
     host?: string;
     port?: number;

@@ -11,20 +11,20 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
-export const QueryColumnEntity_Type = new Type<QueryColumnEntity>("QueryColumn");
+export const QueryColumnEntity_Type = new Type<QueryColumnEntity>("QueryColumnEntity");
 export interface QueryColumnEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
     displayName?: string;
 }
 
-export const QueryFilterEntity_Type = new Type<QueryFilterEntity>("QueryFilter");
+export const QueryFilterEntity_Type = new Type<QueryFilterEntity>("QueryFilterEntity");
 export interface QueryFilterEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
     operation?: Entities.DynamicQuery.FilterOperation;
     valueString?: string;
 }
 
-export const QueryOrderEntity_Type = new Type<QueryOrderEntity>("QueryOrder");
+export const QueryOrderEntity_Type = new Type<QueryOrderEntity>("QueryOrderEntity");
 export interface QueryOrderEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
     orderType?: Entities.DynamicQuery.OrderType;

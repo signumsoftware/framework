@@ -18,7 +18,7 @@ export interface IUserAssetEntity extends Entities.IEntity {
     guid?: string;
 }
 
-export const QueryTokenEntity_Type = new Type<QueryTokenEntity>("QueryToken");
+export const QueryTokenEntity_Type = new Type<QueryTokenEntity>("QueryTokenEntity");
 export interface QueryTokenEntity extends Entities.EmbeddedEntity {
     tokenString?: string;
 }
@@ -44,7 +44,7 @@ export interface UserAssetPreviewLine extends Entities.EmbeddedEntity {
     guid?: string;
 }
 
-export const UserAssetPreviewModel_Type = new Type<UserAssetPreviewModel>("UserAssetPreview");
+export const UserAssetPreviewModel_Type = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");
 export interface UserAssetPreviewModel extends Entities.ModelEntity {
     lines?: Entities.MList<UserAssetPreviewLine>;
 }
