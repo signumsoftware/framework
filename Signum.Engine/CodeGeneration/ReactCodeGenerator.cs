@@ -383,7 +383,7 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("import * as React from 'react'");
             sb.AppendLine("import { "  + type.Name + " } from '../" + type.Namespace + "'");
-            sb.AppendLine("import { EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList } from '" + frp + "Signum.React/Scripts/Lines'");
+            sb.AppendLine("import { EntityComponent, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater } from '" + frp + "Signum.React/Scripts/Lines'");
             
             var v = GetVarName(type);
 

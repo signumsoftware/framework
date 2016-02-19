@@ -1,13 +1,14 @@
 ﻿import * as React from 'react'
 import { Dic } from '../Globals'
-import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, JavascriptMessage } from '../Signum.Entities'
+import { ModifiableEntity, getToString, EntityPack, ModelState, JavascriptMessage } from '../Signum.Entities'
+import { GraphExplorer } from '../Reflection'
 
 
-export default class ValidationErrors extends React.Component<{ modelState: ModelState }, void>
+export default class ValidationErrors extends React.Component<{ entity: ModifiableEntity }, void>
 {
     render() {
 
-        var modelState = this.props.modelState;
+        var modelState = GraphExplorer.collectModelState(this.props.entity);
 
         if (!modelState || Dic.getKeys(modelState).length == 0)
             return null;

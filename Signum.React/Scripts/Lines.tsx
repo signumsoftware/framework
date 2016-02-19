@@ -11,21 +11,32 @@ export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, L
 import { ValueLine, ValueLineType, ValueLineProps } from './Lines/ValueLine'
 export { ValueLine, ValueLineType, ValueLineProps};
 
-import { EntityBase, EntityBaseProps } from  './Lines/EntityBase'
-export { EntityBase, EntityBaseProps };
+import { RenderEntity } from  './Lines/RenderEntity'
+export { RenderEntity };
 
-import { EntityLine, EntityLineProps } from  './Lines/EntityLine'
-export { EntityLine, EntityLineProps };
+import { EntityBase } from  './Lines/EntityBase'
+export { EntityBase };
 
-import { EntityCombo, EntityComboProps } from  './Lines/EntityCombo'
-export { EntityCombo, EntityComboProps };
+import { EntityLine } from  './Lines/EntityLine'
+export { EntityLine };
 
-import { EntityListBase, EntityListBaseProps } from  './Lines/EntityListBase'
-export { EntityListBase, EntityListBaseProps };
+import { EntityCombo } from  './Lines/EntityCombo'
+export { EntityCombo };
 
+import { EntityDetail } from  './Lines/EntityDetail'
+export { EntityDetail };
 
-import { EntityList, EntityListProps } from  './Lines/EntityList'
-export { EntityList, EntityListProps };
+import { EntityListBase } from  './Lines/EntityListBase'
+export { EntityListBase };
+
+import { EntityList } from  './Lines/EntityList'
+export { EntityList };
+
+import { EntityRepeater } from  './Lines/EntityRepeater'
+export { EntityRepeater };
+
+import { EntityStrip } from  './Lines/EntityStrip'
+export { EntityStrip };
 
 export interface EntityFrame<T extends ModifiableEntity> {
     onReload: (pack: EntityPack<T>) => void;

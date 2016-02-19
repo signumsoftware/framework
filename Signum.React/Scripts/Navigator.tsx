@@ -25,14 +25,20 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 
-export function getTypeTitel(entity: Entity) {
+export function getTypeTitle(entity: Entity, pr: PropertyRoute) {
 
     const typeInfo = getTypeInfo(entity.Type)
-    
-    if (entity.isNew)
-        return LiteMessage.New_G.niceToString().forGenderAndNumber(typeInfo.gender) + " " + typeInfo.niceName;
 
-    return typeInfo.niceName + " " + entity.id;
+    if (!typeInfo) {
+        return pr.typeReference().typeNiceName;
+    }
+
+    else {
+        if (entity.isNew)
+            return LiteMessage.New_G.niceToString().forGenderAndNumber(typeInfo.gender) + " " + typeInfo.niceName;
+
+        return typeInfo.niceName + " " + entity.id;
+    }
 }
 
 
@@ -56,7 +62,7 @@ export function navigateRoute(typeOfEntity: any, id: any = null) {
     return currentHistory.createHref("/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id);
 }
 
-export const entitySettings: { [type: string]: EntitySettingsBase<any> } = {};
+export const entitySettings: { [type: string]: EntitySettingsBase<ModifiableEntity> } = {};
 
 export function addSettings(...settings: EntitySettingsBase<any>[]) {
     settings.forEach(s=> Dic.addOrThrow(entitySettings, s.type.typeName, s));
@@ -64,8 +70,8 @@ export function addSettings(...settings: EntitySettingsBase<any>[]) {
 
 
 export function getSettings<T extends ModifiableEntity>(type: Type<T>): EntitySettingsBase<T>;
-export function getSettings(type: PseudoType): EntitySettingsBase<any>;
-export function getSettings(type: PseudoType): EntitySettingsBase<any> {
+export function getSettings(type: PseudoType): EntitySettingsBase<ModifiableEntity>;
+export function getSettings(type: PseudoType): EntitySettingsBase<ModifiableEntity> {
     const typeName = getTypeName(type);
 
     return entitySettings[typeName];
@@ -188,7 +194,7 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
     if (entity == null)
         return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
-    if (!showOperations && !needsCanExecute(entity))
+    if (!showOperations || !needsCanExecute(entity))
         return Promise.resolve({ entity: cloneEntity(entity), canExecute: null });
 
     return API.fetchCanExecute(entity);
@@ -397,7 +403,7 @@ export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySe
         options?: { isCreable?: boolean; isViewable?: boolean; isReadOnly?: boolean }) {
         super(type, getComponent);
 
-        Dic.extend(this, options);
+        Dic.extend(this, options, { isCreable: true, isViewable: true });
     }
 
     onIsCreable(isSearch: boolean) {

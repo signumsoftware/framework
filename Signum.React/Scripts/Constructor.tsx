@@ -22,7 +22,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
 
     var ti = getTypeInfo(typeName);
 
-    if (!ti) {
+    if (ti) {
         var ctrs = operationInfos(ti).filter(a => a.operationType == OperationType.Constructor);
 
         if (ctrs.length) {
@@ -30,7 +30,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
             var ctr = ctrs.length == 1 ? Promise.resolve(ctrs[0]) :
                 SelectorPopup.chooseElement(ctrs, c => c.niceName, SelectorMessage.PleaseSelectAConstructor.niceToString());
 
-            return ctr.then(c => API.construct(c.key));
+            return ctr.then(c => API.construct(c.key)).then(p => { assertCorrect(p.entity); return p; });
         }
     }
 

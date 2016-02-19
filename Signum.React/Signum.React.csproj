@@ -196,7 +196,10 @@
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
-    <TypeScriptCompile Include="Scripts\Lines\EntityLineDetail.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\RenderEntity.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityStrip.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityRepeater.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityDetail.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityLine.tsx" />
     <TypeScriptCompile Include="Scripts\Operations\ContextualOperations.tsx" />
     <TypeScriptCompile Include="Scripts\QuickLinks.tsx" />

@@ -132,7 +132,7 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
 
     if (s.inlineCheckBox) {
         return (
-            <div className={classes("checkbox", vl.state.ctx.hasErrorClass())}>
+            <div className={classes("checkbox", vl.state.ctx.binding.error) }>
                 <label>
                     <input type="checkbox" checked={s.ctx.value } onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}/>
                     {s.labelText}

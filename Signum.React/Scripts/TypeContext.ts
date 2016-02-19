@@ -1,5 +1,5 @@
-﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, createBinding, subModelState } from './Reflection'
-import { ModelState } from './Signum.Entities'
+﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, subModelState, LambdaMemberType } from './Reflection'
+import { ModelState, MList } from './Signum.Entities'
 
 export enum FormGroupStyle {
     /// Unaffected by FormGroupSize
@@ -139,7 +139,6 @@ export class TypeContext<T> extends StyleContext {
 
     propertyRoute: PropertyRoute;
     binding: IBinding<T>;
-    modelState: ModelState;
 
     get value() {
         return this.binding.getValue();
@@ -149,11 +148,10 @@ export class TypeContext<T> extends StyleContext {
         this.binding.setValue(val);
     }
 
-    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>, modelState: ModelState) {
+    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>) {
         super(parent, styleOptions);
         this.propertyRoute = propertyRoute;
         this.binding = binding;
-        this.modelState = modelState;
     }
 
     subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R>
@@ -161,19 +159,17 @@ export class TypeContext<T> extends StyleContext {
     subCtx(propertyOrStyleOptions: ((val: T) => any) | StyleOptions, styleOptions?: StyleOptions): TypeContext<any>
     {
         if (typeof propertyOrStyleOptions != "function")
-            return new TypeContext<T>(this, propertyOrStyleOptions, this.propertyRoute, this.binding, this.modelState);
+            return new TypeContext<T>(this, propertyOrStyleOptions, this.propertyRoute, this.binding);
         
         const property = propertyOrStyleOptions as ((val: T) => any);
 
         const lambdaMembers = getLambdaMembers(property);
 
         const subRoute = lambdaMembers.reduce<PropertyRoute>((pr, m) => pr.addMember(m), this.propertyRoute);
-
-        const subMS = lambdaMembers.reduce<ModelState>((ms, m) => subModelState(ms, m), this.modelState);
-
+        
         const binding = createBinding(this.value, property);
 
-        const result = new TypeContext<any>(this, styleOptions, subRoute, binding, subMS);
+        const result = new TypeContext<any>(this, styleOptions, subRoute, binding);
 
         return result;
     }
@@ -181,14 +177,15 @@ export class TypeContext<T> extends StyleContext {
     niceName(property: (val: T) => any) {
         return this.propertyRoute.add(property).member.niceName;
     }
+}
 
-    hasError(): boolean {
-        return this.modelState && (this.modelState[""] != null); 
-    }
 
-    hasErrorClass(): string {
-        return this.hasError() ? "has-error" : null;
-    }
+export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
+    
+    return ctx.value.map((mle, i) =>
+        new TypeContext<T>(ctx, null,
+            ctx.propertyRoute.addMember({ name: "", type: LambdaMemberType.Indexer }),
+            new ReadonlyBinding(mle.element)));
 }
 
 

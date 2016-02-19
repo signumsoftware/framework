@@ -8,6 +8,7 @@ export interface ModifiableEntity {
     toStr?: string;	
     modified? : boolean;
     isNew?: boolean;
+	error?: { [member: string]: string };
 }
 
 export interface IEntity {
@@ -152,10 +153,10 @@ export function parseLite(lite: string) : Lite<IEntity> {
 import { getTypeInfo } from './Reflection' 
 export function is<T extends IEntity>(a: Lite<T> | T, b: Lite<T> | T) {
 
-    if(!!a != !!b)
-        return false;
-
-    if (a.id != b.id)
+    if(a == null && b == null)
+        return true;
+		
+    if(a == null || b == null)
         return false;
 
     var aType = getTypeInfo((a as T).Type || (a as Lite<T>).EntityType);
@@ -448,12 +449,12 @@ export module VoidEnumMessage {
 
 export namespace Basics {
 
-    export const ColorEntity_Type = new Type<ColorEntity>("Color");
+    export const ColorEntity_Type = new Type<ColorEntity>("ColorEntity");
     export interface ColorEntity extends EmbeddedEntity {
         argb?: number;
     }
     
-    export const DeleteLogParametersEntity_Type = new Type<DeleteLogParametersEntity>("DeleteLogParameters");
+    export const DeleteLogParametersEntity_Type = new Type<DeleteLogParametersEntity>("DeleteLogParametersEntity");
     export interface DeleteLogParametersEntity extends EmbeddedEntity {
         deleteLogsWithMoreThan?: number;
         dateLimit?: string;

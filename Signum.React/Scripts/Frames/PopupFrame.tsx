@@ -28,7 +28,6 @@ interface PopupFrameProps extends React.Props<PopupFrame>, IModalProps {
 
 interface PopupFrameState {
     pack?: EntityPack<ModifiableEntity>;
-    modelState?: ModelState;
     component?: React.ComponentClass<EntityComponentProps<Entity>>;
     entitySettings?: Navigator.EntitySettingsBase<any>;
     propertyRoute?: PropertyRoute;
@@ -92,7 +91,6 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
         this.setState({
             pack: pack,
             savedEntity: JSON.stringify(pack.entity),
-            modelState: null,
         });
     }
 
@@ -130,7 +128,7 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
 
         var entity = this.state.pack.entity;
 
-        new GraphExplorer().propagateModified(entity);
+        GraphExplorer.collectModelState(entity);
 
         var hasChanges = JSON.stringify(entity) != this.state.savedEntity;
         
@@ -167,7 +165,10 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
         var frame: EntityFrame<Entity> = {
             onReload: pack => this.setPack(pack),
             onClose: () => this.props.onExited(null),
-            setError: modelState => this.setState({ modelState }),
+            setError: modelState => {
+                GraphExplorer.setModelState(this.state.pack.entity, modelState);
+                this.forceUpdate();
+            },
         };
 
         const styleOptions: StyleOptions = {
@@ -176,13 +177,13 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
 
         var pack = this.state.pack;
 
-        var ctx =  new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity), this.state.modelState);
+        var ctx =  new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity));
 
         return (
             <Modal.Body>
                 {renderWidgets({ ctx: ctx, pack: pack }) }
                 <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />
-                <ValidationErrors modelState={this.state.modelState}/>
+                <ValidationErrors entity={pack.entity}/>
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
                     { this.state.component && React.createElement(this.state.component, {
                         ctx: ctx,
@@ -207,7 +208,7 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
                 <span className="sf-entity-title">{this.props.title || getToString(entity) }</span>&nbsp;
                 {this.renderExpandLink() }
                 <br />
-                <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitel(entity) }</small>
+                <small> {pr && pr.member && pr.member.typeNiceName || Navigator.getTypeTitle(entity, pr) }</small>
             </h4>
         );
     }

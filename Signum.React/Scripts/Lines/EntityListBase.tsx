@@ -128,4 +128,17 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         });
     };
 
+    handleRemoveElementClick = (event: React.SyntheticEvent, index: number) => {
+        var mle = this.props.ctx.value[index];
+
+        (this.props.onRemove ? this.props.onRemove(mle.element) : Promise.resolve(true))
+            .then(result => {
+                if (result == false)
+                    return;
+
+                this.props.ctx.value.remove(mle);
+                this.forceUpdate();
+            });
+    }; 
+
 }

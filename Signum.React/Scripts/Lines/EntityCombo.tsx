@@ -10,7 +10,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
-import { EntityBase, EntityBaseProps} from './EntityBase'
+import { EntityBase, EntityBaseProps } from './EntityBase'
 
 
 export interface EntityComboProps extends EntityBaseProps {

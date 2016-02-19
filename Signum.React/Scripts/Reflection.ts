@@ -86,6 +86,7 @@ export function toMomentFormat(format: string): any {
 
 export interface TypeReference {
     name: string;
+    typeNiceName?: string;
     isCollection?: boolean;
     isLite?: boolean;
     isNullable?: boolean;
@@ -290,7 +291,10 @@ function calculateRequiresSaveOperation(entityKind: EntityKind): boolean
 
 export interface IBinding<T> {
     getValue(): T;
-    setValue(val: T) :void;
+    setValue(val: T): void;
+
+    error: string;
+    errorClass: string;
 }
 
 export class Binding<T> implements IBinding<T> {
@@ -300,16 +304,25 @@ export class Binding<T> implements IBinding<T> {
         public parentValue: any) {
     }
 
-    getValue() : T {       
+    getValue(): T {
         return this.parentValue[this.member];
     }
     setValue(val: T) {
         var oldVal = this.parentValue[this.member];
-        this.parentValue[this.member] = val;        
+        this.parentValue[this.member] = val;
 
         if (oldVal != val && (this.parentValue as ModifiableEntity).Type) {
             (this.parentValue as ModifiableEntity).modified = true;
-        }   
+        }
+    }
+
+    get error(): string {
+        var parentErrors = (this.parentValue as ModifiableEntity).error;
+        return parentErrors != null && parentErrors[this.parentValue];
+    }
+
+    get errorClass(): string {
+        return !!this.error ? "has-error" : null;
     }
 }
 
@@ -324,8 +337,15 @@ export class ReadonlyBinding<T> implements IBinding<T> {
     setValue(val: T) {
         throw new Error("Readonly Binding");
     }
-}
 
+    get error(): string {
+        return null;
+    }
+
+    get errorClass(): string {
+        return null;
+    }
+}
 
 export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBinding<T> {
 
@@ -436,12 +456,10 @@ export interface LambdaMember {
 }
 
 export enum LambdaMemberType {
-    Member,
-    Mixin,
-    Indexer,
+    Member = "Member" as any,
+    Mixin = "Mixin" as any,
+    Indexer = "Indexer" as any,
 }
-
-
 
 export interface IType {
     typeName: string;
@@ -713,15 +731,37 @@ export enum PropertyRouteType {
 
 export class GraphExplorer {
 
+    static propagateAll(...args: any[]) {
+        var ge = new GraphExplorer();
+        args.forEach(o => ge.isModified(o, null));
+    }
+
+    static setModelState(e: ModifiableEntity, modelState: ModelState) {
+        var ge = new GraphExplorer();
+        ge.modelStateMode = "set";
+        ge.modelState = modelState || {};
+        ge.isModifiableObject(e, "");
+    }
+
+    static collectModelState(e: ModifiableEntity) : ModelState {
+        var ge = new GraphExplorer();
+        ge.modelStateMode = "set";
+        ge.modelState = {};
+        ge.isModifiableObject(e, "");
+        return ge.modelState;
+    }
+
     //cycle detection
     private modified = [];
     private notModified = [];
 
-    propagateModified(...args: any[]) {
-        args.forEach(a => this.isModified(a));
-    }
 
-    isModified(obj: any): boolean {
+    private modelStateMode: "collect" | "set";
+
+    private modelState: ModelState;
+
+
+    isModified(obj: any, modelStatePrefix: string): boolean {
 
         if (obj == null)
             return false;
@@ -736,7 +776,7 @@ export class GraphExplorer {
         if (this.notModified.contains(obj))
             return false;
 
-        var result = this.isModifiableObject(obj);
+        var result = this.isModifiableObject(obj, modelStatePrefix);
 
         (result ? this.modified : this.notModified).push(obj);
 
@@ -745,21 +785,21 @@ export class GraphExplorer {
 
     private static specialProperties = ["Type", "id", "isNew", "ticks", "toStr", "modified"];
 
-    private isModifiableObject(obj: Object) {
+    private isModifiableObject(obj: Object, modelStatePrefix: string) {
 
         if (obj instanceof Date)
             return false;
 
         if (obj instanceof Array)
-            return obj.some(o => this.isModified(o));
+            return obj.some((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]"));
 
         var mle = obj as MListElement<any>;
         if (mle.rowId)
-            return mle.rowId == null || this.isModified(mle.rowId);
+            return mle.rowId == null || this.isModified(mle.element, modelStatePrefix + ".element");
 
         var lite = obj as Lite<Entity>
         if (lite.EntityType)
-            return lite.entity != null && this.isModified(lite.entity);
+            return lite.entity != null && this.isModified(lite.entity, modelStatePrefix + ".entity");
 
         var mod = obj as ModifiableEntity;
         if (mod.Type == null)
@@ -768,9 +808,27 @@ export class GraphExplorer {
         if ((mod as Entity).isNew)
             mod.modified = true;
 
+        mod.error = {};
+
         for (var p in obj) {
             if (obj.hasOwnProperty(p) && !GraphExplorer.specialProperties.contains(p)) {
-                if (this.isModified(p))
+
+                var propertyPrefix = modelStatePrefix + "." + p;
+
+                if (this.modelStateMode == "collect") {
+                    if (mod.error[p])
+                        this.modelState[propertyPrefix] = mod.error[p];
+                    else
+                        delete this.modelState[propertyPrefix];
+                }
+                else if (this.modelStateMode == "set") {
+                    if (this.modelState[propertyPrefix])
+                        mod.error[p] = this.modelState[propertyPrefix];
+                    else
+                        delete mod.error[p];
+                }
+
+                if (this.isModified(p, propertyPrefix))
                     mod.modified = true;
             }
         }

@@ -369,6 +369,8 @@ namespace Signum.React.Facades
         public bool IsEmbedded { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "name")]
         public string Name { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "typeNiceName")]
+        public string TypeNiceName { get; set; }
 
         public TypeReferenceTS(Type type, Implementations? implementations)
         {
@@ -379,6 +381,9 @@ namespace Signum.React.Facades
             this.IsNullable = clean.IsNullable();
             this.IsEnum = clean.UnNullify().IsEnum;
             this.IsEmbedded = clean.IsEmbeddedEntity();
+            if (this.IsEmbedded && !this.IsCollection)
+                this.TypeNiceName = type.NiceName();
+
             this.Name = implementations?.Key() ?? TypeScriptType(type);
         }
 

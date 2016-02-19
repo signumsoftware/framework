@@ -34,7 +34,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
             </label>
         );
 
-        return <div className={ classes("form-group", this.props.ctx.formGroupSizeCss, ctx.hasErrorClass()) }>
+        return <div className={ classes("form-group", this.props.ctx.formGroupSizeCss, ctx.binding.errorClass) }>
             { ctx.formGroupStyle != FormGroupStyle.BasicDown && label }
             {
                 ctx.formGroupStyle == FormGroupStyle.LabelColumns ? (<div className={ this.props.ctx.valueColumnsCss } > { this.props.children } </div>) : this.props.children}

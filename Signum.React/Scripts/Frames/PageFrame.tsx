@@ -8,7 +8,7 @@ import { EntityComponent, EntityComponentProps, EntityFrame } from '../Lines'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, JavascriptMessage } from '../Signum.Entities'
 import { TypeContext, StyleOptions } from '../TypeContext'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, GraphExplorer } from '../Reflection'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
 import { GlobalModalContainer} from '../Modals'
 import ValidationErrors from './ValidationErrors'
@@ -24,7 +24,6 @@ interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: str
 
 interface PageFrameState {
     pack?: EntityPack<Entity>;
-    modelState?: ModelState;
     component?: React.ComponentClass<EntityComponentProps<Entity>>;
     entitySettings?: Navigator.EntitySettingsBase<any>;
     typeInfo?: TypeInfo;
@@ -120,27 +119,27 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             readOnly: this.state.entitySettings.onIsReadonly()
         };
 
-        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity), this.state.modelState);
+        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity));
 
-        var frame: EntityFrame<Entity> = {
-            onReload: pack => this.setState({ pack, modelState: null }),
+        const frame: EntityFrame<Entity> = {
+            onReload: pack => this.setState({ pack }),
             onClose: () => this.onClose(),
-            setError: ms => this.setState({ modelState: ms }),
+            setError: ms => { GraphExplorer.setModelState(entity, ms); this.forceUpdate() },
         };
 
-        var wc: WidgetContext = {
+        const wc: WidgetContext = {
             ctx: ctx,
             pack: this.state.pack,
         };
 
-        var embeddedWidgets = renderEmbeddedWidgets(wc);
+        const embeddedWidgets = renderEmbeddedWidgets(wc);
 
         return (
             <div className="normal-control">
                 { this.renderTitle() }
                 { renderWidgets(wc) }
                 <ButtonBar frame={frame} pack={this.state.pack} showOperations={this.props.showOperations} />
-                <ValidationErrors modelState={this.state.modelState}/>
+                <ValidationErrors entity={this.state.pack.entity}/>
                 { embeddedWidgets.top }
                 <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
                     {this.state.component && React.createElement<EntityComponentProps<Entity>>(this.state.component, { ctx: ctx, frame: frame }) }
@@ -161,7 +160,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             <h3>
                 <span className="sf-entity-title">{ this.props.title || getToString(entity) }</span>
                 <br/>
-                <small className="sf-type-nice-name">{Navigator.getTypeTitel(entity) }</small>
+                <small className="sf-type-nice-name">{ Navigator.getTypeTitle(entity, PropertyRoute.root(this.state.typeInfo)) }</small>
             </h3>
         );
     }
