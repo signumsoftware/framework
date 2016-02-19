@@ -78,21 +78,33 @@ namespace Signum.Engine.Excel
                 }.Register();
 
 
-                EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity uqe, EmailTemplateEntity template, IEntity entity) =>
+                EmailTemplateLogic.FillAttachmentTokens.Register((ExcelAttachmentEntity uqe, EmailTemplateLogic.FillAttachmentTokenContext ctx) =>
                 {
-                    var finalEntity = uqe.Related?.Retrieve() ?? (Entity)entity;
+                    if (uqe.FileName != null)
+                        EmailTemplateParser.Parse(uqe.FileName, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
+
+                    if (uqe.Title != null)
+                        EmailTemplateParser.Parse(uqe.Title, ctx.QueryDescription, ctx.ModelType).FillQueryTokens(ctx.QueryTokens);
+                });
+
+                EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity uqe, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
+                {
+                    var finalEntity = uqe.Related?.Retrieve() ?? (Entity)ctx.Entity;
 
                     using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
                     {
                         QueryRequest request = UserQueryLogic.ToQueryRequest(uqe.UserQuery.Retrieve());
 
-                        var bytes = ExcelLogic.ExecutePlainExcel(request, uqe.Title);
+                        var title = EmailTemplateParser.Parse(uqe.Title, ctx.QueryDescription, ctx.ModelType).Print(ctx.EmailTemplateParameters);
+                        var fileName = EmailTemplateParser.Parse(uqe.FileName, ctx.QueryDescription, ctx.ModelType).Print(ctx.EmailTemplateParameters);
 
+                        var bytes = ExcelLogic.ExecutePlainExcel(request, title);
+                        
                         return new List<EmailAttachmentEntity>
                         {
                             new EmailAttachmentEntity
                             {
-                                File = Files.EmbeddedFilePathLogic.SaveFile(new Entities.Files.EmbeddedFilePathEntity(EmailFileType.Attachment, uqe.FileName, bytes)),
+                                File = Files.EmbeddedFilePathLogic.SaveFile(new Entities.Files.EmbeddedFilePathEntity(EmailFileType.Attachment, fileName, bytes)),
                                 Type = EmailAttachmentType.Attachment,
                             }
                         };

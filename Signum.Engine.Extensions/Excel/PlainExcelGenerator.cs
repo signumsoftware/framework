@@ -56,6 +56,7 @@ namespace Signum.Engine.Excel
                         { TemplateCells.DateTime, worksheet.FindCell("C3").StyleIndex },
                         { TemplateCells.Text, worksheet.FindCell("D3").StyleIndex },
                         { TemplateCells.General, worksheet.FindCell("E3").StyleIndex },
+                        { TemplateCells.Boolean, worksheet.FindCell("E3").StyleIndex },
                         { TemplateCells.Number, worksheet.FindCell("F3").StyleIndex },
                         { TemplateCells.Decimal, worksheet.FindCell("G3").StyleIndex },
                     }
@@ -107,8 +108,7 @@ namespace Signum.Engine.Excel
                
                 worksheetPart.Worksheet.Append(new Sequence<Row>()
                 {
-                    (from a in title
-                   select CellBuilder.Cell(title,TemplateCells.Title)).ToRow(),
+                   new [] { CellBuilder.Cell(title,TemplateCells.Title) }.ToRow(),
 
                     (from c in results.Columns
                     select CellBuilder.Cell(c.Column.DisplayName, TemplateCells.Header)).ToRow(),

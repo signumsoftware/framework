@@ -24,12 +24,12 @@ namespace Signum.Entities.Excel
         [SqlDbType(Size = 50)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
         public string Title { get; set; }
-
-        [ImplementedByAll]
+        
         [NotNullable]
         [NotNullValidator]
         public Lite<UserQueryEntity> UserQuery { get; set; }
-        
+
+        [ImplementedByAll]
         public Lite<Entity> Related { get; set; }
 
         static Expression<Func<ExcelAttachmentEntity, string>> ToStringExpression = @this => @this.FileName;

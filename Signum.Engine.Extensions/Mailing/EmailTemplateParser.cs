@@ -291,6 +291,11 @@ namespace Signum.Engine.Mailing
             }
         }
 
+        internal static object Parse(string title, object queryDescription, object modelType)
+        {
+            throw new NotImplementedException();
+        }
+
         private static string Synchronize(string text, SyncronizationContext sc)
         {
             BlockNode node = new TemplateWalker(text, sc.QueryDescription, sc.ModelType).ParseSync();
