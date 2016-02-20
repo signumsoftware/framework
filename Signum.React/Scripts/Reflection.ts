@@ -308,7 +308,7 @@ export class Binding<T> implements IBinding<T> {
         return this.parentValue[this.member];
     }
     setValue(val: T) {
-        var oldVal = this.parentValue[this.member];
+        const oldVal = this.parentValue[this.member];
         this.parentValue[this.member] = val;
 
         if (oldVal != val && (this.parentValue as ModifiableEntity).Type) {
@@ -317,7 +317,7 @@ export class Binding<T> implements IBinding<T> {
     }
 
     get error(): string {
-        var parentErrors = (this.parentValue as ModifiableEntity).error;
+        const parentErrors = (this.parentValue as ModifiableEntity).error;
         return parentErrors != null && parentErrors[this.parentValue];
     }
 
@@ -365,7 +365,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
     if (m == null)
         return null;
 
-    var newBody = m[1];
+    let newBody = m[1];
 
     newBody = newBody.replace(partialMixinRegex,
         (...m) => `${m[2]}.mixins["${m[4]}"]`);
@@ -413,40 +413,6 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
     }
 
     return result.reverse();
-}
-
-
-export function subModelState(modelState: ModelState, lambdaMember: LambdaMember, assertAll: boolean = false): ModelState {
-
-    if (modelState == null)
-        return null;
-
-    var result: ModelState; 
-    
-    var prefix = lambdaMember.type == LambdaMemberType.Member ? lambdaMember.name :
-        lambdaMember.type == LambdaMemberType.Mixin ? "mixins." + lambdaMember.name :
-            lambdaMember.type == LambdaMemberType.Indexer ? "[" + lambdaMember.name + "]" : null;
-
-    for (var a in modelState) {
-        if (modelState.hasOwnProperty(a)) {
-            if (a == prefix) {
-                if (result == null)
-                    result = {};
-                result[""] = modelState[a];
-            }
-            else if (a.startsWith(prefix + ".")) {
-                if (result == null)
-                    result = {};
-                result[a.after(prefix + ".")] = modelState[a];
-            }
-            else {
-                if (assertAll)
-                    throw new Error(modelState[1]);
-            }
-        }
-    }
-
-    return result;
 }
 
 
@@ -526,7 +492,7 @@ export class MessageKey {
     }
 
     niceToString(args?: any[]): string {
-        var msg = this.propertyInfo().niceName;
+        const msg = this.propertyInfo().niceName;
 
         return args ? msg.formatWith(args) : msg;
     }
@@ -732,29 +698,29 @@ export enum PropertyRouteType {
 export class GraphExplorer {
 
     static propagateAll(...args: any[]) {
-        var ge = new GraphExplorer();
+        const ge = new GraphExplorer();
         args.forEach(o => ge.isModified(o, null));
     }
 
-    static setModelState(e: ModifiableEntity, modelState: ModelState) {
-        var ge = new GraphExplorer();
+    static setModelState(e: ModifiableEntity, modelState: ModelState, initialPrefix: string) {
+        const ge = new GraphExplorer();
         ge.modelStateMode = "set";
-        ge.modelState = modelState || {};
+        ge.modelState = modelState == null ? {} : Dic.copy(modelState);
         ge.isModifiableObject(e, "");
+        Dic.extend(e.error, ge.modelState); //Assign remaining
     }
 
-    static collectModelState(e: ModifiableEntity) : ModelState {
-        var ge = new GraphExplorer();
+    static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {
+        const ge = new GraphExplorer();
         ge.modelStateMode = "set";
         ge.modelState = {};
-        ge.isModifiableObject(e, "");
+        ge.isModifiableObject(e, initialPrefix);
         return ge.modelState;
     }
 
     //cycle detection
     private modified = [];
     private notModified = [];
-
 
     private modelStateMode: "collect" | "set";
 
@@ -766,7 +732,7 @@ export class GraphExplorer {
         if (obj == null)
             return false;
 
-        var t = typeof obj;
+        const t = typeof obj;
         if (t != "object")
             return false;
 
@@ -776,7 +742,7 @@ export class GraphExplorer {
         if (this.notModified.contains(obj))
             return false;
 
-        var result = this.isModifiableObject(obj, modelStatePrefix);
+        const result = this.isModifiableObject(obj, modelStatePrefix);
 
         (result ? this.modified : this.notModified).push(obj);
 
@@ -793,46 +759,78 @@ export class GraphExplorer {
         if (obj instanceof Array)
             return obj.some((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]"));
 
-        var mle = obj as MListElement<any>;
-        if (mle.rowId)
-            return mle.rowId == null || this.isModified(mle.element, modelStatePrefix + ".element");
+        const mle = obj as MListElement<any>;
+        if (mle.hasOwnProperty("rowId"))
+            return mle.rowId == null || this.isModified(mle.element, dot(modelStatePrefix, "element"));
 
-        var lite = obj as Lite<Entity>
+        const lite = obj as Lite<Entity>
         if (lite.EntityType)
-            return lite.entity != null && this.isModified(lite.entity, modelStatePrefix + ".entity");
+            return lite.entity != null && this.isModified(lite.entity, dot(modelStatePrefix, "entity"));
 
-        var mod = obj as ModifiableEntity;
-        if (mod.Type == null)
-            return false;
+        const mod = obj as ModifiableEntity;
+        if (mod.Type == null) {
+            let result = false;
+            for (const p in obj) {
+                if (obj.hasOwnProperty(p)) {
+                    const propertyPrefix = dot(modelStatePrefix, p);
+                    result = this.isModified(obj[p], propertyPrefix) || result;
+                    mod.modified = true;
+                }
+            }
 
-        if ((mod as Entity).isNew)
-            mod.modified = true;
+            return result;
+        }
 
-        mod.error = {};
+        if (this.modelStateMode == "collect") {
+            if (mod.error != null) {
+                for (const p in mod.error) {
+                    const propertyPrefix = dot(modelStatePrefix, p);
 
-        for (var p in obj) {
-            if (obj.hasOwnProperty(p) && !GraphExplorer.specialProperties.contains(p)) {
-
-                var propertyPrefix = modelStatePrefix + "." + p;
-
-                if (this.modelStateMode == "collect") {
                     if (mod.error[p])
-                        this.modelState[propertyPrefix] = mod.error[p];
-                    else
-                        delete this.modelState[propertyPrefix];
+                        this.modelState[dot(modelStatePrefix, p)] = mod.error[p];
                 }
-                else if (this.modelStateMode == "set") {
-                    if (this.modelState[propertyPrefix])
-                        mod.error[p] = this.modelState[propertyPrefix];
-                    else
-                        delete mod.error[p];
-                }
+            }
+        }
+        else if (this.modelStateMode == "set") {
 
+            mod.error = null;
+
+            const prefix = dot(modelStatePrefix, "");
+            for (const key in this.modelState) {
+                const propName = key.tryAfter(prefix)
+                if (propName && !propName.contains(".")) {
+                    if (mod.error == null)
+                        mod.error = {};
+
+                    mod.error[propName] = this.modelState[key];
+
+                    delete this.modelState[key];
+                }
+            }
+
+            if (mod.error == null)
+                delete mod.error;
+        }
+
+        
+        for (const p in obj) {
+            if (obj.hasOwnProperty(p) && !GraphExplorer.specialProperties.contains(p)) {
+                const propertyPrefix = dot(modelStatePrefix, p);
                 if (this.isModified(p, propertyPrefix))
                     mod.modified = true;
             }
         }
 
+        if ((mod as Entity).isNew)
+            mod.modified = true;
+      
         return mod.modified;
     }
+}
+
+function dot(prev: string, property: string) {
+    if (prev == null || prev == "")
+        return property;
+
+    return prev + "." + property
 }

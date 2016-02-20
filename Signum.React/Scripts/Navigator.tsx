@@ -183,6 +183,7 @@ export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | L
     });
 } 
 
+
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, showOperations: boolean): Promise<EntityPack<ModifiableEntity>> {
     if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
         return Promise.resolve(entityOrEntityPack);
@@ -195,7 +196,7 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
         return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
     if (!showOperations || !needsCanExecute(entity))
-        return Promise.resolve({ entity: cloneEntity(entity), canExecute: null });
+        return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
     return API.fetchCanExecute(entity);
 }

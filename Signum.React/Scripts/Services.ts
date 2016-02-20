@@ -1,5 +1,6 @@
 ﻿/// <reference path="../typings/whatwg-fetch/whatwg-fetch.d.ts" />
 import { ModelState } from './Signum.Entities'
+import { GraphExplorer } from './Reflection'
 
 
 export interface AjaxOptions {
@@ -8,6 +9,7 @@ export interface AjaxOptions {
     avoidNotifyPendingRequests?: boolean;
     avoidThrowError?: boolean;
     showError?: ShowError;
+    avoidGraphExplorer?: boolean;
 
     mode?: string | RequestMode;
     credentials?: string | RequestCredentials;
@@ -47,6 +49,10 @@ export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
 }
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
+
+    if (!options.avoidGraphExplorer) {
+        GraphExplorer.propagateAll(data);
+    }
 
     return wrapRequest<T>(options, () =>
         fetch(baseUrl(options), {

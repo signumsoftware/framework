@@ -40,7 +40,7 @@ export { EntityStrip };
 
 export interface EntityFrame<T extends ModifiableEntity> {
     onReload: (pack: EntityPack<T>) => void;
-    setError: (modelState: ModelState) => void;
+    setError: (modelState: ModelState, initialPrefix?: string) => void;
     onClose: () => void;
 }
 

@@ -312,8 +312,13 @@ function convertToLite(val: any): Lite<Entity> {
     if (val == null || val == "")
         return null; 
 
-    if ((val as Lite<Entity>).EntityType)
-        return val as Lite<Entity>;
+    if ((val as Lite<Entity>).EntityType) {
+        let lite = val as Lite<Entity>;
+        if (lite.entity != null && lite.entity.id != null)
+            return toLite(lite.entity, false);
+
+        return lite;
+    }
 
     if ((val as Entity).Type)
         return toLite(val as Entity);

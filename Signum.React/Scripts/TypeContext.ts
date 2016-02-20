@@ -1,4 +1,4 @@
-﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, subModelState, LambdaMemberType } from './Reflection'
+﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType } from './Reflection'
 import { ModelState, MList } from './Signum.Entities'
 
 export enum FormGroupStyle {

@@ -3,7 +3,7 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString } from '../Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, subModelState, LambdaMemberType  } from '../Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType  } from '../Reflection';
 import {classes} from '../Globals';
 import * as Navigator from '../Navigator';
 import { ButtonsContext } from '../Frames/ButtonBar';
@@ -161,9 +161,7 @@ export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>): P
 function catchValidationError(error: any, frame: EntityFrame<Entity>) {
     if (error instanceof ValidationError) {
         var model = (error as ValidationError).modelState;
-        model = subModelState(model, { name: "request", type: LambdaMemberType.Member }, true); 
-        model = subModelState(model, { name: "entity", type: LambdaMemberType.Member }, true);
-        frame.setError(model);
+        frame.setError(model, "request.entity");
         return false;
     }
 

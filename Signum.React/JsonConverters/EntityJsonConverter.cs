@@ -215,7 +215,9 @@ namespace Signum.React.Json
 
             ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer);
 
-            var pr = JsonSerializerExtensions.CurrentPropertyRoute ?? PropertyRoute.Root(mod.GetType());
+            var pr = JsonSerializerExtensions.CurrentPropertyRoute;
+            if(pr == null || mod is Entity)
+                pr = PropertyRoute.Root(mod.GetType());
 
             var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
 

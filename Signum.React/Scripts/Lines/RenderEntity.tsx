@@ -6,7 +6,7 @@ import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, subModelState, LambdaMemberType } from '../Reflection'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { EntityComponentProps, EntityFrame } from '../Lines'
 import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
@@ -114,7 +114,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         var frame: EntityFrame<ModifiableEntity> = {
             onClose: () => { throw new Error("Not implemented Exception"); },
             onReload: pack => { throw new Error("Not implemented Exception"); },
-            setError: error => { throw new Error("Not implemented Exception"); },
+            setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
         }; 
 
         return React.createElement<EntityComponentProps<ModifiableEntity>>(this.state.component, {

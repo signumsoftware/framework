@@ -124,7 +124,10 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         const frame: EntityFrame<Entity> = {
             onReload: pack => this.setState({ pack }),
             onClose: () => this.onClose(),
-            setError: ms => { GraphExplorer.setModelState(entity, ms); this.forceUpdate() },
+            setError: (ms, initialPrefix = "") => {
+                GraphExplorer.setModelState(entity, ms, initialPrefix);
+                this.forceUpdate()
+            },
         };
 
         const wc: WidgetContext = {

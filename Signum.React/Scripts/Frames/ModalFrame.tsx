@@ -128,7 +128,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         var entity = this.state.pack.entity;
 
-        GraphExplorer.collectModelState(entity);
+        GraphExplorer.propagateAll(entity);
 
         var hasChanges = JSON.stringify(entity) != this.state.savedEntity;
         
@@ -165,8 +165,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         var frame: EntityFrame<Entity> = {
             onReload: pack => this.setPack(pack),
             onClose: () => this.props.onExited(null),
-            setError: modelState => {
-                GraphExplorer.setModelState(this.state.pack.entity, modelState);
+            setError: (modelState, initialPrefix = "") => {
+                GraphExplorer.setModelState(this.state.pack.entity, modelState, initialPrefix);
                 this.forceUpdate();
             },
         };
