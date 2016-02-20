@@ -232,6 +232,8 @@ Consider the following options:
 
             operations.GetOrAddDefinition(operation.OverridenType).AddOrThrow(operation.OperationSymbol, operation, "Operation {0} has already been registered");
 
+            operations.ClearCache();
+
             operationsFromKey.Reset();
         }
 
