@@ -278,8 +278,8 @@ module SF {
             enable();
 
             return promise()
-                .then(val=> { disable(); return val; })
-                ['catch']((err) : T => { disable(); throw err; }); //Typescript bug?
+                .then(val => { disable(); return val; })
+            ['catch']((err): any => { disable(); throw err; }); //Typescript bug?
         }
     }
 
