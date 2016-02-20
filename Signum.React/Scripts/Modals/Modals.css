@@ -1,0 +1,40 @@
+﻿.dialog-header-error {
+    background-color: #d2322d;
+}
+
+    .dialog-header-error span, .dialog-header-error h4 {
+        color: #ffffff;
+    }
+
+    .dialog-header-error a {
+        color: #B9DFFF;
+    }
+
+.dialog-header-wait {
+    background-color: #428bca;
+}
+
+    .dialog-header-wait span, .dialog-header-wait h4 {
+        color: #ffffff;
+    }
+
+    .dialog-header-wait a {
+        color: #B9DFFF;
+    }
+
+.dialog-header-confirm {
+    background-color: #333333;
+}
+
+    .dialog-header-confirm span, .dialog-header-confirm h4 {
+        color: #ffffff;
+    }
+
+    .dialog-header-confirm a {
+        color: #B9DFFF;
+    }
+
+
+.dialog-header-notify {
+    background-color: #eeeeee;
+}

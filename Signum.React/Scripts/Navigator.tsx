@@ -9,7 +9,7 @@ import { TypeContext } from './TypeContext';
 import { EntityComponent, EntityComponentProps } from './Lines';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
-import PopupFrame from './Frames/PopupFrame';
+import ModalFrame from './Frames/ModalFrame';
 import { ViewReplacer } from  './Frames/ReactVisitor'
 
 export let NotFound: __React.ComponentClass<any>;
@@ -154,7 +154,7 @@ export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Enti
             entityOrOptions as ViewOptions;
 
     return new Promise<ModifiableEntity>((resolve) => {
-        require(["./Frames/PopupFrame"], function (NP: { default: typeof PopupFrame }) {
+        require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
             NP.default.openView(options).then(resolve);
         });
     });
@@ -177,7 +177,7 @@ export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | L
                 entityOrOptions as NavigateOptions;
 
     return new Promise<ModifiableEntity>((resolve) => {
-        require(["./Frames/PopupFrame"], function (NP: { default: typeof PopupFrame }) {
+        require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
             NP.default.openView(options).then(resolve);
         });
     });

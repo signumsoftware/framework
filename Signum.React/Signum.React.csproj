@@ -139,9 +139,11 @@
     <Compile Include="ApiControllers\EntityController.cs" />
     <Compile Include="ApiControllers\QueryController.cs" />
     <Compile Include="ApiControllers\ReflectionController.cs" />
-    <Compile Include="Facades\EntitesServer.cs" />
+    <Compile Include="Facades\SignumServer.cs" />
     <Compile Include="Facades\ReflectionServer.cs" />
     <Compile Include="Facades\SignumControllerFactory.cs" />
+    <Compile Include="Facades\SignumExceptionFilter.cs" />
+    <Compile Include="Facades\ValidateModelFilterAttribute.cs" />
     <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="JsonConverters\EntityJsonConverter.cs" />
     <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
@@ -153,6 +155,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Scripts\Modals\Modals.css" />
     <Content Include="Scripts\Lines\Lines.css" />
     <Content Include="Scripts\Frames\Frames.css" />
     <Content Include="Scripts\Frames\Notify.css" />
@@ -217,7 +220,7 @@
     <TypeScriptCompile Include="Scripts\Operations.tsx" />
     <TypeScriptCompile Include="Scripts\Navigator.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\PageFrame.tsx" />
-    <TypeScriptCompile Include="Scripts\Frames\PopupFrame.tsx" />
+    <TypeScriptCompile Include="Scripts\Frames\ModalFrame.tsx" />
     <TypeScriptCompile Include="Scripts\Operations\EntityOperations.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ColumnEditor.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\ContextualItems.tsx" />
@@ -227,7 +230,8 @@
     <TypeScriptCompile Include="Scripts\SearchControl\QueryTokenBuilder.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchControl.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchPage.tsx" />
-    <TypeScriptCompile Include="Scripts\SearchControl\SearchPopup.tsx" />
+    <TypeScriptCompile Include="Scripts\Modals\ErrorModal.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\SearchModal.tsx" />
     <TypeScriptCompile Include="Scripts\SelectorPopup.tsx" />
     <TypeScriptCompile Include="Scripts\Services.ts" />
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">

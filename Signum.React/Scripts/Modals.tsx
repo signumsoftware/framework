@@ -4,12 +4,9 @@ import * as Services from './Services';
 
 import * as React from 'react'
 
-
-
 export interface IModalProps {
     onExited?: (val: any) => void;
 }
-
 
 let current: GlobalModalContainer;
 export class GlobalModalContainer extends React.Component<{}, { modals: React.ReactElement<IModalProps>[]

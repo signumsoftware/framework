@@ -19,7 +19,7 @@ namespace Signum.React.ApiControllers
 {
     public class OperationController : ApiController
     {
-        [Route("api/operation/construct"), HttpPost, ValidateModel]
+        [Route("api/operation/construct"), HttpPost, ValidateModelFilter]
         public EntityPackTS Construct(ConstructOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -31,7 +31,7 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/constructFromEntity"), HttpPost, ValidateModel]
+        [Route("api/operation/constructFromEntity"), HttpPost, ValidateModelFilter]
         public EntityPackTS ConstructFromEntity(EntityOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -41,7 +41,7 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/constructFromLite"), HttpPost, ValidateModel]
+        [Route("api/operation/constructFromLite"), HttpPost, ValidateModelFilter]
         public EntityPackTS ConstructFromLite(LiteOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -52,7 +52,7 @@ namespace Signum.React.ApiControllers
         }
 
       
-        [Route("api/operation/executeEntity"), HttpPost, ValidateModel]
+        [Route("api/operation/executeEntity"), HttpPost, ValidateModelFilter]
         public EntityPackTS ExecuteEntity(EntityOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -63,7 +63,7 @@ namespace Signum.React.ApiControllers
         }
 
 
-        [Route("api/operation/executeLite"), HttpPost, ValidateModel]
+        [Route("api/operation/executeLite"), HttpPost, ValidateModelFilter]
         public EntityPackTS ExecuteLite(LiteOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -73,7 +73,7 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/deleteEntity"), HttpPost, ValidateModel]
+        [Route("api/operation/deleteEntity"), HttpPost, ValidateModelFilter]
         public void DeleteEntity(EntityOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -82,7 +82,7 @@ namespace Signum.React.ApiControllers
 
         }
 
-        [Route("api/operation/deleteLite"), HttpPost, ValidateModel]
+        [Route("api/operation/deleteLite"), HttpPost, ValidateModelFilter]
         public void DeleteLite(LiteOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -113,7 +113,7 @@ namespace Signum.React.ApiControllers
             public object[] args { get; set; }
         }
 
-        [Route("api/operation/constructFromMany"), HttpPost, ValidateModel]
+        [Route("api/operation/constructFromMany"), HttpPost, ValidateModelFilter]
         public EntityPackTS ConstructFromMany(MultiOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -125,7 +125,7 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/constructFromMultiple"), HttpPost, ValidateModel]
+        [Route("api/operation/constructFromMultiple"), HttpPost, ValidateModelFilter]
         public MultiOperationResponse ConstructFromMultiple(MultiOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -136,7 +136,7 @@ namespace Signum.React.ApiControllers
             return new MultiOperationResponse { errors = errors };
         }
 
-        [Route("api/operation/executeMultiple"), HttpPost, ValidateModel]
+        [Route("api/operation/executeMultiple"), HttpPost, ValidateModelFilter]
         public MultiOperationResponse ExecuteMultiple(MultiOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -147,7 +147,7 @@ namespace Signum.React.ApiControllers
             return new MultiOperationResponse { errors = errors };
         }
 
-        [Route("api/operation/deleteMultiple"), HttpPost, ValidateModel]
+        [Route("api/operation/deleteMultiple"), HttpPost, ValidateModelFilter]
         public MultiOperationResponse DeleteMultiple(MultiOperationRequest request)
         {
             var operation = SymbolLogic<OperationSymbol>.ToSymbol(request.operationKey);
@@ -191,7 +191,7 @@ namespace Signum.React.ApiControllers
             public Dictionary<string, string> errors { get; set; }
         }
 
-        [Route("api/operation/stateCanExecutes"), HttpPost, ValidateModel]
+        [Route("api/operation/stateCanExecutes"), HttpPost, ValidateModelFilter]
         public StateCanExecuteResponse StateCanExecutes(StateCanExecuteRequest request)
         {
             var result = OperationLogic.GetContextualCanExecute(request.lites, request.operationKeys.Select(SymbolLogic<OperationSymbol>.ToSymbol).ToList());
@@ -208,18 +208,6 @@ namespace Signum.React.ApiControllers
         public class StateCanExecuteResponse
         {
             public Dictionary<string, string> canExecutes { get; set; }
-        }
-    }
-
-    public class ValidateModelAttribute : ActionFilterAttribute
-    {
-        public override void OnActionExecuting(HttpActionContext actionContext)
-        {
-            if (!actionContext.ModelState.IsValid)
-            {
-                actionContext.Response = actionContext.Request.CreateErrorResponse(
-                    HttpStatusCode.BadRequest, actionContext.ModelState);
-            }
         }
     }
 }

@@ -14,7 +14,7 @@ import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeR
 getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from './Reflection';
 
 import {navigateRoute, isNavigable, currentHistory, API as NavAPI } from './Navigator';
-import SearchPopup from './SearchControl/SearchPopup';
+import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 
 
@@ -54,7 +54,7 @@ export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<IEntit
         { queryName: findOptions } as FindOptions;
     
     return new Promise<Lite<IEntity>>((resolve) => {
-        require(["./SearchControl/SearchPopup"], function (SP: { default: typeof SearchPopup }) {
+        require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
             SP.default.open(fo).then(resolve);
         });
     });
@@ -68,7 +68,7 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEn
         { queryName: findOptions } as FindOptions;
 
     return new Promise<Lite<IEntity>[]>((resolve) => {
-        require(["./SearchControl/SearchPopup"], function (SP: { default: typeof SearchPopup }) {
+        require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
             SP.default.openMany(fo).then(resolve);
         });
     });
@@ -82,7 +82,7 @@ export function explore(findOptions: FindOptions | Type<any>): Promise<void> {
         { queryName: findOptions } as FindOptions;
 
     return new Promise<void>((resolve) => {
-        require(["./SearchControl/SearchPopup"], function (SP: { default: typeof SearchPopup }) {
+        require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
             SP.default.explore(fo).then(resolve);
         });
     });

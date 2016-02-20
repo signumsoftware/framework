@@ -15,7 +15,7 @@ import { needsCanExecute } from '../Operations/EntityOperations'
 
 require("!style!css!./Frames.css");
 
-interface PopupFrameProps extends React.Props<PopupFrame>, IModalProps {
+interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     title?: string;
     entityOrPack?: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
@@ -26,7 +26,7 @@ interface PopupFrameProps extends React.Props<PopupFrame>, IModalProps {
     readOnly?: boolean
 }
 
-interface PopupFrameState {
+interface ModalFrameState {
     pack?: EntityPack<ModifiableEntity>;
     component?: React.ComponentClass<EntityComponentProps<Entity>>;
     entitySettings?: Navigator.EntitySettingsBase<any>;
@@ -35,9 +35,9 @@ interface PopupFrameState {
     show?: boolean;
 }
 
-export default class PopupFrame extends React.Component<PopupFrameProps, PopupFrameState>  {
+export default class ModalFrame extends React.Component<ModalFrameProps, ModalFrameState>  {
 
-    static defaultProps: PopupFrameProps = {
+    static defaultProps: ModalFrameProps = {
         showOperations: true,
         component: null,
     }
@@ -62,7 +62,7 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
             .then(() => this.loadComponent());
     }
 
-    calculateState(props: PopupFrameState) {
+    calculateState(props: ModalFrameState) {
 
         const typeName = (this.props.entityOrPack as Lite<Entity>).EntityType ||
             (this.props.entityOrPack as ModifiableEntity).Type ||
@@ -245,7 +245,7 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
 
     static openView(options: Navigator.ViewOptions): Promise<Entity> {
 
-        return openModal<Entity>(<PopupFrame
+        return openModal<Entity>(<ModalFrame
             entityOrPack={options.entity}
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}
@@ -257,7 +257,7 @@ export default class PopupFrame extends React.Component<PopupFrameProps, PopupFr
 
     static openNavigate(options: Navigator.NavigateOptions): Promise<void> {
 
-        return openModal<void>(<PopupFrame
+        return openModal<void>(<ModalFrame
             entityOrPack={options.entity}
             readOnly={options.readOnly}
             propertyRoute={null}

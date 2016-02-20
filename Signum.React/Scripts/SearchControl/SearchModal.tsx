@@ -9,14 +9,14 @@ import * as Reflection from '../Reflection'
 import { default as SearchControl, SearchControlProps, ExternalFullScreenButton} from './SearchControl'
 
 
-interface SearchPopupProps extends React.Props<SearchPopup>, IModalProps {
+interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
     findOptions: FindOptions;
     findMode: FindMode;
     isMany: boolean;
     title?: string;
 }
 
-export default class SearchPopup extends React.Component<SearchPopupProps, { show: boolean; externalButton?: ExternalFullScreenButton }>  {
+export default class SearchModal extends React.Component<SearchModalProps, { show: boolean; externalButton?: ExternalFullScreenButton }>  {
 
     constructor(props) {
         super(props);
@@ -81,7 +81,7 @@ export default class SearchPopup extends React.Component<SearchPopupProps, { sho
 
     static open(findOptions: FindOptions, title?: string): Promise<Lite<Entity>> {
 
-        return openModal<Lite<Entity>[]>(<SearchPopup
+        return openModal<Lite<Entity>[]>(<SearchModal
             findOptions={findOptions}
             findMode={FindMode.Find}
             isMany={false}
@@ -91,7 +91,7 @@ export default class SearchPopup extends React.Component<SearchPopupProps, { sho
 
     static openMany(findOptions: FindOptions, title?: string): Promise<Lite<Entity>[]> {
 
-        return openModal<Lite<Entity>[]>(<SearchPopup findOptions={findOptions}
+        return openModal<Lite<Entity>[]>(<SearchModal findOptions={findOptions}
             findMode={FindMode.Find}
             isMany={true}
             title={title || Reflection.getQueryNiceName(findOptions.queryName) } />);
@@ -99,7 +99,7 @@ export default class SearchPopup extends React.Component<SearchPopupProps, { sho
 
     static explore(findOptions: FindOptions, title?: string): Promise<void> {
 
-        return openModal<void>(<SearchPopup findOptions={findOptions}
+        return openModal<void>(<SearchModal findOptions={findOptions}
             findMode={FindMode.Explore}
             isMany={true}
             title={title || Reflection.getQueryNiceName(findOptions.queryName) } />);
