@@ -35,7 +35,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     calculateDefaultState(state: EntityLineProps) {
         super.calculateDefaultState(state);
-        state.autoComplete = state.autoComplete != null ? state.autoComplete : !state.type.isEmbedded && state.type.name != IsByAll;
+        state.autoComplete = !state.type.isEmbedded && state.type.name != IsByAll;
     }
     
     defaultAutoCompleteGetItems = (query: string) => Finder.API.findLiteLike({

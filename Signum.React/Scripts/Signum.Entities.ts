@@ -69,6 +69,8 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
     toStringDictionary[type.typeName] = toStringFunc;
 }
 
+
+import { getTypeInfo } from './Reflection' 
 function geOrCreateToStringFunction(type: string) {
     var f = toStringDictionary[type];
     if (f != null || f === null)
@@ -150,7 +152,6 @@ export function parseLite(lite: string) : Lite<IEntity> {
     };
 }
 
-import { getTypeInfo } from './Reflection' 
 export function is<T extends IEntity>(a: Lite<T> | T, b: Lite<T> | T) {
 
     if(a == null && b == null)
@@ -159,11 +160,24 @@ export function is<T extends IEntity>(a: Lite<T> | T, b: Lite<T> | T) {
     if(a == null || b == null)
         return false;
 
-    var aType = getTypeInfo((a as T).Type || (a as Lite<T>).EntityType);
-    var bType = getTypeInfo((a as T).Type || (a as Lite<T>).EntityType);
+    var aType = (a as T).Type || (a as Lite<T>).EntityType;
+    var bType = (a as T).Type || (a as Lite<T>).EntityType;
 
-    return aType == bType;
+	if(!aType || !bType)
+		throw new Error("No Type found");
+
+    if (aType != bType)
+        return false;
+
+    if (a.id != null || b.id != null)
+        return a.id == b.id;
+
+    var aEntity = (a as T).Type ? a as T : (a as Lite<T>).entity;
+    var bEntity = (b as T).Type ? b as T : (b as Lite<T>).entity;
+    
+    return aEntity == bEntity;
 }
+
 
 
 export enum BooleanEnum {

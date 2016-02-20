@@ -199,6 +199,8 @@
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityCheckboxList.tsx" />
+    <TypeScriptCompile Include="Scripts\Lines\EntityTabRepeater.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\RenderEntity.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityStrip.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityRepeater.tsx" />

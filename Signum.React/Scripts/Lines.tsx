@@ -35,8 +35,14 @@ export { EntityList };
 import { EntityRepeater } from  './Lines/EntityRepeater'
 export { EntityRepeater };
 
+import { EntityTabRepeater } from  './Lines/EntityTabRepeater'
+export { EntityTabRepeater };
+
 import { EntityStrip } from  './Lines/EntityStrip'
 export { EntityStrip };
+
+import { EntityCheckboxList } from  './Lines/EntityCheckBoxList'
+export { EntityCheckboxList };
 
 export interface EntityFrame<T extends ModifiableEntity> {
     onReload: (pack: EntityPack<T>) => void;
