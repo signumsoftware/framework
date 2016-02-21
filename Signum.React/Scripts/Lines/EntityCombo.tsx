@@ -69,18 +69,9 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
     renderInternal() {
 
-        const s = this.state;
-
-        if (s.data == null)
-            return null;
-
-        const hasValue = !!s.ctx.value;
+        const hasValue = !!this.state.ctx.value;
 
         const lite = this.getLite();
-
-        const elements: Lite<Entity>[] = [null].concat(s.data);
-        if (lite && !elements.some(a => is(a, lite)))
-            elements.insertAt(1, lite);
 
         var buttons = (
             <span className="input-group-btn">
@@ -95,16 +86,32 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
             buttons = null;
 
         return (
-            <FormGroup ctx={s.ctx} title={s.labelText}>
+            <FormGroup ctx={this.state.ctx} title={this.state.labelText}>
                 <div className="SF-entity-combo">
                     <div className={buttons ? "input-group" : null}>
                         <select className="form-control" onChange={this.handleOnChange} value={liteKey(lite) || "" }>
-                            {elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? e.toStr : " - "}</option>) }
+                            {this.renderOptions()}
                         </select>
                         {buttons}
                     </div>
                 </div>
             </FormGroup>
+        );
+    }
+
+    renderOptions() {
+
+        if (this.state.data == null)
+            return null;
+        
+        const lite = this.getLite();
+
+        const elements: Lite<Entity>[] = [null].concat(this.state.data);
+        if (lite && !elements.some(a => is(a, lite)))
+            elements.insertAt(1, lite);
+
+        return (
+            elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? e.toStr : " - "}</option>) 
         );
     }
 }

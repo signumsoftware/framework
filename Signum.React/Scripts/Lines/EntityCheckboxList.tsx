@@ -102,19 +102,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     }
 
     renderInternal() {
-
-        const s = this.state;
-
-        if (s.data == null)
-            return null;
-
-        var data = [...this.state.data];
-
-        this.state.ctx.value.forEach(mle => {
-            if (!data.some(d => is(d, mle.element)))
-                data.insertAt(0, this.maybeToLite(mle.element))
-        });
-
+       
         return (
             <fieldset className={classes("SF-checkbox-list", this.state.ctx.binding.errorClass) }>
                 <legend>
@@ -127,18 +115,32 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
                     </div>
                 </legend>
                 <div style={this.getColumnStyle() }>
-                    {
-                        data.map((lite, i) =>
-                            <label className="sf-checkbox-element" key={i}>
-                                <input type="checkbox"
-                                    checked={this.state.ctx.value.some(mle => is(mle.element, lite)) }
-                                    name={liteKey(lite) }
-                                    onChange={e => this.handleOnChange(e, lite) }  />
-                                <span className="sf-entitStrip-link">{lite.toStr}</span>
-                            </label>)
-                    }
+                    { this.renderContent() }
                 </div>
             </fieldset>
         );
+    }
+
+
+    renderContent() {
+        if (this.state.data == null)
+            return null;
+
+        var data = [...this.state.data];
+
+        this.state.ctx.value.forEach(mle => {
+            if (!data.some(d => is(d, mle.element)))
+                data.insertAt(0, this.maybeToLite(mle.element))
+        });
+
+        return data.map((lite, i) =>
+            <label className="sf-checkbox-element" key={i}>
+                <input type="checkbox"
+                    checked={this.state.ctx.value.some(mle => is(mle.element, lite)) }
+                    name={liteKey(lite) }
+                    onChange={e => this.handleOnChange(e, lite) }  />
+                <span className="sf-entitStrip-link">{lite.toStr}</span>
+            </label>);
+
     }
 }

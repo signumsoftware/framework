@@ -77,6 +77,9 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
 
     handleCreateClick = (event: React.SyntheticEvent) => {
+
+        event.preventDefault();
+
         const onCreate = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
@@ -115,6 +118,9 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
 
     handleFindClick = (event: React.SyntheticEvent) => {
+
+        event.preventDefault();
+
         const result = this.state.onFindMany ? this.state.onFindMany() : this.defaultFindMany();
 
         result.then(lites => {
@@ -130,6 +136,9 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     };
 
     handleRemoveElementClick = (event: React.SyntheticEvent, index: number) => {
+
+        event.preventDefault();
+
         var mle = this.props.ctx.value[index];
 
         (this.props.onRemove ? this.props.onRemove(mle.element) : Promise.resolve(true))

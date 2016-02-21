@@ -71,6 +71,9 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
     }
 
     handleRemoveClick = (event: React.SyntheticEvent) => {
+
+        event.preventDefault();
+
         const s = this.state;
 
         (s.onRemove ? s.onRemove(s.ctx.value[s.selectedIndex].element) : Promise.resolve(true))
@@ -91,6 +94,8 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
     };
 
     handleViewClick = (event: React.MouseEvent) => {
+
+        event.preventDefault();
 
         const ctx = this.state.ctx;
         const selectedIndex = this.state.selectedIndex;

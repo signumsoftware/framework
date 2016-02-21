@@ -111,6 +111,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     handleViewClick = (event: React.MouseEvent) => {
 
+        event.preventDefault();
+
         const ctx = this.state.ctx;
         const entity = ctx.value;
 
@@ -167,6 +169,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
     handleCreateClick = (event: React.SyntheticEvent) => {
+
+        event.preventDefault();
+
         const onCreate = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
@@ -210,6 +215,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             .then(qn => qn == null ? null : Finder.find({ queryName: qn } as FindOptions));
     }
     handleFindClick = (event: React.SyntheticEvent) => {
+
+        event.preventDefault();
+
         const result = this.props.onFind ? this.props.onFind() : this.defaultFind();
 
         result.then(entity => {
@@ -233,6 +241,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
     handleRemoveClick = (event: React.SyntheticEvent) => {
+
+        event.preventDefault();
+
         (this.props.onRemove ? this.props.onRemove(this.props.ctx.value) : Promise.resolve(true))
             .then(result => {
                 if (result == false)
