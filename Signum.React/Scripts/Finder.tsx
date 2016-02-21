@@ -53,9 +53,9 @@ export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<IEntit
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions } as FindOptions;
     
-    return new Promise<Lite<IEntity>>((resolve) => {
+    return new Promise<Lite<IEntity>>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
-            SP.default.open(fo).then(resolve);
+            SP.default.open(fo).then(resolve, reject);
         });
     });
 }
@@ -67,9 +67,9 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEn
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions } as FindOptions;
 
-    return new Promise<Lite<IEntity>[]>((resolve) => {
+    return new Promise<Lite<IEntity>[]>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
-            SP.default.openMany(fo).then(resolve);
+            SP.default.openMany(fo).then(resolve, reject);
         });
     });
 }
@@ -81,9 +81,9 @@ export function explore(findOptions: FindOptions | Type<any>): Promise<void> {
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions } as FindOptions;
 
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
-            SP.default.explore(fo).then(resolve);
+            SP.default.explore(fo).then(resolve, reject);
         });
     });
 }

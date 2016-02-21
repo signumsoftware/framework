@@ -82,7 +82,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                 const list = this.props.ctx.value;
                 list.push({ element: e, rowId: null });
                 this.setValue(list);
-            });
+            }).done();
         return "";
     }
 

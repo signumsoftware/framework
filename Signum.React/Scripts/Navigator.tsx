@@ -153,9 +153,9 @@ export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Enti
         (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions as Lite<Entity> } as ViewOptions :
             entityOrOptions as ViewOptions;
 
-    return new Promise<ModifiableEntity>((resolve) => {
+    return new Promise<ModifiableEntity>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
-            NP.default.openView(options).then(resolve);
+            NP.default.openView(options).then(resolve, reject);
         });
     });
 }
@@ -176,9 +176,9 @@ export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | L
             (entityOrOptions as EntityPack<ModifiableEntity>).entity ? { entity: entityOrOptions } as NavigateOptions :
                 entityOrOptions as NavigateOptions;
 
-    return new Promise<ModifiableEntity>((resolve) => {
+    return new Promise<ModifiableEntity>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
-            NP.default.openView(options).then(resolve);
+            NP.default.openView(options).then(resolve, reject);
         });
     });
 } 
@@ -215,7 +215,7 @@ export module API {
         if (!realLites.length)
             return Promise.resolve<void>();
 
-        return ajaxPost<string[]>({ url: "/api/entityToStrings" }, realLites).then((strs) => {
+        return ajaxPost<string[]>({ url: "/api/entityToStrings" }, realLites).then(strs => {
             realLites.forEach((l, i) => l.toStr = strs[i]);
         });
     }

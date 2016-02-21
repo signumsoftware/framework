@@ -51,7 +51,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     componentWillMount() {
         Navigator.toEntityPack(this.props.entityOrPack, this.props.showOperations)
             .then(ep => this.setPack(ep))
-            .then(() => this.loadComponent());
+            .then(() => this.loadComponent())
+            .done();
     }
 
     componentWillReceiveProps(props) {
@@ -59,7 +60,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         Navigator.toEntityPack(props.entityOrPack, this.props.showOperations)
             .then(ep => this.setPack(ep))
-            .then(() => this.loadComponent());
+            .then(() => this.loadComponent())
+            .done();
     }
 
     calculateState(props: ModalFrameState) {
@@ -100,7 +102,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             this.state.entitySettings.onGetComponent(this.state.pack.entity);
 
         return promise
-            .then(c => this.setState({ component: c }));
+            .then(c => this.setState({ component: c }))
+            .done();
     }
 
     okClicked: boolean;

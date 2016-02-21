@@ -44,7 +44,7 @@ namespace Signum.React.Facades
                 e.Session = GetSession(req);
             });
 
-            error.MessageDetail = exLog.Id.ToString();
+            error["ExceptionID"] = exLog.Id.ToString();
 
             ctx.Response = ctx.Request.CreateResponse<HttpError>(statusCode, error);
 

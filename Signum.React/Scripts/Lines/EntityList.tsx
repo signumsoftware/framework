@@ -86,7 +86,8 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
                     s.selectedIndex = null;
 
                 this.setValue(s.ctx.value);
-            });
+            })
+            .done();
     };
 
     handleViewClick = (event: React.MouseEvent) => {
@@ -114,8 +115,8 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
                     ctx.value[selectedIndex] = { element: m };
 
                 this.setValue(ctx.value);
-            });
-        });
+            }).done();
+        }).done();
     }
 
     getTitle(e: Lite<Entity> | ModifiableEntity) {

@@ -39,7 +39,8 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     componentDidMount() {
         if (!this.state.data) {
             Finder.API.findAllLites({ types: this.state.type.name })
-                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any));
+                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
+                .done();
         }
     }
 
@@ -60,7 +61,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
                     element: e
                 });
                 this.forceUpdate();
-            });
+            }).done();
         }
     }
 

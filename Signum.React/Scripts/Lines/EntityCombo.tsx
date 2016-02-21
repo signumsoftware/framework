@@ -37,7 +37,8 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     componentDidMount() {
         if (!this.state.data) {
             Finder.API.findAllLites({ types: this.state.type.name })
-                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any));
+                .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
+                .done();
         }
     }
 
@@ -50,7 +51,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
             } else {
                 const lite = this.state.data.filter(a => liteKey(a) == current.value).single();
 
-                this.convert(lite).then(v => this.setValue(v));
+                this.convert(lite).then(v => this.setValue(v)).done();
             }
         }
     }

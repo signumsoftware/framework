@@ -17,6 +17,9 @@ declare var require: {
     ensure: (paths: string[], callback: (require: <T>(path: string) => T) => void) => void;
 };
 
+declare interface Promise<T> {
+    done();
+}
 
 interface Array<T> {
     groupByArray(keySelector: (element: T) => string): { key: string; elements: T[] }[];

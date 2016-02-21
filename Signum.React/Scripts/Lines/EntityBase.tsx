@@ -129,8 +129,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 if (e == null)
                     return;
 
-                this.convert(e).then(m => this.setValue(m));
-            });
+                this.convert(e).then(m => this.setValue(m)).done();
+            }).done();
         }
     }
 
@@ -187,8 +187,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             if (!e)
                 return;
 
-            this.convert(e).then(m => this.setValue(m));
-        });
+            this.convert(e).then(m => this.setValue(m)).done();
+        }).done();
     };
 
     renderCreateButton(btn: boolean) {
@@ -216,8 +216,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             if (!entity)
                 return;
 
-            this.convert(entity).then(e => this.setValue(e));
-        });
+            this.convert(entity).then(e => this.setValue(e)).done();
+        }).done();
     };
     renderFindButton(btn: boolean) {
         if (!this.state.find || this.state.ctx.readOnly)
@@ -239,7 +239,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                     return;
 
                 this.setValue(null);
-            });
+            }).done();
     };
     renderRemoveButton(btn: boolean) {
         if (!this.state.remove || this.state.ctx.readOnly)

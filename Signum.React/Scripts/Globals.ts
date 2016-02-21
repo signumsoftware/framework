@@ -389,7 +389,9 @@ if (typeof String.prototype.trim !== 'function') {
     }
 }
 
-
+Promise.prototype.done = function () {
+    (this as Promise<any>).catch(error => setTimeout(() => { throw error; }, 0));
+};
 
 
 export function hasFlag(value: number, flag: number): boolean {

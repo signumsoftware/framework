@@ -77,7 +77,7 @@ function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, event
                 entity: pack
             });
         }
-    });
+    }).done();
 }
 
 
@@ -231,8 +231,10 @@ function defaultEntityClick(coc: ContextualOperationContext<Entity>, event: Reac
         case OperationType.Execute: promise = API.executeMultiple(coc.context.lites, coc.operationInfo.key); break;
         case OperationType.Delete: promise = API.deleteMultiple(coc.context.lites, coc.operationInfo.key); break;
     }
-    
-    promise.then(report => coc.context.markRows(report.errors));
+
+    promise
+        .then(report => coc.context.markRows(report.errors))
+        .done();
 }
 
 

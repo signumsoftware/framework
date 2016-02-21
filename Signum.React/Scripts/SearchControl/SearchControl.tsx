@@ -115,7 +115,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             });
 
             this.resetFindOptions(propsFindOptions);
-        });
+        }).done();
     }
 
     resetFindOptions(propsFindOptions: FindOptions) {
@@ -160,7 +160,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
             if (this.state.findOptions.searchOnLoad)
                 this.handleSearch();
-        });
+        }).done();
     }
 
     entityColumn(): ColumnDescription {
@@ -193,7 +193,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             this.setState({ resultTable: rt, selectedRows: [], currentMenuItems: null, markedRows: null, loading: false });
             this.notifySelectedRowsChanged();
             this.forceUpdate();
-        });
+        }).done();
     }
 
     handlePagination = (p: Pagination) => {
@@ -332,7 +332,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
 
-    chooseType() {
+    chooseType(): Promise<string> {
 
         const tis = getTypeInfos(this.state.queryDescription.columns["Entity"].type)
             .filter(ti => Navigator.isCreable(ti));
@@ -357,12 +357,11 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 if (ev.button == 2 || ev.ctrlKey) {
 
                 }
-                else
-                {
+                else {
                     Navigator.navigate(e);
                 }
-            });
-        });
+            }).done();
+        }).done();
     }
 
     handleFullScreenClick = (ev: React.MouseEvent) => {
@@ -414,7 +413,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         };
 
         renderContextualItems(options)
-            .then(menuItems => this.setState({ currentMenuItems: menuItems }));
+            .then(menuItems => this.setState({ currentMenuItems: menuItems }))
+            .done();
     }
 
     markRows = (dic: MarkRowsDictionary) => {

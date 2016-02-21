@@ -49,7 +49,8 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     handleOnSelect = (lite: Lite<IEntity>, event: React.SyntheticEvent) => {
         this.convert(lite)
-            .then(entity => this.setValue(entity));
+            .then(entity => this.setValue(entity))
+            .done();
         return lite.toStr;
     }
 

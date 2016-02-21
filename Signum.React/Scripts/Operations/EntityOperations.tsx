@@ -138,24 +138,26 @@ export function notifySuccess() {
     return true;
 }
 
-export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>) {
 
     if (!confirmInNecessary(eoc))
         return;
 
-    return API.constructFromEntity(eoc.entity, eoc.operationInfo.key, null)
+    API.constructFromEntity(eoc.entity, eoc.operationInfo.key, null)
         .then(pack => Navigator.view(pack).then(a => notifySuccess()))
-        .catch(e => catchValidationError(e, eoc.frame));
+        .catch(e => catchValidationError(e, eoc.frame))
+        .done();
 }
 
-export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>) {
 
     if (!confirmInNecessary(eoc))
         return;
 
-    return API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, null)
+    API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, null)
         .then(pack => Navigator.view(pack).then(a => notifySuccess()))
-        .catch(e => catchValidationError(e, eoc.frame));
+        .catch(e => catchValidationError(e, eoc.frame))
+        .done();
 }
 
 function catchValidationError(error: any, frame: EntityFrame<Entity>) {
@@ -164,49 +166,51 @@ function catchValidationError(error: any, frame: EntityFrame<Entity>) {
         frame.setError(model, "request.entity");
         return false;
     }
-
-    throw error;
 }
 
 
-export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>){
 
     if (!confirmInNecessary(eoc))
         return;
 
-    return API.executeEntity(eoc.entity, eoc.operationInfo.key, null)
+    API.executeEntity(eoc.entity, eoc.operationInfo.key, null)
         .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
-        .catch(e => catchValidationError(e, eoc.frame));
+        .catch(e => catchValidationError(e, eoc.frame))
+        .done();
 }
 
-export function defaultExecuteLite(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+export function defaultExecuteLite(eoc: EntityOperationContext<Entity>) {
 
     if (!confirmInNecessary(eoc))
         return;
 
-    return API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, null)
+    API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, null)
         .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
-        .catch(e => catchValidationError(e, eoc.frame));
+        .catch(e => catchValidationError(e, eoc.frame))
+        .done();
 }
 
-export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>){
 
     if (!confirmInNecessary(eoc))
         return;
 
-    return API.deleteEntity(eoc.entity, eoc.operationInfo.key, null)
+    API.deleteEntity(eoc.entity, eoc.operationInfo.key, null)
         .then(() => { eoc.frame.onClose(); return notifySuccess(); })
-        .catch(e => catchValidationError(e, eoc.frame));
+        .catch(e => catchValidationError(e, eoc.frame))
+        .done();
 }
 
-export function defaultDeleteLite(eoc: EntityOperationContext<Entity>): Promise<boolean> {
+export function defaultDeleteLite(eoc: EntityOperationContext<Entity>) {
 
     if (!confirmInNecessary(eoc))
         return;
 
-    return API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, null)
+    API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, null)
         .then(() => { eoc.frame.onClose(); return notifySuccess(); })
-        .catch(e => catchValidationError(e, eoc.frame));
+        .catch(e => catchValidationError(e, eoc.frame))
+        .done();
 }
 
 

@@ -25,7 +25,8 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         };
     }
 
-    handleShowStackTrace = () => {
+    handleShowStackTrace = (e: React.MouseEvent) => {
+        e.preventDefault();
         this.setState({ showDetails: !this.state.showDetails });
     }
 
@@ -46,28 +47,17 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         return (
             <Modal onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
                 <Modal.Header closeButton={true} className="dialog-header-error">
-                    {se == null ? <h4 className="modal-title text-danger"><span className="glyphicon glyphicon-alert"></span> Error </h4> :
-                        <h4 className="modal-title text-danger">
-                            <span className={classes("glyphicon", se.defaultIcon) }></span>&nbsp;{se.serviceError.ExceptionType} ({
-                                Navigator.isViewable(Basics.ExceptionEntity_Type) ?
-                                    <a href={Navigator.navigateRoute(Basics.ExceptionEntity_Type, se.serviceError.MessageDetail) }>{se.serviceError.MessageDetail}</a> :
-                                    <strong>{se.serviceError.MessageDetail}</strong>
-                            })
-                        </h4>
-                    }
+                    {this.renderTitle(e, se) }
                 </Modal.Header>
 
                 <Modal.Body>
-                    <p className="text-danger">
-                        {se != null ? se.serviceError.ExceptionMessage :
-                            e.message ? e.message : e }
-                    </p>
+                    { this.renderMessage(e, se) }
 
                     {
-                        se &&
+                        se && se.httpError.StackTrace &&
                         <div>
                             <a href="#" onClick={this.handleShowStackTrace}>StackTrace</a>
-                            {this.state.showDetails && <pre>{se.serviceError.StackTrace}</pre>}
+                            {this.state.showDetails && <pre>{se.httpError.StackTrace}</pre>}
                         </div>
                     }
 
@@ -79,6 +69,33 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
                         {JavascriptMessage.ok.niceToString() }</button>
                 </Modal.Footer>
             </Modal>
+        );
+    }
+
+    renderTitle(e: any, se: ServiceError) {
+        if (se == null || se.httpError.ExceptionType == null)
+            return <h4 className="modal-title text-danger"><span className="glyphicon glyphicon-alert"></span> Error </h4>;
+
+        return (<h4 className="modal-title text-danger">
+            <span className={classes("glyphicon", se.defaultIcon) }></span>&nbsp; <span>{se.httpError.ExceptionType }</span>
+            ({
+                Navigator.isViewable(Basics.ExceptionEntity_Type) ?
+                    <a href={Navigator.navigateRoute(Basics.ExceptionEntity_Type, se.httpError.ExceptionId) }>{se.httpError.ExceptionId}</a> :
+                    <strong>{se.httpError.ExceptionId}</strong>
+            })
+        </h4>);
+    }
+
+    renderMessage(e: any, se: ServiceError) {
+        if (se == null)
+            return <p className="text-danger"> { e.message ? e.message : e }</p>;
+
+        return (
+            <div>
+                {se.httpError.Message && <p className="text-danger">{se.httpError.Message}</p>}
+                {se.httpError.ExceptionMessage && <p className="text-danger">{se.httpError.ExceptionMessage}</p>}
+                {se.httpError.MessageDetail && <p className="text-danger">{se.httpError.MessageDetail}</p>}
+            </div>
         );
     }
 

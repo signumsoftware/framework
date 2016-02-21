@@ -8,7 +8,6 @@ export interface AjaxOptions {
     url: string;
     avoidNotifyPendingRequests?: boolean;
     avoidThrowError?: boolean;
-    showError?: ShowError;
     avoidGraphExplorer?: boolean;
 
     mode?: string | RequestMode;
@@ -16,11 +15,6 @@ export interface AjaxOptions {
     cache?: string | RequestCache;
 }
 
-export enum ShowError {
-    Never,
-    Default,
-    Always,
-}
 
 export function baseUrl(options: AjaxOptions): string {
     if (options.avoidBaseUrl)
@@ -76,15 +70,6 @@ export function wrapRequest<T>(options: AjaxOptions, makeCall: () => Promise<Res
     if (!options.avoidThrowError)
         promise = promise.then(throwError);
 
-    if (options.showError != ShowError.Never)
-        promise = promise.catch((error: any) =>
-        {
-            if (options.showError == ShowError.Always || !(error instanceof ValidationError))
-                return showError(error).then(() => { throw error });
-
-            throw error;
-        }) as any;
-
     return promise.then(a=>
         a.status == 204 ? null : a.json<T>());
 }
@@ -119,12 +104,12 @@ export class ServiceError extends Error {
     constructor(
         public statusText: string,
         public status: number,
-        public serviceError: WebApiHttpError) {
-        super(serviceError.ExceptionMessage)
+        public httpError: WebApiHttpError) {
+        super(httpError.ExceptionMessage)
     }
 
     get defaultIcon() {
-        switch (this.serviceError.ExceptionType) {
+        switch (this.httpError.ExceptionType) {
             case "UnauthorizedAccessException": return "glyphicon-lock";
             case "EntityNotFoundException": return "glyphicon-trash";
             case "UniqueKeyException": return "glyphicon-duplicate";
@@ -144,6 +129,7 @@ export interface WebApiHttpError {
     ExceptionType?: string;
     StackTrace?: string;
     MessageDetail?: string;
+    ExceptionId?: string;
 }
 
 export class ValidationError extends Error {
@@ -160,7 +146,3 @@ export class ValidationError extends Error {
         return this.statusText + "\r\n" + this.message;
     }
 }
-
-
-
-export var showError = (error: any) => { alert(error); return Promise.resolve(null) };

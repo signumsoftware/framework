@@ -80,31 +80,32 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         const onCreate = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
-        onCreate.then(e => {
+        onCreate
+            .then(e => {
 
-            if (e == null)
-                return null;
+                if (e == null)
+                    return null;
 
-            if (!this.state.viewOnCreate)
-                return Promise.resolve(e);
+                if (!this.state.viewOnCreate)
+                    return Promise.resolve(e);
 
-            const pr = this.state.ctx.propertyRoute.add(a => a[0]);
+                const pr = this.state.ctx.propertyRoute.add(a => a[0]);
 
-            return this.state.onView ?
-                this.state.onView(e, pr) :
-                this.defaultView(e, pr);
+                return this.state.onView ?
+                    this.state.onView(e, pr) :
+                    this.defaultView(e, pr);
 
-        }).then(e => {
+            }).then(e => {
 
-            if (!e)
-                return;
+                if (!e)
+                    return;
 
-            this.convert(e).then(m => {
-                const list = this.props.ctx.value;
-                list.push({ element: e, rowId: null });
-                this.setValue(list);
-            });
-        });
+                this.convert(e).then(m => {
+                    const list = this.props.ctx.value;
+                    list.push({ element: e, rowId: null });
+                    this.setValue(list);
+                }).done();
+            }).done();
     };
 
     defaultFindMany(): Promise<(ModifiableEntity | Lite<IEntity>)[]> {
@@ -124,8 +125,8 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                 const list = this.props.ctx.value;
                 entites.forEach(e => list.push({ element: e, rowId: null }));
                 this.setValue(list);
-            });
-        });
+            }).done();
+        }).done();
     };
 
     handleRemoveElementClick = (event: React.SyntheticEvent, index: number) => {
@@ -138,7 +139,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
                 this.props.ctx.value.remove(mle);
                 this.forceUpdate();
-            });
-    }; 
+            }).done();
+    };
 
 }

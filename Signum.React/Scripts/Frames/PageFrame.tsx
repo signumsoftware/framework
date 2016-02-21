@@ -10,7 +10,6 @@ import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelSt
 import { TypeContext, StyleOptions } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, GraphExplorer } from '../Reflection'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
-import { GlobalModalContainer} from '../Modals'
 import ValidationErrors from './ValidationErrors'
 
 require("!style!css!./Frames.css");
@@ -44,13 +43,15 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
     componentWillMount() {
         this.loadEntity(this.props)
-            .then(() => this.loadComponent());
+            .then(() => this.loadComponent())
+            .done();
     }
 
     componentWillReceiveProps(props) {
         this.setState(this.calculateState(props), () => {
             this.loadEntity(props)
-                .then(() => this.loadComponent());
+                .then(() => this.loadComponent())
+                .done();
         });
     }
 
@@ -91,7 +92,6 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         return (
             <div id="divMainPage" data-isnew={this.props.routeParams.id == null} className="form-horizontal">
                 {this.renderEntityControl() }
-                <GlobalModalContainer/>
             </div>
         );
     }

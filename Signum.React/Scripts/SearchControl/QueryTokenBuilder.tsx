@@ -73,8 +73,8 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
 
     requestSubTokens(props: QueryTokenPartProps) {
         Finder.API.subTokens(props.queryKey, props.parentToken, props.subTokenOptions).then(tokens=>
-            this.setState({ data: tokens.length == 0 ? tokens: [null].concat(tokens) })
-        );
+            this.setState({ data: tokens.length == 0 ? tokens : [null].concat(tokens) })
+        ).done();
     }
 
 

@@ -35,7 +35,8 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
     componentWillMount() {
         this.loadEntity()
-            .then(e => this.loadComponent(e));
+            .then(e => this.loadComponent(e))
+            .done();
     }
 
     componentWillReceiveProps(nextProps: RenderEntityProps) {
@@ -45,7 +46,8 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
             });
 
             this.loadEntity()
-                .then(e =>this.loadComponent(e));
+                .then(e => this.loadComponent(e))
+                .done();
         }
     }
 
