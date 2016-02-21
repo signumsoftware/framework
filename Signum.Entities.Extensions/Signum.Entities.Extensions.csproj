@@ -118,6 +118,7 @@
     <Compile Include="Mailing\Pop3Configuration.cs" />
     <Compile Include="Mailing\SystemEmail.cs" />
     <Compile Include="Map\MapMessage.cs" />
+    <Compile Include="Map\MapOmniboxResultGenerator.cs" />
     <Compile Include="Migrations\CSharpMigration.cs" />
     <Compile Include="Migrations\SqlMigration.cs" />
     <Compile Include="Scheduler\ScheduledTaskLogEntity.cs" />
