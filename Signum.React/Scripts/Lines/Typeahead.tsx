@@ -10,10 +10,9 @@ export interface TypeaheadProps {
     renderItem?: (item: any, query: string) => React.ReactNode;
     onSelect?: (item: any, e: React.SyntheticEvent) => string;
     scrollHeight?: number;
-    autoSelect?: boolean;
+    divAttrs?: React.HTMLAttributes;
     inputAttrs?: React.HTMLAttributes;
     menuAttrs?: React.HTMLAttributes;
-    showHintOnFocus?: boolean;
     loadingMessage?: string;
     noResultsMessage?: string;
 }
@@ -57,8 +56,6 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         renderItem: Typeahead.highlightedText,
         onSelect: (elem, event) => elem,
         scrollHeight: 0,
-        autoSelect: true,
-        showHintOnFocus: false,
         loadingMessage: "Loading...",
         noResultsMessage: " - No results -"
     };
@@ -93,12 +90,12 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         //this.setState({ shown: true, items: null });
                
         const query = this.input.value;
-        this.props.getItems(query).then(items=> this.setState({
+        this.props.getItems(query).then(items => this.setState({
             items: items,
             shown: true,
             query: query,
-            selectedIndex : 0,
-        }));
+            selectedIndex: 0,
+        })).done();
     }
 
     select(e: React.SyntheticEvent) {
@@ -116,7 +113,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         if(!this.focused)
         {
             this.focused = true;
-            if (this.props.minLength == 0 && !this.input.value || this.props.showHintOnFocus)
+            if (this.props.minLength == 0 && !this.input.value)
                 this.lookup();
         }
     }
@@ -217,7 +214,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     render() {
         return (
-            <div>
+            <div {...this.props.divAttrs}>
                 <input type="text" autoComplete="off" ref="input" {...this.props.inputAttrs}
                     onFocus={this.handleFocus}
                     onBlur={this.handleBlur}
