@@ -1,13 +1,10 @@
-﻿using Signum.Engine.Operations;
-using Signum.Entities.Basics;
+﻿using Signum.Entities.Basics;
 using Signum.Entities.Omnibox;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Signum.Entities.Map
 {
@@ -15,6 +12,13 @@ namespace Signum.Entities.Map
     public class MapOmniboxResultGenerator : OmniboxResultGenerator<MapOmniboxResult>
     {
         public Func<string> NiceName = () => MapMessage.Map.NiceToString();
+
+        public Func<Type, bool> HasOperations;
+
+        public MapOmniboxResultGenerator(Func<Type, bool> hasOperations)
+        {
+            this.HasOperations = hasOperations;
+        }
 
         Regex regex = new Regex(@"^II?$", RegexOptions.ExplicitCapture);
         public override IEnumerable<MapOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
@@ -43,7 +47,7 @@ namespace Signum.Entities.Map
 
                 bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-                var types = OmniboxParser.Manager.Types().Where(a => OperationLogic.TypeOperations(a.Value).Any()).ToDictionary();
+                var types = OmniboxParser.Manager.Types().Where(a => HasOperations(a.Value)).ToDictionary();
 
                 foreach (var match in OmniboxUtils.Matches(types, OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
                 {
