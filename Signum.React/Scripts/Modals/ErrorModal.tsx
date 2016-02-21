@@ -80,8 +80,8 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
             <span className={classes("glyphicon", se.defaultIcon) }></span>&nbsp; <span>{se.httpError.ExceptionType }</span>
             ({
                 Navigator.isViewable(Basics.ExceptionEntity_Type) ?
-                    <a href={Navigator.navigateRoute(Basics.ExceptionEntity_Type, se.httpError.ExceptionId) }>{se.httpError.ExceptionId}</a> :
-                    <strong>{se.httpError.ExceptionId}</strong>
+                    <a href={Navigator.navigateRoute(Basics.ExceptionEntity_Type, se.httpError.ExceptionID) }>{se.httpError.ExceptionID}</a> :
+                    <strong>{se.httpError.ExceptionID}</strong>
             })
         </h4>);
     }

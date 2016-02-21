@@ -129,7 +129,7 @@ export interface WebApiHttpError {
     ExceptionType?: string;
     StackTrace?: string;
     MessageDetail?: string;
-    ExceptionId?: string;
+    ExceptionID?: string;
 }
 
 export class ValidationError extends Error {
