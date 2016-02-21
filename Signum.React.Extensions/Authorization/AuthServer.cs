@@ -31,7 +31,7 @@ namespace Signum.React.Authorization
             ReflectionServer.GetContext = () => new
             {
                 Culture = ReflectionServer.GetCurrentValidCulture(),
-                Role = RoleEntity.Current,
+                Role = UserEntity.Current == null ? null : RoleEntity.Current,
             };
 
             var piPasswordHash = ReflectionTools.GetPropertyInfo((UserEntity e) => e.PasswordHash);

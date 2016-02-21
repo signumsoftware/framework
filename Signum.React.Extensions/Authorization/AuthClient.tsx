@@ -1,6 +1,4 @@
-﻿/// <reference path="../../../framework/signum.react/scripts/globals.ts" />
-
-import * as React from 'react'
+﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -18,7 +16,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     resetPassword = options.resetPassword;
 
     options.routes.push(<Route path="auth">
-        <Route path="login" getComponent={(loc, cb) => require(["./Login/Login"], (Comp) => cb(null, Comp.default)) } />
+        <Route path="login" getComponent={(loc, cb) => require(["./Login/Login"], (Comp) => cb(null, Comp.default))}/>
         <Route path="about" />
     </Route>);
 }
@@ -47,7 +45,7 @@ export function logout() {
         setCurrentUser(null);
 
         onLogout();
-    });
+    }).done();
 }
 
 export function onLogout() {

@@ -38,7 +38,8 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
             .catch((e: ValidationError) => {
                 if (e.modelState)
                     this.setState({ modelState: e.modelState });
-            });
+            })
+            .done();
     }
 
     render() {
