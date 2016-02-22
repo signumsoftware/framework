@@ -139,6 +139,7 @@
     <Compile Include="Authorization\AuthController.cs" />
     <Compile Include="Authorization\AuthServer.cs" />
     <Compile Include="Authorization\UserTicketClient.cs" />
+    <Compile Include="Omnibox\OmniboxServer.cs" />
     <Compile Include="Omnibox\ReactSpecialOmniboxGenerator.cs" />
     <Compile Include="Omnibox\OmniboxController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

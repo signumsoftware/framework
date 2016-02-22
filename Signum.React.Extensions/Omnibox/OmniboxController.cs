@@ -19,9 +19,9 @@ namespace Signum.React.Omnibox
     public class OmniboxController : ApiController
     {
         [Route("api/omnibox"), HttpGet]
-        public List<OmniboxResult> OmniboxResults(string omniboxQuery)
+        public List<OmniboxResult> OmniboxResults(string query)
         {
-            return OmniboxParser.Results(omniboxQuery, new System.Threading.CancellationToken());
+            return OmniboxParser.Results(query, new System.Threading.CancellationToken());
         }
     }
 }
