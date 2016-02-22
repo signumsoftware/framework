@@ -149,6 +149,7 @@ namespace Signum.Utilities
                     for (int i = 0; i < skipLines; i++)
                         sr.ReadLine();
 
+                    var line = skipLines;
                     while(true)
                     {
                         string csvLine = sr.ReadLine();
@@ -168,8 +169,10 @@ namespace Signum.Utilities
                         }
                         catch(Exception e)
                         {
+                            e.Data["row"] = line;
+
                             if (options.SkipError == null || !options.SkipError(e, m))
-                                throw;
+                                throw new ParseCsvException(e);
                         }
 
                         if (t != null)
@@ -188,6 +191,7 @@ namespace Signum.Utilities
                     if (skipLines > 0)
                         matches = matches.Skip(skipLines);
 
+                    int line = skipLines;
                     foreach (var m in matches)
                     {
                         if (m.Length > 0)
@@ -199,12 +203,15 @@ namespace Signum.Utilities
                             }
                             catch (Exception e)
                             {
+                                e.Data["row"] = line;
+
                                 if (options.SkipError == null || !options.SkipError(e, m))
-                                    throw;
+                                    throw new ParseCsvException(e);
                             }
                             if (t != null)
                                 yield return t;
                         }
+                        line++;
                     }
                 }
             }
@@ -252,12 +259,21 @@ namespace Signum.Utilities
             T t = new T();
             for (int i = 0; i < members.Count; i++)
             {
-                string str = DecodeCsv(vals[i].Value);
+                string str = null; 
+                try
+                {
+                    str = DecodeCsv(vals[i].Value);
 
-                object val = parsers[i](str);
+                    object val = parsers[i](str);
 
-                members[i].Setter(t, val);
-
+                    members[i].Setter(t, val);
+                }
+                catch (Exception e)
+                {
+                    e.Data["value"] = str;
+                    e.Data["member"] = members[i].MemberInfo.Name;
+                    throw;
+                }
             }
             return t;
         }
@@ -347,6 +363,36 @@ namespace Signum.Utilities
             this.Index = index;
             this.MemberEntry = memberEntry;
             this.Format = format;
+        }
+    }
+
+
+    [Serializable]
+    public class ParseCsvException : Exception
+    {
+        public int? Row { get; set; }
+        public string Member { get; set; }
+        public string Value { get; set; }
+
+        public ParseCsvException() { }
+        public ParseCsvException(Exception inner) : base(inner.Message, inner)
+        {
+            this.Row = (int?)inner.Data["row"];
+            this.Value = (string)inner.Data["value"];
+            this.Member = (string)inner.Data["member"];
+
+        }
+        protected ParseCsvException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context) : base(info, context)
+        { }
+
+        public override string Message
+        {
+            get
+            {
+                return $"(Row: {this.Row}, Member: {this.Member}, Value: '{this.Value}') {base.Message})";
+            }
         }
     }
 }

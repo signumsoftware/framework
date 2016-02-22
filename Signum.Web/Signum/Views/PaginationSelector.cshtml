@@ -5,10 +5,28 @@
 @model Context
 @{ 
     Pagination pagination = (Pagination)ViewData[ViewDataKeys.Pagination];
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+
+    pagination = FindOptions.ReplacePagination(queryDescription.QueryName, pagination);
+
     var paginate = pagination as Pagination.Paginate;
 
     ResultTable resultTable = (ResultTable)ViewData[ViewDataKeys.Results];
-    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
+
+
+    Func<PaginationMode, int?, int?, Pagination> getPagination = (mode, elementsPerPage, pageNumber) =>
+    {
+        switch (mode)
+        {
+            case PaginationMode.All: return new Pagination.All();
+            case PaginationMode.Firsts: return new Pagination.Firsts(elementsPerPage ?? 1);
+            case PaginationMode.Paginate: return new Pagination.Paginate(elementsPerPage ?? 1);
+            default: throw new InvalidOperationException();
+        }
+    };
+
+
+    Func<Pagination, bool> isAllowed = pag => pag == FindOptions.ReplacePagination(queryDescription.QueryName, pag); 
 }
 
 <div class="sf-search-footer" style="display:@(((bool)ViewData[ViewDataKeys.ShowFooter])? "block": "none")">
@@ -46,7 +64,7 @@
     <div class="sf-pagination-center form-inline form-xs">
         @{
             var currentMode = pagination.GetMode();
-            var modes = EnumExtensions.GetValues<PaginationMode>().Where(p => FindOptions.IsPaginationAllowed(queryDescription.QueryName, p, null)).Select(pm => new SelectListItem
+            var modes = EnumExtensions.GetValues<PaginationMode>().Where(a => isAllowed(getPagination(a, null, null))).Select(pm => new SelectListItem
             {
                 Text = pm.NiceToString(),
                 Value = pm.ToString(),
@@ -58,7 +76,7 @@
         @if (!(pagination is Pagination.All))
         {
             var currentElements = pagination.GetElementsPerPage();
-            var elements = new List<int> { 5, 10, 20, 50, 100, 200 }.Where(num => FindOptions.IsPaginationAllowed(queryDescription.QueryName, currentMode, num)).Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i == currentElements }).ToList();
+            var elements = new List<int> { 5, 10, 20, 50, 100, 200 }.Where(a => isAllowed(getPagination(pagination.GetMode(), a, null))).Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i == currentElements }).ToList();
 
             @Html.SafeDropDownList(Model.Compose("sfElems"), elements, new { @class = "sf-pagination-size form-control" })
         }

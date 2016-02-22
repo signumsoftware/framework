@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="AggregateFunction">
     <Member Name="Average" Description="Durchschnitt" />
@@ -52,16 +52,16 @@
     <Member Name="LessThanOrEqualTo" Description="Kleiner oder gleich" />
   </Type>
   <Type Name="ConnectionMessage">
-    <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Eine Verbindung mit dem Server ist erforderlich, um fortzufahren" />
+    <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Um fortzufahren ist eine Verbindung mit dem Server ist erforderlich" />
     <Member Name="SessionExpired" Description="Sitzung abgelaufen" />
   </Type>
   <Type Name="CorruptMixin">
-    <Member Name="Corrupt" Description="korrupt" />
+    <Member Name="Corrupt" Description="Korrupt" />
   </Type>
   <Type Name="DeleteLogParametersEntity" Description="Lösch log Parameter">
     <Member Name="ChunkSize" Description="Chunk Größe" />
     <Member Name="DateLimit" Description="Enddatum" />
-    <Member Name="DeleteLogsWithMoreThan" Description="Löschen logs mit mehr als" />
+    <Member Name="DeleteLogsWithMoreThan" Description="Lösche logs mit mehr als" />
     <Member Name="MaxChunks" Description="Max chunks" />
   </Type>
   <Type Name="EmbeddedEntity" Description="Eingebettete Entität" />
@@ -88,8 +88,8 @@
     <Member Name="View" Description="Ansehen" />
   </Type>
   <Type Name="EntityMessage">
-    <Member Name="AttemptToAddRemove0InLockedEntity1" Description="Versuch, {0} in gesperrter Entity {1} hinzuzufügen/zu löschen" />
-    <Member Name="AttemptToSet0InLockedEntity1" Description="Versuch, {0} in gesperrter Entität {1} festzulegen" />
+    <Member Name="AttemptToAddRemove0InLockedEntity1" Description="Versuche {0} in gesperrter Entität {1} hinzuzufügen/zu löschen" />
+    <Member Name="AttemptToSet0InLockedEntity1" Description="Versuche {0} in gesperrter Entität {1} festzulegen" />
   </Type>
   <Type Name="EnumEntity`1" />
   <Type Name="ExceptionEntity" Description="Ausnahme" PluralDescription="Ausnahmen">
@@ -138,7 +138,7 @@
   <Type Name="IEntity">
     <Member Name="Id" Description="Id" />
   </Type>
-  <Type Name="ImmutableEntity" Description="Unveränderlich Entität">
+  <Type Name="ImmutableEntity" Description="Unveränderliche Entität" PluralDescription="Unveränderlichen Entitäten">
     <Member Name="AllowChange" Description="Änderungen erlauben" />
   </Type>
   <Type Name="IUserEntity" />
@@ -206,14 +206,14 @@
     <Member Name="FixErrors" Description="Fehler beheben" />
     <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="Unmöglich zu speichern, Integritätsprüfung fehlgeschlagen:&#xD;&#xA;&#xD;&#xA;" />
     <Member Name="Loading0" Description="{0} läd gerade..." />
-    <Member Name="LoseChanges" Description="Es gibt Änderungen, die noch nicht gespeichert wurden. &#xD;&#xA;Sollen Änderungen verlorengehen?" />
+    <Member Name="LoseChanges" Description="Es gibt Änderungen, die noch nicht gespeichert wurden. &#xD;&#xA;Sollen diese Änderungen verloren gehen?" />
     <Member Name="Message" Description="Nachricht" />
     <Member Name="NoDirectErrors" Description="Keine direkten Fehler" />
     <Member Name="Ok" Description="Ok" />
     <Member Name="Reload" Description="Neu laden" />
     <Member Name="The0HasErrors1" Description="{0} hat Fehler: {1}" />
     <Member Name="ThereAreChanges" Description="Es gibt Änderungen" />
-    <Member Name="ThereAreChangesContinue" Description="Es gibt neue Änderungen, die verloren gehen.&#xD;&#xA;&#xD;&#xA;Weiter?" />
+    <Member Name="ThereAreChangesContinue" Description="Es gibt neue Änderungen, die verloren gehen.&#xD;&#xA;&#xD;&#xA;Trotzdem weiter?" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
   </Type>
   <Type Name="OperationLogEntity" Description="Operation anmelden" PluralDescription="Operationen anmelden">
@@ -229,7 +229,7 @@
   <Type Name="OperationMessage">
     <Member Name="Create" Description="Erstellen..." />
     <Member Name="CreateFromRegex" Description="^Erstellen (.*) aus .*$" />
-    <Member Name="InUserInterface" Description="(in Benutzeroberfläche)" />
+    <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
     <Member Name="Logs" Description="Logs" />
     <Member Name="Operation01IsNotAuthorized" Description="Operation {0} ({1}) ist nicht autorisiert." />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Bitte bestätigen Sie, dass Sie die Entität aus dem System löschen möchten" />
@@ -279,7 +279,7 @@
     <Member Name="Second" Description="Sekunde" />
     <Member Name="Step0" Description="Schritt {0}" />
     <Member Name="Text" Description="Text" />
-    <Member Name="WeekNumber" Description="Wochennummer" />
+    <Member Name="WeekNumber" Description="Kalenderwoche" />
     <Member Name="Year" Description="Jahr" />
   </Type>
   <Type Name="QuickLinkMessage">
@@ -352,13 +352,14 @@
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
   </Type>
   <Type Name="TypeEntity" Description="Typ">
-    <Member Name="ClassName" Description="Klasse Name" />
+    <Member Name="ClassName" Description="Klassen Name" />
     <Member Name="CleanName" Description="Clean Name" />
     <Member Name="FullClassName" Description="Full Class Name" />
     <Member Name="Namespace" Description="Namespace" />
-    <Member Name="TableName" Description="Table Name" />
+    <Member Name="TableName" Description="Tabellen Name" />
   </Type>
   <Type Name="ValidationMessage">
+    <Member Name="_0And1CanNotBeSetAtTheSameTime" Description="{0} und {1} können nicht gleichzeitig festgelegt werden" />
     <Member Name="_0DoesNotHaveAValid1Format" Description="{0} hat kein gültiges {1}-Format" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} hat ein ungültiges Format" />
     <Member Name="_0HasAPrecissionOf1InsteadOf2" Description="{0} hat eine genauigkeit von {1} statt {2}" />
@@ -367,7 +368,7 @@
     <Member Name="_0HasToBeBetween1And2" Description="{0} muss zwischen {1} und {2} sein" />
     <Member Name="_0HasToBeLowercase" Description="{0} muss kleingeschrieben sein" />
     <Member Name="_0HasToBeUppercase" Description="{0} muss großgeschrieben sein" />
-    <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} ist obligatorisch, wenn {1} nicht  festsgeetzt ist" />
+    <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} ist obligatorisch, wenn {1} nicht festgesetzt ist" />
     <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} ist obligatorisch, wenn {1} festgesetzt ist" />
     <Member Name="_0IsNecessary" Description="{0} ist notwendig" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} ist notwendig im Status {1}" />
@@ -382,14 +383,15 @@
     <Member Name="_0ShouldBeNull" Description="{0} sollte leer sein" />
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} sollte leer sein, wenn {1} nicht festgesetzt ist" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} sollte leer sein, wenn {1} festgesetzt ist" />
-    <Member Name="_0ShouldNotHaveBreakLines" Description="{0} sollten keine neuen Zeilen aufweisen." />
-    <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} darf keine abschließende Leerzeichen haben." />
-    <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} sollten keinen Leerzeichen an erster stelle haben" />
+    <Member Name="_0ShouldBeOfType1" Description="{0} sollte vom Typ {1} sein" />
+    <Member Name="_0ShouldNotHaveBreakLines" Description="{0} sollte keine neuen Zeilen aufweisen." />
+    <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} darf keine abschließenden Leerzeichen haben." />
+    <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} sollte keine Leerzeichen an erster stelle haben" />
     <Member Name="Be" Description="sein " />
     <Member Name="BeA0_G" Description="ei[m:n|f:ne|n:n] {0} sein" />
     <Member Name="BeBetween0And1" Description="zwischen {0} und {1} sein" />
     <Member Name="BeInThePast" Description="in der Vergangenheit sein" />
-    <Member Name="BeNotNull" Description="nicht null sein" />
+    <Member Name="BeNotNull" Description="darf nicht null sein" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Have0Decimals" Description="haben {0} Dezimalstellen" />
     <Member Name="HaveANumberOfElements01" Description="hat eine Nummer von Elementen {0} {1}" />
@@ -406,7 +408,7 @@
     <Member Name="OrBeNull" Description="oder null sein" />
     <Member Name="Telephone" Description="Telefon" />
     <Member Name="TheLenghtOf0HasToBeEqualTo1" Description="Die Länge von {0} muss gleich {1} sein" />
-    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo1" Description="Die Länge von {0} muss größer als oder gleich {1}" />
+    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo1" Description="Die Länge von {0} muss größer als oder gleich {1} sein" />
     <Member Name="TheLengthOf0HasToBeLesserOrEqualTo1" Description="Die Länge von {0} muss kleiner als oder gleich {1} sein" />
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="Die Anzahl von {0} wird mit {1} multipliziert" />
     <Member Name="TheNumberOfElementsOf0HasToBe12" Description="Die Anzahl der Elemente von {0} muss {1} {2} sein" />

@@ -625,6 +625,9 @@ namespace Signum.Engine
             return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.Table<T>());
         }
 
+        /// <summary>
+        /// Example: Database.MListQuery((OrderEntity o) => o.Lines)
+        /// </summary>
         [MethodExpander(typeof(MListQueryExpander))]
         public static IQueryable<MListElement<E, V>> MListQuery<E, V>(Expression<Func<E, MList<V>>> mListProperty)
             where E : Entity

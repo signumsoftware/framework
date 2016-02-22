@@ -41,7 +41,7 @@ namespace Signum.Web
             vdd[ViewDataKeys.ViewMode] = !line.ReadOnly;
             vdd[ViewDataKeys.ViewMode] = ViewMode.View;
             vdd[ViewDataKeys.ShowOperations] = true;
-            vdd[ViewDataKeys.RequiresSaveOperation] = EntityKindCache.RequiresSaveOperation(tc.UntypedValue.GetType());
+            vdd[ViewDataKeys.RequiresSaveOperation] = tc.UntypedValue is Entity && EntityKindCache.RequiresSaveOperation(tc.UntypedValue.GetType());
             vdd[ViewDataKeys.WriteEntityState] = 
                 !isTemplate &&
                 !(tc.UntypedValue is EmbeddedEntity) &&

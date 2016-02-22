@@ -316,7 +316,7 @@ namespace Signum.Web
 
     internal class RootContext<T> : MappingContext<T>
     {
-        public override MappingContext Parent { get { throw new InvalidOperationException(); } }
+        public override MappingContext Parent { get { return null; } }
         public override MappingContext Root { get { return this; } }
 
         ControllerBase controller;

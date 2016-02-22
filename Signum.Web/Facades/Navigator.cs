@@ -553,7 +553,8 @@ namespace Signum.Web
             controller.ViewData[ViewDataKeys.ShowOperations] = popupOptions.ShowOperations;
             if (mode == ViewMode.View)
             {
-                controller.ViewData[ViewDataKeys.RequiresSaveOperation] = ((PopupViewOptions)popupOptions).RequiresSaveOperation ?? EntityKindCache.RequiresSaveOperation(entity.GetType());
+                controller.ViewData[ViewDataKeys.RequiresSaveOperation] = ((PopupViewOptions)popupOptions).RequiresSaveOperation ?? 
+                    (entity is Entity && EntityKindCache.RequiresSaveOperation(entity.GetType()));
             }
 
             return new PartialViewResult
