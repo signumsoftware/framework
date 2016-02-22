@@ -92,12 +92,12 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual IEnumerable<Module> GetModules()
         {
-            Dictionary<Type, bool> types = CandiateTypes().ToDictionary(a => a, Schema.Current.Tables.ContainsKey);
+            Dictionary<Type, bool> types = CandidateTypes().ToDictionary(a => a, Schema.Current.Tables.ContainsKey);
 
             return CodeGenerator.GetModules(types, this.SolutionName);
         }
 
-        protected virtual List<Type> CandiateTypes()
+        protected virtual List<Type> CandidateTypes()
         {
             var assembly = Assembly.Load(Assembly.GetEntryAssembly().GetReferencedAssemblies().Single(a => a.Name == this.SolutionName + ".Entities"));
 
