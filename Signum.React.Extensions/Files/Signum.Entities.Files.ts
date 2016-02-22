@@ -18,7 +18,7 @@ export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
     binaryFile?: string;
     fileLength?: number;
     fileLengthString?: string;
-    sufix?: string;
+    suffix?: string;
     calculatedDirectory?: string;
     fileType?: FileTypeSymbol;
     fullPhysicalPath?: string;
@@ -56,7 +56,7 @@ export interface FilePathEntity extends Entities.Patterns.LockableEntity {
     binaryFile?: string;
     fileLength?: number;
     fileLengthString?: string;
-    sufix?: string;
+    suffix?: string;
     calculatedDirectory?: string;
     fileType?: FileTypeSymbol;
     fullPhysicalPath?: string;

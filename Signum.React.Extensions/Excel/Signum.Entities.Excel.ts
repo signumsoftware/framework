@@ -15,12 +15,10 @@ import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 export const ExcelAttachmentEntity_Type = new Type<ExcelAttachmentEntity>("ExcelAttachment");
 export interface ExcelAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
     fileName?: string;
+    title?: string;
     userQuery?: Entities.Lite<UserQueries.UserQueryEntity>;
     related?: Entities.Lite<Entities.Entity>;
-}
-
-export module ExcelAttachmentOperation {
-    export const Save : Entities.ExecuteSymbol<ExcelAttachmentEntity> = registerSymbol({ Type: "Operation", key: "ExcelAttachmentOperation.Save" });
+    template?: Mailing.EmailTemplateEntity;
 }
 
 export module ExcelMessage {
