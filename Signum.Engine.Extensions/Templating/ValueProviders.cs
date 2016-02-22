@@ -50,7 +50,7 @@ namespace Signum.Engine.Templating
             return sb.ToString();
         }
 
-        public abstract void Synchronize(SyncronizationContext sc, string p);
+        public abstract void Synchronize(SyncronizationContext sc, string remainingText);
 
         public virtual void Declare(ScopedDictionary<string, ValueProviderBase> variables)
         {
@@ -162,6 +162,8 @@ namespace Signum.Engine.Templating
                     return new ModelValueProvider(token, modelType, addError) { Variable = variable };
                 case "g":
                     return new GlobalValueProvider(token, addError) { Variable = variable };
+                case "d":
+                    return new DateValueProvider(token, addError) { Variable = variable };
                 default:
                     addError(false, "{0} is not a recognized value provider (q:Query, t:Translate, m:Model, g:Global or just blank)");
                     return null;
@@ -567,7 +569,7 @@ namespace Signum.Engine.Templating
                 sb.Append(" as " + Variable);
         }
 
-        public override void Synchronize(SyncronizationContext sc, string p)
+        public override void Synchronize(SyncronizationContext sc, string remainingText)
         {
             if (Members == null)
             {
@@ -682,7 +684,7 @@ namespace Signum.Engine.Templating
                 sb.Append(" as " + Variable);
         }
 
-        public override void Synchronize(SyncronizationContext sc, string p)
+        public override void Synchronize(SyncronizationContext sc, string remainingText)
         {
             globalKey = sc.Replacements.SelectInteractive(globalKey, GlobalVariables.Keys, "Globals", sc.StringDistance) ?? globalKey;
 
@@ -696,6 +698,60 @@ namespace Signum.Engine.Templating
 
             Declare(sc.Variables);
         }
+    }
+
+    public class DateValueProvider : ValueProviderBase
+    {
+
+        string dateTimeExpression; 
+        public DateValueProvider(string dateTimeExpression, Action<bool, string> addError)
+        {
+            try
+            {
+                var obj = dateTimeExpression == null ? DateTime.Now: FilterValueConverter.Parse(dateTimeExpression, typeof(DateTime?), false);
+                this.dateTimeExpression = dateTimeExpression;
+            }
+            catch (Exception e)
+            {
+                addError(false, $"Invalid expression {dateTimeExpression}: {e.Message}");
+            }
+        }
+
+        public override Type Type => typeof(DateTime?);
+
+        public override object GetValue(TemplateParameters p)
+        {
+            return dateTimeExpression == null ? DateTime.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), false);
+        }
+
+        public override void FillQueryTokens(List<QueryToken> list)
+        {
+        }
+
+        public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables, string afterToken)
+        {
+            sb.Append("[");
+            sb.Append("d:");
+
+            sb.Append(this.dateTimeExpression);
+
+            if (afterToken.HasItems())
+                sb.Append(afterToken);
+
+            sb.Append("]");
+
+            if (Variable.HasItems())
+                sb.Append(" as " + Variable);
+        }
+
+        public override void Synchronize(SyncronizationContext sc, string remainingText)
+        { 
+
+
+        }
+
+        public override string Format => "G";
+
     }
 
     public class ContinueValueProvider : ValueProviderBase
@@ -781,7 +837,7 @@ namespace Signum.Engine.Templating
                 sb.Append(" as " + Variable);
         }
 
-        public override void Synchronize(SyncronizationContext sc, string p)
+        public override void Synchronize(SyncronizationContext sc, string remainingText)
         {
             if (Members == null)
             {

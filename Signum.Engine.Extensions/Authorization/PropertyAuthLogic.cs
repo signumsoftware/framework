@@ -161,7 +161,7 @@ namespace Signum.Engine.Authorization
 
             if (route.PropertyRouteType == PropertyRouteType.Root || route.IsToStringProperty())
             {
-                PropertyAllowed paType = TypeAuthLogic.GetAllowed(route.RootType).Max(ExecutionMode.InUserInterface).ToPropertyAllowed();
+                PropertyAllowed paType = TypeAuthLogic.GetAllowed(route.RootType).MaxUI().ToPropertyAllowed();
                 if (paType < requested)
                     return "Type {0} is set to {1} for {2}".FormatWith(route.RootType.NiceName(), paType, RoleEntity.Current);
 

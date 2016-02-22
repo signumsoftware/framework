@@ -19,12 +19,13 @@ using Signum.Engine.Mailing;
 using Signum.Entities.Mailing;
 using Signum.Engine.UserQueries;
 using Signum.Entities.UserAssets;
+using System.Reflection;
 
 namespace Signum.Engine.Excel
 {
     public static class ExcelLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool excelReport, bool userQueryExcel)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool excelReport)
         {
             if (excelReport)
             {
@@ -55,51 +56,9 @@ namespace Signum.Engine.Excel
                     Delete = (er, _) => { er.Delete(); }
                 }.Register();
             }
-
-            if (userQueryExcel)
-            {
-                sb.Include<ExcelAttachmentEntity>();
-                dqm.RegisterQuery(typeof(ExcelAttachmentEntity), () =>
-                    from s in Database.Query<ExcelAttachmentEntity>()
-                    select new
-                    {
-                        Entity = s,
-                        s.Id,
-                        s.FileName,
-                        s.UserQuery,
-                        s.Related,
-                    });
-
-                new Graph<ExcelAttachmentEntity>.Execute(ExcelAttachmentOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (er, _) => { }
-                }.Register();
-
-
-                EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity uqe, EmailTemplateEntity template, IEntity entity) =>
-                {
-                    var finalEntity = uqe.Related?.Retrieve() ?? (Entity)entity;
-
-                    using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
-                    {
-                        QueryRequest request = UserQueryLogic.ToQueryRequest(uqe.UserQuery.Retrieve());
-
-                        var bytes = ExcelLogic.ExecutePlainExcel(request);
-
-                        return new List<EmailAttachmentEntity>
-                        {
-                            new EmailAttachmentEntity
-                            {
-                                File = Files.EmbeddedFilePathLogic.SaveFile(new Entities.Files.EmbeddedFilePathEntity(EmailFileType.Attachment, uqe.FileName, bytes)),
-                                Type = EmailAttachmentType.Attachment,
-                            }
-                        };
-                    }
-                });
-            }
         }
+
+      
 
         public static List<Lite<ExcelReportEntity>> GetExcelReports(object queryName)
         {
@@ -120,11 +79,11 @@ namespace Signum.Engine.Excel
             return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
         }
 
-        public static byte[] ExecutePlainExcel(QueryRequest request)
+        public static byte[] ExecutePlainExcel(QueryRequest request, string title)
         {
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
 
-            return PlainExcelGenerator.WritePlainExcel(queryResult);
+            return PlainExcelGenerator.WritePlainExcel(queryResult, title);
         }
     }
 }

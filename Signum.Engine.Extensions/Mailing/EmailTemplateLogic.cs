@@ -45,9 +45,33 @@ namespace Signum.Engine.Mailing
         }
         
         public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy;
-        
-        public static Polymorphic<Func<IAttachmentGeneratorEntity, EmailTemplateEntity, IEntity, List<EmailAttachmentEntity>>> GenerateAttachment = 
-            new Polymorphic<Func<IAttachmentGeneratorEntity, EmailTemplateEntity, IEntity, List<EmailAttachmentEntity>>>();
+
+
+        public static Polymorphic<Action<IAttachmentGeneratorEntity, FillAttachmentTokenContext>> FillAttachmentTokens =
+           new Polymorphic<Action<IAttachmentGeneratorEntity, FillAttachmentTokenContext>>();
+
+        public class FillAttachmentTokenContext
+        {
+            public QueryDescription QueryDescription;
+            public Type ModelType;
+            public List<QueryToken> QueryTokens;
+        }
+
+        public static Polymorphic<Func<IAttachmentGeneratorEntity, GenerateAttachmentContext, List<EmailAttachmentEntity>>> GenerateAttachment = 
+            new Polymorphic<Func<IAttachmentGeneratorEntity, GenerateAttachmentContext, List<EmailAttachmentEntity>>>();
+
+        public class GenerateAttachmentContext
+        {
+            public QueryDescription QueryDescription;
+            public Type ModelType;
+            public EmailTemplateEntity Template;
+            public IEntity Entity;
+            public ISystemEmail SystemEmail;
+            public CultureInfo Culture;
+            public Dictionary<QueryToken, ResultColumn> ResultColumns;
+            public IEnumerable<ResultRow> CurrentRows;
+        }
+
 
         public static Func<EmailTemplateEntity, SmtpConfigurationEntity> GetSmtpConfiguration;
 
@@ -181,7 +205,7 @@ namespace Signum.Engine.Mailing
             return null;
         }
 
-        private static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateEntity template, string text, out string errorMessage)
+        public static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateEntity template, string text, out string errorMessage)
         {
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {

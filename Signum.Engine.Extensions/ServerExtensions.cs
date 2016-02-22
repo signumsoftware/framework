@@ -299,7 +299,7 @@ namespace Signum.Services
         public byte[] ExecutePlainExcel(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ExcelLogic.ExecutePlainExcel(request));
+                () => ExcelLogic.ExecutePlainExcel(request, QueryUtils.GetNiceName(request.QueryName)));
         }
 
         #endregion

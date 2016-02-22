@@ -23,6 +23,9 @@
     <span style="margin-left: 10px;">
         @MapMessage.Press0ToExploreEachTable.NiceToString().FormatHtml(new HtmlTag("u").SetInnerText("Ctrl + Click"))
     </span>
+    <a id="sfFullScreen" class="sf-popup-fullscreen" href="#">
+        <span class="glyphicon glyphicon-new-window"></span>
+    </a>
 </div>
 
 <div id="map" style="background-color:white">
@@ -67,5 +70,5 @@
     }
 
 
-    @MapClient.SchemaModule["createMap"]("map", "svgMap", "filter", "color", Model, "getProvider")
+    @MapClient.SchemaModule["createMap"]("map", "svgMap", "filter", "color", "sfFullScreen",  Model, "getProvider")
 </script>

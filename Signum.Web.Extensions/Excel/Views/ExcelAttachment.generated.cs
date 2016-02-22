@@ -81,6 +81,20 @@ Write(Html.ValueLine(sc, s => s.FileName));
             #line hidden
             
             #line 7 "..\..\Excel\Views\ExcelAttachment.cshtml"
+Write(Html.ValueLine(sc, s => s.Title));
+
+            
+            #line default
+            #line hidden
+            
+            #line 7 "..\..\Excel\Views\ExcelAttachment.cshtml"
+                                     
+    
+            
+            #line default
+            #line hidden
+            
+            #line 8 "..\..\Excel\Views\ExcelAttachment.cshtml"
 Write(Html.EntityLine(sc, s => s.UserQuery, el => el.AttachFunction = ExcelClient.Module["attachUserQuery"](el,
     sc.SubContextPrefix(a => a.Related),
     Url.Action((UserQueriesController c) => c.GetUserQueryImplementations()))));
@@ -89,21 +103,21 @@ Write(Html.EntityLine(sc, s => s.UserQuery, el => el.AttachFunction = ExcelClien
             #line default
             #line hidden
             
-            #line 9 "..\..\Excel\Views\ExcelAttachment.cshtml"
+            #line 10 "..\..\Excel\Views\ExcelAttachment.cshtml"
                                                                               
     
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Excel\Views\ExcelAttachment.cshtml"
+            #line 11 "..\..\Excel\Views\ExcelAttachment.cshtml"
 Write(Html.EntityLine(sc, s => s.Related, el => { el.Autocomplete = true; el.Find = true; }));
 
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Excel\Views\ExcelAttachment.cshtml"
+            #line 11 "..\..\Excel\Views\ExcelAttachment.cshtml"
                                                                                            
 }
 

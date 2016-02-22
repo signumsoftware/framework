@@ -549,6 +549,7 @@
     <Member Name="Send" Description="Senden" />
   </Type>
   <Type Name="EmailMessageProcess">
+    <Member Name="CreateEmailsSendAsync" Description="E-Mails erstellen und async senden" />
     <Member Name="SendEmails" Description="E-Mails senden" />
   </Type>
   <Type Name="EmailMessageState" Description="E-Mailstatus">
@@ -597,6 +598,7 @@
   </Type>
   <Type Name="EmailTemplateEntity" Description="E-Mail-Vorlage">
     <Member Name="Active" Description="Aktiv" />
+    <Member Name="Attachments" Description="Anlagen" />
     <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />
     <Member Name="EditableMessage" Description="Bearbeitbare Nachricht" />
     <Member Name="EndDate" Description="Enddatum" />
@@ -660,7 +662,7 @@
     <Member Name="FileType" Description="Dateityp" />
     <Member Name="FullPhysicalPath" Description="Vollständiger Physischer Pfad" />
     <Member Name="FullWebPath" Description="Vollständige Web-Pfad" />
-    <Member Name="Sufix" Description="Suffix" />
+    <Member Name="Suffix" Description="Suffix" />
   </Type>
   <Type Name="EntityAction" Description="Entity-Aktion">
     <Member Name="Different" Description="Verschiedene" />
@@ -678,6 +680,13 @@
   </Type>
   <Type Name="EntityHelpOperation">
     <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ExcelAttachmentEntity" Description="Excel-Anlage">
+    <Member Name="FileName" Description="Dateiname" />
+    <Member Name="Related" Description="In Beziehung mit" />
+    <Member Name="Template" Description="Vorlage" />
+    <Member Name="Title" Description="Titel" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>
   <Type Name="ExcelMessage">
     <Member Name="Administer" Description="Verwalten" />
@@ -733,7 +742,7 @@
     <Member Name="FileType" Description="Dateityp" />
     <Member Name="FullPhysicalPath" Description="Physischer Pfad" />
     <Member Name="FullWebPath" Description="URL" />
-    <Member Name="Sufix" Description="Suffix" />
+    <Member Name="Suffix" Description="Suffix" />
   </Type>
   <Type Name="FilePathOperation">
     <Member Name="Save" Description="Speichern" />
@@ -844,6 +853,9 @@
   <Type Name="HolidayEntity" Description="Feiertag">
     <Member Name="Date" Description="Datum" />
     <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="IAttachmentGeneratorEntity">
+    <Member Name="Template" Description="Vorlage" />
   </Type>
   <Type Name="IEmailOwnerEntity">
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
@@ -1011,11 +1023,11 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="OperationRulePack" Description="Operationsregelpack" />
-  <Type Name="PackageEntity" Description="Paket">
+  <Type Name="PackageEntity" Description="Paket" PluralDescription="Pakete" Gender="n">
     <Member Name="Name" Description="Name" />
     <Member Name="OperationArguments" Description="Operationsargumente" />
   </Type>
-  <Type Name="PackageLineEntity" Description="Packagelinie">
+  <Type Name="PackageLineEntity" Description="Paketzeile" PluralDescription="Paketzeilen" Gender="f">
     <Member Name="FinishTime" Description="Zeitende" />
     <Member Name="Package" Description="Paket" />
     <Member Name="Result" Description="Ergebnis" />
@@ -1083,7 +1095,7 @@
     <Member Name="Reception" Description="Empfang" />
   </Type>
   <Type Name="ProcessAlgorithmSymbol" Description="Prozess-Algorithmus" PluralDescription="Prozess-Algorithmen" Gender="m" />
-  <Type Name="ProcessEntity" Description="Prozess">
+  <Type Name="ProcessEntity" Description="Prozess" PluralDescription="Prozesse" Gender="m">
     <Member Name="Algorithm" Description="Algorithmus" />
     <Member Name="ApplicationName" Description="Anwendungsname" />
     <Member Name="CancelationDate" Description="Stornierungsdatum" />
@@ -1102,13 +1114,13 @@
     <Member Name="SuspendDate" Description="Aussetzungsdatum" />
     <Member Name="User" Description="Benutzer" />
   </Type>
-  <Type Name="ProcessExceptionLineEntity" Description="Prozessausnahmelinie">
+  <Type Name="ProcessExceptionLineEntity" Description="Prozessausnahmezeile" PluralDescription="Prozessausnahmezeilen" Gender="f">
     <Member Name="Exception" Description="Ausnahme" />
-    <Member Name="Line" Description="Linie" />
+    <Member Name="Line" Description="Zeile" />
     <Member Name="Process" Description="Prozess" />
   </Type>
   <Type Name="ProcessMessage">
-    <Member Name="ExceptionLines" Description="Ausnahmelinien" />
+    <Member Name="ExceptionLines" Description="Ausnahmezeilen" />
     <Member Name="LastProcess" Description="Letzter Prozess" />
     <Member Name="Lines" Description="Linien" />
     <Member Name="Process0IsNotRunningAnymore" Description="Prozess {0} wird nicht mehr ausgeführt" />
@@ -1133,12 +1145,12 @@
     <Member Name="Executing" Description="Ausführen" />
     <Member Name="Finished" Description="Fertig" />
     <Member Name="Planned" Description="Geplant" />
-    <Member Name="Queued" Description="In Warteschlange" />
+    <Member Name="Queued" Description="In der Warteschlange" />
     <Member Name="Suspended" Description="Ausgesetzt" />
     <Member Name="Suspending" Description="Aussetzen" />
   </Type>
   <Type Name="ProfilerPermission">
-    <Member Name="OverrideSessionTimeout" Description="Session-Timeout überschreiben" />
+    <Member Name="OverrideSessionTimeout" Description="Session-Zeitüberschreitung überschreiben" />
     <Member Name="ViewHeavyProfiler" Description="Heavy Profiler anzeigen" />
     <Member Name="ViewTimeTracker" Description="Zeiterfassung anzeigen" />
   </Type>
@@ -1251,7 +1263,7 @@
     <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="SchedulerMessage">
-    <Member Name="_0IsNotMultiple1" Description="{0} ist kein Vielfaches von {1}" />
+    <Member Name="Day0At1In2" Description="Tag {0} auf {1} in {2}" />
     <Member Name="Each0Hours" Description="Alle {0} Stunden" />
     <Member Name="Each0Minutes" Description="Alle {0} Minuten" />
     <Member Name="ScheduleRuleDailyDN_Everydayat" Description="Jeden Tag um " />
@@ -1285,15 +1297,24 @@
   <Type Name="SchedulerPermission">
     <Member Name="ViewSchedulerPanel" Description="Schedulersteuerung anzeigen" />
   </Type>
-  <Type Name="ScheduleRuleDailyEntity" Description="Schedule-Regel täglich" PluralDescription="Schedule-Regeln täglich" Gender="f" />
-  <Type Name="ScheduleRuleDayEntity" Description="Schedule-Regel täglich" PluralDescription="Schedule-Regeln täglich" Gender="f">
-    <Member Name="StartingOn" Description="Beginnend am" />
-  </Type>
-  <Type Name="ScheduleRuleHourlyEntity" Description="Schedule-Regel stündlich" PluralDescription="Schedule-Regeln stündlich" Gender="f">
-    <Member Name="EachHours" Description="Jede Stunden" />
-  </Type>
   <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich" PluralDescription="Schedule-Regeln minütlich" Gender="f">
     <Member Name="EachMinutes" Description="Alle Minuten" />
+    <Member Name="IsAligned" Description="Ist ausgerichtet" />
+  </Type>
+  <Type Name="ScheduleRuleMonthsEntity" Description="Regel Monate planen">
+    <Member Name="April" Description="April" />
+    <Member Name="August" Description="August" />
+    <Member Name="December" Description="Dezember" />
+    <Member Name="February" Description="Februar" />
+    <Member Name="January" Description="Januar" />
+    <Member Name="July" Description="Juli" />
+    <Member Name="June" Description="Juni" />
+    <Member Name="March" Description="März" />
+    <Member Name="May" Description="Mai" />
+    <Member Name="November" Description="November" />
+    <Member Name="October" Description="Oktober" />
+    <Member Name="September" Description="September" />
+    <Member Name="StartingOn" Description="Beginnend am" />
   </Type>
   <Type Name="ScheduleRuleWeekDaysEntity" Description="Schedule-Regel Wochentage" PluralDescription="Schedule-Regeln Wochentage">
     <Member Name="Calendar" Description="Kalender" />
@@ -1301,13 +1322,20 @@
     <Member Name="Holiday" Description="Feiertag" />
     <Member Name="Monday" Description="Montag" />
     <Member Name="Saturday" Description="Samstag" />
+    <Member Name="StartingOn" Description="Beginnend am" />
     <Member Name="Sunday" Description="Sonntag" />
     <Member Name="Thursday" Description="Donnerstag" />
     <Member Name="Tuesday" Description="Dienstag" />
     <Member Name="Wednesday" Description="Mittwoch" />
   </Type>
-  <Type Name="ScheduleRuleWeeklyEntity" Description="Schedule-Regel wöchentlich" PluralDescription="Schedule-Regeln wöchentlich" Gender="f">
-    <Member Name="DayOfTheWeek" Description="Tag der Woche" />
+  <Type Name="SendEmailTaskEntity" Description="Sende eine Email Aufgabe" PluralDescription="Sende E-Mail Aufgaben">
+    <Member Name="EmailTemplate" Description="E-Mail Vorlage" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="TargetsFromUserQuery" Description="Ziele von Benutzerabfrage" />
+    <Member Name="UniqueTarget" Description="Einzigartiges Ziel" />
+  </Type>
+  <Type Name="SendEmailTaskOperation">
+    <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="SessionLogEntity" Description="Sitzungsprotokoll" PluralDescription="Sitzungsprotokolle" Gender="n">
     <Member Name="Duration" Description="Dauer" />
@@ -1434,7 +1462,7 @@
     <Member Name="FullClassName" Description="Vollständiger class name" />
   </Type>
   <Type Name="SystemWordTemplateEntity" Description="System-Word-Vorlage">
-    <Member Name="FullClassName" Description="Vollständige Klassenname" />
+    <Member Name="FullClassName" Description="Vollständiger Klassenname" />
   </Type>
   <Type Name="TaskMessage">
     <Member Name="Execute" Description="Ausführen" />
@@ -1677,6 +1705,7 @@
     <Member Name="ViewAction" Description="Anzeigeaktion" />
   </Type>
   <Type Name="WebDownload" Description="Webdownload">
+    <Member Name="FileName" Description="Dateiname" />
     <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
   </Type>
   <Type Name="WebImage" Description="Webbild">

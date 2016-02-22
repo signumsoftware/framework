@@ -169,16 +169,14 @@ namespace Signum.Engine.Word
                     switch (keyword)
                     {
                         case "":
-                            var tok = TemplateUtils.TokenFormatRegex.Match(token);
-                            if (!tok.Success)
+                            var s = TemplateUtils.SplitToken(token);
+                            if (s == null)
                                 AddError(true, "{0} has invalid format".FormatWith(token));
                             else
                             {
-                                var vp = TryParseValueProvider(type, tok.Groups["token"].Value, dec);
-
-                                var format = tok.Groups["format"].Value.DefaultText(null);
-
-                                matchNode.Parent.ReplaceChild(new TokenNode(vp, format)
+                                var vp = TryParseValueProvider(type, s.Value.Token, dec);
+                                
+                                matchNode.Parent.ReplaceChild(new TokenNode(vp, s.Value.Format)
                                 {
                                     RunProperties = matchNode.RunProperties?.Do(d => d.Remove()) 
                                 }, matchNode);

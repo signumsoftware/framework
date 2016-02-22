@@ -93,6 +93,17 @@ namespace Signum.Entities.Mailing
                     foreach (var item in args.NewItems.Cast<EmailTemplateMessageEntity>())
                         item.Template = this;
             }
+
+            if (sender == Attachments)
+            {
+                if (args.OldItems != null)
+                    foreach (var item in args.OldItems.Cast<IAttachmentGeneratorEntity>())
+                        item.Template = null;
+
+                if (args.NewItems != null)
+                    foreach (var item in args.NewItems.Cast<IAttachmentGeneratorEntity>())
+                        item.Template = this;
+            }
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -245,7 +256,7 @@ namespace Signum.Entities.Mailing
 
     public interface IAttachmentGeneratorEntity : IEntity
     {
-        
+        EmailTemplateEntity Template { get; set; }
     }
 
     [AutoInit]

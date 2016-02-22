@@ -11,26 +11,28 @@ using System.IO;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities;
 using System.Globalization;
+using Signum.Entities;
 
 namespace Signum.Engine.Excel
 {
     public enum TemplateCells
     {
+        Title,
         Header,
-
         Date,
         DateTime,
         Text,
         General,
+        Boolean,
         Number,
-        Decimal
+        Decimal,
     }
 
     public class CellBuilder
     {
         public Dictionary<TypeCode, TemplateCells> DefaultTemplateCells = new Dictionary<TypeCode, TemplateCells> 
         {
-            {TypeCode.Boolean, TemplateCells.General},
+            {TypeCode.Boolean, TemplateCells.Boolean},
             {TypeCode.Byte, TemplateCells.Number},
             {TypeCode.Char, TemplateCells.Text},
             {TypeCode.DateTime, TemplateCells.DateTime},
@@ -62,6 +64,7 @@ namespace Signum.Engine.Excel
             {TemplateCells.DateTime, null},
             {TemplateCells.Text, CellValues.InlineString},
             {TemplateCells.General, CellValues.InlineString},
+            {TemplateCells.Boolean, CellValues.InlineString},
             {TemplateCells.Number, null},
             {TemplateCells.Decimal, null}
         };
@@ -96,15 +99,21 @@ namespace Signum.Engine.Excel
             string excelValue = value == null ? "" :
                         (template == TemplateCells.Date || template == TemplateCells.DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
                         (template == TemplateCells.Decimal) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
+                        (template == TemplateCells.Boolean) ? ToYesNo((bool)value) :
                         value.ToString();
 
-            Cell cell = (template == TemplateCells.General || template == TemplateCells.Text || template == TemplateCells.Header) ? 
+            Cell cell = (template== TemplateCells.Title|| template == TemplateCells.General || template == TemplateCells.Text || template == TemplateCells.Header) ? 
                 new Cell(new InlineString(new Text { Text = excelValue })) { DataType = CellValues.InlineString } : 
                 new Cell { CellValue = new CellValue(excelValue), DataType = DefaultCellValues[template] };
 
             cell.StyleIndex = styleIndex;
 
             return cell;
+        }
+
+        private string ToYesNo(bool value)
+        {
+            return value ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString();
         }
 
         public Cell Cell(Type type, object value, UInt32Value styleIndex)

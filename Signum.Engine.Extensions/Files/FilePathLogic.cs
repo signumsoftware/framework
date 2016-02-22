@@ -63,7 +63,7 @@ namespace Signum.Engine.Files
                         p.Id,
                         p.FileName,
                         p.FileType,
-                        p.Sufix
+                        p.Suffix
                     });
 
                 new Graph<FilePathEntity>.Execute(FilePathOperation.Save)
@@ -78,12 +78,12 @@ namespace Signum.Engine.Files
                             var ofp = fp.ToLite().Retrieve();
 
 
-                            if (fp.FileName != ofp.FileName || fp.Sufix != ofp.Sufix || fp.FullPhysicalPath != ofp.FullPhysicalPath)
+                            if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix || fp.FullPhysicalPath != ofp.FullPhysicalPath)
                             {
                                 using (Transaction tr = new Transaction())
                                 {
-                                    var preSufix = ofp.Sufix.Substring(0, ofp.Sufix.Length - ofp.FileName.Length);
-                                    fp.Sufix = Path.Combine(preSufix, fp.FileName);
+                                    var preSufix = ofp.Suffix.Substring(0, ofp.Suffix.Length - ofp.FileName.Length);
+                                    fp.Suffix = Path.Combine(preSufix, fp.FileName);
                                     fp.Save();
                                     System.IO.File.Move(ofp.FullPhysicalPath, fp.FullPhysicalPath);
                                     tr.Commit();
@@ -94,7 +94,7 @@ namespace Signum.Engine.Files
                 }.Register();
                 
 
-                sb.AddUniqueIndex<FilePathEntity>(f => new { f.Sufix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
+                sb.AddUniqueIndex<FilePathEntity>(f => new { f.Suffix, f.FileType }); //With mixins, add AttachToUniqueIndexes to field
 
                 dqm.RegisterExpression((FilePathEntity fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
                 dqm.RegisterExpression((FilePathEntity fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");

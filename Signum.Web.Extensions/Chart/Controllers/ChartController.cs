@@ -225,7 +225,7 @@ namespace Signum.Web.Chart
 
             var resultTable = ChartLogic.ExecuteChart(request);
 
-            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable);
+            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable, QueryUtils.GetNiceName(request.QueryName));
 
             return File(binaryFile, MimeType.FromExtension(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + ".xlsx");
         }
