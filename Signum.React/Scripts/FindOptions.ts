@@ -1,15 +1,9 @@
 ﻿import { TypeReference, PropertyRoute } from './Reflection';
 import { Dic } from './Globals';
-import { Lite, IEntity, DynamicQuery } from './Signum.Entities';
+import { Lite, IEntity } from './Signum.Entities';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType } from './Signum.Entities.DynamicQuery';
 
-import PaginationMode = DynamicQuery.PaginationMode;
-import OrderType = DynamicQuery.OrderType;
-import FilterOperation = DynamicQuery.FilterOperation;
-import FilterType = DynamicQuery.FilterType;
-import ColumnOptionsMode = DynamicQuery.ColumnOptionsMode;
-import UniqueType = DynamicQuery.UniqueType;
-
-export {PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType};
+export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
 export interface CountOptions {
     queryName: any;

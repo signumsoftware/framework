@@ -83,15 +83,15 @@ namespace Signum.TSGenerator
                                   Match = m,
                                   VariableName = var,
                                   AssemblyFullPath = refs.GetReferencedAssembly(parameters.ConsumeParameter(var + ".Assembly"), projectFile),
-                                  BaseNamespace = parameters.TryConsumeParameter(var + ".BaseNamespace") ?? Path.GetFileName(m.Groups["path"].Value),
+                                  Namespace = parameters.TryConsumeParameter(var + ".BaseNamespace") ?? Path.GetFileName(m.Groups["path"].Value),
                               }).ToList();
 
             AssertNoDuplicate(references, r => r.VariableName, "VariableName", fileContent);
-            AssertNoDuplicate(references, r => r.AssemblyFullPath + "/" + r.BaseNamespace, "AssemlyFullPath and BaseNamespace", fileContent);
+            AssertNoDuplicate(references, r => r.AssemblyFullPath + "/" + r.Namespace, "AssemlyFullPath and BaseNamespace", fileContent);
 
             var options = new Options(refs.GetReferencedAssembly(parameters.ConsumeParameter("Assembly"), projectFile))
             {
-                BaseNamespace = parameters.TryConsumeParameter("BaseNamespace") ?? Path.GetFileNameWithoutExtension(templateFile),
+                Namespace = parameters.TryConsumeParameter("BaseNamespace") ?? Path.GetFileNameWithoutExtension(templateFile),
                 References = references,
             };
 

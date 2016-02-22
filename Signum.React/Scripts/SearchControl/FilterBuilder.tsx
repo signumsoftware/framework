@@ -5,7 +5,8 @@ import * as Finder from '../Finder'
 import { Dic, areEqual } from '../Globals'
 import { openModal, IModalProps } from '../Modals';
 import { FilterOperation, FilterOption, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, Entity, DynamicQuery } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
+import { FilterOperation_Type } from '../Signum.Entities.DynamicQuery' 
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
 import { Binding, IsByAll, getTypeInfos } from '../Reflection'
 import { TypeContext, FormGroupStyle } from '../TypeContext'
@@ -153,7 +154,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                     {f.token && f.operation &&
                         <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
                             { filterOperations[f.token.filterType]
-                                .map((ft, i) => <option key={i} value={ft as any}>{ DynamicQuery.FilterOperation_Type.niceName(ft) }</option>) }
+                                .map((ft, i) => <option key={i} value={ft as any}>{ FilterOperation_Type.niceName(ft) }</option>) }
                         </select> }
                 </td>
 

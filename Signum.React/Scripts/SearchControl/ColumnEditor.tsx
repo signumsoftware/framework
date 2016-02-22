@@ -4,7 +4,7 @@ import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import { ColumnOption, QueryDescription, QueryToken, SubTokensOptions, FilterType } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, Entity, DynamicQuery } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
 import { Binding, IsByAll, getTypeInfos } from '../Reflection'
 import { TypeContext, FormGroupStyle } from '../TypeContext'

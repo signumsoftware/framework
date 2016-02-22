@@ -1,11 +1,11 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { Tabs, Tab} from 'react-bootstrap'
-import { Basics, getMixin, CorruptMixin_Type } from '../Signum.Entities'
+import { ExceptionEntity, ExceptionEntity_Type } from '../Signum.Entities.Basics'
 import { TypeContext } from '../TypeContext'
 import { ValueLine, ValueLineType, EntityComponent, EntityLine } from '../Lines'
 
-export default class Exception extends EntityComponent<Basics.ExceptionEntity> {
+export default class Exception extends EntityComponent<ExceptionEntity> {
     renderEntity() {
         const sc = this.subCtx(a => a, { labelColumns: { sm: 4 } });
         return (
@@ -43,7 +43,7 @@ export default class Exception extends EntityComponent<Basics.ExceptionEntity> {
         );
     }
 
-    codeTab(eventKey: number, property: (ex: Basics.ExceptionEntity) => any) {
+    codeTab(eventKey: number, property: (ex: ExceptionEntity) => any) {
         const tc = this.subCtx(property);
 
         if (!tc.value || tc.value == "")

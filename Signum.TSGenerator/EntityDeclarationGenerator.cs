@@ -38,7 +38,7 @@ namespace Signum.TSGenerator
 
             Cache = new TypeCache(entities);
 
-            var exportedTypes = assembly.ExportedTypes.Where(a => a.Namespace.StartsWith(options.BaseNamespace)).ToList();
+            var exportedTypes = assembly.ExportedTypes.Where(a => a.Namespace == options.Namespace).ToList();
             var imported = assembly.GetCustomAttributes(Cache.ImportInTypeScriptAttribute).Select(a => (Type)((dynamic)a).Type).ToList();
             var importedMessage = imported.Where(a => a.Name.EndsWith("Message")).ToList();
             var importedEnums = imported.Except(importedMessage).ToList();
@@ -90,7 +90,7 @@ namespace Signum.TSGenerator
             var extrnalEnums = (from type in usedEnums.Where(options.IsExternal).Concat(importedEnums)
                                 select new
                                 {
-                                    ns = options.BaseNamespace + ".External",
+                                    ns = options.Namespace + ".External",
                                     type,
                                     text = EnumInTypeScript(type, options),
                                 }).ToList();
@@ -98,7 +98,7 @@ namespace Signum.TSGenerator
             var externalMessages = (from type in importedMessage
                                     select new
                                     {
-                                        ns = options.BaseNamespace + ".External",
+                                        ns = options.Namespace + ".External",
                                         type,
                                         text = MessageInTypeScript(type, options),
                                     }).ToList(); 
@@ -135,7 +135,7 @@ namespace Signum.TSGenerator
 
             foreach (var ns in namespaces)
             {
-                var key = RemoveNamespace(ns.Key.ToString(), options.BaseNamespace);
+                var key = RemoveNamespace(ns.Key.ToString(), options.Namespace);
 
                 if (key.Length == 0)
                 {
@@ -369,13 +369,18 @@ namespace Signum.TSGenerator
 
         private static string RelativeName(Type type, Type current, Options options, string errorContext)
         {
+            if (type.Name == "RegionEntity")
+            {
+                type = type;
+            }
+
             if (type.IsGenericParameter)
                 return type.Name;
 
             if (type.DeclaringType != null)
                 return RelativeName(type.DeclaringType, current, options, errorContext) + "_" + BeforeTick(type.Name);
 
-            if (type.Assembly.Equals(current.Assembly))
+            if (type.Assembly.Equals(current.Assembly) && type.Namespace == current.Namespace)
             {
                 string relativeNamespace = RelativeNamespace(type, current);
 
@@ -387,7 +392,7 @@ namespace Signum.TSGenerator
             }
             else
             {
-                var assembly = options.References.SingleOrDefault(r => r.AssemblyName == type.Assembly.GetName().Name && type.Namespace.StartsWith(r.BaseNamespace));
+                var assembly = options.References.SingleOrDefault(r => r.AssemblyName == type.Assembly.GetName().Name && type.Namespace == r.Namespace);
 
                 if (assembly == null)
                 {
@@ -397,9 +402,7 @@ namespace Signum.TSGenerator
                     throw new InvalidOperationException($"{errorContext}:  Type {type.ToString()} is declared in the assembly '{type.Assembly.GetName().Name}.dll' and namespace '{type.Namespace}', but there is no reference to them.");
                 }
 
-                var ns = RemoveNamespace(type.Namespace, assembly.BaseNamespace);
-
-                return CombineNamespace(assembly.VariableName, ns, BeforeTick(type.Name));
+                return CombineNamespace(assembly.VariableName, BeforeTick(type.Name));
             }
         }
 
@@ -453,7 +456,7 @@ namespace Signum.TSGenerator
         public string AssemblyName;
         public string AssemblyFullPath;
         
-        public string BaseNamespace;
+        public string Namespace;
         public List<Reference> References = new List<Reference>();
 
         public Options(string assemblyFullPath)
@@ -489,6 +492,6 @@ namespace Signum.TSGenerator
         public Match Match { get; internal set; }
 
         public string AssemblyName;
-        public string BaseNamespace;
+        public string Namespace;
     }
 }

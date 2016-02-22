@@ -3,7 +3,8 @@ import * as React from 'react'
 import * as Finder from '../Finder'
 import { classes, Dic } from '../Globals'
 import { ResultTable, Pagination, PaginationMode, PaginateMath} from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, IEntity, liteKey, DynamicQuery } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, IEntity, liteKey } from '../Signum.Entities'
+import { PaginationMode_Type } from '../Signum.Entities.DynamicQuery'
 import { getEnumInfo } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { Input, Pagination as BPagination } from 'react-bootstrap'
@@ -95,7 +96,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
             <div className="sf-pagination-center form-inline form-xs">
                 <Input type="select" value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" standalone={true}>
                     {[PaginationMode.Paginate, PaginationMode.Firsts, PaginationMode.All].map(mode =>
-                        <option key={mode} value={mode.toString() }>{DynamicQuery.PaginationMode_Type.niceName(mode) }</option>) }
+                        <option key={mode} value={mode.toString() }>{PaginationMode_Type.niceName(mode) }</option>) }
                 </Input>
                 <Input type="select" value={this.props.pagination.elementsPerPage} onChange={this.handleElementsPerPage} ref="elementsPerPage" standalone={true}>
                     {[5, 10, 20, 50, 100, 200].map(elem =>
