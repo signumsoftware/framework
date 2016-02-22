@@ -5,9 +5,12 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-import * as Basics from '../Basics/Signum.Entities.Basics' 
+import * as ExBasics from '../Basics/Signum.Entities.Basics' 
 
 import * as Processes from '../Processes/Signum.Entities.Processes' 
+
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
 
 export enum MessageLengthExceeded {
     NotAllowed = "NotAllowed" as any,
@@ -37,7 +40,7 @@ export module SMSCharactersMessage {
 
 export const SMSConfigurationEntity_Type = new Type<SMSConfigurationEntity>("SMSConfigurationEntity");
 export interface SMSConfigurationEntity extends Entities.EmbeddedEntity {
-    defaultCulture?: Basics.CultureInfoEntity;
+    defaultCulture?: ExBasics.CultureInfoEntity;
 }
 
 export const SMSMessageEntity_Type = new Type<SMSMessageEntity>("SMSMessage");
@@ -55,7 +58,7 @@ export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLin
     updatePackage?: Entities.Lite<SMSUpdatePackageEntity>;
     updatePackageProcessed?: boolean;
     referred?: Entities.Lite<Entities.Entity>;
-    exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
+    exception?: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export module SMSMessageOperation {
@@ -95,7 +98,7 @@ export interface SMSTemplateEntity extends Entities.Entity {
     name?: string;
     certified?: boolean;
     editableMessage?: boolean;
-    associatedType?: Entities.Basics.TypeEntity;
+    associatedType?: Basics.TypeEntity;
     messages?: Entities.MList<SMSTemplateMessageEntity>;
     from?: string;
     messageLengthExceeded?: MessageLengthExceeded;
@@ -116,7 +119,7 @@ export module SMSTemplateMessage {
 export const SMSTemplateMessageEntity_Type = new Type<SMSTemplateMessageEntity>("SMSTemplateMessageEntity");
 export interface SMSTemplateMessageEntity extends Entities.EmbeddedEntity {
     template?: SMSTemplateEntity;
-    cultureInfo?: Basics.CultureInfoEntity;
+    cultureInfo?: ExBasics.CultureInfoEntity;
     message?: string;
 }
 

@@ -16,3 +16,7 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 //Chart.Assembly: Signum.Entities.Extensions.dll
 import * as Chart from '../Chart/Signum.Entities.Chart' 
+
+//Basics.Assembly: Signum.Entities.dll
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+

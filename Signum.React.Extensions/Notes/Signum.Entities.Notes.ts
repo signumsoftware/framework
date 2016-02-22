@@ -5,13 +5,16 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+
 export const NoteEntity_Type = new Type<NoteEntity>("Note");
 export interface NoteEntity extends Entities.Entity {
     title?: string;
     target?: Entities.Lite<Entities.Entity>;
     creationDate?: string;
     text?: string;
-    createdBy?: Entities.Lite<Entities.Basics.IUserEntity>;
+    createdBy?: Entities.Lite<Basics.IUserEntity>;
     noteType?: NoteTypeEntity;
 }
 
@@ -32,7 +35,7 @@ export module NoteOperation {
 }
 
 export const NoteTypeEntity_Type = new Type<NoteTypeEntity>("NoteType");
-export interface NoteTypeEntity extends Entities.Basics.SemiSymbol {
+export interface NoteTypeEntity extends Basics.SemiSymbol {
 }
 
 export module NoteTypeOperation {

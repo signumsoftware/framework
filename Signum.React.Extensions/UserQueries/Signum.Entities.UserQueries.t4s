@@ -13,3 +13,10 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 //Authorization.Assembly: Signum.Entities.Extensions.dll
 import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
+
+//Basics.Assembly: Signum.Entities.dll
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+//DynamicQuery.Assembly: Signum.Entities.dll
+import * as DynamicQuery from '../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery' 
+

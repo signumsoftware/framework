@@ -13,10 +13,13 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 import * as Files from '../Files/Signum.Entities.Files' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+
 export const ChartColorEntity_Type = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
     related?: Entities.Lite<Entities.Entity>;
-    color?: Entities.Basics.ColorEntity;
+    color?: Basics.ColorEntity;
 }
 
 export const ChartColumnEntity_Type = new Type<ChartColumnEntity>("ChartColumnEntity");
@@ -78,7 +81,7 @@ export module ChartMessage {
 
 export const ChartPaletteModel_Type = new Type<ChartPaletteModel>("ChartPaletteModel");
 export interface ChartPaletteModel extends Entities.ModelEntity {
-    type?: Entities.Basics.TypeEntity;
+    type?: Basics.TypeEntity;
     colors?: Entities.MList<ChartColorEntity>;
 }
 
@@ -142,8 +145,8 @@ export const GroupByChart_Type = new EnumType<GroupByChart>("GroupByChart", Grou
 
 export const UserChartEntity_Type = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
-    query?: Entities.Basics.QueryEntity;
-    entityType?: Entities.Lite<Entities.Basics.TypeEntity>;
+    query?: Basics.QueryEntity;
+    entityType?: Entities.Lite<Basics.TypeEntity>;
     owner?: Entities.Lite<Entities.Entity>;
     displayName?: string;
     chartScript?: ChartScriptEntity;

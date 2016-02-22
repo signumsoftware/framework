@@ -5,8 +5,12 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 //Entities.Assembly: Signum.Entities.dll
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-//Basics.Assembly: Signum.Entities.Extensions.dll
-import * as Basics from '../Basics/Signum.Entities.Basics' 
+//ExBasics.Assembly: Signum.Entities.Extensions.dll
+import * as ExBasics from '../Basics/Signum.Entities.Basics' 
 
 //Processes.Assembly: Signum.Entities.Extensions.dll
 import * as Processes from '../Processes/Signum.Entities.Processes' 
+
+//Basics.Assembly: Signum.Entities.dll
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+

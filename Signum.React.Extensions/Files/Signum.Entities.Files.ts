@@ -5,6 +5,11 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+import * as Patterns from '../../../Framework/Signum.React/Scripts/Signum.Entities.Patterns' 
+
+
 export const EmbeddedFileEntity_Type = new Type<EmbeddedFileEntity>("EmbeddedFileEntity");
 export interface EmbeddedFileEntity extends Entities.EmbeddedEntity {
     fileName?: string;
@@ -50,7 +55,7 @@ export module FileMessage {
 }
 
 export const FilePathEntity_Type = new Type<FilePathEntity>("FilePath");
-export interface FilePathEntity extends Entities.Patterns.LockableEntity {
+export interface FilePathEntity extends Patterns.LockableEntity {
     creationDate?: string;
     fileName?: string;
     binaryFile?: string;

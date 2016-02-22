@@ -7,6 +7,9 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+
 export const ApplicationEventLogEntity_Type = new Type<ApplicationEventLogEntity>("ApplicationEventLog");
 export interface ApplicationEventLogEntity extends Entities.Entity {
     machineName?: string;
@@ -43,21 +46,21 @@ export interface ScheduledTaskEntity extends Entities.Entity {
     task?: ITaskEntity;
     suspended?: boolean;
     machineName?: string;
-    user?: Entities.Lite<Entities.Basics.IUserEntity>;
+    user?: Entities.Lite<Basics.IUserEntity>;
     applicationName?: string;
 }
 
 export const ScheduledTaskLogEntity_Type = new Type<ScheduledTaskLogEntity>("ScheduledTaskLog");
 export interface ScheduledTaskLogEntity extends Entities.Entity {
     scheduledTask?: ScheduledTaskEntity;
-    user?: Entities.Lite<Entities.Basics.IUserEntity>;
+    user?: Entities.Lite<Basics.IUserEntity>;
     task?: ITaskEntity;
     startTime?: string;
     endTime?: string;
     machineName?: string;
     applicationName?: string;
     productEntity?: Entities.Lite<Entities.IEntity>;
-    exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
+    exception?: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export module ScheduledTaskOperation {

@@ -11,13 +11,16 @@ import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets' 
 
-import * as Basics from '../Basics/Signum.Entities.Basics' 
+import * as ExBasics from '../Basics/Signum.Entities.Basics' 
 
 import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
 import * as Files from '../Files/Signum.Entities.Files' 
 
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
+
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
 
 export module AsyncEmailSenderPermission {
     export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel" });
@@ -57,7 +60,7 @@ export const EmailAttachmentType_Type = new EnumType<EmailAttachmentType>("Email
 
 export const EmailConfigurationEntity_Type = new Type<EmailConfigurationEntity>("EmailConfigurationEntity");
 export interface EmailConfigurationEntity extends Entities.EmbeddedEntity {
-    defaultCulture?: Basics.CultureInfoEntity;
+    defaultCulture?: ExBasics.CultureInfoEntity;
     urlLeft?: string;
     sendEmails?: boolean;
     reciveEmails?: boolean;
@@ -81,7 +84,7 @@ export interface EmailMasterTemplateEntity extends Entities.Entity {
 export const EmailMasterTemplateMessageEntity_Type = new Type<EmailMasterTemplateMessageEntity>("EmailMasterTemplateMessageEntity");
 export interface EmailMasterTemplateMessageEntity extends Entities.EmbeddedEntity {
     masterTemplate?: EmailMasterTemplateEntity;
-    cultureInfo?: Basics.CultureInfoEntity;
+    cultureInfo?: ExBasics.CultureInfoEntity;
     text?: string;
 }
 
@@ -103,7 +106,7 @@ export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessL
     body?: string;
     bodyHash?: string;
     isBodyHtml?: boolean;
-    exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
+    exception?: Entities.Lite<Basics.ExceptionEntity>;
     state?: EmailMessageState;
     uniqueIdentifier?: string;
     editableMessage?: boolean;
@@ -199,7 +202,7 @@ export interface EmailTemplateEntity extends Entities.Entity {
     name?: string;
     editableMessage?: boolean;
     disableAuthorization?: boolean;
-    query?: Entities.Basics.QueryEntity;
+    query?: Basics.QueryEntity;
     systemEmail?: SystemEmailEntity;
     sendDifferentMessages?: boolean;
     from?: EmailTemplateContactEntity;
@@ -231,7 +234,7 @@ export module EmailTemplateMessage {
 export const EmailTemplateMessageEntity_Type = new Type<EmailTemplateMessageEntity>("EmailTemplateMessageEntity");
 export interface EmailTemplateMessageEntity extends Entities.EmbeddedEntity {
     template?: EmailTemplateEntity;
-    cultureInfo?: Basics.CultureInfoEntity;
+    cultureInfo?: ExBasics.CultureInfoEntity;
     text?: string;
     subject?: string;
 }
@@ -278,7 +281,7 @@ export interface NewsletterEntity extends Entities.Entity, Processes.IProcessDat
     displayFrom?: string;
     subject?: string;
     text?: string;
-    query?: Entities.Basics.QueryEntity;
+    query?: Basics.QueryEntity;
 }
 
 export module NewsletterOperation {
@@ -328,13 +331,13 @@ export interface Pop3ReceptionEntity extends Entities.Entity {
     startDate?: string;
     endDate?: string;
     newEmails?: number;
-    exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
+    exception?: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export const Pop3ReceptionExceptionEntity_Type = new Type<Pop3ReceptionExceptionEntity>("Pop3ReceptionException");
 export interface Pop3ReceptionExceptionEntity extends Entities.Entity {
     reception?: Entities.Lite<Pop3ReceptionEntity>;
-    exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
+    exception?: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export const SendEmailTaskEntity_Type = new Type<SendEmailTaskEntity>("SendEmailTask");

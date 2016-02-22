@@ -7,6 +7,9 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+
 export enum EntityAction {
     Identical = "Identical" as any,
     Different = "Different" as any,
@@ -37,7 +40,7 @@ export module UserAssetPermission {
 
 export const UserAssetPreviewLine_Type = new Type<UserAssetPreviewLine>("UserAssetPreviewLine");
 export interface UserAssetPreviewLine extends Entities.EmbeddedEntity {
-    type?: Entities.Basics.TypeEntity;
+    type?: Basics.TypeEntity;
     text?: string;
     action?: EntityAction;
     overrideEntity?: boolean;

@@ -14,8 +14,8 @@ import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
 //UserAssets.Assembly: Signum.Entities.Extensions.dll
 import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets' 
 
-//Basics.Assembly: Signum.Entities.Extensions.dll
-import * as Basics from '../Basics/Signum.Entities.Basics' 
+//ExBasics.Assembly: Signum.Entities.Extensions.dll
+import * as ExBasics from '../Basics/Signum.Entities.Basics' 
 
 //Authorization.Assembly: Signum.Entities.Extensions.dll
 import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
@@ -25,3 +25,7 @@ import * as Files from '../Files/Signum.Entities.Files'
 
 //UserQueries.Assembly: Signum.Entities.Extensions.dll
 import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
+
+//Basics.Assembly: Signum.Entities.dll
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+

@@ -4,6 +4,10 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+
 export const AlertEntity_Type = new Type<AlertEntity>("Alert");
 export interface AlertEntity extends Entities.Entity {
     target?: Entities.Lite<Entities.Entity>;
@@ -12,8 +16,8 @@ export interface AlertEntity extends Entities.Entity {
     attendedDate?: string;
     title?: string;
     text?: string;
-    createdBy?: Entities.Lite<Entities.Basics.IUserEntity>;
-    attendedBy?: Entities.Lite<Entities.Basics.IUserEntity>;
+    createdBy?: Entities.Lite<Basics.IUserEntity>;
+    attendedBy?: Entities.Lite<Basics.IUserEntity>;
     alertType?: AlertTypeEntity;
     state?: AlertState;
 }
@@ -47,7 +51,7 @@ export enum AlertState {
 export const AlertState_Type = new EnumType<AlertState>("AlertState", AlertState);
 
 export const AlertTypeEntity_Type = new Type<AlertTypeEntity>("AlertType");
-export interface AlertTypeEntity extends Entities.Basics.SemiSymbol {
+export interface AlertTypeEntity extends Basics.SemiSymbol {
 }
 
 export module AlertTypeOperation {

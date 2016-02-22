@@ -5,6 +5,9 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+
 export const DisconnectedCreatedMixin_Type = new Type<DisconnectedCreatedMixin>("DisconnectedCreatedMixin");
 export interface DisconnectedCreatedMixin extends Entities.MixinEntity {
     disconnectedCreated?: boolean;
@@ -25,7 +28,7 @@ export interface DisconnectedExportEntity extends Entities.Entity {
     dropDatabase?: number;
     total?: number;
     state?: DisconnectedExportState;
-    exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
+    exception?: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export enum DisconnectedExportState {
@@ -37,7 +40,7 @@ export const DisconnectedExportState_Type = new EnumType<DisconnectedExportState
 
 export const DisconnectedExportTableEntity_Type = new Type<DisconnectedExportTableEntity>("DisconnectedExportTableEntity");
 export interface DisconnectedExportTableEntity extends Entities.EmbeddedEntity {
-    type?: Entities.Lite<Entities.Basics.TypeEntity>;
+    type?: Entities.Lite<Basics.TypeEntity>;
     copyTable?: number;
     errors?: string;
 }
@@ -55,7 +58,7 @@ export interface DisconnectedImportEntity extends Entities.Entity {
     dropDatabase?: number;
     total?: number;
     state?: DisconnectedImportState;
-    exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
+    exception?: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export enum DisconnectedImportState {
@@ -67,7 +70,7 @@ export const DisconnectedImportState_Type = new EnumType<DisconnectedImportState
 
 export const DisconnectedImportTableEntity_Type = new Type<DisconnectedImportTableEntity>("DisconnectedImportTableEntity");
 export interface DisconnectedImportTableEntity extends Entities.EmbeddedEntity {
-    type?: Entities.Lite<Entities.Basics.TypeEntity>;
+    type?: Entities.Lite<Basics.TypeEntity>;
     copyTable?: number;
     disableForeignKeys?: boolean;
     insertedRows?: number;

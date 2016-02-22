@@ -11,6 +11,8 @@ import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 
 import * as Mailing from '../Mailing/Signum.Entities.Mailing' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
 
 export const ExcelAttachmentEntity_Type = new Type<ExcelAttachmentEntity>("ExcelAttachment");
 export interface ExcelAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
@@ -37,7 +39,7 @@ export module ExcelMessage {
 
 export const ExcelReportEntity_Type = new Type<ExcelReportEntity>("ExcelReport");
 export interface ExcelReportEntity extends Entities.Entity {
-    query?: Entities.Basics.QueryEntity;
+    query?: Basics.QueryEntity;
     displayName?: string;
     file?: Files.EmbeddedFileEntity;
 }

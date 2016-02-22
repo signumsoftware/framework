@@ -14,3 +14,6 @@ import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
 //Mailing.Assembly: Signum.Entities.Extensions.dll
 import * as Mailing from '../Mailing/Signum.Entities.Mailing' 
 
+//Basics.Assembly: Signum.Entities.dll
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+

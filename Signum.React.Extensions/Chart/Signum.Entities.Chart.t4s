@@ -16,3 +16,7 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 //Files.Assembly: Signum.Entities.Extensions.dll
 import * as Files from '../Files/Signum.Entities.Files' 
+
+//Basics.Assembly: Signum.Entities.dll
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+

@@ -11,6 +11,11 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+import * as DynamicQuery from '../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery' 
+
+
 export const QueryColumnEntity_Type = new Type<QueryColumnEntity>("QueryColumnEntity");
 export interface QueryColumnEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
@@ -20,28 +25,28 @@ export interface QueryColumnEntity extends Entities.EmbeddedEntity {
 export const QueryFilterEntity_Type = new Type<QueryFilterEntity>("QueryFilterEntity");
 export interface QueryFilterEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
-    operation?: Entities.DynamicQuery.FilterOperation;
+    operation?: DynamicQuery.FilterOperation;
     valueString?: string;
 }
 
 export const QueryOrderEntity_Type = new Type<QueryOrderEntity>("QueryOrderEntity");
 export interface QueryOrderEntity extends Entities.EmbeddedEntity {
     token?: UserAssets.QueryTokenEntity;
-    orderType?: Entities.DynamicQuery.OrderType;
+    orderType?: DynamicQuery.OrderType;
 }
 
 export const UserQueryEntity_Type = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
-    query?: Entities.Basics.QueryEntity;
-    entityType?: Entities.Lite<Entities.Basics.TypeEntity>;
+    query?: Basics.QueryEntity;
+    entityType?: Entities.Lite<Basics.TypeEntity>;
     owner?: Entities.Lite<Entities.Entity>;
     displayName?: string;
     withoutFilters?: boolean;
     filters?: Entities.MList<QueryFilterEntity>;
     orders?: Entities.MList<QueryOrderEntity>;
-    columnsMode?: Entities.DynamicQuery.ColumnOptionsMode;
+    columnsMode?: DynamicQuery.ColumnOptionsMode;
     columns?: Entities.MList<QueryColumnEntity>;
-    paginationMode?: Entities.DynamicQuery.PaginationMode;
+    paginationMode?: DynamicQuery.PaginationMode;
     elementsPerPage?: number;
     guid?: string;
     shouldHaveElements?: boolean;

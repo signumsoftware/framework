@@ -5,14 +5,19 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-import * as Basics from '../Basics/Signum.Entities.Basics' 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+import * as ExBasics from '../Basics/Signum.Entities.Basics' 
 
 import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
+
+
+
 
 export const AppendixHelpEntity_Type = new Type<AppendixHelpEntity>("AppendixHelp");
 export interface AppendixHelpEntity extends Entities.Entity {
     uniqueName?: string;
-    culture?: Basics.CultureInfoEntity;
+    culture?: ExBasics.CultureInfoEntity;
     title?: string;
     description?: string;
 }
@@ -23,8 +28,8 @@ export module AppendixHelpOperation {
 
 export const EntityHelpEntity_Type = new Type<EntityHelpEntity>("EntityHelp");
 export interface EntityHelpEntity extends Entities.Entity {
-    type?: Entities.Basics.TypeEntity;
-    culture?: Basics.CultureInfoEntity;
+    type?: Basics.TypeEntity;
+    culture?: ExBasics.CultureInfoEntity;
     description?: string;
     properties?: Entities.MList<PropertyRouteHelpEntity>;
     operations?: Entities.MList<OperationHelpEntity>;
@@ -133,7 +138,7 @@ export module HelpSyntaxMessage {
 export const NamespaceHelpEntity_Type = new Type<NamespaceHelpEntity>("NamespaceHelp");
 export interface NamespaceHelpEntity extends Entities.Entity {
     name?: string;
-    culture?: Basics.CultureInfoEntity;
+    culture?: ExBasics.CultureInfoEntity;
     title?: string;
     description?: string;
 }
@@ -145,7 +150,7 @@ export module NamespaceHelpOperation {
 export const OperationHelpEntity_Type = new Type<OperationHelpEntity>("OperationHelp");
 export interface OperationHelpEntity extends Entities.Entity {
     operation?: Entities.OperationSymbol;
-    culture?: Basics.CultureInfoEntity;
+    culture?: ExBasics.CultureInfoEntity;
     description?: string;
 }
 
@@ -155,7 +160,7 @@ export module OperationHelpOperation {
 
 export const PropertyRouteHelpEntity_Type = new Type<PropertyRouteHelpEntity>("PropertyRouteHelpEntity");
 export interface PropertyRouteHelpEntity extends Entities.EmbeddedEntity {
-    property?: Entities.Basics.PropertyRouteEntity;
+    property?: Basics.PropertyRouteEntity;
     description?: string;
 }
 
@@ -167,8 +172,8 @@ export interface QueryColumnHelpEntity extends Entities.EmbeddedEntity {
 
 export const QueryHelpEntity_Type = new Type<QueryHelpEntity>("QueryHelp");
 export interface QueryHelpEntity extends Entities.Entity {
-    query?: Entities.Basics.QueryEntity;
-    culture?: Basics.CultureInfoEntity;
+    query?: Basics.QueryEntity;
+    culture?: ExBasics.CultureInfoEntity;
     description?: string;
     columns?: Entities.MList<QueryColumnHelpEntity>;
     isEmpty?: boolean;

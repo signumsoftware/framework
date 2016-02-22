@@ -5,9 +5,13 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-import * as Basics from '../Basics/Signum.Entities.Basics' 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+import * as ExBasics from '../Basics/Signum.Entities.Basics' 
 
 import * as Mailing from '../Mailing/Signum.Entities.Mailing' 
+
+
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
     allowedBase?: A;
@@ -129,7 +133,7 @@ export const AuthThumbnail_Type = new EnumType<AuthThumbnail>("AuthThumbnail", A
 export interface BaseRulePack<T> extends Entities.ModelEntity {
     role?: Entities.Lite<RoleEntity>;
     strategy?: string;
-    type?: Entities.Basics.TypeEntity;
+    type?: Basics.TypeEntity;
     rules?: Entities.MList<T>;
 }
 
@@ -197,7 +201,7 @@ export enum PropertyAllowed {
 export const PropertyAllowed_Type = new EnumType<PropertyAllowed>("PropertyAllowed", PropertyAllowed);
 
 export const PropertyAllowedRule_Type = new Type<PropertyAllowedRule>("PropertyAllowedRule");
-export interface PropertyAllowedRule extends AllowedRuleCoerced<Entities.Basics.PropertyRouteEntity, PropertyAllowed> {
+export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, PropertyAllowed> {
 }
 
 export const PropertyRulePack_Type = new Type<PropertyRulePack>("PropertyRulePack");
@@ -205,7 +209,7 @@ export interface PropertyRulePack extends BaseRulePack<PropertyAllowedRule> {
 }
 
 export const QueryAllowedRule_Type = new Type<QueryAllowedRule>("QueryAllowedRule");
-export interface QueryAllowedRule extends AllowedRuleCoerced<Entities.Basics.QueryEntity, boolean> {
+export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity, boolean> {
 }
 
 export const QueryRulePack_Type = new Type<QueryRulePack>("QueryRulePack");
@@ -251,21 +255,21 @@ export interface RulePermissionEntity extends RuleEntity<PermissionSymbol, boole
 }
 
 export const RulePropertyEntity_Type = new Type<RulePropertyEntity>("RuleProperty");
-export interface RulePropertyEntity extends RuleEntity<Entities.Basics.PropertyRouteEntity, PropertyAllowed> {
+export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntity, PropertyAllowed> {
 }
 
 export const RuleQueryEntity_Type = new Type<RuleQueryEntity>("RuleQuery");
-export interface RuleQueryEntity extends RuleEntity<Entities.Basics.QueryEntity, boolean> {
+export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, boolean> {
 }
 
 export const RuleTypeConditionEntity_Type = new Type<RuleTypeConditionEntity>("RuleTypeConditionEntity");
 export interface RuleTypeConditionEntity extends Entities.EmbeddedEntity {
-    condition?: Basics.TypeConditionSymbol;
+    condition?: ExBasics.TypeConditionSymbol;
     allowed?: TypeAllowed;
 }
 
 export const RuleTypeEntity_Type = new Type<RuleTypeEntity>("RuleType");
-export interface RuleTypeEntity extends RuleEntity<Entities.Basics.TypeEntity, TypeAllowed> {
+export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowed> {
     conditions?: Entities.MList<RuleTypeConditionEntity>;
 }
 
@@ -305,16 +309,16 @@ export interface TypeAllowedAndConditions extends Entities.ModelEntity {
 }
 
 export const TypeAllowedRule_Type = new Type<TypeAllowedRule>("TypeAllowedRule");
-export interface TypeAllowedRule extends AllowedRule<Entities.Basics.TypeEntity, TypeAllowedAndConditions> {
+export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllowedAndConditions> {
     properties?: AuthThumbnail;
     operations?: AuthThumbnail;
     queries?: AuthThumbnail;
-    availableConditions?: Array<Basics.TypeConditionSymbol>;
+    availableConditions?: Array<ExBasics.TypeConditionSymbol>;
 }
 
 export const TypeConditionRule_Type = new Type<TypeConditionRule>("TypeConditionRule");
 export interface TypeConditionRule extends Entities.EmbeddedEntity {
-    typeCondition?: Basics.TypeConditionSymbol;
+    typeCondition?: ExBasics.TypeConditionSymbol;
     allowed?: TypeAllowed;
 }
 
@@ -323,14 +327,14 @@ export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
 }
 
 export const UserEntity_Type = new Type<UserEntity>("User");
-export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Entities.Basics.IUserEntity {
+export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
     userName?: string;
     passwordHash?: string;
     passwordSetDate?: string;
     passwordNeverExpires?: boolean;
     role?: RoleEntity;
     email?: string;
-    cultureInfo?: Basics.CultureInfoEntity;
+    cultureInfo?: ExBasics.CultureInfoEntity;
     anulationDate?: string;
     state?: UserState;
 }

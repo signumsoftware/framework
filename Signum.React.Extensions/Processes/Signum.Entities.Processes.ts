@@ -7,6 +7,9 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+
 export interface IProcessDataEntity extends Entities.IEntity {
 }
 
@@ -46,7 +49,7 @@ export interface ProcessEntity extends Entities.Entity {
     data?: IProcessDataEntity;
     machineName?: string;
     applicationName?: string;
-    user?: Entities.Lite<Entities.Basics.IUserEntity>;
+    user?: Entities.Lite<Basics.IUserEntity>;
     state?: ProcessState;
     creationDate?: string;
     plannedDate?: string;
@@ -56,7 +59,7 @@ export interface ProcessEntity extends Entities.Entity {
     executionEnd?: string;
     suspendDate?: string;
     exceptionDate?: string;
-    exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
+    exception?: Entities.Lite<Basics.ExceptionEntity>;
     progress?: number;
 }
 
@@ -64,7 +67,7 @@ export const ProcessExceptionLineEntity_Type = new Type<ProcessExceptionLineEnti
 export interface ProcessExceptionLineEntity extends Entities.Entity {
     line?: Entities.Lite<IProcessLineDataEntity>;
     process?: Entities.Lite<ProcessEntity>;
-    exception?: Entities.Lite<Entities.Basics.ExceptionEntity>;
+    exception?: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export module ProcessMessage {

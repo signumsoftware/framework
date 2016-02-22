@@ -5,11 +5,14 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-import * as Basics from '../Basics/Signum.Entities.Basics' 
+import * as ExBasics from '../Basics/Signum.Entities.Basics' 
 
 import * as Files from '../Files/Signum.Entities.Files' 
 
 import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
+
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
 
 
 export const SystemWordTemplateEntity_Type = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
@@ -24,9 +27,9 @@ export interface WordConverterSymbol extends Entities.Symbol {
 export const WordTemplateEntity_Type = new Type<WordTemplateEntity>("WordTemplate");
 export interface WordTemplateEntity extends Entities.Entity {
     name?: string;
-    query?: Entities.Basics.QueryEntity;
+    query?: Basics.QueryEntity;
     systemWordTemplate?: SystemWordTemplateEntity;
-    culture?: Basics.CultureInfoEntity;
+    culture?: ExBasics.CultureInfoEntity;
     active?: boolean;
     startDate?: string;
     endDate?: string;

@@ -13,6 +13,9 @@ import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
 
 import * as Chart from '../Chart/Signum.Entities.Chart' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+
 export const CountSearchControlPartEntity_Type = new Type<CountSearchControlPartEntity>("CountSearchControlPart");
 export interface CountSearchControlPartEntity extends Entities.Entity, IPartEntity {
     userQueries?: Entities.MList<CountUserQueryElementEntity>;
@@ -35,7 +38,7 @@ export const DashboardEmbedededInEntity_Type = new EnumType<DashboardEmbedededIn
 
 export const DashboardEntity_Type = new Type<DashboardEntity>("Dashboard");
 export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
-    entityType?: Entities.Lite<Entities.Basics.TypeEntity>;
+    entityType?: Entities.Lite<Basics.TypeEntity>;
     embeddedInEntity?: DashboardEmbedededInEntity;
     owner?: Entities.Lite<Entities.Entity>;
     dashboardPriority?: number;

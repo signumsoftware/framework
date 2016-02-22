@@ -5,10 +5,13 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+
+
 export const ViewLogEntity_Type = new Type<ViewLogEntity>("ViewLog");
 export interface ViewLogEntity extends Entities.Entity {
     target?: Entities.Lite<Entities.Entity>;
-    user?: Entities.Lite<Entities.Basics.IUserEntity>;
+    user?: Entities.Lite<Basics.IUserEntity>;
     viewAction?: string;
     startDate?: string;
     endDate?: string;
