@@ -13,12 +13,6 @@
     Implementations implementations = entityColumn.Implementations.Value;
     var settings = Finder.QuerySettings(findOptions.QueryName);
     findOptions.Pagination = findOptions.Pagination ?? settings.Pagination ?? FindOptions.DefaultPagination;
-
-    if (!FindOptions.IsPaginationAllowed(findOptions.QueryName, findOptions.Pagination.GetMode(), findOptions.Pagination.GetElementsPerPage()))
-    {
-        throw new UnauthorizedAccessException("This pagination mode is not authorized");
-    }
-
     ViewData[ViewDataKeys.FindOptions] = findOptions;
 
     var sfb = settings.SimpleFilterBuilder == null ? null :
