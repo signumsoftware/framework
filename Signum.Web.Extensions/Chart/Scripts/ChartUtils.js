@@ -235,7 +235,7 @@ var ChartUtils;
                 .text(function (d) { return d; });
         };
         return Rule;
-    }());
+    })();
     ChartUtils.Rule = Rule;
     function toTree(elements, getKey, getParent) {
         var root = { item: null, children: [] };

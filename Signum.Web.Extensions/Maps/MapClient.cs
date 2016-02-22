@@ -130,7 +130,7 @@ namespace Signum.Web.Maps
     {
         public override OmniboxResultGenerator<MapOmniboxResult> CreateGenerator()
         {
-            return new MapOmniboxResultGenerator();
+            return new MapOmniboxResultGenerator(t => OperationLogic.TypeOperations(t).Any());
         }
 
         public override MvcHtmlString RenderHtml(MapOmniboxResult result)

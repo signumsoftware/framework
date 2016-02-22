@@ -27,51 +27,51 @@ namespace Signum.React.Omnibox
         }
     }
 
-    public class ReactOmniboxManager : OmniboxManager
-    {
-        public override bool AllowedType(Type type)
-        {
-            return Navigator.IsNavigable(type, null, isSearch: true);
-        }
+    //public class ReactOmniboxManager : OmniboxManager
+    //{
+    //    public override bool AllowedType(Type type)
+    //    {
+    //        return Navigator.IsNavigable(type, null, isSearch: true);
+    //    }
 
-        public override bool AllowedPermission(PermissionSymbol permission)
-        {
-            return permission.IsAuthorized();
-        }
+    //    public override bool AllowedPermission(PermissionSymbol permission)
+    //    {
+    //        return permission.IsAuthorized();
+    //    }
 
-        public override bool AllowedQuery(object queryName)
-        {
-            return Finder.IsFindable(queryName);
-        }
+    //    public override bool AllowedQuery(object queryName)
+    //    {
+    //        return Finder.IsFindable(queryName);
+    //    }
 
-        public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
-        {
-            if (!Database.Exists(type, id))
-                return null;
-            return Database.FillToString(Lite.Create(type, id));
-        }
+    //    public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
+    //    {
+    //        if (!Database.Exists(type, id))
+    //            return null;
+    //        return Database.FillToString(Lite.Create(type, id));
+    //    }
 
-        public override QueryDescription GetDescription(object queryName)
-        {
-            return DynamicQueryManager.Current.QueryDescription(queryName);
-        }
+    //    public override QueryDescription GetDescription(object queryName)
+    //    {
+    //        return DynamicQueryManager.Current.QueryDescription(queryName);
+    //    }
 
-        public override List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count)
-        {
-            if (string.IsNullOrEmpty(subString))
-                return new List<Lite<Entity>>();
+    //    public override List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count)
+    //    {
+    //        if (string.IsNullOrEmpty(subString))
+    //            return new List<Lite<Entity>>();
 
-            return AutocompleteUtils.FindLiteLike(implementations, subString, 5);
-        }
+    //        return AutocompleteUtils.FindLiteLike(implementations, subString, 5);
+    //    }
 
-        protected override IEnumerable<object> GetAllQueryNames()
-        {
-            return DynamicQueryManager.Current.GetQueryNames();
-        }
+    //    protected override IEnumerable<object> GetAllQueryNames()
+    //    {
+    //        return DynamicQueryManager.Current.GetQueryNames();
+    //    }
 
-        protected override IEnumerable<Type> GetAllTypes()
-        {
-            return Schema.Current.Tables.Keys;
-        }
-    }
+    //    protected override IEnumerable<Type> GetAllTypes()
+    //    {
+    //        return Schema.Current.Tables.Keys;
+    //    }
+    //}
 }
