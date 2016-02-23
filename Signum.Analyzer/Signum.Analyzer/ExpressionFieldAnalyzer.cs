@@ -57,7 +57,7 @@ namespace Signum.Analyzer
                     {
                         if (param.Modifiers.Any(a => a.Kind() != SyntaxKind.ThisKeyword))
                         {
-                            Diagnostic(context, ident, param.Modifiers.First().GetLocation(), "complex paramerer '" + param.Identifier.ToString() + "'");
+                            Diagnostic(context, ident, param.Modifiers.First().GetLocation(), "complex parameter '" + param.Identifier.ToString() + "'");
                             return;
                         }
                     }
