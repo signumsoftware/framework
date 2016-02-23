@@ -57,6 +57,7 @@ namespace Signum.Engine.Excel
                         { TemplateCells.Text, worksheet.FindCell("D3").StyleIndex },
                         { TemplateCells.General, worksheet.FindCell("E3").StyleIndex },
                         { TemplateCells.Boolean, worksheet.FindCell("E3").StyleIndex },
+                        { TemplateCells.Enum, worksheet.FindCell("E3").StyleIndex },
                         { TemplateCells.Number, worksheet.FindCell("F3").StyleIndex },
                         { TemplateCells.Decimal, worksheet.FindCell("G3").StyleIndex },
                     }

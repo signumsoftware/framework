@@ -24,6 +24,7 @@ namespace Signum.Engine.Excel
         Text,
         General,
         Boolean,
+        Enum,
         Number,
         Decimal,
     }
@@ -54,7 +55,11 @@ namespace Signum.Engine.Excel
 
         public TemplateCells GetTemplateCell(Type type)
         {
-            TypeCode tc = type.UnNullify().Let(a => a.IsEnum ? TypeCode.Object : Type.GetTypeCode(a));
+            var uType = type.UnNullify();
+            if (uType.IsEnum)
+                return TemplateCells.Enum;
+
+            TypeCode tc = Type.GetTypeCode(uType);
             return DefaultTemplateCells.TryGetS(tc) ?? TemplateCells.General;
         }
 
@@ -65,6 +70,7 @@ namespace Signum.Engine.Excel
             {TemplateCells.Text, CellValues.InlineString},
             {TemplateCells.General, CellValues.InlineString},
             {TemplateCells.Boolean, CellValues.InlineString},
+            {TemplateCells.Enum, CellValues.InlineString},
             {TemplateCells.Number, null},
             {TemplateCells.Decimal, null}
         };
@@ -100,15 +106,39 @@ namespace Signum.Engine.Excel
                         (template == TemplateCells.Date || template == TemplateCells.DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
                         (template == TemplateCells.Decimal) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
                         (template == TemplateCells.Boolean) ? ToYesNo((bool)value) :
+                        (template == TemplateCells.Enum) ? ((Enum)value)?.NiceToString() :
                         value.ToString();
 
-            Cell cell = (template== TemplateCells.Title|| template == TemplateCells.General || template == TemplateCells.Text || template == TemplateCells.Header) ? 
+            Cell cell = IsInlineString(template)? 
                 new Cell(new InlineString(new Text { Text = excelValue })) { DataType = CellValues.InlineString } : 
                 new Cell { CellValue = new CellValue(excelValue), DataType = DefaultCellValues[template] };
 
             cell.StyleIndex = styleIndex;
 
             return cell;
+        }
+
+        private bool IsInlineString(TemplateCells template)
+        {
+            switch (template)
+            {
+                case TemplateCells.Title: 
+                case TemplateCells.Header:
+                case TemplateCells.Text: 
+                case TemplateCells.General: 
+                case TemplateCells.Boolean: 
+                case TemplateCells.Enum:
+                    return true;
+
+                case TemplateCells.Date: 
+                case TemplateCells.DateTime: 
+                case TemplateCells.Number: 
+                case TemplateCells.Decimal:
+                    return false;
+
+                default:
+                    throw new InvalidOperationException("Unexpected"); 
+            }
         }
 
         private string ToYesNo(bool value)
