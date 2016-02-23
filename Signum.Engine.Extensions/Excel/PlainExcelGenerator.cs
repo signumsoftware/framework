@@ -60,6 +60,10 @@ namespace Signum.Engine.Excel
                         { TemplateCells.Enum, worksheet.FindCell("E3").StyleIndex },
                         { TemplateCells.Number, worksheet.FindCell("F3").StyleIndex },
                         { TemplateCells.Decimal, worksheet.FindCell("G3").StyleIndex },
+                        { TemplateCells.DecimalEuro, worksheet.FindCell("H3").StyleIndex },
+                        { TemplateCells.DecimalDollar, worksheet.FindCell("I3").StyleIndex },
+                        { TemplateCells.DecimalPound, worksheet.FindCell("J3").StyleIndex },
+                        { TemplateCells.DecimalYuan, worksheet.FindCell("K3").StyleIndex },
                     }
                 };
             }
@@ -116,7 +120,7 @@ namespace Signum.Engine.Excel
 
                     from r in results.Rows
                     select (from c in results.Columns
-                            let template = c.Column.Format == "d" ? TemplateCells.Date : CellBuilder.GetTemplateCell(c.Column.Type)
+                            let template = CellBuilder.GetTemplateCell(c)
                             select CellBuilder.Cell(r[c], template)).ToRow()
                 }.ToSheetData());
 

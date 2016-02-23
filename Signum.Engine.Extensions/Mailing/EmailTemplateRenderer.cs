@@ -69,7 +69,7 @@ namespace Signum.Engine.Mailing
                             ResultColumns = dicTokenColumn,
                             Entity = entity, 
                             Template = template,
-                            Culture = ci,
+                            Culture = ci ?? EmailLogic.Configuration.DefaultCulture.ToCultureInfo(),
                         })).ToMList()
                     };
 
