@@ -14,21 +14,34 @@ export interface OmniboxAutocompleteProps {
 
 export default class OmniboxAutocomplete extends React.Component<OmniboxAutocompleteProps, void>
 {
-    handleOnSelect = (item: OmniboxClient.OmniboxResult) => {
-        
+    handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.SyntheticEvent) => {
+
+        var ke = e as React.KeyboardEvent;
+
+        if (ke.keyCode && ke.keyCode == 9) {
+            return OmniboxClient.toString(result);
+        }
+
+        var url = OmniboxClient.navigateTo(result);
+        if (url)
+            Navigator.currentHistory.push(url);
+
         return "";
     }
 
     render() {
-        return (
+
+        var result  = (
             <Typeahead getItems={OmniboxClient.getResults} 
                 renderItem={OmniboxClient.renderItem}
                 onSelect={this.handleOnSelect}
                 divAttrs={this.props.divAttrs}
                 inputAttrs={this.props.inputAttrs}
                 menuAttrs={this.props.menuAttrs}
-                />  
-         );
+                >Hola<span>Juas</span></Typeahead>  
+        );
+
+        return result;
     }
 }
 

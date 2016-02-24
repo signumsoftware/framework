@@ -1,10 +1,15 @@
 ﻿using Signum.Engine;
+using Signum.Engine.Authorization;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Omnibox;
+using Signum.React.ApiControllers;
+using Signum.React.Facades;
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +21,17 @@ namespace Signum.React.Omnibox
 {
     public static class OmniboxServer
     {
+        public static Func<object, bool> IsFindable;
+        public static Func<Type, bool> IsNavigable;
+
         public static void Start(HttpConfiguration config, params IOmniboxResultGenerator[] generators)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+            QueryTokenJsonConverter.GetQueryTokenTS = qt => new QueryTokenTS(qt, true);
+            QueryNameJsonConverter.GetQueryKey = qn => QueryUtils.GetKey(qn);
+            OmniboxParser.Manager = new ReactOmniboxManager();
+
+            ReflectionServer.RegisterLike(typeof(OmniboxMessage));
 
             foreach (var g in generators)
             {
@@ -31,7 +44,7 @@ namespace Signum.React.Omnibox
     {
         public override bool AllowedType(Type type)
         {
-            return Navigator.IsNavigable(type, null, isSearch: true);
+            return OmniboxServer.IsNavigable.GetInvocationListTyped().All(f => f(type));
         }
 
         public override bool AllowedPermission(PermissionSymbol permission)
@@ -41,7 +54,7 @@ namespace Signum.React.Omnibox
 
         public override bool AllowedQuery(object queryName)
         {
-            return Finder.IsFindable(queryName);
+            return OmniboxServer.IsFindable.GetInvocationListTyped().All(f => f(queryName));
         }
 
         public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)

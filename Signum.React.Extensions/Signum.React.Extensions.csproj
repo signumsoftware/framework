@@ -252,8 +252,10 @@
     <TypeScriptCompile Include="Notes\Signum.Entities.Notes.ts">
       <DependentUpon>Signum.Entities.Notes.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Omnibox\EntityOmniboxProvider.tsx" />
+    <TypeScriptCompile Include="Omnibox\DynamicQueryOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Omnibox\OmniboxAutocomplete.tsx" />
-    <TypeScriptCompile Include="Omnibox\OmniboxClient.ts" />
+    <TypeScriptCompile Include="Omnibox\OmniboxClient.tsx" />
     <TypeScriptCompile Include="Omnibox\Signum.Entities.Omnibox.ts">
       <DependentUpon>Signum.Entities.Omnibox.t4s</DependentUpon>
     </TypeScriptCompile>

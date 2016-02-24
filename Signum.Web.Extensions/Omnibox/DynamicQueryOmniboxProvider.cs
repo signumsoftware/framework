@@ -49,7 +49,7 @@ namespace Signum.Web.Omnibox
                 {
                     html = html.Concat("{0}{1}".FormatHtml(
                         last != null ? "." : "",
-                        ColoredSpan(item.QueryToken.ToString().ToOmniboxPascal(), "gray")));
+                        ColoredSpan(item.QueryTokenOmniboxPascal, "gray")));
                 }
 
                 if (item.CanFilter.HasText())
@@ -61,17 +61,15 @@ namespace Signum.Web.Omnibox
                     html = html.Concat(new HtmlTag("b").InnerHtml(
                         new MvcHtmlString(FilterValueConverter.ToStringOperation(item.Operation.Value))).ToHtml());
 
-                    if (item.Value == DynamicQueryOmniboxResultGenerator.UnknownValue)
+                    if (item.Value is string && (string)item.Value == DynamicQueryOmniboxResultGenerator.UnknownValue)
                         html = html.Concat(ColoredSpan(OmniboxMessage.Unknown.NiceToString(), "red"));
-                    else if (item.ValuePack != null)
-                        html = html.Concat(item.ValuePack.ToHtml());
+                    else if (item.ValueMatch != null)
+                        html = html.Concat(item.ValueMatch.ToHtml());
                     else if (item.Syntax != null && item.Syntax.Completion == FilterSyntaxCompletion.Complete)
                         html = html.Concat(new HtmlTag("b").InnerHtml(new MvcHtmlString(DynamicQueryOmniboxResultGenerator.ToStringValue(item.Value))).ToHtml());
                     else
                         html = html.Concat(ColoredSpan(DynamicQueryOmniboxResultGenerator.ToStringValue(item.Value), "gray"));
-                }
-
-                            
+                }           
             } 
 
             html = Icon().Concat(html);

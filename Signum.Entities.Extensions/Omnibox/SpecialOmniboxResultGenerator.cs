@@ -46,7 +46,7 @@ namespace Signum.Entities.Omnibox
         {
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult { Text = "!SpecialFunction", OmniboxResultType = typeof(SpecialOmniboxResult) },
+                new HelpOmniboxResult { Text = "!SpecialFunction", ReferencedType = typeof(SpecialOmniboxResult) },
             };
         }
     }

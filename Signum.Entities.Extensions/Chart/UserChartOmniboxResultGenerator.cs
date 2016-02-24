@@ -51,7 +51,7 @@ namespace Signum.Entities.Chart
                 new HelpOmniboxResult 
                 { 
                     Text = "'{0}'".FormatWith(OmniboxMessage.Omnibox_UserChart.NiceToString()), 
-                    OmniboxResultType = resultType 
+                    ReferencedType = resultType 
                 }
             };
         }

@@ -13,6 +13,7 @@ using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Services;
 using Signum.Entities.Reflection;
+using Signum.Engine.Authorization;
 
 namespace Signum.React.Authorization
 {
@@ -24,7 +25,7 @@ namespace Signum.React.Authorization
         public static Action<UserEntity> UserLogged;
         public static Action UserLoggingOut;
 
-        public static void Start(HttpConfiguration config)
+        public static void Start(HttpConfiguration config, bool queries, bool types)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
@@ -54,6 +55,16 @@ namespace Signum.React.Authorization
                     ((UserEntity)ctx.Entity).PasswordHash = Security.EncodePassword(password);
                 }
             });
+
+            if (queries)
+            {
+                Omnibox.OmniboxServer.IsFindable += queryName => QueryAuthLogic.GetQueryAllowed(queryName);
+            }
+
+            if (types)
+            {
+                Omnibox.OmniboxServer.IsNavigable += type => TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
+            }
         }
 
         public static void OnUserPreLogin(ApiController controller, UserEntity user)
