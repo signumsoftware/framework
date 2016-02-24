@@ -98,6 +98,9 @@ namespace Signum.Web
                     default:
                         break;
                 }
+
+                if (FindOptions.ReplacePagination(fo.QueryName, fo.Pagination) != fo.Pagination)
+                    throw new InvalidOperationException("Pagination mode not allowed");
             }
             
             if (parameters.AllKeys.Contains("searchOnLoad"))
