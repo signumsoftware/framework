@@ -17,7 +17,7 @@
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
-    <TypeScriptToolsVersion>1.7</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>1.8</TypeScriptToolsVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <IISExpressSSLPort />
