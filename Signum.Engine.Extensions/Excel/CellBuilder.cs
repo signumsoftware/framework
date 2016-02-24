@@ -24,8 +24,13 @@ namespace Signum.Engine.Excel
         Text,
         General,
         Boolean,
+        Enum,
         Number,
         Decimal,
+        DecimalEuro,
+        DecimalDollar,
+        DecimalPound,
+        DecimalYuan,
     }
 
     public class CellBuilder
@@ -54,20 +59,13 @@ namespace Signum.Engine.Excel
 
         public TemplateCells GetTemplateCell(Type type)
         {
-            TypeCode tc = type.UnNullify().Let(a => a.IsEnum ? TypeCode.Object : Type.GetTypeCode(a));
+            var uType = type.UnNullify();
+            if (uType.IsEnum)
+                return TemplateCells.Enum;
+
+            TypeCode tc = Type.GetTypeCode(uType);
             return DefaultTemplateCells.TryGetS(tc) ?? TemplateCells.General;
         }
-
-        public Dictionary<TemplateCells, CellValues?> DefaultCellValues = new Dictionary<TemplateCells, CellValues?> 
-        {
-            {TemplateCells.Date, null},
-            {TemplateCells.DateTime, null},
-            {TemplateCells.Text, CellValues.InlineString},
-            {TemplateCells.General, CellValues.InlineString},
-            {TemplateCells.Boolean, CellValues.InlineString},
-            {TemplateCells.Number, null},
-            {TemplateCells.Decimal, null}
-        };
 
         public Dictionary<TemplateCells, UInt32Value> DefaultStyles;
 
@@ -98,17 +96,65 @@ namespace Signum.Engine.Excel
         {
             string excelValue = value == null ? "" :
                         (template == TemplateCells.Date || template == TemplateCells.DateTime) ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
-                        (template == TemplateCells.Decimal) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
+                        (template.ToString().StartsWith("Decimal")) ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
                         (template == TemplateCells.Boolean) ? ToYesNo((bool)value) :
+                        (template == TemplateCells.Enum) ? ((Enum)value)?.NiceToString() :
                         value.ToString();
 
-            Cell cell = (template== TemplateCells.Title|| template == TemplateCells.General || template == TemplateCells.Text || template == TemplateCells.Header) ? 
+            Cell cell = IsInlineString(template)? 
                 new Cell(new InlineString(new Text { Text = excelValue })) { DataType = CellValues.InlineString } : 
-                new Cell { CellValue = new CellValue(excelValue), DataType = DefaultCellValues[template] };
+                new Cell { CellValue = new CellValue(excelValue), DataType = null };
 
             cell.StyleIndex = styleIndex;
 
             return cell;
+        }
+
+
+        private bool IsInlineString(TemplateCells template)
+        {
+            switch (template)
+            {
+                case TemplateCells.Title: 
+                case TemplateCells.Header:
+                case TemplateCells.Text: 
+                case TemplateCells.General: 
+                case TemplateCells.Boolean: 
+                case TemplateCells.Enum:
+                    return true;
+
+                case TemplateCells.Date: 
+                case TemplateCells.DateTime: 
+                case TemplateCells.Number: 
+                case TemplateCells.Decimal:
+                case TemplateCells.DecimalDollar:
+                case TemplateCells.DecimalEuro:
+                case TemplateCells.DecimalPound:
+                case TemplateCells.DecimalYuan:
+                    return false;
+
+                default:
+                    throw new InvalidOperationException("Unexpected"); 
+            }
+        }
+
+        internal TemplateCells GetTemplateCell(ResultColumn c)
+        {
+            if (c.Column.Type.UnNullify() == typeof(DateTime) && c.Column.Format == "d")
+                return TemplateCells.Date;
+
+            if (c.Column.Type.UnNullify() == typeof(decimal))
+            {
+                switch (c.Column.Unit)
+                {
+                    case "€": return TemplateCells.DecimalEuro;
+                    case "$": return TemplateCells.DecimalDollar;
+                    case "£": return TemplateCells.DecimalPound;
+                    case "¥": return TemplateCells.DecimalYuan;
+                }
+            }
+
+            return GetTemplateCell(c.Column.Type);
         }
 
         private string ToYesNo(bool value)
