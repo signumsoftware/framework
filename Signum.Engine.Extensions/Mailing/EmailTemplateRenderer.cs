@@ -50,7 +50,7 @@ namespace Signum.Engine.Mailing
             {
                 foreach (List<EmailOwnerRecipientData> recipients in GetRecipients())
                 {
-                    CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault().ToCultureInfo();
+                    CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault().ToCultureInfo() ?? EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
 
                     EmailMessageEntity email = new EmailMessageEntity
                     {
@@ -72,26 +72,28 @@ namespace Signum.Engine.Mailing
                             Culture = ci,
                         })).ToMList()
                     };
-
                     
                     EmailTemplateMessageEntity message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
 
                     if (message == null)
                         throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {1} (or Default)".FormatWith(template, ci));
 
-                    email.Subject = SubjectNode(message).Print(
-                        new EmailTemplateParameters(entity, ci, dicTokenColumn, currentRows)
-                        {
-                            IsHtml = false,
-                            SystemEmail = systemEmail
-                        });
+                    using (CultureInfoUtils.ChangeBothCultures(ci))
+                    {
+                        email.Subject = SubjectNode(message).Print(
+                            new EmailTemplateParameters(entity, ci, dicTokenColumn, currentRows)
+                            {
+                                IsHtml = false,
+                                SystemEmail = systemEmail
+                            });
 
-                    email.Body = TextNode(message).Print(
-                        new EmailTemplateParameters(entity, ci, dicTokenColumn, currentRows)
-                        {
-                            IsHtml = template.IsBodyHtml,
-                            SystemEmail = systemEmail,
-                        });
+                        email.Body = TextNode(message).Print(
+                            new EmailTemplateParameters(entity, ci, dicTokenColumn, currentRows)
+                            {
+                                IsHtml = template.IsBodyHtml,
+                                SystemEmail = systemEmail,
+                            });
+                    }
 
 
                     yield return email;

@@ -52,10 +52,11 @@ namespace Signum.Engine.Excel
                 var finalEntity = uqe.Related?.Retrieve() ?? (Entity)ctx.Entity;
 
                 using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
+                using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
                 {
                     QueryRequest request = UserQueryLogic.ToQueryRequest(uqe.UserQuery.Retrieve());
 
-                    var title =  GetTemplateString(uqe.Title,  ref uqe.TitleNode, ctx);
+                    var title = GetTemplateString(uqe.Title, ref uqe.TitleNode, ctx);
                     var fileName = GetTemplateString(uqe.FileName, ref uqe.FileNameNode, ctx);
 
                     var bytes = ExcelLogic.ExecutePlainExcel(request, title);

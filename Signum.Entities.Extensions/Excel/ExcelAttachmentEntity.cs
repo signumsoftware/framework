@@ -33,9 +33,9 @@ namespace Signum.Entities.Excel
         [Ignore]
         internal object FileNameNode;
 
-        [SqlDbType(Size = 50)]
+        [SqlDbType(Size = 300)]
         string title;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300)]
         public string Title
         {
             get { return title; }
