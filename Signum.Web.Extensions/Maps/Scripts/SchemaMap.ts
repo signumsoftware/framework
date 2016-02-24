@@ -488,8 +488,6 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
                 var dist = Math.sqrt(dx * dx + dy * dy);
 
                 return dist > 400;
-
-                return false;
             });
         });
 
