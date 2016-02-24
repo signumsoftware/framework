@@ -23,6 +23,10 @@ export interface Entity extends ModifiableEntity, IEntity {
     mixins?: { [name: string]: MixinEntity }
 }
 
+export interface EnumEntity<T> extends Entity {
+
+}
+
 export interface MixinEntity extends ModifiableEntity {
 }
 
