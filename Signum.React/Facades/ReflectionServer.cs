@@ -39,6 +39,11 @@ namespace Signum.React.Facades
 
         public static Dictionary<Assembly, HashSet<string>> EntityAssemblies;
 
+        public static void RegisterLike(Type type)
+        {
+            EntityAssemblies.GetOrCreate(type.Assembly).Add(type.Namespace);
+        }
+
         internal static void Start()
         {
             DescriptionManager.Invalidated += () => cache.Clear();

@@ -51,7 +51,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     static defaultProps: TypeaheadProps = {
         getItems: null,
-        getItemsTimeout: 300,
+        getItemsTimeout: 200,
         minLength: 1,
         renderItem: Typeahead.highlightedText,
         onSelect: (elem, event) => elem,
@@ -83,7 +83,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     popupate() {
 
         if (this.input.value.length < this.props.minLength) {
-            this.setState({ shown: false, items: null });
+            this.setState({ shown: false, items: null, selectedIndex: null });
             return;
         }
 
@@ -167,7 +167,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
             case 9: // tab
             case 13: // enter
-                if (!this.state.shown) return;
+                if (this.state.selectedIndex == null) return;
                 this.select(e);
                 break;
 
