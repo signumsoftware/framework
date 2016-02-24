@@ -209,10 +209,6 @@ Array.range = function (min, max) {
     return result;
 }
 
-String.prototype.hasText = function () {
-    return (this == null || this == undefined || this == '') ? false : true;
-}
-
 String.prototype.contains = function (str) {
     return this.indexOf(str) !== -1;
 }

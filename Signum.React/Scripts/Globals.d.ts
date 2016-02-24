@@ -56,7 +56,6 @@ interface ArrayConstructor {
 
 
 interface String {
-    hasText(): boolean;
     contains(str: string): boolean;
     startsWith(str: string): boolean;
     endsWith(str: string): boolean;

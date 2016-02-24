@@ -147,10 +147,12 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
             const info = this.entityColumnTypeInfos().firstOrNull()
 
-            findOptions.orderOptions = [{
-                columnName: defaultOrder,
-                orderType: info.entityData == EntityData.Transactional ? OrderType.Descending : OrderType.Ascending
-            }];
+            if (qd.columns[defaultOrder]) {
+                findOptions.orderOptions = [{
+                    columnName: defaultOrder,
+                    orderType: info.entityData == EntityData.Transactional ? OrderType.Descending : OrderType.Ascending
+                }];
+            }
         }
 
         Finder.parseTokens(findOptions).then(fo => {
