@@ -143,7 +143,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual bool ShouldWriteServerFile(Module mod)
         {
-            return SafeConsole.Ask("Write Server File?");
+            return SafeConsole.Ask($"Write Server File for {mod.ModuleName}?");
         }
 
         protected virtual string GetServerNamespace(Module mod)
@@ -196,7 +196,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual bool ShouldWriteControllerFile(Module mod)
         {
-            return SafeConsole.Ask("Write Controller File?");
+            return SafeConsole.Ask($"Write Controller File for {mod.ModuleName}?");
         }
 
         protected virtual string WriteControllerClass(Module mod)
