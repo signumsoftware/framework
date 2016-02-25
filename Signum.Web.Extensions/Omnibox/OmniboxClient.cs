@@ -44,9 +44,9 @@ namespace Signum.Web.Omnibox
             {
                 var innerHtml = MvcHtmlString.Create(helpResult.Text.Replace("(", "<b>").Replace(")", "</b>"));
                 
-                if (helpResult.OmniboxResultType != null)
+                if (helpResult.ReferencedType != null)
                 {
-                    var icon = Providers[helpResult.OmniboxResultType].Icon();
+                    var icon = Providers[helpResult.ReferencedType].Icon();
                     innerHtml = icon.Concat(innerHtml);
                 }
 

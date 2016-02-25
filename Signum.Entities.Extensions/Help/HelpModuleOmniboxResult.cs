@@ -69,12 +69,12 @@ namespace Signum.Entities.Help
                 new HelpOmniboxResult 
                 { 
                     Text =  NiceName() + " " + typeof(TypeEntity).NiceName(), 
-                    OmniboxResultType = resultType 
+                    ReferencedType = resultType 
                 },
                 new HelpOmniboxResult 
                 { 
                     Text =  NiceName() + " '" + HelpMessage.SearchText.NiceToString()  + "'", 
-                    OmniboxResultType = resultType 
+                    ReferencedType = resultType 
                 },
             };
         }

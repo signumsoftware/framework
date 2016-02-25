@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.ComponentModel;
+using Newtonsoft.Json;
 
 namespace Signum.Entities.Omnibox
 {
@@ -25,7 +26,7 @@ namespace Signum.Entities.Omnibox
 
         public static OmniboxMatch SubsequencePascal(object value, string identifier, string pattern)
         {
-            bool[] indices = new bool[identifier.Length];
+            char[] mask = new string('_', identifier.Length).ToCharArray();
             int j = 0;
             for (int i = 0; i < pattern.Length; i++)
             {
@@ -38,7 +39,7 @@ namespace Signum.Entities.Omnibox
                     {
                         if (ic == pc)
                         {
-                            indices[j] = true;
+                            mask[j] = '#';
 
                             break;
                         }
@@ -54,7 +55,7 @@ namespace Signum.Entities.Omnibox
             return new OmniboxMatch(value,
                 remaining: identifier.Count(char.IsUpper) - pattern.Length,
                 choosenString: identifier,
-                boldIndices: indices);
+                boldMask: new string(mask));
         }
 
         public static IEnumerable<OmniboxMatch> Matches<T>(Dictionary<string, T> values, Func<T, bool> filter, string pattern, bool isPascalCase)
@@ -62,7 +63,7 @@ namespace Signum.Entities.Omnibox
             T val;
             if (values.TryGetValue(pattern, out val) && filter(val))
             {
-                yield return new OmniboxMatch(val, 0, pattern, Enumerable.Repeat(true, pattern.Length).ToArray());
+                yield return new OmniboxMatch(val, 0, pattern, new string('#', pattern.Length));
             }
             else
             {
@@ -94,7 +95,7 @@ namespace Signum.Entities.Omnibox
         {
             var parts = pattern.SplitNoEmpty(' ' );
 
-            bool[] indices = null;
+            char[] mask = new string('_', identifier.Length).ToCharArray();
 
             foreach (var p in parts)
 	        {
@@ -102,17 +103,14 @@ namespace Signum.Entities.Omnibox
                 if (index == -1)
                     return null;
 
-                if(indices == null)
-                    indices = new bool[identifier.Length];
-
                 for (int i = 0; i < p.Length; i++)
-                    indices[index + i] = true;
+                    mask[index + i] = '#';
 	        }
 
             return new OmniboxMatch(value,
                 remaining: identifier.Length - pattern.Length,
                 choosenString: identifier,
-                boldIndices: indices ?? new bool[identifier.Length]);
+                boldMask: new string(mask));
         }
 
         public static string CleanCommas(string str)
@@ -123,32 +121,33 @@ namespace Signum.Entities.Omnibox
 
     public class OmniboxMatch
     {
-        public OmniboxMatch(object value, int remaining, string choosenString, bool[] boldIndices)
+        public OmniboxMatch(object value, int remaining, string choosenString, string boldMask)
         {
-            if (choosenString.Length != boldIndices.Length)
-                throw new ArgumentException("choosenString '{0}' is {1} long but boldIndices is {2}".FormatWith(choosenString, choosenString.Length, boldIndices.Length));
+            if (choosenString.Length != boldMask.Length)
+                throw new ArgumentException("choosenString '{0}' is {1} long but boldIndices is {2}".FormatWith(choosenString, choosenString.Length, boldMask.Length));
 
             this.Value = value;
 
             this.Text = choosenString;
-            this.BoldIndices = boldIndices;
+            this.BoldMask = boldMask;
 
             this.Distance = remaining;
 
-            if (boldIndices.Length > 0 && boldIndices[0])
+            if (boldMask.Length > 0 && boldMask[0] == '#')
                 this.Distance /= 2f;
         }
 
+        [JsonIgnore]
         public object Value; 
 
         public float Distance;
         public string Text;
-        public bool[] BoldIndices;
+        public string BoldMask;
 
         public IEnumerable<Tuple<string, bool>> BoldSpans()
         {
-            return this.Text.ZipStrict(BoldIndices)
-                .GroupWhenChange(a => a.Item2)
+            return this.Text.ZipStrict(BoldMask)
+                .GroupWhenChange(a => a.Item2 == '#')
                 .Select(gr => Tuple.Create(new string(gr.Select(a => a.Item1).ToArray()), gr.Key));
         }
     }

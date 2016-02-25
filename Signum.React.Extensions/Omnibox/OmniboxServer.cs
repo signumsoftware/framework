@@ -1,10 +1,15 @@
 ﻿using Signum.Engine;
+using Signum.Engine.Authorization;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Omnibox;
+using Signum.React.ApiControllers;
+using Signum.React.Facades;
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +21,17 @@ namespace Signum.React.Omnibox
 {
     public static class OmniboxServer
     {
+        public static Func<object, bool> IsFindable;
+        public static Func<Type, bool> IsNavigable;
+
         public static void Start(HttpConfiguration config, params IOmniboxResultGenerator[] generators)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+            QueryTokenJsonConverter.GetQueryTokenTS = qt => new QueryTokenTS(qt, true);
+            QueryNameJsonConverter.GetQueryKey = qn => QueryUtils.GetKey(qn);
+            OmniboxParser.Manager = new ReactOmniboxManager();
+
+            ReflectionServer.RegisterLike(typeof(OmniboxMessage));
 
             foreach (var g in generators)
             {
@@ -27,51 +40,51 @@ namespace Signum.React.Omnibox
         }
     }
 
-    //public class ReactOmniboxManager : OmniboxManager
-    //{
-    //    public override bool AllowedType(Type type)
-    //    {
-    //        return Navigator.IsNavigable(type, null, isSearch: true);
-    //    }
+    public class ReactOmniboxManager : OmniboxManager
+    {
+        public override bool AllowedType(Type type)
+        {
+            return OmniboxServer.IsNavigable.GetInvocationListTyped().All(f => f(type));
+        }
 
-    //    public override bool AllowedPermission(PermissionSymbol permission)
-    //    {
-    //        return permission.IsAuthorized();
-    //    }
+        public override bool AllowedPermission(PermissionSymbol permission)
+        {
+            return permission.IsAuthorized();
+        }
 
-    //    public override bool AllowedQuery(object queryName)
-    //    {
-    //        return Finder.IsFindable(queryName);
-    //    }
+        public override bool AllowedQuery(object queryName)
+        {
+            return OmniboxServer.IsFindable.GetInvocationListTyped().All(f => f(queryName));
+        }
 
-    //    public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
-    //    {
-    //        if (!Database.Exists(type, id))
-    //            return null;
-    //        return Database.FillToString(Lite.Create(type, id));
-    //    }
+        public override Lite<Entity> RetrieveLite(Type type, PrimaryKey id)
+        {
+            if (!Database.Exists(type, id))
+                return null;
+            return Database.FillToString(Lite.Create(type, id));
+        }
 
-    //    public override QueryDescription GetDescription(object queryName)
-    //    {
-    //        return DynamicQueryManager.Current.QueryDescription(queryName);
-    //    }
+        public override QueryDescription GetDescription(object queryName)
+        {
+            return DynamicQueryManager.Current.QueryDescription(queryName);
+        }
 
-    //    public override List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count)
-    //    {
-    //        if (string.IsNullOrEmpty(subString))
-    //            return new List<Lite<Entity>>();
+        public override List<Lite<Entity>> Autocomplete(Implementations implementations, string subString, int count)
+        {
+            if (string.IsNullOrEmpty(subString))
+                return new List<Lite<Entity>>();
 
-    //        return AutocompleteUtils.FindLiteLike(implementations, subString, 5);
-    //    }
+            return AutocompleteUtils.FindLiteLike(implementations, subString, 5);
+        }
 
-    //    protected override IEnumerable<object> GetAllQueryNames()
-    //    {
-    //        return DynamicQueryManager.Current.GetQueryNames();
-    //    }
+        protected override IEnumerable<object> GetAllQueryNames()
+        {
+            return DynamicQueryManager.Current.GetQueryNames();
+        }
 
-    //    protected override IEnumerable<Type> GetAllTypes()
-    //    {
-    //        return Schema.Current.Tables.Keys;
-    //    }
-    //}
+        protected override IEnumerable<Type> GetAllTypes()
+        {
+            return Schema.Current.Tables.Keys;
+        }
+    }
 }

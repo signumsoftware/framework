@@ -68,7 +68,7 @@ namespace Signum.Entities.Map
                 new HelpOmniboxResult
                 {
                     Text =  MapMessage.Map.NiceToString() + " " + typeof(TypeEntity).NiceName(),
-                    OmniboxResultType = resultType
+                    ReferencedType = resultType
                 }
             };
         }
