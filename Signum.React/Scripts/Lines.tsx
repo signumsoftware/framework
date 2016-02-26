@@ -56,7 +56,7 @@ export interface EntityComponentProps<T extends ModifiableEntity> {
     frame: EntityFrame<T>;
 }
 
-export abstract class EntityComponent<T extends ModifiableEntity> extends React.Component<EntityComponentProps<T>, {}>{
+export abstract class EntityComponentWithState<T extends ModifiableEntity, S> extends React.Component<EntityComponentProps<T>, S>{
 
     get entity() {
         return this.props.ctx.value;
@@ -94,6 +94,11 @@ export abstract class EntityComponent<T extends ModifiableEntity> extends React.
 
     abstract renderEntity(): React.ReactElement<any>;
 }
+
+export abstract class EntityComponent<T extends ModifiableEntity> extends EntityComponentWithState<T, {}>{
+
+}
+
 
 Tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
