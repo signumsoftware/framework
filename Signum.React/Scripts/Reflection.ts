@@ -318,7 +318,7 @@ export class Binding<T> implements IBinding<T> {
 
     get error(): string {
         const parentErrors = (this.parentValue as ModifiableEntity).error;
-        return parentErrors != null && parentErrors[this.parentValue];
+        return parentErrors != null && parentErrors[this.member];
     }
 
     get errorClass(): string {
@@ -706,13 +706,13 @@ export class GraphExplorer {
         const ge = new GraphExplorer();
         ge.modelStateMode = "set";
         ge.modelState = modelState == null ? {} : Dic.copy(modelState);
-        ge.isModifiableObject(e, "");
+        ge.isModifiableObject(e, initialPrefix);
         Dic.extend(e.error, ge.modelState); //Assign remaining
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {
         const ge = new GraphExplorer();
-        ge.modelStateMode = "set";
+        ge.modelStateMode = "collect";
         ge.modelState = {};
         ge.isModifiableObject(e, initialPrefix);
         return ge.modelState;
