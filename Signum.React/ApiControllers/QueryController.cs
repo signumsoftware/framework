@@ -210,7 +210,7 @@ namespace Signum.React.ApiControllers
         public TypeReferenceTS type;
         public string typeColor; 
         public string niceTypeName; 
-        public FilterType filterType;
+        public FilterType? filterType;
         public string unit;
         public string format;
         public string displayName; 
@@ -221,7 +221,7 @@ namespace Signum.React.ApiControllers
 
             this.name = a.Name;
             this.type = new TypeReferenceTS(a.Type, a.Implementations);
-            this.filterType = QueryUtils.GetFilterType(a.Type);
+            this.filterType = QueryUtils.TryGetFilterType(a.Type);
             this.typeColor = token.TypeColor;
             this.niceTypeName = token.NiceTypeName;
             this.unit = a.Unit;

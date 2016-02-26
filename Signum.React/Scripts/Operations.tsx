@@ -25,8 +25,8 @@ export function start() {
     ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
         queryName: OperationLogEntity_Type,
-        simpleColumnName: "Target",
-        simpleValue: ctx.lite
+        parentColumn: "Target",
+        parentValue: ctx.lite
     }, { isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation }));
 }
 

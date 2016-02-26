@@ -118,7 +118,7 @@ namespace Signum.TSGenerator
                                {
                                    ns = type.Namespace,
                                    type,
-                                   text = MessageInTypeScript(type, options),
+                                   text = QueryInTypeScript(type, options),
                                }).ToList();
 
             var namespaces = entityResults
