@@ -603,7 +603,7 @@ export const entityFormatRules: EntityFormatRule[] = [
         name: "View",
         isApplicable: row=> true,
         formatter: row => !isNavigable(row.entity.EntityType, null, true) ? null :
-            <EntityLink lite={row.entity}>{EntityControlMessage.View.niceToString() }</EntityLink>
+            <EntityLink lite={row.entity} inSearch={true}>{EntityControlMessage.View.niceToString() }</EntityLink>
     },
 ];
 
