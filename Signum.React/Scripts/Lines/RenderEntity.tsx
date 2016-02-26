@@ -62,7 +62,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
 
         var lite = this.props.ctx.value as Lite<Entity>;
-        return Navigator.API.fetch(lite).then(e => {
+        return Navigator.API.fetchAndRemember(lite).then(e => {
             this.forceUpdate();
             return e;
         });

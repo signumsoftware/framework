@@ -220,7 +220,7 @@ export module API {
         });
     }
 
-    export function fetch<T extends Entity>(lite: Lite<T>): Promise<T> {
+    export function fetchAndRemember<T extends Entity>(lite: Lite<T>): Promise<T> {
         if (lite.entity)
             return Promise.resolve(lite.entity);
 
@@ -230,6 +230,9 @@ export module API {
         });
     }
 
+    export function fetchAndForget<T extends Entity>(lite: Lite<T>): Promise<T> {
+        return fetchEntity(lite.EntityType, lite.id);
+    }
     
     export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
     export function fetchEntity(type: PseudoType, id: any): Promise<Entity>;
