@@ -1,6 +1,6 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
-import { Dic, hasFlag } from './Globals';
+import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack } from './Signum.Entities';
@@ -366,7 +366,9 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase<T> {
     }
 
     onIsCreable(isSearch: boolean): boolean {
-        return hasFlag(this.isCreable, isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
+
+        return this.isCreable == EntityWhen.Always ||
+            this.isCreable == (isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
     }
 
 
@@ -386,7 +388,8 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase<T> {
         if (!this.getComponent && !customView)
             return false;
 
-        return hasFlag(this.isNavigable, isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
+        return this.isNavigable == EntityWhen.Always ||
+            this.isNavigable == (isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
     }
 
     onIsReadonly(): boolean {
@@ -440,10 +443,10 @@ export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySe
 
 
 export enum EntityWhen {
-    Always = 3,
-    IsSearch = 2,
-    IsLine = 1,
-    Never = 0,
+    Always = "Always" as any,
+    IsSearch = "IsSearch" as any,
+    IsLine = "IsLine" as any,
+    Never = "Never" as any,
 }
 
 
