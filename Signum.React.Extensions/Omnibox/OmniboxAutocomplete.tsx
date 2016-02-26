@@ -5,6 +5,7 @@ import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Servi
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import * as OmniboxClient from './OmniboxClient'
+import {  OmniboxMessage } from './Signum.Entities.Omnibox'
 
 export interface OmniboxAutocompleteProps {
     divAttrs?: React.HTMLAttributes;
@@ -31,6 +32,15 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
 
     render() {
 
+        var inputAttr = this.props.inputAttrs;
+
+        if (inputAttr == null)
+            inputAttr = {};
+
+        if (inputAttr.placeholder == null)
+            inputAttr.placeholder = OmniboxMessage.Search.niceToString();
+
+
         var result  = (
             <Typeahead getItems={OmniboxClient.getResults} 
                 renderItem={OmniboxClient.renderItem}
@@ -38,7 +48,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
                 divAttrs={this.props.divAttrs}
                 inputAttrs={this.props.inputAttrs}
                 menuAttrs={this.props.menuAttrs}
-                >Hola<span>Juas</span></Typeahead>  
+                ></Typeahead>  
         );
 
         return result;
