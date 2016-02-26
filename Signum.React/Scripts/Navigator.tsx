@@ -220,13 +220,23 @@ export module API {
         });
     }
 
-    export function fetchEntity<T extends Entity>(lite: Lite<T>): Promise<T>;
-    export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
-    export function fetchEntity<T extends Entity>(type: string, id: any): Promise<Entity>;
-    export function fetchEntity(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<Entity> {
+    export function fetch<T extends Entity>(lite: Lite<T>): Promise<T> {
+        if (lite.entity)
+            return Promise.resolve(lite.entity);
 
-        const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
-        let idVal = (typeOrLite as Lite<any>).id || id;
+        return fetchEntity(lite.EntityType, lite.id).then((entity: T) => {
+            lite.entity = entity;
+            return entity;
+        });
+    }
+
+    
+    export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
+    export function fetchEntity(type: PseudoType, id: any): Promise<Entity>;
+    export function fetchEntity(type: PseudoType, id?: any): Promise<Entity> {
+
+        const typeName = getTypeName(type);
+        let idVal = id;
 
         return ajaxGet<Entity>({ url: "/api/entity/" + typeName + "/" + idVal });
     }

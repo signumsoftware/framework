@@ -90,8 +90,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 return Promise.resolve(entityOrLite);
 
             if (isLite) {
-                const lite = entityOrLite as Lite<IEntity>;
-                return lite.entity ? Promise.resolve(lite.entity) : Navigator.API.fetchEntity(lite);
+                return Navigator.API.fetch(entityOrLite as Lite<IEntity>);
             }
 
             const entity = entityOrLite as Entity;
