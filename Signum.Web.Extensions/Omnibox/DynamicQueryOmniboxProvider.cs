@@ -83,7 +83,8 @@ namespace Signum.Web.Omnibox
 
             foreach (var item in result.Filters)
             {
-                if (item.QueryToken != null && item.Operation != null && item.Value != DynamicQueryOmniboxResultGenerator.UnknownValue)
+                if (item.QueryToken != null && item.Operation != null && 
+                    !(item.Value is string && (string)item.Value == DynamicQueryOmniboxResultGenerator.UnknownValue))
                 {
                     if (findOptions.FilterOptions == null)
                         findOptions.FilterOptions = new List<FilterOption>();
