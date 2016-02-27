@@ -5,7 +5,7 @@ import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigato
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { UserEntity, UserEntity_Type, UserOperation, RoleEntity_Type } from './Signum.Entities.Authorization'
+import { UserEntity, UserEntity_Type, UserOperation, RoleEntity_Type, PermissionSymbol } from './Signum.Entities.Authorization'
 import Login from './Login/Login';
 
 export let userTicket: boolean;
@@ -54,6 +54,15 @@ export function onLogout() {
 
 export function onLogin() {
     Navigator.currentHistory.push("/");
+}
+
+export function isPermissionAuthorized(permission: PermissionSymbol) {
+    return true;
+}
+
+export function asserPermissionAuthorized(permission: PermissionSymbol) {
+    if (!isPermissionAuthorized(permission))
+        throw new Error(`Permission ${permission.key} is denied`);
 }
 
 
