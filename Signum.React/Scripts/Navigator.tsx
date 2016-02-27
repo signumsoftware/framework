@@ -219,16 +219,26 @@ export module API {
             realLites.forEach((l, i) => l.toStr = strs[i]);
         });
     }
+    
+    export function fetch<T extends Entity>(lite: Lite<T>): Promise<T> {
+        if (lite.entity)
+            return Promise.resolve(lite.entity);
 
-    export function fetchEntity<T extends Entity>(lite: Lite<T>): Promise<T>;
+        return fetchEntity(lite.EntityType, lite.id).then(e => lite.entity = e as T);
+    }
+
+    export function fetchAndForget<T extends Entity>(lite: Lite<T>): Promise<T> {
+
+        return fetchEntity(lite.EntityType, lite.id);
+    }
+    
     export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
     export function fetchEntity<T extends Entity>(type: string, id: any): Promise<Entity>;
-    export function fetchEntity(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<Entity> {
+    export function fetchEntity(typeOrLite: PseudoType, id?: any): Promise<Entity> {
 
-        const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
-        let idVal = (typeOrLite as Lite<any>).id || id;
+        const typeName = getTypeName(typeOrLite as PseudoType);
 
-        return ajaxGet<Entity>({ url: "/api/entity/" + typeName + "/" + idVal });
+        return ajaxGet<Entity>({ url: "/api/entity/" + typeName + "/" + id });
     }
 
 

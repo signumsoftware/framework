@@ -499,7 +499,7 @@ export module Dic {
 
 
 export function classes(...classNames: string[]) {
-    return classNames.filter(a=> a != null && a != "").join(" ");
+    return classNames.filter(a=> a && a != "").join(" ");
 }
 
 

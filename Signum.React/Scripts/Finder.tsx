@@ -16,6 +16,7 @@ getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from './Reflection';
 import {navigateRoute, isNavigable, currentHistory, API as NavAPI } from './Navigator';
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
+import SearchControl from './SearchControl/SearchControl';
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -74,9 +75,14 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEn
     });
 }
 
-export function explore<T extends Entity>(type: Type<T>): Promise<void>;
-export function explore(findOptions: FindOptions): Promise<void>;
-export function explore(findOptions: FindOptions | Type<any>): Promise<void> {
+export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent) {
+    if (e.ctrlKey || e.button == 2)
+        window.open(findOptionsPath(findOptions));
+    else
+        explore(findOptions).done();
+}
+
+export function explore(findOptions: FindOptions): Promise<void> {
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions } as FindOptions;
@@ -209,24 +215,8 @@ export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
 
     var promises: Promise<any>[] = [];
 
-    var needToStr: Lite<any>[] = [];
-
     if (findOptions.filterOptions)
-        promises.push(...findOptions.filterOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll).then(_ => {
-            if (isList(fo.operation)) {
-                if (!Array.isArray(fo.value))
-                    fo.value = [fo.value];
-
-                fo.value = (fo.value as any[]).map(v => parseValue(fo.token, v, needToStr));
-            }
-
-            else {
-                if (Array.isArray(fo.value))
-                    throw new Error("Unespected array for operation " + fo.operation);
-
-                fo.value = parseValue(fo.token, fo.value, needToStr);
-            }
-        })));
+        promises.push(...findOptions.filterOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)));
 
     if (findOptions.orderOptions)
         promises.push(...findOptions.orderOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement)));
@@ -237,8 +227,7 @@ export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
     completer.trigger();
 
     return Promise.all(promises)
-        .then(a => !needToStr.length ? null : NavAPI.fillToStrings(needToStr))
-        .then(() => findOptions);
+        .then(() => parseFilterValues(findOptions.filterOptions).then(() => findOptions));
 }
 
 class TokenCompleter {
@@ -288,6 +277,34 @@ class TokenCompleter {
         });
     }
 }
+
+
+
+function parseFilterValues(filterOptions: FilterOption[]): Promise<void> {
+
+    var needToStr: Lite<any>[] = [];
+    filterOptions.forEach(fo => {
+        if (isList(fo.operation)) {
+            if (!Array.isArray(fo.value))
+                fo.value = [fo.value];
+
+            fo.value = (fo.value as any[]).map(v => parseValue(fo.token, v, needToStr));
+        }
+
+        else {
+            if (Array.isArray(fo.value))
+                throw new Error("Unespected array for operation " + fo.operation);
+
+            fo.value = parseValue(fo.token, fo.value, needToStr);
+        }
+    });
+
+    if (needToStr.length == 0)
+        return Promise.resolve(null);
+
+    return NavAPI.fillToStrings(needToStr)
+}
+
 
 function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
     switch (filterType(token)) {
@@ -344,7 +361,6 @@ function calculateFilterType(typeRef: TypeReference): FilterType {
 
     return FilterType.Boolean;
 }
-
 
 export module API {
 
@@ -500,10 +516,16 @@ function getTokenString(tokenContainer: { columnName: string, token?: QueryToken
 
 export module ButtonBarQuery {
 
-    export function getContextBarElements(queryKey: string) {
-        return null;
+    interface ButtonBarQueryContext {
+        searchControl: SearchControl;
+        findOptions: FindOptions;
     }
 
+    export var onButtonBarElements: ((ctx: ButtonBarQueryContext) => React.ReactNode)[] = [];
+ 
+    export function getButtonBarElements(ctx: ButtonBarQueryContext) {
+        return onButtonBarElements.map(f => f(ctx)).filter(a => a != null);
+    }
 }
 
 

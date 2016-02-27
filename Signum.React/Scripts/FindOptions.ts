@@ -151,11 +151,27 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
     };
 }
 
+export interface FilterRequest {
+    token: string;
+    operation: FilterOperation;
+    value: any;
+}
+
+export interface OrderRequest {
+    token: string;
+    orderType: OrderType
+}
+
+export interface ColumnRequest {
+    token: string;
+    displayName: string;
+}
+
 export interface QueryRequest {
     queryKey: string;
-    filters: { token: string; operation: FilterOperation; value: any }[];
-    orders: { token: string; orderType: OrderType }[];
-    columns: { token: string; displayName: string }[];
+    filters: FilterRequest[];
+    orders: OrderRequest[];
+    columns: ColumnRequest[];
     pagination: Pagination;
 }
 

@@ -491,7 +491,7 @@ export class MessageKey {
         return getTypeInfo(this.type).members[this.name]
     }
 
-    niceToString(args?: any[]): string {
+    niceToString(...args?: any[]): string {
         const msg = this.propertyInfo().niceName;
 
         return args ? msg.formatWith(args) : msg;
