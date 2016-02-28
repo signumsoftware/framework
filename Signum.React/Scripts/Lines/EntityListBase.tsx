@@ -105,7 +105,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
                 this.convert(e).then(m => {
                     const list = this.props.ctx.value;
-                    list.push({ element: e, rowId: null });
+                    list.push({ rowId: null, element: e });
                     this.setValue(list);
                 }).done();
             }).done();

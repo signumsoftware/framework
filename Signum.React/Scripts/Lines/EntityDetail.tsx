@@ -16,7 +16,6 @@ import { RenderEntity } from './RenderEntity'
 
 export interface EntityDetailProps extends EntityBaseProps {
     ctx?: TypeContext<ModifiableEntity | Lite<IEntity>>;
-    getComponent?: (mod: ModifiableEntity) => Promise<React.ComponentClass<EntityComponentProps<ModifiableEntity>>>;
 }
 
 export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProps> {

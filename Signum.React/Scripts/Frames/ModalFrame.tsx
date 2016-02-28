@@ -21,14 +21,14 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     propertyRoute?: PropertyRoute;
     showOperations?: boolean;
     requiresSaveOperation?: boolean;
-    component?: React.ComponentClass<EntityComponentProps<Entity>>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
     isNavigate?: boolean;
     readOnly?: boolean
 }
 
 interface ModalFrameState {
     pack?: EntityPack<ModifiableEntity>;
-    component?: React.ComponentClass<EntityComponentProps<Entity>>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
     entitySettings?: Navigator.EntitySettingsBase<any>;
     propertyRoute?: PropertyRoute;
     savedEntity?: string;
@@ -39,7 +39,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     static defaultProps: ModalFrameProps = {
         showOperations: true,
-        component: null,
+        getComponent: null,
     }
 
     constructor(props) {
@@ -64,7 +64,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             .done();
     }
 
-    calculateState(props: ModalFrameState) {
+    calculateState(props: ModalFrameState): ModalFrameState {
 
         const typeName = (this.props.entityOrPack as Lite<Entity>).EntityType ||
             (this.props.entityOrPack as ModifiableEntity).Type ||
@@ -82,8 +82,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         return {
             entitySettings: entitySettings,
             propertyRoute: pr,
-            entity: null,
-            show: true
+            show: true,
         };
     }
 
@@ -98,11 +97,19 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     loadComponent() {
 
-        const promise = this.props.component ? Promise.resolve(this.props.component) :
-            this.state.entitySettings.onGetComponent(this.state.pack.entity);
-
-        return promise
-            .then(c => this.setState({ component: c }))
+        if (this.props.getComponent) {
+            this.setState({ getComponent: this.props.getComponent });
+            return Promise.resolve(null);
+        }
+        
+        return this.state.entitySettings.onGetComponent(this.state.pack.entity)
+            .then(c => this.setState(
+            {
+                getComponent: (ctx, frame) => React.createElement(c, {
+                    ctx: ctx,
+                    frame: frame
+                })
+            }))
             .done();
     }
 
@@ -188,10 +195,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
                 <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />
                 <ValidationErrors entity={pack.entity}/>
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
-                    { this.state.component && React.createElement(this.state.component, {
-                        ctx: ctx,
-                        frame: frame
-                    }) }
+                    { this.state.getComponent && this.state.getComponent(ctx, frame) }
                 </div>
             </Modal.Body>
         );
@@ -252,7 +256,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             entityOrPack={options.entity}
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}
-            component={options.component}
+            getComponent={options.getComponent}
             showOperations={options.showOperations}
             requiresSaveOperation={options.requiresSaveOperation}
             isNavigate={false}/>);
@@ -264,7 +268,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             entityOrPack={options.entity}
             readOnly={options.readOnly}
             propertyRoute={null}
-            component={options.component}
+            getComponent={options.getComponent}
             showOperations={null}
             requiresSaveOperation={null}
             isNavigate={true}/>);

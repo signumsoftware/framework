@@ -1,4 +1,4 @@
-﻿import { TypeReference, PropertyRoute } from './Reflection';
+﻿import { TypeReference, PropertyRoute, PseudoType, QueryKey } from './Reflection';
 import { Dic } from './Globals';
 import { Lite, IEntity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType } from './Signum.Entities.DynamicQuery';
@@ -6,7 +6,7 @@ import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMo
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
 export interface CountOptions {
-    queryName: any;
+    queryName: PseudoType | QueryKey;
     filterOptions?: FilterOption[];
 }
 
@@ -14,7 +14,7 @@ export interface CountOptions {
 
 
 export interface FindOptions {
-    queryName: any;
+    queryName: PseudoType | QueryKey;
     simpleColumnName?: string;
     simpleValue?: any;
 

@@ -136,6 +136,18 @@ fieldset.sf-repeater-element > legend {
         border: 0px;
     }
 
+    .form-xs .repeater-inline .sf-repeater-element legend {
+        margin-left: -4px;
+        margin-right: 4px;
+        margin-top: 2px;
+    }
+
+    .form-sm .repeater-inline .sf-repeater-element legend {
+        margin-left: -4px;
+        margin-right: 4px;
+        margin-top: 2px;
+    }
+
 .repeater-inline.repeater-right .sf-repeater-element legend {
     float: right;
     margin-left: 6px;
@@ -245,6 +257,10 @@ ul.nav-tabs {
     min-height: inherit;
 }
 
+.form-xs .sf-query-token-builder {
+    height: 20px;
+}
+
 .form-xs select[multiple], 
 .form-xs select[size] {
     height: auto;
@@ -338,6 +354,10 @@ ul.nav-tabs {
     min-height: inherit;
 }
 
+.form-sm .sf-query-token-builder {
+    height: 26px;
+}
+
 .form-sm select[multiple], 
 .form-sm select[size] {
     height: auto;
@@ -421,6 +441,10 @@ ul.nav-tabs {
 .form-horizontal .form-inline .form-group {
     margin-right: 0px;
     margin-left: 0px;
+}
+
+.form-inline .sf-query-token-builder {
+   vertical-align:middle;
 }
 
 /*form-vertical*/

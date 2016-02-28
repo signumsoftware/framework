@@ -183,6 +183,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         return fo.showHeader && (fo.showFilterButton || fo.showFilters)
     }
 
+    getQueryKey(): string {
+        return getQueryKey(this.state.findOptions.queryName);
+    }
 
     getQueryRequest() : QueryRequest {
         var fo = this.state.findOptions;
@@ -334,7 +337,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                     <span className="glyphicon glyphicon-plus"></span>
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton() }
-                {Finder.ButtonBarQuery.getButtonBarElements({ findOptions : fo, searchControl: this }) }
+                {Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i })) }
                 {!this.props.externalFullScreenButton &&
                     <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>

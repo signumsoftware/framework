@@ -6,7 +6,7 @@ import { openModal } from './Modals';
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack } from './Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName  } from './Reflection';
 import { TypeContext } from './TypeContext';
-import { EntityComponent, EntityComponentProps } from './Lines';
+import { EntityComponent, EntityComponentProps, EntityFrame } from './Lines';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
 import ModalFrame from './Frames/ModalFrame';
@@ -85,13 +85,8 @@ export function isCreable(type: PseudoType, isSearch?: boolean) {
     const typeName = getTypeName(type);
 
     const es = entitySettings[typeName];
-    if (!es)
-        return false;
-
-    if (isSearch != null && !es.onIsCreable(isSearch))
-        return false;
-
-    return isCreableEvent.every(f=> f(typeName));
+    
+    return (es == null || isSearch == null || es.onIsCreable(isSearch)) &&  isCreableEvent.every(f => f(typeName));
 }
 
 export const isFindableEvent: Array<(typeName: string) => boolean> = []; 
@@ -119,7 +114,7 @@ export function isViewable(typeOrEntity: PseudoType | ModifiableEntity, customVi
 
     const es = entitySettings[typeName];
 
-    return es != null && es.onIsViewable(customView) && isViewableEvent.every(f=> f(typeName, entity));
+    return (es == null ? customView : es.onIsViewable(customView)) && isViewableEvent.every(f => f(typeName, entity));
 }
 
 export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customView = false, isSearch = false): boolean {
@@ -130,7 +125,7 @@ export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customV
 
     const es = entitySettings[typeName];
 
-    return es != null && es.onIsNavigable(customView, isSearch) && isViewableEvent.every(f=> f(typeName, entity));
+    return (es == null ? customView : es.onIsNavigable(customView, isSearch)) && isViewableEvent.every(f => f(typeName, entity));
 }
 
 
@@ -141,7 +136,7 @@ export interface ViewOptions {
     readOnly?: boolean;
     showOperations?: boolean;
     requiresSaveOperation?: boolean;
-    component?: React.ComponentClass<EntityComponentProps<any>>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
 }
 
 export function view(options: ViewOptions): Promise<ModifiableEntity>;
@@ -164,7 +159,7 @@ export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Enti
 export interface NavigateOptions {
     entity: Lite<IEntity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     readOnly?: boolean;
-    component?: React.ComponentClass<EntityComponentProps<any>>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
 }
 
 export function navigate(options: NavigateOptions): Promise<ModifiableEntity>;
@@ -220,7 +215,7 @@ export module API {
         });
     }
     
-    export function fetch<T extends Entity>(lite: Lite<T>): Promise<T> {
+    export function fetchAndRemember<T extends Entity>(lite: Lite<T>): Promise<T> {
         if (lite.entity)
             return Promise.resolve(lite.entity);
 

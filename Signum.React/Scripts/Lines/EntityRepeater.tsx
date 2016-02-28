@@ -15,7 +15,6 @@ import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
-    getComponent?: (m: ModifiableEntity) => Promise<React.ComponentClass<EntityComponentProps<ModifiableEntity>>>;
     createAsLink?: boolean;
 }
 
@@ -41,7 +40,6 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                     </div>
                 </legend>
                 <div>
-
                     {
                         mlistItemContext(this.state.ctx).map((mlec, i) =>
                             (<EntityRepeaterElement key={i}
@@ -49,7 +47,6 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                             ctx={mlec}
                             getComponent={this.props.getComponent} />))
                     }
-
                     {
                         this.state.createAsLink && this.state.create &&
                         <a title={EntityControlMessage.Create.niceToString() }
@@ -67,7 +64,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
 export interface EntityRepeaterElementProps {
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-    getComponent: (m: ModifiableEntity) => Promise<React.ComponentClass<EntityComponentProps<ModifiableEntity>>>;
+    getComponent: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
     onRemove: (event: React.MouseEvent) => void;
 }
 

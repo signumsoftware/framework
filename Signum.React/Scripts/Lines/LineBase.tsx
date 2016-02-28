@@ -21,8 +21,16 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const ctx = this.props.ctx;
 
-        if (ctx.formGroupStyle == FormGroupStyle.None)
-            return this.props.children as React.ReactElement<any>;
+        if (ctx.formGroupStyle == FormGroupStyle.None) {
+            var errorClass = ctx.binding.errorClass;
+
+            var c = this.props.children as React.ReactElement<any>;
+
+            if (errorClass == null)
+                return c;
+
+            return React.cloneElement(c, { className: classes(c.props.className, errorClass) });
+        }
 
         const labelClasses = classes(ctx.formGroupStyle == FormGroupStyle.SrOnly && "sr-only",
             ctx.formGroupStyle == FormGroupStyle.LabelColumns && ("control-label " + ctx.labelColumnsCss));
@@ -30,7 +38,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const label = (
             <label htmlFor={this.props.controlId} {...this.props.labelProps } className= { labelClasses } >
-                { this.props.title }
+                { this.props.title || this.props.ctx.propertyRoute.member.niceName }
             </label>
         );
 
