@@ -72,6 +72,10 @@ label > input[type=checkbox] {
         color: gray;
     }
 
+    .sf-line-button:not(.btn) {
+        vertical-align: middle;
+    }
+
 /* EntityLine buttons  */
 .input-group-btn.btn-group-vertical {
     vertical-align: top;
@@ -185,6 +189,10 @@ ul.sf-strip-vertical > li {
 
 .sf-strip-horizontal > li > * {
     vertical-align: middle;
+}
+
+.sf-strip-element .sf-line-button {   
+    margin-left: 2px;
 }
 
 label.sf-checkbox-element {
