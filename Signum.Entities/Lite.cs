@@ -333,7 +333,7 @@ namespace Signum.Entities
             if (!PrimaryKey.TryParse(match.Groups["id"].Value, type, out id))
                 return LiteMessage.IdNotValid.NiceToString();
 
-            string toStr = match.Groups["toStr"].Value; //maybe null
+            string toStr = match.Groups["toStr"].Value.DefaultText(null); //maybe null
 
             result = giNewLite.GetInvoker(type)(id, toStr);
             return null;

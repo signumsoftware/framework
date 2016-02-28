@@ -211,8 +211,8 @@ export function isEntityOperation(operationType: OperationType) {
 
 export namespace API {
 
-    export function construct<T extends Entity>(operationKey: string | ConstructSymbol_Simple<T>, args?: any[]): Promise<EntityPack<T>> {
-        return ajaxPost<EntityPack<T>>({ url: "/api/operation/construct" }, { operationKey: getKey(operationKey), args: args });
+    export function construct<T extends Entity>(type: string, operationKey: string | ConstructSymbol_Simple<T>, args?: any[]): Promise<EntityPack<T>> {
+        return ajaxPost<EntityPack<T>>({ url: "/api/operation/construct" }, { operationKey: getKey(operationKey), args, type });
     }
 
     export function constructFromEntity<T extends Entity, F extends Entity>(entity: F, operationKey: string | ConstructSymbol_From<T, F>, args?: any[]): Promise<EntityPack<T>> {

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
-import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription } from '../FindOptions'
+import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription, ResultRow } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import * as Reflection from '../Reflection'
 import { default as SearchControl, SearchControlProps, ExternalFullScreenButton} from './SearchControl'
@@ -49,6 +49,13 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         this.props.onExited(this.okPressed ? this.selectedEntites : null);
     }
 
+    handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
+        e.preventDefault();
+        this.selectedEntites = [row.entity];
+        this.okPressed = true;
+        this.setState({ show: false });
+    }
+
     render() {
 
         const okEnabled = this.props.isMany ? this.selectedEntites.length > 0 : this.selectedEntites.length == 1;
@@ -73,7 +80,11 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                 </Modal.Header>
 
                 <Modal.Body>
-                    <SearchControl externalFullScreenButton={this.state.externalButton} findOptions={this.props.findOptions} onSelectionChanged={this.handleSelectionChanged} />
+                    <SearchControl externalFullScreenButton={this.state.externalButton}
+                        findOptions={this.props.findOptions}
+                        onSelectionChanged={this.handleSelectionChanged}
+                        onDoubleClick={this.props.findMode == FindMode.Find ? this.handleDoubleClick : null}
+                        />
                 </Modal.Body>
             </Modal>
         );

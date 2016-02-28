@@ -27,16 +27,24 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
     }
 
     renderInternal() {
-        
+
+        var buttons = (
+            <span className="pull-right">
+                {!this.state.createAsLink && this.renderCreateButton(false) }
+                {this.renderFindButton(false) }
+            </span>
+        );
+
+
+        if (!buttons.props.children.some(a => a))
+            buttons = null;
+
         return (
             <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        <span className="pull-right">
-                            {!this.state.createAsLink && this.renderCreateButton(false) }
-                            {this.renderFindButton(false) }
-                        </span>
+                        {buttons}
                     </div>
                 </legend>
                 <div>

@@ -22,6 +22,7 @@ export interface RenderEntityProps {
 
 export interface RenderEntityState {
     getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
+    lastLoadedType?: string;
 }
 
 export class RenderEntity extends React.Component<RenderEntityProps, RenderEntityState> {
@@ -29,7 +30,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     constructor(props) {
         super(props);
 
-        this.state = { getComponent: null };
+        this.state = { getComponent: null, lastLoadedType: null };
     }
 
 
@@ -40,15 +41,9 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     }
 
     componentWillReceiveProps(nextProps: RenderEntityProps) {
-        if (!is(this.props.ctx.value, nextProps.ctx.value)) {
-            this.setState({
-                getComponent: null
-            });
-
-            this.loadEntity()
-                .then(e => this.loadComponent(e))
-                .done();
-        }
+        this.loadEntity()
+            .then(e => this.loadComponent(e))
+            .done();
     }
 
     loadEntity(): Promise<Entity> {
@@ -86,26 +81,30 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         throw new Error("Unexpected value " + lite);
     }
 
-    loadComponent(e: Entity) : Promise<void> {
+    loadComponent(e: Entity): Promise<void> {
 
-        if (e == null) {
-            this.setState({ getComponent: null });
+        if (e == null)
+            return Promise.resolve(null);
+
+        if (this.props.getComponent) {
+            if (this.state.getComponent != this.props.getComponent)
+                this.setState({ getComponent: this.props.getComponent, lastLoadedType: null });
             return Promise.resolve(null);
         }
-        else if (this.props.getComponent) {
-            this.setState({ getComponent: this.props.getComponent });
+
+
+        if (this.state.lastLoadedType == e.Type)
             return Promise.resolve(null);
-        }
-        else {
-            return Navigator.getSettings(e.Type).onGetComponent(e).then(c => {
-                this.setState({
-                    getComponent: (ctx, frame) => React.createElement<EntityComponentProps<ModifiableEntity>>(c, {
-                        ctx: ctx,
-                        frame: frame
-                    })
-                });
+
+        return Navigator.getSettings(e.Type).onGetComponent(e).then(c => {
+            this.setState({
+                getComponent: (ctx, frame) => React.createElement<EntityComponentProps<ModifiableEntity>>(c, {
+                    ctx: ctx,
+                    frame: frame
+                }),
+                lastLoadedType: e.Type
             });
-        }
+        });
     }
 
     render() {

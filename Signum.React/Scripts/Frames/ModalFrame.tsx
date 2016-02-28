@@ -223,7 +223,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     renderExpandLink() {
         const entity = this.state.pack.entity;
 
-        if (entity == null)
+        if (entity == null || entity.isNew)
             return null;
 
         const ti = getTypeInfo(entity.Type);

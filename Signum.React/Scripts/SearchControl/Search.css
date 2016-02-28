@@ -2,10 +2,14 @@
     min-height: 50px;
 }
 
-    .sf-search-footer div {
+    .sf-search-footer > div {
         float: left;
         width: 33%;
     }
+
+.sf-pagination-center > div {
+    display: inline;
+}
 
 table.sf-search-results > thead {
     white-space: nowrap;

@@ -183,6 +183,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
 
     handleMenuClick = (e: React.MouseEvent) => {
+        e.preventDefault();
         this.select(e);
         this.input.focus();
     }

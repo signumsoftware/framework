@@ -6,7 +6,7 @@ import { Dic } from './Globals';
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, SelectorMessage, EntityPack } from './Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType } from './Reflection';
 import SelectorPopup from './SelectorPopup';
-import { API, operationInfos } from './Operations';
+import * as Operations from './Operations';
 
 export var customConstructors: { [typeName: string]: (typeName: string) => ModifiableEntity | Promise<ModifiableEntity> } = { }
 
@@ -23,14 +23,12 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
     var ti = getTypeInfo(typeName);
 
     if (ti) {
-        var ctrs = operationInfos(ti).filter(a => a.operationType == OperationType.Constructor);
+        var ctrs = Operations.operationInfos(ti).filter(a => a.operationType == OperationType.Constructor);
 
         if (ctrs.length) {
 
-            var ctr = ctrs.length == 1 ? Promise.resolve(ctrs[0]) :
-                SelectorPopup.chooseElement(ctrs, c => c.niceName, SelectorMessage.PleaseSelectAConstructor.niceToString());
-
-            return ctr.then(c => API.construct(c.key)).then(p => { assertCorrect(p.entity); return p; });
+            return SelectorPopup.chooseElement(ctrs, c => c.niceName, SelectorMessage.PleaseSelectAConstructor.niceToString())
+                .then(c => Operations.API.construct(typeName, c.key)).then(p => { assertCorrect(p.entity); return p; });
         }
     }
 

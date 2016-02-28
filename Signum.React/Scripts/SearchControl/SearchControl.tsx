@@ -33,6 +33,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     findOptions: FindOptions;
     simpleFilterBuilder?: React.ComponentClass<SimpleFilterBuilderProps>;
     externalFullScreenButton?: ExternalFullScreenButton;
+    onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
     showContextMenu?: boolean;
     onSelectionChanged?: (entity: Lite<IEntity>[]) => void
 }
@@ -673,7 +674,6 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         });
     }
 
-
     renderHeaders(): React.ReactNode {
 
         return (
@@ -747,6 +747,25 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.forceUpdate();
     }
 
+    handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
+        e.preventDefault();
+        if (this.props.onDoubleClick) {
+            this.props.onDoubleClick(e, row);
+            return;
+        } else {
+            var s = Navigator.getSettings(row.entity.EntityType)
+
+            var avoidPopup = s != null && s.avoidPopup;
+
+            if (avoidPopup || e.ctrlKey || e.button == 1) {
+                window.open(Navigator.navigateRoute(row.entity));
+            }
+            else {
+                Navigator.navigate(row.entity).done();
+            }
+        }
+    }
+
     renderRows(): React.ReactNode {
 
         const columnsCount = this.state.findOptions.columnOptions.length +
@@ -780,7 +799,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             const mark: { style: string, message: string } = typeof m === "string" ? { style: m == "" ? null : "error", message: m } : m;
 
             const tr = (
-                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity) } {...rowAttributes ? rowAttributes(row, this.state.resultTable.columns) : null}
+                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity) }  onDoubleClick={e => this.handleDoubleClick(e, row) } {...rowAttributes ? rowAttributes(row, this.state.resultTable.columns) : null}
                     className={mark && mark.style}
                     style={{ opacity: mark && mark.message == "" ? 0.5 : 1 }} >
 

@@ -505,7 +505,7 @@ export class MessageKey {
     niceToString(...args: any[]): string {
         const msg = this.propertyInfo().niceName;
 
-        return args ? msg.formatWith(args) : msg;
+        return args.length ? msg.formatWith(args) : msg;
     }
 }
 
