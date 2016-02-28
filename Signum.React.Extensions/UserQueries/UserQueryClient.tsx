@@ -33,13 +33,13 @@ export function start(options: { routes: JSX.Element[] }) {
         if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
             return null;
 
-        API.forEntityType(ctx.lite.EntityType).then(uqs => {
+        return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr, e => {
                 Navigator.API.fetchAndForget(uq)
                     .then(uq => Converter.toFindOptions(uq, null))
-                    .then(fo => Finder.exploreWindowsOpen(fo, e));
-            }));
-        });
+                    .then(fo => Finder.exploreWindowsOpen(fo, e))
+                    .done();
+            }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));
     });
 
     QuickLinks.registerQuickLink(UserQueryEntity_Type, ctx => new QuickLinks.QuickLinkAction("preview", UserQueryMessage.Preview.niceToString(),
@@ -60,13 +60,8 @@ export function start(options: { routes: JSX.Element[] }) {
             });
         }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
 
-    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity_Type, () => ({
-        Type: QueryFilterEntity_Type.typeName,
-        isNew: true,
-        modified: true,
-        token: Constructor.basicConstruct(QueryTokenEntity_Type)
-    }));
-
+    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity_Type, () => QueryFilterEntity_Type.New({ token: QueryTokenEntity_Type.New() }));
+    Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity_Type, () => QueryOrderEntity_Type.New({ token: QueryTokenEntity_Type.New() }));
     Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity_Type, () => QueryColumnEntity_Type.New({ token: QueryTokenEntity_Type.New() }));
 
     Navigator.addSettings(new EntitySettings(UserQueryEntity_Type, e => new Promise(resolve => require(['./Templates/UserQuery'], resolve))));
@@ -81,13 +76,17 @@ export module Converter {
             queryKey: uq.query.key,
             canAggregate: false,
             entity: entity,
-            filters: uq.filters.map(mle => mle.element)
+            filters: uq.filters.map(mle => mle.element).map(f => ({
+                tokenString: f.token.tokenString,
+                operation: f.operation,
+                valueString: f.valueString
+            }) as API.ParseFilterRequest)
         });
 
         return convertedFilters.then(filters => {
 
-            if (!uq.withoutFilters) {
-                fo.filterOptions = fo.filterOptions.filter(f => !f.frozen);
+            if (!uq.withoutFilters && filters) {
+                fo.filterOptions = (fo.filterOptions || []).filter(f => f.frozen);
                 fo.filterOptions.push(...filters.map(f => ({
                     columnName: f.token,
                     operation: f.operation,
@@ -97,17 +96,21 @@ export module Converter {
 
             fo.columnOptionsMode = uq.columnsMode;
 
-            fo.columnOptions = uq.columns.map(f => ({
+            fo.columnOptions = (uq.columns || []).map(f => ({
                 columnName: f.element.token.tokenString,
                 displayName: f.element.displayName
             }) as ColumnOption);
 
-            fo.orderOptions = uq.orders.map(f => ({
+            fo.orderOptions = (uq.orders || []).map(f => ({
                 columnName: f.element.token.tokenString,
                 orderType: f.element.orderType
             }) as OrderOption);
 
-            fo.pagination = {
+
+            var qs = Finder.querySettings[uq.query.key];
+
+            fo.pagination = uq.paginationMode == null ?
+                ((qs && qs.pagination) || Finder.defaultPagination) : {
                 mode: uq.paginationMode,
                 currentPage: null,
                 elementsPerPage: uq.elementsPerPage
@@ -132,11 +135,24 @@ export module API {
         return ajaxGet<Lite<UserQueryEntity>[]>({ url: "/api/userQueries/forQuery/" + queryKey });
     }
 
-    export function parseFilters(request: { queryKey: string; filters: QueryFilterEntity[]; entity: Lite<Entity>; canAggregate: boolean }): Promise<FilterRequest[]> {
+    export function parseFilters(request: ParseFiltersRequest): Promise<FilterRequest[]> {
         return ajaxPost<FilterRequest[]>({ url: "/api/userQueries/parseFilters/" }, request);
     }
 
     export function fromQueryRequest(request: { queryRequest: QueryRequest; defaultPagination: Pagination}): Promise<UserQueryEntity> {
         return ajaxPost<UserQueryEntity>({ url: "/api/userQueries/fromQueryRequest/" }, request);
+    }
+
+    export interface ParseFiltersRequest {
+        queryKey: string;
+        filters: ParseFilterRequest[];
+        entity: Lite<Entity>;
+        canAggregate: boolean
+    }
+
+    export interface ParseFilterRequest {
+        tokenString: string;
+        operation: FilterOperation;
+        valueString: string;
     }
 }

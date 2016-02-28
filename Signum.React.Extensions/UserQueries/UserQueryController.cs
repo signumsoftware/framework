@@ -46,14 +46,16 @@ namespace Signum.React.Auth
 
             using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.Retrieve()) : null)
             {
-                return request.filters
+                var result = request.filters
                         .Select(f => new FilterTS
                         {
-                            token = f.Token.TokenString,
-                            operation = f.Operation,
-                            value = FilterValueConverter.Parse(f.ValueString, QueryUtils.Parse(f.Token.TokenString, qd, options).Type, f.Operation.IsList())
+                            token = f.tokenString,
+                            operation = f.operation,
+                            value = FilterValueConverter.Parse(f.valueString, QueryUtils.Parse(f.tokenString, qd, options).Type, f.operation.IsList())
                         })
                         .ToList();
+
+                return result;
             }
         }
 
@@ -61,8 +63,15 @@ namespace Signum.React.Auth
         {
             public string queryKey;
             public bool canAggregate;
-            public List<QueryFilterEntity> filters;
+            public List<ParseFilterRequest> filters;
             public Lite<Entity> entity;
+        }
+
+        public class ParseFilterRequest
+        {
+            public string tokenString;
+            public FilterOperation operation;
+            public string valueString;
         }
 
         [Route("api/userQueries/fromQueryRequest"), HttpPost]

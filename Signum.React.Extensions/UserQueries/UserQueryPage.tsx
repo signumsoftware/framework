@@ -41,8 +41,8 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
 
             UserQueryClient.Converter.toFindOptions(uq, null).then(findOptions => {
                 this.setState({ findOptions: findOptions });
-            });
-        });
+            }).done();
+        }).done();
     }
 
     render() {

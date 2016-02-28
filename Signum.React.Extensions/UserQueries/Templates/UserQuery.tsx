@@ -37,6 +37,7 @@ export default class UserQuery extends EntityComponent<UserQueryEntity> {
                     <div className="repeater-inline form-inline sf-filters-list ">
                         <EntityRepeater ctx={this.subCtx(e => e.filters) } getComponent={this.renderFilter}/>
                     </div>
+                    <ValueLine ctx={this.subCtx(e => e.columnsMode) } />
                     <div className="repeater-inline form-inline sf-filters-list ">
                         <EntityRepeater ctx={this.subCtx(e => e.columns) } getComponent={this.renderColumn}/>
                     </div>
@@ -44,8 +45,14 @@ export default class UserQuery extends EntityComponent<UserQueryEntity> {
                         <EntityRepeater ctx={this.subCtx(e => e.orders) } getComponent={this.renderOrder}/>
                     </div>
                 </div>
-                <ValueLine ctx={this.subCtx(e => e.paginationMode) } />
-                <ValueLine ctx={this.subCtx(e => e.elementsPerPage) } />
+                <div className="row">
+                    <div className="col-sm-6">
+                        <ValueLine ctx={this.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } }) } />
+                    </div>
+                    <div className="col-sm-6">
+                        <ValueLine ctx={this.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } }) } />
+                    </div>
+                </div>
             </div>
         );
     }

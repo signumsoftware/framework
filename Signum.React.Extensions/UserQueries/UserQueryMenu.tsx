@@ -40,8 +40,12 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
         Navigator.API.fetchAndForget(uq).then(userQuery => {
             var oldFindOptions = this.props.searchControl.state.findOptions;
             UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, null)
-                .then(newFindOptions => this.props.searchControl.resetFindOptions(newFindOptions));
-        });
+                .then(newFindOptions => {
+                    this.props.searchControl.resetFindOptions(newFindOptions);
+                    this.setState({ currentUserQuery: uq });
+                })
+                .done();
+        }).then();
     }
 
     handleEdit = () => {
@@ -59,7 +63,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
             defaultPagination: this.props.searchControl.defaultPagination()
         }).then(userQuery => Navigator.view(userQuery))
             .then(uq => {
-                if (uq.id) {
+                if (uq && uq.id) {
                     this.reloadList()
                         .then(() => this.setState({ currentUserQuery: toLite(uq) }))
                         .done();
@@ -76,7 +80,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
                 {
                     userQueries && userQueries.map((uq, i) =>
                         <MenuItem
-                            className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "sf-userquery-selected") }
+                            className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active") }
                             onSelect={() => this.handleSelect(uq) }>
                             { uq.toStr }
                         </MenuItem>)
