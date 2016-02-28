@@ -237,7 +237,7 @@ export module RoleOperation {
 }
 
 export module RoleQuery {
-    export const RolesReferedBy = new QueryKey("RoleQuery", "RolesReferedBy");
+    export const RolesReferedBy = new MessageKey("RoleQuery", "RolesReferedBy");
 }
 
 export interface RuleEntity<R, A> extends Entities.Entity {

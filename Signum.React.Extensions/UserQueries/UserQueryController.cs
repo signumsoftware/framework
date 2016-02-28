@@ -25,13 +25,13 @@ namespace Signum.React.Auth
 {
     public class UserQueryController : ApiController
     {
-        [Route("api/userQueries/fromQuery"), HttpGet]
+        [Route("api/userQueries/forQuery/{queryKey}"), HttpGet]
         public IEnumerable<Lite<UserQueryEntity>> FromQuery(string queryKey)
         {
             return UserQueryLogic.GetUserQueries(QueryLogic.ToQueryName(queryKey));
         }
 
-        [Route("api/userQueries/forEntityType"), HttpGet]
+        [Route("api/userQueries/forEntityType/{typeName}"), HttpGet]
         public IEnumerable<Lite<UserQueryEntity>> FromEntityType(string typeName)
         {
             return UserQueryLogic.GetUserQueriesEntity(TypeLogic.GetType(typeName));

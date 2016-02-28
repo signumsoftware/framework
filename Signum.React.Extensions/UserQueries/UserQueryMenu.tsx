@@ -30,7 +30,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     }
 
     reloadList(): Promise<void> {
-        return UserQueryClient.API.forQuery(this.props.searchControl.props.findOptions.queryName)
+        return UserQueryClient.API.forQuery(this.props.searchControl.getQueryKey())
             .then(list => this.setState({ userQueries: list }));
     }
 
@@ -38,9 +38,9 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     handleSelect = (uq: Lite<UserQueryEntity>) => {
 
         Navigator.API.fetchAndForget(uq).then(userQuery => {
-            var oldFindOptions = this.props.searchControl.props.findOptions;
-            var newFindOptions = UserQueryClient.Converter.applyUserQuery(newFindOptions, userQuery, null);
-            this.props.searchControl.resetFindOptions(newFindOptions);
+            var oldFindOptions = this.props.searchControl.state.findOptions;
+            UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, null)
+                .then(newFindOptions => this.props.searchControl.resetFindOptions(newFindOptions));
         });
     }
 
@@ -69,19 +69,19 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
 
     render() {
         const label = UserQueryMessage.UserQueries_UserQueries.niceToString();
-        
+        var userQueries = this.state.userQueries;
         return (
-            <DropdownButton title={label} label={label}
+            <DropdownButton title={label} label={label} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 onToggle={this.handleSelectedToggle}>
                 {
-                    this.state.userQueries && this.state.userQueries.map((uq, i) =>
+                    userQueries && userQueries.map((uq, i) =>
                         <MenuItem
                             className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "sf-userquery-selected") }
                             onSelect={() => this.handleSelect(uq) }>
                             { uq.toStr }
                         </MenuItem>)
                 }
-                <MenuItem divider/>
+                { userQueries && userQueries.length > 0 && <MenuItem divider/> }
                 { this.state.currentUserQuery && <MenuItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString() }</MenuItem> }
                 <MenuItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString() }</MenuItem>
             </DropdownButton>

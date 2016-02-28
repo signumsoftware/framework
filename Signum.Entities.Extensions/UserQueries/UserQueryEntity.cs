@@ -212,7 +212,7 @@ namespace Signum.Entities.UserQueries
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Name == nameof(Token) && Token != null && Token.Token != null)
+            if (pi.Name == nameof(Token) && Token != null && Token.ParseException == null)
             {
                 return QueryUtils.CanOrder(Token.Token);
             }
@@ -260,7 +260,7 @@ namespace Signum.Entities.UserQueries
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Name == nameof(Token) && Token != null && Token.Token != null)
+            if (pi.Name == nameof(Token) && Token != null && Token.ParseException == null)
             {
                 return QueryUtils.CanColumn(Token.Token);
             }
@@ -308,9 +308,9 @@ namespace Signum.Entities.UserQueries
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (token != null)
+            if (token != null && token.ParseException == null)
             {
-                if (pi.Name == nameof(Token) && token.Token != null)
+                if (pi.Name == nameof(Token))
                 {
                     return QueryUtils.CanFilter(token.Token);
                 }

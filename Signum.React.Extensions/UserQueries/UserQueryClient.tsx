@@ -6,11 +6,14 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { Entity, Lite, liteKey } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
-import { UserQueryEntity_Type, UserQueryEntity, UserQueryPermission, UserQueryMessage, QueryFilterEntity } from './Signum.Entities.UserQueries'
+import { UserQueryEntity_Type, UserQueryEntity, UserQueryPermission, UserQueryMessage,
+    QueryFilterEntity, QueryFilterEntity_Type, QueryColumnEntity, QueryColumnEntity_Type, QueryOrderEntity, QueryOrderEntity_Type } from './Signum.Entities.UserQueries'
+import { QueryTokenEntity, QueryTokenEntity_Type } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -20,19 +23,19 @@ export function start(options: { routes: JSX.Element[] }) {
     </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-        if (AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+        if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
             return null;
 
         return <UserQueryMenu searchControl={ctx.searchControl}/>;
     }); 
 
     QuickLinks.registerGlobalQuickLink(ctx => {
-        if (AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+        if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
             return null;
 
         API.forEntityType(ctx.lite.EntityType).then(uqs => {
             uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr, e => {
-                Navigator.API.fetch(uq)
+                Navigator.API.fetchAndForget(uq)
                     .then(uq => Converter.toFindOptions(uq, null))
                     .then(fo => Finder.exploreWindowsOpen(fo, e));
             }));
@@ -41,11 +44,11 @@ export function start(options: { routes: JSX.Element[] }) {
 
     QuickLinks.registerQuickLink(UserQueryEntity_Type, ctx => new QuickLinks.QuickLinkAction("preview", UserQueryMessage.Preview.niceToString(),
         e => {
-            Navigator.API.fetch(ctx.lite).then(uq => {
+            Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
                 if (uq.entityType == null)
                     return Converter.toFindOptions(uq, null);
                 else
-                    return Navigator.API.fetch(uq.entityType)
+                    return Navigator.API.fetchAndForget(uq.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
                         .then(lite => lite == null ? null : Converter.toFindOptions(uq, lite));
             }).then(fo => {
@@ -56,6 +59,15 @@ export function start(options: { routes: JSX.Element[] }) {
                 Finder.exploreWindowsOpen(fo, e);
             });
         }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
+
+    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity_Type, () => ({
+        Type: QueryFilterEntity_Type.typeName,
+        isNew: true,
+        modified: true,
+        token: Constructor.basicConstruct(QueryTokenEntity_Type)
+    }));
+
+    Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity_Type, () => QueryColumnEntity_Type.New({ token: QueryTokenEntity_Type.New() }));
 
     Navigator.addSettings(new EntitySettings(UserQueryEntity_Type, e => new Promise(resolve => require(['./Templates/UserQuery'], resolve))));
 }
@@ -124,7 +136,7 @@ export module API {
         return ajaxPost<FilterRequest[]>({ url: "/api/userQueries/parseFilters/" }, request);
     }
 
-    export function toStringFilters(request: { queryRequest: QueryRequest; defaultPagination: Pagination}): Promise<UserQueryEntity> {
+    export function fromQueryRequest(request: { queryRequest: QueryRequest; defaultPagination: Pagination}): Promise<UserQueryEntity> {
         return ajaxPost<UserQueryEntity>({ url: "/api/userQueries/fromQueryRequest/" }, request);
     }
 }

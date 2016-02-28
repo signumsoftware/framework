@@ -36,6 +36,7 @@ using Signum.Utilities;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly:InternalsVisibleTo("Signum.Engine.Extensions")]
+[assembly: InternalsVisibleTo("Signum.Engine.Extensions")]
+[assembly: InternalsVisibleTo("Signum.React.Extensions")]
 
 [assembly: DefaultAssemblyCulture("en")]
