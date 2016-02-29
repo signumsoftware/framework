@@ -95,7 +95,7 @@ export abstract class EntityComponentWithState<T extends ModifiableEntity, S> ex
     abstract renderEntity(): React.ReactElement<any>;
 }
 
-export abstract class EntityComponent<T extends ModifiableEntity> extends EntityComponentWithState<T, {}>{
+export abstract class EntityComponent<T extends ModifiableEntity> extends EntityComponentWithState<T, {}> {
 
 }
 

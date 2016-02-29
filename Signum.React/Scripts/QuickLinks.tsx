@@ -1,12 +1,12 @@
 ﻿import * as React from 'react'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from './TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, getQueryNiceName, getQueryKey, PseudoType, getTypeName} from './Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, getQueryNiceName, getQueryKey, PseudoType, getTypeName, Type} from './Reflection'
 import { classes, Dic } from './Globals'
 import { FindOptions } from './FindOptions'
 import * as Finder from './Finder'
 import * as Navigator from './Navigator'
-import { ModifiableEntity, EntityPack, ModelState, QuickLinkMessage, Lite, Entity, toLiteFat } from './Signum.Entities'
+import { ModifiableEntity, EntityPack, ModelState, QuickLinkMessage, Lite, Entity, toLiteFat, is } from './Signum.Entities'
 import { onWidgets, WidgetContext } from './Frames/Widgets'
 import { onContextualItems, ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems'
 
@@ -16,22 +16,22 @@ export function start() {
     onContextualItems.push(getQuickLinkContextMenus);
 }
 
-export interface QuickLinkContext {
-    lite: Lite<Entity>;
+export interface QuickLinkContext<T extends Entity> {
+    lite: Lite<T>;
     widgetContext?: WidgetContext;
     contextualContext?: ContextualItemsContext;
 
 }
 
 
-export var onGlobalQuickLinks: Array<(ctx: QuickLinkContext) => QuickLink | QuickLink[]> = [];
-export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext) => QuickLink | QuickLink[])
+export var onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>> = [];
+export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>)
 {
     onGlobalQuickLinks.push(quickLinkGenerator);
 }
 
-export var onQuickLinks: { [typeName: string]: Array<(ctx: QuickLinkContext) => QuickLink | QuickLink[]> } = {};
-export function registerQuickLink(type: PseudoType, quickLinkGenerator: (ctx: QuickLinkContext) => QuickLink | QuickLink[])
+export var onQuickLinks: { [typeName: string]: Array<(ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>> } = {};
+export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>)
 {
     var typeName = getTypeName(type);
 
@@ -40,14 +40,28 @@ export function registerQuickLink(type: PseudoType, quickLinkGenerator: (ctx: Qu
     col.push(quickLinkGenerator);
 }
 
-export function getQuickLinks(ctx: QuickLinkContext){
+export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[]>{
 
-    var links = onGlobalQuickLinks.flatMap(f => asArray(f(ctx)));
+    var promises = onGlobalQuickLinks.map(f => asPromiseArray<QuickLink>(f(ctx)));
 
-    if (onQuickLinks[ctx.lite.EntityType])
-        links.concat(onQuickLinks[ctx.lite.EntityType].flatMap(f => asArray(f(ctx))));
+    if (onQuickLinks[ctx.lite.EntityType]) {
+        var specificPromises = onQuickLinks[ctx.lite.EntityType].map(f => asPromiseArray<QuickLink>(f(ctx)));
 
-    return links.filter(a => a && a.isVisible).orderBy(a => a.order);
+        promises = promises.concat(specificPromises);
+    }
+
+    return Promise.all(promises).then(links => links.flatMap(a => a || []).filter(a => a && a.isVisible).orderBy(a => a.order));
+}
+
+function asPromiseArray<T>(valueOrPromiseOrArray: T | T[] | Promise<T> | Promise<T[]>): Promise<T[]> {
+
+    if (!valueOrPromiseOrArray)
+        return Promise.resolve(null);
+
+    if ((valueOrPromiseOrArray as Promise<T | T[]>).then)
+        return (valueOrPromiseOrArray as Promise<T | T[]>).then(a => asArray(a));
+
+    return Promise.resolve(asArray(valueOrPromiseOrArray as T | T[]))
 }
 
 function asArray<T>(valueOrArray: T | T[]): T[] {
@@ -58,16 +72,8 @@ function asArray<T>(valueOrArray: T | T[]): T[] {
 }
 
 export function getQuickLinkWidget(ctx: WidgetContext): React.ReactElement<any> {
-
-    var links = getQuickLinks({
-        lite: toLiteFat(ctx.pack.entity),
-        widgetContext: ctx
-    });
-
-    if (links.length == 0)
-        return null;
-
-    return <QuickLinkWidget quickLinks={links}/>;
+    
+    return <QuickLinkWidget ctx={ctx}/>;
 }
 
 export function getQuickLinkContextMenus(ctx: ContextualItemsContext): Promise<MenuItemBlock> {
@@ -78,20 +84,47 @@ export function getQuickLinkContextMenus(ctx: ContextualItemsContext): Promise<M
     var links = getQuickLinks({
         lite: ctx.lites[0],
         contextualContext: ctx
+    }).then(links => {
+    
+        if (links.length == 0)
+            return null;
+
+        return {
+            header: QuickLinkMessage.Quicklinks.niceToString(),
+            menuItems: links.map((ql, i) => ql.toMenuItem(i))
+        } as MenuItemBlock;
     });
-
-    if (links.length == 0)
-        return Promise.resolve(null);
-
-    return Promise.resolve({
-        header: QuickLinkMessage.Quicklinks.niceToString(),
-        menuItems: links.map((ql, i) => ql.toMenuItem(i))
-    } as MenuItemBlock);
 }
 
 
-export class QuickLinkWidget extends React.Component<{ quickLinks: QuickLink[] }, void> {
+export class QuickLinkWidget extends React.Component<{ ctx: WidgetContext }, { links: QuickLink[] }> {
+
+    constructor(props) {
+        super(props);
+        this.state = { links: null };
+    }
+
+    componentWillMount() {
+        this.makeRequest(this.props);
+    }
+
+    componentWillReceiveProps(newProps: { ctx: WidgetContext }) {
+        if (!is(newProps.ctx.pack.entity, this.props.ctx.pack.entity)) {
+            this.makeRequest(newProps);
+        }
+    }
+
+    makeRequest(props: { ctx: WidgetContext } ) {
+        this.setState({ links: null })
+        getQuickLinks({
+            lite: toLiteFat(props.ctx.pack.entity),
+            widgetContext: props.ctx
+        }).then(links => this.setState({ links }));
+    }
+
     render() {
+
+        var links = this.state.links;
 
         var a = (
             <a 
@@ -101,7 +134,7 @@ export class QuickLinkWidget extends React.Component<{ quickLinks: QuickLink[] }
                 href="#"
                 data-toggle="dropdown"
                 onClick={e => e.preventDefault() } >
-                {this.props.quickLinks.length}
+                {links ?  links.length : "?"}
             </a >
         );
 
@@ -109,7 +142,7 @@ export class QuickLinkWidget extends React.Component<{ quickLinks: QuickLink[] }
             <Dropdown id="quickLinksWidget" pullRight>
                 {React.cloneElement(a, { "bsRole": "toggle" }) }
                 <Dropdown.Menu>
-                    { this.props.quickLinks.orderBy(a => a.order).map((a, i) => a.toMenuItem(i)) }
+                    { links && links.orderBy(a => a.order).map((a, i) => a.toMenuItem(i)) }
                 </Dropdown.Menu>
             </Dropdown>
         );
@@ -135,7 +168,7 @@ export abstract class QuickLink {
     name: string;
     glyphicon: string;
     glyphiconColor: string;
-    ctx: QuickLinkContext;
+    ctx: QuickLinkContext<Entity>;
 
     constructor(name: string, options: QuickLinkOptions) {
         this.name = name;
@@ -162,9 +195,9 @@ export abstract class QuickLink {
 }
 
 export class QuickLinkAction extends QuickLink {
-    action: (e: React.MouseEvent, ctx: QuickLinkContext) => void;
+    action: (e: React.MouseEvent) => void;
 
-    constructor(name: string, text: string, action: (e: React.MouseEvent, ctx: QuickLinkContext) => void, options?: QuickLinkOptions) {
+    constructor(name: string, text: string, action: (e: React.MouseEvent) => void, options?: QuickLinkOptions) {
         super(name, options);
         this.text = text;
         this.action = action;
@@ -173,7 +206,7 @@ export class QuickLinkAction extends QuickLink {
     toMenuItem(key: any) {
 
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={e => this.action(e, this.ctx) }>
+            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.action}>
                 {this.icon()}
                 {this.text}
             </MenuItem>
@@ -195,11 +228,18 @@ export class QuickLinkExplore extends QuickLink {
 
     toMenuItem(key: any) {
         return (
-            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={e => Finder.explore(this.findOptions) }>
+            <MenuItem data-name={this.name} className="sf-quick-link" key={key} onClick={this.exploreOrPopup}>
                 {this.icon() }
                 {this.text}
             </MenuItem>
         );
+    }
+
+    exploreOrPopup = (e: React.MouseEvent) => {
+        if (e.ctrlKey || e.button == 2)
+            window.open(Finder.findOptionsPath(this.findOptions));
+        else
+            Finder.explore(this.findOptions);
     }
 }
 

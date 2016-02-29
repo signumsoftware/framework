@@ -180,7 +180,7 @@ namespace Signum.React.ApiControllers
             this.currentPage = (pagination as Pagination.Paginate)?.CurrentPage;
         }
 
-        internal Pagination ToPagination()
+        public Pagination ToPagination()
         {
             switch (mode)
             {

@@ -62,7 +62,7 @@ function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, event
     if (!confirmInNecessary(coc))
         return;
 
-    API.constructFromMany(coc.context.lites, coc.operationInfo.key).then(pack => {
+    API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key).then(pack => {
 
         if (!pack || !pack.entity)
             return;

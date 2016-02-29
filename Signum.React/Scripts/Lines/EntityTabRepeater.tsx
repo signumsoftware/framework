@@ -16,7 +16,6 @@ import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
-    getComponent?: (m: ModifiableEntity) => Promise<React.ComponentClass<EntityComponentProps<ModifiableEntity>>>;
     createAsLink?: boolean;
 }
 
@@ -28,16 +27,24 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
     }
 
     renderInternal() {
-        
+
+        var buttons = (
+            <span className="pull-right">
+                {this.renderCreateButton(false) }
+                {this.renderFindButton(false) }
+            </span>
+        );
+
+        if (!buttons.props.children.some(a => a))
+            buttons = null;
+
+
         return (
             <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        <span className="pull-right">
-                            {this.renderCreateButton(false) }
-                            {this.renderFindButton(false) }
-                        </span>
+                        {buttons}
                     </div>
                 </legend>
                 <Tabs>
@@ -57,7 +64,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
 export interface EntityTabRepeaterElementProps {
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-    getComponent: (m: ModifiableEntity) => Promise<React.ComponentClass<EntityComponentProps<ModifiableEntity>>>;
+    getComponent: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
     onRemove: (event: React.MouseEvent) => void;
 }
 

@@ -11,11 +11,12 @@ import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, 
 import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from './Signum.Entities';
 
 import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference,
-getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat } from './Reflection';
+    getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, PseudoType } from './Reflection';
 
 import {navigateRoute, isNavigable, currentHistory, API as NavAPI } from './Navigator';
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
+import SearchControl from './SearchControl/SearchControl';
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -30,12 +31,9 @@ export function addSettings(...settings: QuerySettings[]) {
     settings.forEach(s=> Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
-export function getQuerySettings(queryName: any): QuerySettings {
+export function getQuerySettings(queryName: PseudoType | QueryKey): QuerySettings {
     return querySettings[getQueryKey(queryName)];
 }
-
-
-
 
 export const isFindableEvent: Array<(queryKey: string) => boolean> = [];
 
@@ -51,7 +49,7 @@ export function find(findOptions: FindOptions): Promise<Lite<IEntity>>;
 export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<IEntity>> {
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
-        { queryName: findOptions } as FindOptions;
+        { queryName: findOptions as Type<any> } as FindOptions;
     
     return new Promise<Lite<IEntity>>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
@@ -65,7 +63,7 @@ export function findMany(findOptions: FindOptions): Promise<Lite<IEntity>[]>;
 export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEntity>[]> {
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
-        { queryName: findOptions } as FindOptions;
+        { queryName: findOptions as Type<any> } as FindOptions;
 
     return new Promise<Lite<IEntity>[]>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
@@ -74,22 +72,24 @@ export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEn
     });
 }
 
-export function explore<T extends Entity>(type: Type<T>): Promise<void>;
-export function explore(findOptions: FindOptions): Promise<void>;
-export function explore(findOptions: FindOptions | Type<any>): Promise<void> {
+export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent) {
+    if (e.ctrlKey || e.button == 2)
+        window.open(findOptionsPath(findOptions));
+    else
+        explore(findOptions).done();
+}
 
-    const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
-        { queryName: findOptions } as FindOptions;
+export function explore(findOptions: FindOptions): Promise<void> {
 
     return new Promise<void>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
-            SP.default.explore(fo).then(resolve, reject);
+            SP.default.explore(findOptions).then(resolve, reject);
         });
     });
 }
 
 export function findOptionsPath(findOptions: FindOptions): string;
-export function findOptionsPath(queryName: any): string;
+export function findOptionsPath(queryName: PseudoType | QueryKey): string;
 export function findOptionsPath(queryNameOrFindOptions: any): string
 {
     const fo = queryNameOrFindOptions as FindOptions;
@@ -114,7 +114,7 @@ export function findOptionsPath(queryNameOrFindOptions: any): string
     return currentHistory.createPath("/Find/" + getQueryKey(fo.queryName), query);
 }
 
-export function parseFindOptionsPath(queryName: string, query: any): FindOptions {
+export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: any): FindOptions {
     
     const result = {
         queryName: queryName,
@@ -209,24 +209,8 @@ export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
 
     var promises: Promise<any>[] = [];
 
-    var needToStr: Lite<any>[] = [];
-
     if (findOptions.filterOptions)
-        promises.push(...findOptions.filterOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll).then(_ => {
-            if (isList(fo.operation)) {
-                if (!Array.isArray(fo.value))
-                    fo.value = [fo.value];
-
-                fo.value = (fo.value as any[]).map(v => parseValue(fo.token, v, needToStr));
-            }
-
-            else {
-                if (Array.isArray(fo.value))
-                    throw new Error("Unespected array for operation " + fo.operation);
-
-                fo.value = parseValue(fo.token, fo.value, needToStr);
-            }
-        })));
+        promises.push(...findOptions.filterOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)));
 
     if (findOptions.orderOptions)
         promises.push(...findOptions.orderOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement)));
@@ -234,15 +218,23 @@ export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
     if (findOptions.columnOptions)
         promises.push(...findOptions.columnOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement)));
 
-    completer.trigger();
+    completer.finished();
 
     return Promise.all(promises)
-        .then(a => !needToStr.length ? null : NavAPI.fillToStrings(needToStr))
-        .then(() => findOptions);
+        .then(() => parseFilterValues(findOptions.filterOptions).then(() => findOptions));
+}
+
+export function parseSingleToken(queryName: PseudoType | QueryKey, token: string, subTokenOptions: SubTokensOptions): Promise<QueryToken> {
+
+    const completer = new TokenCompleter(queryName);
+    const result = completer.request(token, subTokenOptions);
+    completer.finished();
+
+    return result;
 }
 
 class TokenCompleter {
-    constructor(public queryName: any) { }
+    constructor(public queryName: PseudoType | QueryKey) { }
 
     tokensToRequest: { [fullKey: string]: ({ options: SubTokensOptions, promise: Promise<QueryToken>, resolve: (action: QueryToken) => void }) };
 
@@ -257,6 +249,9 @@ class TokenCompleter {
 
 
     request(fullKey: string, options: SubTokensOptions): Promise<QueryToken> {
+
+        if (fullKey == null)
+            return Promise.resolve(null);
 
         if (!fullKey.contains("."))
             return API.getQueryDescription(this.queryName).then(qd=> toQueryToken(qd.columns[fullKey]));
@@ -276,7 +271,8 @@ class TokenCompleter {
     }
 
 
-    trigger(): Promise<void> {
+    finished(): Promise<void> {
+
         const queryKey = getQueryKey(this.queryName);
         const tokens = Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }));
         
@@ -288,6 +284,34 @@ class TokenCompleter {
         });
     }
 }
+
+
+
+function parseFilterValues(filterOptions: FilterOption[]): Promise<void> {
+
+    var needToStr: Lite<any>[] = [];
+    filterOptions.forEach(fo => {
+        if (isList(fo.operation)) {
+            if (!Array.isArray(fo.value))
+                fo.value = [fo.value];
+
+            fo.value = (fo.value as any[]).map(v => parseValue(fo.token, v, needToStr));
+        }
+
+        else {
+            if (Array.isArray(fo.value))
+                throw new Error("Unespected array for operation " + fo.operation);
+
+            fo.value = parseValue(fo.token, fo.value, needToStr);
+        }
+    });
+
+    if (needToStr.length == 0)
+        return Promise.resolve(null);
+
+    return NavAPI.fillToStrings(needToStr)
+}
+
 
 function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
     switch (filterType(token)) {
@@ -345,12 +369,11 @@ function calculateFilterType(typeRef: TypeReference): FilterType {
     return FilterType.Boolean;
 }
 
-
 export module API {
 
     const queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
 
-    export function getQueryDescription(queryName: any): Promise<QueryDescription> {
+    export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
 
         const key = getQueryKey(queryName);
 
@@ -500,10 +523,16 @@ function getTokenString(tokenContainer: { columnName: string, token?: QueryToken
 
 export module ButtonBarQuery {
 
-    export function getContextBarElements(queryKey: string) {
-        return null;
+    interface ButtonBarQueryContext {
+        searchControl: SearchControl;
+        findOptions: FindOptions;
     }
 
+    export var onButtonBarElements: ((ctx: ButtonBarQueryContext) => React.ReactElement<any>)[] = [];
+
+    export function getButtonBarElements(ctx: ButtonBarQueryContext): React.ReactElement<any>[] {
+        return onButtonBarElements.map(f => f(ctx)).filter(a => a != null);
+    }
 }
 
 
@@ -517,7 +546,7 @@ export const defaultPagination: Pagination = {
 export const defaultOrderColumn: string = "Id";
 
 export interface QuerySettings {
-    queryName: any;
+    queryName: PseudoType | QueryKey;
     pagination?: Pagination;
     defaultOrderColumn?: string;
     formatters?: { [columnName: string]: CellFormatter };

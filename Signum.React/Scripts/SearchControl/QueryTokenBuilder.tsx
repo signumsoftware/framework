@@ -28,7 +28,7 @@ export default class QueryTokenBuilder extends React.Component<QueryTokenBuilder
         tokenList.push(null);
         
         return (
-            <div>
+            <div className="sf-query-token-builder">
                 {tokenList.map((a, i) => <QueryTokenPart key={i}
                     queryKey={this.props.queryKey}
                     readOnly={this.props.readOnly}

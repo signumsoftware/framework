@@ -5,7 +5,7 @@ import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstr
 import { Dic, DomUtils } from '../Globals'
 import * as Finder from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
-    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandSimpleColumnName } from '../FindOptions'
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandSimpleColumnName, QueryRequest } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, IEntity, liteKey, is } from '../Signum.Entities'
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData} from '../Reflection'
 import * as Navigator from '../Navigator'
@@ -33,6 +33,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     findOptions: FindOptions;
     simpleFilterBuilder?: React.ComponentClass<SimpleFilterBuilderProps>;
     externalFullScreenButton?: ExternalFullScreenButton;
+    onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
     showContextMenu?: boolean;
     onSelectionChanged?: (entity: Lite<IEntity>[]) => void
 }
@@ -133,7 +134,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             allowChangeColumn: true,
             create: ti.some(ti => Navigator.isCreable(ti, true)),
             navigate: ti.some(ti => Navigator.isNavigable(ti, null, true)),
-            pagination: (this.state.querySettings && this.state.querySettings.pagination) || Finder.defaultPagination,
+            pagination: this.defaultPagination(),
             columnOptionsMode: ColumnOptionsMode.Add,
             columnOptions: [],
             orderOptions: [],
@@ -155,14 +156,19 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             }
         }
 
-        Finder.parseTokens(findOptions).then(fo => {
-            this.setState({
-                findOptions: fo,
-            });
+        Finder.parseTokens(findOptions)
+            .then(fo => {
+                this.setState({
+                    findOptions: fo,
+                });
 
-            if (this.state.findOptions.searchOnLoad)
-                this.handleSearch();
-        }).done();
+                if (this.state.findOptions.searchOnLoad)
+                    this.handleSearch();
+            }).done();
+    }
+
+    defaultPagination() {
+        return (this.state.querySettings && this.state.querySettings.pagination) || Finder.defaultPagination
     }
 
     entityColumn(): ColumnDescription {
@@ -178,20 +184,28 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         return fo.showHeader && (fo.showFilterButton || fo.showFilters)
     }
 
+    getQueryKey(): string {
+        return getQueryKey(this.state.findOptions.queryName);
+    }
 
+    getQueryRequest() : QueryRequest {
+        var fo = this.state.findOptions;
+
+        return {
+            queryKey: getQueryKey(fo.queryName),
+            filters: fo.filterOptions.filter(a => a.token != null && a.operation != null).map(fo => ({ token: fo.token.fullKey, operation: fo.operation, value: fo.value })),
+            columns: fo.columnOptions.filter(a => a.token != null).map(co => ({ token: co.token.fullKey, displayName: co.displayName })),
+            orders: fo.orderOptions.filter(a => a.token != null).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
+            pagination: fo.pagination,
+        };
+    }
 
     // MAIN
 
     handleSearch = () => {
         const fo = this.state.findOptions;
         this.setState({ loading: false, editingColumn: null });
-        Finder.API.search({
-            queryKey: getQueryKey(fo.queryName),
-            filters: fo.filterOptions.filter(a => a.token != null && a.operation != null).map(fo => ({ token: fo.token.fullKey, operation: fo.operation, value: fo.value })),
-            columns: fo.columnOptions.filter(a => a.token != null).map(co => ({ token: co.token.fullKey, displayName: co.displayName })),
-            orders: fo.orderOptions.filter(a => a.token != null).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
-            pagination: fo.pagination,
-        }).then(rt => {
+        Finder.API.search(this.getQueryRequest()).then(rt => {
             this.setState({ resultTable: rt, selectedRows: [], currentMenuItems: null, markedRows: null, loading: false });
             this.notifySelectedRowsChanged();
             this.forceUpdate();
@@ -324,7 +338,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                     <span className="glyphicon glyphicon-plus"></span>
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton() }
-                {Finder.ButtonBarQuery.getContextBarElements(fo.queryName) }
+                {Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i })) }
                 {!this.props.externalFullScreenButton &&
                     <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>
@@ -660,7 +674,6 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         });
     }
 
-
     renderHeaders(): React.ReactNode {
 
         return (
@@ -734,6 +747,25 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.forceUpdate();
     }
 
+    handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
+        e.preventDefault();
+        if (this.props.onDoubleClick) {
+            this.props.onDoubleClick(e, row);
+            return;
+        } else {
+            var s = Navigator.getSettings(row.entity.EntityType)
+
+            var avoidPopup = s != null && s.avoidPopup;
+
+            if (avoidPopup || e.ctrlKey || e.button == 1) {
+                window.open(Navigator.navigateRoute(row.entity));
+            }
+            else {
+                Navigator.navigate(row.entity).done();
+            }
+        }
+    }
+
     renderRows(): React.ReactNode {
 
         const columnsCount = this.state.findOptions.columnOptions.length +
@@ -767,7 +799,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             const mark: { style: string, message: string } = typeof m === "string" ? { style: m == "" ? null : "error", message: m } : m;
 
             const tr = (
-                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity) } {...rowAttributes ? rowAttributes(row, this.state.resultTable.columns) : null}
+                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity) }  onDoubleClick={e => this.handleDoubleClick(e, row) } {...rowAttributes ? rowAttributes(row, this.state.resultTable.columns) : null}
                     className={mark && mark.style}
                     style={{ opacity: mark && mark.message == "" ? 0.5 : 1 }} >
 

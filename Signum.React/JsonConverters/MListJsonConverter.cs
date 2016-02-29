@@ -40,17 +40,9 @@ namespace Signum.React.Json
                 foreach (var item in ((IMListPrivate<T>)value).InnerList)
                 {
                     writer.WriteStartObject();
-                    if (item.RowId != null)
-                    {
-                        writer.WritePropertyName("rowId");
-                        writer.WriteValue(item.RowId.Value.Object);
-                    }
-
-                    if (item.OldIndex != null)
-                    {
-                        writer.WritePropertyName("oldIndex");
-                        serializer.Serialize(writer, item.OldIndex);
-                    }
+                    
+                    writer.WritePropertyName("rowId");
+                    writer.WriteValue(item.RowId == null ? null : item.RowId.Value.Object);
 
                     writer.WritePropertyName("element");
                     serializer.Serialize(writer, item.Element);

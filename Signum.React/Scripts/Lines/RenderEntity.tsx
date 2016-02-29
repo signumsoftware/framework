@@ -17,11 +17,12 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 export interface RenderEntityProps {
     ctx?: TypeContext<ModifiableEntity | Lite<IEntity>>;
-    getComponent?: (mod: ModifiableEntity) => Promise<React.ComponentClass<EntityComponentProps<ModifiableEntity>>>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
 }
 
 export interface RenderEntityState {
-    component: React.ComponentClass<EntityComponentProps<ModifiableEntity>>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
+    lastLoadedType?: string;
 }
 
 export class RenderEntity extends React.Component<RenderEntityProps, RenderEntityState> {
@@ -29,7 +30,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     constructor(props) {
         super(props);
 
-        this.state = { component: null };
+        this.state = { getComponent: null, lastLoadedType: null };
     }
 
 
@@ -40,15 +41,9 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     }
 
     componentWillReceiveProps(nextProps: RenderEntityProps) {
-        if (!is(this.props.ctx.value, nextProps.ctx.value)) {
-            this.setState({
-                component: null
-            });
-
-            this.loadEntity()
-                .then(e => this.loadComponent(e))
-                .done();
-        }
+        this.loadEntity()
+            .then(e => this.loadComponent(e))
+            .done();
     }
 
     loadEntity(): Promise<Entity> {
@@ -86,22 +81,35 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         throw new Error("Unexpected value " + lite);
     }
 
-    loadComponent(e: Entity) {
+    loadComponent(e: Entity): Promise<void> {
 
         if (e == null)
-            this.setState({ component: null });
-    
-        const promise = this.props.getComponent ?
-            this.props.getComponent(e) :
-            Navigator.getSettings(e.Type).onGetComponent(e);
+            return Promise.resolve(null);
 
-        return promise
-            .then(c => this.setState({ component: c }));
+        if (this.props.getComponent) {
+            if (this.state.getComponent != this.props.getComponent)
+                this.setState({ getComponent: this.props.getComponent, lastLoadedType: null });
+            return Promise.resolve(null);
+        }
+
+
+        if (this.state.lastLoadedType == e.Type)
+            return Promise.resolve(null);
+
+        return Navigator.getSettings(e.Type).onGetComponent(e).then(c => {
+            this.setState({
+                getComponent: (ctx, frame) => React.createElement<EntityComponentProps<ModifiableEntity>>(c, {
+                    ctx: ctx,
+                    frame: frame
+                }),
+                lastLoadedType: e.Type
+            });
+        });
     }
 
     render() {
         var entity = this.getEntity();
-        if (entity == null || this.state.component == null)
+        if (entity == null || this.state.getComponent == null)
             return null;
         
         var ti = getTypeInfo(entity.Type);
@@ -118,10 +126,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
             setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
         }; 
 
-        return React.createElement<EntityComponentProps<ModifiableEntity>>(this.state.component, {
-            ctx: newCtx,
-            frame: frame
-        });
+        return this.state.getComponent(newCtx, frame);
     }
 
 }

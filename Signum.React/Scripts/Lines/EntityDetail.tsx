@@ -16,7 +16,6 @@ import { RenderEntity } from './RenderEntity'
 
 export interface EntityDetailProps extends EntityBaseProps {
     ctx?: TypeContext<ModifiableEntity | Lite<IEntity>>;
-    getComponent?: (mod: ModifiableEntity) => Promise<React.ComponentClass<EntityComponentProps<ModifiableEntity>>>;
 }
 
 export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProps> {
@@ -32,16 +31,23 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
 
         const hasValue = !!s.ctx.value;
 
+        var buttons = (
+            <span className="pull-right">
+                {!hasValue && this.renderCreateButton(false) }
+                {!hasValue && this.renderFindButton(false) }
+                {hasValue && this.renderRemoveButton(false) }
+            </span>
+        );
+
+        if (!buttons.props.children.some(a => a))
+            buttons = null;
+
         return (
             <fieldset className={classes("sf-entity-line-details", s.ctx.binding.errorClass) }>
                 <legend>
                     <div>
                         <span>{s.labelText}</span>
-                        <span className="pull-right">
-                            {!hasValue && this.renderCreateButton(false) }
-                            {!hasValue && this.renderFindButton(false) }
-                            {hasValue && this.renderRemoveButton(false) }
-                        </span>
+                        {buttons}
                     </div>
                 </legend>
                 <div>

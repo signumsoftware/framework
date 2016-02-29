@@ -206,6 +206,14 @@ namespace Signum.React.Json
             }
         }
 
+
+        public static Polymorphic<Action<ModifiableEntity>> AfterDeserilization = new Polymorphic<Action<ModifiableEntity>>();
+
+        static EntityJsonConverter()
+        {
+            AfterDeserilization.Register((ModifiableEntity e) => { });
+        }
+
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
@@ -258,6 +266,8 @@ namespace Signum.React.Json
             }
 
             reader.Assert(JsonToken.EndObject);
+
+            AfterDeserilization.Invoke(mod);
 
             return mod;
         }
@@ -321,14 +331,14 @@ namespace Signum.React.Json
             Type type = GetEntityType(identityInfo.Type, objectType);
 
             if (identityInfo.IsNew == true)
-                return (ModifiableEntity)Activator.CreateInstance(type);
+                return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
 
-            if(typeof(Entity).IsAssignableFrom(type))
+            if (typeof(Entity).IsAssignableFrom(type))
             {
                 if (identityInfo.Id == null)
                     throw new JsonSerializationException($"Missing Id and IsNew for {identityInfo} ({reader.Path})");
 
-           
+
                 var id = PrimaryKey.Parse(identityInfo.Id, type);
                 if (existingValue != null && existingValue.GetType() == type)
                 {
@@ -356,13 +366,15 @@ namespace Signum.React.Json
             }
             else //Embedded
             {
-                if (existingValue == null)
-                    throw new JsonSerializationException($"Missing IsNew for {identityInfo} because existingValue is null");
+                var existingMod = (ModifiableEntity)existingValue;
 
-                if (existingValue.GetType() != type)
-                    throw new JsonSerializationException($"Missing IsNew for {identityInfo} because existingValue has a different type");
+                if (existingMod == null || existingMod.GetType() != type)
+                    return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
 
-                return (ModifiableEntity)existingValue;              
+                if (identityInfo.Modified == true)
+                    existingMod.SetSelfModified();
+
+                return existingMod;
             }
         }
 

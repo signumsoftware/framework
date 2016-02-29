@@ -2,10 +2,14 @@
     min-height: 50px;
 }
 
-    .sf-search-footer div {
+    .sf-search-footer > div {
         float: left;
         width: 33%;
     }
+
+.sf-pagination-center > div {
+    display: inline;
+}
 
 table.sf-search-results > thead {
     white-space: nowrap;
@@ -101,12 +105,9 @@ div.sf-pagination-right > ul.pagination {
     background-color: transparent;
 }
 
-span.token-builder > select.form-control {
-    width: auto;
-    display: inline;
-    height: 30px;
-    padding: 4px;
-    margin: 2px 0px;
+
+.sf-query-token-builder {
+    display: inline-block
 }
 
 .sf-query-token-part {

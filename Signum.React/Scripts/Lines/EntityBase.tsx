@@ -8,8 +8,8 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
 import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey } from '../Signum.Entities'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
-import { EntityComponentProps } from '../Lines'
+import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
+import { EntityComponentProps, EntityFrame } from '../Lines'
 import Typeahead from '../Lines/Typeahead'
 import SelectorPopup from '../SelectorPopup'
 
@@ -27,7 +27,7 @@ export interface EntityBaseProps extends LineBaseProps {
     onFind?: () => Promise<ModifiableEntity | Lite<IEntity>>;
     onRemove?: (entity: ModifiableEntity | Lite<IEntity>) => Promise<boolean>;
 
-    component?: React.ComponentClass<EntityComponentProps<any>>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
 }
 
 
@@ -38,8 +38,6 @@ export interface EntityBaseState extends LineBaseProps {
     create?: boolean;
     find?: boolean;
     remove?: boolean;
-
-    component?: React.ComponentClass<EntityComponentProps<any>>;
 }
 
 
@@ -53,13 +51,13 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             type.name == IsByAll ? false :
                 getTypeInfos(type).some(ti => Navigator.isCreable(ti, false));
 
-        state.view = type.isEmbedded ? Navigator.isViewable(type.name, !!state.component) :
+        state.view = type.isEmbedded ? Navigator.isViewable(type.name, !!this.props.getComponent) :
             type.name == IsByAll ? true :
-                getTypeInfos(type).some(ti => Navigator.isViewable(ti, !!state.component));
+                getTypeInfos(type).some(ti => Navigator.isViewable(ti, !!this.props.getComponent));
 
-        state.navigate = type.isEmbedded ? Navigator.isNavigable(type.name, !!state.component) :
+        state.navigate = type.isEmbedded ? Navigator.isNavigable(type.name, !!this.props.getComponent) :
             type.name == IsByAll ? true :
-                getTypeInfos(type).some(ti => Navigator.isNavigable(ti, !!state.component));
+                getTypeInfos(type).some(ti => Navigator.isNavigable(ti, !!this.props.getComponent));
 
         state.find = type.isEmbedded ? false :
             type.name == IsByAll ? false :
@@ -90,7 +88,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 return Promise.resolve(entityOrLite);
 
             if (isLite) {
-                return Navigator.API.fetchAndRemember(entityOrLite as Lite<IEntity>);
+                const lite = entityOrLite as Lite<IEntity>;
+                return Navigator.API.fetchAndRemember(lite);
             }
 
             const entity = entityOrLite as Entity;
@@ -102,9 +101,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     defaultView(value: ModifiableEntity | Lite<IEntity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
 
-    
-            return Navigator.view({ entity: value, propertyRoute: propertyRoute });
-        
+        return Navigator.view({ propertyRoute: propertyRoute, entity: value, component: this.props.getComponent } as Navigator.ViewOptions);
     }
 
 

@@ -318,7 +318,7 @@ export class Binding<T> implements IBinding<T> {
 
     get error(): string {
         const parentErrors = (this.parentValue as ModifiableEntity).error;
-        return parentErrors != null && parentErrors[this.member];
+        return parentErrors && parentErrors[this.member];
     }
 
     get errorClass(): string {
@@ -431,7 +431,18 @@ export interface IType {
     typeName: string;
 }
 
-export class Type<T> implements IType {
+export class Type<T extends ModifiableEntity> implements IType {
+
+    New(options?: T): T {
+
+        var result = { Type: this.typeName, isNew: true, modified: true } as any as T;
+
+        if (options)
+            return Dic.extend(result, options);
+
+        return result;
+    }
+
     constructor(
         public typeName: string) { }
 
@@ -491,10 +502,10 @@ export class MessageKey {
         return getTypeInfo(this.type).members[this.name]
     }
 
-    niceToString(args?: any[]): string {
+    niceToString(...args: any[]): string {
         const msg = this.propertyInfo().niceName;
 
-        return args ? msg.formatWith(args) : msg;
+        return args.length ? msg.formatWith(args) : msg;
     }
 }
 
@@ -699,6 +710,7 @@ export class GraphExplorer {
 
     static propagateAll(...args: any[]) {
         const ge = new GraphExplorer();
+        ge.modelStateMode = "clean";
         args.forEach(o => ge.isModified(o, null));
     }
 
@@ -707,7 +719,8 @@ export class GraphExplorer {
         ge.modelStateMode = "set";
         ge.modelState = modelState == null ? {} : Dic.copy(modelState);
         ge.isModifiableObject(e, initialPrefix);
-        Dic.extend(e.error, ge.modelState); //Assign remaining
+        if (Dic.getValues(ge.modelState).length) //Assign remaining
+            e.error = Dic.extend(e.error || {}, ge.modelState);
     }
 
     static collectModelState(e: ModifiableEntity, initialPrefix: string): ModelState {
@@ -722,7 +735,7 @@ export class GraphExplorer {
     private modified = [];
     private notModified = [];
 
-    private modelStateMode: "collect" | "set";
+    private modelStateMode: "collect" | "set" | "clean";
 
     private modelState: ModelState;
 
@@ -761,7 +774,7 @@ export class GraphExplorer {
 
         const mle = obj as MListElement<any>;
         if (mle.hasOwnProperty("rowId"))
-            return mle.rowId == null || this.isModified(mle.element, dot(modelStatePrefix, "element"));
+            return this.isModified(mle.element, dot(modelStatePrefix, "element")) || mle.rowId == null;
 
         const lite = obj as Lite<Entity>
         if (lite.EntityType)
@@ -774,7 +787,6 @@ export class GraphExplorer {
                 if (obj.hasOwnProperty(p)) {
                     const propertyPrefix = dot(modelStatePrefix, p);
                     result = this.isModified(obj[p], propertyPrefix) || result;
-                    mod.modified = true;
                 }
             }
 
@@ -811,12 +823,15 @@ export class GraphExplorer {
             if (mod.error == null)
                 delete mod.error;
         }
+        else if (this.modelStateMode == "clean") {
+            delete mod.error;
+        }
 
         
         for (const p in obj) {
             if (obj.hasOwnProperty(p) && !GraphExplorer.specialProperties.contains(p)) {
                 const propertyPrefix = dot(modelStatePrefix, p);
-                if (this.isModified(p, propertyPrefix))
+                if (this.isModified(obj[p], propertyPrefix))
                     mod.modified = true;
             }
         }
