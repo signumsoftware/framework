@@ -121,7 +121,7 @@ namespace Signum.Engine.Word
 
         protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
         {
-            var str = "@" + this.ValueProvider.ToString(variables, Format.HasText() ? (":" + Format) : null);
+            var str = "@" + this.ValueProvider.ToString(variables, Format.HasText() ? (":" + TemplateUtils.ScapeColon(Format)) : null);
 
             this.ReplaceBy(new Run(this.RunProperties?.Do(prop => prop.Remove()), new Text(str)));
         }
