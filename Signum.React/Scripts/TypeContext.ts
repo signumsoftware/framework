@@ -174,7 +174,11 @@ export class TypeContext<T> extends StyleContext {
         return result;
     }
 
-    niceName(property: (val: T) => any) {
+    niceName(property?: (val: T) => any) {
+
+        if (property == null)
+            return this.propertyRoute.member.niceName;
+
         return this.propertyRoute.add(property).member.niceName;
     }
 }
