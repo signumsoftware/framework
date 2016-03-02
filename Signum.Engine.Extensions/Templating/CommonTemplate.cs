@@ -43,6 +43,12 @@ namespace Signum.Engine.Templating
             };
         }
 
+
+        public static string ScapeColon(string tokenOrFormat)
+        {
+            return tokenOrFormat.Replace(":", @"\:");
+        }
+
         public static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {
             return rows.Select(r => r[column]).Distinct(SemiStructuralEqualityComparer.Comparer).SingleEx(
