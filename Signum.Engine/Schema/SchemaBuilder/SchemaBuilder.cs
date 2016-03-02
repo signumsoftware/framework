@@ -346,13 +346,12 @@ namespace Signum.Engine.Maps
 
         protected virtual Field GenerateField(ITable table, PropertyRoute route, NameSequence preName, bool forceNull, bool inMList)
         {
-            //fieldType: Va variando segun se entra en colecciones o contenidos
-            //fi.Type: el tipo del campo asociado
+            
 
             KindOfField kof = GetKindOfField(route).ThrowIfNull(() => "Field {0} of type {1} has no database representation".FormatWith(route, route.Type.Name));
 
             if(kof == KindOfField.MList && inMList)
-                throw new InvalidOperationException("Field {0} of type {1} can not be neasted in another MList".FormatWith(route, route.Type.TypeName(), kof));
+                throw new InvalidOperationException("Field {0} of type {1} can not be nested in another MList".FormatWith(route, route.Type.TypeName(), kof));
 
             //field name generation 
             NameSequence name;
