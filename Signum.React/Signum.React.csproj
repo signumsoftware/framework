@@ -231,6 +231,7 @@
     <TypeScriptCompile Include="Scripts\SearchControl\ContextualItems.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\FilterBuilder.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\MultipliedMessage.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\CountSearchControl.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\PaginationSelector.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\QueryTokenBuilder.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchControl.tsx" />

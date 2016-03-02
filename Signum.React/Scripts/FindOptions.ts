@@ -175,6 +175,11 @@ export interface QueryRequest {
     pagination: Pagination;
 }
 
+export interface CountQueryRequest {
+    queryKey: string;
+    filters: FilterRequest[];
+}
+
 export interface ResultColumn {
     displayName: string;
     token: QueryToken;

@@ -71,11 +71,7 @@ namespace Signum.Engine.DynamicQuery
             //AssertQueryAllowed(queryName);
             return queries.GetOrThrow(queryName).EntityImplementations;
         }
-
-
-
-
-
+        
         T Execute<T>(ExecuteType executeType, object queryName, BaseQueryRequest request, Func<DynamicQueryBucket, T> executor)
         {
             using (ExecutionMode.UserInterface())

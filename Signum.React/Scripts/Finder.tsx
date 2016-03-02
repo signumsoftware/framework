@@ -4,7 +4,7 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
-import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation,
+import { QueryDescription, CountQueryRequest, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation,
     QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn,
     ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken, isList } from './FindOptions';
 
@@ -388,9 +388,12 @@ export module API {
             });
     }
 
-
     export function search(request: QueryRequest): Promise<ResultTable> {
         return ajaxPost<ResultTable>({ url: "/api/query/search" }, request);
+    }
+
+    export function queryCount(request: CountQueryRequest): Promise<number> {
+        return ajaxPost<number>({ url: "/api/query/queryCount" }, request);
     }
 
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<IEntity>[]> {
