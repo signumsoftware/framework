@@ -118,7 +118,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
         var pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
         
-        var newCtx = new TypeContext<ModifiableEntity>(ctx, null, pr, new ReadonlyBinding(entity));
+        var newCtx = new TypeContext<ModifiableEntity>(ctx, null, pr, new ReadonlyBinding(entity, ""));
         
         var frame: EntityFrame<ModifiableEntity> = {
             onClose: () => { throw new Error("Not implemented Exception"); },

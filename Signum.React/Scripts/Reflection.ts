@@ -292,7 +292,7 @@ function calculateRequiresSaveOperation(entityKind: EntityKind): boolean
 export interface IBinding<T> {
     getValue(): T;
     setValue(val: T): void;
-
+    suffix: string;
     error: string;
     errorClass: string;
 }
@@ -302,6 +302,10 @@ export class Binding<T> implements IBinding<T> {
     constructor(
         public member: string | number,
         public parentValue: any) {
+    }
+
+    get suffix() {
+        return this.member.toString();
     }
 
     getValue(): T {
@@ -328,7 +332,8 @@ export class Binding<T> implements IBinding<T> {
 
 export class ReadonlyBinding<T> implements IBinding<T> {
     constructor(
-        public value: T) {
+        public value: T,
+        public suffix: string) {
     }
 
     getValue() {
@@ -358,7 +363,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
     const body = lambdaMatch[2];
 
     if (parameter == body)
-        return new ReadonlyBinding<T>(parentValue as T);
+        return new ReadonlyBinding<T>(parentValue as T, "");
 
     const m = memberRegex.exec(body);
 

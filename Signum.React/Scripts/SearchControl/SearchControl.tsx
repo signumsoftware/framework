@@ -748,22 +748,29 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
-        e.preventDefault();
+
         if (this.props.onDoubleClick) {
+            e.preventDefault();
             this.props.onDoubleClick(e, row);
             return;
-        } else {
-            var s = Navigator.getSettings(row.entity.EntityType)
-
-            var avoidPopup = s != null && s.avoidPopup;
-
-            if (avoidPopup || e.ctrlKey || e.button == 1) {
-                window.open(Navigator.navigateRoute(row.entity));
-            }
-            else {
-                Navigator.navigate(row.entity).done();
-            }
         }
+
+        if (!Navigator.isNavigable(row.entity.EntityType))
+            return;
+
+        e.preventDefault();
+
+        var s = Navigator.getSettings(row.entity.EntityType)
+
+        var avoidPopup = s != null && s.avoidPopup;
+
+        if (avoidPopup || e.ctrlKey || e.button == 1) {
+            window.open(Navigator.navigateRoute(row.entity));
+        }
+        else {
+            Navigator.navigate(row.entity).done();
+        }
+
     }
 
     renderRows(): React.ReactNode {

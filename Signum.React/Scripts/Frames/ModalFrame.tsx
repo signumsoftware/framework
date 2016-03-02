@@ -23,7 +23,7 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     requiresSaveOperation?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
     isNavigate?: boolean;
-    readOnly?: boolean
+    readOnly?: boolean;
 }
 
 interface ModalFrameState {
@@ -33,7 +33,10 @@ interface ModalFrameState {
     propertyRoute?: PropertyRoute;
     savedEntity?: string;
     show?: boolean;
+    prefix?: string;
 }
+
+var modalCount = 0;
 
 export default class ModalFrame extends React.Component<ModalFrameProps, ModalFrameState>  {
 
@@ -45,7 +48,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     constructor(props) {
         super(props);
         this.state = this.calculateState(props);
-
+        this.state.prefix = "modal" + (modalCount++);
     }
 
     componentWillMount() {
@@ -187,7 +190,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         var pack = this.state.pack;
 
-        var ctx =  new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity));
+        var ctx = new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity, this.state.prefix));
 
         return (
             <Modal.Body>
