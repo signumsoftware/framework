@@ -119,7 +119,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             readOnly: this.state.entitySettings.onIsReadonly()
         };
 
-        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity));
+        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity, ""));
 
         const frame: EntityFrame<Entity> = {
             onReload: pack => this.setState({ pack }),
