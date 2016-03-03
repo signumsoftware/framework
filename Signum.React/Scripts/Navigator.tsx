@@ -162,18 +162,18 @@ export interface NavigateOptions {
     getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
 }
 
-export function navigate(options: NavigateOptions): Promise<ModifiableEntity>;
-export function navigate<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<T>;
-export function navigate<T extends IEntity>(entity: Lite<T>): Promise<T>
-export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity> {
+export function navigate(options: NavigateOptions): Promise<void>;
+export function navigate<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<void>;
+export function navigate<T extends IEntity>(entity: Lite<T>): Promise<void>
+export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | Lite<Entity>): Promise<void> {
     const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } as NavigateOptions :
         (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } as NavigateOptions :
             (entityOrOptions as EntityPack<ModifiableEntity>).entity ? { entity: entityOrOptions } as NavigateOptions :
                 entityOrOptions as NavigateOptions;
 
-    return new Promise<ModifiableEntity>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
-            NP.default.openView(options).then(resolve, reject);
+            NP.default.openNavigate(options).then(resolve, reject);
         });
     });
 } 
