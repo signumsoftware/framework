@@ -67,10 +67,12 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
     render() {
         const ctx = this.props.ctx;
 
-        return <p id={ this.props.controlId }
-            className = {(ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static") + " " + this.props.className}>
-            { this.props.children }
-        </p>
+        return (
+            <p id={ this.props.controlId }
+                className ={classes(ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static", this.props.className) }>
+                { this.props.children }
+            </p>
+        );
     }
 
 }
