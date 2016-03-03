@@ -236,7 +236,13 @@ export function parseSingleToken(queryName: PseudoType | QueryKey, token: string
 class TokenCompleter {
     constructor(public queryName: PseudoType | QueryKey) { }
 
-    tokensToRequest: { [fullKey: string]: ({ options: SubTokensOptions, promise: Promise<QueryToken>, resolve: (action: QueryToken) => void }) };
+    tokensToRequest: {
+        [fullKey: string]: (
+            {
+                options: SubTokensOptions, promise: Promise<QueryToken>,
+                resolve: (action: QueryToken) => void
+            })
+    } = {};
 
 
     complete(tokenContainer: { columnName: string, token?: QueryToken }, options: SubTokensOptions): Promise<void> {
@@ -261,7 +267,7 @@ class TokenCompleter {
         if (bucket)
             return bucket.promise;
 
-        bucket = { promise: null, resolve: null, options: options };
+        this.tokensToRequest[fullKey] = bucket = { promise: null, resolve: null, options: options };
 
         bucket.promise = new Promise<QueryToken>((resolve, reject) => {
             bucket.resolve = resolve;

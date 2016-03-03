@@ -10,9 +10,6 @@ export interface CountOptions {
     filterOptions?: FilterOption[];
 }
 
-
-
-
 export interface FindOptions {
     queryName: PseudoType | QueryKey;
     parentColumn?: string;
@@ -35,7 +32,7 @@ export interface FindOptions {
     contextMenu?: boolean;
 }
 
-export function expandSimpleColumnName(findOptions: FindOptions) {
+export function expandParentColumn(findOptions: FindOptions) {
 
     if (!findOptions.parentColumn)
         return findOptions; 

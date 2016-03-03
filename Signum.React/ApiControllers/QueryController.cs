@@ -106,7 +106,7 @@ namespace Signum.React.ApiControllers
     public class QueryCountTS
     {
         public string querykey;
-        public List<FilterTS> filter;
+        public List<FilterTS> filters;
 
         public QueryCountRequest ToQueryCountRequest()
         {
@@ -116,7 +116,7 @@ namespace Signum.React.ApiControllers
             return new QueryCountRequest
             {
                 QueryName = qn,
-                Filters = this.filter.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
+                Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
             };
         }
     }

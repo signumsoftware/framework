@@ -2,6 +2,7 @@
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
+using Signum.React.ApiControllers;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System;
@@ -31,7 +32,7 @@ namespace Signum.React.Json
             serializer.Serialize(writer, rt.Columns.Select(c => c.Column.Token.FullKey()).ToList());
 
             writer.WritePropertyName("pagination");
-            serializer.Serialize(writer, rt.Pagination);
+            serializer.Serialize(writer, new PaginationTS(rt.Pagination));
 
             writer.WritePropertyName("totalElements");
             writer.WriteValue(rt.TotalElements);
