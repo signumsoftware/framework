@@ -25,7 +25,7 @@ export enum FormGroupSize {
 }
 
 export class StyleContext {
-    private styleOptions: StyleOptions;
+    styleOptions: StyleOptions;
     parent: StyleContext;
 
     constructor(parent: StyleContext, styleOptions: StyleOptions) {
