@@ -272,7 +272,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             readOnly={options.readOnly}
             propertyRoute={null}
             getComponent={options.getComponent}
-            showOperations={null}
+            showOperations={true}
             requiresSaveOperation={null}
             isNavigate={true}/>);
     }

@@ -67,7 +67,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         [valueLineType: string]: (vl: ValueLine) => JSX.Element;
     } = {};
 
-   
+
 
     renderInternal() {
 
@@ -133,12 +133,10 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
 
     if (s.inlineCheckBox) {
         return (
-            <div className={classes("checkbox", vl.state.ctx.binding.error) }>
-                <label>
-                    <input type="checkbox" {...vl.props.valueHtmlProps} checked={s.ctx.value } onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}/>
-                    {s.labelText}
-                </label>
-            </div>
+            <label className={vl.state.ctx.binding.error}>
+                <input type="checkbox" {...vl.props.valueHtmlProps} checked={s.ctx.value } onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}/>
+                { " " + s.labelText}
+            </label>
         );
     }
     else {
@@ -215,11 +213,18 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
         <FormGroup ctx={s.ctx} title={s.labelText}>
             { ValueLine.withUnit(s.unitText,
                 <input type="text" {...vl.props.valueHtmlProps} className="form-control" value={s.ctx.value} onChange={handleTextOnChange}
-                    placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>)
+                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>)
             }
         </FormGroup>
     );
 };
+
+function asString(reactChild: React.ReactChild) {
+    if (typeof reactChild == "string")
+        return reactChild as string;
+
+    return null;
+}
 
 ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
 
@@ -239,8 +244,8 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
 
     return (
         <FormGroup ctx={s.ctx} title={s.labelText}>
-            <input {...vl.props.valueHtmlProps} type="textarea" className="form-control" value={s.ctx.value} onChange={handleTextOnChange}
-                placeholder={s.ctx.placeholderLabels ? s.labelText : null}/>
+            <textarea {...vl.props.valueHtmlProps} className="form-control" value={s.ctx.value} onChange={handleTextOnChange}
+                placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>
         </FormGroup>
     );
 };
@@ -274,7 +279,7 @@ function numericTextBox(vl: ValueLine, handleKeyDown: React.KeyboardEventHandler
         <FormGroup ctx={s.ctx} title={s.labelText}>
             { ValueLine.withUnit(s.unitText,
                 <input {...vl.props.valueHtmlProps} type="textarea" className="form-control numeric" value={s.ctx.value} onChange={handleOnChange}
-                    placeholder={s.ctx.placeholderLabels ? s.labelText : null} onKeyDown={handleKeyDown}/>
+                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null} onKeyDown={handleKeyDown}/>
             ) }
         </FormGroup>
     );
