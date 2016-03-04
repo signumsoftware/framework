@@ -6,7 +6,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../
 import { SearchMessage, JavascriptMessage, parseLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Reflection from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { default as SearchControl, ExternalFullScreenButton} from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
+import SearchControl from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
 import { UserQueryEntity_Type, UserQueryEntity  } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 
@@ -16,18 +16,14 @@ interface UserQueryPageProps extends ReactRouter.RouteComponentProps<{}, { userQ
 }
 
 export default class UserQueryPage extends React.Component<UserQueryPageProps, { userQuery?: UserQueryEntity, findOptions?: FindOptions, }> {
-
-    externalButton: ExternalFullScreenButton = { onClick: null };
-
+    
     constructor(props) {
         super(props);
         this.state = { userQuery: null, findOptions: null };
 
         this.requestFindOptions();
     }
-
-
-
+    
     componentWillReceiveProps(nextProps: UserQueryPageProps) {
 
         this.state = { userQuery: null, findOptions: null };
@@ -45,6 +41,8 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
         }).done();
     }
 
+    searchControl: SearchControl
+
     render() {
 
         const fo = this.state.findOptions;
@@ -55,13 +53,14 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
                 <h2>
                     <span>
                         <span className="sf-entity-title">{Reflection.getQueryNiceName(uq.query.key) }</span> & nbsp;
-                        { fo && <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.externalButton.onClick(e) }>
+                        { fo && <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e) }>
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a> }
                     </span>
                     { this.state.userQuery && < small > { this.state.userQuery.displayName }</small> }
                 </h2>
-                { fo && <SearchControl externalFullScreenButton={this.externalButton} findOptions={fo} /> }
+                { fo && <SearchControl ref={e => this.searchControl = e}
+                    hideExternalButton={true} findOptions={fo} /> }
             </div>
         );
     }

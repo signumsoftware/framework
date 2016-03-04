@@ -28,8 +28,6 @@ namespace Signum.Web.Files
 
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Files/Scripts/Files");
 
-       
-
         public static void Start(bool file, bool embeddedFile, bool filePath, bool embeddedFilePath)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
