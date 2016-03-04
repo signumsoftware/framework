@@ -196,6 +196,14 @@ Array.prototype.joinComma = function (lastSeparator: string) {
     return rest + lastSeparator + (array[lastIndex] == null ? "" : array[lastIndex].toString()); 
 };
 
+Array.prototype.extract = function (predicate: (element: any) => boolean) {
+    const array = this as any[];
+    const result = array.filter(predicate);
+
+    result.forEach(element => { array.remove(element) });
+
+    return array;
+};
 
 Array.range = function (min, max) {
 

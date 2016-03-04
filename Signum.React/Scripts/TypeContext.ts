@@ -1,4 +1,4 @@
-﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType } from './Reflection'
+﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type } from './Reflection'
 import { ModelState, MList } from './Signum.Entities'
 
 export enum FormGroupStyle {
@@ -147,6 +147,10 @@ export class TypeContext<T> extends StyleContext {
 
     set value(val: T) {
         this.binding.setValue(val);
+    }
+
+    static root<T>(type: Type<T>, value: T) {
+        return new TypeContext(null, null, PropertyRoute.root(type), new ReadonlyBinding(value, ""));
     }
 
     constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>) {

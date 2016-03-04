@@ -24,18 +24,15 @@ export interface SimpleFilterBuilderProps {
     findOptions: FindOptions;
 }
 
-export interface ExternalFullScreenButton {
-    onClick?: React.EventHandler<React.MouseEvent>;
-}
 
 export interface SearchControlProps extends React.Props<SearchControl> {
     allowSelection?: boolean
     findOptions: FindOptions;
     simpleFilterBuilder?: React.ComponentClass<SimpleFilterBuilderProps>;
-    externalFullScreenButton?: ExternalFullScreenButton;
     onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
     showContextMenu?: boolean;
-    onSelectionChanged?: (entity: Lite<IEntity>[]) => void
+    onSelectionChanged?: (entity: Lite<IEntity>[]) => void;
+    hideExternalButton?: boolean;
 }
 
 export interface SearchControlState {
@@ -73,11 +70,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     constructor(props: SearchControlProps) {
         super(props);
         this.state = this.initialState(props.findOptions.queryName);
-
-        if (props.externalFullScreenButton) {
-            props.externalFullScreenButton.onClick = this.handleFullScreenClick;
-        }
     }
+
+
 
     initialState(queryName: PseudoType | QueryKey): SearchControlState{
         return {
@@ -99,10 +94,6 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     componentWillReceiveProps(newProps: SearchControlProps) {
         if (JSON.stringify(this.props.findOptions) == JSON.stringify(newProps.findOptions))
             return;
-
-        if (newProps.externalFullScreenButton) {
-            newProps.externalFullScreenButton.onClick = this.handleFullScreenClick;
-        }
 
         this.setState(this.initialState(newProps.findOptions.queryName));
 
@@ -340,7 +331,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton() }
                 {Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i })) }
-                {!this.props.externalFullScreenButton &&
+                {!this.props.hideExternalButton &&
                     <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a> }

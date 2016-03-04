@@ -9,8 +9,6 @@
 /// <reference path="../typings/moment/moment.d.ts" />
 /// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
-
-
 declare var require: {
     <T>(path: string): T;
     (paths: string[], callback: (...modules: any[]) => void): void;
@@ -45,15 +43,13 @@ interface Array<T> {
     insertAt(index: number, element: T);
     clone(): T[];
     joinComma(lastSeparator: string);
+    extract(filter: (element: T) => boolean): T[]; 
 }
-
-
 
 interface ArrayConstructor {
 
     range(min: number, max: number): number[];
 }
-
 
 interface String {
     contains(str: string): boolean;
