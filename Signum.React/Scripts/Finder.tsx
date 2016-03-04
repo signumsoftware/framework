@@ -561,6 +561,7 @@ export interface QuerySettings {
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes;
     entityFormatter?: EntityFormatter;
+    simpleFilterBuilder?: (qd: QueryDescription, initialFindOptions: FindOptions) => React.ReactElement<any>;
 }
 
 export interface FormatRule {

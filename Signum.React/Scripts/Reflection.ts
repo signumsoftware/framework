@@ -571,7 +571,8 @@ export class PropertyRoute {
     member: MemberInfo; //Member
     mixinName: string; //Mixin
 
-    static root(typeInfo: TypeInfo) {
+    static root(type: TypeInfo | PseudoType) {
+        var typeInfo = getTypeInfo(type);
         return new PropertyRoute(null, PropertyRouteType.Root, typeInfo, null, null);
     }
 

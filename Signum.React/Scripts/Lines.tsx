@@ -1,9 +1,11 @@
 ﻿import * as React from 'react'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize } from './TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo} from './Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, PropertyRoute } from './Reflection'
 import { ModifiableEntity, EntityPack, ModelState } from './Signum.Entities'
 import * as Navigator from './Navigator'
 import { ViewReplacer } from  './Frames/ReactVisitor'
+
+export { PropertyRoute };
 
 import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, Tasks} from './Lines/LineBase'
 export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, Tasks};
@@ -51,7 +53,6 @@ export interface EntityFrame<T extends ModifiableEntity> {
     setError: (modelState: ModelState, initialPrefix?: string) => void;
     onClose: () => void;
 }
-
 
 export interface EntityComponentProps<T extends ModifiableEntity> {
     ctx: TypeContext<T>;
