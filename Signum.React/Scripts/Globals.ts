@@ -202,7 +202,7 @@ Array.prototype.extract = function (predicate: (element: any) => boolean) {
 
     result.forEach(element => { array.remove(element) });
 
-    return array;
+    return result;
 };
 
 Array.range = function (min, max) {
