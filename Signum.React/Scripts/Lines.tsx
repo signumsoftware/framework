@@ -147,3 +147,26 @@ export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBasePro
         state.ctx.readOnly = true;
     }
 }
+
+export let maxValueLineSize = 100; 
+
+Tasks.push(taskSetHtmlProperties);
+export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineBaseProps) {
+    var vl = lineBase instanceof ValueLine ? lineBase as ValueLine : null;
+    var pr = state.ctx.propertyRoute;
+    var vlp = state as ValueLineProps;
+    if (vl != null && pr.propertyRouteType == PropertyRouteType.Field) {
+        if (pr.member.maxLength != null) {
+
+            if (!vlp.valueHtmlProps)
+                vlp.valueHtmlProps = {};
+
+            vlp.valueHtmlProps.maxLength = pr.member.maxLength;
+
+            vlp.valueHtmlProps.size = maxValueLineSize == null ? pr.member.maxLength : Math.min(maxValueLineSize, pr.member.maxLength);
+        }
+
+        if (pr.member.isMultiline)
+            vlp.valueLineType = ValueLineType.TextArea;
+    }
+}

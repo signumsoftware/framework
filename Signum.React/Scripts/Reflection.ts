@@ -40,6 +40,8 @@ export interface MemberInfo {
     isIgnored?: boolean;
     unit?: string;
     format?: string;
+    maxLength?: number;
+    isMultiline?: boolean;
     id?: any; //symbols
 }
 
