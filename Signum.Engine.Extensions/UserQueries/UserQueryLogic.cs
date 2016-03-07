@@ -86,7 +86,7 @@ namespace Signum.Engine.UserQueries
             if (!userQuery.WithoutFilters)
             {
                 qr.Filters = userQuery.Filters.Select(qf => 
-                    new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation == FilterOperation.IsIn))).ToList();
+                    new Filter(qf.Token.Token, qf.Operation, FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList()))).ToList();
             }
 
             qr.Columns = MergeColumns(userQuery);
@@ -286,7 +286,7 @@ namespace Signum.Engine.UserQueries
                 {
                 retry:
                     string val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation == FilterOperation.IsIn))
+                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation.IsList()))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);

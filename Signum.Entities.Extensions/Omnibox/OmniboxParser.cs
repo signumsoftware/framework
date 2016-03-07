@@ -12,6 +12,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using Signum.Entities.Authorization;
 using Signum.Entities.UserAssets;
+using Newtonsoft.Json;
 
 namespace Signum.Entities.Omnibox
 {
@@ -179,13 +180,19 @@ namespace Signum.Entities.Omnibox
     public abstract class OmniboxResult
     {
         public float Distance;
+
+        public string ResultTypeName => GetType().Name;
     }
 
     public class HelpOmniboxResult : OmniboxResult
     {
         public string Text { get; set; }
-        public Type OmniboxResultType { get; set; }
-
+        
+        [JsonIgnore]
+        public Type ReferencedType { get; set; }
+        
+        public string ReferencedTypeName => this.ReferencedType.Name;
+        
         public override string ToString()
         {
             return "";

@@ -36,7 +36,6 @@
         @Html.HiddenRuntimeInfo(query)
         
         @Html.Hidden(query.Compose("Key"), query.Value.Key)
-        @Html.Hidden(query.Compose("Name"), query.Value.Name)
 
         var niceName = QueryUtils.GetNiceName(query.Value.ToQueryName());
         

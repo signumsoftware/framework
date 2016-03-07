@@ -93,7 +93,7 @@ namespace Signum.Entities.Authorization
         public MList<T> Rules { get; set; } = new MList<T>();
     }
 
-    [Serializable, DescriptionOptions(DescriptionOptions.None)]
+    [Serializable]
     public abstract class AllowedRule<R, A> : ModelEntity
         where R : Entity
     {
@@ -157,7 +157,7 @@ namespace Signum.Entities.Authorization
         public ReadOnlyCollection<TypeConditionSymbol> AvailableConditions { get; set; }
     }
 
-    [Serializable, DescriptionOptions(DescriptionOptions.None)]
+    [Serializable]
     public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
     {
         public TypeAllowedAndConditions(TypeAllowed? fallback, ReadOnlyCollection<TypeConditionRule> conditions)

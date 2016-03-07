@@ -28,6 +28,12 @@ namespace ASP
     using System.Web.WebPages;
     using Signum.Entities;
     
+    #line 3 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+    using Signum.Entities.Basics;
+    
+    #line default
+    #line hidden
+    
     #line 1 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
     using Signum.Entities.UserAssets;
     
@@ -54,7 +60,7 @@ namespace ASP
 WriteLiteral("<h2>");
 
             
-            #line 3 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 4 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
 Write(UserAssetMessage.ImportUserAssets.NiceToString());
 
             
@@ -63,7 +69,7 @@ Write(UserAssetMessage.ImportUserAssets.NiceToString());
 WriteLiteral("\r\n</h2>\r\n<br />\r\n");
 
             
-            #line 6 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 7 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
  if (ViewBag.Message != null)
 {
 
@@ -73,7 +79,7 @@ WriteLiteral("\r\n</h2>\r\n<br />\r\n");
 WriteLiteral("    <h3>");
 
             
-            #line 8 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 9 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
    Write(ViewBag.Message);
 
             
@@ -82,7 +88,7 @@ WriteLiteral("    <h3>");
 WriteLiteral("</h3>\r\n");
 
             
-            #line 9 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 10 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
 }
 else if (Model == null)
 {
@@ -111,7 +117,7 @@ WriteLiteral(" class=\"sf-button\"");
 WriteLiteral(" />\r\n");
 
             
-            #line 16 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 17 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
     }
 }
 else
@@ -123,7 +129,7 @@ else
 WriteLiteral("    <h3>");
 
             
-            #line 20 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 21 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
    Write(UserAssetMessage.SelectTheEntitiesToOverride.NiceToString());
 
             
@@ -132,7 +138,7 @@ WriteLiteral("    <h3>");
 WriteLiteral("</h3>\r\n");
 
             
-            #line 21 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 22 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
    
 
     using (Html.BeginForm((UserAssetController uac) => uac.ImportConfirm()))
@@ -145,14 +151,14 @@ WriteLiteral("</h3>\r\n");
             #line default
             #line hidden
             
-            #line 28 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 29 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
 Write(Html.Hidden("Document", ViewData["Document"]));
 
             
             #line default
             #line hidden
             
-            #line 28 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 29 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                                                   
 
             
@@ -161,7 +167,7 @@ Write(Html.Hidden("Document", ViewData["Document"]));
 WriteLiteral("    <table>\r\n        <thead>\r\n            <tr>\r\n                <td>");
 
             
-            #line 32 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 33 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                Write(Html.PropertyNiceName((UserAssetPreviewLine l) => l.Action));
 
             
@@ -170,7 +176,7 @@ WriteLiteral("    <table>\r\n        <thead>\r\n            <tr>\r\n            
 WriteLiteral("</td>\r\n                <td>");
 
             
-            #line 33 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 34 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                Write(Html.PropertyNiceName((UserAssetPreviewLine l) => l.OverrideEntity));
 
             
@@ -179,7 +185,7 @@ WriteLiteral("</td>\r\n                <td>");
 WriteLiteral("</td>\r\n                <td>");
 
             
-            #line 34 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 35 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                Write(Html.PropertyNiceName((UserAssetPreviewLine l) => l.Type));
 
             
@@ -188,7 +194,7 @@ WriteLiteral("</td>\r\n                <td>");
 WriteLiteral("</td>\r\n                <td>");
 
             
-            #line 35 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 36 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                Write(Html.PropertyNiceName((UserAssetPreviewLine l) => l.Text));
 
             
@@ -197,15 +203,16 @@ WriteLiteral("</td>\r\n                <td>");
 WriteLiteral("</td>\r\n            </tr>\r\n        </thead>\r\n\r\n");
 
             
-            #line 39 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 40 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 39 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 40 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
          foreach (var item in e.TypeElementContext(a => a.Lines))
         {
+            
 
             
             #line default
@@ -213,7 +220,7 @@ WriteLiteral("</td>\r\n            </tr>\r\n        </thead>\r\n\r\n");
 WriteLiteral("            <tr>\r\n                <td>");
 
             
-            #line 42 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 44 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                Write(item.Value.Action.NiceToString());
 
             
@@ -222,13 +229,13 @@ WriteLiteral("            <tr>\r\n                <td>");
 WriteLiteral("</td>\r\n                <td>\r\n");
 
             
-            #line 44 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 46 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                     
             
             #line default
             #line hidden
             
-            #line 44 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 46 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                      if (item.Value.OverrideVisible)
                     {
                         
@@ -236,14 +243,14 @@ WriteLiteral("</td>\r\n                <td>\r\n");
             #line default
             #line hidden
             
-            #line 46 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 48 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                    Write(Html.CheckBox(item.Compose("OverrideEntity"), item.Value.OverrideEntity));
 
             
             #line default
             #line hidden
             
-            #line 46 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 48 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                                                                                                  
                     }
 
@@ -253,7 +260,7 @@ WriteLiteral("</td>\r\n                <td>\r\n");
 WriteLiteral("                    ");
 
             
-            #line 48 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 50 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                Write(Html.Hidden(item.Compose("Guid"), item.Value.Guid));
 
             
@@ -262,8 +269,8 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </td>\r\n                <td>");
 
             
-            #line 50 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
-               Write(item.Value.Type.NiceName());
+            #line 52 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+               Write(item.Value.Type.ToType().NiceName());
 
             
             #line default
@@ -271,7 +278,7 @@ WriteLiteral("\r\n                </td>\r\n                <td>");
 WriteLiteral("</td>\r\n                <td>");
 
             
-            #line 51 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 53 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
                Write(item.Value.Text);
 
             
@@ -280,7 +287,7 @@ WriteLiteral("</td>\r\n                <td>");
 WriteLiteral("</td>\r\n            </tr>\r\n");
 
             
-            #line 53 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 55 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
         }
 
             
@@ -299,7 +306,7 @@ WriteLiteral(" class=\"sf-button\"");
 WriteLiteral(" />\r\n");
 
             
-            #line 57 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
+            #line 59 "..\..\UserAssets\Views\ImportUserAsset.cshtml"
         }
     }
 }

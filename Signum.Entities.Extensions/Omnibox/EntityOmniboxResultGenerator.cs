@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace Signum.Entities.Omnibox
 {
@@ -102,17 +103,38 @@ namespace Signum.Entities.Omnibox
 
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult { Text = "{0} Id".FormatWith(entityTypeName), OmniboxResultType = resultType },
-                new HelpOmniboxResult { Text = "{0} 'ToStr'".FormatWith(entityTypeName), OmniboxResultType = resultType }
+                new HelpOmniboxResult { Text = "{0} Id".FormatWith(entityTypeName), ReferencedType = resultType },
+                new HelpOmniboxResult { Text = "{0} 'ToStr'".FormatWith(entityTypeName), ReferencedType = resultType }
             };
+        }
+    }
+
+    public class PrimaryKeyJsonConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return true;
+        }
+        
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            writer.WriteValue(value == null ? null : ((PrimaryKey)value).Object);
+        }
+
+        public override bool CanRead => false;
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
         }
     }
 
     public class EntityOmniboxResult : OmniboxResult
     {
+        [JsonIgnore]
         public Type Type { get; set; }
         public OmniboxMatch TypeMatch { get; set; }
 
+        [JsonConverter(typeof(PrimaryKeyJsonConverter))]
         public PrimaryKey? Id { get; set; }
 
         public string ToStr { get; set; }
@@ -123,10 +145,10 @@ namespace Signum.Entities.Omnibox
         public override string ToString()
         {
             if (Id.HasValue)
-                return "{0} {1}".FormatWith(Type.NicePluralName().ToOmniboxPascal(), Id, Lite?.ToString() ?? OmniboxMessage.NotFound.NiceToString());
+                return "{0} {1}".FormatWith(Type.NicePluralName().ToOmniboxPascal(), Id);
 
             if (ToStr != null)
-                return "{0} \"{1}\"".FormatWith(Type.NicePluralName().ToOmniboxPascal(), ToStr, Lite?.ToString() ?? OmniboxMessage.NotFound.NiceToString());
+                return "{0} \"{1}\"".FormatWith(Type.NicePluralName().ToOmniboxPascal(), ToStr);
 
             return Type.NicePluralName().ToOmniboxPascal();
         }

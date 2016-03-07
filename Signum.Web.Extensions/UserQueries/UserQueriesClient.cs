@@ -209,7 +209,7 @@ namespace Signum.Web.UserQueries
                     Token = qf.Token.Token,
                     ColumnName = qf.Token.TokenString,
                     Operation = qf.Operation,
-                    Value = FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation == FilterOperation.IsIn),
+                    Value = FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList()),
                 }));
             }
 

@@ -82,7 +82,7 @@ WriteLiteral("\r\n");
  using (var tc = Html.TypeContext<UserQueryPartEntity>())
 {
     UserQueryEntity uq = tc.Value.UserQuery;
-    object queryName = Finder.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
+    object queryName = Finder.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetKey(k) == uq.Query.Key);
     
     FindOptions fo = new FindOptions(queryName)
     {

@@ -10,7 +10,7 @@
         <input type="hidden" class="sf-tab-title" value="@(tc.Value.CultureInfo?.ToString())" />
         @Html.EntityCombo(tc, e => e.CultureInfo, vl =>
         {
-            vl.LabelText = SmsMessage.Language.NiceToString();
+            vl.LabelText = SMSCharactersMessage.Language.NiceToString();
         })
 
         <div class="sf-sms-edit-container"> 
@@ -23,11 +23,11 @@
             })
             <div class="sf-sms-characters-left">
                 <p>
-                    <span>@SmsMessage.RemainingCharacters.NiceToString()</span>: <span class="sf-sms-chars-left"></span>
+                    <span>@SMSCharactersMessage.RemainingCharacters.NiceToString()</span>: <span class="sf-sms-chars-left"></span>
                 </p>
             </div>
             <div>
-                <input type="button" class="btn sf-button sf-sms-remove-chars" value="@SmsMessage.RemoveNonValidCharacters.NiceToString()" />
+                <input type="button" class="btn sf-button sf-sms-remove-chars" value="@SMSCharactersMessage.RemoveNonValidCharacters.NiceToString()" />
             </div>
         </div>
     </div>

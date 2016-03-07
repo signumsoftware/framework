@@ -35,9 +35,9 @@
         @if (e.Value.State == SMSMessageState.Created && e.Value.EditableMessage)
         {
             <div class="sf-sms-characters-left">
-                <p><span>@SmsMessage.RemainingCharacters.NiceToString()</span>: <span class="sf-sms-chars-left"></span></p>
+                <p><span>@SMSCharactersMessage.RemainingCharacters.NiceToString()</span>: <span class="sf-sms-chars-left"></span></p>
             </div>
-            @Html.FormGroup(e, "", "", new HtmlTag("input").Attr("type", "button").Attr("value", SmsMessage.RemoveNonValidCharacters.NiceToString()).Class("btn sf-button sf-sms-remove-chars").ToHtml())
+            @Html.FormGroup(e, "", "", new HtmlTag("input").Attr("type", "button").Attr("value", SMSCharactersMessage.RemoveNonValidCharacters.NiceToString()).Class("btn sf-button sf-sms-remove-chars").ToHtml())
         }
     </div>
     <br />

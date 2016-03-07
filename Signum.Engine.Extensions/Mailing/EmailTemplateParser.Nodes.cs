@@ -341,7 +341,7 @@ namespace Signum.Engine.Mailing
                 ValueProvider.Synchronize(sc, "@any[]");
 
                 if (Operation != null)
-                    sc.SynchronizeValue(ValueProvider.Type, ref Value, Operation == FilterOperation.IsIn);
+                    sc.SynchronizeValue(ValueProvider.Type, ref Value, Operation.Value.IsList());
 
                 using (sc.NewScope())
                 {
@@ -440,7 +440,7 @@ namespace Signum.Engine.Mailing
                 ValueProvider.Synchronize(sc, "if[]");
 
                 if (Operation != null)
-                    sc.SynchronizeValue(ValueProvider.Type, ref Value, Operation == FilterOperation.IsIn);
+                    sc.SynchronizeValue(ValueProvider.Type, ref Value, Operation.Value.IsList());
 
                 using (sc.NewScope())
                 {

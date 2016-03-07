@@ -96,7 +96,7 @@ WriteLiteral(">\r\n");
          for (int i = 0; i < tc.Value.UserQueries.Count; i++)
         {
             CountUserQueryElementEntity uq = tc.Value.UserQueries[i];
-            object queryName = Finder.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.UserQuery.Query.Key);
+            object queryName = Finder.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetKey(k) == uq.UserQuery.Query.Key);
             FindOptions fo = new FindOptions(queryName)
             {
                 ShowFilters = false

@@ -1,0 +1,158 @@
+﻿import * as React from 'react'
+import { Route } from 'react-router'
+import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
+import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
+import { Entity, Lite, liteKey } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
+import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
+import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
+import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
+import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
+import { UserQueryEntity_Type, UserQueryEntity, UserQueryPermission, UserQueryMessage,
+    QueryFilterEntity, QueryFilterEntity_Type, QueryColumnEntity, QueryColumnEntity_Type, QueryOrderEntity, QueryOrderEntity_Type } from './Signum.Entities.UserQueries'
+import { QueryTokenEntity, QueryTokenEntity_Type } from '../UserAssets/Signum.Entities.UserAssets'
+import UserQueryMenu from './UserQueryMenu'
+
+export function start(options: { routes: JSX.Element[] }) {
+
+    options.routes.push(<Route path="userQuery">
+        <Route path=":userQueryId" getComponent={ (loc, cb) => require(["./UserQueryPage"], (Comp) => cb(null, Comp.default)) } />
+    </Route>);
+
+    Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
+        if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+            return null;
+
+        return <UserQueryMenu searchControl={ctx.searchControl}/>;
+    }); 
+
+    QuickLinks.registerGlobalQuickLink(ctx => {
+        if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+            return null;
+
+        return API.forEntityType(ctx.lite.EntityType).then(uqs =>
+            uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr, e => {
+                Navigator.API.fetchAndForget(uq)
+                    .then(uq => Converter.toFindOptions(uq, null))
+                    .then(fo => Finder.exploreWindowsOpen(fo, e))
+                    .done();
+            }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));
+    });
+
+    QuickLinks.registerQuickLink(UserQueryEntity_Type, ctx => new QuickLinks.QuickLinkAction("preview", UserQueryMessage.Preview.niceToString(),
+        e => {
+            Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
+                if (uq.entityType == null)
+                    return Converter.toFindOptions(uq, null);
+                else
+                    return Navigator.API.fetchAndForget(uq.entityType)
+                        .then(t => Finder.find({ queryName: t.cleanName }))
+                        .then(lite => lite == null ? null : Converter.toFindOptions(uq, lite));
+            }).then(fo => {
+
+                if (fo == null)
+                    return;
+
+                Finder.exploreWindowsOpen(fo, e);
+            });
+        }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
+
+    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity_Type, () => QueryFilterEntity_Type.New({ token: QueryTokenEntity_Type.New() }));
+    Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity_Type, () => QueryOrderEntity_Type.New({ token: QueryTokenEntity_Type.New() }));
+    Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity_Type, () => QueryColumnEntity_Type.New({ token: QueryTokenEntity_Type.New() }));
+
+    Navigator.addSettings(new EntitySettings(UserQueryEntity_Type, e => new Promise(resolve => require(['./Templates/UserQuery'], resolve))));
+}
+
+
+export module Converter {
+
+    export function applyUserQuery(fo: FindOptions, uq: UserQueryEntity, entity: Lite<Entity>): Promise<FindOptions> {
+
+        var convertedFilters = uq.withoutFilters ? Promise.resolve([] as FilterRequest[]) : API.parseFilters({
+            queryKey: uq.query.key,
+            canAggregate: false,
+            entity: entity,
+            filters: uq.filters.map(mle => mle.element).map(f => ({
+                tokenString: f.token.tokenString,
+                operation: f.operation,
+                valueString: f.valueString
+            }) as API.ParseFilterRequest)
+        });
+
+        return convertedFilters.then(filters => {
+
+            if (!uq.withoutFilters && filters) {
+                fo.filterOptions = (fo.filterOptions || []).filter(f => f.frozen);
+                fo.filterOptions.push(...filters.map(f => ({
+                    columnName: f.token,
+                    operation: f.operation,
+                    value: f.value,
+                }) as FilterOption));
+            }
+
+            fo.columnOptionsMode = uq.columnsMode;
+
+            fo.columnOptions = (uq.columns || []).map(f => ({
+                columnName: f.element.token.tokenString,
+                displayName: f.element.displayName
+            }) as ColumnOption);
+
+            fo.orderOptions = (uq.orders || []).map(f => ({
+                columnName: f.element.token.tokenString,
+                orderType: f.element.orderType
+            }) as OrderOption);
+
+
+            var qs = Finder.querySettings[uq.query.key];
+
+            fo.pagination = uq.paginationMode == null ?
+                ((qs && qs.pagination) || Finder.defaultPagination) : {
+                mode: uq.paginationMode,
+                currentPage: null,
+                elementsPerPage: uq.elementsPerPage
+            };
+
+            return Finder.parseTokens(fo);
+        });
+    }
+
+    export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity>): Promise<FindOptions> {
+        var fo: FindOptions = { queryName: uq.query.key }; 
+        return applyUserQuery(fo, uq, entity);
+    }
+}
+
+export module API {
+    export function forEntityType(type: string): Promise<Lite<UserQueryEntity>[]> {
+        return ajaxGet<Lite<UserQueryEntity>[]>({ url: "/api/userQueries/forEntityType/" + type });
+    }
+
+    export function forQuery(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
+        return ajaxGet<Lite<UserQueryEntity>[]>({ url: "/api/userQueries/forQuery/" + queryKey });
+    }
+
+    export function parseFilters(request: ParseFiltersRequest): Promise<FilterRequest[]> {
+        return ajaxPost<FilterRequest[]>({ url: "/api/userQueries/parseFilters/" }, request);
+    }
+
+    export function fromQueryRequest(request: { queryRequest: QueryRequest; defaultPagination: Pagination}): Promise<UserQueryEntity> {
+        return ajaxPost<UserQueryEntity>({ url: "/api/userQueries/fromQueryRequest/" }, request);
+    }
+
+    export interface ParseFiltersRequest {
+        queryKey: string;
+        filters: ParseFilterRequest[];
+        entity: Lite<Entity>;
+        canAggregate: boolean
+    }
+
+    export interface ParseFilterRequest {
+        tokenString: string;
+        operation: FilterOperation;
+        valueString: string;
+    }
+}

@@ -336,8 +336,8 @@ namespace Signum.Engine.Cache
         static ParameterExpression result = Expression.Parameter(typeof(T));
 
         Func<FieldReader, object> rowReader;
-        Expression<Func<object, IRetriever, MList<T>.RowIdValue>> activatorExpression;
-        Func<object, IRetriever, MList<T>.RowIdValue> activator;
+        Expression<Func<object, IRetriever, MList<T>.RowIdElement>> activatorExpression;
+        Func<object, IRetriever, MList<T>.RowIdElement> activator;
         Func<object, PrimaryKey> parentIdGetter;
         Func<object, PrimaryKey> rowIdGetter;
 
@@ -373,16 +373,16 @@ namespace Signum.Engine.Cache
                 instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)));
                 instructions.Add(Expression.Assign(result, ctr.MaterializeField(table.Field)));
 
-                var ci = typeof(MList<T>.RowIdValue).GetConstructor(new []{typeof(T), typeof(PrimaryKey), typeof(int?)});
+                var ci = typeof(MList<T>.RowIdElement).GetConstructor(new []{typeof(T), typeof(PrimaryKey), typeof(int?)});
 
                 var order = table.Order == null ? Expression.Constant(null, typeof(int?)) : 
                      ctr.GetTupleProperty(table.Order).Nullify();
 
                 instructions.Add(Expression.New(ci, result, CachedTableConstructor.NewPrimaryKey(ctr.GetTupleProperty(table.PrimaryKey)), order));
 
-                var block = Expression.Block(typeof(MList<T>.RowIdValue), new[] { ctr.origin, result }, instructions);
+                var block = Expression.Block(typeof(MList<T>.RowIdElement), new[] { ctr.origin, result }, instructions);
 
-                activatorExpression = Expression.Lambda<Func<object, IRetriever, MList<T>.RowIdValue>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever);
+                activatorExpression = Expression.Lambda<Func<object, IRetriever, MList<T>.RowIdElement>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever);
 
                 activator = activatorExpression.Compile();
 

@@ -282,7 +282,7 @@ WriteLiteral(">\r\n            <fieldset>\r\n                <legend>");
 
             
             #line 46 "..\..\SMS\Views\SMSTemplate.cshtml"
-                   Write(SmsMessage.Replacements.NiceToString());
+                   Write(SMSCharactersMessage.Replacements.NiceToString());
 
             
             #line default
@@ -323,14 +323,14 @@ WriteLiteral(" class=\"btn sf-button\"");
 
 WriteLiteral(" id=\"sfInsertLiteral\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 2050), Tuple.Create("\"", 2091)
+WriteAttribute("value", Tuple.Create(" value=\"", 2060), Tuple.Create("\"", 2111)
             
             #line 57 "..\..\SMS\Views\SMSTemplate.cshtml"
-       , Tuple.Create(Tuple.Create("", 2058), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
+       , Tuple.Create(Tuple.Create("", 2068), Tuple.Create<System.Object, System.Int32>(SMSCharactersMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 2058), false)
+, 2068), false)
 );
 
 WriteLiteral(" />\r\n\r\n            </fieldset>\r\n        </div>\r\n    </div>\r\n");

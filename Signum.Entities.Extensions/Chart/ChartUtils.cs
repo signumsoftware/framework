@@ -219,7 +219,7 @@ namespace Signum.Entities.Chart
                 GroupResults = uq.GroupResults,
                 ChartScript = uq.ChartScript,
                 Filters = uq.Filters.Select(qf => new Filter(qf.Token.Token, qf.Operation,
-                    FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation == FilterOperation.IsIn))).ToList(),
+                    FilterValueConverter.Parse(qf.ValueString, qf.Token.Token.Type, qf.Operation.IsList()))).ToList(),
                 Orders = uq.Orders.Select(o => new Order(o.Token.Token, o.OrderType)).ToList(),
             };
 

@@ -64,6 +64,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -118,6 +121,7 @@
     <Compile Include="Mailing\Pop3Configuration.cs" />
     <Compile Include="Mailing\SystemEmail.cs" />
     <Compile Include="Map\MapMessage.cs" />
+    <Compile Include="Map\MapOmniboxResultGenerator.cs" />
     <Compile Include="Migrations\CSharpMigration.cs" />
     <Compile Include="Migrations\SqlMigration.cs" />
     <Compile Include="Scheduler\ScheduledTaskLogEntity.cs" />
@@ -126,8 +130,6 @@
     <Compile Include="Basics\CultureInfoEntity.cs" />
     <Compile Include="Basics\DateSpanEntity.cs" />
     <Compile Include="Basics\TypeConditionSymbol.cs" />
-    <Compile Include="Basics\PropertyRouteEntity.cs" />
-    <Compile Include="Basics\QueryEntity.cs" />
     <Compile Include="Cache\CachePermissions.cs" />
     <Compile Include="Chart\ChartColor.cs" />
     <Compile Include="Chart\ChartOmniboxResultGenerator.cs">
@@ -224,6 +226,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="packages.config" />
     <None Include="SMS\SMSCharactersMap.xlsx" />
   </ItemGroup>
   <ItemGroup>

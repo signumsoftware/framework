@@ -49,7 +49,7 @@ namespace Signum.Entities.Dashboard
             var userQuery = OmniboxMessage.Omnibox_Dashboard.NiceToString();
             return new List<HelpOmniboxResult>
             {
-                new HelpOmniboxResult { Text = "'{0}'".FormatWith(userQuery), OmniboxResultType = resultType }
+                new HelpOmniboxResult { Text = "'{0}'".FormatWith(userQuery), ReferencedType = resultType }
             };
         }
     }

@@ -550,7 +550,7 @@ namespace Signum.Windows.UIAutomation
 
         public static SearchControlProxy GetSearchControl(this AutomationElement element, object queryName)
         {
-            var sc = element.Descendant(a => a.Current.ClassName == "SearchControl" && a.Current.Name == QueryUtils.GetQueryUniqueKey(queryName));
+            var sc = element.Descendant(a => a.Current.ClassName == "SearchControl" && a.Current.Name == QueryUtils.GetKey(queryName));
 
             return new SearchControlProxy(sc);
         }

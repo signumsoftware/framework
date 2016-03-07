@@ -334,13 +334,13 @@ namespace Signum.Engine.Help
 
         public override string ToString()
         {
-            return "Query " + QueryUtils.GetQueryUniqueKey(this.QueryName);
+            return "Query " + QueryUtils.GetKey(this.QueryName);
         }
 
         public override string IsAllowed()
         {
             return DynamicQueryManager.Current.QueryAllowed(this.QueryName) ? null :
-                "Access to query {0} not allowed".FormatWith(QueryUtils.GetQueryUniqueKey(this.QueryName)); 
+                "Access to query {0} not allowed".FormatWith(QueryUtils.GetKey(this.QueryName)); 
         }
     }
 

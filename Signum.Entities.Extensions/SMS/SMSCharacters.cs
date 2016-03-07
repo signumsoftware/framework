@@ -111,7 +111,7 @@ namespace Signum.Entities.SMS
         }
     }
 
-    public enum SmsMessage
+    public enum SMSCharactersMessage
     {
         Insert,
         Message,

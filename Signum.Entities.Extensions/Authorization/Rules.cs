@@ -10,7 +10,7 @@ using System.Reflection;
 namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
-    public class RuleEntity<R, A> : Entity
+    public abstract class RuleEntity<R, A> : Entity
         where R : Entity
     {
         [NotNullValidator]

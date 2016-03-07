@@ -43,7 +43,7 @@ namespace Signum.Engine.Authorization
                     invalidateWithTypes : true,
                     coercer: QueryCoercer.Instance);
 
-                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetQueryUniqueKey, b => b.ToString(), 
+                AuthLogic.ExportToXml += exportAll => cache.ExportXml("Queries", "Query", QueryUtils.GetKey, b => b.ToString(), 
                     exportAll ? QueryLogic.QueryNames.Values.ToList(): null);
                 AuthLogic.ImportFromXml += (x, roles, replacements) => 
                 {
@@ -92,9 +92,9 @@ namespace Signum.Engine.Authorization
 
         public static void SetQueryRules(QueryRulePack rules)
         {
-            string[] queryNames = DynamicQueryManager.Current.GetTypeQueries(TypeLogic.DnToType[rules.Type]).Keys.Select(qn => QueryUtils.GetQueryUniqueKey(qn)).ToArray();
+            string[] queryKeys = DynamicQueryManager.Current.GetTypeQueries(TypeLogic.DnToType[rules.Type]).Keys.Select(qn => QueryUtils.GetKey(qn)).ToArray();
 
-            cache.SetRules(rules, r => queryNames.Contains(r.Key));
+            cache.SetRules(rules, r => queryKeys.Contains(r.Key));
         }
 
         public static bool GetQueryAllowed(object queryName)

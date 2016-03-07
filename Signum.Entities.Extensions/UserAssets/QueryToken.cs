@@ -37,6 +37,7 @@ namespace Signum.Entities.UserAssets
         public string TokenString
         {
             get { return tokenString; }
+            private set { Set(ref tokenString, value); }
         }
 
         [Ignore]

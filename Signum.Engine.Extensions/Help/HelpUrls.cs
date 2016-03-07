@@ -48,7 +48,7 @@ namespace Signum.Engine.Help
 
         public static string IdQuery(object queryName)
         {
-            return "q-" + QueryUtils.GetQueryUniqueKey(queryName).ToString().Replace(".", "_");
+            return "q-" + QueryUtils.GetKey(queryName).ToString().Replace(".", "_");
         }
 
         public static Type GetQueryType(object query)

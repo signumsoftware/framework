@@ -175,7 +175,7 @@ WriteLiteral("                    ");
 
             
             #line 31 "..\..\AuthAdmin\Views\Queries.cshtml"
-               Write(Html.Span(null, item.Value.Resource.Name));
+               Write(Html.Span(null, item.Value.Resource.Key));
 
             
             #line default
