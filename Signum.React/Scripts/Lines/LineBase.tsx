@@ -81,7 +81,7 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
 export interface LineBaseProps {
     ctx?: TypeContext<any>;
     type?: TypeReference;
-    labelText?: string;
+    labelText?: React.ReactChild;
     visible?: boolean;
     hideIfNull?: boolean;
     onChange?: (val: any) => void;
