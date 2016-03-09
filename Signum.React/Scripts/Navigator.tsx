@@ -15,7 +15,7 @@ import { ViewReplacer } from  './Frames/ReactVisitor'
 export let NotFound: __React.ComponentClass<any>;
 
 export let currentUser: IEntity;
-export let currentHistory: HistoryModule.History & HistoryModule.HistoryQueries;
+export let currentHistory: HistoryModule.History;
 
 
 
