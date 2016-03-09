@@ -311,9 +311,17 @@ export class Binding<T> implements IBinding<T> {
     }
 
     getValue(): T {
+
+        if (!this.parentValue)
+            throw new Error(`Impossible to get '${this.member}' from '${this.parentValue}'`); 
+
         return this.parentValue[this.member];
     }
     setValue(val: T) {
+
+        if (!this.parentValue)
+            throw new Error(`Impossible to set '${this.member}' from '${this.parentValue}'`);
+
         const oldVal = this.parentValue[this.member];
         this.parentValue[this.member] = val;
 
