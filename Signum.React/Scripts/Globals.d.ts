@@ -56,7 +56,6 @@ interface String {
     startsWith(str: string): boolean;
     endsWith(str: string): boolean;
     formatWith(...parameters: any[]): string;
-    formatHtml(...parameters: any[]): any[];
     forGenderAndNumber(number: number): string;
     forGenderAndNumber(gender: string): string;
     forGenderAndNumber(gender: any, number: number): string;
