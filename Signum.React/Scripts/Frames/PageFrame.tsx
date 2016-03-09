@@ -82,7 +82,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     loadComponent(): Promise<void> {
 
         const promise = this.props.component ? Promise.resolve(this.props.component) :
-            this.state.entitySettings.onGetComponent(this.state.pack.entity);
+            Navigator.getComponent(this.state.pack.entity);
 
         return promise
             .then(c => this.setState({ component: c }));
