@@ -216,7 +216,7 @@
     <Member Name="ThereAreChangesContinue" Description="Es gibt neue Änderungen, die verloren gehen.&#xD;&#xA;&#xD;&#xA;Trotzdem weiter?" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
   </Type>
-  <Type Name="OperationLogEntity" Description="Operation anmelden" PluralDescription="Operationen anmelden">
+  <Type Name="OperationLogEntity" Description="Operationen Protokoll" PluralDescription="Operationen Protokolle">
     <Member Name="Duration" Description="Dauer" />
     <Member Name="End" Description="Ende" />
     <Member Name="Exception" Description="Ausnahme" />
