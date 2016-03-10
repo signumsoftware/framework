@@ -1,5 +1,5 @@
 ﻿
-Array.prototype.groupByArray = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
+Array.prototype.groupBy = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
     const result: { key: string; elements: any[] }[] = [];
     const objectGrouped = this.groupByObject(keySelector);
     for (const prop in objectGrouped) {
@@ -9,7 +9,7 @@ Array.prototype.groupByArray = function (keySelector: (element: any) => string):
     return result;
 };
 
-Array.prototype.groupByObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
+Array.prototype.groupToObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
     const result: { [key: string]: any[] } = {};
 
     for (let i = 0; i < this.length; i++) {

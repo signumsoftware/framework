@@ -41,7 +41,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
         })
         .filter(eoc => eoc != null);
 
-    var groups = operations.groupByArray(eoc => {
+    var groups = operations.groupBy(eoc => {
 
         const group = getDefaultGroup(eoc);
 

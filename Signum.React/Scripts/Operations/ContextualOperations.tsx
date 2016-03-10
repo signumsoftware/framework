@@ -19,7 +19,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext)
     if (ctx.lites.length == 0)
         return null;
 
-    const types = ctx.lites.groupByArray(lite => lite.EntityType);
+    const types = ctx.lites.groupBy(lite => lite.EntityType);
 
     if (types.length != 1)
         return null;
@@ -85,7 +85,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext):
     if (ctx.lites.length == 0)
         return null;
 
-    const types = ctx.lites.groupByArray(coc => coc.EntityType);
+    const types = ctx.lites.groupBy(coc => coc.EntityType);
 
     if (types.length != 1)
         return null;
