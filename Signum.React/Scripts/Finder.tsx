@@ -94,13 +94,13 @@ export function findOptionsPath(queryNameOrFindOptions: any): string
 {
     const fo = queryNameOrFindOptions as FindOptions;
     if (!fo.queryName)
-        return currentHistory.createPath("/Find/" + getQueryKey(queryNameOrFindOptions)); 
+        return currentHistory.createPath("/find/" + getQueryKey(queryNameOrFindOptions)); 
     
     const query = {
         filters: Encoder.encodeFilters(fo.filterOptions),
         orders: Encoder.encodeOrders(fo.orderOptions),
         columns: Encoder.encodeColumns(fo.columnOptions),
-        columnMode: !fo.columnOptionsMode || fo.columnOptionsMode == ColumnOptionsMode.Add ? null : ColumnOptionsMode[fo.columnOptionsMode],
+        columnMode: !fo.columnOptionsMode || fo.columnOptionsMode == ColumnOptionsMode.Add ? undefined : ColumnOptionsMode[fo.columnOptionsMode],
         create: fo.create,
         navigate: fo.navigate,
         searchOnLoad: fo.searchOnLoad,
@@ -111,7 +111,7 @@ export function findOptionsPath(queryNameOrFindOptions: any): string
         allowChangeColumns: fo.allowChangeColumns,
     };
 
-    return currentHistory.createPath("/Find/" + getQueryKey(fo.queryName), query);
+    return currentHistory.createPath("/find/" + getQueryKey(fo.queryName), query);
 }
 
 export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: any): FindOptions {
@@ -233,7 +233,7 @@ export function parseSingleToken(queryName: PseudoType | QueryKey, token: string
     return result;
 }
 
-class TokenCompleter {
+export class TokenCompleter {
     constructor(public queryName: PseudoType | QueryKey) { }
 
     tokensToRequest: { [fullKey: string]: ({ options: SubTokensOptions, promise: Promise<QueryToken>, resolve: (action: QueryToken) => void }) };
@@ -254,7 +254,7 @@ class TokenCompleter {
             return Promise.resolve(null);
 
         if (!fullKey.contains("."))
-            return API.getQueryDescription(this.queryName).then(qd=> toQueryToken(qd.columns[fullKey]));
+            return getQueryDescription(this.queryName).then(qd=> toQueryToken(qd.columns[fullKey]));
 
         var bucket = this.tokensToRequest[fullKey];
 
@@ -287,7 +287,7 @@ class TokenCompleter {
 
 
 
-function parseFilterValues(filterOptions: FilterOption[]): Promise<void> {
+export function parseFilterValues(filterOptions: FilterOption[]): Promise<void> {
 
     var needToStr: Lite<any>[] = [];
     filterOptions.forEach(fo => {
@@ -369,23 +369,24 @@ function calculateFilterType(typeRef: TypeReference): FilterType {
     return FilterType.Boolean;
 }
 
+const queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
+export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
+    const queryKey = getQueryKey(queryName);
+
+    if (queryDescriptionCache[queryKey])
+        return Promise.resolve(queryDescriptionCache[queryKey]);
+
+    return API.fetchQueryDescription(queryKey).then(qd => {
+        Object.freeze(qd.columns);
+        queryDescriptionCache[queryKey] = Object.freeze(qd);
+        return qd;
+    });
+}
+
 export module API {
-
-    const queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
-
-    export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
-
-        const key = getQueryKey(queryName);
-
-        if (queryDescriptionCache[key])
-            return Promise.resolve(queryDescriptionCache[key]);
-
-        return ajaxGet<QueryDescription>({ url: "/api/query/description/" + key })
-            .then(qd => {
-                Object.freeze(qd.columns);
-                queryDescriptionCache[key] = Object.freeze(qd);
-                return qd;
-            });
+    
+    export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
+        return ajaxGet<QueryDescription>({ url: "/api/query/description/" + queryKey });
     }
 
 
@@ -405,13 +406,26 @@ export module API {
         });
     }
 
+    export function findAllEntities(request: { types: string }): Promise<IEntity[]> {
+        return ajaxGet<Lite<IEntity>[]>({
+            url: currentHistory.createHref("api/query/findAllEntities", request)
+        });
+    }
+
     export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
         return ajaxPost<QueryToken[]>({ url: "/api/query/parseTokens" }, { queryKey, tokens });
     }
 
     export function subTokens(queryKey: string, token: QueryToken, options: SubTokensOptions): Promise<QueryToken[]>{
         return ajaxPost<QueryToken[]>({ url: "/api/query/subTokens" }, { queryKey, token: token == null ? null:  token.fullKey, options }).then(list=> {
-            list.forEach(t=> t.parent = token);
+
+            if (token == null) {
+                var entity = list.filter(a => a.key == "Entity").singleOrNull();
+
+                list.filter(a => a.fullKey.startsWith("Entity.")).forEach(t => t.parent = entity);
+            } else {
+                list.forEach(t => t.parent = token);
+            }
             return list;
         });
     }
@@ -419,18 +433,18 @@ export module API {
 
 
 
-module Encoder {
+export module Encoder {
 
     export function encodeFilters(filterOptions: FilterOption[]): string[] {
-        return !filterOptions ? null : filterOptions.map(fo => getTokenString(fo) + "~" + FilterOperation[fo.operation] + "~" + stringValue(fo.value));
+        return !filterOptions ? undefined : filterOptions.map(fo => getTokenString(fo) + "~" + FilterOperation[fo.operation] + "~" + stringValue(fo.value));
     }
 
-    export function encodeOrders(orderOptions: OrderOption[]): string[] {
-        return !orderOptions ? null : orderOptions.map(oo=> (oo.orderType == OrderType.Descending ? "-" : "") + getTokenString(oo));
+    export function encodeOrders(orderOptions: OrderOption[]): string {
+        return !orderOptions ? undefined : orderOptions.map(oo => (oo.orderType == OrderType.Descending ? "-" : "") + getTokenString(oo)).join("~");
     }
 
     export function encodeColumns(columnOptions: ColumnOption[]): string[] {
-        return !columnOptions ? null : columnOptions.map(co => getTokenString(co) + (co.displayName ? ("~" +  scapeTilde(co.displayName)) : ""));
+        return !columnOptions ? undefined : columnOptions.map(co => getTokenString(co) + (co.displayName ? ("~" +  scapeTilde(co.displayName)) : ""));
     }
 
     export function stringValue(value: any): string {
@@ -450,15 +464,19 @@ module Encoder {
         return scapeTilde(value.toString());
     }
 
-    function scapeTilde(str: string) {
+    export function scapeTilde(str: string) {
         if (str == null)
             return null;
 
         return str.replace("~", "#|#");
     }
+
+    export function getTokenString(tokenContainer: { columnName: string, token?: QueryToken }) {
+        return tokenContainer.token ? tokenContainer.token.fullKey : tokenContainer.columnName;
+    }
 }
 
-module Decoder {
+export module Decoder {
 
     export function asArray(queryPosition: string | string[]) {
 
@@ -486,19 +504,19 @@ module Decoder {
         });
     }
 
-    function unscapeTildes(str: string) {
+    export function unscapeTildes(str: string) {
         if (!str)
             return str;
 
         return str.replace("#|#", "~");
     }
 
-    export function decodeOrders(orders: string | string[]): OrderOption[] {
+    export function decodeOrders(orders: string): OrderOption[] {
         
         if (!orders)
             return undefined;
 
-        return asArray(orders).map(val=> ({
+        return orders.split("~").map(val => ({
             orderType: val[0] == "-" ? OrderType.Descending : OrderType.Ascending,
             columnName: val.tryAfter("-") || val
         }));
@@ -514,10 +532,6 @@ module Decoder {
             displayName: unscapeTildes(val.tryAfter("~"))
         }) as ColumnOption);
     }
-}
-
-function getTokenString(tokenContainer: { columnName: string, token?: QueryToken }) {
-    return tokenContainer.token ? tokenContainer.token.fullKey : tokenContainer.columnName;
 }
 
 
@@ -601,17 +615,17 @@ export const formatRules: FormatRule[] = [
     {
         name: "Number",
         isApplicable: col=> col.token.filterType == FilterType.Integer || col.token.filterType == FilterType.Decimal,
-        formatter: col=> new CellFormatter((cell: number) => cell && cell.toString())
+        formatter: col=> new CellFormatter((cell: number) => cell && cell.toString(), "right")
     },
     {
         name: "Number with Unit",
         isApplicable: col=> (col.token.filterType == FilterType.Integer || col.token.filterType == FilterType.Decimal) && !!col.token.unit,
-        formatter: col=> new CellFormatter((cell: number) => cell && cell.toString() + " " + col.token.unit)
+        formatter: col => new CellFormatter((cell: number) => cell && cell.toString() + " " + col.token.unit, "right")
     },
     {
         name: "Bool",
         isApplicable: col=> col.token.filterType == FilterType.Boolean,
-        formatter: col=> new CellFormatter((cell: boolean) => cell == null ? null : <input type="checkbox" disabled={true} checked={cell}/>)
+        formatter: col=> new CellFormatter((cell: boolean) => cell == null ? null : <input type="checkbox" disabled={true} checked={cell}/>, "center")
     },
 ];
 
