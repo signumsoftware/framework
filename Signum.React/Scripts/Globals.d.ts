@@ -30,7 +30,8 @@ interface Array<T> {
     toObject<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T };
     toObjectDistinct<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
-    flatMap<R>(selector: (element: T, index: number, array : T[]) => R[]): R[];
+    flatMap<R>(selector: (element: T, index: number, array: T[]) => R[]): R[];
+    groupsOf(maxCount: number): T[][];
     max(): T;
     min(): T;
     first(errorContext?: string): T;
@@ -52,6 +53,7 @@ interface Array<T> {
 interface ArrayConstructor {
 
     range(min: number, max: number): number[];
+    repeat<T>(count: number, value: T): T[];
 }
 
 
