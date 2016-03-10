@@ -172,6 +172,9 @@ namespace Signum.React.Json
 
         private static Type GetRowIdTypeFromSchema(PropertyRoute route)
         {
+            if (!typeof(Entity).IsAssignableFrom(route.RootType))
+                return null;
+
             var tryField = Schema.Current.TryField(route) as FieldMList;
 
             if (tryField == null)

@@ -4,6 +4,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
+using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
@@ -65,7 +66,7 @@ namespace Signum.React.Json
 
         public override string ToString()
         {
-            return this.PropertyValidator.PropertyInfo.Name;
+            return this.PropertyValidator?.PropertyInfo.Name;
         }
     }
 
@@ -432,21 +433,13 @@ namespace Signum.React.Json
 
         public Type GetEntityType(string typeStr, Type objectType)
         {
-            var type = TypeLogic.TryGetType(typeStr);
-            if (type == null)
-            {
-                if (typeStr != objectType.Name)
-                    throw new JsonSerializationException($"Type '{typeStr}' is not an Entity and is not the expected type ('{objectType.TypeName()}')");
+            var type = ReflectionServer.TypesByName.Value.GetOrThrow(typeStr);
 
-                return objectType;
-            }
-            else
-            {
-                if (!objectType.IsAssignableFrom(type))
-                    throw new JsonSerializationException($"Type '{type.Name}' is not assignable to '{objectType.TypeName()}'");
+            if (!objectType.IsAssignableFrom(type))
+                throw new JsonSerializationException($"Type '{type.Name}' is not assignable to '{objectType.TypeName()}'");
 
-                return type;
-            }
+            return type;
+
         }
     }
 }

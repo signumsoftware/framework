@@ -25,7 +25,7 @@ namespace Signum.React.Json
             writer.WriteStartObject();
 
             writer.WritePropertyName("entityColumn");
-            writer.WriteValue("Entity");
+            writer.WriteValue(rt.EntityColumn?.Name);
 
             writer.WritePropertyName("columns");
             serializer.Serialize(writer, rt.Columns.Select(c => c.Column.Token.FullKey()).ToList());
@@ -42,9 +42,12 @@ namespace Signum.React.Json
             foreach (var row in rt.Rows)
             {
                 writer.WriteStartObject();
-                writer.WritePropertyName("entity");
-                serializer.Serialize(writer, row.Entity);
-                
+                if (rt.EntityColumn != null)
+                {
+                    writer.WritePropertyName("entity");
+                    serializer.Serialize(writer, row.Entity);
+                }
+
                 writer.WritePropertyName("columns");
                 writer.WriteStartArray();
                 foreach (var column in rt.Columns)
