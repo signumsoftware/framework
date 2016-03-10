@@ -4,7 +4,7 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
-import { QueryDescription, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation,
+import { QueryDescription, CountQueryRequest, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation,
     QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn,
     ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken, isList } from './FindOptions';
 
@@ -236,7 +236,13 @@ export function parseSingleToken(queryName: PseudoType | QueryKey, token: string
 export class TokenCompleter {
     constructor(public queryName: PseudoType | QueryKey) { }
 
-    tokensToRequest: { [fullKey: string]: ({ options: SubTokensOptions, promise: Promise<QueryToken>, resolve: (action: QueryToken) => void }) };
+    tokensToRequest: {
+        [fullKey: string]: (
+            {
+                options: SubTokensOptions, promise: Promise<QueryToken>,
+                resolve: (action: QueryToken) => void
+            })
+    } = {};
 
 
     complete(tokenContainer: { columnName: string, token?: QueryToken }, options: SubTokensOptions): Promise<void> {
@@ -261,7 +267,7 @@ export class TokenCompleter {
         if (bucket)
             return bucket.promise;
 
-        bucket = { promise: null, resolve: null, options: options };
+        this.tokensToRequest[fullKey] = bucket = { promise: null, resolve: null, options: options };
 
         bucket.promise = new Promise<QueryToken>((resolve, reject) => {
             bucket.resolve = resolve;
@@ -389,9 +395,12 @@ export module API {
         return ajaxGet<QueryDescription>({ url: "/api/query/description/" + queryKey });
     }
 
-
     export function search(request: QueryRequest): Promise<ResultTable> {
         return ajaxPost<ResultTable>({ url: "/api/query/search" }, request);
+    }
+
+    export function queryCount(request: CountQueryRequest): Promise<number> {
+        return ajaxPost<number>({ url: "/api/query/queryCount" }, request);
     }
 
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<IEntity>[]> {
@@ -645,8 +654,8 @@ export const entityFormatRules: EntityFormatRule[] = [
     {
         name: "View",
         isApplicable: row=> true,
-        formatter: row => !isNavigable(row.entity.EntityType, null, true) ? null :
-            <EntityLink lite={row.entity}>{EntityControlMessage.View.niceToString() }</EntityLink>
+        formatter: row => !row.entity || !isNavigable(row.entity.EntityType, null, true) ? null :
+            <EntityLink lite={row.entity} inSearch={true}>{EntityControlMessage.View.niceToString() }</EntityLink>
     },
 ];
 

@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Signum.Utilities;
+using System.Threading;
 
 namespace Signum.Engine.CodeGeneration
 {
@@ -15,29 +16,34 @@ namespace Signum.Engine.CodeGeneration
         {
             while (true)
             {
-                Console.WriteLine("Paste your code and then write 'go'");
-
-                StringBuilder sb = new StringBuilder();
-                string line;
-                while (!(line = Console.ReadLine()).Equals("go", StringComparison.InvariantCultureIgnoreCase))
-                    sb.AppendLine(line);
-
-                var react = ToReactView(sb.ToString());
-
-                SafeConsole.WriteLineColor(ConsoleColor.Green, "React Translation:");
-                Console.WriteLine();
-                Console.WriteLine(react);
-                Console.WriteLine();
-                Console.WriteLine();
-                if (!SafeConsole.Ask("Continue?"))
+                Console.WriteLine("Write 'r' to transform your Clipboard to React");
+               
+                var text = Console.ReadLine();
+                if (text != "r")
                     return;
+
+          
+                Thread t = new Thread(() =>
+                {
+                    var aspx = Clipboard.GetText();
+
+                    var react = ToReactView(aspx);
+
+                    Clipboard.SetText(react);
+
+                });
+                
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+                t.Join();
+
+                Console.WriteLine("Done!");
             }
         }   
 
         public virtual string ToReactView(string razorViewText)
         {
-            var result = Regex.Replace(razorViewText, @"@Html\.(?<type>(ValueLine|EntityLine|EntityList|EntityCombo|EntityStrip|EntityRepeater))"+
-                @"\((?<ctx>\w+),\s*(?<param>\w+)\s*=>\s*\k<param>(\.(?<token>\w+))+(?<extra>,.+)?\)\s*$",
+            var result = Regex.Replace(razorViewText, @"@Html\.(?<type>(ValueLine|EntityLine|EntityList|EntityCombo|EntityStrip|EntityRepeater|EntityListCheckbox|EntityDetail))\((?<ctx>\w+)\s*,\s*(?<param>\w+)\s*=>\s*\k<param>(\.(?<token>\w+))+\s*(,\s*(?<param2>\w+)\s*=>\s*((\k<param2>\.(?<token2>\w+)\s*=\s*(?<value>[^)]+))|(?<extra>\{[^\}]*\})))?\)",
                 m =>
                 {
                     var type = m.Groups["type"].Value;
@@ -45,11 +51,19 @@ namespace Signum.Engine.CodeGeneration
                     var param = m.Groups["param"].Value;
                     var tokens = m.Groups["token"].Captures.Cast<Capture>().ToString(c => c.Value.FirstLower(), ".");
                     var extra = m.Groups["extra"].Value;
+                    var prop = m.Groups["prop"].Value;
+                    var value = m.Groups["value"].Value;
 
-                    return $"<{type} typeContext={{{ctx}.subContext({param} => {param}.{tokens})}} />" + (extra.HasText() ? "//" + extra : null);
+                    return $"<{type} ctx={{{ctx}.subCtx({param} => {param}.{tokens})}} {(prop.HasText()? $"{prop}=\"{value}\"" : null)} />" + (extra.HasText() ? "{/*" + extra + "*/}": null);
                 }, RegexOptions.Multiline );
             
+
             result = Regex.Replace(result, @"class=""(?<c>[^""]+)""", m => $"className=\"{m.Groups["c"].Value}\"");
+
+            result = Regex.Replace(result, @"@(?<type>\w+)\.(?<member>\w+)\.NiceToString\((?<params>[^)]*)\)", m =>
+            {
+                return $"{{{m.Groups["type"].Value},{m.Groups["member"].Value}.niceToString({m.Groups["params"].Value})}}";
+            });
 
             return result;
         }

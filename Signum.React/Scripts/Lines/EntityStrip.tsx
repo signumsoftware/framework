@@ -61,7 +61,9 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                             mlistItemContext(this.state.ctx).map((mlec, i) =>
                                 (<EntityStripElement key={i}
                                     ctx={mlec}
-                                    onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : null} />))
+                                    onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : null}
+                                    onView={this.state.view ? e => this.handleViewElement(e, i) : null}
+                                    />))
                         }
                         <li className="sf-strip-input">
                             <div className={buttons ? "input-group" : null}>
@@ -84,17 +86,53 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                 this.setValue(list);
             }).done();
         return "";
+
+    }
+
+    handleViewElement = (event: React.MouseEvent, index: number) => {
+
+        event.preventDefault();
+
+        const ctx = this.state.ctx;
+        var mle = ctx.value[index];
+        const entity = mle.element;
+
+        var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+        if (openWindow) {
+            event.preventDefault();
+            var route = Navigator.navigateRoute(entity as Lite<IEntity> /*or Entity*/);
+            window.open(route);
+        }
+        else {
+            const onView = this.props.onView ?
+                this.props.onView(entity, ctx.propertyRoute) :
+                this.defaultView(entity, ctx.propertyRoute);
+
+            onView.then(e => {
+                if (e == null)
+                    return;
+
+                this.convert(e).then(m => {
+                    if (is(ctx.value[index].element, e))
+                        ctx.value[index].element = m;
+                    else
+                        ctx.value[index] = { element: m };
+
+                    this.setValue(ctx.value);
+                }).done();
+            }).done();
+        }
     }
 
 
     renderAutoComplete() {
 
         if (!this.state.autoComplete || this.state.ctx.readOnly)
-            return <FormControlStatic ctx={this.state.ctx}></FormControlStatic>;
+            return null;
 
         return (
             <Typeahead
-                inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
+                inputAttrs={{ className: "sf-entity-autocomplete" }}
                 getItems={this.props.autoCompleteGetItems || this.defaultAutoCompleteGetItems}
                 renderItem={this.props.autoCompleteRenderItem || this.defaultAutCompleteRenderItem}
                 onSelect={this.handleOnSelect}/>
@@ -105,20 +143,30 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
 export interface EntityStripElementProps {
     onRemove: (event: React.MouseEvent) => void;
+    onView: (event: React.MouseEvent) => void;
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
 }
 
 export class EntityStripElement extends React.Component<EntityStripElementProps, void>
 {
     render() {
+
         return (
             <li className="sf-strip-element input-group">
-                <span className="sf-entitStrip-link">
-                    {this.props.ctx.value.toStr}
-                </span>
+                {
+                    this.props.onView ?
+                        <a className="sf-entitStrip-link" href="#" onClick={this.props.onView}>
+                            {this.props.ctx.value.toStr}
+                        </a>
+                        :
+                        <span className="sf-entitStrip-link">
+                            {this.props.ctx.value.toStr}
+                        </span>
+                }
+               
                 {this.props.onRemove &&
                     <span>
-                        <a className="sf-line-button sf-remove"
+                        <a className="sf-line-button sf-remove" 
                             onClick={this.props.onRemove}
                             title={EntityControlMessage.Remove.niceToString() }>
                             <span className="glyphicon glyphicon-remove"></span></a>

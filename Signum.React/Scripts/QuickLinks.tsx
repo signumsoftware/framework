@@ -114,7 +114,7 @@ export class QuickLinkWidget extends React.Component<{ ctx: WidgetContext }, { l
         }
     }
 
-    makeRequest(props: { ctx: WidgetContext } ) {
+    makeRequest(props: { ctx: WidgetContext }) {
         this.setState({ links: null })
         getQuickLinks({
             lite: toLiteFat(props.ctx.pack.entity),
@@ -126,15 +126,19 @@ export class QuickLinkWidget extends React.Component<{ ctx: WidgetContext }, { l
 
         var links = this.state.links;
 
+        if (links != null && links.length == 0)
+            return null;
+
         var a = (
-            <a 
+            <a
                 className={classes("badge", "sf-widgets-active", "sf-quicklinks") }
                 title={QuickLinkMessage.Quicklinks.niceToString() }
                 role="button"
                 href="#"
                 data-toggle="dropdown"
                 onClick={e => e.preventDefault() } >
-                {links ?  links.length : "?"}
+                { links && <span className="glyphicon glyphicon-star"></span>}
+                { links ? "\u00A0" + links.length : "…"}
             </a >
         );
 
@@ -148,10 +152,6 @@ export class QuickLinkWidget extends React.Component<{ ctx: WidgetContext }, { l
         );
     }
 }
-
-
-
-
 
 export interface QuickLinkOptions {
     isVisible?: boolean;

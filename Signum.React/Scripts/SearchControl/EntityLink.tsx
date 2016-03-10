@@ -7,6 +7,7 @@ import { Link  } from 'react-router';
 
 export interface EntityLinkProps extends React.Props<EntityLink> {
     lite: Lite<Entity>;
+    inSearch?: boolean
 }
 
 
@@ -15,7 +16,7 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
     render() {
         var lite = this.props.lite;
 
-        if (!Navigator.isNavigable(lite.EntityType))
+        if (!Navigator.isNavigable(lite.EntityType, null, this.props.inSearch || false))
             return <span data-entity={liteKey(lite) }>{this.props.children || lite.toStr}</span>;
         
         return (

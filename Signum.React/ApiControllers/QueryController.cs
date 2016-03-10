@@ -93,9 +93,31 @@ namespace Signum.React.ApiControllers
         [Route("api/query/search"), HttpPost]
         public ResultTable Search(QueryRequestTS request)
         {
-            var resultTable = DynamicQueryManager.Current.ExecuteQuery(request.ToQueryRequest());
+            return DynamicQueryManager.Current.ExecuteQuery(request.ToQueryRequest());
+        }
 
-            return resultTable;
+        [Route("api/query/queryCount"), HttpPost]
+        public int? QueryCount(QueryCountTS request)
+        {
+            return DynamicQueryManager.Current.ExecuteQueryCount(request.ToQueryCountRequest());
+        }
+    }
+
+    public class QueryCountTS
+    {
+        public string querykey;
+        public List<FilterTS> filters;
+
+        public QueryCountRequest ToQueryCountRequest()
+        {
+            var qn = QueryLogic.ToQueryName(this.querykey);
+            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+
+            return new QueryCountRequest
+            {
+                QueryName = qn,
+                Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
+            };
         }
     }
 
@@ -210,7 +232,7 @@ namespace Signum.React.ApiControllers
         public TypeReferenceTS type;
         public string typeColor; 
         public string niceTypeName; 
-        public FilterType filterType;
+        public FilterType? filterType;
         public string unit;
         public string format;
         public string displayName;
@@ -222,7 +244,7 @@ namespace Signum.React.ApiControllers
 
             this.name = a.Name;
             this.type = new TypeReferenceTS(a.Type, a.Implementations);
-            this.filterType = QueryUtils.GetFilterType(a.Type);
+            this.filterType = QueryUtils.TryGetFilterType(a.Type);
             this.typeColor = token.TypeColor;
             this.niceTypeName = token.NiceTypeName;
             this.isGroupable = token.IsGroupable;

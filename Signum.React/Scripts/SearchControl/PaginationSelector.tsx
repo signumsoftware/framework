@@ -1,5 +1,4 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
 import * as Finder from '../Finder'
 import { classes, Dic } from '../Globals'
 import { ResultTable, Pagination, PaginationMode, PaginateMath} from '../FindOptions'
@@ -112,7 +111,6 @@ export default class PaginationSelector extends React.Component<PaginationSelect
             return "\u00a0";
 
         const totalPages = PaginateMath.totalPages(resultTable.pagination, resultTable.totalElements);
-
 
         return (
             <BPagination

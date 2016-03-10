@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from './TypeContext'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize } from './TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo} from './Reflection'
 import { ModifiableEntity, EntityPack, ModelState } from './Signum.Entities'
 import * as Navigator from './Navigator'
@@ -43,6 +43,8 @@ export { EntityStrip };
 
 import { EntityCheckboxList } from  './Lines/EntityCheckBoxList'
 export { EntityCheckboxList };
+
+export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize }; 
 
 export interface EntityFrame<T extends ModifiableEntity> {
     onReload: (pack: EntityPack<T>) => void;
@@ -95,9 +97,10 @@ export abstract class EntityComponentWithState<T extends ModifiableEntity, S> ex
     abstract renderEntity(): React.ReactElement<any>;
 }
 
-export abstract class EntityComponent<T extends ModifiableEntity> extends EntityComponentWithState<T, {}> {
+export abstract class EntityComponent<T extends ModifiableEntity> extends EntityComponentWithState<T, void> {
 
 }
+
 
 Tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {

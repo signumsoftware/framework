@@ -139,6 +139,7 @@ export class TypeContext<T> extends StyleContext {
 
     propertyRoute: PropertyRoute;
     binding: IBinding<T>;
+    prefix: string;
 
     get value() {
         return this.binding.getValue();
@@ -152,6 +153,9 @@ export class TypeContext<T> extends StyleContext {
         super(parent, styleOptions);
         this.propertyRoute = propertyRoute;
         this.binding = binding;
+        
+        this.prefix = compose(parent && (parent as TypeContext<any>).prefix, binding.suffix);
+
     }
 
     subCtx(styleOptions?: StyleOptions): TypeContext<T>     
@@ -174,18 +178,36 @@ export class TypeContext<T> extends StyleContext {
         return result;
     }
 
-    niceName(property: (val: T) => any) {
+    niceName(property?: (val: T) => any) {
+
+        if (property == null)
+            return this.propertyRoute.member.niceName;
+
         return this.propertyRoute.add(property).member.niceName;
+    }
+
+    compose(suffix: string) {
+        return compose(this.prefix, suffix);
     }
 }
 
+
+function compose(prefix: string, suffix: string){
+    if (!prefix || prefix == "")
+        return suffix;
+
+    if (!suffix || suffix == "")
+        return prefix;
+
+    return prefix + "_" + suffix;
+}
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
     
     return ctx.value.map((mle, i) =>
         new TypeContext<T>(ctx, null,
             ctx.propertyRoute.addMember({ name: "", type: LambdaMemberType.Indexer }),
-            new ReadonlyBinding(mle.element)));
+            new ReadonlyBinding(mle.element, i.toString())));
 }
 
 

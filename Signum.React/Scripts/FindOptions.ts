@@ -10,13 +10,10 @@ export interface CountOptions {
     filterOptions?: FilterOption[];
 }
 
-
-
-
 export interface FindOptions {
     queryName: PseudoType | QueryKey;
-    simpleColumnName?: string;
-    simpleValue?: any;
+    parentColumn?: string;
+    parentValue?: any;
 
     filterOptions?: FilterOption[];
     orderOptions?: OrderOption[];
@@ -35,21 +32,21 @@ export interface FindOptions {
     contextMenu?: boolean;
 }
 
-export function expandSimpleColumnName(findOptions: FindOptions) {
+export function expandParentColumn(findOptions: FindOptions) {
 
-    if (!findOptions.simpleColumnName)
+    if (!findOptions.parentColumn)
         return findOptions; 
 
     var fo = Dic.extend({}, findOptions) as FindOptions;
 
     fo.filterOptions = [
-        { columnName: fo.simpleColumnName, operation: FilterOperation.EqualTo, value: fo.simpleValue, frozen: true },
+        { columnName: fo.parentColumn, operation: FilterOperation.EqualTo, value: fo.parentValue, frozen: true },
         ...(fo.filterOptions || [])
     ];
     
-    if (!fo.simpleColumnName.contains(".") && fo.columnOptionsMode == null || fo.columnOptionsMode == ColumnOptionsMode.Remove) {
+    if (!fo.parentColumn.contains(".") && fo.columnOptionsMode == null || fo.columnOptionsMode == ColumnOptionsMode.Remove) {
         fo.columnOptions = [
-            { columnName: fo.simpleColumnName },
+            { columnName: fo.parentColumn },
             ...(fo.columnOptions || [])
         ];
     }
@@ -57,8 +54,8 @@ export function expandSimpleColumnName(findOptions: FindOptions) {
     if (fo.searchOnLoad == null)
         fo.searchOnLoad = true;
 
-    fo.simpleColumnName = null;
-    fo.simpleValue = null;
+    fo.parentColumn = null;
+    fo.parentValue = null;
 
     return fo;
 }
@@ -175,6 +172,11 @@ export interface QueryRequest {
     orders: OrderRequest[];
     columns: ColumnRequest[];
     pagination: Pagination;
+}
+
+export interface CountQueryRequest {
+    queryKey: string;
+    filters: FilterRequest[];
 }
 
 export interface ResultColumn {

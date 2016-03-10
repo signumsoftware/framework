@@ -1,0 +1,87 @@
+﻿import * as React from 'react'
+import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Dic, DomUtils } from '../Globals'
+import * as Finder from '../Finder'
+import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandParentColumn, CountQueryRequest, QueryRequest } from '../FindOptions'
+import { SearchMessage, JavascriptMessage, Lite, IEntity, liteKey, is } from '../Signum.Entities'
+import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName} from '../Reflection'
+import * as Navigator from '../Navigator'
+import { StyleContext } from '../Typecontext'
+import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
+
+export interface CountSearchControlProps extends React.Props<CountSearchControl> {
+    ctx: StyleContext;
+    findOptions: FindOptions;
+    title?: string;
+    showAsLink?: boolean;
+}
+
+export interface CountSearchControlState {
+    count?: number;
+}
+
+export default class CountSearchControl extends React.Component<CountSearchControlProps, CountSearchControlState> {
+
+    constructor(props: CountSearchControlProps) {
+        super(props);
+        this.state = {
+            count: null,
+        };
+    }
+
+    getQueryRequest(fo: FindOptions): CountQueryRequest {
+
+        return {
+            queryKey: getQueryKey(fo.queryName),
+            filters: (fo.filterOptions || []).map(fo => ({ token: fo.token.fullKey, operation: fo.operation, value: fo.value })),
+        };
+    }
+
+    componentDidMount() {
+        var newFindOptions = expandParentColumn(this.props.findOptions);
+
+        Finder.parseTokens(newFindOptions)
+            .then(fo => Finder.API.queryCount(this.getQueryRequest(fo)))
+            .then(count => {
+                this.setState({ count });
+                this.forceUpdate();
+            }).done();
+    }
+
+    render() {
+        return (
+            <FormGroup ctx={this.props.ctx} title={this.props.title || getQueryNiceName(this.props.findOptions.queryName) }>
+                {this.props.showAsLink ? this.renderAsLink() : this.renderAsBadge() }
+            </FormGroup>
+        );
+    }
+
+    handleClick = (e: React.MouseEvent) => {
+        Finder.exploreWindowsOpen(this.props.findOptions, e);
+    }
+
+    renderAsBadge() {
+        return (
+            <div>
+                <span className={this.state.count > 0 ? "count-search count-with-results badge" : "count-search count-no-results"}>
+                    {this.state.count == null ? "…" : this.state.count}
+                </span>
+                {this.state.count != null &&
+                    <a className="sf-line-button sf-view" onClick={this.handleClick}>
+                        <span className={"glyphicon glyphicon-arrow-right"}>
+                        </span>
+                    </a>
+                }
+            </div>
+        );
+    }
+
+    renderAsLink() {
+
+        if (this.state.count == null)
+            return (<span>…</span>);
+        else
+            return (<a onClick={this.handleClick}>{this.state.count}</a>);
+    }
+}

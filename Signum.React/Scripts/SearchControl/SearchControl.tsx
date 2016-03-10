@@ -5,9 +5,9 @@ import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstr
 import { Dic, DomUtils } from '../Globals'
 import * as Finder from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
-    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandSimpleColumnName, QueryRequest } from '../FindOptions'
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandParentColumn, QueryRequest } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, IEntity, liteKey, is } from '../Signum.Entities'
-import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData} from '../Reflection'
+import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType} from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import PaginationSelector from './PaginationSelector'
@@ -63,7 +63,6 @@ export interface SearchControlState {
     lastToken?: QueryToken;
 }
 
-
 export default class SearchControl extends React.Component<SearchControlProps, SearchControlState> {
 
     static defaultProps = {
@@ -73,20 +72,24 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     constructor(props: SearchControlProps) {
         super(props);
-        this.state = {
+        this.state = this.initialState(props.findOptions.queryName);
+
+        if (props.externalFullScreenButton) {
+            props.externalFullScreenButton.onClick = this.handleFullScreenClick;
+        }
+    }
+
+    initialState(queryName: PseudoType | QueryKey): SearchControlState{
+        return {
             resultTable: null,
             findOptions: null,
-            querySettings: Finder.getQuerySettings(props.findOptions.queryName),
+            querySettings: Finder.getQuerySettings(queryName),
             queryDescription: null,
             loading: false,
             selectedRows: [],
             currentMenuItems: null,
             markedRows: null,
         };
-
-        if (props.externalFullScreenButton) {
-            props.externalFullScreenButton.onClick = this.handleFullScreenClick;
-        }
     }
 
     componentWillMount() {
@@ -101,10 +104,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             newProps.externalFullScreenButton.onClick = this.handleFullScreenClick;
         }
 
-        if (this.props.findOptions.queryName != newProps.findOptions.queryName)
-            this.initialLoad(newProps.findOptions);
-        else
-            this.resetFindOptions(newProps.findOptions);
+        this.setState(this.initialState(newProps.findOptions.queryName));
+
+        this.initialLoad(newProps.findOptions);
     }
 
     initialLoad(propsFindOptions: FindOptions) {
@@ -139,7 +141,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             columnOptions: [],
             orderOptions: [],
             filterOptions: []
-        }, expandSimpleColumnName(propsFindOptions));
+        }, expandParentColumn(propsFindOptions));
 
         findOptions.columnOptions = Finder.mergeColumns(Dic.getValues(qd.columns), findOptions.columnOptionsMode, findOptions.columnOptions)
         if (!findOptions.orderOptions.length) {
@@ -201,7 +203,6 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     // MAIN
-
     handleSearch = () => {
         const fo = this.state.findOptions;
         this.setState({ loading: false, editingColumn: null });
@@ -748,22 +749,29 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
-        e.preventDefault();
+
         if (this.props.onDoubleClick) {
+            e.preventDefault();
             this.props.onDoubleClick(e, row);
             return;
-        } else {
-            var s = Navigator.getSettings(row.entity.EntityType)
-
-            var avoidPopup = s != null && s.avoidPopup;
-
-            if (avoidPopup || e.ctrlKey || e.button == 1) {
-                window.open(Navigator.navigateRoute(row.entity));
-            }
-            else {
-                Navigator.navigate(row.entity).done();
-            }
         }
+
+        if (!Navigator.isNavigable(row.entity.EntityType))
+            return;
+
+        e.preventDefault();
+
+        var s = Navigator.getSettings(row.entity.EntityType)
+
+        var avoidPopup = s != null && s.avoidPopup;
+
+        if (avoidPopup || e.ctrlKey || e.button == 1) {
+            window.open(Navigator.navigateRoute(row.entity));
+        }
+        else {
+            Navigator.navigate(row.entity).done();
+        }
+
     }
 
     renderRows(): React.ReactNode {

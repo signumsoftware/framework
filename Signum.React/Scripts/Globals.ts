@@ -421,11 +421,6 @@ Promise.prototype.done = function () {
     (this as Promise<any>).catch(error => setTimeout(() => { throw error; }, 0));
 };
 
-
-export function hasFlag(value: number, flag: number): boolean {
-    return (value & flag) == flag;
-}
-
 export module Dic {
 
     export function getValues<V>(obj: { [key: string]: V }): V[] {

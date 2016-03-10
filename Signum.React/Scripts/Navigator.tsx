@@ -1,6 +1,6 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
-import { Dic, hasFlag } from './Globals';
+import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack } from './Signum.Entities';
@@ -173,18 +173,18 @@ export interface NavigateOptions {
     getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
 }
 
-export function navigate(options: NavigateOptions): Promise<ModifiableEntity>;
-export function navigate<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<T>;
-export function navigate<T extends IEntity>(entity: Lite<T>): Promise<T>
-export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity> {
+export function navigate(options: NavigateOptions): Promise<void>;
+export function navigate<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<void>;
+export function navigate<T extends IEntity>(entity: Lite<T>): Promise<void>
+export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | Lite<Entity>): Promise<void> {
     const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } as NavigateOptions :
         (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } as NavigateOptions :
             (entityOrOptions as EntityPack<ModifiableEntity>).entity ? { entity: entityOrOptions } as NavigateOptions :
                 entityOrOptions as NavigateOptions;
 
-    return new Promise<ModifiableEntity>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
-            NP.default.openView(options).then(resolve, reject);
+            NP.default.openNavigate(options).then(resolve, reject);
         });
     });
 } 
@@ -226,6 +226,7 @@ export module API {
         });
     }
     
+
     export function fetchAndRemember<T extends Entity>(lite: Lite<T>): Promise<T> {
         if (lite.entity)
             return Promise.resolve(lite.entity);
@@ -234,15 +235,15 @@ export module API {
     }
 
     export function fetchAndForget<T extends Entity>(lite: Lite<T>): Promise<T> {
-
         return fetchEntity(lite.EntityType, lite.id);
     }
     
     export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
-    export function fetchEntity<T extends Entity>(type: string, id: any): Promise<Entity>;
-    export function fetchEntity(typeOrLite: PseudoType, id?: any): Promise<Entity> {
+    export function fetchEntity(type: PseudoType, id: any): Promise<Entity>;
+    export function fetchEntity(type: PseudoType, id?: any): Promise<Entity> {
 
-        const typeName = getTypeName(typeOrLite as PseudoType);
+        const typeName = getTypeName(type);
+        let idVal = id;
 
         return ajaxGet<Entity>({ url: "/api/entity/" + typeName + "/" + id });
     }
@@ -382,7 +383,9 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase<T> {
     }
 
     onIsCreable(isSearch: boolean): boolean {
-        return hasFlag(this.isCreable, isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
+
+        return this.isCreable == EntityWhen.Always ||
+            this.isCreable == (isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
     }
 
 
@@ -402,7 +405,8 @@ export class EntitySettings<T extends Entity> extends EntitySettingsBase<T> {
         if (!this.getComponent && !customView)
             return false;
 
-        return hasFlag(this.isNavigable, isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
+        return this.isNavigable == EntityWhen.Always ||
+            this.isNavigable == (isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
     }
 
     onIsReadonly(): boolean {
@@ -456,10 +460,10 @@ export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySe
 
 
 export enum EntityWhen {
-    Always = 3,
-    IsSearch = 2,
-    IsLine = 1,
-    Never = 0,
+    Always = "Always" as any,
+    IsSearch = "IsSearch" as any,
+    IsLine = "IsLine" as any,
+    Never = "Never" as any,
 }
 
 

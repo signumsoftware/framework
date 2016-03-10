@@ -11,7 +11,7 @@ require("!style!css!./Lines.css");
 export interface FormGroupProps extends React.Props<FormGroup> {
     title?: React.ReactChild;
     controlId?: string;
-    ctx: TypeContext<any>;
+    ctx: StyleContext;
     labelProps?: React.HTMLProps<HTMLLabelElement>;
 }
 
@@ -21,9 +21,12 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const ctx = this.props.ctx;
 
-        if (ctx.formGroupStyle == FormGroupStyle.None) {
-            var errorClass = ctx.binding.errorClass;
+        const tCtx = ctx as TypeContext<any>;
 
+        var errorClass = tCtx.binding && tCtx.binding.errorClass;
+
+        if (ctx.formGroupStyle == FormGroupStyle.None) {
+           
             var c = this.props.children as React.ReactElement<any>;
 
             if (errorClass == null)
@@ -38,11 +41,11 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const label = (
             <label htmlFor={this.props.controlId} {...this.props.labelProps } className= { labelClasses } >
-                { this.props.title || this.props.ctx.propertyRoute.member.niceName }
+                { this.props.title || tCtx.propertyRoute && tCtx.propertyRoute.member.niceName }
             </label>
         );
 
-        return <div className={ classes("form-group", this.props.ctx.formGroupSizeCss, ctx.binding.errorClass) }>
+        return <div className={ classes("form-group", this.props.ctx.formGroupSizeCss, errorClass) }>
             { ctx.formGroupStyle != FormGroupStyle.BasicDown && label }
             {
                 ctx.formGroupStyle == FormGroupStyle.LabelColumns ? (<div className={ this.props.ctx.valueColumnsCss } > { this.props.children } </div>) : this.props.children}
@@ -64,10 +67,12 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
     render() {
         const ctx = this.props.ctx;
 
-        return <p id={ this.props.controlId }
-            className = {(ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static") + " " + this.props.className}>
-            { this.props.children }
-        </p>
+        return (
+            <p id={ this.props.controlId }
+                className ={classes(ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static", this.props.className) }>
+                { this.props.children }
+            </p>
+        );
     }
 
 }
