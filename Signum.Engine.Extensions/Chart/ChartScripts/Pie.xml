@@ -23,7 +23,7 @@
 
   var r = d3.min([width / 2, height]) / 3;
   var rInner = r  * parseFloat(pInnerRadius);
-  var color = d3.scale.category20().domain( $.map(data.rows, function (v) { return v.c0; }));
+  var color = d3.scale.category20().domain( data.rows.map(function (v) { return v.c0; }));
   
   var pie = d3.layout.pie()
       .sort(pSort == "Ascending"? function(a, b) {return d3.descending(size(a.c1), size(b.c1)) }  :

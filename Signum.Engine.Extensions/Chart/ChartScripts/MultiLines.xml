@@ -122,11 +122,11 @@
   //yRule.debugY(chart);
   
   var x = d3.scale.ordinal()
-      .domain($.map(dim0, function (d) { return d; }))
+      .domain(dim0.map(function (d) { return d; }))
       .rangeBands([0, xRule.size('content')]);
   
   
-  var y =  scaleFor(data.columns.c2, $.map(series, function(s){ return s.points.map(function(p){return p.value;})}), 0, yRule.size('content'), data.parameters["Scale"]);
+  var y =  scaleFor(data.columns.c2, series.map(function(s){ return s.points.map(function(p){return p.value;})}), 0, yRule.size('content'), data.parameters["Scale"]);
   
   chart.append('svg:g').attr('class', 'x-tick').attr('transform', translate(xRule.start('content')+ (x.rangeBand() / 2), yRule.start('ticks')))
     .enterData(dim0, 'line', 'x-tick')
@@ -182,7 +182,7 @@
     .attr('dominant-baseline', 'middle')
     .text(title);
   
-   var color =  d3.scale.category20().domain($.map(series, function (s) { return s.key; }));
+   var color =  d3.scale.category20().domain(series.map(function (s) { return s.key; }));
   
    var line = d3.svg.line()
     .x(function(r) { return x(r.dim0); })
@@ -249,7 +249,7 @@
    }
    
     var legendScale = d3.scale.ordinal()
-    .domain($.map(series, function (s, i) { return i; }))
+    .domain(series.map(function (s, i) { return i; }))
     .rangeBands([0, xRule.size('content')]);
   
   if (legendScale.rangeBand() > 50) {

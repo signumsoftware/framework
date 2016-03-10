@@ -126,7 +126,7 @@
 
   
   var y = d3.scale.ordinal()
-      .domain($.map(dim0, function (v) { return v; }))
+      .domain(dim0.map(function (v) { return v; }))
        .rangeBands([0, yRule.size('content')]);
   
   var stack = d3.layout.stack()
@@ -138,7 +138,7 @@
   
   stack(series);
   
-  var flattened = $.map(series, function(s){return s.points});
+  var flattened = series.map(function(s){return s.points});
   
   var maxDim0 = d3.nest()      
       .key(function(r){return r.dim0; })
@@ -198,7 +198,7 @@
     .attr('dominant-baseline', 'middle')
     .text(data.columns.c0.title);
 
-  var color = d3.scale.category20().domain($.map(series, function (s) { return s.key; }));
+  var color = d3.scale.category20().domain(series.map(function (s) { return s.key; }));
   
   //PAINT GRAPH
   chart.enterData(series, 'g', 'shape-serie').attr('transform', translate(xRule.start('content'), yRule.start('content')))
@@ -265,7 +265,7 @@
   }
   
   var legendScale = d3.scale.ordinal()
-      	.domain($.map(series, function (s, i) { return i; }))
+      	.domain(series.map(function (s, i) { return i; }))
       	.rangeBands([0, xRule.size('content')]);
   
   if (legendScale.rangeBand() > 50) {

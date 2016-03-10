@@ -35,13 +35,13 @@
   }
   else if(data.columns.c2.token != null) 
   {
-    var categoryColor = d3.scale[data.parameters["ColorCategory"]]($.map(data.rows, function(v) { return v.c2; }));
+    var categoryColor = d3.scale[data.parameters["ColorCategory"]](data.rows.map(function(v) { return v.c2; }));
     color = function(v) { return v.c2.color || categoryColor(v.c2); };
   }
   else
   {
     
-    var categoryColor = d3.scale[data.parameters["ColorCategory"]]($.map(data.rows, function(v) { return v.c0; }));
+    var categoryColor = d3.scale[data.parameters["ColorCategory"]](data.rows.map(function(v) { return v.c0; }));
     color = function(v) { return v.c0.color || categoryColor(v.c0); };
   }
   

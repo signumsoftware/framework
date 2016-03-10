@@ -118,10 +118,10 @@
   }, height);
   //yRule.debugY(chart);
 
-  var x = scaleFor(data.columns.c2, $.map(series, function(s){ return s.points.map(function(p){return p.value;})}), 0, xRule.size('content'), data.parameters["Scale"]);
+  var x = scaleFor(data.columns.c2, series.map(function(s){ return s.points.map(function(p){return p.value;})}), 0, xRule.size('content'), data.parameters["Scale"]);
   
   var y = d3.scale.ordinal()
-      .domain($.map(dim0, function (v) { return v; }))
+      .domain(dim0.map(function (v) { return v; }))
       .rangeBands([0,yRule.size('content')]);
 
   
@@ -179,10 +179,10 @@
   
   var interMagin = 2;
   
-  var color = d3.scale.category20().domain($.map(series, function (s) { return s.key; }));
+  var color = d3.scale.category20().domain(series.map(function (s) { return s.key; }));
   
   var ySubscale = d3.scale.ordinal()
-    .domain($.map(series, function (s) { return s.key; }))
+    .domain(series.map(function (s) { return s.key; }))
     .rangeBands([interMagin, y.rangeBand()-interMagin]);
   
   //PAINT GRAPH
@@ -223,7 +223,7 @@
       
     //paint color legend
     var legendScale = d3.scale.ordinal()
-        .domain($.map(series, function (s, i) { return i; }))
+        .domain(series.map(function (s, i) { return i; }))
         .rangeBands([0, xRule.size('content')]);
   
   if (legendScale.rangeBand() > 50) {

@@ -129,7 +129,7 @@
   //yRule.debugY(chart);
   
   var x = d3.scale.ordinal()
-      .domain($.map(dim0, function (d) { return d; }))
+      .domain(dim0.map(function (d) { return d; }))
       .rangeBands([0, xRule.size('content')]);
   
   var stack = d3.layout.stack()
@@ -210,7 +210,7 @@
       .attr('dominant-baseline', 'middle')
       .text(title);
   
-  var color =  d3.scale.category20().domain($.map(series, function (s) { return s.key; }));
+  var color =  d3.scale.category20().domain(series.map(function (s) { return s.key; }));
   
   var area = d3.svg.area()
     .x(function(v) { return x(v.dim0); })
@@ -270,7 +270,7 @@
    });
   
   var legendScale = d3.scale.ordinal()
-      .domain($.map(series, function (s, i) { return i; }))
+      .domain(series.map(function (s, i) { return i; }))
       .rangeBands([0, xRule.size('content')]);
   
   if (legendScale.rangeBand() > 50) {

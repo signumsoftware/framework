@@ -41,7 +41,7 @@
   
   
   var x = d3.scale.ordinal()
-      .domain($.map(data.rows, function (e) { return e.c0; }))
+      .domain(data.rows.map(function (e) { return e.c0; }))
       .rangeBands([0, xRule.size('content')]);
   
   var y = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, yRule.size('content'), data.parameters["Scale"]);
