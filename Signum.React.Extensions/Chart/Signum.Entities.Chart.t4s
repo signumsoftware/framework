@@ -20,3 +20,21 @@ import * as Files from '../Files/Signum.Entities.Files'
 //Basics.Assembly: Signum.Entities.dll
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
+import { FilterOption, OrderOption, FilterRequest, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions' 
+
+//Partial
+export interface ChartRequest {
+    queryKey?: string;
+
+	filterOptions?: FilterOption[];
+    ordersOptions?: OrderOption[];
+
+    filters?: FilterRequest[];
+    orders?: OrderRequest[];
+}
+
+export interface ChartScriptParameterEntity {
+    enumValues: { name: string, typeFilter : ChartColumnType }[];
+}
+
+export type IChartBase = ChartRequest | UserChartEntity;

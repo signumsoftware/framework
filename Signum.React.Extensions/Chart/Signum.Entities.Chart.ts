@@ -15,7 +15,24 @@ import * as Files from '../Files/Signum.Entities.Files'
 
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
+import { FilterOption, OrderOption, FilterRequest, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions' 
 
+//Partial
+export interface ChartRequest {
+    queryKey?: string;
+
+	filterOptions?: FilterOption[];
+    ordersOptions?: OrderOption[];
+
+    filters?: FilterRequest[];
+    orders?: OrderRequest[];
+}
+
+export interface ChartScriptParameterEntity {
+    enumValues: { name: string, typeFilter : ChartColumnType }[];
+}
+
+export type IChartBase = ChartRequest | UserChartEntity;
 export const ChartColorEntity_Type = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
     related?: Entities.Lite<Entities.Entity>;
@@ -24,7 +41,6 @@ export interface ChartColorEntity extends Entities.Entity {
 
 export const ChartColumnEntity_Type = new Type<ChartColumnEntity>("ChartColumnEntity");
 export interface ChartColumnEntity extends Entities.EmbeddedEntity {
-    scriptColumn?: ChartScriptColumnEntity;
     token?: UserAssets.QueryTokenEntity;
     displayName?: string;
 }
@@ -101,6 +117,15 @@ export const ChartParameterType_Type = new EnumType<ChartParameterType>("ChartPa
 
 export module ChartPermission {
     export const ViewCharting : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "ChartPermission.ViewCharting" });
+}
+
+export const ChartRequest_Type = new Type<ChartRequest>("ChartRequest");
+export interface ChartRequest extends Entities.ModelEntity {
+    chartScript?: ChartScriptEntity;
+    groupResults?: boolean;
+    columns?: Entities.MList<ChartColumnEntity>;
+    parameters?: Entities.MList<ChartParameterEntity>;
+    invalidator?: boolean;
 }
 
 export const ChartScriptColumnEntity_Type = new Type<ChartScriptColumnEntity>("ChartScriptColumnEntity");

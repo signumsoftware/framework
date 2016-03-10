@@ -8,7 +8,7 @@ import { Entity, Lite, is } from '../../../Framework/Signum.React/Scripts/Signum
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import * as Reflection from '../../../Framework/Signum.React/Scripts/Reflection'
+import { requestTypes, setTypes } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import * as TranslationClient from './TranslationClient'
 
@@ -41,8 +41,8 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
     handleSelect = (c: Lite<CultureInfoEntity>) => {
 
         TranslationClient.Api.setCurrentCulture(c)
-            .then(() => Reflection.requestTypes())
-            .then(types => Reflection.setTypes(types))
+            .then(() => requestTypes())
+            .then(types => setTypes(types))
             .then(() => {
                 this.setState({ currentCulture: c });
                 window.location.reload(true);
