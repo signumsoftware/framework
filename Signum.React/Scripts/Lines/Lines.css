@@ -24,6 +24,10 @@ p.form-control {
         height: initial !important;
     }
 
+     p.form-control.readonly {
+        overflow: hidden;
+    }
+
 .numeric {
     text-align: right;
 }
