@@ -528,6 +528,14 @@ export function areEqual<T>(a: T, b: T, field: (value: T) => any) {
     return field(a) == field(b);
 }
 
+export function ifError<E extends Error, T>(ErrorClass: { new (...args: any[]): E }, onError: (error: E) => T): (error: any) => T {
+    return error => {
+        if (error instanceof ErrorClass)
+            return onError((error as E));
+        throw error;
+    };
+}
+
 export module DomUtils {
     export function matches(elem: HTMLElement, selector: string): boolean {
         // Vendor-specific implementations of `Element.prototype.matches()`.

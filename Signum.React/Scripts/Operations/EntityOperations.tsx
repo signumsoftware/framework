@@ -4,7 +4,7 @@ import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react
 import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString } from '../Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType  } from '../Reflection';
-import {classes} from '../Globals';
+import {classes, ifError} from '../Globals';
 import * as Navigator from '../Navigator';
 import { ButtonsContext } from '../Frames/ButtonBar';
 import Notify from '../Frames/Notify';
@@ -145,7 +145,7 @@ export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>) 
 
     API.constructFromEntity(eoc.entity, eoc.operationInfo.key, null)
         .then(pack => Navigator.view(pack).then(a => notifySuccess()))
-        .catch(e => catchValidationError(e, eoc.frame))
+        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
 
@@ -156,16 +156,8 @@ export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>) {
 
     API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, null)
         .then(pack => Navigator.view(pack).then(a => notifySuccess()))
-        .catch(e => catchValidationError(e, eoc.frame))
+        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
-}
-
-function catchValidationError(error: any, frame: EntityFrame<Entity>) {
-    if (error instanceof ValidationError) {
-        var model = (error as ValidationError).modelState;
-        frame.setError(model, "request.entity");
-        return false;
-    }
 }
 
 
@@ -176,7 +168,7 @@ export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>){
 
     API.executeEntity(eoc.entity, eoc.operationInfo.key, null)
         .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
-        .catch(e => catchValidationError(e, eoc.frame))
+        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
 
@@ -187,7 +179,7 @@ export function defaultExecuteLite(eoc: EntityOperationContext<Entity>) {
 
     API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, null)
         .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
-        .catch(e => catchValidationError(e, eoc.frame))
+        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
 
@@ -198,7 +190,7 @@ export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>){
 
     API.deleteEntity(eoc.entity, eoc.operationInfo.key, null)
         .then(() => { eoc.frame.onClose(); return notifySuccess(); })
-        .catch(e => catchValidationError(e, eoc.frame))
+        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
 
@@ -209,7 +201,7 @@ export function defaultDeleteLite(eoc: EntityOperationContext<Entity>) {
 
     API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, null)
         .then(() => { eoc.frame.onClose(); return notifySuccess(); })
-        .catch(e => catchValidationError(e, eoc.frame))
+        .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
 
