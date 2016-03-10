@@ -73,7 +73,7 @@ namespace Signum.Entities.UserAssets
             tokenString = token == null ? null : token.FullKey();
         }
 
-        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
+        public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace Signum.Entities.UserAssets
             }
             catch (Exception e)
             {
-                parseException = new FormatException("{0} {1}: {2}\r\n{3}".FormatWith(context.GetType().Name, context.IdOrNull, context, e.Message), e);
+                parseException = new FormatException("{0} {1}: {2}\r\n{3}".FormatWith(context.GetType().Name, (context as Entity)?.IdOrNull, context, e.Message), e);
             }
         }
 

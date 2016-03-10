@@ -38,8 +38,15 @@ namespace Signum.Engine.Chart
                         uq.Icon,
                     });
 
-                Scripts = sb.GlobalLazy(() => Database.Query<ChartScriptEntity>().ToDictionary(a=>a.Name),
-                    new InvalidateWith(typeof(ChartScriptEntity)));
+                Scripts = sb.GlobalLazy(() =>
+                {
+                    var result = Database.Query<ChartScriptEntity>().ToDictionary(a => a.Name);
+                    foreach (var e in result.Values)
+                        if (e.Icon != null)
+                            e.Icon.Retrieve();
+
+                    return result;
+                }, new InvalidateWith(typeof(ChartScriptEntity)));
 
                 RegisterOperations();
             }

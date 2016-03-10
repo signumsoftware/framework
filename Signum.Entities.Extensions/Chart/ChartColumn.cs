@@ -20,6 +20,7 @@ namespace Signum.Entities.Chart
     {
         [Ignore]
         ChartScriptColumnEntity scriptColumn;
+        [HiddenProperty]
         public ChartScriptColumnEntity ScriptColumn
         {
             get { return scriptColumn; }
@@ -34,7 +35,7 @@ namespace Signum.Entities.Chart
         {
             NotifyChange(true);
 
-            this.parentChart.FixParameters(this);
+            this.parentChart?.FixParameters(this);
 
             if (token != null)
             {
@@ -91,7 +92,7 @@ namespace Signum.Entities.Chart
 
         public void NotifyChange(bool needNewQuery)
         {
-            parentChart.InvalidateResults(needNewQuery);
+            parentChart?.InvalidateResults(needNewQuery);
         }
 
         [field: NonSerialized, Ignore]
@@ -155,7 +156,7 @@ namespace Signum.Entities.Chart
             DisplayName = displayName;
         }
 
-        public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
+        public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             if (token != null)
                 token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);

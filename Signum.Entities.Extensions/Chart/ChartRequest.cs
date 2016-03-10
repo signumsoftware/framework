@@ -17,7 +17,7 @@ namespace Signum.Entities.Chart
 {
     public interface IChartBase
     {
-        ChartScriptEntity ChartScript { get; }
+        ChartScriptEntity ChartScript { get; set; }
 
         bool GroupResults { get; set; }
 
@@ -31,19 +31,24 @@ namespace Signum.Entities.Chart
         void FixParameters(ChartColumnEntity chartColumnEntity);
     }
 
-    [Serializable, InTypeScript(false)]
+    [Serializable]
     public class ChartRequest : ModelEntity, IChartBase
     {
+        private ChartRequest()
+        {
+        }
+
         public ChartRequest(object queryName)
         {
             this.queryName = queryName;
         }
-
+        
         object queryName;
-        [NotNullValidator]
+        [NotNullValidator, InTypeScript(false)]
         public object QueryName
         {
             get { return queryName; }
+            set { queryName = value; }
         }
 
         ChartScriptEntity chartScript;
@@ -126,8 +131,10 @@ namespace Signum.Entities.Chart
         }
 
 
+        [InTypeScript(false)]
         public List<Filter> Filters { get; set; } = new List<Filter>();
 
+        [InTypeScript(false)]
         public List<Order> Orders { get; set; } = new List<Order>();
 
         public List<QueryToken> AllTokens()
@@ -143,6 +150,7 @@ namespace Signum.Entities.Chart
             return allTokens;
         }
 
+        [InTypeScript(false)]
         public List<CollectionElementToken> Multiplications
         {
             get { return CollectionElementToken.GetElements(AllTokens().ToHashSet()); }
