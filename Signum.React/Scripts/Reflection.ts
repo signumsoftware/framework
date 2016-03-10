@@ -770,7 +770,7 @@ export class GraphExplorer {
             return false;
 
         if (obj instanceof Array)
-            return obj.some((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]"));
+            return obj.map((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]")).some(a => a);
 
         const mle = obj as MListElement<any>;
         if (mle.hasOwnProperty("rowId"))
