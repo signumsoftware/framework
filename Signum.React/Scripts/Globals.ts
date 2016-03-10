@@ -22,6 +22,62 @@ Array.prototype.groupToObject = function (keySelector: (element: any) => string)
     return result;
 };
 
+Array.prototype.groupWhen = function (isGroupKey: (element: any) => boolean, includeKeyInGroup = false, initialGroup = false): {key: any, elements: any[]}[] {
+    const result: {key: any, elements: any[]}[] = [];
+
+    let group: {key: any, elements: any[]} = null;
+
+    for (let i = 0; i < this.length; i++) {
+        const item: any = this[i];
+        if (isGroupKey(item))
+        {
+            group = { key: item, elements : includeKeyInGroup? [item]: []};
+            result.push(group);
+        }
+        else
+        {
+            if (group == null)
+            {
+                if(!initialGroup)
+                    throw new Error("Parameter initialGroup is false");
+
+                group = { key: null, elements : []};
+                result.push(group);
+            }
+
+            group.elements.push(item);
+        }
+    }
+    return result;
+};
+
+Array.prototype.groupWhenChange = function (getGroupKey: (element: any) => string): {key: string, elements: any[]}[] {
+    const result: {key: any, elements: any[]}[] = [];
+
+    let current: {key: string, elements: any[]} = null;
+    for (let i = 0; i < this.length; i++) {
+        const item: any = this[i];
+        if (current == null)
+        {
+            current =  { key: getGroupKey(getGroupKey(item)), elements : [item]};
+        }
+        else if (current.key == getGroupKey(item))
+        {
+            current.elements.push(item);
+        }
+        else
+        {
+            result.push(current);
+            current = { key: getGroupKey(item), elements: [item]};
+        }
+    }
+
+    if (current != null)
+         result.push(current);
+
+    return result;
+};
+
 Array.prototype.orderBy = function (keySelector: (element: any) => any): any[] {
     const cloned = (<any[]>this).slice(0);
     cloned.sort((e1, e2) => {

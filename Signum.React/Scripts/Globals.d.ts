@@ -22,6 +22,8 @@ declare interface Promise<T> {
 interface Array<T> {
     groupBy(keySelector: (element: T) => string): { key: string; elements: T[] }[];
     groupToObject(keySelector: (element: T) => string): { [key: string]: T[] };
+    groupWhen(condition: (element: T) => boolean): { key: T, elements: T[]}[];
+    groupWhenChange(keySelector: (element: T) => string): { key: string, elements: T[]}[];
     orderBy<V>(keySelector: (element: T) => V): T[];
     orderByDescending<V>(keySelector: (element: T) => V): T[];
     toObject(keySelector: (element: T) => string): { [key: string]: T };
