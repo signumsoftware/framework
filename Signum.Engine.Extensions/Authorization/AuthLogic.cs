@@ -601,7 +601,7 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Console.WriteLine("You want to import (i), export (e) or sync roles (r) uthRules? (nothing to exit)".FormatWith(fileName));
+            Console.WriteLine("Do you want to import (i), export (e) or sync roles (r) AuthRules? (nothing to exit)".FormatWith(fileName));
 
             string answer = Console.ReadLine();
 
