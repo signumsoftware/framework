@@ -9,6 +9,14 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
+import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions' 
+
+export interface QueryTokenEntity {
+    token?: QueryToken;
+    parseException?: string;
+}
+
+
 
 export enum EntityAction {
     Identical = "Identical" as any,

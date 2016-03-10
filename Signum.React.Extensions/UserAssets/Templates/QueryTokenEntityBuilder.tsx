@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { ajaxGet, ajaxPost, ServiceError } from '../../../../Framework/Signum.React/Scripts/Services'
-import { QueryTokenEntity} from '../Signum.Entities.UserAssets'
+import { QueryTokenEntity, QueryTokenEntity_Type} from '../Signum.Entities.UserAssets'
 import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -15,50 +15,39 @@ interface QueryTokenEntityBuilderProps {
     ctx: TypeContext<QueryTokenEntity>;
     queryKey: string;
     subTokenOptions: SubTokensOptions;
+    onTokenChanged?: (newToken: QueryToken) => void;
 }
 
-
-
-export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps, { queryToken?: QueryToken; error?: string }> {
-
-    constructor(props) {
-        super(props);
-        this.state = { queryToken: null };
-    }
-
-    componentWillMount() {
-        this.props.ctx.value.tokenString;
-
-        Finder.parseSingleToken(this.props.queryKey, this.props.ctx.value.tokenString, this.props.subTokenOptions)
-            .then(qt => this.setState({ queryToken: qt, error: null }))
-            .catch((error: ServiceError) => {
-                if (error instanceof ServiceError) {
-                    this.setState({
-                        queryToken: null, error: error.httpError.ExceptionMessage
-                    });
-                }
-            })
-            .done();
-    }
+export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps, { }> {
 
     handleTokenChanged = (newToken: QueryToken) => {
-        this.props.ctx.value.tokenString = newToken ? newToken.fullKey : null;
+        if (newToken == null)
+            this.props.ctx.value = null;
+        else
+            this.props.ctx.value = QueryTokenEntity_Type.New({ tokenString: newToken.fullKey, token: newToken });
+
+        if (this.props.onTokenChanged)
+            this.props.onTokenChanged(newToken);
+
         this.setState({ queryToken: newToken });
     }
 
     render() {
 
-        var token = <QueryTokenBuilder queryToken={this.state.queryToken}
+
+        const qte = this.props.ctx.value;
+
+        const tokenBuilder = <QueryTokenBuilder queryToken={qte && qte.token}
             onTokenChange={this.handleTokenChanged} queryKey={this.props.queryKey} subTokenOptions={this.props.subTokenOptions}
             readOnly={this.props.ctx.readOnly}/>
 
         return (
             <FormGroup ctx={this.props.ctx}>
                 {
-                    this.state.error == null ? token :
+                    !qte || !qte.parseException ? tokenBuilder :
                         <div>
-                            {token}
-                            <p className="alert alert-danger">{this.state.error}</p>
+                            {tokenBuilder}
+                            <p className="alert alert-danger">{qte.parseException}</p>
                         </div>
                 }
             </FormGroup>

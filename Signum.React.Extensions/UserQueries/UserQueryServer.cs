@@ -19,7 +19,7 @@ namespace Signum.React.UserQueries
     {
         public static void Start(HttpConfiguration config)
         {
-            UserAssetsServer.Start(config);
+            UserAssetServer.Start(config);
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 

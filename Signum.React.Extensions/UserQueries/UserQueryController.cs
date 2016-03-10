@@ -37,43 +37,6 @@ namespace Signum.React.Auth
             return UserQueryLogic.GetUserQueriesEntity(TypeLogic.GetType(typeName));
         }
 
-        [Route("api/userQueries/parseFilters"), HttpPost]
-        public List<FilterTS> ParseFilters(ParseFiltersRequest request)
-        {
-            var queryName = QueryLogic.ToQueryName(request.queryKey);
-            var qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            var options = SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | (request.canAggregate ? SubTokensOptions.CanAggregate : 0);
-
-            using (request.entity != null ? CurrentEntityConverter.SetCurrentEntity(request.entity.Retrieve()) : null)
-            {
-                var result = request.filters
-                        .Select(f => new FilterTS
-                        {
-                            token = f.tokenString,
-                            operation = f.operation,
-                            value = FilterValueConverter.Parse(f.valueString, QueryUtils.Parse(f.tokenString, qd, options).Type, f.operation.IsList())
-                        })
-                        .ToList();
-
-                return result;
-            }
-        }
-
-        public class ParseFiltersRequest
-        {
-            public string queryKey;
-            public bool canAggregate;
-            public List<ParseFilterRequest> filters;
-            public Lite<Entity> entity;
-        }
-
-        public class ParseFilterRequest
-        {
-            public string tokenString;
-            public FilterOperation operation;
-            public string valueString;
-        }
-
         [Route("api/userQueries/fromQueryRequest"), HttpPost]
         public UserQueryEntity FromQueryRequest(CreateRequest request)
         {
