@@ -4,6 +4,7 @@ import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Servi
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
+import { PseudoType, QueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { UserEntity, UserEntity_Type, UserOperation, RoleEntity_Type, PermissionSymbol } from './Signum.Entities.Authorization'
 import Login from './Login/Login';
@@ -57,6 +58,10 @@ export function onLogin() {
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol) {
+    return true;
+}
+
+export function isQueryAllowed(quey: PseudoType | QueryKey) {
     return true;
 }
 
