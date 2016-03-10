@@ -733,7 +733,7 @@ namespace Signum.Engine.Templating
             sb.Append("[");
             sb.Append("d:");
 
-            sb.Append(this.dateTimeExpression);
+            sb.Append(TemplateUtils.ScapeColon(this.dateTimeExpression));
 
             if (afterToken.HasItems())
                 sb.Append(afterToken);

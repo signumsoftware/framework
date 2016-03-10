@@ -7,7 +7,7 @@ import { Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Ent
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { default as SearchControl, ExternalFullScreenButton} from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
+import SearchControl from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
 import { UserQueryEntity_Type, UserQueryEntity, UserQueryMessage  } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 
