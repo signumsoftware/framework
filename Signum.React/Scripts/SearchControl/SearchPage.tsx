@@ -4,7 +4,7 @@ import { Dic } from '../Globals'
 import * as Finder from '../Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
-import * as Reflection from '../Reflection'
+import { getQueryNiceName } from '../Reflection'
 import { default as SearchControl, ExternalFullScreenButton} from './SearchControl'
 
 
@@ -40,7 +40,7 @@ export default class SearchPage extends React.Component<SearchPageProps, { findO
         return (
             <div id="divSearchPage">
                 <h2>
-                    <span className="sf-entity-title">{Reflection.getQueryNiceName(fo.queryName) }</span>&nbsp;
+                    <span className="sf-entity-title">{getQueryNiceName(fo.queryName) }</span>&nbsp;
                     <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.externalButton.onClick(e) }>
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>
