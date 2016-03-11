@@ -92,7 +92,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     componentWillReceiveProps(newProps: SearchControlProps) {
-        if (this.stringify(this.props.findOptions) == this.stringify(newProps.findOptions))
+        if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions))
             return;
 
         this.setState(this.initialState(newProps.findOptions.queryName));
@@ -101,7 +101,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     stringify(findOptions: FindOptions) {
-        return Finder.findOptionsPath(expandParentColumn(findOptions));
+        return Finder.findOptionsPath((findOptions));
     }
 
     initialLoad(propsFindOptions: FindOptions) {

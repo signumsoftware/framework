@@ -6,7 +6,7 @@ import { ajaxGet, ajaxPost } from './Services';
 
 import { QueryDescription, CountQueryRequest, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation,
     QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn,
-    ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken, isList } from './FindOptions';
+    ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken, isList, expandParentColumn } from './FindOptions';
 
 import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from './Signum.Entities';
 
@@ -91,9 +91,11 @@ export function explore(findOptions: FindOptions): Promise<void> {
 export function findOptionsPath(findOptions: FindOptions): string;
 export function findOptionsPath(queryName: PseudoType | QueryKey): string;
 export function findOptionsPath(queryNameOrFindOptions: any): string {
-    const fo = queryNameOrFindOptions as FindOptions;
+    let fo = queryNameOrFindOptions as FindOptions;
     if (!fo.queryName)
         return currentHistory.createPath("/find/" + getQueryKey(queryNameOrFindOptions)); 
+
+    fo = expandParentColumn(fo);
     
     const query = {
         filters: Encoder.encodeFilters(fo.filterOptions),
