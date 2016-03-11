@@ -1,7 +1,7 @@
 ﻿
 Array.prototype.groupBy = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
     const result: { key: string; elements: any[] }[] = [];
-    const objectGrouped = this.groupByObject(keySelector);
+    const objectGrouped = this.groupToObject(keySelector);
     for (const prop in objectGrouped) {
         if (objectGrouped.hasOwnProperty(prop))
             result.push({ key: prop, elements: objectGrouped[prop] });
