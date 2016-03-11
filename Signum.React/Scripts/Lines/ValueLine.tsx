@@ -13,7 +13,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     unitText?: string;
     formatText?: string;
     inlineCheckBox?: boolean;
-    comboBoxItems?: MemberInfo[];
+    comboBoxItems?: { name: string, niceName: string }[];
     valueHtmlProps?: React.HTMLAttributes;
 }
 
@@ -162,7 +162,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
 
 
     if (s.type.isNullable || s.ctx.value == null)
-        items = [{ name: "", niceName: " - " } as MemberInfo].concat(items);
+        items = [{ name: "", niceName: " - " }].concat(items);
 
     if (s.ctx.readOnly)
         return (

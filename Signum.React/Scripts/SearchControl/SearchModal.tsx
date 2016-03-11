@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription, ResultRow } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
-import * as Reflection from '../Reflection'
+import { getQueryNiceName } from '../Reflection'
 import SearchControl, { SearchControlProps} from './SearchControl'
 
 
@@ -98,7 +98,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
             findOptions={findOptions}
             findMode={FindMode.Find}
             isMany={false}
-            title={title || Reflection.getQueryNiceName(findOptions.queryName) } />)
+            title={title || getQueryNiceName(findOptions.queryName) } />)
             .then(a => a ? a[0] : null);
     }
 
@@ -107,7 +107,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         return openModal<Lite<Entity>[]>(<SearchModal findOptions={findOptions}
             findMode={FindMode.Find}
             isMany={true}
-            title={title || Reflection.getQueryNiceName(findOptions.queryName) } />);
+            title={title || getQueryNiceName(findOptions.queryName) } />);
     }
 
     static explore(findOptions: FindOptions, title?: string): Promise<void> {
@@ -115,7 +115,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         return openModal<void>(<SearchModal findOptions={findOptions}
             findMode={FindMode.Explore}
             isMany={true}
-            title={title || Reflection.getQueryNiceName(findOptions.queryName) } />);
+            title={title || getQueryNiceName(findOptions.queryName) } />);
     }
 }
 

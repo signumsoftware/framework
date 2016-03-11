@@ -102,7 +102,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     initialLoad(propsFindOptions: FindOptions) {
 
-        Finder.API.getQueryDescription(propsFindOptions.queryName).then(qd => {
+        Finder.getQueryDescription(propsFindOptions.queryName).then(qd => {
 
             this.setState({
                 queryDescription: qd,

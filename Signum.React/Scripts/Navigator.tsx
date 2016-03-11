@@ -102,6 +102,17 @@ export function isCreable(type: PseudoType, isSearch?: boolean) {
     return (es == null || isSearch == null || es.onIsCreable(isSearch)) &&  isCreableEvent.every(f => f(typeName));
 }
 
+export const isReadonlyEvent: Array<(typeName: string) => boolean> = [];
+
+export function isReadOnly(type: PseudoType, isSearch?: boolean) {
+
+    const typeName = getTypeName(type);
+
+    const es = entitySettings[typeName];
+
+    return (es == null || es.onIsReadonly()) && isReadonlyEvent.every(f => f(typeName));
+}
+
 export const isFindableEvent: Array<(typeName: string) => boolean> = []; 
 
 export function isFindable(type: PseudoType, isSearch?: boolean) {

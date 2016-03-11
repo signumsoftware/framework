@@ -145,6 +145,28 @@ Array.prototype.flatMap = function (selector: (element: any, index: number, arra
     return result;
 };
 
+Array.prototype.groupsOf = function (maxCount: number) {
+
+    var array = this as [];
+
+    var result: any[][] = [];
+    var newList: any[] = [];
+
+    array.map(item => {
+        newList.push(item);
+        if (newList.length == maxCount) {
+            result.push(newList);
+            newList = [];
+        }
+    });
+
+    if (newList.length != 0)
+        result.push(newList);
+
+    return result;
+
+}
+
 Array.prototype.max = function () {
     return Math.max.apply(null, this);
 };
@@ -268,6 +290,16 @@ Array.range = function (min, max) {
     const result = new Array(length);
     for (let i = 0; i < length; i++) {
         result[i] = min + i;
+    }
+
+    return result;
+}
+
+Array.repeat = function (count, val) {
+    
+    const result = new Array(count);
+    for (let i = 0; i < count; i++) {
+        result[i] = val;
     }
 
     return result;
@@ -569,6 +601,14 @@ export function areEqual<T>(a: T, b: T, field: (value: T) => any) {
         return false;
 
     return field(a) == field(b);
+}
+
+export function ifError<E extends Error, T>(ErrorClass: { new (...args: any[]): E }, onError: (error: E) => T): (error: any) => T {
+    return error => {
+        if (error instanceof ErrorClass)
+            return onError((error as E));
+        throw error;
+    };
 }
 
 export module DomUtils {

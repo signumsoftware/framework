@@ -81,6 +81,11 @@ namespace Signum.Entities.DynamicQuery
         {
             return new MonthStartToken(Parent.Clone());
         }
+
+        public override bool IsGroupable
+        {
+            get { return true; }
+        }
     }
 
     [Serializable]

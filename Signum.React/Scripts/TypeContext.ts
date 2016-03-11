@@ -162,8 +162,8 @@ export class TypeContext<T> extends StyleContext {
 
     }
 
-    subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R>
     subCtx(styleOptions?: StyleOptions): TypeContext<T>     
+    subCtx<R>(property: (val: T) => R, styleOptions?: StyleOptions): TypeContext<R>
     subCtx(propertyOrStyleOptions: ((val: T) => any) | StyleOptions, styleOptions?: StyleOptions): TypeContext<any>
     {
         if (typeof propertyOrStyleOptions != "function")

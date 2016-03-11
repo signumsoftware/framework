@@ -81,5 +81,10 @@ namespace Signum.Entities.DynamicQuery
         {
             return new DateToken(Parent.Clone());
         }
+
+        public override bool IsGroupable
+        {
+            get { return true; }
+        }
     }
 }

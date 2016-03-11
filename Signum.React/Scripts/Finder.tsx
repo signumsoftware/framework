@@ -24,11 +24,11 @@ export const querySettings: { [queryKey: string]: QuerySettings } = {};
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="find">
         <Route path=":queryName" getComponent={ (loc, cb) => require(["./SearchControl/SearchPage"], (Comp) => cb(null, Comp.default)) } />
-    </Route>);
+        </Route>);
 }
 
 export function addSettings(...settings: QuerySettings[]) {
-    settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
+    settings.forEach(s=> Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
 export function getQuerySettings(queryName: PseudoType | QueryKey): QuerySettings {
@@ -41,16 +41,16 @@ export function isFindable(queryName: any): boolean {
 
     const queryKey = getQueryKey(queryName);
 
-    return isFindableEvent.every(f => f(queryKey));
+    return isFindableEvent.every(f=> f(queryKey));
 }
 
 export function find<T extends Entity>(type: Type<T>): Promise<Lite<T>>;
 export function find(findOptions: FindOptions): Promise<Lite<IEntity>>;
-export function find(findOptions: FindOptions | Type<any>): Promise<Lite<IEntity>> {
+export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<IEntity>> {
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions as Type<any> } as FindOptions;
-
+    
     return new Promise<Lite<IEntity>>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
             SP.default.open(fo).then(resolve, reject);
@@ -93,13 +93,13 @@ export function findOptionsPath(queryName: PseudoType | QueryKey): string;
 export function findOptionsPath(queryNameOrFindOptions: any): string {
     const fo = queryNameOrFindOptions as FindOptions;
     if (!fo.queryName)
-        return currentHistory.createPath("/Find/" + getQueryKey(queryNameOrFindOptions));
-
+        return currentHistory.createPath("/find/" + getQueryKey(queryNameOrFindOptions)); 
+    
     const query = {
         filters: Encoder.encodeFilters(fo.filterOptions),
         orders: Encoder.encodeOrders(fo.orderOptions),
         columns: Encoder.encodeColumns(fo.columnOptions),
-        columnMode: !fo.columnOptionsMode || fo.columnOptionsMode == ColumnOptionsMode.Add ? null : ColumnOptionsMode[fo.columnOptionsMode],
+        columnMode: !fo.columnOptionsMode || fo.columnOptionsMode == ColumnOptionsMode.Add ? undefined : ColumnOptionsMode[fo.columnOptionsMode],
         create: fo.create,
         navigate: fo.navigate,
         searchOnLoad: fo.searchOnLoad,
@@ -110,11 +110,11 @@ export function findOptionsPath(queryNameOrFindOptions: any): string {
         allowChangeColumns: fo.allowChangeColumns,
     };
 
-    return currentHistory.createPath({ pathname: "/Find/" + getQueryKey(fo.queryName), query: query });
+    return currentHistory.createPath({ pathname: "/find/" + getQueryKey(fo.queryName), query: query });
 }
 
 export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: any): FindOptions {
-
+    
     const result = {
         queryName: queryName,
         filterOptions: Decoder.decodeFilters(query.filters),
@@ -150,7 +150,7 @@ export function mergeColumns(columns: ColumnDescription[], mode: ColumnOptionsMo
 }
 
 export function smartColumns(current: ColumnOption[], ideal: ColumnDescription[]): { mode: ColumnOptionsMode; columns: ColumnOption[] } {
-
+    
     var similar = (a: ColumnOption, b: ColumnDescription) =>
         a.token.fullKey == b.name && (a.displayName == b.displayName || a.displayName == null);
 
@@ -185,7 +185,7 @@ export function smartColumns(current: ColumnOption[], ideal: ColumnDescription[]
             columns: current.slice(ideal.length)
         };
     }
-
+    
     return {
         mode: ColumnOptionsMode.Replace,
         columns: current,
@@ -232,7 +232,7 @@ export function parseSingleToken(queryName: PseudoType | QueryKey, token: string
     return result;
 }
 
-class TokenCompleter {
+export class TokenCompleter {
     constructor(public queryName: PseudoType | QueryKey) { }
 
     tokensToRequest: {
@@ -259,7 +259,7 @@ class TokenCompleter {
             return Promise.resolve(null);
 
         if (!fullKey.contains("."))
-            return API.getQueryDescription(this.queryName).then(qd => toQueryToken(qd.columns[fullKey]));
+            return getQueryDescription(this.queryName).then(qd=> toQueryToken(qd.columns[fullKey]));
 
         var bucket = this.tokensToRequest[fullKey];
 
@@ -280,19 +280,19 @@ class TokenCompleter {
 
         const queryKey = getQueryKey(this.queryName);
         const tokens = Dic.map(this.tokensToRequest, (token, val) => ({ token: token, options: val.options }));
-
+        
         if (tokens.length == 0)
             return Promise.resolve(null);
-
-        return API.parseTokens(queryKey, tokens).then(parsedTokens => {
-            parsedTokens.forEach(t => this.tokensToRequest[t.fullKey].resolve(t));
+        
+        return API.parseTokens(queryKey, tokens).then(parsedTokens=> {
+            parsedTokens.forEach(t=> this.tokensToRequest[t.fullKey].resolve(t));
         });
     }
 }
 
 
 
-function parseFilterValues(filterOptions: FilterOption[]): Promise<void> {
+export function parseFilterValues(filterOptions: FilterOption[]): Promise<void> {
 
     var needToStr: Lite<any>[] = [];
     filterOptions.forEach(fo => {
@@ -339,7 +339,7 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
 
 function convertToLite(val: any): Lite<Entity> {
     if (val == null || val == "")
-        return null;
+        return null; 
 
     if ((val as Lite<Entity>).EntityType) {
         let lite = val as Lite<Entity>;
@@ -355,7 +355,7 @@ function convertToLite(val: any): Lite<Entity> {
     if (typeof val == "string")
         return parseLite(val);
 
-    throw new Error(`Impossible to convert ${val} to Lite`);
+    throw new Error(`Impossible to convert ${val} to Lite`); 
 }
 
 function filterType(queryToken: QueryToken) {
@@ -367,30 +367,31 @@ function filterType(queryToken: QueryToken) {
 
 
 function calculateFilterType(typeRef: TypeReference): FilterType {
-
+    
     if (typeRef.name == "boolean")
         return FilterType.Boolean;
 
     return FilterType.Boolean;
 }
 
-export module API {
-
     const queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
-
     export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
+    const queryKey = getQueryKey(queryName);
 
-        const key = getQueryKey(queryName);
+    if (queryDescriptionCache[queryKey])
+        return Promise.resolve(queryDescriptionCache[queryKey]);
 
-        if (queryDescriptionCache[key])
-            return Promise.resolve(queryDescriptionCache[key]);
-
-        return ajaxGet<QueryDescription>({ url: "/api/query/description/" + key })
-            .then(qd => {
+    return API.fetchQueryDescription(queryKey).then(qd => {
                 Object.freeze(qd.columns);
-                queryDescriptionCache[key] = Object.freeze(qd);
+        queryDescriptionCache[queryKey] = Object.freeze(qd);
                 return qd;
             });
+    }
+
+export module API {
+    
+    export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
+        return ajaxGet<QueryDescription>({ url: "/api/query/description/" + queryKey });
     }
 
     export function search(request: QueryRequest): Promise<ResultTable> {
@@ -413,13 +414,26 @@ export module API {
         });
     }
 
+    export function findAllEntities(request: { types: string }): Promise<IEntity[]> {
+        return ajaxGet<Lite<IEntity>[]>({
+            url: currentHistory.createHref("api/query/findAllEntities", request)
+        });
+    }
+
     export function parseTokens(queryKey: string, tokens: { token: string, options: SubTokensOptions }[]): Promise<QueryToken[]> {
         return ajaxPost<QueryToken[]>({ url: "/api/query/parseTokens" }, { queryKey, tokens });
     }
 
-    export function subTokens(queryKey: string, token: QueryToken, options: SubTokensOptions): Promise<QueryToken[]> {
-        return ajaxPost<QueryToken[]>({ url: "/api/query/subTokens" }, { queryKey, token: token == null ? null : token.fullKey, options }).then(list => {
-            list.forEach(t => t.parent = token);
+    export function subTokens(queryKey: string, token: QueryToken, options: SubTokensOptions): Promise<QueryToken[]>{
+        return ajaxPost<QueryToken[]>({ url: "/api/query/subTokens" }, { queryKey, token: token == null ? null:  token.fullKey, options }).then(list=> {
+
+            if (token == null) {
+                var entity = list.filter(a => a.key == "Entity").singleOrNull();
+
+                list.filter(a => a.fullKey.startsWith("Entity.")).forEach(t => t.parent = entity);
+            } else {
+            list.forEach(t=> t.parent = token);
+            }
             return list;
         });
     }
@@ -427,18 +441,18 @@ export module API {
 
 
 
-module Encoder {
+export module Encoder {
 
     export function encodeFilters(filterOptions: FilterOption[]): string[] {
-        return !filterOptions ? null : filterOptions.map(fo => getTokenString(fo) + "~" + FilterOperation[fo.operation] + "~" + stringValue(fo.value));
+        return !filterOptions ? undefined : filterOptions.map(fo => getTokenString(fo) + "~" + FilterOperation[fo.operation] + "~" + stringValue(fo.value));
     }
 
-    export function encodeOrders(orderOptions: OrderOption[]): string[] {
-        return !orderOptions ? null : orderOptions.map(oo => (oo.orderType == OrderType.Descending ? "-" : "") + getTokenString(oo));
+    export function encodeOrders(orderOptions: OrderOption[]): string {
+        return !orderOptions ? undefined : orderOptions.map(oo => (oo.orderType == OrderType.Descending ? "-" : "") + getTokenString(oo)).join("~");
     }
 
     export function encodeColumns(columnOptions: ColumnOption[]): string[] {
-        return !columnOptions ? null : columnOptions.map(co => getTokenString(co) + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
+        return !columnOptions ? undefined : columnOptions.map(co => getTokenString(co) + (co.displayName ? ("~" +  scapeTilde(co.displayName)) : ""));
     }
 
     export function stringValue(value: any): string {
@@ -454,19 +468,23 @@ module Encoder {
 
         if (value.EntityType)
             return liteKey(value as Lite<IEntity>);
-
+        
         return scapeTilde(value.toString());
     }
 
-    function scapeTilde(str: string) {
+    export function scapeTilde(str: string) {
         if (str == null)
             return null;
 
         return str.replace("~", "#|#");
     }
+
+    export function getTokenString(tokenContainer: { columnName: string, token?: QueryToken }) {
+        return tokenContainer.token ? tokenContainer.token.fullKey : tokenContainer.columnName;
+    }
 }
 
-module Decoder {
+export module Decoder {
 
     export function asArray(queryPosition: string | string[]) {
 
@@ -481,7 +499,7 @@ module Decoder {
 
         if (!filters)
             return undefined;
-
+        
         return asArray(filters).map(val => {
             var parts = val.split("~");
 
@@ -494,38 +512,34 @@ module Decoder {
         });
     }
 
-    function unscapeTildes(str: string) {
+    export function unscapeTildes(str: string) {
         if (!str)
             return str;
 
         return str.replace("#|#", "~");
     }
 
-    export function decodeOrders(orders: string | string[]): OrderOption[] {
-
+    export function decodeOrders(orders: string): OrderOption[] {
+        
         if (!orders)
             return undefined;
 
-        return asArray(orders).map(val => ({
+        return orders.split("~").map(val => ({
             orderType: val[0] == "-" ? OrderType.Descending : OrderType.Ascending,
             columnName: val.tryAfter("-") || val
         }));
     }
 
-    export function decodeColumns(columns: string | string[]): ColumnOption[] {
+    export function decodeColumns(columns: string | string[]): ColumnOption[]{
 
         if (!columns)
             return undefined;
 
-        return asArray(columns).map(val => ({
+        return asArray(columns).map(val=> ({
             columnName: val.tryBefore("~") || val,
             displayName: unscapeTildes(val.tryAfter("~"))
         }) as ColumnOption);
     }
-}
-
-function getTokenString(tokenContainer: { columnName: string, token?: QueryToken }) {
-    return tokenContainer.token ? tokenContainer.token.fullKey : tokenContainer.columnName;
 }
 
 
@@ -580,13 +594,13 @@ export class CellFormatter {
 export const formatRules: FormatRule[] = [
     {
         name: "Object",
-        isApplicable: col => true,
-        formatter: col => new CellFormatter(cell => cell ? (cell.toStr || cell.toString()) : null)
+        isApplicable: col=> true,
+        formatter: col=> new CellFormatter(cell => cell ? (cell.toStr || cell.toString()) : null)
     },
     {
         name: "Enum",
-        isApplicable: col => col.token.filterType == FilterType.Enum,
-        formatter: col => new CellFormatter(cell => getEnumInfo(col.token.type.name, cell).niceName)
+        isApplicable: col=> col.token.filterType == FilterType.Enum,
+        formatter: col=> new CellFormatter(cell => getEnumInfo(col.token.type.name, cell).niceName)
     },
     {
         name: "Lite",
@@ -596,31 +610,31 @@ export const formatRules: FormatRule[] = [
 
     {
         name: "Guid",
-        isApplicable: col => col.token.filterType == FilterType.Guid,
+        isApplicable: col=> col.token.filterType == FilterType.Guid,
         formatter: col => new CellFormatter((cell: string) => cell && <span className="guid">{(cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)) }</span>)
     },
     {
         name: "DateTime",
-        isApplicable: col => col.token.filterType == FilterType.DateTime,
-        formatter: col => {
+        isApplicable: col=> col.token.filterType == FilterType.DateTime,
+        formatter: col=> {
             const momentFormat = toMomentFormat(col.token.format);
             return new CellFormatter((cell: string) => cell == null || cell == "" ? "" : moment(cell).format(momentFormat))
         }
     },
     {
         name: "Number",
-        isApplicable: col => col.token.filterType == FilterType.Integer || col.token.filterType == FilterType.Decimal,
-        formatter: col => new CellFormatter((cell: number) => cell && cell.toString())
+        isApplicable: col=> col.token.filterType == FilterType.Integer || col.token.filterType == FilterType.Decimal,
+        formatter: col=> new CellFormatter((cell: number) => cell && cell.toString(), "right")
     },
     {
         name: "Number with Unit",
-        isApplicable: col => (col.token.filterType == FilterType.Integer || col.token.filterType == FilterType.Decimal) && !!col.token.unit,
-        formatter: col => new CellFormatter((cell: number) => cell && cell.toString() + " " + col.token.unit)
+        isApplicable: col=> (col.token.filterType == FilterType.Integer || col.token.filterType == FilterType.Decimal) && !!col.token.unit,
+        formatter: col => new CellFormatter((cell: number) => cell && cell.toString() + " " + col.token.unit, "right")
     },
     {
         name: "Bool",
-        isApplicable: col => col.token.filterType == FilterType.Boolean,
-        formatter: col => new CellFormatter((cell: boolean) => cell == null ? null : <input type="checkbox" disabled={true} checked={cell}/>)
+        isApplicable: col=> col.token.filterType == FilterType.Boolean,
+        formatter: col=> new CellFormatter((cell: boolean) => cell == null ? null : <input type="checkbox" disabled={true} checked={cell}/>, "center")
     },
 ];
 
@@ -636,7 +650,7 @@ export type EntityFormatter = (row: ResultRow) => React.ReactChild;
 export const entityFormatRules: EntityFormatRule[] = [
     {
         name: "View",
-        isApplicable: row => true,
+        isApplicable: row=> true,
         formatter: row => !row.entity || !isNavigable(row.entity.EntityType, null, true) ? null :
             <EntityLink lite={row.entity} inSearch={true}>{EntityControlMessage.View.niceToString() }</EntityLink>
     },

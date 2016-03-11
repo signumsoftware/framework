@@ -39,8 +39,12 @@ namespace Signum.React.Facades
 
         public static Dictionary<Assembly, HashSet<string>> EntityAssemblies;
 
+        public static ResetLazy<Dictionary<string, Type>> TypesByName = new ResetLazy<Dictionary<string, Type>>(
+            () => GetTypes().Where(t => typeof(ModifiableEntity).IsAssignableFrom(t)).ToDictionary(GetTypeName, "Types")); 
+
         public static void RegisterLike(Type type)
         {
+            TypesByName.Reset();
             EntityAssemblies.GetOrCreate(type.Assembly).Add(type.Namespace);
         }
 

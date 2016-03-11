@@ -26,7 +26,49 @@ namespace Signum.Entities.DynamicQuery
         public abstract Type Type { get; }
         public abstract string Key { get; }
 
-        public virtual bool IsRealGroupable { get { return false; } }
+        public virtual bool IsGroupable
+        {
+            get
+            {
+                switch (QueryUtils.TryGetFilterType(this.Type))
+                {
+                    case FilterType.Boolean:
+                    case FilterType.Enum:
+                    case FilterType.Guid:
+                    case FilterType.Integer:
+                    case FilterType.Lite:
+                    case FilterType.String:
+                        return true;
+
+                    case FilterType.Decimal:
+                    case FilterType.Embedded:
+                        return false;
+
+                    case FilterType.DateTime:
+                        {
+
+                            PropertyRoute route = this.GetPropertyRoute();
+
+                            if (route != null && route.PropertyRouteType == PropertyRouteType.FieldOrProperty)
+                            {
+                                var pp = Validator.TryGetPropertyValidator(route);
+                                if (pp != null)
+                                {
+                                    DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
+
+                                    if (datetimePrecission != null && datetimePrecission.Precision == DateTimePrecision.Days)
+                                        return true;
+
+                                }
+                            }
+
+                            return false;
+                        }
+                }
+
+                return false;
+            }
+        }
         protected abstract List<QueryToken> SubTokensOverride(SubTokensOptions options);
 
 
