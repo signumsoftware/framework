@@ -8,7 +8,7 @@ import { Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Ent
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { default as SearchControl, ExternalFullScreenButton} from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
+import { default as SearchControl } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
 import { ChartMessage, ChartRequest_Type } from './Signum.Entities.Chart'
 import * as ChartClient from './ChartClient'
 

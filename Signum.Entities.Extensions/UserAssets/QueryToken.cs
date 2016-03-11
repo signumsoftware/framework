@@ -28,17 +28,12 @@ namespace Signum.Entities.UserAssets
             if (string.IsNullOrEmpty(tokenString))
                 throw new ArgumentNullException("tokenString");
 
-            this.tokenString = tokenString;
+            this.TokenString = tokenString;
         }
 
         [NotNullable]
-        string tokenString;
         [StringLengthValidator(AllowNulls = false, Min = 1)]
-        public string TokenString
-        {
-            get { return tokenString; }
-            private set { Set(ref tokenString, value); }
-        }
+        public string TokenString { get; private set; }
 
         [Ignore]
         QueryToken token;
@@ -70,14 +65,14 @@ namespace Signum.Entities.UserAssets
 
         protected override void PreSaving(ref bool graphModified)
         {
-            tokenString = token == null ? null : token.FullKey();
+            TokenString = token == null ? null : token.FullKey();
         }
 
         public void ParseData(ModifiableEntity context, QueryDescription description, SubTokensOptions options)
         {
             try
             {
-                token = QueryUtils.Parse(tokenString, description, options);
+                token = QueryUtils.Parse(TokenString, description, options);
             }
             catch (Exception e)
             {
@@ -100,7 +95,7 @@ namespace Signum.Entities.UserAssets
             if (token != null)
                 return token.FullKey();
 
-            return tokenString;
+            return TokenString;
         }
 
         public bool Equals(QueryTokenEntity other)
@@ -110,9 +105,9 @@ namespace Signum.Entities.UserAssets
 
         public string GetTokenString()
         {
-            return this.token != null ? this.token.FullKey() : this.tokenString;
+            return this.token != null ? this.token.FullKey() : this.TokenString;
         }
-        
+
         public override bool Equals(object obj)
         {
             return obj is QueryTokenEntity && this.Equals((QueryTokenEntity)obj);

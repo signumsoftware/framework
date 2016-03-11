@@ -5,7 +5,7 @@ import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchMessage, JavascriptMessage, parseLite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { default as SearchControl, ExternalFullScreenButton} from '../../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
+import { default as SearchControl } from '../../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
 import { } from '../../../Queries/Signum.Entities.Chart'
 import * as UserQueryClient from '../ChartClient'
 
