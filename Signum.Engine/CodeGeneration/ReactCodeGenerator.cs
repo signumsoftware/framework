@@ -66,7 +66,7 @@ namespace Signum.Engine.CodeGeneration
 
             FileTools.CreateParentDirectory(fileName);
             if (!File.Exists(fileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fileName)))
-                File.WriteAllText(fileName, content);
+                File.WriteAllText(fileName, content, Encoding.UTF8);
         }
 
         protected virtual string GetProjectFolder()
