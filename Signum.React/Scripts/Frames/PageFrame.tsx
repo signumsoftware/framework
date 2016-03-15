@@ -60,7 +60,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
         const entitySettings = Navigator.getSettings(typeInfo.name);
 
-        return { entitySettings: entitySettings, typeInfo: typeInfo, component: null, modelState: null, pack: null } as PageFrameState;
+        return { entitySettings: entitySettings, typeInfo: typeInfo, component: null,  pack: null } as PageFrameState;
     }
 
     loadEntity(props: PageFrameProps): Promise<void> {
