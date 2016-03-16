@@ -259,7 +259,7 @@ export class TokenCompleter {
         if (fullKey == null)
             return Promise.resolve(null);
 
-        if (!fullKey.contains("."))
+        if (!fullKey.contains(".") && fullKey != "Count")
             return getQueryDescription(this.queryName).then(qd=> toQueryToken(qd.columns[fullKey]));
 
         var bucket = this.tokensToRequest[fullKey];
