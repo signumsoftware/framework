@@ -190,7 +190,7 @@ export module Encoder {
             parameters: Encoder.encodeParameters(cr.parameters),
         };
 
-        return Navigator.currentHistory.createPath("/Chart/" + cr.queryKey, query);
+        return Navigator.currentHistory.createPath({ pathname: "/Chart/" + cr.queryKey, query: query });
     }
 
     var scapeTilde = Finder.Encoder.scapeTilde;
