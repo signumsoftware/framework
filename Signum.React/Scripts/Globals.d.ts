@@ -9,8 +9,6 @@
 /// <reference path="../typings/moment/moment.d.ts" />
 /// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
-
-
 declare var require: {
     <T>(path: string): T;
     (paths: string[], callback: (...modules: any[]) => void): void;
@@ -22,8 +20,10 @@ declare interface Promise<T> {
 }
 
 interface Array<T> {
-    groupByArray(keySelector: (element: T) => string): { key: string; elements: T[] }[];
-    groupByObject(keySelector: (element: T) => string): { [key: string]: T[] };
+    groupBy(keySelector: (element: T) => string): { key: string; elements: T[] }[];
+    groupToObject(keySelector: (element: T) => string): { [key: string]: T[] };
+    groupWhen(condition: (element: T) => boolean): { key: T, elements: T[]}[];
+    groupWhenChange(keySelector: (element: T) => string): { key: string, elements: T[]}[];
     orderBy<V>(keySelector: (element: T) => V): T[];
     orderByDescending<V>(keySelector: (element: T) => V): T[];
     toObject(keySelector: (element: T) => string): { [key: string]: T };
@@ -46,9 +46,8 @@ interface Array<T> {
     insertAt(index: number, element: T);
     clone(): T[];
     joinComma(lastSeparator: string);
+    extract(filter: (element: T) => boolean): T[]; 
 }
-
-
 
 interface ArrayConstructor {
 
@@ -56,13 +55,11 @@ interface ArrayConstructor {
     repeat<T>(count: number, value: T): T[];
 }
 
-
 interface String {
     contains(str: string): boolean;
     startsWith(str: string): boolean;
     endsWith(str: string): boolean;
     formatWith(...parameters: any[]): string;
-    formatHtml(...parameters: any[]): any[];
     forGenderAndNumber(number: number): string;
     forGenderAndNumber(gender: string): string;
     forGenderAndNumber(gender: any, number: number): string;

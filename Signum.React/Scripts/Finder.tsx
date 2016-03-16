@@ -6,7 +6,7 @@ import { ajaxGet, ajaxPost } from './Services';
 
 import { QueryDescription, CountQueryRequest, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation,
     QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn,
-    ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken, isList } from './FindOptions';
+    ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken, isList, expandParentColumn } from './FindOptions';
 
 import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from './Signum.Entities';
 
@@ -90,11 +90,12 @@ export function explore(findOptions: FindOptions): Promise<void> {
 
 export function findOptionsPath(findOptions: FindOptions): string;
 export function findOptionsPath(queryName: PseudoType | QueryKey): string;
-export function findOptionsPath(queryNameOrFindOptions: any): string
-{
-    const fo = queryNameOrFindOptions as FindOptions;
+export function findOptionsPath(queryNameOrFindOptions: any): string {
+    let fo = queryNameOrFindOptions as FindOptions;
     if (!fo.queryName)
         return currentHistory.createPath("/find/" + getQueryKey(queryNameOrFindOptions)); 
+
+    fo = expandParentColumn(fo);
     
     const query = {
         filters: Encoder.encodeFilters(fo.filterOptions),
@@ -111,7 +112,7 @@ export function findOptionsPath(queryNameOrFindOptions: any): string
         allowChangeColumns: fo.allowChangeColumns,
     };
 
-    return currentHistory.createPath("/find/" + getQueryKey(fo.queryName), query);
+    return currentHistory.createPath({ pathname: "/find/" + getQueryKey(fo.queryName), query: query });
 }
 
 export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: any): FindOptions {
@@ -375,19 +376,19 @@ function calculateFilterType(typeRef: TypeReference): FilterType {
     return FilterType.Boolean;
 }
 
-const queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
-export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
+    const queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
+    export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
     const queryKey = getQueryKey(queryName);
 
     if (queryDescriptionCache[queryKey])
         return Promise.resolve(queryDescriptionCache[queryKey]);
 
     return API.fetchQueryDescription(queryKey).then(qd => {
-        Object.freeze(qd.columns);
+                Object.freeze(qd.columns);
         queryDescriptionCache[queryKey] = Object.freeze(qd);
-        return qd;
-    });
-}
+                return qd;
+            });
+    }
 
 export module API {
     
@@ -405,19 +406,19 @@ export module API {
 
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<IEntity>[]> {
         return ajaxGet<Lite<IEntity>[]>({
-            url: currentHistory.createHref("api/query/findLiteLike", request)
+            url: currentHistory.createHref({ pathname: "api/query/findLiteLike", query: request })
         });
     }
 
     export function findAllLites(request: { types: string }): Promise<Lite<IEntity>[]> {
         return ajaxGet<Lite<IEntity>[]>({
-            url: currentHistory.createHref("api/query/findAllLites", request)
+            url: currentHistory.createHref({ pathname: "api/query/findAllLites", query: request })
         });
     }
 
     export function findAllEntities(request: { types: string }): Promise<IEntity[]> {
         return ajaxGet<Lite<IEntity>[]>({
-            url: currentHistory.createHref("api/query/findAllEntities", request)
+            url: currentHistory.createHref({ pathname: "api/query/findAllEntities", query: request })
         });
     }
 
@@ -433,7 +434,7 @@ export module API {
 
                 list.filter(a => a.fullKey.startsWith("Entity.")).forEach(t => t.parent = entity);
             } else {
-                list.forEach(t => t.parent = token);
+            list.forEach(t=> t.parent = token);
             }
             return list;
         });
@@ -575,6 +576,7 @@ export interface QuerySettings {
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes;
     entityFormatter?: EntityFormatter;
+    simpleFilterBuilder?: (qd: QueryDescription, initialFindOptions: FindOptions) => React.ReactElement<any>;
 }
 
 export interface FormatRule {
@@ -611,7 +613,7 @@ export const formatRules: FormatRule[] = [
     {
         name: "Guid",
         isApplicable: col=> col.token.filterType == FilterType.Guid,
-        formatter: col=> new CellFormatter((cell: string) => cell && (cell.substr(0, 5) + "…" + cell.substring(cell.length - 5)))
+        formatter: col => new CellFormatter((cell: string) => cell && <span className="guid">{(cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)) }</span>)
     },
     {
         name: "DateTime",
@@ -638,9 +640,6 @@ export const formatRules: FormatRule[] = [
     },
 ];
 
-
-
-
 export interface EntityFormatRule {
     name: string;
     formatter: EntityFormatter;
@@ -658,13 +657,3 @@ export const entityFormatRules: EntityFormatRule[] = [
             <EntityLink lite={row.entity} inSearch={true}>{EntityControlMessage.View.niceToString() }</EntityLink>
     },
 ];
-
-
-
-
-
-
-
-
-
-

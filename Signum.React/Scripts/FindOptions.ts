@@ -44,11 +44,13 @@ export function expandParentColumn(findOptions: FindOptions) {
         ...(fo.filterOptions || [])
     ];
     
-    if (!fo.parentColumn.contains(".") && fo.columnOptionsMode == null || fo.columnOptionsMode == ColumnOptionsMode.Remove) {
+    if (!fo.parentColumn.contains(".") && (fo.columnOptionsMode == null || fo.columnOptionsMode == ColumnOptionsMode.Remove)) {
         fo.columnOptions = [
             { columnName: fo.parentColumn },
             ...(fo.columnOptions || [])
         ];
+
+        fo.columnOptionsMode = ColumnOptionsMode.Remove;
     }
 
     if (fo.searchOnLoad == null)

@@ -24,23 +24,20 @@ export interface SimpleFilterBuilderProps {
     findOptions: FindOptions;
 }
 
-export interface ExternalFullScreenButton {
-    onClick?: React.EventHandler<React.MouseEvent>;
-}
 
 export interface SearchControlProps extends React.Props<SearchControl> {
     allowSelection?: boolean
     findOptions: FindOptions;
-    simpleFilterBuilder?: React.ComponentClass<SimpleFilterBuilderProps>;
-    externalFullScreenButton?: ExternalFullScreenButton;
     onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
     showContextMenu?: boolean;
-    onSelectionChanged?: (entity: Lite<IEntity>[]) => void
+    onSelectionChanged?: (entity: Lite<IEntity>[]) => void;
+    hideExternalButton?: boolean;
 }
 
 export interface SearchControlState {
     resultTable?: ResultTable;
     findOptions?: FindOptions;
+    simpleFilterBuilder?: React.ReactElement<any>;
     querySettings?: Finder.QuerySettings;
     queryDescription?: QueryDescription;
     loading?: boolean;
@@ -73,11 +70,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     constructor(props: SearchControlProps) {
         super(props);
         this.state = this.initialState(props.findOptions.queryName);
-
-        if (props.externalFullScreenButton) {
-            props.externalFullScreenButton.onClick = this.handleFullScreenClick;
-        }
     }
+
+
 
     initialState(queryName: PseudoType | QueryKey): SearchControlState{
         return {
@@ -97,16 +92,16 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     componentWillReceiveProps(newProps: SearchControlProps) {
-        if (JSON.stringify(this.props.findOptions) == JSON.stringify(newProps.findOptions))
+        if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions))
             return;
-
-        if (newProps.externalFullScreenButton) {
-            newProps.externalFullScreenButton.onClick = this.handleFullScreenClick;
-        }
 
         this.setState(this.initialState(newProps.findOptions.queryName));
 
         this.initialLoad(newProps.findOptions);
+    }
+
+    stringify(findOptions: FindOptions) {
+        return Finder.findOptionsPath((findOptions));
     }
 
     initialLoad(propsFindOptions: FindOptions) {
@@ -122,6 +117,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     resetFindOptions(propsFindOptions: FindOptions) {
+
+        this.simpleFilterBuilderInstance = null;
 
         const qd = this.state.queryDescription;
 
@@ -160,8 +157,16 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         Finder.parseTokens(findOptions)
             .then(fo => {
+                var qs = this.state.querySettings;
+
+                var sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo); 
+
+                if (sfb)
+                    fo.showFilters = false;
+
                 this.setState({
                     findOptions: fo,
+                    simpleFilterBuilder: sfb,
                 });
 
                 if (this.state.findOptions.searchOnLoad)
@@ -204,13 +209,14 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     // MAIN
     handleSearch = () => {
-        const fo = this.state.findOptions;
-        this.setState({ loading: false, editingColumn: null });
-        Finder.API.search(this.getQueryRequest()).then(rt => {
-            this.setState({ resultTable: rt, selectedRows: [], currentMenuItems: null, markedRows: null, loading: false });
-            this.notifySelectedRowsChanged();
-            this.forceUpdate();
-        }).done();
+        this.getFindOptionsWithSFB().then(fo => {
+            this.setState({ loading: false, editingColumn: null });
+            Finder.API.search(this.getQueryRequest()).then(rt => {
+                this.setState({ resultTable: rt, selectedRows: [], currentMenuItems: null, markedRows: null, loading: false });
+                this.notifySelectedRowsChanged();
+                this.forceUpdate();
+            }).done();
+        });
     }
 
     handlePagination = (p: Pagination) => {
@@ -276,24 +282,40 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.setState({ lastToken: token });
     }
 
+    simpleFilterBuilderInstance: ISimpleFilterBuilder; 
+
+    getFindOptionsWithSFB() : Promise<FindOptions> {
+
+        var fo = this.state.findOptions;
+
+        if (this.simpleFilterBuilderInstance == null)
+            return Promise.resolve(fo);
+
+        if (!this.simpleFilterBuilderInstance.getFilters)
+            throw new Error("The simple filter builder should have a method with signature: 'getFilters(): FilterOption[]'");
+
+        fo.filterOptions = this.simpleFilterBuilderInstance.getFilters();
+
+        return Finder.parseTokens(fo);
+    }
+
     render() {
 
         const fo = this.state.findOptions;
         if (!fo)
             return null;
 
-        const SFB = this.props.simpleFilterBuilder;
+        var sfb = this.state.simpleFilterBuilder && React.cloneElement(this.state.simpleFilterBuilder, { ref: (e) => { this.simpleFilterBuilderInstance = e } });
 
         return (
             <div id="searchPage">
                 <div className="sf-search-control SF-control-container" ref="container">
-                    {SFB && <div className="simple-filter-builder"><SFB findOptions={fo}/></div> }
-                    {fo.showHeader && fo.showFilters && <FilterBuilder
+                    {fo.showHeader && (fo.showFilters ? <FilterBuilder
                         queryDescription={this.state.queryDescription}
                         filterOptions={fo.filterOptions}
                         lastToken ={this.state.lastToken}
                         subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
-                        tokenChanged= {this.handleFilterTokenChanged}/> }
+                        tokenChanged= {this.handleFilterTokenChanged}/> : (sfb && <div className="simple-filter-builder">{sfb}</div>)) }
                     {fo.showHeader && this.renderToolBar() }
                     {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type}/>}
                     {this.state.editingColumn && <ColumnEditor
@@ -322,7 +344,14 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     // TOOLBAR
     handleToggleFilters = () => {
         this.state.findOptions.showFilters = !this.state.findOptions.showFilters;
-        this.forceUpdate();
+
+        if (!this.state.simpleFilterBuilder)
+            this.forceUpdate();
+
+        this.getFindOptionsWithSFB().then(() => {
+            this.simpleFilterBuilderInstance = null;
+            this.setState({ simpleFilterBuilder: null });
+        }).done();
     }
 
     renderToolBar() {
@@ -340,7 +369,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton() }
                 {Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i })) }
-                {!this.props.externalFullScreenButton &&
+                {!this.props.hideExternalButton &&
                     <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a> }
@@ -843,4 +872,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         return <OverlayTrigger placement="bottom" overlay={tooltip}>{child}</OverlayTrigger>;
     }
+}
+
+interface ISimpleFilterBuilder {
+    getFilters(): FilterOption[];
 }

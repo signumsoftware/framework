@@ -40,6 +40,8 @@ export interface MemberInfo {
     isIgnored?: boolean;
     unit?: string;
     format?: string;
+    maxLength?: number;
+    isMultiline?: boolean;
     id?: any; //symbols
 }
 
@@ -309,9 +311,17 @@ export class Binding<T> implements IBinding<T> {
     }
 
     getValue(): T {
+
+        if (!this.parentValue)
+            throw new Error(`Impossible to get '${this.member}' from '${this.parentValue}'`); 
+
         return this.parentValue[this.member];
     }
     setValue(val: T) {
+
+        if (!this.parentValue)
+            throw new Error(`Impossible to set '${this.member}' from '${this.parentValue}'`);
+
         const oldVal = this.parentValue[this.member];
         this.parentValue[this.member] = val;
 
@@ -571,7 +581,8 @@ export class PropertyRoute {
     member: MemberInfo; //Member
     mixinName: string; //Mixin
 
-    static root(typeInfo: TypeInfo) {
+    static root(type: TypeInfo | PseudoType) {
+        var typeInfo = getTypeInfo(type);
         return new PropertyRoute(null, PropertyRouteType.Root, typeInfo, null, null);
     }
 

@@ -1,7 +1,7 @@
 ﻿
-Array.prototype.groupByArray = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
+Array.prototype.groupBy = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
     const result: { key: string; elements: any[] }[] = [];
-    const objectGrouped = this.groupByObject(keySelector);
+    const objectGrouped = this.groupToObject(keySelector);
     for (const prop in objectGrouped) {
         if (objectGrouped.hasOwnProperty(prop))
             result.push({ key: prop, elements: objectGrouped[prop] });
@@ -9,7 +9,7 @@ Array.prototype.groupByArray = function (keySelector: (element: any) => string):
     return result;
 };
 
-Array.prototype.groupByObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
+Array.prototype.groupToObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
     const result: { [key: string]: any[] } = {};
 
     for (let i = 0; i < this.length; i++) {
@@ -19,6 +19,62 @@ Array.prototype.groupByObject = function (keySelector: (element: any) => string)
             result[key] = [];
         result[key].push(element);
     }
+    return result;
+};
+
+Array.prototype.groupWhen = function (isGroupKey: (element: any) => boolean, includeKeyInGroup = false, initialGroup = false): {key: any, elements: any[]}[] {
+    const result: {key: any, elements: any[]}[] = [];
+
+    let group: {key: any, elements: any[]} = null;
+
+    for (let i = 0; i < this.length; i++) {
+        const item: any = this[i];
+        if (isGroupKey(item))
+        {
+            group = { key: item, elements : includeKeyInGroup? [item]: []};
+            result.push(group);
+        }
+        else
+        {
+            if (group == null)
+            {
+                if(!initialGroup)
+                    throw new Error("Parameter initialGroup is false");
+
+                group = { key: null, elements : []};
+                result.push(group);
+            }
+
+            group.elements.push(item);
+        }
+    }
+    return result;
+};
+
+Array.prototype.groupWhenChange = function (getGroupKey: (element: any) => string): {key: string, elements: any[]}[] {
+    const result: {key: any, elements: any[]}[] = [];
+
+    let current: {key: string, elements: any[]} = null;
+    for (let i = 0; i < this.length; i++) {
+        const item: any = this[i];
+        if (current == null)
+        {
+            current =  { key: getGroupKey(getGroupKey(item)), elements : [item]};
+        }
+        else if (current.key == getGroupKey(item))
+        {
+            current.elements.push(item);
+        }
+        else
+        {
+            result.push(current);
+            current = { key: getGroupKey(item), elements: [item]};
+        }
+    }
+
+    if (current != null)
+         result.push(current);
+
     return result;
 };
 
@@ -218,6 +274,14 @@ Array.prototype.joinComma = function (lastSeparator: string) {
     return rest + lastSeparator + (array[lastIndex] == null ? "" : array[lastIndex].toString()); 
 };
 
+Array.prototype.extract = function (predicate: (element: any) => boolean) {
+    const array = this as any[];
+    const result = array.filter(predicate);
+
+    result.forEach(element => { array.remove(element) });
+
+    return result;
+};
 
 Array.range = function (min, max) {
 
@@ -267,22 +331,6 @@ String.prototype.formatWith = function () {
     });
 };
 
-String.prototype.formatHtml = function () {
-    const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
-
-    const args = arguments;
-
-    const parts = this.split(regex);
-
-    const result = [];
-    for (let i = 0; i < parts.length - 4; i += 4) {
-        result.push(parts[i]);
-        result.push(args[parts[i + 1]]);
-    }
-    result.push(parts[parts.length - 1]);
-
-    return result;
-};
 
 String.prototype.forGenderAndNumber = function (gender: any, number?: number) {
 

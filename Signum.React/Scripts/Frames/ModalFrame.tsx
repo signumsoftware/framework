@@ -104,8 +104,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             this.setState({ getComponent: this.props.getComponent });
             return Promise.resolve(null);
         }
-        
-        return this.state.entitySettings.onGetComponent(this.state.pack.entity)
+
+        return Navigator.getComponent(this.state.pack.entity)
             .then(c => this.setState(
             {
                 getComponent: (ctx, frame) => React.createElement(c, {
@@ -272,7 +272,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             readOnly={options.readOnly}
             propertyRoute={null}
             getComponent={options.getComponent}
-            showOperations={null}
+            showOperations={true}
             requiresSaveOperation={null}
             isNavigate={true}/>);
     }

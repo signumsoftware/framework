@@ -1,167 +1,147 @@
 ﻿
 input[type=checkbox],
-input[type=radio]
-{
+input[type=radio] {
     width: 16px;
     height: 16px;
 }
 
 label input[type=checkbox],
-label input[type=radio] 
-{
-    margin:0;
+label input[type=radio] {
+    margin: 0;
     vertical-align: middle;
 }
 
-input[type=checkbox].form-control
-{
+input[type=checkbox].form-control {
     margin-top: 9px;
 }
 
-p.form-control
-{
+p.form-control {
     background-color: #f6f6f6;
     margin: 0px;
 }
 
-p.form-control.readonly-textarea
-{
-    height: initial !important;
+    p.form-control.readonly-textarea {
+        height: initial !important;
+    }
+
+
+    p.form-control.readonly {
+        overflow: hidden;
+    }
+
+.numeric {
+    text-align: right;
 }
 
-.numeric 
-{
-    text-align:right;
-}
-
-label > input[type=checkbox]
-{
+label > input[type=checkbox] {
     margin: 0px;
     vertical-align: middle;
 }
 
 .date-time .input-group.date,
-.date-time .input-group.time
-{
+.date-time .input-group.time {
     float: left;
     margin-right: 5px;
 }
 
-.input-group.date
-{
+.input-group.date {
     max-width: 140px;
 }
 
-.input-group.time
-{
+.input-group.time {
     max-width: 100px;
 }
 
-.input-group.time[data-show-seconds=true]
-{
-    max-width: 120px;
-} 
+    .input-group.time[data-show-seconds=true] {
+        max-width: 120px;
+    }
 
 
-.sf-entity-line-entity
-{
+.sf-entity-line-entity {
     background: transparent;
     overflow: hidden;
 }
 
 /* Buttons */
-.btn.btn-default.sf-line-button
-{
+.btn.btn-default.sf-line-button {
     background: transparent;
 }
 
 
-.sf-line-button
-{
-    cursor:pointer;
-    color:lightgray;
-}
-.sf-line-button:hover
-{
-    color:gray;
+.sf-line-button {
+    cursor: pointer;
+    color: lightgray;
 }
 
-/* EntityLine buttons  */
-.input-group-btn.btn-group-vertical
-{
-    vertical-align:top;
-}
-
-.input-group-btn.btn-group-vertical > .btn 
-{
-    border-top-left-radius: 0px !important; 
-    border-bottom-left-radius: 0px !important;
-}
-
-.input-group-btn.btn-group-vertical > .btn:first-child:not(:last-child)
-{
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-}
-
-/*legends*/
-fieldset
-{
-   border: 1px solid #ddd;
-   padding: 10px;
-   border-radius: 4px;
-   margin: 10px 0px;
-}
-
-fieldset > legend
-{
-    border: 0px;
-    border-radius: 4px;
-    padding: 3px 10px 0 10px;
-    margin: 0px;
-    margin-bottom: -5px;
-    font-size: 16px;
-    font-weight: bold;
-    width: initial;
-}
-
-    fieldset > legend > div > span.pull-right
-    {
-        margin-left: 5px;
+    .sf-line-button:hover {
+        color: gray;
     }
 
-.border
-{
-   border: 1px solid #ddd;
-   padding: 10px;
-   border-radius: 4px;
+/* EntityLine buttons  */
+.input-group-btn.btn-group-vertical {
+    vertical-align: top;
+}
+
+    .input-group-btn.btn-group-vertical > .btn {
+        border-top-left-radius: 0px !important;
+        border-bottom-left-radius: 0px !important;
+    }
+
+        .input-group-btn.btn-group-vertical > .btn:first-child:not(:last-child) {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+/*legends*/
+fieldset {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0px;
+}
+
+    fieldset > legend {
+        border: 0px;
+        border-radius: 4px;
+        padding: 3px 10px 0 10px;
+        margin: 0px;
+        margin-bottom: -5px;
+        font-size: 16px;
+        font-weight: bold;
+        width: initial;
+    }
+
+        fieldset > legend > div > span.pull-right {
+            margin-left: 5px;
+        }
+
+.border {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
 }
 
 /*EntityRepeater*/
 
-fieldset.sf-repeater-element > legend
-{
+fieldset.sf-repeater-element > legend {
     width: auto;
 }
 
-.repeater-inline .sf-repeater-element
-{
+.repeater-inline .sf-repeater-element {
     padding: 4px 10px;
     margin: 0px 0px 8px 0px;
 }
 
-.repeater-inline .sf-repeater-element legend
-{
-    float: left;
-    margin-left: -6px;
-    margin-right: 10px;
-    margin-top: 5px;
-    border: 0px;
-}
+    .repeater-inline .sf-repeater-element legend {
+        float: left;
+        margin-left: -6px;
+        margin-right: 10px;
+        margin-top: 5px;
+        border: 0px;
+    }
 
-.repeater-inline.repeater-right .sf-repeater-element legend
-{
+.repeater-inline.repeater-right .sf-repeater-element legend {
     float: right;
     margin-left: 6px;
     margin-right: -10px;
@@ -171,39 +151,32 @@ fieldset.sf-repeater-element > legend
 
 /*EntityStrip*/
 
-ul.sf-strip-horizontal > li
-{
+ul.sf-strip-horizontal > li {
     float: left;
     margin-right: 10px;
 }
 
-ul.sf-strip-vertical>li
-{
+ul.sf-strip-vertical > li {
     margin: 1px 0px;
 }
 
-ul.sf-strip-vertical>li>.form-control
-{
-    background-color:transparent;
-    box-shadow:none;
-}
+    ul.sf-strip-vertical > li > .form-control {
+        background-color: transparent;
+        box-shadow: none;
+    }
 
-.sf-strip
-{
+.sf-strip {
     list-style: none;
     padding: 0px;
-    
     margin-bottom: 7px; /*sf-strip-horizontal*/
 }
 
-    .sf-strip.sf-strip-vertical
-    {
-        margin-top: 7px;  /*sf-strip-vertical*/
+    .sf-strip.sf-strip-vertical {
+        margin-top: 7px; /*sf-strip-vertical*/
     }
 
 
-.sf-strip-horizontal > li > *
-{
+.sf-strip-horizontal > li > * {
     vertical-align: middle;
 }
 
@@ -212,37 +185,31 @@ label.sf-checkbox-element {
 }
 
 /*Tabs*/
-ul.nav-tabs
-{
+ul.nav-tabs {
     margin-bottom: 10px;
 }
 
 
 /*buton colors*/
-.sf-create:hover
-{
-    color:#22BA00;
+.sf-create:hover {
+    color: #22BA00;
 }
 
-.sf-remove:hover
-{
-    color:#CF0000;
+.sf-remove:hover {
+    color: #CF0000;
 }
 
-.sf-find:hover
-{
-    color:#FFCC00;
+.sf-find:hover {
+    color: #FFCC00;
 }
 
-.sf-view:hover
-{
-    color:#007CE8;
+.sf-view:hover {
+    color: #007CE8;
 }
 
-.move-down:hover, 
-.move-up:hover
-{
-    color:#9900E0;
+.move-down:hover,
+.move-up:hover {
+    color: #9900E0;
 }
 
 /*has-error*/
@@ -263,43 +230,36 @@ ul.nav-tabs
 
 /*form xs*/
 
-.form-xs .form-control
-{
+.form-xs .form-control {
     padding: 0px 3px;
 }
 
-.form-xs .form-control:not(textarea),
-.form-xs .form-control-static
-{
-    height: 20px;
-}
+    .form-xs .form-control:not(textarea),
+    .form-xs .form-control-static {
+        height: 20px;
+    }
 
-.form-xs input[type=checkbox].form-control
-{
+.form-xs input[type=checkbox].form-control {
     height: 16px;
     margin-top: 9px;
     padding: 2px;
 }
 
 .form-xs .input-group .btn,
-.form-xs .input-group .input-group-addon
-{
+.form-xs .input-group .input-group-addon {
     padding: 0px 3px;
     height: 20px;
 }
 
-.form-xs .sf-strip
-{
+.form-xs .sf-strip {
     margin-bottom: 0px;
 }
 
-    .form-xs .sf-strip.sf-strip-vertical
-    {
-        margin-top: 0px;  /*sf-strip-vertical*/
+    .form-xs .sf-strip.sf-strip-vertical {
+        margin-top: 0px; /*sf-strip-vertical*/
     }
 
-.form-group.form-xs 
-{
+.form-group.form-xs {
     margin-bottom: 6px;
 }
 
@@ -309,10 +269,10 @@ ul.nav-tabs
     font-size: 16px;
 }
 
-.form-horizontal .form-xs .control-label, 
-.form-horizontal .form-xs .radio, 
-.form-horizontal .form-xs .checkbox, 
-.form-horizontal .form-xs .radio-inline, 
+.form-horizontal .form-xs .control-label,
+.form-horizontal .form-xs .radio,
+.form-horizontal .form-xs .checkbox,
+.form-horizontal .form-xs .radio-inline,
 .form-horizontal .form-xs .checkbox-inline,
 .form-horizontal .form-xs .form-control-static {
     margin-top: 0;
@@ -322,42 +282,35 @@ ul.nav-tabs
 
 /*form sm*/
 
-.form-sm .form-control
-{
+.form-sm .form-control {
     padding: 3px 6px;
 }
 
-.form-sm .form-control:not(textarea),
-.form-sm .form-control-static
-{
-    height: 26px;
-}
+    .form-sm .form-control:not(textarea),
+    .form-sm .form-control-static {
+        height: 26px;
+    }
 
-.form-sm input[type=checkbox].form-control
-{
+.form-sm input[type=checkbox].form-control {
     height: 16px;
     padding: 0px;
     margin-top: 4px;
 }
 
 .form-sm .input-group .btn,
-.form-sm .input-group .input-group-addon
-{
+.form-sm .input-group .input-group-addon {
     padding: 2px 4px;
 }
 
-.form-sm .sf-strip
-{
+.form-sm .sf-strip {
     margin-bottom: 4px;
 }
 
-    .form-sm .sf-strip.sf-strip-vertical
-    {
-        margin-top: 6px;  /*sf-strip-vertical*/
+    .form-sm .sf-strip.sf-strip-vertical {
+        margin-top: 6px; /*sf-strip-vertical*/
     }
 
-.form-group.form-sm 
-{
+.form-group.form-sm {
     margin-bottom: 5px;
 }
 
@@ -367,10 +320,10 @@ ul.nav-tabs
     font-size: 18px;
 }
 
-.form-horizontal .form-sm .control-label, 
-.form-horizontal .form-sm .radio, 
-.form-horizontal .form-sm .checkbox, 
-.form-horizontal .form-sm .radio-inline, 
+.form-horizontal .form-sm .control-label,
+.form-horizontal .form-sm .radio,
+.form-horizontal .form-sm .checkbox,
+.form-horizontal .form-sm .radio-inline,
 .form-horizontal .form-sm .checkbox-inline,
 .form-horizontal .form-sm .form-control-static {
     margin-top: 0;
@@ -379,40 +332,34 @@ ul.nav-tabs
 }
 
 /*form-inline*/
-.form-horizontal .form-inline .form-group
-{
+.form-horizontal .form-inline .form-group {
     margin-right: 0px;
     margin-left: 0px;
 }
 
 /*form-vertical*/
-.form-vertical .form-group > label
-{
+.form-vertical .form-group > label {
     float: none;
     padding-top: 0;
     text-align: start;
     width: auto;
 }
 
-.form-vertical .form-sm.form-group > label 
-{
-    margin-bottom:0px;
+.form-vertical .form-sm.form-group > label {
+    margin-bottom: 0px;
 }
 
-.form-vertical .form-xs.form-group > label 
-{
-    margin-bottom:0px;
+.form-vertical .form-xs.form-group > label {
+    margin-bottom: 0px;
 }
 
-.form-vertical .form-group
-{
+.form-vertical .form-group {
     margin-left: 0;
     margin-right: 0;
 }
 
 .form-vertical .form-control,
-.form-vertical .form-control-static
-{
+.form-vertical .form-control-static {
     display: block;
     /*width: initial;*/
     vertical-align: baseline;
@@ -421,14 +368,13 @@ ul.nav-tabs
 /* table non-fluid*/
 
 .table-nonfluid {
-   width: auto;
+    width: auto;
 }
 
 /* disabled menu items*/
 
 ul.dropdown-menu > li > a[disabled],
-ul.dropdown-menu > li > a.disabled
-{
+ul.dropdown-menu > li > a.disabled {
     pointer-events: none;
     cursor: not-allowed;
     filter: alpha(opacity=65);
@@ -438,10 +384,8 @@ ul.dropdown-menu > li > a.disabled
 }
 
 /*Override absurd width for popups on sm*/
-@media (min-width: 768px)
-{
-    .modal-dialog:not(.modal-sm)
-    {
+@media (min-width: 768px) {
+    .modal-dialog:not(.modal-sm) {
         min-width: 730px;
     }
 }

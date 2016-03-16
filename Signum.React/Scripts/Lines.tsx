@@ -1,9 +1,11 @@
 ﻿import * as React from 'react'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize } from './TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo} from './Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, PropertyRoute } from './Reflection'
 import { ModifiableEntity, EntityPack, ModelState } from './Signum.Entities'
 import * as Navigator from './Navigator'
 import { ViewReplacer } from  './Frames/ReactVisitor'
+
+export { PropertyRoute };
 
 import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, Tasks} from './Lines/LineBase'
 export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, Tasks};
@@ -51,7 +53,6 @@ export interface EntityFrame<T extends ModifiableEntity> {
     setError: (modelState: ModelState, initialPrefix?: string) => void;
     onClose: () => void;
 }
-
 
 export interface EntityComponentProps<T extends ModifiableEntity> {
     ctx: TypeContext<T>;
@@ -144,5 +145,28 @@ export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBasePro
         state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
         state.ctx.propertyRoute.member.isReadOnly) {
         state.ctx.readOnly = true;
+    }
+}
+
+export let maxValueLineSize = 100; 
+
+Tasks.push(taskSetHtmlProperties);
+export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineBaseProps) {
+    var vl = lineBase instanceof ValueLine ? lineBase as ValueLine : null;
+    var pr = state.ctx.propertyRoute;
+    var vlp = state as ValueLineProps;
+    if (vl != null && pr.propertyRouteType == PropertyRouteType.Field) {
+        if (pr.member.maxLength != null) {
+
+            if (!vlp.valueHtmlProps)
+                vlp.valueHtmlProps = {};
+
+            vlp.valueHtmlProps.maxLength = pr.member.maxLength;
+
+            vlp.valueHtmlProps.size = maxValueLineSize == null ? pr.member.maxLength : Math.min(maxValueLineSize, pr.member.maxLength);
+        }
+
+        if (pr.member.isMultiline)
+            vlp.valueLineType = ValueLineType.TextArea;
     }
 }

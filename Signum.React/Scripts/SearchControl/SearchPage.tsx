@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import { getQueryNiceName } from '../Reflection'
-import { default as SearchControl, ExternalFullScreenButton} from './SearchControl'
+import SearchControl, { SearchControlProps } from './SearchControl'
 
 
 
@@ -15,13 +15,12 @@ interface SearchPageProps extends ReactRouter.RouteComponentProps<{}, { queryNam
 
 export default class SearchPage extends React.Component<SearchPageProps, { findOptions?: FindOptions, }> {
 
-    externalButton: ExternalFullScreenButton = { onClick: null };
-
     constructor(props) {
         super(props);
         this.state = this.calculateState(this.props);
     }
 
+    searchControl: SearchControl;
 
     componentWillReceiveProps(nextProps: SearchPageProps) {
         this.setState(this.calculateState(nextProps));
@@ -41,11 +40,13 @@ export default class SearchPage extends React.Component<SearchPageProps, { findO
             <div id="divSearchPage">
                 <h2>
                     <span className="sf-entity-title">{getQueryNiceName(fo.queryName) }</span>&nbsp;
-                    <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.externalButton.onClick(e) }>
+                    <a className="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e) }>
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>
                 </h2>
-                <SearchControl externalFullScreenButton={this.externalButton} findOptions={fo} />
+                <SearchControl ref={e => this.searchControl = e}
+                   hideExternalButton={true}
+                   findOptions={fo} />
             </div>
         );
     }

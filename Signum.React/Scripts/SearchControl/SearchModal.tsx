@@ -6,7 +6,7 @@ import { openModal, IModalProps } from '../Modals';
 import { ResultTable, FindOptions, FindMode, FilterOption, QueryDescription, ResultRow } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { getQueryNiceName } from '../Reflection'
-import { default as SearchControl, SearchControlProps, ExternalFullScreenButton} from './SearchControl'
+import SearchControl, { SearchControlProps} from './SearchControl'
 
 
 interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
@@ -16,14 +16,13 @@ interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
     title?: string;
 }
 
-export default class SearchModal extends React.Component<SearchModalProps, { show: boolean; externalButton?: ExternalFullScreenButton }>  {
+export default class SearchModal extends React.Component<SearchModalProps, { show: boolean; }>  {
 
     constructor(props) {
         super(props);
 
         this.state = {
-            show: true,
-            externalButton: { onClick: null }
+            show: true
         };
     }
 
@@ -56,6 +55,8 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         this.setState({ show: false });
     }
 
+    searchControl: SearchControl;
+
     render() {
 
         const okEnabled = this.props.isMany ? this.selectedEntites.length > 0 : this.selectedEntites.length == 1;
@@ -73,14 +74,15 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         </div>}
                     <h4>
                         <span className="sf-entity-title"> {this.props.title}</span>&nbsp;
-                        <a className ="sf-popup-fullscreen" href="#" onClick={(e) => this.state.externalButton.onClick(e) }>
+                        <a className ="sf-popup-fullscreen" href="#" onClick={(e) => this.searchControl.handleFullScreenClick(e) }>
                             <span className="glyphicon glyphicon-new-window"></span>
                         </a>
                     </h4>
                 </Modal.Header>
 
                 <Modal.Body>
-                    <SearchControl externalFullScreenButton={this.state.externalButton}
+                    <SearchControl hideExternalButton={true}
+                        ref={e => this.searchControl = e}
                         findOptions={this.props.findOptions}
                         onSelectionChanged={this.handleSelectionChanged}
                         onDoubleClick={this.props.findMode == FindMode.Find ? this.handleDoubleClick : null}

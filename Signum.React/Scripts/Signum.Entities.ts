@@ -439,7 +439,7 @@ export module ValidationMessage {
     export const Numeric = new MessageKey("ValidationMessage", "Numeric");
     export const OrBeNull = new MessageKey("ValidationMessage", "OrBeNull");
     export const Telephone = new MessageKey("ValidationMessage", "Telephone");
-    export const _0ShouldNotHaveBreakLines = new MessageKey("ValidationMessage", "_0ShouldNotHaveBreakLines");
+    export const _0ShouldHaveJustOneLine = new MessageKey("ValidationMessage", "_0ShouldHaveJustOneLine");
     export const _0ShouldNotHaveInitialSpaces = new MessageKey("ValidationMessage", "_0ShouldNotHaveInitialSpaces");
     export const _0ShouldNotHaveFinalSpaces = new MessageKey("ValidationMessage", "_0ShouldNotHaveFinalSpaces");
     export const TheLenghtOf0HasToBeEqualTo1 = new MessageKey("ValidationMessage", "TheLenghtOf0HasToBeEqualTo1");

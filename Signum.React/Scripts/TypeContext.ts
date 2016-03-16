@@ -1,5 +1,5 @@
-﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType } from './Reflection'
-import { ModelState, MList } from './Signum.Entities'
+﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type } from './Reflection'
+import { ModelState, MList, ModifiableEntity } from './Signum.Entities'
 
 export enum FormGroupStyle {
     /// Unaffected by FormGroupSize
@@ -149,6 +149,10 @@ export class TypeContext<T> extends StyleContext {
         this.binding.setValue(val);
     }
 
+    static root<T>(type: Type<T>, value: T) {
+        return new TypeContext(null, null, PropertyRoute.root(type), new ReadonlyBinding(value, ""));
+    }
+
     constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>) {
         super(parent, styleOptions);
         this.propertyRoute = propertyRoute;
@@ -188,6 +192,29 @@ export class TypeContext<T> extends StyleContext {
 
     compose(suffix: string) {
         return compose(this.prefix, suffix);
+    }
+
+    tryFindParent<S>(type: Type<S>): S {
+
+        var current: TypeContext<any> = this;
+
+        while (current) {
+            var entity = current.value as ModifiableEntity;
+            if (entity && entity.Type == type.typeName)
+                return entity as S;
+
+            current = current.parent as TypeContext<any>;
+        }
+
+        return null;
+    }
+
+    findParent<S>(type: Type<S>): S {
+        var result = this.tryFindParent(type);
+        if (result == null)
+            throw new Error(`No '${type.typeName}' found in the parent chain`);
+
+        return result;
     }
 }
 
