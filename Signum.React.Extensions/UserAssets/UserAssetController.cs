@@ -25,7 +25,7 @@ namespace Signum.React.Auth
 {
     public class UserAssetController : ApiController
     {
-        [Route("api/userQueries/parseFilters"), HttpPost]
+        [Route("api/userAssets/parseFilters"), HttpPost]
         public List<FilterTS> ParseFilters(ParseFiltersRequest request)
         {
             var queryName = QueryLogic.ToQueryName(request.queryKey);

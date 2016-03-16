@@ -22,6 +22,7 @@ namespace Signum.Entities.Chart
 
         [Ignore]
         ChartScriptParameterEntity scriptParameter;
+        [InTypeScript(false)]
         public ChartScriptParameterEntity ScriptParameter
         {
             get { return scriptParameter; }

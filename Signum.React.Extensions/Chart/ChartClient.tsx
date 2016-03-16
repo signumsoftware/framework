@@ -21,8 +21,7 @@ import { UserChartEntity, UserChartEntity_Type, ChartPermission, ChartMessage, C
 import { QueryTokenEntity, QueryTokenEntity_Type } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView from './Templates/ChartRequestView'
-
-
+import * as UserChartClient from './UserChart/UserChartClient'
 
 
 export function start(options: { routes: JSX.Element[] }) {
@@ -38,6 +37,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return <ChartButton searchControl={ctx.searchControl}/>;
     });
 
+    UserChartClient.start({ routes: options.routes });
 }
 
 
@@ -186,7 +186,7 @@ export module Encoder {
             script: cr.chartScript.name,
             filters: Finder.Encoder.encodeFilters(cr.filterOptions),
             columns: Encoder.encodeColumn(cr.columns),
-            orders: Finder.Encoder.encodeOrders(cr.ordersOptions),
+            orders: Finder.Encoder.encodeOrders(cr.orderOptions),
             parameters: Encoder.encodeParameters(cr.parameters),
         };
 
@@ -203,6 +203,35 @@ export module Encoder {
     }
 }
 
+export function parseTokens(chartRequest: ChartRequest): Promise<ChartRequest> {
+
+    const completer = new Finder.TokenCompleter(chartRequest.queryKey);
+
+    var promises: Promise<void>[] = [];
+
+    if (chartRequest.filterOptions)
+        promises.push(...chartRequest.filterOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate)));
+
+    if (chartRequest.orderOptions)
+        promises.push(...chartRequest.orderOptions.map(oo => completer.complete(oo, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate)));
+
+    if (chartRequest.columns)
+        promises.push(...chartRequest.columns.map(a => a.element.token).map(tok => {
+            if (tok.token && tok.token.fullKey == tok.tokenString)
+                return Promise.resolve(null);
+
+            return completer.request(tok.tokenString, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement).then(t => {
+                tok.token = t;
+            });
+        }));
+
+    completer.finished();
+
+    return Promise.all(promises)
+        .then(() => Finder.parseFilterValues(chartRequest.filterOptions))
+        .then(() => chartRequest);
+}
+
 export module Decoder {
 
     export function parseChartRequest(queryName: string, query: any): Promise<ChartRequest> {
@@ -210,41 +239,21 @@ export module Decoder {
         const chartRequest = ChartRequest_Type.New({
             queryKey: getQueryKey(queryName),
             filterOptions: Finder.Decoder.decodeFilters(query.filters) || [],
-            ordersOptions: Finder.Decoder.decodeOrders(query.orders) || [],
+            orderOptions: Finder.Decoder.decodeOrders(query.orders) || [],
             columns: Decoder.decodeColumns(query.columns) || [],
             parameters: Decoder.decodeParameters(query.parameters) || [],
         });
 
-        return getChartScripts().then(scripts => {
+        return getChartScripts().then(scripts => { 
 
             chartRequest.chartScript = scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
 
-            const completer = new Finder.TokenCompleter(queryName);
-
-            var promises: Promise<void>[] = [];
-
-            if (chartRequest.filterOptions)
-                promises.push(...chartRequest.filterOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate)));
-
-            if (chartRequest.ordersOptions)
-                promises.push(...chartRequest.ordersOptions.map(oo => completer.complete(oo, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate)));
-
-            if (chartRequest.columns)
-                promises.push(...chartRequest.columns.map(a => a.element.token).map(tok => {
-                    if (tok.token && tok.token.fullKey == tok.tokenString)
-                        return Promise.resolve(null);
-
-                    return completer.request(tok.tokenString, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement).then(t => {
-                        tok.token = t;
-                    });
-                }));
-
-            completer.finished();
-
-            return Promise.all(promises)
-                .then(() => Finder.parseFilterValues(chartRequest.filterOptions).then(() => chartRequest));
+            return parseTokens(chartRequest);
         });
     }
+
+
+   
 
 
     var unscapeTildes = Finder.Decoder.unscapeTildes;
@@ -309,15 +318,21 @@ export module API {
         chartTable: ChartTable;
     }
 
-    export function executeChart(request: ChartRequest): Promise<ExecuteChartResult> {
-
+    export function cleanedChartRequest(request: ChartRequest) {
         var clone = Dic.copy(request);
 
-        clone.orders = clone.ordersOptions.map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
-        delete clone.ordersOptions;
+        clone.orders = clone.orderOptions.map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
+        delete clone.orderOptions;
 
         clone.filters = clone.filterOptions.map(fo => ({ token: fo.token.fullKey, operation: fo.operation, value: fo.value }) as FilterRequest);
         delete clone.filterOptions;
+
+        return clone;
+    }
+
+    export function executeChart(request: ChartRequest): Promise<ExecuteChartResult> {
+
+        var clone = cleanedChartRequest(request);
 
         return ajaxPost<ExecuteChartResult>({
             url: "/api/chart/execute"
@@ -343,7 +358,7 @@ export module API {
 
         delete (clone as UserChartEntity).orders;
         delete (clone as ChartRequest).orders;
-        delete (clone as ChartRequest).ordersOptions;
+        delete (clone as ChartRequest).orderOptions;
 
         delete (clone as UserChartEntity).filters;
         delete (clone as ChartRequest).filters;

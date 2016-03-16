@@ -23,6 +23,7 @@ import ChartRenderer from './ChartRenderer'
 
 
 require("!style!css!../Chart.css");
+
 interface ChartRequestViewProps extends ReactRouter.RouteComponentProps<{}, { queryName: string }> {
 
 }
@@ -82,6 +83,10 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
             .done();
     }
 
+    handleOnFullScreen = (e: React.MouseEvent) => {
+        Navigator.currentHistory.push(ChartClient.Encoder.chartRequestPath(this.state.chartRequest));
+    }
+
     render() {
 
         const cr = this.state.chartRequest;
@@ -96,7 +101,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
             <div>
                 <h2>
                     <span className="sf-entity-title">{getQueryNiceName(cr.queryKey) }</span>&nbsp;
-                    <a className ="sf-popup-fullscreen" href="#">
+                    <a className ="sf-popup-fullscreen" href="#" onClick={this.handleOnFullScreen}>
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>
                 </h2 >
@@ -114,7 +119,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     <div className="sf-query-button-bar btn-toolbar">
                         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ ChartMessage.Chart_Draw.niceToString() }</button>
                         <button className="sf-query-button sf-chart-script-edit btn btn-default">{ ChartMessage.EditScript.niceToString() }</button>
-                        { ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }) }
+                        { ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i })) }
                     </div>
                     <br />
                     <div className="sf-search-results-container" >
@@ -126,7 +131,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                                 </Tab>
 
                                 <Tab eventKey="data" title={ChartMessage.Data.niceToString() }>
-                                    <ChartTable chartRequest={cr} resultTable={this.state.chartResult.resultTable} />
+                                    <ChartTable chartRequest={cr} resultTable={this.state.chartResult.resultTable} onRedraw={this.handleOnDrawClick} />
                                 </Tab>
                             </Tabs>
                         }

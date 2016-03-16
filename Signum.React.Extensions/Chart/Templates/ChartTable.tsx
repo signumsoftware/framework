@@ -1,10 +1,39 @@
 ﻿import * as React from 'react'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption, OrderOption, OrderType } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
    ChartColorEntity_Type, ChartScriptEntity, ChartScriptEntity_Type, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 
-export default class ChartTable extends React.Component<{ resultTable: ResultTable, chartRequest: ChartRequest}, void> {
+export default class ChartTable extends React.Component<{ resultTable: ResultTable, chartRequest: ChartRequest, onRedraw: () => void }, void> {
+
+
+    handleHeaderClick = (e: React.MouseEvent) => {
+
+        const tokenStr = (e.currentTarget as HTMLElement).getAttribute("data-column-name");
+
+        var cr = this.props.chartRequest;
+
+        const prev = cr.orderOptions.filter(a => a.token.fullKey == tokenStr).firstOrNull();
+
+        if (prev != null) {
+            prev.orderType = prev.orderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending;
+            if (!e.shiftKey)
+                cr.orderOptions = [prev];
+
+        } else {
+
+            const token = cr.columns.map(mle => mle.element.token.token).filter(t => t.fullKey == tokenStr).first("Column");
+
+            const newOrder: OrderOption = { token: token, orderType: OrderType.Ascending, columnName: token.fullKey };
+
+            if (e.shiftKey)
+                cr.orderOptions.push(newOrder);
+            else
+                cr.orderOptions = [newOrder];
+        }
+
+        this.props.onRedraw();
+    }
 
     render() {
 
@@ -27,7 +56,12 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
                 <thead>
                     <tr>
                         { !chartRequest.groupResults && <th></th> }
-                        { columns.map((col, i) => <th key={i}>{col.column.displayName || col.column.token.niceName}</th>) }
+                        { columns.map((col, i) =>
+                            <th key={i}  data-column-name={col.column.token.fullKey}
+                                onClick={this.handleHeaderClick}>
+                                <span className={"sf-header-sort " + this.orderClassName(col.column) }/>
+                                <span> { col.column.displayName || col.column.token.niceName }</span>
+                            </th>) }
                     </tr>
                 </thead>
                 <tbody>
@@ -49,8 +83,24 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
         );
     }
 
+    orderClassName(column: ColumnOption) {
 
-    
+        if (column.token == null)
+            return "";
+
+        const orders = this.props.chartRequest.orderOptions;
+
+        const o = orders.filter(a => a.token.fullKey == column.token.fullKey).firstOrNull();
+        if (o == null)
+            return "";
+
+        let asc = (o.orderType == OrderType.Ascending ? "asc" : "desc");
+
+        if (orders.indexOf(o))
+            asc += " l" + orders.indexOf(o);
+
+        return asc;
+    }
 }
 
 

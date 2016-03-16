@@ -27,7 +27,7 @@ export interface ChartRequest {
     queryKey?: string;
 
 	filterOptions?: FilterOption[];
-    ordersOptions?: OrderOption[];
+    orderOptions?: OrderOption[];
 
     filters?: FilterRequest[];
     orders?: OrderRequest[];

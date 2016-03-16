@@ -22,7 +22,7 @@ export interface ChartRequest {
     queryKey?: string;
 
 	filterOptions?: FilterOption[];
-    ordersOptions?: OrderOption[];
+    orderOptions?: OrderOption[];
 
     filters?: FilterRequest[];
     orders?: OrderRequest[];
@@ -103,7 +103,6 @@ export interface ChartPaletteModel extends Entities.ModelEntity {
 
 export const ChartParameterEntity_Type = new Type<ChartParameterEntity>("ChartParameterEntity");
 export interface ChartParameterEntity extends Entities.EmbeddedEntity {
-    scriptParameter?: ChartScriptParameterEntity;
     name?: string;
     value?: string;
 }
