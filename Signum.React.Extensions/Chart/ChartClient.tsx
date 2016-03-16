@@ -174,7 +174,7 @@ export function removeAggregates(chart: IChartBase) {
     chart.columns.map(mle => mle.element).forEach(cc => {
         if (cc.token && cc.token.token.queryTokenType == QueryTokenType.Aggregate) {
             var parentToken = cc.token.token.parent;
-            cc.token = QueryTokenEntity_Type.New({ tokenString: parentToken.fullKey, token: parentToken });
+            cc.token = QueryTokenEntity_Type.New({ tokenString: parentToken && parentToken.fullKey, token: parentToken });
         }
     });
 }
@@ -184,22 +184,26 @@ export module Encoder {
     export function chartRequestPath(cr: ChartRequest): string {
         const query = {
             script: cr.chartScript.name,
-            filters: Finder.Encoder.encodeFilters(cr.filterOptions),
-            columns: Encoder.encodeColumn(cr.columns),
-            orders: Finder.Encoder.encodeOrders(cr.orderOptions),
-            parameters: Encoder.encodeParameters(cr.parameters),
         };
+
+        Finder.Encoder.encodeFilters(query, cr.filterOptions);
+        Finder.Encoder.encodeOrders(query, cr.orderOptions);
+        encodeParameters(query, cr.parameters);
+
+        encodeColumn(query, cr.columns);
 
         return Navigator.currentHistory.createPath({ pathname: "/Chart/" + cr.queryKey, query: query });
     }
 
     var scapeTilde = Finder.Encoder.scapeTilde;
 
-    export function encodeColumn(columns: MList<ChartColumnEntity>): string[] {
-        return !columns ? undefined : columns.map(co => co.element.token.tokenString + (co.element.displayName ? ("~" + scapeTilde(co.element.displayName)) : ""));
+    export function encodeColumn(query: any, columns: MList<ChartColumnEntity>) {
+        if (columns)
+            columns.forEach((co, i) => query["column" + i] = co.element.token.tokenString + (co.element.displayName ? ("~" + scapeTilde(co.element.displayName)) : ""));
     }
-    export function encodeParameters(parameters: MList<ChartParameterEntity>): string[] {
-        return !parameters ? undefined : parameters.map(p => scapeTilde(p.element.name) + "~" + scapeTilde(p.element.value));
+    export function encodeParameters(query: any, parameters: MList<ChartParameterEntity>) {
+        if (parameters)
+            parameters.map((p, i) => query["param" + i] = scapeTilde(p.element.name) + "~" + scapeTilde(p.element.value));
     }
 }
 
@@ -238,11 +242,14 @@ export module Decoder {
 
         const chartRequest = ChartRequest_Type.New({
             queryKey: getQueryKey(queryName),
-            filterOptions: Finder.Decoder.decodeFilters(query.filters) || [],
-            orderOptions: Finder.Decoder.decodeOrders(query.orders) || [],
-            columns: Decoder.decodeColumns(query.columns) || [],
-            parameters: Decoder.decodeParameters(query.parameters) || [],
+            filterOptions: Finder.Decoder.decodeFilters(query),
+            orderOptions: Finder.Decoder.decodeOrders(query),
+            columns: Decoder.decodeColumns(query),
+            parameters: Decoder.decodeParameters(query) ,
         });
+
+        
+
 
         return getChartScripts().then(scripts => { 
 
@@ -257,14 +264,10 @@ export module Decoder {
 
 
     var unscapeTildes = Finder.Decoder.unscapeTildes;
-    var asArray = Finder.Decoder.asArray;
+    var valuesInOrder = Finder.Decoder.valuesInOrder;
 
-    export function decodeColumns(columns: string | string[]): MList<ChartColumnEntity> {
-
-        if (!columns)
-            return undefined;
-
-        return asArray(columns).map(val => ({
+    export function decodeColumns(query: any): MList<ChartColumnEntity> {
+        return valuesInOrder(query, "column").map(val => ({
             rowId: null,
             element: ChartColumnEntity_Type.New({
                 token: QueryTokenEntity_Type.New({
@@ -275,12 +278,8 @@ export module Decoder {
         }));
     }
 
-    export function decodeParameters(columns: string | string[]): MList<ChartParameterEntity> {
-
-        if (!columns)
-            return undefined;
-
-        return asArray(columns).map(val => ({
+    export function decodeParameters(query: any): MList<ChartParameterEntity> {
+        return valuesInOrder(query, "param").map(val => ({
             rowId: null,
             element: ChartParameterEntity_Type.New({
                 name: unscapeTildes(val.before("~")),

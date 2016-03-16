@@ -22,9 +22,9 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
 
         } else {
 
-            const token = cr.columns.map(mle => mle.element.token.token).filter(t => t.fullKey == tokenStr).first("Column");
+            const token = cr.columns.map(mle => mle.element.token).filter(t => t && t.token.fullKey == tokenStr).first("Column");
 
-            const newOrder: OrderOption = { token: token, orderType: OrderType.Ascending, columnName: token.fullKey };
+            const newOrder: OrderOption = { token: token.token, orderType: OrderType.Ascending, columnName: token.token.fullKey };
 
             if (e.shiftKey)
                 cr.orderOptions.push(newOrder);
