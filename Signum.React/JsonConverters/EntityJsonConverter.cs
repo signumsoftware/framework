@@ -326,19 +326,23 @@ namespace Signum.React.Json
         public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             IdentityInfo identityInfo = ReadIdentityInfo(reader);
-
-            identityInfo.AssertIsNewId(reader.Path);
             
             Type type = GetEntityType(identityInfo.Type, objectType);
 
             if (identityInfo.IsNew == true)
-                return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
+            {
+                var result = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
+
+                if (identityInfo.Id != null)
+                    ((Entity)result).Id = PrimaryKey.Parse(identityInfo.Id, type);
+
+                return result;
+            }
 
             if (typeof(Entity).IsAssignableFrom(type))
             {
                 if (identityInfo.Id == null)
                     throw new JsonSerializationException($"Missing Id and IsNew for {identityInfo} ({reader.Path})");
-
 
                 var id = PrimaryKey.Parse(identityInfo.Id, type);
                 if (existingValue != null && existingValue.GetType() == type)
@@ -413,12 +417,6 @@ namespace Signum.React.Json
             public string Type;
             public string ToStr;
             public long? Ticks;
-
-            public void AssertIsNewId(string path)
-            {
-                if (IsNew == true && Id != null)
-                    throw new JsonSerializationException($"An entity of type '{ToStr}' is new but has id '({path})'");
-            }
 
             public override string ToString()
             {
