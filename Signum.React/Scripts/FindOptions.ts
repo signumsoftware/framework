@@ -66,7 +66,7 @@ export interface FilterOption {
     columnName: string;
     token?: QueryToken;
     frozen?: boolean;
-    operation: FilterOperation;
+    operation?: FilterOperation;
     value: any;
 }
 

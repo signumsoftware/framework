@@ -155,7 +155,7 @@ export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineB
     var vl = lineBase instanceof ValueLine ? lineBase as ValueLine : null;
     var pr = state.ctx.propertyRoute;
     var vlp = state as ValueLineProps;
-    if (vl != null && pr.propertyRouteType == PropertyRouteType.Field) {
+    if (vl  && pr && pr.propertyRouteType == PropertyRouteType.Field) {
         if (pr.member.maxLength != null) {
 
             if (!vlp.valueHtmlProps)

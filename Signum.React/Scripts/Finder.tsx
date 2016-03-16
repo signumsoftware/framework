@@ -210,8 +210,10 @@ export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
 
     var promises: Promise<any>[] = [];
 
-    if (findOptions.filterOptions)
+    if (findOptions.filterOptions) {
+        findOptions.filterOptions.filter(fo => !fo.operation).forEach(fo => fo.operation = FilterOperation.EqualTo);
         promises.push(...findOptions.filterOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)));
+    }
 
     if (findOptions.orderOptions)
         promises.push(...findOptions.orderOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement)));
@@ -323,8 +325,8 @@ export function parseFilterValues(filterOptions: FilterOption[]): Promise<void> 
 function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
     switch (filterType(token)) {
         case FilterType.Boolean: return parseBoolean(val);
-        case FilterType.Integer: return parseInt(val) || null;
-        case FilterType.Decimal: return parseFloat(val) || null;
+        case FilterType.Integer: return nanToNull(parseInt(val));
+        case FilterType.Decimal: return nanToNull(parseFloat(val));
         case FilterType.Lite:
             {
                 var lite = convertToLite(val);
@@ -337,6 +339,13 @@ function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
     }
 
     return val;
+}
+
+function nanToNull(n: number) {
+    if (isNaN(n))
+        return null;
+
+    return n;
 }
 
 function convertToLite(val: any): Lite<Entity> {
