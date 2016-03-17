@@ -174,7 +174,7 @@ export function removeAggregates(chart: IChartBase) {
     chart.columns.map(mle => mle.element).forEach(cc => {
         if (cc.token && cc.token.token.queryTokenType == QueryTokenType.Aggregate) {
             var parentToken = cc.token.token.parent;
-            cc.token = QueryTokenEntity_Type.New({ tokenString: parentToken.fullKey, token: parentToken });
+            cc.token = QueryTokenEntity_Type.New({ Type: null,  tokenString: parentToken.fullKey, token: parentToken });
         }
     });
 }
@@ -208,6 +208,7 @@ export module Decoder {
     export function parseChartRequest(queryName: string, query: any): Promise<ChartRequest> {
 
         const chartRequest = ChartRequest_Type.New({
+            Type: null,
             queryKey: getQueryKey(queryName),
             filterOptions: Finder.Decoder.decodeFilters(query.filters) || [],
             ordersOptions: Finder.Decoder.decodeOrders(query.orders) || [],
@@ -258,7 +259,9 @@ export module Decoder {
         return asArray(columns).map(val => ({
             rowId: null,
             element: ChartColumnEntity_Type.New({
+                Type: null,
                 token: QueryTokenEntity_Type.New({
+                    Type: null,
                     tokenString: val.tryBefore("~") || val
                 }),
                 displayName: unscapeTildes(val.tryAfter("~"))
@@ -274,6 +277,7 @@ export module Decoder {
         return asArray(columns).map(val => ({
             rowId: null,
             element: ChartParameterEntity_Type.New({
+                Type: null,
                 name: unscapeTildes(val.before("~")),
                 value: unscapeTildes(val.after("~"))
             })
@@ -331,7 +335,7 @@ export module API {
     }
 
     export function fetchColorPalettes(): Promise<string[]> {
-        return ajaxGet<ChartScriptEntity[]>({
+        return ajaxGet<string[]>({
             url: "/api/chart/colorPalettes"
         });
     }

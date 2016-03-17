@@ -90,7 +90,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         if (cr == null || qd == null)
             return null;
 
-        var tc = new TypeContext(null, null, PropertyRoute.root(getTypeInfo(cr.Type)), new Binding("chartRequest", this.state));
+        var tc = new TypeContext<ChartRequest>(null, null, PropertyRoute.root(getTypeInfo(cr.Type)), new Binding<ChartRequest>("chartRequest", this.state));
 
         return (
             <div>

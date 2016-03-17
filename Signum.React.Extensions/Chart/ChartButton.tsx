@@ -24,6 +24,7 @@ export default class ChartButton extends React.Component<ChartButtonProps, void>
 
         ChartClient.getChartScripts().then(scripts => {
             var path = ChartClient.Encoder.chartRequestPath(ChartRequest_Type.New({
+                Type: null,
                 queryKey: getQueryKey(fo.queryName),
                 chartScript: scripts.first("No scripts loaded").first("No scripts loaded"),
                 filterOptions: fo.filterOptions

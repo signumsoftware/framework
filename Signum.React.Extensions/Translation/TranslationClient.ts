@@ -15,7 +15,7 @@ export module Api {
     }
 
     export function getCurrentCulture(): Promise<Lite<CultureInfoEntity>> {
-        return ajaxGet<CultureInfoEntity>({ url: "/api/translation/currentCulture", cache: "no-cache" });
+        return ajaxGet<Lite<CultureInfoEntity>>({ url: "/api/translation/currentCulture", cache: "no-cache" });
     }
 
     export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<void> {
