@@ -51,10 +51,10 @@ namespace Signum.Windows.Omnibox
 
                 lines.Add(new Italic(GetTextSpan(helpResult)));
 
-                if (helpResult.OmniboxResultType != null)
+                if (helpResult.ReferencedType != null)
                 {
                     lines.Add(" ");
-                    lines.Add(OmniboxClient.Providers.GetOrThrow(helpResult.OmniboxResultType).GetIcon());
+                    lines.Add(OmniboxClient.Providers.GetOrThrow(helpResult.ReferencedType).GetIcon());
                 }
                 AutomationProperties.SetName(this, "Help");
             }
