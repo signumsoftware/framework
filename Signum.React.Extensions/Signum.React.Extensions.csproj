@@ -228,6 +228,8 @@
     <TypeScriptCompile Include="Basics\Signum.Entities.Basics.ts">
       <DependentUpon>Signum.Entities.Basics.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Chart\ChartScript\codemirror.d.ts" />
+    <TypeScriptCompile Include="Chart\ChartScript\CodeMirror.tsx" />
     <TypeScriptCompile Include="Chart\Signum.Entities.Chart.ts">
       <DependentUpon>Signum.Entities.Chart.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -322,7 +324,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Chart\ChartColor\" />
-    <Folder Include="Chart\ChartScript\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>

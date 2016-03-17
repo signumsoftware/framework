@@ -95,17 +95,17 @@ export module Converter {
 
             cr.parameters = uq.parameters.map(mle => ({
                 rowId: null,
-                element: ChartParameterEntity_Type.New({
-                    name: mle.element.name,
-                    value: mle.element.value,
+                element: ChartParameterEntity_Type.New(p => {
+                    p.name = mle.element.name;
+                    p.value = mle.element.value;
                 })
             }));
 
             cr.columns = uq.columns.map(mle => ({
                 rowId: null,
-                element: ChartColumnEntity_Type.New({
-                    displayName: mle.element.displayName,
-                    token: mle.element.token,
+                element: ChartColumnEntity_Type.New(c => {
+                    c.displayName = mle.element.displayName;
+                    c.token = mle.element.token;
                 })
             }));
             
@@ -119,7 +119,7 @@ export module Converter {
     }
 
     export function toChartRequest(uq: UserChartEntity, entity: Lite<Entity>): Promise<ChartRequest> {
-        var cs = ChartRequest_Type.New({ queryKey: uq.query.key }); 
+        var cs = ChartRequest_Type.New(cr => cr.queryKey = uq.query.key); 
         return applyUserChart(cs, uq, entity);
     }
 }

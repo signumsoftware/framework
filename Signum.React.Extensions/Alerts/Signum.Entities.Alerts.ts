@@ -10,16 +10,16 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 
 export const AlertEntity_Type = new Type<AlertEntity>("Alert");
 export interface AlertEntity extends Entities.Entity {
-    target?: Entities.Lite<Entities.Entity>;
-    creationDate?: string;
-    alertDate?: string;
-    attendedDate?: string;
-    title?: string;
-    text?: string;
-    createdBy?: Entities.Lite<Basics.IUserEntity>;
-    attendedBy?: Entities.Lite<Basics.IUserEntity>;
-    alertType?: AlertTypeEntity;
-    state?: AlertState;
+    target: Entities.Lite<Entities.Entity>;
+    creationDate: string;
+    alertDate: string;
+    attendedDate: string;
+    title: string;
+    text: string;
+    createdBy: Entities.Lite<Basics.IUserEntity>;
+    attendedBy: Entities.Lite<Basics.IUserEntity>;
+    alertType: AlertTypeEntity;
+    state: AlertState;
 }
 
 export module AlertMessage {

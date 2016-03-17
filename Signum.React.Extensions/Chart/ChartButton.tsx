@@ -27,7 +27,7 @@ export default class ChartButton extends React.Component<ChartButtonProps, void>
                 queryKey: getQueryKey(fo.queryName),
                 chartScript: scripts.first("No scripts loaded").first("No scripts loaded"),
                 filterOptions: fo.filterOptions
-            }));
+            } as any));
 
             if (e.ctrlKey || e.button == 2)
                 window.open(path);

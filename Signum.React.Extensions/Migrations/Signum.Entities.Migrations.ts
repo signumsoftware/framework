@@ -7,12 +7,12 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 export const CSharpMigrationEntity_Type = new Type<CSharpMigrationEntity>("CSharpMigration");
 export interface CSharpMigrationEntity extends Entities.Entity {
-    uniqueName?: string;
-    executionDate?: string;
+    uniqueName: string;
+    executionDate: string;
 }
 
 export const SqlMigrationEntity_Type = new Type<SqlMigrationEntity>("SqlMigration");
 export interface SqlMigrationEntity extends Entities.Entity {
-    versionNumber?: string;
+    versionNumber: string;
 }
 

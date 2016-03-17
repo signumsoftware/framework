@@ -18,38 +18,38 @@ import * as DynamicQuery from '../../../Framework/Signum.React/Scripts/Signum.En
 
 export const QueryColumnEntity_Type = new Type<QueryColumnEntity>("QueryColumnEntity");
 export interface QueryColumnEntity extends Entities.EmbeddedEntity {
-    token?: UserAssets.QueryTokenEntity;
-    displayName?: string;
+    token: UserAssets.QueryTokenEntity;
+    displayName: string;
 }
 
 export const QueryFilterEntity_Type = new Type<QueryFilterEntity>("QueryFilterEntity");
 export interface QueryFilterEntity extends Entities.EmbeddedEntity {
-    token?: UserAssets.QueryTokenEntity;
-    operation?: DynamicQuery.FilterOperation;
-    valueString?: string;
+    token: UserAssets.QueryTokenEntity;
+    operation: DynamicQuery.FilterOperation;
+    valueString: string;
 }
 
 export const QueryOrderEntity_Type = new Type<QueryOrderEntity>("QueryOrderEntity");
 export interface QueryOrderEntity extends Entities.EmbeddedEntity {
-    token?: UserAssets.QueryTokenEntity;
-    orderType?: DynamicQuery.OrderType;
+    token: UserAssets.QueryTokenEntity;
+    orderType: DynamicQuery.OrderType;
 }
 
 export const UserQueryEntity_Type = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
-    query?: Basics.QueryEntity;
-    entityType?: Entities.Lite<Basics.TypeEntity>;
-    owner?: Entities.Lite<Entities.Entity>;
-    displayName?: string;
-    withoutFilters?: boolean;
-    filters?: Entities.MList<QueryFilterEntity>;
-    orders?: Entities.MList<QueryOrderEntity>;
-    columnsMode?: DynamicQuery.ColumnOptionsMode;
-    columns?: Entities.MList<QueryColumnEntity>;
-    paginationMode?: DynamicQuery.PaginationMode;
-    elementsPerPage?: number;
-    guid?: string;
-    shouldHaveElements?: boolean;
+    query: Basics.QueryEntity;
+    entityType: Entities.Lite<Basics.TypeEntity>;
+    owner: Entities.Lite<Entities.Entity>;
+    displayName: string;
+    withoutFilters: boolean;
+    filters: Entities.MList<QueryFilterEntity>;
+    orders: Entities.MList<QueryOrderEntity>;
+    columnsMode: DynamicQuery.ColumnOptionsMode;
+    columns: Entities.MList<QueryColumnEntity>;
+    paginationMode: DynamicQuery.PaginationMode;
+    elementsPerPage: number;
+    guid: string;
+    shouldHaveElements: boolean;
 }
 
 export module UserQueryMessage {

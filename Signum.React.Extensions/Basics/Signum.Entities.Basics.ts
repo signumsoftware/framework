@@ -6,9 +6,9 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 export const CultureInfoEntity_Type = new Type<CultureInfoEntity>("CultureInfo");
 export interface CultureInfoEntity extends Entities.Entity {
-    name?: string;
-    nativeName?: string;
-    englishName?: string;
+    name: string;
+    nativeName: string;
+    englishName: string;
 }
 
 export module CultureInfoOperation {
@@ -17,9 +17,9 @@ export module CultureInfoOperation {
 
 export const DateSpanEntity_Type = new Type<DateSpanEntity>("DateSpanEntity");
 export interface DateSpanEntity extends Entities.EmbeddedEntity {
-    years?: number;
-    months?: number;
-    days?: number;
+    years: number;
+    months: number;
+    days: number;
 }
 
 export const TypeConditionSymbol_Type = new Type<TypeConditionSymbol>("TypeCondition");

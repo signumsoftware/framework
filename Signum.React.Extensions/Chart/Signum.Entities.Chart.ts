@@ -35,14 +35,14 @@ export interface ChartScriptParameterEntity {
 export type IChartBase = ChartRequest | UserChartEntity;
 export const ChartColorEntity_Type = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
-    related?: Entities.Lite<Entities.Entity>;
-    color?: Basics.ColorEntity;
+    related: Entities.Lite<Entities.Entity>;
+    color: Basics.ColorEntity;
 }
 
 export const ChartColumnEntity_Type = new Type<ChartColumnEntity>("ChartColumnEntity");
 export interface ChartColumnEntity extends Entities.EmbeddedEntity {
-    token?: UserAssets.QueryTokenEntity;
-    displayName?: string;
+    token: UserAssets.QueryTokenEntity;
+    displayName: string;
 }
 
 export enum ChartColumnType {
@@ -97,14 +97,14 @@ export module ChartMessage {
 
 export const ChartPaletteModel_Type = new Type<ChartPaletteModel>("ChartPaletteModel");
 export interface ChartPaletteModel extends Entities.ModelEntity {
-    type?: Basics.TypeEntity;
-    colors?: Entities.MList<ChartColorEntity>;
+    type: Basics.TypeEntity;
+    colors: Entities.MList<ChartColorEntity>;
 }
 
 export const ChartParameterEntity_Type = new Type<ChartParameterEntity>("ChartParameterEntity");
 export interface ChartParameterEntity extends Entities.EmbeddedEntity {
-    name?: string;
-    value?: string;
+    name: string;
+    value: string;
 }
 
 export enum ChartParameterType {
@@ -120,30 +120,30 @@ export module ChartPermission {
 
 export const ChartRequest_Type = new Type<ChartRequest>("ChartRequest");
 export interface ChartRequest extends Entities.ModelEntity {
-    chartScript?: ChartScriptEntity;
-    groupResults?: boolean;
-    columns?: Entities.MList<ChartColumnEntity>;
-    parameters?: Entities.MList<ChartParameterEntity>;
-    invalidator?: boolean;
+    chartScript: ChartScriptEntity;
+    groupResults: boolean;
+    columns: Entities.MList<ChartColumnEntity>;
+    parameters: Entities.MList<ChartParameterEntity>;
+    invalidator: boolean;
 }
 
 export const ChartScriptColumnEntity_Type = new Type<ChartScriptColumnEntity>("ChartScriptColumnEntity");
 export interface ChartScriptColumnEntity extends Entities.EmbeddedEntity {
-    displayName?: string;
-    isOptional?: boolean;
-    columnType?: ChartColumnType;
-    isGroupKey?: boolean;
+    displayName: string;
+    isOptional: boolean;
+    columnType: ChartColumnType;
+    isGroupKey: boolean;
 }
 
 export const ChartScriptEntity_Type = new Type<ChartScriptEntity>("ChartScript");
 export interface ChartScriptEntity extends Entities.Entity {
-    name?: string;
-    icon?: Entities.Lite<Files.FileEntity>;
-    script?: string;
-    groupBy?: GroupByChart;
-    columns?: Entities.MList<ChartScriptColumnEntity>;
-    parameters?: Entities.MList<ChartScriptParameterEntity>;
-    columnsStructure?: string;
+    name: string;
+    icon: Entities.Lite<Files.FileEntity>;
+    script: string;
+    groupBy: GroupByChart;
+    columns: Entities.MList<ChartScriptColumnEntity>;
+    parameters: Entities.MList<ChartScriptParameterEntity>;
+    columnsStructure: string;
 }
 
 export module ChartScriptOperation {
@@ -154,10 +154,10 @@ export module ChartScriptOperation {
 
 export const ChartScriptParameterEntity_Type = new Type<ChartScriptParameterEntity>("ChartScriptParameterEntity");
 export interface ChartScriptParameterEntity extends Entities.EmbeddedEntity {
-    name?: string;
-    type?: ChartParameterType;
-    columnIndex?: number;
-    valueDefinition?: string;
+    name: string;
+    type: ChartParameterType;
+    columnIndex: number;
+    valueDefinition: string;
 }
 
 export enum GroupByChart {
@@ -169,18 +169,18 @@ export const GroupByChart_Type = new EnumType<GroupByChart>("GroupByChart", Grou
 
 export const UserChartEntity_Type = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
-    query?: Basics.QueryEntity;
-    entityType?: Entities.Lite<Basics.TypeEntity>;
-    owner?: Entities.Lite<Entities.Entity>;
-    displayName?: string;
-    chartScript?: ChartScriptEntity;
-    parameters?: Entities.MList<ChartParameterEntity>;
-    groupResults?: boolean;
-    columns?: Entities.MList<ChartColumnEntity>;
-    filters?: Entities.MList<UserQueries.QueryFilterEntity>;
-    orders?: Entities.MList<UserQueries.QueryOrderEntity>;
-    guid?: string;
-    invalidator?: boolean;
+    query: Basics.QueryEntity;
+    entityType: Entities.Lite<Basics.TypeEntity>;
+    owner: Entities.Lite<Entities.Entity>;
+    displayName: string;
+    chartScript: ChartScriptEntity;
+    parameters: Entities.MList<ChartParameterEntity>;
+    groupResults: boolean;
+    columns: Entities.MList<ChartColumnEntity>;
+    filters: Entities.MList<UserQueries.QueryFilterEntity>;
+    orders: Entities.MList<UserQueries.QueryOrderEntity>;
+    guid: string;
+    invalidator: boolean;
 }
 
 export module UserChartOperation {

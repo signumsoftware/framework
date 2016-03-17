@@ -12,15 +12,15 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 
 export const ApplicationEventLogEntity_Type = new Type<ApplicationEventLogEntity>("ApplicationEventLog");
 export interface ApplicationEventLogEntity extends Entities.Entity {
-    machineName?: string;
-    date?: string;
-    globalEvent?: TypeEvent;
+    machineName: string;
+    date: string;
+    globalEvent: TypeEvent;
 }
 
 export const HolidayCalendarEntity_Type = new Type<HolidayCalendarEntity>("HolidayCalendar");
 export interface HolidayCalendarEntity extends Entities.Entity {
-    name?: string;
-    holidays?: Entities.MList<HolidayEntity>;
+    name: string;
+    holidays: Entities.MList<HolidayEntity>;
 }
 
 export module HolidayCalendarOperation {
@@ -30,37 +30,37 @@ export module HolidayCalendarOperation {
 
 export const HolidayEntity_Type = new Type<HolidayEntity>("HolidayEntity");
 export interface HolidayEntity extends Entities.EmbeddedEntity {
-    date?: string;
-    name?: string;
+    date: string;
+    name: string;
 }
 
-export interface IScheduleRuleEntity extends Entities.IEntity {
+export interface IScheduleRuleEntity extends Entities.Entity {
 }
 
-export interface ITaskEntity extends Entities.IEntity {
+export interface ITaskEntity extends Entities.Entity {
 }
 
 export const ScheduledTaskEntity_Type = new Type<ScheduledTaskEntity>("ScheduledTask");
 export interface ScheduledTaskEntity extends Entities.Entity {
-    rule?: IScheduleRuleEntity;
-    task?: ITaskEntity;
-    suspended?: boolean;
-    machineName?: string;
-    user?: Entities.Lite<Basics.IUserEntity>;
-    applicationName?: string;
+    rule: IScheduleRuleEntity;
+    task: ITaskEntity;
+    suspended: boolean;
+    machineName: string;
+    user: Entities.Lite<Basics.IUserEntity>;
+    applicationName: string;
 }
 
 export const ScheduledTaskLogEntity_Type = new Type<ScheduledTaskLogEntity>("ScheduledTaskLog");
 export interface ScheduledTaskLogEntity extends Entities.Entity {
-    scheduledTask?: ScheduledTaskEntity;
-    user?: Entities.Lite<Basics.IUserEntity>;
-    task?: ITaskEntity;
-    startTime?: string;
-    endTime?: string;
-    machineName?: string;
-    applicationName?: string;
-    productEntity?: Entities.Lite<Entities.IEntity>;
-    exception?: Entities.Lite<Basics.ExceptionEntity>;
+    scheduledTask: ScheduledTaskEntity;
+    user: Entities.Lite<Basics.IUserEntity>;
+    task: ITaskEntity;
+    startTime: string;
+    endTime: string;
+    machineName: string;
+    applicationName: string;
+    productEntity: Entities.Lite<Entities.Entity>;
+    exception: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export module ScheduledTaskOperation {
@@ -107,39 +107,39 @@ export module SchedulerPermission {
 
 export const ScheduleRuleMinutelyEntity_Type = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
 export interface ScheduleRuleMinutelyEntity extends Entities.Entity, IScheduleRuleEntity {
-    eachMinutes?: number;
-    isAligned?: boolean;
+    eachMinutes: number;
+    isAligned: boolean;
 }
 
 export const ScheduleRuleMonthsEntity_Type = new Type<ScheduleRuleMonthsEntity>("ScheduleRuleMonths");
 export interface ScheduleRuleMonthsEntity extends Entities.Entity, IScheduleRuleEntity {
-    startingOn?: string;
-    january?: boolean;
-    february?: boolean;
-    march?: boolean;
-    april?: boolean;
-    may?: boolean;
-    june?: boolean;
-    july?: boolean;
-    august?: boolean;
-    september?: boolean;
-    october?: boolean;
-    november?: boolean;
-    december?: boolean;
+    startingOn: string;
+    january: boolean;
+    february: boolean;
+    march: boolean;
+    april: boolean;
+    may: boolean;
+    june: boolean;
+    july: boolean;
+    august: boolean;
+    september: boolean;
+    october: boolean;
+    november: boolean;
+    december: boolean;
 }
 
 export const ScheduleRuleWeekDaysEntity_Type = new Type<ScheduleRuleWeekDaysEntity>("ScheduleRuleWeekDays");
 export interface ScheduleRuleWeekDaysEntity extends Entities.Entity, IScheduleRuleEntity {
-    startingOn?: string;
-    monday?: boolean;
-    tuesday?: boolean;
-    wednesday?: boolean;
-    thursday?: boolean;
-    friday?: boolean;
-    saturday?: boolean;
-    sunday?: boolean;
-    calendar?: HolidayCalendarEntity;
-    holiday?: boolean;
+    startingOn: string;
+    monday: boolean;
+    tuesday: boolean;
+    wednesday: boolean;
+    thursday: boolean;
+    friday: boolean;
+    saturday: boolean;
+    sunday: boolean;
+    calendar: HolidayCalendarEntity;
+    holiday: boolean;
 }
 
 export const SimpleTaskSymbol_Type = new Type<SimpleTaskSymbol>("SimpleTask");
@@ -153,7 +153,7 @@ export module TaskMessage {
 }
 
 export module TaskOperation {
-    export const ExecuteSync : Entities.ConstructSymbol_From<Entities.IEntity, ITaskEntity> = registerSymbol({ Type: "Operation", key: "TaskOperation.ExecuteSync" });
+    export const ExecuteSync : Entities.ConstructSymbol_From<Entities.Entity, ITaskEntity> = registerSymbol({ Type: "Operation", key: "TaskOperation.ExecuteSync" });
     export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol({ Type: "Operation", key: "TaskOperation.ExecuteAsync" });
 }
 

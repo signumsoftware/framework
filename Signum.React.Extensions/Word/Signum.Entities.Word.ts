@@ -17,7 +17,7 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 
 export const SystemWordTemplateEntity_Type = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
 export interface SystemWordTemplateEntity extends Entities.Entity {
-    fullClassName?: string;
+    fullClassName: string;
 }
 
 export const WordConverterSymbol_Type = new Type<WordConverterSymbol>("WordConverter");
@@ -26,18 +26,18 @@ export interface WordConverterSymbol extends Entities.Symbol {
 
 export const WordTemplateEntity_Type = new Type<WordTemplateEntity>("WordTemplate");
 export interface WordTemplateEntity extends Entities.Entity {
-    name?: string;
-    query?: Basics.QueryEntity;
-    systemWordTemplate?: SystemWordTemplateEntity;
-    culture?: ExBasics.CultureInfoEntity;
-    active?: boolean;
-    startDate?: string;
-    endDate?: string;
-    disableAuthorization?: boolean;
-    template?: Entities.Lite<Files.FileEntity>;
-    fileName?: string;
-    wordTransformer?: WordTransformerSymbol;
-    wordConverter?: WordConverterSymbol;
+    name: string;
+    query: Basics.QueryEntity;
+    systemWordTemplate: SystemWordTemplateEntity;
+    culture: ExBasics.CultureInfoEntity;
+    active: boolean;
+    startDate: string;
+    endDate: string;
+    disableAuthorization: boolean;
+    template: Entities.Lite<Files.FileEntity>;
+    fileName: string;
+    wordTransformer: WordTransformerSymbol;
+    wordConverter: WordConverterSymbol;
 }
 
 export module WordTemplateMessage {

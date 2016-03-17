@@ -7,7 +7,7 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 export const IsolationEntity_Type = new Type<IsolationEntity>("Isolation");
 export interface IsolationEntity extends Entities.Entity {
-    name?: string;
+    name: string;
 }
 
 export module IsolationMessage {
@@ -18,7 +18,7 @@ export module IsolationMessage {
 
 export const IsolationMixin_Type = new Type<IsolationMixin>("IsolationMixin");
 export interface IsolationMixin extends Entities.MixinEntity {
-    isolation?: Entities.Lite<IsolationEntity>;
+    isolation: Entities.Lite<IsolationEntity>;
 }
 
 export module IsolationOperation {

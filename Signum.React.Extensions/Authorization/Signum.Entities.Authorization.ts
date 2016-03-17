@@ -14,14 +14,14 @@ import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
-    allowedBase?: A;
-    allowed?: A;
-    overriden?: boolean;
-    resource?: R;
+    allowedBase: A;
+    allowed: A;
+    overriden: boolean;
+    resource: R;
 }
 
 export interface AllowedRuleCoerced<R, A> extends AllowedRule<R, A> {
-    coercedValues?: A[];
+    coercedValues: A[];
 }
 
 export module AuthAdminMessage {
@@ -131,10 +131,10 @@ export enum AuthThumbnail {
 export const AuthThumbnail_Type = new EnumType<AuthThumbnail>("AuthThumbnail", AuthThumbnail);
 
 export interface BaseRulePack<T> extends Entities.ModelEntity {
-    role?: Entities.Lite<RoleEntity>;
-    strategy?: string;
-    type?: Basics.TypeEntity;
-    rules?: Entities.MList<T>;
+    role: Entities.Lite<RoleEntity>;
+    strategy: string;
+    type: Basics.TypeEntity;
+    rules: Entities.MList<T>;
 }
 
 export module BasicPermission {
@@ -146,7 +146,7 @@ export module BasicPermission {
 
 export const LastAuthRulesImportEntity_Type = new Type<LastAuthRulesImportEntity>("LastAuthRulesImport");
 export interface LastAuthRulesImportEntity extends Entities.Entity {
-    date?: string;
+    date: string;
 }
 
 export enum MergeStrategy {
@@ -172,9 +172,9 @@ export interface OperationRulePack extends BaseRulePack<OperationAllowedRule> {
 
 export const PasswordExpiresIntervalEntity_Type = new Type<PasswordExpiresIntervalEntity>("PasswordExpiresInterval");
 export interface PasswordExpiresIntervalEntity extends Entities.Entity {
-    days?: number;
-    daysWarning?: number;
-    enabled?: boolean;
+    days: number;
+    daysWarning: number;
+    enabled: boolean;
 }
 
 export module PasswordExpiresIntervalOperation {
@@ -218,17 +218,17 @@ export interface QueryRulePack extends BaseRulePack<QueryAllowedRule> {
 
 export const ResetPasswordRequestEntity_Type = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");
 export interface ResetPasswordRequestEntity extends Entities.Entity {
-    code?: string;
-    user?: UserEntity;
-    requestDate?: string;
-    lapsed?: boolean;
+    code: string;
+    user: UserEntity;
+    requestDate: string;
+    lapsed: boolean;
 }
 
 export const RoleEntity_Type = new Type<RoleEntity>("Role");
 export interface RoleEntity extends Entities.Entity {
-    name?: string;
-    mergeStrategy?: MergeStrategy;
-    roles?: Entities.MList<Entities.Lite<RoleEntity>>;
+    name: string;
+    mergeStrategy: MergeStrategy;
+    roles: Entities.MList<Entities.Lite<RoleEntity>>;
 }
 
 export module RoleOperation {
@@ -241,9 +241,9 @@ export module RoleQuery {
 }
 
 export interface RuleEntity<R, A> extends Entities.Entity {
-    role?: Entities.Lite<RoleEntity>;
-    resource?: R;
-    allowed?: A;
+    role: Entities.Lite<RoleEntity>;
+    resource: R;
+    allowed: A;
 }
 
 export const RuleOperationEntity_Type = new Type<RuleOperationEntity>("RuleOperation");
@@ -264,23 +264,23 @@ export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, boolean>
 
 export const RuleTypeConditionEntity_Type = new Type<RuleTypeConditionEntity>("RuleTypeConditionEntity");
 export interface RuleTypeConditionEntity extends Entities.EmbeddedEntity {
-    condition?: ExBasics.TypeConditionSymbol;
-    allowed?: TypeAllowed;
+    condition: ExBasics.TypeConditionSymbol;
+    allowed: TypeAllowed;
 }
 
 export const RuleTypeEntity_Type = new Type<RuleTypeEntity>("RuleType");
 export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowed> {
-    conditions?: Entities.MList<RuleTypeConditionEntity>;
+    conditions: Entities.MList<RuleTypeConditionEntity>;
 }
 
 export const SessionLogEntity_Type = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
-    user?: Entities.Lite<UserEntity>;
-    sessionStart?: string;
-    sessionEnd?: string;
-    sessionTimeOut?: boolean;
-    userHostAddress?: string;
-    userAgent?: string;
+    user: Entities.Lite<UserEntity>;
+    sessionStart: string;
+    sessionEnd: string;
+    sessionTimeOut: boolean;
+    userHostAddress: string;
+    userAgent: string;
 }
 
 export module SessionLogPermission {
@@ -303,23 +303,23 @@ export const TypeAllowed_Type = new EnumType<TypeAllowed>("TypeAllowed", TypeAll
 
 export const TypeAllowedAndConditions_Type = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
-    fallback?: TypeAllowed;
-    fallbackOrNone?: TypeAllowed;
-    conditions?: Array<TypeConditionRule>;
+    fallback: TypeAllowed;
+    fallbackOrNone: TypeAllowed;
+    conditions: Array<TypeConditionRule>;
 }
 
 export const TypeAllowedRule_Type = new Type<TypeAllowedRule>("TypeAllowedRule");
 export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllowedAndConditions> {
-    properties?: AuthThumbnail;
-    operations?: AuthThumbnail;
-    queries?: AuthThumbnail;
-    availableConditions?: Array<ExBasics.TypeConditionSymbol>;
+    properties: AuthThumbnail;
+    operations: AuthThumbnail;
+    queries: AuthThumbnail;
+    availableConditions: Array<ExBasics.TypeConditionSymbol>;
 }
 
 export const TypeConditionRule_Type = new Type<TypeConditionRule>("TypeConditionRule");
 export interface TypeConditionRule extends Entities.EmbeddedEntity {
-    typeCondition?: ExBasics.TypeConditionSymbol;
-    allowed?: TypeAllowed;
+    typeCondition: ExBasics.TypeConditionSymbol;
+    allowed: TypeAllowed;
 }
 
 export const TypeRulePack_Type = new Type<TypeRulePack>("TypeRulePack");
@@ -328,15 +328,15 @@ export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
 
 export const UserEntity_Type = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
-    userName?: string;
-    passwordHash?: string;
-    passwordSetDate?: string;
-    passwordNeverExpires?: boolean;
-    role?: RoleEntity;
-    email?: string;
-    cultureInfo?: ExBasics.CultureInfoEntity;
-    anulationDate?: string;
-    state?: UserState;
+    userName: string;
+    passwordHash: string;
+    passwordSetDate: string;
+    passwordNeverExpires: boolean;
+    role: RoleEntity;
+    email: string;
+    cultureInfo: ExBasics.CultureInfoEntity;
+    anulationDate: string;
+    state: UserState;
 }
 
 export module UserOperation {
@@ -357,9 +357,9 @@ export const UserState_Type = new EnumType<UserState>("UserState", UserState);
 
 export const UserTicketEntity_Type = new Type<UserTicketEntity>("UserTicket");
 export interface UserTicketEntity extends Entities.Entity {
-    user?: Entities.Lite<UserEntity>;
-    ticket?: string;
-    connectionDate?: string;
-    device?: string;
+    user: Entities.Lite<UserEntity>;
+    ticket: string;
+    connectionDate: string;
+    device: string;
 }
 

@@ -20,12 +20,12 @@ export const TranslatedCultureAction_Type = new EnumType<TranslatedCultureAction
 
 export const TranslatedInstanceEntity_Type = new Type<TranslatedInstanceEntity>("TranslatedInstance");
 export interface TranslatedInstanceEntity extends Entities.Entity {
-    culture?: ExBasics.CultureInfoEntity;
-    instance?: Entities.Lite<Entities.Entity>;
-    propertyRoute?: Basics.PropertyRouteEntity;
-    rowId?: string;
-    translatedText?: string;
-    originalText?: string;
+    culture: ExBasics.CultureInfoEntity;
+    instance: Entities.Lite<Entities.Entity>;
+    propertyRoute: Basics.PropertyRouteEntity;
+    rowId: string;
+    translatedText: string;
+    originalText: string;
 }
 
 export module TranslationJavascriptMessage {
@@ -66,9 +66,9 @@ export module TranslationPermission {
 
 export const TranslationReplacementEntity_Type = new Type<TranslationReplacementEntity>("TranslationReplacement");
 export interface TranslationReplacementEntity extends Entities.Entity {
-    cultureInfo?: ExBasics.CultureInfoEntity;
-    wrongTranslation?: string;
-    rightTranslation?: string;
+    cultureInfo: ExBasics.CultureInfoEntity;
+    wrongTranslation: string;
+    rightTranslation: string;
 }
 
 export module TranslationReplacementOperation {
@@ -78,14 +78,14 @@ export module TranslationReplacementOperation {
 
 export const TranslatorUserCultureEntity_Type = new Type<TranslatorUserCultureEntity>("TranslatorUserCultureEntity");
 export interface TranslatorUserCultureEntity extends Entities.EmbeddedEntity {
-    culture?: ExBasics.CultureInfoEntity;
-    action?: TranslatedCultureAction;
+    culture: ExBasics.CultureInfoEntity;
+    action: TranslatedCultureAction;
 }
 
 export const TranslatorUserEntity_Type = new Type<TranslatorUserEntity>("TranslatorUser");
 export interface TranslatorUserEntity extends Entities.Entity {
-    user?: Entities.Lite<Basics.IUserEntity>;
-    cultures?: Entities.MList<TranslatorUserCultureEntity>;
+    user: Entities.Lite<Basics.IUserEntity>;
+    cultures: Entities.MList<TranslatorUserCultureEntity>;
 }
 
 export module TranslatorUserOperation {

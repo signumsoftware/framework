@@ -24,7 +24,10 @@ export default class QueryTokenEntityBuilder extends React.Component<QueryTokenE
         if (newToken == null)
             this.props.ctx.value = null;
         else
-            this.props.ctx.value = QueryTokenEntity_Type.New({ tokenString: newToken.fullKey, token: newToken });
+            this.props.ctx.value = QueryTokenEntity_Type.New(t => {
+                t.tokenString = newToken.fullKey;
+                t.token = newToken
+            });
 
         if (this.props.onTokenChanged)
             this.props.onTokenChanged(newToken);

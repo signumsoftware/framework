@@ -12,30 +12,30 @@ import * as Patterns from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 export const EmbeddedFileEntity_Type = new Type<EmbeddedFileEntity>("EmbeddedFileEntity");
 export interface EmbeddedFileEntity extends Entities.EmbeddedEntity {
-    fileName?: string;
-    binaryFile?: string;
-    fullWebPath?: string;
+    fileName: string;
+    binaryFile: string;
+    fullWebPath: string;
 }
 
 export const EmbeddedFilePathEntity_Type = new Type<EmbeddedFilePathEntity>("EmbeddedFilePathEntity");
 export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
-    fileName?: string;
-    binaryFile?: string;
-    fileLength?: number;
-    fileLengthString?: string;
-    suffix?: string;
-    calculatedDirectory?: string;
-    fileType?: FileTypeSymbol;
-    fullPhysicalPath?: string;
-    fullWebPath?: string;
+    fileName: string;
+    binaryFile: string;
+    fileLength: number;
+    fileLengthString: string;
+    suffix: string;
+    calculatedDirectory: string;
+    fileType: FileTypeSymbol;
+    fullPhysicalPath: string;
+    fullWebPath: string;
 }
 
 export const FileEntity_Type = new Type<FileEntity>("File");
 export interface FileEntity extends Entities.ImmutableEntity {
-    fileName?: string;
-    hash?: string;
-    binaryFile?: string;
-    fullWebPath?: string;
+    fileName: string;
+    hash: string;
+    binaryFile: string;
+    fullWebPath: string;
 }
 
 export module FileMessage {
@@ -56,16 +56,16 @@ export module FileMessage {
 
 export const FilePathEntity_Type = new Type<FilePathEntity>("FilePath");
 export interface FilePathEntity extends Patterns.LockableEntity {
-    creationDate?: string;
-    fileName?: string;
-    binaryFile?: string;
-    fileLength?: number;
-    fileLengthString?: string;
-    suffix?: string;
-    calculatedDirectory?: string;
-    fileType?: FileTypeSymbol;
-    fullPhysicalPath?: string;
-    fullWebPath?: string;
+    creationDate: string;
+    fileName: string;
+    binaryFile: string;
+    fileLength: number;
+    fileLengthString: string;
+    suffix: string;
+    calculatedDirectory: string;
+    fileType: FileTypeSymbol;
+    fullPhysicalPath: string;
+    fullWebPath: string;
 }
 
 export module FilePathOperation {

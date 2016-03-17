@@ -22,7 +22,7 @@ export module DiffLogMessage {
 
 export const DiffLogMixin_Type = new Type<DiffLogMixin>("DiffLogMixin");
 export interface DiffLogMixin extends Entities.MixinEntity {
-    initialState?: string;
-    finalState?: string;
+    initialState: string;
+    finalState: string;
 }
 

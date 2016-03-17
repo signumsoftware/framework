@@ -10,12 +10,12 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 
 export const NoteEntity_Type = new Type<NoteEntity>("Note");
 export interface NoteEntity extends Entities.Entity {
-    title?: string;
-    target?: Entities.Lite<Entities.Entity>;
-    creationDate?: string;
-    text?: string;
-    createdBy?: Entities.Lite<Basics.IUserEntity>;
-    noteType?: NoteTypeEntity;
+    title: string;
+    target: Entities.Lite<Entities.Entity>;
+    creationDate: string;
+    text: string;
+    createdBy: Entities.Lite<Basics.IUserEntity>;
+    noteType: NoteTypeEntity;
 }
 
 export module NoteMessage {

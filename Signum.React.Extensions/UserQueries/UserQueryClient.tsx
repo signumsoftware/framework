@@ -57,9 +57,9 @@ export function start(options: { routes: JSX.Element[] }) {
             });
         }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
 
-    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity_Type, () => QueryFilterEntity_Type.New({ token: QueryTokenEntity_Type.New() }));
-    Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity_Type, () => QueryOrderEntity_Type.New({ token: QueryTokenEntity_Type.New() }));
-    Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity_Type, () => QueryColumnEntity_Type.New({ token: QueryTokenEntity_Type.New() }));
+    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity_Type, () => QueryFilterEntity_Type.New(f => f.token = QueryTokenEntity_Type.New()));
+    Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity_Type, () => QueryOrderEntity_Type.New(o => o.token = QueryTokenEntity_Type.New()));
+    Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity_Type, () => QueryColumnEntity_Type.New(c => c.token = QueryTokenEntity_Type.New()));
 
     Navigator.addSettings(new EntitySettings(UserQueryEntity_Type, e => new Promise(resolve => require(['./Templates/UserQuery'], resolve))));
 }

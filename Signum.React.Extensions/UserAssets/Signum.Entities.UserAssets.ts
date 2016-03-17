@@ -25,13 +25,13 @@ export enum EntityAction {
 }
 export const EntityAction_Type = new EnumType<EntityAction>("EntityAction", EntityAction);
 
-export interface IUserAssetEntity extends Entities.IEntity {
-    guid?: string;
+export interface IUserAssetEntity extends Entities.Entity {
+    guid: string;
 }
 
 export const QueryTokenEntity_Type = new Type<QueryTokenEntity>("QueryTokenEntity");
 export interface QueryTokenEntity extends Entities.EmbeddedEntity {
-    tokenString?: string;
+    tokenString: string;
 }
 
 export module UserAssetMessage {
@@ -48,15 +48,15 @@ export module UserAssetPermission {
 
 export const UserAssetPreviewLine_Type = new Type<UserAssetPreviewLine>("UserAssetPreviewLine");
 export interface UserAssetPreviewLine extends Entities.EmbeddedEntity {
-    type?: Basics.TypeEntity;
-    text?: string;
-    action?: EntityAction;
-    overrideEntity?: boolean;
-    guid?: string;
+    type: Basics.TypeEntity;
+    text: string;
+    action: EntityAction;
+    overrideEntity: boolean;
+    guid: string;
 }
 
 export const UserAssetPreviewModel_Type = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");
 export interface UserAssetPreviewModel extends Entities.ModelEntity {
-    lines?: Entities.MList<UserAssetPreviewLine>;
+    lines: Entities.MList<UserAssetPreviewLine>;
 }
 

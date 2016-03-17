@@ -174,7 +174,10 @@ export function removeAggregates(chart: IChartBase) {
     chart.columns.map(mle => mle.element).forEach(cc => {
         if (cc.token && cc.token.token.queryTokenType == QueryTokenType.Aggregate) {
             var parentToken = cc.token.token.parent;
-            cc.token = QueryTokenEntity_Type.New({ tokenString: parentToken && parentToken.fullKey, token: parentToken });
+            cc.token = QueryTokenEntity_Type.New(t => {
+                t.tokenString = parentToken && parentToken.fullKey;
+                t.token = parentToken;
+            });
         }
     });
 }
@@ -240,16 +243,13 @@ export module Decoder {
 
     export function parseChartRequest(queryName: string, query: any): Promise<ChartRequest> {
 
-        const chartRequest = ChartRequest_Type.New({
-            queryKey: getQueryKey(queryName),
-            filterOptions: Finder.Decoder.decodeFilters(query),
-            orderOptions: Finder.Decoder.decodeOrders(query),
-            columns: Decoder.decodeColumns(query),
-            parameters: Decoder.decodeParameters(query) ,
+        const chartRequest = ChartRequest_Type.New(cr => {
+            cr.queryKey = getQueryKey(queryName),
+            cr.filterOptions = Finder.Decoder.decodeFilters(query);
+            cr.orderOptions = Finder.Decoder.decodeOrders(query);
+            cr.columns = Decoder.decodeColumns(query);
+            cr.parameters = Decoder.decodeParameters(query);
         });
-
-        
-
 
         return getChartScripts().then(scripts => { 
 
@@ -269,11 +269,11 @@ export module Decoder {
     export function decodeColumns(query: any): MList<ChartColumnEntity> {
         return valuesInOrder(query, "column").map(val => ({
             rowId: null,
-            element: ChartColumnEntity_Type.New({
-                token: QueryTokenEntity_Type.New({
-                    tokenString: val.tryBefore("~") || val
-                }),
-                displayName: unscapeTildes(val.tryAfter("~"))
+            element: ChartColumnEntity_Type.New(cc=> {
+                cc.token = QueryTokenEntity_Type.New(qte=> {
+                    qte.tokenString = val.tryBefore("~") || val;
+                });
+                cc.displayName = unscapeTildes(val.tryAfter("~"));
             })
         }));
     }
@@ -281,9 +281,9 @@ export module Decoder {
     export function decodeParameters(query: any): MList<ChartParameterEntity> {
         return valuesInOrder(query, "param").map(val => ({
             rowId: null,
-            element: ChartParameterEntity_Type.New({
-                name: unscapeTildes(val.before("~")),
-                value: unscapeTildes(val.after("~"))
+            element: ChartParameterEntity_Type.New(cp => {
+                cp.name = unscapeTildes(val.before("~"));
+                cp.value = unscapeTildes(val.after("~"));
             })
         }));
     }
@@ -345,7 +345,7 @@ export module API {
     }
 
     export function fetchColorPalettes(): Promise<string[]> {
-        return ajaxGet<ChartScriptEntity[]>({
+        return ajaxGet<string[]>({
             url: "/api/chart/colorPalettes"
         });
     }

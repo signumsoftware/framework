@@ -21,9 +21,9 @@ export const MessageLengthExceeded_Type = new EnumType<MessageLengthExceeded>("M
 
 export const MultipleSMSModel_Type = new Type<MultipleSMSModel>("MultipleSMSModel");
 export interface MultipleSMSModel extends Entities.ModelEntity {
-    message?: string;
-    from?: string;
-    certified?: boolean;
+    message: string;
+    from: string;
+    certified: boolean;
 }
 
 export module SMSCharactersMessage {
@@ -40,25 +40,25 @@ export module SMSCharactersMessage {
 
 export const SMSConfigurationEntity_Type = new Type<SMSConfigurationEntity>("SMSConfigurationEntity");
 export interface SMSConfigurationEntity extends Entities.EmbeddedEntity {
-    defaultCulture?: ExBasics.CultureInfoEntity;
+    defaultCulture: ExBasics.CultureInfoEntity;
 }
 
 export const SMSMessageEntity_Type = new Type<SMSMessageEntity>("SMSMessage");
 export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
-    template?: Entities.Lite<SMSTemplateEntity>;
-    message?: string;
-    editableMessage?: boolean;
-    from?: string;
-    sendDate?: string;
-    state?: SMSMessageState;
-    destinationNumber?: string;
-    messageID?: string;
-    certified?: boolean;
-    sendPackage?: Entities.Lite<SMSSendPackageEntity>;
-    updatePackage?: Entities.Lite<SMSUpdatePackageEntity>;
-    updatePackageProcessed?: boolean;
-    referred?: Entities.Lite<Entities.Entity>;
-    exception?: Entities.Lite<Basics.ExceptionEntity>;
+    template: Entities.Lite<SMSTemplateEntity>;
+    message: string;
+    editableMessage: boolean;
+    from: string;
+    sendDate: string;
+    state: SMSMessageState;
+    destinationNumber: string;
+    messageID: string;
+    certified: boolean;
+    sendPackage: Entities.Lite<SMSSendPackageEntity>;
+    updatePackage: Entities.Lite<SMSUpdatePackageEntity>;
+    updatePackageProcessed: boolean;
+    referred: Entities.Lite<Entities.Entity>;
+    exception: Entities.Lite<Basics.ExceptionEntity>;
 }
 
 export module SMSMessageOperation {
@@ -86,7 +86,7 @@ export enum SMSMessageState {
 export const SMSMessageState_Type = new EnumType<SMSMessageState>("SMSMessageState", SMSMessageState);
 
 export interface SMSPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
-    name?: string;
+    name: string;
 }
 
 export const SMSSendPackageEntity_Type = new Type<SMSSendPackageEntity>("SMSSendPackage");
@@ -95,17 +95,17 @@ export interface SMSSendPackageEntity extends SMSPackageEntity {
 
 export const SMSTemplateEntity_Type = new Type<SMSTemplateEntity>("SMSTemplate");
 export interface SMSTemplateEntity extends Entities.Entity {
-    name?: string;
-    certified?: boolean;
-    editableMessage?: boolean;
-    associatedType?: Basics.TypeEntity;
-    messages?: Entities.MList<SMSTemplateMessageEntity>;
-    from?: string;
-    messageLengthExceeded?: MessageLengthExceeded;
-    removeNoSMSCharacters?: boolean;
-    active?: boolean;
-    startDate?: string;
-    endDate?: string;
+    name: string;
+    certified: boolean;
+    editableMessage: boolean;
+    associatedType: Basics.TypeEntity;
+    messages: Entities.MList<SMSTemplateMessageEntity>;
+    from: string;
+    messageLengthExceeded: MessageLengthExceeded;
+    removeNoSMSCharacters: boolean;
+    active: boolean;
+    startDate: string;
+    endDate: string;
 }
 
 export module SMSTemplateMessage {
@@ -118,9 +118,9 @@ export module SMSTemplateMessage {
 
 export const SMSTemplateMessageEntity_Type = new Type<SMSTemplateMessageEntity>("SMSTemplateMessageEntity");
 export interface SMSTemplateMessageEntity extends Entities.EmbeddedEntity {
-    template?: SMSTemplateEntity;
-    cultureInfo?: ExBasics.CultureInfoEntity;
-    message?: string;
+    template: SMSTemplateEntity;
+    cultureInfo: ExBasics.CultureInfoEntity;
+    message: string;
 }
 
 export module SMSTemplateOperation {

@@ -16,10 +16,10 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 export const AppendixHelpEntity_Type = new Type<AppendixHelpEntity>("AppendixHelp");
 export interface AppendixHelpEntity extends Entities.Entity {
-    uniqueName?: string;
-    culture?: ExBasics.CultureInfoEntity;
-    title?: string;
-    description?: string;
+    uniqueName: string;
+    culture: ExBasics.CultureInfoEntity;
+    title: string;
+    description: string;
 }
 
 export module AppendixHelpOperation {
@@ -28,13 +28,13 @@ export module AppendixHelpOperation {
 
 export const EntityHelpEntity_Type = new Type<EntityHelpEntity>("EntityHelp");
 export interface EntityHelpEntity extends Entities.Entity {
-    type?: Basics.TypeEntity;
-    culture?: ExBasics.CultureInfoEntity;
-    description?: string;
-    properties?: Entities.MList<PropertyRouteHelpEntity>;
-    operations?: Entities.MList<OperationHelpEntity>;
-    queries?: Entities.MList<QueryHelpEntity>;
-    isEmpty?: boolean;
+    type: Basics.TypeEntity;
+    culture: ExBasics.CultureInfoEntity;
+    description: string;
+    properties: Entities.MList<PropertyRouteHelpEntity>;
+    operations: Entities.MList<OperationHelpEntity>;
+    queries: Entities.MList<QueryHelpEntity>;
+    isEmpty: boolean;
 }
 
 export module EntityHelpOperation {
@@ -137,10 +137,10 @@ export module HelpSyntaxMessage {
 
 export const NamespaceHelpEntity_Type = new Type<NamespaceHelpEntity>("NamespaceHelp");
 export interface NamespaceHelpEntity extends Entities.Entity {
-    name?: string;
-    culture?: ExBasics.CultureInfoEntity;
-    title?: string;
-    description?: string;
+    name: string;
+    culture: ExBasics.CultureInfoEntity;
+    title: string;
+    description: string;
 }
 
 export module NamespaceHelpOperation {
@@ -149,9 +149,9 @@ export module NamespaceHelpOperation {
 
 export const OperationHelpEntity_Type = new Type<OperationHelpEntity>("OperationHelp");
 export interface OperationHelpEntity extends Entities.Entity {
-    operation?: Entities.OperationSymbol;
-    culture?: ExBasics.CultureInfoEntity;
-    description?: string;
+    operation: Entities.OperationSymbol;
+    culture: ExBasics.CultureInfoEntity;
+    description: string;
 }
 
 export module OperationHelpOperation {
@@ -160,23 +160,23 @@ export module OperationHelpOperation {
 
 export const PropertyRouteHelpEntity_Type = new Type<PropertyRouteHelpEntity>("PropertyRouteHelpEntity");
 export interface PropertyRouteHelpEntity extends Entities.EmbeddedEntity {
-    property?: Basics.PropertyRouteEntity;
-    description?: string;
+    property: Basics.PropertyRouteEntity;
+    description: string;
 }
 
 export const QueryColumnHelpEntity_Type = new Type<QueryColumnHelpEntity>("QueryColumnHelpEntity");
 export interface QueryColumnHelpEntity extends Entities.EmbeddedEntity {
-    columnName?: string;
-    description?: string;
+    columnName: string;
+    description: string;
 }
 
 export const QueryHelpEntity_Type = new Type<QueryHelpEntity>("QueryHelp");
 export interface QueryHelpEntity extends Entities.Entity {
-    query?: Basics.QueryEntity;
-    culture?: ExBasics.CultureInfoEntity;
-    description?: string;
-    columns?: Entities.MList<QueryColumnHelpEntity>;
-    isEmpty?: boolean;
+    query: Basics.QueryEntity;
+    culture: ExBasics.CultureInfoEntity;
+    description: string;
+    columns: Entities.MList<QueryColumnHelpEntity>;
+    isEmpty: boolean;
 }
 
 export module QueryHelpOperation {

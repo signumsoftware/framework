@@ -18,15 +18,15 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 
 export const CountSearchControlPartEntity_Type = new Type<CountSearchControlPartEntity>("CountSearchControlPart");
 export interface CountSearchControlPartEntity extends Entities.Entity, IPartEntity {
-    userQueries?: Entities.MList<CountUserQueryElementEntity>;
-    requiresTitle?: boolean;
+    userQueries: Entities.MList<CountUserQueryElementEntity>;
+    requiresTitle: boolean;
 }
 
 export const CountUserQueryElementEntity_Type = new Type<CountUserQueryElementEntity>("CountUserQueryElementEntity");
 export interface CountUserQueryElementEntity extends Entities.EmbeddedEntity {
-    label?: string;
-    userQuery?: UserQueries.UserQueryEntity;
-    href?: string;
+    label: string;
+    userQuery: UserQueries.UserQueryEntity;
+    href: string;
 }
 
 export enum DashboardEmbedededInEntity {
@@ -38,14 +38,14 @@ export const DashboardEmbedededInEntity_Type = new EnumType<DashboardEmbedededIn
 
 export const DashboardEntity_Type = new Type<DashboardEntity>("Dashboard");
 export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
-    entityType?: Entities.Lite<Basics.TypeEntity>;
-    embeddedInEntity?: DashboardEmbedededInEntity;
-    owner?: Entities.Lite<Entities.Entity>;
-    dashboardPriority?: number;
-    autoRefreshPeriod?: number;
-    displayName?: string;
-    parts?: Entities.MList<PanelPartEntity>;
-    guid?: string;
+    entityType: Entities.Lite<Basics.TypeEntity>;
+    embeddedInEntity: DashboardEmbedededInEntity;
+    owner: Entities.Lite<Entities.Entity>;
+    dashboardPriority: number;
+    autoRefreshPeriod: number;
+    displayName: string;
+    parts: Entities.MList<PanelPartEntity>;
+    guid: string;
 }
 
 export module DashboardMessage {
@@ -70,30 +70,30 @@ export module DashboardPermission {
     export const ViewDashboard : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "DashboardPermission.ViewDashboard" });
 }
 
-export interface IPartEntity extends Entities.IEntity {
-    requiresTitle?: boolean;
+export interface IPartEntity extends Entities.Entity {
+    requiresTitle: boolean;
 }
 
 export const LinkElementEntity_Type = new Type<LinkElementEntity>("LinkElementEntity");
 export interface LinkElementEntity extends Entities.EmbeddedEntity {
-    label?: string;
-    link?: string;
+    label: string;
+    link: string;
 }
 
 export const LinkListPartEntity_Type = new Type<LinkListPartEntity>("LinkListPart");
 export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
-    links?: Entities.MList<LinkElementEntity>;
-    requiresTitle?: boolean;
+    links: Entities.MList<LinkElementEntity>;
+    requiresTitle: boolean;
 }
 
 export const PanelPartEntity_Type = new Type<PanelPartEntity>("PanelPartEntity");
 export interface PanelPartEntity extends Entities.EmbeddedEntity {
-    title?: string;
-    row?: number;
-    startColumn?: number;
-    columns?: number;
-    style?: PanelStyle;
-    content?: IPartEntity;
+    title: string;
+    row: number;
+    startColumn: number;
+    columns: number;
+    style: PanelStyle;
+    content: IPartEntity;
 }
 
 export enum PanelStyle {
@@ -108,15 +108,15 @@ export const PanelStyle_Type = new EnumType<PanelStyle>("PanelStyle", PanelStyle
 
 export const UserChartPartEntity_Type = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
-    userChart?: Chart.UserChartEntity;
-    showData?: boolean;
-    requiresTitle?: boolean;
+    userChart: Chart.UserChartEntity;
+    showData: boolean;
+    requiresTitle: boolean;
 }
 
 export const UserQueryPartEntity_Type = new Type<UserQueryPartEntity>("UserQueryPart");
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
-    userQuery?: UserQueries.UserQueryEntity;
-    allowSelection?: boolean;
-    requiresTitle?: boolean;
+    userQuery: UserQueries.UserQueryEntity;
+    allowSelection: boolean;
+    requiresTitle: boolean;
 }
 
