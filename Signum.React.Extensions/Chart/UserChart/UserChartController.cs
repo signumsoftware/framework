@@ -37,5 +37,10 @@ namespace Signum.React.Chart
             return UserChartLogic.GetUserChartsEntity(TypeLogic.GetType(typeName));
         }
 
+        [Route("api/userChart/fromChartRequest"), HttpPost, ValidateModelFilter]
+        public UserChartEntity FromQueryRequest(ChartRequest request)
+        {
+            return request.ToUserChart();
+        }
     }
 }

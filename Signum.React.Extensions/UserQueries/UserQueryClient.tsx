@@ -15,12 +15,9 @@ import { UserQueryEntity_Type, UserQueryEntity, UserQueryPermission, UserQueryMe
     QueryFilterEntity, QueryFilterEntity_Type, QueryColumnEntity, QueryColumnEntity_Type, QueryOrderEntity, QueryOrderEntity_Type } from './Signum.Entities.UserQueries'
 import { QueryTokenEntity, QueryTokenEntity_Type } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
+import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 
 export function start(options: { routes: JSX.Element[] }) {
-
-    options.routes.push(<Route path="userQuery">
-        <Route path=":userQueryId" getComponent={ (loc, cb) => require(["./UserQueryPage"], (Comp) => cb(null, Comp.default)) } />
-    </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
         if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
@@ -72,7 +69,7 @@ export module Converter {
 
     export function applyUserQuery(fo: FindOptions, uq: UserQueryEntity, entity: Lite<Entity>): Promise<FindOptions> {
 
-        var convertedFilters = uq.withoutFilters ? Promise.resolve([] as FilterRequest[]) : API.parseFilters({
+        var convertedFilters = uq.withoutFilters ? Promise.resolve([] as FilterRequest[]) : UserAssetsClient.API.parseFilters({
             queryKey: uq.query.key,
             canAggregate: false,
             entity: entity,
@@ -80,7 +77,7 @@ export module Converter {
                 tokenString: f.token.tokenString,
                 operation: f.operation,
                 valueString: f.valueString
-            }) as API.ParseFilterRequest)
+            }) as UserAssetsClient.API.ParseFilterRequest)
         });
 
         return convertedFilters.then(filters => {
@@ -135,24 +132,7 @@ export module API {
         return ajaxGet<Lite<UserQueryEntity>[]>({ url: "/api/userQueries/forQuery/" + queryKey });
     }
 
-    export function parseFilters(request: ParseFiltersRequest): Promise<FilterRequest[]> {
-        return ajaxPost<FilterRequest[]>({ url: "/api/userQueries/parseFilters/" }, request);
-    }
-
     export function fromQueryRequest(request: { queryRequest: QueryRequest; defaultPagination: Pagination}): Promise<UserQueryEntity> {
         return ajaxPost<UserQueryEntity>({ url: "/api/userQueries/fromQueryRequest/" }, request);
-    }
-
-    export interface ParseFiltersRequest {
-        queryKey: string;
-        filters: ParseFilterRequest[];
-        entity: Lite<Entity>;
-        canAggregate: boolean
-    }
-
-    export interface ParseFilterRequest {
-        tokenString: string;
-        operation: FilterOperation;
-        valueString: string;
     }
 }

@@ -41,7 +41,7 @@ namespace Signum.React.Chart
                     }
                 },
                 AvoidValidate = true,
-                CustomReadJsonProperty = ctx => 
+                CustomReadJsonProperty = ctx =>
                 {
                     var list = ctx.JsonSerializer.Deserialize(ctx.JsonReader);
                     //Discard
@@ -50,18 +50,26 @@ namespace Signum.React.Chart
 
             EntityJsonConverter.AfterDeserilization.Register((ChartRequest cr) =>
             {
+                cr.ChartScript.SyncronizeColumns(cr);
                 var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
 
                 if (cr.Columns != null)
                     foreach (var c in cr.Columns)
                         c.ParseData(cr, qd, SubTokensOptions.CanElement | (c.IsGroupKey == false ? SubTokensOptions.CanAggregate : 0));
+
             });
 
-            EntityJsonConverter.AfterDeserilization.Register((UserChartEntity ue) =>
+            EntityJsonConverter.AfterDeserilization.Register((UserChartEntity uc) =>
             {
-                var qd = DynamicQueryManager.Current.QueryDescription(ue.Query.ToQueryName());
-                ue.ParseData(qd);
+                uc.ChartScript.SyncronizeColumns(uc);
+
+                var qd = DynamicQueryManager.Current.QueryDescription(uc.Query.ToQueryName());
+                uc.ParseData(qd);
             });
+
+            UserChartEntity.SetConverters(
+                query => QueryLogic.ToQueryName(query.Key),
+                queryName => QueryLogic.GetQueryEntity(queryName));
         }
 
         private static void CustomizeChartRequest()

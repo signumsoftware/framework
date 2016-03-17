@@ -239,8 +239,9 @@
     <TypeScriptCompile Include="Chart\Templates\ChartBuilder.tsx" />
     <TypeScriptCompile Include="Chart\Templates\ChartColumn.tsx" />
     <TypeScriptCompile Include="Chart\Templates\ChartUtils.ts" />
+    <TypeScriptCompile Include="Chart\UserChart\UserChart.tsx" />
     <TypeScriptCompile Include="Chart\UserChart\UserChartMenu.tsx" />
-    <TypeScriptCompile Include="Chart\UserChart\UserChartPage.tsx" />
+    <TypeScriptCompile Include="Chart\UserChart\UserChartClient.tsx" />
     <TypeScriptCompile Include="Dashboard\Signum.Entities.Dashboard.ts">
       <DependentUpon>Signum.Entities.Dashboard.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -298,7 +299,6 @@
     <TypeScriptCompile Include="UserAssets\Templates\QueryTokenEntityBuilder.tsx" />
     <TypeScriptCompile Include="UserAssets\UserAssetClient.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryMenu.tsx" />
-    <TypeScriptCompile Include="UserQueries\UserQueryPage.tsx" />
     <TypeScriptCompile Include="UserQueries\Templates\UserQuery.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryClient.tsx" />
     <TypeScriptCompile Include="UserQueries\Signum.Entities.UserQueries.ts">

@@ -8,14 +8,15 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../
 import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import SearchControl from '../../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
-import { } from '../Signum.Entities.Chart'
-import * as UserQueryClient from '../ChartClient'
-/*
-export interface UserQueryMenuProps {
-    searchControl: SearchControl;
+import { UserChartEntity, ChartRequest, ChartMessage, UserChartEntity_Type } from '../Signum.Entities.Chart'
+import * as UserChartClient from './UserChartClient'
+import ChartRequestView from '../Templates/ChartRequestView'
+
+export interface UserChartMenuProps {
+    chartRequestView: ChartRequestView;
 }
 
-export default class UserQueryMenu extends React.Component<UserQueryMenuProps, { currentUserQuery?: Lite<UserQueryEntity>, userQueries?: Lite<UserQueryEntity>[] }> {
+export default class UserChartMenu extends React.Component<UserChartMenuProps, { currentUserChart?: Lite<UserChartEntity>, userCharts?: Lite<UserChartEntity>[] }> {
 
     constructor(props) {
         super(props);
@@ -24,31 +25,31 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
 
     handleSelectedToggle = (isOpen: boolean) => {
 
-        if (isOpen && this.state.userQueries == null)
+        if (isOpen && this.state.userCharts == null)
             this.reloadList().done();
     }
 
     reloadList(): Promise<void> {
-        return UserQueryClient.API.forQuery(this.props.searchControl.getQueryKey())
-            .then(list => this.setState({ userQueries: list }));
+        return UserChartClient.API.forQuery(this.props.chartRequestView.state.chartRequest.queryKey)
+            .then(list => this.setState({ userCharts: list }));
     }
 
 
-    handleSelect = (uq: Lite<UserQueryEntity>) => {
+    handleSelect = (uc: Lite<UserChartEntity>) => {
 
-        Navigator.API.fetchAndForget(uq).then(userQuery => {
-            var oldFindOptions = this.props.searchControl.state.findOptions;
-            UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, null)
-                .then(newFindOptions => {
-                    this.props.searchControl.resetFindOptions(newFindOptions);
-                    this.setState({ currentUserQuery: uq });
+        Navigator.API.fetchAndForget(uc).then(userQuery => {
+            var oldFindOptions = this.props.chartRequestView.state.chartRequest;
+            UserChartClient.Converter.applyUserChart(oldFindOptions, userQuery, null)
+                .then(newChartRequest => {
+                    this.props.chartRequestView.setState({ chartRequest: newChartRequest });
+                    this.setState({ currentUserChart: uc,  });
                 })
                 .done();
         }).then();
     }
 
     handleEdit = () => {
-        Navigator.API.fetchAndForget(this.state.currentUserQuery)
+        Navigator.API.fetchAndForget(this.state.currentUserChart)
             .then(userQuery => Navigator.navigate(userQuery))
             .then(() => this.reloadList())
             .done();
@@ -57,42 +58,36 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
 
     handleCreate = () => {
 
-        UserQueryClient.API.fromQueryRequest({
-            queryRequest: this.props.searchControl.getQueryRequest(),
-            defaultPagination: this.props.searchControl.defaultPagination()
-        }).then(userQuery => Navigator.view(userQuery))
-            .then(uq => {
-                if (uq && uq.id) {
+        UserChartClient.API.fromChartRequest(this.props.chartRequestView.state.chartRequest)
+            .then(userQuery => Navigator.view(userQuery))
+            .then(uc => {
+                if (uc && uc.id) {
                     this.reloadList()
-                        .then(() => this.setState({ currentUserQuery: toLite(uq) }))
+                        .then(() => this.setState({ currentUserChart: toLite(uc) }))
                         .done();
                 }
             }).done();
     }
 
     render() {
-        const label = UserQueryMessage.UserQueries_UserQueries.niceToString();
-        var userQueries = this.state.userQueries;
+        const label = UserChartEntity_Type.nicePluralName();
+        var userCharts = this.state.userCharts;
         return (
             <DropdownButton title={label} label={label} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 onToggle={this.handleSelectedToggle}>
                 {
-                    userQueries && userQueries.map((uq, i) =>
-                        <MenuItem
-                            className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active") }
-                            onSelect={() => this.handleSelect(uq) }>
-                            { uq.toStr }
+                    userCharts && userCharts.map((uc, i) =>
+                        <MenuItem key={i}
+                            className={classes("sf-userquery", is(uc, this.state.currentUserChart) && "active") }
+                            onSelect={() => this.handleSelect(uc) }>
+                            { uc.toStr }
                         </MenuItem>)
                 }
-                { userQueries && userQueries.length > 0 && <MenuItem divider/> }
-                { this.state.currentUserQuery && <MenuItem onSelect={this.handleEdit} >{UserQueryMessage.UserQueries_Edit.niceToString() }</MenuItem> }
-                <MenuItem onSelect={this.handleCreate}>{UserQueryMessage.UserQueries_CreateNew.niceToString() }</MenuItem>
+                { userCharts && userCharts.length > 0 && <MenuItem divider/> }
+                { this.state.currentUserChart && <MenuItem onSelect={this.handleEdit} >{ChartMessage.EditUserChart.niceToString() }</MenuItem> }
+                <MenuItem onSelect={this.handleCreate}>{ChartMessage.CreateNew.niceToString() }</MenuItem>
             </DropdownButton>
         );
     }
  
 }
-
-
-
-*/

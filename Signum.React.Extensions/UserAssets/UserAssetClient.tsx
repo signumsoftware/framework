@@ -20,7 +20,7 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
     export function parseFilters(request: ParseFiltersRequest): Promise<FilterRequest[]> {
-        return ajaxPost<FilterRequest[]>({ url: "/api/userQueries/parseFilters/" }, request);
+        return ajaxPost<FilterRequest[]>({ url: "/api/userAssets/parseFilters/" }, request);
     }
 
     export interface ParseFiltersRequest {
