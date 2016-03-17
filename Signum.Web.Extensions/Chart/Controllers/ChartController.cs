@@ -227,7 +227,7 @@ namespace Signum.Web.Chart
 
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable, QueryUtils.GetNiceName(request.QueryName));
 
-            return File(binaryFile, MimeType.FromExtension(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + ".xlsx");
+            return File(binaryFile, MimeMapping.GetMimeMapping(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + ".xlsx");
         }
         #endregion
 

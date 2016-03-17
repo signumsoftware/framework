@@ -74,7 +74,7 @@ namespace Signum.Web.UserAssets
         {
             var result = UserAssetsExporter.ToXml(entity.Retrieve());
 
-            return File(result, MimeType.FromExtension("xml"), "{0}{1}.xml".FormatWith(entity.EntityType.Name, entity.Id));
+            return File(result, MimeMapping.GetMimeMapping("xml"), "{0}{1}.xml".FormatWith(entity.EntityType.Name, entity.Id));
         }
     }
 }

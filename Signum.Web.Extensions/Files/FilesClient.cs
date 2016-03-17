@@ -164,7 +164,7 @@ namespace Signum.Web.Files
                     {
                         FilePathEntity fp = (FilePathEntity)ri.ToLite().Retrieve();
 
-                        return new FilePathResult(fp.FullPhysicalPath, MimeType.FromFileName(fp.FullPhysicalPath)) { FileDownloadName = fp.FileName };
+                        return new FilePathResult(fp.FullPhysicalPath, MimeMapping.GetMimeMapping(fp.FullPhysicalPath)) { FileDownloadName = fp.FileName };
                     });
 
                     Navigator.AddSettings(new List<EntitySettings>

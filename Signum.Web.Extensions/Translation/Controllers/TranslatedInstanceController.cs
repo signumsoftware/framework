@@ -59,7 +59,7 @@ namespace Signum.Web.Translation.Controllers
 
             var file = TranslatedInstanceLogic.ExportExcelFile(t, c);
 
-            return File(file.Content, MimeType.FromFileName(file.FileName), file.FileName);  
+            return File(file.Content, MimeMapping.GetMimeMapping(file.FileName), file.FileName);  
         }
 
         [HttpPost]
@@ -129,7 +129,7 @@ namespace Signum.Web.Translation.Controllers
 
             var file = TranslatedInstanceLogic.ExportExcelFileSync(t, c);
 
-            return File(file.Content, MimeType.FromFileName(file.FileName), file.FileName);  
+            return File(file.Content, MimeMapping.GetMimeMapping(file.FileName), file.FileName);  
         }
 
         [HttpPost]

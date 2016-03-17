@@ -325,14 +325,14 @@ namespace Signum.Engine.Mailing
             AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, email.IsBodyHtml ? "text/html" : "text/plain");
             view.LinkedResources.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.LinkedResource)
-                .Select(a => new LinkedResource(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))
+                .Select(a => new LinkedResource(a.File.FullPhysicalPath, MimeMapping.GetMimeMapping(a.File.FileName))
                 {
                     ContentId = a.ContentId,
                 }));
 
             message.Attachments.AddRange(email.Attachments
                 .Where(a => a.Type == EmailAttachmentType.Attachment)
-                .Select(a => new Attachment(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))
+                .Select(a => new Attachment(a.File.FullPhysicalPath, MimeMapping.GetMimeMapping(a.File.FileName))
                 {
                     ContentId = a.ContentId,
                     Name = a.File.FileName,

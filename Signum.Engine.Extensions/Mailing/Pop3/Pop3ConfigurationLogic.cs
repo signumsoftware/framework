@@ -73,7 +73,7 @@ namespace Signum.Engine.Mailing.Pop3
 
                 MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
 
-                MimeType.CacheExtension.TryAdd("message/rfc822", ".eml");
+                //MimeMapping.CacheExtension.TryAdd("message/rfc822", ".eml");
 
                 sb.Include<Pop3ConfigurationEntity>();
                 sb.Include<Pop3ReceptionEntity>();

@@ -34,7 +34,7 @@ namespace Signum.Web.Excel
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(request.QueryName));
 
-            return File(binaryFile, MimeType.FromExtension(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + ".xlsx");
+            return File(binaryFile, MimeMapping.GetMimeMapping(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + ".xlsx");
         }
 
         [HttpPost]
@@ -45,7 +45,7 @@ namespace Signum.Web.Excel
 
             byte[] file = ExcelLogic.ExecuteExcelReport(excelReport, request);
 
-            return File(file, MimeType.FromExtension(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
+            return File(file, MimeMapping.GetMimeMapping(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx");
             //Known Bug in IE: When the file dialog is shown, if Open is chosen the Excel will be broken as a result of IE automatically adding [1] to the name. 
             //There's not workaround for this, so either click on Save instead of Open, or use Firefox or Chrome
         }

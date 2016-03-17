@@ -120,7 +120,7 @@ namespace Signum.Web.Files
 
             var fullPhyisicalPath = Path.Combine(pair.PhysicalPrefix, suffix);
 
-            return new FilePathResult(fullPhyisicalPath, MimeType.FromFileName(fullPhyisicalPath)) { FileDownloadName = fileName };
+            return new FilePathResult(fullPhyisicalPath, MimeMapping.GetMimeMapping(fullPhyisicalPath)) { FileDownloadName = fileName };
         }
     }
 }

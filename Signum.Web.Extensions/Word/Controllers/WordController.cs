@@ -45,7 +45,7 @@ namespace Signum.Web.Word
 
             var bytes = template.CreateReport(entity, systemWordReport);
 
-            return File(bytes, MimeType.FromFileName(template.FileName), Path.GetFileName(template.FileName));
+            return File(bytes, MimeMapping.GetMimeMapping(template.FileName), Path.GetFileName(template.FileName));
         }
     }
 }

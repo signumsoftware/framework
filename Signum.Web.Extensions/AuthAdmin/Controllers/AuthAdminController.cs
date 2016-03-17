@@ -136,7 +136,7 @@ namespace Signum.Web.AuthAdmin
             {
                 AuthLogic.ExportRules().Save(ms);
 
-                return File(ms.ToArray(), MimeType.FromExtension("xml"), "AuthRules.xml");
+                return File(ms.ToArray(), MimeMapping.GetMimeMapping("xml"), "AuthRules.xml");
             }
         }
     }
