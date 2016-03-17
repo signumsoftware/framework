@@ -77,8 +77,7 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
 
 }
 
-
-export interface LineBaseProps {
+export interface LineBaseProps extends StyleOptions {
     ctx?: TypeContext<any>;
     type?: TypeReference;
     labelText?: React.ReactChild;
@@ -115,10 +114,23 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     }
 
     calculateState(props: P): S {
-        const state = { ctx: props.ctx, type: (props.type || props.ctx.propertyRoute.member.type) } as LineBaseProps as S;
+
+        var so = {
+            formControlStaticAsFormControlReadonly: null,
+            formGroupSize: null,
+            formGroupStyle: null,
+            labelColumns: null,
+            placeholderLabels: null,
+            readOnly: null,
+            valueColumns: null,
+        } as StyleOptions;
+
+        var cleanProps = Dic.without(props, so);
+        
+        const state = { ctx: cleanProps.ctx.subCtx(so), type: (cleanProps.type || cleanProps.ctx.propertyRoute.member.type) } as LineBaseProps as S;
         this.calculateDefaultState(state);
         runTasks(this, state);
-        Dic.extend(state, props);
+        Dic.extend(state, Dic.without(cleanProps, { ctx: null, type: null }));
         return state;
     }
 

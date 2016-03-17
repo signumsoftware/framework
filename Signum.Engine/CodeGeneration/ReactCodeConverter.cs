@@ -39,11 +39,12 @@ namespace Signum.Engine.CodeGeneration
 
                 Console.WriteLine("Done!");
             }
-        }   
+        }
+
 
         public virtual string ToReactView(string razorViewText)
         {
-            var result = Regex.Replace(razorViewText, @"@Html\.(?<type>(ValueLine|EntityLine|EntityList|EntityCombo|EntityStrip|EntityRepeater|EntityListCheckbox|EntityDetail))\((?<ctx>\w+)\s*,\s*(?<param>\w+)\s*=>\s*\k<param>(\.(?<token>\w+))+\s*(,\s*(?<param2>\w+)\s*=>\s*((\k<param2>\.(?<token2>\w+)\s*=\s*(?<value>[^)]+))|(?<extra>\{[^\}]*\})))?\)",
+            var result = Regex.Replace(razorViewText, @"@Html\.(?<type>(ValueLine|EntityLine|EntityList|EntityCombo|EntityStrip|EntityRepeater|EntityListCheckbox|EntityDetail))\((?<ctx>\w+)\s*,\s*(?<param>\w+)\s*=>\s*\k<param>(\.(?<token>\w+))+\s*(,\s*(?<param2>\w+)\s*=>\s*((\k<param2>\.(?<prop>\w+)\s*=\s*(?<value>[^)]+))|(?<extra>\{[^\}]*\})))?\)",
                 m =>
                 {
                     var type = m.Groups["type"].Value;
@@ -53,9 +54,11 @@ namespace Signum.Engine.CodeGeneration
                     var extra = m.Groups["extra"].Value;
                     var prop = m.Groups["prop"].Value;
                     var value = m.Groups["value"].Value;
+                    
+                    var propAssign = prop.HasText() ? $"{prop.FirstLower()}={FixValue(value)}" : null;
 
-                    return $"<{type} ctx={{{ctx}.subCtx({param} => {param}.{tokens})}} {(prop.HasText()? $"{prop}=\"{value}\"" : null)} />" + (extra.HasText() ? "{/*" + extra + "*/}": null);
-                }, RegexOptions.Multiline );
+                    return $"<{type} ctx={{{ctx}.subCtx({param} => {param}.{tokens})}} {propAssign} />" + (extra.HasText() ? "{/*" + extra + "*/}": null);
+                }, RegexOptions.Multiline | RegexOptions.ExplicitCapture );
             
 
             result = Regex.Replace(result, @"class=""(?<c>[^""]+)""", m => $"className=\"{m.Groups["c"].Value}\"");
@@ -66,6 +69,18 @@ namespace Signum.Engine.CodeGeneration
             });
 
             return result;
+        }
+
+        string FixValue(string value)
+        {
+            if (value.StartsWith("new BsColumn("))
+                return "{{ sm: " + value.After("new BsColumn(") + "}}";
+
+            int _;
+            if (value == "true" || value == "false" || int.TryParse(value, out _))
+                return "{" + value + "}";
+
+            return "\"" + value + "\"";
         }
     }
 }
