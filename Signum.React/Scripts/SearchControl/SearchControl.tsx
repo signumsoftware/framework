@@ -6,7 +6,7 @@ import { Dic, DomUtils } from '../Globals'
 import * as Finder from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandParentColumn, QueryRequest } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, IEntity, liteKey, is } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is } from '../Signum.Entities'
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType} from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -30,7 +30,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     findOptions: FindOptions;
     onDoubleClick?: (e: React.MouseEvent, row: ResultRow) => void;
     showContextMenu?: boolean;
-    onSelectionChanged?: (entity: Lite<IEntity>[]) => void;
+    onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     hideExternalButton?: boolean;
 }
 

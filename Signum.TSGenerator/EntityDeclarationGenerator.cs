@@ -255,7 +255,7 @@ namespace Signum.TSGenerator
             {
                 string context = $"By type {type.Name} and property {prop.Name}";
                 var propertyType = TypeScriptName(prop.PropertyType, type, options, context);
-                sb.AppendLine($"    {FirstLower(prop.Name)}?: {propertyType};");
+                sb.AppendLine($"    {FirstLower(prop.Name)}: {propertyType};");
             }
             sb.AppendLine(@"}");
 
@@ -313,15 +313,7 @@ namespace Signum.TSGenerator
             return char.ToLower(name[0]) + name.Substring(1);
         }
         
-        private static string BeforeTick(string relativeName)
-        {
-            int pos = relativeName.IndexOf('`');
-
-            if (pos == -1)
-                return relativeName;
-
-            return relativeName.Substring(0, pos);
-        }
+    
 
         public static Type UnNullify(this Type type)
         {
@@ -369,26 +361,21 @@ namespace Signum.TSGenerator
 
         private static string RelativeName(Type type, Type current, Options options, string errorContext)
         {
-            if (type.Name == "RegionEntity")
-            {
-                type = type;
-            }
-
             if (type.IsGenericParameter)
                 return type.Name;
 
             if (type.DeclaringType != null)
-                return RelativeName(type.DeclaringType, current, options, errorContext) + "_" + BeforeTick(type.Name);
+                return RelativeName(type.DeclaringType, current, options, errorContext) + "_" + BaseTypeScriptName(type);
 
             if (type.Assembly.Equals(current.Assembly) && type.Namespace == current.Namespace)
             {
                 string relativeNamespace = RelativeNamespace(type, current);
 
-                return CombineNamespace(relativeNamespace, BeforeTick(type.Name));
+                return CombineNamespace(relativeNamespace, BaseTypeScriptName(type));
             }
             else if (type.IsEnum && options.IsExternal(type))
             {
-                return "External." + BeforeTick(type.Name);
+                return "External." + BaseTypeScriptName(type);
             }
             else
             {
@@ -402,8 +389,23 @@ namespace Signum.TSGenerator
                     throw new InvalidOperationException($"{errorContext}:  Type {type.ToString()} is declared in the assembly '{type.Assembly.GetName().Name}.dll' and namespace '{type.Namespace}', but there is no reference to them.");
                 }
 
-                return CombineNamespace(assembly.VariableName, BeforeTick(type.Name));
+                return CombineNamespace(assembly.VariableName, BaseTypeScriptName(type));
             }
+        }
+
+        private static string BaseTypeScriptName(Type type)
+        {
+            if (type == Cache.IEntity)
+                return "Entity";
+
+            var name = type.Name;
+
+            int pos = name.IndexOf('`');
+
+            if (pos == -1)
+                return name;
+
+            return name.Substring(0, pos);
         }
 
         private static string RelativeNamespace(Type referedType, Type current)

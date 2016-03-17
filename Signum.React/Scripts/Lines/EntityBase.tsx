@@ -7,7 +7,7 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
-import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey } from '../Signum.Entities'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import { EntityComponentProps, EntityFrame } from '../Lines'
 import Typeahead from '../Lines/Typeahead'
@@ -22,10 +22,10 @@ export interface EntityBaseProps extends LineBaseProps {
     find?: boolean;
     remove?: boolean;
 
-    onView?: (entity: ModifiableEntity | Lite<IEntity>, pr: PropertyRoute) => Promise<ModifiableEntity>;
-    onCreate?: () => Promise<ModifiableEntity | Lite<IEntity>>;
-    onFind?: () => Promise<ModifiableEntity | Lite<IEntity>>;
-    onRemove?: (entity: ModifiableEntity | Lite<IEntity>) => Promise<boolean>;
+    onView?: (entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity>;
+    onCreate?: () => Promise<ModifiableEntity | Lite<Entity>>;
+    onFind?: () => Promise<ModifiableEntity | Lite<Entity>>;
+    onRemove?: (entity: ModifiableEntity | Lite<Entity>) => Promise<boolean>;
 
     getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
 }
@@ -67,12 +67,12 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         state.remove = true;
     }
 
-    convert(entityOrLite: ModifiableEntity | Lite<IEntity>): Promise<ModifiableEntity | Lite<IEntity>> {
+    convert(entityOrLite: ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity | Lite<Entity>> {
 
         const tr = this.state.type;
 
-        const isLite = (entityOrLite as Lite<IEntity>).EntityType != null;
-        const entityType = (entityOrLite as Lite<IEntity>).EntityType || (entityOrLite as ModifiableEntity).Type;
+        const isLite = (entityOrLite as Lite<Entity>).EntityType != null;
+        const entityType = (entityOrLite as Lite<Entity>).EntityType || (entityOrLite as ModifiableEntity).Type;
 
 
         if (tr.isEmbedded) {
@@ -88,7 +88,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 return Promise.resolve(entityOrLite);
 
             if (isLite) {
-                const lite = entityOrLite as Lite<IEntity>;
+                const lite = entityOrLite as Lite<Entity>;
                 return Navigator.API.fetchAndRemember(lite);
             }
 
@@ -99,7 +99,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    defaultView(value: ModifiableEntity | Lite<IEntity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
+    defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
 
         return Navigator.view({ propertyRoute: propertyRoute, entity: value, component: this.props.getComponent } as Navigator.ViewOptions);
     }
@@ -115,7 +115,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
         if (openWindow) {
             event.preventDefault();
-            var route = Navigator.navigateRoute(entity as Lite<IEntity> /*or Entity*/);
+            var route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
             window.open(route);
         }
         else {
@@ -157,7 +157,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             .then(ti => ti ? ti.name : null);
     }
 
-    defaultCreate(): Promise<ModifiableEntity | Lite<IEntity>> {
+    defaultCreate(): Promise<ModifiableEntity | Lite<Entity>> {
 
         return this.chooseType(Navigator.isCreable)
             .then(typeName => typeName ? Constructor.construct(typeName) : null)
@@ -206,7 +206,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    defaultFind(): Promise<ModifiableEntity | Lite<IEntity>> {
+    defaultFind(): Promise<ModifiableEntity | Lite<Entity>> {
         return this.chooseType(Finder.isFindable)
             .then(qn => qn == null ? null : Finder.find({ queryName: qn } as FindOptions));
     }

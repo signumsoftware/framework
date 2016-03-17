@@ -149,7 +149,7 @@ export class TypeContext<T> extends StyleContext {
         this.binding.setValue(val);
     }
 
-    static root<T>(type: Type<T>, value: T) {
+    static root<T extends ModifiableEntity>(type: Type<T>, value: T) {
         return new TypeContext(null, null, PropertyRoute.root(type), new ReadonlyBinding(value, ""));
     }
 
@@ -194,7 +194,7 @@ export class TypeContext<T> extends StyleContext {
         return compose(this.prefix, suffix);
     }
 
-    tryFindParent<S>(type: Type<S>): S {
+    tryFindParent<S extends ModifiableEntity>(type: Type<S>): S {
 
         var current: TypeContext<any> = this;
 
@@ -209,7 +209,7 @@ export class TypeContext<T> extends StyleContext {
         return null;
     }
 
-    findParent<S>(type: Type<S>): S {
+    findParent<S extends ModifiableEntity>(type: Type<S>): S {
         var result = this.tryFindParent(type);
         if (result == null)
             throw new Error(`No '${type.typeName}' found in the parent chain`);

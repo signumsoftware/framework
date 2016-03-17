@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
 import { classes } from '../Globals'
-import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -114,7 +114,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
                 return;
 
             this.convert(e).then(m => {
-                if (is(ctx.value[selectedIndex].element, e))
+                if (is(ctx.value[selectedIndex].element as Entity, e as Entity))
                     ctx.value[selectedIndex].element = m;
                 else
                     ctx.value[selectedIndex] = { element: m };

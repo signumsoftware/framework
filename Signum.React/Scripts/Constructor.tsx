@@ -3,7 +3,7 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Dic } from './Globals';
-import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, SelectorMessage, EntityPack } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EmbeddedEntity, SelectorMessage, EntityPack } from './Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType } from './Reflection';
 import SelectorPopup from './SelectorPopup';
 import * as Operations from './Operations';

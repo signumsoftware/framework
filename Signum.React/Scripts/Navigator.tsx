@@ -3,7 +3,8 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
-import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack } from './Signum.Entities';
+import { IUserEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName  } from './Reflection';
 import { TypeContext } from './TypeContext';
 import { EntityComponent, EntityComponentProps, EntityFrame } from './Lines';
@@ -14,7 +15,7 @@ import { ViewReplacer } from  './Frames/ReactVisitor'
 
 export let NotFound: __React.ComponentClass<any>;
 
-export let currentUser: IEntity;
+export let currentUser: IUserEntity;
 export let currentHistory: HistoryModule.History;
 
 
@@ -25,7 +26,7 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 
-export function getTypeTitle(entity: Entity, pr: PropertyRoute) {
+export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute) {
 
     const typeInfo = getTypeInfo(entity.Type)
 
@@ -37,23 +38,23 @@ export function getTypeTitle(entity: Entity, pr: PropertyRoute) {
         if (entity.isNew)
             return LiteMessage.New_G.niceToString().forGenderAndNumber(typeInfo.gender) + " " + typeInfo.niceName;
 
-        return typeInfo.niceName + " " + entity.id;
+        return typeInfo.niceName + " " + (entity as Entity).id;
     }
 }
 
 
-export function navigateRoute(entity: IEntity);
-export function navigateRoute(lite: Lite<IEntity>);
+export function navigateRoute(entity: Entity);
+export function navigateRoute(lite: Lite<Entity>);
 export function navigateRoute(type: PseudoType, id: any);
 export function navigateRoute(typeOfEntity: any, id: any = null) {
     let typeName: string;
-    if ((typeOfEntity as IEntity).Type) {
-        typeName = (typeOfEntity as IEntity).Type;
-        id = (typeOfEntity as IEntity).id;
+    if ((typeOfEntity as Entity).Type) {
+        typeName = (typeOfEntity as Entity).Type;
+        id = (typeOfEntity as Entity).id;
     }
-    else if ((typeOfEntity as Lite<IEntity>).EntityType) {
-        typeName = (typeOfEntity as Lite<IEntity>).EntityType;
-        id = (typeOfEntity as Lite<IEntity>).id;
+    else if ((typeOfEntity as Lite<Entity>).EntityType) {
+        typeName = (typeOfEntity as Lite<Entity>).EntityType;
+        id = (typeOfEntity as Lite<Entity>).id;
     }
     else {
         typeName = getTypeName(typeOfEntity as PseudoType);
@@ -155,7 +156,7 @@ export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customV
 
 
 export interface ViewOptions {
-    entity: Lite<IEntity> | ModifiableEntity | EntityPack<ModifiableEntity>;
+    entity: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
     showOperations?: boolean;
@@ -165,7 +166,7 @@ export interface ViewOptions {
 
 export function view(options: ViewOptions): Promise<ModifiableEntity>;
 export function view<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<T>;
-export function view<T extends IEntity>(entity: Lite<T>): Promise<T>
+export function view<T extends Entity>(entity: Lite<T>): Promise<T>
 export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Entity>, propertyRoute?: PropertyRoute): Promise<ModifiableEntity>
 {
     const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions as ModifiableEntity, propertyRoute: propertyRoute } as ViewOptions :
@@ -181,14 +182,14 @@ export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Enti
 
 
 export interface NavigateOptions {
-    entity: Lite<IEntity> | ModifiableEntity | EntityPack<ModifiableEntity>;
+    entity: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     readOnly?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
 }
 
 export function navigate(options: NavigateOptions): Promise<void>;
 export function navigate<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<void>;
-export function navigate<T extends IEntity>(entity: Lite<T>): Promise<void>
+export function navigate<T extends Entity>(entity: Lite<T>): Promise<void>
 export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | Lite<Entity>): Promise<void> {
     const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } as NavigateOptions :
         (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } as NavigateOptions :
@@ -217,7 +218,7 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
     if (!showOperations || !needsCanExecute(entity))
         return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
-    return API.fetchCanExecute(entity);
+    return API.fetchCanExecute(entity as Entity);
 }
 
 function cloneEntity(obj: any) {

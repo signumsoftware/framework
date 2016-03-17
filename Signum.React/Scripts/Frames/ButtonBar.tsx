@@ -8,7 +8,7 @@ import { TypeContext, StyleOptions } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
 
 export interface ButtonsContext {
-    pack: EntityPack<Entity>;
+    pack: EntityPack<ModifiableEntity>;
     frame: EntityFrame<ModifiableEntity>;
     showOperations: boolean;
 }

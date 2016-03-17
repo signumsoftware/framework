@@ -9,7 +9,7 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemConte
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { EntityComponentProps, EntityFrame } from '../Lines'
-import { ModifiableEntity, Lite, IEntity, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 
@@ -17,8 +17,8 @@ export interface EntityStripProps extends EntityListBaseProps {
     vertical?: boolean;
     autoComplete?: boolean;
 
-    autoCompleteGetItems?: (query: string) => Promise<Lite<IEntity>[]>;
-    autoCompleteRenderItem?: (lite: Lite<IEntity>, query: string) => React.ReactNode;
+    autoCompleteGetItems?: (query: string) => Promise<Lite<Entity>[]>;
+    autoCompleteRenderItem?: (lite: Lite<Entity>, query: string) => React.ReactNode;
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
@@ -78,7 +78,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     }
 
-    handleOnSelect = (lite: Lite<IEntity>, event: React.SyntheticEvent) => {
+    handleOnSelect = (lite: Lite<Entity>, event: React.SyntheticEvent) => {
         this.convert(lite)
             .then(e => {
                 const list = this.props.ctx.value;
@@ -100,7 +100,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
         if (openWindow) {
             event.preventDefault();
-            var route = Navigator.navigateRoute(entity as Lite<IEntity> /*or Entity*/);
+            var route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
             window.open(route);
         }
         else {
@@ -113,7 +113,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                     return;
 
                 this.convert(e).then(m => {
-                    if (is(ctx.value[index].element, e))
+                    if (is(ctx.value[index].element as Entity, e as Entity))
                         ctx.value[index].element = m;
                     else
                         ctx.value[index] = { element: m };

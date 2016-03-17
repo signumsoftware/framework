@@ -241,14 +241,14 @@
     <TypeScriptCompile Include="Scripts\SearchControl\SearchModal.tsx" />
     <TypeScriptCompile Include="Scripts\SelectorPopup.tsx" />
     <TypeScriptCompile Include="Scripts\Services.ts" />
-    <TypeScriptCompile Include="Scripts\Signum.Entities.Basics - Copy.ts">
-      <DependentUpon>Signum.Entities.Patterns.t4s</DependentUpon>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\Signum.Entities.Basics.ts">
       <DependentUpon>Signum.Entities.Basics.t4s</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\Signum.Entities.DynamicQuery.ts">
       <DependentUpon>Signum.Entities.DynamicQuery.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Scripts\Signum.Entities.Patterns.ts">
+      <DependentUpon>Signum.Entities.Patterns.t4s</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\Signum.Entities.ts">
       <DependentUpon>Signum.Entities.t4s</DependentUpon>

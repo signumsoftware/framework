@@ -190,7 +190,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         var pack = this.state.pack;
 
-        var ctx = new TypeContext<Entity>(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity, this.state.prefix));
+        var ctx = new TypeContext(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity, this.state.prefix));
 
         return (
             <Modal.Body>
@@ -235,7 +235,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             return null;
 
         return (
-            <a href={ Navigator.navigateRoute(entity) } className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
+            <a href={ Navigator.navigateRoute(entity as Entity) } className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
                 <span className="glyphicon glyphicon-new-window"></span>
             </a>
         );
@@ -247,7 +247,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         } else {
 
-            Navigator.currentHistory.push(Navigator.navigateRoute(this.state.pack.entity));
+            Navigator.currentHistory.push(Navigator.navigateRoute(this.state.pack.entity as Entity));
 
             e.preventDefault();
         }

@@ -10,7 +10,7 @@ export module EntityMessage {
 }
 
 export interface LockableEntity extends Entities.Entity {
-    locked?: boolean;
+    locked: boolean;
 }
 
 export namespace External {

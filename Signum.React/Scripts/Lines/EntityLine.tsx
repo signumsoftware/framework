@@ -7,7 +7,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
-import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 
@@ -15,16 +15,16 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 export interface EntityLineProps extends EntityBaseProps {
 
-    ctx: TypeContext<ModifiableEntity | Lite<IEntity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity>>;
 
     autoComplete?: boolean;
-    autoCompleteGetItems?: (query: string) => Promise<Lite<IEntity>[]>;
-    autoCompleteRenderItem?: (lite: Lite<IEntity>, query: string) => React.ReactNode;
+    autoCompleteGetItems?: (query: string) => Promise<Lite<Entity>[]>;
+    autoCompleteRenderItem?: (lite: Lite<Entity>, query: string) => React.ReactNode;
 }
 
 export interface EntityLineState extends EntityBaseProps {
 
-    ctx: TypeContext<ModifiableEntity | Lite<IEntity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity>>;
 
     autoComplete?: boolean;
 }
@@ -47,7 +47,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     defaultAutCompleteRenderItem = (lite, query) => Typeahead.highlightedText(lite.toStr, query);
     
 
-    handleOnSelect = (lite: Lite<IEntity>, event: React.SyntheticEvent) => {
+    handleOnSelect = (lite: Lite<Entity>, event: React.SyntheticEvent) => {
         this.convert(lite)
             .then(entity => this.setValue(entity))
             .done();

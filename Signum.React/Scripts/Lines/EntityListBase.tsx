@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
 import { Dic, classes } from '../Globals'
-import { ModifiableEntity, Lite, IEntity, Entity, MListElement, MList, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -16,7 +16,7 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 export interface EntityListBaseProps extends EntityBaseProps {
     move?: boolean;
-    onFindMany?: () => Promise<(ModifiableEntity | Lite<IEntity>)[]>;
+    onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[]>;
 
     ctx?: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
 }
@@ -111,7 +111,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             }).done();
     };
 
-    defaultFindMany(): Promise<(ModifiableEntity | Lite<IEntity>)[]> {
+    defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[]> {
         return this.chooseType(Finder.isFindable)
             .then(qn => qn == null ? null : Finder.findMany({ queryName: qn } as FindOptions));
     }

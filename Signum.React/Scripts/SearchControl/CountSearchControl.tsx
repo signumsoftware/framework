@@ -4,7 +4,7 @@ import { Dic, DomUtils } from '../Globals'
 import * as Finder from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandParentColumn, CountQueryRequest, QueryRequest } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, IEntity, liteKey, is } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, is } from '../Signum.Entities'
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName} from '../Reflection'
 import * as Navigator from '../Navigator'
 import { StyleContext } from '../Typecontext'

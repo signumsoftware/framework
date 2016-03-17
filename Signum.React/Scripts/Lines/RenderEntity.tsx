@@ -9,14 +9,14 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../Type
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { EntityComponentProps, EntityFrame } from '../Lines'
-import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 
 
 
 export interface RenderEntityProps {
-    ctx?: TypeContext<ModifiableEntity | Lite<IEntity>>;
+    ctx?: TypeContext<ModifiableEntity | Lite<Entity>>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
 }
 

@@ -4,7 +4,7 @@ import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react
 import { Dic } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
-import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, OperationMessage, EntityPack,
+import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, OperationMessage, EntityPack,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol } from './Signum.Entities';
 import { OperationLogEntity_Type } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, GraphExplorer  } from './Reflection';

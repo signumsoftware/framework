@@ -1,6 +1,6 @@
 ﻿import { TypeReference, PropertyRoute, PseudoType, QueryKey } from './Reflection';
 import { Dic } from './Globals';
-import { Lite, IEntity } from './Signum.Entities';
+import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType } from './Signum.Entities.DynamicQuery';
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
@@ -197,7 +197,7 @@ export interface ResultTable {
 
 
 export interface ResultRow {
-    entity: Lite<IEntity>;
+    entity: Lite<Entity>;
     columns: any[];
 }
 

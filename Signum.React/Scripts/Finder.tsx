@@ -8,7 +8,7 @@ import { QueryDescription, CountQueryRequest, QueryRequest, FindOptions, FilterO
     QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn,
     ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken, isList, expandParentColumn } from './FindOptions';
 
-import { Entity, IEntity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from './Signum.Entities';
 
 import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference,
     getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, PseudoType } from './Reflection';
@@ -45,13 +45,13 @@ export function isFindable(queryName: any): boolean {
 }
 
 export function find<T extends Entity>(type: Type<T>): Promise<Lite<T>>;
-export function find(findOptions: FindOptions): Promise<Lite<IEntity>>;
-export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<IEntity>> {
+export function find(findOptions: FindOptions): Promise<Lite<Entity>>;
+export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<Entity>> {
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions as Type<any> } as FindOptions;
     
-    return new Promise<Lite<IEntity>>((resolve, reject) => {
+    return new Promise<Lite<Entity>>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
             SP.default.open(fo).then(resolve, reject);
         });
@@ -59,13 +59,13 @@ export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<IEntit
 }
 
 export function findMany<T extends Entity>(type: Type<T>): Promise<Lite<T>[]>;
-export function findMany(findOptions: FindOptions): Promise<Lite<IEntity>[]>;
-export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<IEntity>[]> {
+export function findMany(findOptions: FindOptions): Promise<Lite<Entity>[]>;
+export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Entity>[]> {
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions as Type<any> } as FindOptions;
 
-    return new Promise<Lite<IEntity>[]>((resolve, reject) => {
+    return new Promise<Lite<Entity>[]>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
             SP.default.openMany(fo).then(resolve, reject);
         });
@@ -405,20 +405,20 @@ export module API {
         return ajaxPost<number>({ url: "/api/query/queryCount" }, request);
     }
 
-    export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<IEntity>[]> {
-        return ajaxGet<Lite<IEntity>[]>({
+    export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<Entity>[]> {
+        return ajaxGet<Lite<Entity>[]>({
             url: currentHistory.createHref({ pathname: "api/query/findLiteLike", query: request })
         });
     }
 
-    export function findAllLites(request: { types: string }): Promise<Lite<IEntity>[]> {
-        return ajaxGet<Lite<IEntity>[]>({
+    export function findAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
+        return ajaxGet<Lite<Entity>[]>({
             url: currentHistory.createHref({ pathname: "api/query/findAllLites", query: request })
         });
     }
 
-    export function findAllEntities(request: { types: string }): Promise<IEntity[]> {
-        return ajaxGet<Lite<IEntity>[]>({
+    export function findAllEntities(request: { types: string }): Promise<Entity[]> {
+        return ajaxGet<Entity[]>({
             url: currentHistory.createHref({ pathname: "api/query/findAllEntities", query: request })
         });
     }
@@ -470,10 +470,10 @@ export module Encoder {
             return (value as any[]).map(a => stringValue(a)).join("~");
 
         if (value.Type)
-            value = toLite(value as IEntity);
+            value = toLite(value as Entity);
 
         if (value.EntityType)
-            return liteKey(value as Lite<IEntity>);
+            return liteKey(value as Lite<Entity>);
         
         return scapeTilde(value.toString());
     }
@@ -599,7 +599,7 @@ export const formatRules: FormatRule[] = [
     {
         name: "Lite",
         isApplicable: col => col.token.filterType == FilterType.Lite,
-        formatter: col => new CellFormatter((cell: Lite<IEntity>) => !cell ? null : <EntityLink lite={cell}/>)
+        formatter: col => new CellFormatter((cell: Lite<Entity>) => !cell ? null : <EntityLink lite={cell}/>)
     },
 
     {

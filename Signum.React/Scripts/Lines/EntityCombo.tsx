@@ -2,7 +2,7 @@
 import { Link } from 'react-router'
 import * as moment from 'moment'
 import { Input, Tab } from 'react-bootstrap'
-import { ModifiableEntity, Lite, IEntity, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -14,7 +14,7 @@ import { EntityBase, EntityBaseProps } from './EntityBase'
 
 
 export interface EntityComboProps extends EntityBaseProps {
-    ctx: TypeContext<ModifiableEntity | Lite<IEntity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity>>;
 
     data?: Lite<Entity>[];
 }
@@ -61,8 +61,8 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         if (v == null)
             return null;
 
-        if ((v as ModifiableEntity).Type)
-            return toLite(v as ModifiableEntity);
+        if ((v as Entity).Type)
+            return toLite(v as Entity);
 
         return v as Lite<Entity>;
     }

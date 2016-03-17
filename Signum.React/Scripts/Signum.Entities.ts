@@ -4,23 +4,17 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection' 
 
 export interface ModifiableEntity {
-    Type?: string;
-    toStr?: string;	
-    modified? : boolean;
-    isNew?: boolean;
-	error?: { [member: string]: string };
+    Type: string;
+    toStr: string;	
+    modified : boolean;
+    isNew: boolean;
+	error: { [member: string]: string };
 }
 
-export interface IEntity {
-    Type?: string;
-    id?: any;
-    ticks?: string; //max value
-    toStr?: string;
-    modified? : boolean;
-}
-
-export interface Entity extends ModifiableEntity, IEntity {
-    mixins?: { [name: string]: MixinEntity }
+export interface Entity extends ModifiableEntity {
+    id: any;
+    ticks: string; //max value
+    mixins: { [name: string]: MixinEntity }
 }
 
 export interface EnumEntity<T> extends Entity {
@@ -41,7 +35,7 @@ export interface MListElement<T> {
     rowId?: any;
 }
 
-export interface Lite<T extends IEntity> {
+export interface Lite<T extends Entity> {
     entity?: T;
     EntityType: string;
     id?: any;
@@ -61,11 +55,11 @@ export interface EntityPack<T extends ModifiableEntity> {
 
 //The interfaces add no real members, they are there just to force TS structural typing
 
-export interface ExecuteSymbol<T extends IEntity> extends OperationSymbol { _execute_?: T /*TRICK*/ };
-export interface DeleteSymbol<T extends IEntity> extends OperationSymbol { _delete_?: T /*TRICK*/ };
+export interface ExecuteSymbol<T extends Entity> extends OperationSymbol { _execute_?: T /*TRICK*/ };
+export interface DeleteSymbol<T extends Entity> extends OperationSymbol { _delete_?: T /*TRICK*/ };
 export interface ConstructSymbol_Simple<T extends Entity> extends OperationSymbol { _construct_?: T /*TRICK*/ };
-export interface ConstructSymbol_From<T extends Entity, F extends IEntity> extends OperationSymbol { _constructFrom_?: T, _from_?: F /*TRICK*/ };
-export interface ConstructSymbol_FromMany<T extends Entity, F extends IEntity> extends OperationSymbol {  _constructFromMany_?: T, _from_?: F /*TRICK*/ };
+export interface ConstructSymbol_From<T extends Entity, F extends Entity> extends OperationSymbol { _constructFrom_?: T, _from_?: F /*TRICK*/ };
+export interface ConstructSymbol_FromMany<T extends Entity, F extends Entity> extends OperationSymbol {  _constructFromMany_?: T, _from_?: F /*TRICK*/ };
 
 export var toStringDictionary: { [name: string]: (entity: ModifiableEntity) => string } = {};
 
@@ -110,7 +104,7 @@ export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>)
     return entity.toStr || entity.Type;
 }
 
-export function toLite<T extends IEntity>(entity: T, fat?: boolean) : Lite<T> {
+export function toLite<T extends Entity>(entity: T, fat?: boolean) : Lite<T> {
 
     if(entity == null)
         return null;
@@ -128,7 +122,7 @@ export function toLite<T extends IEntity>(entity: T, fat?: boolean) : Lite<T> {
     }
 }
 
-export function toLiteFat<T extends IEntity>(entity: T) : Lite<T> {
+export function toLiteFat<T extends Entity>(entity: T) : Lite<T> {
     
     if(entity == null)
         return null;
@@ -141,7 +135,7 @@ export function toLiteFat<T extends IEntity>(entity: T) : Lite<T> {
     }
 }
 
-export function liteKey(lite: Lite<IEntity>) {
+export function liteKey(lite: Lite<Entity>) {
     
     if(lite == null)
         return null;
@@ -149,14 +143,14 @@ export function liteKey(lite: Lite<IEntity>) {
     return lite.EntityType + ";" + (lite.id || "");
 }
 
-export function parseLite(lite: string) : Lite<IEntity> {
+export function parseLite(lite: string) : Lite<Entity> {
     return {
         EntityType: lite.before(";"),
         id :  lite.after(";"),
     };
 }
 
-export function is<T extends IEntity>(a: Lite<T> | T, b: Lite<T> | T) {
+export function is<T extends Entity>(a: Lite<T> | T, b: Lite<T> | T) {
 
     if(a == null && b == null)
         return true;
@@ -201,7 +195,7 @@ export module ConnectionMessage {
 
 export const CorruptMixin_Type = new Type<CorruptMixin>("CorruptMixin");
 export interface CorruptMixin extends MixinEntity {
-    corrupt?: boolean;
+    corrupt: boolean;
 }
 
 export interface EmbeddedEntity extends ModifiableEntity {
@@ -231,7 +225,7 @@ export module EntityControlMessage {
 }
 
 export interface ImmutableEntity extends Entity {
-    allowChange?: boolean;
+    allowChange: boolean;
 }
 
 export module JavascriptMessage {
@@ -394,7 +388,7 @@ export module SelectorMessage {
 }
 
 export interface Symbol extends Entity {
-    key?: string;
+    key: string;
 }
 
 export module SynchronizerMessage {

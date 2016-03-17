@@ -1,7 +1,7 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
-import { IEntity, Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
+import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString } from '../Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType  } from '../Reflection';
 import {classes, ifError} from '../Globals';
@@ -26,7 +26,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity>;
 
             const eoc: EntityOperationContext<Entity> = {
-                entity: ctx.pack.entity,
+                entity: ctx.pack.entity as Entity,
                 frame: ctx.frame,
                 canExecute: ctx.pack.canExecute[oi.key],
                 operationInfo: oi,

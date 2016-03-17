@@ -109,7 +109,7 @@ export class QuickLinkWidget extends React.Component<{ ctx: WidgetContext }, { l
     }
 
     componentWillReceiveProps(newProps: { ctx: WidgetContext }) {
-        if (!is(newProps.ctx.pack.entity, this.props.ctx.pack.entity)) {
+        if (!is(newProps.ctx.pack.entity as Entity, this.props.ctx.pack.entity as Entity)) {
             this.makeRequest(newProps);
         }
     }
@@ -122,7 +122,7 @@ export class QuickLinkWidget extends React.Component<{ ctx: WidgetContext }, { l
 
         } else {
             getQuickLinks({
-                lite: toLiteFat(props.ctx.pack.entity),
+                lite: toLiteFat(props.ctx.pack.entity as Entity),
                 widgetContext: props.ctx
             }).then(links => this.setState({ links }))
               .done();

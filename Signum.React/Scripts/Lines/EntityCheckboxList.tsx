@@ -9,7 +9,7 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemConte
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { EntityComponentProps, EntityFrame } from '../Lines'
-import { ModifiableEntity, Lite, IEntity, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 
@@ -48,7 +48,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         const current = event.currentTarget as HTMLSelectElement;
 
         var list = this.state.ctx.value;
-        var toRemove = list.filter(mle => is(mle.element, lite))
+        var toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))
 
         if (toRemove.length) {
             toRemove.forEach(mle => list.remove(mle));
@@ -98,7 +98,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         if (entity.Type)
             return toLite(entity, entity.isNew);
 
-        return entity as Lite<Entity>;
+        return entityOrLite as Lite<Entity>;
     }
 
     renderInternal() {
@@ -129,14 +129,14 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         var data = [...this.state.data];
 
         this.state.ctx.value.forEach(mle => {
-            if (!data.some(d => is(d, mle.element)))
-                data.insertAt(0, this.maybeToLite(mle.element))
+            if (!data.some(d => is(d, mle.element as Entity | Lite<Entity>)))
+                data.insertAt(0, this.maybeToLite(mle.element as Entity | Lite<Entity>))
         });
 
         return data.map((lite, i) =>
             <label className="sf-checkbox-element" key={i}>
                 <input type="checkbox"
-                    checked={this.state.ctx.value.some(mle => is(mle.element, lite)) }
+                    checked={this.state.ctx.value.some(mle => is(mle.element as Entity | Lite<Entity>, lite)) }
                     name={liteKey(lite) }
                     onChange={e => this.handleOnChange(e, lite) }  />
                 <span className="sf-entitStrip-link">{lite.toStr}</span>

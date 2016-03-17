@@ -2,7 +2,7 @@
 import * as Finder from '../Finder'
 import { classes, Dic } from '../Globals'
 import { ResultTable, Pagination, PaginationMode, PaginateMath} from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, IEntity, liteKey } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey } from '../Signum.Entities'
 import { PaginationMode_Type } from '../Signum.Entities.DynamicQuery'
 import { getEnumInfo } from '../Reflection'
 import * as Navigator from '../Navigator'

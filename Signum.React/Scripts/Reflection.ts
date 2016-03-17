@@ -448,13 +448,10 @@ export interface IType {
 
 export class Type<T extends ModifiableEntity> implements IType {
 
-    New(options?: T): T {
+    New(modify?: (entity: T) => void): T {
 
         var result = { Type: this.typeName, isNew: true, modified: true } as any as T;
-
-        if (options)
-            return Dic.extend(result, options);
-
+        
         return result;
     }
 
@@ -565,12 +562,12 @@ function setSymbolId(s: ISymbol): boolean {
 }
 
 
-export function registerSymbol<T extends ISymbol>(symbol: T): T {
+export function registerSymbol<T extends ISymbol>(symbol: T): any {
 
     if (!setSymbolId(symbol))
         missingSymbols.push(symbol);
 
-    return symbol;
+    return symbol as any;
 }
 
 export class PropertyRoute {
