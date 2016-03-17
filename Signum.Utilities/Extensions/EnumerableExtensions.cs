@@ -41,7 +41,13 @@ namespace Signum.Utilities
                 return Expression.Call(uniqueMi.MakeGenericMethod(mi.GetGenericArguments()), whereExpr);
             }
         }
-
+        /// <summary>
+        /// Returns the single Element from a collections satisfying a predicate, or throws an Exception
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="collection">the collection to search</param>
+        /// <param name="predicate">the predicate</param>
+        /// <returns>the single Element from the collection satisfying the predicate.</returns>
         [MethodExpander(typeof(UniqueExExpander))]
         public static T SingleEx<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
         {
@@ -77,6 +83,13 @@ namespace Signum.Utilities
             return query.Where(predicate).SingleEx();
         }
 
+
+        /// <summary>
+        /// Returns the single Object from the collection or throws an Exception
+        /// </summary>
+        /// <typeparam name="T">Type of the collection</typeparam>
+        /// <param name="collection">The collection to search</param>
+        /// <returns>The single Element from the collection</returns>
         public static T SingleEx<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
@@ -96,6 +109,14 @@ namespace Signum.Utilities
             throw new InvalidOperationException("Sequence contains more than one {0}".FormatWith(typeof(T).TypeName()));
         }
 
+        /// <summary>
+        /// Returns the single Object from the collection  or throws an Exception
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="collection"></param>
+        /// <param name="elementName"></param>
+        /// <param name="forEndUser"></param>
+        /// <returns></returns>
         public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> elementName, bool forEndUser = false)
         {
             return collection.SingleEx(
@@ -104,6 +125,15 @@ namespace Signum.Utilities
                 forEndUser);
         }
 
+        /// <summary>
+        /// Returns the single Object from the collection  or throws an Exception
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="collection"></param>
+        /// <param name="errorZero">The Message if there is no Element</param>
+        /// <param name="errorMoreThanOne">The Message if there is more than one Element</param>
+        /// <param name="forEndUser"></param>
+        /// <returns></returns>
         public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> errorZero, Func<string> errorMoreThanOne, bool forEndUser = false)
         {
             if (collection == null)
