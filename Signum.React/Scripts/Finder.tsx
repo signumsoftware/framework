@@ -98,9 +98,6 @@ export function findOptionsPath(queryNameOrFindOptions: any): string {
     fo = expandParentColumn(fo);
     
     const query = {
-        filters: Encoder.encodeFilters(fo.filterOptions),
-        orders: Encoder.encodeOrders(fo.orderOptions),
-        columns: Encoder.encodeColumns(fo.columnOptions),
         columnMode: !fo.columnOptionsMode || fo.columnOptionsMode == ColumnOptionsMode.Add ? undefined : ColumnOptionsMode[fo.columnOptionsMode],
         create: fo.create,
         navigate: fo.navigate,
@@ -111,6 +108,10 @@ export function findOptionsPath(queryNameOrFindOptions: any): string {
         showHeader: fo.showHeader,
         allowChangeColumns: fo.allowChangeColumns,
     };
+    
+    Encoder.encodeFilters(query, fo.filterOptions);
+    Encoder.encodeOrders(query, fo.orderOptions);
+    Encoder.encodeColumns(query, fo.columnOptions);
 
     return currentHistory.createPath({ pathname: "/find/" + getQueryKey(fo.queryName), query: query });
 }
@@ -119,9 +120,9 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
     
     const result = {
         queryName: queryName,
-        filterOptions: Decoder.decodeFilters(query.filters),
-        orderOptions: Decoder.decodeOrders(query.orders),
-        columnOptions: Decoder.decodeColumns(query.columns),
+        filterOptions: Decoder.decodeFilters(query),
+        orderOptions: Decoder.decodeOrders(query),
+        columnOptions: Decoder.decodeColumns(query),
         columnOptionsMode: query.columnMode == null ? ColumnOptionsMode.Add : query.columnMode,
         create: parseBoolean(query.create),
         navigate: parseBoolean(query.navigate),
@@ -262,7 +263,7 @@ export class TokenCompleter {
         if (fullKey == null)
             return Promise.resolve(null);
 
-        if (!fullKey.contains("."))
+        if (!fullKey.contains(".") && fullKey != "Count")
             return getQueryDescription(this.queryName).then(qd=> toQueryToken(qd.columns[fullKey]));
 
         var bucket = this.tokensToRequest[fullKey];
@@ -454,16 +455,19 @@ export module API {
 
 export module Encoder {
 
-    export function encodeFilters(filterOptions: FilterOption[]): string[] {
-        return !filterOptions ? undefined : filterOptions.map(fo => getTokenString(fo) + "~" + FilterOperation[fo.operation] + "~" + stringValue(fo.value));
+    export function encodeFilters(query: any, filterOptions: FilterOption[]) {
+        if (filterOptions)
+            filterOptions.forEach((fo, i) => query["filter" + i] = getTokenString(fo) + "~" + FilterOperation[fo.operation] + "~" + stringValue(fo.value));
     }
 
-    export function encodeOrders(orderOptions: OrderOption[]): string {
-        return !orderOptions ? undefined : orderOptions.map(oo => (oo.orderType == OrderType.Descending ? "-" : "") + getTokenString(oo)).join("~");
+    export function encodeOrders(query: any, orderOptions: OrderOption[]) {
+        if (orderOptions)
+            orderOptions.forEach((oo, i) => query["order" + i] = (oo.orderType == OrderType.Descending ? "-" : "") + getTokenString(oo));
     }
 
-    export function encodeColumns(columnOptions: ColumnOption[]): string[] {
-        return !columnOptions ? undefined : columnOptions.map(co => getTokenString(co) + (co.displayName ? ("~" +  scapeTilde(co.displayName)) : ""));
+    export function encodeColumns(query: any, columnOptions: ColumnOption[]) {
+        if (columnOptions)
+            columnOptions.forEach((co, i) => query["column" + i] = getTokenString(co) + (co.displayName ? ("~" + scapeTilde(co.displayName)) : ""));
     }
 
     export function stringValue(value: any): string {
@@ -496,22 +500,16 @@ export module Encoder {
 }
 
 export module Decoder {
+    export function valuesInOrder(query: any, prefix: string): string[] {
+        var regex = new RegExp("^" + prefix + "(\\d*)$");
 
-    export function asArray(queryPosition: string | string[]) {
-
-        if (typeof queryPosition == "string")
-            return [queryPosition as string];
-
-        return queryPosition as string[]
+        return Dic.getKeys(query).map(s => regex.exec(s))
+            .filter(r => !!r).orderBy(a => parseInt(a[1])).map(s => query[s[0]]);
     }
 
 
-    export function decodeFilters(filters: string | string[]): FilterOption[] {
-
-        if (!filters)
-            return undefined;
-        
-        return asArray(filters).map(val => {
+    export function decodeFilters(query: any): FilterOption[] {
+        return valuesInOrder(query, "filter").map(val => {
             var parts = val.split("~");
 
             return {
@@ -530,23 +528,17 @@ export module Decoder {
         return str.replace("#|#", "~");
     }
 
-    export function decodeOrders(orders: string): OrderOption[] {
-        
-        if (!orders)
-            return undefined;
+    export function decodeOrders(query: any): OrderOption[] {
 
-        return orders.split("~").map(val => ({
+        return valuesInOrder(query, "order").map(val => ({
             orderType: val[0] == "-" ? OrderType.Descending : OrderType.Ascending,
             columnName: val.tryAfter("-") || val
         }));
     }
 
-    export function decodeColumns(columns: string | string[]): ColumnOption[]{
+    export function decodeColumns(query: any): ColumnOption[]{
 
-        if (!columns)
-            return undefined;
-
-        return asArray(columns).map(val=> ({
+        return valuesInOrder(query, "column").map(val => ({
             columnName: val.tryBefore("~") || val,
             displayName: unscapeTildes(val.tryAfter("~"))
         }) as ColumnOption);
