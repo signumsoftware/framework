@@ -142,6 +142,7 @@
     <Compile Include="Chart\ChartController.cs" />
     <Compile Include="Chart\ChartServer.cs" />
     <Compile Include="Chart\UserChart\UserChartController.cs" />
+    <Compile Include="Files\FilesController.cs" />
     <Compile Include="Omnibox\OmniboxServer.cs" />
     <Compile Include="Omnibox\ReactSpecialOmniboxGenerator.cs" />
     <Compile Include="Omnibox\OmniboxController.cs" />
