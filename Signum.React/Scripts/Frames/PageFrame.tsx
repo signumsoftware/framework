@@ -60,7 +60,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
         const entitySettings = Navigator.getSettings(typeInfo.name);
 
-        return { entitySettings: entitySettings, typeInfo: typeInfo, component: null, modelState: null, pack: null } as PageFrameState;
+        return { entitySettings: entitySettings, typeInfo: typeInfo, component: null,  pack: null } as PageFrameState;
     }
 
     loadEntity(props: PageFrameProps): Promise<void> {
@@ -82,7 +82,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     loadComponent(): Promise<void> {
 
         const promise = this.props.component ? Promise.resolve(this.props.component) :
-            this.state.entitySettings.onGetComponent(this.state.pack.entity);
+            Navigator.getComponent(this.state.pack.entity);
 
         return promise
             .then(c => this.setState({ component: c }));

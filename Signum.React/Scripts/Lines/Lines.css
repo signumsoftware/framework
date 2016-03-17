@@ -24,6 +24,10 @@ p.form-control {
         height: initial !important;
     }
 
+     p.form-control.readonly {
+        overflow: hidden;
+    }
+
 .numeric {
     text-align: right;
 }
@@ -230,7 +234,7 @@ ul.nav-tabs {
 /*has-error*/
 
 .has-error {
-    border-color: #a94442;
+    border: 1px solid #a94442;
 }
 
 .form-group .form-group {

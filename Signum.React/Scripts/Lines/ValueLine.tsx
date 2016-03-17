@@ -13,7 +13,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     unitText?: string;
     formatText?: string;
     inlineCheckBox?: boolean;
-    comboBoxItems?: MemberInfo[];
+    comboBoxItems?: { name: string, niceName: string }[];
     valueHtmlProps?: React.HTMLAttributes;
 }
 
@@ -111,7 +111,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     static isDecimal(e: React.KeyboardEvent) {
         const c = e.keyCode;
-        return (this.isNumber(e) ||
+        return (ValueLine.isNumber(e) ||
             (c == 110) /*NumPad Decimal*/ ||
             (c == 190) /*.*/ ||
             (c == 188) /*,*/);
@@ -162,7 +162,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
 
 
     if (s.type.isNullable || s.ctx.value == null)
-        items = [{ name: "", niceName: " - " } as MemberInfo].concat(items);
+        items = [{ name: "", niceName: " - " }].concat(items);
 
     if (s.ctx.readOnly)
         return (
@@ -259,7 +259,7 @@ ValueLine.renderers[ValueLineType.Decimal as any] = (vl) => {
 };
 
 
-function numericTextBox(vl: ValueLine, handleKeyDown: React.KeyboardEventHandler) {
+function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) {
 
     const s = vl.state;
 
@@ -272,14 +272,20 @@ function numericTextBox(vl: ValueLine, handleKeyDown: React.KeyboardEventHandler
 
     const handleOnChange = (e: React.SyntheticEvent) => {
         const input = e.currentTarget as HTMLInputElement;
-        vl.setValue(parseFloat(input.value));
+        var result = input.value == null || input.value.length == 0 ? null : parseFloat(input.value);
+        vl.setValue(result);
     };
+
+    var handleKeyDownPreserve = (e: React.KeyboardEvent) => {
+        if (!validateKey(e))
+            e.preventDefault();
+    }
 
     return (
         <FormGroup ctx={s.ctx} title={s.labelText}>
             { ValueLine.withUnit(s.unitText,
                 <input {...vl.props.valueHtmlProps} type="textarea" className="form-control numeric" value={s.ctx.value} onChange={handleOnChange}
-                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null} onKeyDown={handleKeyDown}/>
+                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null} onKeyDown={handleKeyDownPreserve}/>
             ) }
         </FormGroup>
     );

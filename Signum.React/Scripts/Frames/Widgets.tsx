@@ -10,8 +10,8 @@ import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } f
 require("!style!css!./Widgets.css");
 
 export interface WidgetContext {
-    ctx: TypeContext<any>;
-    pack: EntityPack<any>;
+    ctx: TypeContext<ModifiableEntity>;
+    pack: EntityPack<ModifiableEntity>;
 }
 
 export const onWidgets: Array<(ctx: WidgetContext) => React.ReactElement<any>> = [];

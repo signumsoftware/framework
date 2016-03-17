@@ -40,6 +40,8 @@ export interface MemberInfo {
     isIgnored?: boolean;
     unit?: string;
     format?: string;
+    maxLength?: number;
+    isMultiline?: boolean;
     id?: any; //symbols
 }
 
@@ -309,9 +311,17 @@ export class Binding<T> implements IBinding<T> {
     }
 
     getValue(): T {
+
+        if (!this.parentValue)
+            throw new Error(`Impossible to get '${this.member}' from '${this.parentValue}'`); 
+
         return this.parentValue[this.member];
     }
     setValue(val: T) {
+
+        if (!this.parentValue)
+            throw new Error(`Impossible to set '${this.member}' from '${this.parentValue}'`);
+
         const oldVal = this.parentValue[this.member];
         this.parentValue[this.member] = val;
 
@@ -776,7 +786,7 @@ export class GraphExplorer {
             return false;
 
         if (obj instanceof Array)
-            return obj.some((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]"));
+            return obj.map((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]")).some(a => a);
 
         const mle = obj as MListElement<any>;
         if (mle.hasOwnProperty("rowId"))

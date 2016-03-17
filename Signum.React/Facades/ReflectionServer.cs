@@ -39,8 +39,12 @@ namespace Signum.React.Facades
 
         public static Dictionary<Assembly, HashSet<string>> EntityAssemblies;
 
+        public static ResetLazy<Dictionary<string, Type>> TypesByName = new ResetLazy<Dictionary<string, Type>>(
+            () => GetTypes().Where(t => typeof(ModifiableEntity).IsAssignableFrom(t)).ToDictionary(GetTypeName, "Types")); 
+
         public static void RegisterLike(Type type)
         {
+            TypesByName.Reset();
             EntityAssemblies.GetOrCreate(type.Assembly).Add(type.Namespace);
         }
 
@@ -147,7 +151,9 @@ namespace Signum.React.Facades
                                     Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                     IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
                                     Unit = p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName,
-                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type) : p.PropertyInfo?.PropertyType, p.TryGetImplementations())
+                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type) : p.PropertyInfo?.PropertyType, p.TryGetImplementations()),
+                                    IsMultiline = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
+                                    MaxLength = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                 }, p)),
 
                               Operations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
@@ -327,6 +333,10 @@ namespace Signum.React.Facades
         public string Format { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isIgnored")]
         public bool IsIgnored { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "maxLength")]
+        public int? MaxLength { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isMultiline")]
+        public bool IsMultiline { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
         public object Id { get; set; }
 

@@ -424,7 +424,7 @@ export class AjaxEntityAutocompleter implements EntityAutocompleter {
             this.lastXhr = $.ajax({
                 url: this.controllerUrl,
                 data: this.getData(term),
-                success: function (data: AutocompleteResult[]) {
+                success: (data: AutocompleteResult[]) => {
                     this.lastXhr = null;
                     var entities = data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text));
                     resolve(entities);

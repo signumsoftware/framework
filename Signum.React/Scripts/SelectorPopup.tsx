@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage } from './Signum.Entities'
-import * as Reflection from './Reflection'
+import { TypeInfo } from './Reflection'
 
 
 interface SelectorPopupProps extends React.Props<SelectorPopup>, IModalProps {
@@ -68,7 +68,7 @@ export default class SelectorPopup extends React.Component<SelectorPopupProps, {
             title={title || SelectorMessage.PleaseSelectAnElement.niceToString() } />);
     }
 
-    static chooseType(options: Reflection.TypeInfo[], title?: string): Promise<Reflection.TypeInfo> {
+    static chooseType(options: TypeInfo[], title?: string): Promise<TypeInfo> {
 
         return SelectorPopup.chooseElement(options,
             a => a.niceName,

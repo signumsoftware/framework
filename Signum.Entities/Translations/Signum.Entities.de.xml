@@ -216,7 +216,7 @@
     <Member Name="ThereAreChangesContinue" Description="Es gibt neue Änderungen, die verloren gehen.&#xD;&#xA;&#xD;&#xA;Trotzdem weiter?" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
   </Type>
-  <Type Name="OperationLogEntity" Description="Operation anmelden" PluralDescription="Operationen anmelden">
+  <Type Name="OperationLogEntity" Description="Operationen Protokoll" PluralDescription="Operationen Protokolle">
     <Member Name="Duration" Description="Dauer" />
     <Member Name="End" Description="Ende" />
     <Member Name="Exception" Description="Ausnahme" />
@@ -299,7 +299,7 @@
     <Member Name="AddFilter" Description="Filter hinzufügen" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Wählen Sie den Anzeigenamen der neuen Spalte" />
     <Member Name="Create" Description="Erstellen" />
-    <Member Name="CreateNew0_G" Description="Neu[m:en|f:a|n:es] {0} erstellen" />
+    <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />
     <Member Name="DeleteFilter" Description="Filter löschen" />
     <Member Name="Field" Description="Feld" />
     <Member Name="Filters" Description="Filter" />
@@ -384,8 +384,8 @@
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} sollte leer sein, wenn {1} nicht festgesetzt ist" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} sollte leer sein, wenn {1} festgesetzt ist" />
     <Member Name="_0ShouldBeOfType1" Description="{0} sollte vom Typ {1} sein" />
-    <Member Name="_0ShouldNotHaveBreakLines" Description="{0} sollte keine neuen Zeilen aufweisen." />
-    <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} darf keine abschließenden Leerzeichen haben." />
+    <Member Name="_0ShouldHaveJustOneLine" Description="{0} darf nur aus einer Zeile bestehen" />
+    <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} darf keine abschließenden Leerzeichen haben" />
     <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} sollte keine Leerzeichen an erster stelle haben" />
     <Member Name="Be" Description="sein " />
     <Member Name="BeA0_G" Description="ei[m:n|f:ne|n:n] {0} sein" />

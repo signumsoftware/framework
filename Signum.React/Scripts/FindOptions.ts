@@ -44,11 +44,13 @@ export function expandParentColumn(findOptions: FindOptions) {
         ...(fo.filterOptions || [])
     ];
     
-    if (!fo.parentColumn.contains(".") && fo.columnOptionsMode == null || fo.columnOptionsMode == ColumnOptionsMode.Remove) {
+    if (!fo.parentColumn.contains(".") && (fo.columnOptionsMode == null || fo.columnOptionsMode == ColumnOptionsMode.Remove)) {
         fo.columnOptions = [
             { columnName: fo.parentColumn },
             ...(fo.columnOptions || [])
         ];
+
+        fo.columnOptionsMode = ColumnOptionsMode.Remove;
     }
 
     if (fo.searchOnLoad == null)
@@ -64,7 +66,7 @@ export interface FilterOption {
     columnName: string;
     token?: QueryToken;
     frozen?: boolean;
-    operation: FilterOperation;
+    operation?: FilterOperation;
     value: any;
 }
 
@@ -112,6 +114,7 @@ export interface QueryToken {
     type: TypeReference;
     typeColor: string;
     niceTypeName: string;
+    isGroupable: boolean;
     filterType: FilterType;
     fullKey: string;
     queryTokenType?: QueryTokenType;
@@ -145,6 +148,7 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
         typeColor: cd.typeColor,
         niceTypeName: cd.niceTypeName,
         filterType: cd.filterType,
+        isGroupable: cd.isGroupable,
     };
 }
 
@@ -239,6 +243,7 @@ export interface ColumnDescription {
     unit?: string;
     format?: string;
     displayName: string;
+    isGroupable: boolean;
 }
 
 export function isList(fo: FilterOperation) {

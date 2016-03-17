@@ -120,7 +120,7 @@ namespace Signum.Entities
                 return AllowNulls ? null : ValidationMessage._0IsNotSet.NiceToString();
 
             if(!MultiLine && (val.Contains('\n') || val.Contains('\r')))
-                return ValidationMessage._0ShouldNotHaveBreakLines.NiceToString();
+                return ValidationMessage._0ShouldHaveJustOneLine.NiceToString();
 
             if (!AllowLeadingSpaces && Regex.IsMatch(val, @"^\s+"))
                 return ValidationMessage._0ShouldNotHaveInitialSpaces.NiceToString();
@@ -973,8 +973,8 @@ namespace Signum.Entities
         [Description("or be null")]
         OrBeNull,
         Telephone,
-        [Description("{0} should not have break lines")]
-        _0ShouldNotHaveBreakLines,
+        [Description("{0} should have just one line")]
+        _0ShouldHaveJustOneLine,
         [Description("{0} should not have initial spaces")]
         _0ShouldNotHaveInitialSpaces,
         [Description("{0} should not have final spaces")]

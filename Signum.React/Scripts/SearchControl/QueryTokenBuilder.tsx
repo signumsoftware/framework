@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import { DropdownList } from 'react-widgets';
 import 'react-widgets/lib/less/react-widgets.less';
-import { areEqual } from '../Globals'
+import { areEqual, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import { FilterOperation, FilterOption, QueryDescription, QueryToken, SubTokensOptions, getTokenParents } from '../FindOptions'
@@ -19,6 +19,7 @@ interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
     queryKey: string;
     subTokenOptions: SubTokensOptions;
     readOnly: boolean;
+    className?: string;
 }
 
 export default class QueryTokenBuilder extends React.Component<QueryTokenBuilderProps, {}>  {
@@ -26,9 +27,9 @@ export default class QueryTokenBuilder extends React.Component<QueryTokenBuilder
 
         const tokenList = getTokenParents(this.props.queryToken);
         tokenList.push(null);
-        
+
         return (
-            <div className="sf-query-token-builder">
+            <div className={classes("sf-query-token-builder", this.props.className) }>
                 {tokenList.map((a, i) => <QueryTokenPart key={i}
                     queryKey={this.props.queryKey}
                     readOnly={this.props.readOnly}
@@ -65,7 +66,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
     }
 
     componentWillReceiveProps(newProps: QueryTokenPartProps) {
-        if (!newProps.readOnly && !areEqual(this.props.parentToken, newProps.parentToken, a=> a.fullKey)) {
+        if (!newProps.readOnly && (!areEqual(this.props.parentToken, newProps.parentToken, a => a.fullKey) || this.props.subTokenOptions != newProps.subTokenOptions)) {
             this.setState({ data: null });
             this.requestSubTokens(newProps);
         }
@@ -77,8 +78,11 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
         ).done();
     }
 
+    getChildContext() {
+        return { parentToken: this.props.parentToken };
+    }
 
-
+    static childContextTypes: React.ValidationMap<QueryTokenOptionalItem> = { "parentToken": React.PropTypes.object };
 
     handleOnChange = (value: any) => {
         this.props.onTokenSelected(value || this.props.parentToken);
@@ -88,7 +92,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
 
         if (this.state.data != null && this.state.data.length == 0)
             return null;
-
+        
         return (
             <div className="sf-query-token-part">
                 <DropdownList
@@ -111,14 +115,16 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
 export class QueryTokenItem extends React.Component<{ item: QueryToken }, {}> {
     render() {
 
-        if (this.props.item == null)
+        var item = this.props.item;
+
+        if (item == null)
             return null;
 
         return (
             <span
-                style= {{ color: this.props.item.typeColor }}
-                title={this.props.item.niceTypeName}>
-                { this.props.item.toString }
+                style= {{ color: item.typeColor }}
+                title={item.niceTypeName}>
+                { item.toString }
             </span>
         );
     }
@@ -126,11 +132,27 @@ export class QueryTokenItem extends React.Component<{ item: QueryToken }, {}> {
   
 
 export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken }, {}> {
+
+    static contextTypes: React.ValidationMap<QueryTokenOptionalItem> = { "parentToken": React.PropTypes.object };
+
+
     render() {
 
-        if (this.props.item == null)
-            return <span> - </span>
 
-        return <QueryTokenItem {...this.props}/>;
+        var item = this.props.item;
+
+        if (item == null)
+            return <span> - </span>;
+
+        var parentToken = (this.context as any).parentToken;
+
+        return (
+            <span
+                style= {{ color: item.typeColor }}
+                title={item.niceTypeName}>
+                { ((item.parent && !parentToken) ? " > " : "") + item.toString }
+            </span>
+        );
+
     }
 }

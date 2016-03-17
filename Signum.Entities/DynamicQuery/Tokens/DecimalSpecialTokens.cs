@@ -96,7 +96,7 @@ namespace Signum.Entities.DynamicQuery
             return new StepToken(this.Parent.Clone(), this.StepSize);
         }
 
-        public override bool IsRealGroupable
+        public override bool IsGroupable
         {
             get { return true; }
         }
@@ -185,7 +185,7 @@ namespace Signum.Entities.DynamicQuery
             return this.Parent.IsAllowed();
         }
 
-        public override bool IsRealGroupable
+        public override bool IsGroupable
         {
             get { return true; }
         }
@@ -271,7 +271,7 @@ namespace Signum.Entities.DynamicQuery
             return new StepRoundingToken((StepMultiplierToken)this.Parent.Clone(), this.Rounding);
         }
 
-        public override bool IsRealGroupable
+        public override bool IsGroupable
         {
             get { return true; }
         }

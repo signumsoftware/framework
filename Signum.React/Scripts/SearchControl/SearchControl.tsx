@@ -92,7 +92,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     componentWillReceiveProps(newProps: SearchControlProps) {
-        if (JSON.stringify(this.props.findOptions) == JSON.stringify(newProps.findOptions))
+        if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions))
             return;
 
         this.setState(this.initialState(newProps.findOptions.queryName));
@@ -100,9 +100,13 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.initialLoad(newProps.findOptions);
     }
 
+    stringify(findOptions: FindOptions) {
+        return Finder.findOptionsPath((findOptions));
+    }
+
     initialLoad(propsFindOptions: FindOptions) {
 
-        Finder.API.getQueryDescription(propsFindOptions.queryName).then(qd => {
+        Finder.getQueryDescription(propsFindOptions.queryName).then(qd => {
 
             this.setState({
                 queryDescription: qd,
@@ -600,30 +604,29 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     handleHeaderClick = (e: React.MouseEvent) => {
 
-        const token = (e.currentTarget as HTMLElement).getAttribute("data-column-name")
-
-        const prev = this.state.findOptions.orderOptions.filter(a => a.token.fullKey == token).firstOrNull();
+        const token = (e.currentTarget as HTMLElement).getAttribute("data-column-name");
+        var fo = this.state.findOptions;
+        const prev = fo.orderOptions.filter(a => a.token.fullKey == token).firstOrNull();
 
         if (prev != null) {
             prev.orderType = prev.orderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending;
             if (!e.shiftKey)
-                this.state.findOptions.orderOptions = [prev];
+                fo.orderOptions = [prev];
 
         } else {
 
-            const column = this.state.findOptions.columnOptions.filter(a => a.token.fullKey == token).first("Column");
+            const column = fo.columnOptions.filter(a => a.token.fullKey == token).first("Column");
 
             const newOrder: OrderOption = { token: column.token, orderType: OrderType.Ascending, columnName: column.token.fullKey };
 
             if (e.shiftKey)
-                this.state.findOptions.orderOptions.push(newOrder);
+                fo.orderOptions.push(newOrder);
             else
-                this.state.findOptions.orderOptions = [newOrder];
+                fo.orderOptions = [newOrder];
         }
+        
 
-        //this.setState({ resultTable: null });
-
-        if (this.state.findOptions.pagination.mode != PaginationMode.All)
+        if (fo.pagination.mode != PaginationMode.All)
             this.handleSearch();
     }
 

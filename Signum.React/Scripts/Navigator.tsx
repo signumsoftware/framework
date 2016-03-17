@@ -15,7 +15,7 @@ import { ViewReplacer } from  './Frames/ReactVisitor'
 export let NotFound: __React.ComponentClass<any>;
 
 export let currentUser: IEntity;
-export let currentHistory: HistoryModule.History & HistoryModule.HistoryQueries;
+export let currentHistory: HistoryModule.History;
 
 
 
@@ -78,6 +78,19 @@ export function getSettings(type: PseudoType): EntitySettingsBase<ModifiableEnti
 }
 
 
+export function getComponent<T extends ModifiableEntity>(entity: T): Promise<React.ComponentClass<EntityComponentProps<T>>> {
+
+    var settings = getSettings(entity.Type);
+
+    if (settings == null)
+        throw new Error(`No settings for '${entity.Type}'`);
+
+    if (settings.getComponent == null)
+        throw new Error(`No getComponent set for settings for '${entity.Type}'`);
+
+    return settings.getComponent(entity).then(a => a.default);
+}
+
 export const isCreableEvent: Array<(typeName: string) => boolean> = [];
 
 export function isCreable(type: PseudoType, isSearch?: boolean) {
@@ -87,6 +100,17 @@ export function isCreable(type: PseudoType, isSearch?: boolean) {
     const es = entitySettings[typeName];
     
     return (es == null || isSearch == null || es.onIsCreable(isSearch)) &&  isCreableEvent.every(f => f(typeName));
+}
+
+export const isReadonlyEvent: Array<(typeName: string) => boolean> = [];
+
+export function isReadOnly(type: PseudoType, isSearch?: boolean) {
+
+    const typeName = getTypeName(type);
+
+    const es = entitySettings[typeName];
+
+    return (es == null || es.onIsReadonly()) && isReadonlyEvent.every(f => f(typeName));
 }
 
 export const isFindableEvent: Array<(typeName: string) => boolean> = []; 
@@ -272,10 +296,6 @@ export abstract class EntitySettingsBase<T extends ModifiableEntity> {
 
     getComponent: (entity: T) => Promise<{ default: React.ComponentClass<EntityComponentProps<T>> }>;
 
-    onGetComponent(entity: ModifiableEntity): Promise<React.ComponentClass<EntityComponentProps<T>>> {
-        return this.getComponent(entity as T).then(a => a.default);
-    }
-
     viewOverrides: Array<(replacer: ViewReplacer<T>) => void>;
 
     overrideView(override: (replacer: ViewReplacer<T>) => void) {
@@ -442,11 +462,7 @@ export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySe
         return this.isReadOnly;
     }
 
-    onGetComponent(entity: ModifiableEntity): Promise<React.ComponentClass<EntityComponentProps<T>>> {
-        return this.getComponent(entity as T).then(a=> a.default);;
-    }
 }
-
 
 export enum EntityWhen {
     Always = "Always" as any,
@@ -455,5 +471,26 @@ export enum EntityWhen {
     Never = "Never" as any,
 }
 
+declare global {
+    interface String {
+        formatHtml(...parameters: any[]): React.ReactElement<any>;
+    }
+}
 
+String.prototype.formatHtml = function () {
+    const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
+
+    const args = arguments;
+
+    const parts = this.split(regex);
+
+    const result = [];
+    for (let i = 0; i < parts.length - 4; i += 4) {
+        result.push(parts[i]);
+        result.push(args[parts[i + 1]]);
+    }
+    result.push(parts[parts.length - 1]);
+
+    return React.createElement("span", null, ...result);
+};
 

@@ -1,7 +1,7 @@
 ﻿
-Array.prototype.groupByArray = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
+Array.prototype.groupBy = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
     const result: { key: string; elements: any[] }[] = [];
-    const objectGrouped = this.groupByObject(keySelector);
+    const objectGrouped = this.groupToObject(keySelector);
     for (const prop in objectGrouped) {
         if (objectGrouped.hasOwnProperty(prop))
             result.push({ key: prop, elements: objectGrouped[prop] });
@@ -9,7 +9,7 @@ Array.prototype.groupByArray = function (keySelector: (element: any) => string):
     return result;
 };
 
-Array.prototype.groupByObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
+Array.prototype.groupToObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
     const result: { [key: string]: any[] } = {};
 
     for (let i = 0; i < this.length; i++) {
@@ -19,6 +19,62 @@ Array.prototype.groupByObject = function (keySelector: (element: any) => string)
             result[key] = [];
         result[key].push(element);
     }
+    return result;
+};
+
+Array.prototype.groupWhen = function (isGroupKey: (element: any) => boolean, includeKeyInGroup = false, initialGroup = false): {key: any, elements: any[]}[] {
+    const result: {key: any, elements: any[]}[] = [];
+
+    let group: {key: any, elements: any[]} = null;
+
+    for (let i = 0; i < this.length; i++) {
+        const item: any = this[i];
+        if (isGroupKey(item))
+        {
+            group = { key: item, elements : includeKeyInGroup? [item]: []};
+            result.push(group);
+        }
+        else
+        {
+            if (group == null)
+            {
+                if(!initialGroup)
+                    throw new Error("Parameter initialGroup is false");
+
+                group = { key: null, elements : []};
+                result.push(group);
+            }
+
+            group.elements.push(item);
+        }
+    }
+    return result;
+};
+
+Array.prototype.groupWhenChange = function (getGroupKey: (element: any) => string): {key: string, elements: any[]}[] {
+    const result: {key: any, elements: any[]}[] = [];
+
+    let current: {key: string, elements: any[]} = null;
+    for (let i = 0; i < this.length; i++) {
+        const item: any = this[i];
+        if (current == null)
+        {
+            current =  { key: getGroupKey(getGroupKey(item)), elements : [item]};
+        }
+        else if (current.key == getGroupKey(item))
+        {
+            current.elements.push(item);
+        }
+        else
+        {
+            result.push(current);
+            current = { key: getGroupKey(item), elements: [item]};
+        }
+    }
+
+    if (current != null)
+         result.push(current);
+
     return result;
 };
 
@@ -88,6 +144,28 @@ Array.prototype.flatMap = function (selector: (element: any, index: number, arra
 
     return result;
 };
+
+Array.prototype.groupsOf = function (maxCount: number) {
+
+    var array = this as [];
+
+    var result: any[][] = [];
+    var newList: any[] = [];
+
+    array.map(item => {
+        newList.push(item);
+        if (newList.length == maxCount) {
+            result.push(newList);
+            newList = [];
+        }
+    });
+
+    if (newList.length != 0)
+        result.push(newList);
+
+    return result;
+
+}
 
 Array.prototype.max = function () {
     return Math.max.apply(null, this);
@@ -217,6 +295,16 @@ Array.range = function (min, max) {
     return result;
 }
 
+Array.repeat = function (count, val) {
+    
+    const result = new Array(count);
+    for (let i = 0; i < count; i++) {
+        result[i] = val;
+    }
+
+    return result;
+}
+
 String.prototype.contains = function (str) {
     return this.indexOf(str) !== -1;
 }
@@ -243,22 +331,6 @@ String.prototype.formatWith = function () {
     });
 };
 
-String.prototype.formatHtml = function () {
-    const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
-
-    const args = arguments;
-
-    const parts = this.split(regex);
-
-    const result = [];
-    for (let i = 0; i < parts.length - 4; i += 4) {
-        result.push(parts[i]);
-        result.push(args[parts[i + 1]]);
-    }
-    result.push(parts[parts.length - 1]);
-
-    return result;
-};
 
 String.prototype.forGenderAndNumber = function (gender: any, number?: number) {
 
@@ -529,6 +601,14 @@ export function areEqual<T>(a: T, b: T, field: (value: T) => any) {
         return false;
 
     return field(a) == field(b);
+}
+
+export function ifError<E extends Error, T>(ErrorClass: { new (...args: any[]): E }, onError: (error: E) => T): (error: any) => T {
+    return error => {
+        if (error instanceof ErrorClass)
+            return onError((error as E));
+        throw error;
+    };
 }
 
 export module DomUtils {

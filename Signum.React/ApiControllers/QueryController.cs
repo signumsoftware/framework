@@ -138,7 +138,7 @@ namespace Signum.React.ApiControllers
             {
                 QueryName = qn,
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
-                Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd)).ToList(),
+                Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false)).ToList(),
                 Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd)).ToList(),
                 Pagination = this.pagination.ToPagination()
             };
@@ -150,9 +150,9 @@ namespace Signum.React.ApiControllers
         public string token;
         public OrderType orderType;
 
-        public Order ToOrder(QueryDescription qd)
+        public Order ToOrder(QueryDescription qd, bool canAggregate)
         {
-            return new Order(QueryUtils.Parse(this.token, qd, SubTokensOptions.CanElement), orderType);
+            return new Order(QueryUtils.Parse(this.token, qd, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0)), orderType);
         }
     }
 
@@ -162,7 +162,7 @@ namespace Signum.React.ApiControllers
         public FilterOperation operation;
         public object value;
 
-        internal Filter ToFilter(QueryDescription qd, bool canAggregate)
+        public Filter ToFilter(QueryDescription qd, bool canAggregate)
         {
             var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
             var parsedToken = QueryUtils.Parse(token, qd, options);
@@ -235,7 +235,8 @@ namespace Signum.React.ApiControllers
         public FilterType? filterType;
         public string unit;
         public string format;
-        public string displayName; 
+        public string displayName;
+        public bool isGroupable;
 
         public ColumnDescriptionTS(ColumnDescription a, object queryName)
         {
@@ -246,6 +247,7 @@ namespace Signum.React.ApiControllers
             this.filterType = QueryUtils.TryGetFilterType(a.Type);
             this.typeColor = token.TypeColor;
             this.niceTypeName = token.NiceTypeName;
+            this.isGroupable = token.IsGroupable;
             this.unit = a.Unit;
             this.format = a.Format;
             this.displayName = a.DisplayName;
@@ -267,6 +269,7 @@ namespace Signum.React.ApiControllers
             this.typeColor = qt.TypeColor;
             this.niceTypeName = qt.NiceTypeName;
             this.queryTokenType = GetQueryTokenType(qt);
+            this.isGroupable = qt.IsGroupable;
             if (recursive && qt.Parent != null)
                 this.parent = new QueryTokenTS(qt.Parent, recursive);
         }
@@ -304,6 +307,7 @@ namespace Signum.React.ApiControllers
         public FilterType? filterType;
         public string format;
         public string unit;
+        public bool isGroupable;
         public QueryTokenTS parent; 
     }
 

@@ -4,6 +4,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
+using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
@@ -65,7 +66,7 @@ namespace Signum.React.Json
 
         public override string ToString()
         {
-            return this.PropertyValidator.PropertyInfo.Name;
+            return this.PropertyValidator?.PropertyInfo.Name;
         }
     }
 
@@ -325,19 +326,23 @@ namespace Signum.React.Json
         public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             IdentityInfo identityInfo = ReadIdentityInfo(reader);
-
-            identityInfo.AssertIsNewId(reader.Path);
             
             Type type = GetEntityType(identityInfo.Type, objectType);
 
             if (identityInfo.IsNew == true)
-                return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
+            {
+                var result = (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
+
+                if (identityInfo.Id != null)
+                    ((Entity)result).Id = PrimaryKey.Parse(identityInfo.Id, type);
+
+                return result;
+            }
 
             if (typeof(Entity).IsAssignableFrom(type))
             {
                 if (identityInfo.Id == null)
                     throw new JsonSerializationException($"Missing Id and IsNew for {identityInfo} ({reader.Path})");
-
 
                 var id = PrimaryKey.Parse(identityInfo.Id, type);
                 if (existingValue != null && existingValue.GetType() == type)
@@ -413,12 +418,6 @@ namespace Signum.React.Json
             public string ToStr;
             public long? Ticks;
 
-            public void AssertIsNewId(string path)
-            {
-                if (IsNew == true && Id != null)
-                    throw new JsonSerializationException($"An entity of type '{ToStr}' is new but has id '({path})'");
-            }
-
             public override string ToString()
             {
                 var newOrId = IsNew == true ? "New" : Id;
@@ -432,21 +431,13 @@ namespace Signum.React.Json
 
         public Type GetEntityType(string typeStr, Type objectType)
         {
-            var type = TypeLogic.TryGetType(typeStr);
-            if (type == null)
-            {
-                if (typeStr != objectType.Name)
-                    throw new JsonSerializationException($"Type '{typeStr}' is not an Entity and is not the expected type ('{objectType.TypeName()}')");
+            var type = ReflectionServer.TypesByName.Value.GetOrThrow(typeStr);
 
-                return objectType;
-            }
-            else
-            {
-                if (!objectType.IsAssignableFrom(type))
-                    throw new JsonSerializationException($"Type '{type.Name}' is not assignable to '{objectType.TypeName()}'");
+            if (!objectType.IsAssignableFrom(type))
+                throw new JsonSerializationException($"Type '{type.Name}' is not assignable to '{objectType.TypeName()}'");
 
-                return type;
-            }
+            return type;
+
         }
     }
 }
