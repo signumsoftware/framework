@@ -22,7 +22,7 @@ namespace Signum.Web.PortableAreas
         public StaticContentResult(byte[] uncompressedContent, string fileName)
         {
             this.FileName = fileName;
-            this.ContentType = MimeType.FromFileName(fileName);
+            this.ContentType = MimeMapping.GetMimeMapping(fileName);
             this.Uncompressed = uncompressedContent;
         }
 
