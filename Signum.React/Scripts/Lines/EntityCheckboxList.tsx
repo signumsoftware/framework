@@ -98,7 +98,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         if (entity.Type)
             return toLite(entity, entity.isNew);
 
-        return entity as Lite<Entity>;
+        return entityOrLite as Lite<Entity>;
     }
 
     renderInternal() {

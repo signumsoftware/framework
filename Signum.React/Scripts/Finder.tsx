@@ -426,7 +426,7 @@ export module API {
     }
 
     export function findAllEntities(request: { types: string }): Promise<IEntity[]> {
-        return ajaxGet<Lite<IEntity>[]>({
+        return ajaxGet<IEntity[]>({
             url: currentHistory.createHref({ pathname: "api/query/findAllEntities", query: request })
         });
     }

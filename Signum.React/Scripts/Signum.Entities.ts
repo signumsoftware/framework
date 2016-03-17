@@ -4,7 +4,7 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection' 
 
 export interface ModifiableEntity {
-    Type?: string;
+	Type: string;
     toStr?: string;	
     modified? : boolean;
     isNew?: boolean;
@@ -12,7 +12,7 @@ export interface ModifiableEntity {
 }
 
 export interface IEntity {
-    Type?: string;
+    Type: string;
     id?: any;
     ticks?: string; //max value
     toStr?: string;
