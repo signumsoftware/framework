@@ -31,6 +31,7 @@ interface Array<T> {
     toObjectDistinct(keySelector: (element: T) => string): { [key: string]: T };
     toObjectDistinct<V>(keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     flatMap<R>(selector: (element: T, index: number, array: T[]) => R[]): R[];
+    clear(): void;
     groupsOf(maxCount: number): T[][];
     max(): T;
     min(): T;

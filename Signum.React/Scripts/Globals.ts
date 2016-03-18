@@ -1,4 +1,8 @@
 ﻿
+Array.prototype.clear = function (): void {
+    (this as any[]).length = 0;
+};
+
 Array.prototype.groupBy = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
     const result: { key: string; elements: any[] }[] = [];
     const objectGrouped = this.groupToObject(keySelector);
