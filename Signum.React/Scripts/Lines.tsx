@@ -56,7 +56,7 @@ export interface EntityFrame<T extends ModifiableEntity> {
 
 export interface EntityComponentProps<T extends ModifiableEntity> {
     ctx: TypeContext<T>;
-    frame: EntityFrame<T>;
+    frame?: EntityFrame<T>;
 }
 
 export abstract class EntityComponentWithState<T extends ModifiableEntity, S> extends React.Component<EntityComponentProps<T>, S>{
