@@ -668,9 +668,10 @@ export class PropertyRoute {
           
                 const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations");
                 if (ti) {
-                    const m = ti.members[member.name];
+                    const memberName = member.name.firstUpper();
+                    const m = ti.members[memberName];
                     if (!m)
-                        throw new Error(`member '${member.name}' not found`);
+                        throw new Error(`member '${memberName}' not found`);
 
                     return PropertyRoute.member(PropertyRoute.root(ti), m);
                 }
