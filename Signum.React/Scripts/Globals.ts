@@ -563,7 +563,7 @@ export module Dic {
         const result = {};
 
         for (const key in obj) {
-            if (toRemove.hasOwnProperty(key) && !toRemove.hasOwnProperty(key))
+            if (!toRemove.hasOwnProperty(key))
                 result[key] = obj[key];
             else
                 toRemove[key] = obj[key];
