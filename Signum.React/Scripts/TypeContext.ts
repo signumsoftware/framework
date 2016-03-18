@@ -1,4 +1,5 @@
-﻿import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type } from './Reflection'
+﻿import * as React from 'react'
+import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type } from './Reflection'
 import { ModelState, MList, ModifiableEntity } from './Signum.Entities'
 
 export enum FormGroupStyle {
@@ -215,6 +216,11 @@ export class TypeContext<T> extends StyleContext {
             throw new Error(`No '${type.typeName}' found in the parent chain`);
 
         return result;
+    }
+
+
+    using(render: (ctx: this) => React.ReactChild): React.ReactChild {
+        return render(this);
     }
 }
 

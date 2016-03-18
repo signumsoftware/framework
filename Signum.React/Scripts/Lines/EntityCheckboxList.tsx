@@ -137,8 +137,10 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
             <label className="sf-checkbox-element" key={i}>
                 <input type="checkbox"
                     checked={this.state.ctx.value.some(mle => is(mle.element as Entity | Lite<Entity>, lite)) }
+                    disabled={this.state.ctx.readOnly}
                     name={liteKey(lite) }
                     onChange={e => this.handleOnChange(e, lite) }  />
+                &nbsp;
                 <span className="sf-entitStrip-link">{lite.toStr}</span>
             </label>);
 
