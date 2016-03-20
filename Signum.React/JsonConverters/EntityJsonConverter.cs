@@ -9,11 +9,13 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Web;
+using System.Runtime.InteropServices;
 
 namespace Signum.React.Json
 {
@@ -301,9 +303,16 @@ namespace Signum.React.Json
                 {
                     object newValue = serializer.DeserializeValue(reader, pi.PropertyType, oldValue);
 
-                    if (entity.IsGraphModified) //Only apply changes if the client notifies it, to avoid regressions
+                    if (!IsEquals(newValue, oldValue))
                     {
-                        if (!object.Equals(newValue, oldValue))
+                        if (!entity.IsGraphModified)
+                        {
+                            //Only apply changes if the client notifies it, to avoid regressions
+                            if (Debugger.IsAttached)
+                                throw new InvalidOperationException($"'modified' is not set but '{pi.Name}' is modified");
+
+                        }
+                        else
                         {
                             AssertCanWrite(pr);
                             pc.SetValue(entity, newValue);
@@ -313,7 +322,14 @@ namespace Signum.React.Json
             }
         }
 
-     
+        private bool IsEquals(object newValue, object oldValue)
+        {
+            if (newValue is byte[] && oldValue is byte[])
+                return MemCompare.Compare((byte[])newValue, (byte[])oldValue);
+
+            return object.Equals(newValue, oldValue);
+        }
+
 
         public static Func<PropertyRoute, string> CanWritePropertyRoute;
         public static void AssertCanWrite(PropertyRoute pr)
@@ -438,6 +454,20 @@ namespace Signum.React.Json
 
             return type;
 
+        }
+    }
+
+
+    static class MemCompare
+    {
+        [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
+        static extern int memcmp(byte[] b1, byte[] b2, long count);
+
+        public static bool Compare(byte[] b1, byte[] b2)
+        {
+            // Validate buffers are the same length.
+            // This also ensures that the count does not exceed the length of either buffer.  
+            return b1.Length == b2.Length && memcmp(b1, b2, b1.Length) == 0;
         }
     }
 }
