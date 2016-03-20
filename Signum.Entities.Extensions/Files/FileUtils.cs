@@ -50,7 +50,9 @@ namespace Signum.Entities.Files
         ViewFile,
         [Description("Viewing has no default implementation for {0}")]
         ViewingHasNotDefaultImplementationFor0,
-        OnlyOneFileIsSupported
+        OnlyOneFileIsSupported,
+        [Description("drag a file here")]
+        DragAndDropHere, 
     }
 
 

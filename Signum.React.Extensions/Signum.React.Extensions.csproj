@@ -157,7 +157,6 @@
   <ItemGroup>
     <Content Include="Chart\Chart.css" />
     <Content Include="Files\Files.css" />
-    <Content Include="Files\loading.gif" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

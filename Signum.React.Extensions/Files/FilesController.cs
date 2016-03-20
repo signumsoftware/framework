@@ -16,36 +16,64 @@ using Signum.Entities.Omnibox;
 using Signum.Entities.Files;
 using Signum.Engine;
 using System.Web;
+using Signum.Engine.Files;
+using System.IO;
 
 namespace Signum.React.Files
 {
     public class FilesController : ApiController
     {
-        [Route("api/files/downloadFile"), HttpGet]
-        public HttpResponseMessage DownloadFile(Lite<FileEntity> file)
+        [Route("api/files/downloadFile/{fileId}"), HttpGet]
+        public HttpResponseMessage DownloadFile(string fileId)
         {
-            var entity = file.Retrieve();
+            var file = Database.Retrieve<FileEntity>(PrimaryKey.Parse(fileId, typeof(FileEntity)));
 
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var stream = new System.IO.MemoryStream(entity.BinaryFile);
+            var stream = new System.IO.MemoryStream(file.BinaryFile);
             response.Content = new StreamContent(stream);
 
-            var mime = MimeMapping.GetMimeMapping(entity.FileName);
+            var mime = MimeMapping.GetMimeMapping(file.FileName);
             response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mime);
 
             return response;
         }
 
-        [Route("api/files/downloadFilePath"), HttpGet]
-        public HttpResponseMessage DownloadFilePath(Lite<FilePathEntity> file)
+        [Route("api/files/downloadFilePath/{filePathId}"), HttpGet]
+        public HttpResponseMessage DownloadFilePath(string filePathId)
         {
-            var entity = file.Retrieve();
+            var filePath = Database.Retrieve<FilePathEntity>(PrimaryKey.Parse(filePathId, typeof(FilePathEntity)));
 
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var stream = new System.IO.MemoryStream(entity.BinaryFile);
+            var stream = File.OpenRead(filePath.FullPhysicalPath);
             response.Content = new StreamContent(stream);
 
-            var mime = MimeMapping.GetMimeMapping(entity.FileName);
+            var mime = MimeMapping.GetMimeMapping(filePath.FileName);
+            response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mime);
+
+            return response;
+        }
+
+        [Route("api/files/downloadEmbeddedFilePath/{fileType}"), HttpGet]
+        public HttpResponseMessage DownloadEmbeddedFilePath(string fileTypeKey, string suffix, string fileName)
+        {
+            var fileType = SymbolLogic<FileTypeSymbol>.ToSymbol(fileTypeKey);
+
+            var virtualFile = new EmbeddedFilePathEntity(fileType)
+            {
+                Suffix = suffix,
+                FileName = fileName
+            };
+
+            var pair = FileTypeLogic.FileTypes.GetOrThrow(fileType).GetPrefixPair(virtualFile);
+
+            var fullPhysicalPath = Path.Combine(pair.PhysicalPrefix, suffix);
+            
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+
+            var stream = File.OpenRead(fullPhysicalPath);
+            response.Content = new StreamContent(stream);
+
+            var mime = MimeMapping.GetMimeMapping(fullPhysicalPath);
             response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mime);
 
             return response;

@@ -10,6 +10,25 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 import * as Patterns from '../../../Framework/Signum.React/Scripts/Signum.Entities.Patterns' 
 
 
+export interface IFile
+{
+    binaryFile: string;
+    fileName: string 
+    fullWebPath : string 
+}
+
+export interface FileEntity extends IFile { }
+export interface EmbeddedFileEntity extends IFile { }
+
+export interface IFilePath extends IFile
+{
+   fullPhysicalPath : string
+   fileType: FileTypeSymbol 
+   suffix : string
+}
+
+export interface FilePathEntity extends IFilePath { }
+export interface EmbeddedFilePathEntity extends IFilePath { }
 export const EmbeddedFileEntity = new Type<EmbeddedFileEntity>("EmbeddedFileEntity");
 export interface EmbeddedFileEntity extends Entities.EmbeddedEntity {
     fileName: string;
@@ -52,6 +71,7 @@ export module FileMessage {
     export const ViewFile = new MessageKey("FileMessage", "ViewFile");
     export const ViewingHasNotDefaultImplementationFor0 = new MessageKey("FileMessage", "ViewingHasNotDefaultImplementationFor0");
     export const OnlyOneFileIsSupported = new MessageKey("FileMessage", "OnlyOneFileIsSupported");
+    export const DragAndDropHere = new MessageKey("FileMessage", "DragAndDropHere");
 }
 
 export const FilePathEntity = new Type<FilePathEntity>("FilePath");
