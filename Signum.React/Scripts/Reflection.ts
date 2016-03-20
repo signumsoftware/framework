@@ -451,7 +451,10 @@ export class Type<T extends ModifiableEntity> implements IType {
     New(modify?: (entity: T) => void): T {
 
         var result = { Type: this.typeName, isNew: true, modified: true } as any as T;
-        
+
+        if (modify)
+            modify(result);
+
         return result;
     }
 
