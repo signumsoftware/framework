@@ -71,8 +71,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
         const hasValue = !!this.state.ctx.value;
 
-        const lite = this.getLite();
-
+       
         var buttons = (
             <span className="input-group-btn">
                 {!hasValue && this.renderCreateButton(true) }
@@ -89,15 +88,31 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
             <FormGroup ctx={this.state.ctx} title={this.state.labelText}>
                 <div className="SF-entity-combo">
                     <div className={buttons ? "input-group" : null}>
-                        <select className="form-control" onChange={this.handleOnChange} value={liteKey(lite) || "" }>
-                            {this.renderOptions()}
-                        </select>
-                        {buttons}
+                        { this.renderSelect() }
+                        { buttons }
                     </div>
                 </div>
             </FormGroup>
         );
     }
+
+
+    renderSelect() {
+
+        const lite = this.getLite();
+
+        var ctx = this.state.ctx;
+
+        if (ctx.readOnly)
+            return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
+
+        return (
+            <select className="form-control" onChange={this.handleOnChange} value={liteKey(lite) || ""} disabled={ctx.readOnly}>
+                {this.renderOptions() }
+            </select>
+        );
+    }
+
 
     renderOptions() {
 

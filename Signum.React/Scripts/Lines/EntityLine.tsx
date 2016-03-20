@@ -83,9 +83,12 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     }
 
     renderAutoComplete() {
-        
-        if (!this.state.autoComplete || this.state.ctx.readOnly)
-            return <FormControlStatic ctx={this.state.ctx}></FormControlStatic>;
+
+
+        var ctx = this.state.ctx;
+
+        if (!this.state.autoComplete || ctx.readOnly)
+            return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
 
         return (
             <Typeahead
