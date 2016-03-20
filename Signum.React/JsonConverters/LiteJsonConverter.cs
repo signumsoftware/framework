@@ -75,17 +75,17 @@ namespace Signum.React.Json
 
             Type type = TypeLogic.GetType(typeStr);
 
-            PrimaryKey? id = idObj == null ? (PrimaryKey?)null : PrimaryKey.Parse(idObj, type);
+            PrimaryKey? idOrNull = idObj == null ? (PrimaryKey?)null : PrimaryKey.Parse(idObj, type);
 
             if (entity == null)
-                return Lite.Create(type, id.Value, toString);
+                return Lite.Create(type, idOrNull.Value, toString);
 
             var result = entity.ToLite(entity.IsNew, toString);
 
             if (result.EntityType != type)
                 throw new InvalidOperationException("Types don't match");
 
-            if (result.Id != id)
+            if (result.IdOrNull != idOrNull)
                 throw new InvalidOperationException("Id's don't match");
 
            return result;
