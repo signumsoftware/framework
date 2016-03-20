@@ -263,7 +263,7 @@ namespace Signum.Engine.CodeGeneration
             foreach (var gr in mod.Types.GroupBy(a => a.Namespace))
             {
                 sb.AppendLine("import { "
-                    + gr.Select(t => t.Name + "_Type").GroupsOf(5).ToString(a => a.ToString(", "), ",\r\n")
+                    + gr.Select(t => t.Name).GroupsOf(5).ToString(a => a.ToString(", "), ",\r\n")
                     + " } from './" + gr.Key + "'");
             }
 
@@ -352,7 +352,7 @@ namespace Signum.Engine.CodeGeneration
         {
             var v = GetVarName(type);
 
-            return "Navigator.addSettings(new {0}({1}_Type, {2} => new Promise(resolve => require(['./Templates/{3}'], resolve))));".FormatWith(
+            return "Navigator.addSettings(new {0}({1}, {2} => new Promise(resolve => require(['./Templates/{3}'], resolve))));".FormatWith(
                 type.IsEmbeddedEntity() ? "EmbeddedEntitySettings" : "EntitySettings",
                 type.Name, v, GetViewName(type));
         }
