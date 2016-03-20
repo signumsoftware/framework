@@ -154,6 +154,18 @@ export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customV
 }
 
 
+export function applyViewOverrides(ctx: TypeContext<ModifiableEntity>, view: React.ReactElement<any>): React.ReactElement<any> {
+
+    var es = getSettings(ctx.value.Type);
+
+    if (es && es.viewOverrides && es.viewOverrides.length) {
+        var replacer = new ViewReplacer(view, ctx);
+        es.viewOverrides.forEach(vo => vo(replacer));
+        return replacer.result;
+    }
+
+    return view;
+}
 
 export interface ViewOptions {
     entity: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
