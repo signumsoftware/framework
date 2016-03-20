@@ -12,14 +12,13 @@ import * as Processes from '../Processes/Signum.Entities.Processes'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
 
-export enum MessageLengthExceeded {
-    NotAllowed = "NotAllowed" as any,
-    Allowed = "Allowed" as any,
-    TextPruning = "TextPruning" as any,
-}
-export const MessageLengthExceeded_Type = new EnumType<MessageLengthExceeded>("MessageLengthExceeded", MessageLengthExceeded);
+export const MessageLengthExceeded = new EnumType<MessageLengthExceeded>("MessageLengthExceeded");
+export type MessageLengthExceeded =
+    "NotAllowed" |
+    "Allowed" |
+    "TextPruning";
 
-export const MultipleSMSModel_Type = new Type<MultipleSMSModel>("MultipleSMSModel");
+export const MultipleSMSModel = new Type<MultipleSMSModel>("MultipleSMSModel");
 export interface MultipleSMSModel extends Entities.ModelEntity {
     message: string;
     from: string;
@@ -38,12 +37,12 @@ export module SMSCharactersMessage {
     export const Replacements = new MessageKey("SMSCharactersMessage", "Replacements");
 }
 
-export const SMSConfigurationEntity_Type = new Type<SMSConfigurationEntity>("SMSConfigurationEntity");
+export const SMSConfigurationEntity = new Type<SMSConfigurationEntity>("SMSConfigurationEntity");
 export interface SMSConfigurationEntity extends Entities.EmbeddedEntity {
     defaultCulture: ExBasics.CultureInfoEntity;
 }
 
-export const SMSMessageEntity_Type = new Type<SMSMessageEntity>("SMSMessage");
+export const SMSMessageEntity = new Type<SMSMessageEntity>("SMSMessage");
 export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
     template: Entities.Lite<SMSTemplateEntity>;
     message: string;
@@ -77,23 +76,22 @@ export module SMSMessageProcess {
     export const UpdateStatus : Processes.ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "SMSMessageProcess.UpdateStatus" });
 }
 
-export enum SMSMessageState {
-    Created = "Created" as any,
-    Sent = "Sent" as any,
-    Delivered = "Delivered" as any,
-    Failed = "Failed" as any,
-}
-export const SMSMessageState_Type = new EnumType<SMSMessageState>("SMSMessageState", SMSMessageState);
+export const SMSMessageState = new EnumType<SMSMessageState>("SMSMessageState");
+export type SMSMessageState =
+    "Created" |
+    "Sent" |
+    "Delivered" |
+    "Failed";
 
 export interface SMSPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
     name: string;
 }
 
-export const SMSSendPackageEntity_Type = new Type<SMSSendPackageEntity>("SMSSendPackage");
+export const SMSSendPackageEntity = new Type<SMSSendPackageEntity>("SMSSendPackage");
 export interface SMSSendPackageEntity extends SMSPackageEntity {
 }
 
-export const SMSTemplateEntity_Type = new Type<SMSTemplateEntity>("SMSTemplate");
+export const SMSTemplateEntity = new Type<SMSTemplateEntity>("SMSTemplate");
 export interface SMSTemplateEntity extends Entities.Entity {
     name: string;
     certified: boolean;
@@ -116,7 +114,7 @@ export module SMSTemplateMessage {
     export const NewCulture = new MessageKey("SMSTemplateMessage", "NewCulture");
 }
 
-export const SMSTemplateMessageEntity_Type = new Type<SMSTemplateMessageEntity>("SMSTemplateMessageEntity");
+export const SMSTemplateMessageEntity = new Type<SMSTemplateMessageEntity>("SMSTemplateMessageEntity");
 export interface SMSTemplateMessageEntity extends Entities.EmbeddedEntity {
     template: SMSTemplateEntity;
     cultureInfo: ExBasics.CultureInfoEntity;
@@ -128,7 +126,7 @@ export module SMSTemplateOperation {
     export const Save : Entities.ExecuteSymbol<SMSTemplateEntity> = registerSymbol({ Type: "Operation", key: "SMSTemplateOperation.Save" });
 }
 
-export const SMSUpdatePackageEntity_Type = new Type<SMSUpdatePackageEntity>("SMSUpdatePackage");
+export const SMSUpdatePackageEntity = new Type<SMSUpdatePackageEntity>("SMSUpdatePackage");
 export interface SMSUpdatePackageEntity extends SMSPackageEntity {
 }
 

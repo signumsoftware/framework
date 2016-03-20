@@ -8,7 +8,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../
 import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import SearchControl from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
-import { UserQueryEntity_Type, UserQueryEntity, UserQueryMessage  } from './Signum.Entities.UserQueries'
+import { UserQueryEntity, UserQueryMessage  } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 
 export interface UserQueryMenuProps {

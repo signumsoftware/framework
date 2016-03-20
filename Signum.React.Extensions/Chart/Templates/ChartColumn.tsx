@@ -10,7 +10,7 @@ import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../../Fra
 import { getTypeInfos, TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ValueLine, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ChartColumnEntity, ChartScriptColumnEntity, IChartBase, GroupByChart, ChartMessage, ChartColorEntity_Type } from '../Signum.Entities.Chart'
+import { ChartColumnEntity, ChartScriptColumnEntity, IChartBase, GroupByChart, ChartMessage, ChartColorEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 
@@ -48,13 +48,13 @@ export class ChartColumn extends React.Component<ChartColumnProps, { }> {
         var sc = this.props.scriptColumn;
         var cb = this.props.chartBase;
 
-        var groupVisible = this.props.chartBase.chartScript.groupBy != GroupByChart.Never && sc.isGroupKey;
+        var groupVisible = this.props.chartBase.chartScript.groupBy != "Never" && sc.isGroupKey;
         
         return (
             <tr className="sf-chart-token">
                 <th>{ sc.displayName + (sc.isOptional ? "?" : "") }</th>
                 <td style={{ textAlign: "center" }}>
-                    {groupVisible && <input type="checkbox" checked={cb.groupResults} className="sf-chart-group-trigger" disabled={cb.chartScript.groupBy == GroupByChart.Always} onChange={this.handleGroupChecked}/>}
+                    {groupVisible && <input type="checkbox" checked={cb.groupResults} className="sf-chart-group-trigger" disabled={cb.chartScript.groupBy == "Always"} onChange={this.handleGroupChecked}/>}
                 </td>
                 <td>
                     <div className={classes("sf-query-token", this.props.ctx.formGroupSizeCss)}>
@@ -84,7 +84,7 @@ export class ChartColumnInfo extends React.Component<ChartColumnInfoProps, void>
 
         const t = token && token.token.type;
 
-        if (t == null || Navigator.isReadOnly(ChartColorEntity_Type))
+        if (t == null || Navigator.isReadOnly(ChartColorEntity))
             return [];
 
         if (!t.isLite && !t.isEnum)

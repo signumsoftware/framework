@@ -6,7 +6,7 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { UserEntity, UserEntity_Type, UserOperation, RoleEntity_Type, PermissionSymbol } from './Signum.Entities.Authorization'
+import { UserEntity, RoleEntity, UserOperation, PermissionSymbol } from './Signum.Entities.Authorization'
 import Login from './Login/Login';
 
 export let userTicket: boolean;
@@ -23,8 +23,8 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 }
 
 export function startAdmin() {
-    Navigator.addSettings(new EntitySettings(UserEntity_Type, e => new Promise(resolve => require(['./Templates/User'], resolve))));
-    Navigator.addSettings(new EntitySettings(RoleEntity_Type, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
+    Navigator.addSettings(new EntitySettings(UserEntity, e => new Promise(resolve => require(['./Templates/User'], resolve))));
+    Navigator.addSettings(new EntitySettings(RoleEntity, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
 }
 
 export function currentUser(): UserEntity {

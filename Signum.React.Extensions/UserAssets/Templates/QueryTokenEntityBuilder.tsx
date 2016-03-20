@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { ajaxGet, ajaxPost, ServiceError } from '../../../../Framework/Signum.React/Scripts/Services'
-import { QueryTokenEntity, QueryTokenEntity_Type} from '../Signum.Entities.UserAssets'
+import { QueryTokenEntity} from '../Signum.Entities.UserAssets'
 import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { TypeContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
@@ -24,7 +24,7 @@ export default class QueryTokenEntityBuilder extends React.Component<QueryTokenE
         if (newToken == null)
             this.props.ctx.value = null;
         else
-            this.props.ctx.value = QueryTokenEntity_Type.New(t => {
+            this.props.ctx.value = QueryTokenEntity.New(t => {
                 t.tokenString = newToken.fullKey;
                 t.token = newToken
             });

@@ -5,7 +5,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
 
-export const IsolationEntity_Type = new Type<IsolationEntity>("Isolation");
+export const IsolationEntity = new Type<IsolationEntity>("Isolation");
 export interface IsolationEntity extends Entities.Entity {
     name: string;
 }
@@ -16,7 +16,7 @@ export module IsolationMessage {
     export const Entity0HasIsolation1ButEntity2HasIsolation3 = new MessageKey("IsolationMessage", "Entity0HasIsolation1ButEntity2HasIsolation3");
 }
 
-export const IsolationMixin_Type = new Type<IsolationMixin>("IsolationMixin");
+export const IsolationMixin = new Type<IsolationMixin>("IsolationMixin");
 export interface IsolationMixin extends Entities.MixinEntity {
     isolation: Entities.Lite<IsolationEntity>;
 }

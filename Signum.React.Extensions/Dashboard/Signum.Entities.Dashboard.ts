@@ -16,27 +16,26 @@ import * as Chart from '../Chart/Signum.Entities.Chart'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
 
-export const CountSearchControlPartEntity_Type = new Type<CountSearchControlPartEntity>("CountSearchControlPart");
+export const CountSearchControlPartEntity = new Type<CountSearchControlPartEntity>("CountSearchControlPart");
 export interface CountSearchControlPartEntity extends Entities.Entity, IPartEntity {
     userQueries: Entities.MList<CountUserQueryElementEntity>;
     requiresTitle: boolean;
 }
 
-export const CountUserQueryElementEntity_Type = new Type<CountUserQueryElementEntity>("CountUserQueryElementEntity");
+export const CountUserQueryElementEntity = new Type<CountUserQueryElementEntity>("CountUserQueryElementEntity");
 export interface CountUserQueryElementEntity extends Entities.EmbeddedEntity {
     label: string;
     userQuery: UserQueries.UserQueryEntity;
     href: string;
 }
 
-export enum DashboardEmbedededInEntity {
-    None = "None" as any,
-    Top = "Top" as any,
-    Bottom = "Bottom" as any,
-}
-export const DashboardEmbedededInEntity_Type = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity", DashboardEmbedededInEntity);
+export const DashboardEmbedededInEntity = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity");
+export type DashboardEmbedededInEntity =
+    "None" |
+    "Top" |
+    "Bottom";
 
-export const DashboardEntity_Type = new Type<DashboardEntity>("Dashboard");
+export const DashboardEntity = new Type<DashboardEntity>("Dashboard");
 export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     entityType: Entities.Lite<Basics.TypeEntity>;
     embeddedInEntity: DashboardEmbedededInEntity;
@@ -74,19 +73,19 @@ export interface IPartEntity extends Entities.Entity {
     requiresTitle: boolean;
 }
 
-export const LinkElementEntity_Type = new Type<LinkElementEntity>("LinkElementEntity");
+export const LinkElementEntity = new Type<LinkElementEntity>("LinkElementEntity");
 export interface LinkElementEntity extends Entities.EmbeddedEntity {
     label: string;
     link: string;
 }
 
-export const LinkListPartEntity_Type = new Type<LinkListPartEntity>("LinkListPart");
+export const LinkListPartEntity = new Type<LinkListPartEntity>("LinkListPart");
 export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
     links: Entities.MList<LinkElementEntity>;
     requiresTitle: boolean;
 }
 
-export const PanelPartEntity_Type = new Type<PanelPartEntity>("PanelPartEntity");
+export const PanelPartEntity = new Type<PanelPartEntity>("PanelPartEntity");
 export interface PanelPartEntity extends Entities.EmbeddedEntity {
     title: string;
     row: number;
@@ -96,24 +95,23 @@ export interface PanelPartEntity extends Entities.EmbeddedEntity {
     content: IPartEntity;
 }
 
-export enum PanelStyle {
-    Default = "Default" as any,
-    Primary = "Primary" as any,
-    Success = "Success" as any,
-    Info = "Info" as any,
-    Warning = "Warning" as any,
-    Danger = "Danger" as any,
-}
-export const PanelStyle_Type = new EnumType<PanelStyle>("PanelStyle", PanelStyle);
+export const PanelStyle = new EnumType<PanelStyle>("PanelStyle");
+export type PanelStyle =
+    "Default" |
+    "Primary" |
+    "Success" |
+    "Info" |
+    "Warning" |
+    "Danger";
 
-export const UserChartPartEntity_Type = new Type<UserChartPartEntity>("UserChartPart");
+export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
     userChart: Chart.UserChartEntity;
     showData: boolean;
     requiresTitle: boolean;
 }
 
-export const UserQueryPartEntity_Type = new Type<UserQueryPartEntity>("UserQueryPart");
+export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart");
 export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
     userQuery: UserQueries.UserQueryEntity;
     allowSelection: boolean;

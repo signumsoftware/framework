@@ -18,18 +18,17 @@ export interface QueryTokenEntity {
 
 
 
-export enum EntityAction {
-    Identical = "Identical" as any,
-    Different = "Different" as any,
-    New = "New" as any,
-}
-export const EntityAction_Type = new EnumType<EntityAction>("EntityAction", EntityAction);
+export const EntityAction = new EnumType<EntityAction>("EntityAction");
+export type EntityAction =
+    "Identical" |
+    "Different" |
+    "New";
 
 export interface IUserAssetEntity extends Entities.Entity {
     guid: string;
 }
 
-export const QueryTokenEntity_Type = new Type<QueryTokenEntity>("QueryTokenEntity");
+export const QueryTokenEntity = new Type<QueryTokenEntity>("QueryTokenEntity");
 export interface QueryTokenEntity extends Entities.EmbeddedEntity {
     tokenString: string;
 }
@@ -46,7 +45,7 @@ export module UserAssetPermission {
     export const UserAssetsToXML : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "UserAssetPermission.UserAssetsToXML" });
 }
 
-export const UserAssetPreviewLine_Type = new Type<UserAssetPreviewLine>("UserAssetPreviewLine");
+export const UserAssetPreviewLine = new Type<UserAssetPreviewLine>("UserAssetPreviewLine");
 export interface UserAssetPreviewLine extends Entities.EmbeddedEntity {
     type: Basics.TypeEntity;
     text: string;
@@ -55,7 +54,7 @@ export interface UserAssetPreviewLine extends Entities.EmbeddedEntity {
     guid: string;
 }
 
-export const UserAssetPreviewModel_Type = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");
+export const UserAssetPreviewModel = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");
 export interface UserAssetPreviewModel extends Entities.ModelEntity {
     lines: Entities.MList<UserAssetPreviewLine>;
 }

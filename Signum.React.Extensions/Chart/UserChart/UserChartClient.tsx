@@ -12,9 +12,9 @@ import * as Operations from '../../../../Framework/Signum.React/Scripts/Operatio
 import * as QuickLinks from '../../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
-import { UserChartEntity, UserChartEntity_Type, ChartPermission, ChartMessage, ChartRequest, ChartRequest_Type, ChartParameterEntity_Type, ChartColumnEntity_Type  } from '../Signum.Entities.Chart'
-import { QueryFilterEntity, QueryFilterEntity_Type, QueryOrderEntity, QueryOrderEntity_Type } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryTokenEntity, QueryTokenEntity_Type } from '../../UserAssets/Signum.Entities.UserAssets'
+import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEntity, ChartColumnEntity  } from '../Signum.Entities.Chart'
+import { QueryFilterEntity, QueryOrderEntity } from '../../UserQueries/Signum.Entities.UserQueries'
+import { QueryTokenEntity } from '../../UserAssets/Signum.Entities.UserAssets'
 import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
@@ -42,7 +42,7 @@ export function start(options: { routes: JSX.Element[] }) {
             }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));
     });
 
-    QuickLinks.registerQuickLink(UserChartEntity_Type, ctx => new QuickLinks.QuickLinkAction("preview", ChartMessage.Preview.niceToString(),
+    QuickLinks.registerQuickLink(UserChartEntity, ctx => new QuickLinks.QuickLinkAction("preview", ChartMessage.Preview.niceToString(),
         e => {
             Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
                 if (uc.entityType == null)
@@ -61,7 +61,7 @@ export function start(options: { routes: JSX.Element[] }) {
         }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) }));
 
 
-    Navigator.addSettings(new EntitySettings(UserChartEntity_Type, e => new Promise(resolve => require(['./UserChart'], resolve))));
+    Navigator.addSettings(new EntitySettings(UserChartEntity, e => new Promise(resolve => require(['./UserChart'], resolve))));
 }
 
 
@@ -95,7 +95,7 @@ export module Converter {
 
             cr.parameters = uq.parameters.map(mle => ({
                 rowId: null,
-                element: ChartParameterEntity_Type.New(p => {
+                element: ChartParameterEntity.New(p => {
                     p.name = mle.element.name;
                     p.value = mle.element.value;
                 })
@@ -103,7 +103,7 @@ export module Converter {
 
             cr.columns = uq.columns.map(mle => ({
                 rowId: null,
-                element: ChartColumnEntity_Type.New(c => {
+                element: ChartColumnEntity.New(c => {
                     c.displayName = mle.element.displayName;
                     c.token = mle.element.token;
                 })
@@ -119,7 +119,7 @@ export module Converter {
     }
 
     export function toChartRequest(uq: UserChartEntity, entity: Lite<Entity>): Promise<ChartRequest> {
-        var cs = ChartRequest_Type.New(cr => cr.queryKey = uq.query.key); 
+        var cs = ChartRequest.New(cr => cr.queryKey = uq.query.key); 
         return applyUserChart(cs, uq, entity);
     }
 }

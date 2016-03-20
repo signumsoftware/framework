@@ -10,14 +10,14 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
 
-export const ApplicationEventLogEntity_Type = new Type<ApplicationEventLogEntity>("ApplicationEventLog");
+export const ApplicationEventLogEntity = new Type<ApplicationEventLogEntity>("ApplicationEventLog");
 export interface ApplicationEventLogEntity extends Entities.Entity {
     machineName: string;
     date: string;
     globalEvent: TypeEvent;
 }
 
-export const HolidayCalendarEntity_Type = new Type<HolidayCalendarEntity>("HolidayCalendar");
+export const HolidayCalendarEntity = new Type<HolidayCalendarEntity>("HolidayCalendar");
 export interface HolidayCalendarEntity extends Entities.Entity {
     name: string;
     holidays: Entities.MList<HolidayEntity>;
@@ -28,7 +28,7 @@ export module HolidayCalendarOperation {
     export const Delete : Entities.DeleteSymbol<HolidayCalendarEntity> = registerSymbol({ Type: "Operation", key: "HolidayCalendarOperation.Delete" });
 }
 
-export const HolidayEntity_Type = new Type<HolidayEntity>("HolidayEntity");
+export const HolidayEntity = new Type<HolidayEntity>("HolidayEntity");
 export interface HolidayEntity extends Entities.EmbeddedEntity {
     date: string;
     name: string;
@@ -40,7 +40,7 @@ export interface IScheduleRuleEntity extends Entities.Entity {
 export interface ITaskEntity extends Entities.Entity {
 }
 
-export const ScheduledTaskEntity_Type = new Type<ScheduledTaskEntity>("ScheduledTask");
+export const ScheduledTaskEntity = new Type<ScheduledTaskEntity>("ScheduledTask");
 export interface ScheduledTaskEntity extends Entities.Entity {
     rule: IScheduleRuleEntity;
     task: ITaskEntity;
@@ -50,7 +50,7 @@ export interface ScheduledTaskEntity extends Entities.Entity {
     applicationName: string;
 }
 
-export const ScheduledTaskLogEntity_Type = new Type<ScheduledTaskLogEntity>("ScheduledTaskLog");
+export const ScheduledTaskLogEntity = new Type<ScheduledTaskLogEntity>("ScheduledTaskLog");
 export interface ScheduledTaskLogEntity extends Entities.Entity {
     scheduledTask: ScheduledTaskEntity;
     user: Entities.Lite<Basics.IUserEntity>;
@@ -105,13 +105,13 @@ export module SchedulerPermission {
     export const ViewSchedulerPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "SchedulerPermission.ViewSchedulerPanel" });
 }
 
-export const ScheduleRuleMinutelyEntity_Type = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
+export const ScheduleRuleMinutelyEntity = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
 export interface ScheduleRuleMinutelyEntity extends Entities.Entity, IScheduleRuleEntity {
     eachMinutes: number;
     isAligned: boolean;
 }
 
-export const ScheduleRuleMonthsEntity_Type = new Type<ScheduleRuleMonthsEntity>("ScheduleRuleMonths");
+export const ScheduleRuleMonthsEntity = new Type<ScheduleRuleMonthsEntity>("ScheduleRuleMonths");
 export interface ScheduleRuleMonthsEntity extends Entities.Entity, IScheduleRuleEntity {
     startingOn: string;
     january: boolean;
@@ -128,7 +128,7 @@ export interface ScheduleRuleMonthsEntity extends Entities.Entity, IScheduleRule
     december: boolean;
 }
 
-export const ScheduleRuleWeekDaysEntity_Type = new Type<ScheduleRuleWeekDaysEntity>("ScheduleRuleWeekDays");
+export const ScheduleRuleWeekDaysEntity = new Type<ScheduleRuleWeekDaysEntity>("ScheduleRuleWeekDays");
 export interface ScheduleRuleWeekDaysEntity extends Entities.Entity, IScheduleRuleEntity {
     startingOn: string;
     monday: boolean;
@@ -142,7 +142,7 @@ export interface ScheduleRuleWeekDaysEntity extends Entities.Entity, IScheduleRu
     holiday: boolean;
 }
 
-export const SimpleTaskSymbol_Type = new Type<SimpleTaskSymbol>("SimpleTask");
+export const SimpleTaskSymbol = new Type<SimpleTaskSymbol>("SimpleTask");
 export interface SimpleTaskSymbol extends Entities.Symbol, ITaskEntity {
 }
 
@@ -157,9 +157,8 @@ export module TaskOperation {
     export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol({ Type: "Operation", key: "TaskOperation.ExecuteAsync" });
 }
 
-export enum TypeEvent {
-    Start = "Start" as any,
-    Stop = "Stop" as any,
-}
-export const TypeEvent_Type = new EnumType<TypeEvent>("TypeEvent", TypeEvent);
+export const TypeEvent = new EnumType<TypeEvent>("TypeEvent");
+export type TypeEvent =
+    "Start" |
+    "Stop";
 

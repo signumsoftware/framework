@@ -15,16 +15,16 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 
 
 
-export const SystemWordTemplateEntity_Type = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
+export const SystemWordTemplateEntity = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
 export interface SystemWordTemplateEntity extends Entities.Entity {
     fullClassName: string;
 }
 
-export const WordConverterSymbol_Type = new Type<WordConverterSymbol>("WordConverter");
+export const WordConverterSymbol = new Type<WordConverterSymbol>("WordConverter");
 export interface WordConverterSymbol extends Entities.Symbol {
 }
 
-export const WordTemplateEntity_Type = new Type<WordTemplateEntity>("WordTemplate");
+export const WordTemplateEntity = new Type<WordTemplateEntity>("WordTemplate");
 export interface WordTemplateEntity extends Entities.Entity {
     name: string;
     query: Basics.QueryEntity;
@@ -57,7 +57,7 @@ export module WordTemplatePermission {
     export const GenerateReport : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "WordTemplatePermission.GenerateReport" });
 }
 
-export const WordTransformerSymbol_Type = new Type<WordTransformerSymbol>("WordTransformer");
+export const WordTransformerSymbol = new Type<WordTransformerSymbol>("WordTransformer");
 export interface WordTransformerSymbol extends Entities.Symbol {
 }
 

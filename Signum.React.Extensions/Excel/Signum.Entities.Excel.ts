@@ -14,7 +14,7 @@ import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
 
-export const ExcelAttachmentEntity_Type = new Type<ExcelAttachmentEntity>("ExcelAttachment");
+export const ExcelAttachmentEntity = new Type<ExcelAttachmentEntity>("ExcelAttachment");
 export interface ExcelAttachmentEntity extends Entities.Entity, Mailing.IAttachmentGeneratorEntity {
     fileName: string;
     title: string;
@@ -37,7 +37,7 @@ export module ExcelMessage {
     export const CreateNew = new MessageKey("ExcelMessage", "CreateNew");
 }
 
-export const ExcelReportEntity_Type = new Type<ExcelReportEntity>("ExcelReport");
+export const ExcelReportEntity = new Type<ExcelReportEntity>("ExcelReport");
 export interface ExcelReportEntity extends Entities.Entity {
     query: Basics.QueryEntity;
     displayName: string;

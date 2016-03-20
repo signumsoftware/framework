@@ -11,9 +11,9 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
-import { UserQueryEntity_Type, UserQueryEntity, UserQueryPermission, UserQueryMessage,
-    QueryFilterEntity, QueryFilterEntity_Type, QueryColumnEntity, QueryColumnEntity_Type, QueryOrderEntity, QueryOrderEntity_Type } from './Signum.Entities.UserQueries'
-import { QueryTokenEntity, QueryTokenEntity_Type } from '../UserAssets/Signum.Entities.UserAssets'
+import { UserQueryEntity, UserQueryPermission, UserQueryMessage,
+    QueryFilterEntity, QueryColumnEntity, QueryOrderEntity} from './Signum.Entities.UserQueries'
+import { QueryTokenEntity } from '../UserAssets/Signum.Entities.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 
@@ -39,7 +39,7 @@ export function start(options: { routes: JSX.Element[] }) {
             }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));
     });
 
-    QuickLinks.registerQuickLink(UserQueryEntity_Type, ctx => new QuickLinks.QuickLinkAction("preview", UserQueryMessage.Preview.niceToString(),
+    QuickLinks.registerQuickLink(UserQueryEntity, ctx => new QuickLinks.QuickLinkAction("preview", UserQueryMessage.Preview.niceToString(),
         e => {
             Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
                 if (uq.entityType == null)
@@ -57,11 +57,11 @@ export function start(options: { routes: JSX.Element[] }) {
             });
         }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
 
-    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity_Type, () => QueryFilterEntity_Type.New(f => f.token = QueryTokenEntity_Type.New()));
-    Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity_Type, () => QueryOrderEntity_Type.New(o => o.token = QueryTokenEntity_Type.New()));
-    Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity_Type, () => QueryColumnEntity_Type.New(c => c.token = QueryTokenEntity_Type.New()));
+    Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity, () => QueryFilterEntity.New(f => f.token = QueryTokenEntity.New()));
+    Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity, () => QueryOrderEntity.New(o => o.token = QueryTokenEntity.New()));
+    Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity, () => QueryColumnEntity.New(c => c.token = QueryTokenEntity.New()));
 
-    Navigator.addSettings(new EntitySettings(UserQueryEntity_Type, e => new Promise(resolve => require(['./Templates/UserQuery'], resolve))));
+    Navigator.addSettings(new EntitySettings(UserQueryEntity, e => new Promise(resolve => require(['./Templates/UserQuery'], resolve))));
 }
 
 

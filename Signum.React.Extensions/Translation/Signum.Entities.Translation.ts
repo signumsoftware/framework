@@ -12,13 +12,12 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
 
-export enum TranslatedCultureAction {
-    Translate = "Translate" as any,
-    Read = "Read" as any,
-}
-export const TranslatedCultureAction_Type = new EnumType<TranslatedCultureAction>("TranslatedCultureAction", TranslatedCultureAction);
+export const TranslatedCultureAction = new EnumType<TranslatedCultureAction>("TranslatedCultureAction");
+export type TranslatedCultureAction =
+    "Translate" |
+    "Read";
 
-export const TranslatedInstanceEntity_Type = new Type<TranslatedInstanceEntity>("TranslatedInstance");
+export const TranslatedInstanceEntity = new Type<TranslatedInstanceEntity>("TranslatedInstance");
 export interface TranslatedInstanceEntity extends Entities.Entity {
     culture: ExBasics.CultureInfoEntity;
     instance: Entities.Lite<Entities.Entity>;
@@ -64,7 +63,7 @@ export module TranslationPermission {
     export const TranslateInstances : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "TranslationPermission.TranslateInstances" });
 }
 
-export const TranslationReplacementEntity_Type = new Type<TranslationReplacementEntity>("TranslationReplacement");
+export const TranslationReplacementEntity = new Type<TranslationReplacementEntity>("TranslationReplacement");
 export interface TranslationReplacementEntity extends Entities.Entity {
     cultureInfo: ExBasics.CultureInfoEntity;
     wrongTranslation: string;
@@ -76,13 +75,13 @@ export module TranslationReplacementOperation {
     export const Delete : Entities.DeleteSymbol<TranslationReplacementEntity> = registerSymbol({ Type: "Operation", key: "TranslationReplacementOperation.Delete" });
 }
 
-export const TranslatorUserCultureEntity_Type = new Type<TranslatorUserCultureEntity>("TranslatorUserCultureEntity");
+export const TranslatorUserCultureEntity = new Type<TranslatorUserCultureEntity>("TranslatorUserCultureEntity");
 export interface TranslatorUserCultureEntity extends Entities.EmbeddedEntity {
     culture: ExBasics.CultureInfoEntity;
     action: TranslatedCultureAction;
 }
 
-export const TranslatorUserEntity_Type = new Type<TranslatorUserEntity>("TranslatorUser");
+export const TranslatorUserEntity = new Type<TranslatorUserEntity>("TranslatorUser");
 export interface TranslatorUserEntity extends Entities.Entity {
     user: Entities.Lite<Basics.IUserEntity>;
     cultures: Entities.MList<TranslatorUserCultureEntity>;

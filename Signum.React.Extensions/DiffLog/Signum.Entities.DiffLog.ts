@@ -20,7 +20,7 @@ export module DiffLogMessage {
     export const NavigatesToTheCurrentEntity = new MessageKey("DiffLogMessage", "NavigatesToTheCurrentEntity");
 }
 
-export const DiffLogMixin_Type = new Type<DiffLogMixin>("DiffLogMixin");
+export const DiffLogMixin = new Type<DiffLogMixin>("DiffLogMixin");
 export interface DiffLogMixin extends Entities.MixinEntity {
     initialState: string;
     finalState: string;

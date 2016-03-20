@@ -16,13 +16,13 @@ export interface IProcessDataEntity extends Entities.Entity {
 export interface IProcessLineDataEntity extends Entities.Entity {
 }
 
-export const PackageEntity_Type = new Type<PackageEntity>("Package");
+export const PackageEntity = new Type<PackageEntity>("Package");
 export interface PackageEntity extends Entities.Entity, IProcessDataEntity {
     name: string;
     operationArguments: string;
 }
 
-export const PackageLineEntity_Type = new Type<PackageLineEntity>("PackageLine");
+export const PackageLineEntity = new Type<PackageLineEntity>("PackageLine");
 export interface PackageLineEntity extends Entities.Entity, IProcessLineDataEntity {
     package: Entities.Lite<PackageEntity>;
     target: Entities.Entity;
@@ -30,7 +30,7 @@ export interface PackageLineEntity extends Entities.Entity, IProcessLineDataEnti
     finishTime: string;
 }
 
-export const PackageOperationEntity_Type = new Type<PackageOperationEntity>("PackageOperation");
+export const PackageOperationEntity = new Type<PackageOperationEntity>("PackageOperation");
 export interface PackageOperationEntity extends PackageEntity {
     operation: Entities.OperationSymbol;
 }
@@ -39,11 +39,11 @@ export module PackageOperationProcess {
     export const PackageOperation : ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "PackageOperationProcess.PackageOperation" });
 }
 
-export const ProcessAlgorithmSymbol_Type = new Type<ProcessAlgorithmSymbol>("ProcessAlgorithm");
+export const ProcessAlgorithmSymbol = new Type<ProcessAlgorithmSymbol>("ProcessAlgorithm");
 export interface ProcessAlgorithmSymbol extends Entities.Symbol {
 }
 
-export const ProcessEntity_Type = new Type<ProcessEntity>("Process");
+export const ProcessEntity = new Type<ProcessEntity>("Process");
 export interface ProcessEntity extends Entities.Entity {
     algorithm: ProcessAlgorithmSymbol;
     data: IProcessDataEntity;
@@ -63,7 +63,7 @@ export interface ProcessEntity extends Entities.Entity {
     progress: number;
 }
 
-export const ProcessExceptionLineEntity_Type = new Type<ProcessExceptionLineEntity>("ProcessExceptionLine");
+export const ProcessExceptionLineEntity = new Type<ProcessExceptionLineEntity>("ProcessExceptionLine");
 export interface ProcessExceptionLineEntity extends Entities.Entity {
     line: Entities.Lite<IProcessLineDataEntity>;
     process: Entities.Lite<ProcessEntity>;
@@ -92,16 +92,15 @@ export module ProcessPermission {
     export const ViewProcessPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "ProcessPermission.ViewProcessPanel" });
 }
 
-export enum ProcessState {
-    Created = "Created" as any,
-    Planned = "Planned" as any,
-    Canceled = "Canceled" as any,
-    Queued = "Queued" as any,
-    Executing = "Executing" as any,
-    Suspending = "Suspending" as any,
-    Suspended = "Suspended" as any,
-    Finished = "Finished" as any,
-    Error = "Error" as any,
-}
-export const ProcessState_Type = new EnumType<ProcessState>("ProcessState", ProcessState);
+export const ProcessState = new EnumType<ProcessState>("ProcessState");
+export type ProcessState =
+    "Created" |
+    "Planned" |
+    "Canceled" |
+    "Queued" |
+    "Executing" |
+    "Suspending" |
+    "Suspended" |
+    "Finished" |
+    "Error";
 

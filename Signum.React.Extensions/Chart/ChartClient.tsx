@@ -14,11 +14,10 @@ import { PseudoType, QueryKey, getQueryKey } from '../../../Framework/Signum.Rea
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption,
     FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
-import { QueryFilterEntity, QueryFilterEntity_Type, QueryColumnEntity, QueryColumnEntity_Type, QueryOrderEntity, QueryOrderEntity_Type } from '../UserQueries/Signum.Entities.UserQueries'
+import { QueryFilterEntity, QueryColumnEntity, QueryOrderEntity } from '../UserQueries/Signum.Entities.UserQueries'
 
-import { UserChartEntity, UserChartEntity_Type, ChartPermission, ChartMessage, ChartColumnEntity, ChartColorEntity_Type, ChartParameterEntity, ChartParameterEntity_Type,
-    ChartColumnEntity_Type, ChartScriptEntity, ChartRequest, GroupByChart, ChartColumnType, ChartRequest_Type, IChartBase } from './Signum.Entities.Chart'
-import { QueryTokenEntity, QueryTokenEntity_Type } from '../UserAssets/Signum.Entities.UserAssets'
+import { UserChartEntity, ChartPermission, ChartMessage, ChartColumnEntity, ChartParameterEntity, ChartScriptEntity, ChartRequest, GroupByChart, ChartColumnType, IChartBase } from './Signum.Entities.Chart'
+import { QueryTokenEntity } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
@@ -74,10 +73,10 @@ export function getColorPalettes(): Promise<string[]> {
 
 
 export function isCompatibleWith(chartScript: ChartScriptEntity, chartBase: IChartBase): boolean {
-    if (chartScript.groupBy == GroupByChart.Always && !chartBase.groupResults)
+    if (chartScript.groupBy == "Always" && !chartBase.groupResults)
         return false;
 
-    if (chartScript.groupBy == GroupByChart.Never && chartBase.groupResults)
+    if (chartScript.groupBy == "Never" && chartBase.groupResults)
         return false;
 
     return zipOrDefault(
@@ -128,26 +127,26 @@ export function isChartColumnType(token: QueryToken, ct: ChartColumnType): boole
 
     switch (ct) {
 
-        case ChartColumnType.Groupable: return [
-            ChartColumnType.RealGroupable,
-            ChartColumnType.Integer,
-            ChartColumnType.Date,
-            ChartColumnType.String,
-            ChartColumnType.Lite,
-            ChartColumnType.Enum].contains(type);
+        case "Groupable": return [
+            "RealGroupable",
+            "Integer",
+            "Date",
+            "String",
+            "Lite",
+            "Enum"].contains(type);
 
-        case ChartColumnType.Magnitude: return [
-            ChartColumnType.Integer,
-            ChartColumnType.Real,
-            ChartColumnType.RealGroupable].contains(type);
+        case "Magnitude": return [
+             "Integer",
+             "Real",
+             "RealGroupable"].contains(type);
 
-        case ChartColumnType.Positionable: return [
-            ChartColumnType.Integer,
-            ChartColumnType.Real,
-            ChartColumnType.RealGroupable,
-            ChartColumnType.Date,
-            ChartColumnType.DateTime,
-            ChartColumnType.Enum].contains(type);
+        case "Positionable": return [
+             "Integer",
+             "Real",
+             "RealGroupable",
+             "Date",
+             "DateTime",
+             "Enum"].contains(type);
     }
 
 
@@ -157,14 +156,14 @@ export function isChartColumnType(token: QueryToken, ct: ChartColumnType): boole
 export function getChartColumnType(token: QueryToken): ChartColumnType {
 
     switch (token.filterType) {
-        case FilterType.Lite: return ChartColumnType.Lite;
-        case FilterType.Boolean:
-        case FilterType.Enum: return ChartColumnType.Enum;
-        case FilterType.String:
-        case FilterType.Guid: return ChartColumnType.String;
-        case FilterType.Integer: return ChartColumnType.Integer;
-        case FilterType.Decimal: return token.isGroupable ? ChartColumnType.RealGroupable : ChartColumnType.Real;
-        case FilterType.DateTime: return token.isGroupable ? ChartColumnType.Date : ChartColumnType.DateTime;
+        case "Lite": return "Lite";
+        case "Boolean":
+        case "Enum": return "Enum";
+        case "String":
+        case "Guid": return "String";
+        case "Integer": return "Integer";
+        case "Decimal": return token.isGroupable ? "RealGroupable": "Real";
+        case "DateTime": return token.isGroupable ? "Date" : "DateTime";
     }
 
     return null;
@@ -174,7 +173,7 @@ export function removeAggregates(chart: IChartBase) {
     chart.columns.map(mle => mle.element).forEach(cc => {
         if (cc.token && cc.token.token.queryTokenType == QueryTokenType.Aggregate) {
             var parentToken = cc.token.token.parent;
-            cc.token = QueryTokenEntity_Type.New(t => {
+            cc.token = QueryTokenEntity.New(t => {
                 t.tokenString = parentToken && parentToken.fullKey;
                 t.token = parentToken;
             });
@@ -243,7 +242,7 @@ export module Decoder {
 
     export function parseChartRequest(queryName: string, query: any): Promise<ChartRequest> {
 
-        const chartRequest = ChartRequest_Type.New(cr => {
+        const chartRequest = ChartRequest.New(cr => {
             cr.queryKey = getQueryKey(queryName),
             cr.filterOptions = Finder.Decoder.decodeFilters(query);
             cr.orderOptions = Finder.Decoder.decodeOrders(query);
@@ -269,8 +268,8 @@ export module Decoder {
     export function decodeColumns(query: any): MList<ChartColumnEntity> {
         return valuesInOrder(query, "column").map(val => ({
             rowId: null,
-            element: ChartColumnEntity_Type.New(cc=> {
-                cc.token = QueryTokenEntity_Type.New(qte=> {
+            element: ChartColumnEntity.New(cc=> {
+                cc.token = QueryTokenEntity.New(qte=> {
                     qte.tokenString = val.tryBefore("~") || val;
                 });
                 cc.displayName = unscapeTildes(val.tryAfter("~"));
@@ -281,7 +280,7 @@ export module Decoder {
     export function decodeParameters(query: any): MList<ChartParameterEntity> {
         return valuesInOrder(query, "param").map(val => ({
             rowId: null,
-            element: ChartParameterEntity_Type.New(cp => {
+            element: ChartParameterEntity.New(cp => {
                 cp.name = unscapeTildes(val.before("~"));
                 cp.value = unscapeTildes(val.after("~"));
             })
@@ -367,10 +366,10 @@ export module API {
             url: "/api/chart/setChartScript"
         }, { chart: clone, script }).then(newChart => {
 
-            if (script.groupBy == GroupByChart.Always)
+            if (script.groupBy == "Always")
                 chart.groupResults = true;
 
-            if (script.groupBy == GroupByChart.Never) {
+            if (script.groupBy == "Never") {
                 chart.groupResults = false;
                 removeAggregates(chart);
             }

@@ -8,7 +8,7 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
 
-export const NoteEntity_Type = new Type<NoteEntity>("Note");
+export const NoteEntity = new Type<NoteEntity>("Note");
 export interface NoteEntity extends Entities.Entity {
     title: string;
     target: Entities.Lite<Entities.Entity>;
@@ -34,7 +34,7 @@ export module NoteOperation {
     export const Save : Entities.ExecuteSymbol<NoteEntity> = registerSymbol({ Type: "Operation", key: "NoteOperation.Save" });
 }
 
-export const NoteTypeEntity_Type = new Type<NoteTypeEntity>("NoteType");
+export const NoteTypeEntity = new Type<NoteTypeEntity>("NoteType");
 export interface NoteTypeEntity extends Basics.SemiSymbol {
 }
 

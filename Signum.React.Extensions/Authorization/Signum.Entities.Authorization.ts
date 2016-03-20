@@ -123,12 +123,11 @@ export module AuthMessage {
     export const LoginWithAnotherUser = new MessageKey("AuthMessage", "LoginWithAnotherUser");
 }
 
-export enum AuthThumbnail {
-    All = "All" as any,
-    Mix = "Mix" as any,
-    None = "None" as any,
-}
-export const AuthThumbnail_Type = new EnumType<AuthThumbnail>("AuthThumbnail", AuthThumbnail);
+export const AuthThumbnail = new EnumType<AuthThumbnail>("AuthThumbnail");
+export type AuthThumbnail =
+    "All" |
+    "Mix" |
+    "None";
 
 export interface BaseRulePack<T> extends Entities.ModelEntity {
     role: Entities.Lite<RoleEntity>;
@@ -144,33 +143,31 @@ export module BasicPermission {
     export const AutomaticUpgradeOfOperations : PermissionSymbol = registerSymbol({ Type: "Permission", key: "BasicPermission.AutomaticUpgradeOfOperations" });
 }
 
-export const LastAuthRulesImportEntity_Type = new Type<LastAuthRulesImportEntity>("LastAuthRulesImport");
+export const LastAuthRulesImportEntity = new Type<LastAuthRulesImportEntity>("LastAuthRulesImport");
 export interface LastAuthRulesImportEntity extends Entities.Entity {
     date: string;
 }
 
-export enum MergeStrategy {
-    Union = "Union" as any,
-    Intersection = "Intersection" as any,
-}
-export const MergeStrategy_Type = new EnumType<MergeStrategy>("MergeStrategy", MergeStrategy);
+export const MergeStrategy = new EnumType<MergeStrategy>("MergeStrategy");
+export type MergeStrategy =
+    "Union" |
+    "Intersection";
 
-export enum OperationAllowed {
-    None = "None" as any,
-    DBOnly = "DBOnly" as any,
-    Allow = "Allow" as any,
-}
-export const OperationAllowed_Type = new EnumType<OperationAllowed>("OperationAllowed", OperationAllowed);
+export const OperationAllowed = new EnumType<OperationAllowed>("OperationAllowed");
+export type OperationAllowed =
+    "None" |
+    "DBOnly" |
+    "Allow";
 
-export const OperationAllowedRule_Type = new Type<OperationAllowedRule>("OperationAllowedRule");
+export const OperationAllowedRule = new Type<OperationAllowedRule>("OperationAllowedRule");
 export interface OperationAllowedRule extends AllowedRuleCoerced<Entities.OperationSymbol, OperationAllowed> {
 }
 
-export const OperationRulePack_Type = new Type<OperationRulePack>("OperationRulePack");
+export const OperationRulePack = new Type<OperationRulePack>("OperationRulePack");
 export interface OperationRulePack extends BaseRulePack<OperationAllowedRule> {
 }
 
-export const PasswordExpiresIntervalEntity_Type = new Type<PasswordExpiresIntervalEntity>("PasswordExpiresInterval");
+export const PasswordExpiresIntervalEntity = new Type<PasswordExpiresIntervalEntity>("PasswordExpiresInterval");
 export interface PasswordExpiresIntervalEntity extends Entities.Entity {
     days: number;
     daysWarning: number;
@@ -181,42 +178,41 @@ export module PasswordExpiresIntervalOperation {
     export const Save : Entities.ExecuteSymbol<PasswordExpiresIntervalEntity> = registerSymbol({ Type: "Operation", key: "PasswordExpiresIntervalOperation.Save" });
 }
 
-export const PermissionAllowedRule_Type = new Type<PermissionAllowedRule>("PermissionAllowedRule");
+export const PermissionAllowedRule = new Type<PermissionAllowedRule>("PermissionAllowedRule");
 export interface PermissionAllowedRule extends AllowedRule<PermissionSymbol, boolean> {
 }
 
-export const PermissionRulePack_Type = new Type<PermissionRulePack>("PermissionRulePack");
+export const PermissionRulePack = new Type<PermissionRulePack>("PermissionRulePack");
 export interface PermissionRulePack extends BaseRulePack<PermissionAllowedRule> {
 }
 
-export const PermissionSymbol_Type = new Type<PermissionSymbol>("Permission");
+export const PermissionSymbol = new Type<PermissionSymbol>("Permission");
 export interface PermissionSymbol extends Entities.Symbol {
 }
 
-export enum PropertyAllowed {
-    None = "None" as any,
-    Read = "Read" as any,
-    Modify = "Modify" as any,
-}
-export const PropertyAllowed_Type = new EnumType<PropertyAllowed>("PropertyAllowed", PropertyAllowed);
+export const PropertyAllowed = new EnumType<PropertyAllowed>("PropertyAllowed");
+export type PropertyAllowed =
+    "None" |
+    "Read" |
+    "Modify";
 
-export const PropertyAllowedRule_Type = new Type<PropertyAllowedRule>("PropertyAllowedRule");
+export const PropertyAllowedRule = new Type<PropertyAllowedRule>("PropertyAllowedRule");
 export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, PropertyAllowed> {
 }
 
-export const PropertyRulePack_Type = new Type<PropertyRulePack>("PropertyRulePack");
+export const PropertyRulePack = new Type<PropertyRulePack>("PropertyRulePack");
 export interface PropertyRulePack extends BaseRulePack<PropertyAllowedRule> {
 }
 
-export const QueryAllowedRule_Type = new Type<QueryAllowedRule>("QueryAllowedRule");
+export const QueryAllowedRule = new Type<QueryAllowedRule>("QueryAllowedRule");
 export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity, boolean> {
 }
 
-export const QueryRulePack_Type = new Type<QueryRulePack>("QueryRulePack");
+export const QueryRulePack = new Type<QueryRulePack>("QueryRulePack");
 export interface QueryRulePack extends BaseRulePack<QueryAllowedRule> {
 }
 
-export const ResetPasswordRequestEntity_Type = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");
+export const ResetPasswordRequestEntity = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");
 export interface ResetPasswordRequestEntity extends Entities.Entity {
     code: string;
     user: UserEntity;
@@ -224,7 +220,7 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
     lapsed: boolean;
 }
 
-export const RoleEntity_Type = new Type<RoleEntity>("Role");
+export const RoleEntity = new Type<RoleEntity>("Role");
 export interface RoleEntity extends Entities.Entity {
     name: string;
     mergeStrategy: MergeStrategy;
@@ -246,34 +242,34 @@ export interface RuleEntity<R, A> extends Entities.Entity {
     allowed: A;
 }
 
-export const RuleOperationEntity_Type = new Type<RuleOperationEntity>("RuleOperation");
+export const RuleOperationEntity = new Type<RuleOperationEntity>("RuleOperation");
 export interface RuleOperationEntity extends RuleEntity<Entities.OperationSymbol, OperationAllowed> {
 }
 
-export const RulePermissionEntity_Type = new Type<RulePermissionEntity>("RulePermission");
+export const RulePermissionEntity = new Type<RulePermissionEntity>("RulePermission");
 export interface RulePermissionEntity extends RuleEntity<PermissionSymbol, boolean> {
 }
 
-export const RulePropertyEntity_Type = new Type<RulePropertyEntity>("RuleProperty");
+export const RulePropertyEntity = new Type<RulePropertyEntity>("RuleProperty");
 export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntity, PropertyAllowed> {
 }
 
-export const RuleQueryEntity_Type = new Type<RuleQueryEntity>("RuleQuery");
+export const RuleQueryEntity = new Type<RuleQueryEntity>("RuleQuery");
 export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, boolean> {
 }
 
-export const RuleTypeConditionEntity_Type = new Type<RuleTypeConditionEntity>("RuleTypeConditionEntity");
+export const RuleTypeConditionEntity = new Type<RuleTypeConditionEntity>("RuleTypeConditionEntity");
 export interface RuleTypeConditionEntity extends Entities.EmbeddedEntity {
     condition: ExBasics.TypeConditionSymbol;
     allowed: TypeAllowed;
 }
 
-export const RuleTypeEntity_Type = new Type<RuleTypeEntity>("RuleType");
+export const RuleTypeEntity = new Type<RuleTypeEntity>("RuleType");
 export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowed> {
     conditions: Entities.MList<RuleTypeConditionEntity>;
 }
 
-export const SessionLogEntity_Type = new Type<SessionLogEntity>("SessionLog");
+export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
     user: Entities.Lite<UserEntity>;
     sessionStart: string;
@@ -287,28 +283,27 @@ export module SessionLogPermission {
     export const TrackSession : PermissionSymbol = registerSymbol({ Type: "Permission", key: "SessionLogPermission.TrackSession" });
 }
 
-export enum TypeAllowed {
-    None = "None" as any,
-    DBReadUINone = "DBReadUINone" as any,
-    Read = "Read" as any,
-    DBModifyUINone = "DBModifyUINone" as any,
-    DBModifyUIRead = "DBModifyUIRead" as any,
-    Modify = "Modify" as any,
-    DBCreateUINone = "DBCreateUINone" as any,
-    DBCreateUIRead = "DBCreateUIRead" as any,
-    DBCreateUIModify = "DBCreateUIModify" as any,
-    Create = "Create" as any,
-}
-export const TypeAllowed_Type = new EnumType<TypeAllowed>("TypeAllowed", TypeAllowed);
+export const TypeAllowed = new EnumType<TypeAllowed>("TypeAllowed");
+export type TypeAllowed =
+    "None" |
+    "DBReadUINone" |
+    "Read" |
+    "DBModifyUINone" |
+    "DBModifyUIRead" |
+    "Modify" |
+    "DBCreateUINone" |
+    "DBCreateUIRead" |
+    "DBCreateUIModify" |
+    "Create";
 
-export const TypeAllowedAndConditions_Type = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
+export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
     fallback: TypeAllowed;
     fallbackOrNone: TypeAllowed;
     conditions: Array<TypeConditionRule>;
 }
 
-export const TypeAllowedRule_Type = new Type<TypeAllowedRule>("TypeAllowedRule");
+export const TypeAllowedRule = new Type<TypeAllowedRule>("TypeAllowedRule");
 export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllowedAndConditions> {
     properties: AuthThumbnail;
     operations: AuthThumbnail;
@@ -316,17 +311,17 @@ export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllo
     availableConditions: Array<ExBasics.TypeConditionSymbol>;
 }
 
-export const TypeConditionRule_Type = new Type<TypeConditionRule>("TypeConditionRule");
+export const TypeConditionRule = new Type<TypeConditionRule>("TypeConditionRule");
 export interface TypeConditionRule extends Entities.EmbeddedEntity {
     typeCondition: ExBasics.TypeConditionSymbol;
     allowed: TypeAllowed;
 }
 
-export const TypeRulePack_Type = new Type<TypeRulePack>("TypeRulePack");
+export const TypeRulePack = new Type<TypeRulePack>("TypeRulePack");
 export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
 }
 
-export const UserEntity_Type = new Type<UserEntity>("User");
+export const UserEntity = new Type<UserEntity>("User");
 export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, Basics.IUserEntity {
     userName: string;
     passwordHash: string;
@@ -348,14 +343,13 @@ export module UserOperation {
     export const SetPassword : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.SetPassword" });
 }
 
-export enum UserState {
-    New = "New" as any,
-    Saved = "Saved" as any,
-    Disabled = "Disabled" as any,
-}
-export const UserState_Type = new EnumType<UserState>("UserState", UserState);
+export const UserState = new EnumType<UserState>("UserState");
+export type UserState =
+    "New" |
+    "Saved" |
+    "Disabled";
 
-export const UserTicketEntity_Type = new Type<UserTicketEntity>("UserTicket");
+export const UserTicketEntity = new Type<UserTicketEntity>("UserTicket");
 export interface UserTicketEntity extends Entities.Entity {
     user: Entities.Lite<UserEntity>;
     ticket: string;

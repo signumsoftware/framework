@@ -5,7 +5,7 @@ import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as ChartUtils from "./ChartUtils"
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
-   ChartColorEntity_Type, ChartScriptEntity, ChartScriptEntity_Type, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
+   ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 
 

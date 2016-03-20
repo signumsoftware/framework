@@ -16,7 +16,7 @@ export default class Role extends EntityComponent<RoleEntity> {
 
     rolesMessage(): string {
         return AuthAdminMessage.NoRoles.niceToString() + " ⇒ " +
-            (this.entity.mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).niceToString();
+            (this.entity.mergeStrategy == "Union" ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).niceToString();
     }
 }
 

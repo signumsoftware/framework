@@ -8,7 +8,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../
 import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import SearchControl from '../../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
-import { UserChartEntity, ChartRequest, ChartMessage, UserChartEntity_Type } from '../Signum.Entities.Chart'
+import { UserChartEntity, ChartRequest, ChartMessage } from '../Signum.Entities.Chart'
 import * as UserChartClient from './UserChartClient'
 import ChartRequestView from '../Templates/ChartRequestView'
 
@@ -70,7 +70,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
     }
 
     render() {
-        const label = UserChartEntity_Type.nicePluralName();
+        const label = UserChartEntity.nicePluralName();
         var userCharts = this.state.userCharts;
         return (
             <DropdownButton title={label} label={label} id="userQueriesDropDown" className="sf-userquery-dropdown"

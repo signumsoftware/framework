@@ -8,7 +8,7 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
 
-export const AlertEntity_Type = new Type<AlertEntity>("Alert");
+export const AlertEntity = new Type<AlertEntity>("Alert");
 export interface AlertEntity extends Entities.Entity {
     target: Entities.Lite<Entities.Entity>;
     creationDate: string;
@@ -43,14 +43,13 @@ export module AlertOperation {
     export const Unattend : Entities.ExecuteSymbol<AlertEntity> = registerSymbol({ Type: "Operation", key: "AlertOperation.Unattend" });
 }
 
-export enum AlertState {
-    New = "New" as any,
-    Saved = "Saved" as any,
-    Attended = "Attended" as any,
-}
-export const AlertState_Type = new EnumType<AlertState>("AlertState", AlertState);
+export const AlertState = new EnumType<AlertState>("AlertState");
+export type AlertState =
+    "New" |
+    "Saved" |
+    "Attended";
 
-export const AlertTypeEntity_Type = new Type<AlertTypeEntity>("AlertType");
+export const AlertTypeEntity = new Type<AlertTypeEntity>("AlertType");
 export interface AlertTypeEntity extends Basics.SemiSymbol {
 }
 

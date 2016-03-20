@@ -14,7 +14,7 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 
-export const AppendixHelpEntity_Type = new Type<AppendixHelpEntity>("AppendixHelp");
+export const AppendixHelpEntity = new Type<AppendixHelpEntity>("AppendixHelp");
 export interface AppendixHelpEntity extends Entities.Entity {
     uniqueName: string;
     culture: ExBasics.CultureInfoEntity;
@@ -26,7 +26,7 @@ export module AppendixHelpOperation {
     export const Save : Entities.ExecuteSymbol<AppendixHelpEntity> = registerSymbol({ Type: "Operation", key: "AppendixHelpOperation.Save" });
 }
 
-export const EntityHelpEntity_Type = new Type<EntityHelpEntity>("EntityHelp");
+export const EntityHelpEntity = new Type<EntityHelpEntity>("EntityHelp");
 export interface EntityHelpEntity extends Entities.Entity {
     type: Basics.TypeEntity;
     culture: ExBasics.CultureInfoEntity;
@@ -135,7 +135,7 @@ export module HelpSyntaxMessage {
     export const TranslateFrom = new MessageKey("HelpSyntaxMessage", "TranslateFrom");
 }
 
-export const NamespaceHelpEntity_Type = new Type<NamespaceHelpEntity>("NamespaceHelp");
+export const NamespaceHelpEntity = new Type<NamespaceHelpEntity>("NamespaceHelp");
 export interface NamespaceHelpEntity extends Entities.Entity {
     name: string;
     culture: ExBasics.CultureInfoEntity;
@@ -147,7 +147,7 @@ export module NamespaceHelpOperation {
     export const Save : Entities.ExecuteSymbol<NamespaceHelpEntity> = registerSymbol({ Type: "Operation", key: "NamespaceHelpOperation.Save" });
 }
 
-export const OperationHelpEntity_Type = new Type<OperationHelpEntity>("OperationHelp");
+export const OperationHelpEntity = new Type<OperationHelpEntity>("OperationHelp");
 export interface OperationHelpEntity extends Entities.Entity {
     operation: Entities.OperationSymbol;
     culture: ExBasics.CultureInfoEntity;
@@ -158,19 +158,19 @@ export module OperationHelpOperation {
     export const Save : Entities.ExecuteSymbol<OperationHelpEntity> = registerSymbol({ Type: "Operation", key: "OperationHelpOperation.Save" });
 }
 
-export const PropertyRouteHelpEntity_Type = new Type<PropertyRouteHelpEntity>("PropertyRouteHelpEntity");
+export const PropertyRouteHelpEntity = new Type<PropertyRouteHelpEntity>("PropertyRouteHelpEntity");
 export interface PropertyRouteHelpEntity extends Entities.EmbeddedEntity {
     property: Basics.PropertyRouteEntity;
     description: string;
 }
 
-export const QueryColumnHelpEntity_Type = new Type<QueryColumnHelpEntity>("QueryColumnHelpEntity");
+export const QueryColumnHelpEntity = new Type<QueryColumnHelpEntity>("QueryColumnHelpEntity");
 export interface QueryColumnHelpEntity extends Entities.EmbeddedEntity {
     columnName: string;
     description: string;
 }
 
-export const QueryHelpEntity_Type = new Type<QueryHelpEntity>("QueryHelp");
+export const QueryHelpEntity = new Type<QueryHelpEntity>("QueryHelp");
 export interface QueryHelpEntity extends Entities.Entity {
     query: Basics.QueryEntity;
     culture: ExBasics.CultureInfoEntity;

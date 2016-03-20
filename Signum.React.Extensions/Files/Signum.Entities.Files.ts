@@ -10,14 +10,14 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 import * as Patterns from '../../../Framework/Signum.React/Scripts/Signum.Entities.Patterns' 
 
 
-export const EmbeddedFileEntity_Type = new Type<EmbeddedFileEntity>("EmbeddedFileEntity");
+export const EmbeddedFileEntity = new Type<EmbeddedFileEntity>("EmbeddedFileEntity");
 export interface EmbeddedFileEntity extends Entities.EmbeddedEntity {
     fileName: string;
     binaryFile: string;
     fullWebPath: string;
 }
 
-export const EmbeddedFilePathEntity_Type = new Type<EmbeddedFilePathEntity>("EmbeddedFilePathEntity");
+export const EmbeddedFilePathEntity = new Type<EmbeddedFilePathEntity>("EmbeddedFilePathEntity");
 export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
     fileName: string;
     binaryFile: string;
@@ -30,7 +30,7 @@ export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
     fullWebPath: string;
 }
 
-export const FileEntity_Type = new Type<FileEntity>("File");
+export const FileEntity = new Type<FileEntity>("File");
 export interface FileEntity extends Entities.ImmutableEntity {
     fileName: string;
     hash: string;
@@ -54,7 +54,7 @@ export module FileMessage {
     export const OnlyOneFileIsSupported = new MessageKey("FileMessage", "OnlyOneFileIsSupported");
 }
 
-export const FilePathEntity_Type = new Type<FilePathEntity>("FilePath");
+export const FilePathEntity = new Type<FilePathEntity>("FilePath");
 export interface FilePathEntity extends Patterns.LockableEntity {
     creationDate: string;
     fileName: string;
@@ -72,7 +72,7 @@ export module FilePathOperation {
     export const Save : Entities.ExecuteSymbol<FilePathEntity> = registerSymbol({ Type: "Operation", key: "FilePathOperation.Save" });
 }
 
-export const FileTypeSymbol_Type = new Type<FileTypeSymbol>("FileType");
+export const FileTypeSymbol = new Type<FileTypeSymbol>("FileType");
 export interface FileTypeSymbol extends Entities.Symbol {
 }
 

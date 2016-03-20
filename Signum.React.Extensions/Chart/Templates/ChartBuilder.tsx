@@ -9,7 +9,7 @@ import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext,
 import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, IChartBase, GroupByChart, ChartMessage, ChartColorEntity_Type, ChartScriptEntity, ChartScriptEntity_Type, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
+import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, IChartBase, GroupByChart, ChartMessage, ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { ChartColumn, ChartColumnInfo }from './ChartColumn'
@@ -108,7 +108,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                 <div className="col-lg-2">
                     <div className="sf-chart-type panel panel-default">
                         <div className="panel-heading">
-                            <h3 className="panel-title">{ChartScriptEntity_Type.nicePluralName() }</h3>
+                            <h3 className="panel-title">{ChartScriptEntity.nicePluralName() }</h3>
                         </div>
                         <div className="panel-body">
                             {this.state.chartScripts && this.state.expanded && this.state.chartScripts.flatMap(a => a).map((cs, i) =>
@@ -175,10 +175,10 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
             labelText: scriptParameter.name,
         };
 
-        if (scriptParameter.type == ChartParameterType.Number || scriptParameter.type == ChartParameterType.String) {
+        if (scriptParameter.type == "Number" || scriptParameter.type == "String") {
             vl.valueLineType = ValueLineType.TextBox;
         }
-        else if (scriptParameter.type == ChartParameterType.Enum) {
+        else if (scriptParameter.type == "Enum") {
             vl.valueLineType = ValueLineType.Enum;
 
             var tokenEntity = scriptParameter.columnIndex == null ? null : chart.columns[scriptParameter.columnIndex].element.token;

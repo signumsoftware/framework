@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { UserQueryEntity, UserQueryEntity_Type, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../Signum.Entities.UserQueries'
+import { UserQueryEntity, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../Signum.Entities.UserQueries'
 import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
