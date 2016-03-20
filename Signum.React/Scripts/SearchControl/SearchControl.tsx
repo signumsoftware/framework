@@ -134,7 +134,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             create: ti.some(ti => Navigator.isCreable(ti, true)),
             navigate: ti.some(ti => Navigator.isNavigable(ti, null, true)),
             pagination: this.defaultPagination(),
-            columnOptionsMode: ColumnOptionsMode.Add,
+            columnOptionsMode: "Add",
             columnOptions: [],
             orderOptions: [],
             filterOptions: []
@@ -150,7 +150,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             if (qd.columns[defaultOrder]) {
                 findOptions.orderOptions = [{
                     columnName: defaultOrder,
-                    orderType: info.entityData == EntityData.Transactional ? OrderType.Descending : OrderType.Ascending
+                    orderType: info.entityData == EntityData.Transactional ? "Descending" as OrderType : "Ascending" as OrderType
                 }];
             }
         }
@@ -223,7 +223,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.state.findOptions.pagination = p;
         this.setState({ resultTable: null });
 
-        if (this.state.findOptions.pagination.mode != PaginationMode.All)
+        if (this.state.findOptions.pagination.mode != "All")
             this.handleSearch();
     }
 
@@ -609,7 +609,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         const prev = fo.orderOptions.filter(a => a.token.fullKey == token).firstOrNull();
 
         if (prev != null) {
-            prev.orderType = prev.orderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending;
+            prev.orderType = prev.orderType == "Ascending" ? "Descending" : "Ascending";
             if (!e.shiftKey)
                 fo.orderOptions = [prev];
 
@@ -617,7 +617,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
             const column = fo.columnOptions.filter(a => a.token.fullKey == token).first("Column");
 
-            const newOrder: OrderOption = { token: column.token, orderType: OrderType.Ascending, columnName: column.token.fullKey };
+            const newOrder: OrderOption = { token: column.token, orderType: "Ascending", columnName: column.token.fullKey };
 
             if (e.shiftKey)
                 fo.orderOptions.push(newOrder);
@@ -626,7 +626,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         }
         
 
-        if (fo.pagination.mode != PaginationMode.All)
+        if (fo.pagination.mode != "All")
             this.handleSearch();
     }
 
@@ -744,7 +744,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             return "";
 
 
-        let asc = (o.orderType == OrderType.Ascending ? "asc" : "desc");
+        let asc = (o.orderType == "Ascending" ? "asc" : "desc");
 
         if (orders.indexOf(o))
             asc += " l" + orders.indexOf(o);

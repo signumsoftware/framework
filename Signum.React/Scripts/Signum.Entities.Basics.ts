@@ -4,12 +4,12 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection' 
 
 import * as Entities from './Signum.Entities' 
-export const ColorEntity_Type = new Type<ColorEntity>("ColorEntity");
+export const ColorEntity = new Type<ColorEntity>("ColorEntity");
 export interface ColorEntity extends Entities.EmbeddedEntity {
     argb: number;
 }
 
-export const DeleteLogParametersEntity_Type = new Type<DeleteLogParametersEntity>("DeleteLogParametersEntity");
+export const DeleteLogParametersEntity = new Type<DeleteLogParametersEntity>("DeleteLogParametersEntity");
 export interface DeleteLogParametersEntity extends Entities.EmbeddedEntity {
     deleteLogsWithMoreThan: number;
     dateLimit: string;
@@ -17,7 +17,7 @@ export interface DeleteLogParametersEntity extends Entities.EmbeddedEntity {
     maxChunks: number;
 }
 
-export const ExceptionEntity_Type = new Type<ExceptionEntity>("Exception");
+export const ExceptionEntity = new Type<ExceptionEntity>("Exception");
 export interface ExceptionEntity extends Entities.Entity {
     creationDate: string;
     exceptionType: string;
@@ -48,7 +48,7 @@ export interface ExceptionEntity extends Entities.Entity {
 export interface IUserEntity extends Entities.Entity {
 }
 
-export const OperationLogEntity_Type = new Type<OperationLogEntity>("OperationLog");
+export const OperationLogEntity = new Type<OperationLogEntity>("OperationLog");
 export interface OperationLogEntity extends Entities.Entity {
     target: Entities.Lite<Entities.Entity>;
     origin: Entities.Lite<Entities.Entity>;
@@ -59,13 +59,13 @@ export interface OperationLogEntity extends Entities.Entity {
     exception: Entities.Lite<ExceptionEntity>;
 }
 
-export const PropertyRouteEntity_Type = new Type<PropertyRouteEntity>("PropertyRoute");
+export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
     path: string;
     rootType: TypeEntity;
 }
 
-export const QueryEntity_Type = new Type<QueryEntity>("Query");
+export const QueryEntity = new Type<QueryEntity>("Query");
 export interface QueryEntity extends Entities.Entity {
     key: string;
 }
@@ -75,7 +75,7 @@ export interface SemiSymbol extends Entities.Entity {
     name: string;
 }
 
-export const TypeEntity_Type = new Type<TypeEntity>("Type");
+export const TypeEntity = new Type<TypeEntity>("Type");
 export interface TypeEntity extends Entities.Entity {
     fullClassName: string;
     cleanName: string;
@@ -93,16 +93,15 @@ export namespace External {
         export const MoreThanOne0Found = new MessageKey("CollectionMessage", "MoreThanOne0Found");
     }
     
-    export enum DayOfWeek {
-        Sunday = "Sunday" as any,
-        Monday = "Monday" as any,
-        Tuesday = "Tuesday" as any,
-        Wednesday = "Wednesday" as any,
-        Thursday = "Thursday" as any,
-        Friday = "Friday" as any,
-        Saturday = "Saturday" as any,
-    }
-    export const DayOfWeek_Type = new EnumType<DayOfWeek>("DayOfWeek", DayOfWeek);
+    export const DayOfWeek = new EnumType<DayOfWeek>("DayOfWeek");
+    export type DayOfWeek =
+        "Sunday" |
+        "Monday" |
+        "Tuesday" |
+        "Wednesday" |
+        "Thursday" |
+        "Friday" |
+        "Saturday";
     
 }
 

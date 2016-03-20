@@ -4,9 +4,11 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
-import { QueryDescription, CountQueryRequest, QueryRequest, FindOptions, FilterOption, FilterType, FilterOperation,
-    QueryToken, ColumnDescription, ColumnOptionsMode, ColumnOption, Pagination, PaginationMode, ResultColumn,
-    ResultTable, ResultRow, OrderOption, OrderType, SubTokensOptions, toQueryToken, isList, expandParentColumn } from './FindOptions';
+import { QueryDescription, CountQueryRequest, QueryRequest, FindOptions, FilterOption,
+    QueryToken, ColumnDescription, ColumnOption, Pagination, ResultColumn,
+    ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, expandParentColumn, ColumnOptionsMode } from './FindOptions';
+
+import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType } from './Signum.Entities.DynamicQuery';
 
 import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from './Signum.Entities';
 
@@ -98,7 +100,7 @@ export function findOptionsPath(queryNameOrFindOptions: any): string {
     fo = expandParentColumn(fo);
     
     const query = {
-        columnMode: !fo.columnOptionsMode || fo.columnOptionsMode == ColumnOptionsMode.Add ? undefined : ColumnOptionsMode[fo.columnOptionsMode],
+        columnMode: !fo.columnOptionsMode || fo.columnOptionsMode == "Add" as ColumnOptionsMode ? undefined : fo.columnOptionsMode,
         create: fo.create,
         navigate: fo.navigate,
         searchOnLoad: fo.searchOnLoad,
@@ -116,6 +118,8 @@ export function findOptionsPath(queryNameOrFindOptions: any): string {
     return currentHistory.createPath({ pathname: "/find/" + getQueryKey(fo.queryName), query: query });
 }
 
+
+
 export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: any): FindOptions {
     
     const result = {
@@ -123,7 +127,7 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
         filterOptions: Decoder.decodeFilters(query),
         orderOptions: Decoder.decodeOrders(query),
         columnOptions: Decoder.decodeColumns(query),
-        columnOptionsMode: query.columnMode == null ? ColumnOptionsMode.Add : query.columnMode,
+        columnOptionsMode: query.columnMode == null ? "Add" : query.columnMode,
         create: parseBoolean(query.create),
         navigate: parseBoolean(query.navigate),
         searchOnLoad: parseBoolean(query.searchOnLoad),
@@ -131,7 +135,7 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
         showFilters: parseBoolean(query.showFilters),
         showFooter: parseBoolean(query.showFooter),
         showHeader: parseBoolean(query.showHeader),
-    };
+    } as FindOptions;
 
     return result;
 }
@@ -139,15 +143,15 @@ export function parseFindOptionsPath(queryName: PseudoType | QueryKey, query: an
 export function mergeColumns(columns: ColumnDescription[], mode: ColumnOptionsMode, columnOptions: ColumnOption[]): ColumnOption[] {
 
     switch (mode) {
-        case ColumnOptionsMode.Add:
+        case "Add":
             return columns.filter(cd => cd.name != "Entity").map(cd => ({ columnName: cd.name, token: toQueryToken(cd), displayName: cd.displayName }) as ColumnOption)
                 .concat(columnOptions);
 
-        case ColumnOptionsMode.Remove:
+        case "Remove":
             return columns.filter(cd => cd.name != "Entity" && !columnOptions.some(a => (a.token ? a.token.fullKey : a.columnName) == cd.name))
                 .map(cd => ({ columnName: cd.name, token: toQueryToken(cd), displayName: cd.displayName }) as ColumnOption);
 
-        case ColumnOptionsMode.Replace:
+        case "Replace":
             return columnOptions;
     }
 }
@@ -177,20 +181,20 @@ export function smartColumns(current: ColumnOption[], ideal: ColumnDescription[]
         }
         if (toRemove.length + current.length == ideal.length) {
             return {
-                mode: ColumnOptionsMode.Remove,
+                mode: "Remove",
                 columns: toRemove
             };
         }
     }
     else if (current.every((a, i) => i >= ideal.length || similar(a, ideal[i]))) {
         return {
-            mode: ColumnOptionsMode.Add,
+            mode: "Add",
             columns: current.slice(ideal.length)
         };
     }
     
     return {
-        mode: ColumnOptionsMode.Replace,
+        mode: "Replace",
         columns: current,
     };
 }
@@ -212,7 +216,7 @@ export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
     var promises: Promise<any>[] = [];
 
     if (findOptions.filterOptions) {
-        findOptions.filterOptions.filter(fo => !fo.operation).forEach(fo => fo.operation = FilterOperation.EqualTo);
+        findOptions.filterOptions.filter(fo => !fo.operation).forEach(fo => fo.operation = "EqualTo");
         promises.push(...findOptions.filterOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)));
     }
 
@@ -324,11 +328,11 @@ export function parseFilterValues(filterOptions: FilterOption[]): Promise<void> 
 
 
 function parseValue(token: QueryToken, val: any, needToStr: Array<any>): any {
-    switch (filterType(token)) {
-        case FilterType.Boolean: return parseBoolean(val);
-        case FilterType.Integer: return nanToNull(parseInt(val));
-        case FilterType.Decimal: return nanToNull(parseFloat(val));
-        case FilterType.Lite:
+    switch (token.filterType) {
+        case "Boolean": return parseBoolean(val);
+        case "Integer": return nanToNull(parseInt(val));
+        case "Decimal": return nanToNull(parseFloat(val));
+        case "Lite":
             {
                 var lite = convertToLite(val);
 
@@ -370,35 +374,19 @@ function convertToLite(val: any): Lite<Entity> {
     throw new Error(`Impossible to convert ${val} to Lite`); 
 }
 
-function filterType(queryToken: QueryToken) {
-    if ((queryToken as any).filterType)
-        return (queryToken as any).filterType;
+const queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
+export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
+const queryKey = getQueryKey(queryName);
 
-    else (queryToken as any).filterType = calculateFilterType(queryToken.type);
+if (queryDescriptionCache[queryKey])
+    return Promise.resolve(queryDescriptionCache[queryKey]);
+
+return API.fetchQueryDescription(queryKey).then(qd => {
+            Object.freeze(qd.columns);
+    queryDescriptionCache[queryKey] = Object.freeze(qd);
+            return qd;
+        });
 }
-
-
-function calculateFilterType(typeRef: TypeReference): FilterType {
-    
-    if (typeRef.name == "boolean")
-        return FilterType.Boolean;
-
-    return FilterType.Boolean;
-}
-
-    const queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
-    export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
-    const queryKey = getQueryKey(queryName);
-
-    if (queryDescriptionCache[queryKey])
-        return Promise.resolve(queryDescriptionCache[queryKey]);
-
-    return API.fetchQueryDescription(queryKey).then(qd => {
-                Object.freeze(qd.columns);
-        queryDescriptionCache[queryKey] = Object.freeze(qd);
-                return qd;
-            });
-    }
 
 export module API {
     
@@ -462,7 +450,7 @@ export module Encoder {
 
     export function encodeOrders(query: any, orderOptions: OrderOption[]) {
         if (orderOptions)
-            orderOptions.forEach((oo, i) => query["order" + i] = (oo.orderType == OrderType.Descending ? "-" : "") + getTokenString(oo));
+            orderOptions.forEach((oo, i) => query["order" + i] = (oo.orderType == "Descending" ? "-" : "") + getTokenString(oo));
     }
 
     export function encodeColumns(query: any, columnOptions: ColumnOption[]) {
@@ -531,9 +519,9 @@ export module Decoder {
     export function decodeOrders(query: any): OrderOption[] {
 
         return valuesInOrder(query, "order").map(val => ({
-            orderType: val[0] == "-" ? OrderType.Descending : OrderType.Ascending,
+            orderType: val[0] == "-" ? "Descending" : "Ascending",
             columnName: val.tryAfter("-") || val
-        }));
+        } as OrderOption));
     }
 
     export function decodeColumns(query: any): ColumnOption[]{
@@ -562,7 +550,7 @@ export module ButtonBarQuery {
 
 
 export const defaultPagination: Pagination = {
-    mode: PaginationMode.Paginate,
+    mode: "Paginate",
     elementsPerPage: 20,
     currentPage: 1,
 };
@@ -602,23 +590,23 @@ export const formatRules: FormatRule[] = [
     },
     {
         name: "Enum",
-        isApplicable: col=> col.token.filterType == FilterType.Enum,
+        isApplicable: col => col.token.filterType == "Enum",
         formatter: col=> new CellFormatter(cell => getEnumInfo(col.token.type.name, cell).niceName)
     },
     {
         name: "Lite",
-        isApplicable: col => col.token.filterType == FilterType.Lite,
+        isApplicable: col => col.token.filterType == "Lite",
         formatter: col => new CellFormatter((cell: Lite<Entity>) => !cell ? null : <EntityLink lite={cell}/>)
     },
 
     {
         name: "Guid",
-        isApplicable: col=> col.token.filterType == FilterType.Guid,
+        isApplicable: col => col.token.filterType == "Guid",
         formatter: col => new CellFormatter((cell: string) => cell && <span className="guid">{(cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)) }</span>)
     },
     {
         name: "DateTime",
-        isApplicable: col=> col.token.filterType == FilterType.DateTime,
+        isApplicable: col => col.token.filterType == "DateTime",
         formatter: col=> {
             const momentFormat = toMomentFormat(col.token.format);
             return new CellFormatter((cell: string) => cell == null || cell == "" ? "" : moment(cell).format(momentFormat))
@@ -626,17 +614,17 @@ export const formatRules: FormatRule[] = [
     },
     {
         name: "Number",
-        isApplicable: col=> col.token.filterType == FilterType.Integer || col.token.filterType == FilterType.Decimal,
+        isApplicable: col => col.token.filterType == "Integer" || col.token.filterType == "Decimal",
         formatter: col=> new CellFormatter((cell: number) => cell && cell.toString(), "right")
     },
     {
         name: "Number with Unit",
-        isApplicable: col=> (col.token.filterType == FilterType.Integer || col.token.filterType == FilterType.Decimal) && !!col.token.unit,
+        isApplicable: col => (col.token.filterType == "Integer" || col.token.filterType == "Decimal") && !!col.token.unit,
         formatter: col => new CellFormatter((cell: number) => cell && cell.toString() + " " + col.token.unit, "right")
     },
     {
         name: "Bool",
-        isApplicable: col=> col.token.filterType == FilterType.Boolean,
+        isApplicable: col => col.token.filterType == "Boolean",
         formatter: col=> new CellFormatter((cell: boolean) => cell == null ? null : <input type="checkbox" disabled={true} checked={cell}/>, "center")
     },
 ];

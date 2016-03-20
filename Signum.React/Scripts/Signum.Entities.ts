@@ -178,11 +178,10 @@ export function is<T extends Entity>(a: Lite<T> | T, b: Lite<T> | T) {
 
 
 
-export enum BooleanEnum {
-    False = "False" as any,
-    True = "True" as any,
-}
-export const BooleanEnum_Type = new EnumType<BooleanEnum>("BooleanEnum", BooleanEnum);
+export const BooleanEnum = new EnumType<BooleanEnum>("BooleanEnum");
+export type BooleanEnum =
+    "False" |
+    "True";
 
 export module CalendarMessage {
     export const Today = new MessageKey("CalendarMessage", "Today");
@@ -193,7 +192,7 @@ export module ConnectionMessage {
     export const SessionExpired = new MessageKey("ConnectionMessage", "SessionExpired");
 }
 
-export const CorruptMixin_Type = new Type<CorruptMixin>("CorruptMixin");
+export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
 export interface CorruptMixin extends MixinEntity {
     corrupt: boolean;
 }
@@ -317,18 +316,17 @@ export module OperationMessage {
     export const Logs = new MessageKey("OperationMessage", "Logs");
 }
 
-export const OperationSymbol_Type = new Type<OperationSymbol>("Operation");
+export const OperationSymbol = new Type<OperationSymbol>("Operation");
 export interface OperationSymbol extends Symbol {
 }
 
-export enum OperationType {
-    Execute = "Execute" as any,
-    Delete = "Delete" as any,
-    Constructor = "Constructor" as any,
-    ConstructorFrom = "ConstructorFrom" as any,
-    ConstructorFromMany = "ConstructorFromMany" as any,
-}
-export const OperationType_Type = new EnumType<OperationType>("OperationType", OperationType);
+export const OperationType = new EnumType<OperationType>("OperationType");
+export type OperationType =
+    "Execute" |
+    "Delete" |
+    "Constructor" |
+    "ConstructorFrom" |
+    "ConstructorFromMany";
 
 export module PaginationMessage {
     export const All = new MessageKey("PaginationMessage", "All");
@@ -468,16 +466,15 @@ export namespace External {
         export const MoreThanOne0Found = new MessageKey("CollectionMessage", "MoreThanOne0Found");
     }
     
-    export enum DayOfWeek {
-        Sunday = "Sunday" as any,
-        Monday = "Monday" as any,
-        Tuesday = "Tuesday" as any,
-        Wednesday = "Wednesday" as any,
-        Thursday = "Thursday" as any,
-        Friday = "Friday" as any,
-        Saturday = "Saturday" as any,
-    }
-    export const DayOfWeek_Type = new EnumType<DayOfWeek>("DayOfWeek", DayOfWeek);
+    export const DayOfWeek = new EnumType<DayOfWeek>("DayOfWeek");
+    export type DayOfWeek =
+        "Sunday" |
+        "Monday" |
+        "Tuesday" |
+        "Wednesday" |
+        "Thursday" |
+        "Friday" |
+        "Saturday";
     
 }
 

@@ -4,58 +4,53 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection' 
 
 import * as Entities from './Signum.Entities' 
-export enum ColumnOptionsMode {
-    Add = "Add" as any,
-    Remove = "Remove" as any,
-    Replace = "Replace" as any,
-}
-export const ColumnOptionsMode_Type = new EnumType<ColumnOptionsMode>("ColumnOptionsMode", ColumnOptionsMode);
+export const ColumnOptionsMode = new EnumType<ColumnOptionsMode>("ColumnOptionsMode");
+export type ColumnOptionsMode =
+    "Add" |
+    "Remove" |
+    "Replace";
 
-export enum FilterOperation {
-    EqualTo = "EqualTo" as any,
-    DistinctTo = "DistinctTo" as any,
-    GreaterThan = "GreaterThan" as any,
-    GreaterThanOrEqual = "GreaterThanOrEqual" as any,
-    LessThan = "LessThan" as any,
-    LessThanOrEqual = "LessThanOrEqual" as any,
-    Contains = "Contains" as any,
-    StartsWith = "StartsWith" as any,
-    EndsWith = "EndsWith" as any,
-    Like = "Like" as any,
-    NotContains = "NotContains" as any,
-    NotStartsWith = "NotStartsWith" as any,
-    NotEndsWith = "NotEndsWith" as any,
-    NotLike = "NotLike" as any,
-    IsIn = "IsIn" as any,
-    IsNotIn = "IsNotIn" as any,
-}
-export const FilterOperation_Type = new EnumType<FilterOperation>("FilterOperation", FilterOperation);
+export const FilterOperation = new EnumType<FilterOperation>("FilterOperation");
+export type FilterOperation =
+    "EqualTo" |
+    "DistinctTo" |
+    "GreaterThan" |
+    "GreaterThanOrEqual" |
+    "LessThan" |
+    "LessThanOrEqual" |
+    "Contains" |
+    "StartsWith" |
+    "EndsWith" |
+    "Like" |
+    "NotContains" |
+    "NotStartsWith" |
+    "NotEndsWith" |
+    "NotLike" |
+    "IsIn" |
+    "IsNotIn";
 
-export enum FilterType {
-    Integer = "Integer" as any,
-    Decimal = "Decimal" as any,
-    String = "String" as any,
-    DateTime = "DateTime" as any,
-    Lite = "Lite" as any,
-    Embedded = "Embedded" as any,
-    Boolean = "Boolean" as any,
-    Enum = "Enum" as any,
-    Guid = "Guid" as any,
-}
-export const FilterType_Type = new EnumType<FilterType>("FilterType", FilterType);
+export const FilterType = new EnumType<FilterType>("FilterType");
+export type FilterType =
+    "Integer" |
+    "Decimal" |
+    "String" |
+    "DateTime" |
+    "Lite" |
+    "Embedded" |
+    "Boolean" |
+    "Enum" |
+    "Guid";
 
-export enum OrderType {
-    Ascending = "Ascending" as any,
-    Descending = "Descending" as any,
-}
-export const OrderType_Type = new EnumType<OrderType>("OrderType", OrderType);
+export const OrderType = new EnumType<OrderType>("OrderType");
+export type OrderType =
+    "Ascending" |
+    "Descending";
 
-export enum PaginationMode {
-    All = "All" as any,
-    Firsts = "Firsts" as any,
-    Paginate = "Paginate" as any,
-}
-export const PaginationMode_Type = new EnumType<PaginationMode>("PaginationMode", PaginationMode);
+export const PaginationMode = new EnumType<PaginationMode>("PaginationMode");
+export type PaginationMode =
+    "All" |
+    "Firsts" |
+    "Paginate";
 
 export module QueryTokenMessage {
     export const _0As1 = new MessageKey("QueryTokenMessage", "_0As1");
@@ -90,15 +85,14 @@ export module QueryTokenMessage {
     export const Step0 = new MessageKey("QueryTokenMessage", "Step0");
 }
 
-export enum UniqueType {
-    First = "First" as any,
-    FirstOrDefault = "FirstOrDefault" as any,
-    Single = "Single" as any,
-    SingleOrDefault = "SingleOrDefault" as any,
-    SingleOrMany = "SingleOrMany" as any,
-    Only = "Only" as any,
-}
-export const UniqueType_Type = new EnumType<UniqueType>("UniqueType", UniqueType);
+export const UniqueType = new EnumType<UniqueType>("UniqueType");
+export type UniqueType =
+    "First" |
+    "FirstOrDefault" |
+    "Single" |
+    "SingleOrDefault" |
+    "SingleOrMany" |
+    "Only";
 
 export namespace External {
 
@@ -109,16 +103,15 @@ export namespace External {
         export const MoreThanOne0Found = new MessageKey("CollectionMessage", "MoreThanOne0Found");
     }
     
-    export enum DayOfWeek {
-        Sunday = "Sunday" as any,
-        Monday = "Monday" as any,
-        Tuesday = "Tuesday" as any,
-        Wednesday = "Wednesday" as any,
-        Thursday = "Thursday" as any,
-        Friday = "Friday" as any,
-        Saturday = "Saturday" as any,
-    }
-    export const DayOfWeek_Type = new EnumType<DayOfWeek>("DayOfWeek", DayOfWeek);
+    export const DayOfWeek = new EnumType<DayOfWeek>("DayOfWeek");
+    export type DayOfWeek =
+        "Sunday" |
+        "Monday" |
+        "Tuesday" |
+        "Wednesday" |
+        "Thursday" |
+        "Friday" |
+        "Saturday";
     
 }
 

@@ -6,7 +6,7 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, OperationMessage, EntityPack,
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol } from './Signum.Entities';
-import { OperationLogEntity_Type } from './Signum.Entities.Basics';
+import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, GraphExplorer  } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
@@ -24,7 +24,7 @@ export function start() {
     ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
     ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
     QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
-        queryName: OperationLogEntity_Type,
+        queryName: OperationLogEntity,
         parentColumn: "Target",
         parentValue: ctx.lite
     }, { isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).requiresSaveOperation }));

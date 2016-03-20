@@ -483,11 +483,8 @@ export class Type<T extends ModifiableEntity> implements IType {
     }
 }
 
-export class EnumType<T> {
-    constructor(
-        public type: string,
-        public converter: { [value: number]: string }
-    ) { }
+export class EnumType<T extends string> {
+    constructor(public type: string) { }
 
     typeInfo(): TypeInfo {
         return getTypeInfo(this.type);
@@ -498,9 +495,7 @@ export class EnumType<T> {
         if (value == null)
             return this.typeInfo().niceName;
 
-        const valueStr = this.converter[<any>value];
-
-        return this.typeInfo().members[valueStr].niceName;
+        return this.typeInfo().members[value as string].niceName;
     }
 }
 

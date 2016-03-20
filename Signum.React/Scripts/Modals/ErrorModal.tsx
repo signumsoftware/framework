@@ -7,7 +7,7 @@ import * as Navigator from '../Navigator';
 import { classes } from '../Globals';
 import { ServiceError, WebApiHttpError } from '../Services';
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
-import { ExceptionEntity_Type } from '../Signum.Entities.Basics'
+import { ExceptionEntity } from '../Signum.Entities.Basics'
 
 require("!style!css!./Modals.css");
 //http://codepen.io/m-e-conroy/pen/ALsdF
@@ -80,8 +80,8 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         return (<h4 className="modal-title text-danger">
             <span className={classes("glyphicon", se.defaultIcon) }></span>&nbsp; <span>{se.httpError.ExceptionType }</span>
             ({
-                Navigator.isViewable(ExceptionEntity_Type) ?
-                    <a href={Navigator.navigateRoute(ExceptionEntity_Type, se.httpError.ExceptionID) }>{se.httpError.ExceptionID}</a> :
+                Navigator.isViewable(ExceptionEntity) ?
+                    <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID) }>{se.httpError.ExceptionID}</a> :
                     <strong>{se.httpError.ExceptionID}</strong>
             })
         </h4>);

@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { Tabs, Tab} from 'react-bootstrap'
-import { ExceptionEntity, ExceptionEntity_Type } from '../Signum.Entities.Basics'
+import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { TypeContext } from '../TypeContext'
 import { ValueLine, ValueLineType, EntityComponent, EntityLine } from '../Lines'
 

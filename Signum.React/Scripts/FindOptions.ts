@@ -40,17 +40,17 @@ export function expandParentColumn(findOptions: FindOptions) {
     var fo = Dic.extend({}, findOptions) as FindOptions;
 
     fo.filterOptions = [
-        { columnName: fo.parentColumn, operation: FilterOperation.EqualTo, value: fo.parentValue, frozen: true },
+        { columnName: fo.parentColumn, operation: "EqualTo", value: fo.parentValue, frozen: true },
         ...(fo.filterOptions || [])
     ];
-    
-    if (!fo.parentColumn.contains(".") && (fo.columnOptionsMode == null || fo.columnOptionsMode == ColumnOptionsMode.Remove)) {
+
+    if (!fo.parentColumn.contains(".") && (fo.columnOptionsMode == null || fo.columnOptionsMode == "Remove")) {
         fo.columnOptions = [
             { columnName: fo.parentColumn },
             ...(fo.columnOptions || [])
         ];
 
-        fo.columnOptionsMode = ColumnOptionsMode.Remove;
+        fo.columnOptionsMode = "Remove";
     }
 
     if (fo.searchOnLoad == null)
@@ -88,7 +88,7 @@ export interface ColumnOption {
 
 
 export const DefaultPagination: Pagination = {
-    mode: PaginationMode.Paginate,
+    mode: "Paginate",
     elementsPerPage: 20,
     currentPage: 1
 };
@@ -247,86 +247,87 @@ export interface ColumnDescription {
 }
 
 export function isList(fo: FilterOperation) {
-    return fo == FilterOperation.IsIn || fo == FilterOperation.IsNotIn;
+    return fo == "IsIn" ||
+        fo == "IsNotIn";
 }
 
 
-export const filterOperations: { [a: string]: FilterOperation[] } = {};
-filterOperations[FilterType.String as any] = [
-    FilterOperation.Contains,
-    FilterOperation.EqualTo,
-    FilterOperation.StartsWith,
-    FilterOperation.EndsWith,
-    FilterOperation.Like,
-    FilterOperation.NotContains,
-    FilterOperation.DistinctTo,
-    FilterOperation.NotStartsWith,
-    FilterOperation.NotEndsWith,
-    FilterOperation.NotLike,
-    FilterOperation.IsIn,
-    FilterOperation.IsNotIn
+export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};
+filterOperations["String"] = [
+    "Contains",
+    "EqualTo",
+    "StartsWith",
+    "EndsWith",
+    "Like",
+    "NotContains",
+    "DistinctTo",
+    "NotStartsWith",
+    "NotEndsWith",
+    "NotLike",
+    "IsIn",
+    "IsNotIn"
 ];
 
-filterOperations[FilterType.DateTime as any] = [
-    FilterOperation.EqualTo,
-    FilterOperation.DistinctTo,
-    FilterOperation.GreaterThan,
-    FilterOperation.GreaterThanOrEqual,
-    FilterOperation.LessThan,
-    FilterOperation.LessThanOrEqual,
-    FilterOperation.IsIn,
-    FilterOperation.IsNotIn
+filterOperations["DateTime"] = [
+    "EqualTo",
+    "DistinctTo",
+    "GreaterThan",
+    "GreaterThanOrEqual",
+    "LessThan",
+    "LessThanOrEqual",
+    "IsIn",
+    "IsNotIn"
 ];
 
-filterOperations[FilterType.Integer as any] = [
-    FilterOperation.EqualTo,
-    FilterOperation.DistinctTo,
-    FilterOperation.GreaterThan,
-    FilterOperation.GreaterThanOrEqual,
-    FilterOperation.LessThan,
-    FilterOperation.LessThanOrEqual,
-    FilterOperation.IsIn,
-    FilterOperation.IsNotIn
+filterOperations["Integer"] = [
+    "EqualTo",
+    "DistinctTo",
+    "GreaterThan",
+    "GreaterThanOrEqual",
+    "LessThan",
+    "LessThanOrEqual",
+    "IsIn",
+    "IsNotIn"
 ];
 
-filterOperations[FilterType.Decimal as any] = [
-    FilterOperation.EqualTo,
-    FilterOperation.DistinctTo,
-    FilterOperation.GreaterThan,
-    FilterOperation.GreaterThanOrEqual,
-    FilterOperation.LessThan,
-    FilterOperation.LessThanOrEqual,
-    FilterOperation.IsIn,
-    FilterOperation.IsNotIn
+filterOperations["Decimal"] = [
+    "EqualTo",
+    "DistinctTo",
+    "GreaterThan",
+    "GreaterThanOrEqual",
+    "LessThan",
+    "LessThanOrEqual",
+    "IsIn",
+    "IsNotIn"
 ];
 
-filterOperations[FilterType.Enum as any] = [
-    FilterOperation.EqualTo,
-    FilterOperation.DistinctTo,
-    FilterOperation.IsIn,
-    FilterOperation.IsNotIn
+filterOperations["Enum"] = [
+    "EqualTo",
+    "DistinctTo",
+    "IsIn",
+    "IsNotIn"
 ];
 
-filterOperations[FilterType.Guid as any] = [
-    FilterOperation.EqualTo,
-    FilterOperation.DistinctTo,
-    FilterOperation.IsIn,
-    FilterOperation.IsNotIn
+filterOperations["Guid"] = [
+    "EqualTo",
+    "DistinctTo",
+    "IsIn",
+    "IsNotIn"
 ];
 
-filterOperations[FilterType.Lite as any] = [
-    FilterOperation.EqualTo,
-    FilterOperation.DistinctTo,
-    FilterOperation.IsIn,
-    FilterOperation.IsNotIn
+filterOperations["Lite"] = [
+    "EqualTo",
+    "DistinctTo",
+    "IsIn",
+    "IsNotIn"
 ];
 
-filterOperations[FilterType.Embedded as any] = [
-    FilterOperation.EqualTo,
-    FilterOperation.DistinctTo,
+filterOperations["Embedded"] = [
+    "EqualTo",
+    "DistinctTo",
 ];
 
-filterOperations[FilterType.Boolean as any] = [
-    FilterOperation.EqualTo,
-    FilterOperation.DistinctTo,
+filterOperations["Boolean"] = [
+    "EqualTo",
+    "DistinctTo",
 ];

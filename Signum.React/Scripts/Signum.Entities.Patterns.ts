@@ -22,16 +22,15 @@ export namespace External {
         export const MoreThanOne0Found = new MessageKey("CollectionMessage", "MoreThanOne0Found");
     }
     
-    export enum DayOfWeek {
-        Sunday = "Sunday" as any,
-        Monday = "Monday" as any,
-        Tuesday = "Tuesday" as any,
-        Wednesday = "Wednesday" as any,
-        Thursday = "Thursday" as any,
-        Friday = "Friday" as any,
-        Saturday = "Saturday" as any,
-    }
-    export const DayOfWeek_Type = new EnumType<DayOfWeek>("DayOfWeek", DayOfWeek);
+    export const DayOfWeek = new EnumType<DayOfWeek>("DayOfWeek");
+    export type DayOfWeek =
+        "Sunday" |
+        "Monday" |
+        "Tuesday" |
+        "Wednesday" |
+        "Thursday" |
+        "Friday" |
+        "Saturday";
     
 }
 

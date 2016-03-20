@@ -167,16 +167,19 @@ namespace Signum.TSGenerator
         private static string EnumInTypeScript(Type type, Options options)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"export enum {type.Name} {{");
+            sb.AppendLine($"export const {type.Name} = new EnumType<{type.Name}>(\"{type.Name}\");");
 
+            sb.AppendLine($"export type {type.Name} =");
             var fields = type.GetFields(BindingFlags.Static | BindingFlags.Public);
-            foreach (var field in fields)
+            for (int i = 0; i < fields.Length; i++)
             {
-                string context = $"By type {type.Name} and field {field.Name}";
-                sb.AppendLine($"    {field.Name} = \"{field.Name}\" as any,");
+                sb.Append($"    \"{fields[i].Name}\"");
+                if (i < fields.Length - 1)
+                    sb.AppendLine(" |");
+                else
+                    sb.AppendLine(";");
             }
-            sb.AppendLine(@"}");
-            sb.AppendLine($"export const {type.Name}_Type = new EnumType<{type.Name}>(\"{type.Name}\", {type.Name});");
+           
 
             return sb.ToString();
         }
@@ -236,7 +239,7 @@ namespace Signum.TSGenerator
         {
             StringBuilder sb = new StringBuilder();
             if (!type.IsAbstract)
-                sb.AppendLine($"export const {type.Name}_Type = new Type<{type.Name}>(\"{ CleanTypeName(type) }\");");
+                sb.AppendLine($"export const {type.Name} = new Type<{type.Name}>(\"{ CleanTypeName(type) }\");");
 
             List<string> baseTypes = new List<string>();
             if (type.BaseType != null)

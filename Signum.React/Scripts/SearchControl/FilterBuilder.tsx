@@ -4,9 +4,8 @@ import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { Dic, areEqual } from '../Globals'
 import { openModal, IModalProps } from '../Modals';
-import { FilterOperation, FilterOption, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList } from '../FindOptions'
+import { FilterOption, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList, FilterOperation } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
-import { FilterOperation_Type } from '../Signum.Entities.DynamicQuery' 
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
 import { Binding, IsByAll, getTypeInfos } from '../Reflection'
 import { TypeContext, FormGroupStyle } from '../TypeContext'
@@ -154,7 +153,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                     {f.token && f.operation &&
                         <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
                             { filterOperations[f.token.filterType]
-                                .map((ft, i) => <option key={i} value={ft as any}>{ FilterOperation_Type.niceName(ft) }</option>) }
+                                .map((ft, i) => <option key={i} value={ft as any}>{ FilterOperation.niceName(ft) }</option>) }
                         </select> }
                 </td>
 
@@ -181,14 +180,14 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         var token = this.props.filter.token;
 
         switch (token.filterType) {
-            case FilterType.Lite:
+            case "Lite":
                 if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopupation))
                     return <EntityLine ctx={ctx} type={token.type} create={false} />;
                 else
                     return <EntityCombo ctx={ctx} type={token.type} create={false}/>
-            case FilterType.Embedded:
+            case "Embedded":
                 return <EntityLine ctx={ctx} type={token.type} create={false} autoComplete={false} />;
-            case FilterType.Enum:
+            case "Enum":
                 const ti = getTypeInfos(token.type).single();
                 if (!ti)
                     throw new Error(`EnumType ${token.type.name} not found`);

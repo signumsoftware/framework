@@ -29,8 +29,6 @@ export interface EntityLineState extends EntityBaseProps {
     autoComplete?: boolean;
 }
 
-const a = 2;
-
 export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     calculateDefaultState(state: EntityLineProps) {

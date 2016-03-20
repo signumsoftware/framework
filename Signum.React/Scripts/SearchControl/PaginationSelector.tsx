@@ -3,7 +3,6 @@ import * as Finder from '../Finder'
 import { classes, Dic } from '../Globals'
 import { ResultTable, Pagination, PaginationMode, PaginateMath} from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey } from '../Signum.Entities'
-import { PaginationMode_Type } from '../Signum.Entities.DynamicQuery'
 import { getEnumInfo } from '../Reflection'
 import * as Navigator from '../Navigator'
 import { Input, Pagination as BPagination } from 'react-bootstrap'
@@ -41,21 +40,21 @@ export default class PaginationSelector extends React.Component<PaginationSelect
 
         switch (pagination.mode) {
 
-            case PaginationMode.All:
+            case "All":
                 return (
                     <span>{SearchMessage._0Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
                         <span className="sf-pagination-strong" key={1}>{resultTable.totalElements}</span>)
                     }</span>
                 );
 
-            case PaginationMode.Firsts:
+            case "Firsts":
                 return (
                     <span>{SearchMessage.First0Results_N.niceToString().forGenderAndNumber(resultTable.rows.length).formatHtml(
                         <span className={"sf-pagination-strong" + (resultTable.rows.length == resultTable.pagination.elementsPerPage ? " sf-pagination-overflow" : "") } key={1}>{resultTable.rows.length}</span>)
                     }</span>
                 );
 
-            case PaginationMode.Paginate:
+            case "Paginate":
                 return (
                     <span>{SearchMessage._01of2Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
                         <span className={"sf-pagination-strong"} key={1}>{PaginateMath.startElementIndex(pagination) }</span>,
@@ -73,8 +72,8 @@ export default class PaginationSelector extends React.Component<PaginationSelect
 
         const p: Pagination = {
             mode: mode,
-            elementsPerPage: mode != PaginationMode.All ? Finder.defaultPagination.elementsPerPage : null,
-            currentPage: mode == PaginationMode.Paginate ? 1 : null
+            elementsPerPage: mode != "All" ? Finder.defaultPagination.elementsPerPage : null,
+            currentPage: mode == "Paginate" ? 1 : null
         };
 
         this.props.onPagination(p);
@@ -94,8 +93,10 @@ export default class PaginationSelector extends React.Component<PaginationSelect
         return (
             <div className="sf-pagination-center form-inline form-xs">
                 <Input type="select" value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" standalone={true}>
-                    {[PaginationMode.Paginate, PaginationMode.Firsts, PaginationMode.All].map(mode =>
-                        <option key={mode} value={mode.toString() }>{PaginationMode_Type.niceName(mode) }</option>) }
+                    {["Paginate" as PaginationMode,
+                       "Firsts" as PaginationMode,
+                       "All" as PaginationMode].map(mode =>
+                        <option key={mode} value={mode.toString() }>{PaginationMode.niceName(mode) }</option>) }
                 </Input>
                 <Input type="select" value={this.props.pagination.elementsPerPage} onChange={this.handleElementsPerPage} ref="elementsPerPage" standalone={true}>
                     {[5, 10, 20, 50, 100, 200].map(elem =>
@@ -107,7 +108,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
     
     renderRight(): React.ReactNode {
         const resultTable = this.props.resultTable;
-        if (!resultTable || resultTable.pagination.mode != PaginationMode.Paginate)
+        if (!resultTable || resultTable.pagination.mode != "Paginate")
             return "\u00a0";
 
         const totalPages = PaginateMath.totalPages(resultTable.pagination, resultTable.totalElements);
