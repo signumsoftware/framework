@@ -118,9 +118,9 @@ namespace Signum.Web.Files
 
             var pair = FileTypeLogic.FileTypes.GetOrThrow(lite.Retrieve()).GetPrefixPair(virtualFile);
 
-            var fullPhyisicalPath = Path.Combine(pair.PhysicalPrefix, suffix);
+            var fullPhysicalPath = Path.Combine(pair.PhysicalPrefix, suffix);
 
-            return new FilePathResult(fullPhyisicalPath, MimeMapping.GetMimeMapping(fullPhyisicalPath)) { FileDownloadName = fileName };
+            return new FilePathResult(fullPhysicalPath, MimeMapping.GetMimeMapping(fullPhysicalPath)) { FileDownloadName = fileName };
         }
     }
 }
