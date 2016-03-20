@@ -7,13 +7,14 @@ import { ValueLine, ValueLineType, EntityComponent, EntityLine } from '../Lines'
 
 export default class Exception extends EntityComponent<ExceptionEntity> {
     renderEntity() {
-        const sc = this.subCtx(a => a, { labelColumns: { sm: 4 } });
+        var ctx = this.props.ctx;
+        const sc = this.props.ctx.subCtx({ labelColumns: { sm: 4 } });
         return (
             <div>
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueLine ctx={sc.subCtx(f => f.environment) } />
-                        <ValueLine ctx={sc.subCtx(f => f.creationDate) } unitText={moment(this.entity.creationDate).toUserInterface().fromNow() } />
+                        <ValueLine ctx={sc.subCtx(f => f.creationDate) } unitText={moment(sc.value.creationDate).toUserInterface().fromNow() } />
                         <EntityLine ctx={sc.subCtx(f => f.user) } />
                         <ValueLine ctx={sc.subCtx(f => f.version) } />
                         <ValueLine ctx={sc.subCtx(f => f.threadId) } />
@@ -28,10 +29,10 @@ export default class Exception extends EntityComponent<ExceptionEntity> {
                         <ValueLine ctx={sc.subCtx(f => f.userAgent) } valueLineType={ValueLineType.TextArea} />
                     </div>
                 </div>
-                <ValueLine ctx={this.subCtx(f => f.requestUrl) } />
-                <ValueLine ctx={this.subCtx(f => f.urlReferer) } />
-                <h3 style={ { color: "rgb(139, 0, 0)" } }>{this.entity.exceptionType}</h3>
-                <pre><code>{this.entity.exceptionMessage}</code></pre>
+                <ValueLine ctx={ctx.subCtx(f => f.requestUrl) } />
+                <ValueLine ctx={ctx.subCtx(f => f.urlReferer) } />
+                <h3 style={ { color: "rgb(139, 0, 0)" } }>{ctx.value.exceptionType}</h3>
+                <pre><code>{ctx.value.exceptionMessage}</code></pre>
                 <Tabs>
                     { this.codeTab(0, a => a.stackTrace) }
                     { this.codeTab(1, a => a.data) }
@@ -44,7 +45,7 @@ export default class Exception extends EntityComponent<ExceptionEntity> {
     }
 
     codeTab(eventKey: number, property: (ex: ExceptionEntity) => any) {
-        const tc = this.subCtx(property);
+        const tc = this.props.ctx.subCtx(property);
 
         if (!tc.value || tc.value == "")
             return null;
