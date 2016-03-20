@@ -13,44 +13,45 @@ export default class UserQuery extends EntityComponent<UserQueryEntity> {
     renderEntity() {
 
         var queryKey = this.entity.query.key;
+        var ctx = this.props.ctx;
 
         return (
             <div>
-                <EntityLine ctx={this.subCtx(e => e.owner) } />
-                <ValueLine ctx={this.subCtx(e => e.displayName) } />
-                <FormGroup ctx={this.subCtx(e => e.query) }>
+                <EntityLine ctx={ctx.subCtx(e => e.owner) } />
+                <ValueLine ctx={ctx.subCtx(e => e.displayName) } />
+                <FormGroup ctx={ctx.subCtx(e => e.query) }>
                     {
                         Finder.isFindable(queryKey) ?
                             <a className="form-control-static" href={Finder.findOptionsPath(queryKey) }>{getQueryNiceName(queryKey) }</a> :
                             <span>{getQueryNiceName(queryKey) }</span>
                     }
                 </FormGroup>
-                <EntityLine ctx={this.subCtx(e => e.entityType) } onChange={() => this.forceUpdate() }/>
+                <EntityLine ctx={ctx.subCtx(e => e.entityType) } onChange={() => this.forceUpdate() }/>
                 {
                     this.entity.entityType &&
                     <p className="messageEntity col-sm-offset-2">
                         {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey) }
                     </p>
                 }
-                <ValueLine ctx={this.subCtx(e => e.withoutFilters) } />
+                <ValueLine ctx={ctx.subCtx(e => e.withoutFilters) } />
                 <div className="form-xs">
                     <div className="repeater-inline form-inline sf-filters-list ">
-                        <EntityRepeater ctx={this.subCtx(e => e.filters) } getComponent={this.renderFilter}/>
+                        <EntityRepeater ctx={ctx.subCtx(e => e.filters) } getComponent={this.renderFilter}/>
                     </div>
-                    <ValueLine ctx={this.subCtx(e => e.columnsMode) } />
+                    <ValueLine ctx={ctx.subCtx(e => e.columnsMode) } />
                     <div className="repeater-inline form-inline sf-filters-list ">
-                        <EntityRepeater ctx={this.subCtx(e => e.columns) } getComponent={this.renderColumn}/>
+                        <EntityRepeater ctx={ctx.subCtx(e => e.columns) } getComponent={this.renderColumn}/>
                     </div>
                     <div className="repeater-inline form-inline sf-filters-list ">
-                        <EntityRepeater ctx={this.subCtx(e => e.orders) } getComponent={this.renderOrder}/>
+                        <EntityRepeater ctx={ctx.subCtx(e => e.orders) } getComponent={this.renderOrder}/>
                     </div>
                 </div>
                 <div className="row">
                     <div className="col-sm-6">
-                        <ValueLine ctx={this.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } }) } />
+                        <ValueLine ctx={ctx.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } }) } />
                     </div>
                     <div className="col-sm-6">
-                        <ValueLine ctx={this.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } }) } />
+                        <ValueLine ctx={ctx.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } }) } />
                     </div>
                 </div>
             </div>

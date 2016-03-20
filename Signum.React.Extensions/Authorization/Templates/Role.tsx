@@ -5,18 +5,19 @@ import { EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, Ent
 export default class Role extends EntityComponent<RoleEntity> {
 
     renderEntity() {
+        var ctx = this.props.ctx;
         return (
             <div>
-                <ValueLine ctx={this.subCtx(e => e.name)} />
-                <ValueLine ctx={this.subCtx(e => e.mergeStrategy) } unitText={this.rolesMessage() } onChange={() => this.forceUpdate() } />
-                <EntityList ctx={this.subCtx(e => e.roles) } onChange={() => this.forceUpdate() }/>
+                <ValueLine ctx={ctx.subCtx(e => e.name)} />
+                <ValueLine ctx={ctx.subCtx(e => e.mergeStrategy) } unitText={this.rolesMessage() } onChange={() => this.forceUpdate() } />
+                <EntityList ctx={ctx.subCtx(e => e.roles) } onChange={() => this.forceUpdate() }/>
             </div>
         );
     }
 
     rolesMessage(): string {
         return AuthAdminMessage.NoRoles.niceToString() + " ⇒ " +
-            (this.entity.mergeStrategy == "Union" ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).niceToString();
+            (this.props.ctx.value.mergeStrategy == "Union" ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).niceToString();
     }
 }
 
