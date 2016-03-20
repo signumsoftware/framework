@@ -53,18 +53,12 @@ namespace Signum.React.Chart
             public object chartTable;
         }
 
-        [Route("api/chart/setChartScript"), HttpPost, ValidateModelFilter]
-        public IChartBase SetChartScript(SetChartScriptRequest request)
+        [Route("api/chart/syncronizeColumns"), HttpPost, ValidateModelFilter]
+        public IChartBase SyncronizeColumns(ModifiableEntity chart)
         {
-            var chart = (IChartBase)request.chart;
-            chart.ChartScript = request.script;
-            return chart;
-        }
-        
-        public class SetChartScriptRequest
-        {
-            public ModifiableEntity chart;
-            public ChartScriptEntity script;
+            var c = (IChartBase)chart;
+            c.ChartScript.SyncronizeColumns(c);
+            return c;
         }
     }
 }

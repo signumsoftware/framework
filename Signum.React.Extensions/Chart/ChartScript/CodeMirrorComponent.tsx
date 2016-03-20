@@ -1,22 +1,24 @@
 ﻿/// <reference path="codemirror.d.ts" />
 import * as React from 'react'
-import * as CM from 'codemirror'
+import * as CodeMirror from 'codemirror'
 import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
+
+require("!style!css!codemirror/lib/codemirror.css");
 
 
 export interface CodeMirrorProps {
-    onChange: (value: string) => void,
-    onFocusChange: (focused: boolean) => void,
-    options: CM.EditorConfiguration,
-    path: string,
-    value: string,
-    className: string,
-    defaultValue: string;
+    onChange?: (value: string) => void,
+    onFocusChange?: (focused: boolean) => void,
+    options?: CodeMirror.EditorConfiguration,
+    path?: string,
+    value?: string,
+    className?: string,
+    defaultValue?: string;
 }
 
-export default class CodeMirror extends React.Component<CodeMirrorProps, { isFocused: boolean }> {
+export default class CodeMirrorComponent extends React.Component<CodeMirrorProps, { isFocused: boolean }> {
 
-    codeMirror: CM.EditorFromTextArea;
+    codeMirror: CodeMirror.EditorFromTextArea;
     _currentCodemirrorValue: string;
 
     constructor(props) {
@@ -26,10 +28,10 @@ export default class CodeMirror extends React.Component<CodeMirrorProps, { isFoc
 
     componentDidMount() {
         const textareaNode = this.refs["textarea"] as HTMLTextAreaElement;
-        this.codeMirror = CM.fromTextArea(textareaNode, this.props.options);
+        this.codeMirror = CodeMirror.fromTextArea(textareaNode, this.props.options);
         this.codeMirror.on('change', this.codemirrorValueChanged);
-        this.codeMirror.on('focus', this.focusChanged.bind(this, true));
-        this.codeMirror.on('blur', this.focusChanged.bind(this, false));
+        this.codeMirror.on('focus', ()=>this.focusChanged(true));
+        this.codeMirror.on('blur', ()=>this.focusChanged.bind(false));
         this._currentCodemirrorValue = this.props.defaultValue || this.props.value || '';
         this.codeMirror.setValue(this._currentCodemirrorValue);
     }
@@ -51,15 +53,13 @@ export default class CodeMirror extends React.Component<CodeMirrorProps, { isFoc
             }
         }
     }
-    getCodeMirror() {
-        return this.codeMirror;
-    }
 
     focus() {
         if (this.codeMirror) {
             this.codeMirror.focus();
         }
     }
+
     focusChanged(focused) {
         this.setState({
             isFocused: focused,
@@ -67,7 +67,7 @@ export default class CodeMirror extends React.Component<CodeMirrorProps, { isFoc
         this.props.onFocusChange && this.props.onFocusChange(focused);
     }
 
-    codemirrorValueChanged(doc, change) {
+    codemirrorValueChanged = (doc, change) => {
         const newValue = doc.getValue();
         this._currentCodemirrorValue = newValue;
         this.props.onChange && this.props.onChange(newValue);

@@ -88,6 +88,10 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         Navigator.currentHistory.push(ChartClient.Encoder.chartRequestPath(this.state.chartRequest));
     }
 
+    handleEditScript = (e: React.MouseEvent) => {
+        window.open(Navigator.navigateRoute(this.state.chartRequest.chartScript));
+    }
+
     render() {
 
         const cr = this.state.chartRequest;
@@ -119,7 +123,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     </div >
                     <div className="sf-query-button-bar btn-toolbar">
                         <button type="submit" className="sf-query-button sf-chart-draw btn btn-primary" onClick={this.handleOnDrawClick}>{ ChartMessage.Chart_Draw.niceToString() }</button>
-                        <button className="sf-query-button sf-chart-script-edit btn btn-default">{ ChartMessage.EditScript.niceToString() }</button>
+                        <button className="sf-query-button sf-chart-script-edit btn btn-default" onClick={this.handleEditScript}>{ ChartMessage.EditScript.niceToString() }</button>
                         { ChartClient.ButtonBarChart.getButtonBarElements({ chartRequest: cr, chartRequestView: this }).map((a, i) => React.cloneElement(a, { key: i })) }
                     </div>
                     <br />
@@ -128,7 +132,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
                             <Tabs>
                                 <Tab eventKey="chart" title={ChartMessage.Chart.niceToString() }>
-                                    <ChartRenderer  code={cr.chartScript.script} chartRequest={cr} data={this.state.chartResult.chartTable}/>
+                                    <ChartRenderer  chartRequest={cr} data={this.state.chartResult.chartTable}/>
                                 </Tab>
 
                                 <Tab eventKey="data" title={ChartMessage.Data.niceToString() }>

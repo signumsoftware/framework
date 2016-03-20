@@ -2,44 +2,61 @@
 import { UserQueryEntity, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../../UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
 import { ChartScriptEntity, ChartScriptColumnEntity, ChartScriptParameterEntity } from '../Signum.Entities.Chart'
-import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, EntityComponent, EntityComponentProps, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
+import ChartScriptCode from './ChartScriptCode'
 
 require("!style!css!../Chart.css");
 
-export default class UserChart extends EntityComponent<ChartScriptEntity> {
+export default class ChartScript extends EntityComponent<ChartScriptEntity> {
+
+    componentWillMount() {
+        this.loadIcon(this.props);
+    }
+
+    componentWillReceiveProps(newProps: EntityComponentProps<ChartScriptEntity>) {
+        this.loadIcon(newProps);
+    }
+
+    loadIcon(props: EntityComponentProps<ChartScriptEntity> ) {
+        if (props.ctx.value.icon) {
+            Navigator.API.fetchAndRemember(props.ctx.value.icon)
+                .then(() => this.forceUpdate())
+                .done();;
+        }
+    }
+
 
     renderEntity() {
+
+        var ctx = this.props.ctx;
+        var icon = this.entity.icon;
 
         return (
             <div>
 
                 <div className="row">
                     <div className="col-sm-11">
-                        <ValueLine ctx={this.subCtx(c => c.name) }  />
-                        {/* @Html.FileLineLite(cc, c => c.Icon, fl =>
-                        {
-                            fl.LabelText = Html.PropertyNiceName(() => cc.Value.Icon);
-                        fl.AttachFunction = ChartClient.ModuleScript["refreshIcon"](fl, imageRoute);
-                        }) */}
-                        <ValueLine ctx={this.subCtx(c => c.groupBy) }  />
+                        <ValueLine ctx={ctx.subCtx(c => c.name) }  />
+                        <FileLine ctx={ctx.subCtx(c => c.icon) } onChange={() => this.forceUpdate()} />
+                        <ValueLine ctx={ctx.subCtx(c => c.groupBy) }  />
                     </div>
                     <div className="col-sm-1">
-                            <div className="col-sm-6">
-                                <img src="@Url.Action((FileController fc) => fc.Download(new RuntimeInfo(cc.Value.Icon).ToString()))" />
-                            </div>
+                        { icon && icon.entity && <img src={"data:image/png;base64," + icon.entity.binaryFile} /> }
                     </div>
                 </div>
 
                 <div className="sf-chartscript-columns">
-                    <EntityRepeater ctx={this.subCtx(c => c.columns) } getComponent={this.renderColumn}  />
+                    <EntityRepeater ctx={ctx.subCtx(c => c.columns) } getComponent={this.renderColumn}  />
                 </div>
-                <EntityRepeater ctx={this.subCtx(c => c.parameters) } getComponent={this.renderParameter}  />
-                @Html.Partial(Signum.Web.Chart.ChartClient.ChartScriptCodeView, cc)
+                <EntityRepeater ctx={ctx.subCtx(c => c.parameters) } getComponent={this.renderParameter}  />
+                <ChartScriptCode ctx={ctx}/>
             </div>
         );
     }

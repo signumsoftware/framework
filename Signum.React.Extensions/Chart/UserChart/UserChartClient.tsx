@@ -81,9 +81,7 @@ export module Converter {
         });
 
         return convertedFilters.then(filters => {
-
-            cr.chartScript = uq.chartScript;
-
+            
             if (filters) {
                 cr.filterOptions = (cr.filterOptions || []).filter(f => f.frozen);
                 cr.filterOptions.push(...filters.map(f => ({
@@ -113,6 +111,9 @@ export module Converter {
                 columnName: f.element.token.tokenString,
                 orderType: f.element.orderType
             }) as OrderOption);
+
+            cr.chartScript = uq.chartScript;
+            ChartClient.API.syncronizeColumns(cr)
 
             return ChartClient.parseTokens(cr);
         });

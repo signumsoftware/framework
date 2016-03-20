@@ -2,6 +2,7 @@
 import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as ChartUtils from "./ChartUtils"
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
@@ -13,11 +14,36 @@ declare global {
     interface Error {
         lineNumber: number;
     }
+
+    interface Window {       
+        changeScript(chartScript: ChartScriptEntity);
+        getExceptionNumber(): number;
+    }
 }
 
-export default class ChartRenderer extends React.Component<{ data: ChartClient.API.ChartTable; chartRequest: ChartRequest; code: string }, void> {
+export default class ChartRenderer extends React.Component<{ data: ChartClient.API.ChartTable; chartRequest: ChartRequest }, void> {
 
     exceptionLine: number;
+
+    componentWillMount(){
+
+        window.changeScript = (chartScript) => {
+          if(!is(chartScript, this.props.chartRequest.chartScript))
+              return;
+
+            this.props.chartRequest.chartScript = chartScript;
+            this.forceUpdate();
+        };
+        window.getExceptionNumber = () => {
+            if (this.exceptionLine == null || this.exceptionLine == undefined)
+                return null;
+
+            var temp = this.exceptionLine;
+            this.exceptionLine = null;
+            return temp;
+        };
+
+    }
 
     componentDidMount() {
         this.redraw();
@@ -65,7 +91,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.A
             var rule = ChartUtils.rule;
             var ellipsis = ChartUtils.ellipsis;
             __baseLineNumber__ = new Error().lineNumber;
-            func = eval("(" + this.props.code + ")");
+            func = eval("(" + this.props.chartRequest.chartScript.script + ")");
         } catch (e) {
             this.showError(e, __baseLineNumber__, chart);
             return;

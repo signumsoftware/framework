@@ -50,6 +50,10 @@ export class ChartColumn extends React.Component<ChartColumnProps, { }> {
 
         var groupVisible = this.props.chartBase.chartScript.groupBy != "Never" && sc.isGroupKey;
         
+        var groupResults = cb.groupResults == null ? true : cb.groupResults;
+
+        var subTokenOptions = SubTokensOptions.CanElement | (groupResults && !sc.isGroupKey ? SubTokensOptions.CanAggregate : 0)
+
         return (
             <tr className="sf-chart-token">
                 <th>{ sc.displayName + (sc.isOptional ? "?" : "") }</th>
@@ -61,7 +65,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, { }> {
                         <QueryTokenEntityBuilder
                             ctx={this.props.ctx.subCtx(a => a.token, { formGroupStyle: FormGroupStyle.None }) }
                             queryKey={this.props.queryKey}
-                            subTokenOptions={SubTokensOptions.CanElement | (cb.groupResults && !sc.isGroupKey ? SubTokensOptions.CanAggregate : 0) } />
+                            subTokenOptions={subTokenOptions} />
                     </div>
                     <a className="sf-chart-token-config-trigger" onClick={this.handleExpanded}>{ ChartMessage.Chart_ToggleInfo.niceToString() } </a>
                 </td>

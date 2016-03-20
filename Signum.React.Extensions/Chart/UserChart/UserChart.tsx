@@ -15,21 +15,21 @@ const CurrentEntityKey = "[CurrentEntity]";
 export default class UserChart extends EntityComponent<UserChartEntity> {
 
     renderEntity() {
-
+        var ctx = this.props.ctx;
         var queryKey = this.entity.query.key;
 
         return (
             <div>
-                <EntityLine ctx={this.subCtx(e => e.owner) } />
-                <ValueLine ctx={this.subCtx(e => e.displayName) } />
-                <FormGroup ctx={this.subCtx(e => e.query) }>
+                <EntityLine ctx={ctx.subCtx(e => e.owner) } />
+                <ValueLine ctx={ctx.subCtx(e => e.displayName) } />
+                <FormGroup ctx={ctx.subCtx(e => e.query) }>
                     {
                         Finder.isFindable(queryKey) ?
                             <a className="form-control-static" href={Finder.findOptionsPath(queryKey) }>{getQueryNiceName(queryKey) }</a> :
                             <span>{getQueryNiceName(queryKey) }</span>
                     }
                 </FormGroup>
-                <EntityLine ctx={this.subCtx(e => e.entityType) } onChange={() => this.forceUpdate() }/>
+                <EntityLine ctx={ctx.subCtx(e => e.entityType) } onChange={() => this.forceUpdate() }/>
                 {
                     this.entity.entityType &&
                     <p className="messageEntity col-sm-offset-2">
@@ -38,13 +38,13 @@ export default class UserChart extends EntityComponent<UserChartEntity> {
                 }
                 <div className="form-xs">
                     <div className="repeater-inline form-inline sf-filters-list ">
-                        <EntityRepeater ctx={this.subCtx(e => e.filters) } getComponent={this.renderFilter}/>
+                        <EntityRepeater ctx={ctx.subCtx(e => e.filters) } getComponent={this.renderFilter}/>
                     </div>
                 </div>
                 <ChartBuilder queryKey={this.entity.query.key} onInvalidate={this.handleNull} onRedraw={this.handleNull} ctx={this.props.ctx} />
                 <div className="form-xs">
                     <div className="repeater-inline form-inline sf-filters-list ">
-                        <EntityRepeater ctx={this.subCtx(e => e.orders) } getComponent={this.renderOrder}/>
+                        <EntityRepeater ctx={ctx.subCtx(e => e.orders) } getComponent={this.renderOrder}/>
                     </div>
                 </div>
             </div>

@@ -11,7 +11,6 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, IChartBase, GroupByChart, ChartMessage, ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { ChartColumn, ChartColumnInfo }from './ChartColumn'
 
 export interface ChartBuilderProps {
@@ -47,7 +46,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
             .done();
 
         var ctx = this.props.ctx;
-        ChartClient.API.setChartScript(ctx.value, ctx.value.chartScript).then(() => {
+        ChartClient.API.syncronizeColumns(ctx.value).then(() => {
             this.setState({ expanded: Array.repeat(ctx.value.columns.length, false) });
         }).done();
     }
@@ -60,8 +59,13 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
         if (!cb.columns.some(a => a.element.token != null && a.element.token.parseException != null) && ChartClient.isCompatibleWith(script, cb))
             css += " sf-chart-img-equiv";
 
-        if (is(cb.chartScript, script))
+        if (is(cb.chartScript, script)){
+
             css += " sf-chart-img-curr";
+
+            if(cb.chartScript.script != script.script)
+                css += " edited";
+        }
 
         return css;
     }
@@ -87,7 +91,8 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
         var isCompatible = ChartClient.isCompatibleWith(cs, chart);
 
-        ChartClient.API.setChartScript(chart, cs)
+        chart.chartScript = cs;
+        ChartClient.API.syncronizeColumns(chart)
             .then(() => {
                 this.forceUpdate();
 

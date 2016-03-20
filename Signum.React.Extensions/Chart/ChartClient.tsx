@@ -16,7 +16,8 @@ import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption,
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { QueryFilterEntity, QueryColumnEntity, QueryOrderEntity } from '../UserQueries/Signum.Entities.UserQueries'
 
-import { UserChartEntity, ChartPermission, ChartMessage, ChartColumnEntity, ChartParameterEntity, ChartScriptEntity, ChartRequest, GroupByChart, ChartColumnType, IChartBase } from './Signum.Entities.Chart'
+import { UserChartEntity, ChartPermission, ChartMessage, ChartColumnEntity, ChartParameterEntity, ChartScriptEntity, ChartRequest,
+    GroupByChart, ChartColumnType, IChartBase } from './Signum.Entities.Chart'
 import { QueryTokenEntity } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
 import ChartRequestView from './Templates/ChartRequestView'
@@ -35,6 +36,8 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return <ChartButton searchControl={ctx.searchControl}/>;
     });
+
+    Navigator.addSettings(new EntitySettings(ChartScriptEntity, e => new Promise(resolve => require(['./ChartScript/ChartScript'], resolve))));
 
     UserChartClient.start({ routes: options.routes });
 }
@@ -201,7 +204,7 @@ export module Encoder {
 
     export function encodeColumn(query: any, columns: MList<ChartColumnEntity>) {
         if (columns)
-            columns.forEach((co, i) => query["column" + i] = co.element.token.tokenString + (co.element.displayName ? ("~" + scapeTilde(co.element.displayName)) : ""));
+            columns.forEach((co, i) => query["column" + i] = (co.element.token ? co.element.token.tokenString : "") + (co.element.displayName ? ("~" + scapeTilde(co.element.displayName)) : ""));
     }
     export function encodeParameters(query: any, parameters: MList<ChartParameterEntity>) {
         if (parameters)
@@ -222,12 +225,12 @@ export function parseTokens(chartRequest: ChartRequest): Promise<ChartRequest> {
         promises.push(...chartRequest.orderOptions.map(oo => completer.complete(oo, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate)));
 
     if (chartRequest.columns)
-        promises.push(...chartRequest.columns.map(a => a.element.token).map(tok => {
-            if (tok.token && tok.token.fullKey == tok.tokenString)
+        promises.push(...chartRequest.columns.map(a => a.element.token).filter(te=> te != null).map(te => {
+            if (te.token && te.token.fullKey == te.tokenString)
                 return Promise.resolve(null);
 
-            return completer.request(tok.tokenString, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement).then(t => {
-                tok.token = t;
+            return completer.request(te.tokenString, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement).then(t => {
+                te.token = t;
             });
         }));
 
@@ -251,10 +254,10 @@ export module Decoder {
         });
 
         return getChartScripts().then(scripts => { 
-
-            chartRequest.chartScript = scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
-
-            return parseTokens(chartRequest);
+            
+            chartRequest.chartScript = scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`); 
+            return API.syncronizeColumns(chartRequest)
+                .then(()=>parseTokens(chartRequest));
         });
     }
 
@@ -269,9 +272,11 @@ export module Decoder {
         return valuesInOrder(query, "column").map(val => ({
             rowId: null,
             element: ChartColumnEntity.New(cc=> {
-                cc.token = QueryTokenEntity.New(qte=> {
-                    qte.tokenString = val.tryBefore("~") || val;
-                });
+                var ts = (val.tryBefore("~") || val).trim();
+
+                cc.token = !!ts ? QueryTokenEntity.New(qte=> {
+                    qte.tokenString = ts;
+                }) : null;
                 cc.displayName = unscapeTildes(val.tryAfter("~"));
             })
         }));
@@ -349,9 +354,8 @@ export module API {
         });
     }
 
-    export function setChartScript(chart: IChartBase, script: ChartScriptEntity): Promise<void> {
-
-
+    export function syncronizeColumns(chart: IChartBase): Promise<void> {
+        
         var clone = Dic.copy(chart);
 
         delete (clone as UserChartEntity).orders;
@@ -363,13 +367,13 @@ export module API {
         delete (clone as ChartRequest).filterOptions;
 
         return ajaxPost<IChartBase>({
-            url: "/api/chart/setChartScript"
-        }, { chart: clone, script }).then(newChart => {
+            url: "/api/chart/syncronizeColumns"
+        }, clone).then(newChart => {
 
-            if (script.groupBy == "Always")
+            if (newChart.chartScript.groupBy == "Always")
                 chart.groupResults = true;
 
-            if (script.groupBy == "Never") {
+            if (newChart.chartScript.groupBy == "Never") {
                 chart.groupResults = false;
                 removeAggregates(chart);
             }

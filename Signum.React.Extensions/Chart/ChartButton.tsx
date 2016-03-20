@@ -23,11 +23,11 @@ export default class ChartButton extends React.Component<ChartButtonProps, void>
         var fo = this.props.searchControl.state.findOptions;
 
         ChartClient.getChartScripts().then(scripts => {
-            var path = ChartClient.Encoder.chartRequestPath(ChartRequest.New({
-                queryKey: getQueryKey(fo.queryName),
-                chartScript: scripts.first("No scripts loaded").first("No scripts loaded"),
-                filterOptions: fo.filterOptions
-            } as any));
+            var path = ChartClient.Encoder.chartRequestPath(ChartRequest.New(cr => {
+                cr.queryKey = getQueryKey(fo.queryName);
+                cr.chartScript = scripts.first("No scripts loaded").first("No scripts loaded");
+                cr.filterOptions = fo.filterOptions;
+            }));
 
             if (e.ctrlKey || e.button == 2)
                 window.open(path);
