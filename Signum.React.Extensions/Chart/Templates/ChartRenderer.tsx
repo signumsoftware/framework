@@ -144,7 +144,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.A
         var regex = /(DrawChart.*@.*:(.*))|(DrawChart .*:(.*):.*\)\))|(DrawChart .*:(.*):.*\))/;
         var match;
         if (e.stack != undefined && (match = regex.exec(e.stack)) != null) {
-            var lineNumber = parseInt(match[2] || match[4] || match[6]) - __baseLineNumber__;
+            var lineNumber = parseInt(match[2] || match[4] || match[6]) - (__baseLineNumber__ || 0);
             if (isNaN(lineNumber))
                 lineNumber = 1;
             this.exceptionLine = lineNumber;

@@ -137,3 +137,7 @@
 [data-click] {
     cursor: pointer;
 }
+
+.exceptionLine {
+    background-color:pink;
+}

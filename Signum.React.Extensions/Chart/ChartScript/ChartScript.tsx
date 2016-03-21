@@ -38,9 +38,10 @@ export default class ChartScript extends EntityComponent<ChartScriptEntity> {
         var ctx = this.props.ctx;
         var icon = this.entity.icon;
 
+      
         return (
             <div>
-
+                
                 <div className="row">
                     <div className="col-sm-11">
                         <ValueLine ctx={ctx.subCtx(c => c.name) }  />

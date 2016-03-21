@@ -12,6 +12,8 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import CodeMirrorComponent from './CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
+require("!style!css!../Chart.css");
+
 require("!style!css!codemirror/lib/codemirror.css");
 require("!style!css!codemirror/addon/dialog/dialog.css");
 require("!style!css!codemirror/addon/display/fullscreen.css");
@@ -34,14 +36,14 @@ require("codemirror/addon/search/searchcursor");
 
 export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<ChartScriptEntity> }, void> {
 
-    get entity (){
+    get entity() {
         return this.props.ctx.value;
     }
 
-    changedHandler : number;
-    exceptionHandler : number;
+    changedHandler: number;
+    exceptionHandler: number;
 
-    handleOnChange = (newValue: string)=>{
+    handleOnChange = (newValue: string) => {
         this.entity.script = newValue;
         this.entity.modified = true;
 
@@ -51,51 +53,54 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         }
     };
 
-    updatePreview() {
+    updatePreview = () => {
         opener.changeScript(this.entity);
         this.exceptionHandler = setTimeout(this.getException, 100);
     }
 
     codeMirrorComponent: CodeMirrorComponent;
     lineHandle: CodeMirror.LineHandle;
-    getException() {
+    getException = () => {
         var number = (opener as any).getExceptionNumber();
-        if (number != null) {
-            clearTimeout(this.exceptionHandler);
-            if (this.lineHandle != null)
-                this.codeMirrorComponent.codeMirror.removeLineClass(this.lineHandle, null, null);
-            if (number != -1)
-                this.lineHandle = this.codeMirrorComponent.codeMirror.addLineClass(number - 1, null, "exceptionLine");
-        }
+        clearTimeout(this.exceptionHandler);
+        if (this.lineHandle != null)
+            this.codeMirrorComponent.codeMirror.removeLineClass(this.lineHandle, null, null);
+        if (number != -1)
+            this.lineHandle = this.codeMirrorComponent.codeMirror.addLineClass(number - 1, null, "exceptionLine");
+
     }
 
     render() {
 
         var ctx = this.props.ctx;
-        
+
         var options = {
             lineNumbers: true,
             mode: "javascript",
             extraKeys: {
                 "Ctrl-Space": "autocomplete",
-                "Ctrl-K": cm=> cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
-                "Ctrl-U": cm=> cm.uncomment(cm.getCursor(true), cm.getCursor(false)),
-                "Ctrl-I": cm=> cm.autoFormatRange(cm.getCursor(true), cm.getCursor(false)),
-                "F11":  cm => cm.setOption("fullScreen", !cm.getOption("fullScreen")),
-                "Esc": cm =>{
-                    if (cm.getOption("fullScreen")) 
+                "Ctrl-K": cm => cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
+                "Ctrl-U": cm => cm.uncomment(cm.getCursor(true), cm.getCursor(false)),
+                "Ctrl-I": cm => cm.autoFormatRange(cm.getCursor(true), cm.getCursor(false)),
+                "F11": cm => cm.setOption("fullScreen", !cm.getOption("fullScreen")),
+                "Esc": cm => {
+                    if (cm.getOption("fullScreen"))
                         cm.setOption("fullScreen", false);
                 }
             }
         } as CodeMirror.EditorConfiguration;
 
         (options as any).highlightSelectionMatches = true;
-        (options as any).matchBrackets =  true;
+        (options as any).matchBrackets = true;
+
+        var css = ".exceptionLine { background: 'pink' }";
+
 
         return (
             <div>
-                 <pre style={{color: "Green", overflowStyle: "inherit"}}>{ChartScriptCode.example}</pre>
-               <CodeMirrorComponent value={this.props.ctx.value.script} ref={cm=>this.codeMirrorComponent = cm} 
+                <pre style={{ color: "Green", overflowStyle: "inherit" }}>{ChartScriptCode.example}</pre>
+                <style>{css}</style>
+                <CodeMirrorComponent value={this.props.ctx.value.script} ref={cm => this.codeMirrorComponent = cm}
                     options={options}
                     onChange={this.handleOnChange}/>
             </div>
