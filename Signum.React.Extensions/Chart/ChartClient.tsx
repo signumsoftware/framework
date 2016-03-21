@@ -221,7 +221,7 @@ export function synchronizeColumns(chart: IChartBase) {
 
     if (chart.groupResults == null) {
         chart.groupResults = true;
-    }		
+    }
 
     if (chartScript.groupBy == "Always" && chart.groupResults == false) {
         chart.groupResults = true;
@@ -245,6 +245,19 @@ export function synchronizeColumns(chart: IChartBase) {
             }
         }
     });
+
+    if (chart.Type == ChartRequest.typeName) {
+        var cr = chart as ChartRequest;
+
+        var keys = chart.columns.filter((a, i) => a.element.token && chartScript.columns[i].element.isGroupKey).map(a => a.element.token.token.fullKey);
+
+        cr.orderOptions = cr.orderOptions.filter(o => {
+            if (chart.groupResults)
+                return o.token.queryTokenType == QueryTokenType.Aggregate || keys.contains(o.token.fullKey);
+            else
+                return o.token.queryTokenType != QueryTokenType.Aggregate;
+        });
+    }
 }
 
 function isValidParameterValue(value: string, parameter: ChartScriptParameterEntity, relatedColumn: QueryToken) {
