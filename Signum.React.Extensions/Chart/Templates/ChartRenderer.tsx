@@ -9,6 +9,7 @@ import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity,
    ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 
+var colorbrewer = require("colorbrewer");
 
 declare global {
     interface Error {
