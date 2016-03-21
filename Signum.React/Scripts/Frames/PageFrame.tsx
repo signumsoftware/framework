@@ -98,7 +98,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
     onClose() {
         if (Finder.isFindable(this.state.pack.entity.Type))
-            Navigator.currentHistory.push(Finder.findOptionsPath(this.state.pack.entity.Type));
+            Navigator.currentHistory.push(Finder.findOptionsPath({ queryName: this.state.pack.entity.Type }));
         else
             Navigator.currentHistory.push("/");
     }

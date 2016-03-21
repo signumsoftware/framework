@@ -90,12 +90,7 @@ export function explore(findOptions: FindOptions): Promise<void> {
     });
 }
 
-export function findOptionsPath(findOptions: FindOptions): string;
-export function findOptionsPath(queryName: PseudoType | QueryKey): string;
-export function findOptionsPath(queryNameOrFindOptions: any): string {
-    let fo = queryNameOrFindOptions as FindOptions;
-    if (!fo.queryName)
-        return currentHistory.createPath("/find/" + getQueryKey(queryNameOrFindOptions)); 
+export function findOptionsPath(fo: FindOptions, extra?: any): string {
 
     fo = expandParentColumn(fo);
     
@@ -114,6 +109,8 @@ export function findOptionsPath(queryNameOrFindOptions: any): string {
     Encoder.encodeFilters(query, fo.filterOptions);
     Encoder.encodeOrders(query, fo.orderOptions);
     Encoder.encodeColumns(query, fo.columnOptions);
+
+    Dic.extend(query, extra);
 
     return currentHistory.createPath({ pathname: "/find/" + getQueryKey(fo.queryName), query: query });
 }
