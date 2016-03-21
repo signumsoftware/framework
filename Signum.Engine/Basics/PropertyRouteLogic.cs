@@ -32,12 +32,12 @@ namespace Signum.Engine.Basics
 
                 sb.AddUniqueIndex<PropertyRouteEntity>(p => new { p.Path, p.RootType }); 
 
-                sb.Schema.Synchronizing += SyncronizeProperties;
+                sb.Schema.Synchronizing += SynchronizeProperties;
             }
         }
 
         public const string PropertiesFor = "Properties For:{0}";
-        static SqlPreCommand SyncronizeProperties(Replacements rep)
+        static SqlPreCommand SynchronizeProperties(Replacements rep)
         {
             var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
 
