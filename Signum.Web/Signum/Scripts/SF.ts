@@ -718,7 +718,7 @@ interface Document {
 }
 
 
-https://github.com/spencertipping/jquery.fix.clone/blob/master/jquery.fix.clone.js
+//https://github.com/spencertipping/jquery.fix.clone/blob/master/jquery.fix.clone.js
 
 (function (original) {
     jQuery.fn.clone = function () {

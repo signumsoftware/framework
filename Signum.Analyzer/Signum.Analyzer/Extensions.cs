@@ -38,5 +38,27 @@ namespace Signum.Analyzer
         {
             return containingType.GetBaseTypesAndThis().SelectMany(x => x.GetMembers());
         }
+
+
+        public static bool IsLite(this TypeInfo e)
+        {
+            var namedTypeSymbol = e.Type as INamedTypeSymbol;
+
+            if (namedTypeSymbol != null && namedTypeSymbol.MetadataName == "Signum.Entities.Lite`1")
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool IsEntity(this TypeInfo e)
+        {
+            var namedSymbol = e.Type as INamedTypeSymbol;
+            if (namedSymbol != null && namedSymbol.BaseType?.ConstructedFrom.Name == "Signum.Entities.Entity")
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
