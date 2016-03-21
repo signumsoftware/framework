@@ -37,8 +37,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, { }> {
     handleGroupChecked = (e: React.FormEvent) => {
 
         this.props.chartBase.groupResults = (e.currentTarget as HTMLInputElement).checked;
-        if (!this.props.chartBase.groupResults)
-            ChartClient.removeAggregates(this.props.chartBase);
+        ChartClient.synchronizeColumns(this.props.chartBase);
 
         this.props.onInvalidate();
     }

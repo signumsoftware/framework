@@ -11,6 +11,7 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, IChartBase, GroupByChart, ChartMessage, ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
+import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { ChartColumn, ChartColumnInfo }from './ChartColumn'
 
 export interface ChartBuilderProps {
@@ -46,9 +47,9 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
             .done();
 
         var ctx = this.props.ctx;
-        ChartClient.API.syncronizeColumns(ctx.value).then(() => {
-            this.setState({ expanded: Array.repeat(ctx.value.columns.length, false) });
-        }).done();
+
+        ChartClient.synchronizeColumns(ctx.value);
+        this.setState({ expanded: Array.repeat(ctx.value.columns.length, false) });
     }
 
     chartTypeImgClass(script: ChartScriptEntity): string {
@@ -87,21 +88,15 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
     handleChartScriptOnClick = (cs: ChartScriptEntity) => {
 
-        var chart = this.props.ctx.value; 
-
-        var isCompatible = ChartClient.isCompatibleWith(cs, chart);
-
+        var chart = this.props.ctx.value;
+        let compatible = ChartClient.isCompatibleWith(cs, chart)
         chart.chartScript = cs;
-        ChartClient.API.syncronizeColumns(chart)
-            .then(() => {
-                this.forceUpdate();
+        ChartClient.synchronizeColumns(chart);
 
-                if (isCompatible)
-                    this.props.onRedraw();
-                else
-                    this.props.onInvalidate();
-
-            }).done();
+        if (!compatible)
+            this.props.onInvalidate();
+        else
+            this.props.onRedraw();
     }
 
     render() {
@@ -188,7 +183,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
             var tokenEntity = scriptParameter.columnIndex == null ? null : chart.columns[scriptParameter.columnIndex].element.token;
 
-            var compatible = scriptParameter.enumValues.filter(a => a.typeFilter == null || tokenEntity != null && ChartClient.isChartColumnType(tokenEntity.token, a.typeFilter));
+            var compatible = scriptParameter.enumValues.filter(a => a.typeFilter == null || tokenEntity == null || ChartClient.isChartColumnType(tokenEntity.token, a.typeFilter));
             if (compatible.length <= 1)
                 vl.ctx.styleOptions.readOnly = true;
 
