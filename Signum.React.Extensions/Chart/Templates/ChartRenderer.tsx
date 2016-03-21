@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
+import { DomUtils } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as ChartUtils from "./ChartUtils"
@@ -76,6 +77,8 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.A
         var chart = d3.select(node)
             .append('svg:svg').attr('width', rect.width).attr('height', rect.height);
 
+        node.addEventListener("click", this.handleOnClick);
+
         var func;
         var __baseLineNumber__: number;
         try {
@@ -103,6 +106,35 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.A
             //this.bindMouseClick($chartContainer);
         } catch (e) {
             this.showError(e, __baseLineNumber__, chart);
+        }
+    }
+
+    handleOnClick = (e: MouseEvent) => {
+        var element = DomUtils.closest(e.target as HTMLElement, "[data-click]", e.currentTarget as Node);
+        if (element)
+        {
+            var val = element.getAttribute("data-click");
+
+            var cr = this.props.chartRequest;
+
+            var filters = cr.filterOptions.clone();
+
+            var obj = val.split("&").filter(a => !!a).toObject(a => a.before("="), a => a.after("="));
+
+            cr.columns.map((a, i) => {
+                if (obj.hasOwnProperty("c" + i))
+                    filters.push({
+                        columnName: a.element.token.token.fullKey,
+                        token: a.element.token.token,
+                        operation: "EqualTo",
+                        value: obj["c" + i]
+                    } as FilterOption);
+            });
+
+            window.open(Finder.findOptionsPath({
+                queryName: cr.queryKey,
+                filterOptions: filters
+            }));
         }
     }
 
