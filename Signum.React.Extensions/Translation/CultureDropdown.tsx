@@ -1,10 +1,11 @@
 ﻿import * as React from 'react'
+import * as moment from 'moment'
 import { NavDropdown, MenuItem }  from 'react-bootstrap'
 import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
-import { Entity, Lite, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Entity, Lite, is, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
@@ -31,7 +32,8 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
     componentWillMount() {
         TranslationClient.Api.getCurrentCulture()
             .then(ci => {
-                this.setState({ currentCulture: ci });
+                this.setState({ currentCulture: toLite(ci) });
+                moment.locale((ci.name.tryBefore("-") || ci.name).toLowerCase());
                 return TranslationClient.Api.getCultures();
             })
             .then(cultures => this.setState({ cultures }))

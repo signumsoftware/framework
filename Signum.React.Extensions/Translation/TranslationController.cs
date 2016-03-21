@@ -25,9 +25,9 @@ namespace Signum.React.Translation
         }
 
         [Route("api/translation/currentCulture"), HttpGet]
-        public Lite<CultureInfoEntity> CurrentCulture()
+        public CultureInfoEntity CurrentCulture()
         {
-            return CultureInfo.CurrentCulture.ToCultureInfoEntity().ToLite();
+            return CultureInfo.CurrentCulture.ToCultureInfoEntity();
         }
 
         [Route("api/translation/currentCulture"), HttpPost]
