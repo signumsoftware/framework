@@ -75,7 +75,7 @@ namespace Signum.Entities.Chart
 
 		
 		
-		public static bool SyncronizeColumns(this ChartScriptEntity chartScript, IChartBase chart)
+		public static bool SynchronizeColumns(this ChartScriptEntity chartScript, IChartBase chart)
 		{
 			bool result = false;
 

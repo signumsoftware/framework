@@ -151,9 +151,9 @@ namespace Signum.Entities.UserQueries
             ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
             PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
             ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
-            Filters.Syncronize(element.Element("Filters")?.Elements().EmptyIfNull().ToList(), (f, x) => f.FromXml(x, ctx));
-            Columns.Syncronize(element.Element("Columns")?.Elements().EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
-            Orders.Syncronize(element.Element("Orders")?.Elements().EmptyIfNull().ToList(), (o, x) => o.FromXml(x, ctx));
+            Filters.Synchronize(element.Element("Filters")?.Elements().EmptyIfNull().ToList(), (f, x) => f.FromXml(x, ctx));
+            Columns.Synchronize(element.Element("Columns")?.Elements().EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
+            Orders.Synchronize(element.Element("Orders")?.Elements().EmptyIfNull().ToList(), (o, x) => o.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
         }
 

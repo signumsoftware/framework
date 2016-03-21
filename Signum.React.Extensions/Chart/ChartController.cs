@@ -54,10 +54,10 @@ namespace Signum.React.Chart
         }
 
         [Route("api/chart/syncronizeColumns"), HttpPost, ValidateModelFilter]
-        public IChartBase SyncronizeColumns(ModifiableEntity chart)
+        public IChartBase SynchronizeColumns(ModifiableEntity chart)
         {
             var c = (IChartBase)chart;
-            c.ChartScript.SyncronizeColumns(c);
+            c.ChartScript.SynchronizeColumns(c);
             return c;
         }
     }

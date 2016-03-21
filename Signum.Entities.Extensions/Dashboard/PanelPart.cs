@@ -228,7 +228,7 @@ namespace Signum.Entities.Dashboard
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            UserQueries.Syncronize(element.Elements().ToList(), (cuqe, x) => cuqe.FromXml(x, ctx));
+            UserQueries.Synchronize(element.Elements().ToList(), (cuqe, x) => cuqe.FromXml(x, ctx));
         }
     }
 
@@ -306,7 +306,7 @@ namespace Signum.Entities.Dashboard
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Links.Syncronize(element.Elements().ToList(), (le, x) => le.FromXml(x));
+            Links.Synchronize(element.Elements().ToList(), (le, x) => le.FromXml(x));
         }
     }
 

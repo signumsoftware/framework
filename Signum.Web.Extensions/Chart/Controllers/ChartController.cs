@@ -242,7 +242,7 @@ namespace Signum.Web.Chart
             if (lastTokenChanged != null)
             {
                 if (lastTokenChanged == -1)
-                    chart.ChartScript.SyncronizeColumns(chart); 
+                    chart.ChartScript.SynchronizeColumns(chart); 
                 else
                     chart.Columns[lastTokenChanged.Value].TokenChanged();
             }

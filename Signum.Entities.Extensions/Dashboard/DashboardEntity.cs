@@ -161,7 +161,7 @@ namespace Signum.Entities.Dashboard
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
             DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
             EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
-            Parts.Syncronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+            Parts.Synchronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         }
 
         protected override string PropertyValidation(PropertyInfo pi)

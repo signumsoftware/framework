@@ -60,7 +60,7 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value))
                 {
-                    chartScript.SyncronizeColumns(this);
+                    chartScript.SynchronizeColumns(this);
                     NotifyAllColumns();
                 }
             }
@@ -136,7 +136,7 @@ namespace Signum.Entities.Chart
 
         protected override void PostRetrieving()
         {
-            chartScript.SyncronizeColumns(this);
+            chartScript.SynchronizeColumns(this);
         }
 
         public void InvalidateResults(bool needNewQuery)
@@ -170,10 +170,10 @@ namespace Signum.Entities.Chart
             Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
             ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
-            Filters.Syncronize((element.Element("Filters")?.Elements()).EmptyIfNull().ToList(), (f, x) => f.FromXml(x, ctx));
-            Columns.Syncronize((element.Element("Columns")?.Elements()).EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
-            Orders.Syncronize((element.Element("Orders")?.Elements()).EmptyIfNull().ToList(), (o, x) => o.FromXml(x, ctx));
-            Parameters.Syncronize((element.Element("Parameters")?.Elements()).EmptyIfNull().ToList(), (p, x) => p.FromXml(x, ctx));
+            Filters.Synchronize((element.Element("Filters")?.Elements()).EmptyIfNull().ToList(), (f, x) => f.FromXml(x, ctx));
+            Columns.Synchronize((element.Element("Columns")?.Elements()).EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
+            Orders.Synchronize((element.Element("Orders")?.Elements()).EmptyIfNull().ToList(), (o, x) => o.FromXml(x, ctx));
+            Parameters.Synchronize((element.Element("Parameters")?.Elements()).EmptyIfNull().ToList(), (p, x) => p.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
         }
 

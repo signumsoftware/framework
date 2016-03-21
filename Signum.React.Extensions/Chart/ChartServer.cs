@@ -50,7 +50,7 @@ namespace Signum.React.Chart
 
             EntityJsonConverter.AfterDeserilization.Register((ChartRequest cr) =>
             {
-                cr.ChartScript.SyncronizeColumns(cr);
+                cr.ChartScript.SynchronizeColumns(cr);
                 var qd = DynamicQueryManager.Current.QueryDescription(cr.QueryName);
 
                 if (cr.Columns != null)
@@ -61,7 +61,7 @@ namespace Signum.React.Chart
 
             EntityJsonConverter.AfterDeserilization.Register((UserChartEntity uc) =>
             {
-                uc.ChartScript.SyncronizeColumns(uc);
+                uc.ChartScript.SynchronizeColumns(uc);
 
                 var qd = DynamicQueryManager.Current.QueryDescription(uc.Query.ToQueryName());
                 uc.ParseData(qd);
