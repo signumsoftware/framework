@@ -74,6 +74,7 @@ interface String {
     tryAfterLast(separator: string): string;
     tryBeforeLast(separator: string): string;
 
+    replaceAll(search: string, replacement: string): string;
     firstUpper(): string;
     firstLower(): string;
 }

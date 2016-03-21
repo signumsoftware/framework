@@ -462,6 +462,10 @@ String.prototype.firstLower = function () {
     return (this[0] as string).toLowerCase() + this.substring(1);
 };
 
+String.prototype.replaceAll = function (search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
 
 if (typeof String.prototype.trim !== 'function') {
     String.prototype.trim = function () {
