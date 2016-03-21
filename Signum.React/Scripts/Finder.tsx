@@ -445,7 +445,7 @@ export module Encoder {
 
     export function encodeFilters(query: any, filterOptions: FilterOption[]) {
         if (filterOptions)
-            filterOptions.forEach((fo, i) => query["filter" + i] = getTokenString(fo) + "~" + FilterOperation[fo.operation] + "~" + stringValue(fo.value));
+            filterOptions.forEach((fo, i) => query["filter" + i] = getTokenString(fo) + "~" + fo.operation + "~" + stringValue(fo.value));
     }
 
     export function encodeOrders(query: any, orderOptions: OrderOption[]) {
@@ -502,7 +502,7 @@ export module Decoder {
 
             return {
                 columnName: parts[0],
-                operation: parts[1] as any as FilterOperation,
+                operation: parts[1] as FilterOperation,
                 value: parts.length == 3 ? unscapeTildes(parts[2]) :
                     parts.slice(2).map(a => unscapeTildes(a))
             } as FilterOption;
