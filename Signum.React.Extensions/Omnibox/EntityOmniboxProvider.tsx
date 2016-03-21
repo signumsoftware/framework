@@ -54,12 +54,12 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
 
     }
 
-    navigateTo(result: EntityOmniboxResult) {
+    navigateTo(result: EntityOmniboxResult): Promise<string> {
 
         if (result.Lite == null)
-            return null;;
+            return null;
 
-        return Navigator.navigateRoute(result.Lite);
+        return Promise.resolve(Navigator.navigateRoute(result.Lite));
     }
 
     toString(result: EntityOmniboxResult) {

@@ -85,7 +85,7 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
         if (fo.filterOptions.length)
             fo.searchOnLoad = true;
 
-        return Finder.findOptionsPath(fo);
+        return Promise.resolve(Finder.findOptionsPath(fo));
     }
 
     toString(result: DynamicQueryOmniboxResult) {

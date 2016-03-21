@@ -23,9 +23,11 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
             return OmniboxClient.toString(result);
         }
 
-        var url = OmniboxClient.navigateTo(result);
-        if (url)
-            Navigator.currentHistory.push(url);
+        OmniboxClient.navigateTo(result).then(url => {
+            if (url)
+                Navigator.currentHistory.push(url);
+
+        }).done();
 
         return "";
     }

@@ -1,11 +1,11 @@
 ﻿
 import * as React from 'react'
+import {RouteComponentProps, Router, RouteContext } from 'react-router'
 import { DropdownButton, MenuItem, } from 'react-bootstrap'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import { Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import SearchControl from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
 import { UserQueryEntity, UserQueryMessage  } from './Signum.Entities.UserQueries'
@@ -20,6 +20,17 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     constructor(props) {
         super(props);
         this.state = { };
+    }
+
+    componentWillMount() {
+        var props = this.props as RouteComponentProps<any, any>;
+        var userQuery = window.location.search.tryAfter("userQuery=");
+        if (userQuery) {
+            var uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
+            Navigator.API.fillToStrings([uq])
+                .then(() => this.setState({ currentUserQuery: uq }))
+                .done();
+        }
     }
 
     handleSelectedToggle = (isOpen: boolean) => {
@@ -78,7 +89,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
                 onToggle={this.handleSelectedToggle}>
                 {
                     userQueries && userQueries.map((uq, i) =>
-                        <MenuItem
+                        <MenuItem key={i}
                             className={classes("sf-userquery", is(uq, this.state.currentUserQuery) && "active") }
                             onSelect={() => this.handleSelect(uq) }>
                             { uq.toStr }

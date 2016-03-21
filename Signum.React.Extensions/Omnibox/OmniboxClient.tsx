@@ -29,7 +29,7 @@ export function renderItem(result: OmniboxResult): React.ReactChild {
     return React.createElement("span", null, ...items);
 }
 
-export function navigateTo(result: OmniboxResult): string {
+export function navigateTo(result: OmniboxResult): Promise<string> {
     return getProvider(result.ResultTypeName).navigateTo(result);
 }
 
@@ -53,7 +53,7 @@ export function getResults(query: string): Promise<OmniboxResult[]> {
 export abstract class OmniboxProvider<T extends OmniboxResult> {
     abstract getProviderName(): string;
     abstract renderItem(result: T): React.ReactNode[];
-    abstract navigateTo(result: T): string;
+    abstract navigateTo(result: T): Promise<string>;
     abstract toString(result: T): string;
     abstract icon(): React.ReactNode;
     
@@ -77,7 +77,7 @@ export abstract class OmniboxProvider<T extends OmniboxResult> {
     }
 
     coloredSpan(text: string, colorName: string): React.ReactChild {
-        return <span style={{ color: colorName, padding: ".2em .4em", lineHeight: "1.6em" }}>{text}</span>;
+        return <span style={{ color: colorName, lineHeight: "1.6em" }}>{text}</span>;
     }
 
     coloredGlyphicon(icon: string, colorName: string): React.ReactChild {

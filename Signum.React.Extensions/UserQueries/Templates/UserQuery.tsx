@@ -22,7 +22,7 @@ export default class UserQuery extends EntityComponent<UserQueryEntity> {
                 <FormGroup ctx={ctx.subCtx(e => e.query) }>
                     {
                         Finder.isFindable(queryKey) ?
-                            <a className="form-control-static" href={Finder.findOptionsPath(queryKey) }>{getQueryNiceName(queryKey) }</a> :
+                            <a className="form-control-static" href={Finder.findOptionsPath({ queryName: queryKey }) }>{getQueryNiceName(queryKey) }</a> :
                             <span>{getQueryNiceName(queryKey) }</span>
                     }
                 </FormGroup>

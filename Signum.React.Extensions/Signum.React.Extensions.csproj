@@ -230,10 +230,12 @@
     <TypeScriptCompile Include="Basics\Signum.Entities.Basics.ts">
       <DependentUpon>Signum.Entities.Basics.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Chart\UserChartOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScript.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScriptCode.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\codemirror.d.ts" />
     <TypeScriptCompile Include="Chart\ChartScript\CodeMirrorComponent.tsx" />
+    <TypeScriptCompile Include="Chart\ChartOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Chart\Signum.Entities.Chart.ts">
       <DependentUpon>Signum.Entities.Chart.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -305,6 +307,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="UserAssets\Templates\QueryTokenEntityBuilder.tsx" />
     <TypeScriptCompile Include="UserAssets\UserAssetClient.tsx" />
+    <TypeScriptCompile Include="UserQueries\UserQueryOmniboxProvider.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryMenu.tsx" />
     <TypeScriptCompile Include="UserQueries\Templates\UserQuery.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryClient.tsx" />
