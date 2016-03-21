@@ -23,6 +23,17 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
         this.state = { };
     }
 
+    componentWillMount() {
+        
+        var userChart = window.location.search.tryAfter("userChart=");
+        if (userChart) {
+            var uc = parseLite(decodeURIComponent(userChart.tryBefore("&") || userChart)) as Lite<UserChartEntity>;
+            Navigator.API.fillToStrings([uc])
+                .then(() => this.setState({ currentUserChart: uc }))
+                .done();
+        }
+    }
+
     handleSelectedToggle = (isOpen: boolean) => {
 
         if (isOpen && this.state.userCharts == null)

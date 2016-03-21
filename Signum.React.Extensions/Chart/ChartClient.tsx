@@ -285,9 +285,9 @@ function defaultParameterValue(parameter: ChartScriptParameterEntity, relatedCol
 
 export module Encoder {
 
-    export function chartRequestPath(cr: ChartRequest): string {
+    export function chartRequestPath(cr: ChartRequest, extra?: any): string {
         const query = {
-            script: cr.chartScript.name,
+            script: cr.chartScript && cr.chartScript.name,
             groupResults: cr.groupResults,
         };
 
@@ -296,6 +296,8 @@ export module Encoder {
         encodeParameters(query, cr.parameters);
 
         encodeColumn(query, cr.columns);
+
+        Dic.extend(query, extra);
 
         return Navigator.currentHistory.createPath({ pathname: "/Chart/" + cr.queryKey, query: query });
     }
@@ -356,7 +358,10 @@ export module Decoder {
 
         return getChartScripts().then(scripts => { 
 
-            chartRequest.chartScript = scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
+            
+
+            chartRequest.chartScript = query.script == null ? scripts.first("ChartScript").first():
+                scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
 
             return parseTokens(chartRequest);
         });

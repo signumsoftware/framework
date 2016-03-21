@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Chart;
 using Signum.Entities.Omnibox;
 using Signum.Entities.DynamicQuery;
+using Newtonsoft.Json;
 
 namespace Signum.Entities.Chart
 {
@@ -71,6 +72,7 @@ namespace Signum.Entities.Chart
     {
         public OmniboxMatch KeywordMatch { get; set; }
 
+        [JsonConverter(typeof(QueryNameJsonConverter))]
         public object QueryName { get; set; }
         public OmniboxMatch QueryNameMatch { get; set; }
 
