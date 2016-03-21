@@ -191,7 +191,7 @@ namespace Signum.Entities.Omnibox
         [JsonIgnore]
         public Type ReferencedType { get; set; }
         
-        public string ReferencedTypeName => this.ReferencedType.Name;
+        public string ReferencedTypeName => this.ReferencedType?.Name;
         
         public override string ToString()
         {

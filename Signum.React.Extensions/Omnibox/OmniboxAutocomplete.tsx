@@ -50,6 +50,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
                 divAttrs={this.props.divAttrs}
                 inputAttrs={this.props.inputAttrs}
                 menuAttrs={this.props.menuAttrs}
+                minLength={0}
                 ></Typeahead>  
         );
 

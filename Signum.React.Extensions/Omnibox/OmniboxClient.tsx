@@ -25,11 +25,33 @@ export function register(prov: OmniboxProvider<OmniboxResult>) {
 export var providers: { [resultTypeName: string]: OmniboxProvider<OmniboxResult> } = {}; 
 
 export function renderItem(result: OmniboxResult): React.ReactChild {
-    var items = getProvider(result.ResultTypeName).renderItem(result);
+    var items = result.ResultTypeName == "HelpOmniboxResult" ?
+        renderHelpItem(result as HelpOmniboxResult) :
+        getProvider(result.ResultTypeName).renderItem(result);
     return React.createElement("span", null, ...items);
 }
 
+function renderHelpItem(help: HelpOmniboxResult): React.ReactNode[] {
+
+    var result: React.ReactNode[] = [];
+
+    if (help.ReferencedTypeName)
+        result.push(getProvider(help.ReferencedTypeName).icon());
+
+    var str = help.Text
+        .replaceAll("(", "<strong>")
+        .replaceAll(")", "</strong>");
+
+    result.push(<span style={{ fontStyle: "italic" }} dangerouslySetInnerHTML={{ __html: str }}/>);
+
+    return result;
+}
+
 export function navigateTo(result: OmniboxResult): Promise<string> {
+
+    if (result.ResultTypeName == "HelpOmniboxResult")
+        return Promise.resolve(null);
+
     return getProvider(result.ResultTypeName).navigateTo(result);
 }
 
@@ -47,7 +69,7 @@ function getProvider(resultTypeName: string) {
 }
 
 export function getResults(query: string): Promise<OmniboxResult[]> {
-    return ajaxGet<OmniboxResult[]>({ url: "/api/omnibox?query=" + encodeURI(query) })
+    return ajaxGet<OmniboxResult[]>({ url: "/api/omnibox?query=" + encodeURI(query || "help") })
 }
 
 export abstract class OmniboxProvider<T extends OmniboxResult> {
@@ -95,6 +117,11 @@ export interface OmniboxMatch {
     Distance: number;
     Text: string;
     BoldMask: string;
+}
+
+export interface HelpOmniboxResult extends OmniboxResult {
+    Text: string;
+    ReferencedTypeName: string;
 }
 
 
