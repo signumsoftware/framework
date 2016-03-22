@@ -39,6 +39,9 @@ namespace Signum.Engine.DynamicQuery
 
         static List<Lite<Entity>> FindLiteLike(IEnumerable<Type> types, string subString, int count)
         {
+            if (subString == null)
+                subString = "";
+
             types = types.Where(t => Schema.Current.IsAllowed(t, inUserInterface: true) == null);
 
             List<Lite<Entity>> results = new List<Lite<Entity>>();

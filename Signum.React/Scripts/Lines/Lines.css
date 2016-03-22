@@ -172,6 +172,10 @@ ul.sf-strip-vertical > li {
     margin-left: 2px;
 }
 
+.sf-strip-input.input-group .sf-line-button {
+    margin-left: 4px;
+}
+
 label.sf-checkbox-element {
     display: block;
 }

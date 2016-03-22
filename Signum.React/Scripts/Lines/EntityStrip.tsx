@@ -43,16 +43,6 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
         const s = this.state;
 
-        var buttons = (
-            <span className="input-group-btn">
-                { this.renderCreateButton(true) }
-                { this.renderFindButton(true) }
-            </span>
-        );
-
-        if (!buttons.props.children.some(a => a))
-            buttons = null;
-
         return (
             <FormGroup ctx={s.ctx} title={s.labelText}>
                 <div className="SF-entity-strip SF-control-container">
@@ -65,12 +55,13 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                                     onView={this.state.view ? e => this.handleViewElement(e, i) : null}
                                     />))
                         }
-                        <li className="sf-strip-input">
-                            <div className={buttons ? "input-group" : null}>
-                                {this.renderAutoComplete() }
-                                { buttons }
-                            </div>
-                        </li>
+                        <li className="sf-strip-input input-group">
+                            {this.renderAutoComplete() }
+                            <span>
+                                { this.renderCreateButton(false) }
+                                { this.renderFindButton(false) }
+                            </span>
+                        </li> 
                     </ul>
                 </div>
             </FormGroup>
