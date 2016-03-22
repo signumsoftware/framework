@@ -92,6 +92,21 @@ div.sf-pagination-right > ul.pagination {
     border-radius: 4px;
 }
 
+.sf-column-editor.error
+{
+    background: #f2dede;
+}
+
+table.sf-search-results th.sf-current-column {
+    background-color: #eee;
+    border-bottom: 2px solid #aaa;
+}
+
+table.sf-search-results th.sf-current-column.error {
+    background-color: #f2dede;
+    border-bottom: 2px solid #a94442;
+}
+
 
 .sf-search-results-container {
     overflow-x: auto;
