@@ -124,6 +124,7 @@ Lose changes?")]
         Field,
         [Description("Add column")]
         AddColumn,
+        CollectionsCanNotBeAddedAsColumns,
         [Description("Add filter")]
         AddFilter,
         [Description("Add value")]

@@ -396,6 +396,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("export default class {0} extends EntityComponent<{1}> {{".FormatWith(GetViewName(type), type.Name));
             sb.AppendLine("");
             sb.AppendLine("    renderEntity() {");
+            sb.AppendLine("        var ctx = this.props.ctx;");
             sb.AppendLine("        return (");
             sb.AppendLine("            <div>");
 
@@ -441,14 +442,14 @@ namespace Signum.Engine.CodeGeneration
             var eka = elementType.GetCustomAttribute<EntityKindAttribute>();
 
             if (elementType.IsEmbeddedEntity() || (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart))
-                return "<EntityRepeater ctx={{this.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+                return "<EntityRepeater ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
-            return "<EntityStrip ctx={{this.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+            return "<EntityStrip ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
         }
 
         protected virtual string WriteEmbeddedProperty(PropertyInfo pi, string v)
         {
-            return "<EntityDetail ctx={{this.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+            return "<EntityDetail ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
         }
 
         protected virtual string WriteEntityProperty(PropertyInfo pi, string v)
@@ -458,15 +459,15 @@ namespace Signum.Engine.CodeGeneration
             var eka = type.GetCustomAttribute<EntityKindAttribute>();
 
             if (eka == null)
-                return "<EntityLine ctx={{this.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+                return "<EntityLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
             if (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart)
-                return "<EntityDetail ctx={{this.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+                return "<EntityDetail ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
             if (eka.IsLowPopulation)
-                return "<EntityCombo ctx={{this.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+                return "<EntityCombo ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
-            return "<EntityLine ctx={{this.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+            return "<EntityLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
         }
 
 

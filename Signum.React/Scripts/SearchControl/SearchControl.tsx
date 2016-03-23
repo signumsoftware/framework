@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { Dic, DomUtils } from '../Globals'
+import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandParentColumn, QueryRequest } from '../FindOptions'
@@ -715,7 +715,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 { this.state.findOptions.columnOptions.map((co, i) =>
                     <th draggable={true}
                         style={i == this.state.dragColumnIndex ? { opacity: 0.5 } : null }
-                        className={(i == this.state.dropBorderIndex ? "drag-left " : i == this.state.dropBorderIndex - 1 ? "drag-right " : "") }
+                        className={classes(co == this.state.editingColumn ? "sf-current-column" : null,
+                            co == this.state.editingColumn && co.token.type.isCollection ? "error" : null,
+                            i == this.state.dropBorderIndex ? "drag-left " : i == this.state.dropBorderIndex - 1 ? "drag-right " : null) }
                         data-column-name={co.token && co.token.fullKey}
                         data-column-index={i}
                         key={i}

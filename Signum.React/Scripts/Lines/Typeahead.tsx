@@ -215,7 +215,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     render() {
         return (
-            <div {...this.props.divAttrs}>
+            <span {...this.props.divAttrs}>
                 <input type="text" autoComplete="off" ref="input" {...this.props.inputAttrs}
                     onFocus={this.handleFocus}
                     onBlur={this.handleBlur}
@@ -232,7 +232,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
                                 <a href="#" onClick={this.handleMenuClick}>{this.props.renderItem(item, this.state.query) }</a>
                             </li>) }
                 </ul>}
-            </div>
+            </span>
         );
     }
 }

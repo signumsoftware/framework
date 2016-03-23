@@ -2,6 +2,7 @@
 import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
+import { classes } from '../Globals';
 import { openModal, IModalProps } from '../Modals';
 import { ColumnOption, QueryDescription, QueryToken, SubTokensOptions, FilterType } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
@@ -36,8 +37,11 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps, {}>
     render() {
         const co = this.props.columnOption;
 
+        var isCollection = this.props.columnOption.token.type.isCollection;
+
         return (
-            <div className="sf-column-editor form-xs">
+            <div className={classes("sf-column-editor", "form-xs", isCollection ? "error" : null) }
+                title={isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : null }>
                 <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
                 <QueryTokenBuilder
                     queryToken={co.token}
