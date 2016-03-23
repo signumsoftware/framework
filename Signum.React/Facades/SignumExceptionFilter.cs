@@ -7,10 +7,12 @@ using Signum.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.ServiceModel.Channels;
+using System.Text;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Filters;
@@ -40,7 +42,7 @@ namespace Signum.React.Facades
                 e.UserHostAddress = GetClientIp(req);
                 e.UserHostName = GetClientName(req);
                 e.QueryString = ExceptionEntity.Dump(req.RequestUri.ParseQueryString());
-                e.Form = req.Content.ReadAsStringAsync().Result;
+                e.Form = GetForm(req);
                 e.Session = GetSession(req);
             });
 
@@ -49,6 +51,24 @@ namespace Signum.React.Facades
             ctx.Response = ctx.Request.CreateResponse<HttpError>(statusCode, error);
 
             base.OnException(ctx);
+        }
+
+        private string GetForm(HttpRequestMessage request)
+        {
+            if (request.Properties.ContainsKey("MS_HttpContext"))
+            {
+                var httpContextBase = (HttpContextWrapper)request.Properties["MS_HttpContext"];
+
+                using (var stream = new MemoryStream())
+                {
+                    httpContextBase.Request.InputStream.Seek(0, SeekOrigin.Begin);
+                    httpContextBase.Request.InputStream.CopyTo(stream);
+                    string requestBody = Encoding.UTF8.GetString(stream.ToArray());
+                    return requestBody;
+                }
+            }
+
+            return request.Content.ReadAsStringAsync().Result;
         }
 
         private HttpStatusCode GetStatus(Type type)
