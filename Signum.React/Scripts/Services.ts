@@ -10,6 +10,8 @@ export interface AjaxOptions {
     avoidThrowError?: boolean;
     avoidGraphExplorer?: boolean;
 
+    
+	headers?: HeaderInit;
     mode?: string | RequestMode;
     credentials?: string | RequestCredentials;
     cache?: string | RequestCache;
@@ -30,10 +32,15 @@ export function baseUrl(options: AjaxOptions): string {
 }
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
-    return wrapRequest<T>(options, () =>
+    return ajaxGetRaw(options)
+        .then(a=> a.status == 204 ? null : a.json<T>());
+}
+
+export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
+    return wrapRequest(options, () =>
         fetch(baseUrl(options), {
             method: "GET",
-            headers: {
+            headers: options.headers || {
                 'Accept': 'application/json',
             },
             mode: options.mode,
@@ -43,16 +50,21 @@ export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
 }
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
+    return ajaxPostRaw(options, data)
+        .then(a=> a.status == 204 ? null : a.json<T>());
+}
 
+
+export function ajaxPostRaw(options: AjaxOptions, data: any) : Promise<Response> {
     if (!options.avoidGraphExplorer) {
         GraphExplorer.propagateAll(data);
     }
 
-    return wrapRequest<T>(options, () =>
+    return wrapRequest(options, () =>
         fetch(baseUrl(options), {
             method: "POST",
             credentials: options.credentials || "same-origin",
-            headers: {
+            headers: options.headers || {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -63,21 +75,21 @@ export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
 }
 
 
-export function wrapRequest<T>(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<T>
+
+export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response>
 {
     let promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
 
     if (!options.avoidThrowError)
         promise = promise.then(throwError);
 
-    return promise.then(a=>
-        a.status == 204 ? null : a.json<T>());
+    return promise;
 }
 
 
 export var notifyPendingRequests: (pendingRequests: number) => void = () => { };
 let pendingRequests: number = 0;
-function onPendingRequest(makeCall: ()=>Promise<Response>) {
+export function onPendingRequest(makeCall: ()=>Promise<Response>) {
     
     notifyPendingRequests(++pendingRequests);
 
@@ -87,7 +99,7 @@ function onPendingRequest(makeCall: ()=>Promise<Response>) {
 }
 
 
-function throwError(response: Response): Response | Promise<Response> {
+export function throwError(response: Response): Response | Promise<Response> {
     if (response.status >= 200 && response.status < 300) {
         return response;
     } else {

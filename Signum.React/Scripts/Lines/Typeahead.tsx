@@ -10,7 +10,7 @@ export interface TypeaheadProps {
     renderItem?: (item: any, query: string) => React.ReactNode;
     onSelect?: (item: any, e: React.SyntheticEvent) => string;
     scrollHeight?: number;
-    divAttrs?: React.HTMLAttributes;
+    spanAttrs?: React.HTMLAttributes;
     inputAttrs?: React.HTMLAttributes;
     menuAttrs?: React.HTMLAttributes;
     loadingMessage?: string;
@@ -215,7 +215,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     render() {
         return (
-            <span {...this.props.divAttrs}>
+            <span {...this.props.spanAttrs}>
                 <input type="text" autoComplete="off" ref="input" {...this.props.inputAttrs}
                     onFocus={this.handleFocus}
                     onBlur={this.handleBlur}

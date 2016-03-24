@@ -576,8 +576,11 @@ export class PropertyRoute {
     member: MemberInfo; //Member
     mixinName: string; //Mixin
 
-    static root(type: TypeInfo | PseudoType) {
+    static root(type: PseudoType) {
         var typeInfo = getTypeInfo(type);
+        if (!typeInfo) {
+            throw Error(`No TypeInfo for "${getTypeName(type)}" found. Consider calling ReflectionServer.RegisterLike on the server side.`);
+        }
         return new PropertyRoute(null, PropertyRouteType.Root, typeInfo, null, null);
     }
 

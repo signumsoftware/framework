@@ -150,8 +150,8 @@ export class TypeContext<T> extends StyleContext {
         this.binding.setValue(val);
     }
 
-    static root<T extends ModifiableEntity>(type: Type<T>, value: T) : TypeContext<T> {
-        return new TypeContext(null, null, PropertyRoute.root(type), new ReadonlyBinding(value, ""));
+    static root<T extends ModifiableEntity>(type: Type<T>, value: T, styleOptions?: StyleOptions): TypeContext<T> {
+        return new TypeContext(null, styleOptions, PropertyRoute.root(type), new ReadonlyBinding(value, ""));
     }
 
     constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>) {

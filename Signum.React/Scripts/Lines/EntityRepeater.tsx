@@ -82,7 +82,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
         return (
             <fieldset className="sf-repeater-element">
                 <legend>
-                    { this.props.onRemove && <a className={classes("sf-line-button", "sf-create") }
+                    { this.props.onRemove && <a className={classes("sf-line-button", "sf-remove") }
                     onClick={this.props.onRemove}
                     title={EntityControlMessage.Remove.niceToString() }>
                     <span className="glyphicon glyphicon-remove"/>

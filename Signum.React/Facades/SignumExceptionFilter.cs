@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.ServiceModel.Channels;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
 namespace Signum.React.Facades
@@ -124,6 +125,22 @@ namespace Signum.React.Facades
             {
                 return null;
             }
+        }
+
+    }
+    public class HeavyProfilerFilter : ActionFilterAttribute
+    {
+        public override void OnActionExecuting(HttpActionContext actionContext)
+        {
+            actionContext.ControllerContext.RouteData.Values["HeavyProfiler"] = HeavyProfiler.Log("WebApi", () => actionContext.ControllerContext.Request.ToString());
+            base.OnActionExecuting(actionContext);
+        }
+
+        public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
+        {
+
+            base.OnActionExecuted(actionExecutedContext);
+            ((IDisposable)actionExecutedContext.ActionContext.ControllerContext.RouteData.Values["HeavyProfiler"])?.Dispose();
         }
     }
 }

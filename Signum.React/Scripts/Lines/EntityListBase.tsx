@@ -29,6 +29,10 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         if (props.onFind)
             throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);
 
+
+        if(props.ctx.value == null)
+            props.ctx.value = [];
+
         super.calculateDefaultState(props);
     }
 
