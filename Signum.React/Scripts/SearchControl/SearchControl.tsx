@@ -716,7 +716,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                     <th draggable={true}
                         style={i == this.state.dragColumnIndex ? { opacity: 0.5 } : null }
                         className={classes(co == this.state.editingColumn ? "sf-current-column" : null,
-                            co == this.state.editingColumn && co.token.type.isCollection ? "error" : null,
+                            co == this.state.editingColumn && co.token && co.token.type.isCollection ? "error" : null,
                             i == this.state.dropBorderIndex ? "drag-left " : i == this.state.dropBorderIndex - 1 ? "drag-right " : null) }
                         data-column-name={co.token && co.token.fullKey}
                         data-column-index={i}

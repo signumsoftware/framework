@@ -37,7 +37,7 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps, {}>
     render() {
         const co = this.props.columnOption;
 
-        var isCollection = this.props.columnOption.token.type.isCollection;
+        var isCollection = co.token && co.token.type.isCollection;
 
         return (
             <div className={classes("sf-column-editor", "form-xs", isCollection ? "error" : null) }
