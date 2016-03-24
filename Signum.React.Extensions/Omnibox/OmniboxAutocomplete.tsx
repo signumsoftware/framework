@@ -8,7 +8,7 @@ import * as OmniboxClient from './OmniboxClient'
 import {  OmniboxMessage } from './Signum.Entities.Omnibox'
 
 export interface OmniboxAutocompleteProps {
-    divAttrs?: React.HTMLAttributes;
+    spanAttrs?: React.HTMLAttributes;
     inputAttrs?: React.HTMLAttributes;
     menuAttrs?: React.HTMLAttributes;
 }
@@ -47,7 +47,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
             <Typeahead getItems={OmniboxClient.getResults} 
                 renderItem={OmniboxClient.renderItem}
                 onSelect={this.handleOnSelect}
-                divAttrs={this.props.divAttrs}
+                spanAttrs={this.props.spanAttrs}
                 inputAttrs={this.props.inputAttrs}
                 menuAttrs={this.props.menuAttrs}
                 minLength={0}
