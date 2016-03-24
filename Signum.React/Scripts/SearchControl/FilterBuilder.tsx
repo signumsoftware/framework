@@ -222,7 +222,7 @@ export class MultiValue extends React.Component<MultiValueProps, void> {
 
     render() {
         return (
-            <table className="table table-condensed" style={{ marginBottom: "0px" }}>
+            <table style={{ marginBottom: "0px" }}>
                 <tbody>
                     {
                         this.props.values.map((v, i) =>
