@@ -125,7 +125,7 @@ namespace Signum.Entities
             if (!AllowLeadingSpaces && Regex.IsMatch(val, @"^\s+"))
                 return ValidationMessage._0ShouldNotHaveInitialSpaces.NiceToString();
 
-             if (!AllowLeadingSpaces && Regex.IsMatch(val, @"\s+$"))
+             if (!AllowTrailingSpaces && Regex.IsMatch(val, @"\s+$"))
                 return ValidationMessage._0ShouldNotHaveFinalSpaces.NiceToString();
 
             if (min == max && min != -1 && val.Length != min)
