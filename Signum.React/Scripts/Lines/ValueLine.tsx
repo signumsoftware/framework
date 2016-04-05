@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
+import * as numbro from 'numbro'
 import { classes, Dic } from '../Globals'
 import { DateTimePicker } from 'react-widgets'
 import 'react-widgets/lib/less/react-widgets.less';
@@ -270,25 +271,90 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
             </FormGroup>
         );
 
-    const handleOnChange = (e: React.SyntheticEvent) => {
-        const input = e.currentTarget as HTMLInputElement;
-        var result = input.value == null || input.value.length == 0 ? null : parseFloat(input.value);
-        vl.setValue(result);
+    const handleOnChange = (newValue: number) => {
+        vl.setValue(newValue);
     };
 
-    var handleKeyDownPreserve = (e: React.KeyboardEvent) => {
-        if (!validateKey(e))
-            e.preventDefault();
-    }
+    var htmlProps = Dic.extend(
+        { placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : null } as React.HTMLAttributes,
+        vl.props.valueHtmlProps);
 
     return (
         <FormGroup ctx={s.ctx} title={s.labelText}>
             { ValueLine.withUnit(s.unitText,
-                <input {...vl.props.valueHtmlProps} type="textarea" className="form-control numeric" value={s.ctx.value} onChange={handleOnChange}
-                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null} onKeyDown={handleKeyDownPreserve}/>
+                <NumericTextBox
+                    htmlProps={htmlProps}
+                    value={s.ctx.value}
+                    onChange={handleOnChange}
+                    validateKey={validateKey}
+                    format={toNumeralFormat(s.ctx.propertyRoute.member.format)}
+                    />
             ) }
         </FormGroup>
     );
+}
+
+function toNumeralFormat(format: string) {
+    if (format.startsWith("C"))
+        return "0." + "0".repeat(parseInt(format.after("C")));
+
+    if (format.startsWith("N"))
+        return "0." + "0".repeat(parseInt(format.after("N")));
+
+    if (format.startsWith("D"))
+        return "0".repeat(parseInt(format.after("D")));
+
+    if (format.startsWith("E"))
+        return "0." + "0".repeat(parseInt(format.after("E")));
+
+    if (format.startsWith("P"))
+        return "0." + "0".repeat(parseInt(format.after("P"))) + "%";
+
+    return format;
+}
+
+export interface NumericTextBoxProps {
+    value: number;
+    onChange: (newValue: number) => void;
+    validateKey: React.KeyboardEventHandler;
+    format: string;
+    htmlProps: React.HTMLAttributes;
+}
+
+export class NumericTextBox extends React.Component<NumericTextBoxProps, { text: string }> {
+
+    state = { text: null };
+
+
+    render() {
+
+        var value = this.state.text != null ? this.state.text :
+            this.props.value != null ? numbro(this.props.value).format(this.props.format) :
+                "";
+
+        return <input {...this.props.htmlProps} type="text" className="form-control numeric" value={value}
+            onBlur={this.handleOnBlur}
+            onChange={this.handleOnChange}
+            onKeyDown={this.handleKeyDown}/>
+
+    }
+
+    handleOnBlur = (e: React.SyntheticEvent) => {
+        const input = e.currentTarget as HTMLInputElement;
+        var result = input.value == null || input.value.length == 0 ? null : numbro(input.value).value();
+        this.setState({ text: null });
+        this.props.onChange(result);
+    }
+
+    handleOnChange = (e: React.SyntheticEvent) => {
+        const input = e.currentTarget as HTMLInputElement;
+        this.setState({ text: input.value });
+    }
+
+    handleKeyDown = (e: React.KeyboardEvent) => {
+        if (!this.props.validateKey(e))
+            e.preventDefault();
+    }
 }
 
 ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {

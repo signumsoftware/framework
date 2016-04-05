@@ -5,7 +5,7 @@
 /// <reference path="../typings/react-bootstrap/react-bootstrap.d.ts" />
 /// <reference path="../typings/react-router-bootstrap/react-router-bootstrap.d.ts" />
 /// <reference path="../typings/react-widgets/react-widgets.d.ts" />
-/// <reference path="../typings/numeraljs/numeraljs.d.ts" />
+/// <reference path="../typings/numbro/numbro.d.ts" />
 /// <reference path="../typings/moment/moment.d.ts" />
 /// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
@@ -77,6 +77,8 @@ interface String {
     replaceAll(search: string, replacement: string): string;
     firstUpper(): string;
     firstLower(): string;
+
+    repeat(n: number): string;
 }
 
 declare module moment {
