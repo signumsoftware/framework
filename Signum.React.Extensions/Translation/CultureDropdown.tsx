@@ -1,5 +1,4 @@
 ﻿import * as React from 'react'
-import * as moment from 'moment'
 import { NavDropdown, MenuItem }  from 'react-bootstrap'
 import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
@@ -14,7 +13,7 @@ import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import * as TranslationClient from './TranslationClient'
 
 export interface CultureDropdownProps {
-    onCultureChanged?: () => void;
+    changeJavascriptCulture: (culture: string) => void;
 }
 
 export interface CultureDropdownState {
@@ -29,11 +28,13 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
         this.state = {};
     }
 
+    static changeJavascriptCulture: (ci: CultureInfoEntity) => void;
+
     componentWillMount() {
         TranslationClient.Api.getCurrentCulture()
             .then(ci => {
                 this.setState({ currentCulture: toLite(ci) });
-                moment.locale((ci.name.tryBefore("-") || ci.name).toLowerCase());
+                this.props.changeJavascriptCulture(ci.name);     
                 return TranslationClient.Api.getCultures();
             })
             .then(cultures => this.setState({ cultures }))
