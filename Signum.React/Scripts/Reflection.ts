@@ -461,8 +461,18 @@ export class Type<T extends ModifiableEntity> implements IType {
     constructor(
         public typeName: string) { }
 
-    typeInfo(): TypeInfo {
+    tryTypeInfo(): TypeInfo {
         return getTypeInfo(this.typeName);
+    }
+
+    typeInfo(): TypeInfo {
+
+        var result = this.tryTypeInfo();
+
+        if (!result)
+            throw new Error(`Type ${this.typeName} has no TypeInfo. Maybe is an embedded?`);
+
+        return result;
     }
 
     memberInfo(lambdaToProperty: (v: T) => any): MemberInfo {
