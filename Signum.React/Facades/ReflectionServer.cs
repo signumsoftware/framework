@@ -71,13 +71,13 @@ namespace Signum.React.Facades
             return ti;
         }
 
-        public static Action<MemberInfoTS, PropertyRoute> AddMemberExtension;
+        public static Action<MemberInfoTS, PropertyRoute> AddPropertyExtension;
         static MemberInfoTS OnAddMemberExtra(MemberInfoTS mi, PropertyRoute m)
         {
-            if (AddMemberExtension == null)
+            if (AddPropertyExtension == null)
                 return mi;
 
-            foreach (var a in AddMemberExtension.GetInvocationListTyped())
+            foreach (var a in AddPropertyExtension.GetInvocationListTyped())
                 a(mi, m);
 
             return mi;
@@ -314,7 +314,7 @@ namespace Signum.React.Facades
         public Dictionary<string, OperationInfoTS> Operations { get; set; }
 
         [JsonExtensionData]
-        public Dictionary<string, object> Extension { get; set; }
+        public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
     }
 
     public class MemberInfoTS
@@ -341,7 +341,7 @@ namespace Signum.React.Facades
         public object Id { get; set; }
 
         [JsonExtensionData]
-        public Dictionary<string, object> Extension { get; set; }
+        public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
     }
 
     public class OperationInfoTS
@@ -358,7 +358,7 @@ namespace Signum.React.Facades
         private bool? Lite;
 
         [JsonExtensionData]
-        public Dictionary<string, object> Extension { get; set; }
+        public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
 
         public OperationInfoTS(OperationInfo oper)
         {
