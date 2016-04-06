@@ -35,6 +35,27 @@ namespace Signum.React.Authorization
                 Role = UserEntity.Current == null ? null : RoleEntity.Current,
             };
 
+            if (TypeAuthLogic.IsStarted)
+                ReflectionServer.AddTypeExtension = (ti, t) =>
+                {
+                    var allowed = TypeAuthLogic.GetAllowed(t).MaxUI();
+                    ti.Extension.Add("allowed", allowed);
+                };
+
+            if (PropertyAuthLogic.IsStarted)
+                ReflectionServer.AddPropertyExtension = (mi, pr) =>
+                {
+                    var allowed = pr.GetPropertyAllowed();
+                    mi.Extension.Add("allowed", allowed);
+                };
+
+            if (OperationAuthLogic.IsStarted)
+                ReflectionServer.AddOperationExtension = (oi, o) =>
+                {
+                    var allowed = OperationAuthLogic.GetOperationAllowed(o.OperationSymbol, inUserInterface: true);
+                    oi.Extension.Add("allowed", allowed);
+                };
+
             var piPasswordHash = ReflectionTools.GetPropertyInfo((UserEntity e) => e.PasswordHash);
             var pcs = PropertyConverter.GetPropertyConverters(typeof(UserEntity));
             pcs.GetOrThrow("passwordHash").CustomWriteJsonProperty = ctx => { };
