@@ -34,7 +34,7 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);
                 OperationLogic.AssertStarted(sb);
 
-                OperationLogic.AllowOperation += new AllowOperationHandler(OperationLogic_AllowOperation);
+                OperationLogic.AllowOperation += OperationLogic_AllowOperation;
 
                 cache = new AuthCache<RuleOperationEntity, OperationAllowedRule, OperationSymbol, OperationSymbol, OperationAllowed>(sb,
                      s=>s,
