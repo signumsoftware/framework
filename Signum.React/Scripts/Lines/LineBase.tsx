@@ -130,8 +130,13 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         const state = { ctx: cleanProps.ctx.subCtx(so), type: (cleanProps.type || cleanProps.ctx.propertyRoute.member.type) } as LineBaseProps as S;
         this.calculateDefaultState(state);
         runTasks(this, state);
-        Dic.extend(state, Dic.without(cleanProps, { ctx: null, type: null }));
+        var overridenProps = Dic.without(cleanProps, { ctx: null, type: null }) as LineBaseProps as S;
+        this.overrideProps(state, overridenProps);
         return state;
+    }
+
+    overrideProps(state: S, overridenProps: S) {
+        Dic.extend(state, overridenProps);
     }
 
     calculateDefaultState(state: S) {
