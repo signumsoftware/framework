@@ -9,10 +9,10 @@ import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference} fr
 require("!style!css!./Lines.css");
 
 export interface FormGroupProps extends React.Props<FormGroup> {
-    title?: React.ReactChild;
+    labelText?: React.ReactChild;
     controlId?: string;
     ctx: StyleContext;
-    labelProps?: React.HTMLProps<HTMLLabelElement>;
+    labelProps?: React.HTMLAttributes;
 }
 
 export class FormGroup extends React.Component<FormGroupProps, {}> {
@@ -41,7 +41,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const label = (
             <label htmlFor={this.props.controlId} {...this.props.labelProps } className= { labelClasses } >
-                { this.props.title || tCtx.propertyRoute && tCtx.propertyRoute.member.niceName }
+                { this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member.niceName }
             </label>
         );
 
@@ -84,6 +84,7 @@ export interface LineBaseProps extends StyleOptions {
     visible?: boolean;
     hideIfNull?: boolean;
     onChange?: (val: any) => void;
+    labelHtmlProps?: React.HTMLAttributes;
 }
 
 export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps> extends React.Component<P, S> {
@@ -136,7 +137,9 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     }
 
     overrideProps(state: S, overridenProps: S) {
+        var labelHtmlProps = Dic.extend(state.labelHtmlProps, overridenProps.labelHtmlProps);
         Dic.extend(state, overridenProps);
+        state.labelHtmlProps = labelHtmlProps;
     }
 
     calculateDefaultState(state: S) {
@@ -146,8 +149,8 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 }
 
 
-export const Tasks: ((lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) => void)[] = [];
+export const tasks: ((lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) => void)[] = [];
 
 export function runTasks(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
-    Tasks.forEach(t => t(lineBase, state));
+    tasks.forEach(t => t(lineBase, state));
 }

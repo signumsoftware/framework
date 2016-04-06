@@ -7,8 +7,8 @@ import { ViewReplacer } from  './Frames/ReactVisitor'
 
 export { PropertyRoute };
 
-import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, Tasks} from './Lines/LineBase'
-export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, Tasks};
+import { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks} from './Lines/LineBase'
+export { FormGroup, FormGroupProps, FormControlStatic, FormControlStaticProps, LineBase, LineBaseProps, tasks};
 
 import { ValueLine, ValueLineType, ValueLineProps } from './Lines/ValueLine'
 export { ValueLine, ValueLineType, ValueLineProps};
@@ -79,7 +79,7 @@ export abstract class EntityComponent<T extends ModifiableEntity> extends Entity
 }
 
 
-Tasks.push(taskSetNiceName);
+tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (!state.labelText &&
         state.ctx.propertyRoute &&
@@ -88,7 +88,7 @@ export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBasePro
     }
 }
 
-Tasks.push(taskSetUnit);
+tasks.push(taskSetUnit);
 export function taskSetUnit(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (lineBase instanceof ValueLine) {
         const vProps = state as ValueLineProps;
@@ -101,7 +101,7 @@ export function taskSetUnit(lineBase: LineBase<any, any>, state: LineBaseProps) 
     }
 }
 
-Tasks.push(taskSetFormat);
+tasks.push(taskSetFormat);
 export function taskSetFormat(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (lineBase instanceof ValueLine) {
         const vProps = state as ValueLineProps;
@@ -114,7 +114,7 @@ export function taskSetFormat(lineBase: LineBase<any, any>, state: LineBaseProps
     }
 }
 
-Tasks.push(taskSetReadOnly);
+tasks.push(taskSetReadOnly);
 export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBaseProps) {
     if (!state.ctx.readOnly &&
         state.ctx.propertyRoute &&
@@ -126,7 +126,7 @@ export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBasePro
 
 export let maxValueLineSize = 100; 
 
-Tasks.push(taskSetHtmlProperties);
+tasks.push(taskSetHtmlProperties);
 export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineBaseProps) {
     var vl = lineBase instanceof ValueLine ? lineBase as ValueLine : null;
     var pr = state.ctx.propertyRoute;

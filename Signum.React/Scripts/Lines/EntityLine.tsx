@@ -71,7 +71,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
             buttons = null;
 
         return (
-            <FormGroup ctx={s.ctx} title={s.labelText}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
                     <div className={buttons ? "input-group" : null}>
                         { hasValue ? this.renderLink() : this.renderAutoComplete() }

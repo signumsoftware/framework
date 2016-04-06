@@ -13,7 +13,8 @@ import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '
 export interface CountSearchControlProps extends React.Props<CountSearchControl> {
     ctx: StyleContext;
     findOptions: FindOptions;
-    title?: string;
+    labelText?: React.ReactChild;
+    labelProps?: React.HTMLAttributes;
     showAsLink?: boolean;
 }
 
@@ -51,7 +52,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
 
     render() {
         return (
-            <FormGroup ctx={this.props.ctx} title={this.props.title || getQueryNiceName(this.props.findOptions.queryName) }>
+            <FormGroup ctx={this.props.ctx} labelText={this.props.labelText || getQueryNiceName(this.props.findOptions.queryName) } labelProps={this.props.labelProps}>
                 {this.props.showAsLink ? this.renderAsLink() : this.renderAsBadge() }
             </FormGroup>
         );
