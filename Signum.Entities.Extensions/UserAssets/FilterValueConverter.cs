@@ -259,7 +259,16 @@ namespace Signum.Entities.UserAssets
 
                 int year = Mix(now.Year, Year, "yyyy");
                 int month = Mix(now.Month, Month, "mm");
-                int day = Day.ToLower() == "max" ? DateTime.DaysInMonth(year, month) : Mix(now.Day, Day, "dd");
+                int day;
+                if (Day.ToLower() == "max")
+                {
+                    year += MonthDivMod(ref month);
+                    day = DateTime.DaysInMonth(year, month);
+                }
+                else
+                {
+                    day = Mix(now.Day, Day, "dd");
+                }
                 int hour = Mix(now.Hour, Hour, "hh");
                 int minute = Mix(now.Minute, Minute, "mm");
                 int second = Mix(now.Second, Second, "ss");
