@@ -64,21 +64,4 @@ namespace Signum.React
             }
         }
     }
-
-
-    // http://www.strathweb.com/2012/11/adding-session-support-to-asp-net-web-api/
-    public class SessionControllerHandler : HttpControllerHandler, IRequiresSessionState
-    {
-        public SessionControllerHandler(RouteData routeData)
-            : base(routeData)
-        { }
-    }
-
-    public class SessionRouteHandler : IRouteHandler
-    {
-        IHttpHandler IRouteHandler.GetHttpHandler(RequestContext requestContext)
-        {
-            return new SessionControllerHandler(requestContext.RouteData);
-        }
-    }
 }

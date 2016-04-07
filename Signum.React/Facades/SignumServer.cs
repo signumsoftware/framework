@@ -43,12 +43,6 @@ namespace Signum.React.Facades
             // Web API routes
             config.MapHttpAttributeRoutes();
 
-            RouteTable.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
-            ).RouteHandler = new SessionRouteHandler();
-
             config.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
 
             config.Filters.Add(new SignumExceptionFilter());
