@@ -148,6 +148,20 @@ export function getTypeName(pseudoType: IType | TypeInfo | string): string {
     throw new Error("Unexpected pseudoType " + pseudoType);
 }
 
+export function isEntity(type: PseudoType): boolean {
+    var ti = getTypeInfo(type);
+    return ti && !!ti.members["Id"];
+}
+
+export function isModel(type: PseudoType): boolean {
+    var ti = getTypeInfo(type);
+    return ti && !ti.members["Id"];
+}
+
+export function isEmbedded(type: PseudoType): boolean {
+    var ti = getTypeInfo(type);
+    return !ti;
+}
 
 export function getTypeInfo(type: PseudoType): TypeInfo {
 
