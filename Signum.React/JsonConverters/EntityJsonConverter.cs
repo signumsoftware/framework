@@ -98,7 +98,7 @@ namespace Signum.React.Json
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof(ModifiableEntity).IsAssignableFrom(objectType);
+            return typeof(ModifiableEntity).IsAssignableFrom(objectType) || typeof(IEntity).IsAssignableFrom(objectType);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

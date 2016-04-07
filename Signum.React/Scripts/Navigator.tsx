@@ -19,7 +19,6 @@ export let currentUser: IUserEntity;
 export let currentHistory: HistoryModule.History;
 
 
-
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default)) } ></Route>);
     options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default))} ></Route>);
@@ -61,6 +60,10 @@ export function navigateRoute(typeOfEntity: any, id: any = null) {
     }
 
     return currentHistory.createHref("/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id);
+}
+
+export function createRoute(type: PseudoType) {
+    return currentHistory.createHref("/create/" + getTypeName(type));
 }
 
 export const entitySettings: { [type: string]: EntitySettingsBase<ModifiableEntity> } = {};

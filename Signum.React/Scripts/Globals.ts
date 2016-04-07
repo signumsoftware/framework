@@ -287,9 +287,9 @@ Array.prototype.extract = function (predicate: (element: any) => boolean) {
     return result;
 };
 
-Array.range = function (min, max) {
+Array.range = function (min, maxNotIncluded) {
 
-    const length = max - min;
+    const length = maxNotIncluded - min;
 
     const result = new Array(length);
     for (let i = 0; i < length; i++) {

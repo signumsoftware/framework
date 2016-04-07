@@ -36,31 +36,28 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
     componentWillMount() {
         this.loadEntity()
-            .then(e => this.loadComponent(e))
+            .then(() => this.loadComponent())
             .done();
     }
 
     componentWillReceiveProps(nextProps: RenderEntityProps) {
         this.loadEntity()
-            .then(e => this.loadComponent(e))
+            .then(() => this.loadComponent())
             .done();
     }
 
-    loadEntity(): Promise<Entity> {
+    loadEntity(): Promise<void> {
 
         if (!this.props.ctx.value)
             return Promise.resolve(null);
 
         var ent = this.getEntity();
         if (ent)
-            return Promise.resolve(ent);
+            return Promise.resolve(null);
 
 
         var lite = this.props.ctx.value as Lite<Entity>;
-        return Navigator.API.fetchAndRemember(lite).then(e => {
-            this.forceUpdate();
-            return e;
-        });
+        return Navigator.API.fetchAndRemember(lite).then(a => null);
     }
 
 
@@ -81,18 +78,19 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         throw new Error("Unexpected value " + lite);
     }
 
-    loadComponent(e: Entity): Promise<void> {
+    loadComponent(): Promise<void> {
 
-        if (e == null)
+        var e = this.getEntity();
+
+        if (this.props.getComponent)
             return Promise.resolve(null);
 
-        if (this.props.getComponent) {
-            if (this.state.getComponent != this.props.getComponent)
-                this.setState({ getComponent: this.props.getComponent, lastLoadedType: null });
+
+        if (e == null) {
+            this.setState({ getComponent: null, lastLoadedType: null });
             return Promise.resolve(null);
         }
-
-
+        
         if (this.state.lastLoadedType == e.Type)
             return Promise.resolve(null);
 
@@ -109,7 +107,17 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
     render() {
         var entity = this.getEntity();
-        if (entity == null || this.state.getComponent == null)
+        var getComponent = this.props.getComponent;
+
+        if (getComponent == null) {
+
+            if (entity.Type != this.state.lastLoadedType)
+                return <span>entity.Type is {entity.Type} but lastLoadedType is {this.state.lastLoadedType}</span>;
+
+            getComponent = this.state.getComponent;
+        }
+
+        if (entity == null || getComponent == null)
             return null;
         
         var ti = getTypeInfo(entity.Type);
@@ -126,7 +134,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
             setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
         }; 
 
-        return this.state.getComponent(newCtx, frame);
+        return getComponent(newCtx, frame);
     }
 
 }

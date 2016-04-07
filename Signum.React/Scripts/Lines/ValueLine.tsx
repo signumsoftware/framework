@@ -141,7 +141,7 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     }
     else {
         return (
-            <FormGroup ctx={s.ctx} title={s.labelText}>
+            <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
                 <input type="checkbox" {...vl.props.valueHtmlProps} checked={s.ctx.value } onChange={handleCheckboxOnChange} className="form-control" disabled={s.ctx.readOnly}/>
             </FormGroup>
         );
@@ -166,7 +166,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} title={s.labelText}>
+            <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
                 { ValueLine.withUnit(s.unitText,
                     <FormControlStatic {...vl.props.valueHtmlProps} ctx={s.ctx}>
                         {s.ctx.value == null ? null : items.filter(a => a.name == s.ctx.value).single().niceName}
@@ -182,7 +182,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
     };
 
     return (
-        <FormGroup ctx={s.ctx} title={s.labelText}>
+        <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
             { ValueLine.withUnit(s.unitText,
                 <select {...vl.props.valueHtmlProps} value= { s.ctx.value } className= "form-control" onChange={handleEnumOnChange}>
                     {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) }
@@ -199,7 +199,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} title={s.labelText}>
+            <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
                 { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.props.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
@@ -210,7 +210,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
     };
 
     return (
-        <FormGroup ctx={s.ctx} title={s.labelText}>
+        <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
             { ValueLine.withUnit(s.unitText,
                 <input type="text" {...vl.props.valueHtmlProps} className="form-control" value={s.ctx.value} onChange={handleTextOnChange}
                     placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>)
@@ -232,7 +232,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} title={s.labelText}>
+            <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
                 { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.props.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
@@ -243,7 +243,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
     };
 
     return (
-        <FormGroup ctx={s.ctx} title={s.labelText}>
+        <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
             <textarea {...vl.props.valueHtmlProps} className="form-control" value={s.ctx.value} onChange={handleTextOnChange}
                 placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>
         </FormGroup>
@@ -265,7 +265,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} title={s.labelText}>
+            <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
                 { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.props.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
@@ -282,7 +282,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
     }
 
     return (
-        <FormGroup ctx={s.ctx} title={s.labelText}>
+        <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
             { ValueLine.withUnit(s.unitText,
                 <input {...vl.props.valueHtmlProps} type="textarea" className="form-control numeric" value={s.ctx.value} onChange={handleOnChange}
                     placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null} onKeyDown={handleKeyDownPreserve}/>
@@ -302,7 +302,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} title={s.labelText}>
+            <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
                 { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.props.valueHtmlProps} ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
             </FormGroup>
         );
@@ -315,7 +315,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     };
 
     return (
-        <FormGroup ctx={s.ctx} title={s.labelText}>
+        <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
             { ValueLine.withUnit(s.unitText,
                 <DateTimePicker value={m && m.toDate() } onChange={handleDatePickerOnChange} format={momentFormat} time={showTime}/>
             ) }

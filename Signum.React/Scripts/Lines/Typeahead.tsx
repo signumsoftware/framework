@@ -126,6 +126,10 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
 
+    blur() {
+        this.input.blur();
+    }
+
     handleKeyDown = (e: React.KeyboardEvent) => {
         if (!this.state.shown) return;
 

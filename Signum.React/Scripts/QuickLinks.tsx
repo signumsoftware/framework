@@ -20,9 +20,7 @@ export interface QuickLinkContext<T extends Entity> {
     lite: Lite<T>;
     widgetContext?: WidgetContext;
     contextualContext?: ContextualItemsContext;
-
 }
-
 
 export var onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>> = [];
 export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>)
@@ -72,7 +70,7 @@ function asArray<T>(valueOrArray: T | T[]): T[] {
 }
 
 export function getQuickLinkWidget(ctx: WidgetContext): React.ReactElement<any> {
-    
+
     return <QuickLinkWidget ctx={ctx}/>;
 }
 
@@ -81,11 +79,11 @@ export function getQuickLinkContextMenus(ctx: ContextualItemsContext): Promise<M
     if (ctx.lites.length != 1)
         return Promise.resolve(null);
 
-    var links = getQuickLinks({
+    return getQuickLinks({
         lite: ctx.lites[0],
         contextualContext: ctx
     }).then(links => {
-    
+
         if (links.length == 0)
             return null;
 
@@ -180,7 +178,7 @@ export abstract class QuickLink {
     constructor(name: string, options: QuickLinkOptions) {
         this.name = name;
 
-        Dic.extend(this, { isVisible: true, text: "", order: 0 } as QuickLinkOptions, options);       
+        Dic.extend(this, { isVisible: true, text: "", order: 0 } as QuickLinkOptions, options);
     }
 
     abstract toMenuItem(key: any): React.ReactElement<any>;
@@ -222,8 +220,8 @@ export class QuickLinkAction extends QuickLink {
 }
 
 export class QuickLinkExplore extends QuickLink {
-    findOptions: FindOptions; 
-    
+    findOptions: FindOptions;
+
     constructor(findOptions: FindOptions, options?: QuickLinkOptions) {
         super(getQueryKey(findOptions.queryName), Dic.extend({
             isVisible: Finder.isFindable(findOptions.queryName),

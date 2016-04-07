@@ -33,10 +33,7 @@ export interface EmbeddedWidget {
     position: EmbeddedWidgetPosition;
 }
 
-export enum EmbeddedWidgetPosition {
-    Top = "Top" as any,
-    Bottom = "Bottom" as any
-}
+export type EmbeddedWidgetPosition = "Top" | "Bottom";
 
 export var onEmbeddedWidgets: Array<(ctx: WidgetContext) => EmbeddedWidget> = [];
 
@@ -44,7 +41,7 @@ export function renderEmbeddedWidgets(wc: WidgetContext): { top: React.ReactElem
     const widgets = onEmbeddedWidgets.map(a => a(wc)).filter(a => a != null);
     
     return {
-        top: widgets.filter(ew => ew.position == EmbeddedWidgetPosition.Top).map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i })),
-        bottom: widgets.filter(ew => ew.position == EmbeddedWidgetPosition.Bottom).map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i }))
+        top: widgets.filter(ew => ew.position == "Top").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i })),
+        bottom: widgets.filter(ew => ew.position == "Bottom").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i }))
     };
 }
