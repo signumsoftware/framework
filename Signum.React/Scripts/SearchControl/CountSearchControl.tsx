@@ -14,7 +14,8 @@ export interface CountSearchControlProps extends React.Props<CountSearchControl>
     ctx: StyleContext;
     findOptions: FindOptions;
     title?: string;
-    showAsLink?: boolean;
+    style?: "View" | "Link" | "Badge";
+    formGroupHtmlProps?: React.HTMLProps<HTMLDivElement>;
 }
 
 export interface CountSearchControlState {
@@ -50,9 +51,12 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     }
 
     render() {
+        if (this.props.style == "Badge")
+            return this.renderBadget();
+
         return (
-            <FormGroup ctx={this.props.ctx} title={this.props.title || getQueryNiceName(this.props.findOptions.queryName) }>
-                {this.props.showAsLink ? this.renderAsLink() : this.renderAsBadge() }
+            <FormGroup ctx={this.props.ctx} title={this.props.title || getQueryNiceName(this.props.findOptions.queryName) } htmlProps={this.props.formGroupHtmlProps}>
+                {this.props.style == "Link" ? this.renderAsLink() : this.renderAsView() }
             </FormGroup>
         );
     }
@@ -61,7 +65,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
         Finder.exploreWindowsOpen(this.props.findOptions, e);
     }
 
-    renderAsBadge() {
+    renderAsView() {
         return (
             <div>
                 <span className={this.state.count > 0 ? "count-search count-with-results badge" : "count-search count-no-results"}>
@@ -78,10 +82,15 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     }
 
     renderAsLink() {
+        return (<a onClick={this.handleClick}>
+            {this.state.count == null ? "…" : this.state.count}
+        </a>);
+    }
 
-        if (this.state.count == null)
-            return (<span>…</span>);
-        else
-            return (<a onClick={this.handleClick}>{this.state.count}</a>);
+
+    renderBadget() {
+        return <a className={this.state.count > 0 ? "count-search count-with-results badge" : "count-search count-no-results"}  onClick={this.handleClick}>
+            {this.state.count == null ? "…" : this.state.count}
+        </a>;
     }
 }
