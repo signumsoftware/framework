@@ -421,7 +421,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
 
     const parameter = lambdaMatch[1];
     let body = lambdaMatch[2];
-    const result: LambdaMember[] = [];
+    var result: LambdaMember[] = [];
 
     while (body != parameter) {
         let m: RegExpExecArray;
@@ -441,7 +441,11 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
         }
     }
 
-    return result.reverse();
+    result = result.reverse();
+
+    result = result.filter((m, i) => !(m.type == LambdaMemberType.Member && m.name == "element" && i > 0 && result[i - 1].type == LambdaMemberType.Indexer));
+
+    return result;
 }
 
 
