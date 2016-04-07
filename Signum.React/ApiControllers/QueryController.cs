@@ -12,17 +12,28 @@ using Signum.Utilities;
 using Signum.Entities;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Signum.Entities.Basics;
 
 namespace Signum.React.ApiControllers
 {
     public class QueryController : ApiController
     {
         [Route("api/query/findLiteLike"), HttpGet]
-        public List<Lite<Entity>> FindLiteLike([FromUri]string types, [FromUri]string subString, [FromUri]int count)
+        public List<Lite<Entity>> FindLiteLike(string types, string subString, int count)
         {
             Implementations implementations = ParseImplementations(types);
 
             return AutocompleteUtils.FindLiteLike(implementations, subString, count);
+        }
+
+        [Route("api/query/findTypeLike"), HttpGet]
+        public List<Lite<TypeEntity>> FindTypeLike(string subString, int count)
+        {
+            var lites = TypeLogic.TypeToEntity.Values.Select(a => a.ToLite()).ToList();
+
+            var result = AutocompleteUtils.Autocomplete(lites, subString, count);
+
+            return result;
         }
 
         [Route("api/query/findAllLites"), HttpGet]

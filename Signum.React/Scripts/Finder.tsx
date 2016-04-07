@@ -10,7 +10,8 @@ import { QueryDescription, CountQueryRequest, QueryRequest, FindOptions, FilterO
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage  } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage } from './Signum.Entities';
+import { TypeEntity } from './Signum.Entities.Basics';
 
 import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference,
     getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, PseudoType } from './Reflection';
@@ -46,12 +47,14 @@ export function isFindable(queryName: any): boolean {
     return isFindableEvent.every(f=> f(queryKey));
 }
 
-export function find<T extends Entity>(type: Type<T>): Promise<Lite<T>>;
 export function find(findOptions: FindOptions): Promise<Lite<Entity>>;
-export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<Entity>> {
+export function find<T extends Entity>(type: Type<T>): Promise<Lite<T>>;
+export function find(obj: FindOptions | Type<any>): Promise<Lite<Entity>> {
 
-    const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
-        { queryName: findOptions as Type<any> } as FindOptions;
+    
+
+    const fo = (obj as FindOptions).queryName ? obj as FindOptions :
+        { queryName: obj as Type<any> } as FindOptions;
     
     return new Promise<Lite<Entity>>((resolve, reject) => {
         require(["./SearchControl/SearchModal"], function (SP: { default: typeof SearchModal }) {
@@ -60,8 +63,8 @@ export function find(findOptions: FindOptions | Type<any> ): Promise<Lite<Entity
     });
 }
 
-export function findMany<T extends Entity>(type: Type<T>): Promise<Lite<T>[]>;
 export function findMany(findOptions: FindOptions): Promise<Lite<Entity>[]>;
+export function findMany<T extends Entity>(type: Type<T>): Promise<Lite<T>[]>;
 export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Entity>[]> {
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
@@ -401,6 +404,12 @@ export module API {
 
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
+            url: currentHistory.createHref({ pathname: "api/query/findLiteLike", query: request })
+        });
+    }
+
+    export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
+        return ajaxGet<Lite<TypeEntity>[]>({
             url: currentHistory.createHref({ pathname: "api/query/findLiteLike", query: request })
         });
     }
