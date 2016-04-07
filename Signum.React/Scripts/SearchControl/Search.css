@@ -134,6 +134,10 @@ table.sf-search-results th.sf-current-column.error {
         min-width: 200px;
     }
 
+.has-error .sf-query-token-part .rw-dropdownlist {
+    border: 1px solid #a94442;
+}
+
 .sf-filters-body .btn-sm {
     margin-top: -2px;
 }
