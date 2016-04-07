@@ -32,10 +32,10 @@ export default class User extends EntityComponent<UserEntity> {
                 <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true }) } />
                 <ValueLine ctx={ctx.subCtx(e => e.userName) } />
                 {this.entity.isNew && <div>
-                    <FormGroup ctx={ ph } title={AuthMessage.ChangePasswordAspx_NewPassword.niceToString() }>
+                    <FormGroup ctx={ ph } labelText={AuthMessage.ChangePasswordAspx_NewPassword.niceToString() }>
                         <input type="password" ref="newPass" className="form-control" onChange={this.handlePasswordChange}/>
                     </FormGroup>
-                    <FormGroup ctx={ ph } title={AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString() }>
+                    <FormGroup ctx={ ph } labelText={AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString() }>
                         <input type="password" ref="newPass2" className="form-control" onChange={this.handlePasswordChange}/>
                     </FormGroup>
                 </div>}

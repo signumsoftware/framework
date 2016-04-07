@@ -38,22 +38,19 @@ namespace Signum.React.Authorization
             if (TypeAuthLogic.IsStarted)
                 ReflectionServer.AddTypeExtension = (ti, t) =>
                 {
-                    var allowed = TypeAuthLogic.GetAllowed(t).MaxUI();
-                    ti.Extension.Add("allowed", allowed);
+                    ti.Extension.Add("allowed", UserEntity.Current == null ? TypeAllowedBasic.None: TypeAuthLogic.GetAllowed(t).MaxUI());
                 };
 
             if (PropertyAuthLogic.IsStarted)
                 ReflectionServer.AddPropertyExtension = (mi, pr) =>
                 {
-                    var allowed = pr.GetPropertyAllowed();
-                    mi.Extension.Add("allowed", allowed);
+                    mi.Extension.Add("allowed", UserEntity.Current == null ?  PropertyAllowed.None: pr.GetPropertyAllowed());
                 };
 
             if (OperationAuthLogic.IsStarted)
                 ReflectionServer.AddOperationExtension = (oi, o) =>
                 {
-                    var allowed = OperationAuthLogic.GetOperationAllowed(o.OperationSymbol, inUserInterface: true);
-                    oi.Extension.Add("allowed", allowed);
+                    oi.Extension.Add("allowed", UserEntity.Current == null ? false : OperationAuthLogic.GetOperationAllowed(o.OperationSymbol, inUserInterface: true));
                 };
 
             var piPasswordHash = ReflectionTools.GetPropertyInfo((UserEntity e) => e.PasswordHash);

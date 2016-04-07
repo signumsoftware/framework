@@ -135,7 +135,7 @@ export interface ChartLinkProps {
 
 export var ChartLink = (props: ChartLinkProps) =>
     <FormGroup ctx={props.ctx as any}
-        title={ChartMessage.ColorsFor0.niceToString(props.type.niceName) }>
+        labelText={ChartMessage.ColorsFor0.niceToString(props.type.niceName) }>
         <a href={"/chartColors/" + props.type.name} className="form-control">
             {props.currentPalettes.contains(props.type.name) ? ChartMessage.ViewPalette.niceToString() : ChartMessage.CreatePalette.niceToString()  }
         </a>

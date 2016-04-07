@@ -70,7 +70,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
         const hasValue = !!s.ctx.value;
 
         return (
-            <FormGroup ctx={s.ctx} title={s.labelText}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText}>
                 {hasValue ? this.renderLink() : this.renderPlaceholder() }
             </FormGroup>
         );
