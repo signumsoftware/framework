@@ -49,7 +49,6 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
     paginationMode: DynamicQuery.PaginationMode;
     elementsPerPage: number;
     guid: string;
-    shouldHaveElements: boolean;
 }
 
 export module UserQueryMessage {

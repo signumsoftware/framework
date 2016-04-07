@@ -36,7 +36,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr, e => {
                 Navigator.API.fetchAndForget(uc)
-                    .then(uq => Converter.toChartRequest(uq, null))
+                    .then(uq => Converter.toChartRequest(uq, ctx.lite))
                     .then(cr => window.open(ChartClient.Encoder.chartRequestPath(cr)))
                     .done();
             }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));

@@ -71,10 +71,10 @@ export default class ChartScript extends EntityComponent<ChartScriptEntity> {
                         <ValueLine ctx={ctx.subCtx(c => c.columnType) } labelColumns={{ sm: 4 }} />
                     </div>
                     <div className="col-sm-3">
-                        <ValueLine ctx={ctx.subCtx(c => c.isGroupKey) } labelColumns={{ sm: 6 }} />
+                        <ValueLine ctx={ctx.subCtx(c => c.isGroupKey) } inlineCheckBox={true} />
                     </div>
                     <div className="col-sm-3">
-                        <ValueLine ctx={ctx.subCtx(c => c.isOptional) } labelColumns={{ sm: 6 }} />
+                        <ValueLine ctx={ctx.subCtx(c => c.isOptional) } inlineCheckBox={true} />
                     </div>
                 </div>
             </div>

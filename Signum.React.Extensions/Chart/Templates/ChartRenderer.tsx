@@ -12,6 +12,8 @@ import * as ChartClient from '../ChartClient'
 
 var colorbrewer = require("colorbrewer");
 
+require("!style!css!../Chart.css");
+
 declare global {
     interface Error {
         lineNumber: number;

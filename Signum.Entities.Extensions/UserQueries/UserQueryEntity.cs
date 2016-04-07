@@ -100,6 +100,7 @@ namespace Signum.Entities.UserQueries
             return base.PropertyValidation(pi);
         }
 
+        [HiddenProperty]
         public bool ShouldHaveElements
         {
             get

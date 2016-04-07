@@ -42,9 +42,12 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
     constructor(props) {
         super(props);
         this.state = { chartRequest: null };
-        this.load(props);
+   
     }
 
+    componentWillMount() {
+        this.load(this.props);
+    }
 
     componentWillReceiveProps(nextProps: ChartRequestViewProps) {
         this.setState({ chartRequest: null });
