@@ -179,7 +179,7 @@ namespace Signum.Entities
                         }
                     }
                 }
-                else if (t.IsAnonymous())
+                else if (!typeof(ModifiableEntity).IsAssignableFrom(t))
                     foreach (var prop in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                     {
                         DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null));

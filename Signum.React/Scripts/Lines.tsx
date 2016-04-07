@@ -130,19 +130,19 @@ Tasks.push(taskSetHtmlProperties);
 export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineBaseProps) {
     var vl = lineBase instanceof ValueLine ? lineBase as ValueLine : null;
     var pr = state.ctx.propertyRoute;
-    var vlp = state as ValueLineProps;
-    if (vl  && pr && pr.propertyRouteType == PropertyRouteType.Field) {
+    if (vl && pr && pr.propertyRouteType == PropertyRouteType.Field) {
+        var s = state as ValueLineProps;
         if (pr.member.maxLength != null) {
 
-            if (!vlp.valueHtmlProps)
-                vlp.valueHtmlProps = {};
+            if (!s.valueHtmlProps)
+                s.valueHtmlProps = {};
 
-            vlp.valueHtmlProps.maxLength = pr.member.maxLength;
+            s.valueHtmlProps.maxLength = pr.member.maxLength;
 
-            vlp.valueHtmlProps.size = maxValueLineSize == null ? pr.member.maxLength : Math.min(maxValueLineSize, pr.member.maxLength);
+            s.valueHtmlProps.size = maxValueLineSize == null ? pr.member.maxLength : Math.min(maxValueLineSize, pr.member.maxLength);
         }
 
         if (pr.member.isMultiline)
-            vlp.valueLineType = ValueLineType.TextArea;
+            s.valueLineType = ValueLineType.TextArea;
     }
 }
