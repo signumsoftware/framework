@@ -170,7 +170,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 });
 
                 if (this.state.findOptions.searchOnLoad)
-                    this.handleSearch();
+                    this.doSearch();
             }).done();
     }
 
@@ -208,7 +208,18 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     // MAIN
-    handleSearch = () => {
+    handleSearchPage1 = () => {
+        var fo = this.state.findOptions;
+
+        if (fo.pagination.mode == "Paginate")
+            fo.pagination.currentPage = 1;
+
+        this.doSearch();
+
+    };
+
+
+    doSearch = () => {
         this.getFindOptionsWithSFB().then(fo => {
             this.setState({ loading: false, editingColumn: null });
             Finder.API.search(this.getQueryRequest()).then(rt => {
@@ -224,7 +235,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.setState({ resultTable: null });
 
         if (this.state.findOptions.pagination.mode != "All")
-            this.handleSearch();
+            this.doSearch();
     }
 
     handleOnContextMenu = (event: React.MouseEvent) => {
@@ -363,7 +374,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                     className={"sf-query-button sf-filters-header btn btn-default" + (fo.showFilters ? " active" : "") }
                     onClick={this.handleToggleFilters}
                     title={ fo.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() }><span className="glyphicon glyphicon glyphicon-filter"></span></a >}
-                <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "") } onClick={this.handleSearch}>{SearchMessage.Search.niceToString() } </button>
+                <button className={"sf-query-button sf-search btn btn-primary" + (this.state.loading ? " disabled" : "") } onClick={this.handleSearchPage1}>{SearchMessage.Search.niceToString() } </button>
                 {fo.create && <a className="sf-query-button btn btn-default sf-line-button sf-create" title={this.createTitle() } onClick={this.handleCreate}>
                     <span className="glyphicon glyphicon-plus"></span>
                 </a>}
@@ -392,21 +403,22 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         if (!this.state.findOptions.create)
             return;
 
+        var isPopup = ev.button == 2 || ev.ctrlKey;
+
         this.chooseType().then(tn => {
             if (tn == null)
                 return;
 
-            Constructor.construct(tn).then(e => {
-                if (e == null)
-                    return;
+            if (isPopup) {
+                window.open(Navigator.createRoute(tn));
+            }else {
+                Constructor.construct(tn).then(e => {
+                    if (e == null)
+                        return;
 
-                if (ev.button == 2 || ev.ctrlKey) {
-
-                }
-                else {
                     Navigator.navigate(e);
-                }
-            }).done();
+                }).done();
+            }
         }).done();
     }
 
@@ -536,9 +548,13 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     handleRemoveColumn = () => {
+        var s = this.state;
+        const cm = s.contextualMenu;
+        var col = s.findOptions.columnOptions[cm.columnIndex];
+        s.findOptions.columnOptions.removeAt(cm.columnIndex);
 
-        const cm = this.state.contextualMenu;
-        this.state.findOptions.columnOptions.removeAt(cm.columnIndex);
+        if (s.editingColumn == col)
+            s.editingColumn = null;
 
         this.forceUpdate();
     }
@@ -627,7 +643,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         
 
         if (fo.pagination.mode != "All")
-            this.handleSearch();
+            this.handleSearchPage1();
     }
 
     //HEADER DRAG AND DROP
@@ -684,10 +700,10 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     handleHeaderDrop = (de: React.DragEvent) => {
 
-        console.log(JSON.stringify({
-            dragIndex: this.state.dragColumnIndex,
-            dropIndex: this.state.dropBorderIndex
-        }));
+        //console.log(JSON.stringify({
+        //    dragIndex: this.state.dragColumnIndex,
+        //    dropIndex: this.state.dropBorderIndex
+        //}));
 
         const columns = this.state.findOptions.columnOptions;
         const temp = columns[this.state.dragColumnIndex];
