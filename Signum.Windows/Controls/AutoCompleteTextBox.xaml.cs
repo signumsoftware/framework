@@ -330,8 +330,12 @@ namespace Signum.Windows
             }
             else if (pop.IsMouseOver)
             {
-                ReleaseMouseCapture();
-                Commit(CloseReason.ClickList);
+                var sb = lstBox.Child<ScrollBar>(WhereFlags.VisualTree);
+                if (!sb.IsMouseOver)
+                {
+                    ReleaseMouseCapture();
+                    Commit(CloseReason.ClickList);
+                }
             }
 
         }
@@ -436,4 +440,5 @@ namespace Signum.Windows
     }
 
     public delegate void ClosedEventHandler(object sender, CloseEventArgs e);
+
 }
