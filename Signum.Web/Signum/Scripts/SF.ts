@@ -301,8 +301,8 @@ once("serializeObject",() => {
 });
 
 interface Array<T> {
-    groupByArray(keySelector: (element: T) => string): { key: string; elements: T[] }[];
-    groupByObject(keySelector: (element: T) => string): { [key: string]: T[] };
+    groupBy(keySelector: (element: T) => string): { key: string; elements: T[] }[];
+    groupToObject(keySelector: (element: T) => string): { [key: string]: T[] };
     orderBy<V>(keySelector: (element: T) => V): T[];
     orderByDescending<V>(keySelector: (element: T) => V): T[];
     toObject(keySelector: (element: T) => string): { [key: string]: T };
@@ -313,7 +313,7 @@ interface Array<T> {
 }
 
 once("arrayExtensions",() => {
-    Array.prototype.groupByArray = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
+    Array.prototype.groupBy = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
         var result: { key: string; elements: any[] }[] = [];
         var objectGrouped = this.groupByObject(keySelector);
         for (var prop in objectGrouped) {
@@ -323,7 +323,7 @@ once("arrayExtensions",() => {
         return result;
     };
 
-    Array.prototype.groupByObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
+    Array.prototype.groupToObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
         var result: { [key: string]: any[] } = {};
 
         for (var i = 0; i < this.length; i++) {
