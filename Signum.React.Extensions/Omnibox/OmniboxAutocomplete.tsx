@@ -23,14 +23,23 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
             return OmniboxClient.toString(result);
         }
 
+        var ctrlKey = ke.ctrlKey;
+        
         OmniboxClient.navigateTo(result).then(url => {
-            if (url)
-                Navigator.currentHistory.push(url);
-
+            if (url) {
+                if (ctrlKey)
+                    window.open(url);
+                else
+                    Navigator.currentHistory.push(url);
+            }
         }).done();
+
+        this.typeahead.blur();
 
         return "";
     }
+
+    typeahead: Typeahead;
 
     render() {
 
@@ -44,7 +53,7 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
 
 
         var result  = (
-            <Typeahead getItems={OmniboxClient.getResults} 
+            <Typeahead ref={ta=>this.typeahead = ta} getItems={OmniboxClient.getResults} 
                 renderItem={OmniboxClient.renderItem}
                 onSelect={this.handleOnSelect}
                 spanAttrs={this.props.spanAttrs}
