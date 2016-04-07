@@ -13,6 +13,7 @@ export interface FormGroupProps extends React.Props<FormGroup> {
     controlId?: string;
     ctx: StyleContext;
     labelProps?: React.HTMLProps<HTMLLabelElement>;
+    htmlProps?: React.HTMLProps<HTMLDivElement>;
 }
 
 export class FormGroup extends React.Component<FormGroupProps, {}> {
@@ -45,7 +46,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
             </label>
         );
 
-        return <div className={ classes("form-group", this.props.ctx.formGroupSizeCss, errorClass) }>
+        return <div {...this.props.htmlProps} className={ classes("form-group", this.props.ctx.formGroupSizeCss, errorClass) }>
             { ctx.formGroupStyle != FormGroupStyle.BasicDown && label }
             {
                 ctx.formGroupStyle == FormGroupStyle.LabelColumns ? (<div className={ this.props.ctx.valueColumnsCss } > { this.props.children } </div>) : this.props.children}
@@ -84,6 +85,7 @@ export interface LineBaseProps extends StyleOptions {
     visible?: boolean;
     hideIfNull?: boolean;
     onChange?: (val: any) => void;
+    formGroupHtmlProps?: React.HTMLProps<HTMLDivElement>;
 }
 
 export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps> extends React.Component<P, S> {

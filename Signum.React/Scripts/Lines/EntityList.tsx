@@ -50,7 +50,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         const hasSelected = s.selectedIndex != null;
 
         return (
-            <FormGroup ctx={s.ctx} title={s.labelText}>
+            <FormGroup ctx={s.ctx} title={s.labelText} htmlProps={s.formGroupHtmlProps}>
                 <div className="SF-entity-line">
                     <div className="input-group">
                         <select className="form-control" size={this.props.size} onChange={this.handleOnSelect}>
