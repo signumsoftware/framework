@@ -1,0 +1,116 @@
+﻿
+import * as React from 'react'
+import { Link } from 'react-router'
+import { FormGroup, FormControlStatic, EntityComponent, EntityComponentProps, ValueLine, ValueLineType, 
+    EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame, RenderEntity} from '../../../../Framework/Signum.React/Scripts/Lines'
+import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import { ServiceError} from '../../../../Framework/Signum.React/Scripts/Services'
+import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, Lite, is, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
+import { SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
+import SelectorPopup from '../../../../Framework/Signum.React/Scripts/SelectorPopup'
+import { TypeContext, FormGroupStyle, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
+import * as UserChartClient from '../../Chart/UserChart/UserChartClient'
+import * as ChartClient from '../../Chart/ChartClient'
+import { ChartRequest  } from '../../Chart/Signum.Entities.Chart'
+import ChartRenderer from '../../Chart/Templates/ChartRenderer'
+import ChartTable  from '../../Chart/Templates/ChartTable'
+import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
+
+
+export interface UserChartPartProps {
+    part: UserChartPartEntity
+    entity?: Lite<Entity>; 
+}
+
+
+export interface UserChartPartState {
+    chartRequest?: ChartRequest;
+    result?: ChartClient.API.ExecuteChartResult;
+    error?: any;
+}
+
+export default class UserChartPart extends React.Component<UserChartPartProps, UserChartPartState> {
+    
+    state = { chartRequest: null, result: null } as UserChartPartState;
+    
+    componentWillMount(){
+        this.loadChartRequest(this.props);
+    }
+
+    componentWillReceiveProps(newProps : UserChartPartProps ){
+
+        if (is(this.props.part.userChart, newProps.part.userChart) && 
+            is(this.props.entity, newProps.entity))
+            return;
+
+        this.loadChartRequest(newProps);
+    }
+
+    loadChartRequest(props: UserChartPartProps) {
+       
+        this.setState({chartRequest: null, result: null, error: null });
+
+        UserChartClient.Converter.toChartRequest(props.part.userChart, props.entity)
+            .then(cr => {
+                this.setState({chartRequest: cr, result: null });
+                this.makeQuery();
+            })
+            .done();
+    }
+
+    makeQuery(){
+
+        this.setState({ result: null, error: null });
+
+        ChartClient.API.executeChart(this.state.chartRequest)
+            .then(rt => this.setState({ result: rt }))
+            .catch(e => { this.setState({ error: e });  throw e; })
+            .done();
+    }
+
+    render(){
+        
+        var s = this.state;
+        if(s.error)
+        {
+            return ( 
+                <div>
+                    <h4>Error!</h4>
+                    { this.renderError(s.error)}
+                </div>
+            );
+        }
+        
+        if(!s.chartRequest || !s.result)
+            return <span>{ JavascriptMessage.loading.niceToString() }</span>;
+
+        if (this.props.part.showData)
+            return <ChartTable chartRequest={s.chartRequest} resultTable={s.result.resultTable} onRedraw={() => this.makeQuery()}/>;
+        else 
+            return <ChartRenderer chartRequest={s.chartRequest} data={s.result.chartTable}/>;
+    }
+
+    renderError(e : any){
+
+         var se = e instanceof ServiceError ? (e as ServiceError) : null;
+
+         if (se == null)
+            return <p className="text-danger"> { e.message ? e.message : e }</p>;
+
+        return (
+            <div>
+                {se.httpError.Message && <p className="text-danger">{se.httpError.Message}</p>}
+                {se.httpError.ExceptionMessage && <p className="text-danger">{se.httpError.ExceptionMessage}</p>}
+                {se.httpError.MessageDetail && <p className="text-danger">{se.httpError.MessageDetail}</p>}
+            </div>
+        );
+
+    }
+} 
+
+
+

@@ -142,6 +142,8 @@
     <Compile Include="Chart\ChartController.cs" />
     <Compile Include="Chart\ChartServer.cs" />
     <Compile Include="Chart\UserChart\UserChartController.cs" />
+    <Compile Include="Dashboard\DashboardController.cs" />
+    <Compile Include="Dashboard\DashboardServer.cs" />
     <Compile Include="Files\FilesController.cs" />
     <Compile Include="Omnibox\OmniboxServer.cs" />
     <Compile Include="Omnibox\ReactSpecialOmniboxGenerator.cs" />
@@ -156,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Chart\Chart.css" />
+    <Content Include="Dashboard\Dashboard.css" />
     <Content Include="Files\Files.css" />
     <Content Include="packages.config" />
   </ItemGroup>
@@ -250,9 +253,23 @@
     <TypeScriptCompile Include="Chart\UserChart\UserChart.tsx" />
     <TypeScriptCompile Include="Chart\UserChart\UserChartMenu.tsx" />
     <TypeScriptCompile Include="Chart\UserChart\UserChartClient.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\UserChartPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\UserQueryPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\LinkListPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\CountSearchControlPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\Dashboard.tsx" />
+    <TypeScriptCompile Include="Dashboard\Admin\EntityGridRepeater.tsx" />
+    <TypeScriptCompile Include="Dashboard\DashboardClient.tsx" />
     <TypeScriptCompile Include="Dashboard\Signum.Entities.Dashboard.ts">
       <DependentUpon>Signum.Entities.Dashboard.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Dashboard\DashboardOmniboxProvider.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\UserChartPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\UserQueryPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\LinkListPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\CountSearchControlPart.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\DashboardView.tsx" />
+    <TypeScriptCompile Include="Dashboard\View\DashboardPage.tsx" />
     <TypeScriptCompile Include="DiffLog\Signum.Entities.DiffLog.ts">
       <DependentUpon>Signum.Entities.DiffLog.t4s</DependentUpon>
     </TypeScriptCompile>
