@@ -2,6 +2,7 @@
 import * as React from 'react'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
+import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import ButtonBar from './ButtonBar'
 import { EntityComponent, EntityComponentProps, EntityFrame } from '../Lines'
@@ -42,17 +43,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     componentWillMount() {
-        this.loadEntity(this.props)
-            .then(() => this.loadComponent())
-            .done();
-    }
-
-    componentWillReceiveProps(props) {
-        this.setState(this.calculateState(props), () => {
-            this.loadEntity(props)
-                .then(() => this.loadComponent())
-                .done();
-        });
+        this.load(this.props);
     }
 
     calculateState(props: PageFrameProps) {
@@ -60,24 +51,46 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
         const entitySettings = Navigator.getSettings(typeInfo.name);
 
-        return { entitySettings: entitySettings, typeInfo: typeInfo, component: null,  pack: null } as PageFrameState;
+        return { entitySettings: entitySettings, typeInfo: typeInfo, component: null, pack: null } as PageFrameState;
+    }
+
+
+    componentWillReceiveProps(newProps) {
+        this.setState(this.calculateState(newProps), () => {
+            this.load(newProps);
+        });
+    }
+
+    load(props: PageFrameProps) {
+        this.loadEntity(props)
+            .then(() => this.loadComponent())
+            .done();
     }
 
     loadEntity(props: PageFrameProps): Promise<void> {
 
         const ti = this.state.typeInfo;
 
-        const id = ti.members["Id"].type.name == "number" &&
-            this.props.routeParams.id != "" ? parseInt(props.routeParams.id) : props.routeParams.id;
 
-        const lite: Lite<Entity> = {
-            EntityType: ti.name,
-            id: id,
-        };
+        if (this.props.routeParams.id) {
 
-        return Navigator.API.fetchEntityPack(lite)
-            .then(pack => this.setState({ pack }));
+            const id = ti.members["Id"].type.name == "number" ? parseInt(props.routeParams.id) : props.routeParams.id;
+
+            const lite: Lite<Entity> = {
+                EntityType: ti.name,
+                id: id,
+            };
+
+            return Navigator.API.fetchEntityPack(lite)
+                .then(pack => this.setState({ pack }));
+
+        } else {
+
+            return Constructor.construct(ti.name)
+                .then(pack => this.setState({ pack : pack as EntityPack<Entity> }));
+        }
     }
+    
 
     loadComponent(): Promise<void> {
 

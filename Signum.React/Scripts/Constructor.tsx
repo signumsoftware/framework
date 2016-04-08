@@ -4,7 +4,7 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Dic } from './Globals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, SelectorMessage, EntityPack } from './Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType, getTypeName } from './Reflection';
 import SelectorPopup from './SelectorPopup';
 import * as Operations from './Operations';
 
@@ -35,8 +35,8 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
     return Promise.resolve(assertCorrect({ Type: typeName, isNew: true, modified: true } as ModifiableEntity));
 }
 
-export function basicConstruct<T extends ModifiableEntity>(type: Type<T>) {
-    return { Type: type.typeName, isNew: true, modified: true };
+export function basicConstruct(type: PseudoType): ModifiableEntity {
+    return { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
 }
 
 function asPromise<T>(valueOrPromise: T | Promise<T>) {

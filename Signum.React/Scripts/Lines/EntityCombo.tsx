@@ -68,8 +68,9 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     }
 
     renderInternal() {
+        var s = this.state;
 
-        const hasValue = !!this.state.ctx.value;
+        const hasValue = !!s.ctx.value;
 
        
         var buttons = (
@@ -84,8 +85,9 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         if (!buttons.props.children.some(a => a))
             buttons = null;
 
+
         return (
-            <FormGroup ctx={this.state.ctx} labelText={this.state.labelText}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelText={this.state.labelText>
                 <div className="SF-entity-combo">
                     <div className={buttons ? "input-group" : null}>
                         { this.renderSelect() }

@@ -44,7 +44,7 @@ namespace Signum.Engine.CodeGeneration
 
         public virtual string ToReactView(string razorViewText)
         {
-            var result = Regex.Replace(razorViewText, @"@Html\.(?<type>(ValueLine|EntityLine|EntityList|EntityCombo|EntityStrip|EntityRepeater|EntityListCheckbox|EntityDetail))\((?<ctx>\w+)\s*,\s*(?<param>\w+)\s*=>\s*\k<param>(\.(?<token>\w+))+\s*(,\s*(?<param2>\w+)\s*=>\s*((\k<param2>\.(?<prop>\w+)\s*=\s*(?<value>[^)]+))|(?<extra>\{[^\}]*\})))?\)",
+            var result = Regex.Replace(razorViewText, @"@Html\.(?<type>(ValueLine|EntityLine|EntityList|EntityCombo|EntityStrip|EntityRepeater|EntityListCheckbox|EntityDetail))\((?<ctx>\w+)\s*,\s*(?<param>\w+)\s*=>\s*\k<param>(\.(?<token>\w+))+\s*(,\s*(?<param2>\w+)\s*=>\s*((\k<param2>\.(?<prop>\w+)\s*=\s*(?<value>[^)]+))|(?<extra>[^\)]*)))?\)",
                 m =>
                 {
                     var type = m.Groups["type"].Value;

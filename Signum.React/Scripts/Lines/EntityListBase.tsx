@@ -68,6 +68,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         list.insertAt(index + 1, entity);
         this.setValue(list);
     }
+
     renderMoveDown(btn: boolean, index: number) {
         if (!this.state.move || this.state.ctx.readOnly)
             return null;

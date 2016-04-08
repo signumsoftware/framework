@@ -15,7 +15,8 @@ export interface CountSearchControlProps extends React.Props<CountSearchControl>
     findOptions: FindOptions;
     labelText?: React.ReactChild;
     labelProps?: React.HTMLAttributes;
-    showAsLink?: boolean;
+    style?: "View" | "Link" | "Badge";
+    formGroupHtmlProps?: React.HTMLProps<HTMLDivElement>;
 }
 
 export interface CountSearchControlState {
@@ -51,8 +52,11 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     }
 
     render() {
+        if (this.props.style == "Badge")
+            return this.renderBadget();
+
         return (
-            <FormGroup ctx={this.props.ctx} labelText={this.props.labelText || getQueryNiceName(this.props.findOptions.queryName) } labelProps={this.props.labelProps}>
+            <FormGroup ctx={this.props.ctx} labelText={this.props.labelText || getQueryNiceName(this.props.findOptions.queryName) } labelProps={this.props.labelProps} htmlProps={this.props.formGroupHtmlProps}>
                 {this.props.showAsLink ? this.renderAsLink() : this.renderAsBadge() }
             </FormGroup>
         );
@@ -62,7 +66,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
         Finder.exploreWindowsOpen(this.props.findOptions, e);
     }
 
-    renderAsBadge() {
+    renderAsView() {
         return (
             <div>
                 <span className={this.state.count > 0 ? "count-search count-with-results badge" : "count-search count-no-results"}>
@@ -79,10 +83,15 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     }
 
     renderAsLink() {
+        return (<a onClick={this.handleClick}>
+            {this.state.count == null ? "…" : this.state.count}
+        </a>);
+    }
 
-        if (this.state.count == null)
-            return (<span>…</span>);
-        else
-            return (<a onClick={this.handleClick}>{this.state.count}</a>);
+
+    renderBadget() {
+        return <a className={this.state.count > 0 ? "count-search count-with-results badge" : "count-search count-no-results"}  onClick={this.handleClick}>
+            {this.state.count == null ? "…" : this.state.count}
+        </a>;
     }
 }
