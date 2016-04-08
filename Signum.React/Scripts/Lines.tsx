@@ -130,7 +130,7 @@ tasks.push(taskSetHtmlProperties);
 export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineBaseProps) {
     var vl = lineBase instanceof ValueLine ? lineBase as ValueLine : null;
     var pr = state.ctx.propertyRoute;
-    if (vl && pr && pr.propertyRouteType == PropertyRouteType.Field) {
+    if (vl && pr && pr.propertyRouteType == PropertyRouteType.Field && (vl.state.valueLineType == ValueLineType.TextBox || vl.state.valueLineType == ValueLineType.TextArea)) {
         var s = state as ValueLineProps;
         if (pr.member.maxLength != null) {
 
