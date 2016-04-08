@@ -1,8 +1,7 @@
-﻿
-import * as React from 'react'
+﻿import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import { DropdownList } from 'react-widgets';
-import 'react-widgets/lib/less/react-widgets.less';
+import 'react-widgets/dist/css/react-widgets.css';
 import { areEqual, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
@@ -10,7 +9,6 @@ import { FilterOperation, FilterOption, QueryDescription, QueryToken, SubTokensO
 import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import * as Reflection from '../Reflection'
 import { default as SearchControl, SearchControlProps} from './SearchControl'
-
 
 
 interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {

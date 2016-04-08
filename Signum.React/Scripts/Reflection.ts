@@ -395,8 +395,8 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*return\s*(.*)\s*;\s*}$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
-const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)_Type\s*\)$/
-const partialMixinRegex = /(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)_Type\s*\)/
+const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
+const partialMixinRegex = /(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)/
 
 export function getLambdaMembers(lambda: Function): LambdaMember[]{
     
@@ -461,8 +461,18 @@ export class Type<T extends ModifiableEntity> implements IType {
     constructor(
         public typeName: string) { }
 
-    typeInfo(): TypeInfo {
+    tryTypeInfo(): TypeInfo {
         return getTypeInfo(this.typeName);
+    }
+
+    typeInfo(): TypeInfo {
+
+        var result = this.tryTypeInfo();
+
+        if (!result)
+            throw new Error(`Type ${this.typeName} has no TypeInfo. Maybe is an embedded?`);
+
+        return result;
     }
 
     memberInfo(lambdaToProperty: (v: T) => any): MemberInfo {
