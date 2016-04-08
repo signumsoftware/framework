@@ -57,7 +57,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
 
         return (
             <FormGroup ctx={this.props.ctx} labelText={this.props.labelText || getQueryNiceName(this.props.findOptions.queryName) } labelProps={this.props.labelProps} htmlProps={this.props.formGroupHtmlProps}>
-                {this.props.showAsLink ? this.renderAsLink() : this.renderAsBadge() }
+                {this.props.style == "Link" ? this.renderAsLink() : this.renderAsView() }
             </FormGroup>
         );
     }

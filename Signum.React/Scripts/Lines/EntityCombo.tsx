@@ -87,7 +87,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelText={this.state.labelText>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-combo">
                     <div className={buttons ? "input-group" : null}>
                         { this.renderSelect() }
