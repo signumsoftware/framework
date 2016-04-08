@@ -74,6 +74,14 @@ namespace Signum.Utilities
             return new InvalidOperationException("Separator '{0}' not found in '{1}'".FormatWith(separator, str));
         }
 
+
+        /// <summary>
+        /// get the substring before the first occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <exception cref="NotFound">If the separator is not found in the string</exception>
+        /// <returns></returns>
         public static string Before(this string str, char separator)
         {
             int index = str.IndexOf(separator);
@@ -83,6 +91,13 @@ namespace Signum.Utilities
             return str.Substring(0, index);
         }
 
+        /// <summary>
+        /// get the substring before the first occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <exception cref="NotFound">If the separator is not found in the string</exception>
+        /// <returns></returns>
         public static string Before(this string str, string separator)
         {
             int index = str.IndexOf(separator);
@@ -92,6 +107,14 @@ namespace Signum.Utilities
             return str.Substring(0, index);
         }
 
+
+        /// <summary>
+        /// get the substring after the first occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <exception cref="NotFound">If the separator is not found in the string</exception>
+        /// <returns></returns>
         public static string After(this string str, char separator)
         {
             int index = str.IndexOf(separator);
@@ -101,6 +124,13 @@ namespace Signum.Utilities
             return str.Substring(index + 1);
         }
 
+        /// <summary>
+        /// get the substring after the first occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <exception cref="NotFound">If the separator is not found in the string</exception>
+        /// <returns></returns>
         public static string After(this string str, string separator)
         {
             int index = str.IndexOf(separator);
@@ -110,6 +140,13 @@ namespace Signum.Utilities
             return str.Substring(index + separator.Length);
         }
 
+
+        /// <summary>
+        /// get the substring before the first occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <returns>the substring before the first occurence of the separator or null if not found</returns>
         public static string TryBefore(this string str, char separator)
         {
             if (str == null)
@@ -122,6 +159,13 @@ namespace Signum.Utilities
             return str.Substring(0, index);
         }
 
+
+        /// <summary>
+        /// get the substring before the first occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <returns>the substring before the first occurence of the separator or null if not found</returns>
         public static string TryBefore(this string str, string separator)
         {
             if (str == null)
@@ -134,6 +178,12 @@ namespace Signum.Utilities
             return str.Substring(0, index);
         }
 
+        /// <summary>
+        /// get the substring after the first occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <returns>the substring after the first occurence of the separator or null if not found</returns>
         public static string TryAfter(this string str, char separator)
         {
             if (str == null)
@@ -146,6 +196,12 @@ namespace Signum.Utilities
             return str.Substring(index + 1);
         }
 
+        /// <summary>
+        /// get the substring after the first occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <returns>the substring after the first occurence of the separator or null if not found</returns>
         public static string TryAfter(this string str, string separator)
         {
             if (str == null)
@@ -158,7 +214,13 @@ namespace Signum.Utilities
             return str.Substring(index + separator.Length);
         }
 
-
+        /// <summary>
+        /// get the substring before the last occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <exception cref="NotFound">If the separator is not found in the string</exception>
+        /// <returns>the substring before the last occurence of the separator</returns>
         public static string BeforeLast(this string str, char separator)
         {
             int index = str.LastIndexOf(separator);
@@ -168,6 +230,14 @@ namespace Signum.Utilities
             return str.Substring(0, index);
         }
 
+
+        /// <summary>
+        /// get the substring before the last occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <exception cref="NotFound">If the separator is not found in the string</exception>
+        /// <returns>the substring before the last occurence of the separator</returns>
         public static string BeforeLast(this string str, string separator)
         {
             int index = str.LastIndexOf(separator);
@@ -177,6 +247,15 @@ namespace Signum.Utilities
             return str.Substring(0, index);
         }
 
+
+
+        /// <summary>
+        /// get the substring after the last occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <exception cref="NotFound">If the separator is not found in the string</exception>
+        /// <returns>the substring after the last occurence of the separator</returns>
         public static string AfterLast(this string str, char separator)
         {
             int index = str.LastIndexOf(separator);
@@ -186,6 +265,13 @@ namespace Signum.Utilities
             return str.Substring(index + 1);
         }
 
+        /// <summary>
+        /// get the substring after the last occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <exception cref="NotFound">If the separator is not found in the string</exception>
+        /// <returns>the substring after the last occurence of the separator</returns>
         public static string AfterLast(this string str, string separator)
         {
             int index = str.LastIndexOf(separator);
@@ -195,6 +281,13 @@ namespace Signum.Utilities
             return str.Substring(index + separator.Length);
         }
 
+
+        /// <summary>
+        /// get the substring before the last occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <returns>the substring before the last occurence of the separator or null if not found</returns>
         public static string TryBeforeLast(this string str, char separator)
         {
             if (str == null)
@@ -207,6 +300,13 @@ namespace Signum.Utilities
             return str.Substring(0, index);
         }
 
+
+        /// <summary>
+        /// get the substring before the last occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <returns>the substring before the last occurence of the separator or null if not found</returns>
         public static string TryBeforeLast(this string str, string separator)
         {
             if (str == null)
@@ -219,6 +319,12 @@ namespace Signum.Utilities
             return str.Substring(0, index);
         }
 
+        /// <summary>
+        /// get the substring after the last occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <returns>the substring after the last occurence of the separator or null if not found</returns>
         public static string TryAfterLast(this string str, char separator)
         {
             if (str == null)
@@ -231,6 +337,12 @@ namespace Signum.Utilities
             return str.Substring(index + 1);
         }
 
+        /// <summary>
+        /// get the substring after the last occurence of the separator
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="separator"></param>
+        /// <returns>the substring after the last occurence of the separator or null if not found</returns>
         public static string TryAfterLast(this string str, string separator)
         {
             if (str == null)
