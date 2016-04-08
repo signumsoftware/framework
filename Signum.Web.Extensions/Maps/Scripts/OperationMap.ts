@@ -89,8 +89,8 @@ export function createMap(mapId: string, svgMapId: string, colorId: string, map:
 
     var opacities = [1, .5, .3, .2, .1];
 
-    var fanOut = map.operations.flatMap(a=> a.fromStates.map(s=> ({ s: s, weight: 1.0 / a.fromStates.length }))).groupByObject(a=> a.s);
-    var fanIn = map.operations.flatMap(a=> a.toStates.map(s=> ({ s: s, weight: 1.0 / a.toStates.length }))).groupByObject(a=> a.s);
+    var fanOut = map.operations.flatMap(a => a.fromStates.map(s => ({ s: s, weight: 1.0 / a.fromStates.length }))).groupToObject(a => a.s);
+    var fanIn = map.operations.flatMap(a => a.toStates.map(s => ({ s: s, weight: 1.0 / a.toStates.length }))).groupToObject(a=> a.s);
 
     map.states.forEach(m=> {
         m.fanOut = (fanOut[m.key] ? fanOut[m.key].reduce((acum, e) => acum + e.weight, 0) : 0);
