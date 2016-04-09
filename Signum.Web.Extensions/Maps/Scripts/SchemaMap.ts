@@ -205,7 +205,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
 
 
 
-    var fanIn = map.relations.groupByObject(a=> a.toTable);
+    var fanIn = map.relations.groupToObject(a=> a.toTable);
 
     var opacities = [1, .9, .8, .7, .6, .5, .4, .3, .25, .2, .15, .1, .07, .05, .03, .02];
 
