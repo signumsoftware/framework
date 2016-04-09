@@ -145,6 +145,9 @@
     <Compile Include="Dashboard\DashboardController.cs" />
     <Compile Include="Dashboard\DashboardServer.cs" />
     <Compile Include="Files\FilesController.cs" />
+    <Compile Include="Map\MapServer.cs" />
+    <Compile Include="Map\MapController.cs" />
+    <Compile Include="Map\SchemaMap.cs" />
     <Compile Include="Omnibox\OmniboxServer.cs" />
     <Compile Include="Omnibox\ReactSpecialOmniboxGenerator.cs" />
     <Compile Include="Omnibox\OmniboxController.cs" />
@@ -292,6 +295,9 @@
     <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
       <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Map\Signum.Entities.Migrations.ts">
+      <DependentUpon>Signum.Entities.Map.t4s</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Migrations\Signum.Entities.Migrations.ts">
       <DependentUpon>Signum.Entities.Migrations.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -349,6 +355,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Chart\ChartColor\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Map\Signum.Entities.Map.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
