@@ -1,0 +1,39 @@
+﻿
+rect.state {
+    stroke-width: 1px;
+    shape-rendering: geometricPrecision;
+}
+
+    rect.state.start {
+        fill: rgb(14, 216, 0);
+        stroke: rgb(3, 129, 0);
+        stroke-width: 2px;
+    }
+
+    rect.state.end {
+        fill: rgb(255, 127, 127);
+        stroke: rgb(166, 0, 0);
+        stroke-width: 2px;
+    }
+
+    rect.state.all {
+        fill: rgb(153, 146, 255);
+        stroke: rgb(0, 12, 247);
+        stroke-width: 2px;
+    }
+
+    rect.state.ignore {
+        stroke-dasharray: 2 2;
+    }
+
+text.state {
+    text-anchor: middle;
+    cursor: default;
+    font-size: 16px;
+}
+
+text.operation {
+    text-anchor: middle;
+    cursor: default;
+    font-size: 12px;
+}

@@ -16,7 +16,7 @@ namespace Signum.React.Maps
     {
         public static Func<MapColorProvider[]> GetColorProviders;
 
-        internal static SchemaMapInfo GetMapInfo(out List<MapColorProvider> providers)
+        internal static SchemaMapInfo GetMapInfo()
         {
             var getStats = GetRuntimeStats();
 
@@ -45,7 +45,7 @@ namespace Signum.React.Maps
                          }).ToList();
 
 
-            providers = GetColorProviders.GetInvocationListTyped().SelectMany(f => f()).OrderBy(a => a.Order).ToList();
+            var providers = GetColorProviders.GetInvocationListTyped().SelectMany(f => f()).OrderBy(a => a.Order).ToList();
             
             var extraActions = providers.Select(a => a.AddExtra).NotNull().ToList();
 
@@ -80,7 +80,12 @@ namespace Signum.React.Maps
                                   nullable = kvp.Value.IsNullable
                               }).ToList();
 
-            return new SchemaMapInfo { tables = nodes, relations = normalEdges.Concat(mlistEdges).ToList() };
+            return new SchemaMapInfo
+            {
+                tables = nodes,
+                relations = normalEdges.Concat(mlistEdges).ToList(),
+                providers = providers.Select(p => new MapColorProviderInfo { name = p.Name, niceName = p.NiceName }).ToList()
+            };
         }
 
         static EntityBaseType GetEntityBaseType(Type type)

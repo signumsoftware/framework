@@ -1,0 +1,67 @@
+﻿
+rect.node {
+    stroke-width: 2px;
+    shape-rendering: geometricPrecision;
+}
+
+    rect.node.Entity {
+        stroke-opacity: 1;
+        fill-opacity: .6;
+    }
+
+    rect.node.Part {
+        stroke-width: 1px;
+        stroke-opacity: .7;
+        fill-opacity: .3;
+    }
+
+    rect.node.SemiSymbol {
+        stroke-opacity: 0.9;
+        fill-opacity: .5;
+    }
+
+    rect.node.Symbol {
+        stroke-opacity: 0.8;
+        fill-opacity: .4;
+    }
+
+    rect.node.EnumEntity {
+        stroke-opacity: 0.7;
+        fill-opacity: .3;
+    }
+
+    rect.node.MList {
+        stroke-opacity: 1;
+        fill-opacity: .1;
+    }
+
+
+
+text.node {
+    text-anchor: middle;
+    cursor: default;
+}
+
+    text.node.Entity {
+        font-size: 12px;
+    }
+
+    text.node.Part {
+        font-size: 10px;
+    }
+
+    text.node.SemiSymbol {
+        font-size: 12px;
+    }
+
+    text.node.Symbol {
+        font-size: 12px;
+    }
+
+    text.node.EnumEntity {
+        font-size: 10px;
+    }
+
+    text.node.MList {
+        font-size: 10px;
+    }
