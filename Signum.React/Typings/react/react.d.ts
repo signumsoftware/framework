@@ -118,8 +118,8 @@ declare namespace __React {
     // Base component for plain JS classes
     class Component<P, S> implements ComponentLifecycle<P, S> {
         constructor(props?: P, context?: any);
-        setState(state: S, callback?: () => any): void;
         setState(f: (prevState: S, props: P) => S, callback?: () => any): void;
+        setState(state: S, callback?: () => any): void;
         forceUpdate(callBack?: () => any): void;
         render(): JSX.Element;
         props: P;
@@ -1894,6 +1894,11 @@ declare namespace __React {
         y1?: number | string;
         y2?: number | string;
         y?: number | string;
+        refX?: number | string;
+        refY?: number | string;
+        markerWidth?: number | string;
+        markerHeight?: number | string;
+        orient?: string;
     }
 
     //
@@ -2253,6 +2258,7 @@ declare namespace JSX {
         circle: React.SVGProps;
         clipPath: React.SVGProps;
         defs: React.SVGProps;
+        marker: React.SVGProps;
         ellipse: React.SVGProps;
         g: React.SVGProps;
         image: React.SVGProps;

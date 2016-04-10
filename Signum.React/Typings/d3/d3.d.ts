@@ -3231,6 +3231,9 @@ declare module d3 {
 
         export function quadtree(): Quadtree<[number, number]>;
         export function quadtree<T>(): Quadtree<T>;
+        export function quadtree<T>(points: T[]): quadtree.Quadtree<T>;
+        export function quadtree<T>(points: T[], x2: number, y2: number): quadtree.Quadtree<T>;
+        export function quadtree<T>(points: T[], x1: number, y1: number, x2: number, y2: number): quadtree.Quadtree<T>;
 
         module quadtree {
             interface Node<T> {
