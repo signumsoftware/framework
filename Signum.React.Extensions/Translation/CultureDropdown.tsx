@@ -14,6 +14,7 @@ import * as TranslationClient from './TranslationClient'
 
 export interface CultureDropdownProps {
     changeJavascriptCulture: (culture: string) => void;
+    resetUI: () => void;
 }
 
 export interface CultureDropdownState {
@@ -27,9 +28,7 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
         super(props);
         this.state = {};
     }
-
-    static changeJavascriptCulture: (ci: CultureInfoEntity) => void;
-
+    
     componentWillMount() {
         TranslationClient.Api.getCurrentCulture()
             .then(ci => {
@@ -46,10 +45,7 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
         TranslationClient.Api.setCurrentCulture(c)
             .then(() => requestTypes())
             .then(types => setTypes(types))
-            .then(() => {
-                this.setState({ currentCulture: c });
-                window.location.reload(true);
-            })
+            .then(() => this.props.resetUI())
             .done();
     }
 

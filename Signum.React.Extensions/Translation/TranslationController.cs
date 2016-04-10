@@ -5,6 +5,7 @@ using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -34,7 +35,8 @@ namespace Signum.React.Translation
         public HttpResponseMessage SetCurrentCulture(Lite<CultureInfoEntity> culture)
         {
             var resp = new HttpResponseMessage();
-            var ci = culture.Retrieve().ToCultureInfo();
+
+            var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
 
             if (UserEntity.Current == null)
             {
