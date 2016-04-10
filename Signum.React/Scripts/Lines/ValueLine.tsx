@@ -293,7 +293,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
                     value={s.ctx.value}
                     onChange={handleOnChange}
                     validateKey={validateKey}
-                    format={toNumeralFormat(s.ctx.propertyRoute.member.format)}
+                    format={toNumeralFormat(s.formatText) }
                     />
             ) }
         </FormGroup>
@@ -301,6 +301,10 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
 }
 
 function toNumeralFormat(format: string) {
+
+    if (format == null)
+        return null;
+
     if (format.startsWith("C"))
         return "0." + "0".repeat(parseInt(format.after("C")));
 
