@@ -31,7 +31,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
 }
 
 export interface PartRenderer<T extends IPartEntity>{
-    component: Promise<React.ComponentClass<PanelPartContentProps<T>>>;
+    component: ()=>Promise<React.ComponentClass<PanelPartContentProps<T>>>;
     handleTitleClick?: (part: T, entity: Lite<Entity>, e: React.MouseEvent) => void;
     handleFullScreenClick?: (part: T, entity: Lite<Entity>, e: React.MouseEvent) => void;
 }
@@ -53,13 +53,13 @@ export function start(options: { routes: JSX.Element[] }) {
     </Route>);
 
     registerRenderer(CountSearchControlPartEntity, { 
-        component: new Promise(resolve => require(['./View/CountSearchControlPart'], resolve)).then((a : any) => a.default)
+        component: () => new Promise(resolve => require(['./View/CountSearchControlPart'], resolve)).then((a : any) => a.default)
     });
     registerRenderer(LinkListPartEntity, {
-        component: new Promise(resolve => require(['./View/LinkListPart'], resolve)).then((a: any) => a.default)
+        component: () =>new Promise(resolve => require(['./View/LinkListPart'], resolve)).then((a: any) => a.default)
     });
     registerRenderer(UserChartPartEntity, {
-        component: new Promise(resolve => require(['./View/UserChartPart'], resolve)).then((a: any) => a.default),
+        component: () => new Promise(resolve => require(['./View/UserChartPart'], resolve)).then((a: any) => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
             navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userChart));
@@ -74,7 +74,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
 
     registerRenderer(UserQueryPartEntity, { 
-        component: new Promise(resolve => require(['./View/UserQueryPart'], resolve)).then((a: any) => a.default),
+        component: () => new Promise(resolve => require(['./View/UserQueryPart'], resolve)).then((a: any) => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
             navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userQuery));

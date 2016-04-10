@@ -86,7 +86,7 @@ export class PanelPart extends React.Component<PanelPartProps , PanelPartState>{
     loadComponent(props: PanelPartProps  ){
         var content = props.ctx.value.content;
         this.setState({ component: null, lastType: null })
-        DashboardClient.partRenderers[content.Type].component
+        DashboardClient.partRenderers[content.Type].component()
             .then(c => this.setState({ component: c, lastType: content.Type }))
             .done();
     }
