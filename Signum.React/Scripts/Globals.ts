@@ -594,6 +594,13 @@ export function classes(...classNames: string[]) {
     return classNames.filter(a=> a && a != "").join(" ");
 }
 
+export function addClass(props: { className?: string }, newClasses: string) {
+    if (!props || !props.className)
+        return newClasses;
+
+    return classes(props.className, newClasses)
+}
+
 
 export function combineFunction<F extends Function>(func1: F, func2: F) : F {
     if (!func1)

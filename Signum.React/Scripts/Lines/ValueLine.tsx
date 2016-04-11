@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import * as numbro from 'numbro'
-import { classes, Dic } from '../Globals'
+import { Dic, addClass } from '../Globals'
 import { DateTimePicker } from 'react-widgets'
 import 'react-widgets/dist/css/react-widgets.css';
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
@@ -43,7 +43,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.isCollection || t.isLite)
             throw new Error("not implemented");
 
-        if (t.isEnum)
+        if (t.isEnum || t.name == "boolean" && t.isNullable)
             return ValueLineType.Enum;
 
         if (t.name == "boolean")
@@ -128,11 +128,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
 ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     const s = vl.state;
-
-    if (s.type.isNullable) {
-        return internalComboBox(vl, getTypeInfo("BooleanEnum"));
-    }
-
+    
     const handleCheckboxOnChange = (e: React.SyntheticEvent) => {
         const input = e.currentTarget as HTMLInputElement;
         vl.setValue(input.checked);
@@ -149,7 +145,8 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     else {
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
-                <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value } onChange={handleCheckboxOnChange} className="form-control" disabled={s.ctx.readOnly}/>
+                <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value } onChange={handleCheckboxOnChange}
+                    className={addClass(vl.state.valueHtmlProps, "form-control")} disabled={s.ctx.readOnly}/>
             </FormGroup>
         );
     }
@@ -157,6 +154,10 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
 
 
 ValueLine.renderers[ValueLineType.Enum as any] = (vl) => {
+
+    if (vl.state.type.name == "boolean")
+        return internalComboBox(vl, getTypeInfo("BooleanEnum"));
+
     return internalComboBox(vl, getTypeInfo(vl.state.type.name));
 };
 
@@ -191,7 +192,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps}>
             { ValueLine.withUnit(s.unitText,
-                <select {...vl.state.valueHtmlProps} value= { s.ctx.value } className= "form-control" onChange={handleEnumOnChange}>
+                <select {...vl.state.valueHtmlProps} value= { s.ctx.value } className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
                     {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) }
                 </select>)
             }
@@ -219,7 +220,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
             { ValueLine.withUnit(s.unitText,
-                <input type="text" {...vl.state.valueHtmlProps} className="form-control" value={s.ctx.value} onChange={handleTextOnChange}
+                <input type="text" {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value} onChange={handleTextOnChange}
                     placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>)
             }
         </FormGroup>
@@ -251,7 +252,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
-            <textarea {...vl.state.valueHtmlProps} className="form-control" value={s.ctx.value} onChange={handleTextOnChange}
+            <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value} onChange={handleTextOnChange}
                 placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>
         </FormGroup>
     );
@@ -273,7 +274,8 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className="numeric">{s.ctx.value}</FormControlStatic>) }
+                { ValueLine.withUnit(s.unitText,
+                    <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
 
@@ -342,7 +344,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text:
             this.props.value != null ? numbro(this.props.value).format(this.props.format) :
                 "";
 
-        return <input {...this.props.htmlProps} type="text" className="form-control numeric" value={value}
+        return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric") } value={value}
             onBlur={this.handleOnBlur}
             onChange={this.handleOnChange}
             onKeyDown={this.handleKeyDown}/>
@@ -386,8 +388,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     const handleDatePickerOnChange = (date: Date, str: string) => {
 
         const m = moment(date);
-        vl.state.ctx.value = m.isValid() ? m.format(moment.ISO_8601()) : null;
-        vl.forceUpdate();
+        vl.setValue(m.isValid() ? m.format(moment.ISO_8601()) : null);
     };
 
     return (
