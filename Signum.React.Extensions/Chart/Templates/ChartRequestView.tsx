@@ -23,6 +23,7 @@ import ChartRenderer from './ChartRenderer'
 
 
 require("!style!css!../Chart.css");
+require("!style!css!../../../../Framework/Signum.React/Scripts/SearchControl/Search.css");
 
 interface ChartRequestViewProps extends ReactRouter.RouteComponentProps<{}, { queryName: string }> {
 
