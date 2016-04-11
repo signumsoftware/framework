@@ -53,5 +53,18 @@ namespace Signum.React.ApiControllers
 
             return lites.Select(a => Database.GetToStr(a.EntityType, a.Id)).ToArray();
         }
+
+        [Route("api/fetchAll"), HttpGet]
+        public List<Entity> FetchAll(string typeName)
+        {
+            if (typeName == null)
+            {
+                throw new ArgumentNullException(typeName);
+            }
+
+            var type = TypeLogic.GetType(typeName);
+
+            return Database.RetrieveAll(type);
+        }
     }
 }
