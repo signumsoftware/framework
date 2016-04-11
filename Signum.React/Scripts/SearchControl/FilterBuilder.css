@@ -1,0 +1,35 @@
+﻿
+.sf-filters-body .btn-sm {
+    margin-top: -2px;
+}
+
+.panel-heading.sf-filters-body {
+    padding: 3px 5px;
+}
+
+.panel-body.sf-filters-list {
+    padding: 5px;
+}
+
+
+.sf-filters-list > table.table {
+    margin-bottom: 0px;
+}
+
+.sf-filter-token {
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 0px 3px;
+    display: inline-block;
+    margin-bottom: 4px;
+    background-color: #F5F5F5;
+}
+
+div.panel.sf-filters {
+    margin: 0px 0px 4px 0px;
+}
+
+div.sf-filters-list table.table {
+    width: auto;
+}
+

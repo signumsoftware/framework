@@ -11,6 +11,8 @@ import * as Reflection from '../Reflection'
 import { default as SearchControl, SearchControlProps} from './SearchControl'
 
 
+require("!style!css!./QueryTokenBuilder.css");
+
 interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
     queryToken: QueryToken;
     onTokenChange: (newToken: QueryToken) => void;

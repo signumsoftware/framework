@@ -8,6 +8,9 @@ import * as Navigator from '../Navigator'
 import { Input, Pagination as BPagination } from 'react-bootstrap'
 
 
+
+require("!style!css!./PaginationSelector.css");
+
 interface PaginationSelectorProps {
     resultTable?: ResultTable;
     pagination: Pagination;
