@@ -15,6 +15,7 @@ namespace Signum.Utilities
     public static class Csv
     {
         public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
+        public static CultureInfo DefaultCulture = null;
 
         public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false,
             Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null)
@@ -39,7 +40,7 @@ namespace Signum.Utilities
             Func<CsvColumnInfo<T>, CultureInfo, Func<object, string>> toStringFactory = null)
         {
             encoding = encoding ?? DefaultEncoding;
-            culture = culture ?? CultureInfo.CurrentCulture;
+            culture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
 
             string separator = culture.TextInfo.ListSeparator;
 
