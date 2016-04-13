@@ -16,13 +16,15 @@ using Signum.React.ApiControllers;
 using Signum.Entities.DynamicQuery;
 using Signum.React.Maps;
 using Signum.Entities.Map;
+using Signum.React.Facades;
 
 namespace Signum.React.Map
 {
-    public static class MaptServer
+    public static class MapServer
     {
         public static void Start(HttpConfiguration config)
         {
+            ReflectionServer.RegisterLike(typeof(MapMessage));
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
             SchemaMap.GetColorProviders += () => new[]

@@ -5,7 +5,7 @@ import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { Point, Rectangle, calculatePoint, wrap } from './Utils'
 
 export interface TableInfo extends ITableInfo {
-    webTypeName: string;
+    typeName: string;
     mlistTables: MListTableInfo[];
 }
 
@@ -31,14 +31,13 @@ export interface ITableInfo extends d3.layout.force.Node, Rectangle {
     extra: { [key: string]: any };
 }
 
-export enum EntityBaseType {
-    EnumEntity,
-    Symbol,
-    SemiSymbol,
-    Entity,
-    MList,
-    Part,
-}
+export type EntityBaseType =
+    "EnumEntity" |
+    "Symbol" |
+    "SemiSymbol" |
+    "Entity" |
+    "MList" |
+    "Part";
 
 export interface IRelationInfo extends d3.layout.force.Link<ITableInfo> {
     isMList?: boolean;
@@ -124,7 +123,7 @@ export class SchemaMapD3 {
             .attr("width", width)
             .attr("height", height);
 
-        const link = svg.append("svg:g").attr("class", "links").selectAll(".link")
+        this.link = svg.append("svg:g").attr("class", "links").selectAll(".link")
             .data(map.allLinks)
             .enter().append("line")
             .attr("class", "link")
@@ -143,7 +142,7 @@ export class SchemaMapD3 {
             .data(map.allNodes)
             .enter()
             .append("svg:g").attr("class", "nodeGroup")
-            .style("cursor", d => (d as TableInfo).webTypeName ? "pointer" : null)
+            .style("cursor", d => (d as TableInfo).typeName && Finder.isFindable((d as TableInfo).typeName) ? "pointer" : null)
             .on("click", d => {
 
                 this.selectedTable = this.selectedTable == d ? null : d;
@@ -157,8 +156,8 @@ export class SchemaMapD3 {
 
 
 
-                if ((<any>event).ctrlKey && (d as TableInfo).webTypeName) {
-                    window.open(Finder.findOptionsPath({ queryName: (d as TableInfo).webTypeName }));
+                if ((<any>event).ctrlKey && (d as TableInfo).typeName) {
+                    window.open(Finder.findOptionsPath({ queryName: (d as TableInfo).typeName }));
                     d3.event.preventDefault();
                     return false;
                 }
@@ -168,20 +167,20 @@ export class SchemaMapD3 {
             }).call(drag);
 
         this.node = this.nodeGroup.append("rect")
-            .attr("class", d => "node " + EntityBaseType[d.entityBaseType])
+            .attr("class", d => "node " + d.entityBaseType)
             .attr("rx", n =>
-                n.entityBaseType == EntityBaseType.Entity ? 7 :
-                    n.entityBaseType == EntityBaseType.Part ? 4 :
-                        n.entityBaseType == EntityBaseType.SemiSymbol ? 5 :
-                            n.entityBaseType == EntityBaseType.Symbol ? 4 :
-                                n.entityBaseType == EntityBaseType.EnumEntity ? 3 : 0);
+                n.entityBaseType == "Entity" ? 7 :
+                    n.entityBaseType == "Part" ? 4 :
+                        n.entityBaseType == "SemiSymbol" ? 5 :
+                            n.entityBaseType == "Symbol" ? 4 :
+                                n.entityBaseType == "EnumEntity" ? 3 : 0);
 
 
         const margin = 3;
 
         this.label = this.nodeGroup.append("text")
-            .attr("class", d => "node " + EntityBaseType[d.entityBaseType])
-            .style("cursor", d => (d as TableInfo).webTypeName ? "pointer" : null)
+            .attr("class", d => "node " + d.entityBaseType)
+            .style("cursor", d => (d as TableInfo).typeName ? "pointer" : null)
             .text(d => d.niceName)
             .each(function (d) {
                 wrap(this, 60);
@@ -304,23 +303,22 @@ export class SchemaMapD3 {
             .style("stroke", cp.getStroke || cp.getFill)
             .style("mask", cp.getMask);
 
-        this.titles.text(t => cp.getTooltip(t) + " (" + EntityBaseType[t.entityBaseType] + ")");
+        this.titles.text(t => cp.getTooltip(t) + " (" + t.entityBaseType + ")");
     }
 
 
     onTick = () => {
-
         this.nodes.forEach(d => {
-            d.nx = d.x;
-            d.ny = d.y;
+            d.nx = 0;
+            d.ny = 0;
         });
 
         this.namespaceClustering();
         this.gravity();
 
         this.nodes.forEach(d => {
-            d.x = d.nx;
-            d.y = d.ny;
+            d.x += d.nx;
+            d.y += d.ny;
         });
 
         const visibleLink = this.link.filter(f => this.links.indexOf(f) != -1);
@@ -343,27 +341,28 @@ export class SchemaMapD3 {
 
 
     gravity() {
-
-        function gravityDim(v: number, min: number, max: number): number {
-
-            const minF = min + 100;
-            const maxF = max - 100;
-
-            const dist =
-                maxF < v ? maxF - v :
-                    v < minF ? minF - v : 0;
-
-            return dist * this.force.alpha() * 0.4;
-        }
-
         this.nodes.forEach(n => {
-            n.nx += gravityDim(n.x, 0, this.width);
-            n.ny += gravityDim(n.y, 0, this.height);
-        });
+            n.nx += this.gravityDim(n.x, 0, this.width);
+            n.ny += this.gravityDim(n.y, 0, this.height);
+        });         
+    }
+
+    gravityDim(v: number, min: number, max: number): number {
+
+        const minF = min + 100;
+        const maxF = max - 100;
+
+        const dist =
+            maxF < v ? maxF - v :
+                v < minF ? minF - v : 0;
+
+        return dist * this.force.alpha() * 0.4;
     }
 
     namespaceClustering() {
-        const quadtree = d3.geom.quadtree<ITableInfo>(this.nodes, this.width, this.height);
+        const quadtree = d3.geom.quadtree<ITableInfo>()
+            .x(p => p.x)
+            .y(p => p.y)(this.nodes);
 
         var numNodes = this.nodes.length;
 
@@ -386,13 +385,18 @@ export class SchemaMapD3 {
         }
 
         this.nodes.forEach(d => {
-            quadtree.visit((quad: { point: ITableInfo }, x1: number, y1: number, x2: number, y2: number) => {
-
+            quadtree.visit((quad, x1, y1, x2, y2) => {
                 if (quad.point && quad.point != d) {
 
-                    const x = d.x - quad.point.x,
-                        y = d.y - quad.point.y,
-                        l = Math.sqrt(x * x + y * y);
+                    let x = d.x - quad.point.x;
+                    let y = d.y - quad.point.y;
+
+                    if (x == 0 && y == 0) {
+                        x = (Math.random() - 0.5) * 10;
+                        y = (Math.random() - 0.5) * 10;
+                    }
+
+                    var l = Math.sqrt(x * x + y * y);
 
                     const lx = x / l;
                     const ly = y / l;
@@ -400,7 +404,7 @@ export class SchemaMapD3 {
                     const ratio = l / 30;
 
                     let f = constant * this.force.alpha() / Math.max(ratio * ratio, 0.1);
-
+    
                     if (d.namespace != quad.point.namespace)
                         f *= 4;
 

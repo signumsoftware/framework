@@ -24,7 +24,7 @@ namespace Signum.React.Maps
                          let type = EnumEntity.Extract(t.Type) ?? t.Type
                          select new TableInfo
                          {
-                             webTypeName = TypeLogic.GetCleanName(t.Type),
+                             typeName = TypeLogic.GetCleanName(t.Type),
                              niceName = type.NiceName(),
                              tableName = t.Name.ToString(),
                              columns = t.Columns.Count,
@@ -145,8 +145,7 @@ namespace Signum.React.Maps
 
     public class TableInfo
     {
-        public string findUrl;
-        public string webTypeName;
+        public string typeName;
         public string niceName;
         public string tableName;
         public EntityKind entityKind;

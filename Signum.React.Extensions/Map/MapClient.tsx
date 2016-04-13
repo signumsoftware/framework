@@ -1,6 +1,6 @@
-﻿
+﻿   
 import * as React from 'react'
-import { Route } from 'react-router'
+import { Route, IndexRoute } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -31,8 +31,8 @@ export function getAllProviders(): Promise<ClientColorProvider[]>{
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(<Route path="map">
-        <Route path="types" getComponent={ (loc, cb) => require(["./View/DashboardPage"], (Comp) => cb(null, Comp.default)) } />
-        <Route path="operations/:type" getComponent={ (loc, cb) => require(["./View/DashboardPage"], (Comp) => cb(null, Comp.default)) } />
+        <IndexRoute getComponent={ (loc, cb) => require(["./Templates/SchemaMapPage"], (Comp) => cb(null, Comp.default)) } />
+        <Route path=":type" getComponent={ (loc, cb) => require(["./Templates/SchemaMapPage"], (Comp) => cb(null, Comp.default)) } />
     </Route>);
     
     getProviders.push(() => new Promise<ClientColorProvider[]>(resolve => {
@@ -48,13 +48,7 @@ export namespace API {
     export function operations(typeName: string): Promise<OperationMapInfo> {
         return ajaxGet<OperationMapInfo>({ url: "/api/map/operations/" + typeName });
     }
-
 }
-
-
-
-
-
 
 export interface OperationMapInfo {
     states: MapState[];

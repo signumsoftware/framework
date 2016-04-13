@@ -86,21 +86,7 @@ export default function getDefaultProviders() : ClientColorProvider[]{
                     getTooltip: t => t.total_size_kb + " KB"
                 };
             }
-        } as ClientColorProvider,
-
-        {
-            name: "namespace",
-            getColors: (nodes: TableInfo[]) => {
-
-            }
-        } as ClientColorProvider,
-
-        {
-            name: "namespace",
-            getColors: (nodes: TableInfo[]) => {
-
-            }
-        } as ClientColorProvider,
+        } as ClientColorProvider
     ];
 }
 

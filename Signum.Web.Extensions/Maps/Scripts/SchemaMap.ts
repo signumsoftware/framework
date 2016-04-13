@@ -395,18 +395,17 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
     colorComboElement.change(() => drawColor());
 
     force.on("tick", function () {
-
         nodes.forEach(d=> {
-            d.nx = d.x;
-            d.ny = d.y;
+            d.nx = 0;
+            d.ny = 0;
         });
 
         namespaceClustering();
         gravity();
 
         nodes.forEach(d=> {
-            d.x = d.nx;
-            d.y = d.ny;
+            d.x += d.nx;
+            d.y += d.ny;
         });
 
         var visibleLink = link.filter(f=> links.indexOf(f) != -1);
@@ -474,7 +473,7 @@ export function createMap(mapId: string, svgMapId: string, filterId: string, col
                     var ratio = l / 30;
 
                     var f = constant * force.alpha() / Math.max(ratio * ratio, 0.1);
-
+                    
                     if (d.namespace != quad.point.namespace)
                         f *= 4;
 

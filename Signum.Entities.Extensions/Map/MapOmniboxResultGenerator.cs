@@ -1,4 +1,5 @@
-﻿using Signum.Entities.Basics;
+﻿using Newtonsoft.Json;
+using Signum.Entities.Basics;
 using Signum.Entities.Omnibox;
 using Signum.Utilities;
 using System;
@@ -78,6 +79,7 @@ namespace Signum.Entities.Map
     {
         public OmniboxMatch KeywordMatch { get; set; }
 
+        [JsonIgnore]
         public Type Type { get; set; }
         public OmniboxMatch TypeMatch { get; set; }
 

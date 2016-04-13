@@ -166,6 +166,7 @@
     <Content Include="Files\Files.css" />
     <Content Include="Map\Templates\operationMap.css" />
     <Content Include="Map\Templates\schemaMap.css" />
+    <Content Include="Omnibox\Omnibox.css" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -298,8 +299,9 @@
     <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
       <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Map\MapOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Map\MapClient.tsx" />
-    <TypeScriptCompile Include="Map\Signum.Entities.Migrations.ts">
+    <TypeScriptCompile Include="Map\Signum.Entities.Map.ts">
       <DependentUpon>Signum.Entities.Map.t4s</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Map\Templates\SchemaMapDefaultProviders.ts" />

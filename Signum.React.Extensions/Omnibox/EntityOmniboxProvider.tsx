@@ -64,17 +64,16 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
 
     toString(result: EntityOmniboxResult) {
         if (result.Id)
-            return `${result.TypeName} ${result.Id}`;
+            return `${result.TypeMatch.Text} ${result.Id}`;
 
         if (result.ToStr)
-            return `${result.TypeName} "${result.ToStr}"`;
+            return `${result.TypeMatch.Text} "${result.ToStr}"`;
 
-        return result.TypeName;
+        return result.TypeMatch.Text;
     }
 }
 
 interface EntityOmniboxResult extends OmniboxResult {
-    TypeName: string;
     TypeMatch: OmniboxMatch;
     Id: any;
     ToStr: string;

@@ -8,10 +8,10 @@ import { is, JavascriptMessage } from '../../../../Framework/Signum.React/Script
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
-import { SchemaMapInfo, EntityBaseType, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider } from './SchemaMap'
+import { SchemaMapInfo, EntityBaseType, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
 var colorbrewer = require("colorbrewer");
 
-require("!style!css!./SchemaMap.css");
+require("!style!css!./schemaMap.css");
 
 
 
@@ -41,19 +41,20 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
     componentWillMount() {
 
-        MapClient.start
+        MapClient.getAllProviders().then(providers => {
+            this.setState({ providers: providers.toObject(a => a.name) });
 
-
-        MapClient.API.types()
-            .then(smi => {
-                var parsedQuery = this.getParsedQuery();
-                this.fixSchemaMap(smi, parsedQuery);
-                this.setState({
-                    schemaMapInfo: smi,
-                    filter: parsedQuery.filter, 
-                    color: parsedQuery.color || smi.providers.first().name
-                });
-            }).done();
+            MapClient.API.types()
+                .then(smi => {
+                    var parsedQuery = this.getParsedQuery();
+                    this.fixSchemaMap(smi, parsedQuery);
+                    this.setState({
+                        schemaMapInfo: smi,
+                        filter: parsedQuery.filter || "",
+                        color: parsedQuery.color || smi.providers.first().name
+                    });
+                }).done();
+        }).done();
 
 
     }
@@ -62,7 +63,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
         map.tables.forEach(t => t.mlistTables.forEach(ml => {
             ml.entityKind = t.entityKind;
             ml.entityData = t.entityData;
-            ml.entityBaseType = EntityBaseType.MList;
+            ml.entityBaseType = "MList";
             ml.namespace = t.namespace;
         }));
 
@@ -87,7 +88,6 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
         map.allLinks = map.relations.map(a => a as IRelationInfo)
             .concat(map.tables.flatMap(t => t.mlistTables.map(tm => ({ source: t, target: tm, isMList: true }) as MListRelationInfo)));
-
     }
 
 
@@ -116,8 +116,15 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
         return result;
     }
 
-    getStringQuery() {
+    div: HTMLDivElement;
+    handleSetInitialSize = (div: HTMLDivElement) => {
 
+        if (this.div)
+            return;
+
+        this.div = div;
+        var rect = div.getBoundingClientRect();
+        this.setState({ width: rect.width, height: window.innerHeight - 200 });
     }
 
 
@@ -125,11 +132,11 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
         var s = this.state;
         return (
-            <div>
+            <div ref={this.handleSetInitialSize}>
                 {this.renderFilter() }
-                {s.schemaMapInfo ?
+                {!s.schemaMapInfo ?
                     <span>{ JavascriptMessage.loading.niceToString() }</span> :
-                    <SchemaMapRenderer schemaMapInfo={s.schemaMapInfo} filter={s.filter} color={s.color}  height = {s.height} width = {s.width} providers={s.providers} />}
+                    <SchemaMapRenderer schemaMapInfo={s.schemaMapInfo} filter={s.filter} color={s.color}  height={s.height} width={s.width} providers={s.providers} />}
             </div>
         );
     }
@@ -148,6 +155,8 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
     handleFullscreenClick = (e: React.MouseEvent) => {
 
+        e.preventDefault();
+
         var s = this.state;
 
         var tables = s.schemaMapInfo.allNodes.filter(a => a.fixed)
@@ -165,25 +174,29 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
     renderFilter() {
 
+        var s = this.state;
+
         return (
             <div className="form-inline form-sm container" style={{ marginTop: "10px" }}>
                 <div className="form-group">
-                    <label htmlFor="filter"> { MapMessage.Filter.niceToString() }</label>
-                    <input type="text" className="form-control" id="filter" placeholder="type or namespace" value={this.state.filter} onChange={this.handleSetFilter}/>
+                    <label htmlFor="filter"> { MapMessage.Filter.niceToString() }</label>&nbsp;
+                    <input type="text" className="form-control" id="filter" placeholder="type or namespace" value={s.filter} onChange={this.handleSetFilter}/>
                 </div>
                 <div className="form-group" style={{ marginLeft: "10px" }}>
-                    <label htmlFor="color"> { MapMessage.Color.niceToString() }</label>
-                    <select className="form-control" id="color" value={this.state.color} onChange={this.handleSetColor}>
+                    <label htmlFor="color"> { MapMessage.Color.niceToString() }</label>&nbsp;
+                    <select className="form-control" id="color" value={s.color} onChange={this.handleSetColor}>
                         {
-                            this.state.schemaMapInfo.providers.map((a, i) =>
-                                <option key={i} value="@cp.Name">{ a.niceName}</option>)
+                            s.schemaMapInfo &&
+                            s.schemaMapInfo.providers.map((a, i) =>
+                                <option key={i} value={a.name}>{ a.niceName}</option>)
                         }
                     </select>
                 </div>
                 <span style={{ marginLeft: "10px" }}>
                     { MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>) }
                 </span>
-                <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={this.handleFullscreenClick}>
+                &nbsp;
+                <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={this.handleFullscreenClick} href="#">
                     <span className="glyphicon glyphicon-new-window"></span>
                 </a>
             </div>
@@ -195,38 +208,29 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
 export type SchemaMapRendererProps = SchemaMapPropsState;
 
-export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, void> { 
-
-   
-
-    componentWillMount(){
-
-
-    }
+export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, { mapD3: SchemaMapD3 }> { 
 
     componentDidMount() {
-        this.redraw();
+        var p = this.props;
+        var d3 = new SchemaMapD3(this.svg, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height);
+        this.setState({ mapD3: d3 });
     }
 
-    componentDidUpdate() {
-        this.redraw();
+    componentWillReceiveProps(newProps: SchemaMapRendererProps) {
+
+        if (newProps.color != this.props.color)
+            this.state.mapD3.setColor(newProps.color);
+
+        if (newProps.filter != this.props.filter)
+            this.state.mapD3.setFilter(newProps.filter);
     }
 
-    redraw() {
-
-        var node = ReactDOM.findDOMNode(this);
-        while (node.firstChild) {
-            node.removeChild(node.firstChild);
-        }
-
-
-    }
 
     svg: SVGElement;
 
     render() {
         return (
-            <div id="map" style={{ backgroundColor: "white", width: "100%", height: (window.innerHeight - 200) + "px" }}>
+            <div id="map" style={{ backgroundColor: "white", width: "100%", height: this.props.height + "px" }}>
                 <svg id="svgMap" ref={svg => this.svg = svg}>
                     <defs>
                         <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
@@ -241,7 +245,7 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, v
                             <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0L-10,5L-10,-5L0,0" />
                         </marker>
                         {
-                            React.Children.map(Dic.getValues(this.props.providers).map(a => a.defs),
+                            React.Children.map(Dic.getValues(this.props.providers).map(a => a.defs).filter(d=>!!d),
                                 (c, i) => React.cloneElement(c as React.ReactElement<any>, { key: i }))
                         }
                     </defs>

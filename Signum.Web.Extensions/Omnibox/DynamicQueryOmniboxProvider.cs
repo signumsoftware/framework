@@ -61,7 +61,7 @@ namespace Signum.Web.Omnibox
                     html = html.Concat(new HtmlTag("b").InnerHtml(
                         new MvcHtmlString(FilterValueConverter.ToStringOperation(item.Operation.Value))).ToHtml());
 
-                    if (item.Value is string && (string)item.Value == DynamicQueryOmniboxResultGenerator.UnknownValue)
+                    if (item.Value as string == DynamicQueryOmniboxResultGenerator.UnknownValue)
                         html = html.Concat(ColoredSpan(OmniboxMessage.Unknown.NiceToString(), "red"));
                     else if (item.ValueMatch != null)
                         html = html.Concat(item.ValueMatch.ToHtml());
@@ -84,7 +84,7 @@ namespace Signum.Web.Omnibox
             foreach (var item in result.Filters)
             {
                 if (item.QueryToken != null && item.Operation != null && 
-                    !(item.Value is string && (string)item.Value == DynamicQueryOmniboxResultGenerator.UnknownValue))
+                    !(item.Value as string == DynamicQueryOmniboxResultGenerator.UnknownValue))
                 {
                     if (findOptions.FilterOptions == null)
                         findOptions.FilterOptions = new List<FilterOption>();

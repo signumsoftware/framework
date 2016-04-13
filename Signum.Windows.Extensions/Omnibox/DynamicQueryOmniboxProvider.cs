@@ -37,7 +37,7 @@ namespace Signum.Windows.Omnibox
                     }
 
                     object value = f.Value;
-                    if (value == DynamicQueryOmniboxResultGenerator.UnknownValue)
+                    if (value as string == DynamicQueryOmniboxResultGenerator.UnknownValue)
                     {
                         MessageBox.Show(window, "Unknown value for {0}".FormatWith(f.QueryToken.ToString()));
                         value = null;
