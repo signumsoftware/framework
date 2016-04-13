@@ -110,8 +110,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         var getComponent = this.props.getComponent;
 
         if (getComponent == null) {
-
-            if (entity.Type != this.state.lastLoadedType)
+            if (entity != null && entity.Type != this.state.lastLoadedType)
                 return <span>entity.Type is {entity.Type} but lastLoadedType is {this.state.lastLoadedType}</span>;
 
             getComponent = this.state.getComponent;

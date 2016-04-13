@@ -254,7 +254,10 @@ export module API {
             realLites.forEach((l, i) => l.toStr = strs[i]);
         });
     }
-    
+
+    export function fetchAll<T extends Entity>(type: Type<T>): Promise<Array<T>> {
+        return ajaxPost<Array<Entity>>({ url: "/api/fetchAll" }, { typeName: type.typeName });
+    }
 
     export function fetchAndRemember<T extends Entity>(lite: Lite<T>): Promise<T> {
         if (lite.entity)

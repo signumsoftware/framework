@@ -315,7 +315,7 @@ interface Array<T> {
 once("arrayExtensions",() => {
     Array.prototype.groupBy = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
         var result: { key: string; elements: any[] }[] = [];
-        var objectGrouped = this.groupByObject(keySelector);
+        var objectGrouped = (this as any[]).groupToObject(keySelector);
         for (var prop in objectGrouped) {
             if (objectGrouped.hasOwnProperty(prop))
                 result.push({ key: prop, elements: objectGrouped[prop] });

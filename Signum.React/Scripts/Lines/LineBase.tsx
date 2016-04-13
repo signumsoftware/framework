@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import * as moment from 'moment'
-import { classes, Dic } from '../Globals'
+import { classes, Dic, addClass } from '../Globals'
 import { Input, Tab } from 'react-bootstrap'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference} from '../Reflection'
@@ -27,7 +27,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
         var errorClass = tCtx.binding && tCtx.binding.errorClass;
 
         if (ctx.formGroupStyle == FormGroupStyle.None) {
-           
+
             var c = this.props.children as React.ReactElement<any>;
 
             if (errorClass == null)
@@ -41,7 +41,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
 
         const label = (
-            <label htmlFor={this.props.controlId} {...this.props.labelProps } className= { labelClasses } >
+            <label htmlFor={this.props.controlId} {...this.props.labelProps } className= { addClass(this.props.labelProps, labelClasses) } >
                 { this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member.niceName }
             </label>
         );
@@ -129,7 +129,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         } as StyleOptions;
 
         var cleanProps = Dic.without(props, so);
-        
+
         const state = { ctx: cleanProps.ctx.subCtx(so), type: (cleanProps.type || cleanProps.ctx.propertyRoute.member.type) } as LineBaseProps as S;
         this.calculateDefaultState(state);
         runTasks(this, state);
