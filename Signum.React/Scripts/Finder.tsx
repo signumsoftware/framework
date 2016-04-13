@@ -40,7 +40,7 @@ export function getQuerySettings(queryName: PseudoType | QueryKey): QuerySetting
 
 export const isFindableEvent: Array<(queryKey: string) => boolean> = [];
 
-export function isFindable(queryName: any): boolean {
+export function isFindable(queryName: PseudoType | QueryKey): boolean {
 
     const queryKey = getQueryKey(queryName);
 
