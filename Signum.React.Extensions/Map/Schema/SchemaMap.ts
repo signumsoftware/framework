@@ -2,7 +2,7 @@
 import * as React from "react"
 import { EntityData, EntityKind } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { Point, Rectangle, calculatePoint, wrap } from './Utils'
+import { Point, Rectangle, calculatePoint, wrap } from '../Utils'
 
 export interface TableInfo extends ITableInfo {
     typeName: string;
@@ -74,15 +74,11 @@ export interface SchemaMapInfo {
 
 export interface ClientColorProvider {
     name: string;
-    getColors: (nodes: ITableInfo[]) => ColorFunctions
-    defs?: React.ReactNode;
-}
-
-export interface ColorFunctions {
     getFill: (t: ITableInfo) => string;
     getStroke?: (t: ITableInfo) => string;
     getTooltip: (t: ITableInfo) => string;
     getMask?: (t: ITableInfo) => string;
+    defs?: JSX.Element[];
 }
 
 export class SchemaMapD3 {
@@ -297,7 +293,7 @@ export class SchemaMapD3 {
     }
 
     drawColor() {
-        var cp = this.providers[this.color].getColors(this.nodes)
+        var cp = this.providers[this.color];
 
         this.node.style("fill", cp.getFill)
             .style("stroke", cp.getStroke || cp.getFill)

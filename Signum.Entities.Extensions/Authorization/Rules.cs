@@ -174,6 +174,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
+    [InTypeScript(true)]
     [DescriptionOptions(DescriptionOptions.Members)]
     public enum TypeAllowedBasic
     {

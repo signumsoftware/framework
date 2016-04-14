@@ -139,12 +139,15 @@
     <Compile Include="Authorization\AuthController.cs" />
     <Compile Include="Authorization\AuthServer.cs" />
     <Compile Include="Authorization\UserTicketClient.cs" />
+    <Compile Include="Cache\CacheServer.cs" />
     <Compile Include="Chart\ChartController.cs" />
     <Compile Include="Chart\ChartServer.cs" />
     <Compile Include="Chart\UserChart\UserChartController.cs" />
     <Compile Include="Dashboard\DashboardController.cs" />
     <Compile Include="Dashboard\DashboardServer.cs" />
+    <Compile Include="Disconnected\DisconnectedServer.cs" />
     <Compile Include="Files\FilesController.cs" />
+    <Compile Include="Isolation\IsolationServer.cs" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />
     <Compile Include="Map\OperationMap.cs" />
@@ -164,8 +167,8 @@
     <Content Include="Chart\Chart.css" />
     <Content Include="Dashboard\Dashboard.css" />
     <Content Include="Files\Files.css" />
-    <Content Include="Map\Templates\operationMap.css" />
-    <Content Include="Map\Templates\schemaMap.css" />
+    <Content Include="Map\Operation\operationMap.css" />
+    <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="Omnibox\Omnibox.css" />
     <Content Include="packages.config" />
   </ItemGroup>
@@ -301,13 +304,18 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Map\MapOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Map\MapClient.tsx" />
+    <TypeScriptCompile Include="Map\Operation\OperationMap.ts" />
+    <TypeScriptCompile Include="Map\Schema\ColorProviders\Auth.tsx" />
+    <TypeScriptCompile Include="Map\Schema\ColorProviders\Disconnected.tsx" />
+    <TypeScriptCompile Include="Map\Schema\ColorProviders\Isolation.tsx" />
+    <TypeScriptCompile Include="Map\Schema\ColorProviders\Cache.tsx" />
     <TypeScriptCompile Include="Map\Signum.Entities.Map.ts">
       <DependentUpon>Signum.Entities.Map.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Map\Templates\SchemaMapDefaultProviders.ts" />
-    <TypeScriptCompile Include="Map\Templates\SchemaMap.ts" />
-    <TypeScriptCompile Include="Map\Templates\SchemaMapPage.tsx" />
-    <TypeScriptCompile Include="Map\Templates\Utils.ts" />
+    <TypeScriptCompile Include="Map\Schema\ColorProviders\Default.ts" />
+    <TypeScriptCompile Include="Map\Schema\SchemaMap.ts" />
+    <TypeScriptCompile Include="Map\Schema\SchemaMapPage.tsx" />
+    <TypeScriptCompile Include="Map\Utils.ts" />
     <TypeScriptCompile Include="Migrations\Signum.Entities.Migrations.ts">
       <DependentUpon>Signum.Entities.Migrations.t4s</DependentUpon>
     </TypeScriptCompile>

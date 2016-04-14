@@ -112,3 +112,16 @@ export interface DisconnectedSubsetMixin extends Entities.MixinEntity {
     disconnectedMachine: Entities.Lite<DisconnectedMachineEntity>;
 }
 
+export const Download = new EnumType<Download>("Download");
+export type Download =
+    "None" |
+    "All" |
+    "Subset" |
+    "Replace";
+
+export const Upload = new EnumType<Upload>("Upload");
+export type Upload =
+    "None" |
+    "New" |
+    "Subset";
+

@@ -303,6 +303,13 @@ export interface TypeAllowedAndConditions extends Entities.ModelEntity {
     conditions: Array<TypeConditionRule>;
 }
 
+export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic");
+export type TypeAllowedBasic =
+    "None" |
+    "Read" |
+    "Modify" |
+    "Create";
+
 export const TypeAllowedRule = new Type<TypeAllowedRule>("TypeAllowedRule");
 export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllowedAndConditions> {
     properties: AuthThumbnail;

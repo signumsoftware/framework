@@ -40,14 +40,16 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
     state = {} as SchemaMapPropsState;
 
     componentWillMount() {
-
-        MapClient.getAllProviders().then(providers => {
-            this.setState({ providers: providers.toObject(a => a.name) });
-
             MapClient.API.types()
                 .then(smi => {
                     var parsedQuery = this.getParsedQuery();
                     this.fixSchemaMap(smi, parsedQuery);
+                    MapClient.getAllProviders(smi).then(providers => {
+                        this.setState({
+                            providers: providers.toObject(a => a.name)
+                        });
+
+
                     this.setState({
                         schemaMapInfo: smi,
                         filter: parsedQuery.filter || "",
@@ -229,6 +231,7 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
     svg: SVGElement;
 
     render() {
+
         return (
             <div id="map" style={{ backgroundColor: "white", width: "100%", height: this.props.height + "px" }}>
                 <svg id="svgMap" ref={svg => this.svg = svg}>

@@ -103,6 +103,7 @@ namespace Signum.Entities.Disconnected
     }
 
 
+    [InTypeScript(true)]
     public enum Download
     {
         None,
@@ -111,6 +112,7 @@ namespace Signum.Entities.Disconnected
         Replace,
     }
 
+    [InTypeScript(true)]
     public enum Upload
     {
         None,
