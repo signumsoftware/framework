@@ -11,6 +11,7 @@ import { Binding, IsByAll, getTypeInfos } from '../Reflection'
 import { TypeContext, FormGroupStyle } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 
+require("!style!css!./FilterBuilder.css");
 
 interface FilterBuilderProps extends React.Props<FilterBuilder> {
     filterOptions: FilterOption[];

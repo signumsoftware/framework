@@ -1,0 +1,28 @@
+﻿.sf-pagination-center > div {
+    display: inline;
+}
+
+
+/*Pagination*/
+
+.sf-pagination-center {
+    text-align: center;
+}
+
+.sf-pagination-right {
+    text-align: right;
+}
+
+div.sf-pagination-right > ul.pagination {
+    margin: 0px;
+}
+
+    div.sf-pagination-right > ul.pagination > li > a,
+    div.sf-pagination-right > ul.pagination > li > span {
+        padding: 0px 6px;
+    }
+
+    div.sf-pagination-right > ul.pagination > .disabled > a,
+    div.sf-pagination-right > ul.pagination > .disabled > span {
+        cursor: default;
+    }

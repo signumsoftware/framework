@@ -153,6 +153,9 @@
     <Compile Include="JsonConverters\LiteJsonConverter.cs" />
     <Compile Include="JsonModelValidators\SignumBodyModelValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="Scripts\SearchControl\QueryTokenBuilder.css" />
+    <Content Include="Scripts\SearchControl\FilterBuilder.css" />
+    <Content Include="Scripts\SearchControl\PaginationSelector.css" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\Modals\Modals.css" />

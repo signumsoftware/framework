@@ -1,0 +1,17 @@
+﻿
+.sf-query-token-builder {
+    display: inline-block
+}
+
+.sf-query-token-part {
+    display: inline-block;
+    margin-right: 1px;
+}
+
+    .sf-query-token-part .rw-popup-container {
+        min-width: 200px;
+    }
+
+.has-error .sf-query-token-part .rw-dropdownlist {
+    border: 1px solid #a94442;
+}
