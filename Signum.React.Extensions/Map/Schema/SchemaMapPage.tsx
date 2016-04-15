@@ -13,9 +13,6 @@ var colorbrewer = require("colorbrewer");
 
 require("!style!css!./schemaMap.css");
 
-
-
-
 interface SchemaMapPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
 
 }
@@ -27,6 +24,7 @@ interface SchemaMapPropsState {
     width?: number;
     height?: number;
     providers?: { [name: string]: ClientColorProvider };
+    parsedQuery?: ParsedQueryString;
 }
 
 interface ParsedQueryString {
@@ -39,11 +37,21 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
     state = { filter: "", color: "" } as SchemaMapPropsState;
 
+    wasExpanded: boolean;
+
     componentWillMount() {
+
+        if(Navigator.setExpanded){
+            if(Navigator.getExpanded) {
+                this.wasExpanded = Navigator.getExpanded();
+            }
+
+            Navigator.setExpanded(true);
+        }
+
         MapClient.API.types()
             .then(smi => {
                 var parsedQuery = this.getParsedQuery();
-                this.fixSchemaMap(smi, parsedQuery);
                 MapClient.getAllProviders(smi).then(providers => {
 
                     var missingProviders = smi.providers.filter(p => !providers.some(p2 => p2.name == p.name));
@@ -57,6 +65,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
                     this.setState({
                         providers: providers.toObject(a => a.name),
                         schemaMapInfo: smi,
+                        parsedQuery: parsedQuery,
                         filter: parsedQuery.filter || "",
                         color: parsedQuery.color || smi.providers.first().name
                     });
@@ -64,36 +73,13 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
             }).done();
     }
 
-    fixSchemaMap(map: SchemaMapInfo, parsedQuery: ParsedQueryString) {
-        map.tables.forEach(t => t.mlistTables.forEach(ml => {
-            ml.entityKind = t.entityKind;
-            ml.entityData = t.entityData;
-            ml.entityBaseType = "MList";
-            ml.namespace = t.namespace;
-        }));
 
-        map.allNodes = (map.tables as ITableInfo[]).concat(map.tables.flatMap(t => t.mlistTables));
-
-        map.allNodes.forEach(a => {
-            const c = parsedQuery.tables[a.tableName];
-            if (c) {
-                a.x = c.x * this.state.width;
-                a.y = c.y * this.state.height;
-                a.fixed = true;
-            }
-        });
-
-
-        const nodesDic = map.allNodes.toObject(g => g.tableName);
-        map.relations.forEach(a => {
-            a.source = nodesDic[a.fromTable];
-            a.target = nodesDic[a.toTable];
-        });
-        
-
-        map.allLinks = map.relations.map(a => a as IRelationInfo)
-            .concat(map.tables.flatMap(t => t.mlistTables.map(tm => ({ source: t, target: tm, isMList: true }) as MListRelationInfo)));
+    componentWillUnmount(){
+        if(Navigator.setExpanded && this.wasExpanded != null){
+            Navigator.setExpanded(this.wasExpanded);
+        }
     }
+
 
 
     getParsedQuery(): ParsedQueryString {
@@ -134,14 +120,17 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
 
     render() {
+        
+        if(Navigator.getExpanded && !Navigator.getExpanded())
+            return null;
 
         var s = this.state;
         return (
             <div ref={this.handleSetInitialSize}>
                 {this.renderFilter() }
-                {!s.schemaMapInfo ?
+                {!s.schemaMapInfo || this.div == null ?
                     <span>{ JavascriptMessage.loading.niceToString() }</span> :
-                    <SchemaMapRenderer schemaMapInfo={s.schemaMapInfo} filter={s.filter} color={s.color}  height={s.height} width={s.width} providers={s.providers} />}
+                    <SchemaMapRenderer schemaMapInfo={s.schemaMapInfo} parsedQuery={s.parsedQuery} filter={s.filter} color={s.color}  height={s.height} width={s.width} providers={s.providers} />}
             </div>
         );
     }
@@ -217,8 +206,58 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
 
     componentDidMount() {
         var p = this.props;
+
+        this.fixSchemaMap(p.schemaMapInfo, p.parsedQuery);
+
         var d3 = new SchemaMapD3(this.svg, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height);
         this.setState({ mapD3: d3 });
+    }
+
+    
+    fixSchemaMap(map: SchemaMapInfo, parsedQuery: ParsedQueryString) {
+        map.tables.forEach(t => t.mlistTables.forEach(ml => {
+            ml.entityKind = t.entityKind;
+            ml.entityData = t.entityData;
+            ml.entityBaseType = "MList";
+            ml.namespace = t.namespace;
+        }));
+
+        map.allNodes = (map.tables as ITableInfo[]).concat(map.tables.flatMap(t => t.mlistTables));
+
+        map.allNodes.forEach(a => {
+            const c = parsedQuery.tables[a.tableName];
+            if (c) {
+                a.x = c.x * this.props.width;
+                a.y = c.y * this.props.height;
+                a.fixed = true;
+            }
+        });
+
+
+        const nodesDic = map.allNodes.toObject(g => g.tableName);
+        map.relations.forEach(a => {
+            a.source = nodesDic[a.fromTable];
+            a.target = nodesDic[a.toTable];
+        });
+        
+
+        map.allLinks = map.relations.map(a => a as IRelationInfo)
+            .concat(map.tables.flatMap(t => t.mlistTables.map(tm => ({ source: t, target: tm, isMList: true }) as MListRelationInfo)));
+        
+        var repsDic : {[tableName: string]: number} = {};
+
+        map.allLinks.forEach(l=>{
+            var relName = l.source.tableName > l.target.tableName ? 
+                l.source.tableName + "-" + l.target.tableName : 
+                l.target.tableName + "-" + l.source.tableName ;
+
+            if(repsDic[relName] == null)
+                repsDic[relName] = 0;
+
+            l.repetitions = repsDic[relName];
+            repsDic[relName]++;
+
+        });
     }
 
     componentWillReceiveProps(newProps: SchemaMapRendererProps) {
@@ -230,6 +269,9 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
             this.state.mapD3.setFilter(newProps.filter);
     }
 
+    componentWillUnmount(){
+        this.state.mapD3.stop();
+    }
 
     svg: SVGElement;
 

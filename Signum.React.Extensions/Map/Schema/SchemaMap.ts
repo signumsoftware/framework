@@ -41,7 +41,7 @@ export type EntityBaseType =
 
 export interface IRelationInfo extends d3.layout.force.Link<ITableInfo> {
     isMList?: boolean;
-
+    repetitions?: number;
     sourcePoint?: Point;
     targetPoint?: Point;
 }
@@ -121,7 +121,7 @@ export class SchemaMapD3 {
 
         this.link = svg.append("svg:g").attr("class", "links").selectAll(".link")
             .data(map.allLinks)
-            .enter().append("line")
+            .enter().append("path")
             .attr("class", "link")
             .style("stroke-dasharray", d => (<RelationInfo>d).lite ? "2, 2" : null)
             .style("stroke", "black")
@@ -149,8 +149,6 @@ export class SchemaMapD3 {
                 const event = d3.event;
                 if (event.defaultPrevented)
                     return;
-
-
 
                 if ((<any>event).ctrlKey && (d as TableInfo).typeName) {
                     window.open(Finder.findOptionsPath({ queryName: (d as TableInfo).typeName }));
@@ -302,6 +300,10 @@ export class SchemaMapD3 {
         this.titles.text(t => cp.getTooltip(t) + " (" + t.entityBaseType + ")");
     }
 
+    stop(){
+        this.force.stop();
+    }
+
 
     onTick = () => {
         this.nodes.forEach(d => {
@@ -324,16 +326,47 @@ export class SchemaMapD3 {
             rel.targetPoint = calculatePoint(<ITableInfo>rel.target, rel.source);
         });
 
-        visibleLink.attr("x1", l => l.sourcePoint.x)
-            .attr("y1", l => l.sourcePoint.y)
-            .attr("x2", l => l.targetPoint.x)
-            .attr("y2", l => l.targetPoint.y);
+        visibleLink.attr("d", l => this.getPathExpression(l));
 
         this.nodeGroup.filter(d => this.nodes.indexOf(d) != -1)
             .attr("transform", d => "translate(" +
                 (d.x - d.width / 2) + ", " +
                 (d.y - d.height / 2) + ")");
     }
+
+    getPathExpression(l : IRelationInfo){
+       
+        var s = l.sourcePoint;
+        var t = l.targetPoint;
+
+        var m : Point = { 
+            x : (s.x + t.x) / 2, 
+            y : (s.y + t.y) / 2
+        };
+
+        var d : Point = {
+            x : (s.x - t.x), 
+            y : (s.y - t.y) 
+        };
+
+        var h = Math.sqrt(d.x * d.x + d.y * d.y);
+
+        if(h == 0)
+            h = 1;
+
+        //0, 10, -10, 20, -20, 30, -30
+        var repPixels = Math.floor(l.repetitions + 1 / 2) * ((l.repetitions % 2) * 2  - 1); 
+
+        var p : Point = {
+            x : m.x + (d.y / h) * 20 * repPixels,
+            y : m.y - (d.x / h) * 20 * repPixels
+        };
+        
+        
+        return `M${s.x} ${s.y} Q ${p.x} ${p.y} ${t.x} ${t.y}`
+
+    }
+
 
 
     gravity() {
@@ -397,12 +430,14 @@ export class SchemaMapD3 {
                     const lx = x / l;
                     const ly = y / l;
 
-                    const ratio = l / 30;
+                    const ratio = l / 20;
 
                     let f = constant * this.force.alpha() / Math.max(ratio * ratio, 0.1);
     
                     if (d.namespace != quad.point.namespace)
                         f *= 4;
+
+                    f = Math.min(f, 1);
 
                     d.nx += lx * f;
                     d.ny += ly * f;

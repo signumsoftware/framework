@@ -36,6 +36,9 @@ rect.node {
     }
 
 
+path.link {
+    fill: transparent;
+}
 
 text.node {
     text-anchor: middle;
