@@ -35,31 +35,31 @@ export function start(options: { routes: JSX.Element[], auth: boolean; cache: bo
         <Route path=":type" getComponent={ (loc, cb) => require(["./Schema/SchemaMapPage"], (Comp) => cb(null, Comp.default)) } />
     </Route>);
     
-    getProviders.push((types) => new Promise<ClientColorProvider[]>(resolve => {
-        require(["./Schema/ColorProviders/Default"], c => resolve(c.default(types)));
+    getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
+        require(["./Schema/ColorProviders/Default"], c => resolve(c.default(smi)));
     }));
 
     if(options.auth){
-        getProviders.push((types) => new Promise<ClientColorProvider[]>(resolve => {
-            require(["./Schema/ColorProviders/Auth"], c => resolve(c.default(types)));
+        getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
+            require(["./Schema/ColorProviders/Auth"], c => resolve(c.default(smi)));
         }));
     }
 
     if(options.cache){
-        getProviders.push((types) => new Promise<ClientColorProvider[]>(resolve => {
-            require(["./Schema/ColorProviders/Cache"], c => resolve(c.default(types)));
+        getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
+            require(["./Schema/ColorProviders/Cache"], c => resolve(c.default(smi)));
         }));
     }
 
     if(options.disconnected){
-        getProviders.push((types) => new Promise<ClientColorProvider[]>(resolve => {
-            require(["./Schema/ColorProviders/Disconnected"], c => resolve(c.default(types)));
+        getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
+            require(["./Schema/ColorProviders/Disconnected"], c => resolve(c.default(smi)));
         }));
     }
 
     if(options.isolation){
-        getProviders.push((types) => new Promise<ClientColorProvider[]>(resolve => {
-            require(["./Schema/ColorProviders/Disconnected"], c => resolve(c.default(types)));
+        getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
+            require(["./Schema/ColorProviders/Isolation"], c => resolve(c.default(smi)));
         }));
     }
 }

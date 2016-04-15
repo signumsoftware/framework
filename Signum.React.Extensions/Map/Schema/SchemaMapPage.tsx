@@ -37,28 +37,31 @@ interface ParsedQueryString {
 
 export default class SchemaMapPage extends React.Component<SchemaMapPageProps, SchemaMapPropsState> {
 
-    state = {} as SchemaMapPropsState;
+    state = { filter: "", color: "" } as SchemaMapPropsState;
 
     componentWillMount() {
-            MapClient.API.types()
-                .then(smi => {
-                    var parsedQuery = this.getParsedQuery();
-                    this.fixSchemaMap(smi, parsedQuery);
-                    MapClient.getAllProviders(smi).then(providers => {
-                        this.setState({
-                            providers: providers.toObject(a => a.name)
-                        });
+        MapClient.API.types()
+            .then(smi => {
+                var parsedQuery = this.getParsedQuery();
+                this.fixSchemaMap(smi, parsedQuery);
+                MapClient.getAllProviders(smi).then(providers => {
 
+                    var missingProviders = smi.providers.filter(p => !providers.some(p2 => p2.name == p.name));
+                    if (missingProviders.length)
+                        throw new Error(`Missing ClientColorProvider for ${missingProviders.map(a => "'" + a.name + "'").joinComma("and")} found`);
+
+                    var extraProviders = providers.filter(p => !smi.providers.some(p2 => p2.name == p.name));
+                    if (extraProviders.length)
+                        throw new Error(`Extra ClientColorProvider for ${extraProviders.map(a => "'" + a.name + "'").joinComma("and")} found`);
 
                     this.setState({
+                        providers: providers.toObject(a => a.name),
                         schemaMapInfo: smi,
                         filter: parsedQuery.filter || "",
                         color: parsedQuery.color || smi.providers.first().name
                     });
                 }).done();
-        }).done();
-
-
+            }).done();
     }
 
     fixSchemaMap(map: SchemaMapInfo, parsedQuery: ParsedQueryString) {
