@@ -451,7 +451,7 @@ export module Encoder {
 
     export function encodeFilters(query: any, filterOptions: FilterOption[]) {
         if (filterOptions)
-            filterOptions.forEach((fo, i) => query["filter" + i] = getTokenString(fo) + "~" + fo.operation + "~" + stringValue(fo.value));
+            filterOptions.forEach((fo, i) => query["filter" + i] = getTokenString(fo) + "~" + (fo.operation || "EqualTo") + "~" + stringValue(fo.value));
     }
 
     export function encodeOrders(query: any, orderOptions: OrderOption[]) {

@@ -34,3 +34,15 @@ ul.dropdown-menu li a span.glyphicon {
     margin-right: 10px;
     font-size: 11px;
 }
+
+
+a.expand-window {
+    float: right;
+    cursor: pointer;
+    color: lightgray;
+    margin-top: 10px;
+}
+
+a.expand-window:hover {
+    color:gray;
+}
