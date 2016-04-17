@@ -16,6 +16,10 @@ using System.Linq;
 using System.Reflection;
 using System.Web;
 using System.Web.Http;
+using Signum.Entities.Chart;
+using Signum.Entities.Dashboard;
+using Signum.Entities.Map;
+using Signum.Entities.UserQueries;
 
 namespace Signum.React.Omnibox
 {

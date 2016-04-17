@@ -139,6 +139,7 @@
     <Compile Include="Authorization\AuthController.cs" />
     <Compile Include="Authorization\AuthServer.cs" />
     <Compile Include="Authorization\UserTicketClient.cs" />
+    <Compile Include="Cache\CacheController.cs" />
     <Compile Include="Cache\CacheServer.cs" />
     <Compile Include="Chart\ChartController.cs" />
     <Compile Include="Chart\ChartServer.cs" />
@@ -153,8 +154,8 @@
     <Compile Include="Map\OperationMap.cs" />
     <Compile Include="Map\SchemaMap.cs" />
     <Compile Include="Omnibox\OmniboxServer.cs" />
-    <Compile Include="Omnibox\ReactSpecialOmniboxGenerator.cs" />
     <Compile Include="Omnibox\OmniboxController.cs" />
+    <Compile Include="Omnibox\ReactSpecialOmniboxGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Translation\TranslationController.cs" />
     <Compile Include="Translation\TranslationServer.cs" />
@@ -169,7 +170,6 @@
     <Content Include="Files\Files.css" />
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
-    <Content Include="Omnibox\Omnibox.css" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -242,6 +242,11 @@
     <TypeScriptCompile Include="Authorization\Login\LoginUserControl.tsx" />
     <TypeScriptCompile Include="Basics\Signum.Entities.Basics.ts">
       <DependentUpon>Signum.Entities.Basics.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Cache\CacheClient.tsx" />
+    <TypeScriptCompile Include="Cache\CacheStatisticsPage.tsx" />
+    <TypeScriptCompile Include="Cache\Signum.Entities.Cache.ts">
+      <DependentUpon>Signum.Entities.Cache.t4s</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Chart\UserChartOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScript.tsx" />
@@ -323,6 +328,7 @@
     <TypeScriptCompile Include="Notes\Signum.Entities.Notes.ts">
       <DependentUpon>Signum.Entities.Notes.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Omnibox\SpecialOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Omnibox\EntityOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Omnibox\DynamicQueryOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Omnibox\OmniboxAutocomplete.tsx" />
@@ -377,6 +383,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Map\Signum.Entities.Map.t4s" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Cache\Signum.Entities.Cache.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
