@@ -18,6 +18,7 @@ import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption,
     FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { SchemaMapInfo, ClientColorProvider } from './Schema/SchemaMap'
+import { OperationMapInfo } from './Operation/OperationMap'
 
 import {  } from './Signum.Entities.Map'
 
@@ -32,7 +33,7 @@ export function start(options: { routes: JSX.Element[], auth: boolean; cache: bo
 
     options.routes.push(<Route path="map">
         <IndexRoute getComponent={ (loc, cb) => require(["./Schema/SchemaMapPage"], (Comp) => cb(null, Comp.default)) } />
-        <Route path=":type" getComponent={ (loc, cb) => require(["./Schema/SchemaMapPage"], (Comp) => cb(null, Comp.default)) } />
+        <Route path=":type" getComponent={ (loc, cb) => require(["./Operation/OperationMapPage"], (Comp) => cb(null, Comp.default)) } />
     </Route>);
     
     getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {
@@ -72,26 +73,4 @@ export namespace API {
     export function operations(typeName: string): Promise<OperationMapInfo> {
         return ajaxGet<OperationMapInfo>({ url: "/api/map/operations/" + typeName });
     }
-}
-
-export interface OperationMapInfo {
-    states: MapState[];
-    operations: MapOperation[];
-}
-
-export interface MapOperation {
-    key: string;
-    niceName: string;
-    count: number;
-    fromStates: string[];
-    toStates: string[];
-}
-
-export interface MapState {
-    key: string;
-    niceName: string;
-    count: number;
-    ignored: boolean;
-    color: string;
-    token: string;
 }

@@ -305,6 +305,7 @@
     <TypeScriptCompile Include="Map\MapOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Map\MapClient.tsx" />
     <TypeScriptCompile Include="Map\Operation\OperationMap.ts" />
+    <TypeScriptCompile Include="Map\Operation\OperationMapPage.tsx" />
     <TypeScriptCompile Include="Map\Schema\ColorProviders\Auth.tsx" />
     <TypeScriptCompile Include="Map\Schema\ColorProviders\Disconnected.tsx" />
     <TypeScriptCompile Include="Map\Schema\ColorProviders\Isolation.tsx" />

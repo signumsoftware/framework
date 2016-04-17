@@ -1,0 +1,257 @@
+﻿import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import * as d3 from 'd3'
+import { DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
+import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { is, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { MapMessage } from '../Signum.Entities.Map'
+import * as MapClient from '../MapClient'
+import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition} from './OperationMap'
+var colorbrewer = require("colorbrewer");
+
+require("!style!css!./operationMap.css");
+
+interface OperationMapPageProps extends ReactRouter.RouteComponentProps<{}, { type: string}> {
+    
+}
+
+interface OperationMapPropsState {
+    operationMapInfo?: OperationMapInfo;
+    width?: number;
+    height?: number;
+    parsedQuery?: ParsedQueryString;
+    color?: string;
+}
+
+interface ParsedQueryString {
+    color?: string;
+    nodes: { [tableName: string]: { x: number; y: number } };
+}
+
+export default class OperationMapPage extends React.Component<OperationMapPageProps, OperationMapPropsState> {
+
+    state = { filter: "", color: "" } as OperationMapPropsState;
+
+    wasExpanded: boolean;
+
+    componentWillMount() {
+
+        if(Navigator.setExpanded){
+            if(Navigator.getExpanded) {
+                this.wasExpanded = Navigator.getExpanded();
+            }
+
+            Navigator.setExpanded(true);
+        }
+
+        MapClient.API.operations(this.props.routeParams.type)
+            .then(omi => {
+                var parsedQuery = this.getParsedQuery();
+
+                this.setState({
+                    operationMapInfo: omi,
+                    parsedQuery: parsedQuery,
+                    color: parsedQuery.color 
+                });
+            }).done();
+    }
+
+
+    componentWillUnmount(){
+        if(Navigator.setExpanded && this.wasExpanded != null){
+            Navigator.setExpanded(this.wasExpanded);
+        }
+    }
+
+
+
+    getParsedQuery(): ParsedQueryString {
+    
+        var result: ParsedQueryString = { nodes: {} };
+
+        var query = this.props.location.query as { [name: string]: string };
+        if (!query)
+            return result;
+
+        Dic.foreach(query, (name, value) => {
+            
+            if (name == "color")
+                result.color = value;
+            else {
+                result.nodes[name] = {
+                    x: parseFloat(value.before(",")),
+                    y: parseFloat(value.after(",")),
+                };
+            }
+        }); 
+
+        return result;
+    }
+
+    div: HTMLDivElement;
+    handleSetInitialSize = (div: HTMLDivElement) => {
+
+        if (this.div)
+            return;
+
+        this.div = div;
+        var rect = div.getBoundingClientRect();
+        this.setState({ width: rect.width, height: window.innerHeight - 200 });
+    }
+
+
+    render() {
+
+        if (Navigator.getExpanded && !Navigator.getExpanded())
+            return null;
+
+        var s = this.state;
+        return (
+            <div ref={this.handleSetInitialSize}>
+                {this.renderFilter() }
+                {!s.operationMapInfo || this.div == null ?
+                    <span>{ JavascriptMessage.loading.niceToString() }</span> :
+                    <OperationMapRenderer operationMapInfo={s.operationMapInfo} parsedQuery={s.parsedQuery} color={s.color}  height={s.height} width={s.width} queryName={this.props.routeParams.type} />}
+            </div>
+        );
+    }
+
+    handleSetColor = (e: React.FormEvent) => {
+        this.setState({
+            color: (e.currentTarget as HTMLInputElement).value
+        });
+    }
+
+    handleFullscreenClick = (e: React.MouseEvent) => {
+
+        e.preventDefault();
+
+        var s = this.state;
+
+        var tables = s.operationMapInfo.allNodes.filter(a => a.fixed)
+            .toObject(a => a.key, a =>
+                (a.x / s.width).toPrecision(4) + "," +
+                (a.y / s.height).toPrecision(4));
+
+
+        var query = Dic.extend(tables, { color: s.color });
+
+        var url = Navigator.currentHistory.createHref({ pathname: "/map/" + this.props.routeParams.type, query: query });
+
+        window.open(url);
+    }
+
+    renderFilter() {
+
+        var s = this.state;
+
+        return (
+            <div className="form-inline form-sm container" style={{ marginTop: "10px" }}>
+                <div className="form-group" style={{ marginLeft: "10px" }}>
+                    <label htmlFor="color"> { MapMessage.Color.niceToString() }</label>&nbsp;
+                    <select className="form-control" id="color" value={s.color} onChange={this.handleSetColor}>
+                        <option value="state">{ MapMessage.StateColor.niceToString() }</option>
+                        <option value="rows">{ MapMessage.Rows.niceToString() }</option>
+                    </select>
+                </div>
+                <span style={{ marginLeft: "10px" }}>
+                    { MapMessage.Press0ToExploreEachTable.niceToString().formatHtml(<u>Ctrl + Click</u>) }
+                </span>
+                &nbsp;
+                <a id="sfFullScreen" className="sf-popup-fullscreen" onClick={this.handleFullscreenClick} href="#">
+                    <span className="glyphicon glyphicon-new-window"></span>
+                </a>
+            </div>
+        );
+
+    }
+
+}
+
+export interface OperationMapRendererProps extends OperationMapPropsState {
+    queryName: string;
+}
+
+export class OperationMapRenderer extends React.Component<OperationMapRendererProps, { mapD3: OperationMapD3 }> { 
+
+    componentDidMount() {
+        var p = this.props;
+
+        this.fixSchemaMap(p.operationMapInfo, p.parsedQuery);
+
+        var d3 = new OperationMapD3(this.svg, p.queryName, p.operationMapInfo, p.color, p.width, p.height);
+        this.setState({ mapD3: d3 });
+    }
+
+
+    fixSchemaMap(map: OperationMapInfo, parsedQuery: ParsedQueryString) {
+
+        map.allNodes = (map.operations as ForceNode[]).concat(map.states);
+
+        map.allNodes.forEach(a => {
+            const c = parsedQuery.nodes[a.key];
+            if (c) {
+                a.x = c.x * this.props.width;
+                a.y = c.y * this.props.height;
+                a.fixed = true;
+            }
+        });
+        
+        var statesDic = map.states.toObject(g => g.key);
+
+        var fromRelationships = map.operations.filter(op => op.fromStates != null)
+            .flatMap(op => op.fromStates.map(s => ({ source: statesDic[s], target: op, isFrom: true }) as ForceLink));
+
+        var toRelationships = map.operations.filter(op => op.toStates != null)
+            .flatMap(op => op.toStates.map(s => ({ source: op, target: statesDic[s], isFrom: false }) as ForceLink));
+
+        map.allLinks = fromRelationships.concat(toRelationships);
+        map.allTransition = map.operations.flatMap(o => o.fromStates.flatMap(f => o.toStates.map(t => ({
+            fromState: statesDic[f],
+            operation: o,
+            toState: statesDic[t]
+        }) as Transition)));
+
+        var fanOut = map.operations.flatMap(a => a.fromStates.map(s => ({ s: s, weight: 1.0 / a.fromStates.length }))).groupToObject(a => a.s);
+        var fanIn = map.operations.flatMap(a => a.toStates.map(s => ({ s: s, weight: 1.0 / a.toStates.length }))).groupToObject(a => a.s);
+
+        map.states.forEach(m => {
+            m.fanOut = (fanOut[m.key] ? fanOut[m.key].reduce((acum, e) => acum + e.weight, 0) : 0);
+            m.fanIn = (fanIn[m.key]?fanIn[m.key].reduce((acum, e) => acum + e.weight, 0): 0);
+        });
+    }
+
+    componentWillReceiveProps(newProps: OperationMapRendererProps) {
+
+        if (newProps.color != this.props.color)
+            this.state.mapD3.setColor(newProps.color);
+    }
+
+    componentWillUnmount(){
+        this.state.mapD3.stop();
+    }
+
+    svg: SVGElement;
+
+    render() {
+
+        return (
+            <div id="map" style={{ backgroundColor: "white", width: "100%", height: this.props.height + "px" }}>
+                <svg id="svgMap" ref={svg => this.svg = svg}>
+                    <defs>
+                        <marker id="normal_arrow" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="10" markerHeight="10" orient="auto">
+                            <path fill="gray" d="M0,0L0,-5L10,0L0,5L0,0" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        );
+    }
+}
+
+
+
+
+

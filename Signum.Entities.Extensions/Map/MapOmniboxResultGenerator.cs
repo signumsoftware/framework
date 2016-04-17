@@ -53,10 +53,7 @@ namespace Signum.Entities.Map
                 foreach (var match in OmniboxUtils.Matches(types, OmniboxParser.Manager.AllowedType, pattern, isPascalCase).OrderBy(ma => ma.Distance))
                 {
                     var type = match.Value;
-                    if (OmniboxParser.Manager.AllowedQuery(type))
-                    {
-                        yield return new MapOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = (Type)type, TypeMatch = match };
-                    }
+                    yield return new MapOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, Type = (Type)type, TypeMatch = match };
                 }
             }
         }
@@ -81,6 +78,10 @@ namespace Signum.Entities.Map
 
         [JsonIgnore]
         public Type Type { get; set; }
+
+
+        public string TypeName { get { return this.Type == null ? null : QueryNameJsonConverter.GetQueryKey(this.Type); } }
+
         public OmniboxMatch TypeMatch { get; set; }
 
         public override string ToString()
