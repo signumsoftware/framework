@@ -19,6 +19,9 @@ export let currentUser: IUserEntity;
 export let currentHistory: HistoryModule.History;
 
 
+export var getExpanded : () => boolean;
+export var setExpanded : (isExpanded: boolean) => void;
+
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default)) } ></Route>);
     options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default))} ></Route>);

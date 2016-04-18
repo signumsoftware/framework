@@ -27,7 +27,6 @@ export default class ButtonBar extends React.Component<ButtonBarProps, void>{
 
         var buttons = ButtonBar.onButtonBarRender.flatMap(func => func(this.props) || []).map((a, i) => React.cloneElement(a, { key: i }));
 
-
         return (
             <div className="btn-toolbar sf-button-bar">
                 { buttons }

@@ -1859,6 +1859,7 @@ declare namespace __React {
         offset?: number | string;
         opacity?: number | string;
         patternContentUnits?: string;
+        patternTransform?: string;
         patternUnits?: string;
         points?: string;
         preserveAspectRatio?: string;
