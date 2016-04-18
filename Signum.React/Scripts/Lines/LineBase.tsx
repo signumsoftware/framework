@@ -103,9 +103,9 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
     setValue(val: any) {
         this.state.ctx.value = val;
+        this.forceUpdate();
         if (this.state.onChange)
             this.state.onChange(val);
-        this.forceUpdate();
     }
 
     render() {

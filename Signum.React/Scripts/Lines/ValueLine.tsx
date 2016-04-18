@@ -192,7 +192,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps}>
             { ValueLine.withUnit(s.unitText,
-                <select {...vl.state.valueHtmlProps} value= { s.ctx.value } className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
+                <select {...vl.state.valueHtmlProps} value={s.ctx.value} className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
                     {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) }
                 </select>)
             }
@@ -220,7 +220,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
             { ValueLine.withUnit(s.unitText,
-                <input type="text" {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value} onChange={handleTextOnChange}
+                <input type="text" {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value || ""} onChange={handleTextOnChange}
                     placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>)
             }
         </FormGroup>
@@ -252,7 +252,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
-            <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value} onChange={handleTextOnChange}
+            <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value || ""} onChange={handleTextOnChange}
                 placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>
         </FormGroup>
     );
