@@ -104,7 +104,7 @@ export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>)
     return entity.toStr || entity.Type;
 }
 
-export function toLite<T extends Entity>(entity: T, fat?: boolean) : Lite<T> {
+export function toLite<T extends Entity>(entity: T, fat?: boolean, toStr?: string) : Lite<T> {
 
     if(entity == null)
         return null;
@@ -118,7 +118,7 @@ export function toLite<T extends Entity>(entity: T, fat?: boolean) : Lite<T> {
     return {
        EntityType : entity.Type,
        id: entity.id,
-       toStr: getToString(entity),
+       toStr: toStr || getToString(entity),
     }
 }
 
