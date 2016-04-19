@@ -112,13 +112,13 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
 }
 
 export interface ContextualOperationOptions<T extends Entity> {
-    text: () => string;
-    isVisible: (ctx: ContextualOperationContext<T>) => boolean;
-    hideOnCanExecute: boolean;
-    confirmMessage: (ctx: ContextualOperationContext<T>) => string;
-    onClick: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
-    style: string;
-    order: number;
+    text?: () => string;
+    isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
+    hideOnCanExecute?: boolean;
+    confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
+    onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
+    style?: BsStyle;
+    order?: number;
 }
 
 export interface ContextualOperationContext<T extends Entity> {
