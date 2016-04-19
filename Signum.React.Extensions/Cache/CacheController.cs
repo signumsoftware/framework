@@ -17,7 +17,7 @@ using Signum.Engine;
 using Signum.Entities.Cache;
 using Signum.Utilities.ExpressionTrees;
 
-namespace Signum.React.Auth
+namespace Signum.React.Cache
 {
     public class CacheController : ApiController
     {
