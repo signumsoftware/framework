@@ -318,7 +318,8 @@ String.prototype.startsWith = function (str) {
 }
 
 String.prototype.endsWith = function (str) {
-    return this.lastIndexOf(str) === (this.length - str.length);
+    var index = this.lastIndexOf(str);
+    return index !== -1 && index === (this.length - str.length); //keep it
 }
 
 String.prototype.formatWith = function () {
@@ -460,6 +461,28 @@ String.prototype.firstUpper = function () {
 
 String.prototype.firstLower = function () {
     return (this[0] as string).toLowerCase() + this.substring(1);
+};
+
+String.prototype.trimStart = function (char: string) {
+    var result = this as string;
+    if (char == "")
+        throw new Error("Empty char");
+
+    while (result.startsWith(char))
+        result = result.substr(char.length);
+
+    return result;
+};
+
+String.prototype.trimEnd = function (char: string) {
+    var result = this as string;
+    if (char == "")
+        throw new Error("Empty char");
+
+    while (result.endsWith(char))
+        result = result.substr(0, result.length - char.length);
+
+    return result;
 };
 
 String.prototype.repeat = function (n: number) {

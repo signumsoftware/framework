@@ -78,6 +78,9 @@ interface String {
     firstUpper(): string;
     firstLower(): string;
 
+    trimEnd(char?: string): string;
+    trimStart(char?: string): string;
+
     repeat(n: number): string;
 }
 
