@@ -101,7 +101,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
     hideOnCanExecute: boolean;
     confirmMessage: (ctx: ContextualOperationContext<T>) => string;
     onClick: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
-    style: string;
+    style: BsStyle;
     order: number;
 
     constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
@@ -150,7 +150,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     hideOnCanExecute: boolean;
     group: EntityOperationGroup;
     order: number;
-    style: string;
+    style: BsStyle;
 
     constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
         super(operationSymbol)
@@ -161,6 +161,8 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
         this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol, options.contextualFromMany) : null;
     }
 }
+
+export type BsStyle = "default" | "primary" | "success" | "info" | "warning" | "danger";
 
 export interface EntityOperationOptions<T extends Entity> {
     contextual?: ContextualOperationOptions<T>;
@@ -173,7 +175,7 @@ export interface EntityOperationOptions<T extends Entity> {
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup;
     order?: number;
-    style?: string;
+    style?: BsStyle;
 }
 
 
@@ -197,7 +199,7 @@ export interface EntityOperationGroup {
     order?: number;
 }
 
-export function autoStyleFunction(oi: OperationInfo) {
+export function autoStyleFunction(oi: OperationInfo): BsStyle{
     return oi.operationType == OperationType.Delete ? "danger" :
         oi.operationType == OperationType.Execute && oi.key.endsWith(".Save") ? "primary" : "default";
 }
