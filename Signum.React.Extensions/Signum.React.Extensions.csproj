@@ -159,6 +159,8 @@
     <Compile Include="Processes\ProcessServer.cs" />
     <Compile Include="Processes\ProcessController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scheduler\SchedulerServer.cs" />
+    <Compile Include="Scheduler\SchedulerController.cs" />
     <Compile Include="Translation\TranslationController.cs" />
     <Compile Include="Translation\TranslationServer.cs" />
     <Compile Include="UserAssets\UserAssetServer.cs" />
@@ -348,9 +350,16 @@
     <TypeScriptCompile Include="Processes\Templates\Package.tsx" />
     <TypeScriptCompile Include="Processes\Templates\PackageOperation.tsx" />
     <TypeScriptCompile Include="Processes\Templates\Process.tsx" />
+    <TypeScriptCompile Include="Scheduler\SchedulerClient.tsx" />
+    <TypeScriptCompile Include="Scheduler\SchedulerPanelPage.tsx" />
     <TypeScriptCompile Include="Scheduler\Signum.Entities.Scheduler.ts">
       <DependentUpon>Signum.Entities.Scheduler.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Scheduler\Templates\HolidayCalendar.tsx" />
+    <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleMinutely.tsx" />
+    <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleMonths.tsx" />
+    <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleWeekDays.tsx" />
+    <TypeScriptCompile Include="Scheduler\Templates\SchedulerTask.tsx" />
     <TypeScriptCompile Include="SMS\Signum.Entities.SMS.ts">
       <DependentUpon>Signum.Entities.SMS.t4s</DependentUpon>
     </TypeScriptCompile>
