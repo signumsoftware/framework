@@ -118,14 +118,12 @@ namespace Signum.React.ApiControllers
         {
             var operation = ParseOperationAssert(request.operationKey);
 
-            var type = TypeLogic.GetType(request.type);
+            var type = request.type == null ? null : TypeLogic.GetType(request.type);
 
             var entity = OperationLogic.ServiceConstructFromMany(request.lites, type, operation, request.args);
 
             return SignumServer.GetEntityPack(entity);
         }
-
-     
 
         [Route("api/operation/constructFromMultiple"), HttpPost, ValidateModelFilter]
         public MultiOperationResponse ConstructFromMultiple(MultiOperationRequest request)
@@ -214,7 +212,7 @@ namespace Signum.React.ApiControllers
         }
 
 
-        static OperationSymbol ParseOperationAssert(string operationKey)
+        public static OperationSymbol ParseOperationAssert(string operationKey)
         {
             var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 

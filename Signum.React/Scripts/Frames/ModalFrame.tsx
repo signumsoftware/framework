@@ -268,7 +268,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     static openNavigate(options: Navigator.NavigateOptions): Promise<void> {
 
         return openModal<void>(<ModalFrame
-            entityOrPack={options.entity}
+            entityOrPack={options.entityOrPack}
             readOnly={options.readOnly}
             propertyRoute={null}
             getComponent={options.getComponent}

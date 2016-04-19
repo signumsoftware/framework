@@ -43,7 +43,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext)
         })
         .filter(coc => coc != null)
         .orderBy(coc => coc.settings && coc.settings.order)
-        .map((coc, i) => createContextualButton(coc, defaultConstructFromMany, i));
+        .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany, i));
 
 
     if (!menuItems.length)
@@ -74,7 +74,7 @@ function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, event
         }
         else {
             Navigator.navigate({
-                entity: pack
+                entityOrPack: pack,
             });
         }
     }).done();
@@ -141,7 +141,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext):
         var menuItems = ctxs.filter(coc => coc.canExecute == null || !hideOnCanExecute(coc))
             .orderBy(coc => coc.settings && coc.settings.order != null ? coc.settings.order :
                 coc.entityOperationSettings && coc.entityOperationSettings.order != null ? coc.entityOperationSettings.order : 0)
-            .map((coc, i) => createContextualButton(coc, defaultEntityClick, i));
+            .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultEntityClick, i));
 
         if (menuItems.length == 0)
             return null;
@@ -190,32 +190,40 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 }
 
 
-function createContextualButton(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>, event: React.MouseEvent) => void, key: any) {
+ export namespace MenuItemConstructor { //To allow monkey patching
 
-    var text = coc.settings && coc.settings.text ? coc.settings.text() :
-        coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
-            coc.operationInfo.niceName;
+    export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>, event: React.MouseEvent) => void, key: any) {
 
-    var bsStyle = coc.settings && coc.settings.style || autoStyleFunction(coc.operationInfo);
+        event.preventDefault();
+        event.stopPropagation();
 
-    var disabled = !!coc.canExecute;
+        var text = coc.settings && coc.settings.text ? coc.settings.text() :
+            coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
+                coc.operationInfo.niceName;
 
-    var onClick = coc.settings && coc.settings.onClick ?
-        (me: React.MouseEvent) => coc.settings.onClick(coc, me) :
-        (me: React.MouseEvent) => defaultClick(coc, me)
+        var bsStyle = coc.settings && coc.settings.style || autoStyleFunction(coc.operationInfo);
 
-    var menuItem = <MenuItem
-        className={classes("btn-" + bsStyle, disabled ? "disabled" : null) }
-        onClick={disabled ? null : onClick}
-        data-operation={coc.operationInfo.key}
-        key={key}>{text}</MenuItem>;
+        var disabled = !!coc.canExecute;
 
-    if (!coc.canExecute)
-        return menuItem;
+        var onClick = coc.settings && coc.settings.onClick ?
+            (me: React.MouseEvent) => coc.settings.onClick(coc, me) :
+            (me: React.MouseEvent) => defaultClick(coc, me)
 
-    const tooltip = <Tooltip id={"tooltip_" + coc.operationInfo.key.replace(".", "_") }>{coc.canExecute}</Tooltip>;
+        var menuItem = <MenuItem
+            className={classes("btn-" + bsStyle, disabled ? "disabled" : null) }
+            onClick={disabled ? null : onClick}
+            data-operation={coc.operationInfo.key}
+            key={key}>
+            {text}
+            </MenuItem>;
 
-    return <OverlayTrigger placement="right" overlay={tooltip} >{menuItem}</OverlayTrigger>;
+        if (!coc.canExecute)
+            return menuItem;
+
+        const tooltip = <Tooltip id={"tooltip_" + coc.operationInfo.key.replace(".", "_") }>{coc.canExecute}</Tooltip>;
+
+        return <OverlayTrigger placement="right" overlay={tooltip} >{menuItem}</OverlayTrigger>;
+    }
 }
 
 
@@ -237,27 +245,3 @@ function defaultEntityClick(coc: ContextualOperationContext<Entity>, event: Reac
         .done();
 }
 
-
-
-
-//function onClick(eoc: EntityOperationContext<Entity>): void {
-
-//    if (eoc.settings && eoc.settings.onClick)
-//        return eoc.settings.onClick(eoc);
-
-//    if (eoc.operationInfo.lite) {
-//        switch (eoc.operationInfo.operationType) {
-//            case OperationType.ConstructorFrom: defaultConstructFromLite(eoc); return;
-//            case OperationType.Execute: defaultExecuteLite(eoc); return;
-//            case OperationType.Delete: defaultDeleteLite(eoc); return;
-//        }
-//    } else {
-//        switch (eoc.operationInfo.operationType) {
-//            case OperationType.ConstructorFrom: defaultConstructFromEntity(eoc); return;
-//            case OperationType.Execute: defaultExecuteEntity(eoc); return;
-//            case OperationType.Delete: defaultDeleteEntity(eoc); return;
-//        }
-//    }
-
-//    throw new Error("Unexpected OperationType");
-//}

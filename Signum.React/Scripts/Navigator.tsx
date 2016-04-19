@@ -200,7 +200,7 @@ export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Enti
 
 
 export interface NavigateOptions {
-    entity: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
+    entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     readOnly?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
 }
@@ -208,10 +208,11 @@ export interface NavigateOptions {
 export function navigate(options: NavigateOptions): Promise<void>;
 export function navigate<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<void>;
 export function navigate<T extends Entity>(entity: Lite<T>): Promise<void>
-export function navigate(entityOrOptions: NavigateOptions | ModifiableEntity | Lite<Entity>): Promise<void> {
-    const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions } as NavigateOptions :
-        (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions } as NavigateOptions :
-            (entityOrOptions as EntityPack<ModifiableEntity>).entity ? { entity: entityOrOptions } as NavigateOptions :
+export function navigate(entityOrOptions: NavigateOptions | Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<void> {
+
+    const options = (entityOrOptions as ModifiableEntity).Type ? { entityOrPack: entityOrOptions as ModifiableEntity } as NavigateOptions :
+        (entityOrOptions as Lite<Entity>).EntityType ? { entityOrPack: entityOrOptions as Lite<Entity> } as NavigateOptions :
+            (entityOrOptions as EntityPack<ModifiableEntity>).canExecute ? { entityOrPack: entityOrOptions as EntityPack<ModifiableEntity> } as NavigateOptions :
                 entityOrOptions as NavigateOptions;
 
     return new Promise<void>((resolve, reject) => {
