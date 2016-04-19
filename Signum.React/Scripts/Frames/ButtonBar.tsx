@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { Dic } from '../Globals'
+import { Dic, classes } from '../Globals'
 import * as Navigator from '../Navigator'
 import { EntityFrame } from '../Lines'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
@@ -14,7 +14,7 @@ export interface ButtonsContext {
 }
 
 export interface ButtonBarProps extends ButtonsContext {
-
+    align?: "left" | "right";
 }
 
 export default class ButtonBar extends React.Component<ButtonBarProps, void>{
@@ -28,7 +28,7 @@ export default class ButtonBar extends React.Component<ButtonBarProps, void>{
         var buttons = ButtonBar.onButtonBarRender.flatMap(func => func(this.props) || []).map((a, i) => React.cloneElement(a, { key: i }));
 
         return (
-            <div className="btn-toolbar sf-button-bar">
+            <div className={classes("btn-toolbar", "sf-button-bar", this.props.align == "right" ? "right" : null) } >
                 { buttons }
             </div>
         );
