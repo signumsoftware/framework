@@ -578,12 +578,17 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             menuItems.push(<MenuItem className="sf-remove-header" onClick={this.handleRemoveColumn}>{JavascriptMessage.removeColumn.niceToString() }</MenuItem>);
         }
 
-        if (cm.rowIndex != null && this.state.currentMenuItems) {
+        if (cm.rowIndex != null) {
 
-            if (menuItems.length && this.state.currentMenuItems.length)
-                menuItems.push(<MenuItem divider/>);
+            if(this.state.currentMenuItems == null)
+            {
+                menuItems.push(<MenuItem header>{JavascriptMessage.loading.niceToString()}</MenuItem>);
+            }else{
+                if (menuItems.length && this.state.currentMenuItems.length)
+                    menuItems.push(<MenuItem divider/>);
 
-            menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
+                menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
+            }
         }
 
         return (
