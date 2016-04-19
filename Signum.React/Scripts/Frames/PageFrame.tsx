@@ -135,6 +135,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity, ""));
 
         const frame: EntityFrame<Entity> = {
+            component: this,
             onReload: pack => this.setState({ pack }),
             onClose: () => this.onClose(),
             setError: (ms, initialPrefix = "") => {
