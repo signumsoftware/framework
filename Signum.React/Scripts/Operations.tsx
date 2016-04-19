@@ -135,6 +135,7 @@ export interface EntityOperationContext<T extends Entity> {
     frame: EntityFrame<T>;
     entity: T;
     operationInfo: OperationInfo;
+    showOperations: boolean;
     settings: EntityOperationSettings<T>;
     canExecute: string;
 }

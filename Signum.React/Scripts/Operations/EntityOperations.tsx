@@ -30,6 +30,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
                 frame: ctx.frame,
                 canExecute: ctx.pack.canExecute[oi.key],
                 operationInfo: oi,
+                showOperations: ctx.showOperations,
                 settings: eos
             };
 
