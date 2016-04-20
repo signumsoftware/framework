@@ -1,15 +1,15 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
 import * as numbro from 'numbro'
+import * as moment from 'moment'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
-import {CountSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
+import { CountSearchControl, SearchControl } from '../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { QueryDescription, SubTokensOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { API, SchedulerState } from './SchedulerClient'
 import { ScheduledTaskLogEntity, ScheduledTaskEntity} from './Signum.Entities.Scheduler'
-
 
 interface SchedulerPanelProps extends ReactRouter.RouteComponentProps<{}, {}> {
 
@@ -60,49 +60,60 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                     <br />
                     SchedulerMargin: {s.SchedulerMargin}
                     <br />
-                    NextExecution: { s.NextExecution} ({ s.NextExecution == null ? "-None-" : moment(s.NextExecution).toNow()})
+                    NextExecution: { s.NextExecution} ({ s.NextExecution == null ? "-None-" : moment(s.NextExecution).toNow() })
                     <br />
-                    <h3>In Memory Queue</h3>
-                    <table className="sf-search-results sf-stats-table">
-                        <thead>
-                            <tr>
-                                <th>ScheduledTask
-                                </th>
-                                <th>Rule
-                                </th>
-                                <th>NextExecution
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                                { s.Queue.map((item, i)=>
-                                <tr key={i}>
-                                    <td><EntityLink lite={item.ScheduledTask} inSearch={true} /></td>
-                                    <td>{ item.Rule } </td>
-                                    <td>{ s.NextExecution} ({ s.NextExecution == null ? "-None-" : moment(s.NextExecution).toNow()})</td>
-                                </tr>)
-                            }
-                        </tbody>
-                    </table>
+                    { this.renderTable() }
                     <br />
                     <br />
-                    <h2>{ScheduledTaskEntity.niceName()}</h2>
-                    <SearchControl findOptions={{ 
-                        queryName: ScheduledTaskEntity, 
-                        searchOnLoad: true, 
-                        showFilters: false, 
-                        pagination: { elementsPerPage: 10, mode: "Firsts"}}}/>
+                    <h2>{ScheduledTaskEntity.niceName() }</h2>
+                    <SearchControl findOptions={{
+                        queryName: ScheduledTaskEntity,
+                        searchOnLoad: true,
+                        showFilters: false,
+                        pagination: { elementsPerPage: 10, mode: "Firsts" }
+                    }}/>
 
-                    
+
                     <br />
-                    <h2>{ScheduledTaskLogEntity.niceName()}</h2>
-                    <SearchControl findOptions={{ 
-                        queryName: ScheduledTaskLogEntity, 
-                        orderOptions: [{ columnName: "StartTime", orderType: "Descending" }], 
-                        searchOnLoad: true, 
-                        showFilters: false, 
-                        pagination: { elementsPerPage: 10, mode: "Firsts"}}}/>
+                    <h2>{ScheduledTaskLogEntity.niceName() }</h2>
+                    <SearchControl findOptions={{
+                        queryName: ScheduledTaskLogEntity,
+                        orderOptions: [{ columnName: "StartTime", orderType: "Descending" }],
+                        searchOnLoad: true,
+                        showFilters: false,
+                        pagination: { elementsPerPage: 10, mode: "Firsts" }
+                    }}/>
                 </div>
+            </div>
+        );
+    }
+
+    renderTable() {
+        var s = this.state;
+        return (
+            <div>
+                <h3>In Memory Queue</h3>
+                <table className="sf-search-results sf-stats-table">
+                    <thead>
+                        <tr>
+                            <th>ScheduledTask
+                            </th>
+                            <th>Rule
+                            </th>
+                            <th>NextExecution
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        { s.Queue.map((item, i) =>
+                            <tr key={i}>
+                                <td><EntityLink lite={item.ScheduledTask} inSearch={true} /></td>
+                                <td>{ item.Rule } </td>
+                                <td>{ item.NextExecution} ({ item.NextExecution == null ? "-None-" : moment(item.NextExecution).toNow() }) </td>
+                            </tr>)
+                        }
+                    </tbody>
+                </table>
             </div>
         );
     }
