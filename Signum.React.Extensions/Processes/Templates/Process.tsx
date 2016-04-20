@@ -19,10 +19,10 @@ export default class UserQuery extends EntityComponent<ProcessEntity> {
     }
 
     reloadIfNecessary(e : ProcessEntity){
-        if((this.entity.state == "Executing" || this.entity.state == "Queued") && this.handler == null) {
+        if((e.state == "Executing" || e.state == "Queued") && this.handler == null) {
             this.handler = setTimeout(()=> {
                 this.handler = null;
-                var lite = toLite(this.entity);
+                var lite = toLite(e);
                 Navigator.API.fetchEntityPack(lite)
                     .then(pack=> this.props.frame.onReload(pack))
                     .done(); 
