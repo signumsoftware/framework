@@ -178,7 +178,7 @@ namespace Signum.Engine.Processes
 
         private static void Remove(ProcessState processState, DeleteLogParametersEntity parameters)
         {
-            var query = Database.Query<ProcessEntity>().Where(p => p.State == ProcessState.Canceled && p.CreationDate < parameters.DateLimit);
+            var query = Database.Query<ProcessEntity>().Where(p => p.State == processState && p.CreationDate < parameters.DateLimit);
 
             query.SelectMany(a => a.ExceptionLines()).UnsafeDeleteChunks(parameters.ChunkSize, parameters.MaxChunks);
 
