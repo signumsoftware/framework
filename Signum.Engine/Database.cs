@@ -924,6 +924,19 @@ namespace Signum.Engine
             }
         }
 
+        public static int ExecuteChunks(this IUpdateable update, int chunkSize = 10000, int maxQueries = int.MaxValue)
+        {
+            int total = 0;
+            for (int i = 0; i < maxQueries; i++)
+            {
+                int num = update.Take(chunkSize).Execute();
+                total += num;
+                if (num < chunkSize)
+                    break;
+            }
+            return total;
+        }
+
         static string UnsafeMessage(IUpdateable update)
         {
             if (update.PartSelector == null)
@@ -1025,6 +1038,8 @@ namespace Signum.Engine
         Type EntityType { get; }
 
         IQueryable<E> EntityQuery<E>() where E : Entity;
+
+        IUpdateable Take(int count);
     }
 
     //E -> E
@@ -1069,6 +1084,11 @@ namespace Signum.Engine
             var result = query.Select(partSelector);
 
             return UpdateableConverter.Convert<T, E>(result);
+        }
+
+        public IUpdateable Take(int count)
+        {
+            return new UpdateablePart<A, T>(this.query.Take(count), this.partSelector, this.settersExpressions);
         }
     }
 
@@ -1126,6 +1146,11 @@ namespace Signum.Engine
         public IQueryable<E> EntityQuery<E>() where E : Entity
         {
             return UpdateableConverter.Convert<T, E>(query);
+        }
+
+        public IUpdateable Take(int count)
+        {
+            return new Updateable<T>(this.query.Take(count), this.settersExpressions);
         }
     }
 

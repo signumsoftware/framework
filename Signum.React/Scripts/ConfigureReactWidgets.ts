@@ -49,10 +49,16 @@ export function configure(){
         },
 
         parse: function parse(value, format, culture) {
+            if (value == null || value == "")
+                return null;
+
             return getMoment(culture, value, format).toDate();
         },
 
         format: function format(value, _format, culture) {
+            if (value == null)
+                return "";
+
             return getMoment(culture, value, null).format(_format);
         }
     };

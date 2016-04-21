@@ -176,6 +176,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     renderBody() {
 
         var frame: EntityFrame<Entity> = {
+            component: this,
             onReload: pack => this.setPack(pack),
             onClose: () => this.props.onExited(null),
             setError: (modelState, initialPrefix = "") => {
