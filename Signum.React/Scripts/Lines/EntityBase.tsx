@@ -84,7 +84,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             if (tr.name != IsByAll && !tr.name.split(',').map(a => a.trim()).contains(entityType))
                 throw new Error(`Impossible to convert '${entityType}' to '${tr.name}'`);
 
-            if (isLite == tr.isLite)
+            if (!!isLite == !!tr.isLite)
                 return Promise.resolve(entityOrLite);
 
             if (isLite) {
@@ -151,7 +151,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         if (t.isEmbedded)
             return Promise.resolve(t.name);
 
-        const tis = getTypeInfos(t).filter(predicate);
+        const tis = getTypeInfos(t).filter(ti => predicate(ti));
 
         return SelectorPopup.chooseType(tis)
             .then(ti => ti ? ti.name : null);

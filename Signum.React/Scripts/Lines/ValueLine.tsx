@@ -137,7 +137,7 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     if (s.inlineCheckBox) {
         return (
             <label className={vl.state.ctx.binding.error}>
-                <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value } onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}/>
+                <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}/>
                 { " " + s.labelText}
             </label>
         );
@@ -145,7 +145,7 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     else {
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
-                <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value } onChange={handleCheckboxOnChange}
+                <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
                     className={addClass(vl.state.valueHtmlProps, "form-control")} disabled={s.ctx.readOnly}/>
             </FormGroup>
         );

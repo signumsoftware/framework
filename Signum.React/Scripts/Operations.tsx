@@ -215,57 +215,57 @@ export function isEntityOperation(operationType: OperationType) {
 export namespace API {
 
     export function construct<T extends Entity>(type: string, operationKey: string | ConstructSymbol_Simple<T>, args?: any[]): Promise<EntityPack<T>> {
-        return ajaxPost<EntityPack<T>>({ url: "/api/operation/construct" }, { operationKey: getKey(operationKey), args, type });
+        return ajaxPost<EntityPack<T>>({ url: "/api/operation/construct" }, { operationKey: getOperationKey(operationKey), args, type });
     }
 
     export function constructFromEntity<T extends Entity, F extends Entity>(entity: F, operationKey: string | ConstructSymbol_From<T, F>, args?: any[]): Promise<EntityPack<T>> {
 
-        return ajaxPost<EntityPack<T>>({ url: "/api/operation/constructFromEntity" }, { entity: entity, operationKey: getKey(operationKey), args: args } as EntityOperationRequest);
+        return ajaxPost<EntityPack<T>>({ url: "/api/operation/constructFromEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
     }
 
     export function constructFromLite<T extends Entity, F extends Entity>(lite: Lite<F>, operationKey: string | ConstructSymbol_From<T, F>, args?: any[]): Promise<EntityPack<T>> {
         GraphExplorer.propagateAll(lite, args);
-        return ajaxPost<EntityPack<T>>({ url: "/api/operation/constructFromLite" }, { lite: lite, operationKey: getKey(operationKey), args: args } as LiteOperationRequest);
+        return ajaxPost<EntityPack<T>>({ url: "/api/operation/constructFromLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
     }
 
     export function constructFromMultiple<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, args?: any[]): Promise<ErrorReport> {
         GraphExplorer.propagateAll(lites, args);
-        return ajaxPost<ErrorReport>({ url: "/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getKey(operationKey), args: args } as MultiOperationRequest);
+        return ajaxPost<ErrorReport>({ url: "/api/operation/constructFromMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
     }
 
     export function constructFromMany<T extends Entity, F extends Entity>(lites: Lite<F>[], operationKey: string | ConstructSymbol_From<T, F>, args?: any[]): Promise<EntityPack<T>> {
         GraphExplorer.propagateAll(lites, args);
-        return ajaxPost<EntityPack<T>>({ url: "/api/operation/constructMany" }, { lites: lites, operationKey: getKey(operationKey), args: args } as MultiOperationRequest);
+        return ajaxPost<EntityPack<T>>({ url: "/api/operation/constructFromMany" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
     }
 
     export function executeEntity<T extends Entity>(entity: T, operationKey: string | ExecuteSymbol<T>, args?: any[]): Promise<EntityPack<T>> {
         GraphExplorer.propagateAll(entity, args);
-        return ajaxPost<EntityPack<T>>({ url: "/api/operation/executeEntity" }, { entity: entity, operationKey: getKey(operationKey), args: args } as EntityOperationRequest);
+        return ajaxPost<EntityPack<T>>({ url: "/api/operation/executeEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
     }
 
     export function executeLite<T extends Entity>(lite: Lite<T>, operationKey: string | ExecuteSymbol<T>, args?: any[]): Promise<EntityPack<T>> {
         GraphExplorer.propagateAll(lite, args);
-        return ajaxPost<EntityPack<T>>({ url: "/api/operation/executeLite" }, { lite: lite, operationKey: getKey(operationKey), args: args } as LiteOperationRequest);
+        return ajaxPost<EntityPack<T>>({ url: "/api/operation/executeLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
     }
 
     export function executeMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T>, args?: any[]): Promise<ErrorReport> {
         GraphExplorer.propagateAll(lites, args);
-        return ajaxPost<ErrorReport>({ url: "/api/operation/executeMultiple" }, { lites: lites, operationKey: getKey(operationKey), args: args } as MultiOperationRequest);
+        return ajaxPost<ErrorReport>({ url: "/api/operation/executeMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
     }
 
     export function deleteEntity<T extends Entity>(entity: T, operationKey: string | ExecuteSymbol<T>, args?: any[]): Promise<void> {
         GraphExplorer.propagateAll(entity, args);
-        return ajaxPost<void>({ url: "/api/operation/deleteEntity" }, { entity: entity, operationKey: getKey(operationKey), args: args } as EntityOperationRequest);
+        return ajaxPost<void>({ url: "/api/operation/deleteEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
     }
 
     export function deleteLite<T extends Entity>(lite: Lite<T>, operationKey: string | ExecuteSymbol<T>, args?: any[]): Promise<void> {
         GraphExplorer.propagateAll(lite, args);
-        return ajaxPost<void>({ url: "/api/operation/deleteLite" }, { lite: lite, operationKey: getKey(operationKey), args: args } as LiteOperationRequest);
+        return ajaxPost<void>({ url: "/api/operation/deleteLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
     }
 
     export function deleteMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T>, args?: any[]): Promise<ErrorReport> {
         GraphExplorer.propagateAll(lites, args);
-        return ajaxPost<ErrorReport>({ url: "/api/operation/deleteMultiple" }, { lites: lites, operationKey: getKey(operationKey), args: args } as MultiOperationRequest);
+        return ajaxPost<ErrorReport>({ url: "/api/operation/deleteMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
     }
 
     export interface ErrorReport {
@@ -275,13 +275,13 @@ export namespace API {
 
   
 
-    function getKey(operationKey: string | OperationSymbol) {
+    export function getOperationKey(operationKey: string | OperationSymbol) {
         return (operationKey as OperationSymbol).key || operationKey as string;
     }
 
 
 
-    interface MultiOperationRequest {
+    export interface MultiOperationRequest {
         operationKey: string;
         type?: string;
         lites: Lite<Entity>[];

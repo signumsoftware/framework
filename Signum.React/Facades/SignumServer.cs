@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Converters;
+using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.React.ApiControllers;
@@ -20,6 +21,9 @@ namespace Signum.React.Facades
     {
         public static void Start(HttpConfiguration config, Assembly mainAsembly)
         {
+            Schema.Current.ApplicationName = System.Web.Hosting.HostingEnvironment.ApplicationHost.GetPhysicalPath();
+
+
             config.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
             // Web API configuration and services
             var appXmlType = config.Formatters.XmlFormatter.SupportedMediaTypes.FirstOrDefault(t => t.MediaType == "application/xml");
