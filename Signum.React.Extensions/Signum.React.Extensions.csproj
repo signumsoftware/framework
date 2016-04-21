@@ -139,6 +139,7 @@
     <Compile Include="Authorization\AuthController.cs" />
     <Compile Include="Authorization\AuthServer.cs" />
     <Compile Include="Authorization\UserTicketClient.cs" />
+    <Compile Include="Cache\CacheController.cs" />
     <Compile Include="Cache\CacheServer.cs" />
     <Compile Include="Chart\ChartController.cs" />
     <Compile Include="Chart\ChartServer.cs" />
@@ -153,9 +154,13 @@
     <Compile Include="Map\OperationMap.cs" />
     <Compile Include="Map\SchemaMap.cs" />
     <Compile Include="Omnibox\OmniboxServer.cs" />
-    <Compile Include="Omnibox\ReactSpecialOmniboxGenerator.cs" />
     <Compile Include="Omnibox\OmniboxController.cs" />
+    <Compile Include="Omnibox\ReactSpecialOmniboxGenerator.cs" />
+    <Compile Include="Processes\ProcessServer.cs" />
+    <Compile Include="Processes\ProcessController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scheduler\SchedulerServer.cs" />
+    <Compile Include="Scheduler\SchedulerController.cs" />
     <Compile Include="Translation\TranslationController.cs" />
     <Compile Include="Translation\TranslationServer.cs" />
     <Compile Include="UserAssets\UserAssetServer.cs" />
@@ -169,10 +174,10 @@
     <Content Include="Files\Files.css" />
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
-    <Content Include="Omnibox\Omnibox.css" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Processes\Processes.css" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -243,6 +248,11 @@
     <TypeScriptCompile Include="Basics\Signum.Entities.Basics.ts">
       <DependentUpon>Signum.Entities.Basics.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Cache\CacheClient.tsx" />
+    <TypeScriptCompile Include="Cache\CacheStatisticsPage.tsx" />
+    <TypeScriptCompile Include="Cache\Signum.Entities.Cache.ts">
+      <DependentUpon>Signum.Entities.Cache.t4s</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Chart\UserChartOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScript.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScriptCode.tsx" />
@@ -305,6 +315,7 @@
     <TypeScriptCompile Include="Map\MapOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Map\MapClient.tsx" />
     <TypeScriptCompile Include="Map\Operation\OperationMap.ts" />
+    <TypeScriptCompile Include="Map\Operation\OperationMapPage.tsx" />
     <TypeScriptCompile Include="Map\Schema\ColorProviders\Auth.tsx" />
     <TypeScriptCompile Include="Map\Schema\ColorProviders\Disconnected.tsx" />
     <TypeScriptCompile Include="Map\Schema\ColorProviders\Isolation.tsx" />
@@ -322,6 +333,7 @@
     <TypeScriptCompile Include="Notes\Signum.Entities.Notes.ts">
       <DependentUpon>Signum.Entities.Notes.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Omnibox\SpecialOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Omnibox\EntityOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Omnibox\DynamicQueryOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Omnibox\OmniboxAutocomplete.tsx" />
@@ -329,12 +341,25 @@
     <TypeScriptCompile Include="Omnibox\Signum.Entities.Omnibox.ts">
       <DependentUpon>Signum.Entities.Omnibox.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Processes\ProcessClient.tsx" />
+    <TypeScriptCompile Include="Processes\ProcessPanelPage.tsx" />
     <TypeScriptCompile Include="Processes\Signum.Entities.Processes.ts">
       <DependentUpon>Signum.Entities.Processes.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Processes\Templates\PackageLine.tsx" />
+    <TypeScriptCompile Include="Processes\Templates\Package.tsx" />
+    <TypeScriptCompile Include="Processes\Templates\PackageOperation.tsx" />
+    <TypeScriptCompile Include="Processes\Templates\Process.tsx" />
+    <TypeScriptCompile Include="Scheduler\SchedulerClient.tsx" />
+    <TypeScriptCompile Include="Scheduler\SchedulerPanelPage.tsx" />
     <TypeScriptCompile Include="Scheduler\Signum.Entities.Scheduler.ts">
       <DependentUpon>Signum.Entities.Scheduler.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Scheduler\Templates\HolidayCalendar.tsx" />
+    <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleMinutely.tsx" />
+    <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleMonths.tsx" />
+    <TypeScriptCompile Include="Scheduler\Templates\ScheduleRuleWeekDays.tsx" />
+    <TypeScriptCompile Include="Scheduler\Templates\SchedulerTask.tsx" />
     <TypeScriptCompile Include="SMS\Signum.Entities.SMS.ts">
       <DependentUpon>Signum.Entities.SMS.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -376,6 +401,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Map\Signum.Entities.Map.t4s" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Cache\Signum.Entities.Cache.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>

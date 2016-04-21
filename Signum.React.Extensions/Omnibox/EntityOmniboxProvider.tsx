@@ -81,27 +81,3 @@ interface EntityOmniboxResult extends OmniboxResult {
 
     Lite: Lite<Entity>
 }
-
-/*
-   public Type Type { get; set; }
-        public OmniboxMatch TypeMatch { get; set; }
-
-        public PrimaryKey? Id { get; set; }
-
-        public string ToStr { get; set; }
-        public OmniboxMatch ToStrMatch { get; set; }
-
-        public Lite<Entity> Lite { get; set; }
-
-        public override string ToString()
-        {
-            if (Id.HasValue)
-                return "{0} {1}".FormatWith(Type.NicePluralName().ToOmniboxPascal(), Id, Lite?.ToString() ?? OmniboxMessage.NotFound.NiceToString());
-
-            if (ToStr != null)
-                return "{0} \"{1}\"".FormatWith(Type.NicePluralName().ToOmniboxPascal(), ToStr, Lite?.ToString() ?? OmniboxMessage.NotFound.NiceToString());
-
-            return Type.NicePluralName().ToOmniboxPascal();
-        }
-
-*/

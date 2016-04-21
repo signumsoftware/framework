@@ -51,8 +51,9 @@ namespace Signum.React.Map
                           {
                               count = counts.GetOrThrow(e.GetType()).TryGet(e, 0),
                               ignored = ignored,
-                              key = StateKey(e),
+                              key = e.ToString(),
                               niceName = e.NiceToString(),
+                              isSpecial = t == typeof(DefaultState),
                               color = Engine.Chart.ChartColorLogic.ColorFor(EnumEntity.FromEnumUntyped(e)).TryToHtml(),
                               token = tokens.GetOrThrow(e.GetType()),
                           }).ToList(),
@@ -62,8 +63,8 @@ namespace Signum.React.Map
                                   niceName = o.OperationSymbol.NiceToString(),
                                   key = o.OperationSymbol.Key,
                                   count = operationCounts.TryGet(o.OperationSymbol, 0),
-                                  fromStates = WithDefaultStateArray(o.UntypedFromStates, DefaultState.Start).Select(StateKey).ToArray(),
-                                  toStates = WithDefaultStateArray(o.UntypedToStates, DefaultState.End).Select(StateKey).ToArray(),
+                                  fromStates = WithDefaultStateArray(o.UntypedFromStates, DefaultState.Start).Select(a => a.ToString()).ToArray(),
+                                  toStates = WithDefaultStateArray(o.UntypedToStates, DefaultState.End).Select(a => a.ToString()).ToArray(),
                               }).ToList()
             };
         }
@@ -77,11 +78,6 @@ namespace Signum.React.Map
                 return new Enum[] { DefaultState.All };
 
             return enumerable;
-        }
-
-        private static string StateKey(Enum e)
-        {
-            return e.GetType().Name + "." + e.ToString();
         }
 
         static readonly GenericInvoker<Func<LambdaExpression, Dictionary<Enum, int>>> giCountGroupBy =
@@ -142,5 +138,6 @@ namespace Signum.React.Map
         public bool ignored;
         public string color;
         public string token;
+        public bool isSpecial;
     }
 }

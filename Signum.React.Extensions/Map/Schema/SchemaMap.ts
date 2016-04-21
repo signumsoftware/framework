@@ -334,37 +334,54 @@ export class SchemaMapD3 {
                 (d.y - d.height / 2) + ")");
     }
 
-    getPathExpression(l : IRelationInfo){
-       
+    getPathExpression(l: IRelationInfo) {
+
         var s = l.sourcePoint;
         var t = l.targetPoint;
 
-        var m : Point = { 
-            x : (s.x + t.x) / 2, 
-            y : (s.y + t.y) / 2
+        if (l.source == l.target) {
+
+            var dx = (l.repetitions % 2) * 2 - 1;
+            var dy = ((l.repetitions + 1 ) % 2) * 2 - 1;
+
+            var c = calculatePoint(l.source, {
+                x: l.source.x + dx * (l.source.width / 2),
+                y: l.source.y + dy * (l.source.height / 2),
+            });
+            
+            return `M${c.x} ${c.y} C ${c.x + 50 * dx} ${c.y} ${c.x} ${c.y + 50 * dy} ${c.x} ${c.y}`;
+        } else {
+            let p = this.getPointRepetitions(s, t, l.repetitions);
+            return `M${s.x} ${s.y} Q ${p.x} ${p.y} ${t.x} ${t.y}`;
+        }
+    }
+
+    getPointRepetitions(s: Point, t: Point, repetitions: number): Point {
+
+        var m: Point = {
+            x: (s.x + t.x) / 2,
+            y: (s.y + t.y) / 2
         };
 
-        var d : Point = {
-            x : (s.x - t.x), 
-            y : (s.y - t.y) 
+        var d: Point = {
+            x: (s.x - t.x),
+            y: (s.y - t.y)
         };
 
         var h = Math.sqrt(d.x * d.x + d.y * d.y);
 
-        if(h == 0)
+        if (h == 0)
             h = 1;
 
         //0, 10, -10, 20, -20, 30, -30
-        var repPixels = Math.floor(l.repetitions + 1 / 2) * ((l.repetitions % 2) * 2  - 1); 
+        var repPixels = Math.floor(repetitions + 1 / 2) * ((repetitions % 2) * 2 - 1);
 
-        var p : Point = {
-            x : m.x + (d.y / h) * 20 * repPixels,
-            y : m.y - (d.x / h) * 20 * repPixels
+        var p: Point = {
+            x: m.x + (d.y / h) * 20 * repPixels,
+            y: m.y - (d.x / h) * 20 * repPixels
         };
-        
-        
-        return `M${s.x} ${s.y} Q ${p.x} ${p.y} ${t.x} ${t.y}`
 
+        return p;
     }
 
 

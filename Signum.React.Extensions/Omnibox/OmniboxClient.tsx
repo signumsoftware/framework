@@ -12,17 +12,39 @@ import { OmniboxMessage } from './Signum.Entities.Omnibox'
 
 
 export function start(...params: OmniboxProvider<OmniboxResult>[]) {
-    params.forEach(op => register(op));
+    params.forEach(op => registerProvider(op));
 }
 
-export function register(prov: OmniboxProvider<OmniboxResult>) {
+export var providers: { [resultTypeName: string]: OmniboxProvider<OmniboxResult> } = {}; 
+export function registerProvider(prov: OmniboxProvider<OmniboxResult>) {
     if (providers[prov.getProviderName()])
         throw new Error(`Provider '${prov.getProviderName()}' already registered`);
 
     providers[prov.getProviderName()] = prov;
 }
 
-export var providers: { [resultTypeName: string]: OmniboxProvider<OmniboxResult> } = {}; 
+
+
+export var specialActions: { [resultTypeName: string]: SpecialOmniboxAction } = {};
+export function registerSpecialAction(action: SpecialOmniboxAction) {
+    if (specialActions[action.key])
+        throw new Error(`Action '${action.key}' already registered`);
+
+    specialActions[action.key] = action;
+}
+
+export interface SpecialOmniboxAction {
+    key: string;
+    allowed: () => boolean;
+    onClick: () => Promise<string>;
+}
+
+
+export interface HelpOmniboxResult extends OmniboxResult {
+    Text: string;
+    ReferencedTypeName: string;
+}
+
 
 export function renderItem(result: OmniboxResult): React.ReactChild {
     var items = result.ResultTypeName == "HelpOmniboxResult" ?
@@ -68,8 +90,14 @@ function getProvider(resultTypeName: string) {
     return prov;
 }
 
-export function getResults(query: string): Promise<OmniboxResult[]> {
-    return ajaxGet<OmniboxResult[]>({ url: "/api/omnibox?query=" + encodeURI(query || "help") })
+export namespace API {
+
+    export function getResults(query: string): Promise<OmniboxResult[]> {
+        return ajaxPost<OmniboxResult[]>({ url: "/api/omnibox" }, {
+            query: query || "help",
+            specialActions: Dic.getKeys(specialActions)
+        })
+    }
 }
 
 export abstract class OmniboxProvider<T extends OmniboxResult> {
@@ -117,11 +145,6 @@ export interface OmniboxMatch {
     Distance: number;
     Text: string;
     BoldMask: string;
-}
-
-export interface HelpOmniboxResult extends OmniboxResult {
-    Text: string;
-    ReferencedTypeName: string;
 }
 
 

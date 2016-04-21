@@ -41,7 +41,7 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
             return null;
 
         return Promise.resolve(Navigator.currentHistory.createPath(
-            "/Map" + (result.TypeMatch ? "/" + result.TypeMatch.Text : "")
+            "/Map" + (result.TypeName ? "/" + result.TypeName : "")
         ));
     }
 

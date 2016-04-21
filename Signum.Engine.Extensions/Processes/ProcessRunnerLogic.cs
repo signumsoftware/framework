@@ -51,6 +51,7 @@ namespace Signum.Engine.Processes
                 MaxDegreeOfParallelism = MaxDegreeOfParallelism,
                 NextPlannedExecution = nextPlannedExecution,
                 JustMyProcesses = ProcessLogic.JustMyProcesses,
+                MachineName = Environment.MachineName,
                 Executing = executing.Values.Select(p => new ExecutionState
                 {
                     IsCancellationRequested = p.CancelationSource.IsCancellationRequested,
@@ -493,10 +494,12 @@ namespace Signum.Engine.Processes
     {
         public int MaxDegreeOfParallelism;
         public int InitialDelayMiliseconds;
+        public string MachineName;
         public bool Running;
         public bool JustMyProcesses;
         public DateTime? NextPlannedExecution;
         public List<ExecutionState> Executing;
+
     }
 
     public class ExecutionState

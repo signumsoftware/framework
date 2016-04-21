@@ -18,10 +18,21 @@ namespace Signum.React.Omnibox
 {
     public class OmniboxController : ApiController
     {
-        [Route("api/omnibox"), HttpGet]
-        public List<OmniboxResult> OmniboxResults(string query)
+        [Route("api/omnibox"), HttpPost]
+        public List<OmniboxResult> OmniboxResults(OmniboxRequest request)
         {
-            return OmniboxParser.Results(query, new System.Threading.CancellationToken());
+            ReactSpecialOmniboxGenerator.ClientGenerator = new SpecialOmniboxGenerator<ReactSpecialOmniboxAction>()
+            {
+                Actions = request.specialActions.ToDictionary(a => a, a => new ReactSpecialOmniboxAction { Key = a })
+            };
+
+            return OmniboxParser.Results(request.query, new System.Threading.CancellationToken());
+        }
+
+        public class OmniboxRequest
+        {
+            public string query;
+            public string[] specialActions;
         }
     }
 }
