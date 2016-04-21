@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Authentication;
 using System.ServiceModel.Channels;
 using System.Text;
 using System.Web;
@@ -76,6 +77,9 @@ namespace Signum.React.Facades
         {
             if (type == typeof(UnauthorizedAccessException))
                 return HttpStatusCode.Forbidden;
+
+            if (type == typeof(AuthenticationException))
+                return HttpStatusCode.Unauthorized;
 
             if (type == typeof(EntityNotFoundException))
                 return HttpStatusCode.NotFound;
