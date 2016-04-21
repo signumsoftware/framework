@@ -13,7 +13,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     valueLineType?: ValueLineType;
     unitText?: string;
     formatText?: string;
-    inlineCheckBox?: boolean;
+    inlineCheckbox?: boolean;
     comboBoxItems?: { name: string, niceName: string }[];
     valueHtmlProps?: React.HTMLAttributes;
 }
@@ -134,7 +134,7 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
         vl.setValue(input.checked);
     };
 
-    if (s.inlineCheckBox) {
+    if (s.inlineCheckbox) {
         return (
             <label className={vl.state.ctx.binding.error}>
                 <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}/>

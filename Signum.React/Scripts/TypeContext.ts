@@ -113,7 +113,6 @@ export class StyleContext {
     }
 }
 
-
 export interface StyleOptions {
 
     formGroupStyle?: FormGroupStyle;
