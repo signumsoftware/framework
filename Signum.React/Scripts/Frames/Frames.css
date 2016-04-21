@@ -46,3 +46,9 @@ a.expand-window {
 a.expand-window:hover {
     color:gray;
 }
+
+.btn-toolbar.right .btn,
+.btn-toolbar.right .btn-group,
+.btn-toolbar.right .input-group {
+  float: right;
+}
