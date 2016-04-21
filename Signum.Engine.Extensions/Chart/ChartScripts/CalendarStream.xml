@@ -105,8 +105,7 @@
     .key(function(r) { return r.c0.key; })
     .rollup(function(r) { return r[0]; })
     .map(data.rows);
-   debugger
-  
+   
   var rect = svg.selectAll("rect.day")
      .data(function(d) { return d3.time.days.utc(new Date(Date.UTC(d, 0, 1)), new Date(Date.UTC(d + 1, 0, 1))); })
      .enter().append("rect")
@@ -124,7 +123,6 @@
      })
      .append("title")
     	.text(function(d) {  
-          debugger; 
           var r = groups[cleanDate(d)];
           return format(d) + (r == undefined ? "": ("("+r.c1.key+")"));
         });
