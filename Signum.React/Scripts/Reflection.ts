@@ -521,6 +521,10 @@ export class EnumType<T extends string> {
         return getTypeInfo(this.type);
     }
 
+    values(): T[] {
+        return Dic.getKeys(this.typeInfo().members) as T[];
+    }
+
     niceName(value?: T): string {
 
         if (value == null)
