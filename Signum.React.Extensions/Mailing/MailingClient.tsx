@@ -3,7 +3,7 @@ import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, EmbeddedEntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
@@ -11,13 +11,13 @@ import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
 import { EmailMessageEntity, EmailMasterTemplateEntity, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEntity, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
-import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity } from './Signum.Entities.Mailing'
+import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEntity } from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import * as AuthClient from '../Authorization/AuthClient'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
-require("!style!css!./Processes.css");
+require("!style!css!./Mailing.css");
 
 export function start(options: { routes: JSX.Element[], smtpConfig: boolean, newsletter: boolean, pop3Config: boolean, sendEmailTask: boolean, quickLinksFrom: PseudoType[] }) {
     options.routes.push(<Route path="asyncEmailSender">
@@ -34,14 +34,17 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => new Promise(resolve => require(['./Templates/EmailTemplate'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => new Promise(resolve => require(['./Templates/EmailMasterTemplate'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => new Promise(resolve => require(['./Templates/EmailPackage'], resolve))));
+    Navigator.addSettings(new EmbeddedEntitySettings(EmailRecipientEntity, e => new Promise(resolve => require(['./Templates/EmailRecipient'], resolve))));
+    Navigator.addSettings(new EmbeddedEntitySettings(EmailAddressEntity, e => new Promise(resolve => require(['./Templates/EmailAddress'], resolve))));
+    Navigator.addSettings(new EmbeddedEntitySettings(EmailConfigurationEntity, e => new Promise(resolve => require(['./Templates/EmailConfiguration'], resolve))));
 
     if (options.smtpConfig) {
         Navigator.addSettings(new EntitySettings(SmtpConfigurationEntity, e => new Promise(resolve => require(['./Templates/SmtpConfiguration'], resolve))));
     }
 
     if (options.newsletter) {
-        Navigator.addSettings(new EntitySettings(NewsletterEntity, e => new Promise(resolve => require(['./Templates/Newsletter'], resolve))));
-        Navigator.addSettings(new EntitySettings(NewsletterDeliveryEntity, e => new Promise(resolve => require(['./Templates/NewsletterDelivery'], resolve))));
+        Navigator.addSettings(new EntitySettings(NewsletterEntity, e => new Promise(resolve => require(['./Newsletters/Newsletter'], resolve))));
+        Navigator.addSettings(new EntitySettings(NewsletterDeliveryEntity, e => new Promise(resolve => require(['./Newsletters/NewsletterDelivery'], resolve))));
     }
 
     if (options.sendEmailTask) {
@@ -49,7 +52,8 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     }
 
     if (options.pop3Config) {
-        Navigator.addSettings(new EntitySettings(Pop3ConfigurationEntity, e => new Promise(resolve => require(['./Templates/Pop3Configuration'], resolve))));
+        Navigator.addSettings(new EntitySettings(Pop3ConfigurationEntity, e => new Promise(resolve => require(['./Pop3/Pop3Configuration'], resolve))));
+        Navigator.addSettings(new EntitySettings(Pop3ReceptionEntity, e => new Promise(resolve => require(['./Pop3/Pop3Reception'], resolve))));
     }
 
     if (options.quickLinksFrom) {

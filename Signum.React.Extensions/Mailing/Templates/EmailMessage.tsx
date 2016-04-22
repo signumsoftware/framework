@@ -43,8 +43,8 @@ export default class EmailMessage extends EntityComponent<EmailMessageEntity> {
 
 
                 <div className="form-inline repeater-inline">
-                    <EntityDetail ctx={e.subCtx(f => f.from)} getComponent={this.renderAddress}  />
-                    <EntityRepeater ctx={e.subCtx(f => f.recipients)} getComponent={this.renderRecipient}/>
+                    <EntityDetail ctx={e.subCtx(f => f.from)} />
+                    <EntityRepeater ctx={e.subCtx(f => f.recipients)}/>
                     <EntityRepeater ctx={e.subCtx(f => f.attachments)} getComponent={this.renderAttachment} />
                 </div>
                     
@@ -82,46 +82,7 @@ export default class EmailMessage extends EntityComponent<EmailMessageEntity> {
         </Tab>;
     };
 
-    renderAddress = (ec: TypeContext<EmailAddressEntity>) => {
-
-        var sc = ec.subCtx({ placeholderLabels: true, formGroupStyle: FormGroupStyle.SrOnly});
-
-        return (
-            <div className="row form-vertical">
-                <div className="col-sm-4 col-sm-offset-2">
-                     <EntityLine ctx={sc.subCtx(ea => ea.emailOwner)}  />
-                </div>
-                 <div className="col-sm-3">
-                        <ValueLine ctx={sc.subCtx(c => c.emailAddress)}  />{/*vl.ValueHtmlProps.Remove("size"*/})
-                 </div>
-                 <div className="col-sm-3">
-                       <ValueLine ctx={sc.subCtx(c => c.displayName)}  />
-                 </div>
-            </div>
-        );
-    };
-
-    renderRecipient = (ec: TypeContext<EmailRecipientEntity>) => {
-        var sc = ec.subCtx({ placeholderLabels: true, formGroupStyle: FormGroupStyle.SrOnly});
-
-        return (
-            <div className="row form-vertical">
-                <div className="col-sm-1">
-                    <ValueLine ctx={sc.subCtx(c => c.kind)}  />
-                </div>
-                <div className="col-sm-4">
-                    <EntityLine ctx={sc.subCtx(ea => ea.emailOwner)}  />
-                </div>
-                <div className="col-sm-3">
-                    <ValueLine ctx={sc.subCtx(c => c.emailAddress)}  />{/*vl.ValueHtmlProps.Remove("size"*/})
-                </div>
-                <div className="col-sm-3">
-                    <ValueLine ctx={sc.subCtx(c => c.displayName)}  />
-                </div>
-            </div>
-        );
-    };
-
+    
     renderAttachment = (ec: TypeContext<EmailAttachmentEntity>) => {
         var sc = ec.subCtx({ formGroupStyle: FormGroupStyle.SrOnly});
         return (

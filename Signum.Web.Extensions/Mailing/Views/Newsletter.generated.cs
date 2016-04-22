@@ -87,8 +87,8 @@ WriteLiteral("\r\n");
             
             #line 8 "..\..\Mailing\Views\Newsletter.cshtml"
  using (var nc = Html.TypeContext<NewsletterEntity>())
-{  
-    using(var tabs = Html.Tabs(nc)) 
+{
+    using(var tabs = Html.Tabs(nc))
     {
         tabs.Tab("emTabMain", typeof(NewsletterEntity).NiceName(), 
             
@@ -309,14 +309,14 @@ WriteLiteralTo(__razor_template_writer, " data-prefix=\"");
             #line hidden
 WriteLiteralTo(__razor_template_writer, "\"");
 
-WriteAttributeTo(__razor_template_writer, "value", Tuple.Create(" value=\"", 2209), Tuple.Create("\"", 2266)
+WriteAttributeTo(__razor_template_writer, "value", Tuple.Create(" value=\"", 2206), Tuple.Create("\"", 2263)
             
             #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                           , Tuple.Create(Tuple.Create("", 2217), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
+                                                                                                           , Tuple.Create(Tuple.Create("", 2214), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 2217), false)
+, 2214), false)
 );
 
 WriteLiteralTo(__razor_template_writer, " />\r\n");

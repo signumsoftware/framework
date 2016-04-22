@@ -10,7 +10,7 @@ import { EmailTemplateEntity, EmailTemplateContactEntity, EmailTemplateRecipient
 import { TemplateTokenMessage } from '../Signum.Entities.Templating'
 import FileLine from '../../Files/FileLine'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import QueryTokenBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/QueryTokenBuilder'
+import TemplateControls from '../TemplateControls'
 
 
 export default class EmailTemplate extends EntityComponent<EmailTemplateEntity> {
@@ -72,7 +72,8 @@ export default class EmailTemplate extends EntityComponent<EmailTemplateEntity> 
                 <ValueLine ctx={ec.subCtx(e => e.isBodyHtml)}  />
 
                 <div className="sf-email-replacements-container">
-                    <EntityTabRepeater ctx={ec.subCtx(a=>a.messages)} getComponent={(ctx : TypeContext<EmailTemplateMessageEntity>)=><EmailTemplateMessage ctx={ctx} queryKey={ec.value.query && ec.value.query.key}/> } />
+                    <EntityTabRepeater ctx={ec.subCtx(a=>a.messages)} getComponent={(ctx : TypeContext<EmailTemplateMessageEntity>)=>
+                        <EmailTemplateMessage ctx={ctx} queryKey={ec.value.query && ec.value.query.key}/> } />
                 </div>
             </div>
         );
@@ -137,110 +138,30 @@ export default class EmailTemplate extends EntityComponent<EmailTemplateEntity> 
 
     renderMessage = (c: TypeContext<EmailTemplateMessageEntity>) => {
      
-
     }
-    
+
+    onInserToken = (newToken: string)=>{
+
+
+    };
 }
 
-
-class EmailTemplateMessage extends React.Component<{ ctx: TypeContext<EmailTemplateMessageEntity>; queryKey: string }, {currentToken: QueryToken}>{
+export class EmailTemplateMessage extends React.Component<{ ctx: TypeContext<EmailTemplateMessageEntity>, queryKey: string }, {currentControl: "Subject" | "Text"}>{
 
     render(){
         var ec = this.props.ctx.subCtx({ labelColumns: { sm: 1 }});
-
-        var ct = this.state.currentToken;
-
         return (
-
-             <div className="sf-email-template-message">
-                <input type="hidden" className="sf-tab-title" value="@(ec.Value.CultureInfo?.ToString())" />
+            <div className="sf-email-template-message">
                 <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} />
-                {this.props.queryKey && !ec.readOnly &&
-                <div className="sf-template-message-insert-container">
-                    <QueryTokenBuilder queryToken={ct} queryKey={this.props.queryKey} onTokenChange={t=>this.setState({currentToken : t})} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />
-                    {this.renderButton(EmailTemplateViewMessage.Insert.niceToString(), this.canElement(), token=> `@[${token}]`)  }
-                    {this.renderButton("if", this.canIf(), token=> `<!--@if[${token}]--> <!--@else--> <!--@endif-->`)  }
-                    {this.renderButton("foreach", this.canForeach(), token=> `"<!--@foreach[${token}]--> <!--@endforeach-->"`)  }
-                    {this.renderButton("endforeach",this.canElement(), token=> `"<!--@any[${token}=value]--> <!--@notany--> <!--@endany-->"`)  }
-                </div>}
+                <TemplateControls queryKey={this.props.queryKey}  onInsert={this.onInsert} forHtml={true} /> 
                 <ValueLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={FormGroupStyle.None} placeholderLabels={true} labelHtmlProps={{width: "100px"}} valueHtmlProps={{className: "sf-email-inserttoken-target sf-email-template-message-subject form-control"}}  />
                 <ValueLine ctx={ec.subCtx(e => e.text)}  formGroupStyle={FormGroupStyle.None} valueLineType={ValueLineType.TextArea} labelHtmlProps={{width: "100px", height:"180px"}} valueHtmlProps={{className: "sf-rich-text-editor sf-email-template-message-text"}} />
             </div>
         );
     }
 
-    renderButton(title: string, canClick: string,  buildPattern : (key: string)=> string){
-          return <input type="button" disabled={!!canClick} className="btn btn-default btn-sm sf-button" title={canClick}>{title}</input>;
-    }
+    onInsert = (message: string)=> {
 
 
-    canElement() : string
-    {
-        var token = this.state.currentToken;
-
-        if (token == null)
-            return TemplateTokenMessage.NoColumnSelected.niceToString();
-
-        if (token.type.isCollection)
-            return TemplateTokenMessage.YouCannotAddIfBlocksOnCollectionFields.niceToString();
-        
-        if (hasAnyOrAll(token))
-            return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
-
-        return null;
-    }
-
-
-    canIf() : string
-    {
-        var token = this.state.currentToken;
-
-        if (token == null)
-            return TemplateTokenMessage.NoColumnSelected.niceToString();
-
-        if (token.type.isCollection)
-            return TemplateTokenMessage.YouCannotAddIfBlocksOnCollectionFields.niceToString();
-        
-        if (hasAnyOrAll(token))
-            return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
-
-        return null;
-    }
-
-    canForeach() : string
-    {
-             
-        var token = this.state.currentToken;
-
-        if (token == null)
-            return TemplateTokenMessage.NoColumnSelected.niceToString();
-
-        if (token.type.isCollection)
-            return TemplateTokenMessage.YouHaveToAddTheElementTokenToUseForeachOnCollectionFields.niceToString();
-
-        if (token.key != "Element" || token.parent == null || !token.parent.type.isCollection)
-            return TemplateTokenMessage.YouCanOnlyAddForeachBlocksWithCollectionFields.niceToString();
-
-        if (hasAnyOrAll(token))
-            return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
-
-        return null;
-    }
-
-    canAny()
-    {
-          
-        var token = this.state.currentToken;
-
-        if (token == null)
-            return TemplateTokenMessage.NoColumnSelected.niceToString();
-
-        if (hasAnyOrAll(token))
-            return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
-
-        return null;
     }
 }
-
-
-
