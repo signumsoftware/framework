@@ -127,6 +127,16 @@ export enum QueryTokenType {
     AnyOrAll = "AnyOrAll" as any,
 }
 
+export function hasAnyOrAll(token: QueryToken) : boolean {
+    if(token == null)
+        return false;
+
+    if(token.queryTokenType == QueryTokenType.AnyOrAll)
+        return true;
+
+    return hasAnyOrAll(token.parent);
+}
+
 export function getTokenParents(token: QueryToken): QueryToken[] {
     const result = [];
     while (token != null) {
