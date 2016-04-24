@@ -61,10 +61,6 @@ export function isPermissionAuthorized(permission: PermissionSymbol) {
     return true;
 }
 
-export function isQueryAllowed(quey: PseudoType | QueryKey) {
-    return true;
-}
-
 export function asserPermissionAuthorized(permission: PermissionSymbol) {
     if (!isPermissionAuthorized(permission))
         throw new Error(`Permission ${permission.key} is denied`);
