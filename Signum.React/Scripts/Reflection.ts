@@ -411,7 +411,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
         throw Error("invalid function");
 
     const parameter = lambdaMatch[1];
-    const body = lambdaMatch[2];
+    const body = lambdaMatch[3];
 
     if (parameter == body)
         return new ReadonlyBinding<T>(parentValue as T, "");
@@ -433,7 +433,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 }
 
 
-const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*return\s*(.*)\s*;\s*}$/;
+const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*(.*)\s*;\s*}$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
@@ -447,7 +447,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
         throw Error("invalid function");
 
     const parameter = lambdaMatch[1];
-    let body = lambdaMatch[2];
+    let body = lambdaMatch[3];
     var result: LambdaMember[] = [];
 
     while (body != parameter) {
