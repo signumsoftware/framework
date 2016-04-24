@@ -143,7 +143,7 @@ namespace Signum.React.Facades
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                               ToStringFunction = ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
-                              QueryDefinedAndAllowed = dqm.QueryDefinedAndAllowed(type),
+                              QueryDefined = dqm.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type)
                                 .ToDictionary(p => p.PropertyString(), p => OnAddMemberExtra(new MemberInfoTS
                                 {
@@ -244,7 +244,7 @@ namespace Signum.React.Facades
                               Kind = kind,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               Members = type.GetFields(staticFlags)
-                              .Where(fi => kind != KindOfType.Query || dqm.QueryDefinedAndAllowed(fi.GetValue(null)))
+                              .Where(fi => kind != KindOfType.Query || dqm.QueryDefined(fi.GetValue(null)))
                               .ToDictionary(m => m.Name, m => new MemberInfoTS
                               {
                                   NiceName = m.NiceName(),
@@ -309,8 +309,8 @@ namespace Signum.React.Facades
         public bool IsLowPopulation { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "toStringFunction")]
         public string ToStringFunction { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "queryDefinedAndAllowed")]
-        public bool QueryDefinedAndAllowed { get; internal set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "queryDefined")]
+        public bool QueryDefined { get; internal set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
         public Dictionary<string, MemberInfoTS> Members { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "operations")]

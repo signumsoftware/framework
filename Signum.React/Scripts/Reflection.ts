@@ -24,7 +24,7 @@ export interface TypeInfo {
     toStringFunction?: string;
     isLowPopupation?: boolean;
     requiresSaveOperation?: boolean;
-    queryDefinedAndAllowed?: boolean;
+    queryDefined?: boolean;
     members?: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
     mixins?: { [name: string]: string; };
@@ -245,10 +245,10 @@ export function getQueryKey(queryName: PseudoType | QueryKey): string {
 
 export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
     if ((queryName as TypeInfo).kind != null)
-        return (queryName as TypeInfo).queryDefinedAndAllowed;
+        return (queryName as TypeInfo).queryDefined;
 
     if (queryName instanceof Type)
-        return getTypeInfo(queryName).queryDefinedAndAllowed;
+        return getTypeInfo(queryName).queryDefined;
 
     if (queryName instanceof QueryKey)
         return !!_queryNames[queryName.name];
@@ -258,7 +258,7 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
 
         const type = _types[str.toLowerCase()];
         if (type) {
-            return type.queryDefinedAndAllowed;
+            return type.queryDefined;
         }
 
         const qn = _queryNames[str.toLowerCase()];
