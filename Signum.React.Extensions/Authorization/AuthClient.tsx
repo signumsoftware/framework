@@ -31,11 +31,12 @@ export function currentUser(): UserEntity {
     return Navigator.currentUser as UserEntity;
 }
 
-export const CurrentUserChangedEvent = "current-user-changed";
+export var onCurrentUserChanged: Array<(newUser: UserEntity) => void> = [];
+
 export function setCurrentUser(user: UserEntity) {
     Navigator.currentUser = user;
 
-    document.dispatchEvent(new Event(CurrentUserChangedEvent));
+    onCurrentUserChanged.forEach(f => f(user));
 }
 
 

@@ -15,8 +15,7 @@ export default class LoginUserControl extends React.Component<{}, { user: UserEn
     }
 
     componentWillMount() {
-        document.addEventListener(AuthClient.CurrentUserChangedEvent,
-            () => this.setState({ user: AuthClient.currentUser() }));
+        AuthClient.onCurrentUserChanged.push(newUser => this.setState({ user: newUser }));
     }
 
     render() {
