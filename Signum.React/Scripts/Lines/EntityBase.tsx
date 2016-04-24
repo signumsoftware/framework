@@ -47,9 +47,9 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         const type = state.type;
 
-        state.create = type.isEmbedded ? Navigator.isCreable(type.name, false) :
+        state.create = type.isEmbedded ? Navigator.isCreable(type.name, !!this.props.getComponent, false) :
             type.name == IsByAll ? false :
-                getTypeInfos(type).some(ti => Navigator.isCreable(ti, false));
+                getTypeInfos(type).some(ti => Navigator.isCreable(ti, !!this.props.getComponent, false));
 
         state.view = type.isEmbedded ? Navigator.isViewable(type.name, !!this.props.getComponent) :
             type.name == IsByAll ? true :
@@ -159,7 +159,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     defaultCreate(): Promise<ModifiableEntity | Lite<Entity>> {
 
-        return this.chooseType(Navigator.isCreable)
+        return this.chooseType(t => Navigator.isCreable(t, !!this.props.getComponent, false))
             .then(typeName => typeName ? Constructor.construct(typeName) : null)
             .then(e => e ? e.entity : null);
     }

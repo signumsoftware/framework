@@ -24,6 +24,7 @@ export interface TypeInfo {
     toStringFunction?: string;
     isLowPopupation?: boolean;
     requiresSaveOperation?: boolean;
+    queryDefinedAndAllowed?: boolean;
     members?: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
     mixins?: { [name: string]: string; };
@@ -179,14 +180,14 @@ export function getTypeInfo(type: PseudoType): TypeInfo {
 
 export const IsByAll = "[ALL]";
 export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
-    if (typeReference.name == IsByAll)
+    if (typeReference.name == IsByAll || typeReference.name == "")
         return [];
 
     return typeReference.name.split(", ").map(getTypeInfo);
 
 }
 
-export function getQueryNiceName(queryName: any) {
+export function getQueryNiceName(queryName: PseudoType | QueryKey) {
 
     if ((queryName as TypeInfo).kind != null)
         return (queryName as TypeInfo).nicePluralName;
@@ -215,7 +216,7 @@ export function getQueryNiceName(queryName: any) {
 
 }
 
-export function getQueryKey(queryName: any): string {
+export function getQueryKey(queryName: PseudoType | QueryKey): string {
     if ((queryName as TypeInfo).kind != null)
         return (queryName as TypeInfo).name;
 
@@ -239,7 +240,33 @@ export function getQueryKey(queryName: any): string {
         return str;
     }
 
-    throw new Error("unexpected queryName type");
+    return null;
+}
+
+export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
+    if ((queryName as TypeInfo).kind != null)
+        return (queryName as TypeInfo).queryDefinedAndAllowed;
+
+    if (queryName instanceof Type)
+        return getTypeInfo(queryName).queryDefinedAndAllowed;
+
+    if (queryName instanceof QueryKey)
+        return !!_queryNames[queryName.name];
+
+    if (typeof queryName == "string") {
+        const str = queryName as string;
+
+        const type = _types[str.toLowerCase()];
+        if (type) {
+            return type.queryDefinedAndAllowed;
+        }
+
+        const qn = _queryNames[str.toLowerCase()];
+
+        return !!qn;
+    }
+
+    return false;
 }
 
 export function requestTypes(): Promise<TypeInfoDictionary> {

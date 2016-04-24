@@ -7,7 +7,7 @@ import { EntityFrame, EntityComponentProps } from '../Lines'
 import ButtonBar from './ButtonBar'
 
 import { TypeContext, StyleOptions } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState } from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState} from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
@@ -29,7 +29,6 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
 interface ModalFrameState {
     pack?: EntityPack<ModifiableEntity>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
-    entitySettings?: Navigator.EntitySettingsBase<any>;
     propertyRoute?: PropertyRoute;
     savedEntity?: string;
     show?: boolean;
@@ -67,15 +66,22 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             .done();
     }
 
-    calculateState(props: ModalFrameState): ModalFrameState {
 
-        const typeName = (this.props.entityOrPack as Lite<Entity>).EntityType ||
+    getTypeName() {
+        return (this.props.entityOrPack as Lite<Entity>).EntityType ||
             (this.props.entityOrPack as ModifiableEntity).Type ||
             (this.props.entityOrPack as EntityPack<ModifiableEntity>).entity.Type;
+    }
+    
+    getTypeInfo() {
+        const typeName = this.getTypeName();
 
-        const entitySettings = Navigator.getSettings(typeName);
+        return getTypeInfo(typeName);
+    }
 
-        const typeInfo = getTypeInfo(typeName);
+    calculateState(props: ModalFrameState): ModalFrameState {
+
+        const typeInfo = this.getTypeInfo();
 
         const pr = typeInfo ? PropertyRoute.root(typeInfo) : this.props.propertyRoute;
 
@@ -83,7 +89,6 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             throw new Error("propertyRoute is mandatory for embeddedEntities");
 
         return {
-            entitySettings: entitySettings,
             propertyRoute: pr,
             show: true,
         };
@@ -186,7 +191,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         };
 
         const styleOptions: StyleOptions = {
-            readOnly: this.props.readOnly != null ? this.props.readOnly : this.state.entitySettings.onIsReadonly()
+            readOnly: this.props.readOnly != null ? this.props.readOnly : Navigator.isReadOnly(this.getTypeName())
         };
 
         var pack = this.state.pack;
@@ -232,7 +237,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         const ti = getTypeInfo(entity.Type);
 
-        if (ti == null || !Navigator.isNavigable(ti, null)) //Embedded
+        if (ti == null || !Navigator.isNavigable(ti, false)) //Embedded
             return null;
 
         return (

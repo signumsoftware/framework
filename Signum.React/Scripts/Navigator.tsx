@@ -3,9 +3,9 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
-import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack } from './Signum.Entities';
 import { IUserEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName  } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded  } from './Reflection';
 import { TypeContext } from './TypeContext';
 import { EntityComponent, EntityComponentProps, EntityFrame } from './Lines';
 import * as Finder from './Finder';
@@ -48,15 +48,15 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute) {
 export function navigateRoute(entity: Entity);
 export function navigateRoute(lite: Lite<Entity>);
 export function navigateRoute(type: PseudoType, id: any);
-export function navigateRoute(typeOfEntity: any, id: any = null) {
+export function navigateRoute(typeOfEntity: Entity | Lite<Entity> | PseudoType, id: any = null) {
     let typeName: string;
-    if ((typeOfEntity as Entity).Type) {
-        typeName = (typeOfEntity as Entity).Type;
-        id = (typeOfEntity as Entity).id;
+    if (isEntity(typeOfEntity)) {
+        typeName = typeOfEntity.Type;
+        id = typeOfEntity.id;
     }
-    else if ((typeOfEntity as Lite<Entity>).EntityType) {
-        typeName = (typeOfEntity as Lite<Entity>).EntityType;
-        id = (typeOfEntity as Lite<Entity>).id;
+    else if (isLite(typeOfEntity)) {
+        typeName = typeOfEntity.EntityType;
+        id = typeOfEntity.id;
     }
     else {
         typeName = getTypeName(typeOfEntity as PseudoType);
@@ -69,22 +69,22 @@ export function createRoute(type: PseudoType) {
     return currentHistory.createHref("/create/" + getTypeName(type));
 }
 
-export const entitySettings: { [type: string]: EntitySettingsBase<ModifiableEntity> } = {};
+export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
 
-export function addSettings(...settings: EntitySettingsBase<any>[]) {
+export function addSettings(...settings: EntitySettings<any>[]) {
     settings.forEach(s=> Dic.addOrThrow(entitySettings, s.type.typeName, s));
 }
 
 
-export function getSettings<T extends ModifiableEntity>(type: Type<T>): EntitySettingsBase<T>;
-export function getSettings(type: PseudoType): EntitySettingsBase<ModifiableEntity>;
-export function getSettings(type: PseudoType): EntitySettingsBase<ModifiableEntity> {
+export function getSettings<T extends ModifiableEntity>(type: Type<T>): EntitySettings<T>;
+export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity>;
+export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> {
     const typeName = getTypeName(type);
 
     return entitySettings[typeName];
 }
 
-
+ 
 export function getComponent<T extends ModifiableEntity>(entity: T): Promise<React.ComponentClass<EntityComponentProps<T>>> {
 
     var settings = getSettings(entity.Type);
@@ -100,24 +100,75 @@ export function getComponent<T extends ModifiableEntity>(entity: T): Promise<Rea
 
 export const isCreableEvent: Array<(typeName: string) => boolean> = [];
 
-export function isCreable(type: PseudoType, isSearch?: boolean) {
+export function isCreable(type: PseudoType, customView = false, isSearch = false) {
 
     const typeName = getTypeName(type);
+    
+    const baseIsCreable = checkFlag(typeIsCreable(typeName), isSearch);
+
+    const hasView = customView || hasRegisteredView(typeName);
+
+    return baseIsCreable && hasView && isCreableEvent.every(f => f(typeName));
+}
+
+
+function typeIsCreable(typeName: string): EntityWhen {
 
     const es = entitySettings[typeName];
+    if (es != null && es.isCreable != null)
+        return es.isCreable;
     
-    return (es == null || isSearch == null || es.onIsCreable(isSearch)) &&  isCreableEvent.every(f => f(typeName));
+    const typeInfo = getTypeInfo(typeName);
+    if (typeInfo == null)
+        return EntityWhen.IsLine;
+
+    switch (typeInfo.entityKind) {
+        case EntityKind.SystemString: return EntityWhen.Never;
+        case EntityKind.System: return EntityWhen.Never;
+        case EntityKind.Relational: return EntityWhen.Never;
+        case EntityKind.String: return EntityWhen.IsSearch;
+        case EntityKind.Shared: return EntityWhen.Always;
+        case EntityKind.Main: return EntityWhen.IsSearch;
+        case EntityKind.Part: return EntityWhen.IsLine;
+        case EntityKind.SharedPart: return EntityWhen.IsLine;
+        default: throw new Error("Unexpected kind");
+    }
 }
+
 
 export const isReadonlyEvent: Array<(typeName: string) => boolean> = [];
 
-export function isReadOnly(type: PseudoType, isSearch?: boolean) {
+export function isReadOnly(type: PseudoType) {
 
     const typeName = getTypeName(type);
 
-    const es = entitySettings[typeName];
+    const baseIsReadOnly = typeIsReadOnly(typeName);
 
-    return (es == null || es.onIsReadonly()) && isReadonlyEvent.every(f => f(typeName));
+    return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName));
+}
+
+
+function typeIsReadOnly(typeName: string): boolean {
+
+    const es = entitySettings[typeName];
+    if (es != null && es.isReadOnly != null)
+        return es.isReadOnly;
+    
+    const typeInfo = getTypeInfo(typeName);
+    if (typeInfo == null)
+        return false;
+
+    switch (typeInfo.entityKind) {
+        case EntityKind.SystemString: return true;
+        case EntityKind.System: return true;
+        case EntityKind.Relational: return true;
+        case EntityKind.String: return false;
+        case EntityKind.Shared: return false;
+        case EntityKind.Main: return false;
+        case EntityKind.Part: return false;
+        case EntityKind.SharedPart: return false;
+        default: throw new Error("Unexpected kind");
+    }
 }
 
 export const isFindableEvent: Array<(typeName: string) => boolean> = []; 
@@ -125,15 +176,34 @@ export const isFindableEvent: Array<(typeName: string) => boolean> = [];
 export function isFindable(type: PseudoType, isSearch?: boolean) {
 
     const typeName = getTypeName(type);
+    
+    const baseIsReadOnly = typeIsFindable(typeName);
 
-    if (!Finder.isFindable(typeName))
-        return false;
+    return baseIsReadOnly && Finder.isFindable(typeName);
+}
+
+function typeIsFindable(typeName: string) {
 
     const es = entitySettings[typeName];
-    if (es && !es.onIsFindable())
+
+    if (es != null && es.isFindable != null)
+        return es.isFindable;
+
+    const typeInfo = getTypeInfo(typeName);
+    if (typeInfo == null)
         return false;
 
-    return true;
+    switch (typeInfo.entityKind) {
+        case EntityKind.SystemString: return true;
+        case EntityKind.System: return true;
+        case EntityKind.Relational: return false;
+        case EntityKind.String: return true;
+        case EntityKind.Shared: return true;
+        case EntityKind.Main: return true;
+        case EntityKind.Part: return false;
+        case EntityKind.SharedPart: return true;
+        default: throw new Error("Unexpected kind");
+    }
 }
 
 export const isViewableEvent: Array<(typeName: string, entity?: ModifiableEntity) => boolean> = []; 
@@ -142,10 +212,41 @@ export function isViewable(typeOrEntity: PseudoType | ModifiableEntity, customVi
     const entity = (typeOrEntity as ModifiableEntity).Type ? typeOrEntity as ModifiableEntity : null;
 
     const typeName = entity ? entity.Type : getTypeName(typeOrEntity as PseudoType);
+    
+    const baseIsViewable = typeIsViewable(typeName);
+    
+    const hasView = customView || hasRegisteredView(typeName);
+
+    return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entity));
+}
+
+function hasRegisteredView(typeName: string) {
+    const es = entitySettings[typeName];
+    return (es && es.getComponent);
+}
+
+function typeIsViewable(typeName: string): boolean {
 
     const es = entitySettings[typeName];
 
-    return (es == null ? customView : es.onIsViewable(customView)) && isViewableEvent.every(f => f(typeName, entity));
+    if (es != null && es.isViewable != null)
+        return es.isViewable;
+
+    const typeInfo = getTypeInfo(typeName);
+    if (typeInfo == null)
+        return true;
+
+    switch (typeInfo.entityKind) {
+        case EntityKind.SystemString: return false;
+        case EntityKind.System: return true;
+        case EntityKind.Relational: return false;
+        case EntityKind.String: return false;
+        case EntityKind.Shared: return true;
+        case EntityKind.Main: return true;
+        case EntityKind.Part: return true;
+        case EntityKind.SharedPart: return true;
+        default: throw new Error("Unexpected kind");
+    }
 }
 
 export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customView = false, isSearch = false): boolean {
@@ -154,9 +255,37 @@ export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customV
 
     const typeName = entity ? entity.Type : getTypeName(typeOrEntity as PseudoType);
 
+    const baseTypeName = checkFlag(typeIsNavigable(typeName), isSearch);
+
+    const hasView = customView || hasRegisteredView(typeName);
+
+    return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entity));
+}
+
+
+
+function typeIsNavigable(typeName: string): EntityWhen {
+
     const es = entitySettings[typeName];
 
-    return (es == null ? customView : es.onIsNavigable(customView, isSearch)) && isViewableEvent.every(f => f(typeName, entity));
+    if (es != null && es.isViewable != null)
+        return es.isNavigable;
+
+    const typeInfo = getTypeInfo(typeName);
+    if (typeInfo == null)
+        return EntityWhen.Never;
+
+    switch (typeInfo.entityKind) {
+        case EntityKind.SystemString: return EntityWhen.Never;
+        case EntityKind.System: return EntityWhen.Always;
+        case EntityKind.Relational: return EntityWhen.Never;
+        case EntityKind.String: return EntityWhen.IsSearch;
+        case EntityKind.Shared: return EntityWhen.Always;
+        case EntityKind.Main: return EntityWhen.Always;
+        case EntityKind.Part: return EntityWhen.Always;
+        case EntityKind.SharedPart: return EntityWhen.Always;
+        default: throw new Error("Unexpected kind");
+    }
 }
 
 
@@ -304,16 +433,10 @@ export module API {
 }
 
 
-export abstract class EntitySettingsBase<T extends ModifiableEntity> {
+export class EntitySettings<T extends ModifiableEntity> {
     type: Type<T>;
 
     avoidPopup: boolean;
-
-    abstract onIsCreable(isSearch: boolean): boolean;
-    abstract onIsFindable(): boolean;
-    abstract onIsViewable(customView: boolean): boolean;
-    abstract onIsNavigable(customView: boolean, isSearch: boolean): boolean;
-    abstract onIsReadonly(): boolean;
 
     getToString: (entity: T) => string;
 
@@ -321,170 +444,32 @@ export abstract class EntitySettingsBase<T extends ModifiableEntity> {
 
     viewOverrides: Array<(replacer: ViewReplacer<T>) => void>;
 
-    overrideView(override: (replacer: ViewReplacer<T>) => void) {
-        if (this.viewOverrides == null)
-            this.viewOverrides = [];
-
-        this.viewOverrides.push(override);
-    }
-    
-    constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>) {
-        this.type = type;
-        this.getComponent = getComponent;
-    }
-}
-
-export class EntitySettings<T extends Entity> extends EntitySettingsBase<T> {    
-
     isCreable: EntityWhen;
     isFindable: boolean;
     isViewable: boolean;
     isNavigable: EntityWhen;
     isReadOnly: boolean;
 
+    overrideView(override: (replacer: ViewReplacer<T>) => void) {
+        if (this.viewOverrides == null)
+            this.viewOverrides = [];
+
+        this.viewOverrides.push(override);
+    }
+
     constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
         options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean }) {
-        super(type, getComponent);
 
-        switch (type.typeInfo().entityKind) {
-            case EntityKind.SystemString:
-                this.isCreable = EntityWhen.Never;
-                this.isFindable = true;
-                this.isViewable = false;
-                this.isNavigable = EntityWhen.Never;
-                this.isReadOnly = true;
-                break;
-
-            case EntityKind.System:
-                this.isCreable = EntityWhen.Never;
-                this.isFindable = true;
-                this.isViewable = true;
-                this.isNavigable = EntityWhen.Always;
-                this.isReadOnly = true;
-                break;
-
-            case EntityKind.Relational:
-                this.isCreable = EntityWhen.Never;
-                this.isFindable = false;
-                this.isViewable = false;
-                this.isNavigable = EntityWhen.Never;
-                this.isReadOnly = true;
-                break;
-
-            case EntityKind.String:
-                this.isCreable = EntityWhen.IsSearch;
-                this.isFindable = true;
-                this.isViewable = false;
-                this.isNavigable = EntityWhen.IsSearch;
-                break;
-
-            case EntityKind.Shared:
-                this.isCreable = EntityWhen.Always;
-                this.isFindable = true;
-                this.isViewable = true;
-                this.isNavigable = EntityWhen.Always;
-                break;
-
-            case EntityKind.Main:
-                this.isCreable = EntityWhen.IsSearch;
-                this.isFindable = true;
-                this.isViewable = true;
-                this.isNavigable = EntityWhen.Always;
-                break;
-
-            case EntityKind.Part:
-                this.isCreable = EntityWhen.IsLine;
-                this.isFindable = false;
-                this.isViewable = true;
-                this.isNavigable = EntityWhen.Always;
-                break;
-
-            case EntityKind.SharedPart:
-                this.isCreable = EntityWhen.IsLine;
-                this.isFindable = true;
-                this.isViewable = true;
-                this.isNavigable = EntityWhen.Always;
-                break;
-
-            default:
-                break;
-
-        }
+        this.type = type;
+        this.getComponent = getComponent;
 
         Dic.extend(this, options);
     }
-
-    onIsCreable(isSearch: boolean): boolean {
-
-        return this.isCreable == EntityWhen.Always ||
-            this.isCreable == (isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
-    }
-
-
-    onIsFindable(): boolean {
-        return this.isFindable;
-    }
-
-    onIsViewable(customView: boolean): boolean {
-        if (!this.getComponent && !customView)
-            return false;
-
-        return this.isViewable;
-    }
-
-    onIsNavigable(customView: boolean, isSearch: boolean): boolean {
-
-        if (!this.getComponent && !customView)
-            return false;
-
-        return this.isNavigable == EntityWhen.Always ||
-            this.isNavigable == (isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
-    }
-
-    onIsReadonly(): boolean {
-        return this.isReadOnly;
-    }
 }
 
-export class EmbeddedEntitySettings<T extends ModifiableEntity> extends EntitySettingsBase<T> {
-
-    isCreable: boolean;
-    isViewable: boolean;
-    isReadOnly: boolean;
-    
-    constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
-        options?: { isCreable?: boolean; isViewable?: boolean; isReadOnly?: boolean }) {
-        super(type, getComponent);
-
-        Dic.extend(this, options, { isCreable: true, isViewable: true });
-    }
-
-    onIsCreable(isSearch: boolean) {
-        if (isSearch)
-            throw new Error("EmbeddedEntitySettigs are not compatible with isSearch");
-
-        return this.isCreable;
-    }
-
-    onIsFindable(): boolean {
-        return false;
-    }
-
-    onIsViewable(customView: boolean): boolean {
-        if (!this.getComponent && !customView)
-            return false;
-
-        return this.isViewable;
-    }
-
-    onIsNavigable(customView: boolean, isSearch: boolean): boolean {
-        return false;
-    }
-
-    onIsReadonly(): boolean {
-        return this.isReadOnly;
-    }
-
+export function checkFlag(entityWhen: EntityWhen, isSearch: boolean) {
+    return entityWhen == EntityWhen.Always ||
+        entityWhen == (isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
 }
 
 export enum EntityWhen {
