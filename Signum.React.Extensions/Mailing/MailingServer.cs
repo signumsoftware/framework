@@ -20,6 +20,8 @@ using Signum.Engine.Cache;
 using Signum.Entities.Cache;
 using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
+using Signum.Entities.Mailing;
+using Signum.Entities.Templating;
 
 namespace Signum.React.Mailing
 {
@@ -29,6 +31,13 @@ namespace Signum.React.Mailing
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
+            ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));
+
+            EntityJsonConverter.AfterDeserilization.Register((EmailTemplateEntity ue) =>
+            {
+                var qd = DynamicQueryManager.Current.QueryDescription(ue.Query.ToQueryName());
+                ue.ParseData(qd);
+            });
         }
     }
 }

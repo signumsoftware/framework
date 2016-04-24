@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
+import * as moment from 'moment'
 import { Link } from 'react-router'
-import * as numbro from 'numbro'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import EntityLink from '../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import {CountSearchControl, SearchControl, OrderType } from '../../../Framework/Signum.React/Scripts/Search'

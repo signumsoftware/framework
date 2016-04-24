@@ -14,6 +14,8 @@ export default class Newsletter extends EntityComponent<NewsletterEntity> {
     renderEntity() {
 
         var nc = this.props.ctx;
+        
+        
 
         return (
             <div>

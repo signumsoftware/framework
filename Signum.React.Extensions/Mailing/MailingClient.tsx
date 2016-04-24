@@ -3,7 +3,7 @@ import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings, EmbeddedEntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings} from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
@@ -34,9 +34,9 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => new Promise(resolve => require(['./Templates/EmailTemplate'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => new Promise(resolve => require(['./Templates/EmailMasterTemplate'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => new Promise(resolve => require(['./Templates/EmailPackage'], resolve))));
-    Navigator.addSettings(new EmbeddedEntitySettings(EmailRecipientEntity, e => new Promise(resolve => require(['./Templates/EmailRecipient'], resolve))));
-    Navigator.addSettings(new EmbeddedEntitySettings(EmailAddressEntity, e => new Promise(resolve => require(['./Templates/EmailAddress'], resolve))));
-    Navigator.addSettings(new EmbeddedEntitySettings(EmailConfigurationEntity, e => new Promise(resolve => require(['./Templates/EmailConfiguration'], resolve))));
+    Navigator.addSettings(new EntitySettings(EmailRecipientEntity, e => new Promise(resolve => require(['./Templates/EmailRecipient'], resolve))));
+    Navigator.addSettings(new EntitySettings(EmailAddressEntity, e => new Promise(resolve => require(['./Templates/EmailAddress'], resolve))));
+    Navigator.addSettings(new EntitySettings(EmailConfigurationEntity, e => new Promise(resolve => require(['./Templates/EmailConfiguration'], resolve))));
 
     if (options.smtpConfig) {
         Navigator.addSettings(new EntitySettings(SmtpConfigurationEntity, e => new Promise(resolve => require(['./Templates/SmtpConfiguration'], resolve))));
