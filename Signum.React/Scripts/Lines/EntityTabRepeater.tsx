@@ -47,21 +47,25 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                         {buttons}
                     </div>
                 </legend>
-                <Tabs>
+                <Tabs id={this.props.ctx.compose("tabs")}>
                     {
                         mlistItemContext(this.state.ctx).map((mlec, i) =>
-                            <Tab className="sf-repeater-element" eventKey={i} key={i}>
-                                <legend>
-                                    { this.state.remove && <a className={classes("sf-line-button", "sf-create") }
-                                        onClick={e => this.handleRemoveElementClick(e, i) }
-                                        title={EntityControlMessage.Remove.niceToString() }>
+                            <Tab className="sf-repeater-element" eventKey={i} key={i} title={<div>
+                                { getToString(mlec.value) }
+                                &nbsp;
+                                { this.state.remove &&
+                                    <span className={classes("sf-line-button", "sf-create") }
+                                    onClick={e => this.handleRemoveElementClick(e, i) }
+                                    title={EntityControlMessage.Remove.niceToString() }>
                                         <span className="glyphicon glyphicon-remove"/>
-                                    </a> }
-                                </legend>
+                                    </span> }
+                            </div>}>
                                 <RenderEntity ctx={mlec} getComponent={this.props.getComponent}/>
                             </Tab>
                         )
+                        
                     }
+                    <Tab eventKey={"x"} disabled></Tab> {/*Temporal hack*/}
                 </Tabs>
             </fieldset>
         );
