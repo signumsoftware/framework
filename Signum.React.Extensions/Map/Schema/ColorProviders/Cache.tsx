@@ -2,9 +2,16 @@
 import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
 import { ClientColorProvider, SchemaMapInfo  } from '../SchemaMap'
+import { CachePermission } from '../../../Cache/Signum.Entities.Cache'
+import { isPermissionAuthorized } from '../../../Authorization/AuthClient'
 import { colorScale, colorScaleSqr  } from '../../Utils'
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
+
+    if (!isPermissionAuthorized(CachePermission.ViewCache))
+        return null;
+
+
     return [
         getColorProvider(info, "cache-rows", "Rows", true),
         getColorProvider(info, "cache-invalidations", "Invalidations", false),
