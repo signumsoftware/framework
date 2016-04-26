@@ -28,6 +28,7 @@ namespace Signum.React.Cache
         public static void Start(HttpConfiguration config)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+            ReflectionServer.RegisterLike(typeof(CachePermission));
 
             SchemaMap.GetColorProviders += GetMapColors;
         }
