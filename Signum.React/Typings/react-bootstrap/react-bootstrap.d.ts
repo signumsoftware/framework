@@ -650,7 +650,7 @@ declare module "react-bootstrap" {
         last?: boolean;
         maxButtons?: number;
         next?: boolean;
-        onSelect?: (event: React.SyntheticEvent, selectedEvent: { eventKey: number }) => void;
+        onSelect?: (eventKey: number, event: React.SyntheticEvent) => void;
         prev?: boolean;
     }
     interface Pagination extends React.ReactElement<PaginationProps> { }
