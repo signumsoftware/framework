@@ -18,6 +18,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Operations;
 using Signum.Engine.DynamicQuery;
+using Signum.Engine;
 
 namespace Signum.React.Facades
 {
@@ -72,13 +73,26 @@ namespace Signum.React.Facades
             return ti;
         }
 
-        public static Action<MemberInfoTS, PropertyRoute> AddPropertyExtension;
-        static MemberInfoTS OnAddMemberExtra(MemberInfoTS mi, PropertyRoute m)
+        public static Action<MemberInfoTS, PropertyRoute> AddPropertyRouteExtension;
+        static MemberInfoTS OnAddPropertyRouteExtension(MemberInfoTS mi, PropertyRoute m)
         {
-            if (AddPropertyExtension == null)
+            if (AddPropertyRouteExtension == null)
                 return mi;
 
-            foreach (var a in AddPropertyExtension.GetInvocationListTyped())
+            foreach (var a in AddPropertyRouteExtension.GetInvocationListTyped())
+                a(mi, m);
+
+            return mi;
+        }
+
+
+        public static Action<MemberInfoTS, FieldInfo> AddFieldInfoExtension;
+        static MemberInfoTS OnAddFieldInfoExtension(MemberInfoTS mi, FieldInfo m)
+        {
+            if (AddFieldInfoExtension == null)
+                return mi;
+
+            foreach (var a in AddFieldInfoExtension.GetInvocationListTyped())
                 a(mi, m);
 
             return mi;
@@ -95,6 +109,11 @@ namespace Signum.React.Facades
 
             return oi;
         }
+
+
+
+
+
 
         internal static Dictionary<string, TypeInfoTS> GetTypeInfoTS()
         {
@@ -145,7 +164,7 @@ namespace Signum.React.Facades
                               ToStringFunction = ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
                               QueryDefined = dqm.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type)
-                                .ToDictionary(p => p.PropertyString(), p => OnAddMemberExtra(new MemberInfoTS
+                                .ToDictionary(p => p.PropertyString(), p => OnAddPropertyRouteExtension(new MemberInfoTS
                                 {
                                     NiceName = p.PropertyInfo?.NiceName(),
                                     TypeNiceName = GetTypeNiceName(p.PropertyInfo?.PropertyType),
@@ -239,18 +258,18 @@ namespace Signum.React.Facades
                           where descOptions != DescriptionOptions.None
                           let kind = type.Name.EndsWith("Query") ? KindOfType.Query :
                                      type.Name.EndsWith("Message") ? KindOfType.Message : KindOfType.Enum
-                          select KVP.Create(GetTypeName(type), new TypeInfoTS
+                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = kind,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
                               Members = type.GetFields(staticFlags)
                               .Where(fi => kind != KindOfType.Query || dqm.QueryDefined(fi.GetValue(null)))
-                              .ToDictionary(m => m.Name, m => new MemberInfoTS
+                              .ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
                               {
-                                  NiceName = m.NiceName(),
-                                  IsIgnored = kind == KindOfType.Enum && m.HasAttribute<IgnoreAttribute>()
-                              }),
-                          })).ToDictionary("enums");
+                                  NiceName = fi.NiceName(),
+                                  IsIgnored = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
+                              }, fi)),
+                          }, type))).ToDictionary("enums");
 
             return result;
         }
@@ -259,15 +278,15 @@ namespace Signum.React.Facades
         {
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
-                          select KVP.Create(GetTypeName(type), new TypeInfoTS
+                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.SymbolContainer,
-                              Members = type.GetFields(staticFlags).Where(f => GetSymbol(f).IdOrNull.HasValue).ToDictionary(m => m.Name, m => new MemberInfoTS
+                              Members = type.GetFields(staticFlags).Where(f => GetSymbol(f).IdOrNull.HasValue).ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
                               {
-                                  NiceName = m.NiceName(),
-                                  Id = GetSymbol(m).Id.Object
-                              })
-                          })).ToDictionary("symbols");
+                                  NiceName = fi.NiceName(),
+                                  Id = GetSymbol(fi).Id.Object
+                              }, fi))
+                          }, type))).ToDictionary("symbols");
 
             return result;
         }
