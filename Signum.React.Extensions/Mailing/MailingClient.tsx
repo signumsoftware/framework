@@ -5,12 +5,12 @@ import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings} from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, registerToString, JavascriptMessage } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, GraphExplorer, OperationType, Type, getTypeName  } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as ContextualOperations from '../../../Framework/Signum.React/Scripts/Operations/ContextualOperations'
-import { EmailMessageEntity, EmailMasterTemplateEntity, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEntity, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
+import { EmailMessageEntity, EmailTemplateMessageEntity, EmailMasterTemplateEntity, EmailPackageEntity, EmailRecipientEntity, EmailConfigurationEntity, EmailTemplateEntity, AsyncEmailSenderPermission } from './Signum.Entities.Mailing'
 import { SmtpConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, Pop3ReceptionExceptionEntity, EmailAddressEntity } from './Signum.Entities.Mailing'
 import { NewsletterEntity, NewsletterDeliveryEntity, SendEmailTaskEntity } from './Signum.Entities.Mailing'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
@@ -29,6 +29,8 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
         key: "AsyncEmailSenderPanel",
         onClick: () => Promise.resolve(Navigator.currentHistory.createHref("/asyncEmailSender/view"))
     });
+
+    registerToString<EmailTemplateMessageEntity>(EmailTemplateMessageEntity, a => a.cultureInfo == null ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName);
 
     Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => new Promise(resolve => require(['./Templates/EmailMessage'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => new Promise(resolve => require(['./Templates/EmailTemplate'], resolve))));

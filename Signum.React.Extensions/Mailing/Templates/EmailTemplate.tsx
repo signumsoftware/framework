@@ -151,7 +151,7 @@ export class EmailTemplateMessage extends React.Component<{ ctx: TypeContext<Ema
     render(){
         var ec = this.props.ctx.subCtx({ labelColumns: { sm: 1 }});
         return (
-            <div className="sf-email-template-message">
+            <div className="sf-email-template-message form-vertical">
                 <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} />
                 <TemplateControls queryKey={this.props.queryKey}  onInsert={this.onInsert} forHtml={true} />
                 <ValueLine ctx={ec.subCtx(e => e.subject) } formGroupStyle={FormGroupStyle.SrOnly} placeholderLabels={true} labelHtmlProps={{ width: "100px" }} valueHtmlProps={{ className: "sf-email-inserttoken-target sf-email-template-message-subject form-control" }}  />
