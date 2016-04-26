@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
 import * as moment from 'moment'
-import { Input, Tab } from 'react-bootstrap'
+import { Tab } from 'react-bootstrap'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'

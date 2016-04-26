@@ -5,7 +5,7 @@ import { ResultTable, Pagination, PaginationMode, PaginateMath} from '../FindOpt
 import { SearchMessage, JavascriptMessage, Lite, liteKey } from '../Signum.Entities'
 import { getEnumInfo } from '../Reflection'
 import * as Navigator from '../Navigator'
-import { Input, Pagination as BPagination } from 'react-bootstrap'
+import { Pagination as BPagination } from 'react-bootstrap'
 
 
 
@@ -87,24 +87,24 @@ export default class PaginationSelector extends React.Component<PaginationSelect
         this.props.onPagination(p);
     }
 
-    handlePageClick = (e: React.SyntheticEvent, page: { eventKey: number }) => {
-        const p = Dic.extend({}, this.props.pagination, { currentPage: page.eventKey });
+    handlePageClick = (eventKey: number, e: React.SyntheticEvent) => {
+        const p = Dic.extend({}, this.props.pagination, { currentPage: eventKey });
         this.props.onPagination(p);
     }
 
     renderCenter() {
         return (
             <div className="sf-pagination-center form-inline form-xs">
-                <Input type="select" value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" standalone={true}>
+                <select value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" className="form-control">
                     {["Paginate" as PaginationMode,
                        "Firsts" as PaginationMode,
                        "All" as PaginationMode].map(mode =>
                         <option key={mode} value={mode.toString() }>{PaginationMode.niceName(mode) }</option>) }
-                </Input>
-                <Input type="select" value={this.props.pagination.elementsPerPage} onChange={this.handleElementsPerPage} ref="elementsPerPage" standalone={true}>
+                </select>
+                <select value={this.props.pagination.elementsPerPage.toString() } onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control">
                     {[5, 10, 20, 50, 100, 200].map(elem =>
                         <option key={elem} value={elem.toString() }>{elem}</option>) }
-                </Input>
+                </select>
             </div>
         );
     }
