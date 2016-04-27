@@ -1,6 +1,7 @@
 ﻿
 .sf-query-token-builder {
-    display: inline-block
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .sf-query-token-part {
