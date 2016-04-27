@@ -6,8 +6,8 @@
 @using Signum.Entities.DynamicQuery
 @Html.ScriptCss("~/Mailing/Content/Mailing.css")
 @using (var nc = Html.TypeContext<NewsletterEntity>())
-{  
-    using(var tabs = Html.Tabs(nc)) 
+{
+    using(var tabs = Html.Tabs(nc))
     {
         tabs.Tab("emTabMain", typeof(NewsletterEntity).NiceName(), @<text>
     @Html.ValueLine(nc, n => n.Name)

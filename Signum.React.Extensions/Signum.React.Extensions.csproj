@@ -149,6 +149,8 @@
     <Compile Include="Disconnected\DisconnectedServer.cs" />
     <Compile Include="Files\FilesController.cs" />
     <Compile Include="Isolation\IsolationServer.cs" />
+    <Compile Include="Mailing\MailingController.cs" />
+    <Compile Include="Mailing\MailingServer.cs" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />
     <Compile Include="Map\OperationMap.cs" />
@@ -172,6 +174,7 @@
     <Content Include="Chart\Chart.css" />
     <Content Include="Dashboard\Dashboard.css" />
     <Content Include="Files\Files.css" />
+    <Content Include="Mailing\Mailing.css" />
     <Content Include="Map\Operation\operationMap.css" />
     <Content Include="Map\Schema\schemaMap.css" />
     <Content Include="packages.config" />
@@ -309,9 +312,28 @@
     <TypeScriptCompile Include="Isolation\Signum.Entities.Isolation.ts">
       <DependentUpon>Signum.Entities.Isolation.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Mailing\MailingClient.tsx" />
+    <TypeScriptCompile Include="Mailing\AsyncEmailSenderPage.tsx" />
+    <TypeScriptCompile Include="Mailing\Newsletters\Newsletter.tsx" />
+    <TypeScriptCompile Include="Mailing\Newsletters\NewsletterDelivery.tsx" />
+    <TypeScriptCompile Include="Mailing\Pop3\Pop3Configuration.tsx" />
+    <TypeScriptCompile Include="Mailing\Pop3\Pop3Reception.tsx" />
     <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
       <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Mailing\Signum.Entities.Templating.ts">
+      <DependentUpon>Signum.Entities.Templating.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Mailing\TemplateControls.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\SendEmailTask.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailRecipient.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailAddress.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailConfiguration.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\SmtpConfiguration.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailPackage.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailTemplate.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailMessage.tsx" />
+    <TypeScriptCompile Include="Mailing\Templates\EmailMasterTemplate.tsx" />
     <TypeScriptCompile Include="Map\MapOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Map\MapClient.tsx" />
     <TypeScriptCompile Include="Map\Operation\OperationMap.ts" />
@@ -404,6 +426,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Cache\Signum.Entities.Cache.t4s" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Mailing\Signum.Entities.Templating.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>

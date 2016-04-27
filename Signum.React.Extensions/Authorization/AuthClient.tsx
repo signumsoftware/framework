@@ -4,7 +4,7 @@ import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Servi
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PseudoType, QueryKey, getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { UserEntity, RoleEntity, UserOperation, PermissionSymbol } from './Signum.Entities.Authorization'
 import Login from './Login/Login';
@@ -31,11 +31,12 @@ export function currentUser(): UserEntity {
     return Navigator.currentUser as UserEntity;
 }
 
-export const CurrentUserChangedEvent = "current-user-changed";
+export var onCurrentUserChanged: Array<(newUser: UserEntity) => void> = [];
+
 export function setCurrentUser(user: UserEntity) {
     Navigator.currentUser = user;
 
-    document.dispatchEvent(new Event(CurrentUserChangedEvent));
+    onCurrentUserChanged.forEach(f => f(user));
 }
 
 
@@ -58,11 +59,8 @@ export function onLogin() {
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol) {
-    return true;
-}
-
-export function isQueryAllowed(quey: PseudoType | QueryKey) {
-    return true;
+    var member = getTypeInfo(permission.key.before(".")).members[permission.key.after(".")];
+    return (member as any).allowed; 
 }
 
 export function asserPermissionAuthorized(permission: PermissionSymbol) {

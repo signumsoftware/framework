@@ -1,0 +1,32 @@
+﻿import * as React from 'react'
+import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { SearchControl, CountSearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
+import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ExceptionEntity }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { Pop3ConfigurationEntity, EmailMessageEntity } from '../Signum.Entities.Mailing'
+
+export default class Pop3Configuration extends EntityComponent<Pop3ConfigurationEntity> {
+
+    renderEntity() {
+
+         var sc = this.props.ctx;
+
+        return (
+            <div>
+                <ValueLine ctx={sc.subCtx(s => s.active)}  />
+                <ValueLine ctx={sc.subCtx(s => s.port)}  />
+                <ValueLine ctx={sc.subCtx(s => s.host)}  />
+                <ValueLine ctx={sc.subCtx(s => s.username)}  />
+                <ValueLine ctx={sc.subCtx(s => s.password)} valueHtmlProps={{type: "password"}}  />
+                <ValueLine ctx={sc.subCtx(s => s.enableSSL)}  />
+                <ValueLine ctx={sc.subCtx(s => s.readTimeout)}  />
+                <ValueLine ctx={sc.subCtx(s => s.deleteMessagesAfter)}  />
+                <EntityRepeater ctx={sc.subCtx(s => s.clientCertificationFiles)}  />
+                {sc.value.isNew && <CountSearchControl ctx={sc} findOptions={{queryName: Pop3ConfigurationEntity, parentColumn: "Pop3Configuration", parentValue: sc.value}}/> }
+            </div>
+        );
+    }
+}
+

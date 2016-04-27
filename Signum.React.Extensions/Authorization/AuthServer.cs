@@ -41,11 +41,12 @@ namespace Signum.React.Authorization
             if (TypeAuthLogic.IsStarted)
                 ReflectionServer.AddTypeExtension = (ti, t) =>
                 {
-                    ti.Extension.Add("allowed", UserEntity.Current == null ? TypeAllowedBasic.None: TypeAuthLogic.GetAllowed(t).MaxUI());
+                    if (typeof(Entity).IsAssignableFrom(t))
+                        ti.Extension.Add("allowed", UserEntity.Current == null ? TypeAllowedBasic.None : TypeAuthLogic.GetAllowed(t).MaxUI());
                 };
 
             if (PropertyAuthLogic.IsStarted)
-                ReflectionServer.AddPropertyExtension = (mi, pr) =>
+                ReflectionServer.AddPropertyRouteExtension = (mi, pr) =>
                 {
                     mi.Extension.Add("allowed", UserEntity.Current == null ?  PropertyAllowed.None: pr.GetPropertyAllowed());
                 };
@@ -54,6 +55,13 @@ namespace Signum.React.Authorization
                 ReflectionServer.AddOperationExtension = (oi, o) =>
                 {
                     oi.Extension.Add("allowed", UserEntity.Current == null ? false : OperationAuthLogic.GetOperationAllowed(o.OperationSymbol, inUserInterface: true));
+                };
+
+            if (PermissionAuthLogic.IsStarted)
+                ReflectionServer.AddFieldInfoExtension = (mi, fi) =>
+                {
+                    if (fi.FieldType == typeof(PermissionSymbol))
+                        mi.Extension.Add("allowed", UserEntity.Current == null ? false : PermissionAuthLogic.IsAuthorized((PermissionSymbol)fi.GetValue(null)));
                 };
 
             var piPasswordHash = ReflectionTools.GetPropertyInfo((UserEntity e) => e.PasswordHash);

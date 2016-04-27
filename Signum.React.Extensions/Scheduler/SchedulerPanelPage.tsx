@@ -45,7 +45,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
 
         return (
             <div>
-                <h2>ProcessLogic state</h2>
+                <h2>SchedulerLogic state</h2>
                 <div className="btn-toolbar">
                     {s.Running && <a href="#" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
                     {!s.Running && <a href="#" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
