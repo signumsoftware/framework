@@ -68,6 +68,17 @@ export function asserPermissionAuthorized(permission: PermissionSymbol) {
         throw new Error(`Permission ${permission.key} is denied`);
 }
 
+export function isQueryAllowed(query: PseudoType | QueryKey) {
+    return true;
+    //if (query instanceof QueryKey) {
+    //    const member = getTypeInfo(query.type).members[query.name];
+    //    return (member as any).allowed;
+    //} else {
+    //    const typeInfo = getTypeInfo(query as PseudoType);
+    //    return (typeInfo as any).allowed;
+    //}
+}
+
 
 export module Api {
 
