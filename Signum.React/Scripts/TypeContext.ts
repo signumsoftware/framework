@@ -113,7 +113,6 @@ export class StyleContext {
     }
 }
 
-
 export interface StyleOptions {
 
     formGroupStyle?: FormGroupStyle;
@@ -143,6 +142,9 @@ export class TypeContext<T> extends StyleContext {
     prefix: string;
 
     get value() {
+        if (this.binding == null)
+            return null; //React Dev Tools
+
         return this.binding.getValue();
     }
 

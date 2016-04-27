@@ -176,7 +176,22 @@ export function is<T extends Entity>(a: Lite<T> | T, b: Lite<T> | T) {
     return aEntity == bEntity;
 }
 
+export function isLite(obj: any): obj is Lite<Entity> {
+    return (obj as Lite<Entity>).EntityType != null;
+}
 
+export function isModifiableEntity(obj: any): obj is ModifiableEntity {
+    return (obj as ModifiableEntity).Type != null;
+}
+
+export function isEntity(obj: any): obj is Entity {
+    return (obj as Entity).Type != null;
+}
+
+export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity>{
+    return (obj as EntityPack<ModifiableEntity>).entity != null &&
+        (obj as EntityPack<ModifiableEntity>).canExecute !== undefined;
+}
 
 export const BooleanEnum = new EnumType<BooleanEnum>("BooleanEnum");
 export type BooleanEnum =

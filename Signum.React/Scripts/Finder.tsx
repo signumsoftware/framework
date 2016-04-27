@@ -10,10 +10,10 @@ import { QueryDescription, CountQueryRequest, QueryRequest, FindOptions, FilterO
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity} from './Signum.Entities';
 import { TypeEntity } from './Signum.Entities.Basics';
 
-import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, TypeReference,
+import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
     getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, PseudoType } from './Reflection';
 
 import {navigateRoute, isNavigable, currentHistory, API as NavAPI } from './Navigator';
@@ -41,6 +41,9 @@ export function getQuerySettings(queryName: PseudoType | QueryKey): QuerySetting
 export const isFindableEvent: Array<(queryKey: string) => boolean> = [];
 
 export function isFindable(queryName: PseudoType | QueryKey): boolean {
+
+    if (!isQueryDefined(queryName))
+        return false;
 
     const queryKey = getQueryKey(queryName);
 
@@ -362,22 +365,21 @@ function nanToNull(n: number) {
     return n;
 }
 
-function convertToLite(val: any): Lite<Entity> {
+function convertToLite(val: string | Lite<Entity> | Entity): Lite<Entity> {
     if (val == null || val == "")
         return null; 
 
-    if ((val as Lite<Entity>).EntityType) {
-        let lite = val as Lite<Entity>;
-        if (lite.entity != null && lite.entity.id != null)
-            return toLite(lite.entity, false);
+    if (isLite(val)) {
+        if (val.entity != null && val.entity.id != null)
+            return toLite(val.entity, false);
 
-        return lite;
+        return val;
     }
 
-    if ((val as Entity).Type)
-        return toLite(val as Entity);
+    if (isEntity(val))
+        return toLite(val);
 
-    if (typeof val == "string")
+    if (typeof val === "string")
         return parseLite(val);
 
     throw new Error(`Impossible to convert ${val} to Lite`); 

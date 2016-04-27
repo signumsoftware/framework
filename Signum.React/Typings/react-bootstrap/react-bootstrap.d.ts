@@ -383,6 +383,7 @@ declare module "react-bootstrap" {
         placement?: string;
         positionLeft?: number;
         positionTop?: number;
+        style?: React.CSSProperties;
         title: any; // TODO: Add more specific type
     }
     interface Popover extends React.ReactElement<PopoverProps> { }

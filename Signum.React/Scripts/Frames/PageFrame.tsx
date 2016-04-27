@@ -25,8 +25,6 @@ interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: str
 interface PageFrameState {
     pack?: EntityPack<Entity>;
     component?: React.ComponentClass<EntityComponentProps<Entity>>;
-    entitySettings?: Navigator.EntitySettingsBase<any>;
-    typeInfo?: TypeInfo;
 }
 
 export default class PageFrame extends React.Component<PageFrameProps, PageFrameState> {
@@ -46,12 +44,13 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         this.load(this.props);
     }
 
+    getTypeInfo(): TypeInfo {
+        return getTypeInfo(this.props.routeParams.type);
+    }
+
     calculateState(props: PageFrameProps) {
-        const typeInfo = getTypeInfo(props.routeParams.type);
-
-        const entitySettings = Navigator.getSettings(typeInfo.name);
-
-        return { entitySettings: entitySettings, typeInfo: typeInfo, component: null, pack: null } as PageFrameState;
+        
+        return { component: null, pack: null } as PageFrameState;
     }
 
 
@@ -68,12 +67,11 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     loadEntity(props: PageFrameProps): Promise<void> {
-
-        const ti = this.state.typeInfo;
-
+        
+        const ti = this.getTypeInfo();
 
         if (this.props.routeParams.id) {
-
+            
             const id = ti.members["Id"].type.name == "number" ? parseInt(props.routeParams.id) : props.routeParams.id;
 
             const lite: Lite<Entity> = {
@@ -128,11 +126,13 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
         const entity = this.state.pack.entity;
 
+        var ti = this.getTypeInfo();
+
         const styleOptions: StyleOptions = {
-            readOnly: this.state.entitySettings.onIsReadonly()
+            readOnly: Navigator.isReadOnly(ti)
         };
 
-        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(this.state.typeInfo), new ReadonlyBinding(entity, ""));
+        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, ""));
 
         const frame: EntityFrame<Entity> = {
             component: this,
@@ -177,7 +177,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             <h3>
                 <span className="sf-entity-title">{ this.props.title || getToString(entity) }</span>
                 <br/>
-                <small className="sf-type-nice-name">{ Navigator.getTypeTitle(entity, PropertyRoute.root(this.state.typeInfo)) }</small>
+                <small className="sf-type-nice-name">{ Navigator.getTypeTitle(entity, null) }</small>
             </h3>
         );
     }

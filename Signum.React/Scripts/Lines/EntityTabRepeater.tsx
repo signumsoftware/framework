@@ -50,38 +50,20 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                 <Tabs>
                     {
                         mlistItemContext(this.state.ctx).map((mlec, i) =>
-                            (<EntityTabRepeaterElement key={i}
-                            onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : null}
-                            ctx={mlec}
-                            getComponent={this.props.getComponent} />))
+                            <Tab className="sf-repeater-element" eventKey={i} key={i}>
+                                <legend>
+                                    { this.state.remove && <a className={classes("sf-line-button", "sf-create") }
+                                        onClick={e => this.handleRemoveElementClick(e, i) }
+                                        title={EntityControlMessage.Remove.niceToString() }>
+                                        <span className="glyphicon glyphicon-remove"/>
+                                    </a> }
+                                </legend>
+                                <RenderEntity ctx={mlec} getComponent={this.props.getComponent}/>
+                            </Tab>
+                        )
                     }
                 </Tabs>
             </fieldset>
-        );
-    }
-}
-
-
-export interface EntityTabRepeaterElementProps {
-    ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-    getComponent: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
-    onRemove: (event: React.MouseEvent) => void;
-}
-
-export class EntityTabRepeaterElement extends React.Component<EntityTabRepeaterElementProps, void>
-{
-    render() {
-        return (
-            <Tab className="sf-repeater-element">
-                <legend>
-                    { this.props.onRemove && <a className={classes("sf-line-button", "sf-create") }
-                    onClick={this.props.onRemove}
-                    title={EntityControlMessage.Remove.niceToString() }>
-                    <span className="glyphicon glyphicon-remove"/>
-                    </a> }
-                </legend>
-                <RenderEntity ctx={this.props.ctx} getComponent={this.props.getComponent}/>
-            </Tab>
         );
     }
 }

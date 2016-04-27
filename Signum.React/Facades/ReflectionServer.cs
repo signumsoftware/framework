@@ -17,6 +17,8 @@ using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Operations;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine;
 
 namespace Signum.React.Facades
 {
@@ -71,13 +73,26 @@ namespace Signum.React.Facades
             return ti;
         }
 
-        public static Action<MemberInfoTS, PropertyRoute> AddPropertyExtension;
-        static MemberInfoTS OnAddMemberExtra(MemberInfoTS mi, PropertyRoute m)
+        public static Action<MemberInfoTS, PropertyRoute> AddPropertyRouteExtension;
+        static MemberInfoTS OnAddPropertyRouteExtension(MemberInfoTS mi, PropertyRoute m)
         {
-            if (AddPropertyExtension == null)
+            if (AddPropertyRouteExtension == null)
                 return mi;
 
-            foreach (var a in AddPropertyExtension.GetInvocationListTyped())
+            foreach (var a in AddPropertyRouteExtension.GetInvocationListTyped())
+                a(mi, m);
+
+            return mi;
+        }
+
+
+        public static Action<MemberInfoTS, FieldInfo> AddFieldInfoExtension;
+        static MemberInfoTS OnAddFieldInfoExtension(MemberInfoTS mi, FieldInfo m)
+        {
+            if (AddFieldInfoExtension == null)
+                return mi;
+
+            foreach (var a in AddFieldInfoExtension.GetInvocationListTyped())
                 a(mi, m);
 
             return mi;
@@ -94,6 +109,11 @@ namespace Signum.React.Facades
 
             return oi;
         }
+
+
+
+
+
 
         internal static Dictionary<string, TypeInfoTS> GetTypeInfoTS()
         {
@@ -127,7 +147,7 @@ namespace Signum.React.Facades
                           where typeof(ModelEntity).IsAssignableFrom(type) && !type.IsAbstract
                           select type).ToList();
 
-            var a = Schema.Current;
+            var dqm = DynamicQueryManager.Current;
 
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
                           where !type.IsEnumEntity()
@@ -142,16 +162,16 @@ namespace Signum.React.Facades
                               EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                               ToStringFunction = ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
-
+                              QueryDefined = dqm.QueryDefined(type),
                               Members = PropertyRoute.GenerateRoutes(type)
-                                .ToDictionary(p => p.PropertyString(), p => OnAddMemberExtra(new MemberInfoTS
+                                .ToDictionary(p => p.PropertyString(), p => OnAddPropertyRouteExtension(new MemberInfoTS
                                 {
                                     NiceName = p.PropertyInfo?.NiceName(),
                                     TypeNiceName = GetTypeNiceName(p.PropertyInfo?.PropertyType),
                                     Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                     IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
                                     Unit = p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName,
-                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type) : p.PropertyInfo?.PropertyType, p.TryGetImplementations()),
+                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type) : p.PropertyInfo?.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations(): p.TryGetImplementations()),
                                     IsMultiline = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
                                     MaxLength = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                 }, p)),
@@ -230,22 +250,26 @@ namespace Signum.React.Facades
 
         public static Dictionary<string, TypeInfoTS> GetEnums(IEnumerable<Type> allTypes)
         {
+            var dqm = DynamicQueryManager.Current;
+
             var result = (from type in allTypes
                           where type.IsEnum
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
                           where descOptions != DescriptionOptions.None
                           let kind = type.Name.EndsWith("Query") ? KindOfType.Query :
                                      type.Name.EndsWith("Message") ? KindOfType.Message : KindOfType.Enum
-                          select KVP.Create(GetTypeName(type), new TypeInfoTS
+                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = kind,
                               NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
-                              Members = type.GetFields(staticFlags).ToDictionary(m => m.Name, m => new MemberInfoTS
+                              Members = type.GetFields(staticFlags)
+                              .Where(fi => kind != KindOfType.Query || dqm.QueryDefined(fi.GetValue(null)))
+                              .ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
                               {
-                                  NiceName = m.NiceName(),
-                                  IsIgnored = kind == KindOfType.Enum && m.HasAttribute<IgnoreAttribute>()
-                              }),
-                          })).ToDictionary("enums");
+                                  NiceName = fi.NiceName(),
+                                  IsIgnored = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
+                              }, fi)),
+                          }, type))).ToDictionary("enums");
 
             return result;
         }
@@ -254,19 +278,15 @@ namespace Signum.React.Facades
         {
             var result = (from type in allTypes
                           where type.IsStaticClass() && type.HasAttribute<AutoInitAttribute>()
-                          let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
-                          where descOptions != DescriptionOptions.None
-                          let kind = type.Name.EndsWith("Query") ? KindOfType.Query :
-                                     type.Name.EndsWith("Message") ? KindOfType.Message : KindOfType.Enum
-                          select KVP.Create(GetTypeName(type), new TypeInfoTS
+                          select KVP.Create(GetTypeName(type), OnAddTypeExtension(new TypeInfoTS
                           {
                               Kind = KindOfType.SymbolContainer,
-                              Members = type.GetFields(staticFlags).Where(f => GetSymbol(f).IdOrNull.HasValue).ToDictionary(m => m.Name, m => new MemberInfoTS
+                              Members = type.GetFields(staticFlags).Where(f => GetSymbol(f).IdOrNull.HasValue).ToDictionary(fi => fi.Name, fi => OnAddFieldInfoExtension(new MemberInfoTS
                               {
-                                  NiceName = m.NiceName(),
-                                  Id = GetSymbol(m).Id.Object
-                              })
-                          })).ToDictionary("symbols");
+                                  NiceName = fi.NiceName(),
+                                  Id = GetSymbol(fi).Id.Object
+                              }, fi))
+                          }, type))).ToDictionary("symbols");
 
             return result;
         }
@@ -308,13 +328,18 @@ namespace Signum.React.Facades
         public bool IsLowPopulation { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "toStringFunction")]
         public string ToStringFunction { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "queryDefined")]
+        public bool QueryDefined { get; internal set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "members")]
         public Dictionary<string, MemberInfoTS> Members { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "operations")]
         public Dictionary<string, OperationInfoTS> Operations { get; set; }
 
+
         [JsonExtensionData]
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
+
+
     }
 
     public class MemberInfoTS

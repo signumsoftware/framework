@@ -131,7 +131,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             showFilterButton: true,
             showFooter: true,
             allowChangeColumn: true,
-            create: ti.some(ti => Navigator.isCreable(ti, true)),
+            create: ti.some(ti => Navigator.isCreable(ti, false, true)),
             navigate: ti.some(ti => Navigator.isNavigable(ti, null, true)),
             pagination: this.defaultPagination(),
             columnOptionsMode: "Add",
@@ -392,7 +392,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     chooseType(): Promise<string> {
 
         const tis = getTypeInfos(this.state.queryDescription.columns["Entity"].type)
-            .filter(ti => Navigator.isCreable(ti));
+            .filter(ti => Navigator.isCreable(ti, false, true));
 
         return SelectorPopup.chooseType(tis)
             .then(ti => ti ? ti.name : null);    

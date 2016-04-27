@@ -194,9 +194,6 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 
     export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>, event: React.MouseEvent) => void, key: any) {
 
-        event.preventDefault();
-        event.stopPropagation();
-
         var text = coc.settings && coc.settings.text ? coc.settings.text() :
             coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
                 coc.operationInfo.niceName;
