@@ -48,18 +48,18 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute) {
 export function navigateRoute(entity: Entity);
 export function navigateRoute(lite: Lite<Entity>);
 export function navigateRoute(type: PseudoType, id: any);
-export function navigateRoute(typeOfEntity: any, id: any = null) {
+export function navigateRoute(typeOrEntity: any, id: any = null) {
     let typeName: string;
-    if ((typeOfEntity as Entity).Type) {
-        typeName = (typeOfEntity as Entity).Type;
-        id = (typeOfEntity as Entity).id;
+    if ((typeOrEntity as Entity).Type) {
+        typeName = (typeOrEntity as Entity).Type;
+        id = (typeOrEntity as Entity).id;
     }
-    else if ((typeOfEntity as Lite<Entity>).EntityType) {
-        typeName = (typeOfEntity as Lite<Entity>).EntityType;
-        id = (typeOfEntity as Lite<Entity>).id;
+    else if ((typeOrEntity as Lite<Entity>).EntityType) {
+        typeName = (typeOrEntity as Lite<Entity>).EntityType;
+        id = (typeOrEntity as Lite<Entity>).id;
     }
     else {
-        typeName = getTypeName(typeOfEntity as PseudoType);
+        typeName = getTypeName(typeOrEntity as PseudoType);
     }
 
     return currentHistory.createHref("/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id);

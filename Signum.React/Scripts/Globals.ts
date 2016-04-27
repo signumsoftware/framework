@@ -287,6 +287,10 @@ Array.prototype.extract = function (predicate: (element: any) => boolean) {
     return result;
 };
 
+Array.prototype.notNull = function () {
+    return (this as any[]).filter(a => !!a);
+};
+
 Array.range = function (min, maxNotIncluded) {
 
     const length = maxNotIncluded - min;

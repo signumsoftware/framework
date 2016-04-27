@@ -48,6 +48,7 @@ interface Array<T> {
     clone(): T[];
     joinComma(lastSeparator: string);
     extract(filter: (element: T) => boolean): T[]; 
+    notNull(): T[]; 
 }
 
 interface ArrayConstructor {

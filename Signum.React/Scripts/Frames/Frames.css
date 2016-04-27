@@ -37,10 +37,13 @@ ul.dropdown-menu li a span.glyphicon {
 
 
 a.expand-window {
-    float: right;
     cursor: pointer;
     color: lightgray;
     margin-top: 10px;
+    position: fixed;
+    top: 50px;
+    right: 6px;
+    z-index: 1000;
 }
 
 a.expand-window:hover {

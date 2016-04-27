@@ -14,6 +14,7 @@ using Signum.Engine;
 using Signum.Engine.Operations;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using Signum.Entities.Reflection;
 
 namespace Signum.React.ApiControllers
 {
@@ -57,7 +58,18 @@ namespace Signum.React.ApiControllers
         {
             var operation = ParseOperationAssert(request.operationKey);
 
-            var entity = OperationLogic.ServiceExecute(request.entity, operation, request.args);
+            Entity entity;
+            try
+            {
+                entity = OperationLogic.ServiceExecute(request.entity, operation, request.args);
+            }
+            catch (IntegrityCheckException ex)
+            {
+                GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(request.entity), ex);
+                this.Validate(request);
+                this.ResponseMessage(this.Request.CreateResponse(HttpStatusCode.BadRequest, this.ModelState));
+                return null;
+            }
 
             return SignumServer.GetEntityPack(entity);
         }
