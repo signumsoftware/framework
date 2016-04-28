@@ -337,7 +337,7 @@ namespace Signum.Engine.Scheduler
 
         public static Lite<IEntity> ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
         {
-            IUserEntity entityIUser = user == null ? (IUserEntity)scheduledTask.User.Retrieve() : user;
+            IUserEntity entityIUser = user ?? (IUserEntity)scheduledTask.User.Retrieve();
 
             using (IsolationEntity.Override(entityIUser.TryIsolation()))
             {
@@ -363,20 +363,20 @@ namespace Signum.Engine.Scheduler
 
                 try
                 {
-                    using (Transaction tr = Transaction.ForceNew())
+                    using (UserHolder.UserSession(entityIUser))
                     {
-                        using (UserHolder.UserSession(entityIUser))
+                        using (Transaction tr = Transaction.ForceNew())
                         {
                             stl.ProductEntity = ExecuteTask.Invoke(task);
-                        }
 
-                        using (AuthLogic.Disable())
-                        {
-                            stl.EndTime = TimeZoneManager.Now;
-                            stl.Save();
-                        }
+                            using (AuthLogic.Disable())
+                            {
+                                stl.EndTime = TimeZoneManager.Now;
+                                stl.Save();
+                            }
 
-                        tr.Commit();
+                            tr.Commit();
+                        }
                     }
                 }
                 catch (Exception ex)
