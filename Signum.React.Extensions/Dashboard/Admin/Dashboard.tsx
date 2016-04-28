@@ -3,7 +3,7 @@ import * as React from 'react'
 import { FormGroup, FormControlStatic, EntityComponent, EntityComponentProps, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame, RenderEntity} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, PropertyRoute, getTypeInfos, basicConstruct } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
@@ -59,7 +59,7 @@ export default class ChartScript extends EntityComponent<DashboardEntity> {
 
         return SelectorPopup.chooseType(getTypeInfos(pr.type))
             .then(ti => ti == null ? null : PanelPartEntity.New(p => {
-                p.content = Constructor.basicConstruct(ti.name) as any as IPartEntity;
+                p.content = basicConstruct(ti.name) as any as IPartEntity;
                 p.style = "Default";
             }));
     }
