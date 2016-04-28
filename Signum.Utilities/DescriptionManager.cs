@@ -153,7 +153,7 @@ namespace Signum.Utilities
             }
 
             var defaultCulture = LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly);
-            if (defaultCulture != null)
+            //if (defaultCulture != null)
             {
                 var loc = GetLocalizedType(type, CultureInfo.GetCultureInfo(defaultCulture));
                 if (loc == null)
@@ -162,7 +162,7 @@ namespace Signum.Utilities
                 return typeValue(loc);
             }
 
-            return null;
+            //return null;
         }
 
 
@@ -240,7 +240,7 @@ namespace Signum.Utilities
             var cc = CultureInfo.CurrentUICulture;
             var type = memberInfo.DeclaringType;
 
-            if (LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly) == null)
+            if (!LocalizedAssembly.HasDefaultAssemblyCulture(type.Assembly))
             {
                 if (type == typeof(DayOfWeek))
                     return CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)memberInfo).GetValue(null)];
@@ -261,9 +261,9 @@ namespace Signum.Utilities
 
             var cc = CultureInfo.CurrentUICulture;
 
-            if(LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly) == null)
-                return type.GetCustomAttribute<GenderAttribute>()?.Gender ??
-                    NaturalLanguageTools.GetGender(type.NiceName());
+            //if(LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly) == null)
+            //    return type.GetCustomAttribute<GenderAttribute>()?.Gender ??
+            //        NaturalLanguageTools.GetGender(type.NiceName());
 
             var lt = GetLocalizedType(type, cc);
             if (lt != null && lt.Gender != null)
@@ -393,9 +393,16 @@ namespace Signum.Utilities
             var defaultLoc = assembly.GetCustomAttribute<DefaultAssemblyCultureAttribute>();
 
             if (defaultLoc == null)
-                return null;
+                throw new InvalidOperationException($"No {nameof(DefaultAssemblyCultureAttribute)} found in {assembly.GetName().Name}");
 
             return defaultLoc.DefaultCulture;
+        }
+
+        public static bool HasDefaultAssemblyCulture(Assembly assembly)
+        {
+            var defaultLoc = assembly.GetCustomAttribute<DefaultAssemblyCultureAttribute>();
+
+            return defaultLoc != null;
         }
 
         public void ExportXml()
