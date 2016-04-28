@@ -43,7 +43,12 @@ export function getSettings(operation: OperationSymbol | string): OperationSetti
     return operationSettings[operationKey];
 }
 
-var isOperationAllowed = (oi: OperationInfo) => true;
+export var isOperationAllowedEvent: Array<(oi: OperationInfo) => boolean> = [];
+
+export function isOperationAllowed(oi: OperationInfo) {
+    return isOperationAllowedEvent.every(a => a(oi));
+}
+
 
 export function operationInfos(ti: TypeInfo) {
     return Dic.getValues(ti.operations).filter(isOperationAllowed);

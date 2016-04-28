@@ -605,12 +605,12 @@ export class QueryKey {
         public type: string,
         public name: string) { }
 
-    propertyInfo(): MemberInfo {
+    memberInfo(): MemberInfo {
         return getTypeInfo(this.type).members[this.name]
     }
 
     niceName(): string {
-        return this.propertyInfo().niceName;
+        return this.memberInfo().niceName;
     }
 }
 

@@ -61,7 +61,7 @@ namespace Signum.React.Facades
         const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-        public static Action<TypeInfoTS, Type> AddTypeExtension;
+        public static event Action<TypeInfoTS, Type> AddTypeExtension;
         static TypeInfoTS OnAddTypeExtension(TypeInfoTS ti, Type t)
         {
             if (ti == null)
@@ -73,7 +73,7 @@ namespace Signum.React.Facades
             return ti;
         }
 
-        public static Action<MemberInfoTS, PropertyRoute> AddPropertyRouteExtension;
+        public static event Action<MemberInfoTS, PropertyRoute> AddPropertyRouteExtension;
         static MemberInfoTS OnAddPropertyRouteExtension(MemberInfoTS mi, PropertyRoute m)
         {
             if (AddPropertyRouteExtension == null)
@@ -86,7 +86,7 @@ namespace Signum.React.Facades
         }
 
 
-        public static Action<MemberInfoTS, FieldInfo> AddFieldInfoExtension;
+        public static event Action<MemberInfoTS, FieldInfo> AddFieldInfoExtension;
         static MemberInfoTS OnAddFieldInfoExtension(MemberInfoTS mi, FieldInfo m)
         {
             if (AddFieldInfoExtension == null)
@@ -98,7 +98,7 @@ namespace Signum.React.Facades
             return mi;
         }
 
-        public static Action<OperationInfoTS, OperationInfo> AddOperationExtension;
+        public static event Action<OperationInfoTS, OperationInfo> AddOperationExtension;
         static OperationInfoTS OnAddOperationExtension(OperationInfoTS oi, OperationInfo o)
         {
             if (AddOperationExtension == null)
