@@ -170,6 +170,11 @@ namespace Signum.Utilities
         {
             type = CleanType(type);
 
+            if (!LocalizedAssembly.HasDefaultAssemblyCulture(type.Assembly))
+            {
+                return type.GetCustomAttribute<DescriptionAttribute>()?.Description ?? type.Name.NiceName();
+            }
+
             var result = Fallback(type, lt => lt.Description);
 
             if (result != null)
@@ -261,9 +266,10 @@ namespace Signum.Utilities
 
             var cc = CultureInfo.CurrentUICulture;
 
-            //if(LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly) == null)
-            //    return type.GetCustomAttribute<GenderAttribute>()?.Gender ??
-            //        NaturalLanguageTools.GetGender(type.NiceName());
+            if (!LocalizedAssembly.HasDefaultAssemblyCulture(type.Assembly))
+            {
+                return type.GetCustomAttribute<GenderAttribute>()?.Gender ?? NaturalLanguageTools.GetGender(type.NiceName());
+            }
 
             var lt = GetLocalizedType(type, cc);
             if (lt != null && lt.Gender != null)
