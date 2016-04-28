@@ -136,15 +136,17 @@ function typeIsCreable(typeName: string): EntityWhen {
 }
 
 
-export const isReadonlyEvent: Array<(typeName: string) => boolean> = [];
+export const isReadonlyEvent: Array<(typeName: string, entity?: EntityPack<ModifiableEntity>) => boolean> = [];
 
-export function isReadOnly(type: PseudoType) {
+export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>) {
 
-    const typeName = getTypeName(type);
+    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : null;
+
+    const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
     const baseIsReadOnly = typeIsReadOnly(typeName);
 
-    return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName));
+    return baseIsReadOnly || isReadonlyEvent.some(f => f(typeName, entityPack));
 }
 
 
@@ -206,18 +208,19 @@ function typeIsFindable(typeName: string) {
     }
 }
 
-export const isViewableEvent: Array<(typeName: string, entity?: ModifiableEntity) => boolean> = []; 
+export const isViewableEvent: Array<(typeName: string, entityPack?: EntityPack<ModifiableEntity>) => boolean> = []; 
 
-export function isViewable(typeOrEntity: PseudoType | ModifiableEntity, customView = false): boolean{
-    const entity = (typeOrEntity as ModifiableEntity).Type ? typeOrEntity as ModifiableEntity : null;
+export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false): boolean{
 
-    const typeName = entity ? entity.Type : getTypeName(typeOrEntity as PseudoType);
-    
+    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : null;
+
+    const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
+
     const baseIsViewable = typeIsViewable(typeName);
     
     const hasView = customView || hasRegisteredView(typeName);
 
-    return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entity));
+    return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
 
 function hasRegisteredView(typeName: string) {
@@ -249,17 +252,17 @@ function typeIsViewable(typeName: string): boolean {
     }
 }
 
-export function isNavigable(typeOrEntity: PseudoType | ModifiableEntity, customView = false, isSearch = false): boolean {
+export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false, isSearch = false): boolean {
 
-    const entity = (typeOrEntity as ModifiableEntity).Type ? typeOrEntity as Entity : null;
+    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : null;
 
-    const typeName = entity ? entity.Type : getTypeName(typeOrEntity as PseudoType);
+    const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
     const baseTypeName = checkFlag(typeIsNavigable(typeName), isSearch);
 
     const hasView = customView || hasRegisteredView(typeName);
 
-    return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entity));
+    return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
 
 
