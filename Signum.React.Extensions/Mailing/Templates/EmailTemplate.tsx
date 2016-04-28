@@ -70,8 +70,8 @@ export default class EmailTemplate extends EntityComponent<EmailTemplateEntity> 
                 <ValueLine ctx={ec.subCtx(e => e.isBodyHtml)}  />
 
                 <div className="sf-email-replacements-container">
-                    <EntityTabRepeater ctx={ec.subCtx(a => a.messages) } onChange={() => this.forceUpdate()} getComponent={(ctx: TypeContext<EmailTemplateMessageEntity>) =>
-                        <EmailTemplateMessage ctx={ctx} queryKey={ec.value.query && ec.value.query.key}/> } />
+                    <EntityTabRepeater ctx={ec.subCtx(a => a.messages) } onChange={() => this.forceUpdate() } getComponent={(ctx: TypeContext<EmailTemplateMessageEntity>) =>
+                        <EmailTemplateMessage ctx={ctx} queryKey={ec.value.query && ec.value.query.key} invalidate={() => this.forceUpdate()} /> } />
                 </div>
             </div>
         );
@@ -134,28 +134,37 @@ export default class EmailTemplate extends EntityComponent<EmailTemplateEntity> 
             </div>
         );
     };
-
-
-    renderMessage = (c: TypeContext<EmailTemplateMessageEntity>) => {
-     
-    }
-
-    onInserToken = (newToken: string)=>{
-
-
-    };
 }
 
-export class EmailTemplateMessage extends React.Component<{ ctx: TypeContext<EmailTemplateMessageEntity>, queryKey: string }, {currentControl: "Subject" | "Text"}>{
+export interface EmailTemplateMessageProps {
+    ctx: TypeContext<EmailTemplateMessageEntity>;
+    queryKey: string;
+    invalidate: () => void;
+}
 
-    render(){
+export interface EmailTemplateMessageState {
+    currentControl?: "Subject" | "Body" 
+}
+
+export class EmailTemplateMessage extends React.Component<EmailTemplateMessageProps, EmailTemplateMessageState>{
+
+    state = {} as EmailTemplateMessageState;
+
+    render() {
+
         var ec = this.props.ctx.subCtx({ labelColumns: { sm: 1 }});
         return (
             <div className="sf-email-template-message form-vertical">
-                <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} labelText={EmailTemplateViewMessage.Language.niceToString()} />
+                <EntityCombo ctx={ec.subCtx(e => e.cultureInfo) } labelText={EmailTemplateViewMessage.Language.niceToString() } onChange={this.props.invalidate} />
                 <TemplateControls queryKey={this.props.queryKey}  onInsert={this.onInsert} forHtml={true} />
-                <ValueLine ctx={ec.subCtx(e => e.subject) } formGroupStyle={FormGroupStyle.SrOnly} placeholderLabels={true} labelHtmlProps={{ width: "100px" }} valueHtmlProps={{ className: "sf-email-inserttoken-target sf-email-template-message-subject form-control" }}  />
-                <ValueLine ctx={ec.subCtx(e => e.text) }  formGroupStyle={FormGroupStyle.SrOnly} valueLineType={ValueLineType.TextArea} labelHtmlProps={{width: "100px", height:"180px"}} valueHtmlProps={{className: "sf-rich-text-editor sf-email-template-message-text"}} />
+                <ValueLine ctx={ec.subCtx(e => e.subject) } formGroupStyle={FormGroupStyle.SrOnly} placeholderLabels={true} labelHtmlProps={{ width: "100px" }} valueHtmlProps={{
+                    className: classes("sf-email-inserttoken-target sf-email-template-message-subject form-control", this.state.currentControl == "Subject" && "sf-email-inserttoken-targetactive"),
+                    onFocus: () => this.setState({ currentControl: "Subject" })
+                }}  />
+                <ValueLine ctx={ec.subCtx(e => e.text) }  formGroupStyle={FormGroupStyle.SrOnly} valueLineType={ValueLineType.TextArea} labelHtmlProps={{ width: "100px", height: "180px" }} valueHtmlProps={{
+                    className: classes("sf-rich-text-editor sf-email-template-message-text", this.state.currentControl == "Body" && "sf-email-inserttoken-targetactive"),
+                    onFocus: () => this.setState({ currentControl: "Body" }),
+                }} />
             </div>
         );
     }
