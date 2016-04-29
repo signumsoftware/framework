@@ -315,7 +315,7 @@ namespace Signum.React.Json
                         else
                         {
                             AssertCanWrite(pr);
-                            pc.SetValue(entity, newValue);
+                            pc.SetValue?.Invoke(entity, newValue);
                         }
                     }
                 }
