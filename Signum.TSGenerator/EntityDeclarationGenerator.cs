@@ -350,7 +350,7 @@ namespace Signum.TSGenerator
                 }
             }
 
-            if (type.FullName == "System.Guid" || type.FullName == "System.Byte[]")
+            if (type.FullName == "System.Guid" || type.FullName == "System.Byte[]" || type.FullName == "System.TimeSpan")
                 return "string";
 
             var relativeName = RelativeName(type, current, options, errorContext);
