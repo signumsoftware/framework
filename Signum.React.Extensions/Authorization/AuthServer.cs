@@ -17,6 +17,7 @@ using Signum.Engine.Authorization;
 using Signum.React.Maps;
 using Signum.Engine.Basics;
 using Signum.React.Map;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.React.Authorization
 {
@@ -27,6 +28,7 @@ namespace Signum.React.Authorization
         public static Action<ApiController, UserEntity> UserPreLogin;
         public static Action<UserEntity> UserLogged;
         public static Action UserLoggingOut;
+        
 
         public static void Start(HttpConfiguration config, bool queries, bool types)
         {
@@ -39,29 +41,49 @@ namespace Signum.React.Authorization
             };
 
             if (TypeAuthLogic.IsStarted)
-                ReflectionServer.AddTypeExtension = (ti, t) =>
+                ReflectionServer.AddTypeExtension += (ti, t) =>
                 {
                     if (typeof(Entity).IsAssignableFrom(t))
-                        ti.Extension.Add("allowed", UserEntity.Current == null ? TypeAllowedBasic.None : TypeAuthLogic.GetAllowed(t).MaxUI());
+                        ti.Extension.Add("typeAllowed", UserEntity.Current == null ? TypeAllowedBasic.None : TypeAuthLogic.GetAllowed(t).MaxUI());
                 };
 
-            if (PropertyAuthLogic.IsStarted)
-                ReflectionServer.AddPropertyRouteExtension = (mi, pr) =>
+            if (QueryAuthLogic.IsStarted)
+            {
+                ReflectionServer.AddTypeExtension += (ti, t) =>
                 {
-                    mi.Extension.Add("allowed", UserEntity.Current == null ?  PropertyAllowed.None: pr.GetPropertyAllowed());
+                    if (ti.QueryDefined)
+                        ti.Extension.Add("queryAllowed", UserEntity.Current == null ? false : QueryAuthLogic.GetQueryAllowed(t));
+                };
+
+                ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
+                {
+                    if (fi.DeclaringType.Name.EndsWith("Query"))
+                        mi.Extension.Add("queryAllowed", UserEntity.Current == null ? false : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)));
+                };
+            }
+
+            if (PropertyAuthLogic.IsStarted)
+                ReflectionServer.AddPropertyRouteExtension += (mi, pr) =>
+                {
+                    mi.Extension.Add("propertyAllowed", UserEntity.Current == null ?  PropertyAllowed.None: pr.GetPropertyAllowed());
                 };
 
             if (OperationAuthLogic.IsStarted)
-                ReflectionServer.AddOperationExtension = (oi, o) =>
+                ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
                 {
-                    oi.Extension.Add("allowed", UserEntity.Current == null ? false : OperationAuthLogic.GetOperationAllowed(o.OperationSymbol, inUserInterface: true));
+                    if (fi.DeclaringType.Name.EndsWith("Operation"))
+                    {
+                        var container = fi.GetValue(null) as IOperationSymbolContainer;
+                        if (container != null)
+                            mi.Extension.Add("operationAllowed", UserEntity.Current == null ? false : OperationAuthLogic.GetOperationAllowed(container.Symbol, inUserInterface: true));
+                    }
                 };
 
             if (PermissionAuthLogic.IsStarted)
-                ReflectionServer.AddFieldInfoExtension = (mi, fi) =>
+                ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
                 {
                     if (fi.FieldType == typeof(PermissionSymbol))
-                        mi.Extension.Add("allowed", UserEntity.Current == null ? false : PermissionAuthLogic.IsAuthorized((PermissionSymbol)fi.GetValue(null)));
+                        mi.Extension.Add("permissionAllowed", UserEntity.Current == null ? false : PermissionAuthLogic.IsAuthorized((PermissionSymbol)fi.GetValue(null)));
                 };
 
             var piPasswordHash = ReflectionTools.GetPropertyInfo((UserEntity e) => e.PasswordHash);
@@ -85,15 +107,11 @@ namespace Signum.React.Authorization
                 }
             });
 
-            if (queries)
-            {
+            if (QueryAuthLogic.IsStarted)
                 Omnibox.OmniboxServer.IsFindable += queryName => QueryAuthLogic.GetQueryAllowed(queryName);
-            }
 
-            if (types)
-            {
+            if (TypeAuthLogic.IsStarted)
                 Omnibox.OmniboxServer.IsNavigable += type => TypeAuthLogic.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
-            }
 
 
             SchemaMap.GetColorProviders += GetMapColors;

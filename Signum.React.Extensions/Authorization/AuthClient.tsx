@@ -1,16 +1,21 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
+import { ModifiableEntity, EntityPack } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { tasks, LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, getTypeInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { UserEntity, RoleEntity, UserOperation, PermissionSymbol } from './Signum.Entities.Authorization'
+import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic } from './Signum.Entities.Authorization'
 import Login from './Login/Login';
 
 export let userTicket: boolean;
 export let resetPassword: boolean;
+
+
 
 export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean }) {
     userTicket = options.userTicket;
@@ -22,9 +27,90 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     </Route>);
 }
 
-export function startAdmin() {
+export function start(options: { routes: JSX.Element[], types: boolean; properties: boolean, operations: boolean, queries: boolean }) {
+
     Navigator.addSettings(new EntitySettings(UserEntity, e => new Promise(resolve => require(['./Templates/User'], resolve))));
     Navigator.addSettings(new EntitySettings(RoleEntity, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
+
+    if (options.properties) {
+        tasks.push(taskAuthorizeProperties);
+    }
+
+    if (options.types) {
+        Navigator.isCreableEvent.push(navigatorIsCreable);
+        Navigator.isReadonlyEvent.push(navigatorIsReadOnly);
+        Navigator.isViewableEvent.push(navigatorIsViewable);
+    }
+
+    if (options.operations) {
+        Operations.isOperationAllowedEvent.push(onOperationAuthorized);
+    }
+
+    if (options.queries) {
+        Finder.isFindableEvent.push(queryIsFindable);
+    }
+}
+
+export function queryIsFindable(queryKey: PseudoType | QueryKey) {
+    if (queryKey instanceof QueryKey) {
+        return queryKey.memberInfo().queryAllowed;
+    } else {
+        return getTypeInfo(queryKey).queryAllowed;
+    }
+}
+
+export function onOperationAuthorized(oi: OperationInfo) {
+    var member = getTypeInfo(oi.key.before(".")).members[oi.key.after(".")];
+    return member.operationAllowed;
+}
+
+export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
+    if (state.ctx.propertyRoute &&
+        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+
+        var member = state.ctx.propertyRoute.member;
+
+        switch ((member as any).propertyAllowed as PropertyAllowed) {
+            case "None":
+                state.visible = false;
+                break;
+            case "Read":
+                state.readOnly = true;
+                break;
+            case "Modify":
+                break;
+        }
+    }
+}
+
+export function navigatorIsReadOnly(typeName: string, entityPack?: EntityPack<ModifiableEntity>) {
+    var ti = getTypeInfo(typeName);
+
+    if (ti == null)
+        return false;
+
+    if (entityPack && entityPack.typeAllowed)
+        return entityPack.typeAllowed == "None" || entityPack.typeAllowed == "Read";
+
+    return ti.typeAllowed == "None" || ti.typeAllowed == "Read";
+}
+
+export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<ModifiableEntity>) {
+    var ti = getTypeInfo(typeName);
+
+    if (ti == null)
+        return false;
+
+    if (entityPack && entityPack.typeAllowed)
+        return entityPack.typeAllowed != "None";
+
+    return ti.typeAllowed != "None";
+}
+
+export function navigatorIsCreable(typeName: string) {
+    var ti = getTypeInfo(typeName);
+  
+    return ti == null || ti.typeAllowed == "Create";
 }
 
 export function currentUser(): UserEntity {
@@ -60,14 +146,13 @@ export function onLogin() {
 
 export function isPermissionAuthorized(permission: PermissionSymbol) {
     var member = getTypeInfo(permission.key.before(".")).members[permission.key.after(".")];
-    return (member as any).allowed; 
+    return member.permissionAllowed;
 }
 
 export function asserPermissionAuthorized(permission: PermissionSymbol) {
     if (!isPermissionAuthorized(permission))
         throw new Error(`Permission ${permission.key} is denied`);
 }
-
 
 export module Api {
 
@@ -95,5 +180,26 @@ export module Api {
     }
 }
 
+declare module '../../../Framework/Signum.React/Scripts/Reflection' {
+
+    export interface TypeInfo {
+        typeAllowed: TypeAllowedBasic;
+        queryAllowed: boolean;
+    }
+
+    export interface MemberInfo {
+        propertyAllowed: PropertyAllowed;
+        queryAllowed: boolean;
+        operationAllowed: boolean;
+        permissionAllowed: boolean;
+    }
+}
+
+declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
+
+    export interface EntityPack<T extends ModifiableEntity> {
+        typeAllowed: TypeAllowedBasic;
+    }
+}
 
 
