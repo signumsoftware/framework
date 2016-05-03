@@ -18,6 +18,7 @@ using Signum.Engine;
 using System.Web;
 using Signum.Engine.Files;
 using System.IO;
+using System.Net.Http.Headers;
 
 namespace Signum.React.Files
 {
@@ -27,15 +28,9 @@ namespace Signum.React.Files
         public HttpResponseMessage DownloadFile(string fileId)
         {
             var file = Database.Retrieve<FileEntity>(PrimaryKey.Parse(fileId, typeof(FileEntity)));
+            
+            return GetHttpReponseMessage(new System.IO.MemoryStream(file.BinaryFile), file.FileName);
 
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var stream = new System.IO.MemoryStream(file.BinaryFile);
-            response.Content = new StreamContent(stream);
-
-            var mime = MimeMapping.GetMimeMapping(file.FileName);
-            response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mime);
-
-            return response;
         }
 
         [Route("api/files/downloadFilePath/{filePathId}"), HttpGet]
@@ -43,14 +38,7 @@ namespace Signum.React.Files
         {
             var filePath = Database.Retrieve<FilePathEntity>(PrimaryKey.Parse(filePathId, typeof(FilePathEntity)));
 
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            var stream = File.OpenRead(filePath.FullPhysicalPath);
-            response.Content = new StreamContent(stream);
-
-            var mime = MimeMapping.GetMimeMapping(filePath.FileName);
-            response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mime);
-
-            return response;
+            return GetHttpReponseMessage(File.OpenRead(filePath.FullPhysicalPath), filePath.FileName);
         }
 
         [Route("api/files/downloadEmbeddedFilePath/{fileType}"), HttpGet]
@@ -68,14 +56,20 @@ namespace Signum.React.Files
 
             var fullPhysicalPath = Path.Combine(pair.PhysicalPrefix, suffix);
             
+            return GetHttpReponseMessage(File.OpenRead(fullPhysicalPath), fullPhysicalPath);
+        }
+
+
+        public static HttpResponseMessage GetHttpReponseMessage(Stream stream, string fileName)
+        {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
-
-            var stream = File.OpenRead(fullPhysicalPath);
             response.Content = new StreamContent(stream);
-
-            var mime = MimeMapping.GetMimeMapping(fullPhysicalPath);
-            response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mime);
-
+            response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+            {
+                FileName = Path.GetFileName(fileName)
+            };
+            var mime = MimeMapping.GetMimeMapping(fileName);
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue(mime);
             return response;
         }
     }

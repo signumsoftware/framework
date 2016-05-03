@@ -7,10 +7,10 @@ import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Searc
 import { getToString, getMixin }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EmailTemplateEntity, EmailTemplateContactEntity, EmailTemplateRecipientEntity, EmailTemplateMessageEntity, EmailTemplateViewMessage } from '../Signum.Entities.Mailing'
-import { TemplateTokenMessage } from '../Signum.Entities.Templating'
+import { TemplateTokenMessage } from '../../Templating/Signum.Entities.Templating'
 import FileLine from '../../Files/FileLine'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import TemplateControls from '../TemplateControls'
+import TemplateControls from '../../Templating/TemplateControls'
 
 
 export default class EmailTemplate extends EntityComponent<EmailTemplateEntity> {
