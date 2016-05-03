@@ -127,8 +127,9 @@ namespace Signum.Utilities
 
         public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.IsEnum && t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
         public static event Func<MemberInfo, bool> ShouldLocalizeMemeber = m => true;
+        public static event Action<CultureInfo,Type,MemberInfo> NotLocalizedMemeber ;
 
-        static string Fallback(Type type, Func<LocalizedType, string> typeValue)
+        static string Fallback(Type type, Func<LocalizedType, string> typeValue, Action<LocalizedType> notLocalized)
         {
             var cc = CultureInfo.CurrentUICulture;
             {
@@ -137,7 +138,7 @@ namespace Signum.Utilities
                 {
                     string result = typeValue(loc);
                     if (result != null)
-                        return result;
+                        return result;                  
                 }
             }
 
@@ -148,9 +149,12 @@ namespace Signum.Utilities
                 {
                     string result = typeValue(loc);
                     if (result != null)
-                        return result;
+                        return result;              
                 }
+             
             }
+
+  
 
             var defaultCulture = LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly);
             if (defaultCulture != null)
@@ -159,7 +163,12 @@ namespace Signum.Utilities
                 if (loc == null)
                     throw new InvalidOperationException("Type {0} is not localizable".FormatWith(type.TypeName()));
 
-                return typeValue(loc);
+
+
+                if (notLocalized != null)
+                    notLocalized.Invoke(loc);
+                        
+                        return typeValue(loc);
             }
 
             return null;
@@ -170,7 +179,7 @@ namespace Signum.Utilities
         {
             type = CleanType(type);
 
-            var result = Fallback(type, lt => lt.Description);
+            var result = Fallback(type, lt => lt.Description, lt => OnNotLocalizedMemeber(type, null));
 
             if (result != null)
                 return result;
@@ -183,7 +192,7 @@ namespace Signum.Utilities
         {
             type = CleanType(type);
 
-            var result = Fallback(type, lt => lt.PluralDescription);
+            var result = Fallback(type, lt => lt.PluralDescription, lt => OnNotLocalizedMemeber(type,null));
 
             if (result != null)
                 return result;
@@ -237,7 +246,7 @@ namespace Signum.Utilities
 
         static string GetMemberNiceName(MemberInfo memberInfo)
         {
-            var cc = CultureInfo.CurrentUICulture;
+            //var cc = CultureInfo.CurrentUICulture;
             var type = memberInfo.DeclaringType;
 
             if (LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly) == null)
@@ -248,11 +257,22 @@ namespace Signum.Utilities
                 return memberInfo.GetCustomAttribute<DescriptionAttribute>().Try(a => a.Description) ?? memberInfo.Name.NiceName();
             }
        
-            var result = Fallback(type, lt => lt.Members.TryGetC(memberInfo.Name));
+            var result = Fallback(type, lt => lt.Members.TryGetC(memberInfo.Name), lt => OnNotLocalizedMemeber(null,memberInfo));
             if (result != null)
                 return result;
 
+
+
             return result;
+        }
+
+        private static void OnNotLocalizedMemeber(Type  type, MemberInfo memberInfo)
+        {
+            if (NotLocalizedMemeber != null)
+            {
+                var cc = CultureInfo.CurrentUICulture;
+                NotLocalizedMemeber.Invoke(cc, type, memberInfo);
+            }
         }
 
         public static char? GetGender(this Type type)
