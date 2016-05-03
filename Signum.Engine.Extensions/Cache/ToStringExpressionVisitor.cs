@@ -204,7 +204,22 @@ namespace Signum.Engine.Cache
                 }
             }
 
+            if(result.NodeType == ExpressionType.Add && (result.Left.Type == typeof(string) || result.Right.Type == typeof(string)))
+            {
+                var lefto = this.Visit(ToString(result.Left));
+                var righto = this.Visit(ToString(result.Right));
+
+                return Expression.Add(lefto, righto, result.Method);
+            }
             return result;
+        }
+
+        private Expression ToString(Expression node)
+        {
+            if (node.Type == typeof(string))
+                return node;
+
+            return Expression.Call(node, miToString);
         }
 
         private Expression GetPrimaryKey(Expression exp)
