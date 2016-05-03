@@ -321,10 +321,10 @@
     <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
       <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Mailing\Signum.Entities.Templating.ts">
+    <TypeScriptCompile Include="Templating\Signum.Entities.Templating.ts">
       <DependentUpon>Signum.Entities.Templating.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Mailing\TemplateControls.tsx" />
+    <TypeScriptCompile Include="Templating\TemplateControls.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\SendEmailTask.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\EmailRecipient.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\EmailAddress.tsx" />
@@ -428,7 +428,7 @@
     <Content Include="Cache\Signum.Entities.Cache.t4s" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Mailing\Signum.Entities.Templating.t4s" />
+    <Content Include="Templating\Signum.Entities.Templating.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
