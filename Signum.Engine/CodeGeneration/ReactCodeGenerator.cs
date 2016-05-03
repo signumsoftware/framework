@@ -255,7 +255,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("import * as React from 'react'");
             sb.AppendLine("import { Route } from 'react-router'");
             sb.AppendLine("import { ajaxPost, ajaxGet } from '" + fra + "Signum.React/Scripts/Services';");
-            sb.AppendLine("import { EntitySettings, EmbeddedEntitySettings } from '" + fra + "Signum.React/Scripts/Navigator'");
+            sb.AppendLine("import { EntitySettings } from '" + fra + "Signum.React/Scripts/Navigator'");
             sb.AppendLine("import * as Navigator from '" + fra + "Signum.React/Scripts/Navigator'");
             sb.AppendLine("import { EntityOperationSettings } from '" + fra + "Signum.React/Scripts/Operations'");
             sb.AppendLine("import * as Operations from '" + fra + "Signum.React/Scripts/Operations'");
@@ -352,8 +352,7 @@ namespace Signum.Engine.CodeGeneration
         {
             var v = GetVarName(type);
 
-            return "Navigator.addSettings(new {0}({1}, {2} => new Promise(resolve => require(['./Templates/{3}'], resolve))));".FormatWith(
-                type.IsEmbeddedEntity() ? "EmbeddedEntitySettings" : "EntitySettings",
+            return "Navigator.addSettings(new EntitySettings({0}, {1} => new Promise(resolve => require(['./Templates/{2}'], resolve))));".FormatWith(
                 type.Name, v, GetViewName(type));
         }
 
@@ -487,7 +486,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string WriteValueLine(PropertyInfo pi, string v)
         {
-            return "<ValueLine ctx={{this.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+            return "<ValueLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
         }
 
         protected virtual IEnumerable<PropertyInfo> GetProperties(Type type)

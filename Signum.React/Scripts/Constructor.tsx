@@ -3,8 +3,8 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Dic } from './Globals';
-import { Lite, Entity, ModifiableEntity, EmbeddedEntity, SelectorMessage, EntityPack } from './Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType, getTypeName } from './Reflection';
+import { Lite, Entity, ModifiableEntity, EmbeddedEntity, SelectorMessage, EntityPack, MixinEntity } from './Signum.Entities';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType, getTypeName, basicConstruct } from './Reflection';
 import SelectorPopup from './SelectorPopup';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
@@ -33,16 +33,14 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
         }
     }
 
-    const result = { Type: typeName, isNew: true, modified: true } as ModifiableEntity;
+    const result = basicConstruct(typeName);
 
     assertCorrect(result);
 
     return Navigator.toEntityPack(result, true);
 }
 
-export function basicConstruct(type: PseudoType): ModifiableEntity {
-    return { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
-}
+
 
 function asPromise<T>(valueOrPromise: T | Promise<T>) {
     if (valueOrPromise && (valueOrPromise as Promise<T>).then)

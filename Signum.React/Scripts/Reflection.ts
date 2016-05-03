@@ -1,5 +1,5 @@
 ﻿import { Dic } from './Globals';
-import { ModifiableEntity, Entity, Lite, MListElement, ModelState } from './Signum.Entities';
+import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities';
 import {ajaxPost, ajaxGet} from './Services';
 
 
@@ -27,7 +27,6 @@ export interface TypeInfo {
     queryDefined?: boolean;
     members?: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
-    mixins?: { [name: string]: string; };
 
     operations?: { [name: string]: OperationInfo };
 }
@@ -177,6 +176,8 @@ export function getTypeInfo(type: PseudoType): TypeInfo {
 
     throw new Error("Unexpected type: " + type);
 }
+
+
 
 export const IsByAll = "[ALL]";
 export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
@@ -487,6 +488,26 @@ export enum LambdaMemberType {
     Indexer = "Indexer" as any,
 }
 
+export function basicConstruct(type: PseudoType): ModifiableEntity {
+
+    var ti = getTypeInfo(type);
+
+    var result = { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
+
+    if (ti) {
+
+        var mixins = Dic.getKeys(ti.members)
+            .filter(a => a.startsWith("["))
+            .map(a => a.after("[").before("]"))
+            .toObjectDistinct(a => a, a => ({ Type: a, isNew: true, modified: true, }) as MixinEntity);
+
+        if (Dic.getKeys(mixins).length)
+            (result as Entity).mixins = mixins;
+    }
+
+    return result;
+}
+
 export interface IType {
     typeName: string;
 }
@@ -495,7 +516,7 @@ export class Type<T extends ModifiableEntity> implements IType {
 
     New(modify?: (entity: T) => void): T {
 
-        var result = { Type: this.typeName, isNew: true, modified: true } as any as T;
+        var result =  basicConstruct(this.typeName) as T;
 
         if (modify)
             modify(result);
@@ -584,12 +605,12 @@ export class QueryKey {
         public type: string,
         public name: string) { }
 
-    propertyInfo(): MemberInfo {
+    memberInfo(): MemberInfo {
         return getTypeInfo(this.type).members[this.name]
     }
 
     niceName(): string {
-        return this.propertyInfo().niceName;
+        return this.memberInfo().niceName;
     }
 }
 
