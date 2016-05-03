@@ -169,6 +169,8 @@
     <Compile Include="UserAssets\UserAssetController.cs" />
     <Compile Include="UserQueries\UserQueryController.cs" />
     <Compile Include="UserQueries\UserQueryServer.cs" />
+    <Compile Include="Word\WordServer.cs" />
+    <Compile Include="Word\WordController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Chart\Chart.css" />
@@ -405,6 +407,8 @@
     <TypeScriptCompile Include="ViewLog\Signum.Entities.ViewLog.ts">
       <DependentUpon>Signum.Entities.ViewLog.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
+    <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Word\Signum.Entities.Word.ts">
       <DependentUpon>Signum.Entities.Word.t4s</DependentUpon>
     </TypeScriptCompile>
