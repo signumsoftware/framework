@@ -30,8 +30,6 @@
     <Member Name="_0Seconds" Description="{0} Segundos" />
     <Member Name="_0Year" Description="{0} Ano" />
     <Member Name="_0Years" Description="{0} Anos" />
-    <Member Name="DateLast" Description="{0} ultimo" />
-    <Member Name="DateThis" Description="Este {0}" />
     <Member Name="In0" Description="Em {0}" />
     <Member Name="Today" Description="Hoje" />
     <Member Name="Tomorrow" Description="Amanhã" />

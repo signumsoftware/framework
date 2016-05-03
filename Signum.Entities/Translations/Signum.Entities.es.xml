@@ -44,9 +44,7 @@
     <Member Name="DistinctTo" Description="distinto a" />
     <Member Name="EqualTo" Description="igual a" />
     <Member Name="GreaterThan" Description="mayor que" />
-    <Member Name="GreaterThanOrEqual" Description="mayor o igual que" />
     <Member Name="LessThan" Description="menor que" />
-    <Member Name="LessThanOrEqual" Description="menor o igual que" />
   </Type>
   <Type Name="ConnectionMessage">
     <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Es necesario tener conexión con el servidor para continuar" />
@@ -246,6 +244,8 @@
     <Member Name="Firsts" Description="Primeros" />
     <Member Name="Paginate" Description="Paginar" />
   </Type>
+  <Type Name="PropertyRouteEntity" />
+  <Type Name="QueryEntity" />
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} como {1})" />
     <Member Name="And" Description=" y " />
@@ -280,6 +280,7 @@
     <Member Name="No0Found" Description="Ningún {0} encontrado" />
     <Member Name="Quicklinks" Description="Vínculos rápidos" />
   </Type>
+  <Type Name="RoundingType" />
   <Type Name="SearchMessage">
     <Member Name="_01of2Results_N" Description="{0} - {1} de {2} resultado[s]." />
     <Member Name="_0Results_N" Description="{0} resultado[s]." />
@@ -326,7 +327,6 @@
     <Member Name="ValueMustBeSpecifiedFor0" Description="Se debe indicar un valor para {0}" />
   </Type>
   <Type Name="SemiSymbol" Description="Semisímbolo">
-    <Member Name="FieldInfo" Description="Información de campo" />
     <Member Name="Key" Description="Clave" />
     <Member Name="Name" Description="Nombre" />
   </Type>
@@ -351,7 +351,6 @@
     <Member Name="_0HasAnInvalidFormat" Description="{0} tiene un formato inválido" />
     <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} tiene más de {1} decimales" />
     <Member Name="_0HasSomeRepeatedElements1" Description="{0} tiene algunos elementos repetidos: {1}" />
-    <Member Name="_0HasToBe1Than2" Description="{0} tiene que ser {1} {2}" />
     <Member Name="_0HasToBeBetween1And2" Description="{0} Tiene que estar entre {1} y {2}" />
     <Member Name="_0HasToBeLowercase" Description="{0} debe estar en minúsculas" />
     <Member Name="_0HasToBeUppercase" Description="{0} debe estar en mayúsculas" />

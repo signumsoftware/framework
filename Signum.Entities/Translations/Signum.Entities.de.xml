@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="AggregateFunction">
     <Member Name="Average" Description="Durchschnitt" />
@@ -250,6 +250,8 @@
     <Member Name="Firsts" Description="Erste" />
     <Member Name="Paginate" Description="Paginieren" />
   </Type>
+  <Type Name="PropertyRouteEntity" />
+  <Type Name="QueryEntity" />
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} als {1})" />
     <Member Name="_0Steps1" Description="{0} Schritt {1}" />
@@ -338,7 +340,6 @@
     <Member Name="ValueMustBeSpecifiedFor0" Description="Sie müssen einen Wert für {0} angeben" />
   </Type>
   <Type Name="SemiSymbol" Description="Semi" PluralDescription="Semis">
-    <Member Name="FieldInfo" Description="Feld Info" />
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Name" Description="Name" />
   </Type>
