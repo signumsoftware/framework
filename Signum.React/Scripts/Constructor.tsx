@@ -19,7 +19,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
 
     var c = customConstructors[typeName];
     if (c)
-        return asPromise(c(typeName)).then(e => { assertCorrect(e); return Navigator.toEntityPack(result, true); });
+        return asPromise(c(typeName)).then(e => { assertCorrect(e); return Navigator.toEntityPack(e, true); });
 
     var ti = getTypeInfo(typeName);
 
