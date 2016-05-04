@@ -7,7 +7,7 @@ import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.
 import { ExceptionEntity }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { NewsletterEntity } from '../Signum.Entities.Mailing'
-import TemplateControls from '../TemplateControls'
+import TemplateControls from '../../Templating/TemplateControls'
 
 export default class Newsletter extends EntityComponent<NewsletterEntity> {
 

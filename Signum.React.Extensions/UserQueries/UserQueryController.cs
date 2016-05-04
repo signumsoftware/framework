@@ -21,7 +21,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine;
 
-namespace Signum.React.Auth
+namespace Signum.React.UserQueries
 {
     public class UserQueryController : ApiController
     {

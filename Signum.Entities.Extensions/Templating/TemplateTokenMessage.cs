@@ -9,6 +9,7 @@ namespace Signum.Entities.Templating
 {
     public enum TemplateTokenMessage
     {
+        Insert,
         [Description("No column selected")]
         NoColumnSelected,
         [Description("You cannot add If blocks on collection fields")]

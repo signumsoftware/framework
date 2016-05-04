@@ -22,7 +22,7 @@ using System.Threading;
 using Signum.Entities.Scheduler;
 using Signum.Engine.Scheduler;
 
-namespace Signum.React.Process
+namespace Signum.React.Scheduler
 {
     public class SchedulerController : ApiController
     {

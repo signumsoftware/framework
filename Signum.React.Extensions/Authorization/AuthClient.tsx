@@ -198,7 +198,7 @@ declare module '../../../Framework/Signum.React/Scripts/Reflection' {
 declare module '../../../Framework/Signum.React/Scripts/Signum.Entities' {
 
     export interface EntityPack<T extends ModifiableEntity> {
-        typeAllowed: TypeAllowedBasic;
+        typeAllowed?: TypeAllowedBasic;
     }
 }
 

@@ -374,8 +374,8 @@ export module Decoder {
     export function decodeColumns(query: any): MList<ChartColumnEntity> {
         return valuesInOrder(query, "column").map(val => ({
             rowId: null,
-            element: ChartColumnEntity.New(cc=> {
-                const ts = (val.tryBefore("~") || val).trim();
+            element: ChartColumnEntity.New(cc => {
+                const ts = (val.contains("~") ? val.before("~") : val).trim();
 
                 cc.token = !!ts ? QueryTokenEntity.New(qte=> {
                     qte.tokenString = ts;

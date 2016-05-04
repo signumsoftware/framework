@@ -7,6 +7,7 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 
 export module TemplateTokenMessage {
+    export const Insert = new MessageKey("TemplateTokenMessage", "Insert");
     export const NoColumnSelected = new MessageKey("TemplateTokenMessage", "NoColumnSelected");
     export const YouCannotAddIfBlocksOnCollectionFields = new MessageKey("TemplateTokenMessage", "YouCannotAddIfBlocksOnCollectionFields");
     export const YouHaveToAddTheElementTokenToUseForeachOnCollectionFields = new MessageKey("TemplateTokenMessage", "YouHaveToAddTheElementTokenToUseForeachOnCollectionFields");
