@@ -126,6 +126,7 @@
     <Member Name="GreaterThan" Description="größer als" />
     <Member Name="GreaterThanOrEqual" Description="größer als oder gleich" />
     <Member Name="IsIn" Description="ist in" />
+    <Member Name="IsNotIn" Description="Ist nicht in" />
     <Member Name="LessThan" Description="weniger als" />
     <Member Name="LessThanOrEqual" Description="kleiner als oder gleich" />
     <Member Name="Like" Description="wie" />
@@ -148,11 +149,13 @@
     <Member Name="chooseAType" Description="Wählen Sie einen Typ" />
     <Member Name="chooseAValue" Description="Wählen Sie einen Wert" />
     <Member Name="create" Description="Erstellen" />
+    <Member Name="editColumn" Description="Spalte bearbeiten" />
     <Member Name="enterTheNewColumnName" Description="Geben Sie den neuen Spaltennamen ein" />
     <Member Name="error" Description="Fehler" />
     <Member Name="executed" Description="Ausgeführt" />
     <Member Name="find" Description="Finden" />
     <Member Name="hideFilters" Description="Filter ausblenden" />
+    <Member Name="insertColumn" Description="Spalte einfügen" />
     <Member Name="loading" Description="Läd gerade..." />
     <Member Name="loseCurrentChanges" Description="Änderungen verlieren?" />
     <Member Name="moveDown" Description="Nach unten" />
@@ -250,8 +253,13 @@
     <Member Name="Firsts" Description="Erste" />
     <Member Name="Paginate" Description="Paginieren" />
   </Type>
-  <Type Name="PropertyRouteEntity" />
-  <Type Name="QueryEntity" />
+  <Type Name="PropertyRouteEntity" Description="Eigenschaftsroute">
+    <Member Name="Path" Description="Pfad" />
+    <Member Name="RootType" Description="Stammtyp" />
+  </Type>
+  <Type Name="QueryEntity" Description="Abfrage">
+    <Member Name="Key" Description="Schlüssel" />
+  </Type>
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} als {1})" />
     <Member Name="_0Steps1" Description="{0} Schritt {1}" />
@@ -299,7 +307,9 @@
     <Member Name="_0Results_N" Description="{0} Ergebnis[se]." />
     <Member Name="AddColumn" Description="Spalte hinzufügen" />
     <Member Name="AddFilter" Description="Filter hinzufügen" />
+    <Member Name="AddValue" Description="Wert hinzufügen" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Wählen Sie den Anzeigenamen der neuen Spalte" />
+    <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
     <Member Name="Create" Description="Erstellen" />
     <Member Name="CreateNew0_G" Description="Neu[m:en|f:e|n:es] {0} erstellen" />
     <Member Name="DeleteFilter" Description="Filter löschen" />
