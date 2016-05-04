@@ -67,8 +67,7 @@ namespace Signum.React.ApiControllers
             {
                 GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(request.entity), ex);
                 this.Validate(request);
-                this.ResponseMessage(this.Request.CreateResponse(HttpStatusCode.BadRequest, this.ModelState));
-                return null;
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
             }
 
             return SignumServer.GetEntityPack(entity);

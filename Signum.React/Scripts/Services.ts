@@ -4,157 +4,179 @@ import { GraphExplorer } from './Reflection'
 
 
 export interface AjaxOptions {
-    avoidBaseUrl?: boolean;
-    url: string;
-    avoidNotifyPendingRequests?: boolean;
-    avoidThrowError?: boolean;
-    avoidGraphExplorer?: boolean;
+	avoidBaseUrl?: boolean;
+	url: string;
+	avoidNotifyPendingRequests?: boolean;
+	avoidThrowError?: boolean;
+	avoidGraphExplorer?: boolean;
 
-    
+	
 	headers?: HeaderInit;
-    mode?: string | RequestMode;
-    credentials?: string | RequestCredentials;
-    cache?: string | RequestCache;
+	mode?: string | RequestMode;
+	credentials?: string | RequestCredentials;
+	cache?: string | RequestCache;
 }
 
 
 export function baseUrl(options: AjaxOptions): string {
-    if (options.avoidBaseUrl)
-        return options.url;
+	if (options.avoidBaseUrl)
+		return options.url;
 
 
-    const baseUrl = window["__baseUrl"] as string;
+	const baseUrl = window["__baseUrl"] as string;
 
-    if (!baseUrl || options.url.startsWith(baseUrl)) //HACK: Too smart?
-        return options.url;
+	if (!baseUrl || options.url.startsWith(baseUrl)) //HACK: Too smart?
+		return options.url;
 
-    return baseUrl + options.url;
+	return baseUrl + options.url;
 }
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
-    return ajaxGetRaw(options)
-        .then(a=> a.status == 204 ? null : a.json<T>());
+	return ajaxGetRaw(options)
+		.then(a=> a.status == 204 ? null : a.json<T>());
 }
 
 export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
-    return wrapRequest(options, () =>
-        fetch(baseUrl(options), {
-            method: "GET",
-            headers: options.headers || {
-                'Accept': 'application/json',
-            },
-            mode: options.mode,
-            credentials: options.credentials || "same-origin",
-            cache: options.cache
-        }));
+	return wrapRequest(options, () =>
+		fetch(baseUrl(options), {
+			method: "GET",
+			headers: options.headers || {
+				'Accept': 'application/json',
+			},
+			mode: options.mode,
+			credentials: options.credentials || "same-origin",
+			cache: options.cache
+		}));
 }
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
-    return ajaxPostRaw(options, data)
-        .then(a=> a.status == 204 ? null : a.json<T>());
+	return ajaxPostRaw(options, data)
+		.then(a=> a.status == 204 ? null : a.json<T>());
 }
 
 
 export function ajaxPostRaw(options: AjaxOptions, data: any) : Promise<Response> {
-    if (!options.avoidGraphExplorer) {
-        GraphExplorer.propagateAll(data);
-    }
+	if (!options.avoidGraphExplorer) {
+		GraphExplorer.propagateAll(data);
+	}
 
-    return wrapRequest(options, () =>
-        fetch(baseUrl(options), {
-            method: "POST",
-            credentials: options.credentials || "same-origin",
-            headers: options.headers || {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            mode: options.mode,
-            cache: options.cache,
-            body: JSON.stringify(data),
-        }));
+	return wrapRequest(options, () =>
+		fetch(baseUrl(options), {
+			method: "POST",
+			credentials: options.credentials || "same-origin",
+			headers: options.headers || {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			mode: options.mode,
+			cache: options.cache,
+			body: JSON.stringify(data),
+		}));
 }
 
 
 
 export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response>
 {
-    let promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
+	let promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
 
-    if (!options.avoidThrowError)
-        promise = promise.then(throwError);
+	if (!options.avoidThrowError)
+		promise = promise.then(throwError);
 
-    return promise;
+	return promise;
 }
 
 
 export var notifyPendingRequests: (pendingRequests: number) => void = () => { };
 let pendingRequests: number = 0;
 export function onPendingRequest(makeCall: ()=>Promise<Response>) {
-    
-    notifyPendingRequests(++pendingRequests);
+	
+	notifyPendingRequests(++pendingRequests);
 
-    return makeCall().then(
-        resp=> { notifyPendingRequests(--pendingRequests); return resp; },
-        error => { notifyPendingRequests(--pendingRequests); throw error; });
+	return makeCall().then(
+		resp=> { notifyPendingRequests(--pendingRequests); return resp; },
+		error => { notifyPendingRequests(--pendingRequests); throw error; });
 }
 
 
 export function throwError(response: Response): Response | Promise<Response> {
-    if (response.status >= 200 && response.status < 300) {
-        return response;
-    } else {
-        return response.json().then((json : WebApiHttpError)=> {
-            if (json.ModelState)
-                throw new ValidationError(response.statusText, json);
-            else if (json.Message)
-                throw new ServiceError(response.statusText, response.status, json);
-        }) as any;
-    }
+	if (response.status >= 200 && response.status < 300) {
+		return response;
+	} else {
+		return response.json().then((json : WebApiHttpError)=> {
+			if (json.ModelState)
+				throw new ValidationError(response.statusText, json);
+			else if (json.Message)
+				throw new ServiceError(response.statusText, response.status, json);
+		}) as any;
+	}
+}
+
+var a = document.createElement("a");
+document.body.appendChild(a);
+a.style.display = "none";
+
+
+export function saveFile(response: Response) {
+	response.blob().then(blob => {
+		var url = window.URL.createObjectURL(blob);
+		a.href = url;
+
+        let fileName = "file.dat";
+        let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition"));
+		if (match)
+			fileName = match[1];
+
+		(a as any).download = fileName;
+
+		a.click();
+		window.URL.revokeObjectURL(url);
+	});
 }
 
 export class ServiceError extends Error {
-    constructor(
-        public statusText: string,
-        public status: number,
-        public httpError: WebApiHttpError) {
-        super(httpError.ExceptionMessage)
-    }
+	constructor(
+		public statusText: string,
+		public status: number,
+		public httpError: WebApiHttpError) {
+		super(httpError.ExceptionMessage)
+	}
 
-    get defaultIcon() {
-        switch (this.httpError.ExceptionType) {
-            case "UnauthorizedAccessException": return "glyphicon-lock";
-            case "EntityNotFoundException": return "glyphicon-trash";
-            case "UniqueKeyException": return "glyphicon-duplicate";
-            default: return "glyphicon-alert";
-        }
-    }
+	get defaultIcon() {
+		switch (this.httpError.ExceptionType) {
+			case "UnauthorizedAccessException": return "glyphicon-lock";
+			case "EntityNotFoundException": return "glyphicon-trash";
+			case "UniqueKeyException": return "glyphicon-duplicate";
+			default: return "glyphicon-alert";
+		}
+	}
 
-    toString() {
-        return this.message;
-    }
+	toString() {
+		return this.message;
+	}
 }
 
 export interface WebApiHttpError {
-    Message?: string;
-    ModelState?: { [member: string]: string }
-    ExceptionMessage?: string;
-    ExceptionType?: string;
-    StackTrace?: string;
-    MessageDetail?: string;
-    ExceptionID?: string;
+	Message?: string;
+	ModelState?: { [member: string]: string }
+	ExceptionMessage?: string;
+	ExceptionType?: string;
+	StackTrace?: string;
+	MessageDetail?: string;
+	ExceptionID?: string;
 }
 
 export class ValidationError extends Error {
-    modelState: ModelState;
-    message: string;
+	modelState: ModelState;
+	message: string;
 
-    constructor(public statusText: string, json: WebApiHttpError) {
-        super(statusText)
-        this.message = json.Message;
-        this.modelState = json.ModelState;
-    }
+	constructor(public statusText: string, json: WebApiHttpError) {
+		super(statusText)
+		this.message = json.Message;
+		this.modelState = json.ModelState;
+	}
 
-    toString() {
-        return this.statusText + "\r\n" + this.message;
-    }
+	toString() {
+		return this.statusText + "\r\n" + this.message;
+	}
 }
