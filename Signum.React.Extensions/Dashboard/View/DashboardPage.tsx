@@ -5,7 +5,7 @@ import { FormGroup, FormControlStatic, EntityComponent, EntityComponentProps, Va
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
-import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage, EntityPack } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import SelectorPopup from '../../../../Framework/Signum.React/Scripts/SelectorPopup'
@@ -23,9 +23,14 @@ interface DashboardPageProps extends ReactRouter.RouteComponentProps<{}, { dashb
 
 }
 
-export default class DashboardPage extends React.Component<DashboardPageProps, { dashboard?: DashboardEntity, entity?: Entity }> {
+interface DashboardPageState {
+    dashboard?: DashboardEntity;
+    entity?: Entity;
+}
 
-    state = { dashboard: null, entity: null };
+export default class DashboardPage extends React.Component<DashboardPageProps, DashboardPageState> {
+
+    state = { dashboard: null, entity: null } as DashboardPageState;
 
     componentWillMount() {
         this.loadDashboard(this.props);
@@ -67,8 +72,8 @@ export default class DashboardPage extends React.Component<DashboardPageProps, {
                 { withEntity &&
                     <div style={{ float: "right", textAlign: "right" }}>
                         {!entity ? <h3>{JavascriptMessage.loading.niceToString() }</h3> :
-                            <h3>
-                                { Navigator.isNavigable(entity) ?
+                        <h3>
+                            { Navigator.isNavigable({ entity: entity, canExecute: null } as EntityPack<Entity>) ?
                                     <Link className="sf-entity-title" to={Navigator.navigateRoute(entity) }>{getToString(entity) }</Link> :
                                     <span className="sf-entity-title">{getToString(entity) }</span>
                                 }
@@ -80,7 +85,7 @@ export default class DashboardPage extends React.Component<DashboardPageProps, {
 
                 {!dashboard ? <h2>{JavascriptMessage.loading.niceToString() }</h2> :
                     <h2>
-                        {Navigator.isNavigable(dashboard) ?
+                        {Navigator.isNavigable({ entity: dashboard, canExecute: null } as EntityPack<Entity>) ?
                             <Link  to={Navigator.navigateRoute(dashboard) }>{getToString(dashboard) }</Link> :
                             <span>{getToString(dashboard) }</span>
                         }

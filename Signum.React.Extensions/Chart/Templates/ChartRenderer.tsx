@@ -5,7 +5,7 @@ import { DomUtils } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as ChartUtils from "./ChartUtils"
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption, hasAggregate } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
    ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
@@ -119,7 +119,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.A
 
             var cr = this.props.chartRequest;
 
-            var filters = cr.filterOptions.clone();
+            var filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
 
             var obj = val.split("&").filter(a => !!a).toObject(a => a.before("="), a => a.after("="));
 

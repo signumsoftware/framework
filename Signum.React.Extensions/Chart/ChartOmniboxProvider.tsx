@@ -41,7 +41,7 @@ export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxRe
     navigateTo(result: ChartOmniboxResult) {
 
         if (result.QueryNameMatch == null)
-            return null;;
+            return null;
 
         var path = ChartClient.Encoder.chartRequestPath(ChartRequest.New(cr => {
             cr.queryKey = getQueryKey(result.QueryName);

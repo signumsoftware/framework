@@ -170,6 +170,8 @@
     <Compile Include="UserAssets\UserAssetController.cs" />
     <Compile Include="UserQueries\UserQueryController.cs" />
     <Compile Include="UserQueries\UserQueryServer.cs" />
+    <Compile Include="Word\WordServer.cs" />
+    <Compile Include="Word\WordController.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Chart\Chart.css" />
@@ -322,10 +324,10 @@
     <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
       <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Mailing\Signum.Entities.Templating.ts">
+    <TypeScriptCompile Include="Templating\Signum.Entities.Templating.ts">
       <DependentUpon>Signum.Entities.Templating.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Mailing\TemplateControls.tsx" />
+    <TypeScriptCompile Include="Templating\TemplateControls.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\SendEmailTask.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\EmailRecipient.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\EmailAddress.tsx" />
@@ -406,6 +408,8 @@
     <TypeScriptCompile Include="ViewLog\Signum.Entities.ViewLog.ts">
       <DependentUpon>Signum.Entities.ViewLog.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Word\Templates\WordTemplate.tsx" />
+    <TypeScriptCompile Include="Word\WordClient.tsx" />
     <TypeScriptCompile Include="Word\Signum.Entities.Word.ts">
       <DependentUpon>Signum.Entities.Word.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -429,7 +433,7 @@
     <Content Include="Cache\Signum.Entities.Cache.t4s" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Mailing\Signum.Entities.Templating.t4s" />
+    <Content Include="Templating\Signum.Entities.Templating.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
