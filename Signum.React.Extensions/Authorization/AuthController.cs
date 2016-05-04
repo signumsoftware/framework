@@ -13,7 +13,7 @@ using Signum.Utilities;
 using Signum.React.Facades;
 using Signum.React.Authorization;
 
-namespace Signum.React.Auth
+namespace Signum.React.Authorization
 {
     public class AuthController : ApiController
     {

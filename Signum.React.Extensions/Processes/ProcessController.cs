@@ -22,7 +22,7 @@ using System.Threading;
 using Signum.React.ApiControllers;
 using Signum.Engine.Basics;
 
-namespace Signum.React.Process
+namespace Signum.React.Processes
 {
     public class ProcessController : ApiController
     {

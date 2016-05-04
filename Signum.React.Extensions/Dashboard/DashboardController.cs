@@ -23,7 +23,7 @@ using Signum.Engine;
 using Signum.Entities.Dashboard;
 using Signum.Engine.Dashboard;
 
-namespace Signum.React.Auth
+namespace Signum.React.Dashboard
 {
     public class DashboardController : ApiController
     {

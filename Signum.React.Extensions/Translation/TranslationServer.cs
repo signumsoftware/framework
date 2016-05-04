@@ -3,12 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Web;
+using System.Web.Http;
 
 namespace Signum.React.Translation
 {
     public class TranslationServer
     {
+        public static void Start(HttpConfiguration config)
+        {
+            SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+        }
+
         public static CultureInfo GetCultureRequest(HttpRequest request)
         {
             if (request.UserLanguages == null)

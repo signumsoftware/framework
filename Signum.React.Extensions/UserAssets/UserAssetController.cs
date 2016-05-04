@@ -21,8 +21,8 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine;
 
-namespace Signum.React.Auth
-{
+namespace Signum.React.UserAssets
+{ 
     public class UserAssetController : ApiController
     {
         [Route("api/userAssets/parseFilters"), HttpPost]
