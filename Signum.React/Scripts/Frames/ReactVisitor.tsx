@@ -2,10 +2,9 @@
 import { Tab } from 'react-bootstrap'
 import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
-import { EntityFrame } from '../Lines'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, ModifiableEntity } from '../Signum.Entities'
-import { TypeContext, StyleOptions } from '../TypeContext'
+import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos } from '../Reflection'
 
 

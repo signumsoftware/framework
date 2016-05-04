@@ -122,8 +122,8 @@ export function saveFile(response: Response) {
 		var url = window.URL.createObjectURL(blob);
 		a.href = url;
 
-        let fileName = "file.dat";
-        let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition"));
+		let fileName = "file.dat";
+		let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition"));
 		if (match)
 			fileName = match[1];
 

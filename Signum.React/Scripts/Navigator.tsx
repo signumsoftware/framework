@@ -7,7 +7,6 @@ import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack
 import { IUserEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded  } from './Reflection';
 import { TypeContext } from './TypeContext';
-import { EntityComponent, EntityComponentProps, EntityFrame } from './Lines';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
 import ModalFrame from './Frames/ModalFrame';
@@ -84,10 +83,10 @@ export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> 
     return entitySettings[typeName];
 }
 
- 
-export function getComponent<T extends ModifiableEntity>(entity: T): Promise<React.ComponentClass<EntityComponentProps<T>>> {
 
-    var settings = getSettings(entity.Type);
+export function getComponent<T extends ModifiableEntity>(entity: T): Promise<React.ComponentClass<{ ctx: TypeContext<T> }>> {
+
+    var settings = getSettings(entity.Type) as EntitySettings<T>;
 
     if (settings == null)
         throw new Error(`No settings for '${entity.Type}'`);
@@ -95,7 +94,37 @@ export function getComponent<T extends ModifiableEntity>(entity: T): Promise<Rea
     if (settings.getComponent == null)
         throw new Error(`No getComponent set for settings for '${entity.Type}'`);
 
-    return settings.getComponent(entity).then(a => a.default);
+    return settings.getComponent(entity).then(a => applyViewOverrides(settings, a.default));
+}
+
+function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<T>, component: React.ComponentClass<{ ctx: TypeContext<T> }>) {
+
+    if (!component.prototype.render)
+        throw new Error("render function not defined in " + component);
+
+    if (setting.viewOverrides == null || setting.viewOverrides.length == 0)
+        return component;
+
+
+    if (component.prototype.render.withViewOverrides)
+        return component;
+
+    var baseRender = component.prototype.render as () => void;
+
+    component.prototype.render = function () {
+
+        var ctx = this.props.ctx;
+
+        var view = baseRender.call(this);
+
+        var replacer = new ViewReplacer<T>(view, ctx);
+        setting.viewOverrides.forEach(vo => vo(replacer));
+        return replacer.result;
+    };
+
+    component.prototype.render.withViewOverrides = true;
+
+    return component;
 }
 
 export const isCreableEvent: Array<(typeName: string) => boolean> = [];
@@ -292,18 +321,7 @@ function typeIsNavigable(typeName: string): EntityWhen {
 }
 
 
-export function applyViewOverrides(ctx: TypeContext<ModifiableEntity>, view: React.ReactElement<any>): React.ReactElement<any> {
 
-    var es = getSettings(ctx.value.Type);
-
-    if (es && es.viewOverrides && es.viewOverrides.length) {
-        var replacer = new ViewReplacer(view, ctx);
-        es.viewOverrides.forEach(vo => vo(replacer));
-        return replacer.result;
-    }
-
-    return view;
-}
 
 export interface ViewOptions {
     entity: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
@@ -311,7 +329,7 @@ export interface ViewOptions {
     readOnly?: boolean;
     showOperations?: boolean;
     requiresSaveOperation?: boolean;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
 export function view(options: ViewOptions): Promise<ModifiableEntity>;
@@ -334,7 +352,7 @@ export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Enti
 export interface NavigateOptions {
     entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     readOnly?: boolean;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
 export function navigate(options: NavigateOptions): Promise<void>;
@@ -443,7 +461,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
     getToString: (entity: T) => string;
 
-    getComponent: (entity: T) => Promise<{ default: React.ComponentClass<EntityComponentProps<T>> }>;
+    getComponent: (entity: T) => Promise<{ default: React.ComponentClass<{ ctx: TypeContext<T> }> }>;
 
     viewOverrides: Array<(replacer: ViewReplacer<T>) => void>;
 

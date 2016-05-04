@@ -5,10 +5,9 @@ import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import ButtonBar from './ButtonBar'
-import { EntityComponent, EntityComponentProps, EntityFrame } from '../Lines'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, JavascriptMessage } from '../Signum.Entities'
-import { TypeContext, StyleOptions } from '../TypeContext'
+import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, GraphExplorer } from '../Reflection'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
 import ValidationErrors from './ValidationErrors'
@@ -17,14 +16,14 @@ require("!style!css!./Frames.css");
 
 interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string }> {
     showOperations?: boolean;
-    component?: React.ComponentClass<EntityComponentProps<Entity>>;
+    component?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
     title?: string;
 }
 
 
 interface PageFrameState {
     pack?: EntityPack<Entity>;
-    component?: React.ComponentClass<EntityComponentProps<Entity>>;
+    component?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
 }
 
 export default class PageFrame extends React.Component<PageFrameProps, PageFrameState> {
@@ -126,13 +125,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
         const entity = this.state.pack.entity;
 
-        var ti = this.getTypeInfo();
 
-        const styleOptions: StyleOptions = {
-            readOnly: Navigator.isReadOnly(ti)
-        };
-
-        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, ""));
 
         const frame: EntityFrame<Entity> = {
             component: this,
@@ -143,6 +136,16 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
                 this.forceUpdate()
             },
         };
+
+        var ti = this.getTypeInfo();
+
+        const styleOptions: StyleOptions = {
+            readOnly: Navigator.isReadOnly(ti),
+            frame: frame
+        };
+
+        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, ""));
+
 
         const wc: WidgetContext = {
             ctx: ctx,
@@ -159,7 +162,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
                 <ValidationErrors entity={this.state.pack.entity}/>
                 { embeddedWidgets.top }
                 <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
-                    {this.state.component && React.createElement<EntityComponentProps<Entity>>(this.state.component, { ctx: ctx, frame: frame }) }
+                    {this.state.component && React.createElement<{ ctx: TypeContext<Entity> }>(this.state.component, { ctx: ctx }) }
                 </div>
                 { embeddedWidgets.bottom }
             </div>

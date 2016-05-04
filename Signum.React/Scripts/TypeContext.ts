@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type } from './Reflection'
-import { ModelState, MList, ModifiableEntity } from './Signum.Entities'
+import { ModelState, MList, ModifiableEntity, EntityPack } from './Signum.Entities'
 
 export enum FormGroupStyle {
     /// Unaffected by FormGroupSize
@@ -44,7 +44,8 @@ export class StyleContext {
         labelColumns: { sm: 2 },
         readOnly : false,
         placeholderLabels : false,
-        formControlStaticAsFormControlReadonly : false,
+        formControlStaticAsFormControlReadonly: false,
+        frame: null,
     });
 
     get formGroupStyle(): FormGroupStyle {
@@ -93,6 +94,14 @@ export class StyleContext {
         this.styleOptions.readOnly = value;
     }
 
+    
+    get frame(): EntityFrame<ModifiableEntity> {
+        if (this.styleOptions.frame)
+            return this.styleOptions.frame;
+
+        return this.parent.frame;
+    }
+
 
     static bsColumnsCss(bsColumns: BsColumns) {
         return [
@@ -122,6 +131,7 @@ export interface StyleOptions {
     labelColumns?: BsColumns;
     valueColumns?: BsColumns;
     readOnly?: boolean;
+    frame?: EntityFrame<ModifiableEntity>;
 }
 
 
@@ -136,6 +146,7 @@ export interface BsColumns {
 
 
 export class TypeContext<T> extends StyleContext {
+
 
     propertyRoute: PropertyRoute;
     binding: IBinding<T>;
@@ -152,6 +163,7 @@ export class TypeContext<T> extends StyleContext {
         this.binding.setValue(val);
     }
 
+    
     static root<T extends ModifiableEntity>(type: Type<T>, value: T, styleOptions?: StyleOptions): TypeContext<T> {
         return new TypeContext(null, styleOptions, PropertyRoute.root(type), new ReadonlyBinding(value, ""));
     }
@@ -224,6 +236,13 @@ export class TypeContext<T> extends StyleContext {
     using(render: (ctx: this) => React.ReactChild): React.ReactChild {
         return render(this);
     }
+}
+
+export interface EntityFrame<T extends ModifiableEntity> {
+    component: React.Component<any, any>;
+    onReload: (pack: EntityPack<T>) => void;
+    setError: (modelState: ModelState, initialPrefix?: string) => void;
+    onClose: () => void;
 }
 
 

@@ -5,10 +5,9 @@ import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
-import { EntityComponentProps, EntityFrame } from '../Lines'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from './EntityBase'
@@ -17,11 +16,11 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 export interface RenderEntityProps {
     ctx?: TypeContext<ModifiableEntity | Lite<Entity>>;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
 export interface RenderEntityState {
-    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     lastLoadedType?: string;
 }
 
@@ -94,11 +93,11 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         if (this.state.lastLoadedType == e.Type)
             return Promise.resolve(null);
 
+
         return Navigator.getComponent(e).then(c => {
             this.setState({
-                getComponent: (ctx, frame) => React.createElement<EntityComponentProps<ModifiableEntity>>(c, {
-                    ctx: ctx,
-                    frame: frame
+                getComponent: (ctx) => React.createElement<{ ctx: TypeContext<ModifiableEntity> }>(c, {
+                    ctx: ctx
                 }),
                 lastLoadedType: e.Type
             });
@@ -125,8 +124,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
         var pr = !ti ? ctx.propertyRoute : PropertyRoute.root(ti);
         
-        var newCtx = new TypeContext<ModifiableEntity>(ctx, null, pr, new ReadonlyBinding(entity, ""));
-        
+
         var frame: EntityFrame<ModifiableEntity> = {
             component: this,
             onClose: () => { throw new Error("Not implemented Exception"); },
@@ -134,7 +132,9 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
             setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },
         }; 
 
-        return getComponent(newCtx, frame);
+        var newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""));
+        
+        return getComponent(newCtx);
     }
 
 }

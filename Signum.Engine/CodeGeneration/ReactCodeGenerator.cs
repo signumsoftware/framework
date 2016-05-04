@@ -382,7 +382,7 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("import * as React from 'react'");
             sb.AppendLine("import { "  + type.Name + " } from '../" + type.Namespace + "'");
-            sb.AppendLine("import { EntityComponent, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, FormGroup, TypeContext, FormGroupStyle, FormGroupSize } from '" + frp + "Signum.React/Scripts/Lines'");
+            sb.AppendLine("import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, FormGroup, TypeContext, FormGroupStyle, FormGroupSize } from '" + frp + "Signum.React/Scripts/Lines'");
             sb.AppendLine("import { SearchControl, CountSearchControl, FilterOperation, OrderType, PaginationMode } from '" + frp + "Signum.React/Scripts/Search'");
             
             var v = GetVarName(type);
@@ -392,7 +392,7 @@ namespace Signum.Engine.CodeGeneration
 
 
             sb.AppendLine();
-            sb.AppendLine("export default class {0} extends EntityComponent<{1}> {{".FormatWith(GetViewName(type), type.Name));
+            sb.AppendLine("export default class {0} extends React.Component<{{ ctx: TypeContext<{1}> }}, void> {{".FormatWith(GetViewName(type), type.Name));
             sb.AppendLine("");
             sb.AppendLine("    renderEntity() {");
             sb.AppendLine("        var ctx = this.props.ctx;");
