@@ -138,7 +138,7 @@
   <ItemGroup>
     <Compile Include="Authorization\AuthController.cs" />
     <Compile Include="Authorization\AuthServer.cs" />
-    <Compile Include="Authorization\UserTicketClient.cs" />
+    <Compile Include="Authorization\UserTicketServer.cs" />
     <Compile Include="Cache\CacheController.cs" />
     <Compile Include="Cache\CacheServer.cs" />
     <Compile Include="Chart\ChartController.cs" />
@@ -148,6 +148,7 @@
     <Compile Include="Dashboard\DashboardServer.cs" />
     <Compile Include="Disconnected\DisconnectedServer.cs" />
     <Compile Include="Files\FilesController.cs" />
+    <Compile Include="Files\FilesServer.cs" />
     <Compile Include="Isolation\IsolationServer.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />

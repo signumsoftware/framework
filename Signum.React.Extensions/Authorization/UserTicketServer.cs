@@ -7,7 +7,7 @@ using Signum.Entities.Authorization;
 using Signum.Utilities;
 using Signum.React.Authorization;
 
-namespace Signum.React.Auth
+namespace Signum.React.Authorization
 {
     public class UserTicketServer
     {
