@@ -1,13 +1,13 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityFrame} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import {SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { HolidayCalendarEntity, HolidayEntity } from '../Signum.Entities.Scheduler'
 
-export default class HolidayCalendar extends EntityComponent<HolidayCalendarEntity> {
+export default class HolidayCalendar extends React.Component<{ ctx: TypeContext<HolidayCalendarEntity> }, void> {
 
-    renderEntity() {
+    render() {
         
         var e = this.props.ctx;
 

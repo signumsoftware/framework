@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Tab, Tabs, ButtonToolbar }from 'react-bootstrap'
 import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityFrame, EntityTabRepeater} from '../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater} from '../../../Framework/Signum.React/Scripts/Lines'
 import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll }  from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchControl }  from '../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin }  from '../../../Framework/Signum.React/Scripts/Signum.Entities'

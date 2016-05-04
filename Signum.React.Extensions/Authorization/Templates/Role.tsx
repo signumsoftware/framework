@@ -1,10 +1,10 @@
 ﻿import * as React from 'react'
 import { RoleEntity, AuthMessage, AuthAdminMessage, MergeStrategy } from '../Signum.Entities.Authorization'
-import { EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
 
-export default class Role extends EntityComponent<RoleEntity> {
+export default class Role extends React.Component<{ ctx: TypeContext<RoleEntity> }, void> {
 
-    renderEntity() {
+    render() {
         var ctx = this.props.ctx;
         return (
             <div>

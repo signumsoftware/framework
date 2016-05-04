@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Tab, Tabs }from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityFrame, EntityTabRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll }  from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -13,9 +13,9 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import TemplateControls from '../../Templating/TemplateControls'
 
 
-export default class EmailTemplate extends EntityComponent<EmailTemplateEntity> {
+export default class EmailTemplate extends React.Component<{ ctx: TypeContext<EmailTemplateEntity> }, void> {
 
-    renderEntity() {
+    render() {
 
         var e = this.props.ctx;
         
@@ -96,10 +96,10 @@ export default class EmailTemplate extends EntityComponent<EmailTemplateEntity> 
                         <ValueLine ctx={sc.subCtx(c => c.displayName)}  />
                     </div>
                 </div>
-                { this.entity.query &&
+                { this.props.ctx.value.query &&
                     <QueryTokenEntityBuilder
                             ctx={ec.subCtx(a => a.token) }
-                            queryKey={this.entity.query.key}
+                            queryKey={this.props.ctx.value.query.key}
                             subTokenOptions={ SubTokensOptions.CanElement} />
                 }
             </div>
@@ -125,10 +125,10 @@ export default class EmailTemplate extends EntityComponent<EmailTemplateEntity> 
                         <ValueLine ctx={sc.subCtx(c => c.displayName)}  />
                     </div>
                 </div>
-                { this.entity.query && 
+                { this.props.ctx.value.query && 
                     <QueryTokenEntityBuilder
                         ctx={ec.subCtx(a => a.token) }
-                        queryKey={this.entity.query.key}
+                        queryKey={this.props.ctx.value.query.key}
                         subTokenOptions={ SubTokensOptions.CanElement} /> 
                 }
             </div>

@@ -6,10 +6,9 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, mlistItemContext, EntityFrame } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../../../../Framework/Signum.React/Scripts/Lines/LineBase'
-import { EntityComponentProps, EntityFrame } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import Typeahead from '../../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from '../../../../Framework/Signum.React/Scripts/Lines/EntityListBase'
@@ -22,7 +21,7 @@ interface IGridEntity {
 }
 
 export interface EntityGridRepeaterProps extends EntityListBaseProps {
-    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     createAsLink?: boolean;
     move?: boolean;
     resize?: boolean;
@@ -80,7 +79,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                                 this.renderSeparator(parseInt(gr.key)),
                                 <div className="row items-row" key={"row" + gr.key} onDragOver={e => this.handleItemsRowDragOver(e, parseInt(gr.key)) }>
                                     { gr.elements.orderBy(a => a.ctx.value.startColumn).map((p, j, list) => {
-                                        let item = this.props.getComponent(p.ctx, null);
+                                        let item = this.props.getComponent(p.ctx);
                                         const s = this.state;
                                         item = React.cloneElement(item, {
                                             onResizerDragStart: p.ctx.readOnly || !s.resize ? null : (resizer, e) => this.handleResizeDragStart(resizer, e, p.ctx),

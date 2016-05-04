@@ -2,7 +2,7 @@
 import { UserQueryEntity, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../../UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
 import { ChartScriptEntity, ChartScriptColumnEntity, ChartScriptParameterEntity } from '../Signum.Entities.Chart'
-import { FormGroup, FormControlStatic, EntityComponent, EntityComponentProps, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -44,8 +44,8 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
     exceptionHandler: number;
 
     handleOnChange = (newValue: string) => {
-        this.entity.script = newValue;
-        this.entity.modified = true;
+        this.props.ctx.value.script = newValue;
+        this.props.ctx.value.modified = true;
 
         if (opener != null && opener != undefined) {
             clearTimeout(this.changedHandler);
@@ -54,7 +54,7 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
     };
 
     updatePreview = () => {
-        opener.changeScript(this.entity);
+        opener.changeScript(this.props.ctx.value);
         this.exceptionHandler = setTimeout(this.getException, 100);
     }
 

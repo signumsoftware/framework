@@ -1,15 +1,15 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl, CountSearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ExceptionEntity }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { Pop3ReceptionEntity, EmailMessageEntity } from '../Signum.Entities.Mailing'
 
-export default class Pop3Reception extends EntityComponent<Pop3ReceptionEntity> {
+export default class Pop3Reception extends React.Component<{ ctx: TypeContext<Pop3ReceptionEntity> }, void> {
 
-    renderEntity() {
+    render() {
 
          var sc = this.props.ctx;
 

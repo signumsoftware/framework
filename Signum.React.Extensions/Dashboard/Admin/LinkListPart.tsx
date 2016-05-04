@@ -1,6 +1,6 @@
 ﻿
 import * as React from 'react'
-import { FormGroup, FormControlStatic, EntityComponent, EntityComponentProps, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame, RenderEntity} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -12,9 +12,9 @@ import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
 import { LinkListPartEntity, LinkElementEntity} from '../Signum.Entities.Dashboard'
 
 
-export default class CountSearchControlPart extends EntityComponent<LinkListPartEntity> {
+export default class CountSearchControlPart extends React.Component<{ ctx: TypeContext<LinkListPartEntity> }, void> {
 
-    renderEntity() {
+    render() {
         var ctx = this.props.ctx.subCtx({ formGroupStyle: FormGroupStyle.SrOnly, placeholderLabels: true });
         
         return (

@@ -1,20 +1,20 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, EntityComponent, EntityComponentProps, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { CountSearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { toLite }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator  from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ProcessEntity, ProcessState, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
 
-export default class UserQuery extends EntityComponent<ProcessEntity> {
+export default class UserQuery extends React.Component<{ ctx: TypeContext<ProcessEntity> }, void> {
 
     handler: number;
     componentWillMount(){
         this.reloadIfNecessary(this.props.ctx.value);
     }
 
-    componentWillReceiveProps(newProps : EntityComponentProps<ProcessEntity>){
+    componentWillReceiveProps(newProps: { ctx: TypeContext<ProcessEntity> }){
         this.reloadIfNecessary(newProps.ctx.value);
     }
 
@@ -24,14 +24,14 @@ export default class UserQuery extends EntityComponent<ProcessEntity> {
                 this.handler = null;
                 var lite = toLite(e);
                 Navigator.API.fetchEntityPack(lite)
-                    .then(pack=> this.props.frame.onReload(pack))
+                    .then(pack => this.props.ctx.frame.onReload(pack))
                     .done(); 
             });
         }
     }
 
 
-    renderEntity() {
+    render() {
 
         var ctx4 = this.props.ctx.subCtx({ labelColumns: { sm: 4 } });
         var ctx5 = this.props.ctx.subCtx({ labelColumns: { sm: 5 } });
@@ -74,7 +74,7 @@ export default class UserQuery extends EntityComponent<ProcessEntity> {
 
     renderProgress() {
 
-        var p = this.entity;
+        var p = this.props.ctx.value;
 
         var val = p.progress != null ? p.progress * 100 :
             ((p.state == "Queued" || p.state == "Suspended" || p.state == "Finished" || p.state == "Error") ? 100 : 0);

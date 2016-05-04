@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Tab, Tabs }from 'react-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityFrame, EntityTabRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SubTokensOptions, QueryToken, QueryTokenType, hasAnyOrAll }  from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -13,13 +13,13 @@ import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntity
 import TemplateControls from '../../Templating/TemplateControls'
 
 
-export default class WordTemplate extends EntityComponent<WordTemplateEntity> {
+export default class WordTemplate extends React.Component<{ ctx: TypeContext<WordTemplateEntity> }, void> {
 
     handleOnInsert = (newCode: string) => {
         window.prompt("Copy to clipboard: Ctrl+C, Enter", newCode);
     }
 
-    renderEntity() {
+    render() {
 
         var e = this.props.ctx;
 

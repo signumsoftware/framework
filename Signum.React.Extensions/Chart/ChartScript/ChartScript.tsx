@@ -2,7 +2,7 @@
 import { UserQueryEntity, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../../UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
 import { ChartScriptEntity, ChartScriptColumnEntity, ChartScriptParameterEntity } from '../Signum.Entities.Chart'
-import { FormGroup, FormControlStatic, EntityComponent, EntityComponentProps, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -14,17 +14,17 @@ import ChartScriptCode from './ChartScriptCode'
 
 require("!style!css!../Chart.css");
 
-export default class ChartScript extends EntityComponent<ChartScriptEntity> {
+export default class ChartScript extends React.Component<{ ctx: TypeContext<ChartScriptEntity> }, void> {
 
     componentWillMount() {
         this.loadIcon(this.props);
     }
 
-    componentWillReceiveProps(newProps: EntityComponentProps<ChartScriptEntity>) {
+    componentWillReceiveProps(newProps: { ctx: TypeContext<ChartScriptEntity> }) {
         this.loadIcon(newProps);
     }
 
-    loadIcon(props: EntityComponentProps<ChartScriptEntity> ) {
+    loadIcon(props: { ctx: TypeContext<ChartScriptEntity> } ) {
         if (props.ctx.value.icon) {
             Navigator.API.fetchAndRemember(props.ctx.value.icon)
                 .then(() => this.forceUpdate())
@@ -33,10 +33,10 @@ export default class ChartScript extends EntityComponent<ChartScriptEntity> {
     }
 
 
-    renderEntity() {
+    render() {
 
         var ctx = this.props.ctx;
-        var icon = this.entity.icon;
+        var icon = ctx.value.icon;
 
       
         return (

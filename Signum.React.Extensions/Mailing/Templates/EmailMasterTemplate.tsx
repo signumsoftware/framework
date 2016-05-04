@@ -1,14 +1,14 @@
 ﻿import * as React from 'react'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
-import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame, EntityTabRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEntity } from '../Signum.Entities.Mailing'
 
-export default class EmailMasterTemplate extends EntityComponent<EmailMasterTemplateEntity> {
+export default class EmailMasterTemplate extends React.Component<{ ctx: TypeContext<EmailMasterTemplateEntity> }, void> {
 
-    renderEntity() {
+    render() {
 
         var e = this.props.ctx;
 

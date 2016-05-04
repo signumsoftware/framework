@@ -2,36 +2,37 @@
 
 import * as React from 'react'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
-import { ValueLine, ValueLineType, EntityComponent, EntityLine, EntityCombo, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { ValueLine, ValueLineType, EntityLine, EntityCombo, FormGroup, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
 
 
 
 
-export default class User extends EntityComponent<UserEntity> {
+export default class User extends React.Component<{ ctx: TypeContext<UserEntity> }, void> {
 
     handlePasswordChange = (event: React.SyntheticEvent) => {
 
         var areDifferent = (this.refs["newPass"] as HTMLInputElement).value != (this.refs["newPass2"] as HTMLInputElement).value;
 
         if (areDifferent) {
-            this.props.frame.setError({ "passwordHash": AuthMessage.PasswordsAreDifferent.niceToString() });
+            this.props.ctx.frame.setError({ "passwordHash": AuthMessage.PasswordsAreDifferent.niceToString() });
         }
         else {
-            this.props.frame.setError(null);
-            (this.entity as any).newPassword = (this.refs["newPass"] as HTMLInputElement).value;
+            this.props.ctx.frame.setError(null);
+            (this.props.ctx.value as any).newPassword = (this.refs["newPass"] as HTMLInputElement).value;
         }
 
     }
 
-    renderEntity() {
+    render() {
         const ctx = this.props.ctx;
         const ph = this.props.ctx.subCtx(a => a.passwordHash, { labelColumns: { sm: 4 } });
+        var entity = this.props.ctx.value;
 
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true }) } />
                 <ValueLine ctx={ctx.subCtx(e => e.userName) } />
-                {this.entity.isNew && <div>
+                { entity.isNew && <div>
                     <FormGroup ctx={ ph } labelText={AuthMessage.ChangePasswordAspx_NewPassword.niceToString() }>
                         <input type="password" ref="newPass" className="form-control" onChange={this.handlePasswordChange}/>
                     </FormGroup>

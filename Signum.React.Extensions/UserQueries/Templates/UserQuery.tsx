@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { UserQueryEntity, UserQueryMessage, QueryFilterEntity, QueryOrderEntity, QueryColumnEntity } from '../Signum.Entities.UserQueries'
-import { FormGroup, FormControlStatic, EntityComponent, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityFrame} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -8,11 +8,11 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 
 const CurrentEntityKey = "[CurrentEntity]";
-export default class UserQuery extends EntityComponent<UserQueryEntity> {
+export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQueryEntity> }, void> {
 
-    renderEntity() {
+    render() {
 
-        var queryKey = this.entity.query.key;
+        var queryKey = this.props.ctx.value.query.key;
         var ctx = this.props.ctx;
 
         return (
@@ -28,7 +28,7 @@ export default class UserQuery extends EntityComponent<UserQueryEntity> {
                 </FormGroup>
                 <EntityLine ctx={ctx.subCtx(e => e.entityType) } onChange={() => this.forceUpdate() }/>
                 {
-                    this.entity.entityType &&
+                    this.props.ctx.value.entityType &&
                     <p className="messageEntity col-sm-offset-2">
                         {UserQueryMessage.Use0ToFilterCurrentEntity.niceToString(CurrentEntityKey) }
                     </p>
@@ -64,7 +64,7 @@ export default class UserQuery extends EntityComponent<UserQueryEntity> {
             <div>
                 <QueryTokenEntityBuilder
                     ctx={ctx2.subCtx(a => a.token, { formGroupStyle: FormGroupStyle.None }) }
-                    queryKey={this.entity.query.key}
+                    queryKey={this.props.ctx.value.query.key}
                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                 <span style={{ margin: "0px 10px" }}>
                     <ValueLine ctx={ctx2.subCtx(e => e.operation) } />
@@ -80,7 +80,7 @@ export default class UserQuery extends EntityComponent<UserQueryEntity> {
             <div>
                 <QueryTokenEntityBuilder
                     ctx={ctx2.subCtx(a => a.token, { formGroupStyle: FormGroupStyle.None }) }
-                    queryKey={this.entity.query.key}
+                    queryKey={this.props.ctx.value.query.key}
                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                 <span style={{ margin: "0px 10px" }}>
                     <ValueLine ctx={ctx2.subCtx(e => e.displayName) } />
@@ -95,7 +95,7 @@ export default class UserQuery extends EntityComponent<UserQueryEntity> {
             <div>
                 <QueryTokenEntityBuilder
                     ctx={ctx2.subCtx(a => a.token, { formGroupStyle: FormGroupStyle.None }) }
-                    queryKey={this.entity.query.key}
+                    queryKey={this.props.ctx.value.query.key}
                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                 <span style={{ margin: "0px 10px" }}>
                     <ValueLine ctx={ctx2.subCtx(e => e.orderType) } />
