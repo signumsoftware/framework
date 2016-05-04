@@ -137,6 +137,16 @@ export function hasAnyOrAll(token: QueryToken) : boolean {
     return hasAnyOrAll(token.parent);
 }
 
+export function hasAggregate(token: QueryToken): boolean {
+    if (token == null)
+        return false;
+
+    if (token.queryTokenType == QueryTokenType.Aggregate)
+        return true;
+
+    return hasAggregate(token.parent);
+}
+
 export function getTokenParents(token: QueryToken): QueryToken[] {
     const result = [];
     while (token != null) {
