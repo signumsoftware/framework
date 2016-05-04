@@ -32,10 +32,10 @@
     
   function chooseSort(collection, value){
     if(value == "Ascending")
-      return collection.orderBy(function(v){return v.key;});
+      return collection.orderBy(function(v){return v.key || "";});
     
     if(value == "Descending")
-      return collection.orderByDescending(function(v){return v.key;});
+      return collection.orderByDescending(function(v){return v.key || "";});
     
     return collection;
   }
@@ -47,8 +47,7 @@
   
  var dim1 = data.rows
      .groupBy(function(r){return r.c1; })
-     .map(function(g){return g.elements[0].c1; })
-     .orderBy(function(v){return v.key;});
+     .map(function(g){return g.elements[0].c1; });
   
   dim0 = chooseSort(dim0, data.parameters["XSort"]);
   
