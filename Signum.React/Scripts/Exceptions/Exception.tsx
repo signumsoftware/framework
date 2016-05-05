@@ -5,7 +5,7 @@ import { ExceptionEntity } from '../Signum.Entities.Basics'
 import { ValueLine, ValueLineType, EntityLine, TypeContext } from '../Lines'
 
 export default class Exception extends React.Component<{ ctx: TypeContext<ExceptionEntity> }, void> {
-    renderEntity() {
+    render() {
         var ctx = this.props.ctx;
         const sc = this.props.ctx.subCtx({ labelColumns: { sm: 4 } });
         return (
