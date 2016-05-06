@@ -258,7 +258,16 @@ namespace Signum.Web.Selenium
                 superButton.Click();
             }
 
-            button.Click();
+            try
+            {
+                button.Click();
+            }
+            catch (InvalidOperationException e)
+            {
+                if (e.Message.Contains("Element is not clickable")) //Scrolling problems
+                    button.Click();
+
+            }
         }
 
         public static void SafeClick(this IWebElement element)
