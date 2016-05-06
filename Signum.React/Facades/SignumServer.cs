@@ -41,6 +41,7 @@ namespace Signum.React.Facades
                 s.Converters.Add(new MListJsonConverter());
                 s.Converters.Add(new StringEnumConverter());
                 s.Converters.Add(new ResultTableConverter());
+                s.Converters.Add(new TimeSpanConverter());
             });
 
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());

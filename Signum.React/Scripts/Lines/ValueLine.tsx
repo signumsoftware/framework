@@ -35,10 +35,12 @@ export enum ValueLineType {
 export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     calculateDefaultState(state: ValueLineProps) {
-        state.valueLineType = this.calculateValueLineType(state.type);
+        state.valueLineType = this.calculateValueLineType(state);
     }
 
-    calculateValueLineType(t: TypeReference): ValueLineType {
+    calculateValueLineType(state : ValueLineProps): ValueLineType {
+
+        var t = state.type;
 
         if (t.isCollection || t.isLite)
             throw new Error("not implemented");
@@ -52,7 +54,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "datetime")
             return ValueLineType.DateTime;
 
-        if (t.name == "string")
+        if (t.name == "string" || t.name == "TimeSpan")
             return ValueLineType.TextBox;
 
         if (t.name == "number")
@@ -61,7 +63,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "decimal")
             return ValueLineType.Decimal;
 
-        throw new Error(`No value line found for '${t}' (property route = ${this.state.ctx.propertyRoute.propertyPath()})`);
+        throw new Error(`No value line found for '${t}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath(): "??" })`);
     }
 
     overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
