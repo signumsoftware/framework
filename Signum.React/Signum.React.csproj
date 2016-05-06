@@ -147,6 +147,7 @@
     <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="JsonConverters\EntityJsonConverter.cs" />
     <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
+    <Compile Include="JsonConverters\TimeSpanConverter.cs" />
     <Compile Include="JsonModelValidators\OriginalDefaultBodyModelValidator.cs" />
     <Compile Include="JsonConverters\ResultTableConverter.cs" />
     <Compile Include="JsonConverters\MListJsonConverter.cs" />
