@@ -2,11 +2,10 @@
 import * as moment from 'moment'
 import { Tabs, Tab} from 'react-bootstrap'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
-import { TypeContext } from '../TypeContext'
-import { ValueLine, ValueLineType, EntityComponent, EntityLine } from '../Lines'
+import { ValueLine, ValueLineType, EntityLine, TypeContext } from '../Lines'
 
-export default class Exception extends EntityComponent<ExceptionEntity> {
-    renderEntity() {
+export default class Exception extends React.Component<{ ctx: TypeContext<ExceptionEntity> }, void> {
+    render() {
         var ctx = this.props.ctx;
         const sc = this.props.ctx.subCtx({ labelColumns: { sm: 4 } });
         return (

@@ -48,37 +48,6 @@ export { EntityCheckboxList };
 
 export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize }; 
 
-export interface EntityFrame<T extends ModifiableEntity> {
-    component: React.Component<any, any>;
-    onReload: (pack: EntityPack<T>) => void;
-    setError: (modelState: ModelState, initialPrefix?: string) => void;
-    onClose: () => void;
-}
-
-export interface EntityComponentProps<T extends ModifiableEntity> {
-    ctx: TypeContext<T>;
-    frame?: EntityFrame<T>;
-}
-
-export abstract class EntityComponentWithState<T extends ModifiableEntity, S> extends React.Component<EntityComponentProps<T>, S>{
-
-    get entity() {
-        return this.props.ctx.value;
-    }
-
-    render() {
-        var result = this.renderEntity();
-        result = Navigator.applyViewOverrides(this.props.ctx, result);
-        return result;
-    }
-
-    abstract renderEntity(): React.ReactElement<any>;
-}
-
-export abstract class EntityComponent<T extends ModifiableEntity> extends EntityComponentWithState<T, void> {
-
-}
-
 
 tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {

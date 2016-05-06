@@ -25,6 +25,8 @@ namespace Signum.React.Facades
 
 
             config.Services.Replace(typeof(IHttpControllerSelector), new SignumControllerFactory(config, mainAsembly));
+
+            SignumControllerFactory.RegisterArea(typeof(EntitiesController));
             // Web API configuration and services
             var appXmlType = config.Formatters.XmlFormatter.SupportedMediaTypes.FirstOrDefault(t => t.MediaType == "application/xml");
             config.Formatters.XmlFormatter.SupportedMediaTypes.Remove(appXmlType);

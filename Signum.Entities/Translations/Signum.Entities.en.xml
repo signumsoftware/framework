@@ -11,9 +11,7 @@
     <Member Name="DistinctTo" Description="distinct to" />
     <Member Name="EqualTo" Description="equal to" />
     <Member Name="GreaterThan" Description="greater than" />
-    <Member Name="GreaterThanOrEqual" Description="greater than or equal" />
     <Member Name="LessThan" Description="less than" />
-    <Member Name="LessThanOrEqual" Description="less than or equal" />
   </Type>
   <Type Name="ConnectionMessage" />
   <Type Name="CorruptMixin" />
@@ -61,8 +59,11 @@
   <Type Name="OrderType" />
   <Type Name="PaginationMessage" />
   <Type Name="PaginationMode" />
+  <Type Name="PropertyRouteEntity" />
+  <Type Name="QueryEntity" />
   <Type Name="QueryTokenMessage" />
   <Type Name="QuickLinkMessage" />
+  <Type Name="RoundingType" />
   <Type Name="SearchMessage">
     <Member Name="DeleteFilter" Description="Delete Filter" />
     <Member Name="NewColumnSName" Description="New Column's Name" />

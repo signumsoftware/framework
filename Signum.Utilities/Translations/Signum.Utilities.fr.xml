@@ -24,8 +24,6 @@
     <Member Name="_0Seconds" Description="{0} Secondes" />
     <Member Name="_0Year" Description="{0} Année" />
     <Member Name="_0Years" Description="{0} Années" />
-    <Member Name="DateLast" Description="Dernier {0}" />
-    <Member Name="DateThis" Description="Ce {0}" />
     <Member Name="Today" Description="Aujourd'hui" />
     <Member Name="Tomorrow" Description="Demain" />
     <Member Name="Yesterday" Description="Hier" />

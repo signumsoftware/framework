@@ -5,11 +5,10 @@ import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey } from '../Signum.Entities'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
-import { EntityComponentProps, EntityFrame } from '../Lines'
 import Typeahead from '../Lines/Typeahead'
 import SelectorPopup from '../SelectorPopup'
 
@@ -27,7 +26,7 @@ export interface EntityBaseProps extends LineBaseProps {
     onFind?: () => Promise<ModifiableEntity | Lite<Entity>>;
     onRemove?: (entity: ModifiableEntity | Lite<Entity>) => Promise<boolean>;
 
-    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
 

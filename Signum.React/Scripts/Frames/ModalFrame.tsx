@@ -3,10 +3,9 @@ import * as React from 'react'
 import { Modal, ModalProps, ModalClass, ButtonToolbar, Button } from 'react-bootstrap'
 import { openModal, IModalProps } from '../Modals'
 import * as Navigator from '../Navigator'
-import { EntityFrame, EntityComponentProps } from '../Lines'
 import ButtonBar from './ButtonBar'
 
-import { TypeContext, StyleOptions } from '../TypeContext'
+import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState} from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
@@ -21,14 +20,14 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     propertyRoute?: PropertyRoute;
     showOperations?: boolean;
     requiresSaveOperation?: boolean;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     isNavigate?: boolean;
     readOnly?: boolean;
 }
 
 interface ModalFrameState {
     pack?: EntityPack<ModifiableEntity>;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>, frame: EntityFrame<ModifiableEntity>) => React.ReactElement<any>;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     propertyRoute?: PropertyRoute;
     savedEntity?: string;
     show?: boolean;
@@ -113,9 +112,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         return Navigator.getComponent(this.state.pack.entity)
             .then(c => this.setState(
             {
-                getComponent: (ctx, frame) => React.createElement(c, {
-                    ctx: ctx,
-                    frame: frame
+                getComponent: (ctx) => React.createElement(c, {
+                    ctx: ctx
                 })
             }))
             .done();
@@ -191,7 +189,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         };
 
         const styleOptions: StyleOptions = {
-            readOnly: this.props.readOnly != null ? this.props.readOnly : Navigator.isReadOnly(this.getTypeName())
+            readOnly: this.props.readOnly != null ? this.props.readOnly : Navigator.isReadOnly(this.getTypeName()),
+            frame: frame,
         };
 
         var pack = this.state.pack;
@@ -204,7 +203,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
                 <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />
                 <ValidationErrors entity={pack.entity}/>
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
-                    { this.state.getComponent && this.state.getComponent(ctx, frame) }
+                    { this.state.getComponent && this.state.getComponent(ctx) }
                 </div>
             </Modal.Body>
         );

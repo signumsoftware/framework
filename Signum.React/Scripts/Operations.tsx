@@ -8,13 +8,12 @@ import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, OperationM
     OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol } from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, GraphExplorer  } from './Reflection';
-import { TypeContext } from './TypeContext';
+import { TypeContext, EntityFrame } from './TypeContext';
 import * as Finder from './Finder';
 import * as Navigator from './Navigator';
 import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import ButtonBar from './Frames/ButtonBar';
-import { EntityFrame }  from './Lines';
 import { getEntityOperationButtons }  from './Operations/EntityOperations';
 import { getConstructFromManyContextualItems, getEntityOperationsContextualItems }  from './Operations/ContextualOperations';
 import { ContextualItemsContext }  from './SearchControl/ContextualItems';

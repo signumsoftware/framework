@@ -8,7 +8,7 @@ import {classes} from '../Globals';
 import * as Navigator from '../Navigator';
 import Notify from '../Frames/Notify';
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
-import { EntityFrame }  from '../Lines';
+import { EntityFrame }  from '../TypeContext';
 import { Dic }  from '../Globals';
 import { ajaxPost, ValidationError }  from '../Services';
 import { operationInfos, getSettings, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, EntityOperationContext, 
