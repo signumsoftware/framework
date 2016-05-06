@@ -68,7 +68,7 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
 
         ChartClient.API.executeChart(this.state.chartRequest)
             .then(rt => this.setState({ result: rt }))
-            .catch(e => { this.setState({ error: e });  throw e; })
+            .catch(e => { this.setState({ error: e }); })
             .done();
     }
 

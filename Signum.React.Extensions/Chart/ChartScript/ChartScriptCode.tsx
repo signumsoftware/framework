@@ -54,8 +54,10 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
     };
 
     updatePreview = () => {
-        opener.changeScript(this.props.ctx.value);
-        this.exceptionHandler = setTimeout(this.getException, 100);
+        if (opener.changeScript) { //was rendered
+            opener.changeScript(this.props.ctx.value);
+            this.exceptionHandler = setTimeout(this.getException, 100);
+        }
     }
 
     codeMirrorComponent: CodeMirrorComponent;
