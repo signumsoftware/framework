@@ -271,6 +271,20 @@ namespace Signum.Engine.Chart
                     uc.FixParameters(item);
                 }
 
+                foreach (var item in uc.Parameters)
+                {
+                    string val = item.Value;
+                    retry:
+                    switch (FixParameter(item, ref val))
+                    {
+                        case FixTokenResult.Nothing: break;
+                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
+                        case FixTokenResult.RemoveToken: uc.Parameters.Remove(item); break;
+                        case FixTokenResult.SkipEntity: return null;
+                        case FixTokenResult.Fix: { item.Value = val; goto retry; }
+                    }
+                }
+
 
                 try
                 {
@@ -310,6 +324,41 @@ namespace Signum.Engine.Chart
             {
                 Console.Clear();
             }
+        }
+
+        private static FixTokenResult FixParameter(ChartParameterEntity item, ref string val)
+        {
+            var error = item.PropertyCheck(nameof(item.Value));
+            if (error == null)
+                return FixTokenResult.Nothing;
+
+            SafeConsole.WriteLineColor(ConsoleColor.White, "Parameter Name: {0}".FormatWith(item.ScriptParameter.Name));
+            SafeConsole.WriteLineColor(ConsoleColor.White, "Parameter Definition: {0}".FormatWith(item.ScriptParameter.ValueDefinition));
+            SafeConsole.WriteLineColor(ConsoleColor.White, "CurrentValue: {0}".FormatWith(item.Value));
+            SafeConsole.WriteLineColor(ConsoleColor.White, "Error: {0}.".FormatWith(error));
+            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "- s: Skip entity");
+            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "- r: Remove parame");
+            SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
+            SafeConsole.WriteLineColor(ConsoleColor.Green, "- freeText: New value");
+
+            string answer = Console.ReadLine();
+
+            if (answer == null)
+                throw new InvalidOperationException("Impossible to synchronize interactively without Console");
+
+            string a = answer.ToLower();
+
+            if (a == "s")
+                return FixTokenResult.SkipEntity;
+
+            if (a == "r")
+                return FixTokenResult.RemoveToken;
+
+            if (a == "d")
+                return FixTokenResult.DeleteEntity;
+
+            val = answer;
+            return FixTokenResult.Fix;
         }
     }
 }

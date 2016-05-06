@@ -87,7 +87,7 @@ namespace Signum.Entities.Chart
 
         public static string GetCode(this ChartColumnType columnType)
         {
-            return codes[columnType];
+            return codes.GetOrThrow(columnType);
         }
 
         public static string GetComposedCode(this ChartColumnType columnType)
