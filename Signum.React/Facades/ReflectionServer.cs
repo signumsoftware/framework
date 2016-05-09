@@ -24,16 +24,15 @@ namespace Signum.React.Facades
 {
     public static class ReflectionServer
     {
-
         public static Func<object> GetContext = GetCurrentValidCulture;
 
         public static object GetCurrentValidCulture()
         {
             var ci = CultureInfo.CurrentCulture;
-            while (ci != null && !EntityAssemblies.Keys.Any(a => DescriptionManager.GetLocalizedAssembly(a, ci) != null))
+            while (ci != CultureInfo.InvariantCulture && !EntityAssemblies.Keys.Any(a => DescriptionManager.GetLocalizedAssembly(a, ci) != null))
                 ci = ci.Parent;
 
-            return ci ?? CultureInfo.GetCultureInfo("en");
+            return ci != CultureInfo.InvariantCulture ? ci : CultureInfo.GetCultureInfo("en");
         }
 
         public static ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>> cache =
