@@ -20,9 +20,9 @@ export enum FormGroupStyle {
 }
 
 export enum FormGroupSize {
-    Normal,
-    Small,
-    ExtraSmall,
+    Normal, //Raw Bootstrap default
+    Small,  //Signum default
+    ExtraSmall, //Like in FilterBuilder
 }
 
 export class StyleContext {
