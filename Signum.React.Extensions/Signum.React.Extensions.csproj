@@ -147,6 +147,8 @@
     <Compile Include="Dashboard\DashboardController.cs" />
     <Compile Include="Dashboard\DashboardServer.cs" />
     <Compile Include="Disconnected\DisconnectedServer.cs" />
+    <Compile Include="Excel\ExcelController.cs" />
+    <Compile Include="Excel\ExcelServer.cs" />
     <Compile Include="Files\FilesController.cs" />
     <Compile Include="Files\FilesServer.cs" />
     <Compile Include="Isolation\IsolationServer.cs" />
@@ -305,6 +307,7 @@
     <TypeScriptCompile Include="Excel\Signum.Entities.Excel.ts">
       <DependentUpon>Signum.Entities.Excel.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Excel\ExcelClient.tsx" />
     <TypeScriptCompile Include="Files\FileLine.tsx" />
     <TypeScriptCompile Include="Files\Signum.Entities.Files.ts">
       <DependentUpon>Signum.Entities.Files.t4s</DependentUpon>
