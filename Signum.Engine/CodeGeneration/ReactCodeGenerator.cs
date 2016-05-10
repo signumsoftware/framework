@@ -394,7 +394,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine();
             sb.AppendLine("export default class {0} extends React.Component<{{ ctx: TypeContext<{1}> }}, void> {{".FormatWith(GetViewName(type), type.Name));
             sb.AppendLine("");
-            sb.AppendLine("    renderEntity() {");
+            sb.AppendLine("    render() {");
             sb.AppendLine("        var ctx = this.props.ctx;");
             sb.AppendLine("        return (");
             sb.AppendLine("            <div>");

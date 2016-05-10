@@ -147,6 +147,7 @@
     <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="JsonConverters\EntityJsonConverter.cs" />
     <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
+    <Compile Include="JsonConverters\TimeSpanConverter.cs" />
     <Compile Include="JsonModelValidators\OriginalDefaultBodyModelValidator.cs" />
     <Compile Include="JsonConverters\ResultTableConverter.cs" />
     <Compile Include="JsonConverters\MListJsonConverter.cs" />
@@ -204,6 +205,7 @@
     <TypeScriptCompile Include="Scripts\Frames\ReactVisitor.tsx" />
     <TypeScriptCompile Include="Scripts\Frames\Widgets.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.d.ts" />
+    <TypeScriptCompile Include="Scripts\Lines\DynamicComponent.tsx" />
     <TypeScriptCompile Include="Scripts\Search.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityBase.tsx" />
     <TypeScriptCompile Include="Scripts\Lines\EntityCombo.tsx" />

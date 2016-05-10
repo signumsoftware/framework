@@ -36,27 +36,17 @@ namespace Signum.Analyzer
 
             var equalsExpression = (BinaryExpressionSyntax)context.Node;
 
-            var lefttypeInfo = context.SemanticModel.GetTypeInfo(equalsExpression.Left);
-            var rightTypeInfo = context.SemanticModel.GetTypeInfo(equalsExpression.Right);
+            var left = context.SemanticModel.GetTypeInfo(equalsExpression.Left);
+            var right = context.SemanticModel.GetTypeInfo(equalsExpression.Right);
 
-            if (lefttypeInfo.IsLite())
+            if (left.IsLite() && right.IsEntity() ||
+               left.IsEntity() && right.IsLite())
             {
-                if (rightTypeInfo.IsEntity())
-                {
-                    raiseDiagnostic(equalsExpression, context);
-                }
-            }
-
-            if (rightTypeInfo.IsLite())
-            {
-                if (lefttypeInfo.IsEntity())
-                {
-                    raiseDiagnostic(equalsExpression, context);
-                }
+                RaiseDiagnostic(equalsExpression, context);
             }
         }
 
-        private void raiseDiagnostic(BinaryExpressionSyntax equalsExpression, SyntaxNodeAnalysisContext context)
+        private void RaiseDiagnostic(BinaryExpressionSyntax equalsExpression, SyntaxNodeAnalysisContext context)
         {
             var diagnostic = Diagnostic.Create(Rule, equalsExpression.GetLocation());
             context.ReportDiagnostic(diagnostic);
