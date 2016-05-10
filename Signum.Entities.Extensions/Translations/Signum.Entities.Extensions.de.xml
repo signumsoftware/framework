@@ -50,6 +50,15 @@
   <Type Name="AlertTypeOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="AllowedRule`2">
+    <Member Name="Allowed" Description="Erlaubt" />
+    <Member Name="AllowedBase" Description="Base erlaubt" />
+    <Member Name="Overriden" Description="Überschrieben" />
+    <Member Name="Resource" Description="Ressource" />
+  </Type>
+  <Type Name="AllowedRuleCoerced`2">
+    <Member Name="CoercedValues" Description="Umgewandelte Werte" />
+  </Type>
   <Type Name="AppendixHelpEntity" Description="Anlagehilfe" PluralDescription="Anlagehilfen">
     <Member Name="Culture" Description="Kultur" />
     <Member Name="Description" Description="Beschreibung" />
@@ -72,6 +81,7 @@
     <Member Name="Allow" Description="Erlauben" />
     <Member Name="Deny" Description="Verweigern" />
     <Member Name="Everything" Description="Alles" />
+    <Member Name="NoRoles" Description="Keine Rollen" />
     <Member Name="Nothing" Description="Nichts" />
     <Member Name="Overriden" Description="Überschrieben" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
@@ -162,6 +172,11 @@
     <Member Name="YouMustRepeatTheNewPassword" Description="Sie müssen das neue Passwort wiederholen" />
     <Member Name="YourPasswordIsNearExpiration" Description="Ihr Passwort läuft bald ab" />
   </Type>
+  <Type Name="AuthThumbnail" Description="Auth-Miniaturansicht">
+    <Member Name="All" Description="Alle" />
+    <Member Name="Mix" Description="Mix" />
+    <Member Name="None" Description="Keine" />
+  </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Rolle" />
     <Member Name="Rules" Description="Regeln" />
@@ -188,7 +203,6 @@
   </Type>
   <Type Name="ChartColumnEntity" Description="Diagrammspalte">
     <Member Name="DisplayName" Description="Anzeigename" />
-    <Member Name="ScriptColumn" Description="Skriptspalte" />
     <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="ChartColumnType" Description="Diagrammspaltentyp">
@@ -376,6 +390,7 @@
     <Member Name="StateWhenTheOperationStarted" Description="Status bei Beginn der Operation" />
   </Type>
   <Type Name="DiffLogMixin">
+    <Member Name="Cleaned" Description="Gereinigt" />
     <Member Name="FinalState" Description="Endstatus" />
     <Member Name="InitialState" Description="Ausgangsstatus" />
   </Type>
@@ -715,10 +730,10 @@
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
     <Member Name="Hash" Description="Hash" />
-    <Member Name="WebPath" Description="Web-Pfad" />
   </Type>
   <Type Name="FileMessage">
     <Member Name="DownloadFile" Description="Datei downloaden" />
+    <Member Name="DragAndDropHere" Description="Hier eine Datei ablegen" />
     <Member Name="ErrorSavingFile" Description="Fehler beim Speichern der Datei" />
     <Member Name="FileTypes" Description="Filetypen" />
     <Member Name="OnlyOneFileIsSupported" Description="Nur eine Datei wird unterstützt" />
@@ -1014,6 +1029,7 @@
     <Member Name="DBOnly" Description="Nur DB" />
     <Member Name="None" Description="Keine" />
   </Type>
+  <Type Name="OperationAllowedRule" Description="Erlaubte Operationsregel" />
   <Type Name="OperationHelpEntity" Description="Operationshilfe" PluralDescription="Operationshilfen">
     <Member Name="Culture" Description="Kultur" />
     <Member Name="Description" Description="Beschreibung" />
@@ -1063,6 +1079,7 @@
   <Type Name="PasswordExpiresIntervalOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="PermissionAllowedRule" Description="Erlaubte Berechtigungsregel" />
   <Type Name="PermissionRulePack" Description="Berechtigungregelpack" />
   <Type Name="PermissionSymbol" Description="Berechtigung" />
   <Type Name="Pop3ConfigurationAction">
@@ -1159,16 +1176,13 @@
     <Member Name="None" Description="Keine" />
     <Member Name="Read" Description="Lesen" />
   </Type>
-  <Type Name="PropertyRouteEntity" Description="Eigenschaftsroute" PluralDescription="Eigenschaftsrouten">
-    <Member Name="Path" Description="Pfad" />
-    <Member Name="RootType" Description="Stammtyp" />
-    <Member Name="Route" Description="Route" />
-  </Type>
+  <Type Name="PropertyAllowedRule" Description="Erlaubte Eigenschaftenregel" />
   <Type Name="PropertyRouteHelpEntity" Description="Eigenschaftsweghilfe">
     <Member Name="Description" Description="Beschreibung" />
     <Member Name="Property" Description="Eigenschaft" />
   </Type>
   <Type Name="PropertyRulePack" Description="Eigenschaftsregelpack" />
+  <Type Name="QueryAllowedRule" Description="Erlaubte Abfrageregel" />
   <Type Name="QueryColumnEntity" Description="Abfrage-Spalte">
     <Member Name="DisplayName" Description="Angezeigter Name" />
     <Member Name="Token" Description="Token" />
@@ -1176,10 +1190,6 @@
   <Type Name="QueryColumnHelpEntity" Description="Abfrage Spaltenhilfe">
     <Member Name="ColumnName" Description="Spaltenname" />
     <Member Name="Description" Description="Beschreibung" />
-  </Type>
-  <Type Name="QueryEntity" Description="Abfrage">
-    <Member Name="Key" Description="Key" />
-    <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="QueryFilterEntity" Description="Abfragefilter">
     <Member Name="Operation" Description="Betrieb" />
@@ -1350,19 +1360,19 @@
     <Member Name="TrackSession" Description="Sitzungskontrolle" />
   </Type>
   <Type Name="SimpleTaskSymbol" Description="Einfache Aufgabe" PluralDescription="Einfache Aufgaben" Gender="f" />
-  <Type Name="SMSConfigurationEntity" Description="SMS-Konfiguration">
-    <Member Name="DefaultCulture" Description="Standardkultur" />
-  </Type>
-  <Type Name="SmsMessage">
+  <Type Name="SMSCharactersMessage">
     <Member Name="Insert" Description="Einfügen" />
     <Member Name="Language" Description="Sprache" />
     <Member Name="Message" Description="Nachricht" />
     <Member Name="RemainingCharacters" Description="Verbleibende Zeichen" />
-    <Member Name="RemoveNonValidCharacters" Description="Ungültige Zeichen entfernen" />
+    <Member Name="RemoveNonValidCharacters" Description="Nicht gültige Zeichen entfernen" />
     <Member Name="Replacements" Description="Ersatz" />
-    <Member Name="StatusCanNotBeUpdatedForNonSentMessages" Description="Status kann für nicht gesendete Nachrichten nicht aktualisiert werden" />
-    <Member Name="TheTemplateMustBeActiveToConstructSMSMessages" Description="Die Vorlage muss aktiv zum Erstellen von SMS-Nachrichten sein" />
-    <Member Name="TheTextForTheSMSMessageExceedsTheLengthLimit" Description="Der Text für die SMS-Nachricht überschreitet die zugelassene Länge" />
+    <Member Name="StatusCanNotBeUpdatedForNonSentMessages" Description="Für die nicht gesendeten Nachrichten kann der Status nicht aktualisiert werden" />
+    <Member Name="TheTemplateMustBeActiveToConstructSMSMessages" Description="Die Vorlage muss zum erstellen von SMS-Nachrichten aktiv sein" />
+    <Member Name="TheTextForTheSMSMessageExceedsTheLengthLimit" Description="Der Text für die SMS-Nachricht überschreitet die Länge" />
+  </Type>
+  <Type Name="SMSConfigurationEntity" Description="SMS-Konfiguration">
+    <Member Name="DefaultCulture" Description="Standardkultur" />
   </Type>
   <Type Name="SMSMessageEntity" Description="SMS-Nachricht" PluralDescription="SMS-Nachrichten" Gender="f">
     <Member Name="Certified" Description="Zertifiziert" />
@@ -1558,11 +1568,22 @@
     <Member Name="None" Description="Kein" />
     <Member Name="Read" Description="Lesen" />
   </Type>
+  <Type Name="TypeAllowedAndConditions" Description="Erlaubte Typen und Bedingungen">
+    <Member Name="Conditions" Description="Bedingungen" />
+    <Member Name="Fallback" Description="Fallback" />
+    <Member Name="FallbackOrNone" Description="Fallback oder nichts" />
+  </Type>
   <Type Name="TypeAllowedBasic">
     <Member Name="Create" Description="Erstellen" />
     <Member Name="Modify" Description="Ändern" />
     <Member Name="None" Description="Kein" />
     <Member Name="Read" Description="Lesen" />
+  </Type>
+  <Type Name="TypeAllowedRule" Description="Typ Regel erlaubt">
+    <Member Name="AvailableConditions" Description="Verfügbare Bedingungen" />
+    <Member Name="Operations" Description="Operationen" />
+    <Member Name="Properties" Description="Eigenschaften" />
+    <Member Name="Queries" Description="Abfragen" />
   </Type>
   <Type Name="TypeConditionSymbol" Description="Typbedingung" />
   <Type Name="TypeEvent" Description="Ereignistyp">
@@ -1653,7 +1674,6 @@
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="PaginationMode" Description="Paginierungsmodus" />
     <Member Name="Query" Description="Abfrage" />
-    <Member Name="ShouldHaveElements" Description="Sollte Elemente haben" />
     <Member Name="WithoutFilters" Description="Ohne Filter" />
   </Type>
   <Type Name="UserQueryMessage">
