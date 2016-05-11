@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize } from './TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, PropertyRoute } from './Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, PropertyRoute, Binding, ReadonlyBinding } from './Reflection'
 import { ModifiableEntity, EntityPack, ModelState } from './Signum.Entities'
 import * as Navigator from './Navigator'
 import { ViewReplacer } from  './Frames/ReactVisitor'
@@ -46,7 +46,7 @@ export { EntityStrip };
 import { EntityCheckboxList } from  './Lines/EntityCheckBoxList'
 export { EntityCheckboxList };
 
-export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize }; 
+export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize, Binding, ReadonlyBinding }; 
 
 
 tasks.push(taskSetNiceName);
