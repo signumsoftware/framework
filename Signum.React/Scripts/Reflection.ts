@@ -163,6 +163,7 @@ export function isEmbedded(type: PseudoType): boolean {
     return !ti;
 }
 
+
 export function getTypeInfo(type: PseudoType): TypeInfo {
 
     if ((type as TypeInfo).kind != null)
@@ -785,6 +786,39 @@ export class PropertyRoute {
         }
 
         throw new Error("not implemented");
+    }
+
+    subMembers(): { [subMemberName: string]: MemberInfo } {
+
+        var type = this.closestTypeInfo();
+
+        function containsDotOrSlash(name: string) {
+            return name.contains(".") || name.contains("/");
+        }
+
+        switch (this.propertyRouteType) {
+            case PropertyRouteType.Root: return Dic.getValues(type.members).filter(m => !containsDotOrSlash(m.name)).toObject(m => m.name);
+            case PropertyRouteType.Mixin:
+                
+            case PropertyRouteType.MListItem: 
+                {
+                    var path = this.propertyPath();
+                    return Dic.getValues(type.members)
+                        .filter(m => m.name != path && m.name.startsWith(path))
+                        .filter(m => !containsDotOrSlash(m.name.substring(path.length)))
+                        .toObject(m => m.name.substring(path.length));
+                }
+            case PropertyRouteType.LiteEntity:
+            case PropertyRouteType.Field:
+                {
+                    const member = this.member;
+                    return Dic.getValues(type.members)
+                        .filter(m => m.name.startsWith(member.name + "."))
+                        .filter(m => !containsDotOrSlash(m.name.substring(member.name.length + 1)))
+                        .toObject(m => m.name.substring(member.name.length + 1));
+                }
+
+        }
     }
 
     toString() {

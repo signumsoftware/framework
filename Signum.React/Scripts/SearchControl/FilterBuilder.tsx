@@ -66,7 +66,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
                                         <a title={SearchMessage.AddFilter.niceToString() }
                                             className="sf-line-button sf-create"
                                             onClick={this.handlerNewFilter}>
-                                            <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{SearchMessage.AddFilter.niceToString() }
+                                            <span className="glyphicon glyphicon-plus"/><span style={{ marginLeft: "5px", marginRight: "5px" }}> {SearchMessage.AddFilter.niceToString() } </span>
                                         </a>
                                     </td>
                                 </tr>

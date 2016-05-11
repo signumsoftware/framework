@@ -83,13 +83,19 @@ export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> 
     return entitySettings[typeName];
 }
 
+export let fallbackGetComponent: (entity: ModifiableEntity) => Promise<{ default: React.ComponentClass<{ ctx: TypeContext<ModifiableEntity> }> }> =
+    e => new Promise(resolve => require(['./Lines/DynamicComponent'], resolve));
 
 export function getComponent<T extends ModifiableEntity>(entity: T): Promise<React.ComponentClass<{ ctx: TypeContext<T> }>> {
 
     var settings = getSettings(entity.Type) as EntitySettings<T>;
 
-    if (settings == null)
+    if (settings == null) {
+        if (fallbackGetComponent)
+            return fallbackGetComponent(entity).then(a => a.default);
+
         throw new Error(`No settings for '${entity.Type}'`);
+    }
 
     if (settings.getComponent == null)
         throw new Error(`No getComponent set for settings for '${entity.Type}'`);
@@ -253,8 +259,12 @@ export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 }
 
 function hasRegisteredView(typeName: string) {
+        
     const es = entitySettings[typeName];
-    return (es && es.getComponent);
+    if (es)
+        return !!es.getComponent;
+
+    return !!fallbackGetComponent;
 }
 
 function typeIsViewable(typeName: string): boolean {
