@@ -28,7 +28,7 @@ namespace Signum.React.Map
             Dictionary<Type, LambdaExpression> expressions = stateTypes
                 .ToDictionary(t => t, t => type == typeof(DefaultState) ? null : giGetGraphGetter.GetInvoker(type, t)());
 
-            Dictionary<Type, Dictionary<Enum, int>> counts = expressions.SelectDictionary(t => t, exp =>
+            Dictionary<Type, Dictionary<Enum, int>> counts = expressions.SelectDictionary(t => t.UnNullify(), exp =>
                 exp == null ? giCount.GetInvoker(type)() :
                 giCountGroupBy.GetInvoker(type, exp.Body.Type)(exp));
 
@@ -85,7 +85,7 @@ namespace Signum.React.Map
         static Dictionary<Enum, int> CountGroupBy<T, S>(Expression<Func<T, S>> expression)
             where T : Entity
         {
-            return Database.Query<T>().GroupBy(expression).Select(gr => KVP.Create((Enum)(object)gr.Key, gr.Count())).ToDictionary();
+            return Database.Query<T>().GroupBy(expression).Where(a => a.Key != null).Select(gr => KVP.Create((Enum)((object)gr.Key), gr.Count())).ToDictionary();
         }
 
         static readonly GenericInvoker<Func<Dictionary<Enum, int>>> giCount =
