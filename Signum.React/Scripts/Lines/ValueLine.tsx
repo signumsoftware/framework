@@ -167,9 +167,15 @@ ValueLine.renderers[ValueLineType.Enum as any] = (vl) => {
 function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
 
     const s = vl.state;
-
     let items = s.comboBoxItems || Dic.getValues(typeInfo.members);
 
+    let boolValue: boolean = s.ctx.value;    
+    s.ctx.value = String(boolValue);
+       
+   // s.ctx.value == true ? s.ctx.value = "True" : null;
+   // s.ctx.value == false ? s.ctx.value = "False" : null;
+   
+    console.log(s);
 
     if (s.type.isNullable || s.ctx.value == null)
         items = [{ name: "", niceName: " - " }].concat(items);
@@ -184,7 +190,6 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
             </FormGroup>
         );
 
-
     const handleEnumOnChange = (e: React.SyntheticEvent) => {
         const input = e.currentTarget as HTMLInputElement;
         const val = input.value;
@@ -194,8 +199,8 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps}>
             { ValueLine.withUnit(s.unitText,
-                <select {...vl.state.valueHtmlProps} value={s.ctx.value} className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
-                    {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) }
+                <select {...vl.state.valueHtmlProps} value={s.ctx.value == null ? " - " : s.ctx.value} className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
+                        {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) } 
                 </select>)
             }
         </FormGroup>
