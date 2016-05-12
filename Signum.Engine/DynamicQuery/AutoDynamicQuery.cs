@@ -12,7 +12,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.DynamicQuery
 {
-    public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
+    public class AutoDynamicQueryCore<T> : DynamicQueryCore<T> 
     {
         public IQueryable<T> Query { get; private set; }
         
@@ -93,7 +93,20 @@ namespace Signum.Engine.DynamicQuery
 
             return values.ToResultTable(cols, values.Length, new Pagination.All());
         }
+        
+        public override IQueryable<Lite<Entity>> GetEntities(List<Filter> filters)
+        {
+            var ex = new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName);
 
+            DQueryable<T> query = Query
+             .ToDQueryable(GetQueryDescription())
+             .Where(filters)
+             .Select(new List<Column> { ex });
+
+            var exp = Expression.Lambda<Func<object, Lite<Entity>>>(Expression.Convert(ex.Token.BuildExpression(query.Context), typeof(Lite<Entity>)), query.Context.Parameter);
+
+            return query.Query.Select(exp);
+        }
 
         public override Expression Expression
         {

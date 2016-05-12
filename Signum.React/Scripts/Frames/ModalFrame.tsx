@@ -111,12 +111,11 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         return Navigator.getComponent(this.state.pack.entity)
             .then(c => this.setState(
-            {
-                getComponent: (ctx) => React.createElement(c, {
-                    ctx: ctx
-                })
-            }))
-            .done();
+                {
+                    getComponent: (ctx) => React.createElement(c, {
+                        ctx: ctx
+                    })
+                }));
     }
 
     okClicked: boolean;
