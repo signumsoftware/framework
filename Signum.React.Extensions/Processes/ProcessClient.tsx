@@ -36,9 +36,7 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
         Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => new Promise(resolve => require(['./Templates/PackageOperation'], resolve))));
     }
 
-
-    Operations.addSettings
-
+    
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
         key: "ProcessPanel",
