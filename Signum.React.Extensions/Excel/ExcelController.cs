@@ -27,6 +27,7 @@ using System.IO;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Excel;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.Excel;
 
 namespace Signum.React.Excel
 {
@@ -40,7 +41,32 @@ namespace Signum.React.Excel
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(queryRequest);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(queryRequest.QueryName));
 
-            return FilesController.GetHttpReponseMessage(new MemoryStream(binaryFile), request.queryKey + ".xlsx");            
+            var fileName = request.queryKey + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
+
+            return FilesController.GetHttpReponseMessage(new MemoryStream(binaryFile), fileName);            
+        }
+
+
+        [Route("api/excel/reportsFor/{queryKey}"), HttpGet]
+        public IEnumerable<Lite<ExcelReportEntity>> GetExcelReports(string queryKey)
+        {
+            return ExcelLogic.GetExcelReports(QueryLogic.ToQueryName(queryKey));
+        }
+
+        [Route("api/excel/excelReport"), HttpPost]
+        public HttpResponseMessage GenerateExcelReport(ExcelReportRequest request)
+        {
+            byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest());
+
+            var fileName = request.excelReport.ToString() + "-" + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
+
+            return FilesController.GetHttpReponseMessage(new MemoryStream(file),  fileName);
+        }
+
+        public class ExcelReportRequest
+        {
+            public QueryRequestTS queryRequest;
+            public Lite<ExcelReportEntity> excelReport;
         }
     }
 }
