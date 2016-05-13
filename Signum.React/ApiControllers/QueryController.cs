@@ -13,6 +13,7 @@ using Signum.Entities;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Signum.Entities.Basics;
+using Signum.Engine;
 
 namespace Signum.React.ApiControllers
 {
@@ -54,6 +55,13 @@ namespace Signum.React.ApiControllers
         {
             var qn = QueryLogic.ToQueryName(queryName);
             return new QueryDescriptionTS(DynamicQueryManager.Current.QueryDescription(qn));
+        }
+
+        [Route("api/query/entity/{queryName}")]
+        public QueryEntity GetQueryEntity(string queryName)
+        {
+            var qn = QueryLogic.ToQueryName(queryName);
+            return QueryLogic.GetQueryEntity(qn);
         }
 
         [Route("api/query/parseTokens"), HttpPost]
@@ -194,7 +202,9 @@ namespace Signum.React.ApiControllers
 
         internal Column ToColumn(QueryDescription qd)
         {
-            return new Column(QueryUtils.Parse(token, qd, SubTokensOptions.CanElement), dispayName);
+            var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement);
+
+            return new Column(queryToken, dispayName ?? queryToken.NiceName());
         }
     }
 
