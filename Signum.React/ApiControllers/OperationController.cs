@@ -66,7 +66,7 @@ namespace Signum.React.ApiControllers
             catch (IntegrityCheckException ex)
             {
                 GraphExplorer.SetValidationErrors(GraphExplorer.FromRoot(request.entity), ex);
-                this.Validate(request);
+                this.Validate(request, "request");
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
             }
 

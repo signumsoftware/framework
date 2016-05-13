@@ -28,7 +28,7 @@ export { EntityCombo };
 import { EntityDetail } from  './Lines/EntityDetail'
 export { EntityDetail };
 
-import { EntityListBase } from  './Lines/EntityListBase'
+import { EntityListBase, EntityListBaseProps } from  './Lines/EntityListBase'
 export { EntityListBase };
 
 import { EntityList } from  './Lines/EntityList'
@@ -47,7 +47,6 @@ import { EntityCheckboxList } from  './Lines/EntityCheckBoxList'
 export { EntityCheckboxList };
 
 export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize, Binding, ReadonlyBinding }; 
-
 
 tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
@@ -91,6 +90,16 @@ export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBasePro
         state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
         state.ctx.propertyRoute.member.isReadOnly) {
         state.ctx.readOnly = true;
+    }
+}
+
+tasks.push(taskSetMove);
+export function taskSetMove(lineBase: LineBase<any, any>, state: LineBaseProps) {
+    if (lineBase instanceof EntityListBase &&
+        state.ctx.propertyRoute &&
+        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
+        state.ctx.propertyRoute.member.preserveOrder) {
+        (state as EntityListBaseProps).move = true;
     }
 }
 

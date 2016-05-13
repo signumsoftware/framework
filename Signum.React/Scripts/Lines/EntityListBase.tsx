@@ -42,6 +42,8 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     moveUp(index: number) {
         const list = this.props.ctx.value;
+        if (index == 0)
+            return;
 
         const entity = list[index]
         list.removeAt(index);
@@ -63,6 +65,9 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     moveDown(index: number) {
         const list = this.props.ctx.value;
+        if (index == list.length - 1)
+            return;
+  
         const entity = list[index]
         list.removeAt(index);
         list.insertAt(index + 1, entity);

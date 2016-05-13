@@ -148,6 +148,8 @@ namespace Signum.React.Facades
 
             var dqm = DynamicQueryManager.Current;
 
+            var settings = Schema.Current.Settings;
+
             var result = (from type in TypeLogic.TypeToEntity.Keys.Concat(models)
                           where !type.IsEnumEntity()
                           let descOptions = LocalizedAssembly.GetDescriptionOptions(type)
@@ -173,6 +175,7 @@ namespace Signum.React.Facades
                                     Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type) : p.PropertyInfo?.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations(): p.TryGetImplementations()),
                                     IsMultiline = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
                                     MaxLength = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
+                                    PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
                                 }, p)),
 
                               Operations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type)
@@ -361,6 +364,9 @@ namespace Signum.React.Facades
         public int? MaxLength { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isMultiline")]
         public bool IsMultiline { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "preserveOrder")]
+        public bool PreserveOrder { get; internal set; }
+
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "id")]
         public object Id { get; set; }
 
