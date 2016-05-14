@@ -14,11 +14,20 @@ namespace Signum.Entities.Basics
     {
         public static readonly string UserSessionKey = "user";
 
+
+        public static event Action CurrentUserChaged;
+
         public static readonly SessionVariable<IUserEntity> CurrentUserVariable = Statics.SessionVariable<IUserEntity>(UserSessionKey);
         public static IUserEntity Current
         {
             get { return CurrentUserVariable.Value; }
-            set { CurrentUserVariable.Value = value; }
+            set
+            {
+                CurrentUserVariable.Value = value;
+                if (CurrentUserChaged != null)
+                    CurrentUserChaged();
+
+            }
         }
 
         public static IDisposable UserSession(IUserEntity user)
