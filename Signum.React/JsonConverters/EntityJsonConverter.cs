@@ -341,9 +341,18 @@ namespace Signum.React.Json
 
         public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
+
             IdentityInfo identityInfo = ReadIdentityInfo(reader);
             
             Type type = GetEntityType(identityInfo.Type, objectType);
+
+            if (typeof(MixinEntity).IsAssignableFrom(objectType))
+            {
+                if (objectType != existingValue.GetType())
+                    throw new InvalidOperationException($"{objectType.Name} expected");
+
+                return (MixinEntity)existingValue;
+            }
 
             if (identityInfo.IsNew == true)
             {
@@ -445,7 +454,7 @@ namespace Signum.React.Json
             }
         }
 
-        public Type GetEntityType(string typeStr, Type objectType)
+        static Type GetEntityType(string typeStr, Type objectType)
         {
             var type = ReflectionServer.TypesByName.Value.GetOrThrow(typeStr);
 
