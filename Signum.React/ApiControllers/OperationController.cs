@@ -15,6 +15,8 @@ using Signum.Engine.Operations;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using Signum.Entities.Reflection;
+using Newtonsoft.Json;
+using Signum.React.Json;
 
 namespace Signum.React.ApiControllers
 {
@@ -106,6 +108,7 @@ namespace Signum.React.ApiControllers
         {
             public string operationKey { get; set; }
             public string type { get; set; }
+            [JsonConverter(typeof(ArgsJsonConverter))]
             public object[] args { get; set; }
         }
 
@@ -114,6 +117,7 @@ namespace Signum.React.ApiControllers
         {
             public string operationKey { get; set; }
             public Entity entity { get; set; }
+            [JsonConverter(typeof(ArgsJsonConverter))]
             public object[] args { get; set; }
         }
 
@@ -121,6 +125,7 @@ namespace Signum.React.ApiControllers
         {
             public string operationKey { get; set; }
             public Lite<Entity> lite { get; set; }
+            [JsonConverter(typeof(ArgsJsonConverter))]
             public object[] args { get; set; }
         }
 
@@ -195,6 +200,7 @@ namespace Signum.React.ApiControllers
             public string operationKey { get; set; }
             public string type { get; set; }
             public Lite<Entity>[] lites { get; set; }
+            [JsonConverter(typeof(ArgsJsonConverter))]
             public object[] args { get; set; }
         }
 
