@@ -33,6 +33,7 @@ namespace Signum.Engine.DynamicQuery
         public Polymorphic<Dictionary<string, ExtensionInfo>> RegisteredExtensions =
             new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
+     
 
         public void RegisterQuery<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
         {
@@ -102,7 +103,8 @@ namespace Signum.Engine.DynamicQuery
             ExecuteQueryCount,
             ExecuteGroupQuery,
             ExecuteUniqueEntity,
-            QueryDescription
+            QueryDescription,
+            GetEntities
         }
 
         public ResultTable ExecuteQuery(QueryRequest request)
@@ -129,7 +131,12 @@ namespace Signum.Engine.DynamicQuery
         {
             return Execute(ExecuteType.QueryDescription, queryName, null, dqb => dqb.GetDescription());
         }
-     
+
+        public IQueryable<Lite<Entity>> GetEntities(object queryName, List<Filter> filters)
+        {
+            return Execute(ExecuteType.GetEntities, queryName, null, dqb => dqb.Core.Value.GetEntities(filters));
+        }
+
         public event Func<object, bool> AllowQuery;
 
         public bool QueryAllowed(object queryName)

@@ -16,7 +16,7 @@ declare var require: {
 };
 
 declare interface Promise<T> {
-    done();
+    done(): void;
 }
 
 interface Array<T> {
