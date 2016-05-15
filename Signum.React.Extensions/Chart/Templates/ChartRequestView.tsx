@@ -119,7 +119,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                     <div>
                         <FilterBuilder filterOptions={cr.filterOptions} queryDescription={this.state.queryDescription}
                             subTokensOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
-                            lastToken={this.lastToken} tokenChanged={t => this.lastToken = t} />
+                            lastToken={this.lastToken} onTokenChanged={t => this.lastToken = t} />
 
                     </div>
                     <div className="SF-control-container">
