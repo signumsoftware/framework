@@ -29,7 +29,14 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
         if (ctrs.length) {
 
             return SelectorPopup.chooseElement(ctrs, c => c.niceName, SelectorMessage.PleaseSelectAConstructor.niceToString())
-                .then(c => Operations.API.construct(typeName, c.key)).then(p => { assertCorrect(p.entity); return p; });
+                .then(oi => {
+                    var settings = Operations.getSettings(oi.key) as Operations.ConstructorOperationSettings<Entity>;
+
+                    if (settings && settings.onConstruct)
+                        return settings.onConstruct({ operationInfo: oi, settings: settings, typeInfo: ti });
+
+                    return Operations.API.construct(ti.name, oi.key)
+                }).then(p => { assertCorrect(p.entity); return p; });
         }
     }
 

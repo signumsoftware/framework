@@ -166,7 +166,7 @@ export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>, ...arg
     if (!confirmInNecessary(eoc))
         return;
 
-    API.executeEntity(eoc.entity, eoc.operationInfo.key, null)
+    API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
         .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
@@ -177,7 +177,7 @@ export function defaultExecuteLite(eoc: EntityOperationContext<Entity>, ...args:
     if (!confirmInNecessary(eoc))
         return;
 
-    API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, null)
+    API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
         .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
@@ -188,7 +188,7 @@ export function defaultDeleteEntity(eoc: EntityOperationContext<Entity>, ...args
     if (!confirmInNecessary(eoc))
         return;
 
-    API.deleteEntity(eoc.entity, eoc.operationInfo.key, null)
+    API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
         .then(() => { eoc.frame.onClose(); return notifySuccess(); })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();

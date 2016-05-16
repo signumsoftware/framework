@@ -74,7 +74,7 @@ export abstract class OperationSettings {
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
     isVisible: (ctx: ConstructorOperationContext<T>) => boolean;
-    onConstruct: (ctx: ConstructorOperationContext<T>) => Promise<T>;
+    onConstruct: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T>>;
 
     constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
         super(operationSymbol);
@@ -86,12 +86,13 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
 export interface ConstructorOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: ConstructorOperationContext<T>) => boolean;
-    onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<T>;
+    onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T>>;
 }
 
 export interface ConstructorOperationContext<T extends Entity> {
     operationInfo: OperationInfo;
-    settings: ConstructorOperationSettings<T>
+    settings: ConstructorOperationSettings<T>;
+    typeInfo: TypeInfo;
 }
 
 
@@ -108,7 +109,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
     style: BsStyle;
     order: number;
 
-    constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
+    constructor(operationSymbol: ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
         super(operationSymbol);
 
         Dic.extend(this, options);
