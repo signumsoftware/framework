@@ -875,9 +875,10 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             const mark: { style: string, message: string } = typeof m === "string" ? { style: m == "" ? null : "error", message: m } : m;
 
             const tr = (
-                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity) }  onDoubleClick={e => this.handleDoubleClick(e, row) } {...rowAttributes ? rowAttributes(row, this.state.resultTable.columns) : null}
+                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity) }  onDoubleClick={e => this.handleDoubleClick(e, row) }
                     className={mark && mark.style}
-                    style={{ opacity: mark && mark.message == "" ? 0.5 : 1 }} >
+                    style={mark && mark.message == "" ? { opacity: 0.5 } : null}
+                    {...rowAttributes ? rowAttributes(row, this.state.resultTable.columns) : null}>
 
                     {this.props.allowSelection &&
                         <td style={{ textAlign: "center" }}>
