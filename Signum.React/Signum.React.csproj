@@ -147,6 +147,7 @@
     <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="JsonConverters\EntityJsonConverter.cs" />
     <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
+    <Compile Include="JsonConverters\ArgsJsonConverter.cs" />
     <Compile Include="JsonConverters\TimeSpanConverter.cs" />
     <Compile Include="JsonModelValidators\OriginalDefaultBodyModelValidator.cs" />
     <Compile Include="JsonConverters\ResultTableConverter.cs" />
@@ -245,6 +246,7 @@
     <TypeScriptCompile Include="Scripts\SearchControl\SearchPage.tsx" />
     <TypeScriptCompile Include="Scripts\Modals\ErrorModal.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchModal.tsx" />
+    <TypeScriptCompile Include="Scripts\ValueLinePopup.tsx" />
     <TypeScriptCompile Include="Scripts\SelectorPopup.tsx" />
     <TypeScriptCompile Include="Scripts\Services.ts" />
     <TypeScriptCompile Include="Scripts\Signum.Entities.Basics.ts">
