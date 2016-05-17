@@ -1484,6 +1484,7 @@
     <Member Name="ExecuteSync" Description="Sync ausführen" />
   </Type>
   <Type Name="TemplateTokenMessage">
+    <Member Name="Insert" Description="Einfügen" />
     <Member Name="NoColumnSelected" Description="Keine Spalte ausgewählt" />
     <Member Name="YouCannotAddBlocksWithAllOrAny" Description="Sie können keine Blöcke mit &quot;Alle&quot; oder &quot;Keine&quot; hinzufügen" />
     <Member Name="YouCannotAddIfBlocksOnCollectionFields" Description="Sie können keine If-Blöcke in einem Collection-Feld hinzufügen" />
