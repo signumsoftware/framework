@@ -27,37 +27,39 @@ namespace Signum.Engine.Excel
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool excelReport)
         {
-            if (excelReport)
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                QueryLogic.Start(sb);
+                if (excelReport)
+                {
+                    QueryLogic.Start(sb);
 
-                sb.Include<ExcelReportEntity>();
-                dqm.RegisterQuery(typeof(ExcelReportEntity), () =>
-                    from s in Database.Query<ExcelReportEntity>()
-                    select new
+                    sb.Include<ExcelReportEntity>();
+                    dqm.RegisterQuery(typeof(ExcelReportEntity), () =>
+                        from s in Database.Query<ExcelReportEntity>()
+                        select new
+                        {
+                            Entity = s,
+                            s.Id,
+                            s.Query,
+                            s.File.FileName,
+                            s.DisplayName,
+                        });
+
+                    new Graph<ExcelReportEntity>.Execute(ExcelReportOperation.Save)
                     {
-                        Entity = s,
-                        s.Id,
-                        s.Query,
-                        s.File.FileName,
-                        s.DisplayName,
-                    });
+                        AllowsNew = true,
+                        Lite = false,
+                        Execute = (er, _) => { }
+                    }.Register();
 
-                new Graph<ExcelReportEntity>.Execute(ExcelReportOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (er, _) => { }
-                }.Register();
-
-                new Graph<ExcelReportEntity>.Delete(ExcelReportOperation.Delete)
-                {
-                    Lite = true,
-                    Delete = (er, _) => { er.Delete(); }
-                }.Register();
+                    new Graph<ExcelReportEntity>.Delete(ExcelReportOperation.Delete)
+                    {
+                        Lite = true,
+                        Delete = (er, _) => { er.Delete(); }
+                    }.Register();
+                }
             }
         }
-
       
 
         public static List<Lite<ExcelReportEntity>> GetExcelReports(object queryName)

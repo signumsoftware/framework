@@ -308,6 +308,8 @@
       <DependentUpon>Signum.Entities.Excel.t4s</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Excel\ExcelClient.tsx" />
+    <TypeScriptCompile Include="Excel\Templates\ExcelReport.tsx" />
+    <TypeScriptCompile Include="Excel\ExcelMenu.tsx" />
     <TypeScriptCompile Include="Files\FileLine.tsx" />
     <TypeScriptCompile Include="Files\Signum.Entities.Files.ts">
       <DependentUpon>Signum.Entities.Files.t4s</DependentUpon>
