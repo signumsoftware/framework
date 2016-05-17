@@ -21,6 +21,7 @@ using Signum.Entities.Cache;
 using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
 using Signum.Entities.Templating;
+using Signum.Entities.Excel;
 
 namespace Signum.React.Excel
 {
@@ -30,7 +31,7 @@ namespace Signum.React.Excel
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
-            ReflectionServer.RegisterLike(typeof(TemplateTokenMessage));
+            ReflectionServer.RegisterLike(typeof(ExcelMessage));
         }
     }
 }
