@@ -241,6 +241,15 @@ export class TypeContext<T> extends StyleContext {
         return mlistItemContext(this.subCtx(property, styleOptions));
     }
 }
+
+export interface ButtonsContext {
+    pack: EntityPack<ModifiableEntity>;
+    frame: EntityFrame<ModifiableEntity>;
+    showOperations: boolean;
+}
+
+export interface RenderButtonsComponent {
+    renderButtons(ctx: ButtonsContext): React.ReactElement<any>[];
 }
 
 export interface EntityFrame<T extends ModifiableEntity> {
