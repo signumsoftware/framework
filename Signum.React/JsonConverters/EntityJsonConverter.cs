@@ -458,6 +458,9 @@ namespace Signum.React.Json
         {
             var type = ReflectionServer.TypesByName.Value.GetOrThrow(typeStr);
 
+            if (type.IsEnum)
+                type = EnumEntity.Generate(type);
+
             if (!objectType.IsAssignableFrom(type))
                 throw new JsonSerializationException($"Type '{type.Name}' is not assignable to '{objectType.TypeName()}'");
 
