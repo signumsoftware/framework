@@ -236,6 +236,11 @@ export class TypeContext<T> extends StyleContext {
     using(render: (ctx: this) => React.ReactChild): React.ReactChild {
         return render(this);
     }
+
+    mlistItemCtxs<R>(property: (val: T) => MList<R>, styleOptions?: StyleOptions): TypeContext<R>[] {
+        return mlistItemContext(this.subCtx(property, styleOptions));
+    }
+}
 }
 
 export interface EntityFrame<T extends ModifiableEntity> {
