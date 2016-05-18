@@ -311,7 +311,6 @@ namespace Signum.Entities
 
         public static Lite<T> Parse<T>(string liteKey) where T : class, IEntity
         {
-
             return (Lite<T>)Lite.Parse(liteKey);
         }
 
@@ -518,6 +517,12 @@ namespace Signum.Entities
         public static NewExpression NewExpression(Type type, Expression id, Expression toString)
         {
             return Expression.New(Lite.LiteConstructor(type), id.UnNullify(), toString);
+        }
+
+        public static Lite<T> ParsePrimaryKey<T>(string id)
+            where T : Entity
+        {
+            return Lite.Create<T>(PrimaryKey.Parse(id, typeof(T)));
         }
     }
 
