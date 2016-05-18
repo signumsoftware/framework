@@ -2,9 +2,11 @@
 import { Button } from 'react-bootstrap'
 import { Link } from 'react-router'
 import * as numbro from 'numbro'
+import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
-import { TypeContext, ButtonsContext, RenderButtonsComponent } from '../../../../Framework/Signum.React/Scripts/TypeContext'
+import { TypeContext, ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
 
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -14,16 +16,19 @@ import { Api } from '../AuthClient'
 import { PermissionRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 
 
+require("./AuthAdmin.css");
 
+export default class PermissionRulesPackControl extends React.Component<{ ctx: TypeContext<PermissionRulePack> }, void> implements IRenderButtons {
 
-export default class PermissionRulesPackControl extends React.Component<{ ctx: TypeContext<PermissionRulePack> }, void> implements RenderButtonsComponent {
-    
     handleSaveClick = (bc: ButtonsContext) => {
         var pack = this.props.ctx.value;
 
         Api.savePermissionRulePack(pack)
             .then(() => Api.fetchPermissionRulePack(pack.role.id))
-            .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: null }))
+            .then(newPack => {
+                notifySuccess();
+                bc.frame.onReload({ entity: newPack, canExecute: null });
+            })
             .done();
     }
 
@@ -44,40 +49,42 @@ export default class PermissionRulesPackControl extends React.Component<{ ctx: T
                     <EntityLine ctx={ctx.subCtx(f => f.role) }  />
                     <ValueLine ctx={ctx.subCtx(f => f.strategy) }  />
                 </div>
-                <table className="sf-auth-rules">
+                <table className="table table-condensed sf-auth-rules">
                     <thead>
                         <tr>
                             <th>
-                                { PermissionSymbol.niceName()}
+                                { PermissionSymbol.niceName() }
                             </th>
-                            <th>
+                            <th style={{ textAlign: "center" }}>
                                 {AuthAdminMessage.Allow.niceToString() }
                             </th>
-                            <th>
+                            <th style={{ textAlign: "center" }}>
                                 {AuthAdminMessage.Deny.niceToString() }
                             </th>
-                            <th>
+                            <th style={{ textAlign: "center" }}>
                                 {AuthAdminMessage.Overriden.niceToString() }
                             </th>
                         </tr>
                     </thead>
-                    { ctx.mlistItemCtxs(a => a.rules).map(c => 
-                        <tr>
-                            <td>
-                                {c.value.resource.key}                                
-                            </td>
-                            <td>
-                                <ColorRadio checked={c.value.allowed} color="green" onClicked={a => { c.value.allowed = true; this.forceUpdate() } }/>                     
-                            </td>
-                            <td>
-                                <ColorRadio checked={!c.value.allowed} color="red" onClicked={a => { c.value.allowed = false; this.forceUpdate() } }/>  
-                            </td>
-                            <td>
-                                <GrayCheckbox checked={c.value.allowed == c.value.allowedBase}/>
-                            </td>
-                        </tr>
+                    <tbody>
+                        { ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
+                            <tr key={i}>
+                                <td>
+                                    {c.value.resource.key}
+                                </td>
+                                <td style={{ textAlign:"center" }}>
+                                    <ColorRadio checked={c.value.allowed} color="green" onClicked={a => { c.value.allowed = true; this.forceUpdate() } }/>
+                                </td>
+                                <td style={{ textAlign: "center" }}>
+                                    <ColorRadio checked={!c.value.allowed} color="red" onClicked={a => { c.value.allowed = false; this.forceUpdate() } }/>
+                                </td>
+                                <td style={{ textAlign: "center" }}>
+                                    <GrayCheckbox checked={c.value.allowed != c.value.allowedBase}/>
+                                </td>
+                            </tr>
                         )
-                    }
+                        }
+                    </tbody>
                 </table>
 
             </div>
@@ -90,8 +97,8 @@ class ColorRadio extends React.Component<{ checked: boolean, onClicked: (e: Reac
     render() {
         return (
             <a href="#" onClick={e => { e.preventDefault(); this.props.onClicked(e); } }
-                className={this.props.checked ? "fa fa-dot-circle-o" : "fa fa-circle-o"}
-                style={{ color: this.props.checked ? this.props.color : "#eee" }}>
+                className={classes("sf-auth-chooser", "fa", this.props.checked ? "fa-dot-circle-o" : "fa-circle-o")}
+                style={{ color: this.props.checked ? this.props.color : "#aaa" }}>
             </a>
         );
     }
@@ -101,9 +108,8 @@ class GrayCheckbox extends React.Component<{ checked: boolean }, void>{
 
     render() {
         return (
-            <i>
-                className={this.props.checked ? "fa fa-check-square-o" : "fa fa-square-o"}
-                style={{ color: "#eee" }}>
+            <i className={classes("sf-auth-checkbox", "fa", this.props.checked ? "fa-check-square-o" : "fa-square-o") }
+                style={{ color: "#aaa" }}>
             </i>
         );
     }

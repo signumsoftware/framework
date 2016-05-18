@@ -8,6 +8,7 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
+import ButtonBar from '../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
 import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo, isQueryDefined, getQueryInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, PermissionRulePack, TypeRulePack, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
@@ -53,10 +54,11 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     if (options.permissions) {
 
-        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => new Promise(resolve => require(['./Admin/PermissionRulePackControl'], resolve))));
+        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => new Promise(resolve => require(['./Admin/PermissionRulesPackControl'], resolve))));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", AuthAdminMessage.PermissionRules.niceToString(),
-            e => Api.fetchPermissionRulePack(ctx.lite.id).then(pack => Navigator.navigate(pack)).done(), { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
+            e => Api.fetchPermissionRulePack(ctx.lite.id).then(pack => Navigator.navigate(pack, { avoidPromptLooseChange: true })).done(),
+            { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
     }
 }
 
