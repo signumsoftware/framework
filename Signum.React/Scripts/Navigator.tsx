@@ -169,7 +169,7 @@ function typeIsCreable(typeName: string): EntityWhen {
         case EntityKind.Main: return EntityWhen.IsSearch;
         case EntityKind.Part: return EntityWhen.IsLine;
         case EntityKind.SharedPart: return EntityWhen.IsLine;
-        default: throw new Error("Unexpected kind");
+        default: return EntityWhen.Never;
     }
 }
 
@@ -210,7 +210,7 @@ function typeIsReadOnly(typeName: string): boolean {
         case EntityKind.Main: return false;
         case EntityKind.Part: return false;
         case EntityKind.SharedPart: return false;
-        default: throw new Error("Unexpected kind");
+        default: return false;
     }
 }
 
@@ -248,7 +248,7 @@ function typeIsFindable(typeName: string) {
         case EntityKind.Main: return true;
         case EntityKind.Part: return false;
         case EntityKind.SharedPart: return true;
-        default: throw new Error("Unexpected kind");
+        default: return false;
     }
 }
 
@@ -299,7 +299,7 @@ function typeIsViewable(typeName: string): boolean {
         case EntityKind.Main: return true;
         case EntityKind.Part: return true;
         case EntityKind.SharedPart: return true;
-        default: throw new Error("Unexpected kind");
+        default: return true;
     }
 }
 
@@ -341,7 +341,7 @@ function typeIsNavigable(typeName: string): EntityWhen {
         case EntityKind.Main: return EntityWhen.Always;
         case EntityKind.Part: return EntityWhen.Always;
         case EntityKind.SharedPart: return EntityWhen.Always;
-        default: throw new Error("Unexpected kind");
+        default: return EntityWhen.Never;
     }
 }
 
@@ -370,6 +370,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 
 export interface NavigateOptions {
     readOnly?: boolean;
+    avoidPromptLooseChange?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
