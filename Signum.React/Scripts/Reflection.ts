@@ -129,9 +129,7 @@ let _types: TypeInfoDictionary = {};
 
 
 let _queryNames: {
-    [queryKey: string]: {
-        name: string, niceName: string
-    }
+    [queryKey: string]: MemberInfo
 };
 
 export type PseudoType = IType | TypeInfo | string;
@@ -219,6 +217,24 @@ export function getQueryNiceName(queryName: PseudoType | QueryKey) {
 
 }
 
+export function getQueryInfo(queryName: PseudoType | QueryKey): MemberInfo | TypeInfo {
+    if (queryName instanceof QueryKey) {
+        return queryName.memberInfo();
+    }
+    else {
+        var ti = getTypeInfo(queryName);
+        if (ti)
+            return ti;
+
+        var mi = _queryNames[(queryName as string).toLowerCase()];
+
+        if (mi)
+            return mi;
+
+        return null;
+    }
+}
+
 export function getQueryKey(queryName: PseudoType | QueryKey): string {
     if ((queryName as TypeInfo).kind != null)
         return (queryName as TypeInfo).name;
@@ -254,7 +270,7 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
         return getTypeInfo(queryName).queryDefined;
 
     if (queryName instanceof QueryKey)
-        return !!_queryNames[queryName.name];
+        return !!_queryNames[queryName.name.toLowerCase()];
 
     if (typeof queryName == "string") {
         const str = queryName as string;
@@ -312,7 +328,7 @@ export function setTypes(types: TypeInfoDictionary) {
 
     _queryNames = Dic.getValues(types).filter(t => t.kind == KindOfType.Query)
         .flatMap(a => Dic.getValues(a.members))
-        .toObject(m => m.name.toLocaleLowerCase(), m => Object.freeze({ name: m.name, niceName: m.niceName }));
+        .toObject(m => m.name.toLocaleLowerCase(), m => m);
 
     Object.freeze(_queryNames);
 
