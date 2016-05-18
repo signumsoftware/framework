@@ -107,7 +107,5 @@ namespace Signum.React.Authorization
             public string message { get; set; }
             public UserEntity userEntity { get; set; }
         }
-
-
     }
 }

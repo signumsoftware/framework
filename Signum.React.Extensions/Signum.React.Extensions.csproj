@@ -136,6 +136,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\AuthAdminController.cs" />
     <Compile Include="Authorization\AuthController.cs" />
     <Compile Include="Authorization\AuthServer.cs" />
     <Compile Include="Authorization\UserTicketServer.cs" />
@@ -245,6 +246,7 @@
     <TypeScriptCompile Include="Alerts\Signum.Entities.Alerts.ts">
       <DependentUpon>Signum.Entities.Alerts.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Authorization\Admin\PermissionRulesPackControl.tsx" />
     <TypeScriptCompile Include="Authorization\AuthClient.tsx" />
     <TypeScriptCompile Include="Authorization\Signum.Entities.Authorization.ts">
       <DependentUpon>Signum.Entities.Authorization.t4s</DependentUpon>

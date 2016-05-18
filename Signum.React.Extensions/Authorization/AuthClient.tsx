@@ -6,10 +6,11 @@ import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigato
 import { tasks, LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
+import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic } from './Signum.Entities.Authorization'
+import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, PermissionRulePack, TypeRulePack, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
 import Login from './Login/Login';
 
 export let userTicket: boolean;
@@ -27,7 +28,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     </Route>);
 }
 
-export function start(options: { routes: JSX.Element[], types: boolean; properties: boolean, operations: boolean, queries: boolean }) {
+export function start(options: { routes: JSX.Element[], types: boolean; properties: boolean, operations: boolean, queries: boolean; permissions: boolean }) {
 
     Navigator.addSettings(new EntitySettings(UserEntity, e => new Promise(resolve => require(['./Templates/User'], resolve))));
     Navigator.addSettings(new EntitySettings(RoleEntity, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
@@ -48,6 +49,14 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     if (options.queries) {
         Finder.isFindableEvent.push(queryIsFindable);
+    }
+
+    if (options.permissions) {
+
+        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => new Promise(resolve => require(['./Admin/PermissionRulePackControl'], resolve))));
+
+        QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", AuthAdminMessage.PermissionRules.niceToString(),
+            e => Api.fetchPermissionRulePack(ctx.lite.id).then(pack => Navigator.navigate(pack)).done(), { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
     }
 }
 
@@ -178,6 +187,23 @@ export module Api {
     export function logout(): Promise<void> {
         return ajaxPost<void>({ url: "/api/auth/logout" }, null);
     }
+
+    export function fetchPermissionRulePack(roleId: string): Promise<PermissionRulePack> {
+        return ajaxGet<PermissionRulePack>({ url: "/api/authAdmin/permissionRules/" + roleId, cache: "no-cache" });
+    }
+
+    export function savePermissionRulePack(rules: PermissionRulePack): Promise<void> {
+        return ajaxPost<void>({ url: "/api/authAdmin/permissionRules"}, rules);
+    }
+
+    export function fetchTypeRulePack(roleId: string): Promise<TypeRulePack> {
+        return ajaxGet<TypeRulePack>({ url: "/api/authAdmin/typeRules/" + roleId, cache: "no-cache" });
+    }
+
+    export function saveTypeRulePack(rules: TypeRulePack): Promise<void> {
+        return ajaxPost<void>({ url: "/api/authAdmin/typeRules" }, rules);
+    }
+
 }
 
 declare module '../../../Framework/Signum.React/Scripts/Reflection' {
