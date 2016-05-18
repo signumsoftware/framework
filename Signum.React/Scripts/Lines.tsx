@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize, RenderButtonsComponent } from './TypeContext'
-export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize, RenderButtonsComponent };
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize, IRenderButtons } from './TypeContext'
+export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize, IRenderButtons };
 
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, PropertyRoute, Binding, ReadonlyBinding } from './Reflection'
 export { Binding, ReadonlyBinding }

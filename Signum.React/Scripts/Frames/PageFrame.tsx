@@ -15,23 +15,15 @@ import ValidationErrors from './ValidationErrors'
 require("!style!css!./Frames.css");
 
 interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string }> {
-    showOperations?: boolean;
-    component?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
-    title?: string;
 }
 
 
 interface PageFrameState {
     pack?: EntityPack<Entity>;
-    component?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
+    componentClass?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
 }
 
 export default class PageFrame extends React.Component<PageFrameProps, PageFrameState> {
-
-    static defaultProps: PageFrameProps = {
-        showOperations: true,
-        component: null,
-    }
 
     constructor(props) {
         super(props);
@@ -49,7 +41,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
     calculateState(props: PageFrameProps) {
         
-        return { component: null, pack: null } as PageFrameState;
+        return { componentClass: null, pack: null } as PageFrameState;
     }
 
 
@@ -90,12 +82,8 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     
 
     loadComponent(): Promise<void> {
-
-        const promise = this.props.component ? Promise.resolve(this.props.component) :
-            Navigator.getComponent(this.state.pack.entity);
-
-        return promise
-            .then(c => this.setState({ component: c }));
+        return Navigator.getComponent(this.state.pack.entity)
+            .then(c => this.setState({ componentClass: c }));
     }
 
     render() {
@@ -113,6 +101,16 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             Navigator.currentHistory.push("/");
     }
 
+
+    component: React.Component<any, any>;
+
+    setComponent(c: React.Component<any, any>) {
+        if (c && this.component != c) {
+            this.component = c;
+            this.forceUpdate();
+        }
+    }
+
     renderEntityControl() {
 
         if (!this.state.pack) {
@@ -124,9 +122,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         }
 
         const entity = this.state.pack.entity;
-
-
-
+        
         const frame: EntityFrame<Entity> = {
             component: this,
             onReload: pack => this.setState({ pack }),
@@ -158,11 +154,11 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             <div className="normal-control">
                 { this.renderTitle() }
                 { renderWidgets(wc) }
-                <ButtonBar frame={frame} pack={this.state.pack} showOperations={this.props.showOperations} />
+                { this.component && <ButtonBar frame={frame} pack={this.state.pack} showOperations={true} /> }
                 <ValidationErrors entity={this.state.pack.entity}/>
                 { embeddedWidgets.top }
                 <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
-                    {this.state.component && React.createElement<{ ctx: TypeContext<Entity> }>(this.state.component, { ctx: ctx }) }
+                    {this.state.componentClass && React.createElement(this.state.componentClass, { ctx: ctx, ref: c => this.setComponent(c) } as any) }
                 </div>
                 { embeddedWidgets.bottom }
             </div>
@@ -178,7 +174,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
         return (
             <h3>
-                <span className="sf-entity-title">{ this.props.title || getToString(entity) }</span>
+                <span className="sf-entity-title">{ getToString(entity) }</span>
                 <br/>
                 <small className="sf-type-nice-name">{ Navigator.getTypeTitle(entity, null) }</small>
             </h3>

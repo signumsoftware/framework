@@ -5,7 +5,7 @@ import { openModal, IModalProps } from '../Modals'
 import * as Navigator from '../Navigator'
 import ButtonBar from './ButtonBar'
 
-import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
+import { TypeContext, StyleOptions, EntityFrame, IRenderButtons } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState} from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
@@ -111,12 +111,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         }
 
         return Navigator.getComponent(this.state.pack.entity)
-            .then(c => this.setState(
-                {
-                    getComponent: (ctx) => React.createElement(c, {
-                        ctx: ctx
-                    })
-                }));
+            .then(c => this.setState({ getComponent: (ctx) => React.createElement(c, { ctx: ctx }) }));
     }
 
     okClicked: boolean;
@@ -176,10 +171,19 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         );
     }
 
-    renderBody() {
+    component: React.Component<any, any>;
 
+    setComponent(c: React.Component<any, any>) {
+        if (c && this.component != c) {
+            this.component = c;
+            this.forceUpdate();
+        }
+    }
+
+    renderBody() {
+        
         var frame: EntityFrame<Entity> = {
-            component: this,
+            component: this.component,
             onReload: pack => this.setPack(pack),
             onClose: () => this.props.onExited(null),
             setError: (modelState, initialPrefix = "") => {
@@ -200,10 +204,10 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         return (
             <Modal.Body>
                 {renderWidgets({ ctx: ctx, pack: pack }) }
-                <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />
+                { this.component && <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />}
                 <ValidationErrors entity={pack.entity}/>
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
-                    { this.state.getComponent && this.state.getComponent(ctx) }
+                    { this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: c => this.setComponent(c) }) }
                 </div>
             </Modal.Body>
         );
@@ -280,6 +284,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             getComponent={options.getComponent}
             showOperations={true}
             requiresSaveOperation={null}
+            avoidPromptLooseChange={options.avoidPromptLooseChange}
             isNavigate={true}/>);
     }
 }

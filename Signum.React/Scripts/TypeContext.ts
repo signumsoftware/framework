@@ -248,7 +248,7 @@ export interface ButtonsContext {
     showOperations: boolean;
 }
 
-export interface RenderButtonsComponent {
+export interface IRenderButtons {
     renderButtons(ctx: ButtonsContext): React.ReactElement<any>[];
 }
 
