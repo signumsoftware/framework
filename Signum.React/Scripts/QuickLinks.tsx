@@ -115,9 +115,10 @@ export class QuickLinkWidget extends React.Component<{ ctx: WidgetContext }, { l
     makeRequest(props: { ctx: WidgetContext }) {
         this.setState({ links: null });
 
-        if (props.ctx.pack.entity.isNew) {
-            this.setState({ links: [] });
+        var entity = props.ctx.pack.entity;
 
+        if (entity.isNew || !getTypeInfo(entity.Type) || !getTypeInfo(entity.Type).entityKind) {
+            this.setState({ links: [] });
         } else {
             getQuickLinks({
                 lite: toLiteFat(props.ctx.pack.entity as Entity),
