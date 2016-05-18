@@ -7,7 +7,7 @@ import { tasks, LineBase, LineBaseProps } from '../../../Framework/Signum.React/
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
-import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo, isQueryDefined, getQueryInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic } from './Signum.Entities.Authorization'
 import Login from './Login/Login';
@@ -51,12 +51,8 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     }
 }
 
-export function queryIsFindable(queryKey: PseudoType | QueryKey) {
-    if (queryKey instanceof QueryKey) {
-        return queryKey.memberInfo().queryAllowed;
-    } else {
-        return getTypeInfo(queryKey).queryAllowed;
-    }
+export function queryIsFindable(queryKey: string) {
+    return getQueryInfo(queryKey).queryAllowed;
 }
 
 export function onOperationAuthorized(oi: OperationInfo) {
