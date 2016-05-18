@@ -54,6 +54,9 @@ namespace Signum.React.Json
 
         private object ConvertObject(object obj, JsonSerializer serializer)
         {
+            if (obj == null)
+                return null;
+
             if (obj is string || obj is DateTime || obj is long || obj is double)
             {
                 return obj;

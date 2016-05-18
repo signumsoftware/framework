@@ -45,7 +45,7 @@ export interface SearchControlState {
     loading?: boolean;
     selectedRows?: ResultRow[];
     markedRows?: MarkRowsDictionary;
-
+    searchCount?: number;
     dragColumnIndex?: number,
     dropBorderIndex?: number,
 
@@ -86,6 +86,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             selectedRows: [],
             currentMenuItems: null,
             markedRows: null,
+            searchCount: null
         };
     }
 
@@ -223,9 +224,17 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.getFindOptionsWithSFB().then(fo => {
             this.setState({ loading: false, editingColumn: null });
             Finder.API.search(this.getQueryRequest()).then(rt => {
-                this.setState({ resultTable: rt, selectedRows: [], currentMenuItems: null, markedRows: null, loading: false });
+                this.setState({
+                    resultTable: rt,
+                    selectedRows: [],
+                    currentMenuItems: null,
+                    markedRows: null,
+                    loading: false,
+                    searchCount: (this.state.searchCount || 0) + 1
+                });
                 if (this.props.onResult)
                     this.props.onResult(rt);
+
                 this.notifySelectedRowsChanged();
                 this.forceUpdate();
             }).done();
@@ -327,7 +336,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         return (
             <div id="searchPage">
-                <div className="sf-search-control SF-control-container" ref="container">
+                <div className="sf-search-control SF-control-container" ref="container" data-search-count={this.state.searchCount}>
                     {fo.showHeader && (fo.showFilters ? <FilterBuilder
                         queryDescription={this.state.queryDescription}
                         filterOptions={fo.filterOptions}

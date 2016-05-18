@@ -78,9 +78,7 @@ export function navigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent)
         return;
     }
     else {
-        Navigator.navigate({
-            entityOrPack: pack,
-        });
+        Navigator.navigate(pack);
     }
 }
 

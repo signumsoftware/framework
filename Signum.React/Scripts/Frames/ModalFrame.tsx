@@ -20,6 +20,7 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     propertyRoute?: PropertyRoute;
     showOperations?: boolean;
     requiresSaveOperation?: boolean;
+    avoidPromptLooseChange?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     isNavigate?: boolean;
     readOnly?: boolean;
@@ -130,8 +131,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     }
 
     handleCancelClicked = () => {
-        
-        if (this.state.pack.entity.modified) {
+
+        if (this.state.pack.entity.modified && !this.props.avoidPromptLooseChange) {
             if (!confirm(NormalWindowMessage.LoseChanges.niceToString()))
                 return;
         }
@@ -257,22 +258,23 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         }
     }
 
-    static openView(options: Navigator.ViewOptions): Promise<Entity> {
+    static openView(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.ViewOptions): Promise<Entity> {
 
         return openModal<Entity>(<ModalFrame
-            entityOrPack={options.entity}
+            entityOrPack={entityOrPack}
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}
             getComponent={options.getComponent}
             showOperations={options.showOperations}
             requiresSaveOperation={options.requiresSaveOperation}
+            avoidPromptLooseChange={options.avoidPromptLooseChange}
             isNavigate={false}/>);
     }
 
-    static openNavigate(options: Navigator.NavigateOptions): Promise<void> {
+    static openNavigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.NavigateOptions): Promise<void> {
 
         return openModal<void>(<ModalFrame
-            entityOrPack={options.entityOrPack}
+            entityOrPack={entityOrPack}
             readOnly={options.readOnly}
             propertyRoute={null}
             getComponent={options.getComponent}

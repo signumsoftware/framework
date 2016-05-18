@@ -5,7 +5,7 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack } from './Signum.Entities';
 import { IUserEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded  } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, KindOfType  } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
@@ -157,6 +157,9 @@ function typeIsCreable(typeName: string): EntityWhen {
     if (typeInfo == null)
         return EntityWhen.IsLine;
 
+    if (typeInfo.kind == KindOfType.Enum)
+        return EntityWhen.Never;
+
     switch (typeInfo.entityKind) {
         case EntityKind.SystemString: return EntityWhen.Never;
         case EntityKind.System: return EntityWhen.Never;
@@ -195,6 +198,9 @@ function typeIsReadOnly(typeName: string): boolean {
     if (typeInfo == null)
         return false;
 
+    if (typeInfo.kind == KindOfType.Enum)
+        return true;
+
     switch (typeInfo.entityKind) {
         case EntityKind.SystemString: return true;
         case EntityKind.System: return true;
@@ -229,6 +235,9 @@ function typeIsFindable(typeName: string) {
     const typeInfo = getTypeInfo(typeName);
     if (typeInfo == null)
         return false;
+
+    if (typeInfo.kind == KindOfType.Enum)
+        return true;
 
     switch (typeInfo.entityKind) {
         case EntityKind.SystemString: return true;
@@ -278,6 +287,9 @@ function typeIsViewable(typeName: string): boolean {
     if (typeInfo == null)
         return true;
 
+    if (typeInfo.kind == KindOfType.Enum)
+        return false;
+
     switch (typeInfo.entityKind) {
         case EntityKind.SystemString: return false;
         case EntityKind.System: return true;
@@ -317,6 +329,9 @@ function typeIsNavigable(typeName: string): EntityWhen {
     if (typeInfo == null)
         return EntityWhen.Never;
 
+    if (typeInfo.kind == KindOfType.Enum)
+        return EntityWhen.Never;
+
     switch (typeInfo.entityKind) {
         case EntityKind.SystemString: return EntityWhen.Never;
         case EntityKind.System: return EntityWhen.Always;
@@ -331,53 +346,38 @@ function typeIsNavigable(typeName: string): EntityWhen {
 }
 
 
-
-
 export interface ViewOptions {
-    entity: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
     showOperations?: boolean;
     requiresSaveOperation?: boolean;
+    avoidPromptLooseChange?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
-export function view(options: ViewOptions): Promise<ModifiableEntity>;
-export function view<T extends ModifiableEntity>(entity: T, propertyRoute?: PropertyRoute): Promise<T>;
-export function view<T extends Entity>(entity: Lite<T>): Promise<T>
-export function view(entityOrOptions: ViewOptions | ModifiableEntity | Lite<Entity>, propertyRoute?: PropertyRoute): Promise<ModifiableEntity>
-{
-    const options = (entityOrOptions as ModifiableEntity).Type ? { entity: entityOrOptions as ModifiableEntity, propertyRoute: propertyRoute } as ViewOptions :
-        (entityOrOptions as Lite<Entity>).EntityType ? { entity: entityOrOptions as Lite<Entity> } as ViewOptions :
-            entityOrOptions as ViewOptions;
-
+export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T>;
+export function view<T extends ModifiableEntity>(entity: T, viewOptions?: ViewOptions): Promise<T>;
+export function view<T extends Entity>(entity: Lite<T>, viewOptions?: ViewOptions): Promise<T>
+export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity>;
+    export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity> {
     return new Promise<ModifiableEntity>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
-            NP.default.openView(options).then(resolve, reject);
+            NP.default.openView(entityOrPack, viewOptions || {}).then(resolve, reject);
         });
     });
 }
 
 
 export interface NavigateOptions {
-    entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     readOnly?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
-export function navigate(options: NavigateOptions): Promise<void>;
-export function navigate<T extends ModifiableEntity>(entity: T | EntityPack<T>, propertyRoute?: PropertyRoute): Promise<void>;
-export function navigate<T extends Entity>(entity: Lite<T>): Promise<void>
-export function navigate(entityOrOptions: NavigateOptions | Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<void> {
-
-    const options = (entityOrOptions as ModifiableEntity).Type ? { entityOrPack: entityOrOptions as ModifiableEntity } as NavigateOptions :
-        (entityOrOptions as Lite<Entity>).EntityType ? { entityOrPack: entityOrOptions as Lite<Entity> } as NavigateOptions :
-            (entityOrOptions as EntityPack<ModifiableEntity>).entity ? { entityOrPack: entityOrOptions as EntityPack<ModifiableEntity> } as NavigateOptions :
-                entityOrOptions as NavigateOptions;
-
+export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions? : NavigateOptions): Promise<void> {
+    
     return new Promise<void>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
-            NP.default.openNavigate(options).then(resolve, reject);
+            NP.default.openNavigate(entityOrPack, navigateOptions || {}).then(resolve, reject);
         });
     });
 } 
