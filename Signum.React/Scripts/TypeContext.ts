@@ -253,7 +253,8 @@ export interface IRenderButtons {
 }
 
 export interface EntityFrame<T extends ModifiableEntity> {
-    component: React.Component<any, any>;
+    frameComponent: React.Component<any, any>;
+    entityComponent: React.Component<any, any>;
     onReload: (pack: EntityPack<T>) => void;
     setError: (modelState: ModelState, initialPrefix?: string) => void;
     onClose: () => void;
