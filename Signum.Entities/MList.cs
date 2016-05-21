@@ -642,6 +642,13 @@ namespace Signum.Entities
             this.innerList[index] = new RowIdElement(prev.Element, rowId, null);
         }
 
+        PrimaryKey? IMListPrivate.GetRowId(int index)
+        {
+            var prev = this.innerList[index];
+
+            return prev.RowId;
+        }
+
         void IMListPrivate.ForceRowId(int index, PrimaryKey rowId)
         {
             var prev = this.innerList[index];
@@ -677,6 +684,7 @@ namespace Signum.Entities
 
         void ExecutePostRetrieving();
         void SetOldIndex(int index);
+        PrimaryKey? GetRowId(int index);
         void SetRowId(int index, PrimaryKey rowId);
         void ForceRowId(int index, PrimaryKey rowId);
 

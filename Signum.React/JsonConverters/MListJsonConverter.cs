@@ -2,6 +2,7 @@
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Entities;
+using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System;
@@ -98,7 +99,7 @@ namespace Signum.React.Json
                         throw new JsonSerializationException($"member 'element' expected in {reader.Path}");
 
                     reader.Read();
-                    if (rowIdValue != null)
+                    if (rowIdValue != null && !rowIdValue.Equals(GraphExplorer.DummyRowId.Object))
                     {
                         if (rowIdType == null)
                             throw new InvalidOperationException($"impossible to deterine rowId type for PropertyRoute {pr} in path {reader.Path}");

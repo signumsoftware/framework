@@ -127,7 +127,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     handleCancelClicked = () => {
 
-        if (this.state.pack.entity.modified && !this.props.avoidPromptLooseChange) {
+        if (this.hasChanges() && !this.props.avoidPromptLooseChange) {
             if (!confirm(NormalWindowMessage.LoseChanges.niceToString()))
                 return;
         }

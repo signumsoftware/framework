@@ -13,7 +13,6 @@ namespace Signum.Entities.Reflection
 {
     public class ModifyInspector
     {
-        //dicconario con los field info con posibles modificables de los modificables normales
         static Dictionary<Type, Func<object, object>[]> getterCache = new Dictionary<Type, Func<object, object>[]>();
 
         static Func<object, object>[] ModifiableFieldGetters(Type type)
@@ -34,14 +33,9 @@ namespace Signum.Entities.Reflection
         }
 
 
-        /// <summary>
-        /// Devuelve todos los Modificables que haya dentro de obj
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
         public static IEnumerable<Modifiable> FullExplore(Modifiable obj)
         {
-            if (obj == null)//|| obj is Lite)
+            if (obj == null)
                 yield break;
 
             if (Reflector.IsMList(obj.GetType()))
