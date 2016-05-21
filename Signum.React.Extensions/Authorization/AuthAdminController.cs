@@ -16,6 +16,8 @@ using Signum.Engine;
 using Signum.Entities.Reflection;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using Signum.React.Files;
+using System.IO;
 
 namespace Signum.React.Authorization
 {
@@ -26,7 +28,7 @@ namespace Signum.React.Authorization
         {
             BasicPermission.AdminRules.AssertAuthorized();
             var rules = PermissionAuthLogic.GetPermissionRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillToString());
-            GraphExplorer.CleanModifications(GraphExplorer.FromRoot(rules));
+            CleanChanges(rules);
             return rules;
         }
 
@@ -44,7 +46,7 @@ namespace Signum.React.Authorization
         {
             BasicPermission.AdminRules.AssertAuthorized();
             var rules = TypeAuthLogic.GetTypeRules(Lite.ParsePrimaryKey<RoleEntity>(roleId));
-            GraphExplorer.CleanModifications(GraphExplorer.FromRoot(rules));
+            CleanChanges(rules);
             return rules;
         }
 
@@ -57,12 +59,12 @@ namespace Signum.React.Authorization
 
 
 
-        [Route("api/authAdmin/operationRules/{typeId}/{roleId}"), HttpGet]
+        [Route("api/authAdmin/operationRules/{typeName}/{roleId}"), HttpGet]
         public OperationRulePack GetOperationRules(string typeName, string roleId)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             var rules = OperationAuthLogic.GetOperationRules(Lite.ParsePrimaryKey<RoleEntity>(roleId), TypeLogic.GetType(typeName).ToTypeEntity());
-            GraphExplorer.CleanModifications(GraphExplorer.FromRoot(rules));
+            CleanChanges(rules);
             return rules;
         }
 
@@ -75,12 +77,12 @@ namespace Signum.React.Authorization
 
 
 
-        [Route("api/authAdmin/propertyRules/{typeId}/{roleId}"), HttpGet]
+        [Route("api/authAdmin/propertyRules/{typeName}/{roleId}"), HttpGet]
         public PropertyRulePack GetPropertyRule(string typeName, string roleId)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             var rules = PropertyAuthLogic.GetPropertyRules(Lite.ParsePrimaryKey<RoleEntity>(roleId), TypeLogic.GetType(typeName).ToTypeEntity());
-            GraphExplorer.CleanModifications(GraphExplorer.FromRoot(rules));
+            CleanChanges(rules);
             return rules;
         }
 
@@ -93,12 +95,12 @@ namespace Signum.React.Authorization
 
 
 
-        [Route("api/authAdmin/queryRules/{typeId}/{roleId}"), HttpGet]
+        [Route("api/authAdmin/queryRules/{typeName}/{roleId}"), HttpGet]
         public QueryRulePack GetQueryRules(string typeName, string roleId)
         {
             BasicPermission.AdminRules.AssertAuthorized();
             var rules = QueryAuthLogic.GetQueryRules(Lite.ParsePrimaryKey<RoleEntity>(roleId), TypeLogic.GetType(typeName).ToTypeEntity());
-            GraphExplorer.CleanModifications(GraphExplorer.FromRoot(rules));
+            CleanChanges(rules);
             return rules;
         }
 
@@ -107,6 +109,29 @@ namespace Signum.React.Authorization
         {
             BasicPermission.AdminRules.AssertAuthorized();
             QueryAuthLogic.SetQueryRules(rules);
+        }
+
+
+        [Route("api/authAdmin/downloadAuthRules"), HttpGet]
+        public HttpResponseMessage DowloadAuthRules()
+        {
+            BasicPermission.AdminRules.AssertAuthorized();
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                AuthLogic.ExportRules().Save(ms);
+
+                return FilesController.GetHttpReponseMessage(new MemoryStream(ms.ToArray()), "AuthRules.xml");
+            }
+        }
+        
+        private static void CleanChanges(ModelEntity rules)
+        {
+            var graph = GraphExplorer.FromRoot(rules);
+            var conditions = graph.OfType<TypeAllowedAndConditions>().SelectMany(a => a.Conditions).ToList();
+            conditions.ForEach(con => graph.UnionWith(GraphExplorer.FromRoot(con)));
+            GraphExplorer.CleanModifications(graph);
+            GraphExplorer.SetDummyRowIds(graph);
         }
     }
 }

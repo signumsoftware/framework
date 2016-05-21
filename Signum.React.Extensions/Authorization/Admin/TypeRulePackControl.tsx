@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import * as numbro from 'numbro'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
@@ -12,12 +13,14 @@ import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Script
 import SelectorPopup from '../../../../Framework/Signum.React/Scripts/SelectorPopup'
 
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { Api } from '../AuthClient'
-import { TypeRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage, TypeAllowed, TypeAllowedRule, TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRule } from '../Signum.Entities.Authorization'
+import { Api, properties, queries, operations } from '../AuthClient'
+import { TypeRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage, TypeAllowed, TypeAllowedRule, TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRule, AuthThumbnail } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { TypeConditionSymbol } from '../../Basics/Signum.Entities.Basics'
+import { OperationSymbol, ModelEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { QueryEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 
 require("./AuthAdmin.css");
@@ -75,12 +78,21 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                             <th style={{ textAlign: "center" }}>
                                 {AuthAdminMessage.Overriden.niceToString() }
                             </th>
+                            {properties && <th style={{ textAlign: "center" }}>
+                                {PropertyRouteEntity.niceName() }
+                            </th>}
+                            {operations && <th style={{ textAlign: "center" }}>
+                                {OperationSymbol.niceName() }
+                            </th>}
+                            {queries && <th style={{ textAlign: "center" }}>
+                                {QueryEntity.niceName() }
+                            </th>}
                         </tr>
                     </thead>
                     <tbody>
                         { ctx.mlistItemCtxs(a => a.rules).groupBy(a => a.value.resource.fullClassName.tryBeforeLast(".") || "").orderBy(a => a.key).flatMap(gr => [
                             <tr key={gr.key} className="sf-auth-namespace">
-                                <td colSpan={6}><b>{gr.key}</b></td>
+                                <td colSpan={10}><b>{gr.key}</b></td>
                             </tr>
                         ].concat(gr.elements.orderBy(a => a.value.resource.fullClassName).flatMap(c => this.renderType(c)))) }
                     </tbody>
@@ -103,11 +115,13 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     }
 
     renderType(ctx: TypeContext<TypeAllowedRule>) {
-        
+
+        var roleId = this.props.ctx.value.role.id;
+
         var used = ctx.value.allowed.conditions.map(tcs => tcs.typeCondition.id);
 
         var remaining = ctx.value.availableConditions.filter(tcs => !used.contains(tcs.id));
-        
+
         var fallback = new Binding<TypeAllowed>("fallback", ctx.value.allowed);
         return [
             <tr key={ctx.value.resource.fullClassName} className={ classes("sf-auth-type", ctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions") }>
@@ -132,6 +146,15 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                 <td style={{ textAlign: "center" }}>
                     <GrayCheckbox checked={!typeAllowedEquals(ctx.value.allowed, ctx.value.allowedBase) }/>
                 </td>
+                {properties && <td style={{ textAlign: "center" }}>
+                    {this.link("fa fa-pencil-square-o", ctx.value.properties, () => Api.fetchPropertyRulePack(ctx.value.resource.cleanName, roleId)) }
+                </td>}
+                {operations && <td style={{ textAlign: "center" }}>
+                    {this.link("fa fa-bolt", ctx.value.operations, () => Api.fetchOperationRulePack(ctx.value.resource.cleanName, roleId)) }
+                </td>}
+                {queries && <td style={{ textAlign: "center" }}>
+                    {this.link("fa fa-search", ctx.value.queries, () => Api.fetchQueryRulePack(ctx.value.resource.cleanName, roleId)) }
+                </td>}
             </tr>
         ].concat(ctx.value.allowed.conditions.map(c => {
             var b = new Binding<TypeAllowed>("allowed", c);
@@ -166,6 +189,35 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     colorRadio(b: Binding<TypeAllowed>, part: TypeAllowedBasic, color: string) {
         return <ColorRadio checked={isActive(b.getValue(), part) } color={color} onClicked={e => { b.setValue(select(b.getValue(), part, e)); this.forceUpdate(); } }/>;
     }
+
+    link(icon: string, allowed: AuthThumbnail, action: () => Promise<ModelEntity>) {
+
+        if (allowed == null)
+            return null;
+
+        var onClick = () => {
+            GraphExplorer.propagateAll(this.props.ctx.value);
+
+            if (this.props.ctx.value.modified) {
+                alert(AuthAdminMessage.PleaseSaveChangesFirst.niceToString());
+                return;
+            }
+
+            action()
+                .then(m => Navigator.navigate(m))
+                .done();
+        };
+
+        return (
+            <a onClick={onClick}
+                className={classes("sf-auth-link", icon) }
+                style={{
+                    color: allowed == "All" ? "green" :
+                        allowed == "Mix" ? "#FFAD00" : "red"
+                }}>
+            </a>
+        );
+    }
 }
 
 function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeAllowedAndConditions) {
@@ -186,7 +238,7 @@ function getDB(allowed: TypeAllowed): TypeAllowedBasic {
 }
 
 function getUI(allowed: TypeAllowed): TypeAllowedBasic {
-    if (allowed.contains("IU"))
+    if (allowed.contains("UI"))
         return allowed.after("UI") as TypeAllowedBasic;
 
     return allowed as TypeAllowedBasic;

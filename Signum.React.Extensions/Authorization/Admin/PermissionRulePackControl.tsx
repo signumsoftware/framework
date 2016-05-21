@@ -13,7 +13,7 @@ import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Api } from '../AuthClient'
-import { PermissionRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
+import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 require("./AuthAdmin.css");
@@ -67,28 +67,31 @@ export default class PermissionRulesPackControl extends React.Component<{ ctx: T
                         </tr>
                     </thead>
                     <tbody>
-                        { ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
+                        { ctx.mlistItemCtxs(a => a.rules).orderBy(a => a.value.resource.key).map((c, i) =>
                             <tr key={i}>
                                 <td>
                                     {c.value.resource.key}
                                 </td>
-                                <td style={{ textAlign:"center" }}>
-                                    <ColorRadio checked={c.value.allowed} color="green" onClicked={a => { c.value.allowed = true; this.forceUpdate() } }/>
+                                <td style={{ textAlign: "center" }}>
+                                    {this.renderRadio(c.value, true, "green") }
                                 </td>
                                 <td style={{ textAlign: "center" }}>
-                                    <ColorRadio checked={!c.value.allowed} color="red" onClicked={a => { c.value.allowed = false; this.forceUpdate() } }/>
+                                    {this.renderRadio(c.value, false, "red") }
                                 </td>
                                 <td style={{ textAlign: "center" }}>
                                     <GrayCheckbox checked={c.value.allowed != c.value.allowedBase}/>
                                 </td>
                             </tr>
-                        )
-                        }
+                        ) }
                     </tbody>
                 </table>
 
             </div>
         );
+    }
+
+    renderRadio(c: PermissionAllowedRule, allowed: boolean, color: string) {
+        return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; this.forceUpdate() } }/>;
     }
 }
 

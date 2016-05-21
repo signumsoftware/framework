@@ -22,7 +22,7 @@ export class ColorRadio extends React.Component<{ checked: boolean, onClicked: (
 
     render() {
         return (
-            <a href="#" onClick={e => { e.preventDefault(); this.props.onClicked(e); } }
+            <a onClick={e => { e.preventDefault(); this.props.onClicked(e); } }
                 className={classes("sf-auth-chooser", "fa", this.props.checked ? "fa-dot-circle-o" : "fa-circle-o")}
                 style={{ color: this.props.checked ? this.props.color : "#aaa" }}>
             </a>

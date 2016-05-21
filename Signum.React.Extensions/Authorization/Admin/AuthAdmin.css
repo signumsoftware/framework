@@ -124,3 +124,12 @@ a.sf-condition-icon:hover {
     color: #666;
     text-decoration:none;
 }
+
+a.sf-auth-link {
+    opacity:0.5;
+    text-decoration:none;
+}
+
+a.sf-auth-link:hover {
+    opacity:1;
+}

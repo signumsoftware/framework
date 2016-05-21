@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { ModifiableEntity, EntityPack } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
 import { tasks, LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -12,12 +12,12 @@ import ButtonBar from '../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
 import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo, isQueryDefined, getQueryInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
-import {  PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack} from './Signum.Entities.Authorization'
+import { PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack} from './Signum.Entities.Authorization'
+import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import Login from './Login/Login';
 
 export let userTicket: boolean;
 export let resetPassword: boolean;
-
 
 
 export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean }) {
@@ -30,13 +30,27 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     </Route>);
 }
 
+export let types: boolean;
+export let properties: boolean;
+export let operations: boolean;
+export let queries: boolean;
+export let permissions: boolean;
+
 export function start(options: { routes: JSX.Element[], types: boolean; properties: boolean, operations: boolean, queries: boolean; permissions: boolean }) {
+
+    types = options.types;
+    properties = options.properties;
+    operations = options.operations;
+    queries = options.queries;
+    permissions = options.permissions;
 
     Navigator.addSettings(new EntitySettings(UserEntity, e => new Promise(resolve => require(['./Templates/User'], resolve))));
     Navigator.addSettings(new EntitySettings(RoleEntity, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
 
     if (options.properties) {
         tasks.push(taskAuthorizeProperties);
+
+        Navigator.addSettings(new EntitySettings(PropertyRulePack, e => new Promise(resolve => require(['./Admin/PropertyRulePackControl'], resolve))));
     }
 
     if (options.types) {
@@ -44,29 +58,39 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
         Navigator.isReadonlyEvent.push(navigatorIsReadOnly);
         Navigator.isViewableEvent.push(navigatorIsViewable);
 
-        Navigator.addSettings(new EntitySettings(TypeRulePack, e => new Promise(resolve => require(['./Admin/TypeRulesPackControl'], resolve))));
+        Navigator.addSettings(new EntitySettings(TypeRulePack, e => new Promise(resolve => require(['./Admin/TypeRulePackControl'], resolve))));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
-            e => Api.fetchTypeRulePack(ctx.lite.id).then(pack => Navigator.navigate(pack, { avoidPromptLooseChange: true })).done(),
+            e => Api.fetchTypeRulePack(ctx.lite.id).then(pack => Navigator.navigate(pack)).done(),
             { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
     }
 
     if (options.operations) {
         Operations.isOperationAllowedEvent.push(onOperationAuthorized);
+
+        Navigator.addSettings(new EntitySettings(OperationRulePack, e => new Promise(resolve => require(['./Admin/OperationRulePackControl'], resolve))));
     }
 
     if (options.queries) {
         Finder.isFindableEvent.push(queryIsFindable);
+
+        Navigator.addSettings(new EntitySettings(QueryRulePack, e => new Promise(resolve => require(['./Admin/QueryRulePackControl'], resolve))));
     }
 
     if (options.permissions) {
 
-        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => new Promise(resolve => require(['./Admin/PermissionRulesPackControl'], resolve))));
+        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => new Promise(resolve => require(['./Admin/PermissionRulePackControl'], resolve))));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", AuthAdminMessage.PermissionRules.niceToString(),
-            e => Api.fetchPermissionRulePack(ctx.lite.id).then(pack => Navigator.navigate(pack, { avoidPromptLooseChange: true })).done(),
+            e => Api.fetchPermissionRulePack(ctx.lite.id).then(pack => Navigator.navigate(pack)).done(),
             { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
     }
+
+    OmniboxClient.registerSpecialAction({
+        allowed: () => isPermissionAuthorized(BasicPermission.AdminRules),
+        key: "DownloadAuthRules",
+        onClick: () => { Api.downloadAuthRules(); return null; }
+    });
 }
 
 export function queryIsFindable(queryKey: string) {
@@ -237,6 +261,14 @@ export module Api {
 
     export function saveQueryRulePack(rules: QueryRulePack): Promise<void> {
         return ajaxPost<void>({ url: "/api/authAdmin/queryRules" }, rules);
+    }
+
+
+
+    export function downloadAuthRules(): void {
+        ajaxGetRaw({ url: "/api/authAdmin/downloadAuthRules" })
+            .then(response => saveFile(response))
+            .done();
     }
 
 }

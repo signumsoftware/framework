@@ -251,8 +251,11 @@
       <DependentUpon>Signum.Entities.Alerts.t4s</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Authorization\Admin\ColoredRadios.tsx" />
-    <TypeScriptCompile Include="Authorization\Admin\TypeRulesPackControl.tsx" />
-    <TypeScriptCompile Include="Authorization\Admin\PermissionRulesPackControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\QueryRulePackControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\OperationRulePackControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\PropertyRulePackControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\TypeRulePackControl.tsx" />
+    <TypeScriptCompile Include="Authorization\Admin\PermissionRulePackControl.tsx" />
     <TypeScriptCompile Include="Authorization\AuthClient.tsx" />
     <TypeScriptCompile Include="Authorization\Signum.Entities.Authorization.ts">
       <DependentUpon>Signum.Entities.Authorization.t4s</DependentUpon>
