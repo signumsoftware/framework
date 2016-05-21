@@ -47,14 +47,6 @@
 {
     line-height: 22px;    
 }
-.sf-auth-rules .sf-auth-namespace-name
-{
-    vertical-align: top;    
-}
-.sf-auth-rules .sf-auth-namespace img
-{
-    margin-top: 3px;    
-}
 .sf-auth-rules .sf-auth-condition .sf-auth-label
 {
     font-style: italic;
@@ -79,11 +71,13 @@
 a.sf-auth-chooser
 {
     text-decoration: none !important;
-    font-size:16px;
+    font-size:18px;
+    vertical-align:middle;
 }
 
 .sf-auth-checkbox {
-    font-size:16px;
+    font-size:18px;
+    vertical-align:middle;
 }
 
 span.group.inactive
@@ -94,4 +88,39 @@ span.group.inactive
 span.group.active
 {
     color:black
+}
+
+
+table.sf-auth-rules tr.sf-auth-type td {
+    border-top: 0px;
+}
+
+table.sf-auth-rules tr.sf-auth-type.sf-auth-with-conditions td {
+    padding-bottom: 0px;
+}
+
+
+table.sf-auth-rules tr.sf-auth-condition td {
+    border-top: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+table.sf-auth-rules tr.sf-auth-namespace td {
+    padding-top: 16px;
+    border-bottom: 1px solid #ddd;
+    border-top: 0;
+}
+
+.sf-placeholder-icon {
+    color: #d8d8d8
+}
+
+a.sf-condition-icon {
+    color: #999
+}
+
+a.sf-condition-icon:hover {
+    color: #666;
+    text-decoration:none;
 }

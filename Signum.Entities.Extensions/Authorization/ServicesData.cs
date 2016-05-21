@@ -122,6 +122,7 @@ namespace Signum.Entities.Authorization
             Notify(() => Overriden);
         }
 
+        [InTypeScript(false)]
         public bool Overriden
         {
             get { return !allowed.Equals(allowedBase); }
@@ -160,6 +161,10 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
     {
+        private TypeAllowedAndConditions()
+        {
+        }
+
         public TypeAllowedAndConditions(TypeAllowed? fallback, ReadOnlyCollection<TypeConditionRule> conditions)
         {
             this.fallback = fallback;
@@ -172,21 +177,24 @@ namespace Signum.Entities.Authorization
             this.conditions = conditions.ToReadOnly();
         }
 
-        readonly TypeAllowed? fallback;
+        TypeAllowed? fallback;
         public TypeAllowed? Fallback
         {
             get { return fallback; }
+            private set { fallback = value; }
         }
 
+        [InTypeScript(false)]
         public TypeAllowed FallbackOrNone
         {
             get { return this.fallback ?? TypeAllowed.None; }
         }
 
-        readonly ReadOnlyCollection<TypeConditionRule> conditions;
+        ReadOnlyCollection<TypeConditionRule> conditions;
         public ReadOnlyCollection<TypeConditionRule> Conditions
         {
             get { return conditions; }
+            private set { conditions = value; }
         }
 
         public bool Equals(TypeAllowedAndConditions other)
@@ -275,6 +283,8 @@ namespace Signum.Entities.Authorization
     [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
     {
+        private TypeConditionRule() { }
+
         public TypeConditionRule(TypeConditionSymbol typeCondition, TypeAllowed allowed)
         {
             this.TypeCondition = typeCondition;

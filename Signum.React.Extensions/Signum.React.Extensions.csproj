@@ -250,6 +250,7 @@
     <TypeScriptCompile Include="Alerts\Signum.Entities.Alerts.ts">
       <DependentUpon>Signum.Entities.Alerts.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Authorization\Admin\ColoredRadios.tsx" />
     <TypeScriptCompile Include="Authorization\Admin\TypeRulesPackControl.tsx" />
     <TypeScriptCompile Include="Authorization\Admin\PermissionRulesPackControl.tsx" />
     <TypeScriptCompile Include="Authorization\AuthClient.tsx" />

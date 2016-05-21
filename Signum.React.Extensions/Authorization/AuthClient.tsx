@@ -11,7 +11,8 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import ButtonBar from '../../../Framework/Signum.React/Scripts/Frames/ButtonBar'
 import { PseudoType, QueryKey, getTypeInfo, PropertyRouteType, OperationInfo, isQueryDefined, getQueryInfo } from '../../../Framework/Signum.React/Scripts/Reflection'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, PermissionRulePack, TypeRulePack, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
+import { UserEntity, RoleEntity, UserOperation, PermissionSymbol, PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission } from './Signum.Entities.Authorization'
+import {  PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack} from './Signum.Entities.Authorization'
 import Login from './Login/Login';
 
 export let userTicket: boolean;
@@ -42,6 +43,12 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
         Navigator.isCreableEvent.push(navigatorIsCreable);
         Navigator.isReadonlyEvent.push(navigatorIsReadOnly);
         Navigator.isViewableEvent.push(navigatorIsViewable);
+
+        Navigator.addSettings(new EntitySettings(TypeRulePack, e => new Promise(resolve => require(['./Admin/TypeRulesPackControl'], resolve))));
+
+        QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
+            e => Api.fetchTypeRulePack(ctx.lite.id).then(pack => Navigator.navigate(pack, { avoidPromptLooseChange: true })).done(),
+            { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
     }
 
     if (options.operations) {
@@ -194,12 +201,42 @@ export module Api {
         return ajaxPost<void>({ url: "/api/authAdmin/permissionRules"}, rules);
     }
 
+
     export function fetchTypeRulePack(roleId: string): Promise<TypeRulePack> {
         return ajaxGet<TypeRulePack>({ url: "/api/authAdmin/typeRules/" + roleId, cache: "no-cache" });
     }
 
     export function saveTypeRulePack(rules: TypeRulePack): Promise<void> {
         return ajaxPost<void>({ url: "/api/authAdmin/typeRules" }, rules);
+    }
+
+    
+    export function fetchPropertyRulePack(typeName: string, roleId: string): Promise<PropertyRulePack> {
+        return ajaxGet<PropertyRulePack>({ url: "/api/authAdmin/propertyRules/" + typeName + "/" + roleId, cache: "no-cache" });
+    }
+
+    export function savePropertyRulePack(rules: PropertyRulePack): Promise<void> {
+        return ajaxPost<void>({ url: "/api/authAdmin/propertyRules" }, rules);
+    }
+
+
+
+    export function fetchOperationRulePack(typeName: string, roleId: string): Promise<OperationRulePack> {
+        return ajaxGet<OperationRulePack>({ url: "/api/authAdmin/operationRules/" + typeName + "/" + roleId, cache: "no-cache" });
+    }
+
+    export function saveOperationRulePack(rules: OperationRulePack): Promise<void> {
+        return ajaxPost<void>({ url: "/api/authAdmin/operationRules" }, rules);
+    }
+
+
+
+    export function fetchQueryRulePack(typeName: string, roleId: string): Promise<QueryRulePack> {
+        return ajaxGet<QueryRulePack>({ url: "/api/authAdmin/queryRules/" + typeName + "/" + roleId, cache: "no-cache" });
+    }
+
+    export function saveQueryRulePack(rules: QueryRulePack): Promise<void> {
+        return ajaxPost<void>({ url: "/api/authAdmin/queryRules" }, rules);
     }
 
 }

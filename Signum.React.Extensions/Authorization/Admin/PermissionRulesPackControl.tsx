@@ -14,7 +14,7 @@ import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Frame
 import { ModifiableEntity, EntityControlMessage, Entity, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { Api } from '../AuthClient'
 import { PermissionRulePack, AuthAdminMessage, PermissionSymbol, AuthMessage } from '../Signum.Entities.Authorization'
-
+import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
 require("./AuthAdmin.css");
 
@@ -91,30 +91,6 @@ export default class PermissionRulesPackControl extends React.Component<{ ctx: T
         );
     }
 }
-
-class ColorRadio extends React.Component<{ checked: boolean, onClicked: (e: React.MouseEvent) => void, color: string }, void>{
-
-    render() {
-        return (
-            <a href="#" onClick={e => { e.preventDefault(); this.props.onClicked(e); } }
-                className={classes("sf-auth-chooser", "fa", this.props.checked ? "fa-dot-circle-o" : "fa-circle-o")}
-                style={{ color: this.props.checked ? this.props.color : "#aaa" }}>
-            </a>
-        );
-    }
-}
-
-class GrayCheckbox extends React.Component<{ checked: boolean }, void>{
-
-    render() {
-        return (
-            <i className={classes("sf-auth-checkbox", "fa", this.props.checked ? "fa-check-square-o" : "fa-square-o") }
-                style={{ color: "#aaa" }}>
-            </i>
-        );
-    }
-}
-
 
 
 
