@@ -36,7 +36,7 @@ export default class SelectorPopup extends React.Component<SelectorPopupProps, {
     }
 
     render() {
-        return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
+        return <Modal bsSize="sm" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
             <Modal.Header closeButton={true}>
                 <h4 className="modal-title">
                     {this.props.title}
