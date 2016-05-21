@@ -107,6 +107,8 @@ namespace Signum.React.Json
 
             if (pr == null || typeof(IEntity).IsAssignableFrom(pr.Type))
                 pr = PropertyRoute.Root(value.GetType());
+            else if (pr.Type.ElementType() == value.GetType())
+                pr = pr.Add("Item");
 
             ModifiableEntity mod = (ModifiableEntity)value;
 
@@ -227,9 +229,11 @@ namespace Signum.React.Json
             ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer);
 
             var pr = JsonSerializerExtensions.CurrentPropertyRoute;
-            if(pr == null || mod is Entity)
+            if (pr == null || mod is Entity)
                 pr = PropertyRoute.Root(mod.GetType());
-
+            else if (pr.Type.ElementType() == objectType)
+                pr = pr.Add("Item"); //Because we have a custom MListJsonConverter but not for other simpler collections
+            
             var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
 
             while (reader.TokenType == JsonToken.PropertyName)
