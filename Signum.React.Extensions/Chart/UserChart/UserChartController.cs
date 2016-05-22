@@ -20,6 +20,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine;
 using Signum.Entities.Chart;
 using Signum.Engine.Chart;
+using Signum.React.Filters;
 
 namespace Signum.React.Chart
 {
