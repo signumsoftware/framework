@@ -17,12 +17,13 @@ using System.Web.Http.Filters;
 using Signum.Entities.Reflection;
 using Newtonsoft.Json;
 using Signum.React.Json;
+using Signum.React.Filters;
 
 namespace Signum.React.ApiControllers
 {
     public class OperationController : ApiController
     {
-        [Route("api/operation/construct"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/construct"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS Construct(ConstructOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -34,7 +35,7 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/constructFromEntity"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/constructFromEntity"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ConstructFromEntity(EntityOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -44,7 +45,7 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/constructFromLite"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/constructFromLite"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ConstructFromLite(LiteOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -55,7 +56,7 @@ namespace Signum.React.ApiControllers
         }
 
       
-        [Route("api/operation/executeEntity"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/executeEntity"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ExecuteEntity(EntityOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -76,7 +77,7 @@ namespace Signum.React.ApiControllers
         }
 
 
-        [Route("api/operation/executeLite"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/executeLite"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ExecuteLite(LiteOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -86,7 +87,7 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/deleteEntity"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/deleteEntity"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public void DeleteEntity(EntityOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -95,7 +96,7 @@ namespace Signum.React.ApiControllers
 
         }
 
-        [Route("api/operation/deleteLite"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/deleteLite"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public void DeleteLite(LiteOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -110,6 +111,8 @@ namespace Signum.React.ApiControllers
             public string type { get; set; }
             [JsonConverter(typeof(ArgsJsonConverter))]
             public object[] args { get; set; }
+
+            public override string ToString() => operationKey;
         }
 
 
@@ -119,6 +122,8 @@ namespace Signum.React.ApiControllers
             public Entity entity { get; set; }
             [JsonConverter(typeof(ArgsJsonConverter))]
             public object[] args { get; set; }
+
+            public override string ToString() => operationKey;
         }
 
         public class LiteOperationRequest
@@ -127,9 +132,11 @@ namespace Signum.React.ApiControllers
             public Lite<Entity> lite { get; set; }
             [JsonConverter(typeof(ArgsJsonConverter))]
             public object[] args { get; set; }
+
+            public override string ToString() => operationKey;
         }
 
-        [Route("api/operation/constructFromMany"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/constructFromMany"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public EntityPackTS ConstructFromMany(MultiOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -141,7 +148,7 @@ namespace Signum.React.ApiControllers
             return SignumServer.GetEntityPack(entity);
         }
 
-        [Route("api/operation/constructFromMultiple"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/constructFromMultiple"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public MultiOperationResponse ConstructFromMultiple(MultiOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -153,7 +160,7 @@ namespace Signum.React.ApiControllers
         }
 
 
-        [Route("api/operation/executeMultiple"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/executeMultiple"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public MultiOperationResponse ExecuteMultiple(MultiOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -164,7 +171,7 @@ namespace Signum.React.ApiControllers
             return new MultiOperationResponse { errors = errors };
         }
 
-        [Route("api/operation/deleteMultiple"), HttpPost, ValidateModelFilter]
+        [Route("api/operation/deleteMultiple"), HttpPost, ValidateModelFilter, ProfilerActionSplitter]
         public MultiOperationResponse DeleteMultiple(MultiOperationRequest request)
         {
             var operation = ParseOperationAssert(request.operationKey);
@@ -202,6 +209,8 @@ namespace Signum.React.ApiControllers
             public Lite<Entity>[] lites { get; set; }
             [JsonConverter(typeof(ArgsJsonConverter))]
             public object[] args { get; set; }
+
+            public override string ToString() => operationKey;
         }
 
         public class MultiOperationResponse

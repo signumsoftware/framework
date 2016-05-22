@@ -139,11 +139,12 @@
     <Compile Include="ApiControllers\EntityController.cs" />
     <Compile Include="ApiControllers\QueryController.cs" />
     <Compile Include="ApiControllers\ReflectionController.cs" />
+    <Compile Include="Filters\ProfilerFilterAttribute.cs" />
     <Compile Include="Facades\SignumServer.cs" />
     <Compile Include="Facades\ReflectionServer.cs" />
     <Compile Include="Facades\SignumControllerFactory.cs" />
-    <Compile Include="Facades\SignumExceptionFilter.cs" />
-    <Compile Include="Facades\ValidateModelFilterAttribute.cs" />
+    <Compile Include="Filters\SignumExceptionFilterAttribute.cs" />
+    <Compile Include="Filters\ValidateModelFilterAttribute.cs" />
     <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="JsonConverters\EntityJsonConverter.cs" />
     <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
@@ -174,6 +175,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Extensions\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
+      <Project>{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}</Project>
+      <Name>Signum.Engine.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
       <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
       <Name>Signum.Engine</Name>

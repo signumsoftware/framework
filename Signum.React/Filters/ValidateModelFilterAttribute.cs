@@ -7,7 +7,7 @@ using System.Web;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
-namespace Signum.React.Facades
+namespace Signum.React.Filters
 {
     public class ValidateModelFilterAttribute : ActionFilterAttribute
     {

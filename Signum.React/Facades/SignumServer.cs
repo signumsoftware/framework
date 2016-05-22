@@ -3,6 +3,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.React.ApiControllers;
+using Signum.React.Filters;
 using Signum.React.Json;
 using Signum.Utilities;
 using System;
@@ -52,7 +53,8 @@ namespace Signum.React.Facades
 
             config.Services.Replace(typeof(IBodyModelValidator), new SignumBodyModelValidator());
 
-            config.Filters.Add(new SignumExceptionFilter());
+            config.Filters.Add(new SignumExceptionFilterAttribute());
+            config.Filters.Add(new ProfilerFilterAttribute());
 
             ReflectionServer.Start();
         }
