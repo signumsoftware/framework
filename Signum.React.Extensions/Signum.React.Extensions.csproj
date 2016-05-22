@@ -164,6 +164,8 @@
     <Compile Include="Omnibox\ReactSpecialOmniboxGenerator.cs" />
     <Compile Include="Processes\ProcessServer.cs" />
     <Compile Include="Processes\ProcessController.cs" />
+    <Compile Include="Profiler\ProfilerServer.cs" />
+    <Compile Include="Profiler\ProfilerTimesController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scheduler\SchedulerServer.cs" />
     <Compile Include="Scheduler\SchedulerController.cs" />
@@ -191,6 +193,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Processes\Processes.css" />
+    <Content Include="Profiler\Times\Times.css" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -340,6 +343,13 @@
     <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
       <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Profiler\ProfilerClient.tsx" />
+    <TypeScriptCompile Include="Profiler\Signum.Entities.Profiler.ts">
+      <DependentUpon>Signum.Entities.Profiler.t4s</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Profiler\SessionTimeout\SessionTimeoutPage.tsx" />
+    <TypeScriptCompile Include="Profiler\Heavy\HeavyProfilerPage.tsx" />
+    <TypeScriptCompile Include="Profiler\Times\TimesPage.tsx" />
     <TypeScriptCompile Include="Templating\Signum.Entities.Templating.ts">
       <DependentUpon>Signum.Entities.Templating.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -453,6 +463,9 @@
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\..\Framework\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Profiler\Signum.Entities.Profiler.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
