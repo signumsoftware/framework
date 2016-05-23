@@ -126,7 +126,8 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         
 
         var frame: EntityFrame<ModifiableEntity> = {
-            component: this,
+            frameComponent: this,
+            entityComponent: null,
             onClose: () => { throw new Error("Not implemented Exception"); },
             onReload: pack => { throw new Error("Not implemented Exception"); },
             setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },

@@ -171,11 +171,11 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         );
     }
 
-    component: React.Component<any, any>;
+    entityComponent: React.Component<any, any>;
 
     setComponent(c: React.Component<any, any>) {
-        if (c && this.component != c) {
-            this.component = c;
+        if (c && this.entityComponent != c) {
+            this.entityComponent = c;
             this.forceUpdate();
         }
     }
@@ -183,7 +183,8 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     renderBody() {
         
         var frame: EntityFrame<Entity> = {
-            component: this.component,
+            frameComponent: this,
+            entityComponent: this.entityComponent,
             onReload: pack => this.setPack(pack),
             onClose: () => this.props.onExited(null),
             setError: (modelState, initialPrefix = "") => {
@@ -204,7 +205,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         return (
             <Modal.Body>
                 {renderWidgets({ ctx: ctx, pack: pack }) }
-                { this.component && <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />}
+                { this.entityComponent && <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />}
                 <ValidationErrors entity={pack.entity}/>
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
                     { this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: c => this.setComponent(c) }) }

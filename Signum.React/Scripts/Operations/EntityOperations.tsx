@@ -9,6 +9,7 @@ import { ButtonsContext } from '../TypeContext';
 import * as Navigator from '../Navigator';
 import Notify from '../Frames/Notify';
 import { ajaxPost, ValidationError }  from '../Services';
+import { TypeContext }  from '../TypeContext';
 import { operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
     CreateGroup, API, isEntityOperation, autoStyleFunction } from '../Operations'
 
@@ -76,6 +77,18 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
     });
 
     return result.orderBy(a => a.order).map(a => a.button);
+}
+
+export function createEntityOperationContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any>): EntityOperationContext<T> {
+
+    return {
+        frame: ctx.frame,
+        entity: ctx.value,
+        settings: getSettings(operation) as EntityOperationSettings<T>,
+        operationInfo: getTypeInfo(ctx.value.Type).operations[operation.key],
+        showOperations: true,
+        canExecute: null
+    };
 }
 
 function getDefaultGroup(eoc: EntityOperationContext<Entity>) {

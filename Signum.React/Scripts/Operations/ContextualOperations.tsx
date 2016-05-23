@@ -15,7 +15,7 @@ import { operationInfos, getSettings, ContextualOperationSettings, ContextualOpe
     CreateGroup, API, autoStyleFunction, isEntityOperation } from '../Operations'
 
 
-export function getConstructFromManyContextualItems(ctx: ContextualItemsContext): Promise<MenuItemBlock> {
+export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
     if (ctx.lites.length == 0)
         return null;
 
@@ -82,7 +82,7 @@ export function navigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent)
     }
 }
 
-export function getEntityOperationsContextualItems(ctx: ContextualItemsContext): Promise<MenuItemBlock> {
+export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
     if (ctx.lites.length == 0)
         return null;
 

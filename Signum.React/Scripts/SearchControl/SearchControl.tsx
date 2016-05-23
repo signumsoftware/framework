@@ -488,7 +488,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     loadMenuItems() {
-        const options: ContextualItemsContext = {
+        const options: ContextualItemsContext<Entity> = {
             lites: this.state.selectedRows.map(a => a.entity),
             queryDescription: this.state.queryDescription,
             markRows: this.markRows

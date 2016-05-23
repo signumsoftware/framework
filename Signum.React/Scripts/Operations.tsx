@@ -127,7 +127,7 @@ export interface ContextualOperationOptions<T extends Entity> {
 }
 
 export interface ContextualOperationContext<T extends Entity> {
-    context: ContextualItemsContext
+    context: ContextualItemsContext<T>
     operationInfo: OperationInfo;
     settings: ContextualOperationSettings<T>;
     entityOperationSettings: EntityOperationSettings<T>;
