@@ -482,7 +482,7 @@ export module Encoder {
     export function stringValue(value: any): string {
 
         if (!value)
-            return value;
+            return "";
 
         if (Array.isArray(value))
             return (value as any[]).map(a => stringValue(a)).join("~");
