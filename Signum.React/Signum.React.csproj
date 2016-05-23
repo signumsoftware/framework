@@ -277,6 +277,8 @@
     <TypeScriptCompile Include="Typings\react-router-bootstrap\react-router-bootstrap.d.ts" />
     <TypeScriptCompile Include="Typings\react-router\react-router.d.ts" />
     <TypeScriptCompile Include="Typings\react-widgets\react-widgets.d.ts" />
+    <TypeScriptCompile Include="Typings\react\react-addons-css-transition-group.d.ts" />
+    <TypeScriptCompile Include="Typings\react\react-addons-transition-group.d.ts" />
     <TypeScriptCompile Include="Typings\react\react-dom.d.ts" />
     <TypeScriptCompile Include="Typings\react\react.d.ts" />
     <TypeScriptCompile Include="Typings\whatwg-fetch\whatwg-fetch.d.ts" />
