@@ -180,9 +180,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Authorization\Admin\AuthAdmin.css" />
-    <Content Include="Authorization\Admin\Images\operation.png" />
-    <Content Include="Authorization\Admin\Images\property.png" />
-    <Content Include="Authorization\Admin\Images\query.png" />
     <Content Include="Chart\Chart.css" />
     <Content Include="Dashboard\Dashboard.css" />
     <Content Include="Files\Files.css" />

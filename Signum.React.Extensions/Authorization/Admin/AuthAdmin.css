@@ -20,21 +20,6 @@
 {
 	cursor:pointer;
 }
-.sf-auth-rules .sf-auth-property
-{
-    background-image: url('Images/property.png');
-    background-repeat: no-repeat;
-}
-.sf-auth-rules .sf-auth-operation
-{
-    background-image: url('Images/operation.png');
-    background-repeat: no-repeat;
-}
-.sf-auth-rules .sf-auth-query
-{
-    background-image: url('Images/query.png');
-    background-repeat: no-repeat;
-}
 .sf-auth-rules tr.first
 {
     border-top: 1px gray solid
