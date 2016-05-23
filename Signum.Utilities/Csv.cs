@@ -118,7 +118,7 @@ namespace Signum.Utilities
         public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, CsvReadOptions<T> options = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
-            culture = culture ?? CultureInfo.CurrentCulture;
+            culture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
                 return ReadStream<T>(fs, encoding, culture, skipLines, options).ToList();
@@ -133,7 +133,7 @@ namespace Signum.Utilities
         public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, CsvReadOptions<T> options = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
-            culture = culture ?? CultureInfo.CurrentCulture;
+            culture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
             if (options == null)
                 options = new CsvReadOptions<T>();
 
@@ -224,7 +224,7 @@ namespace Signum.Utilities
             if (options == null)
                 options = new CsvReadOptions<T>();
 
-            culture = culture ?? CultureInfo.CurrentCulture;
+            culture = culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
 
             Regex regex = GetRegex(culture, options.RegexTimeout);
 
@@ -255,7 +255,7 @@ namespace Signum.Utilities
             var vals = m.Groups["val"].Captures;
 
             if (vals.Count < members.Count)
-                throw new FormatException("Only {0} coulumns found (instead of {1}) in line: ".FormatWith(vals.Count, members.Count, m.Value));
+                throw new FormatException("Only {0} columns found (instead of {1}) in line: {2}".FormatWith(vals.Count, members.Count, m.Value));
 
             T t = new T();
             for (int i = 0; i < members.Count; i++)
