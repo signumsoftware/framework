@@ -61,7 +61,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Constructor.registerConstructor<QueryOrderEntity>(QueryOrderEntity, () => QueryOrderEntity.New(o => o.token = QueryTokenEntity.New()));
     Constructor.registerConstructor<QueryColumnEntity>(QueryColumnEntity, () => QueryColumnEntity.New(c => c.token = QueryTokenEntity.New()));
 
-    Navigator.addSettings(new EntitySettings(UserQueryEntity, e => new Promise(resolve => require(['./Templates/UserQuery'], resolve)), { isCreable: Navigator.EntityWhen.Never }));
+    Navigator.addSettings(new EntitySettings(UserQueryEntity, e => new Promise(resolve => require(['./Templates/UserQuery'], resolve)), { isCreable: "Never" }));
 }
 
 
