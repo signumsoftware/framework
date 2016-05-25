@@ -30,7 +30,7 @@ namespace Signum.React.Authorization
         public static Action UserLoggingOut;
         
 
-        public static void Start(HttpConfiguration config, bool queries, bool types)
+        public static void Start(HttpConfiguration config)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
@@ -41,11 +41,16 @@ namespace Signum.React.Authorization
             };
 
             if (TypeAuthLogic.IsStarted)
+            {
                 ReflectionServer.AddTypeExtension += (ti, t) =>
                 {
                     if (typeof(Entity).IsAssignableFrom(t))
                         ti.Extension.Add("typeAllowed", UserEntity.Current == null ? TypeAllowedBasic.None : TypeAuthLogic.GetAllowed(t).MaxUI());
                 };
+
+
+                var dic = PropertyConverter.GetPropertyConverters(typeof(TypeAllowedAndConditions));
+            }
 
             if (QueryAuthLogic.IsStarted)
             {

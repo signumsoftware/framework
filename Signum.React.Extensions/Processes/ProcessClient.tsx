@@ -130,9 +130,7 @@ function defaultConstructFromMany(coc: Operations.ContextualOperationContext<Ent
             return;
         }
         else {
-            Navigator.navigate({
-                entityOrPack: pack,
-            });
+            Navigator.navigate(pack);
         }
     }).done();
 }

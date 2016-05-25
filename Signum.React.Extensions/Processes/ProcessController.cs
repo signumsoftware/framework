@@ -21,6 +21,7 @@ using Signum.Engine.Processes;
 using System.Threading;
 using Signum.React.ApiControllers;
 using Signum.Engine.Basics;
+using Signum.React.Filters;
 
 namespace Signum.React.Processes
 {

@@ -16,7 +16,6 @@ import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
     allowedBase: A;
     allowed: A;
-    overriden: boolean;
     resource: R;
 }
 
@@ -34,6 +33,7 @@ export module AuthAdminMessage {
     export const Deny = new MessageKey("AuthAdminMessage", "Deny");
     export const Overriden = new MessageKey("AuthAdminMessage", "Overriden");
     export const NoRoles = new MessageKey("AuthAdminMessage", "NoRoles");
+    export const PleaseSaveChangesFirst = new MessageKey("AuthAdminMessage", "PleaseSaveChangesFirst");
 }
 
 export module AuthEmailMessage {
@@ -299,7 +299,6 @@ export type TypeAllowed =
 export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
     fallback: TypeAllowed;
-    fallbackOrNone: TypeAllowed;
     conditions: Array<TypeConditionRule>;
 }
 

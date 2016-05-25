@@ -163,7 +163,10 @@ namespace Signum.Entities.Authorization
         Deny,
 
         Overriden,
-        NoRoles
+        NoRoles,
+
+
+        PleaseSaveChangesFirst
     }
 
 }
