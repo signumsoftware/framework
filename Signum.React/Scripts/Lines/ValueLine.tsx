@@ -391,10 +391,14 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
         vl.setValue(m.isValid() ? m.format(moment.ISO_8601()) : null);
     };
 
+    var currentDate = moment();
+    if (!showTime)
+        currentDate = currentDate.startOf("day");
+    
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
             { ValueLine.withUnit(s.unitText,
-                <DateTimePicker value={m && m.toDate() } onChange={handleDatePickerOnChange} format={momentFormat} time={showTime}/>
+                <DateTimePicker value={m && m.toDate() } onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate() } />
             ) }
         </FormGroup>
     );
