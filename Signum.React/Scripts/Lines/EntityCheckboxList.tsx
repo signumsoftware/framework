@@ -110,7 +110,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     renderInternal() {
        
         return (
-            <fieldset className={classes("SF-checkbox-list", this.state.ctx.binding.errorClass) }>
+            <fieldset className={classes("SF-checkbox-list", this.state.ctx.binding.errorClass) } data-propertyPath={this.state.ctx.propertyPath}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
