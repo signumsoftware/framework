@@ -21,14 +21,12 @@ namespace Signum.React.Selenium
 
         public IWebElement Element { get; private set; }
 
-        public IWebElement Element { get { return By.Id(Prefix); } }
-
         public PropertyRoute Route { get; private set; }
 
         public BaseLineProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
         {
             this.Selenium = selenium;
-            this.Prefix = prefix;
+            this.Element = element;
             this.Route = route;
         }
 
@@ -41,7 +39,7 @@ namespace Signum.React.Selenium
     public class ValueLineProxy : BaseLineProxy
     {
         public ValueLineProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, prefix, route)
+            : base(selenium, element, route)
         {
         }
 

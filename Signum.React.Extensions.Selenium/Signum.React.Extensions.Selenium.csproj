@@ -62,10 +62,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LineProxies.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BrowserProxy.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="SeleniumExtensions.cs">
       <SubType>Code</SubType>
     </Compile>
