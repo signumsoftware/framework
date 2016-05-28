@@ -730,6 +730,10 @@ export class PropertyRoute {
         }
     }
 
+    typeReferenceInfo(): TypeInfo {
+        return getTypeInfo(this.typeReference().name);
+    }
+
     closestTypeInfo(): TypeInfo {
         switch (this.propertyRouteType) {
             case PropertyRouteType.Root: return this.rootType;
