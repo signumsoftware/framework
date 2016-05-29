@@ -63,7 +63,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "decimal")
             return ValueLineType.Decimal;
 
-        throw new Error(`No value line found for '${t}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath(): "??" })`);
+        throw new Error(`No value line found for '${t.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
 
     overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
