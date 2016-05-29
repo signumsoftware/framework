@@ -75,8 +75,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
     static renderers: {
         [valueLineType: string]: (vl: ValueLine) => JSX.Element;
     } = {};
-
-
+    
 
     renderInternal() {
 
@@ -138,7 +137,7 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
 
     if (s.inlineCheckbox) {
         return (
-            <label className={vl.state.ctx.binding.error}>
+            <label className={vl.state.ctx.binding.error} data-propertyPath={s.ctx.propertyPath}>
                 <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}/>
                 { " " + s.labelText}
             </label>
@@ -146,7 +145,7 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     }
     else {
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)}>
                 <input type="checkbox" {...vl.state.valueHtmlProps} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
                     className={addClass(vl.state.valueHtmlProps, "form-control")} disabled={s.ctx.readOnly}/>
             </FormGroup>
@@ -154,48 +153,45 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
     }
 };
 
-
 ValueLine.renderers[ValueLineType.Enum as any] = (vl) => {
 
     if (vl.state.type.name == "boolean")
-        return internalComboBox(vl, getTypeInfo("BooleanEnum"));
+        return internalComboBox(vl, getTypeInfo("BooleanEnum"),
+            str => str == "True" ? true : false,
+            val => val == true ? "True" : "False");
 
-    return internalComboBox(vl, getTypeInfo(vl.state.type.name));
+    return internalComboBox(vl, getTypeInfo(vl.state.type.name), str => str, str => str);
 };
 
-
-function internalComboBox(vl: ValueLine, typeInfo: TypeInfo) {
+function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: string) => any, toStringValue: (val: any) => string) {
 
     const s = vl.state;
-
     let items = s.comboBoxItems || Dic.getValues(typeInfo.members);
-
 
     if (s.type.isNullable || s.ctx.value == null)
         items = [{ name: "", niceName: " - " }].concat(items);
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
                 { ValueLine.withUnit(s.unitText,
                     <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>
-                        {s.ctx.value == null ? null : items.filter(a => a.name == s.ctx.value).single().niceName}
+                           {s.ctx.value == null ? null : items.filter(a => a.name == toStringValue(s.ctx.value)).single().niceName}
                     </FormControlStatic>) }
             </FormGroup>
         );
 
-
     const handleEnumOnChange = (e: React.SyntheticEvent) => {
         const input = e.currentTarget as HTMLInputElement;
         const val = input.value;
-        vl.setValue(val == "" ? null : val);
+        vl.setValue(val == "" ? null : parseValue(val));
     };
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
             { ValueLine.withUnit(s.unitText,
-                <select {...vl.state.valueHtmlProps} value={s.ctx.value} className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
-                    {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) }
+                <select {...vl.state.valueHtmlProps} value={s.ctx.value == null ? "" : toStringValue(s.ctx.value)} className={addClass(vl.state.valueHtmlProps, "form-control") } onChange={ handleEnumOnChange } >
+                        {items.map((mi, i) => <option key={i} value={mi.name}>{mi.niceName}</option>) } 
                 </select>)
             }
         </FormGroup>
@@ -209,7 +205,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
                 { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
@@ -220,7 +216,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
     };
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
             { ValueLine.withUnit(s.unitText,
                 <input type="text" {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value || ""} onChange={handleTextOnChange}
                     placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>)
@@ -242,7 +238,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
                 { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
         );
@@ -253,7 +249,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
     };
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
             <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value || ""} onChange={handleTextOnChange}
                 placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>
         </FormGroup>
@@ -275,7 +271,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
                 { ValueLine.withUnit(s.unitText,
                     <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{s.ctx.value}</FormControlStatic>) }
             </FormGroup>
@@ -290,7 +286,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
         vl.props.valueHtmlProps);
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
             { ValueLine.withUnit(s.unitText,
                 <NumericTextBox
                     htmlProps={htmlProps}
@@ -382,7 +378,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
                 { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>{m && m.format(momentFormat) }</FormControlStatic>) }
             </FormGroup>
         );
@@ -394,7 +390,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     };
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
             { ValueLine.withUnit(s.unitText,
                 <DateTimePicker value={m && m.toDate() } onChange={handleDatePickerOnChange} format={momentFormat} time={showTime}/>
             ) }

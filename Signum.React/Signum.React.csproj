@@ -139,14 +139,16 @@
     <Compile Include="ApiControllers\EntityController.cs" />
     <Compile Include="ApiControllers\QueryController.cs" />
     <Compile Include="ApiControllers\ReflectionController.cs" />
+    <Compile Include="Filters\ProfilerFilterAttribute.cs" />
     <Compile Include="Facades\SignumServer.cs" />
     <Compile Include="Facades\ReflectionServer.cs" />
     <Compile Include="Facades\SignumControllerFactory.cs" />
-    <Compile Include="Facades\SignumExceptionFilter.cs" />
-    <Compile Include="Facades\ValidateModelFilterAttribute.cs" />
+    <Compile Include="Filters\SignumExceptionFilterAttribute.cs" />
+    <Compile Include="Filters\ValidateModelFilterAttribute.cs" />
     <Compile Include="Facades\WebApiSessionFactory.cs" />
     <Compile Include="JsonConverters\EntityJsonConverter.cs" />
     <Compile Include="JsonConverters\JsonSerializerExtensions.cs" />
+    <Compile Include="JsonConverters\ArgsJsonConverter.cs" />
     <Compile Include="JsonConverters\TimeSpanConverter.cs" />
     <Compile Include="JsonModelValidators\OriginalDefaultBodyModelValidator.cs" />
     <Compile Include="JsonConverters\ResultTableConverter.cs" />
@@ -173,6 +175,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Extensions\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
+      <Project>{BA7FA363-61A1-41B1-945B-9B9C7BBCD357}</Project>
+      <Name>Signum.Engine.Extensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">
       <Project>{7F2DB6FE-C109-4057-B207-C62A767F905D}</Project>
       <Name>Signum.Engine</Name>
@@ -245,6 +251,7 @@
     <TypeScriptCompile Include="Scripts\SearchControl\SearchPage.tsx" />
     <TypeScriptCompile Include="Scripts\Modals\ErrorModal.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchModal.tsx" />
+    <TypeScriptCompile Include="Scripts\ValueLinePopup.tsx" />
     <TypeScriptCompile Include="Scripts\SelectorPopup.tsx" />
     <TypeScriptCompile Include="Scripts\Services.ts" />
     <TypeScriptCompile Include="Scripts\Signum.Entities.Basics.ts">
@@ -275,6 +282,8 @@
     <TypeScriptCompile Include="Typings\react-router-bootstrap\react-router-bootstrap.d.ts" />
     <TypeScriptCompile Include="Typings\react-router\react-router.d.ts" />
     <TypeScriptCompile Include="Typings\react-widgets\react-widgets.d.ts" />
+    <TypeScriptCompile Include="Typings\react\react-addons-css-transition-group.d.ts" />
+    <TypeScriptCompile Include="Typings\react\react-addons-transition-group.d.ts" />
     <TypeScriptCompile Include="Typings\react\react-dom.d.ts" />
     <TypeScriptCompile Include="Typings\react\react.d.ts" />
     <TypeScriptCompile Include="Typings\whatwg-fetch\whatwg-fetch.d.ts" />

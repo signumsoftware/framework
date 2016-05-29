@@ -20,9 +20,9 @@ export enum FormGroupStyle {
 }
 
 export enum FormGroupSize {
-    Normal,
-    Small,
-    ExtraSmall,
+    Normal, //Raw Bootstrap default
+    Small,  //Signum default
+    ExtraSmall, //Like in FilterBuilder
 }
 
 export class StyleContext {
@@ -236,10 +236,29 @@ export class TypeContext<T> extends StyleContext {
     using(render: (ctx: this) => React.ReactChild): React.ReactChild {
         return render(this);
     }
+
+    mlistItemCtxs<R>(property: (val: T) => MList<R>, styleOptions?: StyleOptions): TypeContext<R>[] {
+        return mlistItemContext(this.subCtx(property, styleOptions));
+    }
+
+    get propertyPath() {
+        return this.propertyRoute ? this.propertyRoute.propertyPath() : null;
+    }
+}
+
+export interface ButtonsContext {
+    pack: EntityPack<ModifiableEntity>;
+    frame: EntityFrame<ModifiableEntity>;
+    showOperations: boolean;
+}
+
+export interface IRenderButtons {
+    renderButtons(ctx: ButtonsContext): React.ReactElement<any>[];
 }
 
 export interface EntityFrame<T extends ModifiableEntity> {
-    component: React.Component<any, any>;
+    frameComponent: React.Component<any, any>;
+    entityComponent: React.Component<any, any>;
     onReload: (pack: EntityPack<T>) => void;
     setError: (modelState: ModelState, initialPrefix?: string) => void;
     onClose: () => void;

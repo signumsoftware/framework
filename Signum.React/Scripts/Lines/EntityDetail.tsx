@@ -42,7 +42,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
             buttons = null;
 
         return (
-            <fieldset className={classes("sf-entity-line-details", s.ctx.binding.errorClass) }>
+            <fieldset className={classes("sf-entity-line-details", s.ctx.binding.errorClass) } data-propertyPath={this.state.ctx.propertyPath}>
                 <legend>
                     <div>
                         <span>{s.labelText}</span>

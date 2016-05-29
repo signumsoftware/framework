@@ -1,5 +1,7 @@
 ﻿/// <reference path="../typings/react/react.d.ts" />
 /// <reference path="../typings/react/react-dom.d.ts" />
+/// <reference path="../typings/react/react-addons-transition-group.d.ts" />
+/// <reference path="../typings/react/react-addons-css-transition-group.d.ts" />
 /// <reference path="../typings/react-router/react-router.d.ts" />
 /// <reference path="../typings/react-router/history.d.ts" />
 /// <reference path="../typings/react-bootstrap/react-bootstrap.d.ts" />
@@ -16,7 +18,7 @@ declare var require: {
 };
 
 declare interface Promise<T> {
-    done();
+    done(): void;
 }
 
 interface Array<T> {

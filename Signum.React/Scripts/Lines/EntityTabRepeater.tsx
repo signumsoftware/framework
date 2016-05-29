@@ -39,7 +39,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) }>
+            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) } data-propertyPath={this.state.ctx.propertyPath}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>

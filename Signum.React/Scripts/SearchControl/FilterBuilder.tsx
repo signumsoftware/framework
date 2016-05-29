@@ -17,8 +17,9 @@ interface FilterBuilderProps extends React.Props<FilterBuilder> {
     filterOptions: FilterOption[];
     subTokensOptions: SubTokensOptions;
     queryDescription: QueryDescription;
-    tokenChanged: (token: QueryToken) => void;
+    onTokenChanged: (token: QueryToken) => void;
     lastToken: QueryToken;
+    onFiltersChanged?: (filters: FilterOption[]) => void;
 }
 
 export default class FilterBuilder extends React.Component<FilterBuilderProps, {}>  {
@@ -31,12 +32,24 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
             operation: !this.props.lastToken ? null : (filterOperations[this.props.lastToken.filterType] || []).firstOrNull(),
             value: null,
         });
+
+
+        if (this.props.onFiltersChanged)
+            this.props.onFiltersChanged(this.props.filterOptions);
+
         this.forceUpdate();
     };
 
     handlerDeleteFilter = (filter: FilterOption) => {
         this.props.filterOptions.remove(filter);
+        if (this.props.onFiltersChanged)
+            this.props.onFiltersChanged(this.props.filterOptions);
         this.forceUpdate();
+    };
+
+    handleFilterChanged = (filter: FilterOption) => {
+        if (this.props.onFiltersChanged)
+            this.props.onFiltersChanged(this.props.filterOptions);
     };
 
     render() {
@@ -60,7 +73,9 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
                                     onDeleteFilter={this.handlerDeleteFilter}
                                     subTokenOptions={this.props.subTokensOptions}
                                     queryDescription={this.props.queryDescription}
-                                    tokenChanged ={this.props.tokenChanged} />) }
+                                    onTokenChanged ={this.props.onTokenChanged}
+                                    onFilterChanged={this.handleFilterChanged}
+                                     />) }
                                 <tr >
                                     <td colSpan={4}>
                                         <a title={SearchMessage.AddFilter.niceToString() }
@@ -86,7 +101,8 @@ export interface FilterComponentProps extends React.Props<FilterComponent> {
     onDeleteFilter: (fo: FilterOption) => void;
     queryDescription: QueryDescription;
     subTokenOptions: SubTokensOptions;
-    tokenChanged: (token: QueryToken) => void;
+    onTokenChanged: (token: QueryToken) => void;
+    onFilterChanged: (filter: FilterOption) => void;
 }
 
 export class FilterComponent extends React.Component<FilterComponentProps, {}>{
@@ -113,12 +129,13 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         }
         f.token = newToken;
 
-        this.props.tokenChanged(newToken);
+        this.props.onTokenChanged(newToken);
+
+        this.props.onFilterChanged(this.props.filter);
 
         this.forceUpdate();
     }
-
-
+    
 
     handleChangeOperation = (event: React.FormEvent) => {
         var operation = (event.currentTarget as HTMLSelectElement).value as any;
@@ -126,6 +143,8 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
             this.props.filter.value = isList(operation) ? [this.props.filter.value] : this.props.filter.value[0];
         
         this.props.filter.operation = operation;
+
+        this.props.onFilterChanged(this.props.filter);
 
         this.forceUpdate();
     }
@@ -169,7 +188,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         const f = this.props.filter;
 
         if (isList(f.operation))
-            return <MultiValue values={f.value} createAppropiateControl={this.handleCreateAppropiateControl} frozen={this.props.filter.frozen}/>;
+            return <MultiValue values={f.value} createAppropiateControl={this.handleCreateAppropiateControl} frozen={this.props.filter.frozen} onChange={this.handleValueChange}/>;
 
         const ctx = new TypeContext<any>(null, { formGroupStyle: FormGroupStyle.None, readOnly: f.frozen }, null, new Binding<any>("value", f));
 
@@ -183,20 +202,24 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         switch (token.filterType) {
             case "Lite":
                 if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopupation))
-                    return <EntityLine ctx={ctx} type={token.type} create={false} />;
+                    return <EntityLine ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange} />;
                 else
-                    return <EntityCombo ctx={ctx} type={token.type} create={false}/>
+                    return <EntityCombo ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange}/>
             case "Embedded":
-                return <EntityLine ctx={ctx} type={token.type} create={false} autoComplete={false} />;
+                return <EntityLine ctx={ctx} type={token.type} create={false} autoComplete={false} onChange={this.handleValueChange}/>;
             case "Enum":
                 const ti = getTypeInfos(token.type).single();
                 if (!ti)
                     throw new Error(`EnumType ${token.type.name} not found`);
                 const members = Dic.getValues(ti.members).filter(a => !a.isIgnored);
-                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members}/>;
+                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} comboBoxItems={members} onChange={this.handleValueChange}/>;
             default:
-                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit}/>;
+                return <ValueLine ctx={ctx} type={token.type} formatText={token.format} unitText={token.unit} onChange={this.handleValueChange}/>;
         }
+    }
+
+    handleValueChange = () => {
+        this.props.onFilterChanged(this.props.filter);
     }
 }
 
@@ -205,6 +228,7 @@ export interface MultiValueProps {
     values: any[],
     createAppropiateControl: (ctx: TypeContext<any>) => React.ReactElement<any>;
     frozen: boolean;
+    onChange: () => void;
 }
 
 export class MultiValue extends React.Component<MultiValueProps, void> {
@@ -212,12 +236,14 @@ export class MultiValue extends React.Component<MultiValueProps, void> {
     handleDeleteValue = (index: number) => {
 
         this.props.values.removeAt(index);
+        this.props.onChange();
         this.forceUpdate();
 
     }
 
     handleAddValue = () => {
         this.props.values.push(null);
+        this.props.onChange();
         this.forceUpdate();
     }
 

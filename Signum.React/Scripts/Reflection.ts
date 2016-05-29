@@ -42,6 +42,7 @@ export interface MemberInfo {
     format?: string;
     maxLength?: number;
     isMultiline?: boolean;
+    preserveOrder?: boolean;
     id?: any; //symbols
 }
 
@@ -128,9 +129,7 @@ let _types: TypeInfoDictionary = {};
 
 
 let _queryNames: {
-    [queryKey: string]: {
-        name: string, niceName: string
-    }
+    [queryKey: string]: MemberInfo
 };
 
 export type PseudoType = IType | TypeInfo | string;
@@ -218,6 +217,24 @@ export function getQueryNiceName(queryName: PseudoType | QueryKey) {
 
 }
 
+export function getQueryInfo(queryName: PseudoType | QueryKey): MemberInfo | TypeInfo {
+    if (queryName instanceof QueryKey) {
+        return queryName.memberInfo();
+    }
+    else {
+        var ti = getTypeInfo(queryName);
+        if (ti)
+            return ti;
+
+        var mi = _queryNames[(queryName as string).toLowerCase()];
+
+        if (mi)
+            return mi;
+
+        return null;
+    }
+}
+
 export function getQueryKey(queryName: PseudoType | QueryKey): string {
     if ((queryName as TypeInfo).kind != null)
         return (queryName as TypeInfo).name;
@@ -253,7 +270,7 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
         return getTypeInfo(queryName).queryDefined;
 
     if (queryName instanceof QueryKey)
-        return !!_queryNames[queryName.name];
+        return !!_queryNames[queryName.name.toLowerCase()];
 
     if (typeof queryName == "string") {
         const str = queryName as string;
@@ -311,7 +328,7 @@ export function setTypes(types: TypeInfoDictionary) {
 
     _queryNames = Dic.getValues(types).filter(t => t.kind == KindOfType.Query)
         .flatMap(a => Dic.getValues(a.members))
-        .toObject(m => m.name.toLocaleLowerCase(), m => Object.freeze({ name: m.name, niceName: m.niceName }));
+        .toObject(m => m.name.toLocaleLowerCase(), m => m);
 
     Object.freeze(_queryNames);
 
@@ -713,10 +730,13 @@ export class PropertyRoute {
         }
     }
 
+    typeReferenceInfo(): TypeInfo {
+        return getTypeInfo(this.typeReference().name);
+    }
+
     closestTypeInfo(): TypeInfo {
         switch (this.propertyRouteType) {
             case PropertyRouteType.Root: return this.rootType;
-
             case PropertyRouteType.Field: return this.parent.closestTypeInfo();
             case PropertyRouteType.Mixin: return this.parent.closestTypeInfo();
             case PropertyRouteType.MListItem: return this.parent.closestTypeInfo();
@@ -727,7 +747,15 @@ export class PropertyRoute {
     propertyPath() {
         switch (this.propertyRouteType) {
             case PropertyRouteType.Root: throw new Error("Root has no PropertyString");
-            case PropertyRouteType.Field: return this.member.name;
+            case PropertyRouteType.Field:
+                switch (this.parent.propertyRouteType) {
+                    case PropertyRouteType.Root: return this.member.name;
+                    case PropertyRouteType.Field:
+                    case PropertyRouteType.Mixin:
+                        return this.parent.propertyPath() + "." + this.member.name;
+                    case PropertyRouteType.MListItem: return this.parent.propertyPath() + this.member.name;
+                    default: throw new Error("unexpected parent");
+                }
             case PropertyRouteType.Mixin: return "[" + this.mixinName + "]";
             case PropertyRouteType.MListItem: return this.parent.propertyPath() + "/";
             case PropertyRouteType.LiteEntity: return this.parent.propertyPath() + ".entity";

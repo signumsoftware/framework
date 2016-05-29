@@ -1,6 +1,10 @@
 ﻿import * as React from 'react'
-import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize } from './TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, PropertyRoute } from './Reflection'
+import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize, IRenderButtons } from './TypeContext'
+export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize, IRenderButtons };
+
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, PropertyRoute, Binding, ReadonlyBinding } from './Reflection'
+export { Binding, ReadonlyBinding }
+
 import { ModifiableEntity, EntityPack, ModelState } from './Signum.Entities'
 import * as Navigator from './Navigator'
 import { ViewReplacer } from  './Frames/ReactVisitor'
@@ -28,7 +32,7 @@ export { EntityCombo };
 import { EntityDetail } from  './Lines/EntityDetail'
 export { EntityDetail };
 
-import { EntityListBase } from  './Lines/EntityListBase'
+import { EntityListBase, EntityListBaseProps } from  './Lines/EntityListBase'
 export { EntityListBase };
 
 import { EntityList } from  './Lines/EntityList'
@@ -45,9 +49,7 @@ export { EntityStrip };
 
 import { EntityCheckboxList } from  './Lines/EntityCheckBoxList'
 export { EntityCheckboxList };
-
-export { TypeContext, StyleContext, StyleOptions, FormGroupStyle, FormGroupSize }; 
-
+ 
 
 tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
@@ -91,6 +93,16 @@ export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBasePro
         state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
         state.ctx.propertyRoute.member.isReadOnly) {
         state.ctx.readOnly = true;
+    }
+}
+
+tasks.push(taskSetMove);
+export function taskSetMove(lineBase: LineBase<any, any>, state: LineBaseProps) {
+    if (lineBase instanceof EntityListBase &&
+        state.ctx.propertyRoute &&
+        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
+        state.ctx.propertyRoute.member.preserveOrder) {
+        (state as EntityListBaseProps).move = true;
     }
 }
 

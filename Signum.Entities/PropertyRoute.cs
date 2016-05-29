@@ -72,7 +72,7 @@ namespace Signum.Entities
 
         MemberInfo GetMember(string fieldOrProperty)
         {
-            MemberInfo mi = (MemberInfo)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, null, this.Type.IsMList() ? new[] { typeof(int) } : new Type[0], null) ??
+            MemberInfo mi = (MemberInfo)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, null, IsCollection() ? new[] { typeof(int) } : new Type[0], null) ??
                             (MemberInfo)Type.GetField(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (mi == null && Type.IsEntity())
@@ -86,6 +86,11 @@ namespace Signum.Entities
                 throw new InvalidOperationException("{0}.{1} does not exist".FormatWith(this, fieldOrProperty));
 
             return mi;
+        }
+
+        private bool IsCollection()
+        {
+            return Type.ElementType() != null && Type != typeof(string);
         }
 
         static string ExtractMixin(string fieldOrProperty)
@@ -135,7 +140,7 @@ namespace Signum.Entities
             if (parent.Type.IsIEntity() && parent.PropertyRouteType != PropertyRouteType.Root)
                 throw new ArgumentException("Parent can not be a non-root Identifiable");
 
-            if (fieldOrProperty is PropertyInfo && Reflector.IsMList(parent.Type))
+            if (fieldOrProperty is PropertyInfo && parent.IsCollection())
             {
                 if (fieldOrProperty.Name != "Item")
                     throw new NotSupportedException("PropertyInfo {0} is not supported".FormatWith(fieldOrProperty.Name));

@@ -13,12 +13,14 @@ using Signum.Entities;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Signum.Entities.Basics;
+using Signum.Engine;
+using Signum.React.Filters;
 
 namespace Signum.React.ApiControllers
 {
     public class QueryController : ApiController
     {
-        [Route("api/query/findLiteLike"), HttpGet]
+        [Route("api/query/findLiteLike"), HttpGet, ProfilerActionSplitter("types")]
         public List<Lite<Entity>> FindLiteLike(string types, string subString, int count)
         {
             Implementations implementations = ParseImplementations(types);
@@ -36,7 +38,7 @@ namespace Signum.React.ApiControllers
             return result;
         }
 
-        [Route("api/query/findAllLites"), HttpGet]
+        [Route("api/query/findAllLites"), HttpGet, ProfilerActionSplitter("types")]
         public List<Lite<Entity>> FindAllLites([FromUri]string types)
         {
             Implementations implementations = ParseImplementations(types);
@@ -49,11 +51,18 @@ namespace Signum.React.ApiControllers
             return Implementations.By(types.Split(',').Select(a => TypeLogic.GetType(a.Trim())).ToArray());
         }
 
-        [Route("api/query/description/{queryName}")]
+        [Route("api/query/description/{queryName}"), ProfilerActionSplitter("queryName")]
         public QueryDescriptionTS GetQueryDescription(string queryName)
         {
             var qn = QueryLogic.ToQueryName(queryName);
             return new QueryDescriptionTS(DynamicQueryManager.Current.QueryDescription(qn));
+        }
+
+        [Route("api/query/entity/{queryName}"), ProfilerActionSplitter("queryName")]
+        public QueryEntity GetQueryEntity(string queryName)
+        {
+            var qn = QueryLogic.ToQueryName(queryName);
+            return QueryLogic.GetQueryEntity(qn);
         }
 
         [Route("api/query/parseTokens"), HttpPost]
@@ -101,13 +110,13 @@ namespace Signum.React.ApiControllers
             public SubTokensOptions options;
         }
 
-        [Route("api/query/search"), HttpPost]
+        [Route("api/query/search"), HttpPost, ProfilerActionSplitter]
         public ResultTable Search(QueryRequestTS request)
         {
             return DynamicQueryManager.Current.ExecuteQuery(request.ToQueryRequest());
         }
 
-        [Route("api/query/queryCount"), HttpPost]
+        [Route("api/query/queryCount"), HttpPost, ProfilerActionSplitter]
         public int? QueryCount(QueryCountTS request)
         {
             return DynamicQueryManager.Current.ExecuteQueryCount(request.ToQueryCountRequest());
@@ -130,6 +139,8 @@ namespace Signum.React.ApiControllers
                 Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false)).ToList(),
             };
         }
+
+        public override string ToString() => querykey;
     }
 
     public class QueryRequestTS
@@ -154,6 +165,9 @@ namespace Signum.React.ApiControllers
                 Pagination = this.pagination.ToPagination()
             };
         }
+
+
+        public override string ToString() => queryKey;
     }
 
     public class OrderTS
@@ -194,7 +208,9 @@ namespace Signum.React.ApiControllers
 
         internal Column ToColumn(QueryDescription qd)
         {
-            return new Column(QueryUtils.Parse(token, qd, SubTokensOptions.CanElement), dispayName);
+            var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement);
+
+            return new Column(queryToken, dispayName ?? queryToken.NiceName());
         }
     }
 

@@ -15,7 +15,7 @@ export interface CountSearchControlProps extends React.Props<CountSearchControl>
     findOptions: FindOptions;
     labelText?: React.ReactChild;
     labelProps?: React.HTMLAttributes;
-    style?: "View" | "Link" | "Badge";
+    style?: "View" | "Link" | "Badge" | "Span";
     formGroupHtmlProps?: React.HTMLProps<HTMLDivElement>;
 }
 
@@ -55,6 +55,9 @@ export default class CountSearchControl extends React.Component<CountSearchContr
         if (this.props.style == "Badge")
             return this.renderBadget();
 
+        if (this.props.style == "Span")
+            return this.renderSpan();
+
         return (
             <FormGroup ctx={this.props.ctx} labelText={this.props.labelText || getQueryNiceName(this.props.findOptions.queryName) } labelProps={this.props.labelProps} htmlProps={this.props.formGroupHtmlProps}>
                 {this.props.style == "Link" ? this.renderAsLink() : this.renderAsView() }
@@ -93,5 +96,11 @@ export default class CountSearchControl extends React.Component<CountSearchContr
         return <a className={this.state.count > 0 ? "count-search count-with-results badge" : "count-search count-no-results"}  onClick={this.handleClick}>
             {this.state.count == null ? "…" : this.state.count}
         </a>;
+    }
+
+    renderSpan() {
+        return <span>
+            {this.state.count == null ? "…" : this.state.count}
+        </span>;
     }
 }

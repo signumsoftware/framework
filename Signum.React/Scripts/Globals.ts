@@ -537,12 +537,12 @@ export module Dic {
         return result;
     }
 
-    export function map<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V) => R): R[] {
-
+    export function map<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): R[] {
+        let index = 0;
         const result: R[] = [];
         for (const name in obj) {
             if (obj.hasOwnProperty(name)) {
-                result.push(selector(name, obj[name]));
+                result.push(selector(name, obj[name], index++));
             }
         }
         return result;

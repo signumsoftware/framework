@@ -15,7 +15,7 @@ import { operationInfos, getSettings, ContextualOperationSettings, ContextualOpe
     CreateGroup, API, autoStyleFunction, isEntityOperation } from '../Operations'
 
 
-export function getConstructFromManyContextualItems(ctx: ContextualItemsContext): Promise<MenuItemBlock> {
+export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
     if (ctx.lites.length == 0)
         return null;
 
@@ -57,31 +57,32 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext)
 
 
 
-function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, event: React.MouseEvent) {
+function defaultConstructFromMany(coc: ContextualOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
 
     if (!confirmInNecessary(coc))
         return;
 
-    API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key).then(pack => {
-
-        if (!pack || !pack.entity)
-            return;
-
-        var es = Navigator.getSettings(pack.entity.Type);
-        if (es.avoidPopup || event.ctrlKey || event.button == 1) {
-            Navigator.currentHistory.pushState(pack, '/Create/');
-            return;
-        }
-        else {
-            Navigator.navigate({
-                entityOrPack: pack,
-            });
-        }
+    API.constructFromMany<Entity, Entity>(coc.context.lites, coc.operationInfo.key, ...args).then(pack => {
+        navigateOrTab(pack, event);
     }).done();
 }
 
 
-export function getEntityOperationsContextualItems(ctx: ContextualItemsContext): Promise<MenuItemBlock> {
+export function navigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent) {
+    if (!pack || !pack.entity)
+        return;
+
+    var es = Navigator.getSettings(pack.entity.Type);
+    if (es.avoidPopup || event.ctrlKey || event.button == 1) {
+        Navigator.currentHistory.pushState(pack, '/Create/');
+        return;
+    }
+    else {
+        Navigator.navigate(pack);
+    }
+}
+
+export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
     if (ctx.lites.length == 0)
         return null;
 
@@ -141,7 +142,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext):
         var menuItems = ctxs.filter(coc => coc.canExecute == null || !hideOnCanExecute(coc))
             .orderBy(coc => coc.settings && coc.settings.order != null ? coc.settings.order :
                 coc.entityOperationSettings && coc.entityOperationSettings.order != null ? coc.entityOperationSettings.order : 0)
-            .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultEntityClick, i));
+            .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick, i));
 
         if (menuItems.length == 0)
             return null;
@@ -225,20 +226,33 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 
 
 
-function defaultEntityClick(coc: ContextualOperationContext<Entity>, event: React.MouseEvent) {
+ export function defaultContextualClick(coc: ContextualOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
 
     if (!confirmInNecessary(coc))
         return;
     
-    var promise: Promise<API.ErrorReport>;
     switch (coc.operationInfo.operationType) {
-        case OperationType.ConstructorFrom: promise = API.constructFromMultiple(coc.context.lites, coc.operationInfo.key); break;
-        case OperationType.Execute: promise = API.executeMultiple(coc.context.lites, coc.operationInfo.key); break;
-        case OperationType.Delete: promise = API.deleteMultiple(coc.context.lites, coc.operationInfo.key); break;
+        case OperationType.ConstructorFrom:
+            if (coc.context.lites.length == 1) {
+                API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
+                    .then(pack => { coc.context.markRows({}); navigateOrTab(pack, event); })
+                    .done();
+            }else {
+                API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, ...args)
+                    .then(report => coc.context.markRows(report.errors))
+                    .done();
+            }
+            break;
+        case OperationType.Execute:
+            API.executeMultiple(coc.context.lites, coc.operationInfo.key, ...args)
+                .then(report => coc.context.markRows(report.errors))
+                .done();
+            break;
+        case OperationType.Delete:
+            API.deleteMultiple(coc.context.lites, coc.operationInfo.key, ...args)
+                .then(report => coc.context.markRows(report.errors))
+                .done();
+            break;
     }
-
-    promise
-        .then(report => coc.context.markRows(report.errors))
-        .done();
-}
+ }
 

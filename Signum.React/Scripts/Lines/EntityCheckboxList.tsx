@@ -43,6 +43,13 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         }
     }
 
+    componentWillReceiveProps(newProps: EntityCheckboxListProps, newContext) {
+        if (!!newProps.data && !this.props.data)
+            console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCheckboxList: ${this.state.type.name}`);
+
+        super.componentWillReceiveProps(newProps, newContext);
+    }
+
     handleOnChange = (event: React.FormEvent, lite: Lite<Entity>) => {
         const current = event.currentTarget as HTMLSelectElement;
 
@@ -103,7 +110,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     renderInternal() {
        
         return (
-            <fieldset className={classes("SF-checkbox-list", this.state.ctx.binding.errorClass) }>
+            <fieldset className={classes("SF-checkbox-list", this.state.ctx.binding.errorClass) } data-propertyPath={this.state.ctx.propertyPath}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
@@ -124,6 +131,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     renderContent() {
         if (this.state.data == null)
             return null;
+
 
         var data = [...this.state.data];
 

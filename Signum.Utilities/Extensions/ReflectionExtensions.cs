@@ -102,7 +102,7 @@ namespace Signum.Utilities
                 return null;
 
             return ft.GetInterfaces().PreAnd(ft)
-                .SingleOrDefaultEx(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                .FirstOrDefault(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 ?.Let(ti => ti.GetGenericArguments()[0]);
         }
 

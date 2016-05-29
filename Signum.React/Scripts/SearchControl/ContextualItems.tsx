@@ -12,8 +12,8 @@ export interface MenuItemBlock {
     menuItems: React.ReactElement<any>[];
 }
 
-export interface ContextualItemsContext {
-    lites: Lite<Entity>[];
+export interface ContextualItemsContext<T extends Entity> {
+    lites: Lite<T>[];
     queryDescription: QueryDescription;
     markRows: (dictionary: MarkRowsDictionary) => void;
 }
@@ -22,9 +22,9 @@ export interface MarkRowsDictionary {
     [liteKey: string]: string | { style: string, message: string };
 }
 
-export const onContextualItems: ((ctx: ContextualItemsContext) => Promise<MenuItemBlock>)[] = [];
+export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promise<MenuItemBlock>)[] = [];
 
-export function renderContextualItems(ctx: ContextualItemsContext): Promise<React.ReactElement<any>[]> {
+export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<React.ReactElement<any>[]> {
 
     const blockPromises = onContextualItems.map(func => func(ctx));
 

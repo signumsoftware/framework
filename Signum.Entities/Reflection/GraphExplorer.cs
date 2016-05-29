@@ -43,6 +43,17 @@ namespace Signum.Entities.Reflection
                 item.Modified = ModifiedState.Clean;
         }
 
+        public static void SetDummyRowIds(IEnumerable<Modifiable> graph)
+        {
+            foreach (IMListPrivate mlist in graph.OfType<IMListPrivate>())
+            {
+                for (int i = 0; i < ((IList)mlist).Count; i++)
+                {
+                    mlist.SetRowId(i, DummyRowId);
+                }
+            }
+        }
+
         public static DirectedGraph<Modifiable> FromRootIdentifiable(Modifiable root)
         {
             return DirectedGraph<Modifiable>.Generate(root, ModifyInspector.IdentifiableExplore, ReferenceEqualityComparer<Modifiable>.Default);
@@ -174,6 +185,7 @@ namespace Signum.Entities.Reflection
              "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "forestgreen"
         };
 
+        public static PrimaryKey DummyRowId = new PrimaryKey("dummy");
 
         public static string SuperGraphviz(this DirectedGraph<Modifiable> modifiables)
         {

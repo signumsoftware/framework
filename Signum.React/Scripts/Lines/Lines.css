@@ -127,14 +127,20 @@ fieldset {
 
 /*EntityRepeater*/
 
-fieldset.sf-repeater-element legend {
-    margin-left: -18px;
-    margin-top: -16px;
-    border: 0px;
-    position: absolute;
-    background: white;
-    padding: 0px 5px;
+fieldset.sf-repeater-element{
+    margin: 0;
+    padding-top: 6px;
+    padding-bottom: 3px;
 }
+
+fieldset.sf-repeater-element legend {
+    position: relative;
+    padding: 0px 4px;
+}
+
+    fieldset.sf-repeater-element legend .sf-line-button {
+        margin-right: 5px;
+    }
 
 
 /*EntityStrip*/

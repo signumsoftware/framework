@@ -107,6 +107,8 @@ namespace Signum.React.Json
 
             if (pr == null || typeof(IEntity).IsAssignableFrom(pr.Type))
                 pr = PropertyRoute.Root(value.GetType());
+            else if (pr.Type.ElementType() == value.GetType())
+                pr = pr.Add("Item");
 
             ModifiableEntity mod = (ModifiableEntity)value;
 
@@ -227,9 +229,11 @@ namespace Signum.React.Json
             ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer);
 
             var pr = JsonSerializerExtensions.CurrentPropertyRoute;
-            if(pr == null || mod is Entity)
+            if (pr == null || mod is Entity)
                 pr = PropertyRoute.Root(mod.GetType());
-
+            else if (pr.Type.ElementType() == objectType)
+                pr = pr.Add("Item"); //Because we have a custom MListJsonConverter but not for other simpler collections
+            
             var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
 
             while (reader.TokenType == JsonToken.PropertyName)
@@ -341,9 +345,18 @@ namespace Signum.React.Json
 
         public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
+
             IdentityInfo identityInfo = ReadIdentityInfo(reader);
             
             Type type = GetEntityType(identityInfo.Type, objectType);
+
+            if (typeof(MixinEntity).IsAssignableFrom(objectType))
+            {
+                if (objectType != existingValue.GetType())
+                    throw new InvalidOperationException($"{objectType.Name} expected");
+
+                return (MixinEntity)existingValue;
+            }
 
             if (identityInfo.IsNew == true)
             {
@@ -445,9 +458,12 @@ namespace Signum.React.Json
             }
         }
 
-        public Type GetEntityType(string typeStr, Type objectType)
+        static Type GetEntityType(string typeStr, Type objectType)
         {
             var type = ReflectionServer.TypesByName.Value.GetOrThrow(typeStr);
+
+            if (type.IsEnum)
+                type = EnumEntity.Generate(type);
 
             if (!objectType.IsAssignableFrom(type))
                 throw new JsonSerializationException($"Type '{type.Name}' is not assignable to '{objectType.TypeName()}'");

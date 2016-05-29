@@ -1,5 +1,6 @@
 ﻿using Signum.Engine;
 using Signum.Engine.Basics;
+using Signum.Engine.Profiler;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
@@ -18,10 +19,11 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Routing;
 
-namespace Signum.React.Facades
+namespace Signum.React.Filters
 {
-    public class SignumExceptionFilter : ExceptionFilterAttribute
+    public class SignumExceptionFilterAttribute : ExceptionFilterAttribute
     {
         static Func<HttpActionExecutedContext, bool> IncludeErrorDetails = ctx => true;
 
@@ -151,20 +153,5 @@ namespace Signum.React.Facades
             }
         }
 
-    }
-    public class HeavyProfilerFilter : ActionFilterAttribute
-    {
-        public override void OnActionExecuting(HttpActionContext actionContext)
-        {
-            actionContext.ControllerContext.RouteData.Values["HeavyProfiler"] = HeavyProfiler.Log("WebApi", () => actionContext.ControllerContext.Request.ToString());
-            base.OnActionExecuting(actionContext);
-        }
-
-        public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
-        {
-
-            base.OnActionExecuted(actionExecutedContext);
-            ((IDisposable)actionExecutedContext.ActionContext.ControllerContext.RouteData.Values["HeavyProfiler"])?.Dispose();
-        }
     }
 }

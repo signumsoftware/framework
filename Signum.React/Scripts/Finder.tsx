@@ -10,8 +10,8 @@ import { QueryDescription, CountQueryRequest, QueryRequest, FindOptions, FilterO
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType } from './Signum.Entities.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity} from './Signum.Entities';
-import { TypeEntity } from './Signum.Entities.Basics';
+import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity } from './Signum.Entities';
+import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
     getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, PseudoType } from './Reflection';
@@ -405,6 +405,10 @@ export module API {
         return ajaxGet<QueryDescription>({ url: "/api/query/description/" + queryKey });
     }
 
+    export function fetchQueryEntity(queryKey: string): Promise<QueryEntity> {
+        return ajaxGet<QueryEntity>({ url: "/api/query/entity/" + queryKey });
+    }
+
     export function search(request: QueryRequest): Promise<ResultTable> {
         return ajaxPost<ResultTable>({ url: "/api/query/search" }, request);
     }
@@ -478,7 +482,7 @@ export module Encoder {
     export function stringValue(value: any): string {
 
         if (!value)
-            return value;
+            return "";
 
         if (Array.isArray(value))
             return (value as any[]).map(a => stringValue(a)).join("~");
