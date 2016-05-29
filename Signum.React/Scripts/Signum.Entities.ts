@@ -12,7 +12,7 @@ export interface ModifiableEntity {
 }
 
 export interface Entity extends ModifiableEntity {
-    id: any;
+    id: number | string;
     ticks: string; //max value
     mixins: { [name: string]: MixinEntity }
 }
@@ -32,13 +32,13 @@ export type MList<T> = Array<MListElement<T>>;
 
 export interface MListElement<T> {
     element: T;
-    rowId?: any;
+    rowId?: number | string;
 }
 
 export interface Lite<T extends Entity> {
     entity?: T;
     EntityType: string;
-    id?: any;
+    id?: number | string;
     toStr?: string;
 }
 
