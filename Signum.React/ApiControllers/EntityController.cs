@@ -55,7 +55,7 @@ namespace Signum.React.ApiControllers
             return lites.Select(a => Database.GetToStr(a.EntityType, a.Id)).ToArray();
         }
 
-        [Route("api/fetchAll/{typeName}"), HttpGet, ProfilerActionSplitter("type")]
+        [Route("api/fetchAll/{typeName}"), HttpGet, ProfilerActionSplitter("typeName")]
         public List<Entity> FetchAll(string typeName)
         {
             if (typeName == null)
