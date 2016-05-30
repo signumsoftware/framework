@@ -524,6 +524,11 @@ namespace Signum.Entities
         {
             return Lite.Create<T>(PrimaryKey.Parse(id, typeof(T)));
         }
+
+        public static Lite<Entity> ParsePrimaryKey(Type type, string id)
+        {
+            return Lite.Create(type, PrimaryKey.Parse(id, type));
+        }
     }
 
     public enum LiteMessage
