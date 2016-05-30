@@ -146,7 +146,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         if (hasChanges && !entity.modified)
             throw new Error(`The entity.modified=${this.state.pack.entity.modified} but has changes`);
 
-        return entity.modified;
+        return hasChanges;
     }
 
     handleOnExited = () => {
