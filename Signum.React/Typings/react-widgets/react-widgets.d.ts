@@ -955,6 +955,10 @@ declare module 'react-widgets/lib/DropdownList' {
 }
 
 declare module 'react-widgets' {
+
+    export function setDateLocalizer(localizer: any);
+    export function setNumberLocalizer(localizer: any);
+
     export import Calendar = require('react-widgets/lib/Calendar');
     export import Combobox = require('react-widgets/lib/Combobox');
     export import DateTimePicker = require('react-widgets/lib/DateTimePicker');
