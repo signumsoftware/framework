@@ -15,6 +15,11 @@ namespace Signum.Entities.Basics
         {
         }
 
+        public override bool Equals(object color)
+        {
+           return this.Argb == ((ColorEntity)color).Argb;
+        }
+
         public static ColorEntity FromARGB(byte a, byte r, byte g, byte b)
         {
             return new ColorEntity { Argb = a << 0x18 | r << 0x10 | g << 0x8 | b };
