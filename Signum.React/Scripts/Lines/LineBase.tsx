@@ -75,7 +75,6 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
             </p>
         );
     }
-
 }
 
 export interface LineBaseProps extends StyleOptions {
@@ -136,6 +135,15 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         var overridenProps = Dic.without(cleanProps, { ctx: null, type: null }) as LineBaseProps as S;
         this.overrideProps(state, overridenProps);
         return state;
+    }
+
+    withPropertyPath(htmlAttrs: React.HTMLAttributes) {
+        var path = this.state.ctx.propertyPath;
+
+        if (path == null)
+            return htmlAttrs;
+
+        return Dic.extend({ "data-propertyPath": this.state.ctx.propertyPath }, htmlAttrs);
     }
 
     overrideProps(state: S, overridenProps: S) {

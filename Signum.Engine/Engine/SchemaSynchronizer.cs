@@ -777,6 +777,11 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
                 UserTypeName = UserTypeName,
             };
         }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
     }
 
     public class DiffForeignKey
