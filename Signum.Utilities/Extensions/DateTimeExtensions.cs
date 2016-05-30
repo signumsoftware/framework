@@ -138,6 +138,34 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static double TotalMonths(this DateTime start, DateTime end)
+        {
+            int wholeMonths = start.MonthsTo(end);
+
+            double result = wholeMonths;
+
+            DateTime limit = start.AddMonths(wholeMonths);
+            DateTime limitMonthStart = limit.MonthStart();
+            DateTime nextMonthStart = limitMonthStart.AddMonths(1);
+
+            if(nextMonthStart < end)
+            {
+                result += ((nextMonthStart - limit).TotalDays / NumberOfDaysAfterOneMonth(limitMonthStart));
+                result += ((end - nextMonthStart).TotalDays / NumberOfDaysAfterOneMonth(nextMonthStart)); 
+            }
+            else
+            {
+                result += ((end - limit).TotalDays / NumberOfDaysAfterOneMonth(limitMonthStart));
+            }
+
+            return result;
+        }
+
+        static double NumberOfDaysAfterOneMonth(DateTime monthStart)
+        {
+            return (monthStart.AddMonths(1) - monthStart).TotalDays;
+        }
+
         public static DateSpan DateSpanTo(this DateTime min, DateTime max)
         {
             return DateSpan.FromToDates(min, max);
@@ -239,6 +267,36 @@ namespace Signum.Utilities
             return DateTimePrecision.Days;
         }
 
+        public static string SmartShortDatePattern(this DateTime date)
+        {
+            DateTime currentdate = DateTime.Today;
+            return SmartShortDatePattern(date, currentdate);
+        }
+
+        public static string SmartShortDatePattern(this DateTime date, DateTime currentdate)
+        {
+            int datediff = (date.Date - currentdate).Days;
+
+            if (-7 <= datediff && datediff <= -2)
+                return DateTimeMessage.Last0.NiceToString(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek).FirstUpper());
+
+            if (datediff == -1)
+                return DateTimeMessage.Yesterday.NiceToString();
+
+            if (datediff == 0)
+                return DateTimeMessage.Today.NiceToString();
+
+            if (datediff == 1)
+                return DateTimeMessage.Tomorrow.NiceToString();
+
+            if (2 <= datediff && datediff <= 7)
+                return DateTimeMessage.This0.NiceToString(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek).FirstUpper());
+
+            if (date.Year == currentdate.Year)
+                return date.ToString("d MMM");
+
+            return date.ToString("d MMMM yyyy");
+        }
 
         public static string SmartDatePattern(this DateTime date)
         {
@@ -251,7 +309,7 @@ namespace Signum.Utilities
             int datediff = (date.Date - currentdate).Days;
 
             if (-7 <= datediff && datediff <= -2)
-                return DateTimeMessage.DateLast.NiceToString().FormatWith(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
+                return DateTimeMessage.Last0.NiceToString(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
 
             if (datediff == -1)
                 return DateTimeMessage.Yesterday.NiceToString();
@@ -263,7 +321,7 @@ namespace Signum.Utilities
                 return DateTimeMessage.Tomorrow.NiceToString();
 
             if (2 <= datediff && datediff <= 7)
-                return DateTimeMessage.DateThis.NiceToString().FormatWith(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
+                return DateTimeMessage.This0.NiceToString(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
 
             if (date.Year == currentdate.Year)
             {
@@ -449,9 +507,9 @@ namespace Signum.Utilities
         [Description("{0} ago")]
         _0Ago,
         [Description("Last {0}")]
-        DateLast,
+        Last0,
         [Description("This {0}")]
-        DateThis,
+        This0,
         [Description("In {0}")]
         In0,
         Today,

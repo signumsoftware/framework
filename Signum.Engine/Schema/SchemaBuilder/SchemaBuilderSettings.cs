@@ -22,7 +22,7 @@ namespace Signum.Engine.Maps
 
         }
 
-        public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "Id");
+        public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "ID");
         public int DefaultImplementedBySize = 40;
 
         public Action<Type> AssertNotIncluded = null;
@@ -93,17 +93,23 @@ namespace Signum.Engine.Maps
                     case PropertyRouteType.FieldOrProperty:
                         if (propertyRoute.FieldInfo == null)
                             return null;
-                        return new AttributeCollection(AttributeTargets.Field, propertyRoute.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToList(),
-                            () => AssertNotIncluded(propertyRoute.RootType));
+                        return CreateFieldAttributeCollection(propertyRoute);
                     case PropertyRouteType.MListItems:
                         if (propertyRoute.Parent.FieldInfo == null)
                             return null;
-                        return new AttributeCollection(AttributeTargets.Field, propertyRoute.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToList(),
-                            () => AssertNotIncluded(propertyRoute.RootType));
+                        return CreateFieldAttributeCollection(propertyRoute.Parent);
                     default:
                         throw new InvalidOperationException("Route of type {0} not supported for this method".FormatWith(propertyRoute.PropertyRouteType));
                 }
             });
+        }
+
+        AttributeCollection CreateFieldAttributeCollection(PropertyRoute route)
+        {
+            var fieldAttributes = route.FieldInfo.GetCustomAttributes(false).Cast<Attribute>();
+            var fieldAttributesInProperty = route.PropertyInfo == null ? Enumerable.Empty<Attribute>() :
+               route.PropertyInfo.GetCustomAttributes(false).Cast<Attribute>().Where(a => AttributeCollection.IsCompatibleWith(a, AttributeTargets.Field));
+            return new AttributeCollection(AttributeTargets.Field, fieldAttributes.Concat(fieldAttributesInProperty).ToList(), () => AssertNotIncluded(route.RootType));
         }
 
         public AttributeCollection TypeAttributes<T>() where T : Entity
@@ -301,12 +307,17 @@ namespace Signum.Engine.Maps
         {
             assertNotIncluded();
 
-            var au = item.GetType().GetCustomAttribute<AttributeUsageAttribute>();
-            
-            if(au == null ||(au.ValidOn & Targets) == 0)
-             throw new InvalidOperationException("The attributes is not compatible with targets {0}: {1}".FormatWith(Targets, au.Try(_=>_.ValidOn)));
+            if (!IsCompatibleWith(item, Targets))
+                throw new InvalidOperationException("The attribute {0} is not compatible with targets {1}".FormatWith(item, Targets));
 
             base.InsertItem(index, item);
+        }
+
+        public static bool IsCompatibleWith(Attribute a, AttributeTargets targets)
+        {
+            var au = a.GetType().GetCustomAttribute<AttributeUsageAttribute>();
+
+            return au != null && (au.ValidOn & targets) == targets;
         }
 
         public new AttributeCollection Add(Attribute attr)

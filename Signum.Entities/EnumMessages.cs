@@ -92,7 +92,8 @@ Lose changes?")]
 
 	Continue?")]
         ThereAreChangesContinue,
-        ThereAreErrors
+        ThereAreErrors,
+        Message
     }
 
     public enum EntityControlMessage
@@ -166,7 +167,6 @@ Lose changes?")]
         [Description("View Selected")]
         ViewSelected,
         Operations,
-        Processes,
         NoResultsFound,
     }
 

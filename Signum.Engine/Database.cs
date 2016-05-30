@@ -794,14 +794,19 @@ namespace Signum.Engine
         public static IQueryable<T> View<T>()
             where T : IView
         {
-            return new SignumTable<T>(DbQueryProvider.Single, new ViewBuilder(Schema.Current).NewView(typeof(T)));
+            return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.ViewBuilder.NewView(typeof(T)));
         }
         #endregion
 
         #region UnsafeDelete
-        public static int UnsafeDelete<T>(this IQueryable<T> query)
+        public static int UnsafeDelete<T>(this IQueryable<T> query, string message = null)
             where T : Entity
         {
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? $"Deleting {typeof(T).TypeName()}" : message, 
+                    () => query.UnsafeDelete(message: null));
+
+
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(T).TypeName()))
             {
                 if (query == null)
@@ -818,9 +823,13 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeDeleteMList<E, V>(this IQueryable<MListElement<E, V>> mlistQuery)
+        public static int UnsafeDeleteMList<E, V>(this IQueryable<MListElement<E, V>> mlistQuery, string message = null)
             where E : Entity
         {
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? $"Deleting MList<{typeof(V).TypeName()}> in {typeof(E).TypeName()}" : message,
+                    () => mlistQuery.UnsafeDeleteMList(message: null));
+
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(MListElement<E, V>).TypeName()))
             {
                 if (mlistQuery == null)
@@ -891,8 +900,12 @@ namespace Signum.Engine
             return new UpdateablePart<A, MListElement<E, V>>(query, partSelector, null);
         }
 
-        public static int Execute(this IUpdateable update)
+        public static int Execute(this IUpdateable update, string message = null)
         {
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? UnsafeMessage(update) : message,
+                    () => update.Execute(message: null));
+
             using (HeavyProfiler.Log("DBUnsafeUpdate", () => update.EntityType.TypeName()))
             {
                 if (update == null)
@@ -906,14 +919,26 @@ namespace Signum.Engine
                     return tr.Commit(rows);
                 }
             }
-        } 
+        }
+
+        static string UnsafeMessage(IUpdateable update)
+        {
+            if (update.PartSelector == null)
+                return $"Updating { update.EntityType.TypeName()}";
+            else
+                return $"Updating MList<{update.GetType().GetGenericArguments()[1].TypeName()}> in {update.EntityType.TypeName()}";
+        }
         #endregion
 
         #region UnsafeInsert
 
-        public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor)
+        public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor, string message = null)
             where E : Entity
         {
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? $"Inserting { typeof(E).TypeName()}" : message,
+                    () => query.UnsafeInsert(constructor, message: null));
+
             using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
             {
                 if (query == null)
@@ -934,9 +959,14 @@ namespace Signum.Engine
         }
 
          
-        public static int UnsafeInsertMList<T, E, V>(this IQueryable<T> query, Expression<Func<E, MList<V>>> mListProperty,  Expression<Func<T, MListElement<E, V>>> constructor)
+        public static int UnsafeInsertMList<T, E, V>(this IQueryable<T> query, Expression<Func<E, MList<V>>> mListProperty, Expression<Func<T, MListElement<E, V>>> constructor, string message = null)
                where E : Entity
         {
+
+            if (message != null)
+                return SafeConsole.WaitRows(message == "auto" ? $"Inserting MList<{ typeof(V).TypeName()}> in { typeof(E).TypeName()}" : message,
+                    () => query.UnsafeInsertMList(mListProperty, constructor, message: null));
+
             using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
             {
                 if (query == null)

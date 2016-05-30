@@ -17,32 +17,29 @@ namespace Signum.Entities
     {
         private OperationSymbol() { } 
 
-        private OperationSymbol(StackFrame frame, string memberName)
-            : base(frame, memberName)
+        private OperationSymbol(Type declaringType, string fieldName)
+            : base(declaringType, fieldName)
         {
         }
 
         public static class Construct<T>
             where T : class, IEntity
         {
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            public static ConstructSymbol<T>.Simple Simple([CallerMemberName]string memberName = null)
+            public static ConstructSymbol<T>.Simple Simple(Type declaringType, string fieldName)
             {
-                return new SimpleImp { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
+                return new SimpleImp { Symbol = new OperationSymbol(declaringType, fieldName) };
             }
-
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            public static ConstructSymbol<T>.From<F> From<F>([CallerMemberName]string memberName = null)
+            
+            public static ConstructSymbol<T>.From<F> From<F>(Type declaringType, string fieldName)
                 where F : class,  IEntity
             {
-                return new FromImp<F> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
+                return new FromImp<F> { Symbol = new OperationSymbol(declaringType, fieldName) };
             }
-
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            public static ConstructSymbol<T>.FromMany<F>  FromMany<F>([CallerMemberName]string memberName = null)
+            
+            public static ConstructSymbol<T>.FromMany<F>  FromMany<F>(Type declaringType, string fieldName)
                 where F : class, IEntity
             {
-                return new FromManyImp<F> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
+                return new FromManyImp<F> { Symbol = new OperationSymbol(declaringType, fieldName) };
             }
 
             [Serializable]
@@ -105,26 +102,19 @@ namespace Signum.Entities
                 }
             }
         }
-
-       
-
-   
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static ExecuteSymbol<T> Execute<T>([CallerMemberName]string memberName = null)
+        
+        public static ExecuteSymbol<T> Execute<T>(Type declaringType, string fieldName)
             where T : class,  IEntity
         {
-            return new ExecuteSymbolImp<T> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
+            return new ExecuteSymbolImp<T> { Symbol = new OperationSymbol(declaringType, fieldName) };
         }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static DeleteSymbol<T> Delete<T>([CallerMemberName]string memberName = null)
+        
+        public static DeleteSymbol<T> Delete<T>(Type declaringType, string fieldName)
             where T : class, IEntity
         {
-            return new DeleteSymbolImp<T> { Symbol = new OperationSymbol(new StackFrame(1, false), memberName) };
+            return new DeleteSymbolImp<T> { Symbol = new OperationSymbol(declaringType, fieldName) };
         }
-
-
+        
         [Serializable]
         class ExecuteSymbolImp<T> : ExecuteSymbol<T>
           where T : class, IEntity

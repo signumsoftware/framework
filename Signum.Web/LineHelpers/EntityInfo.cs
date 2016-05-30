@@ -22,7 +22,7 @@ namespace Signum.Web
 
         public static MvcHtmlString HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), tc.RuntimeInfo().TryToString());
+            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), tc.RuntimeInfo()?.ToString());
         }
 
         public static MvcHtmlString HiddenRuntimeInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
@@ -73,7 +73,7 @@ namespace Signum.Web
 
             return "{0};{1};{2};{3}".FormatWith(
                 Navigator.ResolveWebTypeName(EntityType),
-                IdOrNull.TryToString(),
+                IdOrNull?.ToString(),
                 IsNew ? "n" : "o",
                 Ticks
                 );

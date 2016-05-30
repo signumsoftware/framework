@@ -118,19 +118,65 @@ namespace Signum.Web.Controllers
                 }
             }
 
-            return this.DefaultConstructResult(entity);
+            return this.DefaultConstructResult(entity, operation: operationSymbol);
         }
 
         [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
         public ActionResult ConstructFromMany()
         {
-            OperationSymbol operationKey = this.GetOperationKeyAssert();
+            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
 
             var lites = this.ParseLiteKeys<Entity>();
 
-            Entity entity = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, operationKey);
+            Entity entity = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, operationSymbol);
 
-            return this.DefaultConstructResult(entity);
+            return this.DefaultConstructResult(entity, operation: operationSymbol);
+        }
+
+
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
+        public ActionResult ExecuteMultiple()
+        {
+            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
+
+            var lites = this.ParseLiteKeys<Entity>();
+
+            foreach (var item in lites)
+            {
+                OperationLogic.ServiceExecuteLite(item, operationSymbol);
+            }
+
+            return null;
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
+        public ActionResult DeleteMultiple()
+        {
+            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
+
+            var lites = this.ParseLiteKeys<Entity>();
+
+            foreach (var item in lites)
+            {
+                OperationLogic.ServiceDelete(item, operationSymbol);
+            }
+
+            return null;
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, ActionSplitter("operationFullKey")]
+        public ActionResult ConstructFromMultiple()
+        {
+            OperationSymbol operationSymbol = this.GetOperationKeyAssert();
+
+            var lites = this.ParseLiteKeys<Entity>();
+
+            foreach (var item in lites)
+            {
+                OperationLogic.ServiceConstructFromLite(item, operationSymbol);
+            }
+
+            return null;
         }
     }
 }

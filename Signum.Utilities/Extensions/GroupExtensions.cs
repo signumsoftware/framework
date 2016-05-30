@@ -156,12 +156,7 @@ namespace Signum.Utilities
             return collection.OrderBy().GroupsOf(groupSize).Select(gr => new IntervalWithEnd<T>(gr.Min(), gr.Max()));
         }
 
-        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey)
-        {
-            return GroupWhen(collection, isGroupKey, false);
-        }
-
-        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, bool includeKeyInGroup)
+        public static List<IGrouping<T, T>> GroupWhen<T>(this IEnumerable<T> collection, Func<T, bool> isGroupKey, bool includeKeyInGroup = false, bool initialGroup = false)
         {
             List<IGrouping<T, T>> result = new List<IGrouping<T, T>>();
             Grouping<T, T> group = null;
@@ -176,8 +171,16 @@ namespace Signum.Utilities
                 }
                 else
                 {
-                    if (group != null)
-                        group.Add(item);
+                    if (group == null)
+                    {
+                        if(!initialGroup)
+                            throw new InvalidOperationException("Parameter initialGroup is false");
+
+                        group = new Grouping<T, T>(default(T));
+                        result.Add(group);
+                    }
+
+                    group.Add(item);
                 }
             }
 

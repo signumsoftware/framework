@@ -18,7 +18,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class UniqueIndexAttribute : Attribute
     {
         public bool AllowMultipleNulls { get; set; }
@@ -26,7 +26,7 @@ namespace Signum.Entities
         public bool AvoidAttachToUniqueIndexes { get; set; }
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class AttachToUniqueIndexesAttribute : Attribute
     {
     }
@@ -184,7 +184,7 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
         }
     }
 
-    [Serializable, AttributeUsage(AttributeTargets.Field)]
+    [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ImplementedByAttribute : Attribute
     {
         Type[] implementedTypes;
@@ -200,7 +200,7 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
         }
     }
 
-    [Serializable, AttributeUsage(AttributeTargets.Field)]
+    [Serializable, AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ImplementedByAllAttribute : Attribute
     {
         public ImplementedByAllAttribute()
@@ -209,28 +209,28 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
     }
 
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class IgnoreAttribute : Attribute
     {
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class FieldWithoutPropertyAttribute : Attribute
     {
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class NotNullableAttribute : Attribute
     {
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class NullableAttribute : Attribute
     {
     }
 
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class SqlDbTypeAttribute : Attribute
     {
         SqlDbType? sqlDbType;
@@ -278,7 +278,7 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
         public const string NewSequentialId = "NEWSEQUENTIALID()";
     }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
     public sealed class PrimaryKeyAttribute : SqlDbTypeAttribute
     {
         public Type Type { get; set; }
@@ -301,7 +301,7 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
             }
         }
 
-        public PrimaryKeyAttribute(Type type, string name = "Id")
+        public PrimaryKeyAttribute(Type type, string name = "ID")
         {
             this.Type = type;
             this.Name = name;
@@ -310,7 +310,7 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
     public sealed class ColumnNameAttribute : Attribute
     {
         public string Name { get; set; }
@@ -321,7 +321,7 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
     public sealed class BackReferenceColumnNameAttribute : Attribute
     {
         public string Name { get; set; }
@@ -332,12 +332,12 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
-    sealed class ViewPrimaryKeyAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    public sealed class ViewPrimaryKeyAttribute : Attribute
     { 
     }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field /*MList fields*/, Inherited = true, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property /*MList fields*/, Inherited = true, AllowMultiple = false)]
     public sealed class TableNameAttribute : Attribute
     {
         public string Name { get; set; }
@@ -366,20 +366,20 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class AvoidForeignKeyAttribute : Attribute
     {
 
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class AvoidExpandQueryAttribute : Attribute
     {
 
     }
 
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CombineStrategyAttribute : Attribute
     {
         public readonly CombineStrategy Strategy;

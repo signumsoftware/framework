@@ -6,6 +6,7 @@ using Signum.Engine.Maps;
 using System.Threading;
 using Signum.Utilities;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Signum.Engine
 {
@@ -14,6 +15,44 @@ namespace Signum.Engine
     public static class ProgressExtensions
     {
         public static StopOnExceptionDelegate StopOnException = null;
+
+        public static void ProgressForeach<T>(this IEnumerable<T> collection, Func<T, string> elementID, Action<T> action)
+        {
+            LogWriter writer = GetLogWriter(null);
+
+            IProgressInfo pi;
+
+            var enumerator = collection.ToProgressEnumerator(out pi);
+
+            if (!Console.IsOutputRedirected)
+                SafeConsole.WriteSameLine(pi.ToString());
+
+            foreach (var item in enumerator)
+            {
+                using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                    try
+                    {
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            action(item);
+                            tr.Commit();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                        writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+
+                        if (StopOnException != null && StopOnException(elementID(item), null, e))
+                            throw;
+                    }
+
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.WriteSameLine(pi.ToString());
+            }
+            if (!Console.IsOutputRedirected)
+                SafeConsole.ClearSameLine();
+        }
 
         public static void ProgressForeach<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
@@ -26,12 +65,17 @@ namespace Signum.Engine
 
                 IProgressInfo pi;
 
-                foreach (var item in collection.ToProgressEnumerator(out pi))
+                var enumerator = collection.ToProgressEnumerator(out pi);
+
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.WriteSameLine(pi.ToString());
+
+                foreach (var item in enumerator)
                 {
                     using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
                         try
                         {
-                            using (Transaction tr = new Transaction())
+                            using (Transaction tr = Transaction.ForceNew())
                             {
                                 action(item, writer);
                                 tr.Commit();
@@ -43,12 +87,54 @@ namespace Signum.Engine
                             writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
 
                             if (StopOnException != null && StopOnException(elementID(item), fileName, e))
-                                throw; 
+                                throw;
                         }
 
-                    SafeConsole.WriteSameLine(pi.ToString());
+                    if (!Console.IsOutputRedirected)
+                        SafeConsole.WriteSameLine(pi.ToString());
                 }
-                SafeConsole.ClearSameLine();
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.ClearSameLine();
+            }
+        }
+
+        public static void ProgressForeachNonTransactional<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
+        {
+            using (StreamWriter log = TryOpenAutoFlush(fileName))
+            {
+                if (log != null)
+                    log.AutoFlush = true;
+
+                LogWriter writer = GetLogWriter(log);
+
+                IProgressInfo pi;
+
+                var enumerator = collection.ToProgressEnumerator(out pi);
+
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.WriteSameLine(pi.ToString());
+
+                foreach (var item in enumerator)
+                {
+                    using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                        try
+                        {
+                            action(item, writer);
+                        }
+                        catch (Exception e)
+                        {
+                            writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                            writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+
+                            if (StopOnException != null && StopOnException(elementID(item), fileName, e))
+                                throw;
+                        }
+
+                    if (!Console.IsOutputRedirected)
+                        SafeConsole.WriteSameLine(pi.ToString());
+                }
+                if (!Console.IsOutputRedirected)
+                    SafeConsole.ClearSameLine();
             }
         }
 
@@ -61,40 +147,39 @@ namespace Signum.Engine
                     LogWriter writer = GetLogWriter(log);
 
                     IProgressInfo pi;
-                    var col = collection.ToProgressEnumerator(out pi).AsThreadSafe();
-                    Exception stopException = null; 
-                    List<Thread> t = 0.To(4).Select(i => new Thread(() =>
+
+                    var col = collection.ToProgressEnumerator(out pi);
+
+                    lock (SafeConsole.SyncKey)
+                        SafeConsole.WriteSameLine(pi.ToString());
+
+                    Exception stopException = null;
+                    Parallel.ForEach(col, (item, state) =>
                     {
-                        foreach (var item in col)
-                        {
-                            using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
-                                try
+                        using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                            try
+                            {
+                                using (Transaction tr = Transaction.ForceNew())
                                 {
-                                    using (Transaction tr = new Transaction())
-                                    {
-                                        action(item, writer);
-                                        tr.Commit();
-                                    }
+                                    action(item, writer);
+                                    tr.Commit();
                                 }
-                                catch (Exception e)
-                                {
-                                    writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
-                                    writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+                            }
+                            catch (Exception e)
+                            {
+                                writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                                writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
 
-                                    if (StopOnException != null && StopOnException(elementID(item), fileName, e))
-                                        stopException = e;
-                                }
-                            lock (SafeConsole.SyncKey)
-                                SafeConsole.WriteSameLine(pi.ToString());
+                                if (StopOnException != null && StopOnException(elementID(item), fileName, e))
+                                    stopException = e;
+                            }
+                        lock (SafeConsole.SyncKey)
+                            SafeConsole.WriteSameLine(pi.ToString());
 
-                            if (stopException != null)
-                                break;
-                        }
-                    })).ToList();
+                        if (stopException != null)
+                            state.Break();
 
-                    t.ForEach(a => a.Start());
-
-                    t.ForEach(a => a.Join());
+                    });
 
                     if (stopException != null)
                         throw stopException;
@@ -137,8 +222,6 @@ namespace Signum.Engine
             }
         }
 
-       
-
         public static void ProgressForeachParallelDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             Table table = Schema.Current.Table(tableType);
@@ -171,7 +254,7 @@ namespace Signum.Engine
 
         public static string DefaultLogFolder = "Log";
 
-        private static StreamWriter TryOpenAutoFlush(string fileName)
+        public static StreamWriter TryOpenAutoFlush(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
                 return null;
@@ -189,19 +272,22 @@ namespace Signum.Engine
             return result;
         }
 
-        private static LogWriter GetLogWriter(StreamWriter logStreamWriter)
+        public static LogWriter GetLogWriter(StreamWriter logStreamWriter)
         {
             if (logStreamWriter != null)
             {
                 return (color, str, parameters) =>
                 {
-                    string f = parameters == null ? str : str.FormatWith(parameters);
+                    string f = parameters.IsNullOrEmpty() ? str : str.FormatWith(parameters);
                     lock (logStreamWriter)
                         logStreamWriter.WriteLine(f);
                     lock (SafeConsole.SyncKey)
                     {
                         SafeConsole.ClearSameLine();
-                        SafeConsole.WriteLineColor(color, str, parameters);
+                        if (parameters.IsNullOrEmpty())
+                            SafeConsole.WriteLineColor(color, str);
+                        else
+                            SafeConsole.WriteLineColor(color, str, parameters);
                     }
                 };
             }
@@ -212,7 +298,10 @@ namespace Signum.Engine
                     lock (SafeConsole.SyncKey)
                     {
                         SafeConsole.ClearSameLine();
-                        SafeConsole.WriteLineColor(color, str, parameters);
+                        if (parameters.IsNullOrEmpty())
+                            SafeConsole.WriteLineColor(color, str);
+                        else
+                            SafeConsole.WriteLineColor(color, str, parameters);
                     }
                 };
             }

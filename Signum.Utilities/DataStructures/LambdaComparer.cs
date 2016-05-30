@@ -8,23 +8,25 @@ namespace Signum.Utilities.DataStructures
 {
     public class LambdaComparer<T, S> : IComparer<T>, IEqualityComparer<T>, IComparer, IEqualityComparer
     {
-        Func<T, S> func;
-        IComparer<S> comparer = null;
-        IEqualityComparer<S> equalityComparer = null;
-        
-        public LambdaComparer(Func<T, S> func) : this(func, EqualityComparer<S>.Default, Comparer<S>.Default) { }
+        readonly Func<T, S> func;
+        readonly IComparer<S> comparer = null;
+        readonly IEqualityComparer<S> equalityComparer = null;
 
-        public LambdaComparer(Func<T, S> func, IEqualityComparer<S> equalityComparer, IComparer<S> comparer)
+        int descending = 1;
+        public bool Descending
+        {
+            get { return descending == -1; }
+            set { descending = value ? -1 : 1; }
+        }
+        
+        public LambdaComparer(Func<T, S> func, IEqualityComparer<S> equalityComparer = null, IComparer<S> comparer = null)
         {
             if (func == null)
                 throw new ArgumentNullException("func");
 
-            if (equalityComparer == null)
-                throw new ArgumentNullException("equalityComparer"); 
-
             this.func = func;
-            this.equalityComparer = equalityComparer;
-            this.comparer = comparer;
+            this.equalityComparer = equalityComparer ?? EqualityComparer<S>.Default;
+            this.comparer = comparer ?? Comparer<S>.Default;
         }
 
         public int Compare(T x, T y)
@@ -55,6 +57,46 @@ namespace Signum.Utilities.DataStructures
         bool IEqualityComparer.Equals(object x, object y)
         {
             return equalityComparer.Equals(func((T)x), func((T)y));
+        }
+    }
+
+    public static class LambdaComparer
+    {
+        public static LambdaComparer<T, S> By<T, S>(Func<T, S> func, IEqualityComparer<S> equalityComparer = null, IComparer<S> comparer = null)
+        {
+            return new LambdaComparer<T, S>(func, equalityComparer, comparer);
+        }
+
+        public static LambdaComparer<T, S> ByDescending<T, S>(Func<T, S> func, IEqualityComparer<S> equalityComparer = null, IComparer<S> comparer = null)
+        {
+            return new LambdaComparer<T, S>(func, equalityComparer, comparer) { Descending = true };
+        }
+
+        public static IComparer<T> Then<T>(this IComparer<T> comparer1, IComparer<T> comparer2)
+        {
+            return new CombineComparer<T>(comparer1, comparer2);
+        }
+
+        public class CombineComparer<T> : IComparer<T>, IComparer
+        {
+            private IComparer<T> comparer1;
+            private IComparer<T> comparer2;
+
+            public CombineComparer(IComparer<T> comparer1, IComparer<T> comparer2)
+            {
+                this.comparer1 = comparer1;
+                this.comparer2 = comparer2;
+            }
+
+            public int Compare(T x, T y)
+            {
+                return comparer1.Compare(x, y).DefaultToNull() ?? comparer2.Compare(x, y);
+            }
+
+            public int Compare(object x, object y)
+            {
+                return this.Compare((T)x, (T)y);
+            }
         }
     }
 }

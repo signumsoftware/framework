@@ -20,10 +20,13 @@ namespace Signum.Web
         public virtual string WebTypeName { get; set; }
         public Func<UrlHelper, Type, PrimaryKey?, string> ViewRoute { get; set; }
 
+        public bool AvoidPopup { get; set; }
+
         public abstract Type StaticType { get; }
      
         public abstract Delegate UntypedMappingLine { get; }
         public abstract Delegate UntypedMappingMain { get; }
+
 
         internal abstract bool OnIsCreable(bool isSearch);
         internal abstract bool OnIsFindable();

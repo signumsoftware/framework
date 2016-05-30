@@ -153,10 +153,10 @@ namespace Signum.Web
 
         public JsonNetResult ToJsonModelState()
         {
-            return ToJsonModelState(null, null);
+            return ToJsonModelState(null);
         }
 
-        public JsonNetResult ToJsonModelState(string newToString, string newToStringLink)
+        public JsonNetResult ToJsonModelState(string newToString)
         {
             Dictionary<string, object> result = new Dictionary<string, object>
             {
@@ -166,8 +166,7 @@ namespace Signum.Web
 
             if (newToString != null)
                 result.Add(EntityBaseKeys.ToStr, newToString);
-            if (newToStringLink != null)
-                result.Add(EntityBaseKeys.Link, newToStringLink);
+            
 
             return new JsonNetResult(result);
         }
@@ -250,7 +249,7 @@ namespace Signum.Web
         {
         }
 
-        internal bool SupressChange;
+        public bool SupressChange;
 
         public T None()
         {

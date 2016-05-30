@@ -20,7 +20,7 @@ namespace Signum.Web
 
     public class ToolBarButton
     {
-        public string Id { get; private set; }
+        public string Id { get; set; }
         public string Text { get; set; }
         public MvcHtmlString Html { get; set; }
         public string Title { get; set; }
@@ -32,14 +32,18 @@ namespace Signum.Web
         public string CssClass { get; set; }
         public bool Enabled { get; set; }
         public Dictionary<string, object> HtmlProps { get; private set; }
+        public object Tag { get; set; }
 
-        public ToolBarButton(string prefix, string idToAppend)
+        protected ToolBarButton(string id)
         {
             Enabled = true;
             HtmlProps = new Dictionary<string, object>(0);
-            this.Id = TypeContextUtilities.Compose(prefix, idToAppend);
+            this.Id = id;
         }
 
+        public ToolBarButton(string prefix, string idToAppend) : this(TypeContextUtilities.Compose(prefix, idToAppend))
+        {
+        }
 
         public virtual MvcHtmlString ToHtml(HtmlHelper helper)
         {
@@ -106,6 +110,7 @@ namespace Signum.Web
 
             return result;
         }
+
     }
 
     public interface IMenuItem 
@@ -127,15 +132,45 @@ namespace Signum.Web
         public string CssClass { get; set; }
         public bool Enabled { get; set; }
         public Dictionary<string, object> HtmlProps { get; private set; }
+        public object Tag { get; set; }
 
-        public MenuItem(string prefix, string idToAppend)
+        protected MenuItem(string id)
         {
             Enabled = true;
             HtmlProps = new Dictionary<string, object>(0);
-            this.Id = TypeContextUtilities.Compose(prefix, idToAppend);
+            this.Id = id;
         }
 
-        public MvcHtmlString ToHtml()
+        public MenuItem(string prefix, string idToAppend) : this(TypeContextUtilities.Compose(prefix, idToAppend))
+        {
+        }
+
+        public virtual MvcHtmlString ToHtml()
+        {
+            var a = GetLinkElement();
+
+            var result = new HtmlTag("li").InnerHtml(a.ToHtml());
+
+            if (Tooltip.HasText())
+            {
+                result.Attr("data-toggle", "tooltip");
+                result.Attr("data-placement", "left");
+                result.Attr("title", Tooltip);
+            }
+
+            var html = result.ToHtml();
+
+            if (OnClick == null)
+                return html;
+
+            TypeContext.AssertId(this.Id);
+
+            var script = MvcHtmlString.Create("<script>$('#" + Id + "').on('mouseup', function(event){ if(event.which == 3) return; " + OnClick.ToString() + " })</script>");
+
+            return html.Concat(script);
+        }
+
+        protected virtual HtmlTag GetLinkElement()
         {
             var a = new HtmlTag("a")
                .Id(Id)
@@ -157,26 +192,7 @@ namespace Signum.Web
 
             if (!Enabled)
                 a.Attr("disabled", "disabled");
-
-            var result = new HtmlTag("li").InnerHtml(a.ToHtml());
-
-            if (Tooltip.HasText())
-            {
-                result.Attr("data-toggle", "tooltip");
-                result.Attr("data-placement", "left");
-                result.Attr("title", Tooltip);
-            }
-
-            var html = result.ToHtml();
-
-            if (OnClick == null)
-                return html;
-
-            TypeContext.AssertId(this.Id);
-
-            var script = MvcHtmlString.Create("<script>$('#" + Id + "').on('mouseup', function(event){ if(event.which == 3) return; " + OnClick.ToString() + " })</script>");
-
-            return html.Concat(script);
+            return a;
         }
     }
 }

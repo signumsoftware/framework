@@ -232,6 +232,14 @@ namespace Signum.Entities
             return id.Value.Object;
         }
 
+        public static string UnwrapToString(PrimaryKey? id)
+        {
+            if (id == null)
+                return null;
+
+            return id.Value.Object.ToString();
+        }
+
         public string ToString(string format)
         {
             return ((IFormattable)this.Object).ToString(format, CultureInfo.CurrentCulture);

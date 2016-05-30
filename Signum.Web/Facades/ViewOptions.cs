@@ -47,7 +47,7 @@ namespace Signum.Web
             : base(prefix)
         { }
 
-        public bool? SaveProtected { get; set; }
+        public bool? RequiresSaveOperation { get; set; }
 
         public PropertyRoute PropertyRoute { get; set; }
 

@@ -22,7 +22,7 @@ namespace Signum.Web
             if(ident == null || ident.IsNew)
                 return null;
 
-            List<QuickLink> quicklinks = LinksClient.GetForEntity(ident.ToLiteFat(), ctx.PartialViewName, ctx.Prefix);
+            List<QuickLink> quicklinks = LinksClient.GetForEntity(ident.ToLiteFat(), ctx.PartialViewName, ctx.Prefix, null, ctx.Url);
             if (quicklinks == null || quicklinks.Count == 0)
                 return null;
 
@@ -41,20 +41,16 @@ namespace Signum.Web
 
     static class QuickLinkContextualMenu
     {
-        internal static List<IMenuItem> ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
+        internal static MenuItemBlock ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
         {
             if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count > 1)
                 return null;
 
-            List<QuickLink> quickLinks = LinksClient.GetForEntity(ctx.Lites[0], null, ctx.Prefix);
+            List<QuickLink> quickLinks = LinksClient.GetForEntity(ctx.Lites[0], null, ctx.Prefix, ctx.QueryName, ctx.Url);
             if (quickLinks.IsNullOrEmpty())
                 return null;
-
-            List<IMenuItem> menuItems = new List<IMenuItem>();
-            menuItems.Add(new MenuItemHeader(QuickLinkMessage.Quicklinks.NiceToString()));
-            menuItems.AddRange(quickLinks);
-
-            return menuItems;
+            
+            return new MenuItemBlock { Header = QuickLinkMessage.Quicklinks.NiceToString(), Items = quickLinks };
         }
     }
 
@@ -62,6 +58,9 @@ namespace Signum.Web
     {
         public string PartialViewName { get; internal set; }
         public string Prefix { get; internal set; }
+        public object QueryName { get; set; }
+
+        public UrlHelper Url { get; internal set; }
     }
 
 
@@ -84,11 +83,11 @@ namespace Signum.Web
         }
 
 
-        public static List<QuickLink> GetForEntity(Lite<Entity> ident, string partialViewName, string prefix)
+        public static List<QuickLink> GetForEntity(Lite<Entity> ident, string partialViewName, string prefix, object queryName, UrlHelper url)
         {
             List<QuickLink> links = new List<QuickLink>();
 
-            QuickLinkContext ctx = new QuickLinkContext { PartialViewName = partialViewName, Prefix = prefix }; 
+            QuickLinkContext ctx = new QuickLinkContext { PartialViewName = partialViewName, Prefix = prefix, QueryName = queryName, Url = url }; 
 
             var func  =  EntityLinks.TryGetValue(ident.EntityType);
             if (func != null)

@@ -8,6 +8,7 @@
     var paginate = pagination as Pagination.Paginate;
 
     ResultTable resultTable = (ResultTable)ViewData[ViewDataKeys.Results];
+    QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
 }
 
 <div class="sf-search-footer" style="display:@(((bool)ViewData[ViewDataKeys.ShowFooter])? "block": "none")">
@@ -45,21 +46,21 @@
     <div class="sf-pagination-center form-inline form-xs">
         @{
             var currentMode = pagination.GetMode();
-            var modes = EnumExtensions.GetValues<PaginationMode>().Select(pm => new SelectListItem
+            var modes = EnumExtensions.GetValues<PaginationMode>().Where(p => FindOptions.IsPaginationAllowed(queryDescription.QueryName, p, null)).Select(pm => new SelectListItem
             {
                 Text = pm.NiceToString(),
                 Value = pm.ToString(),
                 Selected = currentMode == pm
-            }).ToList();   
+            }).ToList();
         }
-        @Html.DropDownList(Model.Compose("sfPaginationMode"), modes, new { @class = "sf-pagination-size form-control" })
+        @Html.SafeDropDownList(Model.Compose("sfPaginationMode"), modes, new { @class = "sf-pagination-size form-control" })
 
         @if (!(pagination is Pagination.All))
         {
             var currentElements = pagination.GetElementsPerPage();
-            var elements = new List<int> { 5, 10, 20, 50, 100, 200 }.Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i == currentElements }).ToList();
-            
-            @Html.DropDownList(Model.Compose("sfElems"), elements, new { @class = "sf-pagination-size form-control" })
+            var elements = new List<int> { 5, 10, 20, 50, 100, 200 }.Where(num => FindOptions.IsPaginationAllowed(queryDescription.QueryName, currentMode, num)).Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i == currentElements }).ToList();
+
+            @Html.SafeDropDownList(Model.Compose("sfElems"), elements, new { @class = "sf-pagination-size form-control" })
         }
     </div>
 

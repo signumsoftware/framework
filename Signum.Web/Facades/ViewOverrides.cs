@@ -58,7 +58,7 @@ namespace Signum.Web
 
             List<Tab> newTabs = new List<Tab>();
 
-            var before = BeforeTabDictionary.TryGetC(containerId);
+            var before = BeforeTabDictionary?.TryGetC(containerId);
             if (before != null)
                 foreach (var b in before.GetInvocationListTyped())
                 {
@@ -70,7 +70,7 @@ namespace Signum.Web
             foreach (var item in tabs)
                 ExpandTab(item, helper, context, newTabs);
 
-            var after = AfterTabDictionary.TryGetC(containerId);
+            var after = AfterTabDictionary?.TryGetC(containerId);
             if (after != null)
                 foreach (var a in after.GetInvocationListTyped())
                 {
@@ -84,7 +84,7 @@ namespace Signum.Web
 
         void ExpandTab(Tab item, HtmlHelper helper, TypeContext context, List<Tab> newTabs)
         {
-            var before = BeforeTabDictionary.TryGetC(item.Id);
+            var before = BeforeTabDictionary?.TryGetC(item.Id);
             if (before != null)
                 foreach (var b in before.GetInvocationListTyped())
                 {
@@ -96,7 +96,7 @@ namespace Signum.Web
             if (hiddenTabs == null || !hiddenTabs.Contains(item.Id))
                 newTabs.Add(item);
 
-            var after = AfterTabDictionary.TryGetC(item.Id);
+            var after = AfterTabDictionary?.TryGetC(item.Id);
             if (after != null)
                 foreach (var a in after.GetInvocationListTyped())
                 {
@@ -142,12 +142,12 @@ namespace Signum.Web
 
         MvcHtmlString IViewOverrides.OnSurroundLine(PropertyRoute propertyRoute, HtmlHelper helper, TypeContext tc, MvcHtmlString result)
         {
-            var before = beforeLine.TryGetC(propertyRoute);
+            var before = beforeLine?.TryGetC(propertyRoute);
             if (before != null)
                 foreach (var b in before.GetInvocationListTyped())
                     result = b(helper, tc).Concat(result);
 
-            var after = afterLine.TryGetC(propertyRoute);
+            var after = afterLine?.TryGetC(propertyRoute);
             if (after != null)
                 foreach (var a in after.GetInvocationListTyped())
                     result = result.Concat(a(helper, tc));

@@ -142,7 +142,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetViewPrefix(Module mod)
         {
-           return "public static string ViewPrefix = \"~/Views/{0}/{{0}}.cshtml\";".FormatWith(mod.ModuleName);
+           return "public static string ViewPrefix = \"~/Views/{0}/{1}.cshtml\";".FormatWith(mod.ModuleName, "{0}");
         }
 
         protected virtual string GetClientNamespace(Module mod)
@@ -348,7 +348,7 @@ namespace Signum.Engine.CodeGeneration
             var eka = type.GetCustomAttribute<EntityKindAttribute>();
 
             if (eka == null)
-                throw new InvalidOperationException("'{0}' does not have EntityKindAttribute".FormatWith(type.Name));
+                return "@Html.EntityLine({0}, {1} => {1}.{2})\r\n".FormatWith(vc, v, pi.Name); //Interface
 
             if (eka.EntityKind == EntityKind.Part || eka.EntityKind == EntityKind.SharedPart)
                 return "@Html.EntityDetail({0}, {1} => {1}.{2})\r\n".FormatWith(vc, v, pi.Name);

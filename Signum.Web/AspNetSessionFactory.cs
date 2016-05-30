@@ -39,7 +39,7 @@ namespace Signum.Web
             {
                 get
                 {
-                    var session = overrideAspNetSessionVariable.Value ?? HttpContext.Current.Try(c => c.Session);
+                    var session = overrideAspNetSessionVariable.Value ?? HttpContext.Current?.Session;
 
                     if (session == null)
                         return default(T);
@@ -59,7 +59,7 @@ namespace Signum.Web
 
             public override void Clean()
             {
-                var session = overrideAspNetSessionVariable.Value ?? HttpContext.Current.Try(c => c.Session);
+                var session = overrideAspNetSessionVariable.Value ?? HttpContext.Current?.Session;
                 session.Remove(Name);
             }
         }

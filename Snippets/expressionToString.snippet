@@ -40,7 +40,8 @@
         </Literal>
       </Declarations>
       <Code Language="csharp">
-        <![CDATA[static Expression<Func<$type$, string>> ToStringExpression = e => e.$field$; 
+        <![CDATA[static Expression<Func<$type$, string>> ToStringExpression = @this => @this.$field$;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

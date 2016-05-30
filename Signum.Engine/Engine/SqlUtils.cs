@@ -214,7 +214,7 @@ WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
 
         public static string SqlEscape(this string ident)
         {
-            if (Keywords.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"-\d|[áéíóúàèìòùÁÉÍÓÚÀÈÌÒÙ]"))
+            if (Keywords.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"-\d|[áéíóúàèìòùÁÉÍÓÚÀÈÌÒÙ ]") || ident.Contains("/") || ident.Contains(@"\"))
                 return "[" + ident + "]";
 
             return ident;

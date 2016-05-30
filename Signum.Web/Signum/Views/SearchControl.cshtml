@@ -11,9 +11,18 @@
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = Lite.Extract(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations.Value;
-    findOptions.Pagination = findOptions.Pagination ?? (Finder.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Pagination) ?? FindOptions.DefaultPagination;
+    var settings = Finder.QuerySettings(findOptions.QueryName);
+    findOptions.Pagination = findOptions.Pagination ?? settings.Pagination ?? FindOptions.DefaultPagination;
+
+    if (!FindOptions.IsPaginationAllowed(findOptions.QueryName, findOptions.Pagination.GetMode(), findOptions.Pagination.GetElementsPerPage()))
+    {
+        throw new UnauthorizedAccessException("This pagination mode is not authorized");
+    }
 
     ViewData[ViewDataKeys.FindOptions] = findOptions;
+
+    var sfb = settings.SimpleFilterBuilder == null ? null :
+        settings.SimpleFilterBuilder(Html, Model, queryDescription, findOptions);
 
     var prefix = Model.Compose("sfSearchControl");
 }
@@ -23,6 +32,13 @@
      data-find-url="@Finder.FindRoute(findOptions.QueryName)" 
      data-queryName="@QueryUtils.GetQueryUniqueKey(findOptions.QueryName)" 
      >
+    @if (sfb != null)
+    {
+        findOptions.ShowFilters = false;
+        <div id="@Model.Compose("simpleFilerBuilder")" class="form-horizontal">
+            @sfb.Control
+        </div>
+    }
 
     @{
         bool filtersAlwaysHidden = !findOptions.ShowHeader || !findOptions.ShowFilters && !findOptions.ShowFilterButton;
@@ -57,7 +73,7 @@
 
         @if (findOptions.Create)
         {
-            <a class="sf-query-button btn btn-default sf-line-button sf-create" id="@Model.Compose("qbSearchCreate")" title="@SearchMessage.CreateNew0_G.NiceToString().ForGenderAndNumber().FormatWith(implementations.IsByAll ? "?" : implementations.Types.CommaOr(a => a.NiceName()))" onclick="@JsFunction.SFControlThen(prefix, "create_click()")">
+            <a class="sf-query-button btn btn-default sf-line-button sf-create" id="@Model.Compose("qbSearchCreate")" title="@SearchMessage.CreateNew0_G.NiceToString().ForGenderAndNumber().FormatWith(implementations.IsByAll ? "?" : implementations.Types.CommaOr(a => a.NiceName()))" onclick="@JsFunction.SFControlThen(prefix, "create_click(event)")">
                 <span class="glyphicon glyphicon-plus"></span>
             </a>
         }
@@ -138,7 +154,8 @@
     }
 </div>
 <script type="text/javascript">
-    require(["@JsModule.Finder"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), 
+    require(["@JsModule.Finder"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"),
         @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString())),
-        @(MvcHtmlString.Create(JsonConvert.SerializeObject(implementations.ToJsTypeInfos(isSearch : true, prefix: prefix))))).ready();});
+        @Html.Json(implementations.ToJsTypeInfos(isSearch : true, prefix: prefix)),
+        @Html.Json(sfb == null ? null : sfb.Url)).ready();});
 </script>

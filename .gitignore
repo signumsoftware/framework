@@ -29,3 +29,4 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 *.js.map
 *.js
+Signum.Analyzer/packages/*

@@ -14,16 +14,12 @@
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
 			<Declarations>
-				<Literal>
-					<ID>field</ID>
-					<ToolTip>Field</ToolTip>
-					<Default>bar</Default>
-					<Function></Function>
-				</Literal>
 				<Literal>
 					<ID>property</ID>
 					<ToolTip>Property</ToolTip>
@@ -39,13 +35,8 @@
 			</Declarations>
 			<Code Language="csharp">
 				<![CDATA[[NotNullable, SqlDbType( Size = $size$)]
-        string $field$;
         [StringLengthValidator(AllowNulls=false, Min = 3, Max = $size$)]
-        public string $property$
-        {
-            get { return $field$; }
-            set { Set(ref $field$, value); }
-        }$end$]]>
+        public string $property$ { get; set; }$end$]]>
 			</Code>
 		</Snippet>
 	</CodeSnippet>

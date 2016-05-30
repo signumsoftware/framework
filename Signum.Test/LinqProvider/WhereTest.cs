@@ -265,7 +265,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereMixinField()
         {
-            var list = Database.Query<NoteWithDateEntity>().Where(n => n.Mixin<CorruptMixin>().Corrupt == null).ToList();
+            var list = Database.Query<NoteWithDateEntity>().Where(n => n.Mixin<CorruptMixin>().Corrupt == false).ToList();
         }
 
         [TestMethod]

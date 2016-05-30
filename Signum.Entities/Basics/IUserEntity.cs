@@ -20,5 +20,12 @@ namespace Signum.Entities.Basics
             get { return CurrentUserVariable.Value; }
             set { CurrentUserVariable.Value = value; }
         }
+
+        public static IDisposable UserSession(IUserEntity user)
+        {
+            var result = ScopeSessionFactory.OverrideSession();
+            UserHolder.Current = user;
+            return result;
+        }
     }
 }

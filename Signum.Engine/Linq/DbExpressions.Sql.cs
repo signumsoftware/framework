@@ -179,15 +179,18 @@ namespace Signum.Engine.Linq
 
         public ObjectName Name { get { return Table.Name; } }
 
+        public readonly string WithHint;
+
         public override Alias[] KnownAliases
         {
             get { return new[] { Alias }; }
         }
 
-        internal TableExpression(Alias alias, ITable table)
+        internal TableExpression(Alias alias, ITable table, string withHint)
             : base(DbExpressionType.Table, alias)
         {
             this.Table = table;
+            this.WithHint = withHint;
         }
 
         public override string ToString()
@@ -273,7 +276,7 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             if (Name.HasText())
-                return "{0} AS {1}".FormatWith(Expression.ToString(), Name);
+                return "{0} = {1}".FormatWith(Name, Expression.ToString());
 
             return Expression.ToString();
         }
@@ -295,21 +298,21 @@ namespace Signum.Engine.Linq
 
     internal class AggregateExpression : DbExpression
     {
-        public readonly Expression Source;
+        public readonly Expression Expression;
         public readonly AggregateFunction AggregateFunction;
-        public AggregateExpression(Type type, Expression source, AggregateFunction aggregateFunction)
+        public AggregateExpression(Type type, Expression expression, AggregateFunction aggregateFunction)
             : base(DbExpressionType.Aggregate, type)
         {
-            if (source == null && aggregateFunction != AggregateFunction.Count) 
-                throw new ArgumentNullException("source");
+            if (expression == null && aggregateFunction != AggregateFunction.Count) 
+                throw new ArgumentNullException("expression");
 
-            this.Source = source;
+            this.Expression = expression;
             this.AggregateFunction = aggregateFunction;
         }
 
         public override string ToString()
         {
-            return "{0}({1})".FormatWith(AggregateFunction, Source.ToString() ?? "*");
+            return "{0}({1})".FormatWith(AggregateFunction, Expression?.ToString() ?? "*");
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -441,12 +444,12 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "SELECT {0}{1}{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".FormatWith(
+            return "SELECT {0}{1}\r\n{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".FormatWith(
                 IsDistinct ? "DISTINCT " : "",
-                Top.Try(t => "TOP {0} ".FormatWith(t.ToString())),
-                Columns.ToString(", "),
-                From.Try(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
-                Where.Try(a => "WHERE " + a.ToString() + "\r\n"),
+                Top?.Let(t => "TOP {0} ".FormatWith(t.ToString())),
+                Columns.ToString(c => c.ToString().Indent(4) ,",\r\n"),
+                From?.Let(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
+                Where?.Let(a => "WHERE " + a.ToString() + "\r\n"),
                 OrderBy.Any() ? ("ORDER BY " + OrderBy.ToString(" ,") + "\r\n") : null,
                 GroupBy.Any() ? ("GROUP BY " + GroupBy.ToString(g => g.ToString(), " ,") + "\r\n") : null,
                 SelectOptions == 0 ? "" : SelectOptions.ToString() + "\r\n",
@@ -513,7 +516,7 @@ namespace Signum.Engine.Linq
    
         public override string ToString()
         {
-            return "{0}\r\n{1}\r\n{2}\r\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition.ToString());
+            return "{0}\r\n{1}\r\n{2}\r\nON {3}".FormatWith(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition?.ToString());
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -726,7 +729,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return Value.TryToString() ?? "NULL";
+            return Value?.ToString() ?? "NULL";
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1164,7 +1167,7 @@ namespace Signum.Engine.Linq
             return "DELETE {0}\r\nFROM {1}\r\n{2}".FormatWith(
                 Table.Name, 
                 Source.ToString(), 
-                Where.Try(w => "WHERE " + w.ToString())); 
+                Where?.Let(w => "WHERE " + w.ToString())); 
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)
@@ -1195,7 +1198,7 @@ namespace Signum.Engine.Linq
                 Table.Name,
                 Assigments.ToString("\r\n"),
                 Source.ToString(),
-                Where.Try(w => "WHERE " + w.ToString()));
+                Where?.Let(w => "WHERE " + w.ToString()));
         }
 
         protected override Expression Accept(DbExpressionVisitor visitor)

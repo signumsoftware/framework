@@ -8,6 +8,7 @@ Expression Visitor that takes the nominated subtrees of the `ExpressionNominator
 public class ExpressionEvaluator : ExpressionVisitor
 {
    public static Expression PartialEval(Expression exp);
+
    public static object Eval(Expression expression);
 }
 ```

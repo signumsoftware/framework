@@ -10,6 +10,18 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
+    /// <summary>
+    /// When used on a static class, auto-initializes its static fields of symbols or operations 
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public sealed class AutoInitAttribute : Attribute
+    {
+        public static Exception ArgumentNullException(Type argumentType, string argumentName)
+        {
+            return new ArgumentNullException(argumentName, $"The argument '{argumentName}' of type '{argumentType.TypeName()}' is null. Are you missing an [AutoInit] attribute?");
+        }
+    }
+
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class CleanTypeNameAttribute: Attribute
     {
@@ -34,9 +46,14 @@ namespace Signum.Entities
             return GetAttribute(type).EntityData;
         }
 
+        public static bool RequiresSaveOperation(Type type)
+        {
+            return GetAttribute(type).RequiresSaveOperation;
+        }
+
         public static bool IsLowPopulation(Type type)
         {
-            return TryGetAttribute(type).Try(a => a.IsLowPopulation) ?? false;
+            return TryGetAttribute(type)?.IsLowPopulation ?? false;
         }
 
         public static EntityKindAttribute GetAttribute(Type type)
@@ -80,6 +97,35 @@ namespace Signum.Entities
         public EntityData EntityData { get; private set; }
 
         public bool IsLowPopulation { get; set; }
+        
+        bool? overridenRequiresSaveOperation; 
+        public bool RequiresSaveOperation
+        {
+            get { return overridenRequiresSaveOperation ?? CalculateRequiresSaveOperation() ; }
+            set
+            {
+                if (overridenRequiresSaveOperation != CalculateRequiresSaveOperation())
+                    overridenRequiresSaveOperation = value;
+            }
+        }
+
+        public bool IsRequiresSaveOperationOverriden => overridenRequiresSaveOperation.HasValue;
+
+        private bool CalculateRequiresSaveOperation()
+        {
+            switch (this.EntityKind)
+            {
+                case EntityKind.SystemString: return false;
+                case EntityKind.System: return false;
+                case EntityKind.Relational: return false;
+                case EntityKind.String: return true;
+                case EntityKind.Shared: return true;
+                case EntityKind.Main: return true;
+                case EntityKind.Part: return false;
+                case EntityKind.SharedPart: return false;
+                default: throw new InvalidOperationException("Unexpeced entityKind");
+            }
+        }
 
         public EntityKindAttribute(EntityKind entityKind, EntityData entityData)
         {
@@ -93,21 +139,21 @@ namespace Signum.Entities
     {
         /// <summary>
         /// Doesn't make sense to view it from other entity, since there's not to much to see. Not editable. 
-        /// Not SaveProtected
+        /// Not RequiresSaveOperation
         /// ie: PermissionSymbol
         /// </summary>
         SystemString,
 
         /// <summary>
         /// Not editable.
-        /// Not SaveProtected
+        /// Not RequiresSaveOperation
         /// ie: ExceptionEntity
         /// </summary>
         System,
 
         /// <summary>
         /// An entity that connects two entitities to implement a N to N relationship in a symetric way (no MLists)
-        /// Not SaveProtected, not vieable, not creable (override on SearchControl) 
+        /// Not RequiresSaveOperation, not vieable, not creable (override on SearchControl) 
         /// ie: DiscountProductEntity
         /// </summary>
         Relational,
@@ -115,35 +161,35 @@ namespace Signum.Entities
 
         /// <summary>
         /// Doesn't make sense to view it from other entity, since there's not to much to see. 
-        /// SaveProtected
+        /// RequiresSaveOperation
         /// ie: CountryEntity
         /// </summary>
         String,
 
         /// <summary>
         /// Used and shared by other entities, can be created from other entity. 
-        /// SaveProtected
+        /// RequiresSaveOperation
         /// ie: CustomerEntity (can create new while creating the order)
         /// </summary>
         Shared,
 
         /// <summary>
         /// Used and shared by other entities, but too big to create it from other entity.
-        /// SaveProtected
+        /// RequiresSaveOperation
         /// ie: OrderEntity
         /// </summary>
         Main,
 
         /// <summary>
         /// Entity that belongs to just one entity and should be saved together, but that can not be implemented as EmbeddedEntity (usually to enable polymorphisim)
-        /// Not SaveProtected
+        /// Not RequiresSaveOperation
         /// ie :ProductExtensionEntity
         /// </summary>
         Part,
 
         /// <summary>
         /// Entity that can be created on the fly and saved with the parent entity, but could also be shared with other entities to save space. 
-        /// Not SaveProtected
+        /// Not RequiresSaveOperation
         /// ie: AddressEntity
         /// </summary>
         SharedPart,

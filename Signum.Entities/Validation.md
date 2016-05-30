@@ -63,10 +63,11 @@ By default all the validators let null be a valid value, so this validator shoul
 
 ### String Validators
 
-Validators for string propertties
+Validators for string properties
 
 ```C#
-[StringLengthValidator(Max=100, AllowNulls=true)] //AllowNulls is default to false and makes no distiction between empty string and nulls
+[StringLengthValidator(Min=4, Max=100, AllowNulls=true)] //AllowNulls is false by default, and makes no distiction between empty string and nulls, if the string is not-null should be greater than 4
+[StringLengthValidator(Min=4, MultiLine = true)] //MultiLine is false by default, and when set to true allows '\r\n' characters, as well as leading and trailing spaces
 [StringCaseValidator(Case.Uppercase)] // Everything in upercase
 
 [EMailValidator] // should be a valid e-Mail address
@@ -81,7 +82,7 @@ Validators for string propertties
 Validators for numeric properties (`int`, `long`, `decimal`, `float`, `double`, etc..) 
 
 ```C#
-[NumberIsValidator(ComparisonType.GreaterThanOrEqual, 0)]
+[NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
 [NumberBetweenValidator(0,10)] //Not using C intervals to please user, so 10 is a valid number as well. 
 [DecimalsValidator(3)] // Numbers should not have more than 3 decimal places, default is 2. Works only with decimal. 
 ```
@@ -91,7 +92,7 @@ Validators for numeric properties (`int`, `long`, `decimal`, `float`, `double`, 
 Validators for `MList<T>` properties
 
 ```C#
-[CountIsValidator(ComparisonType.GreaterThanOrEqual, 3)]  //Limit the number of elements
+[CountIsValidator(ComparisonType.GreaterThanOrEqualTo, 3)]  //Limit the number of elements
 [NoRepeatValidator] //Avoid repeated elements in a MList  
 ```
 
@@ -173,7 +174,7 @@ By overriding `PropertyValidation`, we can tell the validation system witch is t
 ```C#
 protected override string PropertyValidation(PropertyInfo pi)
 {
-    if (pi.Is(() => Name) && name == "Neo" && dateOfBirth.Year < 1999)
+    if (pi.Name == nameof(Name) && name == "Neo" && dateOfBirth.Year < 1999)
         return "Nobody was named Neo before The Matrix";
 
     return null;
@@ -221,7 +222,7 @@ public class OrderEntity : Entity
 
     protected override string PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Is(() => ShipDate))
+        if (pi.Name == nameof(ShipDate))
         {
             if (ShipDate.HasValue && State != State.Shipped)
                 return "ShipDate has to be null if the state is {0}".FormatWith(State);
@@ -229,7 +230,7 @@ public class OrderEntity : Entity
                 return "ShipDate needs a value if the state is {0}".FormatWith(State); 
         }
 
-        if (pi.Is(() => PaidOn))
+        if (pi.Name == nameof(PaidOn))
         {
             if (PaidOn.HasValue && State != State.Ordered)
                 return "PaidOn has to be null if the state is {0}".FormatWith(State);
@@ -469,7 +470,7 @@ public class PersonEntity : Entity
 
     public override string PropertyValidation(PropertyInfo pi)
     {
-        if(pi.Is(()=>Name) && Name == "Neo" && DateOfBirth.Year < 1999)
+        if(pi.Name == nameof(Name) && Name == "Neo" && DateOfBirth.Year < 1999)
             return "Nobody was named Neo before The Matrix"; 
     }
 }
@@ -575,7 +576,7 @@ public class PersonEntity : Entity
 
     public override string PropertyValidation(PropertyInfo pi)
     {
-        if(pi.Is(()=>Name) && !Corruption.Allowed && Name == "Neo" && DateOfBirth.Year < 1999)
+        if(pi.Name == nameof(Name) && !Corruption.Allowed && Name == "Neo" && DateOfBirth.Year < 1999)
             return "Nobody was named Neo before The Matrix"; 
     }
 

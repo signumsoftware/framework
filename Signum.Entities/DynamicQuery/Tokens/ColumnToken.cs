@@ -72,7 +72,7 @@ namespace Signum.Entities.DynamicQuery
                     DateTimePrecision? precission =
                         Column.PropertyRoutes.Select(pr => Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)
                         .Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx())
-                        .Select(dtp => dtp.Try(d => d.Precision)).Distinct().Only();
+                        .Select(dtp => dtp?.Precision).Distinct().Only();
 
                     if (precission != null)
                         return DateTimeProperties(this, precission.Value);
@@ -80,6 +80,25 @@ namespace Signum.Entities.DynamicQuery
 
                 if (Column.Format == "d")
                     return DateTimeProperties(this, DateTimePrecision.Days);
+            }
+
+            if (Column.Type.UnNullify() == typeof(double) || 
+                Column.Type.UnNullify() == typeof(float) || 
+                Column.Type.UnNullify() == typeof(decimal))
+            {
+                if (Column.PropertyRoutes != null)
+                {
+                    int? decimalPlaces=
+                        Column.PropertyRoutes.Select(pr => Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)
+                        .Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx())
+                        .Select(dtp => dtp?.DecimalPlaces).Distinct().Only();
+
+                    if (decimalPlaces != null)
+                        return StepTokens(this, decimalPlaces.Value);
+                }
+
+                if (Column.Format != null)
+                    return StepTokens(this, Reflector.NumDecimals(Column.Format));
             }
 
             return SubTokensBase(Column.Type, options, Column.Implementations);

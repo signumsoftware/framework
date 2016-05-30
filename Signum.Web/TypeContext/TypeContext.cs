@@ -63,6 +63,7 @@ namespace Signum.Web
             LabelColumns = new BsColumn(2),
             ReadOnly = false,
             PlaceholderLabels = false,
+            FormControlStaticAsFormControlReadonly = false,
         };
 
         FormGroupStyle? formGroupStyle;
@@ -94,6 +95,13 @@ namespace Signum.Web
         {
             get { return placeholderLabels ?? Parent.PlaceholderLabels; ; }
             set { placeholderLabels = value; }
+        }
+
+        bool? formControlStaticAsFormControlReadonly;
+        public bool FormControlStaticAsFormControlReadonly
+        {
+            get { return formControlStaticAsFormControlReadonly ?? Parent.FormControlStaticAsFormControlReadonly; ; }
+            set { formControlStaticAsFormControlReadonly = value; }
         }
 
         BsColumn labelColummns;
@@ -203,6 +211,8 @@ namespace Signum.Web
                 (short?)(a.lg - b.lg)
                 );
         }
+
+    
     }
 
     /// <summary>

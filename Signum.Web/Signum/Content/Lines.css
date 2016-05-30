@@ -18,6 +18,22 @@ input[type=checkbox].form-control
     margin-top: 9px;
 }
 
+p.form-control
+{
+    background-color: #f6f6f6;
+    margin: 0px;
+}
+
+p.form-control.readonly-textarea
+{
+    height: initial !important;
+}
+
+.numeric 
+{
+    text-align:right;
+}
+
 label > input[type=checkbox]
 {
     margin: 0px;
@@ -394,7 +410,8 @@ ul.nav-tabs
     margin-right: 0;
 }
 
-.form-vertical .form-control
+.form-vertical .form-control,
+.form-vertical .form-control-static
 {
     display: block;
     /*width: initial;*/

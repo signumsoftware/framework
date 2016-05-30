@@ -454,5 +454,26 @@ namespace Signum.Test.LinqProvider
                             FemaleFriends = friend.Count(f => f.Entity.Sex == Sex.Female)
                         }).ToList(); 
         }
+
+        [TestMethod]
+        public void DistinctGroupByForce()
+        {
+            var list = Database.Query<ArtistEntity>()
+                .Select(a => new { Initials = a.Name.Substring(0, 1), a.Sex })
+                .Distinct()
+                .GroupBy(a => a.Initials)
+                .Select(gr => new { gr.Key, Count = gr.Count() })
+                .ToList();
+        }
+
+
+        [TestMethod]
+        public void GroupByCount()
+        {
+            var list = Database.Query<AlbumEntity>()
+                .GroupBy(a => a.Songs.Count)
+                .Select(gr => new { NumSongs =  gr.Key, Count = gr.Count() })
+                .ToList();
+        }
     }
 }

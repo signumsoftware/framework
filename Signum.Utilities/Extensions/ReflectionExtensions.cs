@@ -102,7 +102,7 @@ namespace Signum.Utilities
 
             return ft.GetInterfaces().PreAnd(ft)
                 .SingleOrDefaultEx(ti => ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                .Try(ti => ti.GetGenericArguments()[0]);
+                ?.Let(ti => ti.GetGenericArguments()[0]);
         }
 
         public static bool IsExtensionMethod(this MethodInfo m)
@@ -130,6 +130,14 @@ namespace Signum.Utilities
         public static bool IsStaticClass(this Type type)
         {
             return type.IsAbstract && type.IsSealed;
+        }
+
+        public static void PreserveStackTrace(this Exception ex)
+        {
+            Action savestack = Delegate.CreateDelegate(typeof(Action), ex, "InternalPreserveStackTrace", false, false) as Action;
+
+            if (savestack != null)
+                savestack();
         }
     }
 }

@@ -102,6 +102,17 @@ namespace Signum.Web
             if (this.ReadOnly)
                 options.Add("isReadOnly", this.ReadOnly);
 
+            if (Create)
+                options.Add("create", true);
+            if (Remove)
+                options.Add("remove", true);
+            if (Find)
+                options.Add("find", true);
+            if (View)
+                options.Add("view", true);
+            if (Navigate)
+                options.Add("navigate", this.Navigate);
+
             return options;
         }
 

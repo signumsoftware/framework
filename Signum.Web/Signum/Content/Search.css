@@ -40,7 +40,12 @@ th.drag-right
 {
     text-align: center;
     border-left: 1px solid #eee;
-    border-right: 1px solid #eee
+    border-right: 1px solid #eee;  
+}
+
+.sf-search-results > thead > tr > th > span 
+{
+      white-space: pre;
 }
 
 .sf-search-results > tbody > tr > td

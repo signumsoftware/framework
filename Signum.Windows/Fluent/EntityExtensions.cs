@@ -64,7 +64,7 @@ namespace Signum.Windows
 
             var visualErrors = VisualErrors(element).DefaultText(null);
 
-            var entityErrors = GetErrors((Modifiable)element.DataContext).Try(dic => dic.Values.ToString(d => d.Values.ToString("\r\n"), "\r\n"));
+            var entityErrors = GetErrors((Modifiable)element.DataContext)?.Values.ToString(d => d.Values.ToString("\r\n"), "\r\n");
 
             return "\r\n".Combine(visualErrors, entityErrors).DefaultText(null);
         }

@@ -4,7 +4,7 @@
 @{
     ModifiableEntity modifiable = Model.UntypedValue as ModifiableEntity;
     string partialViewName = ViewData[ViewDataKeys.PartialViewName].ToString();
-    var wc = new WidgetContext { TypeContext = Model, PartialViewName = partialViewName };
+    var wc = new WidgetContext { TypeContext = Model, PartialViewName = partialViewName, Url = Url };
 }
 <h3>
     @Html.AntiForgeryToken()
@@ -13,7 +13,7 @@
 
     @if (string.IsNullOrEmpty(ViewBag.Title))
     {
-        ViewBag.Title = modifiable.TryToString();
+        ViewBag.Title = modifiable?.ToString();
     }
     <span class="sf-entity-title">@(ViewBag.Title)</span>
     <br />

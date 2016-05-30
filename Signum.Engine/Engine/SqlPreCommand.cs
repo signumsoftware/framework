@@ -86,12 +86,14 @@ namespace Signum.Engine
                 .Select(s => new SqlPreCommandSimple(s))
                 .Combine(Spacing.Simple);
         }
+
+        public static bool AvoidOpenOpenSqlFileRetry = true;
      
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
             SafeConsole.WriteLineColor(ConsoleColor.Yellow, "There are changes!");
             string file = command.OpenSqlFile();
-            if (SafeConsole.Ask("Open again?"))
+            if (!AvoidOpenOpenSqlFileRetry && SafeConsole.Ask("Open again?"))
                 Process.Start(file);
         }
 
@@ -145,7 +147,7 @@ namespace Signum.Engine
 
         protected internal override int NumParameters
         {
-            get { return Parameters.Try(p => p.Count) ?? 0; }
+            get { return Parameters?.Count ?? 0; }
         }
 
         static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
@@ -162,7 +164,7 @@ namespace Signum.Engine
                 return "\'" + ((Guid)value).ToString() + "'";
 
             if (value is DateTime)
-                return "convert(datetime, '{0:s}', 126)".FormatWith(value);
+                return "convert(datetime, '{0:yyyy-MM-ddThh:mm:ss.fff}', 126)".FormatWith(value);
 
             if (value is TimeSpan)
                 return "convert(time, '{0:g}')".FormatWith(value);

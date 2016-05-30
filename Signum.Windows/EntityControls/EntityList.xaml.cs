@@ -44,8 +44,7 @@ namespace Signum.Windows
         {
             btCreate.Visibility = CanCreate().ToVisibility();
             btFind.Visibility = CanFind().ToVisibility();
-            btView.Visibility = CanView().ToVisibility();
-            btNavigate.Visibility = CanNavigate().ToVisibility();
+            btView.Visibility = CanViewOrNavigate().ToVisibility();
             btRemove.Visibility = CanRemove().ToVisibility();
             btUp.Visibility = this.CanMove() ? (CanMoveUp() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
             btDown.Visibility = this.CanMove() ? (CanMoveDown() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
@@ -122,7 +121,7 @@ namespace Signum.Windows
 
         protected override void btView_Click(object sender, RoutedEventArgs e)
         {
-            object entity = OnViewing(this.listBox.SelectedItem, false);
+            object entity = OnViewingOrNavigating(this.listBox.SelectedItem, false);
 
             if (entity != null)
             {

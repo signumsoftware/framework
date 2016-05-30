@@ -14,6 +14,8 @@
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
@@ -24,12 +26,6 @@
 					<Default>Entity</Default>
 				</Literal>
 				<Literal>
-					<ID>field</ID>
-					<ToolTip>Field</ToolTip>
-					<Default>bar</Default>
-					<Function></Function>
-				</Literal>
-				<Literal>
 					<ID>property</ID>
 					<ToolTip>Property</ToolTip>
 					<Default>Bar</Default>
@@ -37,12 +33,9 @@
 				</Literal>
 			</Declarations>
 			<Code Language="csharp">
-				<![CDATA[Lite<$type$> $field$;
-        public Lite<$type$> $property$
-        {
-            get { return $field$; }
-            set { Set(ref $field$, value); }
-        }$end$]]>
+				<![CDATA[[NotNullable]
+        [NotNullValidator]
+        public Lite<$type$> $property$ { get; set; }$end$]]>
 			</Code>
 		</Snippet>
 	</CodeSnippet>

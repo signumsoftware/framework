@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using Signum.Engine.Maps;
 using Signum.Utilities;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine
 {
@@ -22,7 +23,7 @@ namespace Signum.Engine
             if (!File.Exists(FileName))
                 return new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
-            return File.ReadAllLines(FileName).Where(s=> !string.IsNullOrWhiteSpace(s) && !s.StartsWith("-") && !s.StartsWith("/")).ToDictionary(a => a.Before('>'), a => a.After('>'));          
+            return File.ReadAllLines(FileName).Where(s=> !string.IsNullOrWhiteSpace(s) && !s.StartsWith("-") && !s.StartsWith("/")).ToDictionary(a => a.Before('>'), a => a.After('>'), "UserConnections");          
         }
 
         public static string Replace(string connectionString)
@@ -30,9 +31,14 @@ namespace Signum.Engine
             if (replacements == null)
                 replacements = LoadReplacements();
 
-            string schemaName = new SqlConnection(connectionString).Database;
+            Match m = Regex.Match(connectionString, @"(Initial Catalog|Database)\s*=\s*(?<databaseName>[^;]*)\s*;?", RegexOptions.IgnoreCase);
 
-            return replacements.TryGetC(schemaName) ?? connectionString;
+            if (!m.Success)
+                throw new InvalidOperationException("Database name not found");
+
+            string databaseName = m.Groups["databaseName"].Value;
+
+            return replacements.TryGetC(databaseName) ?? connectionString;
         }
     }
 }

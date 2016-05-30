@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.SchemaInfoTables
 {
@@ -73,6 +74,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysSchemas, IQueryable<SysTables>>> TablesExpression =
             s => Database.View<SysTables>().Where(t => t.schema_id == s.schema_id);
+        [ExpressionField]
         public IQueryable<SysTables> Tables()
         {
             return TablesExpression.Evaluate(this);
@@ -89,6 +91,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysTables, IQueryable<SysColumns>>> ColumnsExpression =
             t => Database.View<SysColumns>().Where(c => c.object_id == t.object_id);
+        [ExpressionField]
         public IQueryable<SysColumns> Columns()
         {
             return ColumnsExpression.Evaluate(this);
@@ -96,6 +99,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysTables, IQueryable<SysForeignKeys>>> ForeignKeysExpression =
             t => Database.View<SysForeignKeys>().Where(fk => fk.parent_object_id == t.object_id);
+        [ExpressionField]
         public IQueryable<SysForeignKeys> ForeignKeys()
         {
             return ForeignKeysExpression.Evaluate(this);
@@ -103,6 +107,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysTables, IQueryable<SysKeyConstraints>>> KeyConstraintsExpression =
             t => Database.View<SysKeyConstraints>().Where(fk => fk.parent_object_id == t.object_id);
+        [ExpressionField]
         public IQueryable<SysKeyConstraints> KeyConstraints()
         {
             return KeyConstraintsExpression.Evaluate(this);
@@ -111,6 +116,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysTables, IQueryable<SysIndexes>>> IndicesExpression =
             t => Database.View<SysIndexes>().Where(ix => ix.object_id == t.object_id);
+        [ExpressionField]
         public IQueryable<SysIndexes> Indices()
         {
             return IndicesExpression.Evaluate(this);
@@ -118,6 +124,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysTables, IQueryable<SysStats>>> StatsExpression =
             t => Database.View<SysStats>().Where(ix => ix.object_id == t.object_id);
+        [ExpressionField]
         public IQueryable<SysStats> Stats()
         {
             return StatsExpression.Evaluate(this);
@@ -125,6 +132,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysTables, IQueryable<SysExtendedProperties>>> ExtendedPropertiesExpression =
             t => Database.View<SysExtendedProperties>().Where(ep => ep.major_id == t.object_id);
+        [ExpressionField]
         public IQueryable<SysExtendedProperties> ExtendedProperties()
         {
             return ExtendedPropertiesExpression.Evaluate(this);
@@ -132,6 +140,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysTables, IQueryable<SysForeignKeyColumns>>> ForeignKeyColumnsExpression =
             fk => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.parent_object_id == fk.object_id);
+        [ExpressionField]
         public IQueryable<SysForeignKeyColumns> ForeignKeyColumns()
         {
             return ForeignKeyColumnsExpression.Evaluate(this);
@@ -139,6 +148,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysTables, SysSchemas>> SchemaExpression =
             i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
+        [ExpressionField]
         public SysSchemas Schema()
         {
             return SchemaExpression.Evaluate(this);
@@ -156,6 +166,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysViews, IQueryable<SysIndexes>>> IndicesExpression =
             v => Database.View<SysIndexes>().Where(ix => ix.object_id == v.object_id);
+        [ExpressionField]
         public IQueryable<SysIndexes> Indices()
         {
             return IndicesExpression.Evaluate(this);
@@ -163,6 +174,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysViews, IQueryable<SysColumns>>> ColumnsExpression =
             t => Database.View<SysColumns>().Where(c => c.object_id == t.object_id);
+        [ExpressionField]
         public IQueryable<SysColumns> Columns()
         {
             return ColumnsExpression.Evaluate(this);
@@ -217,6 +229,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysKeyConstraints, SysSchemas>> SchemaExpression =
             i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
+        [ExpressionField]
         public SysSchemas Schema()
         {
             return SchemaExpression.Evaluate(this);
@@ -237,6 +250,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysForeignKeys, IQueryable<SysForeignKeyColumns>>> ForeignKeyColumnsExpression =
             fk => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.constraint_object_id == fk.object_id);
+        [ExpressionField]
         public IQueryable<SysForeignKeyColumns> ForeignKeyColumns()
         {
             return ForeignKeyColumnsExpression.Evaluate(this);
@@ -244,6 +258,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysForeignKeys, SysSchemas>> SchemaExpression =
             i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
+        [ExpressionField]
         public SysSchemas Schema()
         {
             return SchemaExpression.Evaluate(this);
@@ -264,9 +279,9 @@ namespace Signum.Engine.SchemaInfoTables
     [TableName("indexes", SchemaName = "sys")]
     public class SysIndexes : IView
     {
+        [ViewPrimaryKey]
         public int index_id;
         public string name;
-        [ViewPrimaryKey]
         public int object_id;
         public bool is_unique;
         public bool is_primary_key;
@@ -275,6 +290,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysIndexes, IQueryable<SysIndexColumn>>> IndexColumnsExpression =
             ix => Database.View<SysIndexColumn>().Where(ixc => ixc.index_id == ix.index_id && ixc.object_id == ix.object_id);
+        [ExpressionField]
         public IQueryable<SysIndexColumn> IndexColumns()
         {
             return IndexColumnsExpression.Evaluate(this);
@@ -282,9 +298,18 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysIndexes, SysTables>> TableExpression =
             i => Database.View<SysTables>().Single(a => a.object_id == i.object_id); 
+        [ExpressionField] 
         public SysTables Table()
         {
             return TableExpression.Evaluate(this);
+        }
+
+        static Expression<Func<SysIndexes, SysPartitions>> PartitionExpression =
+        ix => Database.View<SysPartitions>().SingleOrDefault(au => au.object_id == ix.object_id && au.index_id == ix.index_id);
+        [ExpressionField]
+        public SysPartitions Partition()
+        {
+            return PartitionExpression.Evaluate(this);
         }
     }
 
@@ -312,6 +337,7 @@ namespace Signum.Engine.SchemaInfoTables
 
         static Expression<Func<SysStats, IQueryable<SysStatsColumn>>> StatsColumnsExpression =
          ix => Database.View<SysStatsColumn>().Where(ixc => ixc.stats_id == ix.stats_id && ixc.object_id == ix.object_id);
+        [ExpressionField]
         public IQueryable<SysStatsColumn> StatsColumns()
         {
             return StatsColumnsExpression.Evaluate(this);
@@ -355,8 +381,43 @@ namespace Signum.Engine.SchemaInfoTables
     {
         [ViewPrimaryKey]
         public int object_id;
+        public int schema_id;
         public string name;
         public string activation_procedure;
+
+        static Expression<Func<SysServiceQueues, SysSchemas>> SchemaExpression =
+            i => Database.View<SysSchemas>().Single(a => a.schema_id == i.schema_id);
+        [ExpressionField]
+        public SysSchemas Schema()
+        {
+            return SchemaExpression.Evaluate(this);
+        }
+    }
+
+    [TableName("partitions", SchemaName = "sys")]
+    public class SysPartitions : IView
+    {
+        [ViewPrimaryKey]
+        public int partition_id;
+        public int object_id;
+        public int index_id;
+        public int rows;
+
+        static Expression<Func<SysPartitions, IQueryable<SysAllocationUnits>>> AllocationUnitsExpression =
+        ix => Database.View<SysAllocationUnits>().Where(au => au.container_id == ix.partition_id);
+        [ExpressionField]
+        public IQueryable<SysAllocationUnits> AllocationUnits()
+        {
+            return AllocationUnitsExpression.Evaluate(this);
+        }
+    }
+
+    [TableName("allocation_units", SchemaName = "sys")]
+    public class SysAllocationUnits : IView
+    {
+        [ViewPrimaryKey]
+        public int container_id;
+        public int total_pages;
     }
 
 #pragma warning restore 649

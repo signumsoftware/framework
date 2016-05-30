@@ -67,19 +67,16 @@ namespace Signum.Engine.Basics
             return entity.SaveForceNew();
         }
 
-        static ExceptionEntity PreviousExceptionEntity(this Exception ex)
+        public static ExceptionEntity GetExceptionEntity(this Exception ex)
         {
             var exEntity = ex.Data[ExceptionEntity.ExceptionDataKey] as ExceptionEntity;
 
-            if (exEntity != null)
-                return exEntity;
-
-            return null;
+            return exEntity;
         }
 
         static ExceptionEntity GetEntity(Exception ex)
         {
-            ExceptionEntity entity = ex.PreviousExceptionEntity() ?? new ExceptionEntity(ex);
+            ExceptionEntity entity = ex.GetExceptionEntity() ?? new ExceptionEntity(ex);
 
             entity.ExceptionType = ex.GetType().Name;
 
@@ -95,7 +92,7 @@ namespace Signum.Engine.Basics
             entity.Environment = CurrentEnvironment;
             try
             {
-                entity.User = UserHolder.Current.ToLite(); //Session special situations
+                entity.User = UserHolder.Current?.ToLite(); //Session special situations
             }
             catch { }
 

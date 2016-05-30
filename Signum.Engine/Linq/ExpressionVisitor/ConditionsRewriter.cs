@@ -158,6 +158,14 @@ namespace Signum.Engine.Linq
             return base.VisitUnary(u);
         }
 
+        protected internal override Expression VisitSqlCast(SqlCastExpression castExpr)
+        {
+            var expression = MakeSqlValue(Visit(castExpr.Expression));
+            if (expression != castExpr.Expression)
+                return new SqlCastExpression(castExpr.Type, expression, castExpr.SqlDbType);
+            return castExpr;
+        }
+
 
         private bool IsTrue(Expression operand)
         {
@@ -302,8 +310,8 @@ namespace Signum.Engine.Linq
 
         protected internal override Expression VisitAggregate(AggregateExpression aggregate)
         {
-            Expression source = MakeSqlValue(Visit(aggregate.Source));
-            if (source != aggregate.Source)
+            Expression source = MakeSqlValue(Visit(aggregate.Expression));
+            if (source != aggregate.Expression)
                 return new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction);
             return aggregate;
         }

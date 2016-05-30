@@ -152,68 +152,6 @@ return new Button
 Some of this methods will disappear when C# gets `?.` operator. 
 Still if you use them now will be easy to change with a Regex. 
 
-### Try
-
-'Try' method is the ultimate 'break line removers'. Imagine you have a
-pseudo-code like this:
-
-
-```C#
-var a = Foo.Bar.Baz; 
-```
-
-And then someone tell you that Foo or Bar can be null values, then you
-have to change the code to:
-
-```C#
-//Imperative, and access Foo 3 times and Bar twice
-var a = null; 
-if(Foo != null) 
-  if(Foo.Bar != null)
-      a = Foo.Bar.Baz; 
-
-//Functional, still access Foo 3 times and Bar twice
-var a = Foo != null? (Foo.Bar != null? Foo.Bar.Baz : null) : null;
-
-//Imperative, and loong
-var a = null; 
-var f = Foo; 
-if(f != null)
-{ 
-  var b = f.Bar; 
-  if(b != null)
-      a = b.Baz; 
-}
-```
-
-Until we don't have the `?.` operator, our solution is to create the Try methods, that
-propagate nullability without throwing NullReferenceExceptions using lambdas that are conditionally executed. This is the
-idea:
-
-```C#
-var a = Foo.Try(f=>f.Bar).Try(b=>b.Baz); 
-
-public static R Try<T, R>(this T t, Func<T, R> func)
-{
-   if (t == null) 
-      return null;
-   return func(t);
-}
-```
-
-* If Foo is null, then the first Try returns null without evaluating the
-lambda and the second one does the same. 
-* If Foo is not null, the first Try is evaluated. 
- * let's say that then Bar is null, then the second Try
-returns null without evaluating the second lambda. 
- * If neither Foo or Bar are null, the the final Baz value is returned.
-
-The trick here is that we are using Extension Methods, and since they
-are really static methods you can call them even when Foo is null
-without a NullReferenceException being thrown.
-
-If you look at the source code, there are different overloads for classes, structs and nullables. 
-
 ### TryToString
 
 A shortcut for using ToString with Try behavior.
@@ -226,36 +164,8 @@ public static string TryToString(this object obj, string defaultValue)
 Example:
 
 ```C#
-((int?)null).TryToString(); //Returns null instead of throwing exception
-((int?)null).TryToString("0.00"); //for IFormattable
-```
-
-
-### TryDo
-
-Closing the circle, TryDo allows `Do` behaviour over objects that could
-be null.
-
-`
-Let -> Try 
-Do -> TryDo
-`
-
-There are two overloads, for nullables and reference types, but they are basically like this:
-
-```C#
-public static T TryDo<T>(this T t, Action<T> action)
-{
-    if (t != null)
-        action(t);
-    return t;
-}
-```
-
-Example:
-
-```C#
-Departament.Try(d=>d.Boss).TryDo(b=>b.Fire()); 
+((int?)null)?.ToString(); //Returns null instead of throwing exception
+((int?)null)?.ToString("0.00"); //for IFormattable
 ```
 
 

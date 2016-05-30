@@ -413,7 +413,7 @@ namespace Signum.Windows
             }
 
             btCreate.ToolTip = SearchMessage.CreateNew0_G.NiceToString()
-                .ForGenderAndNumber(entityColumn.Implementations.Value.Types.FirstOrDefault().Try(t => t.GetGender()) ?? 'm')
+                .ForGenderAndNumber(entityColumn.Implementations.Value.Types.FirstOrDefault()?.GetGender() ?? 'm')
                 .FormatWith(entityColumn.Implementations.Value.Types.CommaOr(a => a.NiceName()));
 
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
@@ -553,7 +553,7 @@ namespace Signum.Windows
             {
                 foreach (var fun in GetContextMenuItems.GetInvocationListTyped())
                 {
-                    var items = fun(this).Try(a => a.ToList());
+                    var items = fun(this)?.ToList();
 
                     if (items.IsNullOrEmpty())
                         continue;
@@ -577,10 +577,10 @@ namespace Signum.Windows
         
         void UpdateViewSelection()
         {
-            btNavigate.Visibility = Navigate && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
+            btView.Visibility = Navigate && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = Remove && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
 
-            SelectedItem = ((ResultRow)lvResult.SelectedItem).Try(r => r.Entity);
+            SelectedItem = ((ResultRow)lvResult.SelectedItem)?.Entity;
             if (MultiSelection)
                 SelectedItems = lvResult.SelectedItems.Cast<ResultRow>().Select(r => r.Entity).ToList();
             else
@@ -896,7 +896,7 @@ namespace Signum.Windows
 
             Entity result = Creating != null ? Creating() :
                 SelectType(t => Navigator.IsCreable(t, isSearch: true))
-                .Try(type => (Entity)new ConstructorContext(this).ConstructUntyped(type));
+                ?.Let(type => (Entity)new ConstructorContext(this).ConstructUntyped(type));
 
             if (result == null)
                 return;

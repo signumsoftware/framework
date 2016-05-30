@@ -1,30 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
-	<CodeSnippet Format="1.0.0">
-		<Header>
-			<Title>fieldCreation</Title>
-			<Shortcut>fieldCreation</Shortcut>
-			<Description>Field with automatic creation date</Description>
-			<Author>Signum Software</Author>
-			<SnippetTypes>
-				<SnippetType>Expansion</SnippetType>
-			</SnippetTypes>
-		</Header>
-		<Snippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>fieldCreation</Title>
+      <Shortcut>fieldCreation</Shortcut>
+      <Description>Field with automatic creation date</Description>
+      <Author>Signum Software</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
-			<Code Language="csharp">
-				<![CDATA[DateTime creationDate = TimeZoneManager.Now;
-        public DateTime CreationDate
-        {
-            get { return creationDate; }
-            private set { Set(ref creationDate, value); }
-        }$end$]]>
-			</Code>
-		</Snippet>
-	</CodeSnippet>
+      <Code Language="csharp">
+        <![CDATA[public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;$end$]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
 </CodeSnippets>

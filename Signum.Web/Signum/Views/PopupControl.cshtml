@@ -2,8 +2,10 @@
 @using Signum.Engine.Operations
 @model TypeContext
 @{ 
-    var modifiable = (ModifiableEntity)Model.UntypedValue; 
+    var modifiable = (ModifiableEntity)Model.UntypedValue;
     var viewMode = (ViewMode)ViewData[ViewDataKeys.ViewMode];
+    var partialViewName = ViewData[ViewDataKeys.PartialViewName].ToString();
+    var wc = new WidgetContext { TypeContext = Model, PartialViewName = partialViewName, Url = Url };
 }
 <div id="@Model.Compose("panelPopup")" class="sf-popup-control modal fade" tabindex="-1" role="dialog" aria-labelledby="XXXX" data-prefix="@Model.Prefix">
     <div class="modal-dialog modal-lg">
@@ -22,7 +24,7 @@
                     </div>
                 }
                 <h4>
-                    <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString()) </span>
+                    <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue?.ToString()) </span>
                     @{
                         var ident = Model.UntypedValue as Entity;
 
@@ -39,13 +41,14 @@
                 </h4>
             </div>
             <div class="modal-body">
+                @Html.RenderWidgets(wc)
                 <div class="sf-button-bar">
                     @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
                     {
                         Url = Url,
                         ViewMode = viewMode,
                         ControllerContext = this.ViewContext,
-                        PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
+                        PartialViewName = partialViewName,
                         Prefix = Model.Prefix,
                         ShowOperations = (bool?)ViewData[ViewDataKeys.ShowOperations] ?? true,
                     }, modifiable).ToStringButton(Html)
@@ -63,7 +66,7 @@
                     @{ 
                         ViewData[ViewDataKeys.InPopup] = true;
 
-                        Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
+                        Html.RenderPartial(partialViewName, Model);
                     }
                 </div>
             </div>

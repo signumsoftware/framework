@@ -637,9 +637,12 @@ namespace Signum.Windows
             ValueLine vl = fe as ValueLine;
             if (vl != null && context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.Type == typeof(string))
             {
-                var slv = Validator.TryGetPropertyValidator(context).Try(pv => pv.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault());
+                var slv = Validator.TryGetPropertyValidator(context)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault();
                 if (slv != null && slv.Max != -1)
                     vl.MaxTextLength = slv.Max;
+
+                //if (slv != null && slv.MultiLine)
+                //    vl.ValueLineType = ValueLineType.TextArea;
             }
         }
 
@@ -647,7 +650,7 @@ namespace Signum.Windows
         {
             if (fe.NotSet(AutomationProperties.NameProperty))
             {
-                AutomationProperties.SetName(fe, context.TryToString() ?? "");
+                AutomationProperties.SetName(fe, context?.ToString() ?? "");
             }
         }
 

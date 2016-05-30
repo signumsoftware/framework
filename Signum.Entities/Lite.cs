@@ -50,7 +50,7 @@ namespace Signum.Entities
 
         }
 
-        [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
+        [Serializable]
         public sealed class LiteImp<T> : LiteImp, Lite<T>, ISerializable
             where T : Entity
         {
@@ -153,7 +153,7 @@ namespace Signum.Entities
                 if (id == null)
                     throw new InvalidOperationException("Removing entity not allowed in new Lite");
 
-                this.toStr = this.UntypedEntityOrNull.TryToString();
+                this.toStr = this.UntypedEntityOrNull?.ToString();
                 this.entityOrNull = null;
             }
 
@@ -311,6 +311,7 @@ namespace Signum.Entities
 
         public static Lite<T> Parse<T>(string liteKey) where T : class, IEntity
         {
+
             return (Lite<T>)Lite.Parse(liteKey);
         }
 
@@ -359,10 +360,7 @@ namespace Signum.Entities
         public static Lite<T> ToLite<T>(this T entity)
           where T : class, IEntity
         {
-            if (entity == null)
-                return null;
-
-            if (entity.IsNew)
+            if (entity.IdOrNull==null)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
             return (Lite<T>)giNewLite.GetInvoker(entity.GetType())(entity.Id, entity.ToString());
@@ -371,9 +369,6 @@ namespace Signum.Entities
         public static Lite<T> ToLite<T>(this T entity, string toStr)
             where T : class, IEntity
         {
-            if (entity == null)
-                return null;
-
             if (entity.IsNew)
                 throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
@@ -383,18 +378,12 @@ namespace Signum.Entities
         public static Lite<T> ToLiteFat<T>(this T entity)
          where T : class, IEntity
         {
-            if (entity == null)
-                return null;
-
             return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((Entity)(IEntity)entity, entity.ToString());
         }
 
         public static Lite<T> ToLiteFat<T>(this T entity, string toStr)
           where T : class, IEntity
         {
-            if (entity == null)
-                return null;
-
             return (Lite<T>)giNewLiteFat.GetInvoker(entity.GetType())((Entity)(IEntity)entity, toStr ?? entity.ToString());
         }
 

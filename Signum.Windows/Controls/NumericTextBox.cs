@@ -75,7 +75,7 @@ namespace Signum.Windows
 
         private void ConverterChanged(object converter)
         {
-            AutomationProperties.SetItemStatus(this, ((NullableNumericConverter)converter).Try(c => c.Format));
+            AutomationProperties.SetItemStatus(this, ((NullableNumericConverter)converter)?.Format);
         }
 
         public NumericTextBox()

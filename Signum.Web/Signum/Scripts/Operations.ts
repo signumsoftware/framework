@@ -12,6 +12,7 @@ export interface OperationOptions {
     controllerUrl?: string;
     requestExtraJsonData?: any;
     isLite?: boolean;
+    isContextual?: boolean;
     avoidReturnRedirect?: boolean;
     avoidReturnView?: boolean;
     confirmMessage?: string;
@@ -50,6 +51,7 @@ export function executeAjax(options: EntityOperationOptions): Promise<Entities.E
     return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options) })
         .then(result=> {
             Validator.assertModelStateErrors(result, options.prefix);
+            assertMessageBox(result);
             return Entities.EntityHtml.fromHtml(options.prefix, result)
         });
 }
@@ -74,6 +76,14 @@ export function executeAjaxContextual(options: OperationOptions, runtimeInfo?: E
         .then(SF.isEmpty);
 }
 
+export function executeDefaultContextualMultiple(options: OperationOptions): Promise<void> {
+
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
+    return SF.ajaxPost({ url: options.controllerUrl || SF.Urls.operationExecuteMultiple, data: conextualMultipleRequestData(options) })
+        .then(result=> { markCells(options.prefix); });
+}
 
 export function constructFromDefault(options: EntityOperationOptions, openNewWindowOrEvent : any): Promise<void> {
     options = $.extend({
@@ -101,8 +111,38 @@ export function constructFromAjax(options: EntityOperationOptions, newPrefix: st
     }, options);
 
     return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options, newPrefix) })
-        .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
+        .then(result=> {
+            assertMessageBox(result);
+            return Entities.EntityHtml.fromHtml(newPrefix, result);
+        });
 }
+
+export function assertMessageBox(ajaxResult) {
+
+    var mb = getMessageBoxOptions(ajaxResult);
+
+    if (mb) {
+        Navigator.openMessageBox(mb);
+        throw mb;
+    }
+}
+
+export function getMessageBoxOptions(ajaxResult): Navigator.MessageBoxOptions {
+    if (SF.isEmpty(ajaxResult))
+        return null;
+
+    if (typeof ajaxResult !== "object")
+        return null;
+
+    if (ajaxResult.result == null)
+        return null;
+
+    if (ajaxResult.result == 'messageBox')
+        return <Navigator.MessageBoxOptions>ajaxResult;
+
+    return null;
+}
+
 
 export function constructFromSubmit(options: EntityOperationOptions) : void {
     options = $.extend({
@@ -136,7 +176,10 @@ export function constructFromAjaxContextual(options: OperationOptions, newPrefix
     }, options);
 
     return SF.ajaxPost({ url: options.controllerUrl, data: contextualRequestData(options, newPrefix, runtimeInfo) })
-        .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
+        .then(result=> {
+            assertMessageBox(result);
+            return Entities.EntityHtml.fromHtml(newPrefix, result);
+        });
 }
 
 export function constructFromSubmitContextual(options: OperationOptions, runtimeInfo?: Entities.RuntimeInfo): void {
@@ -146,6 +189,15 @@ export function constructFromSubmitContextual(options: OperationOptions, runtime
     }, options);
 
     SF.submitOnly(options.controllerUrl, contextualRequestData(options, "", runtimeInfo), true);
+}
+
+export function constructFromDefaultContextualMultiple(options: OperationOptions): Promise<void> {
+
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
+    return SF.ajaxPost({ url: options.controllerUrl || SF.Urls.operationConstructFromMultiple, data: conextualMultipleRequestData(options) })
+        .then(result=> { markCells(options.prefix); });
 }
 
 export function deleteDefault(options: EntityOperationOptions) : Promise <void> {
@@ -198,6 +250,15 @@ export function deleteAjaxContextual(options: OperationOptions, runtimeInfo?: En
     return SF.ajaxPost({ url: options.controllerUrl, data: contextualRequestData(options, null, runtimeInfo) });
 }
 
+export function deleteDefaultContextualMultiple(options: OperationOptions): Promise<void> {
+
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
+    return SF.ajaxPost({ url: options.controllerUrl || SF.Urls.operationDeleteMultiple, data: conextualMultipleRequestData(options) })
+        .then(result=> { markCells(options.prefix); });
+}
+
 export function constructFromManyDefault(options: OperationOptions, openNewWindowOrEvent: any): Promise<void> {
 
     if (!confirmIfNecessary(options))
@@ -209,6 +270,9 @@ export function constructFromManyDefault(options: OperationOptions, openNewWindo
     } else {
         return constructFromManyAjax(options, getNewPrefix(options)).then(eHtml=> {
             markCells(options.prefix);
+            if (!eHtml)
+                return null;
+
             return openPopup(eHtml);
         });
     }
@@ -220,8 +284,11 @@ export function constructFromManyAjax(options: OperationOptions, newPrefix: stri
         controllerUrl: SF.Urls.operationConstructFromMany,
     }, options);
 
-    return SF.ajaxPost({ url: options.controllerUrl, data: constructFromManyRequestData(options, newPrefix) })
-        .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
+    return SF.ajaxPost({ url: options.controllerUrl, data: conextualMultipleRequestData(options, newPrefix) })
+        .then(result=> {
+            assertMessageBox(result);
+            return Entities.EntityHtml.fromHtml(newPrefix, result);
+        });
 }
 
 export function constructFromManySubmit(options: OperationOptions): void {
@@ -230,7 +297,7 @@ export function constructFromManySubmit(options: OperationOptions): void {
         controllerUrl: SF.Urls.operationConstructFromMany,
     }, options);
 
-    SF.submitOnly(options.controllerUrl, constructFromManyRequestData(options, ""), true);
+    SF.submitOnly(options.controllerUrl, conextualMultipleRequestData(options, ""), true);
 }
 
 export function confirmIfNecessary(options: OperationOptions): boolean {
@@ -243,7 +310,7 @@ export function openPopup(entityHtml : Entities.EntityHtml) : Promise<void> {
 }
 
 export function markCells(prefix: string) {
-    $("tr.active").addClass("sf-entity-ctxmenu-success");
+    Finder.getFor(prefix).then(sc=>sc.markSelectedAsSuccess());
     notifyExecuted();
 }
 
@@ -268,7 +335,7 @@ export function entityRequestData(options: EntityOperationOptions, newPrefix?: s
     return $.extend(result, formValues);
 }
 
-export function constructFromManyRequestData(options: OperationOptions, newPrefix?: string, liteKey? : string[]) : FormData {
+export function conextualMultipleRequestData(options: OperationOptions, newPrefix?: string, liteKey? : string[]) : FormData {
 
     var result = baseRequestData(options, newPrefix); 
 
@@ -277,7 +344,7 @@ export function constructFromManyRequestData(options: OperationOptions, newPrefi
         liteKey = items.map(i=> i.key());
     }
 
-    result["liteKeys"] = liteKey.join(",");
+    result["liteKeys"] = liteKey.map(i=> i.replace(",","#coma#")).join(",");
 
     return result; 
 }

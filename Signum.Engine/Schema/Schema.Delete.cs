@@ -19,7 +19,7 @@ namespace Signum.Engine.Maps
                                    .FormatWith(tml.Name, tml.BackReference.Name.SqlEscape(), ident.Id, comment ?? ident.ToString()))).Combine(Spacing.Simple);
 
             var main = new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
-                    .FormatWith(Name, "Id", ident.Id, comment ?? ident.ToString()));
+                    .FormatWith(Name, this.PrimaryKey.Name.SqlEscape(), ident.Id, comment ?? ident.ToString()));
 
             return SqlPreCommand.Combine(Spacing.Simple, pre, collections, main);
         }

@@ -20,6 +20,8 @@ using System.IO;
 using Signum.Engine.Basics;
 using System.Globalization;
 using Signum.Utilities.Reflection;
+using Signum.Web.Operations;
+using Signum.Engine.Operations;
 
 namespace Signum.Web.Controllers
 {
@@ -34,7 +36,7 @@ namespace Signum.Web.Controllers
 
             using (Navigator.Manager.OnRetrievingForView(lite))
             {
-                return Navigator.NormalPage(this, Database.Retrieve(lite));
+                return Navigator.NormalPage(this, Database.RetrieveAndForget(lite));
             }
         }
 
@@ -46,7 +48,7 @@ namespace Signum.Web.Controllers
             if (!type.IsEntity())
                 throw new InvalidOperationException("Only classes that inherit from Entity can be created using this Action"); 
 
-            var entity = (Entity)new ConstructorContext(this).ConstructUntyped(type);
+            var entity = (Entity)new ConstructorContext(this, this.TryGetOperationInfo(type)).ConstructUntyped(type);
 
             return this.NormalPage(entity);
         }
@@ -66,7 +68,7 @@ namespace Signum.Web.Controllers
                 }
             }
             else
-                entity = (Entity)new ConstructorContext(this).ConstructUntyped(type);
+                entity = (Entity)new ConstructorContext(this, this.TryGetOperationInfo(type)).ConstructUntyped(type);
 
             return this.PopupNavigate(entity, new PopupNavigateOptions(prefix)
             {
@@ -91,14 +93,14 @@ namespace Signum.Web.Controllers
                  }
             }
             else
-                entity = (Entity)new ConstructorContext(this).ConstructUntyped(type);
+                entity = (Entity)new ConstructorContext(this, this.TryGetOperationInfo(type)).ConstructUntyped(type);
 
             return this.PopupView(entity, new PopupViewOptions(prefix)
             {
                 PartialViewName = partialViewName,
                 ReadOnly = readOnly,
                 ShowOperations = showOperations ?? true,
-                SaveProtected = saveProtected
+                RequiresSaveOperation = saveProtected
             });
         }
 
@@ -117,7 +119,7 @@ namespace Signum.Web.Controllers
                  }
             }
             else
-                entity = (Entity)new ConstructorContext(this).ConstructUntyped(type);
+                entity = (Entity)new ConstructorContext(this, this.TryGetOperationInfo(type)).ConstructUntyped(type);
 
             TypeContext tc = TypeContextUtilities.UntypedNew((Entity)entity, prefix);
 
@@ -202,7 +204,7 @@ namespace Signum.Web.Controllers
                     {
                         PartialViewName = partialViewName,
                         ReadOnly = readOnly,
-                        SaveProtected = saveProtected,
+                        RequiresSaveOperation = saveProtected,
                         ShowOperations = showOperations
                     });
                 case VisualConstructStyle.PopupNavigate:

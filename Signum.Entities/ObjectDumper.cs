@@ -24,7 +24,7 @@ namespace Signum.Entities
             {
                 var od = new DumpVisitor(showIgnoredFields, showByteArrays);
                 od.DumpObject(o);
-                return od.Sb.TryToString();
+                return od.Sb?.ToString();
             }
         }
 
@@ -104,7 +104,7 @@ namespace Signum.Entities
                         var id =  ((Lite<Entity>)o).IdOrNull;
                         Sb.Append(id.HasValue ? "({0})".FormatWith(id.Value) : "");
                     }
-                    Sb.Append(" /* [CICLE] {0} */".FormatWith(o.ToString()));
+                    Sb.Append(" /* [CICLE] {0} */".FormatWith(SafeToString(o)));
                     return;
                 }
 
@@ -112,13 +112,15 @@ namespace Signum.Entities
 
                 if (o is Entity)
                 {
-                    var ident = o as Entity;
-                    var ent = o as Entity;
+                    var ent = (Entity)o;
                     Sb.Append("({0}{1})".FormatWith(
-                        ident.IsNew ? "IsNew" : ident.IdOrNull.ToString(),
-                        ent == null ? null : ", ticks: " + ent.ticks
+                        ent.IsNew ? "IsNew" : ent.IdOrNull.ToString(),
+                        ent.ticks == 0 ? null : ", ticks: " + ent.ticks
                         ));
-                    Sb.Append(" /* {0} */".FormatWith(o.ToString()));
+
+                    string toString = SafeToString(o);
+
+                    Sb.Append(" /* {0} */".FormatWith(toString));
                 }
 
                 if (o is Lite<Entity>)
@@ -145,7 +147,7 @@ namespace Signum.Entities
                 level += 1;
 
                 if (t.Namespace.HasText() && t.Namespace.StartsWith("System.Reflection"))
-                    Sb.AppendLine("ToString = {0},".FormatWith(o.ToString()).Indent(level));
+                    Sb.AppendLine("ToString = {0},".FormatWith(SafeToString(o)).Indent(level));
                 else if (o is Exception)
                 {
                     var ex = o as Exception;
@@ -177,7 +179,7 @@ namespace Signum.Entities
                         }
                     }
                 }
-                else if (t.IsAnonymous())
+                else if (!typeof(ModifiableEntity).IsAssignableFrom(t))
                     foreach (var prop in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                     {
                         DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null));
@@ -195,18 +197,40 @@ namespace Signum.Entities
                             if (val == null)
                                 continue;
 
-                            DumpPropertyOrField(field.FieldType, field.Name, val);
+                            DumpPropertyOrField(field.FieldType, GetFieldName(field), val);
                         }
 
-                        if (!showIgnoredFields && field.IsDefined(typeof(IgnoreAttribute), false))
+                        if (!showIgnoredFields && (field.HasAttribute<IgnoreAttribute>()) || (Reflector.TryFindPropertyInfo(field)?.HasAttribute<IgnoreAttribute>() == true))
                             continue;
 
-                        DumpPropertyOrField(field.FieldType, field.Name, field.GetValue(o));
+                        DumpPropertyOrField(field.FieldType, GetFieldName(field), field.GetValue(o));
                     }
 
                 level -= 1;
                 Sb.Append("}".Indent(level));
                 return;
+            }
+
+            private static string GetFieldName(FieldInfo field)
+            {
+                if (field.Name.StartsWith("<"))
+                    return field.Name.Between('<', '>');
+
+                return field.Name;
+            }
+
+            private static string SafeToString(object o)
+            {
+                string toString;
+                try
+                {
+                    toString = o.ToString();
+                }
+                catch (Exception e)
+                {
+                    toString = "ToString thrown " + e.GetType().Name + ":" + e.Message.Etc(100);
+                }
+                return toString;
             }
 
             private bool IsMixinField(FieldInfo field)
@@ -257,7 +281,7 @@ namespace Signum.Entities
 
             string DumpValue(object item)
             {
-                string value = item.TryToString() ?? "null";
+                string value = item?.ToString() ?? "null";
                 string startDelimiter = null;
                 string endDelimiter = null;
 

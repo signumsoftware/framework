@@ -14,7 +14,12 @@
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Utilities</Namespace>
+        </Import>
+        <Import>
+          <Namespace>System.Linq.Expressions</Namespace>
         </Import>
       </Imports>
 			<Declarations>
@@ -23,11 +28,6 @@
 					<ToolTip>Name of the Entity</ToolTip>
 					<Default>Foo</Default>
 				</Literal>
-        <Literal>
-          <ID>name</ID>
-          <ToolTip>Name field</ToolTip>
-          <Default>name</Default>
-        </Literal>
         <Literal>
           <ID>Name</ID>
           <ToolTip>Name Property</ToolTip>
@@ -39,27 +39,24 @@
     public class $entityName$Entity: Entity
     {
         [NotNullable, SqlDbType( Size = 100), UniqueIndex]
-        string $name$;
         [StringLengthValidator(AllowNulls=false, Min = 3, Max = 100)]
-        public string $Name$
-        {
-            get { return $name$; }
-            set { SetToStr(ref $name$, value); }
-        }
+        public string $Name$ { get; set; }
         
         $end$
 
 
-        static Expression<Func<$entityName$Entity, string>> ToStringExpression = e => e.$name$;
+        static Expression<Func<$entityName$Entity, string>> ToStringExpression = @this => @this.$Name$;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
     }
     
+    [AutoInit]
     public static class $entityName$Operation
     {
-        public static readonly ExecuteSymbol<$entityName$Entity> Save = OperationSymbol.Execute<$entityName$Entity>();
+        public static readonly ExecuteSymbol<$entityName$Entity> Save;
     }]]>
 			</Code>
 		</Snippet>

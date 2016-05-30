@@ -14,6 +14,7 @@ using System.Globalization;
 using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
+using System.CodeDom.Compiler;
 
 namespace Signum.Entities.Reflection
 {
@@ -276,15 +277,31 @@ namespace Signum.Entities.Reflection
         static readonly BindingFlags privateFlags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.NonPublic;
         public static FieldInfo TryFindFieldInfo(Type type, PropertyInfo pi)
         {
+            string prefix = pi.DeclaringType != type && pi.DeclaringType.IsInterface ? pi.DeclaringType.FullName + "." : null;
+
             FieldInfo fi = null;
             for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
             {
-                fi = (tempType.GetField(pi.Name, privateFlags) ??
-                      tempType.GetField("m" + pi.Name, privateFlags) ??
-                      tempType.GetField("_" + pi, privateFlags));
+                fi = tempType.GetField("<" + pi.Name + ">k__BackingField", privateFlags) ??
+                    (prefix != null ? tempType.GetField("<" + prefix + pi.Name + ">k__BackingField", privateFlags) : null);
+                if (fi != null)
+                    CheckSignumProcessed(fi);
+                else
+                    fi = tempType.GetField(pi.Name, privateFlags);
             }
 
             return fi;
+        }
+
+        public static ConcurrentDictionary<Assembly, bool> processedAssemblies = new ConcurrentDictionary<Assembly, bool>();
+
+        private static void CheckSignumProcessed(FieldInfo fieldInfo)
+        {
+            var isProcessed = processedAssemblies.GetOrAdd(fieldInfo.DeclaringType.Assembly,
+                a => a.GetCustomAttributes<GeneratedCodeAttribute>().Any(gc => gc.Tool == "SignumTask"));
+
+            if (!isProcessed)
+                throw new InvalidOperationException("Entity {0} has auto-property {1}, but you can not use auto-propertes if the assembly iy not processed by 'SignumTask'".FormatWith(fieldInfo.DeclaringType.Name, fieldInfo.FieldType.Name));
         }
 
         public static PropertyInfo FindPropertyInfo(FieldInfo fi)
@@ -301,7 +318,14 @@ namespace Signum.Entities.Reflection
         {
             const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-            var propertyName = PropertyName(fi.Name);
+            string propertyName = null;
+            if(fi.Name.StartsWith("<"))
+            {
+                CheckSignumProcessed(fi);
+                propertyName = fi.Name.After('<').Before('>');
+            }
+            else
+                propertyName = fi.Name.FirstUpper();
 
             var result = fi.DeclaringType.GetProperty(propertyName, flags, null, null, new Type[0], null);
 
@@ -319,18 +343,6 @@ namespace Signum.Entities.Reflection
             return null;
         }
         
-        public static Func<string, string> PropertyName = (string fieldName) =>
-        {
-            //if (name.Length > 2)
-            //{
-            //    if (name.StartsWith("_"))
-            //        name = name.Substring(1);
-            //    else if (name.StartsWith("m") && char.IsUpper(name[1]))
-            //        name = Char.ToLower(name[1]) + name.Substring(2);
-            //}
-
-            return fieldName.FirstUpper();
-        };
 
         public static bool QueryableProperty(Type type, PropertyInfo pi)
         {
@@ -339,7 +351,7 @@ namespace Signum.Entities.Reflection
                 return spa.AvailableForQueries;
 
             FieldInfo fi = TryFindFieldInfo(type, pi);
-            if (fi != null && !fi.HasAttribute<IgnoreAttribute>())
+            if (fi != null && !fi.HasAttribute<IgnoreAttribute>() && !pi.HasAttribute<IgnoreAttribute>())
                 return true;
 
             if (ExpressionCleaner.HasExpansions(type, pi))
@@ -474,6 +486,26 @@ namespace Signum.Entities.Reflection
         {
             if (!ValidIdentifier(step))
                 throw new FormatException("'{0}' is not a valid identifier".FormatWith(step));
+        }
+
+        public static PropertyInfo PropertyInfo<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
+        {
+            return ReflectionTools.GetPropertyInfo(property);
+        }
+
+        public static string NicePropertyName<T>(this T entity, Expression<Func<T, object>> property) where T : ModifiableEntity
+        {
+            return ReflectionTools.GetPropertyInfo(property).NiceName();
+        }
+
+        public static int NumDecimals(string format)
+        {
+            var str = (0.0).ToString(format).TryAfter('.');
+
+            if(str == null)
+                return 0;
+
+            return str.Length;
         }
     }
 }

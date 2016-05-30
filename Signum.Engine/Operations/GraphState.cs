@@ -26,15 +26,13 @@ namespace Signum.Engine.Operations
     public class Graph<T, S>
         where T : Entity
     {
-        
-
         public interface IGraphOperation : IOperation
         {
         }
 
         public interface IGraphToStateOperation : IGraphOperation
         {
-            S ToState { get; }
+            List<S> ToStates { get; }
         }
 
         public interface IGraphFromStatesOperation : IGraphOperation, IGraphHasFromStatesOperation
@@ -44,16 +42,14 @@ namespace Signum.Engine.Operations
 
         public class Construct : Graph<T>.Construct, IGraphToStateOperation
         {
-            Box<S> toState;
-            public S ToState
-            {
-                get { return toState.Value; }
-                set { toState = new Box<S>(value); }
-            }
+            public List<S> ToStates { get; private set; }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
+            Type IOperation.StateType { get { return typeof(S); } }
 
             public Construct(ConstructSymbol<T>.Simple symbol)
                 : base(symbol)
             {
+                ToStates = new List<S>();
             }
 
             protected override void AssertEntity(T entity)
@@ -63,32 +59,41 @@ namespace Signum.Engine.Operations
 
             public override string ToString()
             {
-                return base.ToString() + " in state " + ToState;
+                return base.ToString() + " in state " + ToStates.CommaOr();
             }
 
             public override void AssertIsValid()
             {
+                AssertGetState();
                 base.AssertIsValid();
 
-                if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".FormatWith(Symbol.Symbol));
+                if (ToStates.IsEmpty())
+                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
 
             }
+        }
+
+        private static void AssertGetState()
+        {
+            if (GetState == null)
+            {
+                var graphName = typeof(Graph<T, S>).TypeName();
+                throw new InvalidOperationException($"{graphName}.GetState is not set. Consider writing something like 'GetState = a => a.State' at the beginning of your Register method.");
+            }
+               
         }
 
         public class ConstructFrom<F> : Graph<T>.ConstructFrom<F>, IGraphToStateOperation
             where F : class, IEntity
         {
-            Box<S> toState;
-            public S ToState
-            {
-                get { return toState.Value; }
-                set { toState = new Box<S>(value); }
-            }
+            public List<S> ToStates { get; private set; }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
+            Type IOperation.StateType { get { return typeof(S); } }
 
             public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
                 : base(symbol)
             {
+                ToStates = new List<S>();
             }
 
             protected override void AssertEntity(T result)
@@ -100,31 +105,30 @@ namespace Signum.Engine.Operations
 
             public override string ToString()
             {
-                return base.ToString() + " in state " + ToState;
+                return base.ToString() + " in state " + ToStates.CommaOr();
             }
 
             public override void AssertIsValid()
             {
+                AssertGetState();
                 base.AssertIsValid();
 
-                if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".FormatWith(Symbol.Symbol));
+                if (ToStates.IsEmpty())
+                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
             }
         }
 
         public class ConstructFromMany<F> : Graph<T>.ConstructFromMany<F>, IGraphToStateOperation
             where F : class, IEntity
         {
-            Box<S> toState;
-            public S ToState
-            {
-                get { return toState.Value; }
-                set { toState = new Box<S>(value); }
-            }
+            public List<S> ToStates { get; private set; }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
+            Type IOperation.StateType { get { return typeof(S); } }
 
             public ConstructFromMany(ConstructSymbol<T>.FromMany<F> symbol)
                 : base(symbol)
             {
+                ToStates = new List<S>();
             }
 
             protected override void AssertEntity(T result)
@@ -135,28 +139,26 @@ namespace Signum.Engine.Operations
 
             public override string ToString()
             {
-                return base.ToString() + " in state " + ToState;
+                return base.ToString() + " in state " + ToStates.CommaOr();
             }
 
             public override void AssertIsValid()
             {
+                AssertGetState();
                 base.AssertIsValid();
 
-                if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".FormatWith(Symbol));
+                if (ToStates.IsEmpty())
+                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
             }
         }
 
         public class Execute : Graph<T>.Execute, IGraphToStateOperation, IGraphFromStatesOperation, IEntityOperation
         {
-            Box<S> toState;
-            public S ToState
-            {
-                get { return toState.Value; }
-                set { toState = new Box<S>(value); }
-            }
-            
             public List<S> FromStates { get; private set; }
+            public List<S> ToStates { get; private set; }
+            IEnumerable<Enum> IOperation.UntypedToStates { get { return ToStates.Cast<Enum>(); } }
+            IEnumerable<Enum> IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
+            Type IOperation.StateType { get { return typeof(S); } }
 
             bool IGraphHasFromStatesOperation.HasFromStates
             {
@@ -167,6 +169,7 @@ namespace Signum.Engine.Operations
                 : base(symbol)
             {
                 FromStates = new List<S>();
+                ToStates = new List<S>();
             }
 
             bool IEntityOperation.HasCanExecute { get { return true; } }
@@ -190,10 +193,11 @@ namespace Signum.Engine.Operations
 
             public override void AssertIsValid()
             {
+                AssertGetState();
                 base.AssertIsValid();
 
-                if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".FormatWith(Symbol));
+                if (ToStates.IsEmpty())
+                    throw new InvalidOperationException("Operation {0} does not have ToStates initialized".FormatWith(Symbol.Symbol));
 
                 if (FromStates.IsEmpty())
                     throw new InvalidOperationException("Operation {0} does not have FromStates initialized".FormatWith(Symbol));
@@ -203,6 +207,8 @@ namespace Signum.Engine.Operations
         public class Delete : Graph<T>.Delete, IGraphOperation, IGraphFromStatesOperation
         {
             public List<S> FromStates { get; private set; }
+            IEnumerable<Enum> IOperation.UntypedFromStates { get { return FromStates.Cast<Enum>(); } }
+            Type IOperation.StateType { get { return typeof(S); } }
 
             bool IGraphHasFromStatesOperation.HasFromStates
             {
@@ -229,6 +235,7 @@ namespace Signum.Engine.Operations
 
             protected override void OnDelete(T entity, object[] args)
             {
+                AssertGetState();
                 S oldState = Graph<T, S>.GetStateFunc(entity);
 
                 base.OnDelete(entity, args);
@@ -293,22 +300,17 @@ namespace Signum.Engine.Operations
                         {
                             Execute gOp = (Execute)item;
 
-                            if (gOp.FromStates == null)
-                                Add("[All States]", gOp.ToState.ToString(), item.OperationSymbol);
-                            else
-                                foreach (var s in gOp.FromStates)
-                                    Add(s.ToString(), gOp.ToState.ToString(), item.OperationSymbol);
+                            foreach (var f in gOp.FromStates)
+                                foreach (var t in gOp.ToStates)
+                                    Add(f.ToString(), t.ToString(), item.OperationSymbol);
 
 
                         } break;
                     case OperationType.Delete:
                         {
                             Delete dOp = (Delete)item;
-                            if (dOp.FromStates == null)
-                                Add("[All States]", "[Deleted]", item.OperationSymbol);
-                            else
-                                foreach (var s in dOp.FromStates)
-                                    Add(s.ToString(), "[Deleted]", item.OperationSymbol);
+                            foreach (var f in dOp.FromStates)
+                                Add(f.ToString(), "[Deleted]", item.OperationSymbol);
 
 
                         } break;
@@ -320,8 +322,9 @@ namespace Signum.Engine.Operations
                                             item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".FormatWith(item.GetType().GetGenericArguments()[2].TypeName()) :
                                             item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".FormatWith(item.GetType().GetGenericArguments()[2].TypeName()) : "";
 
-                            Add(from, ((IGraphToStateOperation)item).ToState.ToString(), item.OperationSymbol);
-
+                            var dtoState = (IGraphToStateOperation)item;
+                            foreach (var t in dtoState.ToStates)
+                                Add(from, t.ToString(), item.OperationSymbol);
 
                         } break;
                 }
@@ -334,18 +337,8 @@ namespace Signum.Engine.Operations
         {
             S state = GetStateFunc(entity);
 
-            if (!state.Equals(operation.ToState))
-                throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".FormatWith(operation.OperationSymbol, operation.ToState, state));
+            if (!operation.ToStates.Contains(state))
+                throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".FormatWith(operation.OperationSymbol, operation.ToStates.CommaOr(), state));
         }
-    }
-
-    internal class Box<T>
-    {
-        public Box(T value)
-        {
-            this.Value = value;
-        }
-
-        public readonly T Value;
     }
 }

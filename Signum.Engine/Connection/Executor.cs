@@ -77,9 +77,9 @@ namespace Signum.Engine
             }
         }
 
-        public static void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options)
+        public static void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)
         {
-            Connector.Current.BulkCopy(dt, destinationTable, options);
+            Connector.Current.BulkCopy(dt, destinationTable, options, timeout);
         }
     }
 }

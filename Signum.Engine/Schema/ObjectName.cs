@@ -51,7 +51,7 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode();
         }
 
-        internal static ServerName Parse(string name)
+        public static ServerName Parse(string name)
         {
             if (string.IsNullOrEmpty(name))
                 return null;
@@ -105,7 +105,7 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode() ^ (Server == null ? 0 : Server.GetHashCode());
         }
 
-        internal static DatabaseName Parse(string name)
+        public static DatabaseName Parse(string name)
         {
             if (string.IsNullOrEmpty(name))
                 return null;
@@ -174,7 +174,7 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode() ^ (Database == null ? 0 : Database.GetHashCode());
         }
 
-        internal static SchemaName Parse(string name)
+        public static SchemaName Parse(string name)
         {
             if (string.IsNullOrEmpty(name))
                 return SchemaName.Default;
@@ -224,7 +224,7 @@ namespace Signum.Engine.Maps
             return Name.GetHashCode() ^ Schema.GetHashCode();
         }
 
-        internal static ObjectName Parse(string name)
+        public static ObjectName Parse(string name)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");

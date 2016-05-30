@@ -130,10 +130,7 @@ namespace Signum.Engine.Maps
 
                 if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
                 {
-                    if (Mixins == null)
-                        return null;
-
-                    return Mixins.TryGetC(mi.GetGenericArguments().Single());
+                    return Mixins?.TryGetC(mi.GetGenericArguments().Single());
                 }
 
                 return null;
@@ -141,10 +138,7 @@ namespace Signum.Engine.Maps
 
             if (member is Type)
             {
-                if (Mixins == null)
-                    return null;
-
-                return Mixins.TryGetC((Type)member);
+                return Mixins?.TryGetC((Type)member);
             }
 
             FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member);
@@ -900,7 +894,12 @@ namespace Signum.Engine.Maps
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
+            yield return KVP.Create(ColumnType.ReferenceTable, new RelationInfo
+            {
+                 IsNullable = this.ColumnType.Nullable,
+                 IsLite = true,
+                 IsImplementedByAll = true,
+            });
         }
 
         bool clearEntityOnSaving;
@@ -1012,7 +1011,7 @@ namespace Signum.Engine.Maps
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
-            foreach (var kvp in TableMList.Field.GetTables())
+            foreach (var kvp in TableMList.GetTables())
             {
                 kvp.Value.IsCollection = true;
                 yield return kvp;
@@ -1140,6 +1139,11 @@ namespace Signum.Engine.Maps
         internal object[] BulkInsertDataRow(Entity entity, object value, int order)
         {
             return this.cache.Value.BulkInsertDataRow(entity, value, order);
+        }
+
+        public IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+        {
+            return this.Field.GetTables();
         }
     }
 }

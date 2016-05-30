@@ -32,8 +32,8 @@ namespace Signum.Web
                 exLog.ControllerName = hei.ControllerName;
                 exLog.ActionName = hei.ActionName;
                 exLog.UserAgent = req.UserAgent;
-                exLog.RequestUrl = req.Url.TryToString();
-                exLog.UrlReferer = req.UrlReferrer.TryToString();
+                exLog.RequestUrl = req.Url?.ToString();
+                exLog.UrlReferer = req.UrlReferrer?.ToString();
                 exLog.UserHostAddress = req.UserHostAddress;
                 exLog.UserHostName = req.UserHostName;
                 exLog.QueryString = ExceptionEntity.Dump(req.QueryString);
@@ -48,9 +48,11 @@ namespace Signum.Web
         {
             if (context.Request.IsAjaxRequest())
             {
+                var exceptionEntity = Signum.Engine.Basics.ExceptionLogic.GetExceptionEntity(model.Exception);
+
                 return new ContentResult
                 {
-                    Content = model.Exception.Message
+                    Content = (exceptionEntity == null ? null : "(Exception {0}) ".FormatWith(exceptionEntity.IdOrNull)) + model.Exception.Message
                 };
             }
             else

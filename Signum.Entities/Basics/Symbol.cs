@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Entities
@@ -21,38 +22,28 @@ namespace Signum.Entities
         static Dictionary<Type, Dictionary<string, PrimaryKey>> Ids = new Dictionary<Type, Dictionary<string, PrimaryKey>>();
 
         public Symbol() { }
-      
+
         /// <summary>
-        /// 
+        /// Similar methods of inheritors will be automatically called by Signum.MSBuildTask using AutoInitiAttribute
         /// </summary>
-        /// <param name="frame">Inheritors should use new StackFrame(1, false) and add [MethodImpl(MethodImplOptions.NoInlining)]</param>
-        /// <param name="fieldName">Inheritors should use [CallerMemberName]</param>
-        public Symbol(StackFrame frame, string fieldName)
+        public Symbol(Type declaringType, string fieldName)
         {
-            var mi = frame.GetMethod();
-
-            if (mi != mi.DeclaringType.TypeInitializer)
-                throw new InvalidOperationException(string.Format("{0} {1} can only be created in static field initializers", GetType().Name, fieldName));
-
-            if (!IsStaticClass(mi.DeclaringType))
-                throw new InvalidOperationException(string.Format("{0} {1} is declared in {2}, but {2} is not static", GetType().Name, fieldName, mi.DeclaringType.Name));
-
-            this.fieldInfo = mi.DeclaringType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            this.fieldInfo = declaringType.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
             if (this.fieldInfo == null)
-                throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, mi.DeclaringType.Name));
+                throw new InvalidOperationException(string.Format("No field with name {0} found in {1}", fieldName, declaringType.Name));
 
-            this.Key = mi.DeclaringType.Name + "." + fieldName;
+            this.Key = declaringType.Name + "." + fieldName;
 
             var dic = Ids.TryGetC(this.GetType());
             if (dic != null)
             {
-                PrimaryKey? id = dic.TryGetS(this.key);
+                PrimaryKey? id = dic.TryGetS(this.Key);
                 if (id != null)
                     this.SetId(id.Value);
             }
 
-            Symbols.GetOrCreate(this.GetType()).Add(this.key, this);
+            Symbols.GetOrCreate(this.GetType()).Add(this.Key, this);
         }
 
         private static bool IsStaticClass(Type type)
@@ -71,15 +62,11 @@ namespace Signum.Entities
 
 
         [NotNullable, SqlDbType(Size = 200), UniqueIndex]
-        string key;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
-        public string Key
-        {
-            get { return key; }
-            set { SetToStr(ref key, value); }
-        }
+        public string Key { get; set; }
 
         static Expression<Func<Symbol, string>> ToStringExpression = e => e.Key;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -99,7 +86,7 @@ namespace Signum.Entities
 
         public override int GetHashCode()
         {
-            return key.GetHashCode();
+            return Key.GetHashCode();
         }
 
         public string NiceToString()
@@ -114,7 +101,7 @@ namespace Signum.Entities
 
             var symbols = Symbol.Symbols.TryGetC(typeof(S));
 
-            if (symbols != null) 
+            if (symbols != null)
             {
                 foreach (var kvp in symbolIds)
                 {
@@ -129,7 +116,7 @@ namespace Signum.Entities
         {
             this.id = id;
             this.IsNew = false;
-            this.toStr = this.key;
+            this.toStr = this.Key;
             if (this.Modified != ModifiedState.Sealed)
                 this.Modified = ModifiedState.Sealed;
         }

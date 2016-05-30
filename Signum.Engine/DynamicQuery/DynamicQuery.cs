@@ -308,6 +308,11 @@ namespace Signum.Engine.DynamicQuery
         
 	    #endregion
 
+        public static DEnumerable<T> ToDEnumerable<T>(this DQueryable<T> query)
+        {
+            return new DEnumerable<T>(query.Query.ToList(), query.Context);
+        }
+
         #region SelectMany
         public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens)
         {
@@ -373,6 +378,11 @@ namespace Signum.Engine.DynamicQuery
             return new DQueryable<T>(query.Query.Where(where), query.Context);
         }
 
+        public static DQueryable<T> Where<T>(this DQueryable<T> query, Expression<Func<object, bool>> filter)
+        {
+            return new DQueryable<T>(query.Query.Where(filter), query.Context);
+        }
+
         public static DEnumerable<T> Where<T>(this DEnumerable<T> collection, params Filter[] filters)
         {
             return Where(collection, filters.NotNull().ToList()); 
@@ -388,6 +398,11 @@ namespace Signum.Engine.DynamicQuery
             return new DEnumerable<T>(collection.Collection.Where(where.Compile()), collection.Context);
         }
 
+        public static DEnumerable<T> Where<T>(this DEnumerable<T> collection, Func<object, bool> filter)
+        {
+            return new DEnumerable<T>(collection.Collection.Where(filter).ToList(), collection.Context);
+        }
+        
         static Expression<Func<object, bool>> GetWhereExpression(BuildExpressionContext context, List<Filter> filters)
         {
             if (filters == null || filters.Count == 0)
@@ -425,11 +440,23 @@ namespace Signum.Engine.DynamicQuery
                 throw new ApplicationException(str);
 
             var pairs = orders.Select(o => Tuple.Create(
-                     Expression.Lambda(o.Token.BuildExpression(query.Context), query.Context.Parameter),
+                     Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(query.Context)), query.Context.Parameter),
                     o.OrderType)).ToList();
 
             return new DQueryable<T>(query.Query.OrderBy(pairs), query.Context);
         }
+
+        static Expression OnAddaptForOrderBy(Expression exp)
+        {
+            foreach (var item in AddaptForOrderBy.GetInvocationListTyped())
+            {
+                exp = item(exp);
+            }
+
+            return exp;
+        }
+
+        public static Func<Expression, Expression> AddaptForOrderBy = e => e; 
 
         public static IQueryable<object> OrderBy(this IQueryable<object> query, List<Tuple<LambdaExpression, OrderType>> orders)
         {
@@ -468,7 +495,7 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
         {
             var pairs = orders.Select(o => Tuple.Create(
-                    Expression.Lambda(o.Token.BuildExpression(collection.Context), collection.Context.Parameter),
+                    Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
                    o.OrderType)).ToList();
 
 
@@ -478,7 +505,7 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerableCount<T> OrderBy<T>(this DEnumerableCount<T> collection, List<Order> orders)
         {
             var pairs = orders.Select(o => Tuple.Create(
-                    Expression.Lambda(o.Token.BuildExpression(collection.Context), collection.Context.Parameter),
+                    Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
                    o.OrderType)).ToList();
 
 

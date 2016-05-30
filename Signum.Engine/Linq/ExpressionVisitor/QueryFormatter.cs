@@ -416,16 +416,28 @@ namespace Signum.Engine.Linq
             }
 
             if (select.Columns.Count == 0)
-                sb.Append("0 as Dummy"); 
+                sb.Append("0 as Dummy");
             else
+            {
+                this.AppendNewLine(Indentation.Inner);
                 for (int i = 0, n = select.Columns.Count; i < n; i++)
                 {
                     ColumnDeclaration column = select.Columns[i];
-                    if (i > 0)
-                        sb.Append(", ");
-
                     AppendColumn(column);
+                    if (i < (n - 1))
+                    {
+                        sb.Append(", ");
+                        this.AppendNewLine(Indentation.Same);
+                    }
+                    else
+                    {
+                        this.Indent(Indentation.Outer);
+                    }
+
+
+
                 }
+            }
 
             if (select.From != null)
             {
@@ -500,10 +512,10 @@ namespace Signum.Engine.Linq
         {
             sb.Append(dic[aggregate.AggregateFunction]);
             sb.Append("(");
-            if (aggregate.Source == null)
+            if (aggregate.Expression == null)
                 sb.Append("*");
             else
-                Visit(aggregate.Source);
+                Visit(aggregate.Expression);
             sb.Append(")");
 
             return aggregate; 
@@ -548,12 +560,18 @@ namespace Signum.Engine.Linq
 
         private void AppendColumn(ColumnDeclaration column)
         {
-            ColumnExpression c = this.Visit(column.Expression) as ColumnExpression;
+            ColumnExpression c = column.Expression as ColumnExpression;
 
             if (column.Name.HasText() && (c == null || c.Name != column.Name))
             {
-                sb.Append(" AS ");
+                
                 sb.Append(column.Name.SqlEscape());
+                sb.Append(" = ");
+                this.Visit(column.Expression);
+            }
+            else
+            {
+                this.Visit(column.Expression);
             }
         }
 
@@ -579,6 +597,12 @@ namespace Signum.Engine.Linq
 
                 sb.Append(" AS ");
                 sb.Append(((SourceWithAliasExpression)source).Alias.Name.SqlEscape());
+
+                var ta = source as TableExpression;
+                if(ta != null && ta.WithHint != null)
+                {
+                    sb.Append(" WITH(" + ta.WithHint + ")");
+                }
             }
             else
                 this.VisitJoin((JoinExpression)source);

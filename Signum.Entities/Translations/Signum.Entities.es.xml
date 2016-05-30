@@ -7,6 +7,7 @@
     <Member Name="Min" Description="Min" />
     <Member Name="Sum" Description="Suma" />
   </Type>
+  <Type Name="BooleanEnum" />
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Hoy" />
   </Type>
@@ -79,11 +80,9 @@
     <Member Name="MoveDown" Description="Mover abajo" />
     <Member Name="MoveUp" Description="Mover arriba" />
     <Member Name="Navigate" Description="Navegar" />
-    <Member Name="No" Description="no" />
     <Member Name="NullValueNotAllowed" Description="No se admite un valor nulo" />
     <Member Name="Remove" Description="Quitar" />
     <Member Name="View" Description="Ver" />
-    <Member Name="Yes" Description="sí" />
   </Type>
   <Type Name="EntityMessage">
     <Member Name="AttemptToAddRemove0InLockedEntity1" Description="Trate de añadir/quitar {0} en entidad bloqueada {1}" />
@@ -304,7 +303,6 @@
     <Member Name="Of" Description="de" />
     <Member Name="Operation" Description="Operación" />
     <Member Name="Operations" Description="Operaciones" />
-    <Member Name="Processes" Description="Procesos" />
     <Member Name="Query0IsNotAllowed" Description="No se permite la consulta {0}" />
     <Member Name="Query0NotAllowed" Description="La query {0} no está permitida" />
     <Member Name="Query0NotRegistered" Description="La query {0} no está registrada en el DynamicQueryManager" />
@@ -349,12 +347,12 @@
     <Member Name="TableName" Description="Table Name" />
   </Type>
   <Type Name="ValidationMessage">
-    <Member Name="_0DoesNotHaveAValid0Format" Description="{{0}} no tiene un formato válido {0}" />
+    <Member Name="_0DoesNotHaveAValid1Format" Description="{0} no tiene un formato válido {1}" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} tiene un formato inválido" />
-    <Member Name="_0HasMoreThan0DecimalPlaces" Description="{{0}} tiene más de {0} decimales" />
-    <Member Name="_0HasSomeRepeatedElements0" Description="{{0}} tiene algunos elementos repetidos: {0}" />
-    <Member Name="_0HasToBe0Than1" Description="{{0}} tiene que ser {0} {1}" />
-    <Member Name="_0HasToBeBetween0And1" Description="{{0}} Tiene que estar entre {0} y {1}" />
+    <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} tiene más de {1} decimales" />
+    <Member Name="_0HasSomeRepeatedElements1" Description="{0} tiene algunos elementos repetidos: {1}" />
+    <Member Name="_0HasToBe1Than2" Description="{0} tiene que ser {1} {2}" />
+    <Member Name="_0HasToBeBetween1And2" Description="{0} Tiene que estar entre {1} y {2}" />
     <Member Name="_0HasToBeLowercase" Description="{0} debe estar en minúsculas" />
     <Member Name="_0HasToBeUppercase" Description="{0} debe estar en mayúsculas" />
     <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} es obligatorio si {1} no está establecido" />
@@ -387,11 +385,11 @@
     <Member Name="Numeric" Description="Numérico" />
     <Member Name="OrBeNull" Description="o ser nulo" />
     <Member Name="Telephone" Description="Teléfono" />
-    <Member Name="TheLenghtOf0HasToBeEqualTo0" Description="La longitud de {{0}} ha de ser {0}" />
-    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo0" Description="La longitud de {{0}} ha de ser mayor o igual a {0}" />
-    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo0" Description="La longitud de {{0}} ha de ser menor o igual a {0}" />
+    <Member Name="TheLenghtOf0HasToBeEqualTo1" Description="La longitud de {0} ha de ser {1}" />
+    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo1" Description="La longitud de {0} ha de ser mayor o igual a {1}" />
+    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo1" Description="La longitud de {0} ha de ser menor o igual a {1}" />
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="El número de {0} está siendo multiplicado por {1}" />
-    <Member Name="TheNumberOfElementsOf0HasToBe01" Description="El número de elementos en {{0}} ha de ser {0} {1}" />
+    <Member Name="TheNumberOfElementsOf0HasToBe12" Description="El número de elementos en {0} ha de ser {1} {2}" />
     <Member Name="Type0NotAllowed" Description="El tipo {0} no está permitido" />
   </Type>
   <Type Name="VoidEnumMessage">

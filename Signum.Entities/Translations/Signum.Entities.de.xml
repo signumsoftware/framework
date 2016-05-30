@@ -7,6 +7,10 @@
     <Member Name="Min" Description="Min" />
     <Member Name="Sum" Description="Summe" />
   </Type>
+  <Type Name="BooleanEnum">
+    <Member Name="False" Description="Nein" />
+    <Member Name="True" Description="Ja" />
+  </Type>
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Heute" />
   </Type>
@@ -43,9 +47,9 @@
     <Member Name="DistinctTo" Description="anders als" />
     <Member Name="EqualTo" Description="gleich" />
     <Member Name="GreaterThan" Description="größer als" />
-    <Member Name="GreaterThanOrEqual" Description="größer als oder gleich" />
+    <Member Name="GreaterThanOrEqualTo" Description="Größer oder gleich" />
     <Member Name="LessThan" Description="weniger als" />
-    <Member Name="LessThanOrEqual" Description="kleiner oder gleich" />
+    <Member Name="LessThanOrEqualTo" Description="Kleiner oder gleich" />
   </Type>
   <Type Name="ConnectionMessage">
     <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Eine Verbindung mit dem Server ist erforderlich, um fortzufahren" />
@@ -55,7 +59,7 @@
     <Member Name="Corrupt" Description="korrupt" />
   </Type>
   <Type Name="DeleteLogParametersEntity" Description="Lösch log Parameter">
-    <Member Name="ChunkSize" Description="Chunk-Größe" />
+    <Member Name="ChunkSize" Description="Chunk Größe" />
     <Member Name="DateLimit" Description="Enddatum" />
     <Member Name="DeleteLogsWithMoreThan" Description="Löschen logs mit mehr als" />
     <Member Name="MaxChunks" Description="Max chunks" />
@@ -79,11 +83,9 @@
     <Member Name="MoveDown" Description="Nach unten" />
     <Member Name="MoveUp" Description="Nach oben" />
     <Member Name="Navigate" Description="Navigieren" />
-    <Member Name="No" Description="nein" />
     <Member Name="NullValueNotAllowed" Description="NULL-Wert nicht zulässig" />
     <Member Name="Remove" Description="Entfernen" />
     <Member Name="View" Description="Ansehen" />
-    <Member Name="Yes" Description="Ja" />
   </Type>
   <Type Name="EntityMessage">
     <Member Name="AttemptToAddRemove0InLockedEntity1" Description="Versuch, {0} in gesperrter Entity {1} hinzuzufügen/zu löschen" />
@@ -104,7 +106,7 @@
     <Member Name="MachineName" Description="Computername" />
     <Member Name="QueryString" Description="Query string" />
     <Member Name="Referenced" Description="Auf die verwiesen wird" />
-    <Member Name="RequestUrl" Description="Anforderungs-url" />
+    <Member Name="RequestUrl" Description="Request url" />
     <Member Name="Session" Description="Sitzung" />
     <Member Name="StackTrace" Description="Stack trace" />
     <Member Name="StackTraceHash" Description="Stack trace hash" />
@@ -205,6 +207,7 @@
     <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="Unmöglich zu speichern, Integritätsprüfung fehlgeschlagen:&#xD;&#xA;&#xD;&#xA;" />
     <Member Name="Loading0" Description="{0} läd gerade..." />
     <Member Name="LoseChanges" Description="Es gibt Änderungen, die noch nicht gespeichert wurden. &#xD;&#xA;Sollen Änderungen verlorengehen?" />
+    <Member Name="Message" Description="Nachricht" />
     <Member Name="NoDirectErrors" Description="Keine direkten Fehler" />
     <Member Name="Ok" Description="Ok" />
     <Member Name="Reload" Description="Neu laden" />
@@ -249,6 +252,7 @@
   </Type>
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} als {1})" />
+    <Member Name="_0Steps1" Description="{0} Schritt {1}" />
     <Member Name="And" Description=" und " />
     <Member Name="AnyEntity" Description="Jede Einheit" />
     <Member Name="As0" Description="Als {0}" />
@@ -273,6 +277,7 @@
     <Member Name="Number" Description="Nummer" />
     <Member Name="Of" Description=" von " />
     <Member Name="Second" Description="Sekunde" />
+    <Member Name="Step0" Description="Schritt {0}" />
     <Member Name="Text" Description="Text" />
     <Member Name="WeekNumber" Description="Wochennummer" />
     <Member Name="Year" Description="Jahr" />
@@ -280,6 +285,12 @@
   <Type Name="QuickLinkMessage">
     <Member Name="No0Found" Description="Keine(n) {0} gefunden" />
     <Member Name="Quicklinks" Description="Quick links" />
+  </Type>
+  <Type Name="RoundingType">
+    <Member Name="Ceil" Description="Decke" />
+    <Member Name="Floor" Description="Boden" />
+    <Member Name="Round" Description="Runde" />
+    <Member Name="RoundMiddle" Description="Runde Mitte" />
   </Type>
   <Type Name="SearchMessage">
     <Member Name="_01of2Results_N" Description="{0} - {1} von {2} Ergebnis[sen]." />
@@ -302,9 +313,8 @@
     <Member Name="NoFiltersSpecified" Description="Keine Filter angegeben" />
     <Member Name="NoResultsFound" Description="Keine Ergebnisse gefunden" />
     <Member Name="Of" Description="von" />
-    <Member Name="Operation" Description="Betrieb" />
+    <Member Name="Operation" Description="Verknüpfung" />
     <Member Name="Operations" Description="Operationen" />
-    <Member Name="Processes" Description="Prozesse" />
     <Member Name="Query0IsNotAllowed" Description="Abfrage {0} ist nicht zulässig." />
     <Member Name="Query0NotAllowed" Description="Abfrage {0} ist nicht zulässig." />
     <Member Name="Query0NotRegistered" Description="Abfrage {0} ist nicht in der DynamicQueryManager registriert." />
@@ -318,7 +328,7 @@
   </Type>
   <Type Name="SelectorMessage">
     <Member Name="ChooseAValue" Description="Wählen Sie einen Wert" />
-    <Member Name="ConstructorSelector" Description="Konstruktor-Selektor" />
+    <Member Name="ConstructorSelector" Description="Konstruktor Selektor" />
     <Member Name="PleaseChooseAValueToContinue" Description="Bitte wählen Sie einen Wert, um fortzufahren:" />
     <Member Name="PleaseSelectAConstructor" Description="Bitte wählen Sie einen Konstruktor" />
     <Member Name="PleaseSelectAnElement" Description="Bitte wählen Sie ein Element" />
@@ -342,35 +352,43 @@
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
   </Type>
   <Type Name="TypeEntity" Description="Typ">
-    <Member Name="ClassName" Description="Klasse-Name" />
+    <Member Name="ClassName" Description="Klasse Name" />
     <Member Name="CleanName" Description="Clean Name" />
     <Member Name="FullClassName" Description="Full Class Name" />
     <Member Name="Namespace" Description="Namespace" />
     <Member Name="TableName" Description="Table Name" />
   </Type>
   <Type Name="ValidationMessage">
-    <Member Name="_0DoesNotHaveAValid0Format" Description="{{0}} hat kein gültiges {0}-Format" />
+    <Member Name="_0DoesNotHaveAValid1Format" Description="{0} hat kein gültiges {1}-Format" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} hat ein ungültiges Format" />
-    <Member Name="_0HasMoreThan0DecimalPlaces" Description="{{0}} hat mehr als {0} Dezimalstellen" />
-    <Member Name="_0HasSomeRepeatedElements0" Description="{{0}} hat einige wiederholte Elemente: {0}" />
-    <Member Name="_0HasToBe0Than1" Description="{{0}} muss {0} {1} sein" />
-    <Member Name="_0HasToBeBetween0And1" Description="{{0}} muss zwischen {0} und {1} sein" />
+    <Member Name="_0HasAPrecissionOf1InsteadOf2" Description="{0} hat eine genauigkeit von {1} statt {2}" />
+    <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} hat mehr als {1} Dezimalstellen" />
+    <Member Name="_0HasSomeRepeatedElements1" Description="{0} hat einige wiederholte Elemente: {1}" />
+    <Member Name="_0HasToBeBetween1And2" Description="{0} muss zwischen {1} und {2} sein" />
     <Member Name="_0HasToBeLowercase" Description="{0} muss kleingeschrieben sein" />
     <Member Name="_0HasToBeUppercase" Description="{0} muss großgeschrieben sein" />
-    <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} ist obligatorisch, wenn {1} nicht festgelegt ist" />
-    <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} ist obligatorisch, wenn {1} festgelegt ist" />
+    <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} ist obligatorisch, wenn {1} nicht  festsgeetzt ist" />
+    <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} ist obligatorisch, wenn {1} festgesetzt ist" />
     <Member Name="_0IsNecessary" Description="{0} ist notwendig" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} ist notwendig im Status {1}" />
     <Member Name="_0IsNotA1_G" Description="{0} ist kei[m:n|f:ne|n:n] {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} ist nicht zulässig" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
-    <Member Name="_0IsNotSet" Description="{0} ist nicht festgelegt" />
+    <Member Name="_0IsNotSet" Description="{0} ist nicht festgesetzt" />
+    <Member Name="_0IsSet" Description="{0} wird gesetzt" />
+    <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2}" />
+    <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
+    <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer sein als {1}" />
     <Member Name="_0ShouldBeNull" Description="{0} sollte leer sein" />
-    <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} sollte leer sein, wenn {1} nicht festgelegt ist" />
-    <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} sollte leer sein, wenn {1} festgelegt ist" />
+    <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} sollte leer sein, wenn {1} nicht festgesetzt ist" />
+    <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} sollte leer sein, wenn {1} festgesetzt ist" />
+    <Member Name="_0ShouldNotHaveBreakLines" Description="{0} sollten keine neuen Zeilen aufweisen." />
+    <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} darf keine abschließende Leerzeichen haben." />
+    <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} sollten keinen Leerzeichen an erster stelle haben" />
     <Member Name="Be" Description="sein " />
     <Member Name="BeA0_G" Description="ei[m:n|f:ne|n:n] {0} sein" />
     <Member Name="BeBetween0And1" Description="zwischen {0} und {1} sein" />
+    <Member Name="BeInThePast" Description="in der Vergangenheit sein" />
     <Member Name="BeNotNull" Description="nicht null sein" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Have0Decimals" Description="haben {0} Dezimalstellen" />
@@ -387,11 +405,11 @@
     <Member Name="Numeric" Description="Numerisch" />
     <Member Name="OrBeNull" Description="oder null sein" />
     <Member Name="Telephone" Description="Telefon" />
-    <Member Name="TheLenghtOf0HasToBeEqualTo0" Description="Die Länge von {{0}} muss gleich {0} sein" />
-    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo0" Description="Die Länge von {{0}} muss größer als oder gleich {0}" />
-    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo0" Description="Die Länge von {{0}} muss kleiner als oder gleich {0} sein" />
+    <Member Name="TheLenghtOf0HasToBeEqualTo1" Description="Die Länge von {0} muss gleich {1} sein" />
+    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo1" Description="Die Länge von {0} muss größer als oder gleich {1}" />
+    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo1" Description="Die Länge von {0} muss kleiner als oder gleich {1} sein" />
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="Die Anzahl von {0} wird mit {1} multipliziert" />
-    <Member Name="TheNumberOfElementsOf0HasToBe01" Description="Die Anzahl der Elemente von {{0}} muss {0} {1} sein" />
+    <Member Name="TheNumberOfElementsOf0HasToBe12" Description="Die Anzahl der Elemente von {0} muss {1} {2} sein" />
     <Member Name="Type0NotAllowed" Description="Der Typ {0} ist nicht zulässig" />
   </Type>
   <Type Name="VoidEnumMessage">

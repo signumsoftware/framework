@@ -16,15 +16,9 @@ namespace Signum.Web
 {
     public static class FilterBuilderHelper
     {
-        public static MvcHtmlString NewFilter(this HtmlHelper helper, object queryName, FilterOption filterOptions, Context context, int index)
+        public static MvcHtmlString NewFilter(this HtmlHelper helper, FilterOption filterOptions, Context context, int index)
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            if (filterOptions.Token == null)
-            {
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                filterOptions.Token = QueryUtils.Parse(filterOptions.ColumnName, qd, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
-            }
 
             FilterType filterType = QueryUtils.GetFilterType(filterOptions.Token.Type);
             List<FilterOperation> possibleOperations = QueryUtils.GetFilterOperations(filterType);
@@ -47,8 +41,11 @@ namespace Signum.Web
 
                 using (sb.SurroundLine(new HtmlTag("td")))
                 {
-                    sb.AddLine(helper.HiddenAnonymous(filterOptions.Token.FullKey()));
-
+                    sb.AddLine(new HtmlTag("input")
+                        .Attr("type", "hidden")
+                        .Attr("value", filterOptions.Token.FullKey())
+                        .ToHtmlSelf());
+                        
                     foreach (var t in filterOptions.Token.Follow(tok => tok.Parent).Reverse())
                     {
                         sb.AddLine(new HtmlTag("span")
@@ -66,7 +63,7 @@ namespace Signum.Web
                         dic.Add("disabled", "disabled");
 
                     sb.AddLine(
-                        helper.DropDownList(
+                        helper.SafeDropDownList(
                         context.Compose("ddlSelector", index.ToString()),
                         possibleOperations.Select(fo =>
                             new SelectListItem

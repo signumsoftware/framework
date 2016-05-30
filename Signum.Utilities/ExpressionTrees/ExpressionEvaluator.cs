@@ -56,6 +56,9 @@ namespace Signum.Utilities.ExpressionTrees
                         var conv = (UnaryExpression)expression;
                         var operand = Eval(conv.Operand);
 
+                        if(conv.Method != null)
+                            return GetExtensionMethodCaller(conv.Method)(operand);
+
                         if (operand is IConvertible)
                             return ReflectionTools.ChangeType(operand, conv.Type);
 
@@ -103,14 +106,13 @@ namespace Signum.Utilities.ExpressionTrees
             }
             catch (TargetInvocationException ex)
             {
-                Action savestack = Delegate.CreateDelegate(typeof(Action), ex.InnerException, "InternalPreserveStackTrace", false, false) as Action;
-
-                if (savestack != null)
-                    savestack();
+                ex.InnerException.PreserveStackTrace();
 
                 throw ex.InnerException;
             }
         }
+
+       
 
         public struct MethodKey : IEquatable<MethodKey>
         {

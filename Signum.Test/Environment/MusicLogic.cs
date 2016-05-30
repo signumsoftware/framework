@@ -75,7 +75,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<BandEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Name,
                         a.LastAward,
@@ -86,7 +86,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<LabelEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Name,
                     });
@@ -96,7 +96,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<AmericanMusicAwardEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Year,
                         a.Category,
@@ -107,7 +107,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<GrammyAwardEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Year,
                         a.Category,
@@ -118,7 +118,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<PersonalAwardEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Year,
                         a.Category,
@@ -129,7 +129,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<AwardNominationEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Award,
                         a.Author
@@ -246,7 +246,7 @@ namespace Signum.Test.Environment
             new Execute(AlbumOperation.Save)
             {
                 FromStates = { AlbumState.New },
-                ToState = AlbumState.Saved,
+                ToStates = { AlbumState.Saved },
                 AllowsNew = true,
                 Lite = false,
                 Execute = (album, _) => { album.State = AlbumState.Saved; album.Save(); },
@@ -255,7 +255,7 @@ namespace Signum.Test.Environment
             new Execute(AlbumOperation.Modify)
             {
                 FromStates = { AlbumState.Saved },
-                ToState = AlbumState.Saved,
+                ToStates = { AlbumState.Saved },
                 AllowsNew = false,
                 Lite = false,
                 Execute = (album, _) => { },
@@ -263,7 +263,7 @@ namespace Signum.Test.Environment
 
             new ConstructFrom<BandEntity>(AlbumOperation.CreateAlbumFromBand)
             {
-                ToState = AlbumState.Saved,
+                ToStates = { AlbumState.Saved },
                 AllowsNew = false,
                 Lite = true,
                 Construct = (BandEntity band, object[] args) =>
@@ -279,7 +279,7 @@ namespace Signum.Test.Environment
 
             new ConstructFrom<AlbumEntity>(AlbumOperation.Clone)
             {
-                ToState = AlbumState.New,
+                ToStates = { AlbumState.New },
                 AllowsNew = false,
                 Lite = true,
                 Construct = (g, args) =>
@@ -298,7 +298,7 @@ namespace Signum.Test.Environment
 
             new ConstructFromMany<AlbumEntity>(AlbumOperation.CreateGreatestHitsAlbum)
             {
-                ToState = AlbumState.New,
+                ToStates = { AlbumState.New },
                 Construct = (albumLites, _) =>
                 {
                     List<AlbumEntity> albums = albumLites.Select(a => a.Retrieve()).ToList();
@@ -317,7 +317,7 @@ namespace Signum.Test.Environment
 
             new ConstructFromMany<AlbumEntity>(AlbumOperation.CreateEmptyGreatestHitsAlbum)
             {
-                ToState = AlbumState.New,
+                ToStates = { AlbumState.New },
                 Construct = (albumLites, _) =>
                 {
                     List<AlbumEntity> albums = albumLites.Select(a => a.Retrieve()).ToList();

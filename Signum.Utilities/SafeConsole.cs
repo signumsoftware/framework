@@ -68,14 +68,14 @@ namespace Signum.Utilities
             Console.ForegroundColor = old;
         }
 
-        public static string AskString(string question, Func<string, string> stringValidator)
+        public static string AskString(string question, Func<string, string> stringValidator = null)
         {
             Console.Write(question);
             do
             {
                 var userAnswer = Console.ReadLine();
 
-                string error = stringValidator(userAnswer); 
+                string error = stringValidator == null ? null : stringValidator(userAnswer);
                 if (error == null)
                     return userAnswer;
 
@@ -158,19 +158,21 @@ namespace Signum.Utilities
             return cs.Choose(question);
         }
 
-        public static void WaitRows(string startingText, Func<int> updateOrDelete)
+        public static int WaitRows(string startingText, Func<int> updateOrDelete)
         {
-            SafeConsole.WriteColor(ConsoleColor.Gray, startingText); 
+            SafeConsole.WriteColor(ConsoleColor.Gray, startingText);
+            int result = 0;
             WaitExecute(() =>
             {
-                int result = updateOrDelete();
+                result = updateOrDelete();
 
                 lock (SafeConsole.SyncKey)
                 {
                     SafeConsole.WriteColor(ConsoleColor.White, " {0} ", result);
                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "rows afected");
                 }
-            }); 
+            });
+            return result;
         }
 
         public static T WaitQuery<T>(string startingText, Func<T> query)
@@ -189,6 +191,12 @@ namespace Signum.Utilities
 
         public static void WaitExecute(Action action)
         {
+            if (Console.IsOutputRedirected)
+            {
+                action();
+                return;
+            }
+
             int? result = null;
             try
             {

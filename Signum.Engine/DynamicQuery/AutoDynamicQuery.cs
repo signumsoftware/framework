@@ -8,6 +8,7 @@ using Signum.Entities;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -61,7 +62,7 @@ namespace Signum.Engine.DynamicQuery
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
-                .Select(new List<Column> { ex});
+                .Select(new List<Column> { ex });
 
             var exp = Expression.Lambda<Func<object, Lite<IEntity>>>(Expression.Convert(ex.Token.BuildExpression(orderQuery.Context), typeof(Lite<IEntity>)), orderQuery.Context.Parameter);
 

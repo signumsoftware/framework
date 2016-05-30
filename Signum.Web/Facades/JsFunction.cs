@@ -128,7 +128,10 @@ namespace Signum.Web
         public static object This = new object();
         public static object Event = new object();
 
-      
+        public MvcHtmlString ToScriptTag()
+        {
+            return MvcHtmlString.Create("<script>" + this.ToString() + "</script>");
+        }
 
         public static string SFControlThen(string prefix, string functionCall)
         {
@@ -182,7 +185,8 @@ namespace Signum.Web
                 niceName = type.NiceName(),
                 creable = Navigator.IsCreable(type, isSearch),
                 findable = Finder.IsFindable(type),
-                preConstruct = new JRaw(Constructor.ClientManager.GetPreConstructorScript(new ClientConstructorContext(type, prefix)))
+                preConstruct = new JRaw(Constructor.ClientManager.GetPreConstructorScript(new ClientConstructorContext(type, prefix))),
+                avoidPopup = (Navigator.Manager.EntitySettings.TryGetC(type)?.AvoidPopup) ?? false,
             };
 
             return result;
@@ -195,6 +199,7 @@ namespace Signum.Web
             public bool creable;
             public JRaw preConstruct;
             public bool findable;
+            public bool avoidPopup;
         }
     }
 }

@@ -7,6 +7,7 @@
     <Member Name="Min" Description="Min" />
     <Member Name="Sum" Description="Soma" />
   </Type>
+  <Type Name="BooleanEnum" />
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Hoje" />
   </Type>
@@ -54,6 +55,7 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Corrompido" />
   </Type>
+  <Type Name="DeleteLogParametersEntity" />
   <Type Name="EmbeddedEntity" Description="Entidade embebida" />
   <Type Name="EngineMessage">
     <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Erro de concordância na base de dados, tabela = {0}, ID = {1}" />
@@ -62,7 +64,6 @@
     <Member Name="TheEntity0IsNew" Description="A entidade {0} é nova" />
     <Member Name="ThereAre0ThatReferThisEntity" Description="Existem '{0}' que se referem a esta entidade" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Existem registos em '{0}' que se referem a esta tabela pela coluna '{1}'" />
-    <Member Name="TheresAlreadyA0With1EqualsTo2" Description="Já existe [m:un|f:una] {0} com {1} igual a '{2}'" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Acesso negado a {0} porque {1}" />
   </Type>
   <Type Name="Entity" Description="a Entidade" PluralDescription="as Entidades" />
@@ -73,12 +74,9 @@
     <Member Name="MoveDown" Description="Mover para baixo" />
     <Member Name="MoveUp" Description="Mover para cima" />
     <Member Name="Navigate" Description="Navegar" />
-    <Member Name="New" Description="Novo" />
-    <Member Name="No" Description="não" />
     <Member Name="NullValueNotAllowed" Description="Não se pode admitir um valor nulo" />
     <Member Name="Remove" Description="Remover" />
     <Member Name="View" Description="Ver" />
-    <Member Name="Yes" Description="Sim" />
   </Type>
   <Type Name="EntityMessage">
     <Member Name="AttemptToAddRemove0InLockedEntity1" Description="Tentativa de adicionar/eliminar {0} na entidade bloqueada {1}" />
@@ -176,7 +174,6 @@
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="ID inválido" />
     <Member Name="InvalidFormat" Description="Formato inválido" />
-    <Member Name="New" Description="Novo" />
     <Member Name="ToStr" Description="Texto" />
     <Member Name="Type0NotFound" Description="Tipo {0} não encontrado" />
   </Type>
@@ -187,7 +184,6 @@
   <Type Name="ModelEntity" Description="Entidade modelo" />
   <Type Name="ModifiableEntity" Description="Entidade modificável" />
   <Type Name="NormalControlMessage">
-    <Member Name="New" Description="Novo" />
     <Member Name="Save" Description="Guardar" />
     <Member Name="ViewForType0IsNotAllowed" Description="View para o tipo {0} não é permitido" />
   </Type>
@@ -278,19 +274,15 @@
     <Member Name="Quicklinks" Description="links rápidos" />
   </Type>
   <Type Name="SearchMessage">
-    <Member Name="_01of2Results" Description="{0} - {1} de {2} resultado[s]." />
-    <Member Name="_0Results" Description="{0} resultado[s]." />
     <Member Name="AddColumn" Description="Adicionar coluna" />
     <Member Name="AddFilter" Description="Adicionar filtro" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Escolhe o nome que será visível na nova coluna" />
     <Member Name="Create" Description="Criar" />
-    <Member Name="CreateNew0" Description="Criar nov[m:o|f:a] {0}" />
     <Member Name="DeleteFilter" Description="Eliminar filtro" />
     <Member Name="Field" Description="Campo" />
     <Member Name="Filters" Description="Filtros" />
     <Member Name="Find" Description="Encontrar" />
     <Member Name="FinderOf0" Description="Campo de pesquisa de {0}" />
-    <Member Name="First0Results" Description="primeir[os] {0} resultado[s]." />
     <Member Name="Name" Description="Nome" />
     <Member Name="NewColumnSName" Description="Nome da nova coluna" />
     <Member Name="NoActionsFound" Description="Não se encontram acções" />
@@ -300,7 +292,6 @@
     <Member Name="Of" Description="de" />
     <Member Name="Operation" Description="Operação" />
     <Member Name="Operations" Description="Operações" />
-    <Member Name="Processes" Description="Processos" />
     <Member Name="Query0IsNotAllowed" Description="Não se permite a consulta {0}" />
     <Member Name="Query0NotAllowed" Description="A query {0} não é permitida" />
     <Member Name="Query0NotRegistered" Description="A query {0} não está registada no DynamicQueryManager" />
@@ -345,19 +336,18 @@
     <Member Name="TableName" Description="Table Name" />
   </Type>
   <Type Name="ValidationMessage">
-    <Member Name="_0DoesNotHaveAValid0Format" Description="{{0}} não tem um formato válido {0}" />
+    <Member Name="_0DoesNotHaveAValid1Format" Description="{0} não tem um formato válido {1}" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} tem un formato inválido" />
-    <Member Name="_0HasMoreThan0DecimalPlaces" Description="{{0}} tem mais de {0} decimais" />
-    <Member Name="_0HasSomeRepeatedElements0" Description="{{0}} tem alguns elementos repetidos: {0}" />
-    <Member Name="_0HasToBe0Than1" Description="{{0}} tem que ser {0} {1}" />
-    <Member Name="_0HasToBeBetween0And1" Description="{{0}} Tem que estar entre {0} y {1}" />
+    <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} tem mais de {1} decimais" />
+    <Member Name="_0HasSomeRepeatedElements1" Description="{0} tem alguns elementos repetidos: {1}" />
+    <Member Name="_0HasToBe1Than2" Description="{0} tem que ser {1} {2}" />
+    <Member Name="_0HasToBeBetween1And2" Description="{0} Tem que estar entre {1} y {2}" />
     <Member Name="_0HasToBeLowercase" Description="{0} deve estar em minúsculas" />
     <Member Name="_0HasToBeUppercase" Description="{0} deve estar en maiúsculas" />
     <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} é obrigatório se {1} não está establecido" />
     <Member Name="_0IsMandatoryWhen1IsSet" Description="{0} é obrigatório se se establece {1}" />
     <Member Name="_0IsNecessary" Description="é necessário {0}" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} é necessário em estado {1}" />
-    <Member Name="_0IsNotA1" Description="{0} não é [m:um|f:uma] {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} não está permitido" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} não se permite no estado {1}" />
     <Member Name="_0IsNotSet" Description="{0} não estabelecido" />
@@ -365,7 +355,6 @@
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} deve ser nulo se {1} não está estabelecido" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} deve ser nulo se {1} se estabelece" />
     <Member Name="Be" Description="ser " />
-    <Member Name="BeA0" Description="ser [m:um|f:uma] {0}" />
     <Member Name="BeBetween0And1" Description="estar entre {0} e {1}" />
     <Member Name="BeNotNull" Description="não pode ser nulo" />
     <Member Name="FileName" Description="Nome do ficheiro" />
@@ -383,11 +372,11 @@
     <Member Name="Numeric" Description="Numérico" />
     <Member Name="OrBeNull" Description="ou é nulo" />
     <Member Name="Telephone" Description="Telefone" />
-    <Member Name="TheLenghtOf0HasToBeEqualTo0" Description="O comprimento de {{0}} deve ser igual a {0}" />
-    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo0" Description="O comprimento de {{0}} deve ser maior ou igual a {0}" />
-    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo0" Description="O comprimento de {{0}} deve ser menor ou igual a {0}" />
+    <Member Name="TheLenghtOf0HasToBeEqualTo1" Description="O comprimento de {0} deve ser igual a {1}" />
+    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo1" Description="O comprimento de {0} deve ser maior ou igual a {1}" />
+    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo1" Description="O comprimento de {0} deve ser menor ou igual a {1}" />
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="O número de {0} está a ser multiplicado por {1}" />
-    <Member Name="TheNumberOfElementsOf0HasToBe01" Description="O número de elementos de {{0}} deve ser {0} {1}" />
+    <Member Name="TheNumberOfElementsOf0HasToBe12" Description="O número de elementos de {0} deve ser {1} {2}" />
     <Member Name="Type0NotAllowed" Description="Tipo {0} não permitido" />
   </Type>
   <Type Name="VoidEnumMessage">

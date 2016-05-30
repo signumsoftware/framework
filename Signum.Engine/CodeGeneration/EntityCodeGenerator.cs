@@ -420,9 +420,10 @@ namespace Signum.Engine.CodeGeneration
                 return null;
 
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine("[AutoInit]");
             sb.AppendLine("public static class {0}".FormatWith(GetOperationName(table.Name)));
             sb.AppendLine("{");
-            sb.AppendLine("    public static readonly ExecuteSymbol<{0}> Save = OperationSymbol.Execute<{0}>();".FormatWith(GetEntityName(table.Name)));
+            sb.AppendLine("    public static readonly ExecuteSymbol<{0}> Save;".FormatWith(GetEntityName(table.Name)));
             sb.AppendLine("}");
             return sb.ToString();
         }
@@ -554,15 +555,8 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
 
             WriteAttributeTag(sb, GetFieldAttributes(table, col, relatedEntity));
-            sb.AppendLine("{0} {1};".FormatWith(type, CSharpRenderer.Escape(fieldName)));
             WriteAttributeTag(sb, GetPropertyAttributes(table, col, relatedEntity));
-
-            sb.AppendLine("public {0} {1}".FormatWith(type, fieldName.FirstUpper()));
-            sb.AppendLine("{");
-            sb.AppendLine("    get { return " + CSharpRenderer.Escape(fieldName) + "; }");
-            if (!IsReadonly(table, col))
-                sb.AppendLine("    set { Set(ref " + CSharpRenderer.Escape(fieldName) + ", value); }");
-            sb.AppendLine("}");
+            sb.AppendLine("public {0} {1} {{ get; {2}set; }}".FormatWith(type, fieldName.FirstUpper(), IsReadonly(table, col) ? "private" : null));
 
             return sb.ToString();
         }
@@ -584,15 +578,38 @@ namespace Signum.Engine.CodeGeneration
         {
             List<string> attributes = new List<string>();
 
-            if (HasNotNullValidator(col, relatedEntity))
+            if (HasNotNullableAttribute(col, relatedEntity) && GetValueType(col) != typeof(string))
                 attributes.Add("NotNullValidator");
+
+            string stringLengthValidator = GetStringLengthValidator(table, col, relatedEntity);
+            if(stringLengthValidator != null)
+                attributes.Add(stringLengthValidator);
 
             return attributes;
         }
 
-        protected virtual bool HasNotNullValidator(DiffColumn col, string relatedEntity)
+        protected virtual string GetStringLengthValidator(DiffTable table, DiffColumn col, string relatedEntity)
         {
-            return HasNotNullableAttribute(col, relatedEntity);
+            if (GetValueType(col) != typeof(string))
+                return null;
+
+            var parts = new List<string>();
+
+            parts.Add("AllowNulls = " + col.Nullable.ToString().ToLower());
+
+            var min = GetMinStringLength(col);
+            if (min != null)
+                parts.Add("Min = " + min);
+
+            if (col.Length != -1)
+                parts.Add("Max = " + col.Length / DiffColumn.BytesPerChar(col.SqlDbType));
+
+            return "StringLengthValidator(" + parts.ToString(", ") + ")";
+        }
+
+        protected virtual int? GetMinStringLength(DiffColumn col)
+        {
+            return 1;
         }
 
         protected virtual bool HasNotNullableAttribute(DiffColumn col, string relatedEntity)
@@ -652,7 +669,7 @@ namespace Signum.Engine.CodeGeneration
             if (col.ForeignKey == null)
                 return fieldName;
 
-            return "id" + fieldName;
+            return fieldName + "ID";
         }
 
         protected virtual string GetSqlTypeAttribute(DiffTable table, DiffColumn col)
@@ -774,13 +791,8 @@ namespace Signum.Engine.CodeGeneration
             string typeName = GetEmbeddedTypeName(fieldName);
 
             sb.AppendLine("[NotNullable]");
-            sb.AppendLine("{0} {1};".FormatWith(typeName, fieldName));
             sb.AppendLine("[NotNullValidator]");
-            sb.AppendLine("public {0} {1}".FormatWith(typeName, propertyName));
-            sb.AppendLine("{");
-            sb.AppendLine("    get { return " + fieldName + "; }");
-            sb.AppendLine("    set { Set(ref " + fieldName + ", value); }");
-            sb.AppendLine("}");
+            sb.AppendLine("public {0} {1} { get; set; }".FormatWith(typeName, fieldName.FirstUpper()));
 
             return sb.ToString();
         }
@@ -827,14 +839,8 @@ namespace Signum.Engine.CodeGeneration
 
             string fieldName = GetFieldMListName(table, relatedTable, mListInfo);
             WriteAttributeTag(sb, fieldAttributes);
-
-            sb.AppendLine("MList<{0}> {1} = new MList<{0}>();".FormatWith(type, CSharpRenderer.Escape(fieldName)));
             sb.AppendLine("[NotNullValidator, NoRepeatValidator]");
-            sb.AppendLine("public MList<{0}> {1}".FormatWith(type, fieldName.FirstUpper()));
-            sb.AppendLine("{");
-            sb.AppendLine("    get { return " + CSharpRenderer.Escape(fieldName) + "; }");
-            sb.AppendLine("    set { Set(ref " + CSharpRenderer.Escape(fieldName) + ", value); }");
-            sb.AppendLine("}");
+            sb.AppendLine("public MList<{0}> {1} { get; set; } = new MList<{0}>();".FormatWith(type, fieldName.FirstUpper()));
 
             return sb.ToString();
         }
@@ -857,7 +863,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetBackColumnNameAttribute(DiffColumn backReference)
         {
-            if (backReference.Name == "idParent")
+            if (backReference.Name == "ParentID")
                 return null;
 
             return "BackReferenceColumnName(\"{0}\")".FormatWith(backReference.Name);
@@ -865,7 +871,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetFieldMListName(DiffTable table, DiffTable relatedTable, MListInfo mListInfo)
         {
-            ObjectName name = mListInfo.TrivialElementColumn.Try(te => te.ForeignKey.TargetTable) ?? relatedTable.Name;
+            ObjectName name = mListInfo.TrivialElementColumn?.ForeignKey.TargetTable ?? relatedTable.Name;
 
             return NaturalLanguageTools.Pluralize(GetEntityName(name).RemoveSuffix("Entity")).FirstLower();
         }
@@ -879,7 +885,8 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("static Expression<Func<{0}, string>> ToStringExpression = e => e.{1}{2};".FormatWith(GetEntityName(table.Name),
                 toStringColumn.PrimaryKey ? "Id" : GetFieldName(table, toStringColumn).FirstUpper(),
-                GetFieldType(table, toStringColumn, null) == "string" ? "" : ".TryToString()"));
+                toStringColumn.PrimaryKey || GetFieldType(table, toStringColumn, GetRelatedEntity(table, toStringColumn)) != "string" ? "?.ToString()" : ""));
+            sb.AppendLine("[ExpressionField]");
             sb.AppendLine("public override string ToString()");
             sb.AppendLine("{");
             sb.AppendLine("    return ToStringExpression.Evaluate(this);");
