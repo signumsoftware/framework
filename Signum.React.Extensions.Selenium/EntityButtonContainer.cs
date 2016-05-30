@@ -12,7 +12,7 @@ namespace Signum.React.Selenium
 {
     public interface IEntityButtonContainer : ILineContainer
     {
-        RuntimeInfoProxy RuntimeInfo();
+        EntityInfoProxy EntityInfo();
 
         IWebElement ContainerElement();
     }
@@ -25,18 +25,19 @@ namespace Signum.React.Selenium
     {
         public static Lite<T> GetLite<T>(this IEntityButtonContainer<T> container) where T : Entity
         {
-            return (Lite<T>)container.RuntimeInfo().ToLite();
+            return (Lite<T>)container.EntityInfo().ToLite();
         }
 
-        public static IWebElement ButtonElement(this IEntityButtonContainer container, string buttonId)
+        public static IWebElement Button(this IEntityButtonContainer container, string buttonId)
         {
-            return container.ContainerLocator().CombineCss(" #" + "_".CombineIfNotEmpty(container.Element, buttonId));
+            throw new InvalidOperationException();
+            //return container.ContainerElement().FindElement(" #" + "_".CombineIfNotEmpty(container.Element, buttonId));
         }
 
         public static IWebElement OperationElement<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
             where T : Entity
         {
-            return container.ButtonLocator(symbol.Symbol.KeyWeb());
+            return container.Button(symbol.Symbol.KeyWeb());
         }
 
         public static string KeyWeb(this OperationSymbol operationSymbol)
@@ -46,9 +47,9 @@ namespace Signum.React.Selenium
 
         public static bool ButtonEnabled(this IEntityButtonContainer container, string idButton)
         {
-            By locator = container.ButtonLocator(idButton);
+            var button = container.Button(idButton);
 
-            return container.Selenium.IsElementPresent(locator.CombineCss(":not([disabled])"));
+            return button.GetAttribute("disabled") == null;
         }
 
         public static bool OperationEnabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
@@ -59,9 +60,9 @@ namespace Signum.React.Selenium
 
         public static bool ButtonDisabled(this IEntityButtonContainer container, string idButton)
         {
-            By locator = container.ButtonLocator(idButton);
+            var button = container.Button(idButton);
 
-            return container.Selenium.IsElementPresent(locator.CombineCss("[disabled]"));
+            return button.GetAttribute("disabled") != null;
         }
 
         public static bool OperationDisabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
@@ -72,7 +73,7 @@ namespace Signum.React.Selenium
 
         public static void ButtonClick(this IEntityButtonContainer container, string idButton)
         {
-            var button = container.Selenium.FindElement(container.ButtonLocator(idButton));
+            var button = container.Button(idButton);
 
             button.ButtonClick();
         }
@@ -146,7 +147,7 @@ namespace Signum.React.Selenium
         {
             container.OperationClick(symbol);
 
-            container.Selenium.Wait(() => { try { return container.RuntimeInfo().IsNew; } catch { return false; } });
+            container.Selenium.Wait(() => { try { return container.EntityInfo().IsNew; } catch { return false; } });
 
             return new NormalPage<T>(container.Selenium, null);
         }
@@ -156,7 +157,7 @@ namespace Signum.React.Selenium
         {
             container.ButtonClick(symbol.Symbol.KeyWeb());
 
-            container.Selenium.Wait(() => { try { return container.RuntimeInfo().IsNew; } catch { return false; } });
+            container.Selenium.Wait(() => { try { return container.EntityInfo().IsNew; } catch { return false; } });
 
             return new NormalPage<T>(container.Selenium, null);
         }
@@ -166,7 +167,7 @@ namespace Signum.React.Selenium
         {
             container.ButtonClick(symbol.Symbol.KeyWeb());
 
-            var popup = new PopupControl<T>(container.Selenium, prefix);
+            var popup = new PopupControl<T>(container.Selenium, element);
 
             container.Selenium.WaitElementPresent(popup.PopupLocator);
 
@@ -179,7 +180,7 @@ namespace Signum.React.Selenium
         {
             container.OperationClick(symbol);
 
-            var popup = new PopupControl<T>(container.Selenium, prefix);
+            var popup = new PopupControl<T>(container.Selenium, element);
 
             container.Selenium.WaitElementPresent(popup.PopupLocator);
 

@@ -26,17 +26,17 @@ namespace Signum.React.Selenium
             this.WaitVisible();
         }
 
-        private IWebElement BackdropElement
+        private By BackdropLocator
         {
             get
             {
-                return this.Selenium.NotImplemented(); // return By.XPath("//*[@id='" + PopupId(null) + "']/following-sibling::div[@class='modal-backdrop fade in']");
+                return By.XPath("//*[@id='" + PopupId(null) + "']/following-sibling::div[@class='modal-backdrop fade in']");
             }
         }
 
-        public IWebElement PopupElement
+        public By PopupLocator
         {
-            get { return this.Selenium.NotImplemented();/* By.CssSelector("#{0}_panelPopup".FormatWith(null)); */ }
+            get { return By.CssSelector("#{0}_panelPopup");  }
         }
 
         public IWebElement CloseButtonElement
@@ -84,7 +84,12 @@ namespace Signum.React.Selenium
 
         public IWebElement OkButtonElement
         {
-            get { return this.Selenium.NotImplemented(); /* By.CssSelector("#{0}_btnOk".FormatWith(Prefix));*/ }
+            get { return this.Selenium.FindElement(this.OkButtonLocator); }
+        }
+
+        public By OkButtonLocator
+        {
+            get { throw new NotImplementedException(); /* By.CssSelector("#{0}_btnOk".FormatWith(Prefix));*/ }
         }
 
         public void OkWaitSubmit()
@@ -97,7 +102,7 @@ namespace Signum.React.Selenium
 
         public NormalPage<T> OkWaitNormalPage<T>() where T : Entity
         {
-            Selenium.FindElement(OkButtonLocator).Click();
+            this.OkButtonElement.Click();
             this.Disposing = null;
             return new NormalPage<T>(Selenium).WaitLoaded();
         }
@@ -106,7 +111,7 @@ namespace Signum.React.Selenium
         {
             if (element == null)
                 this.AvoidClose = true;
-            this.OkButtonElement..Click();
+            this.OkButtonElement.Click();
             var disposing = this.Disposing;
             this.Disposing = null;
             return new PopupControl<T>(Selenium, element) { Disposing = disposing };
@@ -115,19 +120,21 @@ namespace Signum.React.Selenium
         public bool OkPressed;
         public void OkWaitClosed()
         {
-            this.io Selenium..FindElement(OkButtonLocator).Click();
+            this.Selenium.FindElement(OkButtonLocator).Click();
             Selenium.WaitElementNotVisible(PopupLocator);
             this.OkPressed = true;
         }
 
         public static bool IsPopupVisible(RemoteWebDriver selenium, IWebElement element)
         {
-            return selenium.IsElementVisible(By.CssSelector("#{0}.modal.fade.in".FormatWith(PopupId(prefix))));
+            throw new NotImplementedException();
+            //return selenium.IsElementVisible(By.CssSelector("#{0}.modal.fade.in".FormatWith(PopupId(prefix))));
         }
 
         public static string PopupId(IWebElement element)
         {
-            return "_".CombineIfNotEmpty(prefix, "panelPopup");
+            throw new NotImplementedException();
+            //return "_".CombineIfNotEmpty(prefix, "panelPopup");
         }
 
 
@@ -143,45 +150,48 @@ namespace Signum.React.Selenium
 
         public void Choose(string value)
         {
-            ChooseButton(Selenium, Prefix, value);
+            ChooseButton(Selenium, this.Element, value);
         }
 
         public void Choose(Enum enumValue)
         {
-            ChooseButton(Selenium, Prefix, enumValue.ToString());
+            ChooseButton(Selenium, this.Element, enumValue.ToString());
         }
 
         public void Choose<T>()
         {
-            ChooseButton(Selenium, Prefix, TypeLogic.GetCleanName(typeof(T)));
+            ChooseButton(Selenium, this.Element, TypeLogic.GetCleanName(typeof(T)));
         }
 
         public static bool IsChooser(RemoteWebDriver selenium, IWebElement element)
         {
-            return selenium.IsElementVisible(By.CssSelector("#{0}".FormatWith(PopupId(prefix)) + " .sf-chooser-button"));
+            throw new NotImplementedException();
+            //return selenium.IsElementVisible(By.CssSelector("#{0}".FormatWith(PopupId(prefix)) + " .sf-chooser-button"));
         }
 
-        public static void ChooseButton(RemoteWebDriver Selenium, IWebElement element, Type type)
+        public static void ChooseButton(RemoteWebDriver selenium, IWebElement element, Type type)
         {
-            ChooseButton(Selenium, prefix, TypeLogic.GetCleanName(type));
+            ChooseButton(selenium, element, TypeLogic.GetCleanName(type));
         }
 
-        public static void ChooseButton(RemoteWebDriver Selenium, IWebElement element, string value)
+        public static void ChooseButton(RemoteWebDriver selenium, IWebElement element, string value)
         {
-            Selenium.FindElement(By.CssSelector("#" + Popup.PopupId(prefix) + " button[data-value='" + value + "']")).Click();
-            Selenium.Wait(() => !IsChooser(Selenium, prefix));
+
+            throw new NotImplementedException();
+            //selenium.FindElement(By.CssSelector("#" + Popup.PopupId(prefix) + " button[data-value='" + value + "']")).Click();
+            //selenium.Wait(() => !IsChooser(selenium, prefix));
         }
     }
 
     public class ValueLinePopup : Popup
     {
-        public ValueLinePopup(RemoteWebDriver selenium, IWebElement element = "New") : base(selenium, prefix)
+        public ValueLinePopup(RemoteWebDriver selenium, IWebElement element) : base(selenium, element)
         {
         }
 
         public ValueLineProxy ValueLine
         {
-            get { return new ValueLineProxy(Selenium, Prefix + "_value", null); }
+            get { return new ValueLineProxy(Selenium, this.Element.GetDriver().NotImplemented(), null); }
         }
 
         public string StringValue
@@ -207,24 +217,26 @@ namespace Signum.React.Selenium
         public PropertyRoute Route { get; private set; }
 
         public PopupControl(RemoteWebDriver selenium, IWebElement element, PropertyRoute route = null)
-            : base(selenium, prefix)
+            : base(selenium, element)
         {
             this.Route = route == null || route.IsImplementation(typeof(T)) ? PropertyRoute.Root(typeof(T)) : route;
         }
 
         public IWebElement ContainerElement()
         {
-            return By.CssSelector("#{0}_panelPopup".FormatWith(Prefix));
+            throw new NotImplementedException();
+            //return By.CssSelector("#{0}_panelPopup".FormatWith(Prefix));
         }
 
         public string GetTitle()
         {
-            return Selenium.FindElement(ContainerLocator().CombineCss(" span.sf-entity-title")).Text;
+            throw new InvalidOperationException();
+            //return Selenium.FindElement(ContainerLocator().CombineCss(" span.sf-entity-title")).Text;
         }
 
         public void CloseDiscardChanges()
         {
-            Selenium.FindElement(CloseButtonLocator).Click();
+            this.CloseButtonElement.Click();
 
             Selenium.ConsumeAlert();
 
@@ -241,11 +253,11 @@ namespace Signum.React.Selenium
                     if (!Selenium.IsElementVisible(PopupLocator))
                         return true;
 
-                    if (Selenium.IsElementVisible(CloseButtonLocator))
+                    if (this.CloseButtonElement.Displayed)
                     {
                         try
                         {
-                            Selenium.FindElement(CloseButtonLocator).Click();
+                            this.CloseButtonElement.Click();
                         }
                         catch (NoSuchElementException e)
                         {
@@ -262,31 +274,23 @@ namespace Signum.React.Selenium
                     }
 
                     return false;
-                }, () => "popup {0} to disapear with or without confirmation".FormatWith(Prefix));
+                }, () => "popup {0} to disapear with or without confirmation".FormatWith());
             }
 
             if (Disposing != null)
                 Disposing(this.OkPressed);
         }
 
-        public RuntimeInfoProxy RuntimeInfo()
+        public EntityInfoProxy EntityInfo()
         {
-            return RuntimeInfoProxy.FromFormValue((string)Selenium.ExecuteScript("return $('#{0}_divMainControl').data('runtimeinfo')".FormatWith(Prefix)));
-        }
-
-        public string EntityState()
-        {
-            if ((long)Selenium.ExecuteScript("return $('#{0}_sfEntityState').length".FormatWith(Prefix)) == 0)
-                return null;
-
-            return (string)Selenium.ExecuteScript("return $('#{0}_sfEntityState')[0].value".FormatWith(Prefix));
+            throw new InvalidOperationException();
+            //return EntityInfoProxy.FromFormValue((string)Selenium.ExecuteScript("return $('#{0}_divMainControl').data('EntityInfo')".FormatWith(Prefix)));
         }
 
         public bool HasId()
         {
-            return this.RuntimeInfo().IdOrNull.HasValue;
+            return this.EntityInfo().IdOrNull.HasValue;
         }
-
     }
 
 
@@ -294,7 +298,7 @@ namespace Signum.React.Selenium
     {
         public static P WaitVisible<P>(this P popup) where P : Popup
         {
-            popup.Selenium.Wait(() => Popup.IsPopupVisible(popup.Selenium, popup.Prefix), () => "Popup {0} to be visible".FormatWith(popup.Prefix));
+            popup.Selenium.Wait(() => Popup.IsPopupVisible(popup.Selenium, popup.Element), () => "Popup {0} to be visible".FormatWith(popup.Element));
 
             return popup;
         }
