@@ -30,18 +30,18 @@ namespace Signum.React.Selenium
         {
             get
             {
-                return By.XPath("//*[@id='" + PopupId(this.Prefix) + "']/following-sibling::div[@class='modal-backdrop fade in']");
+                return this.Selenium.NotImplemented(); // return By.XPath("//*[@id='" + PopupId(null) + "']/following-sibling::div[@class='modal-backdrop fade in']");
             }
         }
 
         public IWebElement PopupElement
         {
-            get { return By.CssSelector("#{0}_panelPopup".FormatWith(Prefix)); }
+            get { return this.Selenium.NotImplemented();/* By.CssSelector("#{0}_panelPopup".FormatWith(null)); */ }
         }
 
         public IWebElement CloseButtonElement
         {
-            get { return By.CssSelector("#{0}_panelPopup button.close, #{0}_panelPopup #{0}_btnCancel".FormatWith(Prefix)); }
+            get { return this.Selenium.NotImplemented(); /* By.CssSelector("#{0}_panelPopup button.close, #{0}_panelPopup #{0}_btnCancel".FormatWith(Prefix)); */ }
         }
 
         public bool AvoidClose { get; set; }
@@ -55,7 +55,7 @@ namespace Signum.React.Selenium
                     {
 
 
-                        var button = Selenium.FindElements(CloseButtonLocator).SingleOrDefaultEx();
+                        var button = this.CloseButtonElement;
                         if (button != null && button.Displayed)
                             button.Click();
 
@@ -77,19 +77,20 @@ namespace Signum.React.Selenium
 
         public void Close()
         {
-            Selenium.FindElement(CloseButtonLocator).Click();
+            this.CloseButtonElement.Click();
         }
 
         public Action<bool> Disposing;
 
         public IWebElement OkButtonElement
         {
-            get { return By.CssSelector("#{0}_btnOk".FormatWith(Prefix)); }
+            get { return this.Selenium.NotImplemented(); /* By.CssSelector("#{0}_btnOk".FormatWith(Prefix));*/ }
         }
 
         public void OkWaitSubmit()
         {
-            Selenium.FindElement(OkButtonLocator).Click();
+            this.OkButtonElement.Click();
+
             Selenium.WaitElementNotPresent(OkButtonLocator);
             this.Disposing = null;
         }
@@ -103,18 +104,18 @@ namespace Signum.React.Selenium
 
         public PopupControl<T> OkWaitPopupControl<T>(IWebElement element = null) where T : Entity
         {
-            if (prefix == null)
+            if (element == null)
                 this.AvoidClose = true;
-            Selenium.FindElement(OkButtonLocator).Click();
+            this.OkButtonElement..Click();
             var disposing = this.Disposing;
             this.Disposing = null;
-            return new PopupControl<T>(Selenium, prefix ?? Prefix) { Disposing = disposing };
+            return new PopupControl<T>(Selenium, element) { Disposing = disposing };
         }
 
         public bool OkPressed;
         public void OkWaitClosed()
         {
-            Selenium.FindElement(OkButtonLocator).Click();
+            this.io Selenium..FindElement(OkButtonLocator).Click();
             Selenium.WaitElementNotVisible(PopupLocator);
             this.OkPressed = true;
         }

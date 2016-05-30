@@ -47,50 +47,57 @@ namespace Signum.React.Selenium
         {
             get
             {
-                IWebElement element =  Selenium.TryFindElement(By.Id(Prefix));
-                if (element != null && element.TagName == "input" && element.GetAttribute("type") == "checkbox")
-                    return element.Selected.ToString();
+                IWebElement checkBox = this.Element.FindElement(By.CssSelector("input[type=checkbox]"));
+                if (checkBox != null)
+                    return checkBox.Selected.ToString();
 
-                IWebElement namedElement = Selenium.TryFindElement(By.Name(Prefix));
+                IWebElement namedElement = Selenium.TryFindElement(By.CssSelector("input[type=text]"));
                 if(namedElement != null)
                     return namedElement.GetAttribute("value");
 
-                IWebElement date = Selenium.TryFindElement(By.Name(Prefix + "_Date"));
-                IWebElement time = Selenium.TryFindElement(By.Name(Prefix + "_Time"));
+                IWebElement date = Selenium.TryFindElement(By.Name("Date"));
+                IWebElement time = Selenium.TryFindElement(By.Name("Time"));
 
                 if (date != null && time != null)
                     return date.GetAttribute("value") + " " + time.GetAttribute("value");
 
-                if (element != null)
-                    return element.Text;
+                if (checkBox != null)
+                    return checkBox.Text;
             
-                throw new InvalidOperationException("Element {0} not found".FormatWith(Prefix));
+                throw new InvalidOperationException("Element {0} not found".FormatWith(this.Route.PropertyString()));
             }
 
             set
             {
-                IWebElement element = Selenium.TryFindElement(By.Id(Prefix));
-                if (element != null)
+
+                IWebElement checkBox = this.Element.TryFindElement(By.CssSelector("input[type=checkbox]"));
+                if (checkBox != null)
                 {
-                    if (element != null && element.TagName == "input" && element.GetAttribute("type") == "checkbox")
-                    {
-                        element.SetChecked(bool.Parse(value));
-                        return;
-                    }
-                    else if (element.GetParent().HasClass("input-group", "date"))
-                    {
-                        Selenium.ExecuteScript("$('div.input-group.date>#{0}').parent().datepicker('setDate', '{1}')".FormatWith(Prefix, value)); 
-                        return;
-                    }
-                    else if (element.FindElements(By.CssSelector("div.date")).Any() && element.FindElements(By.CssSelector("div.time")).Any())
-                    {
-                        Selenium.ExecuteScript("$('#{0} > div.date').datepicker('setDate', '{1}')".FormatWith(Prefix, value.TryBefore(" ")));
-                        Selenium.ExecuteScript("$('#{0} > div.time').timepicker('setTime', '{1}')".FormatWith(Prefix, value.TryAfter(" ")));
-                        return;
-                    }
+                    checkBox.SetChecked(bool.Parse(value));
                 }
 
-                var byName = Selenium.TryFindElement(By.Name(Prefix));
+                //IWebElement element = Selenium.TryFindElement(By.Id(Prefix));
+                //if (element != null)
+                //{
+                //    if (element != null && element.TagName == "input" && element.GetAttribute("type") == "checkbox")
+                //    {
+                //        element.SetChecked(bool.Parse(value));
+                //        return;
+                //    }
+                //    else if (element.GetParent().HasClass("input-group", "date"))
+                //    {
+                //        Selenium.ExecuteScript("$('div.input-group.date>#{0}').parent().datepicker('setDate', '{1}')".FormatWith(Prefix, value)); 
+                //        return;
+                //    }
+                //    else if (element.FindElements(By.CssSelector("div.date")).Any() && element.FindElements(By.CssSelector("div.time")).Any())
+                //    {
+                //        Selenium.ExecuteScript("$('#{0} > div.date').datepicker('setDate', '{1}')".FormatWith(Prefix, value.TryBefore(" ")));
+                //        Selenium.ExecuteScript("$('#{0} > div.time').timepicker('setTime', '{1}')".FormatWith(Prefix, value.TryAfter(" ")));
+                //        return;
+                //    }
+                //}
+
+                IWebElement byName = this.Element.TryFindElement(By.CssSelector("input[type=text]"));
                 if (byName != null)
                 {
                     if (byName.TagName == "select")
@@ -100,7 +107,7 @@ namespace Signum.React.Selenium
                     return;
                 }
                 else
-                    throw new InvalidOperationException("Element {0} not found".FormatWith(Prefix));
+                    throw new InvalidOperationException("Element {0} not found".FormatWith(this.Route));
             }
         }
 
@@ -127,38 +134,25 @@ namespace Signum.React.Selenium
                     value is IFormattable ? ((IFormattable)value).ToString(format, null) :
                     value.ToString();
         }
-
-        public IWebElement MainElement()
-        {
-            IWebElement element = Selenium.TryFindElement(By.Id(Prefix));
-            if (element != null)
-                return element;
-
-            var byName = Selenium.TryFindElement(By.Name(Prefix));
-            if (byName != null)
-                return byName;
-
-            throw new NotImplementedException();
-        }
     }
 
     public abstract class EntityBaseProxy : BaseLineProxy
     {
         public EntityBaseProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, prefix, route)
+            : base(selenium, element, route)
         {
         }
 
         public IWebElement CreateElement
         {
-            get { return By.CssSelector("#{0}_btnCreate".FormatWith(Prefix)); }
+            get { return this.Element.TryFindElement(By.CssSelector("#{0}_btnCreate".FormatWith()); }
         }
 
         protected void CreateEmbedded<T>(bool mlist)
         {
             WaitChanges(() =>
             {
-                Selenium.FindElement(CreateLocator).Click();
+                this.CreateElement.Click();
 
                 var route = this.Route;
                 if (mlist)
@@ -180,7 +174,7 @@ namespace Signum.React.Selenium
             var index = NewIndex();
             string changes = GetChanges();
 
-            Selenium.FindElement(CreateLocator).Click();
+            this.CreateElement.Click();
 
             string newPrefix = ChooseType(typeof(T), index);
 
@@ -194,7 +188,7 @@ namespace Signum.React.Selenium
 
         public IWebElement ViewElement
         {
-            get { return By.CssSelector("#{0}_btnView".FormatWith(Prefix)); }
+            get { return By.CssSelector("#{0}_btnView".FormatWith(this.Route.PropertyString())); }
         }
 
         protected PopupControl<T> ViewPopup<T>(int? index) where T : ModifiableEntity
