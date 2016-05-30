@@ -34,9 +34,8 @@ namespace Signum.Web
                 return new TypeContext<T>((T)stc.UntypedValue, stc, "", stc.PropertyRoute);
             }
 
-            throw new InvalidCastException("Impossible to convert object '{0}' of type '{1}' to '{2}'".FormatWith(
-                helper.ViewData.Model.TryToString() ?? "null",
-                helper.ViewData.Model == null ? "object" :
+            throw new InvalidCastException("Impossible to convert object {0} of type {1} to {2}".FormatWith(
+                helper.ViewData.Model,
                 helper.ViewData.Model.GetType().TypeName(),
                 typeof(TypeContext<T>).TypeName()));
         }
