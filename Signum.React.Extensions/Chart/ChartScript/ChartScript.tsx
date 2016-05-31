@@ -82,7 +82,7 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Char
     }
 
     renderParameter = (ctx: TypeContext<ChartScriptParameterEntity>) => {
-        var cc = ctx.subCtx({ formGroupStyle: FormGroupStyle.Basic });
+        var cc = ctx.subCtx({ formGroupStyle: "Basic" });
         return (
             <div>
                 <div className="form-vertical">

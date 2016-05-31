@@ -15,7 +15,7 @@ import { CountSearchControlPartEntity, CountUserQueryElementEntity } from '../Si
 export default class CountSearchControlPart extends React.Component<{ ctx: TypeContext<CountSearchControlPartEntity> }, void> {
 
     render() {
-        var ctx = this.props.ctx.subCtx({ formGroupStyle: FormGroupStyle.SrOnly, placeholderLabels: true });
+        var ctx = this.props.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
         
         return (
             <div className="form-inline repeater-inline">
