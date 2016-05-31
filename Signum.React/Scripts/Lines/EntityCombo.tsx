@@ -42,6 +42,13 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         }
     }
 
+    componentWillReceiveProps(newProps: EntityComboProps, newContext) {
+        if (!!newProps.data && !this.props.data)
+            console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.state.type.name}`);
+
+        super.componentWillReceiveProps(newProps, newContext);
+    }
+
     handleOnChange = (event: React.FormEvent) => {
         const current = event.currentTarget as HTMLSelectElement;
 
@@ -87,7 +94,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={s.formGroupHtmlProps} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={this.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-combo">
                     <div className={buttons ? "input-group" : null}>
                         { this.renderSelect() }

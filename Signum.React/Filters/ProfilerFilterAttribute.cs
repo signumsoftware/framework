@@ -5,6 +5,8 @@ using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities.Reflection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -38,7 +40,7 @@ namespace Signum.React.Filters
                 var attr = rad.MethodInfo.GetCustomAttributes(true).OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
                 if (attr != null)
                 {
-                    var obj = attr.RequestKey == null ? actionContext.ActionArguments.Values.Single() : actionContext.ActionArguments[attr.RequestKey];
+                    var obj = attr.RequestKey == null ? actionContext.ActionArguments.Values.Single() : actionContext.ActionArguments.GetOrThrow(attr.RequestKey, "Argument '{0}' not found in: " + rad.MethodInfo.MethodSignature());
 
                     if (obj != null)
                         action += " " + obj.ToString();

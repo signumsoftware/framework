@@ -166,7 +166,7 @@ namespace Signum.React.Facades
                               IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
                               ToStringFunction = ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)),
                               QueryDefined = dqm.QueryDefined(type),
-                              Members = PropertyRoute.GenerateRoutes(type)
+                              Members = PropertyRoute.GenerateRoutes(type).Where(pr => InTypeScript(pr))
                                 .ToDictionary(p => p.PropertyString(), p => OnAddPropertyRouteExtension(new MemberInfoTS
                                 {
                                     NiceName = p.PropertyInfo?.NiceName(),
@@ -174,7 +174,7 @@ namespace Signum.React.Facades
                                     Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                     IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
                                     Unit = p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName,
-                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type) : p.PropertyInfo?.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations(): p.TryGetImplementations()),
+                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type) : p.PropertyInfo?.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
                                     IsMultiline = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
                                     MaxLength = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                     PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
@@ -186,6 +186,11 @@ namespace Signum.React.Facades
                           }, type))).ToDictionary("entities");
 
             return result;
+        }
+
+        private static bool InTypeScript(PropertyRoute pr)
+        {
+            return (pr.Parent == null || InTypeScript(pr.Parent)) && (pr.PropertyInfo == null || pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.InTypeScript != false);
         }
 
         private static string ToJavascript(LambdaExpression lambdaExpression)

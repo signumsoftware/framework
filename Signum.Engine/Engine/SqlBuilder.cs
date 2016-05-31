@@ -118,6 +118,8 @@ namespace Signum.Engine
             return false;
         }
 
+
+
         public static SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column)
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1}".FormatWith(table.Name, CreateColumn(column)));
@@ -174,6 +176,14 @@ namespace Signum.Engine
         public static SqlPreCommand CreateAllIndices(ITable t)
         {
             return t.GeneratAllIndexes().Select(CreateIndex).Combine(Spacing.Simple);
+        }
+
+        public static SqlPreCommand DropIndex(UniqueIndex ix)
+        {
+            if (ix.ViewName == null)
+                return DropIndex(ix.Table.Name, ix.IndexName);
+            else
+                return DropViewIndex(new ObjectName(ix.Table.Name.Schema, ix.ViewName), ix.IndexName);
         }
 
         public static SqlPreCommand DropIndex(ObjectName tableName, DiffIndex index)

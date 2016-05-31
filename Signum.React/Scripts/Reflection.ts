@@ -730,10 +730,13 @@ export class PropertyRoute {
         }
     }
 
+    typeReferenceInfo(): TypeInfo {
+        return getTypeInfo(this.typeReference().name);
+    }
+
     closestTypeInfo(): TypeInfo {
         switch (this.propertyRouteType) {
             case PropertyRouteType.Root: return this.rootType;
-
             case PropertyRouteType.Field: return this.parent.closestTypeInfo();
             case PropertyRouteType.Mixin: return this.parent.closestTypeInfo();
             case PropertyRouteType.MListItem: return this.parent.closestTypeInfo();
@@ -741,7 +744,7 @@ export class PropertyRoute {
         }
     }
 
-    propertyPath() {
+    propertyPath(): string{
         switch (this.propertyRouteType) {
             case PropertyRouteType.Root: throw new Error("Root has no PropertyString");
             case PropertyRouteType.Field: return this.member.name;

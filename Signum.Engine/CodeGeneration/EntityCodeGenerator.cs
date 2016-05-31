@@ -22,7 +22,7 @@ namespace Signum.Engine.CodeGeneration
         public string SolutionFolder;
 
         public Dictionary<ObjectName, DiffTable> Tables;
-        public DirectedGraph<DiffTable> Graph;
+        public DirectedGraph<DiffTable> InverseGraph;
 
         public Schema CurrentSchema; 
 
@@ -30,14 +30,12 @@ namespace Signum.Engine.CodeGeneration
         {
             CurrentSchema = Schema.Current;
 
-            var tables = SchemaSynchronizer.DefaultGetDatabaseDescription(Schema.Current.DatabaseNames()).Values.ToList();
-
-            CleanDiffTables(tables);
+            var tables =  GetTables();
 
             this.Tables = tables.ToDictionary(a=>a.Name);
 
-            Graph = DirectedGraph<DiffTable>.Generate(tables, t =>
-                t.Columns.Values.Select(a => a.ForeignKey).NotNull().Select(a => a.TargetTable).Distinct().Select(on => this.Tables.GetOrThrow(on)));
+            InverseGraph = DirectedGraph<DiffTable>.Generate(tables, t =>
+                t.Columns.Values.Select(a => a.ForeignKey).NotNull().Select(a => a.TargetTable).Distinct().Select(on => this.Tables.GetOrThrow(on))).Inverse();
 
             GetSolutionInfo(out SolutionFolder, out SolutionName);
 
@@ -73,9 +71,9 @@ namespace Signum.Engine.CodeGeneration
             return Path.Combine(SolutionFolder, SolutionName + ".Entities");
         }
 
-        protected virtual void CleanDiffTables(List<DiffTable> tables)
+        protected virtual List<DiffTable> GetTables()
         {
-            
+            return SchemaSynchronizer.DefaultGetDatabaseDescription(Schema.Current.DatabaseNames()).Values.ToList();
         }
         
         protected virtual void GetSolutionInfo(out string solutionFolder, out string solutionName)
@@ -85,6 +83,10 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetFileName(DiffTable t)
         {
+            var mli = this.GetMListInfo(t);
+            if (mli != null)
+                return this.GetFileName(this.Tables.GetOrThrow(mli.BackReferenceColumn.ForeignKey.TargetTable));
+
             string name = t.Name.ToString().Replace('.', '\\');
 
             name = Regex.Replace(name, "[" + Regex.Escape(new string(Path.GetInvalidPathChars())) + "]", "");
@@ -321,7 +323,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual IEnumerable<KeyValuePair<DiffTable, MListInfo>> GetMListFields(DiffTable table)
         {
-            return from relatedTable in Graph.InverseRelatedTo(table)
+            return from relatedTable in InverseGraph.RelatedTo(table)
                    let mListInfo2 = GetMListInfo(relatedTable)
                    where mListInfo2 != null && mListInfo2.BackReferenceColumn.ForeignKey.TargetTable.Equals(table.Name)
                    select KVP.Create(relatedTable, mListInfo2);
@@ -435,9 +437,37 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual MListInfo GetMListInfo(DiffTable table)
         {
-            return null;
+            if (this.InverseGraph.RelatedTo(table).Any())
+                return null;
+
+            var parentColumn = GetMListParentColumn(table);
+            if (parentColumn == null)
+                return null;
+
+            var orderColumn = GetMListOrderColumn(table);
+            var trivialColumn = GetMListTrivialElementColumn(table, parentColumn, orderColumn);
+
+            return new MListInfo(parentColumn)
+            {
+                TrivialElementColumn = trivialColumn,
+                PreserveOrderColumn = orderColumn,
+            };
         }
 
+        protected virtual DiffColumn GetMListTrivialElementColumn(DiffTable table, DiffColumn parentColumn, DiffColumn orderColumn)
+        {
+            return table.Columns.Values.Where(c => c != parentColumn && c != orderColumn && !c.PrimaryKey).Only();
+        }
+
+        protected virtual DiffColumn GetMListOrderColumn(DiffTable table)
+        {
+            return table.Columns.TryGetC("Order") ?? table.Columns.TryGetC("Row") ?? table.Columns.TryGetC("Index");
+        }
+
+        protected virtual DiffColumn GetMListParentColumn(DiffTable table)
+        {
+            return table.Columns.Values.Where(c => c.ForeignKey != null && c.Nullable == false && table.Name.Name.StartsWith(c.ForeignKey.TargetTable.Name)).OrderByDescending(a => a.ForeignKey.TargetTable.Name.Length).FirstOrDefault();
+        }
         protected virtual IEnumerable<string> GetEntityAttributes(DiffTable table)
         {
             List<string> atts = new List<string> { "Serializable" };
@@ -514,7 +544,7 @@ namespace Signum.Engine.CodeGeneration
             {
                 sb.Append(", DatabaseName = \"" + objectName.Schema.Database.Name + "\"");
 
-                if (objectName.Schema.Database != null)
+                if (objectName.Schema.Database.Server != null)
                 {
                     sb.Append(", ServerName = \"" + objectName.Schema.Database.Server.Name + "\"");
                 }
@@ -648,13 +678,18 @@ namespace Signum.Engine.CodeGeneration
                     attributes.Add(sqlDbType);
             }
 
-            if (GetEmbeddedField(table, col) != null || col.Name != DefaultColumnName(table, col))
+            if (RequiresColumnName(table, col))
                 attributes.Add("ColumnName(\"" + col.Name + "\")");
 
             if (HasUniqueIndex(table, col))
                 attributes.Add("UniqueIndex");
 
             return attributes;
+        }
+
+        protected virtual bool RequiresColumnName(DiffTable table, DiffColumn col)
+        {
+            return GetEmbeddedField(table, col) != null || col.Name != DefaultColumnName(table, col);
         }
 
         protected virtual bool HasUniqueIndex(DiffTable table, DiffColumn col)
@@ -840,7 +875,7 @@ namespace Signum.Engine.CodeGeneration
             string fieldName = GetFieldMListName(table, relatedTable, mListInfo);
             WriteAttributeTag(sb, fieldAttributes);
             sb.AppendLine("[NotNullValidator, NoRepeatValidator]");
-            sb.AppendLine("public MList<{0}> {1} { get; set; } = new MList<{0}>();".FormatWith(type, fieldName.FirstUpper()));
+            sb.AppendLine("public MList<{0}> {1} {{ get; set; }} = new MList<{0}>();".FormatWith(type, fieldName.FirstUpper()));
 
             return sb.ToString();
         }
@@ -871,9 +906,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual string GetFieldMListName(DiffTable table, DiffTable relatedTable, MListInfo mListInfo)
         {
-            ObjectName name = mListInfo.TrivialElementColumn?.ForeignKey.TargetTable ?? relatedTable.Name;
-
-            return NaturalLanguageTools.Pluralize(GetEntityName(name).RemoveSuffix("Entity")).FirstLower();
+            return NaturalLanguageTools.Pluralize(relatedTable.Name.Name.RemovePrefix(table.Name.Name));
         }
 
         protected virtual string WriteToString(DiffTable table)
@@ -885,7 +918,7 @@ namespace Signum.Engine.CodeGeneration
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("static Expression<Func<{0}, string>> ToStringExpression = e => e.{1}{2};".FormatWith(GetEntityName(table.Name),
                 toStringColumn.PrimaryKey ? "Id" : GetFieldName(table, toStringColumn).FirstUpper(),
-                toStringColumn.PrimaryKey || GetFieldType(table, toStringColumn, GetRelatedEntity(table, toStringColumn)) != "string" ? "?.ToString()" : ""));
+                toStringColumn.PrimaryKey || GetFieldType(table, toStringColumn, GetRelatedEntity(table, toStringColumn)) != "string" ? " + \"\"" : ""));
             sb.AppendLine("[ExpressionField]");
             sb.AppendLine("public override string ToString()");
             sb.AppendLine("{");

@@ -155,21 +155,21 @@ function typeIsCreable(typeName: string): EntityWhen {
     
     const typeInfo = getTypeInfo(typeName);
     if (typeInfo == null)
-        return EntityWhen.IsLine;
+        return "IsLine";
 
     if (typeInfo.kind == KindOfType.Enum)
-        return EntityWhen.Never;
+        return "Never";
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return EntityWhen.Never;
-        case EntityKind.System: return EntityWhen.Never;
-        case EntityKind.Relational: return EntityWhen.Never;
-        case EntityKind.String: return EntityWhen.IsSearch;
-        case EntityKind.Shared: return EntityWhen.Always;
-        case EntityKind.Main: return EntityWhen.IsSearch;
-        case EntityKind.Part: return EntityWhen.IsLine;
-        case EntityKind.SharedPart: return EntityWhen.IsLine;
-        default: return EntityWhen.Never;
+        case EntityKind.SystemString: return "Never";
+        case EntityKind.System: return "Never";
+        case EntityKind.Relational: return "Never";
+        case EntityKind.String: return "IsSearch";
+        case EntityKind.Shared: return "Always";
+        case EntityKind.Main: return "IsSearch";
+        case EntityKind.Part: return "IsLine";
+        case EntityKind.SharedPart: return "IsLine";
+        default: return "Never";
     }
 }
 
@@ -327,21 +327,21 @@ function typeIsNavigable(typeName: string): EntityWhen {
 
     const typeInfo = getTypeInfo(typeName);
     if (typeInfo == null)
-        return EntityWhen.Never;
+        return "Never";
 
     if (typeInfo.kind == KindOfType.Enum)
-        return EntityWhen.Never;
+        return "Never";
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return EntityWhen.Never;
-        case EntityKind.System: return EntityWhen.Always;
-        case EntityKind.Relational: return EntityWhen.Never;
-        case EntityKind.String: return EntityWhen.IsSearch;
-        case EntityKind.Shared: return EntityWhen.Always;
-        case EntityKind.Main: return EntityWhen.Always;
-        case EntityKind.Part: return EntityWhen.Always;
-        case EntityKind.SharedPart: return EntityWhen.Always;
-        default: return EntityWhen.Never;
+        case EntityKind.SystemString: return "Never";
+        case EntityKind.System: return "Always";
+        case EntityKind.Relational: return "Never";
+        case EntityKind.String: return "IsSearch";
+        case EntityKind.Shared: return "Always";
+        case EntityKind.Main: return "Always";
+        case EntityKind.Part: return "Always";
+        case EntityKind.SharedPart: return "Always";
+        default: return "Never";
     }
 }
 
@@ -500,16 +500,11 @@ export class EntitySettings<T extends ModifiableEntity> {
 }
 
 export function checkFlag(entityWhen: EntityWhen, isSearch: boolean) {
-    return entityWhen == EntityWhen.Always ||
-        entityWhen == (isSearch ? EntityWhen.IsSearch : EntityWhen.IsLine);
+    return entityWhen == "Always" ||
+        entityWhen == (isSearch ? "IsSearch" : "IsLine");
 }
 
-export enum EntityWhen {
-    Always = "Always" as any,
-    IsSearch = "IsSearch" as any,
-    IsLine = "IsLine" as any,
-    Never = "Never" as any,
-}
+export type EntityWhen = "Always" | "IsSearch" | "IsLine" | "Never";
 
 declare global {
     interface String {

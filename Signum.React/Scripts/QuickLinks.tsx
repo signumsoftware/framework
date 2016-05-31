@@ -19,7 +19,7 @@ export function start() {
 export interface QuickLinkContext<T extends Entity> {
     lite: Lite<T>;
     widgetContext?: WidgetContext;
-    contextualContext?: ContextualItemsContext;
+    contextualContext?: ContextualItemsContext<T>;
 }
 
 export var onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>> = [];
@@ -74,7 +74,7 @@ export function getQuickLinkWidget(ctx: WidgetContext): React.ReactElement<any> 
     return <QuickLinkWidget ctx={ctx}/>;
 }
 
-export function getQuickLinkContextMenus(ctx: ContextualItemsContext): Promise<MenuItemBlock> {
+export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
 
     if (ctx.lites.length != 1)
         return Promise.resolve(null);

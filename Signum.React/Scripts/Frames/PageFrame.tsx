@@ -102,11 +102,11 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
 
-    component: React.Component<any, any>;
+    entityComponent: React.Component<any, any>;
 
     setComponent(c: React.Component<any, any>) {
-        if (c && this.component != c) {
-            this.component = c;
+        if (c && this.entityComponent != c) {
+            this.entityComponent = c;
             this.forceUpdate();
         }
     }
@@ -124,7 +124,8 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         const entity = this.state.pack.entity;
         
         const frame: EntityFrame<Entity> = {
-            component: this,
+            frameComponent: this,
+            entityComponent: this.entityComponent,
             onReload: pack => this.setState({ pack }),
             onClose: () => this.onClose(),
             setError: (ms, initialPrefix = "") => {
@@ -154,7 +155,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             <div className="normal-control">
                 { this.renderTitle() }
                 { renderWidgets(wc) }
-                { this.component && <ButtonBar frame={frame} pack={this.state.pack} showOperations={true} /> }
+                { this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} showOperations={true} /> }
                 <ValidationErrors entity={this.state.pack.entity}/>
                 { embeddedWidgets.top }
                 <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
