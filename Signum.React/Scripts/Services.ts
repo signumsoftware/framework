@@ -121,20 +121,26 @@ a.style.display = "none";
 
 
 export function saveFile(response: Response) {
-	response.blob().then(blob => {
-		var url = window.URL.createObjectURL(blob);
-		a.href = url;
+    let fileName = "file.dat";
+    let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition"));
+    if (match)
+        fileName = match[1];
 
-		let fileName = "file.dat";
-		let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition"));
-		if (match)
-			fileName = match[1];
+    response.blob().then(blob => {
+		
+        if (window.navigator.msSaveBlob)
+            window.navigator.msSaveBlob(blob, fileName);
+        else {
+            var url = window.URL.createObjectURL(blob);
+            a.href = url;
 
-		(a as any).download = fileName;
 
-		a.click();
+            (a as any).download = fileName;
+
+            a.click();
 
             setTimeout(() => window.URL.revokeObjectURL(url), 500);
+        }
 	});
 }
 
