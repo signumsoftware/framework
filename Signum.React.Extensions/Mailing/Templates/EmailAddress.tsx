@@ -10,7 +10,7 @@ export default class EmailAddress extends React.Component<{ ctx: TypeContext<Ema
 
     render() {
 
-         var sc = this.props.ctx.subCtx({ placeholderLabels: true, formGroupStyle: FormGroupStyle.SrOnly});
+         var sc = this.props.ctx.subCtx({ placeholderLabels: true, formGroupStyle: "SrOnly"});
 
         return (
             <div className="row form-vertical">

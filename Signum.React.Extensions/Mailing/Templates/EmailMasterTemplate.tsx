@@ -30,7 +30,7 @@ export default class EmailMasterTemplate extends React.Component<{ ctx: TypeCont
                     <input type="button" className="sf-button sf-master-template-insert-content" value="@(EmailTemplateViewMessage.InsertMessageContent.NiceToString())" />
                 </div>
 
-                <ValueLine ctx={ec.subCtx(e => e.text) }  formGroupStyle={FormGroupStyle.None} valueLineType={ValueLineType.TextArea} valueHtmlProps={{ style: { width: "100%", height: "180px;" }, className: "sf-rich-text-editor sf-email-template-message-text" }} />
+                <ValueLine ctx={ec.subCtx(e => e.text) }  formGroupStyle={"None"} valueLineType={ValueLineType.TextArea} valueHtmlProps={{ style: { width: "100%", height: "180px;" }, className: "sf-rich-text-editor sf-email-template-message-text" }} />
             </div>
         );
     };

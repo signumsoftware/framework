@@ -62,7 +62,7 @@ export class ChartColumn extends React.Component<ChartColumnProps, { }> {
                 <td>
                     <div className={classes("sf-query-token", this.props.ctx.formGroupSizeCss)}>
                         <QueryTokenEntityBuilder
-                            ctx={this.props.ctx.subCtx(a => a.token, { formGroupStyle: FormGroupStyle.None }) }
+                            ctx={this.props.ctx.subCtx(a => a.token, { formGroupStyle: "None" }) }
                             queryKey={this.props.queryKey}
                             subTokenOptions={subTokenOptions} />
                     </div>
@@ -98,7 +98,7 @@ export class ChartColumnInfo extends React.Component<ChartColumnInfoProps, void>
 
     render() {
 
-        var ctx = this.props.ctx.subCtx({ formGroupSize: FormGroupSize.Small, formGroupStyle: FormGroupStyle.Basic });
+        var ctx = this.props.ctx.subCtx({ formGroupSize: "Small", formGroupStyle: "Basic" });
 
 
 

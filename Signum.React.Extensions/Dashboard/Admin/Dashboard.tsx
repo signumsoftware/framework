@@ -22,7 +22,7 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Dash
 
     render() {
         var ctx = this.props.ctx;
-        var sc = ctx.subCtx({ formGroupStyle: FormGroupStyle.Basic });
+        var sc = ctx.subCtx({ formGroupStyle: "Basic" });
         return (
             <div>
                 <div className="form-vertical">
@@ -68,9 +68,9 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Dash
 
         var title = (
             <div>
-                <ValueLine ctx={tc.subCtx(pp => pp.title, { formGroupStyle: FormGroupStyle.None, placeholderLabels: true }) }  />
+                <ValueLine ctx={tc.subCtx(pp => pp.title, { formGroupStyle: "None", placeholderLabels: true }) }  />
                 &nbsp;
-                <ValueLine ctx={tc.subCtx(pp => pp.style, { formGroupStyle: FormGroupStyle.None }) } onChange={() => this.forceUpdate() }  />
+                <ValueLine ctx={tc.subCtx(pp => pp.style, { formGroupStyle: "None" }) } onChange={() => this.forceUpdate() }  />
             </div>
         );
 
