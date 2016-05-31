@@ -202,15 +202,6 @@ namespace Signum.React.Selenium
             return new EntityListProxy(lineContainer.Selenium, element, newRoute);
         }
 
-        public static EntityListDetailProxy EntityListDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-            where T : ModifiableEntity
-        {
-            IWebElement element;
-            PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
-
-            return new EntityListDetailProxy(lineContainer.Selenium, element, newRoute);
-        }
-
         public static EntityListCheckBoxProxy EntityListCheckBox<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
             where T : ModifiableEntity
         {
@@ -262,14 +253,10 @@ namespace Signum.React.Selenium
         {
             string query = QueryUtils.GetKey(queryName);
 
-            var prefix = (string)lineContainer.Selenium.ExecuteScript("return $('div.sf-search-control[data-queryname=\"{0}\"]').data('prefix')".FormatWith(query));
+            throw new NotImplementedException();
+            //var prefix = (string)lineContainer.Selenium.ExecuteScript("return $('div.sf-search-control[data-queryname=\"{0}\"]').data('prefix')".FormatWith(query));
 
-            return new SearchControlProxy(lineContainer.Selenium, prefix);
-        }
-
-        public static SearchControlProxy GetSearchControlSuffix(this ILineContainer lineContainer, string suffix)
-        {
-            return new SearchControlProxy(lineContainer.Selenium, lineContainer.PrefixUnderscore() + suffix); 
+            //return new SearchControlProxy(lineContainer.Selenium,  prefix);
         }
     }
 

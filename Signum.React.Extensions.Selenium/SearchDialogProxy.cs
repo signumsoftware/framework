@@ -119,14 +119,14 @@ namespace Signum.React.Selenium
 
         public PopupControl<T> Create<T>() where T : ModifiableEntity
         {
-            Selenium.FindElement(SearchControl.CreateButtonLocator).Click();
+            SearchControl.CreateButton.Click();
 
             return new PopupControl<T>(Selenium, Selenium.NotImplemented("")).WaitVisible();
         }
         
         public PopupControl<T> CreateChoose<T>() where T : ModifiableEntity
         {
-            Selenium.FindElement(SearchControl.CreateButtonLocator).Click();
+            SearchControl.CreateButton.Click();
 
             //implementation popup opens
             Selenium.Wait(() => Popup.IsPopupVisible(Selenium, SearchControl.Element));
@@ -150,7 +150,7 @@ namespace Signum.React.Selenium
 
         internal SearchPageProxy WaitLoaded()
         {
-            this.Selenium.WaitElementPresent(this.SearchControl.SearchButtonLocator);
+            this.Selenium.Wait(() => this.SearchControl.SearchButton != null);
             return this;
         }
     }
@@ -175,19 +175,19 @@ namespace Signum.React.Selenium
             this.Filters = new FiltersProxy(this.Selenium, this.Element);
         }
 
-        public IWebElement SearchButtonLocator
+        public WebElementLocator SearchButton
         {
-            get { return Selenium.NotImplemented(@"By.CssSelector(""#{0}qbSearch"".FormatWith(PrefixUnderscore))"); }
+            get { return this.Element.WithLocator(By.ClassName("sf-search-control")); }
         }
 
         public void Search()
         {
-            WaitSearchCompleted(() => Selenium.FindElement(SearchButtonLocator).Click());
+            WaitSearchCompleted(() => SearchButton.Get().Click());
         }
 
         public void WaitSearchCompleted(Action searchTrigger)
         {
-            string counter = (string)Selenium.ExecuteScript("return $('#{0}qbSearch').attr('data-searchcount')".FormatWith(this.PrefixUnderscore));
+            string counter = this.Element.GetAttribute("data-search-count");
             searchTrigger();
             WaitSearchCompleted(counter);
         }
@@ -199,63 +199,63 @@ namespace Signum.React.Selenium
 
         void WaitSearchCompleted(string counter)
         {
-            By searchButtonDisctinct = SearchButtonLocator.CombineCss((string.IsNullOrEmpty(counter) ? "[data-search-count]" : "[data-search-count='{0}']".FormatWith(int.Parse(counter) + 1)));
             Selenium.Wait(() =>
-                Selenium.IsElementPresent(searchButtonDisctinct)
-                , () => "button {0} to finish searching".FormatWith(SearchButtonLocator));
+             this.Element.GetAttribute("data-search-count") != counter
+                , () => "button {0} to finish searching".FormatWith(SearchButton));
         }
 
-
-        public IWebElement ToggleFiltersElement
+        public WebElementLocator ToggleFiltersButton
         {
-            get { return By.CssSelector("#{0}sfSearchControl .sf-filters-header".FormatWith(PrefixUnderscore)); }
+            get { return this.Element.WithLocator(By.ClassName("sf-filters-header")); }
         }
 
-        public IWebElement FiltersPanelElement
+        public WebElementLocator FiltersPanel
         {
-            get { return By.CssSelector("#{0}sfSearchControl .sf-filters".FormatWith(PrefixUnderscore)); }
+            get { return this.Element.WithLocator(By.ClassName("sf-filters")) }
         }
 
         public void ToggleFilters(bool show)
         {
-            Selenium.FindElement(ToggleFiltersLocator).Click();
+            ToggleFiltersButton.Get().Click();
             if (show)
-                Selenium.WaitElementVisible(FiltersPanelLocator);
+                FiltersPanel.WaitVisible();
             else
-                Selenium.WaitElementNotVisible(FiltersPanelLocator);
+                FiltersPanel.WaitNoVisible();
         }
 
-        public IWebElement AddColumnButtonElement
-        {
-            get { return By.CssSelector("#{0}btnAddColumn".FormatWith(PrefixUnderscore)); }
-        }
+        //public IWebElement AddColumnButtonElement
+        //{
+        //    get { throw new NotImplementedException(); /* return By.CssSelector("#{0}btnAddColumn".FormatWith(PrefixUnderscore)); */ }
+        //}
 
-        public bool IsAddColumnEnabled
-        {
-            get
-            {
-                Selenium.AssertElementPresent(AddColumnButtonLocator);
+        //public bool IsAddColumnEnabled
+        //{
+        //    get
+        //    {
+        //        throw new NotImplementedException();
+        //        //Selenium.AssertElementPresent(AddColumnButtonLocator);
 
-                return Selenium.IsElementPresent(AddColumnButtonLocator.CombineCss(":not([disabled])"));
-            }
-        }
+        //        //return Selenium.IsElementPresent(AddColumnButtonLocator.CombineCss(":not([disabled])"));
+        //    }
+        //}
 
-        public void AddColumn(string token)
-        {
-            Filters.QueryTokenBuilder.SelectToken(token);
-            Selenium.Wait(() => IsAddColumnEnabled);
-            Selenium.FindElement(AddColumnButtonLocator).Click();
-            Selenium.WaitElementPresent(Results.HeaderCellLocator(token));
-        }
+        //public void AddColumn(string token)
+        //{
+        //    throw new NotImplementedException();
+        //    //Filters.QueryTokenBuilder.SelectToken(token);
+        //    //Selenium.Wait(() => IsAddColumnEnabled);
+        //    //Selenium.FindElement(AddColumnButtonLocator).Click();
+        //    //Selenium.WaitElementPresent(Results.HeaderCellLocator(token));
+        //}
 
 
         public FilterOptionProxy AddQuickFilter(int rowIndex, string token)
         {
             var newFilterIndex = Filters.NewFilterIndex();
-           
+
             Selenium.FindElement(Results.CellLocator(rowIndex, token)).ContextClick();
 
-            IWebElement quickFilterElement = By.CssSelector("#sfContextMenu .sf-quickfilter");
+            IWebElement quickFilterElement =  By.CssSelector("#sfContextMenu .sf-quickfilter");
             Selenium.WaitElementPresent(quickFilterLocator);
             Selenium.FindElement(quickFilterLocator).Click();
 
@@ -265,81 +265,93 @@ namespace Signum.React.Selenium
         }
 
         public FilterOptionProxy AddQuickFilter(string token)
-        {
-            var newFilterIndex = Filters.NewFilterIndex();
+        { 
+            //var newFilterIndex = Filters.NewFilterIndex();
 
-            var headerLocator = Results.HeaderCellLocator(token);
-            Selenium.FindElement(headerLocator).ContextClick();
+            //var headerLocator = Results.HeaderCellLocator(token);
+            //Selenium.FindElement(headerLocator).ContextClick();
 
-            IWebElement quickFilterElement = By.CssSelector("#sfContextMenu .sf-quickfilter-header");
-            Selenium.WaitElementPresent(quickFilterLocator);
-            Selenium.FindElement(quickFilterLocator).Click();
+            //IWebElement quickFilterElement = By.CssSelector("#sfContextMenu .sf-quickfilter-header");
+            //Selenium.WaitElementPresent(quickFilterLocator);
+            //Selenium.FindElement(quickFilterLocator).Click();
 
-            FilterOptionProxy filter = new FilterOptionProxy(this.Filters, newFilterIndex);
-            Selenium.WaitElementPresent(filter.OperationLocator);
-            return filter;
+            //FilterOptionProxy filter = new FilterOptionProxy(this.Filters, newFilterIndex);
+            //Selenium.WaitElementPresent(filter.OperationLocator);
+            //return filter;
         }
 
 
         public IWebElement QueryButtonElement(string id)
         {
-            return By.CssSelector("#{0}.sf-query-button".FormatWith(id));
+            throw new NotImplementedException();
+
+            //return By.CssSelector("#{0}.sf-query-button".FormatWith(id));
         }
 
         public void QueryButtonClick(string id)
         {
-            Selenium.FindElement(QueryButtonLocator(id)).Click();
+            throw new NotImplementedException();
+
+            //Selenium.FindElement(QueryButtonLocator(id)).Click();
         }
 
         public PopupControl<T> Create<T>() where T : ModifiableEntity
         {
-            var element = this.PrefixUnderscore + "Temp";
+            throw new NotImplementedException();
+           
 
-            Selenium.FindElement(CreateButtonLocator).Click();
+            //var element = this.PrefixUnderscore + "Temp";
 
-            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, element));
+            //Selenium.FindElement(CreateButtonLocator).Click();
 
-            return new PopupControl<T>(Selenium, element);
+            //Selenium.Wait(() => Popup.IsPopupVisible(Selenium, element));
+
+            //return new PopupControl<T>(Selenium, element);
         }
 
         public PopupControl<T> CreateChoose<T>() where T : ModifiableEntity
         {
-            Selenium.FindElement(CreateButtonLocator).Click();
+            throw new NotImplementedException();
 
-            //implementation popup opens
-            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, Prefix));
+            //Selenium.FindElement(CreateButtonLocator).Click();
 
-            if (!ChooserPopup.IsChooser(Selenium, Prefix))
-                throw new InvalidOperationException("{0} is not a Chooser".FormatWith(Selenium));
+            ////implementation popup opens
+            //Selenium.Wait(() => Popup.IsPopupVisible(Selenium, Prefix));
 
-            ChooserPopup.ChooseButton(Selenium, Prefix, typeof(T));
+            //if (!ChooserPopup.IsChooser(Selenium, Prefix))
+            //    throw new InvalidOperationException("{0} is not a Chooser".FormatWith(Selenium));
 
-            return new PopupControl<T>(Selenium, Prefix);
+            //ChooserPopup.ChooseButton(Selenium, Prefix, typeof(T));
+
+            //return new PopupControl<T>(Selenium, Prefix);
         }
 
-        public IWebElement CreateButtonElement
+        public IWebElement CreateButton
         {
-            get { return QueryButtonLocator(PrefixUnderscore + "qbSearchCreate"); }
+            get { throw new NotImplementedException(); /* return QueryButtonLocator(PrefixUnderscore + "qbSearchCreate");*/ }
         }
 
         public bool HasMultiplyMessage
         {
-            get { return Selenium.IsElementPresent(By.CssSelector("#{0}sfSearchControl .sf-td-multiply".FormatWith(PrefixUnderscore))); }
+            get { throw new NotImplementedException(); /*  return Selenium.IsElementPresent(By.CssSelector("#{0}sfSearchControl .sf-td-multiply".FormatWith(PrefixUnderscore))); */ }
         }
 
         public IWebElement MenuOptionElement(string optionId)
         {
-            return By.CssSelector("#{0}sfSearchControl a#{1}".FormatWith(PrefixUnderscore, optionId));
+
+            //return By.CssSelector("#{0}sfSearchControl a#{1}".FormatWith(PrefixUnderscore, optionId));
         }
 
         public IWebElement MenuOptionElementByAttr(string optionLocator)
         {
-            return By.CssSelector("#{0}sfSearchControl a[{1}]".FormatWith(PrefixUnderscore, optionLocator));
+            
+
+            //return By.CssSelector("#{0}sfSearchControl a[{1}]".FormatWith(PrefixUnderscore, optionLocator));
         }
 
         public bool FiltersVisible
         {
-            get { return this.Selenium.IsElementVisible(this.FiltersPanelLocator); }
+            get { return this.Selenium.IsElementVisible(this.FiltersPanel); }
         }
 
         public ILineContainer<T> SimpleFilterBuilder<T>() where T : ModifiableEntity
@@ -745,7 +757,7 @@ namespace Signum.React.Selenium
 
         public bool IsElementInCell(int rowIndex, string token, By locator)
         {
-            return Selenium.FindElement(CellLocator(rowIndex, token)).FindElements(locator).Any();
+            return Selenium.FindElement(CellElement(rowIndex, token)).FindElements(locator).Any();
         }
 
         public void EditColumnName(string token, string newName)

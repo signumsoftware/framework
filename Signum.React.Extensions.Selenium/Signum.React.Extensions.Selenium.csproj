@@ -67,6 +67,7 @@
     <Compile Include="LineProxies.cs" />
     <Compile Include="Popup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SearchDialogProxy.cs" />
     <Compile Include="SeleniumExtensions.cs">
       <SubType>Code</SubType>
     </Compile>

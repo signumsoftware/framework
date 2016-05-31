@@ -45,10 +45,7 @@ namespace Signum.React.Selenium
                     selenium.Url));
             }
         }
-
         
-   
-
         public static void WaitEquals<T>(this RemoteWebDriver selenium, T expectedValue, Func<T> value, TimeSpan? timeout = null)
         {
             T lastValue = default(T);
@@ -381,6 +378,67 @@ namespace Signum.React.Selenium
                         throw;
                 }
             }
+        }
+
+        public static WebElementLocator WithLocator(this IWebElement element, By locator)
+        {
+            return new WebElementLocator(element, locator);
+        }
+    }
+
+    public class WebElementLocator
+    {
+        public IWebElement ParentElement;
+        public By Locator; 
+
+        public WebElementLocator  (IWebElement parentElement, By locator)
+        {
+            this.ParentElement = parentElement;
+            this.Locator = locator;
+        }
+
+        public IWebElement Get()
+        {
+            return ParentElement.FindElement(this.Locator);
+        }
+
+        public IWebElement TryGet()
+        {
+            return ParentElement.TryFindElement(this.Locator);
+        }
+
+        public IWebElement WaitPresent()
+        {
+            return ParentElement.WaitElementPresent(this.Locator);
+        }
+        public void WaitNoPresent()
+        {
+            ParentElement.WaitElementNotPresent(this.Locator);
+        }
+
+        public IWebElement WaitVisible()
+        {
+            return ParentElement.WaitElementVisible(this.Locator);
+        }
+
+        public void WaitNoVisible()
+        {
+            ParentElement.WaitElementNotVisible(this.Locator);
+        }
+
+        public void AssertNotPresent()
+        {
+            ParentElement.AssertElementNotPresent(this.Locator);
+        }
+
+        public void AssertNotVisible()
+        {
+            ParentElement.AssertElementNotVisible(this.Locator);
+        }
+
+        public void AssertPresent()
+        {
+            ParentElement.AssertElementPresent(this.Locator);
         }
     }
 }

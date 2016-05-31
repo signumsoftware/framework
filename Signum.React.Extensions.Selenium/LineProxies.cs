@@ -228,11 +228,11 @@ namespace Signum.React.Selenium
         public SearchPopupProxy Find(Type selectType = null)
         {
             string changes = GetChanges();
-            Selenium.FindElement(FindLocator).Click();
+            FindButton.Click();
 
-            ChooseType(selectType, null);
+            var element = ChooseType(selectType, null);
 
-            return new SearchPopupProxy(Selenium, Prefix)
+            return new SearchPopupProxy(Selenium, element)
             {
                 Disposing = okPressed => { WaitNewChanges(changes, "create dialog closed"); }
             };
