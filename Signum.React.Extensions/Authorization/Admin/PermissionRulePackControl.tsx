@@ -21,7 +21,7 @@ require("./AuthAdmin.css");
 export default class PermissionRulesPackControl extends React.Component<{ ctx: TypeContext<PermissionRulePack> }, void> implements IRenderButtons {
 
     handleSaveClick = (bc: ButtonsContext) => {
-        var pack = this.props.ctx.value;
+        let pack = this.props.ctx.value;
 
         Api.savePermissionRulePack(pack)
             .then(() => Api.fetchPermissionRulePack(pack.role.id))
@@ -41,7 +41,7 @@ export default class PermissionRulesPackControl extends React.Component<{ ctx: T
 
     render() {
 
-        var ctx = this.props.ctx;
+        let ctx = this.props.ctx;
 
         return (
             <div>

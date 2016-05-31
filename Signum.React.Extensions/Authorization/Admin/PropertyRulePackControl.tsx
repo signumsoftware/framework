@@ -21,7 +21,7 @@ require("./AuthAdmin.css");
 export default class PropertyRulesPackControl extends React.Component<{ ctx: TypeContext<PropertyRulePack> }, void> implements IRenderButtons {
 
     handleSaveClick = (bc: ButtonsContext) => {
-        var pack = this.props.ctx.value;
+        let pack = this.props.ctx.value;
 
         Api.savePropertyRulePack(pack)
             .then(() => Api.fetchPropertyRulePack(pack.type.cleanName, pack.role.id))
@@ -41,7 +41,7 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
 
     render() {
 
-        var ctx = this.props.ctx;
+        let ctx = this.props.ctx;
 
         return (
             <div>
