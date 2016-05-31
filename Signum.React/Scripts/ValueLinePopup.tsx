@@ -58,7 +58,7 @@ export default class ValueLinePopup extends React.Component<ValueLinePopupProps,
                     valueLineType={o.valueLineType}
                     formatText={o.format}
                     unitText={o.unit}
-                    formGroupStyle={o.labelText ? FormGroupStyle.Basic : FormGroupStyle.SrOnly}/>
+                    formGroupStyle={o.labelText ? "Basic" : "SrOnly"}/>
             </Modal.Body>
             <Modal.Footer>
                 <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" onClick={this.hanleOkClick}>

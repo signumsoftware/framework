@@ -26,7 +26,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         var errorClass = tCtx.binding && tCtx.binding.errorClass;
 
-        if (ctx.formGroupStyle == FormGroupStyle.None) {
+        if (ctx.formGroupStyle == "None") {
 
             var c = this.props.children as React.ReactElement<any>;
 
@@ -36,8 +36,8 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
             return React.cloneElement(c, { className: classes(c.props.className, errorClass) });
         }
 
-        const labelClasses = classes(ctx.formGroupStyle == FormGroupStyle.SrOnly && "sr-only",
-            ctx.formGroupStyle == FormGroupStyle.LabelColumns && ("control-label " + ctx.labelColumnsCss));
+        const labelClasses = classes(ctx.formGroupStyle == "SrOnly" && "sr-only",
+            ctx.formGroupStyle == "LabelColumns" && ("control-label " + ctx.labelColumnsCss));
 
 
         const label = (
@@ -47,10 +47,10 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
         );
 
         return <div {...this.props.htmlProps} className={ classes("form-group", this.props.ctx.formGroupSizeCss, errorClass) }>
-            { ctx.formGroupStyle != FormGroupStyle.BasicDown && label }
+            { ctx.formGroupStyle != "BasicDown" && label }
             {
-                ctx.formGroupStyle == FormGroupStyle.LabelColumns ? (<div className={ this.props.ctx.valueColumnsCss } > { this.props.children } </div>) : this.props.children}
-            {ctx.formGroupStyle == FormGroupStyle.BasicDown && label
+                ctx.formGroupStyle == "LabelColumns" ? (<div className={ this.props.ctx.valueColumnsCss } > { this.props.children } </div>) : this.props.children}
+            {ctx.formGroupStyle == "BasicDown" && label
             }
         </div>;
     }

@@ -2,28 +2,18 @@
 import { PropertyRoute, PropertyRouteType, getLambdaMembers, IBinding, ReadonlyBinding, createBinding, LambdaMemberType, Type } from './Reflection'
 import { ModelState, MList, ModifiableEntity, EntityPack } from './Signum.Entities'
 
-export enum FormGroupStyle {
-    /// Unaffected by FormGroupSize
-    None,
-    
-    /// Requires form-vertical container
-    Basic,
+export type FormGroupStyle =
+    "None" |  /// Unaffected by FormGroupSize     
+    "Basic" |   /// Requires form-vertical container
+    "BasicDown" |  /// Requires form-vertical container
+    "SrOnly" |    /// Requires form-vertical / form-inline container
+    "LabelColumns"; /// Requires form-horizontal (default),  affected by LabelColumns / ValueColumns
 
-    /// Requires form-vertical container
-    BasicDown,
-
-    /// Requires form-vertical / form-inline container
-    SrOnly,
-
-    /// Requires form-horizontal (default),  affected by LabelColumns / ValueColumns
-    LabelColumns,
-}
-
-export enum FormGroupSize {
-    Normal, //Raw Bootstrap default
-    Small,  //Signum default
-    ExtraSmall, //Like in FilterBuilder
-}
+export type FormGroupSize =
+    "Normal" | //Raw Bootstrap default
+    "Small" | //Signum default
+    "ExtraSmall"; //Like in FilterBuilder
+   
 
 export class StyleContext {
     styleOptions: StyleOptions;
@@ -39,8 +29,8 @@ export class StyleContext {
 
     static default: StyleContext = new StyleContext(null,
     {
-        formGroupStyle : FormGroupStyle.LabelColumns,
-        formGroupSize : FormGroupSize.Small,
+        formGroupStyle : "LabelColumns",
+        formGroupSize : "Small",
         labelColumns: { sm: 2 },
         readOnly : false,
         placeholderLabels : false,
@@ -57,8 +47,8 @@ export class StyleContext {
     }
 
     get formGroupSizeCss(): string {
-        return this.formGroupSize == FormGroupSize.Normal ? "form-md" :
-            this.formGroupSize == FormGroupSize.Small ? "form-sm" : "form-xs";
+        return this.formGroupSize == "Normal" ? "form-md" :
+            this.formGroupSize == "Small" ? "form-sm" : "form-xs";
     }
 
     get placeholderLabels(): boolean {
