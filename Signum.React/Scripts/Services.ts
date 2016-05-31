@@ -133,7 +133,8 @@ export function saveFile(response: Response) {
 		(a as any).download = fileName;
 
 		a.click();
-		window.URL.revokeObjectURL(url);
+
+            setTimeout(() => window.URL.revokeObjectURL(url), 500);
 	});
 }
 
