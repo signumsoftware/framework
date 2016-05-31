@@ -115,7 +115,7 @@ namespace Signum.Utilities.ExpressionTrees
 
         public static string TypeName(this Type type)
         {
-            List<Type> arguments = type.IsGenericType ? type.GetGenericArguments().ToList() : null;
+            List<Type> arguments = type.IsGenericType ? type.GetGenericArguments().ToList() : new List<Type>();
 
             StringBuilder sb = new StringBuilder();
             foreach (var item in type.Follow(a => a.IsNested ? a.DeclaringType : null).Reverse())
