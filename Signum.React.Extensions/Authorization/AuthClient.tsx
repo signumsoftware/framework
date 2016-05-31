@@ -217,7 +217,7 @@ export module Api {
         return ajaxPost<void>({ url: "/api/auth/logout" }, null);
     }
 
-    export function fetchPermissionRulePack(roleId: string): Promise<PermissionRulePack> {
+    export function fetchPermissionRulePack(roleId: number | string): Promise<PermissionRulePack> {
         return ajaxGet<PermissionRulePack>({ url: "/api/authAdmin/permissionRules/" + roleId, cache: "no-cache" });
     }
 
@@ -226,7 +226,7 @@ export module Api {
     }
 
 
-    export function fetchTypeRulePack(roleId: string): Promise<TypeRulePack> {
+    export function fetchTypeRulePack(roleId: number | string): Promise<TypeRulePack> {
         return ajaxGet<TypeRulePack>({ url: "/api/authAdmin/typeRules/" + roleId, cache: "no-cache" });
     }
 
@@ -235,7 +235,7 @@ export module Api {
     }
 
     
-    export function fetchPropertyRulePack(typeName: string, roleId: string): Promise<PropertyRulePack> {
+    export function fetchPropertyRulePack(typeName: string, roleId: number | string): Promise<PropertyRulePack> {
         return ajaxGet<PropertyRulePack>({ url: "/api/authAdmin/propertyRules/" + typeName + "/" + roleId, cache: "no-cache" });
     }
 
@@ -245,7 +245,7 @@ export module Api {
 
 
 
-    export function fetchOperationRulePack(typeName: string, roleId: string): Promise<OperationRulePack> {
+    export function fetchOperationRulePack(typeName: string, roleId: number | string): Promise<OperationRulePack> {
         return ajaxGet<OperationRulePack>({ url: "/api/authAdmin/operationRules/" + typeName + "/" + roleId, cache: "no-cache" });
     }
 
@@ -255,7 +255,7 @@ export module Api {
 
 
 
-    export function fetchQueryRulePack(typeName: string, roleId: string): Promise<QueryRulePack> {
+    export function fetchQueryRulePack(typeName: string, roleId: number | string): Promise<QueryRulePack> {
         return ajaxGet<QueryRulePack>({ url: "/api/authAdmin/queryRules/" + typeName + "/" + roleId, cache: "no-cache" });
     }
 

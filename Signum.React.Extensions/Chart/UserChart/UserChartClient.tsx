@@ -61,7 +61,7 @@ export function start(options: { routes: JSX.Element[] }) {
         }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) }));
 
 
-    Navigator.addSettings(new EntitySettings(UserChartEntity, e => new Promise(resolve => require(['./UserChart'], resolve)), { isCreable: Navigator.EntityWhen.Never }));
+    Navigator.addSettings(new EntitySettings(UserChartEntity, e => new Promise(resolve => require(['./UserChart'], resolve)), { isCreable: "Never" }));
 }
 
 
