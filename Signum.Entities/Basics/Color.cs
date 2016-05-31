@@ -20,6 +20,10 @@ namespace Signum.Entities.Basics
            return this.Argb == ((ColorEntity)color).Argb;
         }
 
+        public override int GetHashCode()
+        {
+            return this.Argb;  
+        }
         public static ColorEntity FromARGB(byte a, byte r, byte g, byte b)
         {
             return new ColorEntity { Argb = a << 0x18 | r << 0x10 | g << 0x8 | b };
