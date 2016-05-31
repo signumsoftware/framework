@@ -397,14 +397,24 @@ namespace Signum.React.Selenium
             this.Locator = locator;
         }
 
-        public IWebElement Get()
+        public IWebElement Find()
         {
             return ParentElement.FindElement(this.Locator);
         }
 
-        public IWebElement TryGet()
+        public IWebElement TryFind()
         {
             return ParentElement.TryFindElement(this.Locator);
+        }
+
+        public bool IsPresent()
+        {
+            return ParentElement.IsElementPresent(this.Locator);
+        }
+
+        public bool IsVisible()
+        {
+            return ParentElement.IsElementVisible(this.Locator);
         }
 
         public IWebElement WaitPresent()
@@ -440,5 +450,6 @@ namespace Signum.React.Selenium
         {
             ParentElement.AssertElementPresent(this.Locator);
         }
+
     }
 }

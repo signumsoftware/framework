@@ -182,7 +182,7 @@ namespace Signum.React.Selenium
 
         public void Search()
         {
-            WaitSearchCompleted(() => SearchButton.Get().Click());
+            WaitSearchCompleted(() => SearchButton.Find().Click());
         }
 
         public void WaitSearchCompleted(Action searchTrigger)
@@ -216,7 +216,7 @@ namespace Signum.React.Selenium
 
         public void ToggleFilters(bool show)
         {
-            ToggleFiltersButton.Get().Click();
+            ToggleFiltersButton.Find().Click();
             if (show)
                 FiltersPanel.WaitVisible();
             else
@@ -351,7 +351,7 @@ namespace Signum.React.Selenium
 
         public bool FiltersVisible
         {
-            get { return this.Selenium.IsElementVisible(this.FiltersPanel); }
+            get { return this.FiltersPanel.IsVisible(); }
         }
 
         public ILineContainer<T> SimpleFilterBuilder<T>() where T : ModifiableEntity

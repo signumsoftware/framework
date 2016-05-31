@@ -28,16 +28,15 @@ namespace Signum.React.Selenium
             return (Lite<T>)container.EntityInfo().ToLite();
         }
 
-        public static IWebElement Button(this IEntityButtonContainer container, string buttonId)
+        public static WebElementLocator Button(this IEntityButtonContainer container, OperationSymbol symbol)
         {
-            throw new InvalidOperationException();
-            //return container.ContainerElement().FindElement(" #" + "_".CombineIfNotEmpty(container.Element, buttonId));
+            return container.ContainerElement().WithLocator(By.CssSelector("button[data-operation={0}]".FormatWith(symbol.KeyWeb())));
         }
 
-        public static IWebElement OperationElement<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+        public static WebElementLocator OperationElement<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
             where T : Entity
         {
-            return container.Button(symbol.Symbol.KeyWeb());
+            return container.Button(symbol.Symbol);
         }
 
         public static string KeyWeb(this OperationSymbol operationSymbol)
@@ -45,44 +44,38 @@ namespace Signum.React.Selenium
             return operationSymbol.Key.Replace('.', '_');
         }
 
-        public static bool ButtonEnabled(this IEntityButtonContainer container, string idButton)
+        public static bool ButtonEnabled(this IEntityButtonContainer container, OperationSymbol symbol)
         {
-            var button = container.Button(idButton);
-
-            return button.GetAttribute("disabled") == null;
+            return container.Button(symbol).Find().GetAttribute("disabled") == null;
         }
 
         public static bool OperationEnabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
             where T : Entity
         {
-            return container.ButtonEnabled(symbol.Symbol.KeyWeb());
+            return container.ButtonEnabled(symbol.Symbol);
         }
 
-        public static bool ButtonDisabled(this IEntityButtonContainer container, string idButton)
+        public static bool ButtonDisabled(this IEntityButtonContainer container, OperationSymbol symbol)
         {
-            var button = container.Button(idButton);
-
-            return button.GetAttribute("disabled") != null;
+            return container.Button(symbol).Find().GetAttribute("disabled") != null;
         }
 
         public static bool OperationDisabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
               where T : Entity
         {
-            return container.ButtonDisabled(symbol.Symbol.KeyWeb());
+            return container.ButtonDisabled(symbol.Symbol);
         }
 
-        public static void ButtonClick(this IEntityButtonContainer container, string idButton)
+        public static void ButtonClick(this IEntityButtonContainer container, OperationSymbol symbol)
         {
-            var button = container.Button(idButton);
-
-            button.ButtonClick();
+            container.Button(symbol).Find().ButtonClick();
         }
 
 
         public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
               where T : Entity
         {
-            container.ButtonClick(symbol.Symbol.KeyWeb());
+            container.ButtonClick(symbol.Symbol);
         }
 
         public static void ExecuteAjax<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false)
@@ -155,7 +148,7 @@ namespace Signum.React.Selenium
         public static NormalPage<T> OperationNormalPageNew<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol)
             where T : Entity
         {
-            container.ButtonClick(symbol.Symbol.KeyWeb());
+            container.ButtonClick(symbol.Symbol);
 
             container.Selenium.Wait(() => { try { return container.EntityInfo().IsNew; } catch { return false; } });
 
@@ -165,7 +158,7 @@ namespace Signum.React.Selenium
         public static PopupControl<T> OperationPopup<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol, IWebElement element)
             where T : ModifiableEntity
         {
-            container.ButtonClick(symbol.Symbol.KeyWeb());
+            container.ButtonClick(symbol.Symbol);
 
             var popup = new PopupControl<T>(container.Selenium, element);
 
