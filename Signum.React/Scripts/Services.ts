@@ -78,7 +78,10 @@ export function ajaxPostRaw(options: AjaxOptions, data: any) : Promise<Response>
 
 export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response>
 {
-	let promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
+    let promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
+
+    if (!(promise as any).__proto__.done)
+        (promise as any).__proto__.done = Promise.prototype.done;
 
 	if (!options.avoidThrowError)
 		promise = promise.then(throwError);
