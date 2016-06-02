@@ -87,7 +87,7 @@ namespace Signum.Web.Mailing
 
                 EmailAttachmentEntity only = options.Attachments.Where(a => a.ContentId == cid).Only();
                 if (only != null)
-                    return "src=\"{0}\"".FormatWith(options.Url.Content(only.File.FullWebPath));
+                    return "src=\"{0}\"".FormatWith(options.Url.Content(only.File.FullWebPath()));
 
                 string fileName = cid.TryBefore('@');
                 if (fileName == null)
@@ -95,7 +95,7 @@ namespace Signum.Web.Mailing
 
                 only = options.Attachments.Where(a => a.File.FileName == fileName).Only();
                 if (only != null)
-                    return "src=\"{0}\"".FormatWith(options.Url.Content(only.File.FullWebPath));
+                    return "src=\"{0}\"".FormatWith(options.Url.Content(only.File.FullWebPath()));
 
                 return src.Value;
             });
@@ -108,7 +108,7 @@ namespace Signum.Web.Mailing
             if (!options.Attachments.Any())
                 return body;
 
-            var dic = options.Attachments.Where(a => a.File.FullWebPath.HasText()).ToDictionary(a => options.Url.Content(a.File.FullWebPath), a => a.ContentId);
+            var dic = options.Attachments.Where(a => a.File.FullWebPath().HasText()).ToDictionary(a => options.Url.Content(a.File.FullWebPath()), a => a.ContentId);
 
             return Regex.Replace(body, "src=\"(?<link>[^\"]*)\"", m =>
             {

@@ -33,7 +33,6 @@ export const EmbeddedFileEntity = new Type<EmbeddedFileEntity>("EmbeddedFileEnti
 export interface EmbeddedFileEntity extends Entities.EmbeddedEntity {
     fileName: string;
     binaryFile: string;
-    fullWebPath: string;
 }
 
 export const EmbeddedFilePathEntity = new Type<EmbeddedFilePathEntity>("EmbeddedFilePathEntity");
@@ -45,8 +44,6 @@ export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
     suffix: string;
     calculatedDirectory: string;
     fileType: FileTypeSymbol;
-    fullPhysicalPath: string;
-    fullWebPath: string;
 }
 
 export const FileEntity = new Type<FileEntity>("File");
@@ -54,7 +51,6 @@ export interface FileEntity extends Entities.ImmutableEntity {
     fileName: string;
     hash: string;
     binaryFile: string;
-    fullWebPath: string;
 }
 
 export module FileMessage {
@@ -84,8 +80,6 @@ export interface FilePathEntity extends Patterns.LockableEntity {
     suffix: string;
     calculatedDirectory: string;
     fileType: FileTypeSymbol;
-    fullPhysicalPath: string;
-    fullWebPath: string;
 }
 
 export module FilePathOperation {
