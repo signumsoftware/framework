@@ -39,7 +39,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
             buttons = null;
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) }>
+            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) } data-propertyPath={this.state.ctx.propertyPath}>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>

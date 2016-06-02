@@ -240,6 +240,10 @@ export class TypeContext<T> extends StyleContext {
     mlistItemCtxs<R>(property: (val: T) => MList<R>, styleOptions?: StyleOptions): TypeContext<R>[] {
         return mlistItemContext(this.subCtx(property, styleOptions));
     }
+
+    get propertyPath() {
+        return this.propertyRoute ? this.propertyRoute.propertyPath() : null;
+    }
 }
 
 export interface ButtonsContext {

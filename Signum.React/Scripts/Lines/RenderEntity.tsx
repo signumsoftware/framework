@@ -134,8 +134,12 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         }; 
 
         var newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(entity, ""));
-        
-        return getComponent(newCtx);
+
+        return (
+            <div data-propertypath={ctx.propertyPath}>
+                {getComponent(newCtx) }
+            </div>
+        );
     }
 
 }
