@@ -148,6 +148,10 @@ namespace Signum.Engine.Migrations
                 }
                 else
                 {
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkGray, script.ToString().Indent(4));
+
+                    Console.WriteLine();
+
                     string version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
 
                     string comment = SafeConsole.AskString("Comment for the new Migration? ", stringValidator: s => null);
