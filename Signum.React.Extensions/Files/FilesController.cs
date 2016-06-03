@@ -41,7 +41,7 @@ namespace Signum.React.Files
             return GetHttpReponseMessage(File.OpenRead(filePath.FullPhysicalPath()), filePath.FileName);
         }
 
-        [Route("api/files/downloadEmbeddedFilePath/{fileType}"), HttpGet]
+        [Route("api/files/downloadEmbeddedFilePath/{fileTypeKey}"), HttpGet]
         public HttpResponseMessage DownloadEmbeddedFilePath(string fileTypeKey, string suffix, string fileName)
         {
             var fileType = SymbolLogic<FileTypeSymbol>.ToSymbol(fileTypeKey);
