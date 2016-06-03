@@ -43,9 +43,9 @@ namespace Signum.Entities.Files
             return "{0} {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
-        public string FullWebPath
+        public string FullWebPath()
         {
-            get { return null; }
+            return null; 
         }
     }
 }

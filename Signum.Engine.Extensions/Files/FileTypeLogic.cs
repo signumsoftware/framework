@@ -76,7 +76,7 @@ namespace Signum.Engine.Files
 
                     int i = 2;
                     fp.Suffix = sufix;
-                    while (alg.RenameOnCollision && File.Exists(fp.FullPhysicalPath))
+                    while (alg.RenameOnCollision && File.Exists(fp.FullPhysicalPath()))
                     {
                         fp.Suffix = alg.RenameAlgorithm(sufix, i);
                         i++;
@@ -154,11 +154,11 @@ namespace Signum.Engine.Files
             string fullPhysicalPath = null;
             try
             {
-                string path = Path.GetDirectoryName(fp.FullPhysicalPath);
+                string path = Path.GetDirectoryName(fp.FullPhysicalPath());
                 fullPhysicalPath = path;
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
-                File.WriteAllBytes(fp.FullPhysicalPath, fp.BinaryFile);
+                File.WriteAllBytes(fp.FullPhysicalPath(), fp.BinaryFile);
                 fp.BinaryFile = null;
             }
             catch (IOException ex)
@@ -174,7 +174,7 @@ namespace Signum.Engine.Files
         {
             foreach (var fp in filePaths)
             {
-                File.Delete(fp.FullPhysicalPath);
+                File.Delete(fp.FullPhysicalPath());
             }
         }
     }
