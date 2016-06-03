@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import * as numbro from 'numbro'
+
 import { Dic, addClass } from '../Globals'
 import { DateTimePicker } from 'react-widgets'
 import 'react-widgets/dist/css/react-widgets.css';
@@ -23,12 +24,12 @@ export enum ValueLineType {
     Boolean = "Boolean" as any,
     Enum = "Enum" as any,
     DateTime = "DateTime" as any,
-    TimeSpan = "TimeSpan" as any,
     TextBox = "TextBox" as any,
     TextArea = "TextArea" as any,
     Number = "Number" as any,
     Decimal = "Decimal" as any,
     Color = "Color" as any,
+    TimeSpan = "TimeSpan" as any,
 }
 
 
@@ -62,6 +63,9 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
         if (t.name == "decimal")
             return ValueLineType.Decimal;
+
+        if (t.name == "timespan")
+            return ValueLineType.TimeSpan;
 
         throw new Error(`No value line found for '${t.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
@@ -398,6 +402,39 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
             { ValueLine.withUnit(s.unitText,
                 <DateTimePicker value={m && m.toDate() } onChange={handleDatePickerOnChange} format={momentFormat} time={showTime} defaultCurrentDate={currentDate.toDate() } />
             ) }
+        </FormGroup>
+    );
+}
+
+ValueLine.renderers[ValueLineType.TimeSpan as any] = (vl) => {
+
+    const s = vl.state;
+
+    const ticksPerMillisecond = 10000;
+    const durationFormat = "h:mm";
+
+    const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : null;
+
+    if (s.ctx.readOnly)
+        return (
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+                { ValueLine.withUnit(s.unitText, <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx}>{d && d.format(durationFormat) }</FormControlStatic>) }
+            </FormGroup>
+        );
+
+    const handleTextOnChange = (e: React.SyntheticEvent) => {
+        const input = e.currentTarget as HTMLInputElement;
+        const d = moment.duration(input.value.toString());
+
+        vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : null);
+    };
+
+    return (
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+            { ValueLine.withUnit(s.unitText,
+                <input type="text" {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={d && d.format(durationFormat) || ""} onChange={handleTextOnChange}
+                    placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>)
+            }
         </FormGroup>
     );
 };

@@ -9,6 +9,7 @@
 /// <reference path="../typings/react-widgets/react-widgets.d.ts" />
 /// <reference path="../typings/numbro/numbro.d.ts" />
 /// <reference path="../typings/moment/moment.d.ts" />
+/// <reference path="../typings/moment-duration-format/moment-duration-format.d.ts"/>
 /// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
 declare var require: {
