@@ -427,6 +427,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                                   Type = (DiffIndexType)i.type,
                                                   Columns = (from ic in i.IndexColumns()
                                                              join c in t.Columns() on ic.column_id equals c.column_id
+                                                             orderby ic.key_ordinal
                                                              select c.name).ToList()
                                               }).ToList(),
 
@@ -440,6 +441,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                                 IndexName = i.name,
                                                 Columns = (from ic in i.IndexColumns()
                                                            join c in v.Columns() on ic.column_id equals c.column_id
+                                                           orderby ic.key_ordinal
                                                            select c.name).ToList()
 
                                             }).ToList(),
@@ -712,9 +714,14 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
             if (this.Columns.Count != mix.Columns.Length)
                 return true;
 
-            var dixColumns = dif.Columns.Where(kvp => this.Columns.Contains(kvp.Value.Name));
+            var difColumns = this.Columns.Select(cn => dif.Columns.Values.SingleOrDefault(dc => dc.Name == cn)).ToList();
 
-            return !dixColumns.All(kvp => dif.Columns.GetOrThrow(kvp.Key).ColumnEquals(mix.Columns.SingleEx(c => c.Name == kvp.Key), ignorePrimaryKey: true));
+            var perfect = difColumns.ZipOrDefault(mix.Columns, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true)).All(a => a);
+
+            if (!perfect)
+                perfect = perfect;
+
+            return !perfect;
         }
 
         public bool IsControlledIndex
