@@ -23,7 +23,7 @@ namespace Signum.Engine.Files
     public static class FilePathLogic
     {
         static Expression<Func<FilePathEntity, WebImage>> WebImageExpression =
-            fp => new WebImage { FullWebPath = fp.FullWebPath };
+            fp => new WebImage { FullWebPath = fp.FullWebPath() };
         [ExpressionField]
         public static WebImage WebImage(this FilePathEntity fp)
         {
@@ -31,7 +31,7 @@ namespace Signum.Engine.Files
         }
 
         static Expression<Func<FilePathEntity, WebDownload>> WebDownloadExpression =
-           fp => new WebDownload { FullWebPath = fp.FullWebPath };
+           fp => new WebDownload { FullWebPath = fp.FullWebPath() };
         [ExpressionField]
         public static WebDownload WebDownload(this FilePathEntity fp)
         {
@@ -51,7 +51,7 @@ namespace Signum.Engine.Files
 
                 sb.Include<FilePathEntity>();
 
-                sb.Schema.EntityEvents<FilePathEntity>().Retrieved += FilePathLogic_Retrieved;
+                FilePathEntity.CalculatePrefixPair = CalculatePrefixPair;
                 sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
 
@@ -78,14 +78,14 @@ namespace Signum.Engine.Files
                             var ofp = fp.ToLite().Retrieve();
 
 
-                            if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix || fp.FullPhysicalPath != ofp.FullPhysicalPath)
+                            if (fp.FileName != ofp.FileName || fp.Suffix != ofp.Suffix || fp.FullPhysicalPath() != ofp.FullPhysicalPath())
                             {
                                 using (Transaction tr = new Transaction())
                                 {
                                     var preSufix = ofp.Suffix.Substring(0, ofp.Suffix.Length - ofp.FileName.Length);
                                     fp.Suffix = Path.Combine(preSufix, fp.FileName);
                                     fp.Save();
-                                    System.IO.File.Move(ofp.FullPhysicalPath, fp.FullPhysicalPath);
+                                    System.IO.File.Move(ofp.FullPhysicalPath(), fp.FullPhysicalPath());
                                     tr.Commit();
                                 }
                             }
@@ -106,16 +106,13 @@ namespace Signum.Engine.Files
 
         static void FilePathLogic_Retrieved(FilePathEntity fp)
         {
-            using (new EntityCache(EntityCacheType.ForceNew))
-                fp.SetPrefixPair();
+            fp.GetPrefixPair();
         }
 
-        public static FilePathEntity SetPrefixPair(this FilePathEntity fp)
+        static PrefixPair CalculatePrefixPair(FilePathEntity fp)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
-                fp.prefixPair = FileTypeLogic.FileTypes.GetOrThrow(fp.FileType).GetPrefixPair(fp);
-
-            return fp;
+               return FileTypeLogic.FileTypes.GetOrThrow(fp.FileType).GetPrefixPair(fp);
         }
 
         public static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathEntity> query)
@@ -155,12 +152,12 @@ namespace Signum.Engine.Files
 
         public static byte[] GetByteArray(this FilePathEntity fp)
         {
-            return fp.BinaryFile ?? File.ReadAllBytes(fp.FullPhysicalPath);
+            return fp.BinaryFile ?? File.ReadAllBytes(fp.FullPhysicalPath());
         }
 
         public static byte[] GetByteArray(this Lite<FilePathEntity> fp)
         {
-            return File.ReadAllBytes(fp.InDB(f => f.FullPhysicalPath));
+            return File.ReadAllBytes(fp.InDB(f => f.FullPhysicalPath()));
         }
     }
 }

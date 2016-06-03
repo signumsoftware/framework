@@ -164,7 +164,7 @@ namespace Signum.Web.Files
                     {
                         FilePathEntity fp = (FilePathEntity)ri.ToLite().Retrieve();
 
-                        return new FilePathResult(fp.FullPhysicalPath, MimeMapping.GetMimeMapping(fp.FullPhysicalPath)) { FileDownloadName = fp.FileName };
+                        return new FilePathResult(fp.FullPhysicalPath(), MimeMapping.GetMimeMapping(fp.FullPhysicalPath())) { FileDownloadName = fp.FileName };
                     });
 
                     Navigator.AddSettings(new List<EntitySettings>
@@ -327,8 +327,6 @@ namespace Signum.Web.Files
             return FileConstructors.GetOrThrow(type)(data);
         }
 
-
-
         public static Dictionary<Type, Func<IFile, string>> DownloadUrlConstructors = new Dictionary<Type, Func<IFile, string>>();
 
         public static void RegisterDownloadUrlConstructor<T>(Func<T, string> fileUrlConstructor) where T : class, IFile
@@ -338,7 +336,7 @@ namespace Signum.Web.Files
 
         public static string GetDownloadUrl(IFile file)
         {
-            var webPath = file.FullWebPath;
+            var webPath = file.FullWebPath();
             if (webPath.HasText())
                 return RouteHelper.New().Content(webPath);
 
@@ -349,7 +347,6 @@ namespace Signum.Web.Files
 
             return ctor(file);
         }
-
 
         public static Dictionary<Type, Func<RuntimeInfo, ActionResult>> FileDownloadResult = new Dictionary<Type, Func<RuntimeInfo, ActionResult>>();
 

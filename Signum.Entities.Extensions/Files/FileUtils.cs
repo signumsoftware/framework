@@ -12,7 +12,7 @@ namespace Signum.Entities.Files
     {
         string CalculatedDirectory { get; }
 
-        string FullPhysicalPath { get; }
+        string FullPhysicalPath();
 
         FileTypeSymbol FileType { get; }
 
@@ -25,7 +25,7 @@ namespace Signum.Entities.Files
     {
         byte[] BinaryFile { get; set; }
         string FileName { get; set; }
-        string FullWebPath { get; }
+        string FullWebPath();
     }
 
     public enum FileMessage

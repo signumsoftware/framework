@@ -84,7 +84,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
 
     
     renderAttachment = (ec: TypeContext<EmailAttachmentEntity>) => {
-        var sc = ec.subCtx({ formGroupStyle: FormGroupStyle.SrOnly});
+        var sc = ec.subCtx({ formGroupStyle: "SrOnly"});
         return (
             <div>
                 <FileLine ctx={ec.subCtx(a=>a.file)} remove={false} 

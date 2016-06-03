@@ -20,7 +20,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
         var e = this.props.ctx;
         
         var ec = e.subCtx({labelColumns: { sm: 3 }});
-        var sc = e.subCtx({formGroupStyle: FormGroupStyle.Basic});
+        var sc = e.subCtx({formGroupStyle: "Basic"});
      
 
         return (
@@ -79,7 +79,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
     renderContact = (ec: TypeContext<EmailTemplateContactEntity>) => {
 
-        var sc = ec.subCtx({ formGroupStyle: FormGroupStyle.Basic });
+        var sc = ec.subCtx({ formGroupStyle: "Basic" });
 
         return (
             <div>
@@ -108,7 +108,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
     renderRecipient = (ec: TypeContext<EmailTemplateRecipientEntity>) => {
 
-        var sc = ec.subCtx({ formGroupStyle: FormGroupStyle.Basic });
+        var sc = ec.subCtx({ formGroupStyle: "Basic" });
 
         return (
             <div>
@@ -157,11 +157,11 @@ export class EmailTemplateMessage extends React.Component<EmailTemplateMessagePr
             <div className="sf-email-template-message form-vertical">
                 <EntityCombo ctx={ec.subCtx(e => e.cultureInfo) } labelText={EmailTemplateViewMessage.Language.niceToString() } onChange={this.props.invalidate} />
                 <TemplateControls queryKey={this.props.queryKey}  onInsert={this.onInsert} forHtml={true} />
-                <ValueLine ctx={ec.subCtx(e => e.subject) } formGroupStyle={FormGroupStyle.SrOnly} placeholderLabels={true} labelHtmlProps={{ width: "100px" }} valueHtmlProps={{
+                <ValueLine ctx={ec.subCtx(e => e.subject) } formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlProps={{ width: "100px" }} valueHtmlProps={{
                     className: classes("sf-email-inserttoken-target sf-email-template-message-subject form-control", this.state.currentControl == "Subject" && "sf-email-inserttoken-targetactive"),
                     onFocus: () => this.setState({ currentControl: "Subject" })
                 }}  />
-                <ValueLine ctx={ec.subCtx(e => e.text) }  formGroupStyle={FormGroupStyle.SrOnly} valueLineType={ValueLineType.TextArea} labelHtmlProps={{ width: "100px", height: "180px" }} valueHtmlProps={{
+                <ValueLine ctx={ec.subCtx(e => e.text) }  formGroupStyle={"SrOnly"} valueLineType={ValueLineType.TextArea} labelHtmlProps={{ width: "100px", height: "180px" }} valueHtmlProps={{
                     className: classes("sf-rich-text-editor sf-email-template-message-text", this.state.currentControl == "Body" && "sf-email-inserttoken-targetactive"),
                     onFocus: () => this.setState({ currentControl: "Body" }),
                 }} />

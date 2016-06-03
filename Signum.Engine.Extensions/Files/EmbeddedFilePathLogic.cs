@@ -56,24 +56,19 @@ namespace Signum.Engine.Files
                     }
                 };
 
-                EmbeddedFilePathEntity.OnPostRetrieved += efp =>
-                {
-                    efp.SetPrefixPair();
-                };
+                EmbeddedFilePathEntity.CalculatePrefixPair += CalculatePrefixPair;
             }
         }
 
-        public static EmbeddedFilePathEntity SetPrefixPair(this EmbeddedFilePathEntity efp)
+        static PrefixPair CalculatePrefixPair(this EmbeddedFilePathEntity efp)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
-                efp.prefixPair = FileTypeLogic.FileTypes.GetOrThrow(efp.FileType).GetPrefixPair(efp);
-
-            return efp;
+                return FileTypeLogic.FileTypes.GetOrThrow(efp.FileType).GetPrefixPair(efp);
         }
 
         public static byte[] GetByteArray(this EmbeddedFilePathEntity efp)
         {
-            return efp.BinaryFile ?? File.ReadAllBytes(efp.FullPhysicalPath);
+            return efp.BinaryFile ?? File.ReadAllBytes(efp.FullPhysicalPath());
         }
 
         public static EmbeddedFilePathEntity SaveFile(this EmbeddedFilePathEntity efp)

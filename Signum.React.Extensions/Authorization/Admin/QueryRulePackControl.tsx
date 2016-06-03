@@ -21,7 +21,7 @@ require("./AuthAdmin.css");
 export default class QueryRulesPackControl extends React.Component<{ ctx: TypeContext<QueryRulePack> }, void> implements IRenderButtons {
 
     handleSaveClick = (bc: ButtonsContext) => {
-        var pack = this.props.ctx.value;
+        let pack = this.props.ctx.value;
 
         Api.saveQueryRulePack(pack)
             .then(() => Api.fetchQueryRulePack(pack.type.cleanName, pack.role.id))
@@ -41,7 +41,7 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
 
     render() {
 
-        var ctx = this.props.ctx;
+        let ctx = this.props.ctx;
 
         return (
             <div>

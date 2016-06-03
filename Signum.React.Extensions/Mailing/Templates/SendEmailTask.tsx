@@ -33,7 +33,7 @@ export default class SendEmailTask extends React.Component<{ ctx: TypeContext<Se
     render() {
 
         var sc = this.props.ctx;
-        var ac = this.props.ctx.subCtx({ formGroupStyle: FormGroupStyle.Basic });
+        var ac = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
 
         return (
             <div>

@@ -20,7 +20,7 @@ export default class CountSearchControlPart extends React.Component<{ part: Coun
     render() {
 
         const entity = this.props.part;
-        const ctx = TypeContext.root(CountSearchControlPartEntity, entity, { formGroupStyle: FormGroupStyle.None });
+        const ctx = TypeContext.root(CountSearchControlPartEntity, entity, { formGroupStyle: "None" });
         return (
             <div>
                 {
