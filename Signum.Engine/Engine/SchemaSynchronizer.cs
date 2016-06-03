@@ -56,17 +56,19 @@ namespace Signum.Engine
                 return model.TryGetC(name)?.Name ?? objectName;
             };
 
-            Func<DiffTable, DiffIndex, Index, bool> columnsChanged = (dif, dix, mix) =>
+
+            Func<ObjectName, SqlPreCommand> DeleteAllForeignKey = tableName =>
             {
-                if (dix.Columns.Count != mix.Columns.Length)
-                    return true;
+                var dropFks = (from t in database.Values
+                               from c in t.Columns.Values
+                               where c.ForeignKey != null && c.ForeignKey.TargetTable.Equals(tableName)
+                               select SqlBuilder.AlterTableDropConstraint(t.Name, c.ForeignKey.Name)).Combine(Spacing.Simple);
 
-                var dixColumns = dif.Columns.Where(kvp => dix.Columns.Contains(kvp.Value.Name));
+                if (dropFks == null)
+                    return null;
 
-                return !dixColumns.All(kvp => dif.Columns.GetOrThrow(kvp.Key).ColumnEquals(mix.Columns.SingleEx(c => c.Name == kvp.Key), ignorePrimaryKey: true));
+                return SqlPreCommand.Combine(Spacing.Simple, new SqlPreCommandSimple("---In order to remove the PK of " + tableName.Name), dropFks);
             };
-            
-              
 
             using (replacements.WithReplacedDatabaseName())
             {
@@ -104,7 +106,7 @@ namespace Signum.Engine
                         var changes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                             null,
                             (i, dix) => dix.Columns.Any(removedColums.Contains) || dix.IsControlledIndex ? SqlBuilder.DropIndex(dif.Name, dix) : null,
-                            (i, mix, dix) => (mix as UniqueIndex)?.ViewName != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                            (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlPreCommand.Combine(Spacing.Double, dix.IsPrimary ? DeleteAllForeignKey(dif.Name) : null, SqlBuilder.DropIndex(dif.Name, dix)) : null,
                             Spacing.Simple);
 
                         return changes;
@@ -219,7 +221,7 @@ namespace Signum.Engine
                         var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                             (i, mix) => mix is UniqueIndex || mix.Columns.Any(isNew) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) ? SqlBuilder.CreateIndex(mix) : null,
                             null,
-                            (i, mix, dix) => (mix as UniqueIndex)?.ViewName != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.CreateIndex(mix) :
+                            (i, mix, dix) => !dix.IndexEquals(dif, mix) ? SqlBuilder.CreateIndex(mix) :
                                 mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab, dix.IndexName, mix.IndexName) : null,
                             Spacing.Simple);
 
@@ -303,10 +305,10 @@ namespace Signum.Engine
                 var nIx = newOnly.FirstOrDefault(n =>
                 {
                     var newIx = dictionary[n];
-                    if (oldIx.IsPrimary && newIx is PrimaryIndex)
+                    if (oldIx.IsPrimary && newIx is PrimaryClusteredIndex)
                         return true;
 
-                    if (oldIx.IsPrimary || newIx is PrimaryIndex)
+                    if (oldIx.IsPrimary || newIx is PrimaryClusteredIndex)
                         return false;
 
                     if (oldIx.IsUnique != (newIx is UniqueIndex))
@@ -686,6 +688,33 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         public override string ToString()
         {
             return "{0} ({1})".FormatWith(IndexName, Columns.ToString(", "));
+        }
+
+        internal bool IndexEquals(DiffTable dif, Index mix)
+        {
+            if (this.ViewName != (mix as UniqueIndex)?.ViewName)
+                return false;
+            
+            if (this.ColumnsChanged(dif, mix))
+                return false;
+            
+            if (this.IsPrimary != mix is PrimaryClusteredIndex)
+                return false;
+            
+            if (this.Type != (mix is PrimaryClusteredIndex ? DiffIndexType.Clustered : DiffIndexType.NonClustered))
+                return false;
+
+            return true;
+        }
+
+        bool ColumnsChanged(DiffTable dif, Index mix)
+        {
+            if (this.Columns.Count != mix.Columns.Length)
+                return true;
+
+            var dixColumns = dif.Columns.Where(kvp => this.Columns.Contains(kvp.Value.Name));
+
+            return !dixColumns.All(kvp => dif.Columns.GetOrThrow(kvp.Key).ColumnEquals(mix.Columns.SingleEx(c => c.Name == kvp.Key), ignorePrimaryKey: true));
         }
 
         public bool IsControlledIndex
