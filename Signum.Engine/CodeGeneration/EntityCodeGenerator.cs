@@ -659,7 +659,7 @@ namespace Signum.Engine.CodeGeneration
 
         protected virtual bool HasUniqueIndex(DiffTable table, DiffColumn col)
         {
-            return table.Indices.Values.Any(a => a.FilterDefinition == null && a.Columns.Only() == col.Name && a.IsUnique && a.Type == DiffIndexType.NonClustered);
+            return table.Indices.Values.Any(a => a.FilterDefinition == null && a.Columns.Only() == col.Name && a.IsUnique && !a.IsPrimary && a.Type == DiffIndexType.NonClustered);
         }
 
         protected virtual string DefaultColumnName(DiffTable table, DiffColumn col)

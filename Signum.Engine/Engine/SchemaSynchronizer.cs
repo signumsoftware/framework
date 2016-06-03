@@ -303,6 +303,11 @@ namespace Signum.Engine
                 var nIx = newOnly.FirstOrDefault(n =>
                 {
                     var newIx = dictionary[n];
+                    if (oldIx.IsPrimary && newIx is PrimaryIndex)
+                        return true;
+
+                    if (oldIx.IsPrimary || newIx is PrimaryIndex)
+                        return false;
 
                     if (oldIx.IsUnique != (newIx is UniqueIndex))
                         return false;
@@ -410,10 +415,11 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".FormatWith(tabCol.Name,
                                                  }).ToList(),
 
                              SimpleIndices = (from i in t.Indices()
-                                              where !i.is_primary_key && i.type != 0  /*heap indexes*/
+                                              where /*!i.is_primary_key && */i.type != 0  /*heap indexes*/
                                               select new DiffIndex
                                               {
                                                   IsUnique = i.is_unique,
+                                                  IsPrimary = i.is_primary_key,
                                                   IndexName = i.name,
                                                   FilterDefinition = i.filter_definition,
                                                   Type = (DiffIndexType)i.type,
@@ -669,6 +675,7 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
     public class DiffIndex
     {
         public bool IsUnique;
+        public bool IsPrimary;
         public string IndexName;
         public string ViewName;
         public string FilterDefinition;

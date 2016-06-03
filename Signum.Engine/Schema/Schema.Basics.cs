@@ -414,7 +414,7 @@ namespace Signum.Engine.Maps
             if (this.UniqueIndex != null)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
 
-            return Enumerable.Empty<Index>();
+            return new[] { new PrimaryIndex(table) };
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
