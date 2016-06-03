@@ -1290,7 +1290,7 @@ namespace Signum.Engine.Linq
                                 case DbExpressionType.EmbeddedInit:
                                     {
                                         EmbeddedEntityExpression eee = (EmbeddedEntityExpression)source;
-                                        FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(eee.Type, (PropertyInfo)m.Member);
+                                        FieldInfo fi = m.Member as FieldInfo ?? Reflector.TryFindFieldInfo(eee.Type, (PropertyInfo)m.Member);
 
                                         if (fi == null)
                                             throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".FormatWith(m.Member.Name, eee.Type.TypeName()));
