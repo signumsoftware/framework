@@ -76,7 +76,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
 
 
-    initialState(queryName: PseudoType | QueryKey): SearchControlState{
+    initialState(queryName: PseudoType | QueryKey): SearchControlState {
         return {
             resultTable: null,
             findOptions: null,
@@ -162,7 +162,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             .then(fo => {
                 var qs = this.state.querySettings;
 
-                var sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo); 
+                var sfb = qs && qs.simpleFilterBuilder && qs.simpleFilterBuilder(qd, fo);
 
                 if (sfb)
                     fo.showFilters = false;
@@ -198,7 +198,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         return getQueryKey(this.state.findOptions.queryName);
     }
 
-    getQueryRequest() : QueryRequest {
+    getQueryRequest(): QueryRequest {
         var fo = this.state.findOptions;
 
         return {
@@ -211,7 +211,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     }
 
     // MAIN
-    doSearchPage1(){
+    doSearchPage1() {
         var fo = this.state.findOptions;
 
         if (fo.pagination.mode == "Paginate")
@@ -304,9 +304,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.setState({ lastToken: token });
     }
 
-    simpleFilterBuilderInstance: ISimpleFilterBuilder; 
+    simpleFilterBuilderInstance: ISimpleFilterBuilder;
 
-    getFindOptionsWithSFB() : Promise<FindOptions> {
+    getFindOptionsWithSFB(): Promise<FindOptions> {
 
         var fo = this.state.findOptions;
 
@@ -335,35 +335,33 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         var sfb = this.state.simpleFilterBuilder && React.cloneElement(this.state.simpleFilterBuilder, { ref: (e) => { this.simpleFilterBuilderInstance = e } });
 
         return (
-            <div id="searchPage">
-                <div className="sf-search-control SF-control-container" ref="container" data-search-count={this.state.searchCount}>
-                    {fo.showHeader && (fo.showFilters ? <FilterBuilder
-                        queryDescription={this.state.queryDescription}
-                        filterOptions={fo.filterOptions}
-                        lastToken ={this.state.lastToken}
-                        subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
-                        onTokenChanged= {this.handleFilterTokenChanged}
-                        onFiltersChanged={this.handleFiltersChanged}/> : (sfb && <div className="simple-filter-builder">{sfb}</div>)) }
-                    {fo.showHeader && this.renderToolBar() }
-                    {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type}/>}
-                    {this.state.editingColumn && <ColumnEditor
-                        columnOption={this.state.editingColumn}
-                        onChange={this.handleColumnChanged}
-                        queryDescription={this.state.queryDescription}
-                        subTokensOptions={SubTokensOptions.CanElement}
-                        close={this.handleColumnClose}/>}
-                    <div className="sf-search-results-container table-responsive" >
-                        <table className="sf-search-results table table-hover table-condensed" onContextMenu={this.handleOnContextMenu} >
-                            <thead>
-                                {this.renderHeaders() }
-                            </thead>
-                            <tbody>
-                                {this.renderRows() }
-                            </tbody>
-                        </table>
-                    </div>
-                    {fo.showFooter && <PaginationSelector pagination={fo.pagination} onPagination={this.handlePagination} resultTable={this.state.resultTable}/>}
+            <div className="sf-search-control SF-control-container" ref="container" data-search-count={this.state.searchCount}>
+                {fo.showHeader && (fo.showFilters ? <FilterBuilder
+                    queryDescription={this.state.queryDescription}
+                    filterOptions={fo.filterOptions}
+                    lastToken ={this.state.lastToken}
+                    subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
+                    onTokenChanged= {this.handleFilterTokenChanged}
+                    onFiltersChanged={this.handleFiltersChanged}/> : (sfb && <div className="simple-filter-builder">{sfb}</div>)) }
+                {fo.showHeader && this.renderToolBar() }
+                {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type}/>}
+                {this.state.editingColumn && <ColumnEditor
+                    columnOption={this.state.editingColumn}
+                    onChange={this.handleColumnChanged}
+                    queryDescription={this.state.queryDescription}
+                    subTokensOptions={SubTokensOptions.CanElement}
+                    close={this.handleColumnClose}/>}
+                <div className="sf-search-results-container table-responsive" >
+                    <table className="sf-search-results table table-hover table-condensed" onContextMenu={this.handleOnContextMenu} >
+                        <thead>
+                            {this.renderHeaders() }
+                        </thead>
+                        <tbody>
+                            {this.renderRows() }
+                        </tbody>
+                    </table>
                 </div>
+                {fo.showFooter && <PaginationSelector pagination={fo.pagination} onPagination={this.handlePagination} resultTable={this.state.resultTable}/>}
                 {this.state.contextualMenu && this.renderContextualMenu() }
             </div>
         );
@@ -419,7 +417,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             .filter(ti => Navigator.isCreable(ti, false, true));
 
         return SelectorPopup.chooseType(tis)
-            .then(ti => ti ? ti.name : null);    
+            .then(ti => ti ? ti.name : null);
     }
 
     handleCreate = (ev: React.MouseEvent) => {
@@ -435,7 +433,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
             if (isPopup) {
                 window.open(Navigator.createRoute(tn));
-            }else {
+            } else {
                 Constructor.construct(tn).then(e => {
                     if (e == null)
                         return;
@@ -606,10 +604,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         if (cm.rowIndex != null) {
 
-            if(this.state.currentMenuItems == null)
-            {
-                menuItems.push(<MenuItem header>{JavascriptMessage.loading.niceToString()}</MenuItem>);
-            }else{
+            if (this.state.currentMenuItems == null) {
+                menuItems.push(<MenuItem header>{JavascriptMessage.loading.niceToString() }</MenuItem>);
+            } else {
                 if (menuItems.length && this.state.currentMenuItems.length)
                     menuItems.push(<MenuItem divider/>);
 
@@ -671,7 +668,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             else
                 fo.orderOptions = [newOrder];
         }
-        
+
 
         if (fo.pagination.mode != "All")
             this.doSearchPage1();

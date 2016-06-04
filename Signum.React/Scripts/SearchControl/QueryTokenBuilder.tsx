@@ -147,7 +147,7 @@ export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken }
         var parentToken = (this.context as any).parentToken;
 
         return (
-            <span
+            <span data-token={item.key}
                 style= {{ color: item.typeColor }}
                 title={item.niceTypeName}>
                 { ((item.parent && !parentToken) ? " > " : "") + item.toString }

@@ -95,14 +95,14 @@ export default class PaginationSelector extends React.Component<PaginationSelect
     renderCenter() {
         return (
             <div className="sf-pagination-center form-inline form-xs">
-                <select value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" className="form-control">
+                <select value={this.props.pagination.mode} onChange={this.handleMode} ref="mode" className="form-control sf-pagination-mode">
                     {["Paginate" as PaginationMode,
                        "Firsts" as PaginationMode,
                        "All" as PaginationMode].map(mode =>
                         <option key={mode} value={mode.toString() }>{PaginationMode.niceName(mode) }</option>) }
                 </select>
                 {this.props.pagination.mode != "All" &&
-                    <select value={ this.props.pagination.elementsPerPage.toString() } onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control">
+                    <select value={ this.props.pagination.elementsPerPage.toString() } onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control sf-elements-per-page">
                         {[5, 10, 20, 50, 100, 200].map(elem =>
                             <option key={elem} value={elem.toString() }>{elem}</option>) }
                     </select>

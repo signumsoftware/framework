@@ -59,7 +59,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
             <div className="panel panel-default sf-filters form-xs">
                 <div className="panel-body sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
                     {
-                        <table className="table table-condensed">
+                        <table className="table table-condensed sf-filter-table">
                             <thead>
                                 <tr>
                                     <th style={{ minWidth: "24px" }}></th>
@@ -169,7 +169,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                         queryKey={ this.props.queryDescription.queryKey }
                         subTokenOptions={this.props.subTokenOptions}
                         readOnly={f.frozen}/></td>
-                <td>
+                <td className="sf-filter-operation">
                     {f.token && f.operation &&
                         <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
                             { filterOperations[f.token.filterType]
@@ -177,7 +177,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                         </select> }
                 </td>
 
-                <td>
+                <td className="sf-filter-value">
                     {f.token && f.operation && this.renderValue() }
                 </td>
             </tr>
