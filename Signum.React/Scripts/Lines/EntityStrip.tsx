@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
-import { classes } from '../Globals'
+import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -43,7 +43,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         const s = this.state;
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} labelProps={s.labelHtmlProps} htmlProps={this.withPropertyPath(s.formGroupHtmlProps)}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} labelProps={s.labelHtmlProps} {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal") }>
                         {
@@ -142,7 +142,7 @@ export class EntityStripElement extends React.Component<EntityStripElementProps,
     render() {
 
         return (
-            <li className="sf-strip-element input-group">
+            <li className="sf-strip-element input-group" {...EntityListBase.entityHtmlProps(this.props.ctx.value) }>
                 {
                     this.props.onView ?
                         <a className="sf-entitStrip-link" href="#" onClick={this.props.onView}>

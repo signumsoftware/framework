@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import * as moment from 'moment'
 import { Tab } from 'react-bootstrap'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
+import { Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -94,7 +95,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={this.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps} >
                 <div className="SF-entity-combo">
                     <div className={buttons ? "input-group" : null}>
                         { this.renderSelect() }

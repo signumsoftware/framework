@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
-import { classes } from '../Globals'
+import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -110,7 +110,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     renderInternal() {
        
         return (
-            <fieldset className={classes("SF-checkbox-list", this.state.ctx.binding.errorClass) } data-propertyPath={this.state.ctx.propertyPath}>
+            <fieldset className={classes("SF-checkbox-list", this.state.ctx.binding.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>

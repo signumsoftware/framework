@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
-import { classes } from '../Globals'
+import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -39,7 +39,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
             buttons = null;
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) } data-propertyPath={this.state.ctx.propertyPath}>
+            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
@@ -83,7 +83,7 @@ export class EntityRepeaterElement extends React.Component<EntityRepeaterElement
 {
     render() {
         return (
-            <fieldset className="sf-repeater-element">
+            <fieldset className="sf-repeater-element" {...EntityListBase.entityHtmlProps(this.props.ctx.value) }>
                 <legend>
                     <div className="item-group">
                         { this.props.onRemove && <a className={classes("sf-line-button", "sf-remove") }

@@ -29,11 +29,12 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
         if (ctx.formGroupStyle == "None") {
 
             var c = this.props.children as React.ReactElement<any>;
-
-            if (errorClass == null)
-                return c;
-
-            return React.cloneElement(c, { className: classes(c.props.className, errorClass) });
+         
+            return (
+                <div {...this.props.htmlProps} className={ errorClass }>
+                    {c}
+                </div>
+            );
         }
 
         const labelClasses = classes(ctx.formGroupStyle == "SrOnly" && "sr-only",
@@ -100,8 +101,10 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         this.setState(this.calculateState(nextProps));
     }
 
+    changes = 0;
     setValue(val: any) {
         this.state.ctx.value = val;
+        this.changes++;
         this.forceUpdate();
         if (this.state.onChange)
             this.state.onChange(val);
@@ -136,20 +139,18 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         this.overrideProps(state, overridenProps);
         return state;
     }
-
-    withPropertyPath(htmlAttrs: React.HTMLAttributes) {
-        var path = this.state.ctx.propertyPath;
-
-        if (path == null)
-            return htmlAttrs;
-
-        return Dic.extend({ "data-propertyPath": this.state.ctx.propertyPath }, htmlAttrs);
-    }
-
+    
     overrideProps(state: S, overridenProps: S) {
         var labelHtmlProps = Dic.extend(state.labelHtmlProps, overridenProps.labelHtmlProps);
         Dic.extend(state, overridenProps);
         state.labelHtmlProps = labelHtmlProps;
+    }
+
+    baseHtmlProps(): React.HTMLAttributes {
+        return {
+            'data-propertyPath': this.state.ctx.propertyPath,
+            'data-changes': this.changes
+        } as any;
     }
 
     calculateDefaultState(state: S) {

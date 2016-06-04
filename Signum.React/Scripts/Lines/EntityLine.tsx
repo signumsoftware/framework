@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
+import { Dic } from '../Globals'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
@@ -71,7 +72,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
             buttons = null;
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={this.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
                     <div className={buttons ? "input-group" : null}>
                         { hasValue ? this.renderLink() : this.renderAutoComplete() }
@@ -83,7 +84,6 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
     }
 
     renderAutoComplete() {
-
 
         var ctx = this.state.ctx;
 

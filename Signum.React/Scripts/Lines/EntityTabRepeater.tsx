@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
 import { Tab, Tabs } from 'react-bootstrap'
-import { classes } from '../Globals'
+import { classes, Dic } from '../Globals'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -39,7 +39,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) } data-propertyPath={this.state.ctx.propertyPath}>
+            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
@@ -49,16 +49,20 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                 <Tabs id={this.props.ctx.compose("tabs")}>
                     {
                         mlistItemContext(this.state.ctx).map((mlec, i) =>
-                            <Tab className="sf-repeater-element" eventKey={i} key={i} title={<div>
-                                { getToString(mlec.value) }
-                                &nbsp;
-                                { this.state.remove &&
-                                    <span className={classes("sf-line-button", "sf-create") }
-                                    onClick={e => this.handleRemoveElementClick(e, i) }
-                                    title={EntityControlMessage.Remove.niceToString() }>
-                                        <span className="glyphicon glyphicon-remove"/>
-                                    </span> }
-                            </div>}>
+                            <Tab className="sf-repeater-element" eventKey={i} key={i} {...EntityListBase.entityHtmlProps(mlec.value) }
+                                title={
+                                    <div>
+                                        { getToString(mlec.value) }
+                                        &nbsp;
+                                        { this.state.remove &&
+                                            <span className={classes("sf-line-button", "sf-create") }
+                                            onClick={e => this.handleRemoveElementClick(e, i) }
+                                            title={EntityControlMessage.Remove.niceToString() }>
+                                            <span className="glyphicon glyphicon-remove"/>
+                                            </span>
+                                        }
+                                    </div>
+                                }>
                                 <RenderEntity ctx={mlec} getComponent={this.props.getComponent}/>
                             </Tab>
                         )

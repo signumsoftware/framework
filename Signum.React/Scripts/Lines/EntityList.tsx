@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
-import { classes } from '../Globals'
+import { classes, Dic } from '../Globals'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
@@ -50,11 +50,11 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         const hasSelected = s.selectedIndex != null;
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={this.withPropertyPath(s.formGroupHtmlProps)} labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
                     <div className="input-group">
                         <select className="form-control" size={this.props.size} onChange={this.handleOnSelect}>
-                            {s.ctx.value.map((e, i) => <option  key={i} title={this.getTitle(e.element) }>{e.element.toStr}</option>) }
+                            {s.ctx.value.map((e, i) => <option  key={i} title={this.getTitle(e.element) } {...EntityListBase.entityHtmlProps(e.element) }>{e.element.toStr}</option>) }
                         </select>
                         <span className="input-group-btn btn-group-vertical">
                             { this.renderCreateButton(true) }
