@@ -208,7 +208,7 @@ namespace Signum.Engine
 
                 SqlPreCommand addIndices =
                     Synchronizer.SynchronizeScript(model, database,
-                     (tn, tab) => modelIndices[tab].Values.Select(SqlBuilder.CreateIndex).Combine(Spacing.Simple),
+                     (tn, tab) => modelIndices[tab].Values.Where(a => !(a is PrimaryClusteredIndex)).Select(SqlBuilder.CreateIndex).Combine(Spacing.Simple),
                      null,
                     (tn, tab, dif) =>
                     {
