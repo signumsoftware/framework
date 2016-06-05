@@ -311,9 +311,9 @@ namespace Signum.Windows.Files
 
         public static byte[] DefaultResolveBinaryFile(IFile f)
         {
-            if (f.FullWebPath != null)
+            if (f.FullWebPath() != null)
             {
-                return new WebClient().DownloadData(f.FullWebPath);
+                return new WebClient().DownloadData(f.FullWebPath());
             }
             else
             {

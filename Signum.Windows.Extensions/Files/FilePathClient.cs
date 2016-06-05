@@ -23,7 +23,6 @@ namespace Signum.Windows.Files
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<FilePathEntity> { View = e => new FilePath() },
                 });
 
                 Server.SetSymbolIds<FileTypeSymbol>();
