@@ -95,6 +95,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                 inputAttrs={{ className: "form-control sf-entity-autocomplete" }}
                 getItems={this.props.autoCompleteGetItems || this.defaultAutoCompleteGetItems}
                 renderItem={this.props.autoCompleteRenderItem || this.defaultAutCompleteRenderItem}
+                liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
                 onSelect={this.handleOnSelect}/>
         );
     }

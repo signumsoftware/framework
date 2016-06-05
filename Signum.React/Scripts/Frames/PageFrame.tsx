@@ -6,7 +6,7 @@ import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import ButtonBar from './ButtonBar'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
-import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, JavascriptMessage } from '../Signum.Entities'
+import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, JavascriptMessage, entityInfo } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, GraphExplorer } from '../Reflection'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
@@ -86,14 +86,6 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             .then(c => this.setState({ componentClass: c }));
     }
 
-    render() {
-        return (
-            <div id="divMainPage" data-isnew={this.props.routeParams.id == null} className="form-horizontal">
-                {this.renderEntityControl() }
-            </div>
-        );
-    }
-
     onClose() {
         if (Finder.isFindable(this.state.pack.entity.Type))
             Navigator.currentHistory.push(Finder.findOptionsPath({ queryName: this.state.pack.entity.Type }));
@@ -111,7 +103,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         }
     }
 
-    renderEntityControl() {
+    render() {
 
         if (!this.state.pack) {
             return (
@@ -158,7 +150,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
                 { this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} showOperations={true} /> }
                 <ValidationErrors entity={this.state.pack.entity}/>
                 { embeddedWidgets.top }
-                <div id="divMainControl" className="sf-main-control" data-test-ticks={new Date().valueOf() }>
+                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
                     {this.state.componentClass && React.createElement(this.state.componentClass, { ctx: ctx, ref: c => this.setComponent(c) } as any) }
                 </div>
                 { embeddedWidgets.bottom }

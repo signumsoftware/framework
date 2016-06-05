@@ -43,7 +43,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         var t = state.type;
 
         if (t.isCollection || t.isLite)
-            throw new Error("not implemented");
+            throw new Error("ValueLine not implemented for " + JSON.stringify(t));
 
         if (t.isEnum || t.name == "boolean" && t.isNullable)
             return ValueLineType.Enum;

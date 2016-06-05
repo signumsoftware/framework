@@ -16,7 +16,7 @@ import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
 import { renderContextualItems, ContextualItemsContext, MarkRowsDictionary } from './ContextualItems'
 import { ContextMenu } from './ContextMenu'
-import SelectorPopup from '../SelectorPopup'
+import SelectorModal from '../SelectorModal'
 
 require("!style!css!./Search.css");
 
@@ -335,7 +335,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         var sfb = this.state.simpleFilterBuilder && React.cloneElement(this.state.simpleFilterBuilder, { ref: (e) => { this.simpleFilterBuilderInstance = e } });
 
         return (
-            <div className="sf-search-control SF-control-container" ref="container" data-search-count={this.state.searchCount}>
+            <div className="sf-search-control SF-control-container" ref="container" data-search-count={this.state.searchCount} data-query-key={getQueryKey(fo.queryName)}>
                 {fo.showHeader && (fo.showFilters ? <FilterBuilder
                     queryDescription={this.state.queryDescription}
                     filterOptions={fo.filterOptions}
@@ -416,7 +416,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         const tis = getTypeInfos(this.state.queryDescription.columns["Entity"].type)
             .filter(ti => Navigator.isCreable(ti, false, true));
 
-        return SelectorPopup.chooseType(tis)
+        return SelectorModal.chooseType(tis)
             .then(ti => ti ? ti.name : null);
     }
 

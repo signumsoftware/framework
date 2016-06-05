@@ -1,4 +1,5 @@
 ﻿import * as React from 'react'
+import { classes, Dic }from '../Globals'
 
 
 
@@ -13,6 +14,7 @@ export interface TypeaheadProps {
     spanAttrs?: React.HTMLAttributes;
     inputAttrs?: React.HTMLAttributes;
     menuAttrs?: React.HTMLAttributes;
+    liAttrs?: (item: any) => React.HTMLAttributes;
     loadingMessage?: string;
     noResultsMessage?: string;
 }
@@ -218,8 +220,9 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
     render() {
+        
         return (
-            <span {...this.props.spanAttrs}>
+            <span {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead")}>
                 <input type="text" autoComplete="off" ref="input" {...this.props.inputAttrs}
                     onFocus={this.handleFocus}
                     onBlur={this.handleBlur}
@@ -230,9 +233,10 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
                 {this.state.shown && <ul className="typeahead dropdown-menu" {...this.props.menuAttrs} ref={this.onMenuLoad}>
                     { /*!this.state.items ? <li className="loading"><a><small>{this.props.loadingMessage}</small></a></li> :*/
                         !this.state.items.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
-                            this.state.items.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : null} data-index={i}
+                            this.state.items.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : null} data-index={i} 
                                 onMouseEnter={this.handleElementMouseEnter}
-                                onMouseLeave={this.handleElementMouseLeave}>
+                                onMouseLeave={this.handleElementMouseLeave}
+                                {...this.props.liAttrs && this.props.liAttrs(item) }>
                                 <a href="#" onClick={this.handleMenuClick}>{this.props.renderItem(item, this.state.query) }</a>
                             </li>) }
                 </ul>}

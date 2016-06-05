@@ -40,6 +40,9 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
                 return <EntityStrip ctx={ctx}/>;
         }
 
+        if (tr.name == "[ALL]")
+            return <EntityLine ctx={ctx}/>;
+
         if (ti) {
             if (ti.kind == KindOfType.Enum)
                 return <ValueLine ctx={ctx}/>;

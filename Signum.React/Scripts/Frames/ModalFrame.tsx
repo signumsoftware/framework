@@ -6,7 +6,7 @@ import * as Navigator from '../Navigator'
 import ButtonBar from './ButtonBar'
 
 import { TypeContext, StyleOptions, EntityFrame, IRenderButtons } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState} from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState, entityInfo} from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
@@ -207,7 +207,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
                 {renderWidgets({ ctx: ctx, pack: pack }) }
                 { this.entityComponent && <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />}
                 <ValidationErrors entity={pack.entity}/>
-                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() }>
+                <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
                     { this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: c => this.setComponent(c) }) }
                 </div>
             </Modal.Body>

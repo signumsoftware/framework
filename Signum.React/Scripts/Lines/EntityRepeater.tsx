@@ -46,7 +46,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                         {buttons}
                     </div>
                 </legend>
-                <div>
+                <div className="sf-repater-elements">
                     {
                         mlistItemContext(this.state.ctx).map((mlec, i) =>
                             (<EntityRepeaterElement key={i}

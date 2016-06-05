@@ -125,6 +125,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                 inputAttrs={{ className: "sf-entity-autocomplete" }}
                 getItems={this.props.autoCompleteGetItems || this.defaultAutoCompleteGetItems}
                 renderItem={this.props.autoCompleteRenderItem || this.defaultAutCompleteRenderItem}
+                liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
                 onSelect={this.handleOnSelect}/>
         );
     }

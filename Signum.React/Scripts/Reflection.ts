@@ -998,3 +998,4 @@ function dot(prev: string, property: string) {
 
     return prev + "." + property
 }
+

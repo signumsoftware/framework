@@ -193,6 +193,17 @@ export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity>{
         (obj as EntityPack<ModifiableEntity>).canExecute !== undefined;
 }
 
+export function entityInfo(entity: ModifiableEntity | Lite<Entity>)
+{
+	if (!entity)
+		return "null";
+
+	var type = isLite(entity) ? entity.EntityType : entity.Type;
+    var id = isLite(entity) ? entity.id : isEntity(entity) ? entity.id : "";
+    var isNew = isLite(entity) ? entity.entity && entity.entity.isNew : entity.isNew;
+
+	return  `${type};${id};${isNew}`;
+}
 export const BooleanEnum = new EnumType<BooleanEnum>("BooleanEnum");
 export type BooleanEnum =
     "False" |

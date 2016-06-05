@@ -5,7 +5,7 @@ import { openModal } from './Modals';
 import { Dic } from './Globals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, SelectorMessage, EntityPack, MixinEntity } from './Signum.Entities';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType, getTypeName, basicConstruct } from './Reflection';
-import SelectorPopup from './SelectorPopup';
+import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
 
@@ -35,7 +35,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
 
         if (ctrs.length) {
 
-            return SelectorPopup.chooseElement(ctrs, c => c.niceName, SelectorMessage.PleaseSelectAConstructor.niceToString())
+            return SelectorModal.chooseElement(ctrs, { display: c => c.niceName, name: c => c.key, message: SelectorMessage.PleaseSelectAConstructor.niceToString() })
                 .then(oi => {
                     var settings = Operations.getSettings(oi.key) as Operations.ConstructorOperationSettings<Entity>;
 

@@ -10,7 +10,6 @@ import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../Type
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
 import Typeahead from '../Lines/Typeahead'
-import SelectorPopup from '../SelectorPopup'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 
 

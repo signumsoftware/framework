@@ -120,7 +120,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
                         </span>
                     </div>
                 </legend>
-                <div style={this.getColumnStyle() }>
+                <div className="sf-checkbox-elements" style={this.getColumnStyle() }>
                     { this.renderContent() }
                 </div>
             </fieldset>

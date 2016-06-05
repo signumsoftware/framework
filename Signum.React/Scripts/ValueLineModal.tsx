@@ -7,12 +7,12 @@ import { FormGroupStyle, TypeContext } from './TypeContext'
 import { ValueLineType, ValueLine} from './Lines/ValueLine'
 
 
-interface ValueLinePopupProps extends React.Props<ValueLinePopup>, IModalProps {
+interface ValueLinePopupModal extends React.Props<ValueLineModal>, IModalProps {
 
     options: ValueLinePopupOptions;
 }
 
-export default class ValueLinePopup extends React.Component<ValueLinePopupProps, { show: boolean; value?: any }>  {
+export default class ValueLineModal extends React.Component<ValueLinePopupModal, { show: boolean; value?: any }>  {
 
     constructor(props) {
         super(props);
@@ -69,7 +69,7 @@ export default class ValueLinePopup extends React.Component<ValueLinePopupProps,
     }
     
     static show(options: ValueLinePopupOptions): Promise<any> {
-        return openModal<any>(<ValueLinePopup options={options}/>);
+        return openModal<any>(<ValueLineModal options={options}/>);
     }
 }
 

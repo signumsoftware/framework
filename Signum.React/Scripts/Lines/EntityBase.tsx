@@ -7,10 +7,10 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey, isLite, isEntity } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey, isLite, isEntity, entityInfo } from '../Signum.Entities'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import Typeahead from '../Lines/Typeahead'
-import SelectorPopup from '../SelectorPopup'
+import SelectorModal from '../SelectorModal'
 
 
 export interface EntityBaseProps extends LineBaseProps {
@@ -152,7 +152,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         const tis = getTypeInfos(t).filter(ti => predicate(ti));
 
-        return SelectorPopup.chooseType(tis)
+        return SelectorModal.chooseType(tis)
             .then(ti => ti ? ti.name : null);
     }
 
@@ -206,12 +206,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     static entityHtmlProps(entity: ModifiableEntity | Lite<Entity>): React.HTMLAttributes {
 
-        var type = isLite(entity) ? entity.EntityType : entity.Type;
-        var id = isLite(entity) ? entity.id : isEntity(entity) ? entity.id : "";
-        var isNew = isLite(entity) ? entity.entity && entity.entity.isNew : entity.isNew;
-
         return {
-            'data-entity': `${type};${id};${isNew}`
+            'data-entity': entityInfo(entity)
         } as any;
     }
 

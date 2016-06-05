@@ -49,9 +49,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
                         {buttons}
                     </div>
                 </legend>
-                <div>
-                    <RenderEntity ctx={this.state.ctx} getComponent={this.props.getComponent}/>
-                </div>
+                <RenderEntity ctx={this.state.ctx} getComponent={this.props.getComponent}/>
             </fieldset>
         );
     }
