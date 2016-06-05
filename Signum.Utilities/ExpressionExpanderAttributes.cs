@@ -17,6 +17,16 @@ namespace Signum.Utilities
         Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi);
     }
 
+
+    public class GenericMethodExpander
+    {
+        public LambdaExpression GenericLambdaExpression;
+        public GenericMethodExpander(LambdaExpression genericLambdaExpression)
+        {
+            this.GenericLambdaExpression = genericLambdaExpression;
+        } 
+    }
+
     /// <summary>
     /// Attribute to define the class that should be used to convert calls to methods
     /// in LINQ expression trees

@@ -37,7 +37,7 @@ namespace Signum.Engine
         #region Create Tables
         public static SqlPreCommandSimple CreateTableSql(ITable t)
         {
-            var primaryKeyConstraint = "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC))".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
+            var primaryKeyConstraint = "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
 
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".FormatWith(
                 t.Name, 
@@ -136,7 +136,7 @@ namespace Signum.Engine
         {
             Connector.Current.FixType(ref type, ref size, ref scale);
 
-            return "{0} {1}{2} {3}{4}{5}{6}".FormatWith(
+            return "{0} {1}{2} {3}{4}{5}".FormatWith(
                 name.SqlEscape(),
                 type == SqlDbType.Udt ? udtTypeName : type.ToString().ToUpper(),
                 GetSizeScale(size, scale),

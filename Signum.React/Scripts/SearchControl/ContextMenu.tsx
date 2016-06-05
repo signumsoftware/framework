@@ -7,7 +7,7 @@ export interface ContextMenuProps extends React.Props<ContextMenu>, React.HTMLAt
     onHide: () => void;
 }
 
-export class ContextMenu extends React.Component<ContextMenuProps, {}> {
+export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
     render() {
 
         const { position } = this.props;

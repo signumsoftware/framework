@@ -15,7 +15,7 @@ import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
 import { renderContextualItems, ContextualItemsContext, MarkRowsDictionary } from './ContextualItems'
-import { ContextMenu } from './ContextMenu'
+import ContextMenu from './ContextMenu'
 import SelectorPopup from '../SelectorPopup'
 
 require("!style!css!./Search.css");

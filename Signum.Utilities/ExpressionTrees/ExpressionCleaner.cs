@@ -74,16 +74,31 @@ namespace Signum.Utilities.ExpressionTrees
             MethodExpanderAttribute attribute = m.Method.GetCustomAttribute<MethodExpanderAttribute>();
             if (attribute != null)
             {
-                IMethodExpander expander = Activator.CreateInstance(attribute.ExpanderType) as IMethodExpander;
-                if (expander == null)
-                    throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander".FormatWith(attribute.ExpanderType.TypeName()));
+                if (attribute.ExpanderType.IsGenericTypeDefinition)
+                {
+                    if (!typeof(GenericMethodExpander).IsAssignableFrom(attribute.ExpanderType))
+                        throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander or GenericMethodExpander".FormatWith(attribute.ExpanderType.TypeName()));
+                    
+                    Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
 
-                Expression exp = expander.Expand(
-                    m.Object,
-                    m.Arguments.ToArray(),
-                    m.Method);
+                    var type = attribute.ExpanderType.MakeGenericType(m.Method.GetGenericArguments());
+                    GenericMethodExpander expander = Activator.CreateInstance(type) as GenericMethodExpander;
+                    return Expression.Invoke(expander.GenericLambdaExpression, args);
+                }
+                else
+                {
+                    if(!typeof(IMethodExpander).IsAssignableFrom(attribute.ExpanderType))
+                        throw new InvalidOperationException("Expansion failed, '{0}' does not implement IMethodExpander or GenericMethodExpander".FormatWith(attribute.ExpanderType.TypeName()));
 
-                return exp;
+                    IMethodExpander expander = (IMethodExpander)Activator.CreateInstance(attribute.ExpanderType);
+
+                    Expression exp = expander.Expand(
+                        m.Object,
+                        m.Arguments.ToArray(),
+                        m.Method);
+
+                    return exp;
+                }
             }
 
             LambdaExpression lambdaExpression = GetFieldExpansion(m.Object?.Type, m.Method);

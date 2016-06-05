@@ -54,8 +54,6 @@ export function find(findOptions: FindOptions): Promise<Lite<Entity>>;
 export function find<T extends Entity>(type: Type<T>): Promise<Lite<T>>;
 export function find(obj: FindOptions | Type<any>): Promise<Lite<Entity>> {
 
-    
-
     const fo = (obj as FindOptions).queryName ? obj as FindOptions :
         { queryName: obj as Type<any> } as FindOptions;
     
