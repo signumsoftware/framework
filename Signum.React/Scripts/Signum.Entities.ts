@@ -325,6 +325,7 @@ export module OperationMessage {
     export const StateShouldBe0InsteadOf1 = new MessageKey("OperationMessage", "StateShouldBe0InsteadOf1");
     export const InUserInterface = new MessageKey("OperationMessage", "InUserInterface");
     export const Operation01IsNotAuthorized = new MessageKey("OperationMessage", "Operation01IsNotAuthorized");
+    export const PleaseConfirmYouDLikeToDelete0FromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDelete0FromTheSystem");
     export const PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem");
     export const PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem = new MessageKey("OperationMessage", "PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem");
     export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
