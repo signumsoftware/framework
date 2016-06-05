@@ -62,6 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BrowserProxy.cs" />
     <Compile Include="EntityButtonContainer.cs" />
     <Compile Include="LineContainer.cs" />
     <Compile Include="LineProxies.cs" />
@@ -71,6 +72,8 @@
     <Compile Include="SeleniumExtensions.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ValidationSummaryContainer.cs" />
+    <Compile Include="WidgetContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Engine\Signum.Engine.csproj">

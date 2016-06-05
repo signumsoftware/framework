@@ -14,7 +14,7 @@ using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support;
 using OpenQA.Selenium.Support.UI;
 using Signum.Utilities;
-
+using System.Collections.ObjectModel;
 
 namespace Signum.React.Selenium
 {
@@ -130,11 +130,6 @@ namespace Signum.React.Selenium
         {
             return element.GetDriver().Wait(() => element.FindElements(locator).FirstOrDefault(a => a.Displayed),
                 actionDescription ?? (Func<string>)(() => "{0} to be visible".FormatWith(locator)), timeout);
-        }
-
-        public static IWebElement NotImplemented(this RemoteWebDriver selenium, string oldCode = null)
-        {
-            throw new NotImplementedException("The code is not implemented:" + oldCode);
         }
 
         public static void AssertElementVisible(this RemoteWebDriver selenium, By locator)
@@ -295,6 +290,28 @@ namespace Signum.React.Selenium
             element.Options.SingleEx(predicate).Click();
         }
 
+        public static IWebElement CaptureOnClick(this IWebElement button)
+        {
+            return button.GetDriver().CapturePopup(() => button.Click());
+        }
+
+        public static IWebElement CapturePopup(this RemoteWebDriver selenium, Action clickToOpen)
+        {
+            var body = selenium.FindElement(By.TagName("body"));
+            var last = body.FindElement(By.XPath("./*[last()]"));
+            clickToOpen();
+            var result = selenium.Wait(() =>
+            {
+                var newLast = body.FindElement(By.XPath("./*[last()]"));
+
+                if (last == newLast)
+                    return null;
+
+                return newLast.FindElement(By.ClassName("modal"));
+            });
+            return result;
+        }
+
         public static void ContextClick(this IWebElement element)
         {
             Actions builder = new Actions(element.GetDriver());
@@ -344,22 +361,22 @@ namespace Signum.React.Selenium
         {
             if (!element.Displayed || element.Location.Y < 150)//Nav
             {
-                element.GetDriver().ScrollTo(element);
+                element.ScrollTo();
             }
 
             element.Click();
         }
 
-        public static void ScrollTo(this RemoteWebDriver driver, IWebElement element)
+        public static void ScrollTo(this IWebElement element)
         {
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            IJavaScriptExecutor js = (IJavaScriptExecutor)element.GetDriver();
             js.ExecuteScript("arguments[0].scrollIntoView(false);", element);
             Thread.Sleep(500);
         }
 
-        public static void LoseFocus(this RemoteWebDriver driver, IWebElement element)
+        public static void LoseFocus(this IWebElement element)
         {
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            IJavaScriptExecutor js = (IJavaScriptExecutor)element.GetDriver();
             js.ExecuteScript("arguments[0].focus(); arguments[0].blur(); return true", element);
         }
 
@@ -400,6 +417,11 @@ namespace Signum.React.Selenium
         public IWebElement Find()
         {
             return ParentElement.FindElement(this.Locator);
+        }
+
+        public ReadOnlyCollection<IWebElement> FindElements()
+        {
+            return ParentElement.FindElements(this.Locator);
         }
 
         public IWebElement TryFind()
@@ -451,5 +473,11 @@ namespace Signum.React.Selenium
             ParentElement.AssertElementPresent(this.Locator);
         }
 
+        public WebElementLocator CombineCss(string cssSelectorSuffix)
+        {
+            return new WebElementLocator(this.ParentElement, this.Locator.CombineCss(cssSelectorSuffix));
+        }
+
     }
+
 }

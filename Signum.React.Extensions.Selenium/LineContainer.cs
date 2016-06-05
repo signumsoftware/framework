@@ -18,15 +18,12 @@ using Signum.React.Selenium;
 
 namespace Signum.React.Selenium
 {
-    public interface ILineContainer<T> :ILineContainer where T : ModifiableEntity
+    public interface ILineContainer<T> : ILineContainer where T : ModifiableEntity
     {
-      
     }
 
     public interface ILineContainer
     {
-        RemoteWebDriver Selenium { get; }
-
         IWebElement Element { get; }
 
         PropertyRoute Route { get; }
@@ -68,7 +65,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new LineContainer<S>(lineContainer.Selenium, element, newRoute);
+            return new LineContainer<S>(element, newRoute);
         }
 
         public static ValueLineProxy ValueLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -77,7 +74,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new ValueLineProxy(lineContainer.Selenium, element, newRoute);
+            return new ValueLineProxy(element, newRoute);
         }
 
         public static void ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
@@ -88,7 +85,7 @@ namespace Signum.React.Selenium
             valueLine.Value = value;
 
             if (loseFocus)
-                lineContainer.Selenium.LoseFocus(valueLine.MainElement());
+                valueLine.MainElement.Find().LoseFocus();
         }
 
         public static FileLineProxy FileLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -97,7 +94,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new FileLineProxy(lineContainer.Selenium, element, newRoute);
+            return new FileLineProxy(element, newRoute);
         }
 
         public static V ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -112,7 +109,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new EntityLineProxy(lineContainer.Selenium, element, newRoute);
+            return new EntityLineProxy(element, newRoute);
         }
 
         public static V EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -135,7 +132,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new EntityComboProxy(lineContainer.Selenium, element, newRoute);
+            return new EntityComboProxy(element, newRoute);
         }
 
         public static V EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -154,7 +151,7 @@ namespace Signum.React.Selenium
             combo.LiteValue = value as Lite<IEntity> ?? ((IEntity)value)?.ToLite();
 
             if (loseFocus)
-                lineContainer.Selenium.LoseFocus(combo.ComboElement.WrappedElement);
+                combo.ComboElement.WrappedElement.LoseFocus();
         }
 
         public static EntityDetailProxy EntityDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -163,7 +160,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new EntityDetailProxy(lineContainer.Selenium, element, newRoute);
+            return new EntityDetailProxy(element, newRoute);
         }
 
         public static EntityRepeaterProxy EntityRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -172,7 +169,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new EntityRepeaterProxy(lineContainer.Selenium, element, newRoute);
+            return new EntityRepeaterProxy(element, newRoute);
         }
 
         public static EntityTabRepeaterProxy EntityTabRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -181,7 +178,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new EntityTabRepeaterProxy(lineContainer.Selenium, element, newRoute);
+            return new EntityTabRepeaterProxy(element, newRoute);
         }
 
         public static EntityStripProxy EntityStrip<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -190,7 +187,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new EntityStripProxy(lineContainer.Selenium, element, newRoute);
+            return new EntityStripProxy(element, newRoute);
         }
 
         public static EntityListProxy EntityList<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -199,7 +196,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new EntityListProxy(lineContainer.Selenium, element, newRoute);
+            return new EntityListProxy(element, newRoute);
         }
 
         public static EntityListCheckBoxProxy EntityListCheckBox<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -208,7 +205,7 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new EntityListCheckBoxProxy(lineContainer.Selenium, element, newRoute);
+            return new EntityListCheckBoxProxy(element, newRoute);
         }
 
         public static bool IsImplementation(this PropertyRoute route, Type type)
@@ -227,50 +224,35 @@ namespace Signum.React.Selenium
             IWebElement element;
             PropertyRoute newRoute = lineContainer.GetRoute(property, out element);
 
-            return new QueryTokenBuilderProxy(lineContainer.Selenium, element);
+            return new QueryTokenBuilderProxy(element);
         }
 
-        public static void SelectTab(this ILineContainer lineContainer, string tabId)
+        public static void SelectTab(this ILineContainer lineContainer, string title)
         {
-            
-            lineContainer.Selenium.NotImplemented().Click();
-            throw new NotImplementedException();
-            //lineContainer.Selenium.Wait(() => lineContainer.Selenium.IsElementVisible(By.Id(fullTabId)));
+            var tabs = lineContainer.Element.FindElement(By.CssSelector("ul[role=tablist]"));
 
-        }
+            var tab = tabs.FindElements(By.CssSelector("a[role=tab]")).Single(a => a.Text.Contains(title));
 
-        public static string[] Errors(this ILineContainer lineContainer)
-        {
-            //var result = (string)lineContainer.Selenium
-            //    .ExecuteScript("return $('#" + lineContainer.PrefixUnderscore() + "sfGlobalValidationSummary > ul > li').toArray().map(function(e){return $(e).text()}).join('\\r\\n');");
-
-            //return result.SplitNoEmpty("\r\n" );
-
-            throw new InvalidOperationException();
         }
 
         public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
         {
-            string query = QueryUtils.GetKey(queryName);
+            string queryKey = QueryUtils.GetKey(queryName);
+            
+            var element = lineContainer.Element.FindElement(By.CssSelector("div.sf-search-control[data-query-key={0}]".FormatWith(queryKey)));
 
-            throw new NotImplementedException();
-            //var prefix = (string)lineContainer.Selenium.ExecuteScript("return $('div.sf-search-control[data-queryname=\"{0}\"]').data('prefix')".FormatWith(query));
-
-            //return new SearchControlProxy(lineContainer.Selenium,  prefix);
+            return new SearchControlProxy(element);
         }
     }
 
     public class LineContainer<T> :ILineContainer<T> where T:ModifiableEntity
     {
-        public RemoteWebDriver Selenium { get; private set; }
-
         public IWebElement Element { get; private set; }
 
         public PropertyRoute Route { get; private set; }
 
-        public LineContainer(RemoteWebDriver selenium, IWebElement element = null, PropertyRoute route = null)
+        public LineContainer(IWebElement element, PropertyRoute route = null)
         {
-            this.Selenium = selenium;
             this.Element = element;
             this.Route = route == null || route.IsImplementation(typeof(T)) ? PropertyRoute.Root(typeof(T)) : route;
         }
@@ -284,32 +266,20 @@ namespace Signum.React.Selenium
 
         public PropertyRoute Route { get; private set; }
 
-        public NormalPage(RemoteWebDriver selenium, IWebElement element = null)
+        public NormalPage(RemoteWebDriver selenium)
         {
             this.Selenium = selenium;
-            this.Element = element;
+            this.Element = selenium.WaitElementPresent(By.CssSelector(".normal-control"));
             this.Route = PropertyRoute.Root(typeof(T));
         }
 
         public IWebElement ContainerElement()
         {
-            return this.Selenium.NotImplemented(); // By.CssSelector("#divMainPage");
+            return this.Element;
         }
 
         public void Dispose()
         {
-        }
-
-        public bool HasId()
-        {
-            return Selenium.IsElementPresent(By.CssSelector("#divMainPage[data-isnew=false]"));
-        }
-
-        public NormalPage<T> WaitLoaded()
-        {
-            this.Selenium.Wait(() => { var ri = this.EntityInfo(); return ri != null && ri.EntityType == typeof(T); });
-
-            return this;
         }
 
         public NormalPage<T> WaitLoadedAndId()
@@ -326,18 +296,19 @@ namespace Signum.React.Selenium
 
         public EntityInfoProxy EntityInfo()
         {
-            var ri = (string)Selenium.ExecuteScript("return $('#sfRuntimeInfo').val()");
-
-            if (ri == null)
-                return null;
-
-            throw new NotImplementedException();
+            return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("sf-main-control")).GetAttribute("data-main-entity"));
         }
 
         public T RetrieveEntity()
         {
             var lite = this.EntityInfo().ToLite();
             return (T)(IEntity)lite.Retrieve();
+        }
+
+        public NormalPage<T> WaitLoaded()
+        {
+            this.Element.GetDriver().Wait(() => this.EntityInfo() != null);
+            return this;
         }
     }
 }

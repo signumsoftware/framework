@@ -66,7 +66,7 @@ namespace Signum.React.Selenium
         {
             var url = Url(NavigateRoute(typeof(T), null));
 
-            return NormalPageUrl<T>(url);
+            return AsNormalPage<T>(url);
         }
 
         public NormalPage<T> NormalPage<T>(Lite<T> lite) where T : Entity
@@ -76,14 +76,14 @@ namespace Signum.React.Selenium
             
             var url = Url(NavigateRoute(lite));
 
-            return NormalPageUrl<T>(url);
+            return AsNormalPage<T>(url);
         }
 
-        public NormalPage<T> NormalPageUrl<T>(string url) where T : Entity
+        public NormalPage<T> AsNormalPage<T>(string url) where T : Entity
         {
             Selenium.Url = url;
 
-            return new NormalPage<T>(Selenium, null).WaitLoaded();
+            return new NormalPage<T>(Selenium);
         }
 
         public virtual string NavigateRoute(Type type, PrimaryKey? id)
@@ -91,9 +91,9 @@ namespace Signum.React.Selenium
             var typeName = TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type);
 
             if (id.HasValue)
-                return "View/{0}/{1}".FormatWith(typeName, id.HasValue ? id.ToString() : "");
+                return "view/{0}/{1}".FormatWith(typeName, id.HasValue ? id.ToString() : "");
             else
-                return "Create/{0}".FormatWith(typeName);
+                return "create/{0}".FormatWith(typeName);
         }
 
         public virtual string NavigateRoute(Lite<IEntity> lite)

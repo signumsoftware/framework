@@ -10,31 +10,21 @@ namespace Signum.React.Selenium
 {
     public interface IValidationSummaryContainer
     {
-        RemoteWebDriver Selenium { get; }
-
         IWebElement Element { get; }
     }
 
     public static class ValidationSummaryContainer
     {
-        public static IWebElement ValidationSummaryElement(this IValidationSummaryContainer container)
+        public static WebElementLocator ValidationSummary(this IValidationSummaryContainer container)
         {
-            return By.CssSelector("#{0}_sfGlobalValidationSummary".FormatWith(container.Prefix));
+            return container.Element.WithLocator(By.CssSelector("ul.validaton-summary"));
         }
 
-        public static bool FormHasNErrors(this IValidationSummaryContainer container, int? numberOfErrors)
+        public static string[] ValidationErrors(this IValidationSummaryContainer container, int? numberOfErrors)
         {
-            var locator = container.ValidationSummaryLocator();
+            var errors = container.ValidationSummary().CombineCss(" > li").FindElements().Select(a => a.Text).ToArray();
 
-            if (numberOfErrors.HasValue)
-            {
-                return container.Selenium.IsElementPresent(locator.CombineCss(" > ul > li:nth-child({0})".FormatWith(numberOfErrors))) &&
-                    !container.Selenium.IsElementPresent(locator.CombineCss(" > ul > li:nth-child({0})".FormatWith(numberOfErrors + 1)));
-            }
-            else
-            {
-                return container.Selenium.IsElementPresent(locator.CombineCss(" > ul > li"));
-            }
+            return errors;
         }
     }
 }

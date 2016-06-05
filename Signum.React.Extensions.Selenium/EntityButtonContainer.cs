@@ -28,64 +28,69 @@ namespace Signum.React.Selenium
             return (Lite<T>)container.EntityInfo().ToLite();
         }
 
-        public static WebElementLocator Button(this IEntityButtonContainer container, OperationSymbol symbol)
+        public static WebElementLocator OperationButton(this IEntityButtonContainer container, OperationSymbol symbol)
         {
-            return container.ContainerElement().WithLocator(By.CssSelector("button[data-operation={0}]".FormatWith(symbol.KeyWeb())));
+            return container.ContainerElement().WithLocator(By.CssSelector("button[data-operation={0}]".FormatWith(symbol.Key)));
         }
 
-        public static WebElementLocator OperationElement<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+        public static WebElementLocator OperationButton<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
             where T : Entity
         {
-            return container.Button(symbol.Symbol);
+            return container.OperationButton(symbol.Symbol);
         }
 
-        public static string KeyWeb(this OperationSymbol operationSymbol)
+        public static bool OperationEnabled(this IEntityButtonContainer container, OperationSymbol symbol)
         {
-            return operationSymbol.Key.Replace('.', '_');
-        }
-
-        public static bool ButtonEnabled(this IEntityButtonContainer container, OperationSymbol symbol)
-        {
-            return container.Button(symbol).Find().GetAttribute("disabled") == null;
+            return container.OperationButton(symbol).Find().GetAttribute("disabled") == null;
         }
 
         public static bool OperationEnabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
             where T : Entity
         {
-            return container.ButtonEnabled(symbol.Symbol);
+            return container.OperationEnabled(symbol.Symbol);
         }
 
-        public static bool ButtonDisabled(this IEntityButtonContainer container, OperationSymbol symbol)
+        public static bool OperationDisabled(this IEntityButtonContainer container, OperationSymbol symbol)
         {
-            return container.Button(symbol).Find().GetAttribute("disabled") != null;
+            return container.OperationButton(symbol).Find().GetAttribute("disabled") != null;
         }
 
         public static bool OperationDisabled<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
               where T : Entity
         {
-            return container.ButtonDisabled(symbol.Symbol);
+            return container.OperationDisabled(symbol.Symbol);
         }
 
-        public static void ButtonClick(this IEntityButtonContainer container, OperationSymbol symbol)
+        public static void OperationClick(this IEntityButtonContainer container, OperationSymbol symbol)
         {
-            container.Button(symbol).Find().ButtonClick();
+            container.OperationButton(symbol).Find().ButtonClick();
         }
-
-
+        
         public static void OperationClick<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
               where T : Entity
         {
-            container.ButtonClick(symbol.Symbol);
+            container.OperationClick(symbol.Symbol);
         }
 
-        public static void ExecuteAjax<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false)
+        public static IWebElement OperationClickCapture(this IEntityButtonContainer container, OperationSymbol symbol)
+        {
+            return container.OperationButton(symbol).Find().CaptureOnClick();
+        }
+
+        public static IWebElement OperationClickCapture<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
+              where T : Entity
+        {
+            return container.OperationClickCapture(symbol.Symbol);
+        }
+
+        public static void Execute<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false)
             where T : Entity
         {
             container.WaitReload(() =>
             {
                 container.OperationClick(symbol);
                 if (consumeAlert)
-                    container.Selenium.ConsumeAlert();
+                    container.Element.GetDriver().ConsumeAlert();
             });
         }
 
@@ -93,29 +98,10 @@ namespace Signum.React.Selenium
         {
             var ticks = container.TestTicks().Value;
             action();
-            container.Selenium.Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
+            container.Element.GetDriver().Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
         }
 
-        public static void ExecuteSubmit<T>(this NormalPage<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false)
-              where T : Entity
-        {
-            container.OperationClick(symbol);
-            if (consumeAlert)
-                container.Selenium.ConsumeAlert();
-            container.WaitLoadedAndId();
-        }
-
-        public static SearchPageProxy DeleteSubmit<T>(this NormalPage<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
-         where T : Entity
-        {
-            container.OperationClick(symbol);
-            if (consumeAlert)
-                container.Selenium.ConsumeAlert();
-
-            return new SearchPageProxy(container.Selenium).WaitLoaded();
-        }
-
-        public static void DeleteAjax<T>(this PopupControl<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
+        public static void Delete<T>(this PopupControl<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
               where T : Entity
         {
             container.OperationClick(symbol);
@@ -125,71 +111,31 @@ namespace Signum.React.Selenium
             container.WaitNotVisible();
         }
 
-        public static NormalPage<T> ConstructFromNormalPageSaved<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+        public static PopupControl<T> ConstructFrom<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+            where T : Entity
+            where F : Entity
+        {
+            var element = container.OperationClickCapture(symbol);
+
+            return new PopupControl<T>(element).WaitLoaded();
+        }
+
+        public static NormalPage<T> ConstructFromNormalPage<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
             where T : Entity
             where F : Entity
         {
             container.OperationClick(symbol);
 
-            return new NormalPage<T>(container.Selenium, null).WaitLoaded();
-        }
+            container.Element.GetDriver().Wait(() => { try { return container.EntityInfo().IsNew; } catch { return false; } });
 
-        public static NormalPage<T> ConstructFromNormalPageNew<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
-            where T : Entity
-            where F : Entity
-        {
-            container.OperationClick(symbol);
-
-            container.Selenium.Wait(() => { try { return container.EntityInfo().IsNew; } catch { return false; } });
-
-            return new NormalPage<T>(container.Selenium, null);
-        }
-
-        public static NormalPage<T> OperationNormalPageNew<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol)
-            where T : Entity
-        {
-            container.ButtonClick(symbol.Symbol);
-
-            container.Selenium.Wait(() => { try { return container.EntityInfo().IsNew; } catch { return false; } });
-
-            return new NormalPage<T>(container.Selenium, null);
-        }
-
-        public static PopupControl<T> OperationPopup<T>(this IEntityButtonContainer container, IOperationSymbolContainer symbol, IWebElement element)
-            where T : ModifiableEntity
-        {
-            container.ButtonClick(symbol.Symbol);
-
-            var popup = new PopupControl<T>(container.Selenium, element);
-
-            container.Selenium.WaitElementPresent(popup.PopupLocator);
-
-            return popup;
-        }
-
-        public static PopupControl<T> ConstructFromPopup<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol, IWebElement element)
-            where T : Entity
-            where F : Entity
-        {
-            container.OperationClick(symbol);
-
-            var popup = new PopupControl<T>(container.Selenium, element);
-
-            container.Selenium.WaitElementPresent(popup.PopupLocator);
-
-            return popup;
-        }
-
-        public static bool HasChanges(this IEntityButtonContainer container)
-        {
-            return container.Selenium.IsElementPresent(By.CssSelector("#{0}divMainControl.sf-changed".FormatWith(container.Element)));
+            return new NormalPage<T>(container.Element.GetDriver());
         }
 
         public static long? TestTicks(this IEntityButtonContainer container)
         {
             try
             {
-                return ((string)container.Selenium.ExecuteScript("return $ && $('#" + container.Element + "divMainControl').attr('data-test-ticks')")).ToLong();
+                return container.Element.FindElement(By.CssSelector("div.sf-main-control[data-test-ticks]")).GetAttribute("data-test-ticks").ToLong();
             }
             catch
             {

@@ -18,15 +18,12 @@ namespace Signum.React.Selenium
 
     public class BaseLineProxy
     {
-        public RemoteWebDriver Selenium { get; private set; }
-
         public IWebElement Element { get; private set; }
 
         public PropertyRoute Route { get; private set; }
 
-        public BaseLineProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
+        public BaseLineProxy(IWebElement element, PropertyRoute route)
         {
-            this.Selenium = selenium;
             this.Element = element;
             this.Route = route;
         }
@@ -39,8 +36,8 @@ namespace Signum.React.Selenium
 
     public class ValueLineProxy : BaseLineProxy
     {
-        public ValueLineProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public ValueLineProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
         }
 
@@ -52,12 +49,12 @@ namespace Signum.React.Selenium
                 if (checkBox != null)
                     return checkBox.Selected.ToString();
 
-                IWebElement namedElement = Selenium.TryFindElement(By.CssSelector("input[type=text]"));
+                IWebElement namedElement = this.Element.TryFindElement(By.CssSelector("input[type=text]"));
                 if(namedElement != null)
                     return namedElement.GetAttribute("value");
 
-                IWebElement date = Selenium.TryFindElement(By.Name("Date"));
-                IWebElement time = Selenium.TryFindElement(By.Name("Time"));
+                IWebElement date = this.Element.TryFindElement(By.Name("Date"));
+                IWebElement time = this.Element.TryFindElement(By.Name("Time"));
 
                 if (date != null && time != null)
                     return date.GetAttribute("value") + " " + time.GetAttribute("value");
@@ -77,27 +74,6 @@ namespace Signum.React.Selenium
                     checkBox.SetChecked(bool.Parse(value));
                 }
 
-                //IWebElement element = Selenium.TryFindElement(By.Id(Prefix));
-                //if (element != null)
-                //{
-                //    if (element != null && element.TagName == "input" && element.GetAttribute("type") == "checkbox")
-                //    {
-                //        element.SetChecked(bool.Parse(value));
-                //        return;
-                //    }
-                //    else if (element.GetParent().HasClass("input-group", "date"))
-                //    {
-                //        Selenium.ExecuteScript("$('div.input-group.date>#{0}').parent().datepicker('setDate', '{1}')".FormatWith(Prefix, value)); 
-                //        return;
-                //    }
-                //    else if (element.FindElements(By.CssSelector("div.date")).Any() && element.FindElements(By.CssSelector("div.time")).Any())
-                //    {
-                //        Selenium.ExecuteScript("$('#{0} > div.date').datepicker('setDate', '{1}')".FormatWith(Prefix, value.TryBefore(" ")));
-                //        Selenium.ExecuteScript("$('#{0} > div.time').timepicker('setTime', '{1}')".FormatWith(Prefix, value.TryAfter(" ")));
-                //        return;
-                //    }
-                //}
-
                 IWebElement byName = this.Element.TryFindElement(By.CssSelector("input[type=text]"));
                 if (byName != null)
                 {
@@ -112,9 +88,9 @@ namespace Signum.React.Selenium
             }
         }
 
-        internal IWebElement MainElement()
+        public WebElementLocator MainElement
         {
-            throw new NotImplementedException();
+            get { return this.Element.WithLocator(By.CssSelector("input")); }
         }
 
         public object Value
@@ -143,122 +119,117 @@ namespace Signum.React.Selenium
 
     public abstract class EntityBaseProxy : BaseLineProxy
     {
-        public EntityBaseProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public EntityBaseProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
         }
 
-        public IWebElement CreateButton
+        public virtual PropertyRoute ItemRoute => this.Route;
+
+        public WebElementLocator CreateButton
         {
-            get { return this.Selenium.NotImplemented(); /* TryFindElement(By.CssSelector("#{0}_btnCreate".FormatWith()); */ }
+            get { return this.Element.WithLocator(By.CssSelector("a.sf-create")); }
         }
 
-        protected void CreateEmbedded<T>(bool mlist)
+        
+
+        protected void CreateEmbedded<T>()
         {
             WaitChanges(() =>
             {
-                this.CreateButton.Click();
-
-                var route = this.Route;
-                if (mlist)
-                    route = route.Add("Item");
-
-                var imp = route.TryGetImplementations();
+                var imp = this.ItemRoute.TryGetImplementations();
                 if (imp != null && imp.Value.Types.Count() != 1)
-                    ChooseType(typeof(T), NewIndex());
+                {
+                    var popup = this.CreateButton.Find().CaptureOnClick();
+                    ChooseType(typeof(T), popup);
+                }
+                else
+                {
+                    this.CreateButton.Find().Click();
+                }
             }, "create clicked");
-        }
-
-        public virtual int? NewIndex()
-        {
-            return null;
         }
 
         public PopupControl<T> CreatePopup<T>() where T : ModifiableEntity
         {
-            var index = NewIndex();
+         
             string changes = GetChanges();
 
-            this.CreateButton.Click();
+            var popup = this.CreateButton.Find().CaptureOnClick();
 
-            IWebElement element = ChooseType(typeof(T), index);
+            popup = ChooseTypeCapture(typeof(T), popup);
 
-            PropertyRoute route = index == null ? this.Route : this.Route.Add("Item");
-
-            return new PopupControl<T>(this.Selenium, element, route)
+            return new PopupControl<T>(popup, this.ItemRoute)
             {
                 Disposing = okPressed => { WaitNewChanges(changes, "create dialog closed"); }
             };
         }
 
-        public IWebElement ViewButton
+        public WebElementLocator ViewButton
         {
-            get { return this.Selenium.NotImplemented();/* ( By.CssSelector("#{0}_btnView".FormatWith(this.Route.PropertyString()));*/ }
+            get { return this.Element.WithLocator(By.CssSelector("a.sf-view")); }
         }
-
-        protected PopupControl<T> ViewPopup<T>(int? index) where T : ModifiableEntity
+        
+        protected PopupControl<T> ViewInternal<T>() where T : ModifiableEntity
         {
-            var newElement = this.Selenium.NotImplemented();
-            //string newPrefix = Prefix + (index == null ? "" : ("_" + index));
+            var newElement = this.ViewButton.Find().CaptureOnClick();
             string changes = GetChanges();
-
-            PropertyRoute route = index == null ? this.Route : this.Route.Add("Item");
-
-            return new PopupControl<T>(this.Selenium, newElement, route)
+            
+            return new PopupControl<T>(newElement, this.ItemRoute)
             {
                 Disposing = okPressed => WaitNewChanges(changes, "create dialog closed")
             };
         }
 
-        public IWebElement FindButton
+        public WebElementLocator FindButton
         {
-            get { return this.Selenium.NotImplemented();/* get { return By.CssSelector("#{0}_btnFind".FormatWith(Prefix)); */ }
+            get { return this.Element.WithLocator(By.CssSelector("a.sf-find")); }
         }
 
-        public IWebElement RemoveButton
+        public WebElementLocator RemoveButton
         {
-            get { return this.Selenium.NotImplemented();/* get { return By.CssSelector("#{0}_btnRemove".FormatWith(Prefix));  */}
+            get { return this.Element.WithLocator(By.CssSelector("a.sf-remove")); }
         }
 
         public void Remove()
         {
-            WaitChanges(() => this.RemoveButton.Click(), "removing");
+            WaitChanges(() => this.RemoveButton.Find().Click(), "removing");
         }
       
         public SearchPopupProxy Find(Type selectType = null)
         {
             string changes = GetChanges();
-            FindButton.Click();
+            var popup = FindButton.Find().CaptureOnClick();
 
-            var element = ChooseType(selectType, null);
+            popup = ChooseTypeCapture(selectType, popup);
 
-            return new SearchPopupProxy(Selenium, element)
+            return new SearchPopupProxy(popup)
             {
                 Disposing = okPressed => { WaitNewChanges(changes, "create dialog closed"); }
             };
         }
 
-        private IWebElement ChooseType(Type selectType, int? index)
+        private void ChooseType(Type selectType, IWebElement element)
         {
-            IWebElement newElement = this.Selenium.NotImplemented(); // Prefix + (index == null ? "" : ("_" + index));
-
-            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, newElement) || Popup.IsPopupVisible(Selenium, this.Element), 
-                () => "Popup {0} or {1} to be visible".FormatWith(newElement, this.Element));
+            if (!SelectorModal.IsSelector(element))
+                return;
 
             if (selectType == null)
-            {
-                if (ChooserPopup.IsChooser(Selenium, this.Element))
-                    throw new InvalidOperationException("TypeChooser found but arugment selectType is not specified");
-            }
-            else
-            {
-                if (ChooserPopup.IsChooser(Selenium, this.Element))
-                {
-                    ChooserPopup.ChooseButton(Selenium, this.Element, TypeLogic.GetCleanName(selectType));
+                throw new InvalidOperationException("No type to choose from selected");
 
-                    Selenium.Wait(() => !ChooserPopup.IsChooser(Selenium, this.Element));
-                }
-            }
+            SelectorModal.Select(this.Element, TypeLogic.GetCleanName(selectType));
+        }
+
+        private IWebElement ChooseTypeCapture(Type selectType, IWebElement element)
+        {
+            if (!SelectorModal.IsSelector(element))
+                return element;
+
+            if (selectType == null)
+                throw new InvalidOperationException("No type to choose from selected");
+
+            var newElement = element.GetDriver().CapturePopup(() =>
+                SelectorModal.Select(this.Element, TypeLogic.GetCleanName(selectType)));
 
             return newElement;
         }
@@ -274,32 +245,33 @@ namespace Signum.React.Selenium
 
         public void WaitNewChanges(string changes, string actionDescription)
         {
-            Selenium.Wait(() => GetChanges() != changes, () => "Waiting for changes after {0} in {1}".FormatWith(actionDescription, this.Route.ToString()));
+            Element.GetDriver().Wait(() => GetChanges() != changes, () => "Waiting for changes after {0} in {1}".FormatWith(actionDescription, this.Route.ToString()));
         }
 
         public string GetChanges()
         {
-            throw new NotImplementedException();
-            //return (string)Selenium.ExecuteScript("return $('#{0}').attr('changes')".FormatWith(Prefix));
+            return this.Element.GetAttribute("data-changes");
         }
 
-        protected EntityInfoProxy EntityInfoInternal(int? index = null)
+        protected EntityInfoProxy EntityInfoInternal(int? index)
         {
-            throw new NotImplementedException();
-            //return EntityInfoProxy.FromFormValue(Selenium.FindElement(EntityInfoLocatorInternal(index)).GetAttribute("value"));
+            var element = index == null ? Element.FindElement(By.CssSelector("[data-entity]")) :
+            this.Element.FindElements(By.CssSelector("[data-entity]")).ElementAt(index.Value);
+
+            return EntityInfoProxy.Parse(element.GetAttribute("data-entity"));
         }
 
-        internal void AutoCompleteAndSelect(IWebElement autoCompleteElement, Lite<IEntity> lite)
+        protected void AutoCompleteAndSelect(IWebElement autoCompleteElement, Lite<IEntity> lite)
         {
             WaitChanges(() =>
             {
-                autoCompleteElement.SafeSendKeys(lite.Id.ToString());
+                autoCompleteElement.FindElement(By.CssSelector("input")).SafeSendKeys(lite.Id.ToString());
                 //Selenium.FireEvent(autoCompleteLocator, "keyup");
 
                 var listLocator = By.CssSelector("ul.typeahead.dropdown-menu");
 
-                Selenium.WaitElementVisible(listLocator);
-                IWebElement itemElement = this.Selenium.NotImplemented();//  listLocator.CombineCss(" span[data-type='{0}'][data-id='{1}']".FormatWith(TypeLogic.GetCleanName(lite.EntityType), lite.Id));
+                autoCompleteElement.WaitElementVisible(listLocator);
+                IWebElement itemElement = autoCompleteElement.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
 
                 itemElement.Click();
 
@@ -312,45 +284,53 @@ namespace Signum.React.Selenium
         public bool IsNew { get; set; }
         public string TypeName { get; set; }
 
-        public Type EntityType => TypeLogic.GetType(this.TypeName);
-        public int? IdOrNull { get; set; }
+        public Type EntityType;
+        public PrimaryKey? IdOrNull { get; set; }
+        
 
         public Lite<Entity> ToLite(string toString = null) => Lite.Create(this.EntityType, this.IdOrNull.Value, null);
+
+        internal static EntityInfoProxy Parse(string dataEntity)
+        {
+            if (dataEntity == "null")
+                return null;
+
+            var parts = dataEntity.Split(';');
+
+            var typeName = parts[0];
+            var id = parts[1];
+            var isNew = parts[2];
+
+            var type = TypeLogic.TryGetType(typeName);
+
+            return new EntityInfoProxy
+            {
+                TypeName = typeName,
+                EntityType = type,
+                IdOrNull = id.HasText() ? PrimaryKey.Parse(id, type) : (PrimaryKey?)null,
+                IsNew = isNew.HasText() && bool.Parse(isNew)
+            };
+        }
     }
 
     public class EntityLineProxy : EntityBaseProxy
     {
-        public EntityLineProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public EntityLineProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
-        }
-
-        public IWebElement ToStrElement
-        {
-            get { return this.Selenium.NotImplemented(); /* By.CssSelector("#{0}_sfToStr".FormatWith(Prefix)); */ }
-        }
-
-        public IWebElement LinkElement
-        {
-            get { return this.Selenium.NotImplemented();  /*By.CssSelector("#{0}_sfLink".FormatWith(Prefix));*/ }
-        }
-
-        public bool HasEntity()
-        {
-            return this.LinkElement != null; // Selenium.IsElementVisible(LinkLocator);
         }
 
         public Lite<IEntity> LiteValue
         {
-            get { return EntityInfo().ToLite(); }
+            get { return EntityInfo()?.ToLite(); }
             set
             {
-                if (HasEntity())
+                if (this.EntityInfo() != null)
                     this.Remove();
 
                 if (value != null)
                 {
-                    if (AutoCompleteElement != null)
+                    if (AutoCompleteElement.IsVisible())
                         AutoComplete(value);
                     else if (FindButton != null)
                         this.Find().SelectLite(value);
@@ -360,21 +340,19 @@ namespace Signum.React.Selenium
             }
         }
 
-        public IWebElement AutoCompleteElement
+        public WebElementLocator AutoCompleteElement
         {
-            get { return this.Selenium.NotImplemented(); /* By.CssSelector("#{0}_sfToStr".FormatWith(Prefix));*/ }
+            get { return this.Element.WithLocator(By.CssSelector(".sf-typeahead")); }
         }
 
         public void AutoComplete(Lite<IEntity> lite)
         {
-            base.AutoCompleteAndSelect(AutoCompleteElement, lite);
+            base.AutoCompleteAndSelect(AutoCompleteElement.Find(), lite);
         }
 
         public PopupControl<T> View<T>() where T : ModifiableEntity
         {
-            this.ViewButton.Click();
-
-            return base.ViewPopup<T>(null);
+            return base.ViewInternal<T>();
         }
 
         public EntityInfoProxy EntityInfo()
@@ -385,14 +363,14 @@ namespace Signum.React.Selenium
 
     public class EntityComboProxy : EntityBaseProxy
     {
-        public EntityComboProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public EntityComboProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
         }
 
         public SelectElement ComboElement
         {
-            get { return this.Selenium.NotImplemented().SelectElement(); /* By.CssSelector("#{0}_sfCombo".FormatWith(Prefix)); */ }
+            get { return this.Element.FindElement(By.CssSelector("select")).SelectElement(); }
         }
 
         public Lite<IEntity> LiteValue
@@ -418,9 +396,7 @@ namespace Signum.React.Selenium
 
         public PopupControl<T> View<T>() where T : ModifiableEntity
         {
-            this.ViewButton.Click();
-
-            return base.ViewPopup<T>(null);
+            return base.ViewInternal<T>();
         }
 
         public void SelectLabel(string label)
@@ -445,31 +421,20 @@ namespace Signum.React.Selenium
 
     public class EntityDetailProxy : EntityBaseProxy
     {
-        public EntityDetailProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public EntityDetailProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
-        }
-
-        public IWebElement DivSelector
-        {
-            get { return this.Selenium.NotImplemented(); /* By.CssSelector("#{0}_sfDetail".FormatWith(Prefix)); */ }
-        }
-
-        public bool HasEntity()
-        {
-            throw new NotImplementedException();
-            //return Selenium.IsElementPresent(DivSelector.CombineCss(" *:first-child"));
         }
 
         public Lite<IEntity> Lite
         {
-            get { return EntityInfo().ToLite(); }
+            get { return EntityInfo()?.ToLite(); }
             set
             {
-                if (HasEntity())
+                if (this.EntityInfo() != null)
                     this.Remove();
 
-                if (this.FindButton?.Displayed == true)
+                if (this.FindButton.IsVisible())
                     this.Find().SelectLite(value);
 
                 throw new NotImplementedException("AutoComplete");
@@ -478,9 +443,8 @@ namespace Signum.React.Selenium
 
         public LineContainer<T> Details<T>() where T : ModifiableEntity
         {
-            return new LineContainer<T>(Selenium, this.Selenium.NotImplemented(), Route);
+            return new LineContainer<T>(this.Element.FindElement(By.CssSelector("div[data-propertypath]")), Route);
         }
-
 
         public EntityInfoProxy EntityInfo()
         {
@@ -489,10 +453,10 @@ namespace Signum.React.Selenium
 
         public ILineContainer<T> GetOrCreateDetailControl<T>() where T : ModifiableEntity
         {
-            if (this.HasEntity())
+            if (this.EntityInfo() !=null)
                 return this.Details<T>();
 
-            CreateEmbedded<T>(mlist: false);
+            CreateEmbedded<T>();
 
             return this.Details<T>();
         }
@@ -500,147 +464,100 @@ namespace Signum.React.Selenium
 
     public class EntityListProxy : EntityBaseProxy
     {
-        public EntityListProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public override PropertyRoute ItemRoute => base.ItemRoute.Add("Item");
+
+        public EntityListProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
         }
 
-        public IWebElement OptionIdElement(int index)
+        public WebElementLocator OptionElement(int index)
         {
-            return this.Selenium.NotImplemented(); // By.CssSelector("#{0}_{1}_sfToStr".FormatWith(Prefix, index));
+            return this.ListElement.Find().WithLocator(By.CssSelector("option:nth-child({0})".FormatWith(index)));
         }
 
-        public IWebElement ListElement
+        public WebElementLocator ListElement
         {
-            get { return this.Selenium.NotImplemented(); /*return By.CssSelector("#{0}_sfList".FormatWith(Prefix));*/ }
+            get { return this.Element.WithLocator(By.CssSelector("select.form-control")); }
         }
 
         public void Select(int index)
         {
-            throw new NotImplementedException();
-            //var selectElement = Selenium.FindElement(ListLocator).SelectElement();
-            //if (selectElement.IsMultiple)
-            //    selectElement.DeselectAll();
-
-            //var id = "{0}_{1}_sfToStr".FormatWith(Prefix, index);
-            //selectElement.SelectByPredicate(a => a.GetAttribute("id") == id);
+            this.OptionElement(index).Find().Click();
         }
 
         public PopupControl<T> View<T>(int index) where T : ModifiableEntity
         {
             Select(index);
 
-            this.ViewButton.Click();
-
-            return base.ViewPopup<T>(index);
-        }
-
-        public bool HasEntity(int index)
-        {
-            return OptionIdElement(index)?.Displayed == true;
-        }
-
-
-        public int ItemsCount()
-        {
-            throw new InvalidOperationException();
-            //return (int)(long)Selenium.ExecuteScript("return $('#{0}_sfList option').length".FormatWith(Prefix));
-        }
-
-        public override int? NewIndex()
-        {
-
-            throw new InvalidOperationException();
-
-            //string result = (string)Selenium.ExecuteScript("return $('#{0}_sfList option').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
-
-            //return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
+            return base.ViewInternal<T>();
         }
         
+        public int ItemsCount()
+        {
+            return this.ListElement.Find().FindElements(By.CssSelector("option")).Count;
+        }
 
         public EntityInfoProxy EntityInfo(int index)
         {
             return EntityInfoInternal(index);
         }
-
-
+        
         public void DoubleClick(int index)
         {
             Select(index);
-            OptionIdElement(index).DoubleClick();
+            OptionElement(index).Find().DoubleClick();
         }
     }
     
 
     public class EntityRepeaterProxy : EntityBaseProxy
     {
-        public EntityRepeaterProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public override PropertyRoute ItemRoute => base.ItemRoute.Add("Item");
+
+        public EntityRepeaterProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
         }
 
-        public IWebElement ItemsContainerElement
+        public virtual WebElementLocator ItemsContainerElement
         {
-            get { return this.Selenium.NotImplemented(); /* By.CssSelector("#{0}_sfItemsContainer".FormatWith(Prefix)); */}
+            get { return this.Element.WithLocator(By.CssSelector("sf-repater-elements")); }
         }
 
-        public virtual By RepeaterItemSelector(int index)
+        public virtual WebElementLocator ItemElement(int index)
         {
-            throw new NotImplementedException();
-            //return ItemsContainerLocator.CombineCss(" > #{0}_{1}_sfRepeaterItem".FormatWith(Prefix, index));
+            return this.ItemsContainerElement.CombineCss(" > fieldset.sf-repeater-element:nth-child({0})".FormatWith(index));
         }
 
         public void WaitItemLoaded(int index)
         {
-            Selenium.WaitElementPresent(RepeaterItemSelector(index));
+            ItemElement(index).WaitPresent();
         }
 
         public virtual void MoveUp(int index)
         {
-            this.Element.FindElement(By.CssSelector("{1}_btnUp".FormatWith(index))).Click();
+            ItemElement(index).CombineCss(" a.move-up").Find().Click();
         }
 
         public virtual void MoveDown(int index)
         {
-            Selenium.FindElement(By.CssSelector("{1}_btnDown".FormatWith(index))).Click();
-        }
-
-        public bool HasEntity(int index)
-        {
-            return Selenium.IsElementPresent(RepeaterItemSelector(index)); ;
+            ItemElement(index).CombineCss(" a.move-down").Find().Click();
         }
 
         public virtual int ItemsCount()
         {
-            throw new InvalidOperationException();
-            //return (int)(long)Selenium.ExecuteScript("return $('{0} fieldset:not(.hidden)').length".FormatWith(ItemsContainerLocator.CssSelector()));
+            return this.ItemsContainerElement.CombineCss(" > fieldset.sf-repeater-element§").FindElements().Count;
         }
-
-        public virtual int HiddenItemsCount()
-        {
-            throw new InvalidOperationException();
-            //return (int)(long)Selenium.ExecuteScript("return $('{0} fieldset.hidden').length".FormatWith(ItemsContainerLocator.CssSelector()));
-        }
-
-        public override int? NewIndex()
-        {
-            throw new InvalidOperationException();
-
-            //string result = (string)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer fieldset').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
-
-            //return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
-        }
-
+        
         public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
         {
-            throw new NotImplementedException();
-            //return new LineContainer<T>(Selenium, Prefix + "_" + index, Route.Add("Item"));
+            return new LineContainer<T>(ItemElement(index).Find(), this.Route);
         }
 
         public IWebElement RemoveElementIndex(int index)
         {
-            throw new NotImplementedException();
-            //return By.CssSelector("#{0}_{1}_btnRemove".FormatWith(Prefix, index));
+            return ItemElement(index).CombineCss(" a.remove").Find();
         }
 
         public void Remove(int index)
@@ -655,100 +572,62 @@ namespace Signum.React.Selenium
 
         public LineContainer<T> CreateElement<T>() where T : ModifiableEntity
         {
-            var index = NewIndex();
+            var count = this.ItemsCount();
 
-            CreateEmbedded<T>(mlist: true);
+            CreateEmbedded<T>();
 
-            return this.Details<T>(index.Value);
+            return this.Details<T>(count + 1);
         }
 
         public LineContainer<T> LastDetails<T>() where T : ModifiableEntity
         {
-            return this.Details<T>(this.ItemsCount() + this.HiddenItemsCount() - 1);
+            return this.Details<T>(this.ItemsCount() + 1);
         }
     }
 
     public class EntityTabRepeaterProxy : EntityRepeaterProxy
     {
-        public EntityTabRepeaterProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public EntityTabRepeaterProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
-        }
-
-     
-        public override int ItemsCount()
-        {
-            throw new InvalidOperationException();
-            //return (int)(long)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer li').length".FormatWith(ItemsContainerLocator));
-        }
-
-        public override int? NewIndex()
-        {
-            throw new InvalidOperationException();
-            //string result = (string)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer li').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
-
-            //return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
     }
 
     public class EntityStripProxy : EntityBaseProxy
     {
-        public EntityStripProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public EntityStripProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
         }
 
-        public IWebElement ItemsContainerElement
+        public WebElementLocator ItemsContainerElement
         {
-            get { return Selenium.NotImplemented(); /* By.CssSelector("#{0}_sfItemsContainer".FormatWith(Prefix)); */ }
+            get { return this.Element.WithLocator(By.CssSelector("ul.sf-strip")); }
         }
 
-        public By StripItemSelector(int index)
+        public WebElementLocator StripItemSelector(int index)
         {
-            throw new NotImplementedException();
-            //return ItemsContainerLocator.CombineCss(" > #{0}_{1}_sfStripItem".FormatWith(Prefix, index));
-        }
-
-        public void WaitItemLoaded(int index)
-        {
-            Selenium.WaitElementPresent(StripItemSelector(index));
-        }
-
-        public bool HasEntity(int index)
-        {
-            return Selenium.IsElementPresent(StripItemSelector(index));
+            return this.ItemsContainerElement.CombineCss(" > li.sf-strip-element:nth-child({0})".FormatWith(index));
         }
 
         public int ItemsCount()
         {
-            throw new NotImplementedException();
-            //return (int)(long)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer li.sf-strip-element').length".FormatWith(ItemsContainerLocator));
+            return this.ItemsContainerElement.CombineCss(" > li.sf-strip-element").FindElements().Count;
         }
 
-        public override int? NewIndex()
+        public WebElementLocator ViewElementIndex(int index)
         {
-            throw new NotImplementedException(); 
-            //var result = (string)Selenium.ExecuteScript("return $('#{0}_sfItemsContainer li.sf-strip-element').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".FormatWith(Prefix));
-
-            //return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
+            return StripItemSelector(index).CombineCss(" > a.sf-entitStrip-link");
         }
 
-
-        public IWebElement ViewElementIndex(int index)
+        public WebElementLocator RemoveElementIndex(int index)
         {
-            throw new InvalidOperationException();
-            //return By.CssSelector("#{0}_{1}_btnView".FormatWith(Prefix, index));
-        }
-
-        public IWebElement RemoveElementIndex(int index)
-        {
-            throw new InvalidOperationException();
-            //return By.CssSelector("#{0}_{1}_btnRemove".FormatWith(Prefix, index));
+            return StripItemSelector(index).CombineCss(" > a.sf-remove");
         }
 
         public void Remove(int index)
         {
-            RemoveElementIndex(index).Click();
+            RemoveElementIndex(index).Find().Click();
         }
 
         public EntityInfoProxy EntityInfo(int index)
@@ -756,65 +635,73 @@ namespace Signum.React.Selenium
             return EntityInfoInternal(index);
         }
 
-        public IWebElement AutoCompleteElement
+        public WebElementLocator AutoCompleteElement
         {
-            get { return this.Selenium.NotImplemented(); /* By.CssSelector("#{0}_sfToStr".FormatWith(Prefix)); */ }
+            get { return this.Element.WithLocator(By.CssSelector(".sf-typeahead")); }
         }
 
         public void AutoComplete(Lite<IEntity> lite)
         {
-            base.AutoCompleteAndSelect(this.AutoCompleteElement, lite);
+            base.AutoCompleteAndSelect(AutoCompleteElement.Find(), lite);
         }
 
         public PopupControl<T> View<T>(int index) where T : ModifiableEntity
         {
-            ViewElementIndex(index).Click(); 
+            var changes = this.GetChanges();
+            var popup = ViewElementIndex(index).Find().CaptureOnClick();
 
-            return this.ViewPopup<T>(index);
+            return new PopupControl<T>(popup, this.ItemRoute)
+            {
+                Disposing = okPressed => WaitNewChanges(changes, "create dialog closed")
+            };
         }
     }
 
     public class EntityListCheckBoxProxy : EntityBaseProxy
     {
-        public EntityListCheckBoxProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public EntityListCheckBoxProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
         }
 
-        public IWebElement CheckBoxElement(Lite<Entity> lite)
+        public WebElementLocator CheckBoxElement(Lite<Entity> lite)
         {
-            throw new InvalidOperationException();
-            //return By.CssSelector("#" + this.Prefix + " input[value^='" + EntityInfoProxy.FromLite(lite) + "']");
+            return this.Element.WithLocator(By.CssSelector("input[name='{0}']".FormatWith(lite.Key())));
         }
 
         public List<Lite<Entity>> GetDataElements()
         {
-            throw new InvalidOperationException();
-            //return Selenium.FindElements(By.CssSelector("#" + this.Prefix + " input[type=checkbox]")).Select(cb => EntityInfoProxy.FromFormValue(cb.GetAttribute("value")).ToLite(cb.GetParent().Text)).ToList();
+            return this.Element.WithLocator(By.CssSelector("label.sf-checkbox-element")).FindElements().Select(e =>
+            {
+                var lite = Lite.Parse(e.FindElement(By.CssSelector("input[type=checkbox]")).GetAttribute("name"));
+                lite.SetToString(e.FindElement(By.CssSelector("div.sf-entitStrip-link")).Text);
+                return lite;
+            }).ToList();
         }
 
         public void SetChecked(Lite<Entity> lite, bool isChecked)
         {
-            CheckBoxElement(lite).SetChecked(isChecked);
+            CheckBoxElement(lite).Find().SetChecked(isChecked);
         }
     }
 
 
     public class FileLineProxy : BaseLineProxy
     {
-        public FileLineProxy(RemoteWebDriver selenium, IWebElement element, PropertyRoute route)
-            : base(selenium, element, route)
+        public FileLineProxy(IWebElement element, PropertyRoute route)
+            : base(element, route)
         {
         }
 
         public void SetPath(string path)
         {
-            throw new NotImplementedException();
-            //Selenium.FindElement(By.CssSelector("#{0}_sfFile".FormatWith(Prefix))).SendKeys(path);
-            ////Selenium.FireEvent("{0}_sfFile".FormatWith(Prefix), "change");
-            //Selenium.Wait(() =>
-            //    Selenium.IsElementVisible(By.CssSelector("#{0}_sfLink".FormatWith(Prefix))) ||
-            //    Selenium.IsElementVisible(By.CssSelector("#{0}_sfToStr".FormatWith(Prefix))));
+            FileElement.Find().SendKeys(path);
+            FileElement.WaitNoPresent();
+        }
+
+        private WebElementLocator FileElement
+        {
+            get { return this.Element.WithLocator(By.CssSelector("input[type=file]")); }
         }
     }
 }
