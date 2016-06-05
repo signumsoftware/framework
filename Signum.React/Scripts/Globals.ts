@@ -459,6 +459,17 @@ String.prototype.tryAfterLast = function (separator) {
     return this.substring(index + separator.length);
 };
 
+String.prototype.etc = function (maxLength: number) {
+    var str = this as string;
+
+    str = str.tryBefore("\n") || str;
+
+    if (str.length > maxLength)
+        str = str.substr(0, maxLength - 1) + "…";
+
+    return str;
+};
+
 String.prototype.firstUpper = function () {
     return (this[0] as string).toUpperCase() + this.substring(1);
 };

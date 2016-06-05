@@ -190,7 +190,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         if (isList(f.operation))
             return <MultiValue values={f.value} createAppropiateControl={this.handleCreateAppropiateControl} frozen={this.props.filter.frozen} onChange={this.handleValueChange}/>;
 
-        const ctx = new TypeContext<any>(null, { formGroupStyle: FormGroupStyle.None, readOnly: f.frozen }, null, new Binding<any>("value", f));
+        const ctx = new TypeContext<any>(null, { formGroupStyle: "None", readOnly: f.frozen }, null, new Binding<any>("value", f));
 
         return this.handleCreateAppropiateControl(ctx);
     }
@@ -265,7 +265,7 @@ export class MultiValue extends React.Component<MultiValueProps, void> {
                                 <td>
                                     {this.props.createAppropiateControl(new TypeContext<any>(null,
                                         {
-                                            formGroupStyle: FormGroupStyle.None,
+                                            formGroupStyle: "None",
                                             readOnly: this.props.frozen
                                         }, null, new Binding<any>(i, this.props.values))) }
                                 </td>

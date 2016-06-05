@@ -78,7 +78,10 @@ export function ajaxPostRaw(options: AjaxOptions, data: any) : Promise<Response>
 
 export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response>
 {
-	let promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
+    let promise = options.avoidNotifyPendingRequests ? makeCall() : onPendingRequest(makeCall);
+
+    if (!(promise as any).__proto__.done)
+        (promise as any).__proto__.done = Promise.prototype.done;
 
 	if (!options.avoidThrowError)
 		promise = promise.then(throwError);
@@ -118,19 +121,26 @@ a.style.display = "none";
 
 
 export function saveFile(response: Response) {
-	response.blob().then(blob => {
-		var url = window.URL.createObjectURL(blob);
-		a.href = url;
+    let fileName = "file.dat";
+    let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition"));
+    if (match)
+        fileName = match[1];
 
-		let fileName = "file.dat";
-		let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition"));
-		if (match)
-			fileName = match[1];
+    response.blob().then(blob => {
+		
+        if (window.navigator.msSaveBlob)
+            window.navigator.msSaveBlob(blob, fileName);
+        else {
+            var url = window.URL.createObjectURL(blob);
+            a.href = url;
 
-		(a as any).download = fileName;
 
-		a.click();
-		window.URL.revokeObjectURL(url);
+            (a as any).download = fileName;
+
+            a.click();
+
+            setTimeout(() => window.URL.revokeObjectURL(url), 500);
+        }
 	});
 }
 

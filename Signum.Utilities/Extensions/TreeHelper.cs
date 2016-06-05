@@ -81,7 +81,7 @@ namespace Signum.Utilities
             {
                 T elem = stack.Pop();
                 yield return elem;
-                stack.PushRange(children(elem));
+                stack.PushRange(children(elem).Reverse());
             }
         }
 

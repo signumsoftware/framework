@@ -50,7 +50,7 @@ namespace Signum.React.Filters
 
             routeData.Add("elapsed", TimeTracker.Start(action));
 
-            IDisposable profiler = HeavyProfiler.Log("MvcRequest", () => actionContext.Request.RequestUri.ToString());
+            IDisposable profiler = HeavyProfiler.Log("Web.API " + actionContext.Request.Method, () => actionContext.Request.RequestUri.ToString());
             if (profiler != null)
                 routeData.Add("profiler", profiler);
 
