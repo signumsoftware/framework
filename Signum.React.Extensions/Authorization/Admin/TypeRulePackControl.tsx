@@ -10,7 +10,7 @@ import { notifySuccess }from '../../../../Framework/Signum.React/Scripts/Operati
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { TypeContext, ButtonsContext, IRenderButtons } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { EntityLine, ValueLine } from '../../../../Framework/Signum.React/Scripts/Lines'
-import SelectorPopup from '../../../../Framework/Signum.React/Scripts/SelectorPopup'
+import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
 
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfo, Binding, GraphExplorer } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -103,7 +103,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     }
 
     handleAddConditionClick = (remainig: TypeConditionSymbol[], taac: TypeAllowedAndConditions) => {
-        SelectorPopup.chooseElement(remainig, a => a.toStr.tryAfter(".") || a.toStr)
+        SelectorModal.chooseElement(remainig, a => a.toStr.tryAfter(".") || a.toStr)
             .then(tc => taac.conditions.push(TypeConditionRule.New(tcr => { tcr.typeCondition = tc; tcr.allowed = "None"; })))
             .then(() => this.forceUpdate())
             .done();

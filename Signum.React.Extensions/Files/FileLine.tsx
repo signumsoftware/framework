@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
-import { classes } from '../../../Framework/Signum.React/Scripts/Globals'
+import { classes, Dic } from '../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -70,7 +70,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
         const hasValue = !!s.ctx.value;
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} labelProps={s.labelHtmlProps} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }>
                 {hasValue ? this.renderLink() : this.renderPlaceholder() }
             </FormGroup>
         );

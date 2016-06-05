@@ -7,7 +7,7 @@ import { getQueryNiceName, PropertyRoute, getTypeInfos, basicConstruct } from '.
 import { ModifiableEntity, EntityControlMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
-import SelectorPopup from '../../../../Framework/Signum.React/Scripts/SelectorPopup'
+import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
@@ -57,7 +57,7 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Dash
     handleOnCreate = () => {
         var pr = DashboardEntity.memberInfo(a => a.parts[0].element.content);
 
-        return SelectorPopup.chooseType(getTypeInfos(pr.type))
+        return SelectorModal.chooseType(getTypeInfos(pr.type))
             .then(ti => ti == null ? null : PanelPartEntity.New(p => {
                 p.content = basicConstruct(ti.name) as any as IPartEntity;
                 p.style = "Default";
