@@ -98,6 +98,15 @@ namespace Signum.Engine
             if (retrieved.TryGetValue(tuple, out ident))
                 return (T)ident;
 
+            ICacheController cc = Schema.Current.CacheController(typeof(T));
+            if (cc != null && cc.Enabled)
+            {
+                T entityFromCache = EntityCache.Construct<T>(id.Value);
+                cc.Complete(entityFromCache, this);
+                retrieved.Add(tuple, entityFromCache);
+                return entityFromCache;
+            }
+
             ident = (T)requests?.TryGetC(typeof(T))?.TryGetC(id.Value);
             if (ident != null)
                 return (T)ident;
@@ -127,6 +136,13 @@ namespace Signum.Engine
         {
             if (lite == null)
                 return null;
+            
+            ICacheController cc = Schema.Current.CacheController(lite.EntityType);
+            if (cc != null && cc.Enabled)
+            {
+                lite.SetToString(cc.TryGetToString(lite.Id) ?? ("[" + EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(lite.EntityType.NiceName(), lite.Id) + "]"));
+                return lite;
+            }
 
             IdentityTuple tuple = new IdentityTuple(lite.EntityType, lite.Id);
             if (liteRequests == null)

@@ -37,9 +37,11 @@ namespace Signum.Engine
         #region Create Tables
         public static SqlPreCommandSimple CreateTableSql(ITable t)
         {
+            var primaryKeyConstraint = "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryClusteredIndex.GetPrimaryKeyName(t.Name), t.PrimaryKey.Name.SqlEscape());
+
             return new SqlPreCommandSimple("CREATE TABLE {0}(\r\n{1}\r\n)".FormatWith(
                 t.Name, 
-                t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c)).ToString(",\r\n").Indent(2)));
+                t.Columns.Values.Select(c => SqlBuilder.CreateColumn(c)).And(primaryKeyConstraint).ToString(",\r\n").Indent(2)));
         }
 
         public static SqlPreCommand DropTable(ObjectName tableName)
@@ -127,21 +129,20 @@ namespace Signum.Engine
 
         public static string CreateColumn(IColumn c)
         {
-            return CreateColumn(c.Name, c.SqlDbType, c.UserDefinedTypeName, c.Size, c.Scale, c.Nullable, c.PrimaryKey, c.Identity, c.Default);
+            return CreateColumn(c.Name, c.SqlDbType, c.UserDefinedTypeName, c.Size, c.Scale, c.Nullable, c.Identity, c.Default);
         }
 
-        public static string CreateColumn(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool primaryKey, bool identity, string @default)
+        public static string CreateColumn(string name, SqlDbType type, string udtTypeName, int? size, int? scale, bool nullable, bool identity, string @default)
         {
             Connector.Current.FixType(ref type, ref size, ref scale);
 
-            return "{0} {1}{2} {3}{4}{5}{6}".FormatWith(
+            return "{0} {1}{2} {3}{4}{5}".FormatWith(
                 name.SqlEscape(),
                 type == SqlDbType.Udt ? udtTypeName : type.ToString().ToUpper(),
                 GetSizeScale(size, scale),
                 identity ? "IDENTITY " : "",
                 nullable ? "NULL" : "NOT NULL",
-                @default != null ? " DEFAULT " +  Quote(type, @default) : "",
-                primaryKey ? " PRIMARY KEY" : "");
+                @default != null ? " DEFAULT " +  Quote(type, @default) : "");
         }
 
         static string Quote(SqlDbType type, string @default)
@@ -188,6 +189,9 @@ namespace Signum.Engine
 
         public static SqlPreCommand DropIndex(ObjectName tableName, DiffIndex index)
         {
+            if (index.IsPrimary)
+                return AlterTableDropConstraint(tableName, new ObjectName(tableName.Schema, index.IndexName));
+
             if (index.ViewName == null)
                 return DropIndex(tableName, index.IndexName);
             else
@@ -227,6 +231,14 @@ namespace Signum.Engine
         {
             string columns = index.Columns.ToString(c => c.Name.SqlEscape(), ", ");
 
+            if (index is PrimaryClusteredIndex)
+            {
+                return new SqlPreCommandSimple("ALTER TABLE {0} ADD CONSTRAINT {1} PRIMARY KEY CLUSTERED({2})".FormatWith(
+                  index.Table.Name,
+                  index.IndexName,
+                  columns));
+            }
+            
             if (!(index is UniqueIndex))
             {
                 return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".FormatWith(
@@ -235,38 +247,37 @@ namespace Signum.Engine
                   columns));
 
             }
+
+            var uIndex = (UniqueIndex)index;
+
+            if (string.IsNullOrEmpty(uIndex.Where))
+            {
+                return new SqlPreCommandSimple("CREATE {0}INDEX {1} ON {2}({3})".FormatWith(
+                    uIndex is UniqueIndex ? "UNIQUE " : null,
+                    uIndex.IndexName,
+                    uIndex.Table.Name,
+                    columns));
+            }
+
+            if (uIndex.ViewName != null)
+            {
+                ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
+
+                SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM {2} WHERE {3}"
+                    .FormatWith(viewName, columns, uIndex.Table.Name.ToString(), uIndex.Where))
+                { GoBefore = true, GoAfter = true };
+
+                SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
+                    .FormatWith(uIndex.IndexName, viewName, uIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ")));
+
+                return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
+            }
             else
             {
-                var uIndex = (UniqueIndex)index;
-
-                if (string.IsNullOrEmpty(uIndex.Where))
-                {
-                    return new SqlPreCommandSimple("CREATE {0}INDEX {1} ON {2}({3})".FormatWith(
-                        uIndex is UniqueIndex ? "UNIQUE " : null,
-                        uIndex.IndexName,
-                        uIndex.Table.Name,
-                        columns));
-                }
-
-                if (uIndex.ViewName != null)
-                {
-                    ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
-
-                    SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM {2} WHERE {3}"
-                        .FormatWith(viewName, columns, uIndex.Table.Name.ToString(), uIndex.Where)) { GoBefore = true, GoAfter = true };
-
-                    SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
-                        .FormatWith(uIndex.IndexName, viewName, uIndex.Columns.ToString(c => c.Name.SqlEscape(), ", ")));
-
-                    return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
-                }
-                else
-                {
-                    return new SqlPreCommandSimple("CREATE UNIQUE INDEX {0} ON {1}({2}) WHERE {3}".FormatWith(
-                          uIndex.IndexName,
-                          uIndex.Table.Name,
-                          columns, uIndex.Where));
-                }
+                return new SqlPreCommandSimple("CREATE UNIQUE INDEX {0} ON {1}({2}) WHERE {3}".FormatWith(
+                      uIndex.IndexName,
+                      uIndex.Table.Name,
+                      columns, uIndex.Where));
             }
         }
 
@@ -274,7 +285,7 @@ namespace Signum.Engine
         {
             return new SqlPreCommandSimple("ALTER TABLE {0} DROP CONSTRAINT {1}".FormatWith(
                 tableName,
-                constraintName.Name.SqlEscape())) { GoAfter = true };
+                constraintName.Name.SqlEscape()));
         }
 
         public static SqlPreCommand AlterTableAddDefaultConstraint(ObjectName tableName, string column, string constraintName, string definition)

@@ -50,6 +50,21 @@ namespace Signum.Engine.Maps
         }
     }
 
+    public class PrimaryClusteredIndex : Index
+    {
+        public PrimaryClusteredIndex(ITable table) : base(table, new[] { table.PrimaryKey })
+        {
+
+        }
+
+        public override string IndexName => GetPrimaryKeyName(this.Table.Name);
+
+        public static string GetPrimaryKeyName(ObjectName tableName)
+        {
+            return "PK_" + tableName.Schema.Name + "_" + tableName.Name;
+        }
+    }
+
     public class UniqueIndex : Index
     {
         public UniqueIndex(ITable table, IColumn[] columns) : base(table, columns) { }

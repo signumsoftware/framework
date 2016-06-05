@@ -50,7 +50,7 @@ namespace Signum.Engine.Linq
             if (lite.Reference is ImplementedByAllExpression)
                 return null;
 
-              if (IsCacheable(typeId))
+            if (IsCacheable(typeId))
                 return null;
 
             if (lite.Reference is EntityExpression)
@@ -120,7 +120,12 @@ namespace Signum.Engine.Linq
         private bool IsCached(Type type)
         { 
             var cc = Schema.Current.CacheController(type);
-            return cc != null && cc.Enabled; /*just to force cache before executing the query*/
+            if (cc != null && cc.Enabled)
+            {
+                cc.Load(); /*just to force cache before executing the query*/
+                return true;
+            }
+            return false;
         }
 
         protected internal override Expression VisitMList(MListExpression ml)
