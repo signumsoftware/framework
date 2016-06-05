@@ -163,8 +163,8 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
         Dic.extend(this, options);
 
-        this.contextual = options.contextual ? new ContextualOperationSettings(operationSymbol, options.contextual) : null;
-        this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol, options.contextualFromMany) : null;
+        this.contextual = options.contextual ? new ContextualOperationSettings(operationSymbol as any, options.contextual) : null;
+        this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol as any, options.contextualFromMany) : null;
     }
 }
 
@@ -258,17 +258,17 @@ export namespace API {
         return ajaxPost<ErrorReport>({ url: "/api/operation/executeMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
     }
 
-    export function deleteEntity<T extends Entity>(entity: T, operationKey: string | ExecuteSymbol<T>, ...args: any[]): Promise<void> {
+    export function deleteEntity<T extends Entity>(entity: T, operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<void> {
         GraphExplorer.propagateAll(entity, args);
         return ajaxPost<void>({ url: "/api/operation/deleteEntity" }, { entity: entity, operationKey: getOperationKey(operationKey), args: args } as EntityOperationRequest);
     }
 
-    export function deleteLite<T extends Entity>(lite: Lite<T>, operationKey: string | ExecuteSymbol<T>, ...args: any[]): Promise<void> {
+    export function deleteLite<T extends Entity>(lite: Lite<T>, operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<void> {
         GraphExplorer.propagateAll(lite, args);
         return ajaxPost<void>({ url: "/api/operation/deleteLite" }, { lite: lite, operationKey: getOperationKey(operationKey), args: args } as LiteOperationRequest);
     }
 
-    export function deleteMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T>, ...args: any[]): Promise<ErrorReport> {
+    export function deleteMultiple<T extends Entity>(lites: Lite<T>[], operationKey: string | DeleteSymbol<T>, ...args: any[]): Promise<ErrorReport> {
         GraphExplorer.propagateAll(lites, args);
         return ajaxPost<ErrorReport>({ url: "/api/operation/deleteMultiple" }, { lites: lites, operationKey: getOperationKey(operationKey), args: args } as MultiOperationRequest);
     }
