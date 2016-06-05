@@ -59,11 +59,11 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
     }
 
     renderFilter = (ctx: TypeContext<QueryFilterEntity>) => {
-        var ctx2 = ctx.subCtx({ formGroupStyle: FormGroupStyle.None });
+        var ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
                 <QueryTokenEntityBuilder
-                    ctx={ctx2.subCtx(a => a.token, { formGroupStyle: FormGroupStyle.None }) }
+                    ctx={ctx2.subCtx(a => a.token, { formGroupStyle: "None" }) }
                     queryKey={this.props.ctx.value.query.key}
                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                 <span style={{ margin: "0px 10px" }}>
@@ -75,11 +75,11 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
     }
 
     renderColumn = (ctx: TypeContext<QueryColumnEntity>) => {
-        var ctx2 = ctx.subCtx({ formGroupStyle: FormGroupStyle.None });
+        var ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
                 <QueryTokenEntityBuilder
-                    ctx={ctx2.subCtx(a => a.token, { formGroupStyle: FormGroupStyle.None }) }
+                    ctx={ctx2.subCtx(a => a.token, { formGroupStyle: "None" }) }
                     queryKey={this.props.ctx.value.query.key}
                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                 <span style={{ margin: "0px 10px" }}>
@@ -90,11 +90,11 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
     }
 
     renderOrder = (ctx: TypeContext<QueryOrderEntity>) => {
-        var ctx2 = ctx.subCtx({ formGroupStyle: FormGroupStyle.None });
+        var ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
                 <QueryTokenEntityBuilder
-                    ctx={ctx2.subCtx(a => a.token, { formGroupStyle: FormGroupStyle.None }) }
+                    ctx={ctx2.subCtx(a => a.token, { formGroupStyle: "None" }) }
                     queryKey={this.props.ctx.value.query.key}
                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} />
                 <span style={{ margin: "0px 10px" }}>

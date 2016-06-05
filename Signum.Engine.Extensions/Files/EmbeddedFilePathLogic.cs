@@ -11,13 +11,17 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Signum.Engine.Files
 {
     public static class EmbeddedFilePathLogic
     {
         static Expression<Func<EmbeddedFilePathEntity, FileTypeSymbol, WebImage>> WebImageExpression =
-            (efp, ft) => efp == null ? null : new WebImage { FullWebPath = Path.Combine(FileTypeLogic.FileTypes[ft].GetPrefixPair(efp).WebPrefix, efp.Suffix) };
+            (efp, ft) => efp == null ? null : new WebImage
+            {
+                FullWebPath = efp.FullWebPath()
+            };
         [ExpressionField]
         public static WebImage WebImage(this EmbeddedFilePathEntity efp, FileTypeSymbol fileType)
         {
@@ -27,7 +31,7 @@ namespace Signum.Engine.Files
         static Expression<Func<EmbeddedFilePathEntity, FileTypeSymbol, WebDownload>> WebDownloadExpression =
            (efp, ft) => efp == null ? null : new WebDownload
            {
-               FullWebPath = Path.Combine(FileTypeLogic.FileTypes[ft].GetPrefixPair(efp).WebPrefix, efp.Suffix),
+               FullWebPath = efp.FullWebPath(),
                FileName = efp.FileName
            };
         [ExpressionField]
@@ -56,24 +60,19 @@ namespace Signum.Engine.Files
                     }
                 };
 
-                EmbeddedFilePathEntity.OnPostRetrieved += efp =>
-                {
-                    efp.SetPrefixPair();
-                };
+                EmbeddedFilePathEntity.CalculatePrefixPair += CalculatePrefixPair;
             }
         }
 
-        public static EmbeddedFilePathEntity SetPrefixPair(this EmbeddedFilePathEntity efp)
+        static PrefixPair CalculatePrefixPair(this EmbeddedFilePathEntity efp)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
-                efp.prefixPair = FileTypeLogic.FileTypes.GetOrThrow(efp.FileType).GetPrefixPair(efp);
-
-            return efp;
+                return FileTypeLogic.FileTypes.GetOrThrow(efp.FileType).GetPrefixPair(efp);
         }
 
         public static byte[] GetByteArray(this EmbeddedFilePathEntity efp)
         {
-            return efp.BinaryFile ?? File.ReadAllBytes(efp.FullPhysicalPath);
+            return efp.BinaryFile ?? File.ReadAllBytes(efp.FullPhysicalPath());
         }
 
         public static EmbeddedFilePathEntity SaveFile(this EmbeddedFilePathEntity efp)

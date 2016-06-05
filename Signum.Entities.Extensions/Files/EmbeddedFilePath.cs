@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Utilities;
 using System.ComponentModel;
 using System.IO;
+using System.Web;
 
 namespace Signum.Entities.Files
 {
@@ -81,32 +82,42 @@ namespace Signum.Entities.Files
         public FileTypeSymbol FileType { get; internal set; }
 
         [Ignore]
-        internal PrefixPair prefixPair;
+        internal PrefixPair _prefixPair;
         public void SetPrefixPair(PrefixPair prefixPair)
         {
-            this.prefixPair = prefixPair;
+            this._prefixPair = prefixPair;
         }
 
-        public string FullPhysicalPath
+        public PrefixPair GetPrefixPair()
         {
-            get
-            {
-                if (prefixPair == null)
-                    throw new InvalidOperationException("prefixPair not set");
+            if (this._prefixPair != null)
+                return this._prefixPair;
 
-                return Path.Combine(prefixPair.PhysicalPrefix, Suffix);
-            }
+            if (CalculatePrefixPair == null)
+                throw new InvalidOperationException("OnCalculatePrefixPair not set");
+
+            this._prefixPair = CalculatePrefixPair(this);
+
+            return this._prefixPair;
         }
 
-        public string FullWebPath
-        {
-            get
-            {
-                if (prefixPair == null)
-                    throw new InvalidOperationException("prefixPair not set");
+        public static Func<EmbeddedFilePathEntity, PrefixPair> CalculatePrefixPair;
 
-                return string.IsNullOrEmpty(prefixPair.WebPrefix) ? null : prefixPair.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
-            }
+        public string FullPhysicalPath()
+        {
+            var pp = this.GetPrefixPair();
+
+            return Path.Combine(pp.PhysicalPrefix, Suffix);
+        }
+
+        public string FullWebPath()
+        {
+            var pp = this.GetPrefixPair();
+
+            if (string.IsNullOrEmpty(pp.WebPrefix))
+                return null;
+
+            return VirtualPathUtility.ToAbsolute(pp.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
         }
 
         public override string ToString()
@@ -123,14 +134,13 @@ namespace Signum.Entities.Files
             OnPreSaving(this);
         }
 
-        public static Action<EmbeddedFilePathEntity> OnPostRetrieved;
-
+      
         protected override void PostRetrieving()
         {
-            if (OnPostRetrieved == null)
-                throw new InvalidOperationException("OnPostRetrieved not set");
+            if (CalculatePrefixPair == null)
+                throw new InvalidOperationException("OnCalculatePrefixPair not set");
 
-            OnPostRetrieved(this);
+            this.GetPrefixPair();
         }
     }
 }

@@ -28,7 +28,7 @@ require("./AuthAdmin.css");
 export default class TypesRulesPackControl extends React.Component<{ ctx: TypeContext<TypeRulePack> }, void> implements IRenderButtons {
 
     handleSaveClick = (bc: ButtonsContext) => {
-        var pack = this.props.ctx.value;
+        let pack = this.props.ctx.value;
 
         Api.saveTypeRulePack(pack)
             .then(() => Api.fetchTypeRulePack(pack.role.id))
@@ -48,7 +48,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
     render() {
 
-        var ctx = this.props.ctx;
+        let ctx = this.props.ctx;
 
         return (
             <div>
@@ -116,13 +116,13 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
     renderType(ctx: TypeContext<TypeAllowedRule>) {
 
-        var roleId = this.props.ctx.value.role.id;
+        let roleId = this.props.ctx.value.role.id;
 
-        var used = ctx.value.allowed.conditions.map(tcs => tcs.typeCondition.id);
+        let used = ctx.value.allowed.conditions.map(tcs => tcs.typeCondition.id);
 
-        var remaining = ctx.value.availableConditions.filter(tcs => !used.contains(tcs.id));
+        let remaining = ctx.value.availableConditions.filter(tcs => !used.contains(tcs.id));
 
-        var fallback = new Binding<TypeAllowed>("fallback", ctx.value.allowed);
+        let fallback = new Binding<TypeAllowed>("fallback", ctx.value.allowed);
         return [
             <tr key={ctx.value.resource.fullClassName} className={ classes("sf-auth-type", ctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions") }>
                 <td>
@@ -157,7 +157,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                 </td>}
             </tr>
         ].concat(ctx.value.allowed.conditions.map(c => {
-            var b = new Binding<TypeAllowed>("allowed", c);
+            let b = new Binding<TypeAllowed>("allowed", c);
             return (
                 <tr key={ctx.value.resource.fullClassName + "_" + c.typeCondition.id} className="sf-auth-condition">
                     <td>
@@ -195,7 +195,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
         if (allowed == null)
             return null;
 
-        var onClick = () => {
+        let onClick = () => {
             GraphExplorer.propagateAll(this.props.ctx.value);
 
             if (this.props.ctx.value.modified) {
@@ -225,7 +225,7 @@ function typeAllowedEquals(allowed: TypeAllowedAndConditions, allowedBase: TypeA
         && allowed.conditions.length == allowedBase.conditions.length
         && allowed.conditions
             .every((c, i) => {
-                var b = allowedBase.conditions[i];
+                let b = allowedBase.conditions[i];
                 return c.allowed == b.allowed && c.typeCondition.id == b.typeCondition.id;
             });
 }
@@ -244,11 +244,11 @@ function getUI(allowed: TypeAllowed): TypeAllowedBasic {
     return allowed as TypeAllowedBasic;
 }
 
-var values: TypeAllowedBasic[] = ["Create", "Modify", "Read", "None"];
+let values: TypeAllowedBasic[] = ["Create", "Modify", "Read", "None"];
 
 function combine(val1: TypeAllowedBasic, val2: TypeAllowedBasic): TypeAllowed {
 
-    var db, ui: TypeAllowedBasic;
+    let db, ui: TypeAllowedBasic;
     if (values.indexOf(val1) < values.indexOf(val2)) {
         db = val1;
         ui = val2;
@@ -269,8 +269,8 @@ function select(current: TypeAllowed, basicAllowed: TypeAllowedBasic, e: React.M
     if (!e.shiftKey)
         return basicAllowed as TypeAllowedBasic;
 
-    var db = getDB(current);
-    var ui = getUI(current);
+    let db = getDB(current);
+    let ui = getUI(current);
 
     if (db != ui) {
         if (basicAllowed == ui)

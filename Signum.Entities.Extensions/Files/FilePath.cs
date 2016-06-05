@@ -40,7 +40,7 @@ namespace Signum.Entities.Files
             this.FileName = fileName;
             this.BinaryFile = fileData;
         }
-        
+
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
         [NotNullable, SqlDbType(Size = 260)]
@@ -89,37 +89,55 @@ namespace Signum.Entities.Files
         public FileTypeSymbol FileType { get; internal set; }
 
         [Ignore]
-        internal PrefixPair prefixPair;
+        internal PrefixPair _prefixPair;
         public void SetPrefixPair(PrefixPair prefixPair)
         {
-            this.prefixPair = prefixPair;
+            this._prefixPair = prefixPair;
         }
 
-        public string FullPhysicalPath
+        public PrefixPair GetPrefixPair()
         {
-            get
-            {
-                if (prefixPair == null)
-                    throw new InvalidOperationException("prefixPair not set");
+            if (this._prefixPair != null)
+                return this._prefixPair;
 
-                return Path.Combine(prefixPair.PhysicalPrefix, Suffix);
-            }
+            if (CalculatePrefixPair == null)
+                throw new InvalidOperationException("OnCalculatePrefixPair not set");
+
+            this._prefixPair = CalculatePrefixPair(this);
+
+            return this._prefixPair;
         }
 
-        public string FullWebPath
-        {
-            get
-            {
-                if (prefixPair == null)
-                    throw new InvalidOperationException("prefixPair not set");
+        public static Func<FilePathEntity, PrefixPair> CalculatePrefixPair;
 
-                return string.IsNullOrEmpty(prefixPair.WebPrefix) ? null : prefixPair.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
-            }
+        public string FullPhysicalPath()
+        {
+            var pp = this.GetPrefixPair();
+
+            return Path.Combine(pp.PhysicalPrefix, Suffix);
+        }
+
+        public string FullWebPath()
+        {
+            var pp = this.GetPrefixPair();
+
+            if (string.IsNullOrEmpty(pp.WebPrefix))
+                return null;
+
+            return VirtualPathUtility.ToAbsolute(pp.WebPrefix + "/" + HttpFilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
         }
 
         public override string ToString()
         {
             return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize(true));
+        }
+
+        protected override void PostRetrieving()
+        {
+            if (CalculatePrefixPair == null)
+                throw new InvalidOperationException("OnCalculatePrefixPair not set");
+
+            this.GetPrefixPair();
         }
     }
 

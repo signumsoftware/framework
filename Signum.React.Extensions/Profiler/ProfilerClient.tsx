@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
-import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
+import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
@@ -18,7 +18,8 @@ import * as AuthClient from '../Authorization/AuthClient'
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="profiler">
         <Route path="times" getComponent={(loc, cb) => require(["./Times/TimesPage"], (Comp) => cb(null, Comp.default))}/>
-        <Route path="heavyProfiler" getComponent={(loc, cb) => require(["./Heavy/HeavyProfilerPage"], (Comp) => cb(null, Comp.default)) }/>
+        <Route path="heavy" getComponent={(loc, cb) => require(["./Heavy/HeavyListPage"], (Comp) => cb(null, Comp.default)) }/>
+        <Route path="heavy/entry/:selectedIndex" getComponent={(loc, cb) => require(["./Heavy/HeavyEntryPage"], (Comp) => cb(null, Comp.default)) }/>
         <Route path="overrideSessionTimeout" getComponent={(loc, cb) => require(["./SessionTimeout/SessionTimeoutPage"], (Comp) => cb(null, Comp.default)) }/>
     </Route>);
 
@@ -39,7 +40,7 @@ export function start(options: { routes: JSX.Element[] }) {
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewHeavyProfiler),
         key: "ProfilerHeavy",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("/profiler/heavyProfiler"))
+        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("/profiler/heavy"))
     });
     
     OmniboxClient.registerSpecialAction({
@@ -60,18 +61,39 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
     export module  Heavy {
-        export function start(): Promise<void> {
-            return ajaxPost<void>({ url: "/api/profilerHeavy/start" }, null);
+        export function setEnabled(isEnabled: boolean): Promise<void> {
+            return ajaxPost<void>({ url: "/api/profilerHeavy/setEnabled/" + isEnabled }, null);
         }
 
-        export function stop(): Promise<void> {
-            return ajaxPost<void>({ url: "/api/profilerHeavy/stop" }, null);
+        export function isEnabled(): Promise<boolean> {
+            return ajaxGet<boolean>({ url: "/api/profilerHeavy/isEnabled" });
         }
 
         export function clear(): Promise<void> {
             return ajaxPost<void>({ url: "/api/profilerHeavy/clear" }, null);
         }
 
+        export function entries(): Promise<HeavyProfilerEntry[]> {
+            return ajaxGet<HeavyProfilerEntry[]>({ url: "/api/profilerHeavy/entries" });
+        }
+
+        export function details(key: string): Promise<HeavyProfilerEntry[]> {
+            return ajaxGet<HeavyProfilerEntry[]>({ url: "/api/profilerHeavy/details/" + key });
+        }
+
+        export function stackTrace(key: string): Promise<StackTraceTS[]> {
+            return ajaxGet<StackTraceTS[]>({ url: "/api/profilerHeavy/stackTrace/" + key });
+        }
+
+        export function download(indices?: string): void {
+            ajaxGetRaw({ url: "/api/profilerHeavy/download" + (indices ? ("?indices=" + indices) : "") })
+                .then(response => saveFile(response))
+                .done();
+        }
+
+        export function upload(file: { fileName: string; content: string }): Promise<void> {
+            return ajaxPost<void>({ url: "/api/profilerHeavy/upload" }, file);
+        }
     }
 
     export module Times {
@@ -84,11 +106,30 @@ export module API {
             return ajaxGet<TimeTrackerEntry[]>({ url: "/api/profilerTimes/times" });
         }
     }
-    //export function view(): Promise<ProcessLogicState> {
-    //    return ajaxGet<ProcessLogicState>({ url: "/api/processes/view" });
-    //}
 }
 
+export interface StackTraceTS {
+    Color: string;
+    FileName: string;
+    LineNumber: number;
+    Method: string;
+    Type: string;
+    Namespace: string;
+}
+
+export interface HeavyProfilerEntry {
+    BeforeStart: number;
+    Start: number;
+    End: number;
+    Elapsed: string;
+    Role: string;
+    Color: string;
+    Depth : number;
+    AdditionalData: string;
+    FullIndex: string;
+    StackTrace: string;
+    Entries: HeavyProfilerEntry[];
+}
 
 export interface TimeTrackerEntry {
     key: string;

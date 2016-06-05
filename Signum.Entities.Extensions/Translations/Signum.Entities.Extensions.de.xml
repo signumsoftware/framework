@@ -85,6 +85,7 @@
     <Member Name="Nothing" Description="Nichts" />
     <Member Name="Overriden" Description="Überschrieben" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
+    <Member Name="PleaseSaveChangesFirst" Description="Bitte erst Änderungen speichern" />
     <Member Name="TypeRules" Description="Typregeln" />
   </Type>
   <Type Name="AuthEmailMessage">

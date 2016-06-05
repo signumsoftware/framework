@@ -15,7 +15,7 @@ import { LinkListPartEntity, LinkElementEntity} from '../Signum.Entities.Dashboa
 export default class CountSearchControlPart extends React.Component<{ ctx: TypeContext<LinkListPartEntity> }, void> {
 
     render() {
-        var ctx = this.props.ctx.subCtx({ formGroupStyle: FormGroupStyle.SrOnly, placeholderLabels: true });
+        var ctx = this.props.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
         
         return (
             <div className="form-inline repeater-inline">

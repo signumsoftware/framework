@@ -57,11 +57,11 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
     };
 
     renderFilter = (ctx: TypeContext<QueryFilterEntity>) => {
-        var ctx2 = ctx.subCtx({ formGroupStyle: FormGroupStyle.None });
+        var ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
                 <QueryTokenEntityBuilder
-                    ctx={ctx2.subCtx(a => a.token, { formGroupStyle: FormGroupStyle.None }) }
+                    ctx={ctx2.subCtx(a => a.token, { formGroupStyle: "None" }) }
                     queryKey={this.props.ctx.value.query.key}
                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
                 <span style={{ margin: "0px 10px" }}>
@@ -73,11 +73,11 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
     }
 
     renderOrder = (ctx: TypeContext<QueryOrderEntity>) => {
-        var ctx2 = ctx.subCtx({ formGroupStyle: FormGroupStyle.None });
+        var ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
                 <QueryTokenEntityBuilder
-                    ctx={ctx2.subCtx(a => a.token, { formGroupStyle: FormGroupStyle.None }) }
+                    ctx={ctx2.subCtx(a => a.token, { formGroupStyle: "None" }) }
                     queryKey={this.props.ctx.value.query.key}
                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
                 <span style={{ margin: "0px 10px" }}>

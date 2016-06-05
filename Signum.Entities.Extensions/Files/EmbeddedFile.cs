@@ -24,9 +24,9 @@ namespace Signum.Entities.Files
         }
 
         
-        public string FullWebPath
+        public string FullWebPath()
         {
-            get { return null; }
+            return null; 
         }
     }
 }

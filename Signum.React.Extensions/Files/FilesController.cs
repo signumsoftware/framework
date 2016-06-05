@@ -38,10 +38,10 @@ namespace Signum.React.Files
         {
             var filePath = Database.Retrieve<FilePathEntity>(PrimaryKey.Parse(filePathId, typeof(FilePathEntity)));
 
-            return GetHttpReponseMessage(File.OpenRead(filePath.FullPhysicalPath), filePath.FileName);
+            return GetHttpReponseMessage(File.OpenRead(filePath.FullPhysicalPath()), filePath.FileName);
         }
 
-        [Route("api/files/downloadEmbeddedFilePath/{fileType}"), HttpGet]
+        [Route("api/files/downloadEmbeddedFilePath/{fileTypeKey}"), HttpGet]
         public HttpResponseMessage DownloadEmbeddedFilePath(string fileTypeKey, string suffix, string fileName)
         {
             var fileType = SymbolLogic<FileTypeSymbol>.ToSymbol(fileTypeKey);
