@@ -426,8 +426,7 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-                { ValueLine.withUnit(s.unitText,
-                    <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{d && d.format(durationFormat) }</FormControlStatic>) }
+                <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{d && d.format(durationFormat) }</FormControlStatic>
             </FormGroup>
         );
 
@@ -443,15 +442,13 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
 
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            { ValueLine.withUnit(s.unitText,
-                <DurationTextBox
+            <DurationTextBox
                     htmlProps={htmlProps}
                     value={s.ctx.value}
                     onChange={handleOnChange}
                     validateKey={validateKey}
                     format={"h:mm"}
                     />
-            ) }
         </FormGroup>
     );
 }
