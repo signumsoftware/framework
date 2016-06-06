@@ -652,7 +652,13 @@ function setSymbolId(s: ISymbol): boolean {
     if (!member)
         return false;
 
+    const key = s.key;
+    delete s.key;
+
     s.id = member.id;
+
+    s.key = key; //Key should be after id
+
 
     return true;
 }
