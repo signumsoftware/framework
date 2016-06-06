@@ -202,7 +202,7 @@ export function entityInfo(entity: ModifiableEntity | Lite<Entity>)
     var id = isLite(entity) ? entity.id : isEntity(entity) ? entity.id : "";
     var isNew = isLite(entity) ? entity.entity && entity.entity.isNew : entity.isNew;
 
-	return  `${type};${id};${isNew}`;
+	return  `${type};${id || ""};${isNew || ""}`;
 }
 
 export const BooleanEnum = new EnumType<BooleanEnum>("BooleanEnum");
