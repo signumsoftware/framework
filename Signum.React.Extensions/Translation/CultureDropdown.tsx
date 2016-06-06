@@ -55,12 +55,13 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
         if (cultures == null)
             return null;
 
+        var pair = Dic.map(cultures, (name, c) => ({ name, c })).filter(p => is(p.c, this.state.currentCulture)).singleOrNull();
 
         return (
-            <NavDropdown id="culture-dropdown" title={this.state.currentCulture.toStr}>
+            <NavDropdown id="culture-dropdown" title={this.state.currentCulture.toStr} data-culture={pair.name}>
                 {
-                    Dic.getValues(cultures).map((c, i) =>
-                        <MenuItem key={i} selected={is(c, this.state.currentCulture) } onSelect={() => this.handleSelect(c)}>
+                    Dic.map(cultures, (name, c, i) =>
+                        <MenuItem key={i} data-culture={name} selected={is(c, this.state.currentCulture) } onSelect={() => this.handleSelect(c)}>
                             {c.toStr}
                         </MenuItem>)
                 }

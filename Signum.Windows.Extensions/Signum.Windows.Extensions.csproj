@@ -253,9 +253,6 @@
     <Compile Include="Files\FileLine.xaml.cs">
       <DependentUpon>FileLine.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Files\FilePath.xaml.cs">
-      <DependentUpon>FilePath.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Files\FilePathClient.cs" />
     <Compile Include="ExtensionsImageLoader.cs" />
     <Compile Include="Files\ImageFileExtension.cs" />
@@ -650,12 +647,6 @@
     <Page Include="Files\FileLine.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Files\FilePath.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
