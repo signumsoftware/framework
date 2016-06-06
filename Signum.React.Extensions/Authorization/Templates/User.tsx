@@ -11,7 +11,8 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
 
     handlePasswordChange = (event: React.SyntheticEvent) => {
 
-        var areDifferent = (this.refs["newPass"] as HTMLInputElement).value != (this.refs["newPass2"] as HTMLInputElement).value;
+        var pass2Value = (this.refs["newPass2"] as HTMLInputElement).value;
+        var areDifferent = pass2Value != "" && (this.refs["newPass"] as HTMLInputElement).value != pass2Value ;
 
         if (areDifferent) {
             this.props.ctx.frame.setError({ "passwordHash": AuthMessage.PasswordsAreDifferent.niceToString() });
@@ -34,10 +35,10 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
                 <ValueLine ctx={ctx.subCtx(e => e.userName) } />
                 { entity.isNew && <div>
                     <FormGroup ctx={ ph } labelText={AuthMessage.ChangePasswordAspx_NewPassword.niceToString() }>
-                        <input type="password" ref="newPass" className="form-control" onChange={this.handlePasswordChange}/>
+                        <input type="password" ref="newPass" className="form-control" onBlur={this.handlePasswordChange}/>
                     </FormGroup>
                     <FormGroup ctx={ ph } labelText={AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString() }>
-                        <input type="password" ref="newPass2" className="form-control" onChange={this.handlePasswordChange}/>
+                        <input type="password" ref="newPass2" className="form-control" onBlur={this.handlePasswordChange}/>
                     </FormGroup>
                 </div>}
                 <EntityCombo ctx={ctx.subCtx(e => e.role) } />
