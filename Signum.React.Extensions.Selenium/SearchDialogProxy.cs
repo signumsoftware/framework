@@ -482,12 +482,12 @@ namespace Signum.React.Selenium
             headerLocator.WaitNoPresent();
         }
 
-        public WebElementLocator EntityLinkElement(Lite<IEntity> lite)
+        public WebElementLocator EntityLink(Lite<IEntity> lite)
         {
             return RowElement(lite).CombineCss(" > td:nth-child({0}) > a");
         }
 
-        public WebElementLocator EntityLinkElement(int rowIndex)
+        public WebElementLocator EntityLink(int rowIndex)
         {
             return RowElement(rowIndex).CombineCss(" > td:nth-child({0}) > a");
         }
@@ -495,25 +495,25 @@ namespace Signum.React.Selenium
 
         public PopupControl<T> EntityClick<T>(Lite<T> lite) where T : Entity
         {
-            var element = EntityLinkElement(lite).Find().CaptureOnClick();
+            var element = EntityLink(lite).Find().CaptureOnClick();
             return new PopupControl<T>(element);
         }
 
         public PopupControl<T> EntityClick<T>(int rowIndex) where T : Entity
         {
-            var element = EntityLinkElement(rowIndex).Find().CaptureOnClick();
+            var element = EntityLink(rowIndex).Find().CaptureOnClick();
             return new PopupControl<T>(element);
         }
 
         public NormalPage<T> EntityClickNormalPage<T>(Lite<T> lite) where T : Entity
         {
-            EntityLinkElement(lite).Find().Click();
+            EntityLink(lite).Find().Click();
             return new NormalPage<T>(this.Element.GetDriver());
         }
 
         public NormalPage<T> EntityClickNormalPage<T>(int rowIndex) where T : Entity
         {
-            EntityLinkElement(rowIndex).Find().Click();
+            EntityLink(rowIndex).Find().Click();
             return new NormalPage<T>(this.Element.GetDriver());
         }
 

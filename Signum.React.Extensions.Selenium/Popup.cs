@@ -168,7 +168,7 @@ namespace Signum.React.Selenium
     }
 
 
-    public class PopupControl<T> : Popup, ILineContainer<T>, IEntityButtonContainer<T> where T : ModifiableEntity
+    public class PopupControl<T> : Popup, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer where T : ModifiableEntity
     {
         public PropertyRoute Route { get; private set; }
 
