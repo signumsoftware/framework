@@ -36,7 +36,7 @@ namespace Signum.Entities.Authorization
             sb.AddUniqueIndex<RuleTypeEntity>(rt => new { rt.Resource, rt.Role });
 
             runtimeRules = sb.GlobalLazy(NewCache,
-                new InvalidateWith(typeof(RuleTypeEntity), typeof(RoleEntity)));
+                new InvalidateWith(typeof(RuleTypeEntity), typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
 
             sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
 
