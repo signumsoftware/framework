@@ -774,7 +774,7 @@ namespace Signum.Engine.Maps
             GlobalLazyManager = manager;
         }
 
-        public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith) where T : class
+        public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith, Action onInvalidated = null) where T : class
         {
             var result = Signum.Engine.GlobalLazy.WithoutInvalidations(() =>
             {
@@ -783,7 +783,11 @@ namespace Signum.Engine.Maps
                 return func();
             });
 
-            GlobalLazyManager.AttachInvalidations(this, invalidateWith, (sender, args) => result.Reset());
+            GlobalLazyManager.AttachInvalidations(this, invalidateWith, (sender, args) =>
+            {
+                result.Reset();
+                onInvalidated?.Invoke();
+            });
 
             return result;
         }
