@@ -1,11 +1,12 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import * as numbro from 'numbro'
+
 import { Dic, addClass } from '../Globals'
 import { DateTimePicker } from 'react-widgets'
 import 'react-widgets/dist/css/react-widgets.css';
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat } from '../Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from '../Lines/LineBase'
 
 
@@ -23,12 +24,12 @@ export enum ValueLineType {
     Boolean = "Boolean" as any,
     Enum = "Enum" as any,
     DateTime = "DateTime" as any,
-    TimeSpan = "TimeSpan" as any,
     TextBox = "TextBox" as any,
     TextArea = "TextArea" as any,
     Number = "Number" as any,
     Decimal = "Decimal" as any,
     Color = "Color" as any,
+    TimeSpan = "TimeSpan" as any,
 }
 
 
@@ -62,6 +63,9 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
         if (t.name == "decimal")
             return ValueLineType.Decimal;
+
+        if (t.name == "timespan")
+            return ValueLineType.TimeSpan;
 
         throw new Error(`No value line found for '${t.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
@@ -125,6 +129,11 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
             (c == 188) /*,*/);
     }
 
+    static isDuration(e: React.KeyboardEvent) {
+        const c = e.keyCode;
+        return (ValueLine.isNumber(e) ||
+            (c == 186) /*Colon*/);
+    }
 }
 
 ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
@@ -264,7 +273,6 @@ ValueLine.renderers[ValueLineType.Decimal as any] = (vl) => {
     return numericTextBox(vl, ValueLine.isDecimal);
 };
 
-
 function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) {
 
     const s = vl.state;
@@ -400,4 +408,84 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
             ) }
         </FormGroup>
     );
+}
+
+ValueLine.renderers[ValueLineType.TimeSpan as any] = (vl) => {
+    return durationTextBox(vl, ValueLine.isDuration);
 };
+
+function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) {
+
+    const s = vl.state;
+
+    const durationFormat = toMomentDurationFormat(s.formatText);
+
+    const ticksPerMillisecond = 10000;
+
+    if (s.ctx.readOnly) {
+        const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : null;
+        return (
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+                <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{d && d.format(durationFormat) }</FormControlStatic>
+            </FormGroup>
+        );
+    }
+
+    const handleOnChange = (newValue: number) => {
+        const d = moment.duration(newValue);
+
+        vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : null);
+    };
+
+    var htmlProps = Dic.extend({ placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : null } as React.HTMLAttributes, vl.props.valueHtmlProps);
+
+    return (
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+            <DurationTextBox htmlProps={htmlProps} value={s.ctx.value} onChange={handleOnChange} validateKey={validateKey} format={durationFormat} />
+        </FormGroup>
+    );
+}
+
+export interface DurationTextBoxProps {
+    value: number;
+    onChange: (newValue: number) => void;
+    validateKey: React.KeyboardEventHandler;
+    format: string;
+    htmlProps: React.HTMLAttributes;
+}
+
+export class DurationTextBox extends React.Component<DurationTextBoxProps, { text: string }> {
+
+    state = { text: null };
+
+
+    render() {
+        const ticksPerMillisecond = 10000;
+        var value = this.state.text != null ? this.state.text :
+            this.props.value != null ? moment.duration(this.props.value / ticksPerMillisecond).format(this.props.format) :
+                "";
+
+        return <input {...this.props.htmlProps} type="text" className={addClass(this.props.htmlProps, "form-control numeric") } value={value}
+            onBlur={this.handleOnBlur}
+            onChange={this.handleOnChange}
+            onKeyDown={this.handleKeyDown}/>
+
+    }
+
+    handleOnBlur = (e: React.SyntheticEvent) => {
+        const input = e.currentTarget as HTMLInputElement;
+        var result = input.value == null || input.value.length == 0 ? null : moment.duration(input.value).asMilliseconds();
+        this.setState({ text: null });
+        this.props.onChange(result);
+    }
+
+    handleOnChange = (e: React.SyntheticEvent) => {
+        const input = e.currentTarget as HTMLInputElement;
+        this.setState({ text: input.value });
+    }
+
+    handleKeyDown = (e: React.KeyboardEvent) => {
+        if (!this.props.validateKey(e))
+            e.preventDefault();
+    }
+}
