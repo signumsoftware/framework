@@ -9,6 +9,7 @@ using OpenQA.Selenium.Remote;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Utilities;
+using OpenQA.Selenium.Support.UI;
 
 namespace Signum.React.Selenium
 {
@@ -46,6 +47,9 @@ namespace Signum.React.Selenium
                 {
                     try
                     {
+                        if (this.Element.IsStale())
+                            return;
+
                         var button = this.CloseButton.TryFind();
                         if (button != null && button.Displayed)
                             button.Click();
@@ -201,27 +205,21 @@ namespace Signum.React.Selenium
                 string confirmationMessage = null;
                 Selenium.Wait(() =>
                 {
-                    try
-                    {
-                        var close = this.CloseButton.TryFind();
-                        if (close?.Displayed == true)
-                        {
-                            close.Click();
-                        }
-
-                        if (Selenium.IsAlertPresent())
-                        {
-                            var alert = Selenium.SwitchTo().Alert();
-                            confirmationMessage = alert.Text;
-                            alert.Accept();
-                        }
-
-                        return false;
-                    }
-                    catch (StaleElementReferenceException)
-                    {
+                    if (this.Element.IsStale())
                         return true;
+
+                    if (TryToClose())
+                        return true;
+
+                    if (Selenium.IsAlertPresent())
+                    {
+                        var alert = Selenium.SwitchTo().Alert();
+                        confirmationMessage = alert.Text;
+                        alert.Accept();
                     }
+
+                    return false;
+                 
                 }, () => "popup {0} to disapear with or without confirmation".FormatWith());
 
                 if (confirmationMessage != null)
@@ -230,6 +228,25 @@ namespace Signum.React.Selenium
 
             if (Disposing != null)
                 Disposing(this.OkPressed);
+        }
+
+        [DebuggerStepThrough]
+        private bool TryToClose()
+        {
+            try
+            {
+                var close = this.CloseButton.TryFind();
+                if (close?.Displayed == true)
+                {
+                    close.Click();
+                }
+
+                return false;
+            }
+            catch (StaleElementReferenceException)
+            {
+                return true;
+            }
         }
 
         public EntityInfoProxy EntityInfo()

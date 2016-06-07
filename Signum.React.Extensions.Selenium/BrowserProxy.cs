@@ -14,6 +14,7 @@ using Signum.Entities.DynamicQuery;
 using System.Linq.Expressions;
 using OpenQA.Selenium;
 using Signum.React.Selenium;
+using System.Globalization;
 
 namespace Signum.React.Selenium
 {
@@ -140,6 +141,15 @@ namespace Signum.React.Selenium
             Selenium.FindElement(By.Id("login")).Submit();
 
             Selenium.WaitElementPresent(By.Id("sfUserDropDown"));
+
+            SetCurrentCulture();
+        }
+
+        public virtual void SetCurrentCulture()
+        {
+            string culture = Selenium.FindElement(By.CssSelector("li[data-culture]")).GetAttribute("data-culture");
+
+            Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
         }
     }
 }

@@ -388,9 +388,14 @@ namespace Signum.React.Selenium
         {
             get
             {
-                var text =  this.ComboElement.AllSelectedOptions.SingleOrDefaultEx()?.Text;
+                var ei = EntityInfo();
 
-                return EntityInfo().ToLite(text);
+                if (ei == null)
+                    return null;
+
+                var text = this.ComboElement.AllSelectedOptions.SingleOrDefaultEx()?.Text;
+
+                return ei.ToLite(text);
             }
             set
             {
@@ -412,6 +417,10 @@ namespace Signum.React.Selenium
 
         public void SelectLabel(string label)
         {
+
+            this.Element.GetDriver().Wait(() =>
+                this.ComboElement.WrappedElement.FindElements(By.CssSelector("option")).Any(a => a.Text.Contains(label)));
+
             WaitChanges(() =>
                 this.ComboElement.SelectByText(label),
                 "ComboBox selected");
@@ -419,6 +428,9 @@ namespace Signum.React.Selenium
 
         public void SelectIndex(int index)
         {
+            this.Element.GetDriver().Wait(() =>
+                        this.ComboElement.WrappedElement.FindElements(By.CssSelector("option")).Count > index);
+
             WaitChanges(() =>
                 this.ComboElement.SelectByIndex(index + 1),
                 "ComboBox selected");
