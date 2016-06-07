@@ -49,18 +49,10 @@ namespace Signum.React.Selenium
                 if (checkBox != null)
                     return checkBox.Selected.ToString();
 
-                IWebElement namedElement = this.Element.TryFindElement(By.CssSelector("input[type=text]"));
+                IWebElement namedElement = this.Element.TryFindElement(By.CssSelector("input[type=text], textarea"));
                 if(namedElement != null)
                     return namedElement.GetAttribute("value");
 
-                IWebElement date = this.Element.TryFindElement(By.Name("Date"));
-                IWebElement time = this.Element.TryFindElement(By.Name("Time"));
-
-                if (date != null && time != null)
-                    return date.GetAttribute("value") + " " + time.GetAttribute("value");
-
-                if (checkBox != null)
-                    return checkBox.Text;
             
                 throw new InvalidOperationException("Element {0} not found".FormatWith(this.Route.PropertyString()));
             }
@@ -72,19 +64,24 @@ namespace Signum.React.Selenium
                 if (checkBox != null)
                 {
                     checkBox.SetChecked(bool.Parse(value));
-                }
-
-                IWebElement byName = this.Element.TryFindElement(By.CssSelector("input[type=text]"));
-                if (byName != null)
-                {
-                    if (byName.TagName == "select")
-                        byName.SelectElement().SelectByValue(value);
-                    else
-                        byName.SafeSendKeys(value);
                     return;
                 }
-                else
-                    throw new InvalidOperationException("Element {0} not found".FormatWith(this.Route));
+
+                IWebElement textOrTextArea = this.Element.TryFindElement(By.CssSelector("input[type=text], textarea"));
+                if (textOrTextArea != null)
+                {
+                    textOrTextArea.SafeSendKeys(value);
+                    return;
+                }
+
+                IWebElement select = this.Element.TryFindElement(By.CssSelector("select"));
+                if (select != null)
+                {
+                    select.SelectElement().SelectByValue(value);
+                    return;
+                }
+
+                throw new InvalidOperationException("No ValueLine input element for  {0} found".FormatWith(this.Route));
             }
         }
 
@@ -255,27 +252,31 @@ namespace Signum.React.Selenium
 
         protected EntityInfoProxy EntityInfoInternal(int? index)
         {
-            var element = index == null ? Element.FindElement(By.CssSelector("[data-entity]")) :
-            this.Element.FindElements(By.CssSelector("[data-entity]")).ElementAt(index.Value);
+            var element = index == null ? Element :
+                this.Element.FindElements(By.CssSelector("[data-entity]")).ElementAt(index.Value);
 
             return EntityInfoProxy.Parse(element.GetAttribute("data-entity"));
         }
 
-        protected void AutoCompleteAndSelect(IWebElement autoCompleteElement, Lite<IEntity> lite)
+        public void AutoCompleteWaitChanges(IWebElement autoCompleteElement, Lite<IEntity> lite)
         {
             WaitChanges(() =>
             {
-                autoCompleteElement.FindElement(By.CssSelector("input")).SafeSendKeys(lite.Id.ToString());
-                //Selenium.FireEvent(autoCompleteLocator, "keyup");
-
-                var listLocator = By.CssSelector("ul.typeahead.dropdown-menu");
-
-                autoCompleteElement.WaitElementVisible(listLocator);
-                IWebElement itemElement = autoCompleteElement.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
-
-                itemElement.Click();
+                AutoCompleteBasic(autoCompleteElement, lite);
 
             }, "autocomplete selection");
+        }
+        public static void AutoCompleteBasic(IWebElement autoCompleteElement, Lite<IEntity> lite)
+        {
+            autoCompleteElement.FindElement(By.CssSelector("input")).SafeSendKeys(lite.Id.ToString());
+            //Selenium.FireEvent(autoCompleteLocator, "keyup");
+
+            var listLocator = By.CssSelector("ul.typeahead.dropdown-menu");
+
+            autoCompleteElement.WaitElementVisible(listLocator);
+            IWebElement itemElement = autoCompleteElement.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
+
+            itemElement.Click();
         }
     }
 
@@ -286,9 +287,12 @@ namespace Signum.React.Selenium
 
         public Type EntityType;
         public PrimaryKey? IdOrNull { get; set; }
-        
 
-        public Lite<Entity> ToLite(string toString = null) => Lite.Create(this.EntityType, this.IdOrNull.Value, null);
+
+        public Lite<Entity> ToLite(string toString = null)
+        {
+            return Lite.Create(this.EntityType, this.IdOrNull.Value, toString);
+        }
 
         internal static EntityInfoProxy Parse(string dataEntity)
         {
@@ -347,7 +351,12 @@ namespace Signum.React.Selenium
 
         public void AutoComplete(Lite<IEntity> lite)
         {
-            base.AutoCompleteAndSelect(AutoCompleteElement.Find(), lite);
+            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), lite);
+        }
+
+        public void AutoCompleteBasic(Lite<IEntity> lite)
+        {
+            AutoCompleteBasic(AutoCompleteElement.Find(), lite);
         }
 
         public PopupControl<T> View<T>() where T : ModifiableEntity
@@ -359,6 +368,8 @@ namespace Signum.React.Selenium
         {
             return EntityInfoInternal(null);
         }
+
+      
     }
 
     public class EntityComboProxy : EntityBaseProxy
@@ -642,7 +653,7 @@ namespace Signum.React.Selenium
 
         public void AutoComplete(Lite<IEntity> lite)
         {
-            base.AutoCompleteAndSelect(AutoCompleteElement.Find(), lite);
+            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), lite);
         }
 
         public PopupControl<T> View<T>(int index) where T : ModifiableEntity
