@@ -72,7 +72,7 @@ namespace Signum.Entities.Reflection
             }
         }
 
-        public static IEnumerable<Modifiable> IdentifiableExplore(Modifiable obj)
+        public static IEnumerable<Modifiable> EntityExplore(Modifiable obj)
         {
             if (obj == null)//|| obj is Lite)
                 yield break;
