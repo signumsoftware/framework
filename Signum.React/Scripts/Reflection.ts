@@ -87,6 +87,13 @@ export function toMomentFormat(format: string): any {
     }
 }
 
+
+//https://msdn.microsoft.com/en-us/library/ee372286(v=vs.110).aspx
+//https://github.com/jsmreese/moment-duration-format
+export function toMomentDurationFormat(format: string) {
+    return format.replace("\:", ":");
+}
+
 export interface TypeReference {
     name: string;
     typeNiceName?: string;

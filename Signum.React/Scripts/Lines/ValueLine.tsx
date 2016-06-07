@@ -6,7 +6,7 @@ import { Dic, addClass } from '../Globals'
 import { DateTimePicker } from 'react-widgets'
 import 'react-widgets/dist/css/react-widgets.css';
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat } from '../Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from '../Lines/LineBase'
 
 
@@ -418,17 +418,18 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
 
     const s = vl.state;
 
+    const durationFormat = toMomentDurationFormat(s.formatText);
+
     const ticksPerMillisecond = 10000;
-    const durationFormat = "h:mm";
 
-    const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : null;
-
-    if (s.ctx.readOnly)
+    if (s.ctx.readOnly) {
+        const d = s.ctx.value ? moment.duration(s.ctx.value / ticksPerMillisecond) : null;
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{d && d.format(durationFormat) }</FormControlStatic>
             </FormGroup>
         );
+    }
 
     const handleOnChange = (newValue: number) => {
         const d = moment.duration(newValue);
@@ -436,19 +437,11 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
         vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : null);
     };
 
-    var htmlProps = Dic.extend(
-        { placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : null } as React.HTMLAttributes,
-        vl.props.valueHtmlProps);
+    var htmlProps = Dic.extend({ placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : null } as React.HTMLAttributes, vl.props.valueHtmlProps);
 
     return (
-        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={vl.withPropertyPath(s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            <DurationTextBox
-                    htmlProps={htmlProps}
-                    value={s.ctx.value}
-                    onChange={handleOnChange}
-                    validateKey={validateKey}
-                    format={"h:mm"}
-                    />
+        <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+            <DurationTextBox htmlProps={htmlProps} value={s.ctx.value} onChange={handleOnChange} validateKey={validateKey} format={durationFormat} />
         </FormGroup>
     );
 }
