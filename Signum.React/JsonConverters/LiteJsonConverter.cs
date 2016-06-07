@@ -80,13 +80,21 @@ namespace Signum.React.Json
             if (entity == null)
                 return Lite.Create(type, idOrNull.Value, toString);
 
-            var result = entity.ToLite(entity.IsNew, toString);
+            var result = entity.ToLiteFat(toString);
 
             if (result.EntityType != type)
                 throw new InvalidOperationException("Types don't match");
 
             if (result.IdOrNull != idOrNull)
                 throw new InvalidOperationException("Id's don't match");
+
+            var existing = existingValue as Lite<Entity>;
+
+            if (existing.Is(result) && existing.EntityOrNull == null && result.EntityOrNull != null)
+            {
+                existing.SetEntity(result.EntityOrNull);
+                return existing;
+            }
 
            return result;
         }
