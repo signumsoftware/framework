@@ -755,7 +755,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                     <input type="checkbox" id="cbSelectAll" onClick={this.handleToggleAll} checked={this.allSelected() }/>
                 </th>
                 }
-                { this.state.findOptions.navigate && <th className="sf-th-entity"></th> }
+                { this.state.findOptions.navigate && <th className="sf-th-entity" data-column-name="Entity"></th> }
                 { this.state.findOptions.columnOptions.map((co, i) =>
                     <th draggable={true}
                         style={i == this.state.dragColumnIndex ? { opacity: 0.5 } : null }
