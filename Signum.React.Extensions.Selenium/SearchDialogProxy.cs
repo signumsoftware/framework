@@ -109,7 +109,7 @@ namespace Signum.React.Selenium
         public SearchPageProxy(RemoteWebDriver selenium)
         {
             this.Selenium = selenium;
-            this.SearchControl = new SearchControlProxy(selenium.FindElement(By.CssSelector("div.sf-search-control")));
+            this.SearchControl = new SearchControlProxy(selenium.WaitElementVisible(By.ClassName("sf-search-control")));
         }
 
         public PopupControl<T> Create<T>() where T : ModifiableEntity
@@ -160,7 +160,7 @@ namespace Signum.React.Selenium
 
         public WebElementLocator SearchButton
         {
-            get { return this.Element.WithLocator(By.ClassName("sf-search-control")); }
+            get { return this.Element.WithLocator(By.CssSelector(".sf-query-button.sf-search")); }
         }
 
         public void Search()
@@ -367,14 +367,14 @@ namespace Signum.React.Selenium
         {
             var index = GetColumnIndex(token);
 
-            return RowElement(rowIndex).CombineCss("> td:nth-child({0})".FormatWith(index + 1));
+            return RowElement(rowIndex).CombineCss("> td:nth-child({0})".FormatWith(index));
         }
 
         public WebElementLocator CellElement(Lite<IEntity> lite, string token)
         {
             var index = GetColumnIndex(token);
 
-            return RowElement(lite).CombineCss("> td:nth-child({0})".FormatWith(index + 1));
+            return RowElement(lite).CombineCss("> td:nth-child({0})".FormatWith(index));
         }
 
         private int GetColumnIndex(string token)
@@ -384,7 +384,7 @@ namespace Signum.React.Selenium
             var index = tokens.IndexOf(token);
 
             if (index == -1)
-                throw new InvalidOperationException("Token {0} not found between {1}".FormatWith(token, tokens.CommaAnd()));
+                throw new InvalidOperationException("Token {0} not found between {1}".FormatWith(token, tokens.NotNull().CommaAnd()));
             return index;
         }
 
@@ -416,7 +416,9 @@ namespace Signum.React.Selenium
 
         public string[] GetColumnTokens()
         {
-            return this.Element.FindElements(By.CssSelector("thead > th")).Select(a=>a.GetAttribute("data-column-name")).ToArray();
+            var ths = this.Element.FindElements(By.CssSelector("thead > tr > th")).ToList();
+            
+            return ths.Select(a=>a.GetAttribute("data-column-name")).ToArray();
         }
 
         public WebElementLocator HeaderCellElement(string token)
@@ -482,12 +484,12 @@ namespace Signum.React.Selenium
             headerLocator.WaitNoPresent();
         }
 
-        public WebElementLocator EntityLinkElement(Lite<IEntity> lite)
+        public WebElementLocator EntityLink(Lite<IEntity> lite)
         {
             return RowElement(lite).CombineCss(" > td:nth-child({0}) > a");
         }
 
-        public WebElementLocator EntityLinkElement(int rowIndex)
+        public WebElementLocator EntityLink(int rowIndex)
         {
             return RowElement(rowIndex).CombineCss(" > td:nth-child({0}) > a");
         }
@@ -495,25 +497,25 @@ namespace Signum.React.Selenium
 
         public PopupControl<T> EntityClick<T>(Lite<T> lite) where T : Entity
         {
-            var element = EntityLinkElement(lite).Find().CaptureOnClick();
+            var element = EntityLink(lite).Find().CaptureOnClick();
             return new PopupControl<T>(element);
         }
 
         public PopupControl<T> EntityClick<T>(int rowIndex) where T : Entity
         {
-            var element = EntityLinkElement(rowIndex).Find().CaptureOnClick();
+            var element = EntityLink(rowIndex).Find().CaptureOnClick();
             return new PopupControl<T>(element);
         }
 
         public NormalPage<T> EntityClickNormalPage<T>(Lite<T> lite) where T : Entity
         {
-            EntityLinkElement(lite).Find().Click();
+            EntityLink(lite).Find().Click();
             return new NormalPage<T>(this.Element.GetDriver());
         }
 
         public NormalPage<T> EntityClickNormalPage<T>(int rowIndex) where T : Entity
         {
-            EntityLinkElement(rowIndex).Find().Click();
+            EntityLink(rowIndex).Find().Click();
             return new NormalPage<T>(this.Element.GetDriver());
         }
 

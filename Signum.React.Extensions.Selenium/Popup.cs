@@ -28,7 +28,8 @@ namespace Signum.React.Selenium
 
         private void WaitVisible()
         {
-            this.Element.WaitElementVisible(By.CssSelector("modal.fade.in"));
+            //this.Element.WaitElementVisible(By.CssSelector("modal.fade.in"));
+            this.Element.WaitElementVisible(By.CssSelector("div.modal-content"));
         }
 
         public WebElementLocator CloseButton
@@ -168,7 +169,7 @@ namespace Signum.React.Selenium
     }
 
 
-    public class PopupControl<T> : Popup, ILineContainer<T>, IEntityButtonContainer<T> where T : ModifiableEntity
+    public class PopupControl<T> : Popup, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer where T : ModifiableEntity
     {
         public PropertyRoute Route { get; private set; }
 
@@ -197,32 +198,34 @@ namespace Signum.React.Selenium
         {
             if (!AvoidClose)
             {
-                string confirmationMessage;
+                string confirmationMessage = null;
                 Selenium.Wait(() =>
                 {
-                    var close = this.CloseButton.TryFind();
-                    if (close?.Displayed == true)
+                    try
                     {
-                        try
+                        var close = this.CloseButton.TryFind();
+                        if (close?.Displayed == true)
                         {
                             close.Click();
                         }
-                        catch (NoSuchElementException e)
+
+                        if (Selenium.IsAlertPresent())
                         {
-                            if (!e.Message.Contains("not found"))
-                                throw;
+                            var alert = Selenium.SwitchTo().Alert();
+                            confirmationMessage = alert.Text;
+                            alert.Accept();
                         }
-                    }
 
-                    if (Selenium.IsAlertPresent())
+                        return false;
+                    }
+                    catch (StaleElementReferenceException)
                     {
-                        var alert = Selenium.SwitchTo().Alert();
-                        confirmationMessage = alert.Text;
-                        alert.Accept();
+                        return true;
                     }
-
-                    return false;
                 }, () => "popup {0} to disapear with or without confirmation".FormatWith());
+
+                if (confirmationMessage != null)
+                    throw new UnhandledAlertException(confirmationMessage);
             }
 
             if (Disposing != null)

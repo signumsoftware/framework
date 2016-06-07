@@ -307,8 +307,9 @@ namespace Signum.React.Selenium
                 if (last == newLast)
                     return null;
 
-                return newLast.FindElement(By.ClassName("modal"));
+                return newLast.TryFindElement(By.CssSelector(".fade.in.modal"));
             });
+
             return result;
         }
 

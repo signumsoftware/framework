@@ -30,7 +30,7 @@ namespace Signum.React.Selenium
 
         public static WebElementLocator OperationButton(this IEntityButtonContainer container, OperationSymbol symbol)
         {
-            return container.ContainerElement().WithLocator(By.CssSelector("button[data-operation={0}]".FormatWith(symbol.Key)));
+            return container.ContainerElement().WithLocator(By.CssSelector($"button[data-operation='{symbol.Key}']"));
         }
 
         public static WebElementLocator OperationButton<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)

@@ -139,7 +139,7 @@ namespace Signum.React.Selenium
             Selenium.FindElement(By.Id("password")).SafeSendKeys(password);
             Selenium.FindElement(By.Id("login")).Submit();
 
-            Selenium.Wait(() => GetCurrentUser() != null);
+            Selenium.WaitElementPresent(By.Id("sfUserDropDown"));
         }
     }
 }

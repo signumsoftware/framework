@@ -18,6 +18,7 @@ using Signum.React.Maps;
 using Signum.Engine.Basics;
 using Signum.React.Map;
 using Signum.Engine.DynamicQuery;
+using Signum.Engine.Maps;
 
 namespace Signum.React.Authorization
 {
@@ -40,6 +41,8 @@ namespace Signum.React.Authorization
                 Role = UserEntity.Current == null ? null : RoleEntity.Current,
             };
 
+            AuthLogic.OnRulesChanged += () => ReflectionServer.cache.Clear();
+            
             if (TypeAuthLogic.IsStarted)
             {
                 ReflectionServer.AddTypeExtension += (ti, t) =>
@@ -47,9 +50,6 @@ namespace Signum.React.Authorization
                     if (typeof(Entity).IsAssignableFrom(t))
                         ti.Extension.Add("typeAllowed", UserEntity.Current == null ? TypeAllowedBasic.None : TypeAuthLogic.GetAllowed(t).MaxUI());
                 };
-
-
-                var dic = PropertyConverter.GetPropertyConverters(typeof(TypeAllowedAndConditions));
             }
 
             if (QueryAuthLogic.IsStarted)
@@ -65,31 +65,49 @@ namespace Signum.React.Authorization
                     if (fi.DeclaringType.Name.EndsWith("Query"))
                         mi.Extension.Add("queryAllowed", UserEntity.Current == null ? false : QueryAuthLogic.GetQueryAllowed(fi.GetValue(null)));
                 };
+                
             }
 
             if (PropertyAuthLogic.IsStarted)
+            {
                 ReflectionServer.AddPropertyRouteExtension += (mi, pr) =>
                 {
-                    mi.Extension.Add("propertyAllowed", UserEntity.Current == null ?  PropertyAllowed.None: pr.GetPropertyAllowed());
+                    mi.Extension.Add("propertyAllowed",
+                        UserEntity.Current == null ? PropertyAllowed.None : pr.GetPropertyAllowed());
                 };
+                
+            }
 
             if (OperationAuthLogic.IsStarted)
+            {
                 ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
                 {
                     if (fi.DeclaringType.Name.EndsWith("Operation"))
                     {
                         var container = fi.GetValue(null) as IOperationSymbolContainer;
                         if (container != null)
-                            mi.Extension.Add("operationAllowed", UserEntity.Current == null ? false : OperationAuthLogic.GetOperationAllowed(container.Symbol, inUserInterface: true));
+                            mi.Extension.Add("operationAllowed",
+                                UserEntity.Current == null
+                                    ? false
+                                    : OperationAuthLogic.GetOperationAllowed(container.Symbol, inUserInterface: true));
                     }
                 };
+                
+            }
 
             if (PermissionAuthLogic.IsStarted)
+            {
                 ReflectionServer.AddFieldInfoExtension += (mi, fi) =>
                 {
                     if (fi.FieldType == typeof(PermissionSymbol))
-                        mi.Extension.Add("permissionAllowed", UserEntity.Current == null ? false : PermissionAuthLogic.IsAuthorized((PermissionSymbol)fi.GetValue(null)));
+                        mi.Extension.Add("permissionAllowed",
+                            UserEntity.Current == null
+                                ? false
+                                : PermissionAuthLogic.IsAuthorized((PermissionSymbol) fi.GetValue(null)));
                 };
+                
+            }
+
 
             var piPasswordHash = ReflectionTools.GetPropertyInfo((UserEntity e) => e.PasswordHash);
             var pcs = PropertyConverter.GetPropertyConverters(typeof(UserEntity));

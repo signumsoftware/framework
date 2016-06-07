@@ -82,7 +82,7 @@ namespace Signum.Engine.Authorization
                 sb.Include<RoleEntity>();
                 sb.Include<LastAuthRulesImportEntity>(); 
 
-                roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)));
+                roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
                 mergeStrategies = sb.GlobalLazy(() =>
                 {
                     var strategies = Database.Query<RoleEntity>().Select(r => KVP.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
@@ -104,7 +104,7 @@ namespace Signum.Engine.Authorization
                     }
 
                     return result;
-                },new InvalidateWith(typeof(RoleEntity)));
+                }, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
 
                 sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
 
@@ -283,6 +283,13 @@ namespace Signum.Engine.Authorization
         public static bool IsEnabled
         {
             get { return !tempDisabled.Value && gloaballyEnabled; }
+        }
+
+        public static event Action OnRulesChanged;
+
+        public static void NotifyRulesChanged()
+        {
+            OnRulesChanged?.Invoke();
         }
 
         public static UserEntity Login(string username, byte[] passwordHash)
