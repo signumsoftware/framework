@@ -323,7 +323,7 @@ namespace Signum.Engine.Authorization
             return Login(username, newPasswordHash);
         }
 
-        public static void ChangePassword(Lite<UserEntity> user, byte[] passwordHash, byte[] newPasswordHash)
+        public static void ChangePassword(Lite<UserEntity> user, byte[] newPasswordHash)
         {
             var userEntity = user.RetrieveAndForget();
             userEntity.PasswordHash = newPasswordHash;
