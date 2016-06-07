@@ -176,7 +176,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand CreateAllIndices(ITable t)
         {
-            return t.GeneratAllIndexes().Select(CreateIndex).Combine(Spacing.Simple);
+            return t.GeneratAllIndexes().Where(a => !(a is PrimaryClusteredIndex)).Select(CreateIndex).Combine(Spacing.Simple);
         }
 
         public static SqlPreCommand DropIndex(UniqueIndex ix)
