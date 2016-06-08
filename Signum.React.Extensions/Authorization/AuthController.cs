@@ -115,8 +115,8 @@ namespace Signum.React.Authorization
             if (!user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
                 throw ModelException("oldPassword", AuthMessage.InvalidPassword.NiceToString());
 
-            AuthLogic.ChangePassword(UserEntity.Current.ToLite(), 
-                Security.EncodePassword(request.newPassword));
+            //AuthLogic.ChangePassword(UserEntity.Current.ToLite(), 
+            //    Security.EncodePassword(request.newPassword));
         }
        
         private HttpResponseException ModelException(string field, string error)
