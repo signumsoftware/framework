@@ -12,6 +12,7 @@ using Signum.Services;
 using Signum.Utilities;
 using Signum.React.Facades;
 using Signum.React.Authorization;
+using Signum.Engine.Operations;
 
 namespace Signum.React.Authorization
 {
@@ -107,16 +108,25 @@ namespace Signum.React.Authorization
             public string newPassword { get; set; }
         }
 
-        [Route("api/auth/changePAssword"), HttpPost]
-        public void ChangePassword(ChangePasswordRequest request)
+        [Route("api/auth/ChangePassword"), HttpPost]
+        public UserEntity ChangePassword(ChangePasswordRequest request)
         {
+            if (string.IsNullOrEmpty(request.oldPassword))
+                throw ModelException("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+
+            if (string.IsNullOrEmpty(request.newPassword))
+                throw ModelException("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+
             var user = UserEntity.Current;
             
             if (!user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
                 throw ModelException("oldPassword", AuthMessage.InvalidPassword.NiceToString());
 
-            AuthLogic.ChangePassword(UserEntity.Current.ToLite(), 
-                Security.EncodePassword(request.newPassword));
+            user.PasswordHash = Security.EncodePassword(request.newPassword);
+            using (AuthLogic.Disable())
+                user.Execute(UserOperation.Save);
+
+            return user;
         }
        
         private HttpResponseException ModelException(string field, string error)

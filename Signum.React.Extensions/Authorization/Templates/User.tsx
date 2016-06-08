@@ -23,35 +23,44 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
                 <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true }) } />
                 <ValueLine ctx={ctx.subCtx(e => e.userName) } />
                 { entity.isNew || this.state.withPassword ?
-                    <DoublePassword ctx={ctx.subCtx(a => a.passwordHash, { labelColumns: { sm: 4 } }) }/> :
-                    !ctx.readOnly  &&
-                    <a className="btn btn-default btn-sm" onClick={() => this.setState({ withPassword: true }) }>
-                        <i className="fa fa-key"></i> {AuthMessage.ChangePassword.niceToString() }
-                    </a>
+                    <DoublePassword ctx={ctx.subCtx(a => a.passwordHash, { labelColumns: { sm: 3 } }) }/> :
+                    !ctx.readOnly && this.renderButton()
                 }
                 <EntityCombo ctx={ctx.subCtx(e => e.role) } />
                 <ValueLine ctx={ctx.subCtx(e => e.email) } />
                 <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo) }/>
-                <ValueLine ctx={ctx.subCtx(e => e.passwordNeverExpires, { labelColumns: { sm: 4 } }) } />
-                <ValueLine ctx={ctx.subCtx(e => e.passwordSetDate, { labelColumns: { sm: 4 } }) } />
+                <ValueLine ctx={ctx.subCtx(e => e.passwordNeverExpires, { labelColumns: { sm: 3 } }) } />
+                <ValueLine ctx={ctx.subCtx(e => e.passwordSetDate, { labelColumns: { sm: 3 } }) } />
             </div>
+        );
+    }
+
+    renderButton() {
+        return (
+            <FormGroup labelText={AuthMessage.NewPassword.niceToString()} ctx={this.props.ctx}>
+                <a className="btn btn-default btn-sm" onClick={() => this.setState({ withPassword: true }) }>
+                    <i className="fa fa-key"></i> {AuthMessage.ChangePassword.niceToString() }
+                </a>
+            </FormGroup>
         );
     }
 }
 
 class DoublePassword extends React.Component<{ ctx: TypeContext<string> }, void>{
 
-    handlePasswordChange = (event: React.SyntheticEvent) => {
+    handlePasswordBlur = (event: React.SyntheticEvent) => {
 
-        var areDifferent = this.newPass.value != this.newPass2.value;
+        var ctx = this.props.ctx;
 
-        if (this.newPass.value && areDifferent) {
-            this.props.ctx.frame.setError({ "passwordHash": AuthMessage.PasswordsAreDifferent.niceToString() });
+        if (this.newPass.value && this.newPass2.value && this.newPass.value != this.newPass2.value) {
+            ctx.binding.error = AuthMessage.PasswordsAreDifferent.niceToString()
         }
         else {
-            this.props.ctx.frame.setError(null);
-            (this.props.ctx.value as any).newPassword = (this.refs["newPass"] as HTMLInputElement).value;
+            ctx.binding.error = null;
+            ctx.value = this.newPass.value;
         }
+
+        ctx.frame.onClose
 
     }
 
@@ -62,14 +71,13 @@ class DoublePassword extends React.Component<{ ctx: TypeContext<string> }, void>
         return (
             <div>
                 <FormGroup ctx={ this.props.ctx } labelText={AuthMessage.ChangePasswordAspx_NewPassword.niceToString() }>
-                        <input type="password" ref={p=>this.newPass = p} className="form-control" onBlur={this.handlePasswordChange}/>
-                    </FormGroup>
+                    <input type="password" ref={p => this.newPass = p} className="form-control" onBlur={this.handlePasswordBlur}/>
+                </FormGroup>
                 <FormGroup ctx={ this.props.ctx } labelText={AuthMessage.ChangePasswordAspx_ConfirmNewPassword.niceToString() }>
-                        <input type="password" ref={p=>this.newPass2 = p} className="form-control" onBlur={this.handlePasswordChange}/>
-                    </FormGroup>
+                    <input type="password" ref={p => this.newPass2 = p} className="form-control" onBlur={this.handlePasswordBlur}/>
+                </FormGroup>
             </div>
         );
     }
-
 }
 
