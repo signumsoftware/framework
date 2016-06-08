@@ -54,9 +54,9 @@ namespace Signum.Entities.Reflection
             }
         }
 
-        public static DirectedGraph<Modifiable> FromRootIdentifiable(Modifiable root)
+        public static DirectedGraph<Modifiable> FromRootEntity(Modifiable root)
         {
-            return DirectedGraph<Modifiable>.Generate(root, ModifyInspector.IdentifiableExplore, ReferenceEqualityComparer<Modifiable>.Default);
+            return DirectedGraph<Modifiable>.Generate(root, ModifyInspector.EntityExplore, ReferenceEqualityComparer<Modifiable>.Default);
         }
 
         public static DirectedGraph<Modifiable> FromRoot(Modifiable root)
@@ -73,7 +73,7 @@ namespace Signum.Entities.Reflection
         public static DirectedGraph<Modifiable> FromRootsIdentifiable<T>(IEnumerable<T> roots)
             where T : Modifiable
         {
-            return DirectedGraph<Modifiable>.Generate(roots.Cast<Modifiable>(), ModifyInspector.IdentifiableExplore, ReferenceEqualityComparer<Modifiable>.Default);
+            return DirectedGraph<Modifiable>.Generate(roots.Cast<Modifiable>(), ModifyInspector.EntityExplore, ReferenceEqualityComparer<Modifiable>.Default);
         }
 
         public static Dictionary<K, V> ToDictionaryOrNull<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> nullableValueSelector) where V : class
@@ -96,7 +96,7 @@ namespace Signum.Entities.Reflection
             return result;
         }
 
-        public static Dictionary<Guid, Dictionary<string, string>> IdentifiableIntegrityCheck(DirectedGraph<Modifiable> graph)
+        public static Dictionary<Guid, Dictionary<string, string>> EntityIntegrityCheck(DirectedGraph<Modifiable> graph)
         {
             return graph.OfType<ModifiableEntity>().ToDictionaryOrNull(a=>a.temporalId, a=>a.IntegrityCheck());
         }

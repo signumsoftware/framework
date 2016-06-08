@@ -15,11 +15,16 @@ export interface MenuItemBlock {
 export interface ContextualItemsContext<T extends Entity> {
     lites: Lite<T>[];
     queryDescription: QueryDescription;
-    markRows: (dictionary: MarkRowsDictionary) => void;
+    markRows: (dictionary: MarkedRowsDictionary) => void;
 }
 
-export interface MarkRowsDictionary {
-    [liteKey: string]: string | { style: string, message: string };
+export interface MarkedRowsDictionary {
+    [liteKey: string]: string | MarkedRow;
+}
+
+export interface MarkedRow {
+    style: string;
+    message: string;
 }
 
 export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promise<MenuItemBlock>)[] = [];

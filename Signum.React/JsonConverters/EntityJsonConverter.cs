@@ -352,10 +352,12 @@ namespace Signum.React.Json
 
             if (typeof(MixinEntity).IsAssignableFrom(objectType))
             {
-                if (objectType != existingValue.GetType())
-                    throw new InvalidOperationException($"{objectType.Name} expected");
+                var mixin = (MixinEntity)existingValue;
 
-                return (MixinEntity)existingValue;
+                if (identityInfo.Modified == true)
+                    mixin.SetSelfModified();
+
+                return mixin;
             }
 
             if (identityInfo.IsNew == true)
