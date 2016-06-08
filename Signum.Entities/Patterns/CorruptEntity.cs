@@ -19,7 +19,7 @@ namespace Signum.Entities
 
             if (Corrupt)
             {
-                var integrity = MainEntity.IdentifiableIntegrityCheckBase(); // So, no corruption allowed
+                var integrity = MainEntity.EntityIntegrityCheckBase(); // So, no corruption allowed
                 if (integrity == null)
                 {
                     this.Corrupt = false;

@@ -107,14 +107,14 @@ namespace Signum.Entities
         {
             using (Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
             {
-                return IdentifiableIntegrityCheckBase();
+                return EntityIntegrityCheckBase();
             }
         }
 
-        internal virtual Dictionary<Guid, Dictionary<string, string>> IdentifiableIntegrityCheckBase()
+        internal virtual Dictionary<Guid, Dictionary<string, string>> EntityIntegrityCheckBase()
         {
-            using (HeavyProfiler.LogNoStackTrace("IdentifiableIntegrityCheck", () => GetType().Name))
-                return GraphExplorer.IdentifiableIntegrityCheck(GraphExplorer.FromRootIdentifiable(this));
+            using (HeavyProfiler.LogNoStackTrace("EntityIntegrityCheckBase", () => GetType().Name))
+                return GraphExplorer.EntityIntegrityCheck(GraphExplorer.FromRootEntity(this));
         }
 
         public override int GetHashCode()

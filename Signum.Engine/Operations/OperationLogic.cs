@@ -355,7 +355,7 @@ Consider the following options:
         public static Entity ServiceExecuteLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[] args)
         {
             Entity entity = (Entity)lite.RetrieveAndForget();
-            var op = Find<IExecuteOperation>(lite.EntityType, operationSymbol).AssertLite();
+            var op = Find<IExecuteOperation>(lite.EntityType, operationSymbol);
             op.Execute(entity, args);
             return entity;
         }
@@ -381,7 +381,7 @@ Consider the following options:
             where T : class, IEntity
         {
             IEntity entity = lite.RetrieveAndForget();
-            var op = Find<IDeleteOperation>(lite.EntityType, symbol.Symbol);
+            var op = Find<IDeleteOperation>(lite.EntityType, symbol.Symbol).AssertLite();
             op.Delete(entity, args);
         }
 
@@ -447,7 +447,7 @@ Consider the following options:
 
         public static Entity ServiceConstructFromLite(Lite<IEntity> lite, OperationSymbol operationSymbol, params object[] args)
         {
-            var op = Find<IConstructorFromOperation>(lite.EntityType, operationSymbol).AssertLite();
+            var op = Find<IConstructorFromOperation>(lite.EntityType, operationSymbol);
             return (Entity)op.Construct(Database.RetrieveAndForget(lite), args);
         }
         #endregion
