@@ -251,6 +251,7 @@ export interface EntityFrame<T extends ModifiableEntity> {
     entityComponent: React.Component<any, any>;
     onReload: (pack: EntityPack<T>) => void;
     setError: (modelState: ModelState, initialPrefix?: string) => void;
+    forceUpdate: () => void;
     onClose: () => void;
 }
 
