@@ -362,8 +362,8 @@ export interface IBinding<T> {
     getValue(): T;
     setValue(val: T): void;
     suffix: string;
-    error: string;
-    errorClass: string;
+    getError(): string;
+    setError(value: string);
 }
 
 export class Binding<T> implements IBinding<T> {
@@ -397,13 +397,12 @@ export class Binding<T> implements IBinding<T> {
         }
     }
 
-    get error(): string {
+    getError(): string {
         const parentErrors = (this.parentValue as ModifiableEntity).error;
         return parentErrors && parentErrors[this.member];
     }
 
-    set error(value: string) {
-
+    setError(value: string) {
         var parent = this.parentValue as ModifiableEntity;
 
         if (!value) {
@@ -423,10 +422,6 @@ export class Binding<T> implements IBinding<T> {
 
         }
     }
-
-    get errorClass(): string {
-        return !!this.error ? "has-error" : null;
-    }
 }
 
 export class ReadonlyBinding<T> implements IBinding<T> {
@@ -442,11 +437,11 @@ export class ReadonlyBinding<T> implements IBinding<T> {
         throw new Error("Readonly Binding");
     }
 
-    get error(): string {
+    getError(): string {
         return null;
     }
 
-    get errorClass(): string {
+    setError(name: string) {
         return null;
     }
 }

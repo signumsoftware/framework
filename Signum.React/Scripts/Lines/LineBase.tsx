@@ -24,7 +24,7 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const tCtx = ctx as TypeContext<any>;
 
-        var errorClass = tCtx.binding && tCtx.binding.errorClass;
+        var errorClass = tCtx.errorClass;
 
         if (ctx.formGroupStyle == "None") {
 

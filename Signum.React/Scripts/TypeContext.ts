@@ -153,6 +153,18 @@ export class TypeContext<T> extends StyleContext {
         this.binding.setValue(val);
     }
 
+
+    get error() {
+        if (this.binding == null)
+            return null; //React Dev Tools
+
+        return this.binding.getError();
+    }
+
+    set error(val: string) {
+        this.binding.setError(val);
+    }
+
     
     static root<T extends ModifiableEntity>(type: Type<T>, value: T, styleOptions?: StyleOptions): TypeContext<T> {
         return new TypeContext(null, styleOptions, PropertyRoute.root(type), new ReadonlyBinding(value, ""));
@@ -233,6 +245,10 @@ export class TypeContext<T> extends StyleContext {
 
     get propertyPath() {
         return this.propertyRoute ? this.propertyRoute.propertyPath() : null;
+    }
+
+    get errorClass(): string {
+        return !!this.error ? "has-error" : null;
     }
 }
 
