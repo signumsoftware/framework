@@ -87,7 +87,7 @@ namespace Signum.React.Selenium
             this.Dispose();
         }
 
-        public PopupControl<T> Create<T>() where T : ModifiableEntity
+        public PopupFrame<T> Create<T>() where T : ModifiableEntity
         {
             return SearchControl.Create<T>();
         }
@@ -112,14 +112,14 @@ namespace Signum.React.Selenium
             this.SearchControl = new SearchControlProxy(selenium.WaitElementVisible(By.ClassName("sf-search-control")));
         }
 
-        public PopupControl<T> Create<T>() where T : ModifiableEntity
+        public PopupFrame<T> Create<T>() where T : ModifiableEntity
         {
             var popup = SearchControl.CreateButton.Find().CaptureOnClick();
 
             if (SelectorModal.IsSelector(popup))
                 popup = popup.GetDriver().CapturePopup(() => SelectorModal.Select(popup, typeof(T)));
 
-            return new PopupControl<T>(popup);
+            return new PopupFrame<T>(popup);
         }
 
         public void Dispose()
@@ -148,7 +148,7 @@ namespace Signum.React.Selenium
         public ColumnEditorProxy ColumnEditor() => new ColumnEditorProxy(this.Element.FindElement(By.CssSelector(".sf-column-editor")));
 
         public PaginationSelectorProxy Pagination => new PaginationSelectorProxy(this);
-        public ResultTableProxy Results  { get; private set; }
+        public ResultTableProxy Results { get; private set; }
 
 
         public SearchControlProxy(IWebElement element)
@@ -220,12 +220,12 @@ namespace Signum.React.Selenium
                 FiltersPanel.WaitNoVisible();
         }
 
-       
+
 
         public WebElementLocator ContextualMenu => this.Element.WithLocator(By.ClassName("sf-context-menu"));
-       
+
         public FilterOptionProxy AddQuickFilter(int rowIndex, string token)
-        {   
+        {
             Results.CellElement(rowIndex, token).Find().ContextClick();
 
             var menuItem = ContextualMenu.WaitVisible().FindElement(By.CssSelector(".sf-quickfilter-header a"));
@@ -242,14 +242,14 @@ namespace Signum.React.Selenium
             return this.Filters.GetNewFilter(() => menuItem.Click());
         }
 
-        public PopupControl<T> Create<T>() where T : ModifiableEntity
+        public PopupFrame<T> Create<T>() where T : ModifiableEntity
         {
             var popup = this.CreateButton.Find().CaptureOnClick();
 
             if (SelectorModal.IsSelector(popup))
                 popup = popup.GetDriver().CapturePopup(() => SelectorModal.Select(popup, typeof(T)));
 
-            return new PopupControl<T>(popup).WaitLoaded();
+            return new PopupFrame<T>(popup).WaitLoaded();
         }
 
         public WebElementLocator CreateButton
@@ -335,7 +335,7 @@ namespace Signum.React.Selenium
         public IWebElement Element;
 
         SearchControlProxy SearchControl;
-        
+
         public ResultTableProxy(IWebElement element, SearchControlProxy searchControl)
         {
             this.Selenium = element.GetDriver();
@@ -408,7 +408,7 @@ namespace Signum.React.Selenium
         {
             RowElement(lite).CombineCss(" .sf-td-selection").Find().Click();
         }
-        
+
         public WebElementLocator HeaderElement
         {
             get { return this.Element.WithLocator(By.CssSelector("thead > tr > th")); }
@@ -417,8 +417,8 @@ namespace Signum.React.Selenium
         public string[] GetColumnTokens()
         {
             var ths = this.Element.FindElements(By.CssSelector("thead > tr > th")).ToList();
-            
-            return ths.Select(a=>a.GetAttribute("data-column-name")).ToArray();
+
+            return ths.Select(a => a.GetAttribute("data-column-name")).ToArray();
         }
 
         public WebElementLocator HeaderCellElement(string token)
@@ -495,28 +495,28 @@ namespace Signum.React.Selenium
         }
 
 
-        public PopupControl<T> EntityClick<T>(Lite<T> lite) where T : Entity
+        public PopupFrame<T> EntityClick<T>(Lite<T> lite) where T : Entity
         {
             var element = EntityLink(lite).Find().CaptureOnClick();
-            return new PopupControl<T>(element);
+            return new PopupFrame<T>(element);
         }
 
-        public PopupControl<T> EntityClick<T>(int rowIndex) where T : Entity
+        public PopupFrame<T> EntityClick<T>(int rowIndex) where T : Entity
         {
             var element = EntityLink(rowIndex).Find().CaptureOnClick();
-            return new PopupControl<T>(element);
+            return new PopupFrame<T>(element);
         }
 
-        public NormalPage<T> EntityClickNormalPage<T>(Lite<T> lite) where T : Entity
+        public PageFrame<T> EntityClickNormalPage<T>(Lite<T> lite) where T : Entity
         {
             EntityLink(lite).Find().Click();
-            return new NormalPage<T>(this.Element.GetDriver());
+            return new PageFrame<T>(this.Element.GetDriver());
         }
 
-        public NormalPage<T> EntityClickNormalPage<T>(int rowIndex) where T : Entity
+        public PageFrame<T> EntityClickNormalPage<T>(int rowIndex) where T : Entity
         {
             EntityLink(rowIndex).Find().Click();
-            return new NormalPage<T>(this.Element.GetDriver());
+            return new PageFrame<T>(this.Element.GetDriver());
         }
 
         public EntityContextMenuProxy EntityContextMenu(int rowIndex, string columnToken = "Entity")
@@ -598,7 +598,7 @@ namespace Signum.React.Selenium
 
         public void WaitActiveSuccess()
         {
-            RowsElement.CombineCss(".active.sf-entity-ctxmenu-success").WaitVisible();
+            RowsElement.CombineCss(".sf-entity-ctxmenu-success").WaitVisible();
         }
     }
 
@@ -625,12 +625,12 @@ namespace Signum.React.Selenium
     {
         ResultTableProxy ResultTable;
         public IWebElement Element { get; private set; }
-        public EntityContextMenuProxy(ResultTableProxy  resultTable, IWebElement element)
+        public EntityContextMenuProxy(ResultTableProxy resultTable, IWebElement element)
         {
             this.ResultTable = resultTable;
             this.Element = element;
         }
-        
+
 
         public WebElementLocator QuickLink(string name)
         {
@@ -662,19 +662,19 @@ namespace Signum.React.Selenium
             ResultTable.WaitActiveSuccess();
         }
 
-        public PopupControl<ProcessEntity> DeleteProcessClick(IOperationSymbolContainer operationSymbol)
+        public PopupFrame<ProcessEntity> DeleteProcessClick(IOperationSymbolContainer operationSymbol)
         {
             Operation(operationSymbol).Find();
 
             var popup = this.Element.GetDriver().CapturePopup(() =>
             ResultTable.Selenium.ConsumeAlert());
 
-            return new PopupControl<ProcessEntity>(popup).WaitLoaded();
+            return new PopupFrame<ProcessEntity>(popup).WaitLoaded();
         }
 
         public WebElementLocator Operation(IOperationSymbolContainer symbolContainer)
         {
-            return this.Element.WithLocator(By.CssSelector("a[data-operation='{0}']".FormatWith(symbolContainer.Symbol.Key)));
+            return this.Element.WithLocator(By.CssSelector("a[data-operation=\'{0}']".FormatWith(symbolContainer.Symbol.Key)));
         }
 
         public bool OperationIsDisabled(IOperationSymbolContainer symbolContainer)
@@ -682,17 +682,17 @@ namespace Signum.React.Selenium
             return Operation(symbolContainer).Find().GetAttribute("disabled").HasText();
         }
 
-        public PopupControl<T> OperationClickPopup<T>(IOperationSymbolContainer symbolContainer)
+        public PopupFrame<T> OperationClickPopup<T>(IOperationSymbolContainer symbolContainer)
             where T : Entity
         {
             var popup = Operation(symbolContainer).Find().CaptureOnClick();
-            return new PopupControl<T>(popup);
+            return new PopupFrame<T>(popup);
         }
-        
-        private NormalPage<T> MenuClickNormalPage<T>(IOperationSymbolContainer contanier) where T : Entity
+
+        private PageFrame<T> MenuClickNormalPage<T>(IOperationSymbolContainer contanier) where T : Entity
         {
             OperationIsDisabled(contanier);
-            var result = new NormalPage<T>(this.ResultTable.Selenium);
+            var result = new PageFrame<T>(this.ResultTable.Selenium);
             return result;
         }
 
@@ -771,12 +771,12 @@ namespace Signum.React.Selenium
             get { return OperationElement.Find().SelectElement().SelectedOption.GetAttribute("value").ToEnum<FilterOperation>(); }
             set { OperationElement.Find().SelectElement().SelectByValue(value.ToString()); }
         }
-        
+
         public void Delete()
         {
             DeleteButton.Find().Click();
         }
-        
+
         public ValueLineProxy ValueLine()
         {
             return new ValueLineProxy(this.Element, null);
@@ -784,7 +784,7 @@ namespace Signum.React.Selenium
 
         public EntityLineProxy EntityLine()
         {
-            return new EntityLineProxy(this.Element , null);
+            return new EntityLineProxy(this.Element, null);
         }
 
         internal void SetValue(object value)
@@ -793,11 +793,11 @@ namespace Signum.React.Selenium
                 return; //Hack
 
             if (value is Lite<Entity>)
-                EntityLine().LiteValue = (Lite<Entity>)value;
+                EntityLine().SetLite((Lite<Entity>)value);
             else if (value is Entity)
-                EntityLine().LiteValue = ((Entity)value).ToLite();
+                EntityLine().SetLite(((Entity)value).ToLite());
             else
-                ValueLine().StringValue = value.ToString();
+                ValueLine().SetValue(value);
         }
     }
 
@@ -864,7 +864,7 @@ namespace Signum.React.Selenium
 
             if (key.HasText())
                 container.FindElement(By.CssSelector("li > span[data-token=" + key + "]")).Click();
-            else 
+            else
                 container.FindElement(By.CssSelector("li > span:not([data-token])")).Click();
         }
     }
