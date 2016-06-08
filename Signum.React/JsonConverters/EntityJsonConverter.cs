@@ -70,6 +70,13 @@ namespace Signum.React.Json
         {
             return this.PropertyValidator?.PropertyInfo.Name;
         }
+
+        internal bool IsNotNull()
+        {
+            var pi = this.PropertyValidator.PropertyInfo;
+
+            return pi.PropertyType.IsValueType && !pi.PropertyType.IsNullable();
+        }
     }
 
     public class ReadJsonPropertyContext
@@ -319,6 +326,9 @@ namespace Signum.React.Json
                         else
                         {
                             AssertCanWrite(pr);
+                            if (newValue == null && pc.IsNotNull()) //JSON.Net already complaining
+                                return;
+
                             pc.SetValue?.Invoke(entity, newValue);
                         }
                     }

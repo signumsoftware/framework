@@ -174,7 +174,7 @@ namespace Signum.React.Facades
                                     Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
                                     IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
                                     Unit = p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName,
-                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type) : p.PropertyInfo?.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
+                                    Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type).Nullify() : p.PropertyInfo?.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
                                     IsMultiline = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
                                     MaxLength = Validator.TryGetPropertyValidator(p)?.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
                                     PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
@@ -415,8 +415,8 @@ namespace Signum.React.Facades
         public bool IsCollection { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLite")]
         public bool IsLite { get; set; }
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isNullable")]
-        public bool IsNullable { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isNotNullable")]
+        public bool IsNotNullable { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isEmbedded")]
         public bool IsEmbedded { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "name")]
@@ -430,7 +430,7 @@ namespace Signum.React.Facades
             
             var clean = type == typeof(string) ? type :  (type.ElementType() ?? type);
             this.IsLite = clean.IsLite();
-            this.IsNullable = clean.IsNullable();
+            this.IsNotNullable = clean.IsValueType && !clean.IsNullable();
             this.IsEnum = clean.UnNullify().IsEnum;
             this.IsEmbedded = clean.IsEmbeddedEntity();
             if (this.IsEmbedded && !this.IsCollection)

@@ -99,7 +99,7 @@ export interface TypeReference {
     typeNiceName?: string;
     isCollection?: boolean;
     isLite?: boolean;
-    isNullable?: boolean;
+    isNotNullable?: boolean;
     isEnum?: boolean;
     isEmbedded?: boolean;
 }

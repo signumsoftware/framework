@@ -46,7 +46,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.isCollection || t.isLite)
             throw new Error("ValueLine not implemented for " + JSON.stringify(t));
 
-        if (t.isEnum || t.name == "boolean" && t.isNullable)
+        if (t.isEnum || t.name == "boolean" && !t.isNotNullable)
             return ValueLineType.Enum;
 
         if (t.name == "boolean")
@@ -177,7 +177,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
     const s = vl.state;
     let items = s.comboBoxItems || Dic.getValues(typeInfo.members);
 
-    if (s.type.isNullable || s.ctx.value == null)
+    if (!s.type.isNotNullable || s.ctx.value == null)
         items = [{ name: "", niceName: " - " }].concat(items);
 
     if (s.ctx.readOnly)
