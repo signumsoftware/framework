@@ -402,6 +402,28 @@ export class Binding<T> implements IBinding<T> {
         return parentErrors && parentErrors[this.member];
     }
 
+    set error(value: string) {
+
+        var parent = this.parentValue as ModifiableEntity;
+
+        if (!value) {
+
+            if (parent.error)
+                delete parent.error[this.member];
+
+
+        } else {
+            if (!parent.Type)
+                return;
+
+            if (!parent.error)
+                parent.error = {};
+
+            parent.error[this.member] = value;
+
+        }
+    }
+
     get errorClass(): string {
         return !!this.error ? "has-error" : null;
     }
@@ -855,6 +877,9 @@ export class PropertyRoute {
     }
 
     toString() {
+        if (this.propertyRouteType == PropertyRouteType.Root)
+            return `(${this.findRootType().name})`;
+
         return `(${this.findRootType().name}).${this.propertyPath()}`;
     }
 }
