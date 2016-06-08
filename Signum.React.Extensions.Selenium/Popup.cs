@@ -154,22 +154,6 @@ namespace Signum.React.Selenium
                 return new ValueLineProxy(formGroup, null);
             }
         }
-
-        public string StringValue
-        {
-            get { return ValueLine.StringValue; }
-            set { ValueLine.StringValue = value; }
-        }
-
-        public T GetValue<T>()
-        {
-            return ValueLine.GetValue<T>();
-        }
-
-        public void SetValue(object value, string format = null)
-        {
-            ValueLine.SetValue(value, format);
-        }
     }
 
 

@@ -132,7 +132,7 @@ namespace Signum.React.Selenium
         {
             var valueLine = lineContainer.ValueLine(property);
 
-            valueLine.Value = value;
+            valueLine.SetValue(value);
 
             if (loseFocus)
                 valueLine.MainElement.Find().LoseFocus();
@@ -149,7 +149,7 @@ namespace Signum.React.Selenium
         public static V ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
             where T : ModifiableEntity
         {
-            return (V)lineContainer.ValueLine(property).Value;
+            return (V)lineContainer.ValueLine(property).GetValue();
         }
 
         public static EntityLineProxy EntityLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -163,7 +163,7 @@ namespace Signum.React.Selenium
         public static V EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
         where T : ModifiableEntity
         {
-            var lite = lineContainer.EntityLine(property).LiteValue;
+            var lite = lineContainer.EntityLine(property).GetLite();
 
             return lite is V ? (V)lite : (V)(object)lite.Retrieve();
         }
@@ -171,7 +171,7 @@ namespace Signum.React.Selenium
         public static void EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
             where T : ModifiableEntity
         {
-            lineContainer.EntityLine(property).LiteValue = value as Lite<IEntity> ?? ((IEntity)value)?.ToLite();
+            lineContainer.EntityLine(property).SetLite( value as Lite<IEntity> ?? ((IEntity)value)?.ToLite());
         }
 
         public static EntityComboProxy EntityCombo<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -298,7 +298,7 @@ namespace Signum.React.Selenium
         }
     }
 
-    public class NormalPage<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IValidationSummaryContainer, IDisposable where T : ModifiableEntity
+    public class PageFrame<T> : ILineContainer<T>, IEntityButtonContainer<T>, IWidgetContainer, IValidationSummaryContainer, IDisposable where T : ModifiableEntity
     {
         public RemoteWebDriver Selenium { get; private set; }
 
@@ -322,21 +322,16 @@ namespace Signum.React.Selenium
         {
         }
 
-        public NormalPage<T> WaitLoadedAndId()
+        public WebElementLocator MainControl
         {
-            this.Selenium.Wait(() => {var ri = this.EntityInfo(); return ri != null && ri.EntityType == typeof(T) && ri.IdOrNull.HasValue;});
-
-            return this;
-        }
-
-        public string Title()
-        {
-            return (string)Selenium.ExecuteScript("return $('#divMainPage > h3 > .sf-entity-title').html()");
+            get { return this.Element.WithLocator(By.CssSelector(".sf-main-control"));  }
         }
 
         public EntityInfoProxy EntityInfo()
         {
-            return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("sf-main-control")).GetAttribute("data-main-entity"));
+            var attr = MainControl.Find().GetAttribute("data-main-entity");
+
+            return EntityInfoProxy.Parse(attr);
         }
 
         public T RetrieveEntity()
@@ -347,7 +342,7 @@ namespace Signum.React.Selenium
 
         public PageFrame<T> WaitLoaded()
         {
-            this.Element.GetDriver().Wait(() => this.EntityInfo() != null);
+            MainControl.WaitPresent();
             return this;
         }
     }

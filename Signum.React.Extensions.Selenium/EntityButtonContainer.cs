@@ -135,7 +135,7 @@ namespace Signum.React.Selenium
         {
             try
             {
-                return container.Element.FindElement(By.CssSelector("div.sf-main-control[data-test-ticks]")).GetAttribute("data-test-ticks").ToLong();
+                return container.Element.TryFindElement(By.CssSelector("div.sf-main-control[data-test-ticks]"))?.GetAttribute("data-test-ticks").ToLong();
             }
             catch
             {

@@ -793,11 +793,11 @@ namespace Signum.React.Selenium
                 return; //Hack
 
             if (value is Lite<Entity>)
-                EntityLine().LiteValue = (Lite<Entity>)value;
+                EntityLine().SetLite((Lite<Entity>)value);
             else if (value is Entity)
-                EntityLine().LiteValue = ((Entity)value).ToLite();
+                EntityLine().SetLite(((Entity)value).ToLite());
             else
-                ValueLine().StringValue = value.ToString();
+                ValueLine().SetValue(value);
         }
     }
 
