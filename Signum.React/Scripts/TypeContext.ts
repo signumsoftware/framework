@@ -167,7 +167,7 @@ export class TypeContext<T> extends StyleContext {
 
     
     static root<T extends ModifiableEntity>(type: Type<T>, value: T, styleOptions?: StyleOptions): TypeContext<T> {
-        return new TypeContext(null, styleOptions, PropertyRoute.root(type), new ReadonlyBinding(value, ""));
+        return new TypeContext(null, styleOptions, PropertyRoute.root(type), new ReadonlyBinding<T>(value, ""));
     }
 
     constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>) {
@@ -200,6 +200,9 @@ export class TypeContext<T> extends StyleContext {
     }
 
     niceName(property?: (val: T) => any) {
+
+        if (this.propertyRoute == null)
+            return null;
 
         if (property == null)
             return this.propertyRoute.member.niceName;

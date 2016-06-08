@@ -129,12 +129,10 @@ export class ViewReplacer<T> {
     }
 }
 
-
-
 export function hasPropertyRoute(e: React.ReactElement<any>, pr: PropertyRoute) {
     var tc = e.props.ctx as TypeContext<any>;
 
-    return tc && tc.propertyRoute.toString() == pr.toString();
+    return tc && tc.propertyRoute && tc.propertyRoute.toString() == pr.toString();
 }
 
 

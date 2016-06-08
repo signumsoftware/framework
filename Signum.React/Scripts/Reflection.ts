@@ -1,4 +1,5 @@
-﻿import { Dic } from './Globals';
+﻿import * as moment from 'moment';
+import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities';
 import {ajaxPost, ajaxGet} from './Services';
 
