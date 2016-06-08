@@ -87,7 +87,7 @@ namespace Signum.React.Selenium
             this.Dispose();
         }
 
-        public PopupControl<T> Create<T>() where T : ModifiableEntity
+        public PopupFrame<T> Create<T>() where T : ModifiableEntity
         {
             return SearchControl.Create<T>();
         }
@@ -112,14 +112,14 @@ namespace Signum.React.Selenium
             this.SearchControl = new SearchControlProxy(selenium.WaitElementVisible(By.ClassName("sf-search-control")));
         }
 
-        public PopupControl<T> Create<T>() where T : ModifiableEntity
+        public PopupFrame<T> Create<T>() where T : ModifiableEntity
         {
             var popup = SearchControl.CreateButton.Find().CaptureOnClick();
 
             if (SelectorModal.IsSelector(popup))
                 popup = popup.GetDriver().CapturePopup(() => SelectorModal.Select(popup, typeof(T)));
 
-            return new PopupControl<T>(popup);
+            return new PopupFrame<T>(popup);
         }
 
         public void Dispose()
@@ -242,14 +242,14 @@ namespace Signum.React.Selenium
             return this.Filters.GetNewFilter(() => menuItem.Click());
         }
 
-        public PopupControl<T> Create<T>() where T : ModifiableEntity
+        public PopupFrame<T> Create<T>() where T : ModifiableEntity
         {
             var popup = this.CreateButton.Find().CaptureOnClick();
 
             if (SelectorModal.IsSelector(popup))
                 popup = popup.GetDriver().CapturePopup(() => SelectorModal.Select(popup, typeof(T)));
 
-            return new PopupControl<T>(popup).WaitLoaded();
+            return new PopupFrame<T>(popup).WaitLoaded();
         }
 
         public WebElementLocator CreateButton
@@ -495,16 +495,16 @@ namespace Signum.React.Selenium
         }
 
 
-        public PopupControl<T> EntityClick<T>(Lite<T> lite) where T : Entity
+        public PopupFrame<T> EntityClick<T>(Lite<T> lite) where T : Entity
         {
             var element = EntityLink(lite).Find().CaptureOnClick();
-            return new PopupControl<T>(element);
+            return new PopupFrame<T>(element);
         }
 
-        public PopupControl<T> EntityClick<T>(int rowIndex) where T : Entity
+        public PopupFrame<T> EntityClick<T>(int rowIndex) where T : Entity
         {
             var element = EntityLink(rowIndex).Find().CaptureOnClick();
-            return new PopupControl<T>(element);
+            return new PopupFrame<T>(element);
         }
 
         public PageFrame<T> EntityClickNormalPage<T>(Lite<T> lite) where T : Entity
@@ -662,14 +662,14 @@ namespace Signum.React.Selenium
             ResultTable.WaitActiveSuccess();
         }
 
-        public PopupControl<ProcessEntity> DeleteProcessClick(IOperationSymbolContainer operationSymbol)
+        public PopupFrame<ProcessEntity> DeleteProcessClick(IOperationSymbolContainer operationSymbol)
         {
             Operation(operationSymbol).Find();
 
             var popup = this.Element.GetDriver().CapturePopup(() =>
             ResultTable.Selenium.ConsumeAlert());
 
-            return new PopupControl<ProcessEntity>(popup).WaitLoaded();
+            return new PopupFrame<ProcessEntity>(popup).WaitLoaded();
         }
 
         public WebElementLocator Operation(IOperationSymbolContainer symbolContainer)
@@ -682,11 +682,11 @@ namespace Signum.React.Selenium
             return Operation(symbolContainer).Find().GetAttribute("disabled").HasText();
         }
 
-        public PopupControl<T> OperationClickPopup<T>(IOperationSymbolContainer symbolContainer)
+        public PopupFrame<T> OperationClickPopup<T>(IOperationSymbolContainer symbolContainer)
             where T : Entity
         {
             var popup = Operation(symbolContainer).Find().CaptureOnClick();
-            return new PopupControl<T>(popup);
+            return new PopupFrame<T>(popup);
         }
 
         private PageFrame<T> MenuClickNormalPage<T>(IOperationSymbolContainer contanier) where T : Entity

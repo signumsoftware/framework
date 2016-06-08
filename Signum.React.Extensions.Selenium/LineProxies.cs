@@ -147,7 +147,7 @@ namespace Signum.React.Selenium
             }, "create clicked");
         }
 
-        public PopupControl<T> CreatePopup<T>() where T : ModifiableEntity
+        public PopupFrame<T> CreatePopup<T>() where T : ModifiableEntity
         {
          
             string changes = GetChanges();
@@ -156,7 +156,7 @@ namespace Signum.React.Selenium
 
             popup = ChooseTypeCapture(typeof(T), popup);
 
-            return new PopupControl<T>(popup, this.ItemRoute)
+            return new PopupFrame<T>(popup, this.ItemRoute)
             {
                 Disposing = okPressed => { WaitNewChanges(changes, "create dialog closed"); }
             };
@@ -167,12 +167,12 @@ namespace Signum.React.Selenium
             get { return this.Element.WithLocator(By.CssSelector("a.sf-view")); }
         }
         
-        protected PopupControl<T> ViewInternal<T>() where T : ModifiableEntity
+        protected PopupFrame<T> ViewInternal<T>() where T : ModifiableEntity
         {
             var newElement = this.ViewButton.Find().CaptureOnClick();
             string changes = GetChanges();
             
-            return new PopupControl<T>(newElement, this.ItemRoute)
+            return new PopupFrame<T>(newElement, this.ItemRoute)
             {
                 Disposing = okPressed => WaitNewChanges(changes, "create dialog closed")
             };
@@ -359,7 +359,7 @@ namespace Signum.React.Selenium
             AutoCompleteBasic(AutoCompleteElement.Find(), lite);
         }
 
-        public PopupControl<T> View<T>() where T : ModifiableEntity
+        public PopupFrame<T> View<T>() where T : ModifiableEntity
         {
             return base.ViewInternal<T>();
         }
@@ -410,7 +410,7 @@ namespace Signum.React.Selenium
                 .ToList();
         }
 
-        public PopupControl<T> View<T>() where T : ModifiableEntity
+        public PopupFrame<T> View<T>() where T : ModifiableEntity
         {
             return base.ViewInternal<T>();
         }
@@ -509,7 +509,7 @@ namespace Signum.React.Selenium
             this.OptionElement(index).Find().Click();
         }
 
-        public PopupControl<T> View<T>(int index) where T : ModifiableEntity
+        public PopupFrame<T> View<T>(int index) where T : ModifiableEntity
         {
             Select(index);
 
@@ -668,12 +668,12 @@ namespace Signum.React.Selenium
             base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), lite);
         }
 
-        public PopupControl<T> View<T>(int index) where T : ModifiableEntity
+        public PopupFrame<T> View<T>(int index) where T : ModifiableEntity
         {
             var changes = this.GetChanges();
             var popup = ViewElementIndex(index).Find().CaptureOnClick();
 
-            return new PopupControl<T>(popup, this.ItemRoute)
+            return new PopupFrame<T>(popup, this.ItemRoute)
             {
                 Disposing = okPressed => WaitNewChanges(changes, "create dialog closed")
             };

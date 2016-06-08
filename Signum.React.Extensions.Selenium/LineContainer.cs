@@ -306,7 +306,7 @@ namespace Signum.React.Selenium
 
         public PropertyRoute Route { get; private set; }
 
-        public NormalPage(RemoteWebDriver selenium)
+        public PageFrame(RemoteWebDriver selenium)
         {
             this.Selenium = selenium;
             this.Element = selenium.WaitElementPresent(By.CssSelector(".normal-control"));
@@ -345,7 +345,7 @@ namespace Signum.React.Selenium
             return (T)(IEntity)lite.Retrieve();
         }
 
-        public NormalPage<T> WaitLoaded()
+        public PageFrame<T> WaitLoaded()
         {
             this.Element.GetDriver().Wait(() => this.EntityInfo() != null);
             return this;

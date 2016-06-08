@@ -101,7 +101,7 @@ namespace Signum.React.Selenium
             container.Element.GetDriver().Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
         }
 
-        public static void Delete<T>(this PopupControl<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
+        public static void Delete<T>(this PopupFrame<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
               where T : Entity
         {
             container.OperationClick(symbol);
@@ -111,13 +111,13 @@ namespace Signum.React.Selenium
             container.WaitNotVisible();
         }
 
-        public static PopupControl<T> ConstructFrom<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+        public static PopupFrame<T> ConstructFrom<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
             where T : Entity
             where F : Entity
         {
             var element = container.OperationClickCapture(symbol);
 
-            return new PopupControl<T>(element).WaitLoaded();
+            return new PopupFrame<T>(element).WaitLoaded();
         }
 
         public static PageFrame<T> ConstructFromNormalPage<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)

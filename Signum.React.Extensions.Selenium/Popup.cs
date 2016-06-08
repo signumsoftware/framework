@@ -81,12 +81,12 @@ namespace Signum.React.Selenium
         }
 
 
-        public PopupControl<T> OkWaitPopupControl<T>() where T : Entity
+        public PopupFrame<T> OkWaitPopupControl<T>() where T : Entity
         {
             var element = this.OkButton.Find().CaptureOnClick();
             var disposing = this.Disposing;
             this.Disposing = null;
-            return new PopupControl<T>(element) { Disposing = disposing };
+            return new PopupFrame<T>(element) { Disposing = disposing };
         }
 
         public bool OkPressed;
@@ -173,11 +173,11 @@ namespace Signum.React.Selenium
     }
 
 
-    public class PopupControl<T> : Popup, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer where T : ModifiableEntity
+    public class PopupFrame<T> : Popup, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer where T : ModifiableEntity
     {
         public PropertyRoute Route { get; private set; }
 
-        public PopupControl(IWebElement element, PropertyRoute route = null)
+        public PopupFrame(IWebElement element, PropertyRoute route = null)
             : base(element)
         {
             this.Route = route == null || route.IsImplementation(typeof(T)) ? PropertyRoute.Root(typeof(T)) : route;
@@ -254,7 +254,7 @@ namespace Signum.React.Selenium
             return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetAttribute("data-main-entity"));
         }
 
-        public PopupControl<T> WaitLoaded()
+        public PopupFrame<T> WaitLoaded()
         {
             this.Element.WaitElementPresent(By.CssSelector("div.modal.fade.in"));
             return this;
