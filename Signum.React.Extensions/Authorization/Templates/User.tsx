@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { AuthMessage, UserEntity } from '../Signum.Entities.Authorization'
+import { Binding } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ValueLine, ValueLineType, EntityLine, EntityCombo, FormGroup, TypeContext } from '../../../../Framework/Signum.React/Scripts/Lines'
 
 
@@ -15,7 +16,7 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
     }
 
     render() {
-        const ctx = this.props.ctx;
+        const ctx = this.props.ctx.subCtx({ labelColumns: { sm: 3 } });
         var entity = this.props.ctx.value;
 
         return (
@@ -23,21 +24,21 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
                 <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true }) } />
                 <ValueLine ctx={ctx.subCtx(e => e.userName) } />
                 { entity.isNew || this.state.withPassword ?
-                    <DoublePassword ctx={ctx.subCtx(a => a.passwordHash, { labelColumns: { sm: 3 } }) }/> :
-                    !ctx.readOnly && this.renderButton()
+                    <DoublePassword ctx={new TypeContext<string>(ctx, null, null, new Binding<string>('newPassword', ctx.value)) }/> :
+                    !ctx.readOnly && this.renderButton(ctx)
                 }
                 <EntityCombo ctx={ctx.subCtx(e => e.role) } />
                 <ValueLine ctx={ctx.subCtx(e => e.email) } />
                 <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo) }/>
-                <ValueLine ctx={ctx.subCtx(e => e.passwordNeverExpires, { labelColumns: { sm: 3 } }) } />
-                <ValueLine ctx={ctx.subCtx(e => e.passwordSetDate, { labelColumns: { sm: 3 } }) } />
+                <ValueLine ctx={ctx.subCtx(e => e.passwordNeverExpires) } />
+                <ValueLine ctx={ctx.subCtx(e => e.passwordSetDate) } />
             </div>
         );
     }
 
-    renderButton() {
+    renderButton(ctx: TypeContext<UserEntity>) {
         return (
-            <FormGroup labelText={AuthMessage.NewPassword.niceToString()} ctx={this.props.ctx}>
+            <FormGroup labelText={AuthMessage.NewPassword.niceToString()} ctx={ctx}>
                 <a className="btn btn-default btn-sm" onClick={() => this.setState({ withPassword: true }) }>
                     <i className="fa fa-key"></i> {AuthMessage.ChangePassword.niceToString() }
                 </a>
@@ -53,15 +54,14 @@ class DoublePassword extends React.Component<{ ctx: TypeContext<string> }, void>
         var ctx = this.props.ctx;
 
         if (this.newPass.value && this.newPass2.value && this.newPass.value != this.newPass2.value) {
-            ctx.binding.error = AuthMessage.PasswordsAreDifferent.niceToString()
+            ctx.error = AuthMessage.PasswordsAreDifferent.niceToString()
         }
         else {
-            ctx.binding.error = null;
+            ctx.error = null;
             ctx.value = this.newPass.value;
         }
 
-        ctx.frame.onClose
-
+        ctx.frame.forceUpdate();
     }
 
     newPass: HTMLInputElement;

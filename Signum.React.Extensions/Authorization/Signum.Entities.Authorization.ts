@@ -11,7 +11,9 @@ import * as ExBasics from '../Basics/Signum.Entities.Basics'
 
 import * as Mailing from '../Mailing/Signum.Entities.Mailing' 
 
-
+export interface UserEntity {
+	newPassword: string;
+}
 
 export interface AllowedRule<R, A> extends Entities.ModelEntity {
     allowedBase: A;

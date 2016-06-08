@@ -14,4 +14,6 @@ import * as ExBasics from '../Basics/Signum.Entities.Basics'
 //Mailing.Assembly: Signum.Entities.Extensions.dll
 import * as Mailing from '../Mailing/Signum.Entities.Mailing' 
 
-
+export interface UserEntity {
+	newPassword: string;
+}

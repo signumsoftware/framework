@@ -49,7 +49,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
     renderInternal() {
         var s = this.state;
         return (
-            <fieldset className={classes("SF-grid-repeater-field SF-control-container", this.state.ctx.binding.errorClass) }>
+            <fieldset className={classes("SF-grid-repeater-field SF-control-container", this.state.ctx.errorClass) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
