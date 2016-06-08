@@ -5,6 +5,7 @@ import { classes, Dic, addClass } from '../Globals'
 import { Tab } from 'react-bootstrap'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference} from '../Reflection'
+import { ValidationMessage } from '../Signum.Entities'
 
 require("!style!css!./Lines.css");
 
@@ -85,6 +86,7 @@ export interface LineBaseProps extends StyleOptions {
     visible?: boolean;
     hideIfNull?: boolean;
     onChange?: (val: any) => void;
+    onValidate?: (val: any) => string;
     labelHtmlProps?: React.HTMLAttributes;
     formGroupHtmlProps?: React.HTMLAttributes;
 }
@@ -105,9 +107,23 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     setValue(val: any) {
         this.state.ctx.value = val;
         this.changes++;
+        this.validate();
         this.forceUpdate();
         if (this.state.onChange)
             this.state.onChange(val);
+    }
+
+    validate() {
+        var error = this.state.onValidate ? this.state.onValidate(this.state.ctx.value) : this.defaultValidate(this.state.ctx.value);
+        this.state.ctx.error = error;
+        this.props.ctx.frame.forceUpdate();
+    }
+
+    defaultValidate(val: any) {
+        if (this.state.type.isNotNullable && val == null)
+            return ValidationMessage._0IsNotSet.niceToString(this.state.ctx.niceName());
+
+        return null;
     }
 
     render() {
