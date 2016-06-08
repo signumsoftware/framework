@@ -120,7 +120,7 @@ namespace Signum.React.Selenium
             return new PopupControl<T>(element).WaitLoaded();
         }
 
-        public static NormalPage<T> ConstructFromNormalPage<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+        public static PageFrame<T> ConstructFromNormalPage<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
             where T : Entity
             where F : Entity
         {
@@ -128,7 +128,7 @@ namespace Signum.React.Selenium
 
             container.Element.GetDriver().Wait(() => { try { return container.EntityInfo().IsNew; } catch { return false; } });
 
-            return new NormalPage<T>(container.Element.GetDriver());
+            return new PageFrame<T>(container.Element.GetDriver());
         }
 
         public static long? TestTicks(this IEntityButtonContainer container)

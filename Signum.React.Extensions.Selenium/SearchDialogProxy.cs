@@ -507,16 +507,16 @@ namespace Signum.React.Selenium
             return new PopupControl<T>(element);
         }
 
-        public NormalPage<T> EntityClickNormalPage<T>(Lite<T> lite) where T : Entity
+        public PageFrame<T> EntityClickNormalPage<T>(Lite<T> lite) where T : Entity
         {
             EntityLink(lite).Find().Click();
-            return new NormalPage<T>(this.Element.GetDriver());
+            return new PageFrame<T>(this.Element.GetDriver());
         }
 
-        public NormalPage<T> EntityClickNormalPage<T>(int rowIndex) where T : Entity
+        public PageFrame<T> EntityClickNormalPage<T>(int rowIndex) where T : Entity
         {
             EntityLink(rowIndex).Find().Click();
-            return new NormalPage<T>(this.Element.GetDriver());
+            return new PageFrame<T>(this.Element.GetDriver());
         }
 
         public EntityContextMenuProxy EntityContextMenu(int rowIndex, string columnToken = "Entity")
@@ -689,10 +689,10 @@ namespace Signum.React.Selenium
             return new PopupControl<T>(popup);
         }
 
-        private NormalPage<T> MenuClickNormalPage<T>(IOperationSymbolContainer contanier) where T : Entity
+        private PageFrame<T> MenuClickNormalPage<T>(IOperationSymbolContainer contanier) where T : Entity
         {
             OperationIsDisabled(contanier);
-            var result = new NormalPage<T>(this.ResultTable.Selenium);
+            var result = new PageFrame<T>(this.ResultTable.Selenium);
             return result;
         }
 
