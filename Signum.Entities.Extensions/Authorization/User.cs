@@ -58,7 +58,7 @@ namespace Signum.Entities.Authorization
         public bool PasswordNeverExpires { get; set; }
 
         [NotNullValidator]
-        public RoleEntity Role { get; set; }
+        public Lite<RoleEntity> Role { get; set; }
 
         [EMailValidator]
         public string Email { get; set; }

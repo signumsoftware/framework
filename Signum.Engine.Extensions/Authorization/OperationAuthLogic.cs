@@ -113,7 +113,7 @@ namespace Signum.Engine.Authorization
             if (GetTemporallyAllowed(operationKey))
                 return true;
 
-            OperationAllowed allowed = cache.GetAllowed(RoleEntity.Current.ToLite(), operationKey);
+            OperationAllowed allowed = cache.GetAllowed(RoleEntity.Current, operationKey);
 
             return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
         }
@@ -125,7 +125,7 @@ namespace Signum.Engine.Authorization
 
         public static Dictionary<OperationSymbol, OperationAllowed> AllowedOperations()
         {
-            return OperationLogic.AllSymbols().ToDictionary(k => k, k => cache.GetAllowed(RoleEntity.Current.ToLite(), k));
+            return OperationLogic.AllSymbols().ToDictionary(k => k, k => cache.GetAllowed(RoleEntity.Current, k));
         }
 
         static readonly Variable<ImmutableStack<OperationSymbol>> tempAllowed = Statics.ThreadVariable<ImmutableStack<OperationSymbol>>("authTempOperationsAllowed");

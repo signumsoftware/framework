@@ -54,7 +54,7 @@ namespace Signum.Engine.Authorization
         public static void SessionStart(string userHostAddress, string userAgent)
         {
             var user = UserEntity.Current;
-            if (SessionLogLogic.RoleTracked(user.Role.ToLite()))
+            if (SessionLogLogic.RoleTracked(user.Role))
             {
                 using (AuthLogic.Disable())
                 {
@@ -71,7 +71,7 @@ namespace Signum.Engine.Authorization
 
         public static void SessionEnd(UserEntity user, TimeSpan? timeOut)
         {
-            if (user == null || !RoleTracked(user.Role.ToLite()))
+            if (user == null || !RoleTracked(user.Role))
                 return;
 
             using (AuthLogic.Disable())
