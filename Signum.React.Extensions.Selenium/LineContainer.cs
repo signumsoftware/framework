@@ -60,7 +60,7 @@ namespace Signum.React.Selenium
                     var newRoute = route.Add(mi);
 
                     if (newRoute.Parent != route)
-                        element = element.FindElement(By.CssSelector("[data-propertypath=" + route.PropertyString() + "]"));
+                        element = element.FindElement(By.CssSelector("[data-propertypath='" + route.PropertyString() + "']"));
 
                     route = newRoute;
                 }
@@ -69,7 +69,7 @@ namespace Signum.React.Selenium
             return new LineLocator<S>
             {
                 Route = route,
-                ElementLocator = element.WithLocator(By.CssSelector("[data-propertypath=" + route.PropertyString() + "]"))
+                ElementLocator = element.WithLocator(By.CssSelector("[data-propertypath='" + route.PropertyString() + "']"))
             };
         }
 
