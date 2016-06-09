@@ -46,6 +46,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     Navigator.addSettings(new EntitySettings(UserEntity, e => new Promise(resolve => require(['./Templates/User'], resolve))));
     Navigator.addSettings(new EntitySettings(RoleEntity, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
+    Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
 
     if (options.properties) {
         tasks.push(taskAuthorizeProperties);
