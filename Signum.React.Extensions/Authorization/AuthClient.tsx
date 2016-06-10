@@ -26,7 +26,7 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
 
     options.routes.push(<Route path="auth">
         <Route path="login" getComponent={(loc, cb) => require(["./Login/Login"], (Comp) => cb(null, Comp.default))}/>
-        <Route path="about" />
+        <Route path="changePassword" getComponent={(loc, cb) => require(["./Login/ChangePassword"], (Comp) => cb(null, Comp.default)) }/>
     </Route>);
 }
 
@@ -208,6 +208,15 @@ export module Api {
 
     export function login(loginRequest: LoginRequest): Promise<LoginResponse> {
         return ajaxPost<LoginResponse>({ url: "/api/auth/login" }, loginRequest);
+    }
+
+    export interface ChangePasswordRequest {
+        oldPassword: string;
+        newPassword: string;
+    }
+
+    export function changePassword(request: ChangePasswordRequest): Promise<UserEntity> {
+        return ajaxPost<UserEntity>({ url: "/api/auth/ChangePassword" }, request);
     }
 
     export function retrieveCurrentUser(): Promise<UserEntity> {

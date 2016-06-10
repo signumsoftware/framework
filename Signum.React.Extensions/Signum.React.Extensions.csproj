@@ -260,6 +260,7 @@
     <TypeScriptCompile Include="Authorization\Admin\TypeRulePackControl.tsx" />
     <TypeScriptCompile Include="Authorization\Admin\PermissionRulePackControl.tsx" />
     <TypeScriptCompile Include="Authorization\AuthClient.tsx" />
+    <TypeScriptCompile Include="Authorization\Login\ChangePassword.tsx" />
     <TypeScriptCompile Include="Authorization\Signum.Entities.Authorization.ts">
       <DependentUpon>Signum.Entities.Authorization.t4s</DependentUpon>
     </TypeScriptCompile>
