@@ -576,7 +576,7 @@ public class PersonEntity : Entity
 
     public override string PropertyValidation(PropertyInfo pi)
     {
-        if(pi.Name == nameof(Name) && !Corruption.Allowed && Name == "Neo" && DateOfBirth.Year < 1999)
+        if(pi.Name == nameof(Name) && Corruption.Strict && Name == "Neo" && DateOfBirth.Year < 1999)
             return "Nobody was named Neo before The Matrix"; 
     }
 
