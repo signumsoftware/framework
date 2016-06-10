@@ -1,4 +1,5 @@
-﻿import { Dic } from './Globals';
+﻿import * as moment from 'moment';
+import { Dic } from './Globals';
 import { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity } from './Signum.Entities';
 import {ajaxPost, ajaxGet} from './Services';
 
@@ -99,7 +100,7 @@ export interface TypeReference {
     typeNiceName?: string;
     isCollection?: boolean;
     isLite?: boolean;
-    isNullable?: boolean;
+    isNotNullable?: boolean;
     isEnum?: boolean;
     isEmbedded?: boolean;
 }
@@ -362,8 +363,8 @@ export interface IBinding<T> {
     getValue(): T;
     setValue(val: T): void;
     suffix: string;
-    error: string;
-    errorClass: string;
+    getError(): string;
+    setError(value: string);
 }
 
 export class Binding<T> implements IBinding<T> {
@@ -397,13 +398,30 @@ export class Binding<T> implements IBinding<T> {
         }
     }
 
-    get error(): string {
+    getError(): string {
         const parentErrors = (this.parentValue as ModifiableEntity).error;
         return parentErrors && parentErrors[this.member];
     }
 
-    get errorClass(): string {
-        return !!this.error ? "has-error" : null;
+    setError(value: string) {
+        var parent = this.parentValue as ModifiableEntity;
+
+        if (!value) {
+
+            if (parent.error)
+                delete parent.error[this.member];
+
+
+        } else {
+            if (!parent.Type)
+                return;
+
+            if (!parent.error)
+                parent.error = {};
+
+            parent.error[this.member] = value;
+
+        }
     }
 }
 
@@ -420,11 +438,11 @@ export class ReadonlyBinding<T> implements IBinding<T> {
         throw new Error("Readonly Binding");
     }
 
-    get error(): string {
+    getError(): string {
         return null;
     }
 
-    get errorClass(): string {
+    setError(name: string) {
         return null;
     }
 }
@@ -855,6 +873,9 @@ export class PropertyRoute {
     }
 
     toString() {
+        if (this.propertyRouteType == PropertyRouteType.Root)
+            return `(${this.findRootType().name})`;
+
         return `(${this.findRootType().name}).${this.propertyPath()}`;
     }
 }

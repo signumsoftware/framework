@@ -37,7 +37,7 @@ export class ReactVisitor {
         var newChildren = React.Children.map(oldChildren, c => this.visitChild(c)); 
 
         if (newChildren.length != oldChildren.length || newChildren.some((n, i) => n !== oldChildren[i]))
-            return React.cloneElement(element, element.props, newChildren);
+            return React.cloneElement(element, null, newChildren);
 
         return element;
     }
@@ -129,12 +129,10 @@ export class ViewReplacer<T> {
     }
 }
 
-
-
 export function hasPropertyRoute(e: React.ReactElement<any>, pr: PropertyRoute) {
     var tc = e.props.ctx as TypeContext<any>;
 
-    return tc && tc.propertyRoute.toString() == pr.toString();
+    return tc && tc.propertyRoute && tc.propertyRoute.toString() == pr.toString();
 }
 
 

@@ -31,9 +31,15 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
     var ti = getTypeInfo(typeName);
 
     if (ti) {
-        var ctrs = Operations.operationInfos(ti).filter(a => a.operationType == OperationType.Constructor);
 
-        if (ctrs.length) {
+        var constructOperations = Dic.getValues(ti.operations).filter(a => a.operationType == OperationType.Constructor);
+
+        if (constructOperations.length) {
+
+            var ctrs = constructOperations.filter(oi => Operations.isOperationAllowed(oi)); 
+
+            if (!ctrs.length)
+                throw new Error("No constructor is allowed!");
 
             return SelectorModal.chooseElement(ctrs, { display: c => c.niceName, name: c => c.key, message: SelectorMessage.PleaseSelectAConstructor.niceToString() })
                 .then(oi => {

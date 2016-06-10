@@ -120,6 +120,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             entityComponent: this.entityComponent,
             onReload: pack => this.setState({ pack }),
             onClose: () => this.onClose(),
+            forceUpdate: () => this.forceUpdate(),
             setError: (ms, initialPrefix = "") => {
                 GraphExplorer.setModelState(entity, ms, initialPrefix);
                 this.forceUpdate()
