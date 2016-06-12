@@ -153,9 +153,21 @@ export class TypeContext<T> extends StyleContext {
         this.binding.setValue(val);
     }
 
+
+    get error() {
+        if (this.binding == null)
+            return null; //React Dev Tools
+
+        return this.binding.getError();
+    }
+
+    set error(val: string) {
+        this.binding.setError(val);
+    }
+
     
     static root<T extends ModifiableEntity>(type: Type<T>, value: T, styleOptions?: StyleOptions): TypeContext<T> {
-        return new TypeContext(null, styleOptions, PropertyRoute.root(type), new ReadonlyBinding(value, ""));
+        return new TypeContext(null, styleOptions, PropertyRoute.root(type), new ReadonlyBinding<T>(value, ""));
     }
 
     constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>) {
@@ -188,6 +200,9 @@ export class TypeContext<T> extends StyleContext {
     }
 
     niceName(property?: (val: T) => any) {
+
+        if (this.propertyRoute == null)
+            return null;
 
         if (property == null)
             return this.propertyRoute.member.niceName;
@@ -234,6 +249,10 @@ export class TypeContext<T> extends StyleContext {
     get propertyPath() {
         return this.propertyRoute ? this.propertyRoute.propertyPath() : null;
     }
+
+    get errorClass(): string {
+        return !!this.error ? "has-error" : null;
+    }
 }
 
 export interface ButtonsContext {
@@ -251,6 +270,7 @@ export interface EntityFrame<T extends ModifiableEntity> {
     entityComponent: React.Component<any, any>;
     onReload: (pack: EntityPack<T>) => void;
     setError: (modelState: ModelState, initialPrefix?: string) => void;
+    forceUpdate: () => void;
     onClose: () => void;
 }
 

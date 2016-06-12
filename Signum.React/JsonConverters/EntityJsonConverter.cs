@@ -70,6 +70,13 @@ namespace Signum.React.Json
         {
             return this.PropertyValidator?.PropertyInfo.Name;
         }
+
+        internal bool IsNotNull()
+        {
+            var pi = this.PropertyValidator.PropertyInfo;
+
+            return pi.PropertyType.IsValueType && !pi.PropertyType.IsNullable();
+        }
     }
 
     public class ReadJsonPropertyContext
@@ -319,6 +326,9 @@ namespace Signum.React.Json
                         else
                         {
                             AssertCanWrite(pr);
+                            if (newValue == null && pc.IsNotNull()) //JSON.Net already complaining
+                                return;
+
                             pc.SetValue?.Invoke(entity, newValue);
                         }
                     }
@@ -352,10 +362,12 @@ namespace Signum.React.Json
 
             if (typeof(MixinEntity).IsAssignableFrom(objectType))
             {
-                if (objectType != existingValue.GetType())
-                    throw new InvalidOperationException($"{objectType.Name} expected");
+                var mixin = (MixinEntity)existingValue;
 
-                return (MixinEntity)existingValue;
+                if (identityInfo.Modified == true)
+                    mixin.SetSelfModified();
+
+                return mixin;
             }
 
             if (identityInfo.IsNew == true)

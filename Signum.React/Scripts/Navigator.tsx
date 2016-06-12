@@ -5,10 +5,11 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack } from './Signum.Entities';
 import { IUserEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, KindOfType  } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, KindOfType, OperationType  } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
+import * as Operations from './Operations';
 import ModalFrame from './Frames/ModalFrame';
 import { ViewReplacer } from  './Frames/ReactVisitor'
 
@@ -143,9 +144,26 @@ export function isCreable(type: PseudoType, customView = false, isSearch = false
 
     const hasView = customView || hasRegisteredView(typeName);
 
-    return baseIsCreable && hasView && isCreableEvent.every(f => f(typeName));
+    const hasConstructor = hasAllowedConstructor(typeName);
+
+    return baseIsCreable && hasView && hasConstructor && isCreableEvent.every(f => f(typeName));
 }
 
+function hasAllowedConstructor(typeName: string) {
+    var ti = getTypeInfo(typeName);
+
+    if (ti == null || ti.operations == null)
+        return true;
+
+    var constructOperations = Dic.getValues(ti.operations).filter(a => a.operationType == OperationType.Constructor);
+
+    if (!constructOperations.length)
+        return true;
+    
+    var allowed = constructOperations.filter(oi => Operations.isOperationAllowed(oi));
+
+    return allowed.length > 0;
+}
 
 function typeIsCreable(typeName: string): EntityWhen {
 

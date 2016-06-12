@@ -530,7 +530,7 @@ export module Decoder {
 
     export function unscapeTildes(str: string) {
         if (!str)
-            return str;
+            return null;
 
         return str.replace("#|#", "~");
     }

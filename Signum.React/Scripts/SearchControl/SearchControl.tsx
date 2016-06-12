@@ -14,7 +14,7 @@ import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
-import { renderContextualItems, ContextualItemsContext, MarkRowsDictionary } from './ContextualItems'
+import { renderContextualItems, ContextualItemsContext, MarkedRowsDictionary, MarkedRow } from './ContextualItems'
 import ContextMenu from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 
@@ -44,7 +44,7 @@ export interface SearchControlState {
     queryDescription?: QueryDescription;
     loading?: boolean;
     selectedRows?: ResultRow[];
-    markedRows?: MarkRowsDictionary;
+    markedRows?: MarkedRowsDictionary;
     searchCount?: number;
     dragColumnIndex?: number,
     dropBorderIndex?: number,
@@ -497,7 +497,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             .done();
     }
 
-    markRows = (dic: MarkRowsDictionary) => {
+    markRows = (dic: MarkedRowsDictionary) => {
         this.setState({ markedRows: Dic.extend(this.state.markedRows, dic) });
     }
 
@@ -755,7 +755,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                     <input type="checkbox" id="cbSelectAll" onClick={this.handleToggleAll} checked={this.allSelected() }/>
                 </th>
                 }
-                { this.state.findOptions.navigate && <th className="sf-th-entity"></th> }
+                { this.state.findOptions.navigate && <th className="sf-th-entity" data-column-name="Entity"></th> }
                 { this.state.findOptions.columnOptions.map((co, i) =>
                     <th draggable={true}
                         style={i == this.state.dragColumnIndex ? { opacity: 0.5 } : null }
@@ -874,18 +874,13 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         const rowAttributes = qs && qs.rowAttributes;
 
         return this.state.resultTable.rows.map((row, i) => {
-
-            const m = row.entity == null || this.state.markedRows == null ? null :
-                this.state.markedRows[liteKey(row.entity)];
-
-            const mark: { style: string, message: string } = typeof m === "string" ? { style: m == "" ? null : "error", message: m } : m;
+            
+            const mark = this.getMarkedRow(row.entity);
 
             const tr = (
                 <tr key={i} data-row-index={i} data-entity={liteKey(row.entity) }  onDoubleClick={e => this.handleDoubleClick(e, row) }
-                    className={mark && mark.style}
-                    style={mark && mark.message == "" ? { opacity: 0.5 } : null}
-                    {...rowAttributes ? rowAttributes(row, this.state.resultTable.columns) : null}>
-
+                    className={mark && mark.style} 
+                    {...rowAttributes ? rowAttributes(row, this.state.resultTable.columns) : null}>                    
                     {this.props.allowSelection &&
                         <td style={{ textAlign: "center" }}>
                             <input type="checkbox" className="sf-td-selection" checked={this.state.selectedRows.contains(row) } onChange={this.handleChecked} data-index={i}/>
@@ -905,13 +900,29 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 </tr>
             );
 
-
-            if (!mark || mark.message == "")
-                return tr;
+            return tr;
         });
     }
 
-    wrapError(mark: { style: string, message: string }, index: number, child: React.ReactChild) {
+    getMarkedRow(entity: Lite<Entity>): MarkedRow {
+
+        if (!entity || !this.state.markedRows)
+            return null; 
+
+        var m = this.state.markedRows[liteKey(entity)];
+
+        if (typeof m === "string") {
+            if (m)
+                return { style: "error", message: m };
+            else
+                return { style: "sf-entity-ctxmenu-success", message: null };
+        }
+        else {
+            return m;
+        }
+    }
+
+    wrapError(mark: MarkedRow, index: number, child: React.ReactChild) {
         if (!mark || mark.message == "")
             return child;
 

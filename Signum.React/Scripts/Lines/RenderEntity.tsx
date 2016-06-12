@@ -8,7 +8,7 @@ import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, EntityFrame } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, ReadonlyBinding, LambdaMemberType } from '../Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, isEntity, isLite, isModifiableEntity, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from './EntityBase'
 
@@ -34,56 +34,53 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
 
     componentWillMount() {
-        this.loadEntity()
-            .then(() => this.loadComponent())
+        this.loadEntity(this.props)
+            .then(() => this.loadComponent(this.props))
+            .then(() => this.forceUpdate())
             .done();
     }
 
     componentWillReceiveProps(nextProps: RenderEntityProps) {
-        this.loadEntity()
-            .then(() => this.loadComponent())
+        this.loadEntity(nextProps)
+            .then(() => this.loadComponent(nextProps))
+            .then(() => this.forceUpdate())
             .done();
     }
 
-    loadEntity(): Promise<void> {
+    loadEntity(nextProps: RenderEntityProps): Promise<void> {
 
-        if (!this.props.ctx.value)
+        if (!nextProps.ctx.value)
             return Promise.resolve(null);
 
-        var ent = this.getEntity();
+        var ent = this.toEntity(nextProps.ctx.value);
         if (ent)
             return Promise.resolve(null);
 
-
-        var lite = this.props.ctx.value as Lite<Entity>;
+        var lite = nextProps.ctx.value as Lite<Entity>;
         return Navigator.API.fetchAndRemember(lite).then(a => null);
     }
 
 
-    getEntity() {
-        var element = this.props.ctx.value;
+    toEntity(entityOrLite: ModifiableEntity | Lite<Entity>): ModifiableEntity {
 
-        if (!element)
+        if (!entityOrLite)
             return null;
 
-        var entity = element as Entity;
-        if (entity.Type)
-            return entity;
+        if (isLite(entityOrLite))
+            return entityOrLite.entity;
+        
+        if (isModifiableEntity(entityOrLite))
+            return entityOrLite;
 
-        var lite = element as Lite<Entity>;
-        if (lite.EntityType)
-            return lite.entity;
-
-        throw new Error("Unexpected value " + lite);
+        throw new Error("Unexpected value " + entityOrLite);
     }
 
-    loadComponent(): Promise<void> {
+    loadComponent(nextProps: RenderEntityProps): Promise<void> {
 
-        var e = this.getEntity();
+        var e = this.toEntity(nextProps.ctx.value);
 
-        if (this.props.getComponent)
+        if (nextProps.getComponent)
             return Promise.resolve(null);
-
 
         if (e == null) {
             this.setState({ getComponent: null, lastLoadedType: null });
@@ -105,19 +102,24 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     }
 
     render() {
-        var entity = this.getEntity();
+        var entity = this.toEntity(this.props.ctx.value);
+
+        if (entity == null)
+            return null;
+
         var getComponent = this.props.getComponent;
 
         if (getComponent == null) {
-            if (entity != null && entity.Type != this.state.lastLoadedType)
-                return <span>entity.Type is {entity.Type} but lastLoadedType is {this.state.lastLoadedType}</span>;
+            if (entity.Type != this.state.lastLoadedType)
+                return null;
 
             getComponent = this.state.getComponent;
+
+            if (getComponent == null)
+                return null;
         }
 
-        if (entity == null || getComponent == null)
-            return null;
-        
+       
         var ti = getTypeInfo(entity.Type);
 
         var ctx = this.props.ctx;
@@ -128,6 +130,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         var frame: EntityFrame<ModifiableEntity> = {
             frameComponent: this,
             entityComponent: null,
+            forceUpdate: () => this.props.ctx.frame.forceUpdate(),
             onClose: () => { throw new Error("Not implemented Exception"); },
             onReload: pack => { throw new Error("Not implemented Exception"); },
             setError: (modelState, initialPrefix) => { throw new Error("Not implemented Exception"); },

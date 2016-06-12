@@ -39,7 +39,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
             buttons = null;
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.binding.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>

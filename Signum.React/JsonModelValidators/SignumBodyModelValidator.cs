@@ -38,31 +38,35 @@ namespace Signum.React.Json
             bool isValid = true;
             PropertyScope propertyScope = new PropertyScope();
             validationContext.KeyBuilders.Push(propertyScope);
-            foreach (var kvp in PropertyConverter.GetPropertyConverters(mod.GetType()))
+
+            var entity = mod as Entity;
+            using (entity == null ? null : entity.Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : Corruption.DenyScope())
             {
-                if (kvp.Value.AvoidValidate)
-                    continue;
-
-                propertyScope.PropertyName = kvp.Key;
-                if (SignumValidate(validationContext, kvp.Value.GetValue(mod)) ?? true)
+                foreach (var kvp in PropertyConverter.GetPropertyConverters(mod.GetType()))
                 {
-                    isValid = false;
-                }
+                    if (kvp.Value.AvoidValidate)
+                        continue;
 
-                string error = kvp.Value.PropertyValidator.PropertyCheck(mod);
-
-                if (error != null)
-                {
-                    string key = CalculateKey(validationContext);
-                    if (validationContext.ModelState.IsValidField(key))
+                    propertyScope.PropertyName = kvp.Key;
+                    if (SignumValidate(validationContext, kvp.Value.GetValue(mod)) ?? true)
                     {
                         isValid = false;
-                        validationContext.ModelState.AddModelError(key, error);
+                    }
+
+                    string error = kvp.Value.PropertyValidator.PropertyCheck(mod);
+
+                    if (error != null)
+                    {
+                        string key = CalculateKey(validationContext);
+                        if (validationContext.ModelState.IsValidField(key))
+                        {
+                            isValid = false;
+                            validationContext.ModelState.AddModelError(key, error);
+                        }
                     }
                 }
             }
             
-            var entity = mod as Entity;
             if (entity != null && entity.Mixins.Any())
             {
                 propertyScope.PropertyName = "mixins";

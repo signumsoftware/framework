@@ -138,7 +138,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
             Promise.all(lites.map(a => this.convert(a))).then(entites => {
                 const list = this.props.ctx.value;
-                entites.forEach(e => list.push({ element: e, rowId: null }));
+                entites.forEach(e => list.push({ rowId: null, element: e }));
                 this.setValue(list);
             }).done();
         }).done();

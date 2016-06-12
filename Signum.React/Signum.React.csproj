@@ -268,6 +268,7 @@
     <TypeScriptCompile Include="Scripts\Lines\ValueLine.tsx" />
     <TypeScriptCompile Include="Scripts\Globals.ts" />
     <TypeScriptCompile Include="Typings\es6-promise\es6-promise.d.ts" />
+    <TypeScriptCompile Include="Typings\moment-duration-format\moment-duration-format.d.ts" />
     <TypeScriptCompile Include="Typings\moment\moment-node.d.ts" />
     <TypeScriptCompile Include="Typings\moment\moment.d.ts" />
     <TypeScriptCompile Include="Typings\numbro\numbro.d.ts" />
