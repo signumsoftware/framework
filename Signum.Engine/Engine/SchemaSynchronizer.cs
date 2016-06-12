@@ -96,7 +96,7 @@ namespace Signum.Engine
                 SqlPreCommand dropIndices =
                     Synchronizer.SynchronizeScript(model, database,
                      null,
-                    (tn, dif) => dif.Indices.Values.Select(ix => SqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
+                    (tn, dif) => dif.Indices.Values.Where(ix => !ix.IsPrimary).Select(ix => SqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
                     (tn, tab, dif) =>
                     {
                         Dictionary<string, Index> modelIxs = modelIndices[tab];
