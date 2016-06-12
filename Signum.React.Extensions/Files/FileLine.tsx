@@ -182,11 +182,11 @@ interface FileLineConfiguration<T extends IFile> {
 
 
 FileLine.configurtions[FileEntity.typeName] = {
-    downloadLink: e => Navigator.currentHistory.createHref("api/files/downloadFile/" + e.id.toString())
+    downloadLink: e => Navigator.currentHistory.createHref("/api/files/downloadFile/" + e.id.toString())
 } as FileLineConfiguration<FileEntity>;
 
 FileLine.configurtions[FilePathEntity.typeName] = {
-    downloadLink: e => Navigator.currentHistory.createHref("api/files/downloadFilePath/" + e.id.toString())
+    downloadLink: e => Navigator.currentHistory.createHref("/api/files/downloadFilePath/" + e.id.toString())
 } as FileLineConfiguration<FilePathEntity>;
 
 FileLine.configurtions[EmbeddedFileEntity.typeName] = {
@@ -195,7 +195,7 @@ FileLine.configurtions[EmbeddedFileEntity.typeName] = {
 
 FileLine.configurtions[EmbeddedFilePathEntity.typeName] = {
     downloadLink: e => Navigator.currentHistory.createHref({
-        pathname: "api/files/downloadEmbeddedFilePath/" + e.fileType.key,
+        pathname: "/api/files/downloadEmbeddedFilePath/" + e.fileType.key,
         query: {
             suffix: e.suffix,
             fileName: e.fileName
