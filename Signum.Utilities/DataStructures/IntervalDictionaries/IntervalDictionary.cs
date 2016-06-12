@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Linq;
 using Signum.Utilities;
 using System.Diagnostics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities.DataStructures
 {
@@ -137,14 +138,20 @@ namespace Signum.Utilities.DataStructures
             {
                 int index = PossibleIndex(key);
                 if (index == -1)
-                    throw new KeyNotFoundException("No interval found");
+                    throw new KeyNotFoundException("No interval found in {0}".FormatWith(this.GetType().TypeName()));
 
                 if (dic.Keys[index].Contains(key))
                     return dic.Values[index];
 
-                throw new KeyNotFoundException("No interval found");
+                throw new KeyNotFoundException("No interval found in {0}".FormatWith(this.GetType().TypeName()));
             }
             
+        }
+
+        public V TryGet(K key, V defaultValue)
+        {
+            this.TryGetValue(key, out defaultValue);
+            return defaultValue;
         }
 
         public bool TryGetValue(K key, out V value)
