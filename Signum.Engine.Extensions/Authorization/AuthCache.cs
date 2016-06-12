@@ -61,7 +61,7 @@ namespace Signum.Entities.Authorization
             runtimeRules = sb.GlobalLazy(this.NewCache,
                 invalidateWithTypes ?
                 new InvalidateWith(typeof(RT), typeof(RoleEntity), typeof(RuleTypeEntity)) :
-                new InvalidateWith(typeof(RT), typeof(RoleEntity)));
+                new InvalidateWith(typeof(RT), typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
 
             sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
 

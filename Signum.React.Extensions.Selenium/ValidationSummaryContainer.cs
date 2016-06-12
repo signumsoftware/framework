@@ -20,7 +20,7 @@ namespace Signum.React.Selenium
             return container.Element.WithLocator(By.CssSelector("ul.validaton-summary"));
         }
 
-        public static string[] ValidationErrors(this IValidationSummaryContainer container, int? numberOfErrors)
+        public static string[] ValidationErrors(this IValidationSummaryContainer container)
         {
             var errors = container.ValidationSummary().CombineCss(" > li").FindElements().Select(a => a.Text).ToArray();
 

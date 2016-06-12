@@ -120,6 +120,11 @@ namespace Signum.React.Selenium
                 throw new InvalidOperationException("{0} is found".FormatWith(locator));
         }
 
+        public static bool IsStale(this IWebElement element)
+        {
+            return ExpectedConditions.StalenessOf(element)(element.GetDriver());
+        }
+
         public static IWebElement WaitElementVisible(this RemoteWebDriver selenium, By locator, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
             return selenium.Wait(() => selenium.FindElements(locator).FirstOrDefault(a => a.Displayed),
@@ -307,8 +312,9 @@ namespace Signum.React.Selenium
                 if (last == newLast)
                     return null;
 
-                return newLast.FindElement(By.ClassName("modal"));
+                return newLast.TryFindElement(By.CssSelector(".fade.in.modal"));
             });
+
             return result;
         }
 
@@ -416,7 +422,9 @@ namespace Signum.React.Selenium
 
         public IWebElement Find()
         {
-            return ParentElement.FindElement(this.Locator);
+            return this.ParentElement.WaitElementVisible(this.Locator); 
+                
+           //return ParentElement.FindElement(this.Locator);
         }
 
         public ReadOnlyCollection<IWebElement> FindElements()

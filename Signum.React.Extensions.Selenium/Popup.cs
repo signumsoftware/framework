@@ -9,6 +9,7 @@ using OpenQA.Selenium.Remote;
 using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Utilities;
+using OpenQA.Selenium.Support.UI;
 
 namespace Signum.React.Selenium
 {
@@ -28,7 +29,8 @@ namespace Signum.React.Selenium
 
         private void WaitVisible()
         {
-            this.Element.WaitElementVisible(By.CssSelector("modal.fade.in"));
+            //this.Element.WaitElementVisible(By.CssSelector("modal.fade.in"));
+            this.Element.WaitElementVisible(By.CssSelector("div.modal-content"));
         }
 
         public WebElementLocator CloseButton
@@ -45,6 +47,9 @@ namespace Signum.React.Selenium
                 {
                     try
                     {
+                        if (this.Element.IsStale())
+                            return;
+
                         var button = this.CloseButton.TryFind();
                         if (button != null && button.Displayed)
                             button.Click();
@@ -76,12 +81,12 @@ namespace Signum.React.Selenium
         }
 
 
-        public PopupControl<T> OkWaitPopupControl<T>() where T : Entity
+        public PopupFrame<T> OkWaitPopupControl<T>() where T : Entity
         {
             var element = this.OkButton.Find().CaptureOnClick();
             var disposing = this.Disposing;
             this.Disposing = null;
-            return new PopupControl<T>(element) { Disposing = disposing };
+            return new PopupFrame<T>(element) { Disposing = disposing };
         }
 
         public bool OkPressed;
@@ -149,30 +154,14 @@ namespace Signum.React.Selenium
                 return new ValueLineProxy(formGroup, null);
             }
         }
-
-        public string StringValue
-        {
-            get { return ValueLine.StringValue; }
-            set { ValueLine.StringValue = value; }
-        }
-
-        public T GetValue<T>()
-        {
-            return ValueLine.GetValue<T>();
-        }
-
-        public void SetValue(object value, string format = null)
-        {
-            ValueLine.SetValue(value, format);
-        }
     }
 
 
-    public class PopupControl<T> : Popup, ILineContainer<T>, IEntityButtonContainer<T> where T : ModifiableEntity
+    public class PopupFrame<T> : Popup, ILineContainer<T>, IEntityButtonContainer<T>, IValidationSummaryContainer where T : ModifiableEntity
     {
         public PropertyRoute Route { get; private set; }
 
-        public PopupControl(IWebElement element, PropertyRoute route = null)
+        public PopupFrame(IWebElement element, PropertyRoute route = null)
             : base(element)
         {
             this.Route = route == null || route.IsImplementation(typeof(T)) ? PropertyRoute.Root(typeof(T)) : route;
@@ -197,22 +186,14 @@ namespace Signum.React.Selenium
         {
             if (!AvoidClose)
             {
-                string confirmationMessage;
+                string confirmationMessage = null;
                 Selenium.Wait(() =>
                 {
-                    var close = this.CloseButton.TryFind();
-                    if (close?.Displayed == true)
-                    {
-                        try
-                        {
-                            close.Click();
-                        }
-                        catch (NoSuchElementException e)
-                        {
-                            if (!e.Message.Contains("not found"))
-                                throw;
-                        }
-                    }
+                    if (this.Element.IsStale())
+                        return true;
+
+                    if (TryToClose())
+                        return true;
 
                     if (Selenium.IsAlertPresent())
                     {
@@ -222,11 +203,34 @@ namespace Signum.React.Selenium
                     }
 
                     return false;
+                 
                 }, () => "popup {0} to disapear with or without confirmation".FormatWith());
+
+                if (confirmationMessage != null)
+                    throw new UnhandledAlertException(confirmationMessage);
             }
 
             if (Disposing != null)
                 Disposing(this.OkPressed);
+        }
+
+        [DebuggerStepThrough]
+        private bool TryToClose()
+        {
+            try
+            {
+                var close = this.CloseButton.TryFind();
+                if (close?.Displayed == true)
+                {
+                    close.Click();
+                }
+
+                return false;
+            }
+            catch (StaleElementReferenceException)
+            {
+                return true;
+            }
         }
 
         public EntityInfoProxy EntityInfo()
@@ -234,7 +238,7 @@ namespace Signum.React.Selenium
             return EntityInfoProxy.Parse(this.Element.FindElement(By.CssSelector("div.sf-main-control")).GetAttribute("data-main-entity"));
         }
 
-        public PopupControl<T> WaitLoaded()
+        public PopupFrame<T> WaitLoaded()
         {
             this.Element.WaitElementPresent(By.CssSelector("div.modal.fade.in"));
             return this;

@@ -40,52 +40,60 @@ namespace Signum.React.Selenium
             : base(element, route)
         {
         }
+        
 
-        public string StringValue
+        private void SetStringValue(string value)
         {
-            get
+            IWebElement checkBox = this.Element.TryFindElement(By.CssSelector("input[type=checkbox]"));
+            if (checkBox != null)
             {
-                IWebElement checkBox = this.Element.FindElement(By.CssSelector("input[type=checkbox]"));
-                if (checkBox != null)
-                    return checkBox.Selected.ToString();
-
-                IWebElement namedElement = this.Element.TryFindElement(By.CssSelector("input[type=text]"));
-                if(namedElement != null)
-                    return namedElement.GetAttribute("value");
-
-                IWebElement date = this.Element.TryFindElement(By.Name("Date"));
-                IWebElement time = this.Element.TryFindElement(By.Name("Time"));
-
-                if (date != null && time != null)
-                    return date.GetAttribute("value") + " " + time.GetAttribute("value");
-
-                if (checkBox != null)
-                    return checkBox.Text;
-            
-                throw new InvalidOperationException("Element {0} not found".FormatWith(this.Route.PropertyString()));
+                checkBox.SetChecked(bool.Parse(value));
+                return;
             }
 
-            set
+            IWebElement dateTimePicker = this.Element.TryFindElement(By.CssSelector("div.rw-datetimepicker input[type=text]"));
+            if(dateTimePicker != null)
             {
+                var js = this.Element.GetDriver() as IJavaScriptExecutor;
 
-                IWebElement checkBox = this.Element.TryFindElement(By.CssSelector("input[type=checkbox]"));
-                if (checkBox != null)
-                {
-                    checkBox.SetChecked(bool.Parse(value));
-                }
+                var script = 
+$@"arguments[0].value = '{value}'; 
+arguments[0].dispatchEvent(new Event('input', {{ bubbles: true }}));
+arguments[0].dispatchEvent(new Event('blur'));";
 
-                IWebElement byName = this.Element.TryFindElement(By.CssSelector("input[type=text]"));
-                if (byName != null)
-                {
-                    if (byName.TagName == "select")
-                        byName.SelectElement().SelectByValue(value);
-                    else
-                        byName.SafeSendKeys(value);
-                    return;
-                }
-                else
-                    throw new InvalidOperationException("Element {0} not found".FormatWith(this.Route));
+                js.ExecuteScript(script, dateTimePicker);
+                return;
             }
+
+            IWebElement textOrTextArea = this.Element.TryFindElement(By.CssSelector(" input[type=text], textarea"));
+            if (textOrTextArea != null)
+            {
+                textOrTextArea.SafeSendKeys(value);
+                return;
+            }
+
+            IWebElement select = this.Element.TryFindElement(By.CssSelector("select"));
+            if (select != null)
+            {
+                select.SelectElement().SelectByValue(value);
+                return;
+            }
+
+            throw new InvalidOperationException("No ValueLine input element for  {0} found".FormatWith(Route));
+        }
+
+        private string GetStringValue()
+        {
+            IWebElement checkBox = this.Element.TryFindElement(By.CssSelector("input[type=checkbox]"));
+            if (checkBox != null)
+                return checkBox.Selected.ToString();
+
+            IWebElement textOrTextArea = this.Element.TryFindElement(By.CssSelector("input[type=text], textarea"));
+            if (textOrTextArea != null)
+                return textOrTextArea.GetAttribute("value");
+
+
+            throw new InvalidOperationException("Element {0} not found".FormatWith(Route.PropertyString()));
         }
 
         public WebElementLocator MainElement
@@ -93,27 +101,34 @@ namespace Signum.React.Selenium
             get { return this.Element.WithLocator(By.CssSelector("input")); }
         }
 
-        public object Value
+        public object GetValue()
         {
-            get { return GetValue(Route.Type); }
-            set { SetValue(value, Reflector.FormatString(Route)); }
+            return this.GetValue(Route.Type);
         }
-
+      
         public object GetValue(Type type)
         {
-            return ReflectionTools.Parse(StringValue, type);
+            return ReflectionTools.Parse(GetStringValue(), type);
         }
 
         public T GetValue<T>()
         {
-            return ReflectionTools.Parse<T>(StringValue); 
+            return ReflectionTools.Parse<T>(GetStringValue()); 
         }
 
-        public void SetValue(object value, string format = null)
+        public void SetValue(object value)
         {
-            StringValue = value == null ? null :
+            var format = Reflector.FormatString(Route);
+            this.SetValue(value, format);
+        }
+
+        public void SetValue(object value, string format)
+        {
+            var str = value == null ? null :
                     value is IFormattable ? ((IFormattable)value).ToString(format, null) :
                     value.ToString();
+
+            SetStringValue(str);
         }
     }
 
@@ -150,7 +165,7 @@ namespace Signum.React.Selenium
             }, "create clicked");
         }
 
-        public PopupControl<T> CreatePopup<T>() where T : ModifiableEntity
+        public PopupFrame<T> CreatePopup<T>() where T : ModifiableEntity
         {
          
             string changes = GetChanges();
@@ -159,7 +174,7 @@ namespace Signum.React.Selenium
 
             popup = ChooseTypeCapture(typeof(T), popup);
 
-            return new PopupControl<T>(popup, this.ItemRoute)
+            return new PopupFrame<T>(popup, this.ItemRoute)
             {
                 Disposing = okPressed => { WaitNewChanges(changes, "create dialog closed"); }
             };
@@ -170,12 +185,12 @@ namespace Signum.React.Selenium
             get { return this.Element.WithLocator(By.CssSelector("a.sf-view")); }
         }
         
-        protected PopupControl<T> ViewInternal<T>() where T : ModifiableEntity
+        protected PopupFrame<T> ViewInternal<T>() where T : ModifiableEntity
         {
             var newElement = this.ViewButton.Find().CaptureOnClick();
             string changes = GetChanges();
             
-            return new PopupControl<T>(newElement, this.ItemRoute)
+            return new PopupFrame<T>(newElement, this.ItemRoute)
             {
                 Disposing = okPressed => WaitNewChanges(changes, "create dialog closed")
             };
@@ -255,27 +270,31 @@ namespace Signum.React.Selenium
 
         protected EntityInfoProxy EntityInfoInternal(int? index)
         {
-            var element = index == null ? Element.FindElement(By.CssSelector("[data-entity]")) :
-            this.Element.FindElements(By.CssSelector("[data-entity]")).ElementAt(index.Value);
+            var element = index == null ? Element :
+                this.Element.FindElements(By.CssSelector("[data-entity]")).ElementAt(index.Value);
 
             return EntityInfoProxy.Parse(element.GetAttribute("data-entity"));
         }
 
-        protected void AutoCompleteAndSelect(IWebElement autoCompleteElement, Lite<IEntity> lite)
+        public void AutoCompleteWaitChanges(IWebElement autoCompleteElement, Lite<IEntity> lite)
         {
             WaitChanges(() =>
             {
-                autoCompleteElement.FindElement(By.CssSelector("input")).SafeSendKeys(lite.Id.ToString());
-                //Selenium.FireEvent(autoCompleteLocator, "keyup");
-
-                var listLocator = By.CssSelector("ul.typeahead.dropdown-menu");
-
-                autoCompleteElement.WaitElementVisible(listLocator);
-                IWebElement itemElement = autoCompleteElement.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
-
-                itemElement.Click();
+                AutoCompleteBasic(autoCompleteElement, lite);
 
             }, "autocomplete selection");
+        }
+        public static void AutoCompleteBasic(IWebElement autoCompleteElement, Lite<IEntity> lite)
+        {
+            autoCompleteElement.FindElement(By.CssSelector("input")).SafeSendKeys(lite.Id.ToString());
+            //Selenium.FireEvent(autoCompleteLocator, "keyup");
+
+            var listLocator = By.CssSelector("ul.typeahead.dropdown-menu");
+
+            autoCompleteElement.WaitElementVisible(listLocator);
+            IWebElement itemElement = autoCompleteElement.FindElement(By.CssSelector("[data-entity-key='{0}']".FormatWith(lite.Key())));
+
+            itemElement.Click();
         }
     }
 
@@ -286,9 +305,12 @@ namespace Signum.React.Selenium
 
         public Type EntityType;
         public PrimaryKey? IdOrNull { get; set; }
-        
 
-        public Lite<Entity> ToLite(string toString = null) => Lite.Create(this.EntityType, this.IdOrNull.Value, null);
+
+        public Lite<Entity> ToLite(string toString = null)
+        {
+            return Lite.Create(this.EntityType, this.IdOrNull.Value, toString);
+        }
 
         internal static EntityInfoProxy Parse(string dataEntity)
         {
@@ -319,25 +341,26 @@ namespace Signum.React.Selenium
             : base(element, route)
         {
         }
-
-        public Lite<IEntity> LiteValue
+      
+        public void SetLite(Lite<IEntity> value)
         {
-            get { return EntityInfo()?.ToLite(); }
-            set
-            {
-                if (this.EntityInfo() != null)
-                    this.Remove();
+            if (this.EntityInfo() != null)
+                this.Remove();
 
-                if (value != null)
-                {
-                    if (AutoCompleteElement.IsVisible())
-                        AutoComplete(value);
-                    else if (FindButton != null)
-                        this.Find().SelectLite(value);
-                    else
-                        throw new NotImplementedException("AutoComplete");
-                }
+            if (value != null)
+            {
+                if (AutoCompleteElement.IsVisible())
+                    AutoComplete(value);
+                else if (FindButton != null)
+                    this.Find().SelectLite(value);
+                else
+                    throw new NotImplementedException("AutoComplete");
             }
+        }
+
+        public Lite<Entity> GetLite()
+        {
+            return EntityInfo()?.ToLite();
         }
 
         public WebElementLocator AutoCompleteElement
@@ -347,10 +370,15 @@ namespace Signum.React.Selenium
 
         public void AutoComplete(Lite<IEntity> lite)
         {
-            base.AutoCompleteAndSelect(AutoCompleteElement.Find(), lite);
+            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), lite);
         }
 
-        public PopupControl<T> View<T>() where T : ModifiableEntity
+        public void AutoCompleteBasic(Lite<IEntity> lite)
+        {
+            AutoCompleteBasic(AutoCompleteElement.Find(), lite);
+        }
+
+        public PopupFrame<T> View<T>() where T : ModifiableEntity
         {
             return base.ViewInternal<T>();
         }
@@ -359,6 +387,8 @@ namespace Signum.React.Selenium
         {
             return EntityInfoInternal(null);
         }
+
+      
     }
 
     public class EntityComboProxy : EntityBaseProxy
@@ -377,9 +407,14 @@ namespace Signum.React.Selenium
         {
             get
             {
-                var text =  this.ComboElement.AllSelectedOptions.SingleOrDefaultEx()?.Text;
+                var ei = EntityInfo();
 
-                return EntityInfo().ToLite(text);
+                if (ei == null)
+                    return null;
+
+                var text = this.ComboElement.AllSelectedOptions.SingleOrDefaultEx()?.Text;
+
+                return ei.ToLite(text);
             }
             set
             {
@@ -394,13 +429,17 @@ namespace Signum.React.Selenium
                 .ToList();
         }
 
-        public PopupControl<T> View<T>() where T : ModifiableEntity
+        public PopupFrame<T> View<T>() where T : ModifiableEntity
         {
             return base.ViewInternal<T>();
         }
 
         public void SelectLabel(string label)
         {
+
+            this.Element.GetDriver().Wait(() =>
+                this.ComboElement.WrappedElement.FindElements(By.CssSelector("option")).Any(a => a.Text.Contains(label)));
+
             WaitChanges(() =>
                 this.ComboElement.SelectByText(label),
                 "ComboBox selected");
@@ -408,6 +447,9 @@ namespace Signum.React.Selenium
 
         public void SelectIndex(int index)
         {
+            this.Element.GetDriver().Wait(() =>
+                        this.ComboElement.WrappedElement.FindElements(By.CssSelector("option")).Count > index);
+
             WaitChanges(() =>
                 this.ComboElement.SelectByIndex(index + 1),
                 "ComboBox selected");
@@ -486,7 +528,7 @@ namespace Signum.React.Selenium
             this.OptionElement(index).Find().Click();
         }
 
-        public PopupControl<T> View<T>(int index) where T : ModifiableEntity
+        public PopupFrame<T> View<T>(int index) where T : ModifiableEntity
         {
             Select(index);
 
@@ -642,15 +684,15 @@ namespace Signum.React.Selenium
 
         public void AutoComplete(Lite<IEntity> lite)
         {
-            base.AutoCompleteAndSelect(AutoCompleteElement.Find(), lite);
+            base.AutoCompleteWaitChanges(AutoCompleteElement.Find(), lite);
         }
 
-        public PopupControl<T> View<T>(int index) where T : ModifiableEntity
+        public PopupFrame<T> View<T>(int index) where T : ModifiableEntity
         {
             var changes = this.GetChanges();
             var popup = ViewElementIndex(index).Find().CaptureOnClick();
 
-            return new PopupControl<T>(popup, this.ItemRoute)
+            return new PopupFrame<T>(popup, this.ItemRoute)
             {
                 Disposing = okPressed => WaitNewChanges(changes, "create dialog closed")
             };

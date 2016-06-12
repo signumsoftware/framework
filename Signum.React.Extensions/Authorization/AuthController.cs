@@ -12,19 +12,33 @@ using Signum.Services;
 using Signum.Utilities;
 using Signum.React.Facades;
 using Signum.React.Authorization;
+using Signum.Engine.Operations;
 
 namespace Signum.React.Authorization
 {
     public class AuthController : ApiController
     {
+        public class LoginRequest
+        {
+            public string userName { get; set; }
+            public string password { get; set; }
+            public bool? rememberMe { get; set; }
+        }
+
+        public class LoginResponse
+        {
+            public string message { get; set; }
+            public UserEntity userEntity { get; set; }
+        }
+
         [Route("api/auth/login"), HttpPost]
         public LoginResponse Login([FromBody]LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
-                throw LoginError("userName", AuthMessage.UserNameMustHaveAValue.NiceToString());
+                throw ModelException("userName", AuthMessage.UserNameMustHaveAValue.NiceToString());
 
             if (string.IsNullOrEmpty(data.password))
-                throw LoginError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
+                throw ModelException("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             // Attempt to login
             UserEntity user = null;
@@ -42,16 +56,16 @@ namespace Signum.React.Authorization
                 }
                 else if (e is IncorrectUsernameException)
                 {
-                    throw LoginError("userName", AuthMessage.InvalidUsername.NiceToString());
+                    throw ModelException("userName", AuthMessage.InvalidUsername.NiceToString());
                 }
                 else if(e is IncorrectPasswordException)
                 {
-                    throw LoginError("password", AuthMessage.InvalidPassword.NiceToString());
+                    throw ModelException("password", AuthMessage.InvalidPassword.NiceToString());
                 }
             }
             catch (IncorrectPasswordException)
             {
-                throw LoginError("password", AuthServer.MergeInvalidUsernameAndPasswordMessages ?
+                throw ModelException("password", AuthServer.MergeInvalidUsernameAndPasswordMessages ?
                     AuthMessage.InvalidUsernameOrPassword.NiceToString() :
                     AuthMessage.InvalidPassword.NiceToString());
             }
@@ -88,24 +102,37 @@ namespace Signum.React.Authorization
             httpContext.Session.Abandon();
         }
 
+        public class ChangePasswordRequest
+        {
+            public string oldPassword { get; set; }
+            public string newPassword { get; set; }
+        }
+
+        [Route("api/auth/ChangePassword"), HttpPost]
+        public UserEntity ChangePassword(ChangePasswordRequest request)
+        {
+            if (string.IsNullOrEmpty(request.oldPassword))
+                throw ModelException("oldPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+
+            if (string.IsNullOrEmpty(request.newPassword))
+                throw ModelException("newPassword", AuthMessage.PasswordMustHaveAValue.NiceToString());
+
+            var user = UserEntity.Current;
+            
+            if (!user.PasswordHash.SequenceEqual(Security.EncodePassword(request.oldPassword)))
+                throw ModelException("oldPassword", AuthMessage.InvalidPassword.NiceToString());
+
+            user.PasswordHash = Security.EncodePassword(request.newPassword);
+            using (AuthLogic.Disable())
+                user.Execute(UserOperation.Save);
+
+            return user;
+        }
        
-        private HttpResponseException LoginError(string field, string error)
+        private HttpResponseException ModelException(string field, string error)
         {
             ModelState.AddModelError(field, error);
             return new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, this.ModelState));
-        }
-
-        public class LoginRequest
-        {
-            public string userName { get; set; }
-            public string password { get; set; }
-            public bool? rememberMe { get; set; }
-        }
-
-        public class LoginResponse
-        {
-            public string message { get; set; }
-            public UserEntity userEntity { get; set; }
-        }
+        }     
     }
 }

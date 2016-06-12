@@ -30,7 +30,7 @@ namespace Signum.React.Selenium
 
         public static WebElementLocator OperationButton(this IEntityButtonContainer container, OperationSymbol symbol)
         {
-            return container.ContainerElement().WithLocator(By.CssSelector("button[data-operation={0}]".FormatWith(symbol.Key)));
+            return container.ContainerElement().WithLocator(By.CssSelector($"button[data-operation='{symbol.Key}']"));
         }
 
         public static WebElementLocator OperationButton<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol)
@@ -101,7 +101,7 @@ namespace Signum.React.Selenium
             container.Element.GetDriver().Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
         }
 
-        public static void Delete<T>(this PopupControl<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
+        public static void Delete<T>(this PopupFrame<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
               where T : Entity
         {
             container.OperationClick(symbol);
@@ -111,16 +111,16 @@ namespace Signum.React.Selenium
             container.WaitNotVisible();
         }
 
-        public static PopupControl<T> ConstructFrom<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+        public static PopupFrame<T> ConstructFrom<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
             where T : Entity
             where F : Entity
         {
             var element = container.OperationClickCapture(symbol);
 
-            return new PopupControl<T>(element).WaitLoaded();
+            return new PopupFrame<T>(element).WaitLoaded();
         }
 
-        public static NormalPage<T> ConstructFromNormalPage<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
+        public static PageFrame<T> ConstructFromNormalPage<F, T>(this IEntityButtonContainer<F> container, ConstructSymbol<T>.From<F> symbol)
             where T : Entity
             where F : Entity
         {
@@ -128,14 +128,14 @@ namespace Signum.React.Selenium
 
             container.Element.GetDriver().Wait(() => { try { return container.EntityInfo().IsNew; } catch { return false; } });
 
-            return new NormalPage<T>(container.Element.GetDriver());
+            return new PageFrame<T>(container.Element.GetDriver());
         }
 
         public static long? TestTicks(this IEntityButtonContainer container)
         {
             try
             {
-                return container.Element.FindElement(By.CssSelector("div.sf-main-control[data-test-ticks]")).GetAttribute("data-test-ticks").ToLong();
+                return container.Element.TryFindElement(By.CssSelector("div.sf-main-control[data-test-ticks]"))?.GetAttribute("data-test-ticks").ToLong();
             }
             catch
             {
