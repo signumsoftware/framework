@@ -417,25 +417,25 @@ export module API {
 
     export function findLiteLike(request: { types: string, subString: string, count: number }): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
-            url: currentHistory.createHref({ pathname: "api/query/findLiteLike", query: request })
+            url: currentHistory.createHref({ pathname: "/api/query/findLiteLike", query: request })
         });
     }
 
     export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {
         return ajaxGet<Lite<TypeEntity>[]>({
-            url: currentHistory.createHref({ pathname: "api/query/findLiteLike", query: request })
+            url: currentHistory.createHref({ pathname: "/api/query/findLiteLike", query: request })
         });
     }
 
     export function findAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
         return ajaxGet<Lite<Entity>[]>({
-            url: currentHistory.createHref({ pathname: "api/query/findAllLites", query: request })
+            url: currentHistory.createHref({ pathname: "/api/query/findAllLites", query: request })
         });
     }
 
     export function findAllEntities(request: { types: string }): Promise<Entity[]> {
         return ajaxGet<Entity[]>({
-            url: currentHistory.createHref({ pathname: "api/query/findAllEntities", query: request })
+            url: currentHistory.createHref({ pathname: "/api/query/findAllEntities", query: request })
         });
     }
 
