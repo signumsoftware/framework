@@ -231,59 +231,62 @@ namespace Signum.React.Json
             if (reader.TokenType == JsonToken.Null)
                 return null;
 
-            reader.Assert(JsonToken.StartObject);
-
-            ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer);
-
-            var pr = JsonSerializerExtensions.CurrentPropertyRoute;
-            if (pr == null || mod is Entity)
-                pr = PropertyRoute.Root(mod.GetType());
-            else if (pr.Type.ElementType() == objectType)
-                pr = pr.Add("Item"); //Because we have a custom MListJsonConverter but not for other simpler collections
-            
-            var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
-
-            while (reader.TokenType == JsonToken.PropertyName)
+            using (EntityCache ec = new EntityCache())
             {
-                if ((string)reader.Value == "mixins")
-                {
-                    var entity = (Entity)mod;
-                    reader.Read();
-                    reader.Assert(JsonToken.StartObject);
+                reader.Assert(JsonToken.StartObject);
 
-                    reader.Read();
-                    while (reader.TokenType == JsonToken.PropertyName)
+                ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer);
+
+                var pr = JsonSerializerExtensions.CurrentPropertyRoute;
+                if (pr == null || mod is Entity)
+                    pr = PropertyRoute.Root(mod.GetType());
+                else if (pr.Type.ElementType() == objectType)
+                    pr = pr.Add("Item"); //Because we have a custom MListJsonConverter but not for other simpler collections
+
+                var dic = PropertyConverter.GetPropertyConverters(mod.GetType());
+
+                while (reader.TokenType == JsonToken.PropertyName)
+                {
+                    if ((string)reader.Value == "mixins")
                     {
-                        var mixin = entity[(string)reader.Value];
+                        var entity = (Entity)mod;
+                        reader.Read();
+                        reader.Assert(JsonToken.StartObject);
 
                         reader.Read();
+                        while (reader.TokenType == JsonToken.PropertyName)
+                        {
+                            var mixin = entity[(string)reader.Value];
 
-                        using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr.Add(mixin.GetType())))
-                            serializer.DeserializeValue(reader, mixin.GetType(), mixin);
+                            reader.Read();
+
+                            using (JsonSerializerExtensions.SetCurrentPropertyRoute(pr.Add(mixin.GetType())))
+                                serializer.DeserializeValue(reader, mixin.GetType(), mixin);
+
+                            reader.Read();
+                        }
+
+                        reader.Assert(JsonToken.EndObject);
+                        reader.Read();
+                    }
+                    else
+                    {
+
+                        PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
+
+                        reader.Read();
+                        ReadJsonProperty(reader, serializer, mod, pc, pr);
 
                         reader.Read();
                     }
-
-                    reader.Assert(JsonToken.EndObject);
-                    reader.Read();
                 }
-                else
-                {
 
-                    PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
+                reader.Assert(JsonToken.EndObject);
 
-                    reader.Read();
-                    ReadJsonProperty(reader, serializer, mod, pc, pr);
+                AfterDeserilization.Invoke(mod);
 
-                    reader.Read();
-                }
+                return mod;
             }
-
-            reader.Assert(JsonToken.EndObject);
-
-            AfterDeserilization.Invoke(mod);
-
-            return mod;
         }
 
 
