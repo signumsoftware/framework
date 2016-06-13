@@ -207,7 +207,7 @@ namespace Signum.React.Selenium
                 }, () => "popup {0} to disapear with or without confirmation".FormatWith());
 
                 if (confirmationMessage != null)
-                    throw new UnhandledAlertException(confirmationMessage);
+                    throw new InvalidOperationException(confirmationMessage);
             }
 
             if (Disposing != null)
