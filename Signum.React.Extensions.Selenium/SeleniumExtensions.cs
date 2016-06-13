@@ -422,9 +422,7 @@ namespace Signum.React.Selenium
 
         public IWebElement Find()
         {
-            return this.ParentElement.WaitElementVisible(this.Locator); 
-                
-           //return ParentElement.FindElement(this.Locator);
+           return ParentElement.FindElement(this.Locator);
         }
 
         public ReadOnlyCollection<IWebElement> FindElements()

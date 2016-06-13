@@ -83,7 +83,7 @@ namespace Signum.React.Selenium
             return container.OperationClickCapture(symbol.Symbol);
         }
 
-        public static void Execute<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false)
+        public static void Execute<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false, bool checkValidationErrors = true)
             where T : Entity
         {
             container.WaitReload(() =>
@@ -91,14 +91,24 @@ namespace Signum.React.Selenium
                 container.OperationClick(symbol);
                 if (consumeAlert)
                     container.Element.GetDriver().ConsumeAlert();
-            });
+            }, checkValidationErrors);
         }
 
-        public static void WaitReload(this IEntityButtonContainer container, Action action)
+        public static void WaitReload(this IEntityButtonContainer container, Action action, bool checkValidationErrors = true)
         {
             var ticks = container.TestTicks().Value;
             action();
             container.Element.GetDriver().Wait(() => container.TestTicks().Let(t => t != null && t != ticks));
+
+            var vs = container as IValidationSummaryContainer;
+
+            if (checkValidationErrors  && vs != null)
+            {
+                var errors = vs.ValidationErrors();
+
+                if (!errors.IsNullOrEmpty())
+                    throw new InvalidOperationException("Validation Errors found: \r\n" + errors.ToString("\r\n").Indent(4));
+            }
         }
 
         public static void Delete<T>(this PopupFrame<T> container, DeleteSymbol<T> symbol, bool consumeAlert = true)
