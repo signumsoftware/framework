@@ -86,10 +86,8 @@ export class StyleContext {
 
     
     get frame(): EntityFrame<ModifiableEntity> {
-        if (this.styleOptions.frame)
-            return this.styleOptions.frame;
-
-        return this.parent.frame;
+        return this.styleOptions.frame ? this.styleOptions.frame :
+            this.parent ? this.parent.frame : null;
     }
 
 
