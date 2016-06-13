@@ -418,7 +418,9 @@ arguments[0].dispatchEvent(new Event('blur'));";
             }
             set
             {
-                this.ComboElement.SelectByValue(value == null ? "" : value.Key());
+                var val = value == null ? "" : value.Key();
+                this.Element.GetDriver().Wait(() => this.ComboElement.Options.Any(o => o.GetAttribute("value") == val));
+                this.ComboElement.SelectByValue(val);
             }
         }
 
