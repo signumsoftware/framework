@@ -486,12 +486,14 @@ namespace Signum.React.Selenium
 
         public WebElementLocator EntityLink(Lite<IEntity> lite)
         {
-            return RowElement(lite).CombineCss(" > td:nth-child({0}) > a");
+            var entityIndex = GetColumnIndex("Entity");
+            return RowElement(lite).CombineCss(" > td:nth-child({0}) > a".FormatWith(entityIndex));
         }
 
         public WebElementLocator EntityLink(int rowIndex)
         {
-            return RowElement(rowIndex).CombineCss(" > td:nth-child({0}) > a");
+            var entityIndex = GetColumnIndex("Entity");
+            return RowElement(rowIndex).CombineCss(" > td:nth-child({0}) > a".FormatWith(entityIndex));
         }
 
 
