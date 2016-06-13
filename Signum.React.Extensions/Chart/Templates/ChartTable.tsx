@@ -68,7 +68,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
                     {
                         resultTable.rows.map((row, i) =>
                             <tr key={i}>
-                                { !chartRequest.groupResults && <td>{ ((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row) }</td> }
+                                { !chartRequest.groupResults && <td>{ ((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns) }</td> }
                                 { columns.map((c, j) =>
                                     <td key={j} style={{ textAlign: c.cellFormatter && c.cellFormatter.textAllign }}>
                                         {c.resultIndex == -1 || c.cellFormatter == null ? null : c.cellFormatter.formatter(row.columns[c.resultIndex]) }
