@@ -19,7 +19,7 @@ export default class Newsletter extends React.Component<{ ctx: TypeContext<Newsl
 
         return (
             <div>
-                <Tabs>
+                <Tabs id="newsletterTabs">
                     <Tab eventKey={0}>
                         <ValueLine ctx={nc.subCtx(n => n.name)}  />
                         <ValueLine ctx={nc.subCtx(n => n.state)} readOnly={true} />

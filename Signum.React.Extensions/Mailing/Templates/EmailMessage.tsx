@@ -23,7 +23,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
         var sc1 = e.subCtx({labelColumns: {sm: 1}});
 
         return (
-            <Tabs>
+            <Tabs id="newsletterTabs">
                 <Tab title={EmailMessageEntity.niceName() }>
                       <fieldset>
                     <legend>Properties</legend>
