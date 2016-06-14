@@ -582,7 +582,7 @@ declare module "react-bootstrap" {
         animation?: boolean;
         bsStyle?: string;
         defaultActiveKey?: any;
-        id?: string | number;
+        id: string | number;
         onSelect?: React.ReactEventHandler;
         paneWidth?: any; // TODO: Add more specific type 
         position?: string;
