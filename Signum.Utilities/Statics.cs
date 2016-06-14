@@ -187,6 +187,33 @@ namespace Signum.Utilities
         SessionVariable<T> CreateVariable<T>(string name);
     }
 
+    public class VoidSessionFactory : ISessionFactory
+    {
+        public SessionVariable<T> CreateVariable<T>(string name)
+        {
+            return new VoidVariable<T>(name);
+        }
+
+        class VoidVariable<T> : SessionVariable<T>
+        {
+            public override Func<T> ValueFactory { get; set; }
+
+            public VoidVariable(string name)
+                : base(name)
+            { }
+
+            public override T Value
+            {
+                get { return default(T); }
+                set { throw new InvalidOperationException("No session found to set '{0}'".FormatWith(this.Name)); ; }
+            }
+
+            public override void Clean()
+            {   
+            }
+        }
+    }
+
     public class SingletonSessionFactory : ISessionFactory
     {
         public static Dictionary<string, object> singletonSession = new Dictionary<string, object>();
