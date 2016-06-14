@@ -88,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Alerts\Alert.cs" />
+    <Compile Include="Authorization\AuthTokenConfigration.cs" />
     <Compile Include="Authorization\AuthMessages.cs" />
     <Compile Include="Authorization\PasswordValidInterval.cs" />
     <Compile Include="Authorization\ResetPasswordRequest.cs" />

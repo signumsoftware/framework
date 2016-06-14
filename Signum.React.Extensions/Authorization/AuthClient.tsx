@@ -1,7 +1,9 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { ModifiableEntity, EntityPack } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
-import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
+import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
+import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '../../../Framework/Signum.React/Scripts/Services';
+import * as Services from '../../../Framework/Signum.React/Scripts/Services';
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
 import { tasks, LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
@@ -19,6 +21,8 @@ import Login from './Login/Login';
 export let userTicket: boolean;
 export let resetPassword: boolean;
 
+
+Services.AuthTokenFilter.addAuthToken = addAuthToken;
 
 export function startPublic(options: { routes: JSX.Element[], userTicket: boolean, resetPassword: boolean }) {
     userTicket = options.userTicket;
@@ -159,17 +163,91 @@ export function currentUser(): UserEntity {
 export var onCurrentUserChanged: Array<(newUser: UserEntity) => void> = [];
 
 export function setCurrentUser(user: UserEntity) {
+
     Navigator.currentUser = user;
 
     onCurrentUserChanged.forEach(f => f(user));
 }
 
+export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Promise<Response>): Promise<Response> {
+
+    var token = getAuthToken();
+
+    if (token) {
+        if (options.headers == null)
+            options.headers = {}; 
+
+        options.headers["Authorization"] = "Bearer " + token;
+    }
+
+    return makeCall()
+        .catch(ifError(ServiceError, e => {
+
+            if (e.httpError.ExceptionType.endsWith(".AuthenticationException")) {
+                if (e.httpError.ExceptionMessage != "OutdatedToken") {
+                    Navigator.currentHistory.push("/auth/login");
+                } else {
+                    return Api.refreshToken(token).then(resp => {
+                        setCurrentUser(resp.userEntity)
+                        setAuthToken(resp.token);
+
+                        return makeCall();
+                    });
+                }
+            }
+        }));
+}
+
+export function getAuthToken(): string {
+    return sessionStorage.getItem("authToken") || null;
+}
+
+export function setAuthToken(authToken: string): void{
+    sessionStorage.setItem("authToken", authToken || "");
+}
+
+export function autoLogin(): Promise<UserEntity> {
+
+    if (Navigator.currentUser)
+        return Promise.resolve(Navigator.currentUser);
+
+    if (getAuthToken())
+        return Api.fetchCurrentUser().then(u => {
+            setCurrentUser(u);
+            return u;
+        });
+
+    return new Promise<UserEntity>((resolve) => {
+        setTimeout(() => {
+            if (getAuthToken()) {
+                Api.fetchCurrentUser()
+                    .then(u => {
+                        setCurrentUser(u);
+                        resolve(u);
+                    });
+            } else {
+                Api.loginFromCookie()
+                    .then(respo => {
+
+                        if (!respo) {
+                            resolve(null);
+                        } else {
+                            setAuthToken(respo.token);
+                            setCurrentUser(respo.userEntity);
+                            resolve(respo.userEntity);
+                        }
+                    });
+            }
+        }, 500);
+    });
+}
 
 export function logout() {
 
     Api.logout().then(() => {
 
         setCurrentUser(null);
+        setAuthToken(null);
 
         onLogout();
     }).done();
@@ -203,11 +281,20 @@ export module Api {
 
     export interface LoginResponse {
         message: string;
-        userEntity: UserEntity 
+        userEntity: UserEntity;
+        token: string;
     }
 
     export function login(loginRequest: LoginRequest): Promise<LoginResponse> {
         return ajaxPost<LoginResponse>({ url: "/api/auth/login" }, loginRequest);
+    }
+
+    export function loginFromCookie(): Promise<LoginResponse> {
+        return ajaxPost<LoginResponse>({ url: "/api/auth/loginFromCookie" }, null);
+    }
+
+    export function refreshToken(oldToken: string): Promise<LoginResponse> {
+        return ajaxPost<LoginResponse>({ url: "/api/auth/refreshToken", avoidAuthToken: true }, oldToken);
     }
 
     export interface ChangePasswordRequest {
@@ -219,7 +306,7 @@ export module Api {
         return ajaxPost<UserEntity>({ url: "/api/auth/ChangePassword" }, request);
     }
 
-    export function retrieveCurrentUser(): Promise<UserEntity> {
+    export function fetchCurrentUser(): Promise<UserEntity> {
         return ajaxGet<UserEntity>({ url: "/api/auth/currentUser", cache: "no-cache" });
     }
 
@@ -243,7 +330,7 @@ export module Api {
     export function saveTypeRulePack(rules: TypeRulePack): Promise<void> {
         return ajaxPost<void>({ url: "/api/authAdmin/typeRules" }, rules);
     }
-
+    
     
     export function fetchPropertyRulePack(typeName: string, roleId: number | string): Promise<PropertyRulePack> {
         return ajaxGet<PropertyRulePack>({ url: "/api/authAdmin/propertyRules/" + typeName + "/" + roleId, cache: "no-cache" });

@@ -141,6 +141,7 @@
     <Compile Include="Authorization\AuthController.cs" />
     <Compile Include="Authorization\AuthServer.cs" />
     <Compile Include="Authorization\UserTicketServer.cs" />
+    <Compile Include="Authorization\AuthTokensServer.cs" />
     <Compile Include="Cache\CacheController.cs" />
     <Compile Include="Cache\CacheServer.cs" />
     <Compile Include="Chart\ChartController.cs" />
@@ -350,7 +351,6 @@
     <TypeScriptCompile Include="Profiler\Signum.Entities.Profiler.ts">
       <DependentUpon>Signum.Entities.Profiler.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Profiler\SessionTimeout\SessionTimeoutPage.tsx" />
     <TypeScriptCompile Include="Profiler\Heavy\HeavyListPage.tsx" />
     <TypeScriptCompile Include="Profiler\Times\TimesPage.tsx" />
     <TypeScriptCompile Include="Templating\Signum.Entities.Templating.ts">

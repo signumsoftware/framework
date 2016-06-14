@@ -20,7 +20,6 @@ export function start(options: { routes: JSX.Element[] }) {
         <Route path="times" getComponent={(loc, cb) => require(["./Times/TimesPage"], (Comp) => cb(null, Comp.default))}/>
         <Route path="heavy" getComponent={(loc, cb) => require(["./Heavy/HeavyListPage"], (Comp) => cb(null, Comp.default)) }/>
         <Route path="heavy/entry/:selectedIndex" getComponent={(loc, cb) => require(["./Heavy/HeavyEntryPage"], (Comp) => cb(null, Comp.default)) }/>
-        <Route path="overrideSessionTimeout" getComponent={(loc, cb) => require(["./SessionTimeout/SessionTimeoutPage"], (Comp) => cb(null, Comp.default)) }/>
     </Route>);
 
     //Navigator.addSettings(new EntitySettings(ProcessEntity, e => new Promise(resolve => require(['./Templates/Process'], resolve))));
