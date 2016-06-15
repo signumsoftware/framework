@@ -139,7 +139,7 @@
     <Compile Include="ApiControllers\EntityController.cs" />
     <Compile Include="ApiControllers\QueryController.cs" />
     <Compile Include="ApiControllers\ReflectionController.cs" />
-    <Compile Include="Filters\AuthenticationRequired.cs" />
+    <Compile Include="Filters\SignumAuthenticationAndProfilerAttribute.cs" />
     <Compile Include="Filters\ProfilerFilterAttribute.cs" />
     <Compile Include="Facades\SignumServer.cs" />
     <Compile Include="Facades\ReflectionServer.cs" />

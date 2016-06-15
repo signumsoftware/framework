@@ -47,14 +47,4 @@ namespace Signum.React.Filters
             return continuation();
         }
     }
-
-    [AttributeUsage(AttributeTargets.Method)]
-    public class AnonymousAttribute : Attribute
-    {
-        public static bool IsAnonymous(HttpActionContext actionContext)
-        {
-            var r = actionContext.ActionDescriptor as ReflectedHttpActionDescriptor;
-            return r.GetCustomAttributes<AnonymousAttribute>().Any();
-        }
-    }
 }

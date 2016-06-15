@@ -17,7 +17,7 @@ namespace Signum.React.ApiControllers
 {
     public class ReflectionController : ApiController
     {
-        [Route("api/reflection/types"), HttpGet, Anonymous]
+        [Route("api/reflection/types"), HttpGet, AllowAnonymous]
         public Dictionary<string, TypeInfoTS> Types()
         {
             return ReflectionServer.GetTypeInfoTS();
