@@ -344,6 +344,9 @@ namespace Signum.React.Json
             if (newValue is byte[] && oldValue is byte[])
                 return MemCompare.Compare((byte[])newValue, (byte[])oldValue);
 
+            if (newValue is DateTime && oldValue is DateTime)
+                return Math.Abs(((DateTime)newValue).Subtract((DateTime)oldValue).TotalMilliseconds) < 10; //JSon dates get rounded
+
             return object.Equals(newValue, oldValue);
         }
 
