@@ -124,7 +124,7 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal || cache == null)
                 return true;
 
-            return cache.GetAllowed(RoleEntity.Current.ToLite(), permissionSymbol);
+            return cache.GetAllowed(RoleEntity.Current, permissionSymbol);
         }
         
         public static bool IsAuthorized(this PermissionSymbol permissionSymbol, Lite<RoleEntity> role)

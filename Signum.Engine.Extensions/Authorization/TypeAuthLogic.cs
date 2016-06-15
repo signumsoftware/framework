@@ -153,7 +153,7 @@ namespace Signum.Engine.Authorization
             if (temp.HasValue)
                 return new TypeAllowedAndConditions(temp.Value);
 
-            return cache.GetAllowed(RoleEntity.Current.ToLite(), type);
+            return cache.GetAllowed(RoleEntity.Current, type);
         }
 
         public static TypeAllowedAndConditions GetAllowed(Lite<RoleEntity> role, Type type)

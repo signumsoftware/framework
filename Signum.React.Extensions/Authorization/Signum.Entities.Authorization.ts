@@ -131,6 +131,12 @@ export type AuthThumbnail =
     "Mix" |
     "None";
 
+export const AuthTokenConfigurationEntity = new Type<AuthTokenConfigurationEntity>("AuthTokenConfigurationEntity");
+export interface AuthTokenConfigurationEntity extends Entities.EmbeddedEntity {
+    refreshTokenEvery: number;
+    refreshAnyTokenPreviousTo: string;
+}
+
 export interface BaseRulePack<T> extends Entities.ModelEntity {
     role: Entities.Lite<RoleEntity>;
     strategy: string;
@@ -335,7 +341,7 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
     passwordHash: string;
     passwordSetDate: string;
     passwordNeverExpires: boolean;
-    role: RoleEntity;
+    role: Entities.Lite<RoleEntity>;
     email: string;
     cultureInfo: ExBasics.CultureInfoEntity;
     anulationDate: string;

@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
 import { DomUtils } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { is, SearchMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as ChartUtils from "./ChartUtils"
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption, hasAggregate } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
@@ -103,11 +103,20 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.A
             return;
         }
 
-        try {
-            func(chart, this.props.data);
-            //this.bindMouseClick($chartContainer);
-        } catch (e) {
-            this.showError(e, __baseLineNumber__, chart);
+        if (this.props.data.rows.length == 0) {
+            var height = parseInt(chart.attr("height"));
+            var width = parseInt(chart.attr("width"));
+
+            chart.select(".sf-chart-error").remove();
+            chart.append('svg:rect').attr('class', 'sf-chart-error').attr("x", width / 4).attr("y", (height / 2) - 10).attr("fill", "#EFF4FB").attr("stroke", "#FAC0DB").attr("width", width / 2).attr("height", 20);
+            chart.append('svg:text').attr('class', 'sf-chart-error').attr("x", width / 4).attr("y", height / 2).attr("fill", "#0066ff").attr("dy", 5).attr("dx", 4).text(SearchMessage.NoResultsFound.niceToString());
+        } else {
+            try {
+                func(chart, this.props.data);
+                //this.bindMouseClick($chartContainer);
+            } catch (e) {
+                this.showError(e, __baseLineNumber__, chart);
+            }
         }
     }
 
@@ -140,7 +149,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.A
         }
     }
 
-    showError(e, __baseLineNumber__, chart) {
+    showError(e, __baseLineNumber__: number, chart: d3.Selection<any>) {
         var message = e.toString();
 
         var regex = /(DrawChart.*@.*:(.*))|(DrawChart .*:(.*):.*\)\))|(DrawChart .*:(.*):.*\))/;
@@ -155,9 +164,12 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.A
             this.exceptionLine = 1;
         }
 
+        var height = parseInt(chart.attr("height"));
+        var width = parseInt(chart.attr("width"));
+
         chart.select(".sf-chart-error").remove();
-        chart.append('svg:rect').attr('class', 'sf-chart-error').attr("y", (chart.attr("height") / 2) - 10).attr("fill", "#FBEFFB").attr("stroke", "#FAC0DB").attr("width", chart.attr("width") - 1).attr("height", 20);
-        chart.append('svg:text').attr('class', 'sf-chart-error').attr("y", chart.attr("height") / 2).attr("fill", "red").attr("dy", 5).attr("dx", 4).text(message);
+        chart.append('svg:rect').attr('class', 'sf-chart-error').attr("y", (height / 2) - 10).attr("fill", "#FBEFFB").attr("stroke", "#FAC0DB").attr("width", width - 1).attr("height", 20);
+        chart.append('svg:text').attr('class', 'sf-chart-error').attr("y", height / 2).attr("fill", "red").attr("dy", 5).attr("dx", 4).text(message);
     }
 
 

@@ -14,8 +14,16 @@ export default class LoginUserControl extends React.Component<{}, { user: UserEn
         this.state = { user: AuthClient.currentUser() };
     }
 
+    setUser = (newUser: UserEntity) => {
+        this.setState({ user: newUser });
+    }
+
     componentWillMount() {
-        AuthClient.onCurrentUserChanged.push(newUser => this.setState({ user: newUser }));
+        AuthClient.onCurrentUserChanged.push(this.setUser);
+    }
+
+    componentWillUnmount() {
+        AuthClient.onCurrentUserChanged.remove(this.setUser);
     }
 
     render() {

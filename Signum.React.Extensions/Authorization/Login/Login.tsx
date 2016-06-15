@@ -31,6 +31,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
         AuthClient.Api.login(request)
             .then(response => {
                 AuthClient.setCurrentUser(response.userEntity);
+                AuthClient.setAuthToken(response.token);
                 AuthClient.onLogin();
             })
             .catch((e: ValidationError) => {
@@ -95,6 +96,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
 
                         { AuthClient.resetPassword &&
                             <div>
+                                <br/>
                                 <Link to="auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString() }</Link>
                             </div>
                         }

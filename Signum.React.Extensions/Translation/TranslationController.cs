@@ -5,6 +5,7 @@ using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
+using Signum.React.Filters;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -19,47 +20,44 @@ namespace Signum.React.Translation
 {
     public class TranslationController : ApiController
     {
-        [Route("api/translation/cultures"), HttpGet]
+        [Route("api/translation/cultures"), HttpGet, AllowAnonymous]
         public Dictionary<string, Lite<CultureInfoEntity>> GetCultures()
         {
             return CultureInfoLogic.CultureInfoToEntity.Value.Values.ToDictionary(a => a.Name, a => a.ToLite());
         }
 
-        [Route("api/translation/currentCulture"), HttpGet]
+        [Route("api/translation/currentCulture"), HttpGet, AllowAnonymous]
         public CultureInfoEntity CurrentCulture()
         {
             return CultureInfo.CurrentCulture.ToCultureInfoEntity();
         }
 
-        [Route("api/translation/currentCulture"), HttpPost]
+        [Route("api/translation/currentCulture"), HttpPost, AllowAnonymous]
         public HttpResponseMessage SetCurrentCulture(Lite<CultureInfoEntity> culture)
         {
-            var resp = new HttpResponseMessage();
-
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
 
-            if (UserEntity.Current == null)
+            if (UserEntity.Current != null) //Won't be used till next refresh
             {
-                resp.Headers.AddCookies(new[] 
-                {
-                    new CookieHeaderValue("language", ci.Name)
-                    {
-                        Expires = DateTime.Now.AddMonths(6),
-                        Domain = Request.RequestUri.Host,
-                        Path = "/"
-                    }
-                });
-            }
-            else
-            {
-                UserEntity.Current.CultureInfo = culture.Retrieve();
+                var user = UserEntity.Current.ToLite().Retrieve();
+
+                user.CultureInfo = culture.Retrieve();
                 using (AuthLogic.Disable())
                 using (OperationLogic.AllowSave<UserEntity>())
-                    UserEntity.Current.Save();
+                    user.Save();
             }
 
+            var resp = new HttpResponseMessage();
+            resp.Headers.AddCookies(new[] 
+            {
+                new CookieHeaderValue("language", ci.Name)
+                {
+                    Expires = DateTime.Now.AddMonths(6),
+                    Domain = Request.RequestUri.Host,
+                    Path = "/"
+                }
+            });
             resp.StatusCode = HttpStatusCode.NoContent;
-
             return resp;
         }
     }

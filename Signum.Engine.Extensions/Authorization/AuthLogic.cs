@@ -349,7 +349,7 @@ namespace Signum.Engine.Authorization
 
         public static HashSet<Lite<RoleEntity>> CurrentRoles()
         {
-            return roles.Value.IndirectlyRelatedTo(RoleEntity.Current.ToLite(), true);
+            return roles.Value.IndirectlyRelatedTo(RoleEntity.Current, true);
         }
 
         public static HashSet<Lite<RoleEntity>> RolesFromRole(Lite<RoleEntity> role)
