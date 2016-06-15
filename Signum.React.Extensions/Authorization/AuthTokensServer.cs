@@ -10,11 +10,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 
 namespace Signum.React.Authorization
@@ -43,7 +46,7 @@ namespace Signum.React.Authorization
                 else
                     throw new AuthenticationException("No authorization token header found");
             }
-            
+
             var token = DeserializeToken(tokenString);
 
             var c = Configuration();
@@ -52,29 +55,33 @@ namespace Signum.React.Authorization
                 c.RefreshAnyTokenPreviousTo.HasValue && token.CreationDate < c.RefreshAnyTokenPreviousTo;
 
             if (requiresRefresh)
-                throw new AuthenticationException("OutdatedToken");
+            {
+                ctx.Response = ctx.Request.CreateResponse<HttpError>(HttpStatusCode.Unauthorized, 
+                    new HttpError(new AuthenticationException("OutdatedToken"), includeErrorDetail: true)); //Avoid annoying exception
+                return null;
+            }
 
             return UserHolder.UserSession(token.User);
         }
 
-        public static string RefreshToken(string oldToken)
+        public static string RefreshToken(string oldToken, out UserEntity newUser)
         {
             AuthToken token = DeserializeToken(oldToken);
 
-            UserEntity user = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == token.User.Id));
+            newUser = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == token.User.Id));
 
-            if (user == null || user.State == UserState.Disabled)
-                throw new AuthenticationException(AuthMessage.User0IsDisabled.NiceToString(user));
+            if (newUser == null || newUser.State == UserState.Disabled)
+                throw new AuthenticationException(AuthMessage.User0IsDisabled.NiceToString(newUser));
 
-            if (user.UserName.SequenceEqual(token.User.UserName))
+            if (newUser.UserName != token.User.UserName)
                 throw new AuthenticationException(AuthMessage.InvalidUsername.NiceToString());
 
-            if (user.PasswordHash.SequenceEqual(token.User.PasswordHash))
+            if (!newUser.PasswordHash.SequenceEqual(token.User.PasswordHash))
                 throw new AuthenticationException(AuthMessage.InvalidPassword.NiceToString());
 
             AuthToken newToken = new AuthToken
             {
-                User = user,
+                User = newUser,
                 CreationDate = TimeZoneManager.Now,
             };
 

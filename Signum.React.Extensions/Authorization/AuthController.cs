@@ -15,6 +15,7 @@ using Signum.React.Authorization;
 using Signum.Engine.Operations;
 using Signum.React.Filters;
 using Signum.Entities.Basics;
+using Signum.Engine;
 
 namespace Signum.React.Authorization
 {
@@ -121,9 +122,12 @@ namespace Signum.React.Authorization
         }
 
         [Route("api/auth/refreshToken"), HttpPost, Anonymous]
-        public string RefreshToken(string oldToken)
-        {
-            return AuthTokenServer.RefreshToken(oldToken);
+        public LoginResponse RefreshToken([FromBody]string oldToken)
+        {   
+            UserEntity user;
+            var newToken = AuthTokenServer.RefreshToken(oldToken, out user);
+
+            return new LoginResponse { message = null, userEntity = user, token = newToken };
         }
 
         public class ChangePasswordRequest

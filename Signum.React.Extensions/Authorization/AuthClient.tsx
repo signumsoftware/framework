@@ -173,12 +173,13 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 
     var token = getAuthToken();
 
-    if (token) {
-        if (options.headers == null)
-            options.headers = {}; 
+    if (!token)
+        return makeCall();
+    
+    if (options.headers == null)
+        options.headers = {}; 
 
-        options.headers["Authorization"] = "Bearer " + token;
-    }
+    options.headers["Authorization"] = "Bearer " + token;   
 
     return makeCall()
         .catch(ifError(ServiceError, e => {
@@ -188,8 +189,11 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
                     Navigator.currentHistory.push("/auth/login");
                 } else {
                     return Api.refreshToken(token).then(resp => {
+
                         setCurrentUser(resp.userEntity)
                         setAuthToken(resp.token);
+
+                        options.headers["Authorization"] = "Bearer " + resp.token;
 
                         return makeCall();
                     });
