@@ -204,7 +204,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         return {
             queryKey: getQueryKey(fo.queryName),
             filters: fo.filterOptions.filter(a => a.token != null && a.operation != null).map(fo => ({ token: fo.token.fullKey, operation: fo.operation, value: fo.value })),
-            columns: fo.columnOptions.filter(a => a.token != null).map(co => ({ token: co.token.fullKey, displayName: co.displayName })),
+            columns: fo.columnOptions.filter(a => a.token != null).map(co => ({ token: co.token.fullKey, displayName: co.displayName }))
+                .concat((this.state.querySettings && this.state.querySettings.hiddenColumns || []).map(co => ({ token: co.columnName, displayName: "" }))),
             orders: fo.orderOptions.filter(a => a.token != null).map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType })),
             pagination: fo.pagination,
         };
@@ -889,7 +890,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
                     {this.state.findOptions.navigate &&
                         <td>
-                            {this.wrapError(mark, i, ((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row)) }
+                            {this.wrapError(mark, i, ((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, this.state.resultTable.columns)) }
                         </td>
                     }
 
