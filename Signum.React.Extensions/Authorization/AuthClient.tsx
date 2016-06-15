@@ -183,22 +183,27 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 
     return makeCall()
         .catch(ifError(ServiceError, e => {
+            if (e.status == 426 && e.httpError.ExceptionType.endsWith(".NewTokenRequiredException")) {
+                return Api.refreshToken(token).then(resp => {
+                    setCurrentUser(resp.userEntity)
+                    setAuthToken(resp.token);
 
-            if (e.httpError.ExceptionType.endsWith(".AuthenticationException")) {
-                if (e.httpError.ExceptionMessage != "OutdatedToken") {
+                    options.headers["Authorization"] = "Bearer " + resp.token;
+
+                    return makeCall();
+                }, e2 => {
+                    setAuthToken(null);
                     Navigator.currentHistory.push("/auth/login");
-                } else {
-                    return Api.refreshToken(token).then(resp => {
-
-                        setCurrentUser(resp.userEntity)
-                        setAuthToken(resp.token);
-
-                        options.headers["Authorization"] = "Bearer " + resp.token;
-
-                        return makeCall();
-                    });
-                }
+                    throw e;
+                });
             }
+
+            if (e.httpError.ExceptionType && e.httpError.ExceptionType.endsWith(".AuthenticationException")) {
+                setAuthToken(null);
+                Navigator.currentHistory.push("/auth/login");
+            }
+
+            throw e;
         }));
 }
 

@@ -136,6 +136,7 @@ namespace Signum.Entities.Authorization
         [Description("Welcome {0}")]
         Welcome0,
         LoginWithAnotherUser,
+        TheUserIsNotLongerInTheDatabase,
     }
 
     public enum AuthEmailMessage

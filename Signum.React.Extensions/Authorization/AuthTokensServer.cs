@@ -63,8 +63,8 @@ namespace Signum.React.Authorization
 
             if (requiresRefresh)
             {
-                ctx.Response = ctx.Request.CreateResponse<HttpError>(HttpStatusCode.Unauthorized, 
-                    new HttpError(new AuthenticationException("OutdatedToken"), includeErrorDetail: true)); //Avoid annoying exception
+                ctx.Response = ctx.Request.CreateResponse<HttpError>(HttpStatusCode.UpgradeRequired, 
+                    new HttpError(new NewTokenRequiredException("Please upgrade the token to continue using the service"), includeErrorDetail: true)); //Avoid annoying exception
                 return null;
             }
 
@@ -77,7 +77,10 @@ namespace Signum.React.Authorization
 
             newUser = AuthLogic.Disable().Using(_ => Database.Query<UserEntity>().SingleOrDefaultEx(u => u.Id == token.User.Id));
 
-            if (newUser == null || newUser.State == UserState.Disabled)
+            if (newUser == null)
+                throw new AuthenticationException(AuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
+
+            if (newUser.State == UserState.Disabled)
                 throw new AuthenticationException(AuthMessage.User0IsDisabled.NiceToString(newUser));
 
             if (newUser.UserName != token.User.UserName)
@@ -206,5 +209,12 @@ namespace Signum.React.Authorization
         public UserEntity User { get; set; }
 
         public DateTime CreationDate { get; set; }
-    } 
+    }
+
+
+    [Serializable]
+    public class NewTokenRequiredException : Exception
+    {
+        public NewTokenRequiredException(string message) : base(message) { }
+    }
 }
