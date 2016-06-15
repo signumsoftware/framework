@@ -11,12 +11,13 @@ using Signum.Entities;
 using Signum.React.Facades;
 using Signum.Utilities;
 using Signum.Engine;
+using Signum.React.Filters;
 
 namespace Signum.React.ApiControllers
 {
     public class ReflectionController : ApiController
     {
-        [Route("api/reflection/types"), HttpGet]
+        [Route("api/reflection/types"), HttpGet, Anonymous]
         public Dictionary<string, TypeInfoTS> Types()
         {
             return ReflectionServer.GetTypeInfoTS();

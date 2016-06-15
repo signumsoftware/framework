@@ -718,9 +718,6 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
 
             var perfect = difColumns.ZipOrDefault(mix.Columns, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true)).All(a => a);
 
-            if (!perfect)
-                perfect = perfect;
-
             return !perfect;
         }
 

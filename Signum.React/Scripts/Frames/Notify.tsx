@@ -34,6 +34,10 @@ export default class Notify extends React.Component<void, NotifyOptions>{
         this._isMounted = true;
     }
 
+    componentWillUnmount() {
+        this._isMounted = false;
+    }
+
     handler: number;
     notifyTimeout(options: NotifyOptions, timeout: number = 2000) {
         this.notify(options);
