@@ -19,6 +19,7 @@ using Signum.Engine.Basics;
 using Signum.React.Map;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
+using System.Web.Http.Controllers;
 
 namespace Signum.React.Authorization
 {
@@ -31,9 +32,11 @@ namespace Signum.React.Authorization
         public static Action UserLoggingOut;
         
 
-        public static void Start(HttpConfiguration config)
+        public static void Start(HttpConfiguration config, Func<AuthTokenConfigurationEntity> tokenConfig, string hasheableEncriptationKey)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+
+            AuthTokenServer.Start(tokenConfig, hasheableEncriptationKey);
 
             ReflectionServer.GetContext = () => new
             {
@@ -137,6 +140,11 @@ namespace Signum.React.Authorization
 
 
             SchemaMap.GetColorProviders += GetMapColors;
+        }
+
+        private static void AuthTokensServer(HttpActionContext obj)
+        {
+            throw new NotImplementedException();
         }
 
         public static void OnUserPreLogin(ApiController controller, UserEntity user)

@@ -55,7 +55,7 @@ namespace Signum.Entities.Authorization
             return ToStringExpression.Evaluate(this);
         }
 
-        public static RoleEntity Current
+        public static Lite<RoleEntity> Current
         {
             get
             {

@@ -149,7 +149,7 @@ namespace Signum.Engine.Authorization
             if (!typeof(Entity).IsAssignableFrom(route.RootType))
                 return PropertyAllowed.Modify;
 
-            return cache.GetAllowed(RoleEntity.Current.ToLite(), route);
+            return cache.GetAllowed(RoleEntity.Current, route);
         }
 
         public static string GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
@@ -169,7 +169,7 @@ namespace Signum.Engine.Authorization
             }
             else
             {
-                PropertyAllowed paProperty = cache.GetAllowed(RoleEntity.Current.ToLite(), route);
+                PropertyAllowed paProperty = cache.GetAllowed(RoleEntity.Current, route);
 
                 if (paProperty < requested)
                     return "Property {0} is set to {1} for {2}".FormatWith(route, paProperty, RoleEntity.Current);

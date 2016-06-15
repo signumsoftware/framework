@@ -13,6 +13,8 @@ using Signum.Utilities;
 using Signum.React.Facades;
 using Signum.React.Authorization;
 using Signum.Engine.Operations;
+using Signum.React.Filters;
+using Signum.Entities.Basics;
 
 namespace Signum.React.Authorization
 {
@@ -28,10 +30,11 @@ namespace Signum.React.Authorization
         public class LoginResponse
         {
             public string message { get; set; }
+            public string token { get; set; }
             public UserEntity userEntity { get; set; }
         }
 
-        [Route("api/auth/login"), HttpPost]
+        [Route("api/auth/login"), HttpPost, Anonymous]
         public LoginResponse Login([FromBody]LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
@@ -70,18 +73,37 @@ namespace Signum.React.Authorization
                     AuthMessage.InvalidPassword.NiceToString());
             }
 
-            UserEntity.Current = user;
-
-            if (data.rememberMe == true)
+            using (UserHolder.UserSession(user))
             {
-                UserTicketServer.SaveCookie();
+                if (data.rememberMe == true)
+                {
+                    UserTicketServer.SaveCookie();
+                }
+
+                AuthServer.AddUserSession(user);
+
+                string message = AuthLogic.OnLoginMessage();
+
+                var token = AuthTokenServer.CreateToken(user);
+
+                return new LoginResponse { message = message, userEntity = user, token = token };
             }
+        }
 
-            AuthServer.AddUserSession(user);
+        [Route("api/auth/loginFromCookie"), HttpPost, Anonymous]
+        public LoginResponse LoginFromCookie()
+        {
+            using (ScopeSessionFactory.OverrideSession())
+            {
+                if (!UserTicketServer.LoginFromCookie())
+                    return null;
 
-            string message = AuthLogic.OnLoginMessage();
+                string message = AuthLogic.OnLoginMessage();
 
-            return new LoginResponse { message = message, userEntity = user };
+                var token = AuthTokenServer.CreateToken(UserEntity.Current);
+
+                return new LoginResponse { message = message, userEntity = UserEntity.Current, token = token };
+            }
         }
 
         [Route("api/auth/currentUser")]
@@ -93,13 +115,15 @@ namespace Signum.React.Authorization
         [Route("api/auth/logout"), HttpPost]
         public void Logout()
         {
-            var httpContext = System.Web.HttpContext.Current;
-            
             AuthServer.UserLoggingOut?.Invoke();
 
             UserTicketServer.RemoveCookie();
+        }
 
-            httpContext.Session.Abandon();
+        [Route("api/auth/refreshToken"), HttpPost, Anonymous]
+        public string RefreshToken(string oldToken)
+        {
+            return AuthTokenServer.RefreshToken(oldToken);
         }
 
         public class ChangePasswordRequest

@@ -228,7 +228,7 @@ namespace Signum.Entities.Authorization
 
         internal DefaultDictionary<Type, TypeAllowedAndConditions> GetDefaultDictionary()
         {
-            return runtimeRules.Value[RoleEntity.Current.ToLite()].DefaultDictionary();
+            return runtimeRules.Value[RoleEntity.Current].DefaultDictionary();
         }
 
         public class RoleAllowedCache
