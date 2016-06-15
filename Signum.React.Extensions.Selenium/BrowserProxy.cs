@@ -117,9 +117,9 @@ namespace Signum.React.Selenium
 
         public virtual void Logout()
         {
-            Selenium.FindElement(By.CssSelector("a[href$='Auth/Logout']")).ButtonClick();
+            Selenium.FindElement(By.Id("sfUserDropDown")).Click();
+            Selenium.FindElement(By.Id("sf-auth-logout")).Click();    //SelectElement();
             Selenium.Wait(() => GetCurrentUser() == null);
-
             Selenium.Url = Url("Auth/Login");
             Selenium.WaitElementVisible(By.CssSelector(".sf-login"));
         }
@@ -147,8 +147,7 @@ namespace Signum.React.Selenium
 
         public virtual void SetCurrentCulture()
         {
-            string culture = Selenium.FindElement(By.CssSelector("li[data-culture]")).GetAttribute("data-culture");
-
+            string culture = Selenium.WaitElementPresent(By.Id("culture-dropdown")).GetParent().GetAttribute("data-culture");  
             Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
         }
     }

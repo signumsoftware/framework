@@ -13,7 +13,7 @@ namespace Signum.React.Selenium
         IWebElement Element { get; }
     }
 
-    public static class ValidationSummaryContainer
+    public static class ValidationSummaryContainerExtensions
     {
         public static WebElementLocator ValidationSummary(this IValidationSummaryContainer container)
         {
