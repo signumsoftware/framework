@@ -479,7 +479,7 @@ export module Encoder {
 
     export function stringValue(value: any): string {
 
-        if (!value)
+        if (value == null || value == "")
             return "";
 
         if (Array.isArray(value))
