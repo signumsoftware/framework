@@ -42,6 +42,8 @@ namespace Signum.React.Filters
                     actionContext.Request.RegisterForDispose(session);
             }
 
+            if (actionContext.Response != null)
+                return Task.FromResult(actionContext.Response);
             return continuation();
         }
     }
