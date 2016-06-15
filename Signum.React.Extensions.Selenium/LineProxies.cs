@@ -312,7 +312,7 @@ arguments[0].dispatchEvent(new Event('blur'));";
             return Lite.Create(this.EntityType, this.IdOrNull.Value, toString);
         }
 
-        internal static EntityInfoProxy Parse(string dataEntity)
+        public static EntityInfoProxy Parse(string dataEntity)
         {
             if (dataEntity == "null")
                 return null;
@@ -718,7 +718,7 @@ arguments[0].dispatchEvent(new Event('blur'));";
             return this.Element.WithLocator(By.CssSelector("label.sf-checkbox-element")).FindElements().Select(e =>
             {
                 var lite = Lite.Parse(e.FindElement(By.CssSelector("input[type=checkbox]")).GetAttribute("name"));
-                lite.SetToString(e.FindElement(By.CssSelector("div.sf-entitStrip-link")).Text);
+                lite.SetToString(e.FindElement(By.CssSelector("span.sf-entitStrip-link")).Text);
                 return lite;
             }).ToList();
         }

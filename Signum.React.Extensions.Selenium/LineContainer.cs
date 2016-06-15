@@ -116,7 +116,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new LineContainer<S>(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new LineContainer<S>(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static ValueLineProxy ValueLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -124,7 +124,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new ValueLineProxy(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new ValueLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static void ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
@@ -143,7 +143,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new FileLineProxy(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new FileLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static V ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -157,7 +157,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new EntityLineProxy(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new EntityLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static V EntityLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -179,7 +179,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new EntityComboProxy(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new EntityComboProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static V EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -206,7 +206,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new EntityDetailProxy(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new EntityDetailProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static EntityRepeaterProxy EntityRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -214,7 +214,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new EntityRepeaterProxy(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new EntityRepeaterProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static EntityTabRepeaterProxy EntityTabRepeater<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -222,7 +222,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new EntityTabRepeaterProxy(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new EntityTabRepeaterProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static EntityStripProxy EntityStrip<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -230,7 +230,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new EntityStripProxy(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new EntityStripProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static EntityListProxy EntityList<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -238,7 +238,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new EntityListProxy(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new EntityListProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static EntityListCheckBoxProxy EntityListCheckBox<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
@@ -246,7 +246,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new EntityListCheckBoxProxy(lineLocator.ElementLocator.Find(), lineLocator.Route);
+            return new EntityListCheckBoxProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
         }
 
         public static bool IsImplementation(this PropertyRoute route, Type type)
@@ -264,7 +264,7 @@ namespace Signum.React.Selenium
         {
             var lineLocator = lineContainer.LineLocator(property);
 
-            return new QueryTokenBuilderProxy(lineLocator.ElementLocator.Find());
+            return new QueryTokenBuilderProxy(lineLocator.ElementLocator.WaitVisible());
         }
 
         public static void SelectTab(this ILineContainer lineContainer, string title)
