@@ -35,7 +35,7 @@ namespace Signum.React.Authorization
             public UserEntity userEntity { get; set; }
         }
 
-        [Route("api/auth/login"), HttpPost, Anonymous]
+        [Route("api/auth/login"), HttpPost, AllowAnonymous]
         public LoginResponse Login([FromBody]LoginRequest data)
         {
             if (string.IsNullOrEmpty(data.userName))
@@ -91,7 +91,7 @@ namespace Signum.React.Authorization
             }
         }
 
-        [Route("api/auth/loginFromCookie"), HttpPost, Anonymous]
+        [Route("api/auth/loginFromCookie"), HttpPost, AllowAnonymous]
         public LoginResponse LoginFromCookie()
         {
             using (ScopeSessionFactory.OverrideSession())
@@ -121,7 +121,7 @@ namespace Signum.React.Authorization
             UserTicketServer.RemoveCookie();
         }
 
-        [Route("api/auth/refreshToken"), HttpPost, Anonymous]
+        [Route("api/auth/refreshToken"), HttpPost, AllowAnonymous]
         public LoginResponse RefreshToken([FromBody]string oldToken)
         {   
             UserEntity user;

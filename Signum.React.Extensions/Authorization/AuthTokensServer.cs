@@ -5,6 +5,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.React.Filters;
 using Signum.Utilities;
+using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,9 +35,15 @@ namespace Signum.React.Authorization
             SignumAuthenticationAndProfilerAttribute.Authenticate += Authenticate;
         }
 
+        public static bool AllowsAnonymous(HttpActionContext actionContext)
+        {
+            var r = actionContext.ActionDescriptor as ReflectedHttpActionDescriptor;
+            return r.GetCustomAttributes<AllowAnonymousAttribute>().Any() || r.ControllerDescriptor.ControllerType.HasAttribute<AllowAnonymousAttribute>();
+        }
+
         static IDisposable Authenticate(HttpActionContext ctx)
         {
-            var anonymous = AnonymousAttribute.IsAnonymous(ctx);
+            var anonymous = AllowsAnonymous(ctx);
 
             var tokenString = ctx.Request.Headers.Authorization?.Parameter;
             if (tokenString == null)

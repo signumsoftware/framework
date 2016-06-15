@@ -20,19 +20,19 @@ namespace Signum.React.Translation
 {
     public class TranslationController : ApiController
     {
-        [Route("api/translation/cultures"), HttpGet, Anonymous]
+        [Route("api/translation/cultures"), HttpGet, AllowAnonymous]
         public Dictionary<string, Lite<CultureInfoEntity>> GetCultures()
         {
             return CultureInfoLogic.CultureInfoToEntity.Value.Values.ToDictionary(a => a.Name, a => a.ToLite());
         }
 
-        [Route("api/translation/currentCulture"), HttpGet, Anonymous]
+        [Route("api/translation/currentCulture"), HttpGet, AllowAnonymous]
         public CultureInfoEntity CurrentCulture()
         {
             return CultureInfo.CurrentCulture.ToCultureInfoEntity();
         }
 
-        [Route("api/translation/currentCulture"), HttpPost, Anonymous]
+        [Route("api/translation/currentCulture"), HttpPost, AllowAnonymous]
         public HttpResponseMessage SetCurrentCulture(Lite<CultureInfoEntity> culture)
         {
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());
