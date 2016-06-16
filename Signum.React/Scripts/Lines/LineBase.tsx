@@ -117,7 +117,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         var error = this.state.onValidate ? this.state.onValidate(this.state.ctx.value) : this.defaultValidate(this.state.ctx.value);
         this.state.ctx.error = error;
         if (this.state.ctx.frame)
-            this.state.ctx.frame.forceUpdate();
+            this.state.ctx.frame.revalidate();
     }
 
     defaultValidate(val: any) {

@@ -120,7 +120,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             entityComponent: this.entityComponent,
             onReload: pack => this.setState({ pack }),
             onClose: () => this.onClose(),
-            forceUpdate: () => this.forceUpdate(),
+            revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
             setError: (ms, initialPrefix = "") => {
                 GraphExplorer.setModelState(entity, ms, initialPrefix);
                 this.forceUpdate()
@@ -149,7 +149,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
                 { this.renderTitle() }
                 { renderWidgets(wc) }
                 { this.entityComponent && <ButtonBar frame={frame} pack={this.state.pack} showOperations={true} /> }
-                <ValidationErrors entity={this.state.pack.entity}/>
+                <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve}/>
                 { embeddedWidgets.top }
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
                     {this.state.componentClass && React.createElement(this.state.componentClass, { ctx: ctx, ref: c => this.setComponent(c) } as any) }
@@ -158,6 +158,8 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             </div>
         );
     }
+
+    validationErrors: ValidationErrors;
 
     renderTitle() {
 
