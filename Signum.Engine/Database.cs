@@ -607,12 +607,15 @@ namespace Signum.Engine
             {
                 using (Transaction tr = new Transaction())
                 {
-                    int result = Database.Query<T>().Where(a => ids.Contains(a.Id)).UnsafeDelete();
+                    var groups = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters);
+                    int result = 0;
+                    foreach (var group in groups)
+                        result += Database.Query<T>().Where(a => group.Contains(a.Id)).UnsafeDelete();
+
                     if (result != ids.Count())
                         throw new InvalidOperationException("not all the elements have been deleted");
                     tr.Commit();
                 }
-
             }
         }
 

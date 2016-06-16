@@ -479,7 +479,7 @@ export module Encoder {
 
     export function stringValue(value: any): string {
 
-        if (!value)
+        if (value == null || value == "")
             return "";
 
         if (Array.isArray(value))
@@ -581,6 +581,7 @@ export interface QuerySettings {
     queryName: PseudoType | QueryKey;
     pagination?: Pagination;
     defaultOrderColumn?: string;
+    hiddenColumns?: ColumnOption[];
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes;
     entityFormatter?: EntityFormatter;
@@ -655,7 +656,7 @@ export interface EntityFormatRule {
 }
 
 
-export type EntityFormatter = (row: ResultRow) => React.ReactChild;
+export type EntityFormatter = (row: ResultRow, columns: string[]) => React.ReactChild;
 
 export const entityFormatRules: EntityFormatRule[] = [
     {

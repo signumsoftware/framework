@@ -187,7 +187,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             entityComponent: this.entityComponent,
             onReload: pack => this.setPack(pack),
             onClose: () => this.props.onExited(null),
-            forceUpdate: () => this.forceUpdate(),
+            revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
             setError: (modelState, initialPrefix = "") => {
                 GraphExplorer.setModelState(this.state.pack.entity, modelState, initialPrefix);
                 this.forceUpdate();
@@ -207,7 +207,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             <Modal.Body>
                 {renderWidgets({ ctx: ctx, pack: pack }) }
                 { this.entityComponent && <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />}
-                <ValidationErrors entity={pack.entity}/>
+                <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve}/>
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
                     { this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: c => this.setComponent(c) }) }
                 </div>
@@ -215,6 +215,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         );
     }
 
+    validationErrors: ValidationErrors;
 
     renderTitle() {
         
