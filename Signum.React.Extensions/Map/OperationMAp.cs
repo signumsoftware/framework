@@ -21,9 +21,7 @@ namespace Signum.React.Map
         {
             var operations = OperationLogic.TypeOperationsAndConstructors(type);
 
-            var stateTypes = operations.Select(a => a.UntypedFromStates == null ? typeof(DefaultState) : a.StateType)
-                .Concat(operations.Select(a => a.UntypedToStates == null ? typeof(DefaultState) : a.StateType))
-                .Distinct().Where(t => t != null).ToList();
+            var stateTypes = operations.Select(a => a.StateType ?? typeof(DefaultState)).Distinct().ToList();
 
             Dictionary<Type, LambdaExpression> expressions = stateTypes
                 .ToDictionary(t => t, t => type == typeof(DefaultState) ? null : giGetGraphGetter.GetInvoker(type, t)());
@@ -32,7 +30,7 @@ namespace Signum.React.Map
                 exp == null ? giCount.GetInvoker(type)() :
                 giCountGroupBy.GetInvoker(type, exp.Body.Type)(exp));
 
-            Dictionary<Type, string> tokens = expressions.SelectDictionary(t => t, exp => exp == null ? null : GetToken(exp));
+            Dictionary<Type, string> tokens = expressions.SelectDictionary(t => t.UnNullify(), exp => exp == null ? null : GetToken(exp));
 
             var symbols = operations.Select(a => a.OperationSymbol).ToList();
 
