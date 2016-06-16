@@ -150,7 +150,7 @@ export function parseLite(lite: string) : Lite<Entity> {
     };
 }
 
-export function is<T extends Entity>(a: Lite<T> | T, b: Lite<T> | T) {
+export function is<T extends Entity>(a: Lite<T> | T, b: Lite<T> | T, compareTicks = false) {
 
     if(a == null && b == null)
         return true;
@@ -168,7 +168,7 @@ export function is<T extends Entity>(a: Lite<T> | T, b: Lite<T> | T) {
         return false;
 
     if (a.id != null || b.id != null)
-        return a.id == b.id;
+        return a.id == b.id && (!compareTicks || (a as T).ticks == (b as T).ticks);
 
     var aEntity = (a as T).Type ? a as T : (a as Lite<T>).entity;
     var bEntity = (b as T).Type ? b as T : (b as Lite<T>).entity;
