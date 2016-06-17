@@ -39,19 +39,19 @@ export function start(options: { routes: JSX.Element[] }) {
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewHeavyProfiler),
         key: "ProfilerHeavy",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("/profiler/heavy"))
+        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/profiler/heavy"))
     });
     
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewTimeTracker),
         key: "ProfilerTimes",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("/profiler/times"))
+        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/profiler/times"))
     });
 
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.OverrideSessionTimeout),
         key: "OverrideSessionTimeout",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("/profiler/overrideSessionTimeout"))
+        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/profiler/overrideSessionTimeout"))
     });
 
 }
@@ -61,48 +61,48 @@ export module API {
 
     export module  Heavy {
         export function setEnabled(isEnabled: boolean): Promise<void> {
-            return ajaxPost<void>({ url: "/api/profilerHeavy/setEnabled/" + isEnabled }, null);
+            return ajaxPost<void>({ url: "~/api/profilerHeavy/setEnabled/" + isEnabled }, null);
         }
 
         export function isEnabled(): Promise<boolean> {
-            return ajaxGet<boolean>({ url: "/api/profilerHeavy/isEnabled" });
+            return ajaxGet<boolean>({ url: "~/api/profilerHeavy/isEnabled" });
         }
 
         export function clear(): Promise<void> {
-            return ajaxPost<void>({ url: "/api/profilerHeavy/clear" }, null);
+            return ajaxPost<void>({ url: "~/api/profilerHeavy/clear" }, null);
         }
 
         export function entries(): Promise<HeavyProfilerEntry[]> {
-            return ajaxGet<HeavyProfilerEntry[]>({ url: "/api/profilerHeavy/entries" });
+            return ajaxGet<HeavyProfilerEntry[]>({ url: "~/api/profilerHeavy/entries" });
         }
 
         export function details(key: string): Promise<HeavyProfilerEntry[]> {
-            return ajaxGet<HeavyProfilerEntry[]>({ url: "/api/profilerHeavy/details/" + key });
+            return ajaxGet<HeavyProfilerEntry[]>({ url: "~/api/profilerHeavy/details/" + key });
         }
 
         export function stackTrace(key: string): Promise<StackTraceTS[]> {
-            return ajaxGet<StackTraceTS[]>({ url: "/api/profilerHeavy/stackTrace/" + key });
+            return ajaxGet<StackTraceTS[]>({ url: "~/api/profilerHeavy/stackTrace/" + key });
         }
 
         export function download(indices?: string): void {
-            ajaxGetRaw({ url: "/api/profilerHeavy/download" + (indices ? ("?indices=" + indices) : "") })
+            ajaxGetRaw({ url: "~/api/profilerHeavy/download" + (indices ? ("?indices=" + indices) : "") })
                 .then(response => saveFile(response))
                 .done();
         }
 
         export function upload(file: { fileName: string; content: string }): Promise<void> {
-            return ajaxPost<void>({ url: "/api/profilerHeavy/upload" }, file);
+            return ajaxPost<void>({ url: "~/api/profilerHeavy/upload" }, file);
         }
     }
 
     export module Times {
 
         export function clear(): Promise<void> {
-            return ajaxPost<void>({ url: "/api/profilerTimes/clear" }, null);
+            return ajaxPost<void>({ url: "~/api/profilerTimes/clear" }, null);
         }
 
         export function fetchInfo(): Promise<TimeTrackerEntry[]> {
-            return ajaxGet<TimeTrackerEntry[]>({ url: "/api/profilerTimes/times" });
+            return ajaxGet<TimeTrackerEntry[]>({ url: "~/api/profilerTimes/times" });
         }
     }
 }

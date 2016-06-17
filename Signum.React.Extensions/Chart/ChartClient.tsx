@@ -299,7 +299,7 @@ export module Encoder {
 
         Dic.extend(query, extra);
 
-        return Navigator.currentHistory.createPath({ pathname: "/Chart/" + cr.queryKey, query: query });
+        return Navigator.currentHistory.createPath({ pathname: "~/Chart/" + cr.queryKey, query: query });
     }
 
     const scapeTilde = Finder.Encoder.scapeTilde;
@@ -441,19 +441,19 @@ export module API {
         const clone = cleanedChartRequest(request);
 
         return ajaxPost<ExecuteChartResult>({
-            url: "/api/chart/execute"
+            url: "~/api/chart/execute"
         }, clone);
     }
 
     export function fetchScripts(): Promise<ChartScriptEntity[][]> {
         return ajaxGet<ChartScriptEntity[][]>({
-            url: "/api/chart/scripts"
+            url: "~/api/chart/scripts"
         });
     }
 
     export function fetchColorPalettes(): Promise<string[]> {
         return ajaxGet<string[]>({
-            url: "/api/chart/colorPalettes"
+            url: "~/api/chart/colorPalettes"
         });
     }
 

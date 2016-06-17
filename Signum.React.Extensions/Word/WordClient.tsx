@@ -25,7 +25,7 @@ export function start(options: { routes: JSX.Element[] }) {
                 if (!lite)
                     return;
 
-                ajaxPostRaw({ url: "/api/word/createReport" }, { template: toLite(ctx.entity), entity: lite })
+                ajaxPostRaw({ url: "~/api/word/createReport" }, { template: toLite(ctx.entity), entity: lite })
                     .then(response => saveFile(response))
                     .done();
             }).done();

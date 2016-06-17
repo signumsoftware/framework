@@ -125,14 +125,14 @@ export module Converter {
 
 export module API {
     export function forEntityType(type: string): Promise<Lite<UserQueryEntity>[]> {
-        return ajaxGet<Lite<UserQueryEntity>[]>({ url: "/api/userQueries/forEntityType/" + type });
+        return ajaxGet<Lite<UserQueryEntity>[]>({ url: "~/api/userQueries/forEntityType/" + type });
     }
 
     export function forQuery(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
-        return ajaxGet<Lite<UserQueryEntity>[]>({ url: "/api/userQueries/forQuery/" + queryKey });
+        return ajaxGet<Lite<UserQueryEntity>[]>({ url: "~/api/userQueries/forQuery/" + queryKey });
     }
 
     export function fromQueryRequest(request: { queryRequest: QueryRequest; defaultPagination: Pagination}): Promise<UserQueryEntity> {
-        return ajaxPost<UserQueryEntity>({ url: "/api/userQueries/fromQueryRequest/" }, request);
+        return ajaxPost<UserQueryEntity>({ url: "~/api/userQueries/fromQueryRequest/" }, request);
     }
 }

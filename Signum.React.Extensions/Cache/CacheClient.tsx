@@ -20,7 +20,7 @@ export function start(options: { routes: JSX.Element[] }) {
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(CachePermission.InvalidateCache),
         key: "ViewCache",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("/cache/statistics"))
+        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/cache/statistics"))
     });
 }
 
@@ -28,19 +28,19 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
     export function enable(): Promise<void> {
-        return ajaxPost<void>({ url: "/api/cache/enable" }, null);
+        return ajaxPost<void>({ url: "~/api/cache/enable" }, null);
     }
 
     export function disable(): Promise<void> {
-        return ajaxPost<void>({ url: "/api/cache/disable" }, null);
+        return ajaxPost<void>({ url: "~/api/cache/disable" }, null);
     }
 
     export function clear(): Promise<void> {
-        return ajaxPost<void>({ url: "/api/cache/clear" }, null);
+        return ajaxPost<void>({ url: "~/api/cache/clear" }, null);
     }
 
     export function view(): Promise<CacheState> {
-        return ajaxGet<CacheState>({ url: "/api/cache/view" });
+        return ajaxGet<CacheState>({ url: "~/api/cache/view" });
     }
 }
 

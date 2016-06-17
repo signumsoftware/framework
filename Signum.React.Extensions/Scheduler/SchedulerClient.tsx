@@ -28,7 +28,7 @@ export function start(options: { routes: JSX.Element[] }) {
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(SchedulerPermission.ViewSchedulerPanel),
         key: "SchedulerPanel",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("/scheduler/view"))
+        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/scheduler/view"))
     });
 }
 
@@ -36,15 +36,15 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
     export function start(): Promise<void> {
-        return ajaxPost<void>({ url: "/api/scheduler/start" }, null);
+        return ajaxPost<void>({ url: "~/api/scheduler/start" }, null);
     }
 
     export function stop(): Promise<void> {
-        return ajaxPost<void>({ url: "/api/scheduler/stop" }, null);
+        return ajaxPost<void>({ url: "~/api/scheduler/stop" }, null);
     }
 
     export function view(): Promise<SchedulerState> {
-        return ajaxGet<SchedulerState>({ url: "/api/scheduler/view" });
+        return ajaxGet<SchedulerState>({ url: "~/api/scheduler/view" });
     }
 }
 

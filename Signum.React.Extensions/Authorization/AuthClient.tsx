@@ -193,14 +193,14 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
                     return makeCall();
                 }, e2 => {
                     setAuthToken(null);
-                    Navigator.currentHistory.push("/auth/login");
+                    Navigator.currentHistory.push("~/auth/login");
                     throw e;
                 });
             }
 
             if (e.httpError.ExceptionType && e.httpError.ExceptionType.endsWith(".AuthenticationException")) {
                 setAuthToken(null);
-                Navigator.currentHistory.push("/auth/login");
+                Navigator.currentHistory.push("~/auth/login");
             }
 
             throw e;
@@ -263,11 +263,11 @@ export function logout() {
 }
 
 export function onLogout() {
-    Navigator.currentHistory.push("/");
+    Navigator.currentHistory.push("~/");
 }
 
 export function onLogin() {
-    Navigator.currentHistory.push("/");
+    Navigator.currentHistory.push("~/");
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol) {
@@ -295,15 +295,15 @@ export module Api {
     }
 
     export function login(loginRequest: LoginRequest): Promise<LoginResponse> {
-        return ajaxPost<LoginResponse>({ url: "/api/auth/login" }, loginRequest);
+        return ajaxPost<LoginResponse>({ url: "~/api/auth/login" }, loginRequest);
     }
 
     export function loginFromCookie(): Promise<LoginResponse> {
-        return ajaxPost<LoginResponse>({ url: "/api/auth/loginFromCookie" }, null);
+        return ajaxPost<LoginResponse>({ url: "~/api/auth/loginFromCookie" }, null);
     }
 
     export function refreshToken(oldToken: string): Promise<LoginResponse> {
-        return ajaxPost<LoginResponse>({ url: "/api/auth/refreshToken", avoidAuthToken: true }, oldToken);
+        return ajaxPost<LoginResponse>({ url: "~/api/auth/refreshToken", avoidAuthToken: true }, oldToken);
     }
 
     export interface ChangePasswordRequest {
@@ -312,67 +312,67 @@ export module Api {
     }
 
     export function changePassword(request: ChangePasswordRequest): Promise<UserEntity> {
-        return ajaxPost<UserEntity>({ url: "/api/auth/ChangePassword" }, request);
+        return ajaxPost<UserEntity>({ url: "~/api/auth/ChangePassword" }, request);
     }
 
     export function fetchCurrentUser(): Promise<UserEntity> {
-        return ajaxGet<UserEntity>({ url: "/api/auth/currentUser", cache: "no-cache" });
+        return ajaxGet<UserEntity>({ url: "~/api/auth/currentUser", cache: "no-cache" });
     }
 
     export function logout(): Promise<void> {
-        return ajaxPost<void>({ url: "/api/auth/logout" }, null);
+        return ajaxPost<void>({ url: "~/api/auth/logout" }, null);
     }
 
     export function fetchPermissionRulePack(roleId: number | string): Promise<PermissionRulePack> {
-        return ajaxGet<PermissionRulePack>({ url: "/api/authAdmin/permissionRules/" + roleId, cache: "no-cache" });
+        return ajaxGet<PermissionRulePack>({ url: "~/api/authAdmin/permissionRules/" + roleId, cache: "no-cache" });
     }
 
     export function savePermissionRulePack(rules: PermissionRulePack): Promise<void> {
-        return ajaxPost<void>({ url: "/api/authAdmin/permissionRules"}, rules);
+        return ajaxPost<void>({ url: "~/api/authAdmin/permissionRules"}, rules);
     }
 
 
     export function fetchTypeRulePack(roleId: number | string): Promise<TypeRulePack> {
-        return ajaxGet<TypeRulePack>({ url: "/api/authAdmin/typeRules/" + roleId, cache: "no-cache" });
+        return ajaxGet<TypeRulePack>({ url: "~/api/authAdmin/typeRules/" + roleId, cache: "no-cache" });
     }
 
     export function saveTypeRulePack(rules: TypeRulePack): Promise<void> {
-        return ajaxPost<void>({ url: "/api/authAdmin/typeRules" }, rules);
+        return ajaxPost<void>({ url: "~/api/authAdmin/typeRules" }, rules);
     }
     
     
     export function fetchPropertyRulePack(typeName: string, roleId: number | string): Promise<PropertyRulePack> {
-        return ajaxGet<PropertyRulePack>({ url: "/api/authAdmin/propertyRules/" + typeName + "/" + roleId, cache: "no-cache" });
+        return ajaxGet<PropertyRulePack>({ url: "~/api/authAdmin/propertyRules/" + typeName + "/" + roleId, cache: "no-cache" });
     }
 
     export function savePropertyRulePack(rules: PropertyRulePack): Promise<void> {
-        return ajaxPost<void>({ url: "/api/authAdmin/propertyRules" }, rules);
+        return ajaxPost<void>({ url: "~/api/authAdmin/propertyRules" }, rules);
     }
 
 
 
     export function fetchOperationRulePack(typeName: string, roleId: number | string): Promise<OperationRulePack> {
-        return ajaxGet<OperationRulePack>({ url: "/api/authAdmin/operationRules/" + typeName + "/" + roleId, cache: "no-cache" });
+        return ajaxGet<OperationRulePack>({ url: "~/api/authAdmin/operationRules/" + typeName + "/" + roleId, cache: "no-cache" });
     }
 
     export function saveOperationRulePack(rules: OperationRulePack): Promise<void> {
-        return ajaxPost<void>({ url: "/api/authAdmin/operationRules" }, rules);
+        return ajaxPost<void>({ url: "~/api/authAdmin/operationRules" }, rules);
     }
 
 
 
     export function fetchQueryRulePack(typeName: string, roleId: number | string): Promise<QueryRulePack> {
-        return ajaxGet<QueryRulePack>({ url: "/api/authAdmin/queryRules/" + typeName + "/" + roleId, cache: "no-cache" });
+        return ajaxGet<QueryRulePack>({ url: "~/api/authAdmin/queryRules/" + typeName + "/" + roleId, cache: "no-cache" });
     }
 
     export function saveQueryRulePack(rules: QueryRulePack): Promise<void> {
-        return ajaxPost<void>({ url: "/api/authAdmin/queryRules" }, rules);
+        return ajaxPost<void>({ url: "~/api/authAdmin/queryRules" }, rules);
     }
 
 
 
     export function downloadAuthRules(): void {
-        ajaxGetRaw({ url: "/api/authAdmin/downloadAuthRules" })
+        ajaxGetRaw({ url: "~/api/authAdmin/downloadAuthRules" })
             .then(response => saveFile(response))
             .done();
     }

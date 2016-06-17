@@ -40,7 +40,7 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
         key: "ProcessPanel",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("/processes/view"))
+        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/processes/view"))
     });
 
     monkeyPatchCreateContextualMenuItem()
@@ -139,19 +139,19 @@ export module API {
 
     export function processFromMany<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, args?: any[]): Promise<EntityPack<ProcessEntity>> {
         GraphExplorer.propagateAll(lites, args);
-        return ajaxPost<EntityPack<ProcessEntity>>({ url: "/api/processes/constructFromMany" }, { lites: lites, operationKey: Operations.API.getOperationKey(operationKey), args: args } as Operations.API.MultiOperationRequest);
+        return ajaxPost<EntityPack<ProcessEntity>>({ url: "~/api/processes/constructFromMany" }, { lites: lites, operationKey: Operations.API.getOperationKey(operationKey), args: args } as Operations.API.MultiOperationRequest);
     }
 
     export function start(): Promise<void> {
-        return ajaxPost<void>({ url: "/api/processes/start" }, null);
+        return ajaxPost<void>({ url: "~/api/processes/start" }, null);
     }
 
     export function stop(): Promise<void> {
-        return ajaxPost<void>({ url: "/api/processes/stop" }, null);
+        return ajaxPost<void>({ url: "~/api/processes/stop" }, null);
     }
 
     export function view(): Promise<ProcessLogicState> {
-        return ajaxGet<ProcessLogicState>({ url: "/api/processes/view" });
+        return ajaxGet<ProcessLogicState>({ url: "~/api/processes/view" });
     }
 }
 

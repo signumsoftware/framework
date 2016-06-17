@@ -40,9 +40,7 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
         if (result.KeywordMatch == null)
             return null;
 
-        return Promise.resolve(Navigator.currentHistory.createPath(
-            "/Map" + (result.TypeName ? "/" + result.TypeName : "")
-        ));
+        return Promise.resolve(Navigator.currentHistory.createPath("~/Map" + (result.TypeName ? "/" + result.TypeName : "")));
     }
 
     toString(result: MapOmniboxResult) {

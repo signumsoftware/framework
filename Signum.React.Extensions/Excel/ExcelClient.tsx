@@ -32,18 +32,18 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
 export namespace API {
 
     export function generatePlanExcel(request: QueryRequest): void {
-        ajaxPostRaw({ url: "/api/excel/plain" }, request)
+        ajaxPostRaw({ url: "~/api/excel/plain" }, request)
             .then(response => saveFile(response))
             .done();
     }
 
     export function forQuery(queryKey: string): Promise<Lite<ExcelReportEntity>[]> {
-        return ajaxGet<Lite<ExcelReportEntity>[]>({ url: "/api/excel/reportsFor/" + queryKey });
+        return ajaxGet<Lite<ExcelReportEntity>[]>({ url: "~/api/excel/reportsFor/" + queryKey });
     }
 
 
     export function generateExcelReport(queryRequest: QueryRequest, excelReport: Lite<ExcelReportEntity>): void{
-        ajaxPostRaw({ url: "/api/excel/excelReport" }, { queryRequest, excelReport })
+        ajaxPostRaw({ url: "~/api/excel/excelReport" }, { queryRequest, excelReport })
             .then(response => saveFile(response))
             .done();
     }

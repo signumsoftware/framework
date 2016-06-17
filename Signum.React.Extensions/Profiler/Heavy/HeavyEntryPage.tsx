@@ -326,7 +326,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
             }
             else
             {
-                let url = Navigator.currentHistory.createHref("profiler/heavy/entry/" + e.FullIndex);
+                let url = Navigator.currentHistory.createHref("~/profiler/heavy/entry/" + e.FullIndex);
 
                 if (d3.event.ctrlKey) {
                     window.open(url);

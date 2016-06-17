@@ -204,7 +204,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         //labelsRight.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
 
         groups.on("click", e => {
-            let url = Navigator.currentHistory.createHref("/profiler/heavy/entry/" + e.FullIndex);
+            let url = Navigator.currentHistory.createHref("~/profiler/heavy/entry/" + e.FullIndex);
 
             if (d3.event.ctrlKey) {
                 window.open(url);

@@ -27,7 +27,7 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel),
         key: "AsyncEmailSenderPanel",
-        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("/asyncEmailSender/view"))
+        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/asyncEmailSender/view"))
     });
 
     registerToString<EmailTemplateMessageEntity>(EmailTemplateMessageEntity, a => a.cultureInfo == null ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName);
@@ -72,15 +72,15 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
 
 export module API {
     export function start(): Promise<void> {
-        return ajaxPost<void>({ url: "/api/asyncEmailSender/start" }, null);
+        return ajaxPost<void>({ url: "~/api/asyncEmailSender/start" }, null);
     }
 
     export function stop(): Promise<void> {
-        return ajaxPost<void>({ url: "/api/asyncEmailSender/stop" }, null);
+        return ajaxPost<void>({ url: "~/api/asyncEmailSender/stop" }, null);
     }
 
     export function view(): Promise<AsyncEmailSenderState> {
-        return ajaxGet<AsyncEmailSenderState>({ url: "/api/asyncEmailSender/view" });
+        return ajaxGet<AsyncEmailSenderState>({ url: "~/api/asyncEmailSender/view" });
     }
 }
 
