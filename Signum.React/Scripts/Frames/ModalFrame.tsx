@@ -30,7 +30,6 @@ interface ModalFrameState {
     pack?: EntityPack<ModifiableEntity>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
     propertyRoute?: PropertyRoute;
-    savedEntity?: string;
     show?: boolean;
     prefix?: string;
 }
@@ -98,8 +97,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     setPack(pack: EntityPack<ModifiableEntity>): void {
         this.setState({
-            pack: pack,
-            savedEntity: JSON.stringify(pack.entity),
+            pack: pack
         });
     }
 
@@ -141,12 +139,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         GraphExplorer.propagateAll(entity);
 
-        var hasChanges = JSON.stringify(entity) != this.state.savedEntity;
-        
-        if (hasChanges && !entity.modified)
-            throw new Error(`The entity.modified=${this.state.pack.entity.modified} but has changes`);
-
-        return hasChanges;
+        return entity.modified;
     }
 
     handleOnExited = () => {
