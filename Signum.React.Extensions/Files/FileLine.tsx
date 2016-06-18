@@ -1,6 +1,7 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
 import { classes, Dic } from '../../../Framework/Signum.React/Scripts/Globals'
+import * as Services from '../../../Framework/Signum.React/Scripts/Services'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -71,13 +72,13 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} labelProps={s.labelHtmlProps} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }>
-                {hasValue ? this.renderLink() : this.renderPlaceholder() }
+                {hasValue ? this.renderFile() : this.renderPlaceholder() }
             </FormGroup>
         );
     }
 
 
-    renderLink() {
+    renderFile() {
 
         var val = this.state.ctx.value;
         var entity = (val as Lite<IFile & Entity>).EntityType ?
@@ -89,14 +90,8 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
                 {
                     entity == null ? <span className="form-control file-control">{JavascriptMessage.loading.niceToString() }</span> :
                         this.state.download == DownloadBehaviour.None || entity.isNew ? <span className="form-control file-control">{entity.fileName}</span> :
-                            <a className="form-control file-control"
-                                href={this.state.configuration.downloadLink(entity) }
-                                title={entity.fileName}
-                                download={this.state.download == DownloadBehaviour.View ? null : entity.fileName}>
-                                {entity.fileName}
-                            </a>
+                            this.renderLink(entity)
                 }
-
                 <span className="input-group-btn">
                     {this.renderRemoveButton(true) }
                 </span>
@@ -104,6 +99,29 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
         );
     }
 
+
+    renderLink(entity: IFile) {
+
+        var dl = this.state.configuration.downloadLink(entity);
+
+        return (
+            <a className="form-control file-control"
+                onClick={dl.requiresToken && ((e) => this.handleDownloadClick(e, dl.url)) }
+                download={this.state.download == DownloadBehaviour.View ? null : entity.fileName}
+                href={dl.requiresToken ? "#" : dl.url}
+                title={entity.fileName}>
+                {entity.fileName}
+            </a>
+        );
+
+    }
+
+    handleDownloadClick = (e: React.MouseEvent, url: string) => {
+        e.preventDefault();
+        Services.ajaxGetRaw({ url: url })
+            .then(resp => Services.saveFile(resp))
+            .done();
+    };
 
     handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -176,29 +194,35 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
     static configurtions: { [typeName: string]: FileLineConfiguration<IFile> } = {};
 }
 
+
 interface FileLineConfiguration<T extends IFile> {
-    downloadLink: (entity: T)=> string;
+    downloadLink: (entity: T) => DownloadLinkResult;
+}
+
+interface DownloadLinkResult {
+    url: string;
+    requiresToken: boolean;
 }
 
 
 FileLine.configurtions[FileEntity.typeName] = {
-    downloadLink: e => Navigator.currentHistory.createHref("~/api/files/downloadFile/" + e.id.toString())
+    downloadLink: e => ({ url: Navigator.currentHistory.createHref("~/api/files/downloadFile/" + e.id.toString()), requiresToken: true })
 } as FileLineConfiguration<FileEntity>;
 
 FileLine.configurtions[FilePathEntity.typeName] = {
-    downloadLink: e => Navigator.currentHistory.createHref("~/api/files/downloadFilePath/" + e.id.toString())
+    downloadLink: e => ({ url: Navigator.currentHistory.createHref("~/api/files/downloadFilePath/" + e.id.toString()), requiresToken: true })
 } as FileLineConfiguration<FilePathEntity>;
 
 FileLine.configurtions[EmbeddedFileEntity.typeName] = {
-    downloadLink: e => "data:application/octet-stream;base64," + e.binaryFile
+    downloadLink: e => ({ url: "data:application/octet-stream;base64," + e.binaryFile, requiresToken: false })
 } as FileLineConfiguration<EmbeddedFileEntity>;
 
 FileLine.configurtions[EmbeddedFilePathEntity.typeName] = {
-    downloadLink: e => Navigator.currentHistory.createHref({
-        pathname: "~/api/files/downloadEmbeddedFilePath/" + e.fileType.key,
-        query: {
-            suffix: e.suffix,
-            fileName: e.fileName
-        }
+    downloadLink: e => ({
+        url: Navigator.currentHistory.createHref({
+            pathname: "~/api/files/downloadEmbeddedFilePath/" + e.fileType.key,
+            query: {  suffix: e.suffix, fileName: e.fileName }
+        }),
+        requiresToken: true
     })
 } as FileLineConfiguration<EmbeddedFilePathEntity>;
