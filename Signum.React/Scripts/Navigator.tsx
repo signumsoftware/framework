@@ -547,3 +547,35 @@ String.prototype.formatHtml = function () {
     return React.createElement("span", null, ...result);
 };
 
+
+
+function fixBaseName<T>(baseFunction: (location: HistoryModule.LocationDescriptorObject | string) => T, baseName: string): (location: HistoryModule.LocationDescriptorObject | string) => T {
+
+    function fixUrl(url: string): string {
+        if (url && url.startsWith("~/"))
+            return baseName + "/" + url.after("~/");
+
+        if (url.startsWith(baseName))
+            return url;
+
+        console.warn(url);
+        return url;
+    }
+
+    return (location) => {
+        if (typeof location === "string") {
+            return baseFunction(fixUrl(location));
+        } else {
+            location.pathname = fixUrl(location.pathname);
+            return baseFunction(location);
+        }
+    };
+}
+
+export function useAppRelativeBasename(history: HistoryModule.History, baseName: string) {
+    history.push = fixBaseName(history.push, baseName);
+    history.replace = fixBaseName(history.replace, baseName);
+    history.createHref = fixBaseName(history.createHref, baseName);
+    history.createPath = fixBaseName(history.createPath, baseName);
+    history.createLocation = fixBaseName(history.createLocation, baseName);
+}
