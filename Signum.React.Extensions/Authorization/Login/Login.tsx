@@ -97,7 +97,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                         { AuthClient.resetPassword &&
                             <div>
                                 <br/>
-                                <Link to="auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString() }</Link>
+                                <Link to="~/auth/resetPassword">{AuthMessage.IHaveForgottenMyPassword.niceToString() }</Link>
                             </div>
                         }
                     </div>

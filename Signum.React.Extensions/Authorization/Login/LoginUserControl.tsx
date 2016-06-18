@@ -29,11 +29,11 @@ export default class LoginUserControl extends React.Component<{}, { user: UserEn
     render() {
 
         if (!this.state.user)
-            return <LinkContainer to={"auth/login"}><NavItem  className="sf-login">{AuthMessage.Login.niceToString() }</NavItem></LinkContainer>;
+            return <LinkContainer to="~/auth/login"><NavItem  className="sf-login">{AuthMessage.Login.niceToString() }</NavItem></LinkContainer>;
 
         return (
             <NavDropdown className="sf-user" title={this.state.user.userName} id="sfUserDropDown">
-                <LinkContainer to={"auth/changePassword"}><MenuItem>{AuthMessage.ChangePassword.niceToString() }</MenuItem></LinkContainer>
+                <LinkContainer to="~/auth/changePassword"><MenuItem>{AuthMessage.ChangePassword.niceToString() }</MenuItem></LinkContainer>
                 <MenuItem id="sf-auth-logout" onSelect={() => AuthClient.logout() }>{AuthMessage.Logout.niceToString() }</MenuItem>
             </NavDropdown>);
     }
