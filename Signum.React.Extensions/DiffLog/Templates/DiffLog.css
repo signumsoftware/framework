@@ -1,0 +1,26 @@
+﻿.colorIcon {
+    color: black;
+    padding: 2px;
+    margin: 0 2px;
+}
+
+    .colorIcon.red {
+        background: #FF8B8B;
+    }
+
+    .colorIcon.mini.red {
+        background: #FFD1D1;
+    }
+
+    .colorIcon.green {
+        background: #72F272;
+    }
+
+    .colorIcon.mini.green {
+        background: #CEF3CE;
+    }
+
+.nav-tabs > li.linkTab > a:hover {
+    border-color: transparent;
+    background-color: transparent;
+}

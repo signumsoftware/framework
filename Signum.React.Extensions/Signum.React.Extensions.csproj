@@ -149,6 +149,8 @@
     <Compile Include="Chart\UserChart\UserChartController.cs" />
     <Compile Include="Dashboard\DashboardController.cs" />
     <Compile Include="Dashboard\DashboardServer.cs" />
+    <Compile Include="DiffLog\DiffLogController.cs" />
+    <Compile Include="DiffLog\DiffLogServer.cs" />
     <Compile Include="Disconnected\DisconnectedServer.cs" />
     <Compile Include="Excel\ExcelController.cs" />
     <Compile Include="Excel\ExcelServer.cs" />
@@ -185,6 +187,7 @@
     <Content Include="Authorization\Admin\AuthAdmin.css" />
     <Content Include="Chart\Chart.css" />
     <Content Include="Dashboard\Dashboard.css" />
+    <Content Include="DiffLog\Templates\DiffLog.css" />
     <Content Include="Files\Files.css" />
     <Content Include="Mailing\Mailing.css" />
     <Content Include="Map\Operation\operationMap.css" />
@@ -314,6 +317,8 @@
     <TypeScriptCompile Include="Dashboard\View\CountSearchControlPart.tsx" />
     <TypeScriptCompile Include="Dashboard\View\DashboardView.tsx" />
     <TypeScriptCompile Include="Dashboard\View\DashboardPage.tsx" />
+    <TypeScriptCompile Include="DiffLog\DiffLogClient.tsx" />
+    <TypeScriptCompile Include="DiffLog\Templates\OperationLog.tsx" />
     <TypeScriptCompile Include="DiffLog\Signum.Entities.DiffLog.ts">
       <DependentUpon>Signum.Entities.DiffLog.t4s</DependentUpon>
     </TypeScriptCompile>
