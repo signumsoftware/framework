@@ -24,13 +24,8 @@ namespace Signum.React.Selenium
             this.Selenium = element.GetDriver();
             this.Element = element;
 
-            this.WaitVisible();
-        }
-
-        private void WaitVisible()
-        {
-            //this.Element.WaitElementVisible(By.CssSelector("modal.fade.in"));
-            this.Element.WaitElementVisible(By.CssSelector("div.modal-content"));
+            if (!this.Element.HasClass("modal", "fade", "in"))
+                throw new InvalidOperationException("Not a valid modal");
         }
 
         public WebElementLocator CloseButton
@@ -240,7 +235,7 @@ namespace Signum.React.Selenium
 
         public PopupFrame<T> WaitLoaded()
         {
-            this.Element.WaitElementPresent(By.CssSelector("div.modal.fade.in"));
+            this.Element.WaitElementPresent(By.CssSelector("div.sf-main-control"));
             return this;
         }
     }
