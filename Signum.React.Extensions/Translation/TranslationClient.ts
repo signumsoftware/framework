@@ -11,15 +11,15 @@ import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 
 export module Api {
     export function getCultures(): Promise<{ [name: string]: Lite<CultureInfoEntity> }> {
-        return ajaxGet<{ [name: string]: Lite<CultureInfoEntity> }>({ url: "/api/translation/cultures", cache: "no-cache" });
+        return ajaxGet<{ [name: string]: Lite<CultureInfoEntity> }>({ url: "~/api/translation/cultures", cache: "no-cache" });
     }
 
     export function getCurrentCulture(): Promise<CultureInfoEntity> {
-        return ajaxGet<CultureInfoEntity>({ url: "/api/translation/currentCulture", cache: "no-cache" });
+        return ajaxGet<CultureInfoEntity>({ url: "~/api/translation/currentCulture", cache: "no-cache" });
     }
 
     export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<void> {
-        return ajaxPost<void>({ url: "/api/translation/currentCulture", cache: "no-cache" }, culture);
+        return ajaxPost<void>({ url: "~/api/translation/currentCulture", cache: "no-cache" }, culture);
     }
 }
 

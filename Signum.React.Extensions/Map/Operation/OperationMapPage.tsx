@@ -138,7 +138,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
         var query = Dic.extend(tables, { color: s.color });
 
-        var url = Navigator.currentHistory.createHref({ pathname: "/map/" + this.props.routeParams.type, query: query });
+        var url = Navigator.currentHistory.createHref({ pathname: "~/map/" + this.props.routeParams.type, query: query });
 
         window.open(url);
     }

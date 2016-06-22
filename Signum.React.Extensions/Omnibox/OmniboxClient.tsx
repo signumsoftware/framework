@@ -93,7 +93,7 @@ function getProvider(resultTypeName: string) {
 export namespace API {
 
     export function getResults(query: string): Promise<OmniboxResult[]> {
-        return ajaxPost<OmniboxResult[]>({ url: "/api/omnibox" }, {
+        return ajaxPost<OmniboxResult[]>({ url: "~/api/omnibox" }, {
             query: query || "help",
             specialActions: Dic.getKeys(specialActions)
         })

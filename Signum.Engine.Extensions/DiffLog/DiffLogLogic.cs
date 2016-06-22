@@ -44,10 +44,13 @@ namespace Signum.Engine.DiffLog
             if (strategy == false)
                 return null;
 
-            if (operation.OperationType == OperationType.Delete)
-                log.Mixin<DiffLogMixin>().InitialState = entity.Dump();
-            else if (operation.OperationType == OperationType.Execute && !entity.IsNew)
-                log.Mixin<DiffLogMixin>().InitialState = ((IEntityOperation)operation).Lite ? entity.Dump() : RetrieveFresh(entity).Dump();
+            using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
+            {
+                if (operation.OperationType == OperationType.Delete)
+                    log.Mixin<DiffLogMixin>().InitialState = entity.Dump();
+                else if (operation.OperationType == OperationType.Execute && !entity.IsNew)
+                    log.Mixin<DiffLogMixin>().InitialState = ((IEntityOperation)operation).Lite ? entity.Dump() : RetrieveFresh(entity).Dump();
+            }
 
             return new Disposable(() =>
             {
@@ -57,8 +60,11 @@ namespace Signum.Engine.DiffLog
 
                     if (target != null && operation.OperationType != OperationType.Delete && !target.IsNew)
                     {
-                        if (strategy ?? Types.GetValue(target.GetType())(operation))
-                            log.Mixin<DiffLogMixin>().FinalState = entity.Dump();
+                        using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))
+                        {
+                            if (strategy ?? Types.GetValue(target.GetType())(operation))
+                                log.Mixin<DiffLogMixin>().FinalState = entity.Dump();
+                        }
                     }
                 }
             });

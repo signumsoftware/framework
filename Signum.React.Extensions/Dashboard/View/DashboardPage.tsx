@@ -85,7 +85,7 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                 {!dashboard ? <h2>{JavascriptMessage.loading.niceToString() }</h2> :
                     <h2>
                         {Navigator.isNavigable({ entity: dashboard, canExecute: null } as EntityPack<Entity>) ?
-                            <Link  to={Navigator.navigateRoute(dashboard) }>{getToString(dashboard) }</Link> :
+                            <Link to={Navigator.navigateRoute(dashboard) }>{getToString(dashboard) }</Link> :
                             <span>{getToString(dashboard) }</span>
                         }
                     </h2>}

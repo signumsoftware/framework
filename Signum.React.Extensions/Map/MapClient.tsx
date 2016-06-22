@@ -67,10 +67,10 @@ export function start(options: { routes: JSX.Element[], auth: boolean; cache: bo
 
 export namespace API {
     export function types(): Promise<SchemaMapInfo> {
-        return ajaxGet<SchemaMapInfo>({ url: "/api/map/types" });
+        return ajaxGet<SchemaMapInfo>({ url: "~/api/map/types" });
     }
 
     export function operations(typeName: string): Promise<OperationMapInfo> {
-        return ajaxGet<OperationMapInfo>({ url: "/api/map/operations/" + typeName });
+        return ajaxGet<OperationMapInfo>({ url: "~/api/map/operations/" + typeName });
     }
 }

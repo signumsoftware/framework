@@ -78,7 +78,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
         let current = this.selectedEntry();
         return (
             <div>
-                <h2><Link to="/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
+                <h2><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>
                 <br />
                 {this.state.entries && < HeavyProfilerDetailsD3 entries={this.state.entries} selected={current}/>}
                 <br />
@@ -326,7 +326,7 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
             }
             else
             {
-                let url = Navigator.currentHistory.createHref("profiler/heavy/entry/" + e.FullIndex);
+                let url = Navigator.currentHistory.createHref("~/profiler/heavy/entry/" + e.FullIndex);
 
                 if (d3.event.ctrlKey) {
                     window.open(url);
