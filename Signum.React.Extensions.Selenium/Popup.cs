@@ -92,11 +92,9 @@ namespace Signum.React.Selenium
             this.OkPressed = true;
         }
 
-
-
         public void WaitNotVisible()
         {
-            this.Element.GetDriver().Wait(() => !this.Element.Displayed);
+            this.Element.GetDriver().Wait(() => this.Element.IsStale());
         }
     }
 

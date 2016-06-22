@@ -541,7 +541,9 @@ namespace Signum.React.Selenium
 
         public int RowsCount()
         {
-            return this.Element.FindElements(By.CssSelector("tbody > tr")).Count;
+
+            //return this.Element.FindElements(By.CssSelector("tbody > tr")).Count;
+            return this.Element.FindElements(By.CssSelector("tbody > tr[data-entity]")).Count;
         }
 
         public Lite<Entity> EntityInIndex(int index)
@@ -648,7 +650,7 @@ namespace Signum.React.Selenium
 
         public void ExecuteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = false)
         {
-            Operation(symbolContainer).Find().Click();
+            Operation(symbolContainer).WaitVisible().Click();
             if (consumeConfirmation)
                 this.ResultTable.Selenium.ConsumeAlert();
 
@@ -657,7 +659,7 @@ namespace Signum.React.Selenium
 
         public void DeleteClick(IOperationSymbolContainer symbolContainer, bool consumeConfirmation = true)
         {
-            Operation(symbolContainer).Find().Click();
+            Operation(symbolContainer).WaitVisible().Click();
             if (consumeConfirmation)
                 this.ResultTable.Selenium.ConsumeAlert();
 
@@ -666,7 +668,7 @@ namespace Signum.React.Selenium
 
         public PopupFrame<ProcessEntity> DeleteProcessClick(IOperationSymbolContainer operationSymbol)
         {
-            Operation(operationSymbol).Find();
+            Operation(operationSymbol).WaitVisible();
 
             var popup = this.Element.GetDriver().CapturePopup(() =>
             ResultTable.Selenium.ConsumeAlert());
@@ -681,13 +683,13 @@ namespace Signum.React.Selenium
 
         public bool OperationIsDisabled(IOperationSymbolContainer symbolContainer)
         {
-            return Operation(symbolContainer).Find().GetAttribute("disabled").HasText();
+            return Operation(symbolContainer).WaitVisible().GetAttribute("disabled").HasText();
         }
 
         public PopupFrame<T> OperationClickPopup<T>(IOperationSymbolContainer symbolContainer)
             where T : Entity
         {
-            var popup = Operation(symbolContainer).Find().CaptureOnClick();
+            var popup = Operation(symbolContainer).WaitVisible().CaptureOnClick();
             return new PopupFrame<T>(popup);
         }
 

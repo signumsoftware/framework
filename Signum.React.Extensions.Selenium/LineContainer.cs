@@ -130,12 +130,12 @@ namespace Signum.React.Selenium
         public static void ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
             where T : ModifiableEntity
         {
-            var valueLine = lineContainer.ValueLine(property);
+            var valueLine = lineContainer.ValueLine(property);            
 
             valueLine.SetValue(value);
 
             if (loseFocus)
-                valueLine.MainElement.Find().LoseFocus();
+                valueLine.EditableElement.Find().LoseFocus();
         }
 
         public static FileLineProxy FileLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
