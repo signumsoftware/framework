@@ -62,11 +62,11 @@ export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, 
         typeName = getTypeName(typeOrEntity as PseudoType);
     }
 
-    return currentHistory.createHref("/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id);
+    return currentHistory.createHref("~/view/" + typeName[0].toLowerCase() + typeName.substr(1) + "/" + id);
 }
 
 export function createRoute(type: PseudoType) {
-    return currentHistory.createHref("/create/" + getTypeName(type));
+    return currentHistory.createHref("~/create/" + getTypeName(type));
 }
 
 export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
@@ -433,13 +433,13 @@ export module API {
         if (!realLites.length)
             return Promise.resolve<void>();
 
-        return ajaxPost<string[]>({ url: "/api/entityToStrings" }, realLites).then(strs => {
+        return ajaxPost<string[]>({ url: "~/api/entityToStrings" }, realLites).then(strs => {
             realLites.forEach((l, i) => l.toStr = strs[i]);
         });
     }
 
     export function fetchAll<T extends Entity>(type: Type<T>): Promise<Array<T>> {
-        return ajaxGet<Array<Entity>>({ url: "/api/fetchAll/" + type.typeName });
+        return ajaxGet<Array<Entity>>({ url: "~/api/fetchAll/" + type.typeName });
     }
 
     export function fetchAndRemember<T extends Entity>(lite: Lite<T>): Promise<T> {
@@ -460,7 +460,7 @@ export module API {
         const typeName = getTypeName(type);
         let idVal = id;
 
-        return ajaxGet<Entity>({ url: "/api/entity/" + typeName + "/" + id });
+        return ajaxGet<Entity>({ url: "~/api/entity/" + typeName + "/" + id });
     }
 
 
@@ -472,13 +472,13 @@ export module API {
         const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);
         let idVal = (typeOrLite as Lite<any>).id || id;
 
-        return ajaxGet<EntityPack<Entity>>({ url: "/api/entityPack/" + typeName + "/" + idVal });
+        return ajaxGet<EntityPack<Entity>>({ url: "~/api/entityPack/" + typeName + "/" + idVal });
     }
 
 
     export function fetchCanExecute<T extends Entity>(entity: T): Promise<EntityPack<T>> {
 
-        return ajaxPost<EntityPack<Entity>>({ url: "/api/entityPackEntity" }, entity);
+        return ajaxPost<EntityPack<Entity>>({ url: "~/api/entityPackEntity" }, entity);
     }
 }
 
@@ -547,3 +547,35 @@ String.prototype.formatHtml = function () {
     return React.createElement("span", null, ...result);
 };
 
+
+
+function fixBaseName<T>(baseFunction: (location: HistoryModule.LocationDescriptorObject | string) => T, baseName: string): (location: HistoryModule.LocationDescriptorObject | string) => T {
+
+    function fixUrl(url: string): string {
+        if (url && url.startsWith("~/"))
+            return baseName + "/" + url.after("~/");
+
+        if (url.startsWith(baseName))
+            return url;
+
+        console.warn(url);
+        return url;
+    }
+
+    return (location) => {
+        if (typeof location === "string") {
+            return baseFunction(fixUrl(location));
+        } else {
+            location.pathname = fixUrl(location.pathname);
+            return baseFunction(location);
+        }
+    };
+}
+
+export function useAppRelativeBasename(history: HistoryModule.History, baseName: string) {
+    history.push = fixBaseName(history.push, baseName);
+    history.replace = fixBaseName(history.replace, baseName);
+    history.createHref = fixBaseName(history.createHref, baseName);
+    history.createPath = fixBaseName(history.createPath, baseName);
+    history.createLocation = fixBaseName(history.createLocation, baseName);
+}

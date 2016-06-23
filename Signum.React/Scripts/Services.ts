@@ -5,7 +5,6 @@ import { GraphExplorer } from './Reflection'
 
 
 export interface AjaxOptions {
-    avoidBaseUrl?: boolean;
     url: string;
     avoidNotifyPendingRequests?: boolean;
     avoidThrowError?: boolean;
@@ -21,15 +20,12 @@ export interface AjaxOptions {
 
 
 export function baseUrl(options: AjaxOptions): string {
-    if (options.avoidBaseUrl)
-        return options.url;
-    
     const baseUrl = window["__baseUrl"] as string;
 
-    if (!baseUrl || options.url.startsWith(baseUrl)) //HACK: Too smart?
-        return options.url;
+    if (options.url.startsWith("~/"))
+        return baseUrl + "/" + options.url.after("~/");
 
-    return baseUrl + options.url;
+    return options.url;
 }
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {

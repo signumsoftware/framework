@@ -78,15 +78,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     initialState(queryName: PseudoType | QueryKey): SearchControlState {
         return {
-            resultTable: null,
-            findOptions: null,
             querySettings: Finder.getQuerySettings(queryName),
-            queryDescription: null,
             loading: false,
             selectedRows: [],
-            currentMenuItems: null,
-            markedRows: null,
-            searchCount: null
         };
     }
 
@@ -98,7 +92,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         if (Finder.findOptionsPath(this.props.findOptions) == Finder.findOptionsPath(newProps.findOptions))
             return;
 
-        this.setState(this.initialState(newProps.findOptions.queryName));
+        this.state = this.initialState(newProps.findOptions.queryName);
+        this.forceUpdate();
 
         this.initialLoad(newProps.findOptions);
     }

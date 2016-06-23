@@ -242,7 +242,7 @@ namespace Signum.Engine
         #region Exists
 
         public static bool Exists<T>(this Lite<T> lite)
-            where T : Entity
+            where T : class, IEntity
         {
             try
             {

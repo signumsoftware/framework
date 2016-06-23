@@ -297,7 +297,7 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
 }
 
 export function reloadTypes(): Promise<void> {
-    return ajaxGet<TypeInfoDictionary>({ url: "/api/reflection/types" })
+    return ajaxGet<TypeInfoDictionary>({ url: "~/api/reflection/types" })
         .then(types => setTypes(types));
 }
 
@@ -456,21 +456,24 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
         throw Error("invalid function");
 
     const parameter = lambdaMatch[1];
-    const body = lambdaMatch[3];
+    let body = lambdaMatch[3];
 
     if (parameter == body)
         return new ReadonlyBinding<T>(parentValue as T, "");
 
+    body = body.replace(partialMixinRegex,
+        (...m) => `${m[2]}.mixins["${m[4]}"]`);
+
     const m = memberRegex.exec(body);
 
-    if (m == null)
-        return null;
+    if (m == null) {
+        const realParentValue = eval(`(function(${parameter}){ return ${body};})`)(parentValue);
+
+        return new ReadonlyBinding<T>(realParentValue as T, "");
+    }
 
     let newBody = m[1];
 
-    newBody = newBody.replace(partialMixinRegex,
-        (...m) => `${m[2]}.mixins["${m[4]}"]`);
-    
     const realParentValue = m[1] == parameter ? parentValue :
         eval(`(function(${parameter}){ return ${newBody};})`)(parentValue);
 
