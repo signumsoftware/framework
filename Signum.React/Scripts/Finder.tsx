@@ -479,7 +479,7 @@ export module Encoder {
 
     export function stringValue(value: any): string {
 
-        if (value == null || value == "")
+        if (value == null)
             return "";
 
         if (Array.isArray(value))
@@ -496,7 +496,7 @@ export module Encoder {
 
     export function scapeTilde(str: string) {
         if (str == null)
-            return null;
+            return "";
 
         return str.replace("~", "#|#");
     }
