@@ -273,6 +273,8 @@ namespace Signum.Utilities
         public string Singular { get; private set; }
         public string Plural { get; private set; }
 
+        public PronomInfo() { }
+
         public PronomInfo(char gender, string singular, string plural)
         {
             this.Gender = gender;
