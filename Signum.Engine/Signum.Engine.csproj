@@ -206,6 +206,7 @@
     <None Include="Database.UnsafeDelete.md" />
     <None Include="Database.UnsafeInsert.md" />
     <None Include="Database.UnsafeUpdate.md" />
+    <None Include="DynamicQuery\DynamicQueries.md" />
     <None Include="EntityCache.md" />
     <None Include="index.mdi" />
     <None Include="Introduction.md" />
