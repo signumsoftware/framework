@@ -11,19 +11,20 @@ import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 
 export let currentCulture: CultureInfoEntity;
 
+
+export const onCultureLoaded: Array<(culture: CultureInfoEntity) => void> = [];
 export function loadCurrentCulture() : Promise<void> {
     return API.fetchCurrentCulture()
-        .then(ci => { currentCulture = ci; }); 
-}
-
-export const onCultureChanged: Array<(culture: CultureInfoEntity) => void> = [];
-export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
-    API.setCurrentCulture(newCulture)
-        .then(() => API.fetchCurrentCulture())
         .then(ci => {
             currentCulture = ci;
-            onCultureChanged.forEach(f => f(ci));
-        }).done();
+            onCultureLoaded.forEach(f => f(ci));
+        }); 
+}
+
+export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
+    API.setCurrentCulture(newCulture)
+        .then(() => loadCurrentCulture())
+        .done();
 }
 
 let cachedCultures: Promise<{ [name: string]: Lite<CultureInfoEntity> }>;
