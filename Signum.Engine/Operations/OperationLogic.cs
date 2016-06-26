@@ -222,15 +222,6 @@ Consider the following options:
         }
         #endregion
 
-        public static void RegisterTypicalSave<T>(this Graph<T>.Execute operation)
-            where T : Entity
-        {
-            operation.AllowsNew = true;
-            operation.Lite = false;
-            operation.Execute = (e, _) => { };
-            operation.Register();
-        }
-
         public static void Register(this IOperation operation)
         {
             if (!operation.OverridenType.IsIEntity())
@@ -683,7 +674,12 @@ Consider the following options:
         public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation)
             where T : Entity
         {
-            new Graph<T>.Execute(saveOperation).RegisterTypicalSave();
+            new Graph<T>.Execute(saveOperation)
+            {
+                AllowsNew = true,
+                Lite = false,
+                Execute = (e, _) => { }
+            }.Register();
             return fi;
         }
 
