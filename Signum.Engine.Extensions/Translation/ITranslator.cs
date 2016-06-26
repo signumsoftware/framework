@@ -5,18 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-using System.Web.Script.Serialization;
 using Signum.Engine.Translation;
 using Signum.Entities.Translation;
 using Signum.Utilities;
 using System.Web.Configuration;
 using System.Reflection;
+using System.Runtime.Serialization.Json;
 
-namespace Signum.Web.Translation
+namespace Signum.Engine.Translation
 {
     public interface ITranslator
     {

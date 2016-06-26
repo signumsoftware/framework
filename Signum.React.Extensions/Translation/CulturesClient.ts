@@ -8,18 +8,22 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 
+let cachedCultures : Promise<{ [name: string]: Lite<CultureInfoEntity> }>;
 
-export module Api {
+export function getCultures(): Promise < { [name: string]: Lite<CultureInfoEntity> }> {
+    return cachedCultures || (cachedCultures = API.getCultures());
+}
+
+export module API {
     export function getCultures(): Promise<{ [name: string]: Lite<CultureInfoEntity> }> {
-        return ajaxGet<{ [name: string]: Lite<CultureInfoEntity> }>({ url: "~/api/translation/cultures", cache: "no-cache" });
+        return ajaxGet<{ [name: string]: Lite<CultureInfoEntity> }>({ url: "~/api/cultures/cultures", cache: "no-cache" });
     }
 
     export function getCurrentCulture(): Promise<CultureInfoEntity> {
-        return ajaxGet<CultureInfoEntity>({ url: "~/api/translation/currentCulture", cache: "no-cache" });
+        return ajaxGet<CultureInfoEntity>({ url: "~/api/cultures/currentCulture", cache: "no-cache" });
     }
 
     export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/translation/currentCulture", cache: "no-cache" }, culture);
+        return ajaxPost<void>({ url: "~/api/cultures/currentCulture", cache: "no-cache" }, culture);
     }
 }
-

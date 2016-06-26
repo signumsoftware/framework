@@ -10,7 +10,7 @@ import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { reloadTypes } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
-import * as TranslationClient from './TranslationClient'
+import * as CulturesClient from './CulturesClient'
 
 export interface CultureDropdownProps {
     changeJavascriptCulture: (culture: string) => void;
@@ -30,11 +30,11 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
     }
     
     componentWillMount() {
-        TranslationClient.Api.getCurrentCulture()
+        CulturesClient.API.getCurrentCulture()
             .then(ci => {
                 this.setState({ currentCulture: toLite(ci) });
-                this.props.changeJavascriptCulture(ci.name);     
-                return TranslationClient.Api.getCultures();
+                this.props.changeJavascriptCulture(ci.name);
+                return CulturesClient.getCultures();
             })
             .then(cultures => this.setState({ cultures }))
             .done();
@@ -42,7 +42,7 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
 
     handleSelect = (c: Lite<CultureInfoEntity>) => {
 
-        TranslationClient.Api.setCurrentCulture(c)
+        CulturesClient.API.setCurrentCulture(c)
             .then(() => reloadTypes())
             .then(() => this.props.resetUI())
             .done();

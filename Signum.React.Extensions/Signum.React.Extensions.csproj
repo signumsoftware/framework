@@ -174,6 +174,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scheduler\SchedulerServer.cs" />
     <Compile Include="Scheduler\SchedulerController.cs" />
+    <Compile Include="Translation\CulturesController.cs" />
     <Compile Include="Translation\TranslationController.cs" />
     <Compile Include="Translation\TranslationServer.cs" />
     <Compile Include="UserAssets\UserAssetServer.cs" />
@@ -198,6 +199,7 @@
     <Content Include="Processes\Processes.css" />
     <Content Include="Profiler\Heavy\Profiler.css" />
     <Content Include="Profiler\Times\Times.css" />
+    <Content Include="Translation\Translation.css" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -422,11 +424,15 @@
     <TypeScriptCompile Include="SMS\Signum.Entities.SMS.ts">
       <DependentUpon>Signum.Entities.SMS.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Translation\Code\Sync.tsx" />
+    <TypeScriptCompile Include="Translation\Code\View.tsx" />
+    <TypeScriptCompile Include="Translation\Code\Status.tsx" />
     <TypeScriptCompile Include="Translation\CultureDropdown.tsx" />
+    <TypeScriptCompile Include="Translation\TranslationClient.tsx" />
     <TypeScriptCompile Include="Translation\Signum.Entities.Translation.ts">
       <DependentUpon>Signum.Entities.Translation.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Translation\TranslationClient.ts" />
+    <TypeScriptCompile Include="Translation\CulturesClient.ts" />
     <TypeScriptCompile Include="UserAssets\Signum.Entities.UserAssets.ts">
       <DependentUpon>Signum.Entities.UserAssets.t4s</DependentUpon>
     </TypeScriptCompile>

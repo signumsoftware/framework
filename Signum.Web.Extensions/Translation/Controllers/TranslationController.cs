@@ -249,12 +249,4 @@ namespace Signum.Web.Translation.Controllers
             return TranslatedSummaryState.Completed;
         }
     }
-
-
-    public enum TranslationFileStatus
-    {
-        NotCreated,
-        Outdated,
-        InSync
-    }
 }

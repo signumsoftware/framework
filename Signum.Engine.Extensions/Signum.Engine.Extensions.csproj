@@ -73,6 +73,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -156,6 +157,7 @@
     <Compile Include="Scheduler\ApplicationEventLogLogic.cs" />
     <Compile Include="Basics\CultureInfoLogic.cs" />
     <Compile Include="Templating\ValueProviders.cs" />
+    <Compile Include="Translation\ITranslator.cs" />
     <Compile Include="Translation\TranslatedInstanceLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Mailing\EmailTemplateParser.cs" />
@@ -173,8 +175,10 @@
     <Compile Include="Excel\ExcelExtensions.cs" />
     <Compile Include="Excel\PlainExcelGenerator.cs" />
     <Compile Include="Excel\ExcelLogic.cs" />
+    <Compile Include="Translation\TranslatedInstanceSynchronizer.cs" />
     <Compile Include="Translation\TranslationLogic.cs" />
     <Compile Include="Translation\TranslationReplacementLogic.cs" />
+    <Compile Include="Translation\TranslationSynchronizer.cs" />
     <Compile Include="UserAssets\QueryTokenSynchronizer.cs" />
     <Compile Include="ViewLog\ViewLogLogic.cs" />
     <Compile Include="UserQueries\UserQueryLogic.cs" />

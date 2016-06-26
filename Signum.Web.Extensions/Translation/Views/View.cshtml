@@ -145,11 +145,11 @@ else
                             <tr>
                                 <th class="leftCell">
                                     @TranslationMessage.Member.NiceToString()
-                            </th>
-                            <th colspan="4">
-                                @(key)
-                        </th>
-                    </tr>
+                                </th>
+                                <th colspan="4">
+                                    @(key)
+                                </th>
+                            </tr>
 
                             foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt => editCulture(lt.Assembly.Culture) || lt.Members.ContainsKey(key)))
                             {

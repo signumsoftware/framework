@@ -604,22 +604,22 @@ WriteLiteral("                                    ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n                            </th>\r\n                            <th");
+WriteLiteral("\r\n                                </th>\r\n                                <th");
 
 WriteLiteral(" colspan=\"4\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                                ");
+WriteLiteral("                                    ");
 
             
             #line 150 "..\..\Translation\Views\View.cshtml"
-                            Write(key);
+                                Write(key);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        </th>\r\n                    </tr>\r\n");
+WriteLiteral("\r\n                                </th>\r\n                            </tr>\r\n");
 
             
             #line 153 "..\..\Translation\Views\View.cshtml"
@@ -716,14 +716,14 @@ WriteLiteral("            <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 9125), Tuple.Create("\"", 9172)
+WriteAttribute("value", Tuple.Create(" value=\"", 9153), Tuple.Create("\"", 9200)
             
             #line 175 "..\..\Translation\Views\View.cshtml"
-, Tuple.Create(Tuple.Create("", 9133), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+, Tuple.Create(Tuple.Create("", 9161), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 9133), false)
+, 9161), false)
 );
 
 WriteLiteral(" />\r\n");

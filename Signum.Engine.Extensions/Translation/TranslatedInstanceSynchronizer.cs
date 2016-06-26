@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Web;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Engine.Translation;
-using Signum.Web.Translation;
 using Signum.Entities.Translation;
 
-namespace Signum.Web.Translation
+namespace Signum.Engine.Translation
 {
     public static class TranslatedInstanceSynchronizer
     {

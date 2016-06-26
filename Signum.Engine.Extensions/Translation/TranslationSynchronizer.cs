@@ -6,7 +6,7 @@ using System.Text;
 using System.Web;
 using Signum.Utilities;
 
-namespace Signum.Web.Translation
+namespace Signum.Engine.Translation
 {
     public static class TranslationSynchronizer
     {
