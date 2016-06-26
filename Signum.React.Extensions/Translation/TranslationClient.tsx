@@ -88,5 +88,12 @@ export interface LocalizedType {
     gender: string;
     description: string;
     pluralDescription: string;
-    members: { [member: string]: string };
+    translatedDescription: string;
+    members: { [member: string]: LocalizedMember };
+}
+
+export interface LocalizedMember {
+    name: string;
+    description: string;
+    translatedDescription: string;
 }

@@ -32,9 +32,12 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
     componentWillMount() {
         CultureClient.getCultures().then(cultures => this.setState({ cultures })).done();
 
-        var { assembly, culture } = this.props.routeParams;
+        this.loadSync().done();
+    }
 
-        API.sync(assembly, culture).then(result => this.setState({ result })).done();
+    loadSync() {
+        var { assembly, culture } = this.props.routeParams;
+        return API.sync(assembly, culture).then(result => this.setState({ result }))
     }
 
     render() {
@@ -72,7 +75,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
         return (
             <div>
-                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={this.state.result} culture={this.props.routeParams.culture} />) }
+                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={this.state.result} currentCulture={this.props.routeParams.culture} />) }
                 <input type="submit" value={ TranslationMessage.Save.niceToString() } className="btn btn-primary" onClick={this.handleSave}/>
             </div>
         );
@@ -81,6 +84,9 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
     handleSave = (e: React.FormEvent) => {
         e.preventDefault();
         var params = this.props.routeParams;
-        API.save(params.assembly, params.culture || "", this.state.result).then(() => notifySuccess()).done();
+        API.save(params.assembly, params.culture || "", this.state.result)
+            .then(() => notifySuccess())
+            .then(() => this.loadSync())
+            .done();
     }
 }
