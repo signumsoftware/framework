@@ -35,15 +35,15 @@ export function getCultures(): Promise<{ [name: string]: Lite<CultureInfoEntity>
 
 export module API {
     export function fetchCultures(): Promise<{ [name: string]: Lite<CultureInfoEntity> }> {
-        return ajaxGet<{ [name: string]: Lite<CultureInfoEntity> }>({ url: "~/api/translation/cultures", cache: "no-cache" });
+        return ajaxGet<{ [name: string]: Lite<CultureInfoEntity> }>({ url: "~/api/culture/cultures", cache: "no-cache" });
     }
 
     export function fetchCurrentCulture(): Promise<CultureInfoEntity> {
-        return ajaxGet<CultureInfoEntity>({ url: "~/api/translation/currentCulture", cache: "no-cache" });
+        return ajaxGet<CultureInfoEntity>({ url: "~/api/culture/currentCulture", cache: "no-cache" });
     }
 
     export function setCurrentCulture(culture: Lite<CultureInfoEntity>): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/translation/currentCulture", cache: "no-cache" }, culture);
+        return ajaxPost<void>({ url: "~/api/culture/currentCulture", cache: "no-cache" }, culture);
     }
 }
 
