@@ -298,17 +298,10 @@ namespace Signum.Engine.DynamicQuery
             return fi;
         }
 
-        public static FluentInclude<T> WithExpression<T, S>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<T, S>> lambdaToMethodOrProperty)
+        public static FluentInclude<T> WithExpressionFrom<T,F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty, Func<string> niceName = null)
             where T : Entity
         {
-            dqm.RegisterExpression(lambdaToMethodOrProperty);
-            return fi;
-        }
-
-        public static FluentInclude<T> WithExpression<T, S>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<T, S>> lambdaToMethodOrProperty, Func<string> niceName)
-            where T : Entity
-        {
-            dqm.RegisterExpression(lambdaToMethodOrProperty, niceName);
+            dqm.RegisterExpression(lambdaToMethodOrProperty, niceName ?? (() => typeof(T).NicePluralName()));
             return fi;
         }
     }
