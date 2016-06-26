@@ -99,7 +99,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return API.forEntityType(ctx.lite.EntityType).then(das =>
             das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr, e => {
-                navigateOrWindowsOpen(e, "/dashboard/" + d.id + "?entity=" + liteKey(ctx.lite))
+                navigateOrWindowsOpen(e, "~/dashboard/" + d.id + "?entity=" + liteKey(ctx.lite))
             }, { glyphicon: "glyphicon-th-large", glyphiconColor: "darkslateblue" })));
     });
 
@@ -107,12 +107,12 @@ export function start(options: { routes: JSX.Element[] }) {
         e => Navigator.API.fetchAndRemember(ctx.lite)
             .then(db => {
                 if (db.entityType == null)
-                    navigateOrWindowsOpen(e, "/dashboard/" + ctx.lite.id);
+                    navigateOrWindowsOpen(e, "~/dashboard/" + ctx.lite.id);
                 else
                     Navigator.API.fetchAndRemember(db.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
                         .then(lite => {
-                            navigateOrWindowsOpen(e, "/dashboard/" + ctx.lite.id + "?entity=" + liteKey(lite));
+                            navigateOrWindowsOpen(e, "~/dashboard/" + ctx.lite.id + "?entity=" + liteKey(lite));
                         }).done();
             }).done()));
 }

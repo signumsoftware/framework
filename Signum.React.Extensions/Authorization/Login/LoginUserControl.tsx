@@ -9,30 +9,14 @@ import * as AuthClient from '../AuthClient'
 
 export default class LoginUserControl extends React.Component<{}, { user: UserEntity }> {
 
-    constructor(props) {
-        super(props);
-        this.state = { user: AuthClient.currentUser() };
-    }
-
-    setUser = (newUser: UserEntity) => {
-        this.setState({ user: newUser });
-    }
-
-    componentWillMount() {
-        AuthClient.onCurrentUserChanged.push(this.setUser);
-    }
-
-    componentWillUnmount() {
-        AuthClient.onCurrentUserChanged.remove(this.setUser);
-    }
-
     render() {
+        var user = AuthClient.currentUser();
 
-        if (!this.state.user)
+        if (!user)
             return <LinkContainer to="~/auth/login"><NavItem  className="sf-login">{AuthMessage.Login.niceToString() }</NavItem></LinkContainer>;
 
         return (
-            <NavDropdown className="sf-user" title={this.state.user.userName} id="sfUserDropDown">
+            <NavDropdown className="sf-user" title={user.userName} id="sfUserDropDown">
                 <LinkContainer to="~/auth/changePassword"><MenuItem>{AuthMessage.ChangePassword.niceToString() }</MenuItem></LinkContainer>
                 <MenuItem id="sf-auth-logout" onSelect={() => AuthClient.logout() }>{AuthMessage.Logout.niceToString() }</MenuItem>
             </NavDropdown>);

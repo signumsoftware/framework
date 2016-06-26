@@ -9,7 +9,7 @@ import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { ModifiableEntity, EntityControlMessage, Entity, Lite, parseLite, getToString, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { getCultures } from '../CulturesClient'
+import * as CultureClient from '../CultureClient'
 import { API, AssemblyResult, LocalizedType, LocalizableType } from '../TranslationClient'
 import { CultureInfoEntity } from '../../Basics/Signum.Entities.Basics'
 import { TranslationMessage } from '../Signum.Entities.Translation'
@@ -28,7 +28,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
     }
 
     componentWillMount() {
-        getCultures().then(cultures => this.setState({ cultures }));
+        CultureClient.getCultures().then(cultures => this.setState({ cultures }));
     }
 
     render() {

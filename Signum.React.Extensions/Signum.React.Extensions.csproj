@@ -432,7 +432,7 @@
     <TypeScriptCompile Include="Translation\Signum.Entities.Translation.ts">
       <DependentUpon>Signum.Entities.Translation.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Translation\CulturesClient.ts" />
+    <TypeScriptCompile Include="Translation\CultureClient.ts" />
     <TypeScriptCompile Include="UserAssets\Signum.Entities.UserAssets.ts">
       <DependentUpon>Signum.Entities.UserAssets.t4s</DependentUpon>
     </TypeScriptCompile>

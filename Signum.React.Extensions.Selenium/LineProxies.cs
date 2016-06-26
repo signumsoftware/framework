@@ -91,14 +91,17 @@ arguments[0].dispatchEvent(new Event('blur'));";
             IWebElement textOrTextArea = this.Element.TryFindElement(By.CssSelector("input[type=text], textarea"));
             if (textOrTextArea != null)
                 return textOrTextArea.GetAttribute("value");
-
+            
+            IWebElement readonlyField = this.Element.TryFindElement(By.CssSelector("p.form-control, p.form-control-static"));
+            if (readonlyField != null)
+                return readonlyField.Text;
 
             throw new InvalidOperationException("Element {0} not found".FormatWith(Route.PropertyString()));
         }
 
-        public WebElementLocator MainElement
+        public WebElementLocator EditableElement
         {
-            get { return this.Element.WithLocator(By.CssSelector("input")); }
+            get { return this.Element.WithLocator(By.CssSelector("input, textarea")); }
         }
 
         public object GetValue()
