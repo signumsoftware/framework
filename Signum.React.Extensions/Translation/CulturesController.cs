@@ -21,21 +21,21 @@ using System.Web.Http;
 
 namespace Signum.React.Translation
 {
-    public class CulturesController : ApiController
+    public class CultureController : ApiController
     {
-        [Route("api/cultures/cultures"), HttpGet, AllowAnonymous]
+        [Route("api/culture/cultures"), HttpGet, AllowAnonymous]
         public Dictionary<string, Lite<CultureInfoEntity>> GetCultures()
         {
             return CultureInfoLogic.CultureInfoToEntity.Value.Values.ToDictionary(a => a.Name, a => a.ToLite());
         }
 
-        [Route("api/cultures/currentCulture"), HttpGet, AllowAnonymous]
+        [Route("api/culture/currentCulture"), HttpGet, AllowAnonymous]
         public CultureInfoEntity CurrentCulture()
         {
             return CultureInfo.CurrentCulture.ToCultureInfoEntity();
         }
 
-        [Route("api/cultures/currentCulture"), HttpPost, AllowAnonymous]
+        [Route("api/culture/currentCulture"), HttpPost, AllowAnonymous]
         public HttpResponseMessage SetCurrentCulture(Lite<CultureInfoEntity> culture)
         {
             var ci = ExecutionMode.Global().Using(_ => culture.Retrieve().ToCultureInfo());

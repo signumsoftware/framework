@@ -205,7 +205,7 @@ namespace Signum.React.Translation
 
             foreach (var cultureGroup in result.types.Values.SelectMany(a => a.cultures.Values).GroupBy(lt => lt.culture).ToList())
             {
-                LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture), forceCreate: true);
+                LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(cultureGroup.Key), forceCreate: true);
 
                 var types = cultureGroup.ToDictionary(a => a.type);
 

@@ -4,6 +4,7 @@ import * as numbro from 'numbro'
 import * as moment from 'moment'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
+import { notifySuccess } from '../../../../Framework/Signum.React/Scripts/Operations/EntityOperations'
 import { CountSearchControl, SearchControl } from '../../../../Framework/Signum.React/Scripts/Search'
 import EntityLink from '../../../../Framework/Signum.React/Scripts/SearchControl/EntityLink'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
@@ -20,11 +21,11 @@ interface TranslationCodeViewProps extends ReactRouter.RouteComponentProps<{}, {
 
 }
 
-export default class TranslationCodeView extends React.Component<TranslationCodeViewProps, { result?: AssemblyResult; filter?: string; cultures?: { [name: string]: Lite<CultureInfoEntity> } }> {
+export default class TranslationCodeView extends React.Component<TranslationCodeViewProps, { result?: AssemblyResult; cultures?: { [name: string]: Lite<CultureInfoEntity> } }> {
 
     constructor(props) {
         super(props);
-        this.state = { filter: "" };
+        this.state = { };
     }
 
     componentWillMount() {
@@ -43,7 +44,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
         return (
             <div>
                 <h2>{message}</h2>
-                { this.renderSearch() }
+                <TranslateSearchBox search={this.handleSearch} />
                 <em> {TranslationMessage.PressSearchForResults.niceToString() }</em>
                 <br/>
                 { this.renderTable() }
@@ -51,35 +52,12 @@ export default class TranslationCodeView extends React.Component<TranslationCode
         );
     }
 
-    handeFilterChange = (e: React.FormEvent) => {
-        var filter = (e.currentTarget as HTMLInputElement).value;
-        this.setState({ filter });
-    }
+    handleSearch = (filter: string) => {
+        var {assembly, culture} = this.props.routeParams;
 
-    handleSearch = (e: React.FormEvent) => {
-
-        e.preventDefault();
-
-        var params = this.props.routeParams;
-
-        return API.retrieve(params.assembly, params.culture || "", this.state.filter)
+        return API.retrieve(assembly, culture || "", filter)
             .then(result => this.setState({ result: result }))
             .done();
-    }
-
-    renderSearch() {
-
-        return (
-            <form onSubmit={this.handleSearch} className="input-group">
-                <input type="text" className="form-control"
-                    placeholder={ TranslationMessage.Search.niceToString() }  value={ this.state.filter} onChange={this.handeFilterChange}/>
-                <div className="input-group-btn">
-                    <button className="btn btn-default" type="submit" title={ TranslationMessage.Search.niceToString() }>
-                        <i className="glyphicon glyphicon-search"></i>
-                    </button>
-                </div>
-            </form>
-        );
     }
 
     renderTable() {
@@ -93,7 +71,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
 
         return (
             <div>
-                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable type={type} result={this.state.result} culture={this.props.routeParams.culture} />) }
+                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={this.state.result} culture={this.props.routeParams.culture} />) }
                 <input type="submit" value={ TranslationMessage.Save.niceToString() } className="btn btn-primary" onClick={this.handleSave}/>
             </div>
         );
@@ -102,7 +80,37 @@ export default class TranslationCodeView extends React.Component<TranslationCode
     handleSave = (e: React.FormEvent) => {
         e.preventDefault();
         var params = this.props.routeParams;
-        API.save(params.assembly, params.culture || "", this.state.result).done();
+        API.save(params.assembly, params.culture || "", this.state.result).then(() => notifySuccess()).done();
+    }
+}
+
+export class TranslateSearchBox extends React.Component<{ search: (newValue: string) => void }, { filter: string }>
+{
+    state = { filter: "" };
+
+    handleChange = (e: React.FormEvent) => {
+        e.preventDefault();
+        this.setState({ filter: (e.currentTarget as HTMLInputElement).value });
+    }
+
+    handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        this.props.search(this.state.filter);
+    }
+
+    render() {
+
+        return (
+            <form onSubmit={this.handleSearch} className="input-group">
+                <input type="text" className="form-control"
+                    placeholder={ TranslationMessage.Search.niceToString() }  value={ this.state.filter} onChange={this.handleChange}/>
+                <div className="input-group-btn">
+                    <button className="btn btn-default" type="submit" title={ TranslationMessage.Search.niceToString() }>
+                        <i className="glyphicon glyphicon-search"></i>
+                    </button>
+                </div>
+            </form>
+        );
     }
 }
 
@@ -215,7 +223,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
                 <th className="smallCell monospaceCell">
                     {type.hasGender && (edit ?
                         <select value={loc.gender || ""} onChange={(e) => loc.gender = (e.currentTarget as HTMLSelectElement).value }>
-                            { pronoms.concat(loc.gender == null ? [{ Gender: "", Singular: " - ", Plural: " - " }] : []).map(a => <option key={a.Gender}>{a.Singular}</option>) }
+                            { pronoms.concat(loc.gender == null ? [{ Gender: "", Singular: " - ", Plural: " - " }] : []).map(a => <option key={a.Gender} value={a.Gender}>{a.Singular}</option>) }
                         </select> :
                         (pronoms.filter(a => a.Gender == loc.gender).map(a => a.Singular).singleOrNull()))
                     }
