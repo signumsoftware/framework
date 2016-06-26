@@ -18,6 +18,8 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Utilities.DataStructures;
 using System.Threading;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Operations;
 
 namespace Signum.Engine.Maps
 {
@@ -46,6 +48,7 @@ namespace Signum.Engine.Maps
             };
         }
 
+     
         protected SchemaBuilder(Schema schema)
         {
             this.schema = schema;
@@ -62,12 +65,7 @@ namespace Signum.Engine.Maps
         }
 
 
-        public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object>> fields) where T : Entity
-        {
-            return AddUniqueIndex<T>(fields, null);
-        }
-
-        public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where) where T : Entity
+        public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null) where T : Entity
         {
             var table = Schema.Table<T>();
 
@@ -180,15 +178,18 @@ namespace Signum.Engine.Maps
             table.MultiColumnIndexes.Add(index);
         }
 
-        public Table Include<T>() where T : Entity
+        public FluentInclude<T> Include<T>() where T : Entity
         {
-            return Include(typeof(T), null);
+            var table = Include(typeof(T), null);
+            return new FluentInclude<T>(table, this);
         }
 
         public virtual Table Include(Type type)
         {
             return Include(type, null);
         }
+
+
 
         internal protected virtual Table Include(Type type, PropertyRoute route)
         {
@@ -393,6 +394,26 @@ namespace Signum.Engine.Maps
                     throw new NotSupportedException(EngineMessage.NoWayOfMappingType0Found.NiceToString().FormatWith(route.Type));
             }
         }
+
+        public class FluentInclude<T>
+         where T : Entity
+        {
+            public SchemaBuilder SchemaBuilder { get; private set; }
+            public Table Table { get; private set; }
+
+            public FluentInclude(Table table, SchemaBuilder schemaBuilder)
+            {
+                Table = table;
+                SchemaBuilder = schemaBuilder;
+            }
+
+            public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null)
+            {
+                this.SchemaBuilder.AddUniqueIndex<T>(fields, null);
+                return this;
+            }
+        }
+
 
         public enum KindOfField
         {
@@ -945,4 +966,5 @@ namespace Signum.Engine.Maps
             return result;
         }
     }
+
 }

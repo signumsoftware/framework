@@ -17,6 +17,7 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.Threading;
+using static Signum.Engine.Maps.SchemaBuilder;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -287,6 +288,24 @@ namespace Signum.Engine.DynamicQuery
             }).ToArray(); 
         }
     }
+
+    public static class DynamicQueryFluentInclude
+    {
+        public static FluentInclude<T> WithQuery<T, Q>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<T, Q>> simpleQuerySelector)
+            where T : Entity
+        {
+            dqm.RegisterQuery<Q>(typeof(T), () => Database.Query<T>().Select(simpleQuerySelector));
+            return fi;
+        }
+
+        public static FluentInclude<T> WithExpressionFrom<T,F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty, Func<string> niceName = null)
+            where T : Entity
+        {
+            dqm.RegisterExpression(lambdaToMethodOrProperty, niceName ?? (() => typeof(T).NicePluralName()));
+            return fi;
+        }
+    }
+        
 
     public class ExtensionInfo
     {
