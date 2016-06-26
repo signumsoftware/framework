@@ -424,9 +424,9 @@
     <TypeScriptCompile Include="SMS\Signum.Entities.SMS.ts">
       <DependentUpon>Signum.Entities.SMS.t4s</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Translation\Code\Sync.tsx" />
-    <TypeScriptCompile Include="Translation\Code\View.tsx" />
-    <TypeScriptCompile Include="Translation\Code\Status.tsx" />
+    <TypeScriptCompile Include="Translation\Code\TranslationCodeSync.tsx" />
+    <TypeScriptCompile Include="Translation\Code\TranslationCodeView.tsx" />
+    <TypeScriptCompile Include="Translation\Code\TranslationCodeStatus.tsx" />
     <TypeScriptCompile Include="Translation\CultureDropdown.tsx" />
     <TypeScriptCompile Include="Translation\TranslationClient.tsx" />
     <TypeScriptCompile Include="Translation\Signum.Entities.Translation.ts">

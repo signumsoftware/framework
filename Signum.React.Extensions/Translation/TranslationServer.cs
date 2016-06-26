@@ -1,4 +1,5 @@
 ﻿using Signum.Engine.Basics;
+using Signum.Engine.Translation;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,13 @@ namespace Signum.React.Translation
 {
     public class TranslationServer
     {
-        public static void Start(HttpConfiguration config, bool copyNewTranslationsToRootFolder = true)
+        public static ITranslator Translator;
+
+        public static void Start(HttpConfiguration config, ITranslator translator, bool copyNewTranslationsToRootFolder = true)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+
+            Translator = translator;
 
             if (copyNewTranslationsToRootFolder)
             {

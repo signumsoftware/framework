@@ -29,17 +29,17 @@ export default class TranslationCodeView extends React.Component<TranslationCode
     }
 
     componentWillMount() {
-        CultureClient.getCultures().then(cultures => this.setState({ cultures }));
+        CultureClient.getCultures().then(cultures => this.setState({ cultures })).done();
     }
 
     render() {
 
-        var {routeParams } = this.props;
+        var {assembly, culture } = this.props.routeParams;
 
-        var message = TranslationMessage.View0In1.niceToString(routeParams.assembly,
-            routeParams.culture == null ? TranslationMessage.AllLanguages.niceToString() :
-                this.state.cultures ? this.state.cultures[routeParams.culture].toStr :
-                    routeParams.culture);
+        var message = TranslationMessage.View0In1.niceToString(assembly,
+            culture == null ? TranslationMessage.AllLanguages.niceToString() :
+                this.state.cultures ? this.state.cultures[culture].toStr :
+                    culture);
 
         return (
             <div>

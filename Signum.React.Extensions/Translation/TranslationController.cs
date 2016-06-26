@@ -80,7 +80,7 @@ namespace Signum.React.Translation
 
 
         [Route("api/translation/retrieve"), HttpPost]
-        public AssemblyResultTS RetrieveTypes(string assembly, string culture, string filter)
+        public AssemblyResultTS Retrieve(string assembly, string culture, string filter)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
 
@@ -106,14 +106,8 @@ namespace Signum.React.Translation
                      members = t.Members.ToDictionary(),
                  }
                  group lt by t.Type into g
-                 let options = LocalizedAssembly.GetDescriptionOptions(g.Key)
-                 select KVP.Create(g.Key.Name, new LocalizableTypeTS
-                 {
-                     type = g.Key.Name,
-                     hasDescription = options.IsSet(DescriptionOptions.Description),
-                     hasPluralDescription = options.IsSet(DescriptionOptions.PluralDescription),
-                     hasMembers = options.IsSet(DescriptionOptions.Members),
-                     hasGender = options.IsSet(DescriptionOptions.Gender),
+                 select KVP.Create(g.Key.Name, new LocalizableTypeTS(g.Key)
+                 {  
                      cultures = g.ToDictionary(a => a.culture)
                  }))
                  .ToDictionary("types");
@@ -153,14 +147,43 @@ namespace Signum.React.Translation
             return new AssemblyResultTS
             {
                 types = types.OrderBy(a => a.Key).ToDictionary(),
-                cultures = cultures.Select(c => new CulturesTS
-                {
-                    name = c.Name,
-                    englishName = c.EnglishName,
-                    pronoms = NaturalLanguageTools.GenderDetectors.TryGetC(c.TwoLetterISOLanguageName)?.Pronoms.ToList()
-                }).ToDictionary(a => a.name)
+                cultures = cultures.Select(c => new CulturesTS(c)
+               ).ToDictionary(a => a.name)
             };
         }
+
+
+        [Route("api/translation/sync"), HttpPost]
+        public AssemblyResultTS Sync(string assembly, string culture)
+        {
+            Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
+            CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
+
+            CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+
+            Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture)
+                                                                    let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
+                                                                    where la != null || ci == defaultCulture || ci == targetCulture
+                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true))).ToDictionary();
+
+            var master = reference.Extract(defaultCulture);
+            var target = reference.Extract(targetCulture);
+            int totalTypes;
+            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationServer.Translator, target, master, reference.Values.ToList(), false, out totalTypes);
+
+            return new AssemblyResultTS
+            {
+                types = changes.Types.Select(t => new LocalizableTypeTS(t.Type.Type)
+                {
+                    cultures = null
+                }).ToDictionary(a => a.type),
+                cultures = new Dictionary<string, CulturesTS>
+                {
+                    { target.Culture.Name, new CulturesTS(target.Culture) }
+                }
+            };
+        }
+
 
         public class AssemblyResultTS
         {
@@ -172,8 +195,14 @@ namespace Signum.React.Translation
         {
             public string name;
             public string englishName;
-            public List<PronomInfo> pronoms; 
+            public List<PronomInfo> pronoms;
 
+            public CulturesTS(CultureInfo c)
+            {
+                name = c.Name;
+                englishName = c.EnglishName;
+                pronoms = NaturalLanguageTools.GenderDetectors.TryGetC(c.TwoLetterISOLanguageName)?.Pronoms.ToList();
+            }
         }
 
         public class LocalizableTypeTS
@@ -185,6 +214,16 @@ namespace Signum.React.Translation
             public bool hasPluralDescription;
 
             public Dictionary<string, LocalizedTypeTS> cultures;
+
+            public LocalizableTypeTS(Type type)
+            {
+                var options = LocalizedAssembly.GetDescriptionOptions(type);
+                this.type = type.Name;
+                hasDescription = options.IsSet(DescriptionOptions.Description);
+                hasPluralDescription = options.IsSet(DescriptionOptions.PluralDescription);
+                hasMembers = options.IsSet(DescriptionOptions.Members);
+                hasGender = options.IsSet(DescriptionOptions.Gender);
+            }
         }
 
         public class LocalizedTypeTS

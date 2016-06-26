@@ -21,9 +21,9 @@ export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(
         <Route path="translation" >
-            <Route path="status" getComponent= {(loc, cb) => require(["./Code/Status"], (Comp) => cb(null, Comp.default)) }/>
-            <Route path="view/:assembly(/:culture)" getComponent= {(loc, cb) => require(["./Code/View"], (Comp) => cb(null, Comp.default)) }/>
-            <Route path="sync/:assembly/:culture" getComponent= {(loc, cb) => require(["./Code/Sync"], (Comp) => cb(null, Comp.default)) }/>
+            <Route path="status" getComponent= {(loc, cb) => require(["./Code/TranslationCodeStatus"], (Comp) => cb(null, Comp.default)) }/>
+            <Route path="view/:assembly(/:culture)" getComponent= {(loc, cb) => require(["./Code/TranslationCodeView"], (Comp) => cb(null, Comp.default)) }/>
+            <Route path="sync/:assembly/:culture" getComponent= {(loc, cb) => require(["./Code/TranslationCodeSync"], (Comp) => cb(null, Comp.default)) }/>
         </Route>
     );
 }
@@ -36,6 +36,10 @@ export module API {
 
     export function retrieve(assembly: string, culture: string, filter: string): Promise<AssemblyResult> {
         return ajaxPost<AssemblyResult>({ url: `~/api/translation/retrieve?assembly=${assembly}&culture=${culture}&filter=${filter}` }, null);
+    }
+
+    export function sync(assembly: string, culture: string): Promise<AssemblyResult> {
+        return ajaxPost<AssemblyResult>({ url: `~/api/translation/sync?assembly=${assembly}&culture=${culture}` }, null);
     }
 
     export function save(assembly: string, culture: string, result: AssemblyResult): Promise<void> {
