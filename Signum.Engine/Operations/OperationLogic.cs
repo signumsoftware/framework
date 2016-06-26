@@ -17,6 +17,7 @@ using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Data.Common;
 using Signum.Engine.Operations.Internal;
+using static Signum.Engine.Maps.SchemaBuilder;
 
 namespace Signum.Engine.Operations
 {
@@ -221,7 +222,14 @@ Consider the following options:
         }
         #endregion
 
-
+        public static void RegisterTypicalSave<T>(this Graph<T>.Execute operation)
+            where T : Entity
+        {
+            operation.AllowsNew = true;
+            operation.Lite = false;
+            operation.Execute = (e, _) => { };
+            operation.Register();
+        }
 
         public static void Register(this IOperation operation)
         {
@@ -667,6 +675,26 @@ Consider the following options:
                         OperationMessage.StateShouldBe0InsteadOf1.NiceToString().FormatWith(
                         o.FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
                         invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();
+        }
+    }
+    
+    public static class FluentOperationInclude
+    {
+        public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation)
+            where T : Entity
+        {
+            new Graph<T>.Execute(saveOperation).RegisterTypicalSave();
+            return fi;
+        }
+
+        public static FluentInclude<T> WithDelete<T>(this FluentInclude<T> fi, DeleteSymbol<T> delete)
+               where T : Entity
+        {
+            new Graph<T>.Delete(delete)
+            {
+                Delete = (e, _) => e.Delete()
+            }.Register();
+            return fi;
         }
     }
 
