@@ -409,7 +409,7 @@ namespace Signum.Engine.Maps
 
             public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null)
             {
-                this.SchemaBuilder.AddUniqueIndex<T>(fields, null);
+                this.SchemaBuilder.AddUniqueIndex<T>(fields, where);
                 return this;
             }
         }
