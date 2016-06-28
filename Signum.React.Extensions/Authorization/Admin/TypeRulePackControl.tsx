@@ -122,7 +122,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
         let remaining = ctx.value.availableConditions.filter(tcs => !used.contains(tcs.id));
 
-        let fallback = new Binding<TypeAllowed>("fallback", ctx.value.allowed);
+        let fallback = Binding.create(ctx.value.allowed, a => a.fallback);
         return [
             <tr key={ctx.value.resource.fullClassName} className={ classes("sf-auth-type", ctx.value.allowed.conditions.length > 0 && "sf-auth-with-conditions") }>
                 <td>
@@ -157,7 +157,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
                 </td>}
             </tr>
         ].concat(ctx.value.allowed.conditions.map(c => {
-            let b = new Binding<TypeAllowed>("allowed", c);
+            let b = Binding.create(c, ca => ca.allowed);
             return (
                 <tr key={ctx.value.resource.fullClassName + "_" + c.typeCondition.id} className="sf-auth-condition">
                     <td>
