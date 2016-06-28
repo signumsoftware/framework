@@ -439,6 +439,7 @@
       <DependentUpon>Signum.Entities.UserAssets.t4s</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="UserAssets\Templates\QueryTokenEntityBuilder.tsx" />
+    <TypeScriptCompile Include="UserAssets\ImportAssetsPage.tsx" />
     <TypeScriptCompile Include="UserAssets\UserAssetClient.tsx" />
     <TypeScriptCompile Include="UserQueries\Templates\UserQueryPage.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryOmniboxProvider.tsx" />

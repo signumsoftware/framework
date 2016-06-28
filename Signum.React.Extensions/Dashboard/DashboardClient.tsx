@@ -23,6 +23,7 @@ import { QueryFilterEntity, QueryColumnEntity, QueryOrderEntity } from '../UserQ
 
 import { DashboardPermission, DashboardEntity, CountSearchControlPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, DashboardEmbedededInEntity } from './Signum.Entities.Dashboard'
 import { QueryTokenEntity } from '../UserAssets/Signum.Entities.UserAssets'
+import * as UserAssetClient from '../UserAssets/UserAssetClient'
 
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -40,6 +41,8 @@ export interface PartRenderer<T extends IPartEntity>{
 export const partRenderers : { [typeName:string] : PartRenderer<IPartEntity>} = {};
 
 export function start(options: { routes: JSX.Element[] }) {
+
+    UserAssetClient.registerExportAssertLink(DashboardEntity);
 
     Navigator.addSettings(new EntitySettings(DashboardEntity, e => new Promise(resolve => require(['./Admin/Dashboard'], resolve))));
 

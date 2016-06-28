@@ -19,6 +19,8 @@ import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
+    UserAssetsClient.registerExportAssertLink(UserQueryEntity);
+
     options.routes.push(<Route path="userQuery">
         <Route path=":userQueryId(/:entity)" getComponent={ (loc, cb) => require(["./Templates/UserQueryPage"], (Comp) => cb(null, Comp.default)) } />
     </Route>);

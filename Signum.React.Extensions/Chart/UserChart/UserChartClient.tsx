@@ -22,6 +22,8 @@ import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
+    UserAssetsClient.registerExportAssertLink(UserChartEntity);
+
     options.routes.push(<Route path="userChart">
         <Route path=":userChartId(/:entity)" getComponent={ (loc, cb) => require(["./UserChartPage"], (Comp) => cb(null, Comp.default)) } />
     </Route>);

@@ -33,10 +33,10 @@ namespace Signum.Web.UserAssets
         {
             LinksClient.RegisterEntityLinks<T>((lite, ctx) => new[]
             {
-               new QuickLinkAction(UserAssetMessage.ExportToXml, RouteHelper.New().Action((UserAssetController a)=>a.Export(lite)))
-               {
-                   IsVisible = UserAssetPermission.UserAssetsToXML.IsAuthorized()
-               }
+                new QuickLinkAction(UserAssetMessage.ExportToXml, RouteHelper.New().Action((UserAssetController a)=>a.Export(lite)))
+                {
+                    IsVisible = UserAssetPermission.UserAssetsToXML.IsAuthorized()
+                }
             });
         }
     }

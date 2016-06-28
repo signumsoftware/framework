@@ -20,6 +20,9 @@ using Signum.Entities.UserAssets;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine;
+using Signum.React.Files;
+using Signum.Engine.UserAssets;
+using System.IO;
 
 namespace Signum.React.UserAssets
 { 
@@ -60,6 +63,38 @@ namespace Signum.React.UserAssets
             public string tokenString;
             public FilterOperation operation;
             public string valueString;
+        }
+
+        [Route("api/userAssets/export"), HttpPost]
+        public HttpResponseMessage Export(Lite<IUserAssetEntity> lite)
+        {
+            var bytes = UserAssetsExporter.ToXml(lite.Retrieve());
+            
+            return FilesController.GetHttpReponseMessage(new MemoryStream(bytes), "{0}{1}.xml".FormatWith(lite.EntityType.Name, lite.Id));
+        }
+
+        [Route("api/userAssets/importPreview"), HttpPost]
+        public UserAssetPreviewModel ImportPreview(FileUpload file)
+        {
+            return UserAssetsImporter.Preview(file.content);
+        }
+
+        [Route("api/userAssets/import"), HttpPost]
+        public void Import(FileUploadWithModel file)
+        {
+            UserAssetsImporter.Import(file.file.content, file.model);
+        }
+
+        public class FileUpload
+        {
+            public string fileName;
+            public byte[] content;
+        }
+
+        public class FileUploadWithModel
+        {
+            public FileUpload file;
+            public UserAssetPreviewModel model;
         }
     }
 }
