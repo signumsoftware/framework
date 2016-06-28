@@ -22,6 +22,11 @@ import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
+    options.routes.push(<Route path="userChart">
+        <Route path=":userChartId(/:entity)" getComponent={ (loc, cb) => require(["./UserChartPage"], (Comp) => cb(null, Comp.default)) } />
+    </Route>);
+
+
     ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
         if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
             return null;
@@ -35,10 +40,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr, e => {
-                Navigator.API.fetchAndForget(uc)
-                    .then(uq => Converter.toChartRequest(uq, ctx.lite))
-                    .then(cr => window.open(ChartClient.Encoder.chartRequestPath(cr)))
-                    .done();
+                window.open(Navigator.currentHistory.createHref(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
             }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));
     });
 
@@ -46,18 +48,18 @@ export function start(options: { routes: JSX.Element[] }) {
         e => {
             Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
                 if (uc.entityType == null)
-                    return Converter.toChartRequest(uc, null);
+                    window.open(Navigator.currentHistory.createHref(`~/userChart/${uc.id}`));
                 else
-                    return Navigator.API.fetchAndForget(uc.entityType)
+                    Navigator.API.fetchAndForget(uc.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
-                        .then(lite => lite == null ? null : Converter.toChartRequest(uc, lite));
-            }).then(cr => {
+                        .then(lite => {
+                            if (!lite)
+                                return;
 
-                if (cr == null)
-                    return;
-
-                window.open(ChartClient.Encoder.chartRequestPath(cr));
-            });
+                            window.open(Navigator.currentHistory.createHref(`~/userChart/${uc.id}/${liteKey(lite)}`));
+                        })
+                        .done();
+            }).done();
         }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) }));
 
 

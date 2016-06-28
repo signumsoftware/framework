@@ -7,13 +7,13 @@ import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext, mlistItemContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SearchMessage, JavascriptMessage, parseLite, is, liteKey } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { PropertyRoute, getQueryNiceName, getTypeInfo, Binding, GraphExplorer }  from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer }  from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import FilterBuilder from '../../../../Framework/Signum.React/Scripts/SearchControl/FilterBuilder'
 import ValidationErrors from '../../../../Framework/Signum.React/Scripts/Frames/ValidationErrors'
 import { ValueLine, FormGroup, ValueLineProps, ValueLineType } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
-    ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
+    ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType, UserChartEntity } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
 import { ChartColumn, ChartColumnInfo }from './ChartColumn'
@@ -25,13 +25,15 @@ import ChartRenderer from './ChartRenderer'
 require("!style!css!../Chart.css");
 require("!style!css!../../../../Framework/Signum.React/Scripts/SearchControl/Search.css");
 
-interface ChartRequestViewProps extends ReactRouter.RouteComponentProps<{}, { queryName: string }> {
 
+interface ChartRequestViewProps {
+    chartRequest?: ChartRequest;
+    userChart?: UserChartEntity;
+    onChange: (newChartRequest: ChartRequest) => void;
+    title?: string;
 }
 
-
 interface ChartRequestViewState {
-    chartRequest?: ChartRequest;
     queryDescription?: QueryDescription;
     chartResult?: ChartClient.API.ExecuteChartResult;
 }
@@ -42,28 +44,26 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     constructor(props) {
         super(props);
-        this.state = { chartRequest: null };
+        this.state = { };
    
     }
 
     componentWillMount() {
-        this.load(this.props);
+        this.loadQueryDescription(this.props);
     }
 
     componentWillReceiveProps(nextProps: ChartRequestViewProps) {
-        this.setState({ chartRequest: null });
-        this.load(nextProps);
+        this.state = {};
+        this.forceUpdate();
+        this.loadQueryDescription(nextProps);
     }
 
-    load(props: ChartRequestViewProps) {
-
-        Finder.getQueryDescription(props.routeParams.queryName).then(qd => {
-            this.setState({ queryDescription: qd });
-        }).done();
-
-        ChartClient.Decoder.parseChartRequest(props.routeParams.queryName, props.location.query).then(cr => {
-            this.setState({ chartRequest: cr });
-        }).done();
+    loadQueryDescription(props: ChartRequestViewProps) {
+        if (props.chartRequest) {
+            Finder.getQueryDescription(props.chartRequest.queryKey).then(qd => {
+                this.setState({ queryDescription: qd });
+            }).done();
+        }
     }
 
     handleOnInvalidate = () => {
@@ -78,10 +78,10 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
         this.setState({ chartResult: null });
 
-        ChartClient.API.executeChart(this.state.chartRequest)
+        ChartClient.API.executeChart(this.props.chartRequest)
             .then(rt => this.setState({ chartResult: rt }),
             ifError(ValidationError, e => {
-                GraphExplorer.setModelState(this.state.chartRequest, e.modelState, "request");
+                GraphExplorer.setModelState(this.props.chartRequest, e.modelState, "request");
                 this.forceUpdate();
             }))
             .done();
@@ -89,22 +89,22 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     handleOnFullScreen = (e: React.MouseEvent) => {
         e.preventDefault();
-        Navigator.currentHistory.push(ChartClient.Encoder.chartRequestPath(this.state.chartRequest));
+        Navigator.currentHistory.push(ChartClient.Encoder.chartRequestPath(this.props.chartRequest));
     }
 
     handleEditScript = (e: React.MouseEvent) => {
-        window.open(Navigator.navigateRoute(this.state.chartRequest.chartScript));
+        window.open(Navigator.navigateRoute(this.props.chartRequest.chartScript));
     }
 
     render() {
 
-        const cr = this.state.chartRequest;
+        const cr = this.props.chartRequest;
         const qd = this.state.queryDescription;
 
         if (cr == null || qd == null)
             return null;
 
-        var tc = new TypeContext<ChartRequest>(null, null, PropertyRoute.root(getTypeInfo(cr.Type)), new Binding<ChartRequest>("chartRequest", this.state));
+        var tc = new TypeContext<ChartRequest>(null, null, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(this.props.chartRequest, ""));
 
         return (
             <div>
@@ -151,6 +151,9 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
     }
 
 }
+
+
+
 
 
 

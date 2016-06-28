@@ -282,6 +282,7 @@
     <TypeScriptCompile Include="Cache\Signum.Entities.Cache.ts">
       <DependentUpon>Signum.Entities.Cache.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Chart\Templates\ChartRequestPage.tsx" />
     <TypeScriptCompile Include="Chart\UserChartOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScript.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScriptCode.tsx" />
@@ -299,6 +300,7 @@
     <TypeScriptCompile Include="Chart\Templates\ChartBuilder.tsx" />
     <TypeScriptCompile Include="Chart\Templates\ChartColumn.tsx" />
     <TypeScriptCompile Include="Chart\Templates\ChartUtils.ts" />
+    <TypeScriptCompile Include="Chart\UserChart\UserChartPage.tsx" />
     <TypeScriptCompile Include="Chart\UserChart\UserChart.tsx" />
     <TypeScriptCompile Include="Chart\UserChart\UserChartMenu.tsx" />
     <TypeScriptCompile Include="Chart\UserChart\UserChartClient.tsx" />
@@ -438,6 +440,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="UserAssets\Templates\QueryTokenEntityBuilder.tsx" />
     <TypeScriptCompile Include="UserAssets\UserAssetClient.tsx" />
+    <TypeScriptCompile Include="UserQueries\Templates\UserQueryPage.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryOmniboxProvider.tsx" />
     <TypeScriptCompile Include="UserQueries\UserQueryMenu.tsx" />
     <TypeScriptCompile Include="UserQueries\Templates\UserQuery.tsx" />

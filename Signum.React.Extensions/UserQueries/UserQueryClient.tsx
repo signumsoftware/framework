@@ -19,6 +19,10 @@ import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
+    options.routes.push(<Route path="userQuery">
+        <Route path=":userQueryId(/:entity)" getComponent={ (loc, cb) => require(["./Templates/UserQueryPage"], (Comp) => cb(null, Comp.default)) } />
+    </Route>);
+
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
         if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
             return null;
@@ -32,10 +36,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr, e => {
-                Navigator.API.fetchAndForget(uq)
-                    .then(uq => Converter.toFindOptions(uq, null))
-                    .then(fo => Finder.exploreWindowsOpen(fo, e))
-                    .done();
+                window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
             }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));
     });
 
@@ -43,18 +44,18 @@ export function start(options: { routes: JSX.Element[] }) {
         e => {
             Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
                 if (uq.entityType == null)
-                    return Converter.toFindOptions(uq, null);
+                    window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}`));
                 else
-                    return Navigator.API.fetchAndForget(uq.entityType)
+                    Navigator.API.fetchAndForget(uq.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
-                        .then(lite => lite == null ? null : Converter.toFindOptions(uq, lite));
-            }).then(fo => {
+                        .then(lite => {
+                            if (!lite)
+                                return;
 
-                if (fo == null)
-                    return;
-
-                Finder.exploreWindowsOpen(fo, e);
-            });
+                            window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}/${liteKey(lite)}`));
+                        })
+                        .done();
+            }).done();
         }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) }));
 
     Constructor.registerConstructor<QueryFilterEntity>(QueryFilterEntity, () => QueryFilterEntity.New(f => f.token = QueryTokenEntity.New()));

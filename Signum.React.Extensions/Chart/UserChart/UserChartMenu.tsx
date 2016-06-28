@@ -16,23 +16,13 @@ export interface UserChartMenuProps {
     chartRequestView: ChartRequestView;
 }
 
-export default class UserChartMenu extends React.Component<UserChartMenuProps, { currentUserChart?: Lite<UserChartEntity>, userCharts?: Lite<UserChartEntity>[] }> {
+export default class UserChartMenu extends React.Component<UserChartMenuProps, { currentUserChart?: UserChartEntity, userCharts?: Lite<UserChartEntity>[] }> {
 
-    constructor(props) {
+    constructor(props: UserChartMenuProps) {
         super(props);
-        this.state = { };
+        this.state = { currentUserChart: props.chartRequestView.props.userChart };
     }
 
-    componentWillMount() {
-        
-        var userChart = window.location.search.tryAfter("userChart=");
-        if (userChart) {
-            var uc = parseLite(decodeURIComponent(userChart.tryBefore("&") || userChart)) as Lite<UserChartEntity>;
-            Navigator.API.fillToStrings([uc])
-                .then(() => this.setState({ currentUserChart: uc }))
-                .done();
-        }
-    }
 
     handleSelectedToggle = (isOpen: boolean) => {
 
@@ -41,26 +31,26 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
     }
 
     reloadList(): Promise<void> {
-        return UserChartClient.API.forQuery(this.props.chartRequestView.state.chartRequest.queryKey)
+        return UserChartClient.API.forQuery(this.props.chartRequestView.props.chartRequest.queryKey)
             .then(list => this.setState({ userCharts: list }));
     }
 
 
     handleSelect = (uc: Lite<UserChartEntity>) => {
 
-        Navigator.API.fetchAndForget(uc).then(userQuery => {
-            var oldFindOptions = this.props.chartRequestView.state.chartRequest;
-            UserChartClient.Converter.applyUserChart(oldFindOptions, userQuery, null)
+        Navigator.API.fetchAndForget(uc).then(userChart => {
+            var oldFindOptions = this.props.chartRequestView.props.chartRequest;
+            UserChartClient.Converter.applyUserChart(oldFindOptions, userChart, null)
                 .then(newChartRequest => {
-                    this.props.chartRequestView.setState({ chartRequest: newChartRequest });
-                    this.setState({ currentUserChart: uc,  });
+                    this.props.chartRequestView.props.onChange(newChartRequest);
+                    this.setState({ currentUserChart: userChart, });
                 })
                 .done();
         }).then();
     }
 
     handleEdit = () => {
-        Navigator.API.fetchAndForget(this.state.currentUserChart)
+        Navigator.API.fetchAndForget(toLite(this.state.currentUserChart))
             .then(userQuery => Navigator.navigate(userQuery))
             .then(() => this.reloadList())
             .done();
@@ -69,12 +59,12 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
 
     handleCreate = () => {
 
-        UserChartClient.API.fromChartRequest(this.props.chartRequestView.state.chartRequest)
+        UserChartClient.API.fromChartRequest(this.props.chartRequestView.props.chartRequest)
             .then(userQuery => Navigator.view(userQuery))
             .then(uc => {
                 if (uc && uc.id) {
                     this.reloadList()
-                        .then(() => this.setState({ currentUserChart: toLite(uc) }))
+                        .then(() => this.setState({ currentUserChart: uc}))
                         .done();
                 }
             }).done();
