@@ -371,8 +371,17 @@ export interface IBinding<T> {
 export class Binding<T> implements IBinding<T> {
 
     constructor(
-        public member: string | number,
-        public parentValue: any) {
+        public parentValue: any,
+        public member: string | number) {
+    }
+
+    static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T) {
+        var members = getLambdaMembers(fieldAccessor);
+
+        if (members.length != 1 || members[0].type != LambdaMemberType.Member)
+            throw Error("invalid function 'fieldAccessor'");
+
+        return new Binding<T>(parentValue, members[0].name);
     }
 
     get suffix() {
@@ -477,7 +486,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
     const realParentValue = m[1] == parameter ? parentValue :
         eval(`(function(${parameter}){ return ${newBody};})`)(parentValue);
 
-    return new Binding<T>(m[2], realParentValue);
+    return new Binding<T>(realParentValue, m[2]);
 }
 
 

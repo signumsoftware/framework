@@ -38,7 +38,7 @@ export default class ValueLineModal extends React.Component<ValueLinePopupModal,
     render() {
         var o = this.props.options;
 
-        var ctx = new TypeContext(null, null, null, new Binding("value", o));
+        var ctx = new TypeContext(null, null, null, Binding.create(o, ops => ops.value));
 
         return <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited}>
             <Modal.Header closeButton={true}>
