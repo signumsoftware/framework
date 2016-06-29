@@ -341,11 +341,11 @@ export function conextualMultipleRequestData(options: OperationOptions, newPrefi
 
     if (!liteKey) {
         var items = Finder.SearchControl.getSelectedItems(options.prefix);
-        liteKey = items.map(i=> i.key());
+        liteKey = items.map(i => i.runtimeInfo.key());
+    
     }
 
-    result["liteKeys"] = liteKey.map(i=> i.replace(",","#coma#")).join(",");
-
+    result["liteKeys"] = liteKey.join(",");
     return result; 
 }
 

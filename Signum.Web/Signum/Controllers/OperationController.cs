@@ -143,7 +143,16 @@ namespace Signum.Web.Controllers
 
             foreach (var item in lites)
             {
-                OperationLogic.ServiceExecuteLite(item, operationSymbol);
+                try
+                {
+                    OperationLogic.ServiceExecuteLite(item, operationSymbol);
+
+                }
+                catch (Exception ex)
+                {
+
+                  //  throw;
+                }
             }
 
             return null;
