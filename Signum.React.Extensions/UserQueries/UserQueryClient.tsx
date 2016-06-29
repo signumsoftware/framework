@@ -19,6 +19,7 @@ import * as UserAssetsClient from '../UserAssets/UserAssetClient'
 
 export function start(options: { routes: JSX.Element[] }) {
 
+    UserAssetsClient.start({ routes: options.routes });
     UserAssetsClient.registerExportAssertLink(UserQueryEntity);
 
     options.routes.push(<Route path="userQuery">

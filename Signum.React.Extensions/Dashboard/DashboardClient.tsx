@@ -42,6 +42,7 @@ export const partRenderers : { [typeName:string] : PartRenderer<IPartEntity>} = 
 
 export function start(options: { routes: JSX.Element[] }) {
 
+    UserAssetClient.start({ routes: options.routes });
     UserAssetClient.registerExportAssertLink(DashboardEntity);
 
     Navigator.addSettings(new EntitySettings(DashboardEntity, e => new Promise(resolve => require(['./Admin/Dashboard'], resolve))));

@@ -48,6 +48,7 @@ namespace Signum.Entities.UserAssets
         ExportToXml,
         ImportUserAssets,
         ImportPreview,
+        SelectTheXmlFileWithTheUserAssetsThatYouWantToImport,
         SelectTheEntitiesToOverride,
         SucessfullyImported,
     }

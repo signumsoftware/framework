@@ -37,6 +37,7 @@ export module UserAssetMessage {
     export const ExportToXml = new MessageKey("UserAssetMessage", "ExportToXml");
     export const ImportUserAssets = new MessageKey("UserAssetMessage", "ImportUserAssets");
     export const ImportPreview = new MessageKey("UserAssetMessage", "ImportPreview");
+    export const SelectTheXmlFileWithTheUserAssetsThatYouWantToImport = new MessageKey("UserAssetMessage", "SelectTheXmlFileWithTheUserAssetsThatYouWantToImport");
     export const SelectTheEntitiesToOverride = new MessageKey("UserAssetMessage", "SelectTheEntitiesToOverride");
     export const SucessfullyImported = new MessageKey("UserAssetMessage", "SucessfullyImported");
 }

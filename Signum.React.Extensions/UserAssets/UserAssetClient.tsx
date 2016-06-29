@@ -12,12 +12,24 @@ import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
-import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel }  from './Signum.Entities.UserAssets'
+import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission }  from './Signum.Entities.UserAssets'
+import * as OmniboxClient from '../Omnibox/OmniboxClient'
+
 
 let started = false;
 export function start(options: { routes: JSX.Element[] }) {
     if (started)
         return;
+
+    options.routes.push(<Route path="userAssets">
+        <Route path="import" getComponent={(loc, cb) => require(["./ImportAssetsPage"], (Comp) => cb(null, Comp.default)) }/>
+    </Route>);
+
+    OmniboxClient.registerSpecialAction({
+        allowed: () => AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),
+        key: "ImportUserAssets",
+        onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/userAssets/import"))
+    });
 
 
     started = true;
@@ -25,6 +37,9 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
     QuickLinks.registerQuickLink(type, ctx => {
+        if (!AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
+            return null;
+        
         return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, UserAssetMessage.ExportToXml.niceToString(), e => {
             API.exportAsset(ctx.lite);
         });
@@ -67,7 +82,7 @@ export module API {
     }
 
     export function importAssets(request: FileUploadWithModel): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/userAssets/importPreview/" }, request);
+        return ajaxPost<void>({ url: "~/api/userAssets/import" }, request);
     }
     
     export interface FileUploadWithModel {
