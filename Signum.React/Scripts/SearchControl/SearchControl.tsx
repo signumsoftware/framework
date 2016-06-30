@@ -104,6 +104,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     initialLoad(propsFindOptions: FindOptions) {
 
+        if (!Finder.isFindable(this.props.findOptions.queryName))
+            return;
+
         Finder.getQueryDescription(propsFindOptions.queryName).then(qd => {
 
             this.setState({
@@ -326,6 +329,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         const fo = this.state.findOptions;
         if (!fo)
+            return null;
+
+        if (!Finder.isFindable(fo.queryName))
             return null;
 
         var sfb = this.state.simpleFilterBuilder && React.cloneElement(this.state.simpleFilterBuilder, { ref: (e) => { this.simpleFilterBuilderInstance = e } });
