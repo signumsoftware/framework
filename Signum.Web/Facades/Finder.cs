@@ -119,7 +119,8 @@ namespace Signum.Web
         public static string ViewPrefix = "~/Signum/Views/{0}.cshtml";
 
         public Func<bool> AllowChangeColumns = () => true;
-        
+        public Func<bool> AllowOrder = () => true;
+
         public string SearchPopupControlView = ViewPrefix.FormatWith("SearchPopupControl");
         public string SearchPageView = ViewPrefix.FormatWith("SearchPage");
         public string SearchControlView = ViewPrefix.FormatWith("SearchControl");
