@@ -620,7 +620,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     //SELECTED ROWS
 
     allSelected() {
-        return this.state.resultTable && this.state.resultTable.rows.length && this.state.resultTable.rows.length == this.state.selectedRows.length;
+        return this.state.resultTable != null && this.state.resultTable.rows.length != 0 && this.state.resultTable.rows.length == this.state.selectedRows.length;
     }
 
 

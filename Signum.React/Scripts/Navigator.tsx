@@ -423,7 +423,6 @@ function cloneEntity(obj: any) {
     return JSON.parse(JSON.stringify(obj));
 }
 
-
 export module API {
 
     export function fillToStrings<T extends Entity>(lites: Lite<T>[]): Promise<void> {

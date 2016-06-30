@@ -32,9 +32,9 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
             var c = this.props.children as React.ReactElement<any>;
          
             return (
-                <div {...this.props.htmlProps} className={ errorClass }>
+                <span {...this.props.htmlProps} className={ errorClass }>
                     {c}
-                </div>
+                </span>
             );
         }
 
