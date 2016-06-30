@@ -162,6 +162,9 @@ namespace Signum.Engine
                             Spacing.Simple)),
                      Spacing.Double);
 
+                if (tables != null)
+                    tables.GoAfter = true;
+
                 var tableReplacements = replacements.TryGetC(Replacements.KeyTables);
                 if (tableReplacements != null)
                     replacements[Replacements.KeyTablesInverse] = tableReplacements.Inverse();
