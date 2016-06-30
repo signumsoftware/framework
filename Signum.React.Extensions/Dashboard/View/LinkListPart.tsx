@@ -15,22 +15,23 @@ import * as UserQueryClient from '../../UserQueries/UserQueryClient'
 import { LinkListPartEntity, LinkElementEntity} from '../Signum.Entities.Dashboard'
 
 export default class LinkListPart extends React.Component<{ part: LinkListPartEntity }, void> {
-    
+
     render() {
 
         var entity = this.props.part;
-        
+
         return (
-        
+
             <ul className="sf-cp-link-list">
                 {
                     entity.links.map(mle => mle.element)
-                        .map((link, i) =>                             
-                            <li key={i} >    
-                                <a href={Navigator.currentHistory.createHref(link.link)} 
-                                    title={link.label}>
-                                    {link.label}
-                                    </a>    
+                        .map((le, i) =>
+                            <li key={i} >
+                                <a href={Navigator.currentHistory.createHref(le.link) }
+                                    onClick={le.link.startsWith("~") ? (e => { e.preventDefault(); Navigator.currentHistory.push(le.link) }) : null}
+                                    title={le.label}>
+                                    {le.label}
+                                </a>
                             </li>)
                 }
             </ul>
