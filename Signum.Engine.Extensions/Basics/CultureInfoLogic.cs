@@ -87,6 +87,11 @@ namespace Signum.Engine.Basics
             return CultureInfoToEntity.Value.GetOrThrow(ci.Name);
         }
 
+        public static CultureInfoEntity TryGetCultureInfoEntity(this CultureInfo ci)
+        {
+            return CultureInfoToEntity.Value.TryGetC(ci.Name);
+        }
+
         public static IEnumerable<CultureInfo> ApplicationCultures
         {
             get
