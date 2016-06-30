@@ -325,6 +325,11 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             this.props.onFiltersChanged(this.state.findOptions.filterOptions);
     }
 
+    handleFiltersKeyUp = (e: React.KeyboardEvent) => {
+        if(e.keyCode == 13)
+            this.doSearchPage1();
+    }
+
     render() {
 
         const fo = this.state.findOptions;
@@ -338,13 +343,20 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         return (
             <div className="sf-search-control SF-control-container" ref="container" data-search-count={this.state.searchCount} data-query-key={getQueryKey(fo.queryName)}>
-                {fo.showHeader && (fo.showFilters ? <FilterBuilder
-                    queryDescription={this.state.queryDescription}
-                    filterOptions={fo.filterOptions}
-                    lastToken ={this.state.lastToken}
-                    subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
-                    onTokenChanged= {this.handleFilterTokenChanged}
-                    onFiltersChanged={this.handleFiltersChanged}/> : (sfb && <div className="simple-filter-builder">{sfb}</div>)) }
+                {fo.showHeader && 
+                    <div onKeyUp={this.handleFiltersKeyUp}> 
+                        {
+                            fo.showFilters ? <FilterBuilder
+                            queryDescription={this.state.queryDescription}
+                            filterOptions={fo.filterOptions}
+                            lastToken ={this.state.lastToken}
+                            subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
+                            onTokenChanged= {this.handleFilterTokenChanged}
+                            onFiltersChanged={this.handleFiltersChanged}/> : 
+                            sfb && <div className="simple-filter-builder">{sfb}</div>
+                        }
+                    </div>
+                }
                 {fo.showHeader && this.renderToolBar() }
                 {<MultipliedMessage findOptions={fo} mainType={this.entityColumn().type}/>}
                 {this.state.editingColumn && <ColumnEditor
