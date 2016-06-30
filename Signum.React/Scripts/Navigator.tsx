@@ -365,6 +365,7 @@ function typeIsNavigable(typeName: string): EntityWhen {
 
 
 export interface ViewOptions {
+    title?: string;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
     showOperations?: boolean;
