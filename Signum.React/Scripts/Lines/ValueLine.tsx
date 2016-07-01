@@ -274,14 +274,17 @@ ValueLine.renderers[ValueLineType.Decimal as any] = (vl) => {
 };
 
 function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) {
+    const s = vl.state
 
-    const s = vl.state;
+    var numeralFormat = toNumeralFormat(s.formatText); 
 
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 { ValueLine.withUnit(s.unitText,
-                    <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>{s.ctx.value}</FormControlStatic>) }
+                    <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>
+                        {numbro(s.ctx.value).format(numeralFormat) }
+                    </FormControlStatic>) }
             </FormGroup>
         );
 
@@ -301,7 +304,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
                     value={s.ctx.value}
                     onChange={handleOnChange}
                     validateKey={validateKey}
-                    format={toNumeralFormat(s.formatText) }
+                    format={ numeralFormat}
                     />
             ) }
         </FormGroup>
