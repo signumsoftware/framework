@@ -33,17 +33,23 @@ namespace Signum.Entities.Omnibox
         }
 
         public static List<IOmniboxResultGenerator> Generators = new List<IOmniboxResultGenerator>();
+        
+        static string ident = @"[{n,}(?=)_\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}][\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}\p{Cf}]*";
+
+        static string guid = @"[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}";
+
+        static string symbol = @"[\.\,;!?@#$%&/\\\(\)\^\*\[\]\{\}\-+]";
 
         static readonly Regex tokenizer = new Regex(
-@"(?<entity>[a-zA-Z_][a-zA-Z0-9_]*;(\d+|[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}))|
+$@"(?<entity>{ident};(\d+|{guid}))|
 (?<space>\s+)|
-(?<guid>[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12})|
-(?<ident>[a-zA-Z_][a-zA-Z0-9_]*)|
-(?<ident>\[[a-zA-Z_][a-zA-Z0-9_]*\])|
+(?<guid>{guid})|
+(?<ident>{ident})|
+(?<ident>\[{ident}\])|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
-(?<comparer>(" + FilterValueConverter.OperationRegex + @"))|
-(?<symbol>[\.\,;!?@#$%&/\\\(\)\^\*\[\]\{\}\-+])", 
+(?<comparer>({ FilterValueConverter.OperationRegex}))|
+(?<symbol>{symbol})", 
   RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
 
         public static int MaxResults = 20;
