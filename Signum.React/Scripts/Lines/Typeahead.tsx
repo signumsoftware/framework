@@ -214,8 +214,13 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         const rec = this.input.getBoundingClientRect();
         if (ul) {
             ul.style.top = (rec.height) + "px";
-            ul.style.left = "0px";
-            ul.style.display = "block";
+
+            if (getComputedStyle(ul).direction == "rtl")
+                ul.style.right = "0px";
+            else
+                ul.style.left = "0px";
+
+            ul.style.display = "table";
         }
     }
 
