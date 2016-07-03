@@ -383,18 +383,22 @@ function convertToLite(val: string | Lite<Entity> | Entity): Lite<Entity> {
     throw new Error(`Impossible to convert ${val} to Lite`); 
 }
 
-const queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
+export function clearQueryDescriptionCache() {
+    queryDescriptionCache = {};
+}
+
+let queryDescriptionCache: { [queryKey: string]: QueryDescription } = {};
 export function getQueryDescription(queryName: PseudoType | QueryKey): Promise<QueryDescription> {
-const queryKey = getQueryKey(queryName);
+    const queryKey = getQueryKey(queryName);
 
-if (queryDescriptionCache[queryKey])
-    return Promise.resolve(queryDescriptionCache[queryKey]);
+    if (queryDescriptionCache[queryKey])
+        return Promise.resolve(queryDescriptionCache[queryKey]);
 
-return API.fetchQueryDescription(queryKey).then(qd => {
-            Object.freeze(qd.columns);
-    queryDescriptionCache[queryKey] = Object.freeze(qd);
-            return qd;
-        });
+    return API.fetchQueryDescription(queryKey).then(qd => {
+        Object.freeze(qd.columns);
+        queryDescriptionCache[queryKey] = Object.freeze(qd);
+        return qd;
+    });
 }
 
 export module API {
