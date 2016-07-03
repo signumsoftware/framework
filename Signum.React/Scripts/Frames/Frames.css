@@ -29,12 +29,16 @@
     margin-bottom: 6px;
 }
 
-ul.dropdown-menu li a span.glyphicon {
+ul.dropdown-menu li a span.icon {
     margin-left: -10px;
     margin-right: 10px;
     font-size: 11px;
 }
 
+div.rtl-mode ul.dropdown-menu li a span.icon {
+    margin-left: 10px;
+    margin-right: -10px;
+}
 
 a.expand-window {
     cursor: pointer;

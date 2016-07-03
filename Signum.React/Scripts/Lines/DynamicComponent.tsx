@@ -42,19 +42,17 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
     } = {};
 
     static appropiateComponent = (ctx: TypeContext<any>): React.ReactElement<any> => {
-        var tr = ctx.propertyRoute.typeReference();
-
+        var tr = ctx.propertyRoute.typeReference();        
+    
+        var sc = DynamicComponent.specificComponents[tr.name];
+        if (sc) {
+            var result = sc(ctx);
+            if (result)
+                return result;
+        }
+        
         var tis = getTypeInfos(tr);
         var ti = tis.firstOrNull();
-
-        if (ti) {
-            var sc = DynamicComponent.specificComponents[ti.name];
-            if (sc) {
-                var result = sc(ctx);
-                if (result)
-                    return result;
-            }
-        }
 
         if (tr.isCollection) {
             if (tr.isEmbedded || ti.entityKind == EntityKind.Part || ti.entityKind == EntityKind.SharedPart)
