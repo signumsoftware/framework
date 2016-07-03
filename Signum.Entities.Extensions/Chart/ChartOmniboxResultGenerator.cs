@@ -45,11 +45,13 @@ namespace Signum.Entities.Chart
 
                 foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.GetQueries(), OmniboxParser.Manager.AllowedQuery, pattern, isPascalCase).OrderBy(ma => ma.Distance))
                 {
-                    var queryName = match.Value;
-                    if (OmniboxParser.Manager.AllowedQuery(queryName))
+                    yield return new ChartOmniboxResult
                     {
-                        yield return new ChartOmniboxResult { Distance = keyMatch.Distance + match.Distance, KeywordMatch = keyMatch, QueryName = queryName, QueryNameMatch = match };
-                    }
+                        Distance = keyMatch.Distance + match.Distance,
+                        KeywordMatch = keyMatch,
+                        QueryName = match.Value,
+                        QueryNameMatch = match
+                    };
                 }
             }
         }
