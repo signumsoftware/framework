@@ -15,7 +15,7 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
     }
 
     icon() {
-        return this.coloredGlyphicon("glyphicon-search", "orange");
+        return this.coloredIcon("glyphicon glyphicon-search", "orange");
     }
 
 

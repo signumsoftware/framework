@@ -17,7 +17,7 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
     }
 
     icon() {
-        return this.coloredGlyphicon("glyphicon-map-marker", "green");
+        return this.coloredIcon("glyphicon glyphicon-map-marker", "green");
     }
 
     renderItem(result: MapOmniboxResult): React.ReactChild[] {
