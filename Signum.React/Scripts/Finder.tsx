@@ -611,7 +611,7 @@ export const formatRules: FormatRule[] = [
     {
         name: "Enum",
         isApplicable: col => col.token.filterType == "Enum",
-        formatter: col=> new CellFormatter(cell => getEnumInfo(col.token.type.name, cell).niceName)
+        formatter: col => new CellFormatter(cell => cell == null ? null : getEnumInfo(col.token.type.name, cell).niceName)
     },
     {
         name: "Lite",
