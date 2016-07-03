@@ -105,11 +105,6 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         this.setState({ shown: false });
     }
 
-
-    get input() {
-        return this.refs["input"] as HTMLInputElement;
-    }
-
     focused = false; 
     handleFocus = () => {
         if(!this.focused)
@@ -209,7 +204,12 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
             this.setState({ shown: false });
     }
 
+    input: HTMLInputElement;
+
+
     onMenuLoad = (ul: HTMLUListElement) => {
+        if (!this.input)
+            return;
 
         const rec = this.input.getBoundingClientRect();
         if (ul) {
@@ -222,8 +222,8 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     render() {
         
         return (
-            <span {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead")}>
-                <input type="text" autoComplete="off" ref="input" {...this.props.inputAttrs}
+            <span {...this.props.spanAttrs} className={classes(this.props.spanAttrs && this.props.spanAttrs.className, "sf-typeahead") }>
+                <input type="text" autoComplete="off" ref={inp => this.input = inp} {...this.props.inputAttrs}
                     onFocus={this.handleFocus}
                     onBlur={this.handleBlur}
                     onKeyUp={this.handleKeyUp}
