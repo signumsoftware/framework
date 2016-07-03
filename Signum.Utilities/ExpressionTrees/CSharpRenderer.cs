@@ -167,9 +167,6 @@ namespace Signum.Utilities.ExpressionTrees
                 .Replace("<>h__TransparentIdentifier", "τ");
         }
 
-        static CSharpCodeProvider provider = new CSharpCodeProvider();
-        static CodeGeneratorOptions options = new CodeGeneratorOptions();
-
         public static string Value(object value, Type type, string[] importedNamespaces)
         {
             var expr = GetRightExpressionForValue(value, type, importedNamespaces);
@@ -178,7 +175,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             StringBuilder sb = new StringBuilder();
             using (StringWriter sw = new StringWriter(sb))
-                provider.GenerateCodeFromExpression(expr, sw, options);
+                new CSharpCodeProvider().GenerateCodeFromExpression(expr, sw, new CodeGeneratorOptions());
 
             return sb.ToString();
         }

@@ -2,6 +2,8 @@
 import { Dic } from '../Globals'
 import { Binding, LambdaMemberType, getTypeInfos, EntityKind, KindOfType } from '../Reflection'
 import { ModifiableEntity } from '../Signum.Entities'
+import * as Navigator from '../Navigator'
+import { ViewReplacer } from '../Frames/ReactVisitor'
 import {  ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, EntityCheckboxList } from '../Lines'
 
 export default class DynamicComponent extends React.Component<{ ctx: TypeContext<ModifiableEntity> }, void> {
@@ -10,9 +12,19 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
         var subContexts = this.subContext(this.props.ctx).filter(m => m.propertyRoute.member.name != "Id");
 
-        var components = subContexts.map(ctx => this.appropiateComponent(ctx));
+        var components = subContexts.map(ctx => DynamicComponent.appropiateComponent(ctx));
 
-        return React.createElement("div", null, ...components);
+        var result = React.createElement("div", null, ...components);
+
+        var es = Navigator.getSettings(this.props.ctx.value.Type);
+        
+        if (es && es.viewOverrides && es.viewOverrides.length) {
+            var replacer = new ViewReplacer(result, this.props.ctx);
+            es.viewOverrides.forEach(vo => vo(replacer));
+            return replacer.result;
+        } else {
+            return result;
+        }   
     }
 
 
@@ -25,9 +37,20 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         return result;
     }
 
-    appropiateComponent(ctx: TypeContext<any>): React.ReactElement<any> {
-        var tr = ctx.propertyRoute.typeReference();
+    static specificComponents: {
+        [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any>;
+    } = {};
 
+    static appropiateComponent = (ctx: TypeContext<any>): React.ReactElement<any> => {
+        var tr = ctx.propertyRoute.typeReference();        
+    
+        var sc = DynamicComponent.specificComponents[tr.name];
+        if (sc) {
+            var result = sc(ctx);
+            if (result)
+                return result;
+        }
+        
         var tis = getTypeInfos(tr);
         var ti = tis.firstOrNull();
 

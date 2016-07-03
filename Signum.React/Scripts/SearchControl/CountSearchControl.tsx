@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils } from '../Globals'
 import * as Finder from '../Finder'
@@ -41,6 +41,10 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     }
 
     componentDidMount() {
+
+        if (!Finder.isFindable(this.props.findOptions.queryName))
+            return;
+
         var newFindOptions = expandParentColumn(this.props.findOptions);
 
         Finder.parseTokens(newFindOptions)
@@ -52,6 +56,9 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     }
 
     render() {
+        if (!Finder.isFindable(this.props.findOptions.queryName))
+            return null;
+
         if (this.props.style == "Badge")
             return this.renderBadget();
 

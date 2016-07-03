@@ -98,8 +98,12 @@ export function getComponent<T extends ModifiableEntity>(entity: T): Promise<Rea
         throw new Error(`No settings for '${entity.Type}'`);
     }
 
-    if (settings.getComponent == null)
+    if (settings.getComponent == null) {
+        if (fallbackGetComponent)
+            return fallbackGetComponent(entity).then(a => a.default);
+
         throw new Error(`No getComponent set for settings for '${entity.Type}'`);
+    }
 
     return settings.getComponent(entity).then(a => applyViewOverrides(settings, a.default));
 }
@@ -365,6 +369,7 @@ function typeIsNavigable(typeName: string): EntityWhen {
 
 
 export interface ViewOptions {
+    title?: string;
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
     showOperations?: boolean;
