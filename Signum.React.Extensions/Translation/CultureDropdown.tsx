@@ -8,7 +8,6 @@ import { Entity, Lite, is, toLite } from '../../../Framework/Signum.React/Script
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { reloadTypes } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
 import * as CultureClient from './CultureClient'
 
