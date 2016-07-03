@@ -24,6 +24,7 @@ export interface FileLineProps extends EntityBaseProps {
     dragAndDrop?: boolean;
     dragAndDropMessage?: string;
     fileType?: FileTypeSymbol;
+    accept?: string;
     configuration?: FileLineConfiguration<IFile>;
 }
 
@@ -177,7 +178,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
         return (
             <div className="sf-file-line-new">
-                <input type='file' className='form-control' onChange={this.handleFileChange}/>
+                <input type='file' className='form-control' accept={this.props.accept} onChange={this.handleFileChange}/>
                 {this.state.isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString() }</div> :
                     (this.state.dragAndDrop && <div className={classes("sf-file-drop", this.state.isOver ? "sf-file-drop-over" : null) }
                         onDragOver={this.handleDragOver}

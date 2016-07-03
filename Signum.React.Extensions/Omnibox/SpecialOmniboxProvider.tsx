@@ -15,7 +15,7 @@ export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmnib
     }
 
     icon() {
-        return this.coloredGlyphicon("glyphicon-cog", "limegreen");
+        return this.coloredIcon("glyphicon glyphicon-cog", "limegreen");
     }
 
     renderItem(result: SpecialOmniboxResult): React.ReactChild[] {

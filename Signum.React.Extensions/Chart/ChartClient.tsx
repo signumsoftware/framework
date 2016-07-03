@@ -27,7 +27,7 @@ import * as UserChartClient from './UserChart/UserChartClient'
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(<Route path="chart">
-        <Route path=":queryName" getComponent={ (loc, cb) => require(["./Templates/ChartRequestView"], (Comp) => cb(null, Comp.default)) } />
+        <Route path=":queryName" getComponent={ (loc, cb) => require(["./Templates/ChartRequestPage"], (Comp) => cb(null, Comp.default)) } />
     </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {

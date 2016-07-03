@@ -18,15 +18,15 @@ export default class OperationLog extends React.Component<{ ctx: TypeContext<Ope
     render() {
         
         var ctx = this.props.ctx;
-        var ctx6 = ctx.subCtx({ labelColumns: { sm: 6 } });
+        var ctx6 = ctx.subCtx({ labelColumns: { sm: 3 } });
 
         return (
             <div>
                 <div className="row">
                     <div className="col-sm-6">
-                        <EntityLine ctx={ctx6.subCtx(f => f.origin) }  />
-                        <EntityLine ctx={ctx6.subCtx(f => f.operation) }  />
                         <EntityLine ctx={ctx6.subCtx(f => f.target) }  />
+                        <EntityLine ctx={ctx6.subCtx(f => f.operation) }  />
+                        <EntityLine ctx={ctx6.subCtx(f => f.origin) }  />
                         <EntityLine ctx={ctx6.subCtx(f => f.user) }  />
                     </div>
                     <div className="col-sm-6">

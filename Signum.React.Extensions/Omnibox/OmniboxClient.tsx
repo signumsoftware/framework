@@ -130,8 +130,8 @@ export abstract class OmniboxProvider<T extends OmniboxResult> {
         return <span style={{ color: colorName, lineHeight: "1.6em" }}>{text}</span>;
     }
 
-    coloredGlyphicon(icon: string, colorName: string): React.ReactChild {
-        return <span className={"glyphicon " + icon} style={{ color: colorName, }}/>;
+    coloredIcon(className: string, color: string): React.ReactChild {
+        return <span className={"icon " + className} style={{ color: color, }}/>;
     }
 }
 

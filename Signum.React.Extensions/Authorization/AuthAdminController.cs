@@ -45,7 +45,7 @@ namespace Signum.React.Authorization
         public TypeRulePack GetTypeRules(string roleId)
         {
             BasicPermission.AdminRules.AssertAuthorized();
-            var rules = TypeAuthLogic.GetTypeRules(Lite.ParsePrimaryKey<RoleEntity>(roleId));
+            var rules = TypeAuthLogic.GetTypeRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillToString());
             CleanChanges(rules);
             return rules;
         }
@@ -63,7 +63,7 @@ namespace Signum.React.Authorization
         public OperationRulePack GetOperationRules(string typeName, string roleId)
         {
             BasicPermission.AdminRules.AssertAuthorized();
-            var rules = OperationAuthLogic.GetOperationRules(Lite.ParsePrimaryKey<RoleEntity>(roleId), TypeLogic.GetType(typeName).ToTypeEntity());
+            var rules = OperationAuthLogic.GetOperationRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillToString(), TypeLogic.GetType(typeName).ToTypeEntity());
             CleanChanges(rules);
             return rules;
         }
@@ -81,7 +81,7 @@ namespace Signum.React.Authorization
         public PropertyRulePack GetPropertyRule(string typeName, string roleId)
         {
             BasicPermission.AdminRules.AssertAuthorized();
-            var rules = PropertyAuthLogic.GetPropertyRules(Lite.ParsePrimaryKey<RoleEntity>(roleId), TypeLogic.GetType(typeName).ToTypeEntity());
+            var rules = PropertyAuthLogic.GetPropertyRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillToString(), TypeLogic.GetType(typeName).ToTypeEntity());
             CleanChanges(rules);
             return rules;
         }
@@ -99,7 +99,7 @@ namespace Signum.React.Authorization
         public QueryRulePack GetQueryRules(string typeName, string roleId)
         {
             BasicPermission.AdminRules.AssertAuthorized();
-            var rules = QueryAuthLogic.GetQueryRules(Lite.ParsePrimaryKey<RoleEntity>(roleId), TypeLogic.GetType(typeName).ToTypeEntity());
+            var rules = QueryAuthLogic.GetQueryRules(Lite.ParsePrimaryKey<RoleEntity>(roleId).FillToString(), TypeLogic.GetType(typeName).ToTypeEntity());
             CleanChanges(rules);
             return rules;
         }
