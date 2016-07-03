@@ -5,9 +5,11 @@ import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, Ent
 import { SearchControl }  from '../../../../Framework/Signum.React/Scripts/Search'
 import { getToString, getMixin }  from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { EmailMessageEntity, EmailAddressEntity, EmailRecipientEntity, EmailAttachmentEntity, 
+import { EmailMessageEntity, EmailAddressEntity, EmailRecipientEntity, EmailAttachmentEntity,
     EmailReceptionMixin, EmailFileType } from '../Signum.Entities.Mailing'
 import FileLine from '../../Files/FileLine'
+import IFrameRenderer from './IFrameRenderer'
+import HtmlCodemirror from './HtmlCodemirror'
 
 
 export default class EmailMessage extends React.Component<{ ctx: TypeContext<EmailMessageEntity> }, void> {
@@ -19,42 +21,42 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
         if (e.value.state != "Created")
             e = e.subCtx({ readOnly: true });
 
-        var sc4 = e.subCtx({labelColumns: {sm: 4}});
-        var sc1 = e.subCtx({labelColumns: {sm: 1}});
+        var sc4 = e.subCtx({ labelColumns: { sm: 4 } });
+        var sc1 = e.subCtx({ labelColumns: { sm: 1 } });
 
         return (
             <Tabs id="newsletterTabs">
                 <Tab title={EmailMessageEntity.niceName() }>
-                      <fieldset>
-                    <legend>Properties</legend>
-                    <div className="row">
-                        <div className="col-sm-5">
-                            <ValueLine ctx={sc4.subCtx(f => f.state)}  />
-                            <ValueLine ctx={sc4.subCtx(f => f.sent)}  />
-                            <ValueLine ctx={sc4.subCtx(f => f.bodyHash)}  />
+                    <fieldset>
+                        <legend>Properties</legend>
+                        <div className="row">
+                            <div className="col-sm-5">
+                                <ValueLine ctx={sc4.subCtx(f => f.state) }  />
+                                <ValueLine ctx={sc4.subCtx(f => f.sent) }  />
+                                <ValueLine ctx={sc4.subCtx(f => f.bodyHash) }  />
+                            </div>
+                            <div className="col-sm-7">
+                                <EntityLine ctx={e.subCtx(f => f.template) }  />
+                                <EntityLine ctx={e.subCtx(f => f.package) }  />
+                                <EntityLine ctx={e.subCtx(f => f.exception) }  />
+                            </div>
                         </div>
-                        <div className="col-sm-7">
-                            <EntityLine ctx={e.subCtx(f => f.template)}  />
-                            <EntityLine ctx={e.subCtx(f => f.package)}  />
-                            <EntityLine ctx={e.subCtx(f => f.exception)}  />
-                        </div>
+                    </fieldset>
+
+
+                    <div className="form-inline repeater-inline">
+                        <EntityDetail ctx={e.subCtx(f => f.from) } />
+                        <EntityRepeater ctx={e.subCtx(f => f.recipients) }/>
+                        <EntityRepeater ctx={e.subCtx(f => f.attachments) } getComponent={this.renderAttachment} />
                     </div>
-                </fieldset>
 
-
-                <div className="form-inline repeater-inline">
-                    <EntityDetail ctx={e.subCtx(f => f.from)} />
-                    <EntityRepeater ctx={e.subCtx(f => f.recipients)}/>
-                    <EntityRepeater ctx={e.subCtx(f => f.attachments)} getComponent={this.renderAttachment} />
-                </div>
-                    
-                <EntityLine ctx={sc1.subCtx(f => f.target)}  />
-                <ValueLine ctx={sc1.subCtx(f => f.subject)}  />
-                <ValueLine ctx={sc1.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} />
-                {sc1.value.state == "Created" ? 
-                    <ValueLine ctx={e.subCtx(f => f.body)} valueLineType={ValueLineType.TextArea} valueHtmlProps={{style : { width: "100%", height: "180px" }}}/> :
-                    <iframe  style={{width: "100%"}} dangerouslySetInnerHTML={{ __html: e.value.body}}/>
-                }
+                    <EntityLine ctx={sc1.subCtx(f => f.target) }  />
+                    <ValueLine ctx={sc1.subCtx(f => f.subject) }  />
+                    <ValueLine ctx={sc1.subCtx(f => f.isBodyHtml) } inlineCheckbox={true} onChange={() => this.forceUpdate()} />
+                    {sc1.value.state != "Created" ? <IFrameRenderer html={e.value.body }/> :
+                        sc1.value.isBodyHtml ? <HtmlCodemirror ctx={e.subCtx(f => f.body) } /> :
+                            <ValueLine ctx={e.subCtx(f => f.body) } valueLineType={ValueLineType.TextArea} valueHtmlProps={{ style: { width: "100%", height: "180px" } }} formGroupStyle="SrOnly"/>
+                    }
                 </Tab>
                 {getMixin(e.value, EmailReceptionMixin) && this.renderEmailReceptionMixin() }
             </Tabs>
@@ -64,30 +66,30 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
 
     renderEmailReceptionMixin = () => {
 
-        var ri = this.props.ctx.subCtx(a=>getMixin(a, EmailReceptionMixin).receptionInfo);
+        var ri = this.props.ctx.subCtx(a => getMixin(a, EmailReceptionMixin).receptionInfo);
 
         return <Tab title={EmailReceptionMixin.niceName() }>
             <fieldset>
                 <legend>Properties</legend>
 
-                <EntityLine ctx={ri.subCtx(f => f.reception)}  />
-                <ValueLine ctx={ri.subCtx(f => f.uniqueId)}  />
-                <ValueLine ctx={ri.subCtx(f => f.sentDate)}  />
-                <ValueLine ctx={ri.subCtx(f => f.receivedDate)}  />
-                <ValueLine ctx={ri.subCtx(f => f.deletionDate)}  />
+                <EntityLine ctx={ri.subCtx(f => f.reception) }  />
+                <ValueLine ctx={ri.subCtx(f => f.uniqueId) }  />
+                <ValueLine ctx={ri.subCtx(f => f.sentDate) }  />
+                <ValueLine ctx={ri.subCtx(f => f.receivedDate) }  />
+                <ValueLine ctx={ri.subCtx(f => f.deletionDate) }  />
 
-             </fieldset>
+            </fieldset>
 
-             <pre>{ ri.value.rawContent }</pre>
+            <pre>{ ri.value.rawContent }</pre>
         </Tab>;
     };
 
-    
+
     renderAttachment = (ec: TypeContext<EmailAttachmentEntity>) => {
-        var sc = ec.subCtx({ formGroupStyle: "SrOnly"});
+        var sc = ec.subCtx({ formGroupStyle: "SrOnly" });
         return (
             <div>
-                <FileLine ctx={ec.subCtx(a=>a.file)} remove={false} 
+                <FileLine ctx={ec.subCtx(a => a.file) } remove={false}
                     fileType={EmailFileType.Attachment} />
             </div>
         );

@@ -292,6 +292,8 @@ namespace Signum.Entities.Mailing
         TokenAndEmailAddressCanNotBeSetAtTheSameTime,
         [Description("Token must be a {0}")]
         TokenMustBeA0,
+        ShowPreview,
+        HidePreview
     }
 
     public enum EmailTemplateViewMessage

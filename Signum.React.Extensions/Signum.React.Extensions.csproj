@@ -159,6 +159,7 @@
     <Compile Include="Isolation\IsolationServer.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
+    <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />
     <Compile Include="Map\OperationMap.cs" />
@@ -286,8 +287,8 @@
     <TypeScriptCompile Include="Chart\UserChartOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScript.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScriptCode.tsx" />
-    <TypeScriptCompile Include="Chart\ChartScript\codemirror.d.ts" />
-    <TypeScriptCompile Include="Chart\ChartScript\CodeMirrorComponent.tsx" />
+    <TypeScriptCompile Include="Codemirror\codemirror.d.ts" />
+    <TypeScriptCompile Include="Codemirror\CodeMirrorComponent.tsx" />
     <TypeScriptCompile Include="Chart\ChartOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Chart\Signum.Entities.Chart.ts">
       <DependentUpon>Signum.Entities.Chart.t4s</DependentUpon>
@@ -355,6 +356,7 @@
     <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
       <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Mailing\Templates\HtmlCodemirror.tsx" />
     <TypeScriptCompile Include="Profiler\Heavy\HeavyEntryPage.tsx" />
     <TypeScriptCompile Include="Profiler\ProfilerClient.tsx" />
     <TypeScriptCompile Include="Profiler\Signum.Entities.Profiler.ts">

@@ -1,7 +1,7 @@
 ﻿/// <reference path="codemirror.d.ts" />
 import * as React from 'react'
 import * as CodeMirror from 'codemirror'
-import { Dic, classes } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals'
 
 require("!style!css!codemirror/lib/codemirror.css");
 
@@ -30,8 +30,8 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
         const textareaNode = this.refs["textarea"] as HTMLTextAreaElement;
         this.codeMirror = CodeMirror.fromTextArea(textareaNode, this.props.options);
         this.codeMirror.on('change', this.codemirrorValueChanged);
-        this.codeMirror.on('focus', ()=>this.focusChanged(true));
-        this.codeMirror.on('blur', ()=>this.focusChanged.bind(false));
+        this.codeMirror.on('focus', () => this.focusChanged(true));
+        this.codeMirror.on('blur', () => this.focusChanged.bind(false));
         this._currentCodemirrorValue = this.props.defaultValue || this.props.value || '';
         this.codeMirror.setValue(this._currentCodemirrorValue);
     }

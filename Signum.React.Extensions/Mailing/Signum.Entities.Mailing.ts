@@ -225,6 +225,8 @@ export module EmailTemplateMessage {
     export const TokenOrEmailAddressMustBeSet = new MessageKey("EmailTemplateMessage", "TokenOrEmailAddressMustBeSet");
     export const TokenAndEmailAddressCanNotBeSetAtTheSameTime = new MessageKey("EmailTemplateMessage", "TokenAndEmailAddressCanNotBeSetAtTheSameTime");
     export const TokenMustBeA0 = new MessageKey("EmailTemplateMessage", "TokenMustBeA0");
+    export const ShowPreview = new MessageKey("EmailTemplateMessage", "ShowPreview");
+    export const HidePreview = new MessageKey("EmailTemplateMessage", "HidePreview");
 }
 
 export const EmailTemplateMessageEntity = new Type<EmailTemplateMessageEntity>("EmailTemplateMessageEntity");
