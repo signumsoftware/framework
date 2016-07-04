@@ -85,9 +85,13 @@ namespace Signum.React.Selenium
         }
 
         public bool OkPressed;
-        public void OkWaitClosed()
+        public void OkWaitClosed(bool consumeAlert = false)
         {
             this.OkButton.Find().Click();
+           
+            if (consumeAlert)
+                this.Selenium.ConsumeAlert();
+
             this.WaitNotVisible();
             this.OkPressed = true;
         }
