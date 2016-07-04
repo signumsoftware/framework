@@ -69,7 +69,7 @@ namespace Signum.React.ApiControllers
         }
 
         [Route("api/validateEntity"), HttpPost, ValidateModelFilter]
-        public void FetchAll(ModifiableEntity entity)
+        public void ValidateEntity(ModifiableEntity entity)
         {
             return;
         }
