@@ -140,14 +140,17 @@ namespace Signum.React.Selenium
             Selenium.FindElement(By.Id("password")).SafeSendKeys(password);
             Selenium.FindElement(By.Id("login")).Submit();
 
-            Selenium.WaitElementPresent(By.Id("sfUserDropDown"));
+            //Selenium.WaitElementPresent(By.Id("sfUserDropDown"));  -> Makes Problems with timing / Test DuplicateInsurance Number
+            Selenium.WaitElementVisible(By.Id("sfUserDropDown"));
 
             SetCurrentCulture();
         }
 
         public virtual void SetCurrentCulture()
         {
-            string culture = Selenium.WaitElementPresent(By.Id("culture-dropdown")).GetParent().GetAttribute("data-culture");  
+            //string culture = Selenium.WaitElementPresent(By.Id("culture-dropdown")).GetParent().GetAttribute("data-culture"); -> Makes Problems with timing / Test DuplicateInsurance Number
+            string culture = Selenium.WaitElementVisible(By.Id("culture-dropdown")).GetParent().GetAttribute("data-culture");
+
             Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
         }
     }

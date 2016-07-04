@@ -99,6 +99,11 @@ arguments[0].dispatchEvent(new Event('blur'));";
             throw new InvalidOperationException("Element {0} not found".FormatWith(Route.PropertyString()));
         }
 
+        public bool IsReadonly()
+        {
+            return this.Element.IsElementPresent(By.CssSelector("p.form-control"));
+        }
+
         public WebElementLocator EditableElement
         {
             get { return this.Element.WithLocator(By.CssSelector("input, textarea")); }
