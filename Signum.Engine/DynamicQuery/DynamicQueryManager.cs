@@ -206,7 +206,8 @@ namespace Signum.Engine.DynamicQuery
             return dic.Values.Where(a => a.Inherit || a.SourceType == parentType).Select(v => v.CreateToken(parent));
         }
 
-        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty)
+
+        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName = null)
         {
             if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.Call)
             {
@@ -214,32 +215,13 @@ namespace Signum.Engine.DynamicQuery
 
                 AssertExtensionMethod(mi);
 
-                return RegisterExpression<E, S>(lambdaToMethodOrProperty, () => mi.Name.NiceName(), mi.Name);
+                return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName ?? (() => mi.Name.NiceName()), mi.Name);
             }
             else if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.MemberAccess)
             {
                 var pi = ReflectionTools.GetPropertyInfo(lambdaToMethodOrProperty);
 
-                return RegisterExpression<E, S>(lambdaToMethodOrProperty, () => pi.NiceName(), pi.Name);
-            }
-            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
-        }
-
-        public ExtensionInfo RegisterExpression<E, S>(Expression<Func<E, S>> lambdaToMethodOrProperty, Func<string> niceName)
-        {
-            if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.Call)
-            {
-                var mi = ReflectionTools.GetMethodInfo(lambdaToMethodOrProperty);
-
-                AssertExtensionMethod(mi);
-
-                return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName, mi.Name);
-            }
-            else if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.MemberAccess)
-            {
-                var pi = ReflectionTools.GetPropertyInfo(lambdaToMethodOrProperty);
-
-                return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName, pi.Name);
+                return RegisterExpression<E, S>(lambdaToMethodOrProperty, niceName ?? (() => pi.NiceName()), pi.Name);
             }
             else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
         }
@@ -298,10 +280,10 @@ namespace Signum.Engine.DynamicQuery
             return fi;
         }
 
-        public static FluentInclude<T> WithExpressionFrom<T,F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty, Func<string> niceName = null)
+        public static FluentInclude<T> WithExpressionFrom<T, F>(this FluentInclude<T> fi, DynamicQueryManager dqm, Expression<Func<F, IQueryable<T>>> lambdaToMethodOrProperty, Func<string> niceName = null)
             where T : Entity
         {
-            dqm.RegisterExpression(lambdaToMethodOrProperty, niceName ?? (() => typeof(T).NicePluralName()));
+            dqm.RegisterExpression(lambdaToMethodOrProperty, niceName);
             return fi;
         }
     }
