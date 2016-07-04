@@ -5,9 +5,11 @@ import { openModal, IModalProps } from '../Modals'
 import * as Navigator from '../Navigator'
 import ButtonBar from './ButtonBar'
 
+import { ValidationError } from '../Services'
+import { ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IRenderButtons } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState, entityInfo} from '../Signum.Entities'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer } from '../Reflection'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState, entityInfo, isEntityPack, isLite } from '../Signum.Entities'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isModel } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
 import { needsCanExecute } from '../Operations/EntityOperations'
@@ -19,6 +21,7 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     entityOrPack?: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
     showOperations?: boolean;
+    validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
@@ -119,9 +122,26 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             return;
         }
 
-        this.okClicked = true;
-        this.setState({ show: false });
+        if (!this.props.validate) {
+
+            this.okClicked = true;
+            this.setState({ show: false });
+
+            return;
+        }
+
+        Navigator.API.validateEntity(this.state.pack.entity)
+            .then(() => {
+
+                this.okClicked = true;
+                this.setState({ show: false });
+
+            }, ifError(ValidationError, e => {
+                GraphExplorer.setModelState(this.state.pack.entity, e.modelState, "entity");
+                this.forceUpdate();
+            }));
     }
+
 
     handleCancelClicked = () => {
 
@@ -268,8 +288,16 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             showOperations={options.showOperations}
             requiresSaveOperation={options.requiresSaveOperation}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
+            validate={options.validate == null ? ModalFrame.isModelEntity(entityOrPack) : options.validate }
             title={options.title}
             isNavigate={false}/>);
+    }
+
+    static isModelEntity(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>) {
+        var typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type :
+            isLite(entityOrPack) ? entityOrPack.EntityType : entityOrPack.Type;
+
+        return isModel(typeName);
     }
 
     static openNavigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.NavigateOptions): Promise<void> {

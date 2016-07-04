@@ -373,6 +373,7 @@ export interface ViewOptions {
     propertyRoute?: PropertyRoute;
     readOnly?: boolean;
     showOperations?: boolean;
+    validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
@@ -382,7 +383,7 @@ export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOpt
 export function view<T extends ModifiableEntity>(entity: T, viewOptions?: ViewOptions): Promise<T>;
 export function view<T extends Entity>(entity: Lite<T>, viewOptions?: ViewOptions): Promise<T>
 export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity>;
-    export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity> {
+export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity> {
     return new Promise<ModifiableEntity>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
             NP.default.openView(entityOrPack, viewOptions || {}).then(resolve, reject);
@@ -446,6 +447,7 @@ export module API {
         return ajaxGet<Array<Entity>>({ url: "~/api/fetchAll/" + type.typeName });
     }
 
+
     export function fetchAndRemember<T extends Entity>(lite: Lite<T>): Promise<T> {
         if (lite.entity)
             return Promise.resolve(lite.entity);
@@ -483,6 +485,10 @@ export module API {
     export function fetchCanExecute<T extends Entity>(entity: T): Promise<EntityPack<T>> {
 
         return ajaxPost<EntityPack<Entity>>({ url: "~/api/entityPackEntity" }, entity);
+    }
+
+    export function validateEntity(entity: ModifiableEntity): Promise<void> {
+        return ajaxPost<void>({ url: "~/api/validateEntity" }, entity);
     }
 }
 
