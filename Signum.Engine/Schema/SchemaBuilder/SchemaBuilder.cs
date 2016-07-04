@@ -79,6 +79,19 @@ namespace Signum.Engine.Maps
             return index;
         }
 
+        public Index AddIndex<T>(Expression<Func<T, object>> fields) where T : Entity
+        {
+            var table = Schema.Table<T>();
+
+            IColumn[] columns = Split(table, fields);
+
+            var index = new Index(table, columns);
+
+            AddIndex(index);
+
+            return index;
+        }
+
         public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields)
            where T : Entity
         {
@@ -410,6 +423,12 @@ namespace Signum.Engine.Maps
             public FluentInclude<T> WithUniqueIndex(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where = null)
             {
                 this.SchemaBuilder.AddUniqueIndex<T>(fields, where);
+                return this;
+            }
+
+            public FluentInclude<T> WithIndex(Expression<Func<T, object>> fields)
+            {
+                this.SchemaBuilder.AddIndex<T>(fields);
                 return this;
             }
         }
