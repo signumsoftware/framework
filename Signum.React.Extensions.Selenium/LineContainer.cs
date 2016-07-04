@@ -273,6 +273,8 @@ namespace Signum.React.Selenium
 
             var tab = tabs.FindElements(By.CssSelector("a[role=tab]")).Single(a => a.Text.Contains(title));
 
+            tab.Click();
+
         }
 
         public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
