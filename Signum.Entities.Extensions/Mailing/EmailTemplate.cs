@@ -110,6 +110,7 @@ namespace Signum.Entities.Mailing
         {
             base.PreSaving(ref graphModified);
 
+            Attachments.ForEach(e => e.Template = this);
             Messages.ForEach(e => e.Template = this);
         }
 
@@ -206,6 +207,7 @@ namespace Signum.Entities.Mailing
 
         [Ignore]
         internal EmailTemplateEntity template;
+        [InTypeScript(false)]
         public EmailTemplateEntity Template
         {
             get { return template; }

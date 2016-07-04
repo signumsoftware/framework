@@ -166,7 +166,7 @@ export class EmailTemplateMessageComponent extends React.Component<EmailTemplate
 
     render() {
 
-        var ec = this.props.ctx.subCtx({ labelColumns: { sm: 1 } });
+        var ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
         return (
             <div className="sf-email-template-message">
                 <EntityCombo ctx={ec.subCtx(e => e.cultureInfo) } labelText={EmailTemplateViewMessage.Language.niceToString() } onChange={this.props.invalidate} />

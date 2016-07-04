@@ -11,17 +11,17 @@ import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Entities.Mai
 export default class IFrameRenderer extends React.Component<{ html: string }, void> {
 
     componentDidMount() {
-        this.load();
+        this.load(this.props.html);
     }
 
-    componentWillUpdate() {
-        this.load();
+    componentWillReceiveProps(newProps: { html: string }) {
+        this.load(newProps.html);
     }
 
-    load() {
+    load(html: string) {
         var cd = this.iframe.contentDocument;
 
-        cd.body.innerHTML = this.props.html;
+        cd.body.innerHTML = html;
     }
 
     iframe: HTMLIFrameElement;
@@ -29,7 +29,5 @@ export default class IFrameRenderer extends React.Component<{ html: string }, vo
     render() {
         return (<iframe style={{ width: "100%" }} ref={e => this.iframe= e}></iframe>);
     }
-
-
 }
 

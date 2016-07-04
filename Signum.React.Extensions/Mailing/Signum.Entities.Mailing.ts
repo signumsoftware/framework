@@ -81,7 +81,6 @@ export interface EmailMasterTemplateEntity extends Entities.Entity {
 
 export const EmailMasterTemplateMessageEntity = new Type<EmailMasterTemplateMessageEntity>("EmailMasterTemplateMessageEntity");
 export interface EmailMasterTemplateMessageEntity extends Entities.EmbeddedEntity {
-    masterTemplate: EmailMasterTemplateEntity;
     cultureInfo: ExBasics.CultureInfoEntity;
     text: string;
 }
@@ -231,7 +230,6 @@ export module EmailTemplateMessage {
 
 export const EmailTemplateMessageEntity = new Type<EmailTemplateMessageEntity>("EmailTemplateMessageEntity");
 export interface EmailTemplateMessageEntity extends Entities.EmbeddedEntity {
-    template: EmailTemplateEntity;
     cultureInfo: ExBasics.CultureInfoEntity;
     text: string;
     subject: string;
