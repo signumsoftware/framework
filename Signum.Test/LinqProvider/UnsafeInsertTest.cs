@@ -53,6 +53,25 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
         [TestMethod]
+        public void InsertSimpleParameter()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int value = Database.Query<AlbumEntity>().Select(a => new AlbumEntity
+                {
+                    Author = a.Author,
+                    BonusTrack = a.BonusTrack,
+                    Label = a.Label,
+                    Name = a.Name + "copy",
+                    State = a.State,
+                    Year = a.Year,
+                }.SetReadonly(_ => _.Ticks, a.Ticks)).UnsafeInsert(a => a);
+
+                //tr.Commit();
+            }
+        }
+
+        [TestMethod]
         public void InsertSimpleId()
         {
             using (Transaction tr = new Transaction())
@@ -87,6 +106,24 @@ namespace Signum.Test.LinqProviderUpdateDelete
                     Element = mle.Element,
                     Order = mle.Order,
                 });
+                //tr.Commit();
+            }
+        }
+
+
+        [TestMethod]
+        public void InsertMListParameter()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int value = Database.MListQuery((AlbumEntity a) => a.Songs)
+                    .Select(mle => new MListElement<AlbumEntity, SongEntity>
+                    {
+                        Parent = mle.Parent,
+                        Element = mle.Element,
+                        Order = mle.Order,
+                    })
+                    .UnsafeInsertMList((AlbumEntity a) => a.Songs, mle => mle);
                 //tr.Commit();
             }
         }

@@ -1971,7 +1971,12 @@ namespace Signum.Engine.Linq
                 map.Add(param, pr.Projector);
                 map.Add(toInsertParam, toInsert);
                 var cleanedConstructor = DbQueryProvider.Clean(constructor.Body, false, null);
-                FillColumnAssigments(assignments, toInsertParam, cleanedConstructor);
+                FillColumnAssigments(assignments, toInsertParam, cleanedConstructor, e=>
+                {
+                    var cleaned = DbQueryProvider.Clean(e, true, null);
+                    Expression expression = Visit(cleaned);
+                    return expression;
+                });
                 map.Remove(toInsertParam);
                 map.Remove(param);
             }
@@ -1994,22 +1999,27 @@ namespace Signum.Engine.Linq
         static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => UnsafeEntityExtensions.SetReadonly(null, (Entity a) => a.Id, 1)).GetGenericMethodDefinition();
         static readonly MethodInfo miSetMixin = ReflectionTools.GetMethodInfo(() => ((Entity)null).SetMixin((CorruptMixin m) => m.Corrupt, true)).GetGenericMethodDefinition();
 
-        public void FillColumnAssigments(List<ColumnAssignment> assignments, ParameterExpression toInsert, Expression body)
+        public void FillColumnAssigments(List<ColumnAssignment> assignments, ParameterExpression toInsert, Expression body, Func<Expression, Expression> visitValue)
         {
+            if(body is ParameterExpression)
+            {
+                body = this.map.GetOrThrow((ParameterExpression)body);
+                visitValue = e => e;
+            }
+
             if (body is MethodCallExpression)
             {
                 var mce = (MethodCallExpression)body;
 
                 var prev = mce.Arguments[0];
-                FillColumnAssigments(assignments, toInsert, prev);
+                FillColumnAssigments(assignments, toInsert, prev, visitValue);
 
                 if (mce.Method.IsInstantiationOf(miSetReadonly))
                 {
                     var pi = ReflectionTools.BasePropertyInfo(mce.Arguments[1].StripQuotes());
 
                     Expression colExpression = Visit(Expression.MakeMemberAccess(toInsert, Reflector.FindFieldInfo(body.Type, pi)));
-                    Expression cleaned = DbQueryProvider.Clean(mce.Arguments[2], true, null);
-                    Expression expression = Visit(cleaned);
+                    Expression expression = visitValue(mce.Arguments[2]);
                     assignments.AddRange(AdaptAssign(colExpression, expression));
                 }
                 else if (mce.Method.IsInstantiationOf(miSetMixin))
@@ -2019,11 +2029,9 @@ namespace Signum.Engine.Linq
                     var mi = ReflectionTools.BaseMemberInfo(mce.Arguments[1].StripQuotes());
 
                     Expression mixin = Expression.Call(toInsert, MixinDeclarations.miMixin.MakeGenericMethod(mixinType));
-
-                    Expression cleaned = DbQueryProvider.Clean(mce.Arguments[2], true, null);
-                    Expression expression = Visit(cleaned);
-
+                    
                     Expression colExpression = Visit(Expression.MakeMemberAccess(mixin, mi));
+                    Expression expression = visitValue(mce.Arguments[2]);
                     assignments.AddRange(AdaptAssign(colExpression, expression));
                 }
                 else
@@ -2036,13 +2044,15 @@ namespace Signum.Engine.Linq
                 {
                     MemberAssignment ma = (MemberAssignment)m;
                     Expression colExpression = Visit(Expression.MakeMemberAccess(toInsert, ma.Member));
-                    Expression cleaned = DbQueryProvider.Clean(ma.Expression, true, null);
-                    Expression expression = Visit(cleaned);
+                    Expression expression = visitValue(ma.Expression);
                     return AdaptAssign(colExpression, expression);
                 }));
             }
             else if (body is NewExpression)
             {
+                if (((NewExpression)body).Arguments.Any())
+                    throw InvalidBody();
+
                 return;
             }
             else
@@ -2053,7 +2063,7 @@ namespace Signum.Engine.Linq
 
         private Exception InvalidBody()
         {
-            throw new InvalidOperationException("The only allowed expressions on UnsafeUpdate are: object initializers, calling method SetMixin, or or calling Administrator.SetReadonly");
+            throw new InvalidOperationException("The only allowed expressions on UnsafeInsert are: object initializers, calling method 'SetMixin', or or calling 'Administrator.SetReadonly'");
         }
 
         private ColumnAssignment[] AdaptAssign(Expression colExpression, Expression exp)
