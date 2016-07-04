@@ -299,18 +299,12 @@ namespace Signum.Utilities
 
         static string DecodeCsv(string s)
         {
-            if (s.StartsWith("\""))
+            if (s.StartsWith("\"") && s.EndsWith("\""))
             {
-                if (!s.EndsWith("\""))
-                    throw new FormatException("Cell starts by quotes but not ends with quotes".FormatWith(s));
-
                 string str = s.Substring(1, s.Length - 2).Replace("\"\"", "\"");
 
                 return Regex.Replace(str, "(?<!\r)\n", "\r\n");
             }
-
-            if (s.Contains("\""))
-                throw new FormatException("Cell has quotes ina unexpected position".FormatWith(s));
 
             return s;
         }
