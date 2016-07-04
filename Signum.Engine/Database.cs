@@ -17,6 +17,7 @@ using System.Threading;
 using Signum.Entities.Basics;
 using System.Collections.ObjectModel;
 using Signum.Entities.Internal;
+using System.Diagnostics;
 
 namespace Signum.Engine
 {
@@ -622,6 +623,7 @@ namespace Signum.Engine
         #endregion
 
         #region Query
+        [DebuggerStepThrough]
         public static IQueryable<T> Query<T>()
             where T : Entity
         {
