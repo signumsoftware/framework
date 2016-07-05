@@ -4,10 +4,11 @@ import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Servi
 import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
 import { Entity, Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
+import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { CultureInfoEntity } from '../Basics/Signum.Entities.Basics'
-
+import { reloadTypes } from '../../../Framework/Signum.React/Scripts/Reflection'
 
 export let currentCulture: CultureInfoEntity;
 
@@ -23,6 +24,8 @@ export function loadCurrentCulture() : Promise<void> {
 
 export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>) {
     API.setCurrentCulture(newCulture)
+        .then(() => reloadTypes())
+        .then(() => Finder.clearQueryDescriptionCache())
         .then(() => loadCurrentCulture())
         .done();
 }

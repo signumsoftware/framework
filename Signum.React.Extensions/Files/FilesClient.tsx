@@ -1,4 +1,4 @@
-﻿
+
 import * as React from 'react'
 import { Route } from 'react-router'
 
@@ -9,11 +9,22 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
-import { FileEntity } from './Signum.Entities.Files'
+import { Type } from '../../../Framework/Signum.React/Scripts/Reflection'
+import DynamicComponent from '../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'
+import { FileEntity, FilePathEntity, EmbeddedFileEntity, EmbeddedFilePathEntity, IFile } from './Signum.Entities.Files'
+import FileLine from './FileLine'
 import CellFormatter = Finder.CellFormatter;
-import { Lite, Entity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
+import { Lite, Entity, ModifiableEntity } from "../../../Framework/Signum.React/Scripts/Signum.Entities";
 
 export function start(options: { routes: JSX.Element[] }) {
+
+    registerAutoFileLine(FileEntity);
+    registerAutoFileLine(EmbeddedFileEntity);
+
+    //Requires FileType
+    //registerAutoFileLine(FilePathEntity);
+    //registerAutoFileLine(EmbeddedFilePathEntity);
+
 
     Finder.formatRules.push({
         name: "Lite",
@@ -28,6 +39,16 @@ export function start(options: { routes: JSX.Element[] }) {
         formatter: col => new CellFormatter((cell: WebImage) =>
             !cell ? null : <img src={cell.FullWebPath}/>)
     });
+}
+
+
+function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
+    DynamicComponent.specificComponents[type.typeName] = ctx => {
+        var tr = ctx.propertyRoute.typeReference();
+        if (tr.isCollection)
+            return null;
+        return <FileLine ctx={ctx}/>;
+    };
 }
 
 

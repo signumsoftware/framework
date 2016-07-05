@@ -9,7 +9,7 @@ import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Ref
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import CodeMirrorComponent from './CodeMirrorComponent'
+import CodeMirrorComponent from '../../Codemirror/CodeMirrorComponent'
 import * as CodeMirror from 'codemirror'
 
 require("!style!css!../Chart.css");

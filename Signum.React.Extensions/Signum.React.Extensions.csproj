@@ -68,8 +68,8 @@
       <Private>True</Private>
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Activities" />
@@ -159,6 +159,7 @@
     <Compile Include="Isolation\IsolationServer.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
+    <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />
     <Compile Include="Map\OperationMap.cs" />
@@ -286,8 +287,8 @@
     <TypeScriptCompile Include="Chart\UserChartOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScript.tsx" />
     <TypeScriptCompile Include="Chart\ChartScript\ChartScriptCode.tsx" />
-    <TypeScriptCompile Include="Chart\ChartScript\codemirror.d.ts" />
-    <TypeScriptCompile Include="Chart\ChartScript\CodeMirrorComponent.tsx" />
+    <TypeScriptCompile Include="Codemirror\codemirror.d.ts" />
+    <TypeScriptCompile Include="Codemirror\CodeMirrorComponent.tsx" />
     <TypeScriptCompile Include="Chart\ChartOmniboxProvider.tsx" />
     <TypeScriptCompile Include="Chart\Signum.Entities.Chart.ts">
       <DependentUpon>Signum.Entities.Chart.t4s</DependentUpon>
@@ -355,6 +356,7 @@
     <TypeScriptCompile Include="Mailing\Signum.Entities.Mailing.ts">
       <DependentUpon>Signum.Entities.Mailing.t4s</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Mailing\Templates\HtmlCodemirror.tsx" />
     <TypeScriptCompile Include="Profiler\Heavy\HeavyEntryPage.tsx" />
     <TypeScriptCompile Include="Profiler\ProfilerClient.tsx" />
     <TypeScriptCompile Include="Profiler\Signum.Entities.Profiler.ts">

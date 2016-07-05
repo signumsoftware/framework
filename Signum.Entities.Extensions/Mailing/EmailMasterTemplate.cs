@@ -23,7 +23,6 @@ namespace Signum.Entities.Mailing
         [NotifyCollectionChanged, NotNullable]
         public MList<EmailMasterTemplateMessageEntity> Messages { get; set; } = new MList<EmailMasterTemplateMessageEntity>();
 
-        [Ignore]
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
         static Expression<Func<EmailMasterTemplateEntity, string>> ToStringExpression = e => e.Name;
@@ -40,7 +39,7 @@ namespace Signum.Entities.Mailing
                 if (Messages == null || !Messages.Any())
                     return EmailTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();
 
-                if (Messages.GroupCount(m => m.CultureInfo).Any(c => c.Value > 1))
+                if (Messages.GroupBy(m => m.CultureInfo).Any(g => g.Count() > 1))
                     return EmailTemplateMessage.TheresMoreThanOneMessageForTheSameLanguage.NiceToString();
             }
 
@@ -88,6 +87,7 @@ namespace Signum.Entities.Mailing
 
         [Ignore]
         internal EmailMasterTemplateEntity masterTemplate;
+        [InTypeScript(false)]
         public EmailMasterTemplateEntity MasterTemplate
         {
             get { return masterTemplate; }
@@ -111,7 +111,7 @@ namespace Signum.Entities.Mailing
         {
             if (pi.Name == nameof(Text) && !EmailMasterTemplateEntity.MasterTemplateContentRegex.IsMatch(Text))
             {
-                throw new ApplicationException(EmailTemplateMessage.TheTextMustContain0IndicatingReplacementPoint.NiceToString().FormatWith("@[content]"));
+                return EmailTemplateMessage.TheTextMustContain0IndicatingReplacementPoint.NiceToString().FormatWith("@[content]");
             }
 
             return base.PropertyValidation(pi);

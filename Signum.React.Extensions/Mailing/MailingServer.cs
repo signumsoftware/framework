@@ -37,6 +37,9 @@ namespace Signum.React.Mailing
             {
                 var qd = DynamicQueryManager.Current.QueryDescription(ue.Query.ToQueryName());
                 ue.ParseData(qd);
+                
+                ue.Attachments.ForEach(e => e.Template = ue);
+                ue.Messages.ForEach(e => e.Template = ue);
             });
         }
     }
