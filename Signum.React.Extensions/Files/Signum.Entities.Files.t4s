@@ -1,17 +1,4 @@
-﻿//Assembly: Signum.Entities.Extensions.dll
-
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
-
-//Entities.Assembly: Signum.Entities.dll
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-//Basics.Assembly: Signum.Entities.dll
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
-
-//Patterns.Assembly: Signum.Entities.dll
-import * as Patterns from '../../../Framework/Signum.React/Scripts/Signum.Entities.Patterns' 
-
-
+﻿
 export interface IFile
 {
     binaryFile: string;

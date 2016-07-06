@@ -1,19 +1,14 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
-
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
-
-import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets' 
-
-import * as Chart from '../Chart/Signum.Entities.Chart' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
+import * as Chart from '../Chart/Signum.Entities.Chart'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export const CountSearchControlPartEntity = new Type<CountSearchControlPartEntity>("CountSearchControlPart");
@@ -117,4 +112,5 @@ export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
     allowSelection: boolean;
     requiresTitle: boolean;
 }
+
 

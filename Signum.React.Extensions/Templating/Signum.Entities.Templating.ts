@@ -1,9 +1,9 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 
 
 export module TemplateTokenMessage {
@@ -14,4 +14,5 @@ export module TemplateTokenMessage {
     export const YouCanOnlyAddForeachBlocksWithCollectionFields = new MessageKey("TemplateTokenMessage", "YouCanOnlyAddForeachBlocksWithCollectionFields");
     export const YouCannotAddBlocksWithAllOrAny = new MessageKey("TemplateTokenMessage", "YouCannotAddBlocksWithAllOrAny");
 }
+
 

@@ -1,19 +1,13 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
-
-import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets' 
-
-import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
-
-import * as DynamicQuery from '../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as DynamicQuery from '../../../Framework/Signum.React/Scripts/Signum.Entities.DynamicQuery'
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export const QueryColumnEntity = new Type<QueryColumnEntity>("QueryColumnEntity");
@@ -76,4 +70,5 @@ export module UserQueryOperation {
 export module UserQueryPermission {
     export const ViewUserQuery : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "UserQueryPermission.ViewUserQuery" });
 }
+
 

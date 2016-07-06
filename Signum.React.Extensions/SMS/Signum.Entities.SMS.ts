@@ -1,15 +1,12 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as ExBasics from '../Basics/Signum.Entities.Basics' 
-
-import * as Processes from '../Processes/Signum.Entities.Processes' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Signum from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Basics from '../Basics/Signum.Entities.Basics'
+import * as Processes from '../Processes/Signum.Entities.Processes'
 
 
 export const MessageLengthExceeded = new EnumType<MessageLengthExceeded>("MessageLengthExceeded");
@@ -39,7 +36,7 @@ export module SMSCharactersMessage {
 
 export const SMSConfigurationEntity = new Type<SMSConfigurationEntity>("SMSConfigurationEntity");
 export interface SMSConfigurationEntity extends Entities.EmbeddedEntity {
-    defaultCulture: ExBasics.CultureInfoEntity;
+    defaultCulture: Basics.CultureInfoEntity;
 }
 
 export const SMSMessageEntity = new Type<SMSMessageEntity>("SMSMessage");
@@ -57,7 +54,7 @@ export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLin
     updatePackage: Entities.Lite<SMSUpdatePackageEntity>;
     updatePackageProcessed: boolean;
     referred: Entities.Lite<Entities.Entity>;
-    exception: Entities.Lite<Basics.ExceptionEntity>;
+    exception: Entities.Lite<Signum.ExceptionEntity>;
 }
 
 export module SMSMessageOperation {
@@ -96,7 +93,7 @@ export interface SMSTemplateEntity extends Entities.Entity {
     name: string;
     certified: boolean;
     editableMessage: boolean;
-    associatedType: Basics.TypeEntity;
+    associatedType: Signum.TypeEntity;
     messages: Entities.MList<SMSTemplateMessageEntity>;
     from: string;
     messageLengthExceeded: MessageLengthExceeded;
@@ -117,7 +114,7 @@ export module SMSTemplateMessage {
 export const SMSTemplateMessageEntity = new Type<SMSTemplateMessageEntity>("SMSTemplateMessageEntity");
 export interface SMSTemplateMessageEntity extends Entities.EmbeddedEntity {
     template: SMSTemplateEntity;
-    cultureInfo: ExBasics.CultureInfoEntity;
+    cultureInfo: Basics.CultureInfoEntity;
     message: string;
 }
 
@@ -129,4 +126,5 @@ export module SMSTemplateOperation {
 export const SMSUpdatePackageEntity = new Type<SMSUpdatePackageEntity>("SMSUpdatePackage");
 export interface SMSUpdatePackageEntity extends SMSPackageEntity {
 }
+
 

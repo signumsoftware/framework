@@ -1,9 +1,10 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+
 
 export module OmniboxMessage {
     export const No = new MessageKey("OmniboxMessage", "No");
@@ -24,4 +25,5 @@ export module OmniboxMessage {
     export const ComplementWordsRegex = new MessageKey("OmniboxMessage", "ComplementWordsRegex");
     export const Search = new MessageKey("OmniboxMessage", "Search");
 }
+
 

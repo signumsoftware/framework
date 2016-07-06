@@ -1,25 +1,18 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Signum from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Basics from '../Basics/Signum.Entities.Basics'
+import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler'
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
+import * as Processes from '../Processes/Signum.Entities.Processes'
+import * as Files from '../Files/Signum.Entities.Files'
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
-import * as Processes from '../Processes/Signum.Entities.Processes' 
-
-import * as Scheduler from '../Scheduler/Signum.Entities.Scheduler' 
-
-import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets' 
-
-import * as ExBasics from '../Basics/Signum.Entities.Basics' 
-
-import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
-
-import * as Files from '../Files/Signum.Entities.Files' 
-
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
 
 export module AsyncEmailSenderPermission {
@@ -58,7 +51,7 @@ export type EmailAttachmentType =
 
 export const EmailConfigurationEntity = new Type<EmailConfigurationEntity>("EmailConfigurationEntity");
 export interface EmailConfigurationEntity extends Entities.EmbeddedEntity {
-    defaultCulture: ExBasics.CultureInfoEntity;
+    defaultCulture: Basics.CultureInfoEntity;
     urlLeft: string;
     sendEmails: boolean;
     reciveEmails: boolean;
@@ -81,7 +74,7 @@ export interface EmailMasterTemplateEntity extends Entities.Entity {
 
 export const EmailMasterTemplateMessageEntity = new Type<EmailMasterTemplateMessageEntity>("EmailMasterTemplateMessageEntity");
 export interface EmailMasterTemplateMessageEntity extends Entities.EmbeddedEntity {
-    cultureInfo: ExBasics.CultureInfoEntity;
+    cultureInfo: Basics.CultureInfoEntity;
     text: string;
 }
 
@@ -103,7 +96,7 @@ export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessL
     body: string;
     bodyHash: string;
     isBodyHtml: boolean;
-    exception: Entities.Lite<Basics.ExceptionEntity>;
+    exception: Entities.Lite<Signum.ExceptionEntity>;
     state: EmailMessageState;
     uniqueIdentifier: string;
     editableMessage: boolean;
@@ -197,7 +190,7 @@ export interface EmailTemplateEntity extends Entities.Entity {
     name: string;
     editableMessage: boolean;
     disableAuthorization: boolean;
-    query: Basics.QueryEntity;
+    query: Signum.QueryEntity;
     systemEmail: SystemEmailEntity;
     sendDifferentMessages: boolean;
     from: EmailTemplateContactEntity;
@@ -230,7 +223,7 @@ export module EmailTemplateMessage {
 
 export const EmailTemplateMessageEntity = new Type<EmailTemplateMessageEntity>("EmailTemplateMessageEntity");
 export interface EmailTemplateMessageEntity extends Entities.EmbeddedEntity {
-    cultureInfo: ExBasics.CultureInfoEntity;
+    cultureInfo: Basics.CultureInfoEntity;
     text: string;
     subject: string;
 }
@@ -277,7 +270,7 @@ export interface NewsletterEntity extends Entities.Entity, Processes.IProcessDat
     displayFrom: string;
     subject: string;
     text: string;
-    query: Basics.QueryEntity;
+    query: Signum.QueryEntity;
 }
 
 export module NewsletterOperation {
@@ -326,13 +319,13 @@ export interface Pop3ReceptionEntity extends Entities.Entity {
     startDate: string;
     endDate: string;
     newEmails: number;
-    exception: Entities.Lite<Basics.ExceptionEntity>;
+    exception: Entities.Lite<Signum.ExceptionEntity>;
 }
 
 export const Pop3ReceptionExceptionEntity = new Type<Pop3ReceptionExceptionEntity>("Pop3ReceptionException");
 export interface Pop3ReceptionExceptionEntity extends Entities.Entity {
     reception: Entities.Lite<Pop3ReceptionEntity>;
-    exception: Entities.Lite<Basics.ExceptionEntity>;
+    exception: Entities.Lite<Signum.ExceptionEntity>;
 }
 
 export const SendEmailTaskEntity = new Type<SendEmailTaskEntity>("SendEmailTask");
@@ -392,4 +385,5 @@ export namespace External {
         "PickupDirectoryFromIis";
     
 }
+
 

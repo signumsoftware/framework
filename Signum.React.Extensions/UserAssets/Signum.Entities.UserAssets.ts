@@ -1,13 +1,12 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
-import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
 import { QueryToken } from '../../../Framework/Signum.React/Scripts/FindOptions' 
 
@@ -59,4 +58,5 @@ export const UserAssetPreviewModel = new Type<UserAssetPreviewModel>("UserAssetP
 export interface UserAssetPreviewModel extends Entities.ModelEntity {
     lines: Entities.MList<UserAssetPreviewLine>;
 }
+
 

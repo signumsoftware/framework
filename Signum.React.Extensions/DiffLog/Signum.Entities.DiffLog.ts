@@ -1,9 +1,10 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+
 
 export module DiffLogMessage {
     export const PreviousLog = new MessageKey("DiffLogMessage", "PreviousLog");
@@ -26,4 +27,5 @@ export interface DiffLogMixin extends Entities.MixinEntity {
     finalState: string;
     cleaned: boolean;
 }
+
 

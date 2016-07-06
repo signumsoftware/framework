@@ -1,13 +1,10 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
-
-import * as Patterns from '../../../Framework/Signum.React/Scripts/Signum.Entities.Patterns' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Patterns from '../../../Framework/Signum.React/Scripts/Signum.Entities.Patterns'
 
 
 export interface IFile
@@ -89,4 +86,5 @@ export module FilePathOperation {
 export const FileTypeSymbol = new Type<FileTypeSymbol>("FileType");
 export interface FileTypeSymbol extends Entities.Symbol {
 }
+
 

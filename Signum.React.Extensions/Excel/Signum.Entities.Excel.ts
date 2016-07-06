@@ -1,17 +1,13 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as Files from '../Files/Signum.Entities.Files' 
-
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
-
-import * as Mailing from '../Mailing/Signum.Entities.Mailing' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Mailing from '../Mailing/Signum.Entities.Mailing'
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
+import * as Files from '../Files/Signum.Entities.Files'
 
 
 export const ExcelAttachmentEntity = new Type<ExcelAttachmentEntity>("ExcelAttachment");
@@ -48,4 +44,5 @@ export module ExcelReportOperation {
     export const Save : Entities.ExecuteSymbol<ExcelReportEntity> = registerSymbol({ Type: "Operation", key: "ExcelReportOperation.Save" });
     export const Delete : Entities.DeleteSymbol<ExcelReportEntity> = registerSymbol({ Type: "Operation", key: "ExcelReportOperation.Delete" });
 }
+
 

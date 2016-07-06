@@ -1,9 +1,10 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+
 
 export const IsolationEntity = new Type<IsolationEntity>("Isolation");
 export interface IsolationEntity extends Entities.Entity {
@@ -24,4 +25,5 @@ export interface IsolationMixin extends Entities.MixinEntity {
 export module IsolationOperation {
     export const Save : Entities.ExecuteSymbol<IsolationEntity> = registerSymbol({ Type: "Operation", key: "IsolationOperation.Save" });
 }
+
 

@@ -1,18 +1,13 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as ExBasics from '../Basics/Signum.Entities.Basics' 
-
-import * as Files from '../Files/Signum.Entities.Files' 
-
-import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
-
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Signum from '../Basics/Signum.Entities.Basics'
+import * as Files from '../Files/Signum.Entities.Files'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export const SystemWordTemplateEntity = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
@@ -29,7 +24,7 @@ export interface WordTemplateEntity extends Entities.Entity {
     name: string;
     query: Basics.QueryEntity;
     systemWordTemplate: SystemWordTemplateEntity;
-    culture: ExBasics.CultureInfoEntity;
+    culture: Signum.CultureInfoEntity;
     active: boolean;
     startDate: string;
     endDate: string;
@@ -60,4 +55,5 @@ export module WordTemplatePermission {
 export const WordTransformerSymbol = new Type<WordTransformerSymbol>("WordTransformer");
 export interface WordTransformerSymbol extends Entities.Symbol {
 }
+
 
