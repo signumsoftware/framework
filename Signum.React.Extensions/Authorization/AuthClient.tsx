@@ -254,11 +254,9 @@ export function autoLogin(): Promise<UserEntity> {
 export function logout() {
 
     Api.logout().then(() => {
-
+        onLogout();
         setCurrentUser(null);
         setAuthToken(null);
-
-        onLogout();
     }).done();
 }
 
@@ -299,7 +297,7 @@ export module Api {
     }
 
     export function loginFromCookie(): Promise<LoginResponse> {
-        return ajaxPost<LoginResponse>({ url: "~/api/auth/loginFromCookie" }, null);
+        return ajaxPost<LoginResponse>({ url: "~/api/auth/loginFromCookie", avoidAuthToken: true }, null);
     }
 
     export function refreshToken(oldToken: string): Promise<LoginResponse> {
