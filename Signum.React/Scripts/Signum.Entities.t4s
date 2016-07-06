@@ -1,8 +1,4 @@
-﻿//Assembly: Signum.Entities.dll
-
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection' 
-
-export interface ModifiableEntity {
+﻿export interface ModifiableEntity {
     Type: string;
     toStr: string;	
     modified : boolean;
@@ -49,8 +45,6 @@ export interface EntityPack<T extends ModifiableEntity> {
     entity: T
     canExecute: { [key: string]: string };
 }
-
-
 
 //The interfaces add no real members, they are there just to force TS structural typing
 

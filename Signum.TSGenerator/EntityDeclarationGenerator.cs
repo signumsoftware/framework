@@ -29,16 +29,23 @@ namespace Signum.TSGenerator
 
         static TypeCache Cache;
 
-        public static string Process(StringBuilder sb, Options options)
+        public static string Process(Options options)
         {
-            var assembly = Assembly.LoadFrom(options.AssemblyFullPath);
-            options.References.ForEach(r => Assembly.LoadFrom(r.AssemblyFullPath));
+            StringBuilder sb = new StringBuilder();
+
+            var assembly = Assembly.LoadFrom(options.CurrentAssemblyReference.AssemblyFullPath);
+            options.AssemblyReferences.Values.ToList().ForEach(r => Assembly.LoadFrom(r.AssemblyFullPath));
 
             var entities = AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == "Signum.Entities");
-
+            
             Cache = new TypeCache(entities);
 
-            var exportedTypes = assembly.ExportedTypes.Where(a => a.Namespace == options.Namespace).ToList();
+            GetNamespaceReference(options, Cache.ModifiableEntity);
+
+            var exportedTypes = assembly.ExportedTypes.Where(a => a.Namespace == options.CurrentNamespace).ToList();
+            if (exportedTypes.Count == 0)
+                throw new InvalidOperationException($"Assembly '{options.CurrentAssembly}' has not types in namespace '{options.CurrentNamespace}'");
+
             var imported = assembly.GetCustomAttributes(Cache.ImportInTypeScriptAttribute).Select(a => (Type)((dynamic)a).Type).ToList();
             var importedMessage = imported.Where(a => a.Name.EndsWith("Message")).ToList();
             var importedEnums = imported.Except(importedMessage).ToList();
@@ -79,7 +86,7 @@ namespace Signum.TSGenerator
                                  }).ToList();
 
             var enumResult = (from type in exportedTypes
-                              where type.IsEnum && (type.InTypeScript() ??  usedEnums.Contains(type))
+                              where type.IsEnum && (type.InTypeScript() ?? usedEnums.Contains(type))
                               select new
                               {
                                   ns = type.Namespace,
@@ -90,7 +97,7 @@ namespace Signum.TSGenerator
             var extrnalEnums = (from type in usedEnums.Where(options.IsExternal).Concat(importedEnums)
                                 select new
                                 {
-                                    ns = options.Namespace + ".External",
+                                    ns = options.CurrentNamespace + ".External",
                                     type,
                                     text = EnumInTypeScript(type, options),
                                 }).ToList();
@@ -98,10 +105,10 @@ namespace Signum.TSGenerator
             var externalMessages = (from type in importedMessage
                                     select new
                                     {
-                                        ns = options.Namespace + ".External",
+                                        ns = options.CurrentNamespace + ".External",
                                         type,
                                         text = MessageInTypeScript(type, options),
-                                    }).ToList(); 
+                                    }).ToList();
 
             var messageResults = (from type in exportedTypes
                                   where type.IsEnum && type.Name.EndsWith("Message")
@@ -135,7 +142,7 @@ namespace Signum.TSGenerator
 
             foreach (var ns in namespaces)
             {
-                var key = RemoveNamespace(ns.Key.ToString(), options.Namespace);
+                var key = RemoveNamespace(ns.Key.ToString(), options.CurrentNamespace);
 
                 if (key.Length == 0)
                 {
@@ -159,10 +166,51 @@ namespace Signum.TSGenerator
                     sb.AppendLine();
                 }
             }
+            
+            var code = sb.ToString();
+
+            return WriteFillFile(options, code);
+        }
+
+        private static string WriteFillFile(Options options, string code)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(@"//////////////////////////////////");
+            sb.AppendLine(@"//Auto-generated. Do NOT modify!//");
+            sb.AppendLine(@"//////////////////////////////////");
+            sb.AppendLine();
+            var path = options.AssemblyReferences["Signum.Entities"].NamespacesReferences["Signum.Entities"].Path.Replace("Signum.Entities.ts", "Reflection.ts");
+            sb.AppendLine($"import {{ MessageKey, QueryKey, Type, EnumType, registerSymbol }} from '{RelativePath(path, options.TemplateFileName)}'");
+            
+            foreach (var a in options.AssemblyReferences.Values)
+            {
+                foreach (var ns in a.NamespacesReferences.Values)
+                {
+                    sb.AppendLine($"import * as {ns.VariableName} from '{RelativePath(ns.Path, options.TemplateFileName)}'");
+                }
+            }
+            sb.AppendLine();
+            sb.AppendLine(File.ReadAllText(options.TemplateFileName));
+
+            sb.AppendLine(code);
 
             return sb.ToString();
         }
 
+        private static string RelativePath(string path, string fileName)
+        {
+            Uri pathUri = new Uri(path.RemoveSuffix(".ts"), UriKind.Absolute);
+            Uri fileNameUri = new Uri(fileName, UriKind.Absolute);
+
+            string relPath = fileNameUri.MakeRelativeUri(pathUri).ToString();
+
+            var result = relPath.Replace(@"\", "/");
+
+            if (!result.StartsWith(".."))
+                return "./" + result;
+
+            return result;
+        }
 
         private static string EnumInTypeScript(Type type, Options options)
         {
@@ -382,18 +430,68 @@ namespace Signum.TSGenerator
             }
             else
             {
-                var assembly = options.References.SingleOrDefault(r => r.AssemblyName == type.Assembly.GetName().Name && type.Namespace == r.Namespace);
-
-                if (assembly == null)
+                var nsReference = GetNamespaceReference(options, type);
+                if (nsReference == null)
                 {
                     if (type.GetInterfaces().Contains(typeof(IEnumerable)))
                         return "Array";
 
-                    throw new InvalidOperationException($"{errorContext}:  Type {type.ToString()} is declared in the assembly '{type.Assembly.GetName().Name}.dll' and namespace '{type.Namespace}', but there is no reference to them.");
+                    throw new InvalidOperationException($"{errorContext}:  Type {type.ToString()} is declared in the assembly '{type.Assembly.GetName().Name}.dll', but no React directory for it is found.");
                 }
 
-                return CombineNamespace(assembly.VariableName, BaseTypeScriptName(type));
+                return CombineNamespace(nsReference.VariableName, BaseTypeScriptName(type));
             }
+        }
+
+        public static NamespaceTSReference GetNamespaceReference(Options options, Type type)
+        {
+            AssemblyReference assemblyReference;
+            options.AssemblyReferences.TryGetValue(type.Assembly.GetName().Name, out assemblyReference);
+            if (assemblyReference == null)
+                return null;
+
+            NamespaceTSReference nsReference;
+            if (!assemblyReference.NamespacesReferences.TryGetValue(type.Namespace, out nsReference))
+            {
+                nsReference = new NamespaceTSReference
+                {
+                    Namespace = type.Namespace,
+                    Path = FindDeclarationsFile(assemblyReference.ReactDirectory, type.Namespace),
+                    VariableName = GetVariableName(options, type.Namespace.Split('.'))
+                };
+
+                assemblyReference.NamespacesReferences.Add(nsReference.Namespace, nsReference);
+            }
+
+            return nsReference;
+        }
+
+        private static string GetVariableName(Options options, string[] nameParts)
+        {
+            var list = options.AssemblyReferences.Values.SelectMany(a => a.NamespacesReferences.Values.Select(ns => ns.VariableName));
+
+            for (int i = 1; ; i++)
+            {
+                foreach (var item in nameParts.Reverse())
+                {
+                    var candidate = item + (i == 1 ? "" : i.ToString());
+                    if (!list.Contains(candidate))
+                        return candidate;
+                }
+            }
+        }
+
+        private static string FindDeclarationsFile(string reactDirectory, string @namespace)
+        {
+            var file = @namespace + ".ts";
+
+            var result = new DirectoryInfo(reactDirectory).EnumerateFiles(file, SearchOption.AllDirectories).Select(a => a.FullName).FirstOrDefault();
+
+            if (result == null)
+                throw new InvalidOperationException($"Directory '{reactDirectory}' not found '{file}'");
+
+            return result;
+
         }
 
         private static string BaseTypeScriptName(Type type)
@@ -458,45 +556,37 @@ namespace Signum.TSGenerator
     [Serializable]
     public class Options
     {
-        public string AssemblyName;
-        public string AssemblyFullPath;
-        
-        public string Namespace;
-        public List<Reference> References = new List<Reference>();
+        public string CurrentAssembly;
+        public string CurrentNamespace;
 
-        public Options(string assemblyFullPath)
-        {
-            this.AssemblyFullPath = assemblyFullPath;
-            this.AssemblyName = Path.GetFileNameWithoutExtension(assemblyFullPath);
-        }
+        public AssemblyReference CurrentAssemblyReference => AssemblyReferences[CurrentAssembly];
 
-        internal bool IsExternal(Type type)
+        public string TemplateFileName { get; internal set; }
+
+        public Dictionary<string, AssemblyReference> AssemblyReferences;
+
+
+        public bool IsExternal(Type type)
         {
-            return type.Assembly.GetName().Name != AssemblyName &&
-                 !References.Any(r => type.Assembly.GetName().Name == r.AssemblyName);
+            return type.Assembly.GetName().Name != CurrentAssembly &&
+                 !AssemblyReferences.ContainsKey(type.Assembly.GetName().Name);
         }
     }
 
     [Serializable]
-    public class Reference
+    public class AssemblyReference
     {
-        public string VariableName;
-        
-        string assemblyFullPath;
-        public string AssemblyFullPath
-        {
-            get { return assemblyFullPath; }
-            set
-            {
-                assemblyFullPath = value;
-                if (assemblyFullPath != null)
-                    this.AssemblyName = Path.GetFileNameWithoutExtension(assemblyFullPath);
-            }
-        }
-
-        public Match Match { get; internal set; }
-
+        public string ReactDirectory;
+        public string AssemblyFullPath;
         public string AssemblyName;
+
+        public Dictionary<string, NamespaceTSReference> NamespacesReferences = new Dictionary<string, NamespaceTSReference>();
+    }
+
+    public class NamespaceTSReference
+    {
         public string Namespace;
+        public string Path;
+        public string VariableName;
     }
 }

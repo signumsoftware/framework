@@ -1,7 +1,9 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection' 
+
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection'
+import * as Entities from './Signum.Entities'
 
 export interface ModifiableEntity {
     Type: string;
@@ -50,8 +52,6 @@ export interface EntityPack<T extends ModifiableEntity> {
     entity: T
     canExecute: { [key: string]: string };
 }
-
-
 
 //The interfaces add no real members, they are there just to force TS structural typing
 
@@ -506,4 +506,5 @@ export namespace External {
         "Saturday";
     
 }
+
 

@@ -1,9 +1,11 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection' 
 
-import * as Entities from './Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection'
+import * as Entities from './Signum.Entities'
+
+
 export const ColumnOptionsMode = new EnumType<ColumnOptionsMode>("ColumnOptionsMode");
 export type ColumnOptionsMode =
     "Add" |
@@ -114,4 +116,5 @@ export namespace External {
         "Saturday";
     
 }
+
 
