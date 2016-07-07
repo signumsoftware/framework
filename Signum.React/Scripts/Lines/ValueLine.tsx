@@ -14,6 +14,7 @@ export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     valueLineType?: ValueLineType;
     unitText?: string;
     formatText?: string;
+    autoTrim?: boolean;
     inlineCheckbox?: boolean;
     comboBoxItems?: { name: string, niceName: string }[];
     valueHtmlProps?: React.HTMLAttributes;
@@ -224,10 +225,23 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
         vl.setValue(input.value);
     };
 
+    let handleBlur: (e: React.SyntheticEvent) => void;
+    if (s.autoTrim == null || s.autoTrim == true) {
+        handleBlur = (e: React.SyntheticEvent) => {
+            const input = e.currentTarget as HTMLInputElement;
+            if (input.value && input.value.trim() != input.value)
+                vl.setValue(input.value.trim());
+        };
+    }
+
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
             { ValueLine.withUnit(s.unitText,
-                <input type="text" {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value || ""} onChange={handleTextOnChange}
+                <input type="text" {...vl.state.valueHtmlProps}
+                    className={addClass(vl.state.valueHtmlProps, "form-control") }
+                    value={s.ctx.value || ""}
+                    onBlur={handleBlur}
+                    onChange={handleTextOnChange}
                     placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>)
             }
         </FormGroup>

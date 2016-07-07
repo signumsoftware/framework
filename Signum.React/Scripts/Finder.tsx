@@ -610,12 +610,12 @@ export const formatRules: FormatRule[] = [
     {
         name: "Object",
         isApplicable: col=> true,
-        formatter: col=> new CellFormatter(cell => cell ? (cell.toStr || cell.toString()) : null)
+        formatter: col => new CellFormatter(cell => cell ? <span>{cell.toStr || cell.toString() }</span> : null)
     },
     {
         name: "Enum",
         isApplicable: col => col.token.filterType == "Enum",
-        formatter: col => new CellFormatter(cell => cell == null ? null : getEnumInfo(col.token.type.name, cell).niceName)
+        formatter: col => new CellFormatter(cell => cell == null ? null : <span>{getEnumInfo(col.token.type.name, cell).niceName}</span>)
     },
     {
         name: "Lite",
@@ -626,25 +626,25 @@ export const formatRules: FormatRule[] = [
     {
         name: "Guid",
         isApplicable: col => col.token.filterType == "Guid",
-        formatter: col => new CellFormatter((cell: string) => cell && <span className="guid">{(cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)) }</span>)
+        formatter: col => new CellFormatter((cell: string) => cell && <span className="guid">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>)
     },
     {
         name: "DateTime",
         isApplicable: col => col.token.filterType == "DateTime",
         formatter: col=> {
             const momentFormat = toMomentFormat(col.token.format);
-            return new CellFormatter((cell: string) => cell == null || cell == "" ? "" : moment(cell).format(momentFormat))
+            return new CellFormatter((cell: string) => cell == null || cell == "" ? "" : <span>{moment(cell).format(momentFormat) }</span>)
         }
     },
     {
         name: "Number",
         isApplicable: col => col.token.filterType == "Integer" || col.token.filterType == "Decimal",
-        formatter: col=> new CellFormatter((cell: number) => cell && cell.toString(), "right")
+        formatter: col => new CellFormatter((cell: number) => cell && <span>{cell.toString() }</span>, "right")
     },
     {
         name: "Number with Unit",
         isApplicable: col => (col.token.filterType == "Integer" || col.token.filterType == "Decimal") && !!col.token.unit,
-        formatter: col => new CellFormatter((cell: number) => cell && cell.toString() + " " + col.token.unit, "right")
+        formatter: col => new CellFormatter((cell: number) => cell && <span>{cell.toString() + " " + col.token.unit}</span>, "right")
     },
     {
         name: "Bool",
