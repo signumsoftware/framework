@@ -27,7 +27,7 @@ export function start(options: { routes: JSX.Element[] }) {
     </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-        if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+        if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
             return null;
 
         return <UserQueryMenu searchControl={ctx.searchControl}/>;

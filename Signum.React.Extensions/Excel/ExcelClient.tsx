@@ -25,6 +25,10 @@ export function start(options: { routes: JSX.Element[], plainExcel: boolean, exc
     }
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
+
+        if (!ctx.searchControl.props.showBarExtension)
+            return null;
+
         return <ExcelMenu searchControl={ctx.searchControl} plainExcel={options.plainExcel} excelReport={options.excelReport} />;
     }); 
 }
