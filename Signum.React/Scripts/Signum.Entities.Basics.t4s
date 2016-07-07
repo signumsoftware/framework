@@ -1,6 +1,1 @@
-﻿//Assembly: Signum.Entities.dll
-
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection' 
-
-//Entities.Assembly: Signum.Entities.dll
-import * as Entities from './Signum.Entities' 
+﻿

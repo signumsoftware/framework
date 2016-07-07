@@ -58,86 +58,63 @@ namespace Signum.TSGenerator
     {
         public string Process(string templateFile, string referenceList, string projectFile)
         {
-            var refs = referenceList.Split(';').ToDictionary(a => Path.GetFileName(a));
 
-            var fileContent = File.ReadAllText(templateFile);
-
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-
-            fileContent = Regex.Replace(fileContent, @"//(?<key>\w*(\.\w*)?):\s*(?<value>.*?)\s*$\n", m =>
+            var options = new Options
             {
-                var key = m.Groups["key"].Value;
-
-                if (parameters.ContainsKey(key))
-                    throw new LoggerException($"Meta-Comment '{key}' is repeated") { Data = { ["LineNumber"] = Utils.SetLineNumbers(m, fileContent) } };
-
-                parameters.Add(key, m.Groups["value"].Value);
-                return "";
-            }, RegexOptions.Multiline);
-
-   
-            var references = (from Match m in Regex.Matches(fileContent, @"import \* as (?<variable>\w+) from '(?<path>.+?)'")
-                              let var = m.Groups["variable"].Value
-                              select new Reference
-                              {
-                                  Match = m,
-                                  VariableName = var,
-                                  AssemblyFullPath = refs.GetReferencedAssembly(parameters.ConsumeParameter(var + ".Assembly"), projectFile),
-                                  Namespace = parameters.TryConsumeParameter(var + ".BaseNamespace") ?? Path.GetFileName(m.Groups["path"].Value),
-                              }).ToList();
-
-            AssertNoDuplicate(references, r => r.VariableName, "VariableName", fileContent);
-            AssertNoDuplicate(references, r => r.AssemblyFullPath + "/" + r.Namespace, "AssemlyFullPath and BaseNamespace", fileContent);
-
-            var options = new Options(refs.GetReferencedAssembly(parameters.ConsumeParameter("Assembly"), projectFile))
-            {
-                Namespace = parameters.TryConsumeParameter("BaseNamespace") ?? Path.GetFileNameWithoutExtension(templateFile),
-                References = references,
+                TemplateFileName = templateFile,
+                CurrentNamespace = Path.GetFileNameWithoutExtension(templateFile),
+                CurrentAssembly = Path.GetFileNameWithoutExtension(projectFile).Replace(".React", ".Entities"),
+                AssemblyReferences = (from r in referenceList.Split(';')
+                                      where r.Contains(".Entities")
+                                      select new AssemblyReference
+                                      {
+                                          AssemblyName = Path.GetFileNameWithoutExtension(r),
+                                          AssemblyFullPath = r,
+                                          ReactDirectory = FindReactDirectory(r)
+                                      }).ToDictionary(a => a.AssemblyName)
             };
 
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine(@"//////////////////////////////////");
-            sb.AppendLine(@"//Auto-generated. Do NOT modify!//");
-            sb.AppendLine(@"//////////////////////////////////");
-
-            sb.AppendLine(fileContent);
-
-            EntityDeclarationGenerator.Process(sb, options);
-
-            return sb.ToString();
+            return EntityDeclarationGenerator.Process(options);
         }
 
-        private void AssertNoDuplicate(List<Reference> references, Func<Reference, string> selector, string typeOfthing, string fileContent)
+        private static string ToWindows(string nodeRelative)
         {
-            HashSet<string> already = new HashSet<string>();
-            foreach (var r in references)
+            var relative = nodeRelative;
+            if (nodeRelative.StartsWith("./"))
+                nodeRelative = nodeRelative.Substring(2);
+
+            return nodeRelative.Replace("/", @"\");
+        }
+
+        private string FindReactDirectory(string absoluteFilePath)
+        {
+            var prefix = absoluteFilePath;
+            while (prefix != null)
             {
-                var key = selector(r);
+                var name = Path.GetFileName(prefix);
 
-                if(already.Contains(key))
-                    throw new LoggerException($"Duplicated {typeOfthing} '{key}'") { Data = { ["LineNumber"] = Utils.SetLineNumbers(r.Match, fileContent) } };
-
-                already.Add(key);
+                if (name.Contains(".Entities"))
+                {
+                    name = name.Replace(".Entities", ".React");
+                    var dir = Path.Combine(Path.GetDirectoryName(prefix), name);
+                    if (Directory.Exists(dir))
+                        return dir;
+                }
+                
+                prefix = Path.GetDirectoryName(prefix);
             }
+
+            throw new InvalidOperationException("Impossible to determine the react directory for '" + absoluteFilePath + "'");
         }
     }
 
     public static class Utils
     {
-        public static string GetReferencedAssembly(this Dictionary<string, string> dictionary, string assemblyName, string projectName)
+        public static string GetReferencedAssembly(this Dictionary<string, string> refs, string assemblyName, string projectName)
         {
             string value;
-            if (!dictionary.TryGetValue(assemblyName, out value))
+            if (!refs.TryGetValue(assemblyName, out value))
                 throw new InvalidOperationException($"No reference to '{assemblyName}' found in {projectName}.");
-
-            return value;
-        }
-
-        public static V ConsumeParameter<K, V>(this Dictionary<K, V> dictionary, K key)
-        {
-            V value;
-            if (!dictionary.TryGetValue(key, out value))
-                throw new InvalidOperationException($"No parameter '{key}' found. Write something like //{key}: yourValue");
 
             return value;
         }

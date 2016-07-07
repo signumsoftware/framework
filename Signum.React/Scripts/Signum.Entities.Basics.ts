@@ -1,9 +1,11 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection' 
 
-import * as Entities from './Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflection'
+import * as Entities from './Signum.Entities'
+
+
 export const ColorEntity = new Type<ColorEntity>("ColorEntity");
 export interface ColorEntity extends Entities.EmbeddedEntity {
     argb: number;
@@ -104,4 +106,5 @@ export namespace External {
         "Saturday";
     
 }
+
 
