@@ -1,9 +1,11 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+
+
 export const CultureInfoEntity = new Type<CultureInfoEntity>("CultureInfo");
 export interface CultureInfoEntity extends Entities.Entity {
     name: string;
@@ -25,4 +27,5 @@ export interface DateSpanEntity extends Entities.EmbeddedEntity {
 export const TypeConditionSymbol = new Type<TypeConditionSymbol>("TypeCondition");
 export interface TypeConditionSymbol extends Entities.Symbol {
 }
+
 

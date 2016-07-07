@@ -1,13 +1,11 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export interface IProcessDataEntity extends Entities.Entity {
@@ -103,4 +101,5 @@ export type ProcessState =
     "Suspended" |
     "Finished" |
     "Error";
+
 

@@ -1,19 +1,16 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Files from '../Files/Signum.Entities.Files'
+import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets'
+import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
-import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
-import * as UserQueries from '../UserQueries/Signum.Entities.UserQueries' 
-
-import * as UserAssets from '../UserAssets/Signum.Entities.UserAssets' 
-
-import * as Files from '../Files/Signum.Entities.Files' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
 import { FilterOption, OrderOption, FilterRequest, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions' 
 
@@ -184,4 +181,5 @@ export module UserChartOperation {
     export const Save : Entities.ExecuteSymbol<UserChartEntity> = registerSymbol({ Type: "Operation", key: "UserChartOperation.Save" });
     export const Delete : Entities.DeleteSymbol<UserChartEntity> = registerSymbol({ Type: "Operation", key: "UserChartOperation.Delete" });
 }
+
 

@@ -1,15 +1,14 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Signum from '../Basics/Signum.Entities.Basics'
+import * as Mailing from '../Mailing/Signum.Entities.Mailing'
 
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
 
-import * as ExBasics from '../Basics/Signum.Entities.Basics' 
-
-import * as Mailing from '../Mailing/Signum.Entities.Mailing' 
 
 export interface UserEntity {
 	newPassword: string;
@@ -269,7 +268,7 @@ export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, boolean>
 
 export const RuleTypeConditionEntity = new Type<RuleTypeConditionEntity>("RuleTypeConditionEntity");
 export interface RuleTypeConditionEntity extends Entities.EmbeddedEntity {
-    condition: ExBasics.TypeConditionSymbol;
+    condition: Signum.TypeConditionSymbol;
     allowed: TypeAllowed;
 }
 
@@ -323,12 +322,12 @@ export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllo
     properties: AuthThumbnail;
     operations: AuthThumbnail;
     queries: AuthThumbnail;
-    availableConditions: Array<ExBasics.TypeConditionSymbol>;
+    availableConditions: Array<Signum.TypeConditionSymbol>;
 }
 
 export const TypeConditionRule = new Type<TypeConditionRule>("TypeConditionRule");
 export interface TypeConditionRule extends Entities.EmbeddedEntity {
-    typeCondition: ExBasics.TypeConditionSymbol;
+    typeCondition: Signum.TypeConditionSymbol;
     allowed: TypeAllowed;
 }
 
@@ -344,7 +343,7 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
     passwordNeverExpires: boolean;
     role: Entities.Lite<RoleEntity>;
     email: string;
-    cultureInfo: ExBasics.CultureInfoEntity;
+    cultureInfo: Signum.CultureInfoEntity;
     anulationDate: string;
     state: UserState;
 }
@@ -371,4 +370,5 @@ export interface UserTicketEntity extends Entities.Entity {
     connectionDate: string;
     device: string;
 }
+
 

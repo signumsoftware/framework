@@ -1,11 +1,10 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 
 export const NoteEntity = new Type<NoteEntity>("Note");
@@ -41,4 +40,5 @@ export interface NoteTypeEntity extends Basics.SemiSymbol {
 export module NoteTypeOperation {
     export const Save : Entities.ExecuteSymbol<NoteTypeEntity> = registerSymbol({ Type: "Operation", key: "NoteTypeOperation.Save" });
 }
+
 

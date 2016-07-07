@@ -1,11 +1,10 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 
 export const DisconnectedCreatedMixin = new Type<DisconnectedCreatedMixin>("DisconnectedCreatedMixin");
@@ -124,4 +123,5 @@ export type Upload =
     "None" |
     "New" |
     "Subset";
+
 

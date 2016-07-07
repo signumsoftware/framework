@@ -1,11 +1,10 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 
 export const AlertEntity = new Type<AlertEntity>("Alert");
@@ -56,4 +55,5 @@ export interface AlertTypeEntity extends Basics.SemiSymbol {
 export module AlertTypeOperation {
     export const Save : Entities.ExecuteSymbol<AlertTypeEntity> = registerSymbol({ Type: "Operation", key: "AlertTypeOperation.Save" });
 }
+
 

@@ -1,11 +1,11 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
-import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
 
 export module MapMessage {
     export const Map = new MessageKey("MapMessage", "Map");
@@ -24,4 +24,5 @@ export module MapMessage {
 export module MapPermission {
     export const ViewMap : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "MapPermission.ViewMap" });
 }
+
 

@@ -1,23 +1,18 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
-
-import * as ExBasics from '../Basics/Signum.Entities.Basics' 
-
-import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
-
-
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Signum from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Basics from '../Basics/Signum.Entities.Basics'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export const AppendixHelpEntity = new Type<AppendixHelpEntity>("AppendixHelp");
 export interface AppendixHelpEntity extends Entities.Entity {
     uniqueName: string;
-    culture: ExBasics.CultureInfoEntity;
+    culture: Basics.CultureInfoEntity;
     title: string;
     description: string;
 }
@@ -28,8 +23,8 @@ export module AppendixHelpOperation {
 
 export const EntityHelpEntity = new Type<EntityHelpEntity>("EntityHelp");
 export interface EntityHelpEntity extends Entities.Entity {
-    type: Basics.TypeEntity;
-    culture: ExBasics.CultureInfoEntity;
+    type: Signum.TypeEntity;
+    culture: Basics.CultureInfoEntity;
     description: string;
     properties: Entities.MList<PropertyRouteHelpEntity>;
     operations: Entities.MList<OperationHelpEntity>;
@@ -138,7 +133,7 @@ export module HelpSyntaxMessage {
 export const NamespaceHelpEntity = new Type<NamespaceHelpEntity>("NamespaceHelp");
 export interface NamespaceHelpEntity extends Entities.Entity {
     name: string;
-    culture: ExBasics.CultureInfoEntity;
+    culture: Basics.CultureInfoEntity;
     title: string;
     description: string;
 }
@@ -150,7 +145,7 @@ export module NamespaceHelpOperation {
 export const OperationHelpEntity = new Type<OperationHelpEntity>("OperationHelp");
 export interface OperationHelpEntity extends Entities.Entity {
     operation: Entities.OperationSymbol;
-    culture: ExBasics.CultureInfoEntity;
+    culture: Basics.CultureInfoEntity;
     description: string;
 }
 
@@ -160,7 +155,7 @@ export module OperationHelpOperation {
 
 export const PropertyRouteHelpEntity = new Type<PropertyRouteHelpEntity>("PropertyRouteHelpEntity");
 export interface PropertyRouteHelpEntity extends Entities.EmbeddedEntity {
-    property: Basics.PropertyRouteEntity;
+    property: Signum.PropertyRouteEntity;
     description: string;
 }
 
@@ -172,8 +167,8 @@ export interface QueryColumnHelpEntity extends Entities.EmbeddedEntity {
 
 export const QueryHelpEntity = new Type<QueryHelpEntity>("QueryHelp");
 export interface QueryHelpEntity extends Entities.Entity {
-    query: Basics.QueryEntity;
-    culture: ExBasics.CultureInfoEntity;
+    query: Signum.QueryEntity;
+    culture: Basics.CultureInfoEntity;
     description: string;
     columns: Entities.MList<QueryColumnHelpEntity>;
     isEmpty: boolean;
@@ -182,4 +177,5 @@ export interface QueryHelpEntity extends Entities.Entity {
 export module QueryHelpOperation {
     export const Save : Entities.ExecuteSymbol<QueryHelpEntity> = registerSymbol({ Type: "Operation", key: "QueryHelpOperation.Save" });
 }
+
 

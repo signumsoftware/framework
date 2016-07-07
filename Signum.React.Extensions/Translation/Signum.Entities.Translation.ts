@@ -1,15 +1,12 @@
 //////////////////////////////////
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection' 
 
-import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities' 
-
-import * as ExBasics from '../Basics/Signum.Entities.Basics' 
-
-import * as Authorization from '../Authorization/Signum.Entities.Authorization' 
-
-import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics' 
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Framework/Signum.React/Scripts/Reflection'
+import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import * as Signum from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
+import * as Basics from '../Basics/Signum.Entities.Basics'
+import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export const TranslatedCultureAction = new EnumType<TranslatedCultureAction>("TranslatedCultureAction");
@@ -19,9 +16,9 @@ export type TranslatedCultureAction =
 
 export const TranslatedInstanceEntity = new Type<TranslatedInstanceEntity>("TranslatedInstance");
 export interface TranslatedInstanceEntity extends Entities.Entity {
-    culture: ExBasics.CultureInfoEntity;
+    culture: Basics.CultureInfoEntity;
     instance: Entities.Lite<Entities.Entity>;
-    propertyRoute: Basics.PropertyRouteEntity;
+    propertyRoute: Signum.PropertyRouteEntity;
     rowId: string;
     translatedText: string;
     originalText: string;
@@ -65,7 +62,7 @@ export module TranslationPermission {
 
 export const TranslationReplacementEntity = new Type<TranslationReplacementEntity>("TranslationReplacement");
 export interface TranslationReplacementEntity extends Entities.Entity {
-    cultureInfo: ExBasics.CultureInfoEntity;
+    cultureInfo: Basics.CultureInfoEntity;
     wrongTranslation: string;
     rightTranslation: string;
 }
@@ -77,13 +74,13 @@ export module TranslationReplacementOperation {
 
 export const TranslatorUserCultureEntity = new Type<TranslatorUserCultureEntity>("TranslatorUserCultureEntity");
 export interface TranslatorUserCultureEntity extends Entities.EmbeddedEntity {
-    culture: ExBasics.CultureInfoEntity;
+    culture: Basics.CultureInfoEntity;
     action: TranslatedCultureAction;
 }
 
 export const TranslatorUserEntity = new Type<TranslatorUserEntity>("TranslatorUser");
 export interface TranslatorUserEntity extends Entities.Entity {
-    user: Entities.Lite<Basics.IUserEntity>;
+    user: Entities.Lite<Signum.IUserEntity>;
     cultures: Entities.MList<TranslatorUserCultureEntity>;
 }
 
@@ -91,4 +88,5 @@ export module TranslatorUserOperation {
     export const Save : Entities.ExecuteSymbol<TranslatorUserEntity> = registerSymbol({ Type: "Operation", key: "TranslatorUserOperation.Save" });
     export const Delete : Entities.DeleteSymbol<TranslatorUserEntity> = registerSymbol({ Type: "Operation", key: "TranslatorUserOperation.Delete" });
 }
+
 
