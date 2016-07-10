@@ -185,7 +185,9 @@ export function getTypeInfo(type: PseudoType): TypeInfo {
     throw new Error("Unexpected type: " + type);
 }
 
-
+export function parseId(ti: TypeInfo, id: string): string | number {
+    return ti.members["Id"].type.name == "number" ? parseInt(id) : id;
+}
 
 export const IsByAll = "[ALL]";
 export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
