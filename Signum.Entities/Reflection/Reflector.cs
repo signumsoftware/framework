@@ -403,7 +403,7 @@ namespace Signum.Entities.Reflection
 
                 StringCaseValidatorAttribute stringCase = pp.Validators.OfType<StringCaseValidatorAttribute>().SingleOrDefaultEx();
                 if (stringCase != null)
-                    return stringCase.TextCase == Case.Lowercase ? "L" : "U";
+                    return stringCase.TextCase == StringCase.Lowercase ? "L" : "U";
             }
 
             return FormatString(route.Type);
