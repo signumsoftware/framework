@@ -4,6 +4,7 @@ import * as d3 from 'd3'
 import { DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import  { Expanded } from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { is, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { MapMessage } from '../Signum.Entities.Map'
@@ -41,12 +42,12 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
     componentWillMount() {
 
-        if(Navigator.setExpanded){
-            if(Navigator.getExpanded) {
-                this.wasExpanded = Navigator.getExpanded();
+        if (Expanded.setExpanded){
+            if (Expanded.getExpanded) {
+                this.wasExpanded = Expanded.getExpanded();
             }
 
-            Navigator.setExpanded(true);
+            Expanded.setExpanded(true);
         }
 
         MapClient.API.types()
@@ -75,8 +76,8 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
 
     componentWillUnmount(){
-        if(Navigator.setExpanded && this.wasExpanded != null){
-            Navigator.setExpanded(this.wasExpanded);
+        if (Expanded.setExpanded && this.wasExpanded != null){
+            Expanded.setExpanded(this.wasExpanded);
         }
     }
 
@@ -121,7 +122,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
     render() {
         
-        if(Navigator.getExpanded && !Navigator.getExpanded())
+        if (Expanded.getExpanded && !Expanded.getExpanded())
             return null;
 
         var s = this.state;

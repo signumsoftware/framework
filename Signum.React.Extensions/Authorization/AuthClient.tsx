@@ -164,7 +164,7 @@ export var onCurrentUserChanged: Array<(newUser: UserEntity) => void> = [];
 
 export function setCurrentUser(user: UserEntity) {
 
-    Navigator.currentUser = user;
+    Navigator.setCurentUser(user);
 
     onCurrentUserChanged.forEach(f => f(user));
 }
@@ -262,12 +262,20 @@ export function logout() {
     }).done();
 }
 
-export function onLogout() {
+export let onLogout = () => {
     Navigator.currentHistory.push("~/");
 }
 
-export function onLogin() {
+export function changeOnLogout(newOnLogout: () => void) {
+    onLogout = newOnLogout;
+}
+
+export let onLogin = () => {
     Navigator.currentHistory.push("~/");
+}
+
+export function changeOnLogin(newOnLogin: () => void) {
+    onLogin = newOnLogin;
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol) {

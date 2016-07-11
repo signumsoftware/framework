@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
 import { DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { currentHistory, Expanded } from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { is, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { MapMessage } from '../Signum.Entities.Map'
@@ -38,12 +38,12 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
     componentWillMount() {
 
-        if(Navigator.setExpanded){
-            if(Navigator.getExpanded) {
-                this.wasExpanded = Navigator.getExpanded();
+        if (Expanded.setExpanded){
+            if (Expanded.getExpanded) {
+                this.wasExpanded = Expanded.getExpanded();
             }
 
-            Navigator.setExpanded(true);
+            Expanded.setExpanded(true);
         }
 
         MapClient.API.operations(this.props.routeParams.type)
@@ -60,8 +60,8 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
 
     componentWillUnmount(){
-        if(Navigator.setExpanded && this.wasExpanded != null){
-            Navigator.setExpanded(this.wasExpanded);
+        if (Expanded.setExpanded && this.wasExpanded != null){
+            Expanded.setExpanded(this.wasExpanded);
         }
     }
 
@@ -104,7 +104,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
     render() {
 
-        if (Navigator.getExpanded && !Navigator.getExpanded())
+        if (Expanded.getExpanded && !Expanded.getExpanded())
             return null;
 
         var s = this.state;
@@ -138,7 +138,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
         var query = Dic.extend(tables, { color: s.color });
 
-        var url = Navigator.currentHistory.createHref({ pathname: "~/map/" + this.props.routeParams.type, query: query });
+        var url = currentHistory.createHref({ pathname: "~/map/" + this.props.routeParams.type, query: query });
 
         window.open(url);
     }
