@@ -22,6 +22,10 @@ declare interface Promise<T> {
     done(): void;
 }
 
+declare interface Window {
+    __baseUrl: string;
+}
+
 interface Array<T> {
     groupBy(keySelector: (element: T) => string): { key: string; elements: T[] }[];
     groupToObject(keySelector: (element: T) => string): { [key: string]: T[] };

@@ -5,8 +5,7 @@
     "module": "commonjs",
     "jsx": "react",
     "noEmit": true,
-    "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true
+    "noImplicitAny": true
   },
   "exclude": [ "node_modules" ]
 }

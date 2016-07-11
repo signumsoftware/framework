@@ -87,13 +87,13 @@ declare namespace HistoryModule {
 
     type LocationListener = (location: Location) => void
 
-    type LocationState = Object
+    type LocationState = { [key: string]: any }
 
     type Path = string // Pathname + QueryString
 
     type Pathname = string
 
-    type Query = Object
+    type Query = { [key: string]: any }
 
     type QueryString = string
 

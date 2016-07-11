@@ -6,13 +6,13 @@ export function configure(){
 
     if (typeof moment !== 'function') throw new TypeError('You must provide a valid moment object');
 
-    const localField = typeof moment().locale === 'function' ? 'locale' : 'lang',
+    const localField = (m: moment.Moment) => m.locale || m.lang,
         hasLocaleData = !!moment.localeData;
 
     if (!hasLocaleData) throw new TypeError('The Moment localizer depends on the `localeData` api, please provide a moment object v2.2.0 or higher');
 
     function getMoment(culture: string, value: any, format: string) {
-        return culture ? moment(value, format)[localField](culture) : moment(value, format);
+        return culture ? localField(moment(value, format))(culture) : moment(value, format);
     }
 
     function endOfDecade(date: Date) {

@@ -111,14 +111,13 @@ Array.prototype.orderByDescending = function (keySelector: (element: any) => any
 };
 
 Array.prototype.toObject = function (keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
-    const obj = {};
+    const obj: any = {};
 
     (<Array<any>>this).forEach(item=> {
         const key = keySelector(item);
 
         if (obj[key])
             throw new Error("Repeated key {0}".formatWith(key));
-
 
         obj[key] = valueSelector ? valueSelector(item) : item;
     });
@@ -127,7 +126,7 @@ Array.prototype.toObject = function (keySelector: (element: any) => any, valueSe
 };
 
 Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
-    const obj = {};
+    const obj: any = {};
 
     (<Array<any>>this).forEach(item=> {
         const key = keySelector(item);
@@ -329,7 +328,7 @@ String.prototype.endsWith = function (str) {
 String.prototype.formatWith = function () {
     const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
-    const args = arguments;
+    const args: any = arguments;
 
     return (this as string).replace(regex, match => {
         //match will look like {sample-match}
@@ -572,15 +571,15 @@ export module Dic {
     }
 
     export function copy<T>(object: T): T {
-        const objectCopy = <T>{};
+        const objectCopy: any = {};
 
         for (const key in object) {
             if (object.hasOwnProperty(key)) {
-                objectCopy[key] = object[key];
+                objectCopy[key] = (object as any)[key];
             }
         }
 
-        return objectCopy;
+        return objectCopy as T;
     }
 
     export function extend<O>(out: O): O;
@@ -608,13 +607,13 @@ export module Dic {
 
     /**  Waiting for https://github.com/Microsoft/TypeScript/issues/2103 */
     export function without<T>(obj: T, toRemove: {}): T {
-        const result = {};
+        const result: any = {};
 
         for (const key in obj) {
             if (!toRemove.hasOwnProperty(key))
-                result[key] = obj[key];
+                result[key] = (obj as any)[key];
             else
-                toRemove[key] = obj[key];
+                (toRemove as any)[key] = (obj as any)[key];
         }
 
         return result as T;

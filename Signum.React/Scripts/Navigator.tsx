@@ -550,7 +550,7 @@ String.prototype.formatHtml = function () {
     const result: (string | React.ReactElement<any>)[] = [];
     for (let i = 0; i < parts.length - 4; i += 4) {
         result.push(parts[i]);
-        result.push(args[parts[i + 1]]);
+        result.push(args[parseInt(parts[i + 1])]);
     }
     result.push(parts[parts.length - 1]);
 

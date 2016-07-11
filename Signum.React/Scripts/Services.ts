@@ -3,7 +3,6 @@ import { ModelState } from './Signum.Entities'
 import { Dic } from './Globals'
 import { GraphExplorer } from './Reflection'
 
-
 export interface AjaxOptions {
     url: string;
     avoidNotifyPendingRequests?: boolean;
@@ -12,7 +11,7 @@ export interface AjaxOptions {
     avoidAuthToken?: boolean;
 
     
-    headers?: HeaderInit | { [index: string]: string };
+    headers?: { [index: string]: string };
     mode?: string | RequestMode;
     credentials?: string | RequestCredentials;
     cache?: string | RequestCache;
@@ -20,7 +19,7 @@ export interface AjaxOptions {
 
 
 export function baseUrl(options: AjaxOptions): string {
-    const baseUrl = window["__baseUrl"] as string;
+    const baseUrl = window.__baseUrl;
 
     if (options.url.startsWith("~/"))
         return baseUrl + "/" + options.url.after("~/");

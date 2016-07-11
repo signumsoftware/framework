@@ -960,13 +960,13 @@ export class GraphExplorer {
 
     private static specialProperties = ["Type", "id", "isNew", "ticks", "toStr", "modified"];
 
-    private isModifiableObject(obj: Object, modelStatePrefix: string) {
+    private isModifiableObject(obj: any, modelStatePrefix: string) {
 
         if (obj instanceof Date)
             return false;
 
         if (obj instanceof Array)
-            return obj.map((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]")).some(a => a);
+            return (obj as Array<any>).map((o, i) => this.isModified(o, modelStatePrefix + "[" + i + "]")).some(a => a);
 
         const mle = obj as MListElement<any>;
         if (mle.hasOwnProperty("rowId"))
