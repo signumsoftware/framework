@@ -138,6 +138,7 @@ export interface ContextualOperationContext<T extends Entity> {
 
 export interface EntityOperationContext<T extends Entity> {
     frame: EntityFrame<T>;
+    tag: string;
     entity: T;
     operationInfo: OperationInfo;
     showOperations: boolean;
