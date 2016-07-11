@@ -10,7 +10,7 @@ import { ValueLine, ValueLineType, EntityLine, EntityCombo, FormGroup, TypeConte
 
 export default class User extends React.Component<{ ctx: TypeContext<UserEntity> }, { withPassword: boolean }> {
 
-    constructor(props) {
+    constructor(props: any) {
         super(props);
         this.state = { withPassword: false };
     }

@@ -20,7 +20,7 @@ export interface ExcelMenuProps {
 
 export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelReport?: Lite<ExcelReportEntity>[] }> {
 
-    constructor(props) {
+    constructor(props: ExcelMenuProps) {
         super(props);
         this.state = { };
     }

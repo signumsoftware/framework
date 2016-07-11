@@ -19,7 +19,7 @@ interface HeavyEntryProps extends ReactRouter.RouteComponentProps<{}, {selectedI
 
 export default class HeavyEntry extends React.Component<HeavyEntryProps, { entries?: HeavyProfilerEntry[], stackTrace?: StackTraceTS[]}> {
 
-    constructor(props){
+    constructor(props: HeavyEntryProps) {
         super(props);
         this.state = { };
     }

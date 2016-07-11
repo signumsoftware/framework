@@ -43,7 +43,7 @@ export default class OperationLog extends React.Component<{ ctx: TypeContext<Ope
 
 export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationLogEntity> }, { result: DiffLogResult }>
 {
-    constructor(props) {
+    constructor(props: any) {
         super(props);
         this.state = { result: null };
     }

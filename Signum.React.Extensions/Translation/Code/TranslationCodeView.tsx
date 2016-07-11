@@ -23,7 +23,7 @@ interface TranslationCodeViewProps extends ReactRouter.RouteComponentProps<{}, {
 
 export default class TranslationCodeView extends React.Component<TranslationCodeViewProps, { result?: AssemblyResult; cultures?: { [name: string]: Lite<CultureInfoEntity> } }> {
 
-    constructor(props) {
+    constructor(props: TranslationCodeViewProps) {
         super(props);
         this.state = { };
     }
@@ -173,7 +173,7 @@ export class TranslationTypeTable extends React.Component<{ type: LocalizableTyp
 
 export class TranslationMember extends React.Component<{ type: LocalizableType, loc: LocalizedType; member: LocalizedMember; edit: boolean }, { avoidCombo?: boolean }>{
 
-    constructor(props) {
+    constructor(props: any) {
         super(props);
         this.state = {};
     }
@@ -230,7 +230,7 @@ function initialElementIf(condition: boolean) {
 
 export class TranslationTypeDescription extends React.Component<{ type: LocalizableType, loc: LocalizedType, edit: boolean, result?: AssemblyResult }, { avoidCombo?: boolean }>{
 
-    constructor(props) {
+    constructor(props: any) {
         super(props);
         this.state = {};
     }

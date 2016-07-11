@@ -26,7 +26,7 @@ export interface ChartColumnProps {
 
 export class ChartColumn extends React.Component<ChartColumnProps, { }> {
 
-    constructor(props) {
+    constructor(props: ChartColumnProps) {
         super(props);
     }
 

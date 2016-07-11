@@ -20,7 +20,7 @@ interface TranslationCodeStatusProps extends ReactRouter.RouteComponentProps<{},
 
 export default class TranslationCodeStatus extends React.Component<TranslationCodeStatusProps, { result: TranslationFileStatus[] }> {
 
-    constructor(props) {
+    constructor(props: TranslationCodeStatusProps) {
         super(props);
         this.state = { result: null };
     }

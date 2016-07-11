@@ -11,12 +11,14 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
             getFill: t => t.extra["disc-upload"] == null ? "white" : "url(#disconnected-" + t.extra["disc-upload"] + "-" + t.extra["disc-download"] + ")",
             getTooltip: t => t.extra["disc-upload"] == null ? "" : "Download " + t.extra["disc-download"] + " - " + "Upload " + t.extra["disc-upload"],
             defs: info.tables.groupBy(t => (t.extra["disc-upload"] || "None") + "-" + (t.extra["disc-download"] || "None"))
-                .map(gr => gradientDef(gr.key.before("-"), gr.key.after("-")))
+                .map(gr => gradientDef(
+                    gr.key.before("-") as Upload,
+                    gr.key.after("-") as Download))
         }
     ];
 }
 
-function gradientDef(upload, download) {
+function gradientDef(upload: Upload, download: Download) {
     return (
         <linearGradient id={grandientName(upload, download) } x1="0% " y1="0% " x2="0% " y2="100%">
             <stop offset="0% " stopColor={uploadColor(upload) } />

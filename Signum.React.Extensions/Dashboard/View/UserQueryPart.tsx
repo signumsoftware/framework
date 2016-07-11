@@ -21,8 +21,12 @@ export interface UserQueryPartProps {
 }
 
 export default class UserQueryPart extends React.Component<UserQueryPartProps, {fo?: FindOptions }> {
-    
-    state = { fo : null};
+
+    constructor(props: any) {
+        super(props);
+        this.state = { fo: null };
+    }
+
     
     componentWillMount(){
         this.loadFindOptions(this.props);

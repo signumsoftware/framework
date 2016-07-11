@@ -24,7 +24,7 @@ interface TranslationCodeSyncProps extends ReactRouter.RouteComponentProps<{}, {
 
 export default class TranslationCodeSync extends React.Component<TranslationCodeSyncProps, { result?: AssemblyResult; cultures?: { [name: string]: Lite<CultureInfoEntity> } }> {
 
-    constructor(props) {
+    constructor(props: TranslationCodeSyncProps) {
         super(props);
         this.state = {};
     }

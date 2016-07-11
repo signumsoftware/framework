@@ -21,7 +21,7 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
     codeMirror: CodeMirror.EditorFromTextArea;
     _currentCodemirrorValue: string;
 
-    constructor(props) {
+    constructor(props: CodeMirrorProps) {
         super(props);
         this.state = { isFocused: false, };
     }
@@ -51,7 +51,7 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
             if (typeof nextProps.options === 'object') {
                 for (let optionName in nextProps.options) {
                     if (nextProps.options.hasOwnProperty(optionName)) {
-                        this.codeMirror.setOption(optionName, nextProps.options[optionName]);
+                        this.codeMirror.setOption(optionName, (nextProps.options as any)[optionName]);
                     }
                 }
             }
@@ -64,14 +64,14 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
         }
     }
 
-    focusChanged(focused) {
+    focusChanged(focused: boolean) {
         this.setState({
             isFocused: focused,
         });
         this.props.onFocusChange && this.props.onFocusChange(focused);
     }
 
-    codemirrorValueChanged = (doc, change) => {
+    codemirrorValueChanged = (doc: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList) => {
         const newValue = doc.getValue();
         this._currentCodemirrorValue = newValue;
         this.props.onChange && this.props.onChange(newValue);

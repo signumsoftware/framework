@@ -12,7 +12,7 @@ import * as AuthClient from '../AuthClient'
 
 export default class Login extends React.Component<{}, { modelState?: ModelState }> {
 
-    constructor(props) {
+    constructor(props: {}) {
         super(props);
         this.state = {};
     }

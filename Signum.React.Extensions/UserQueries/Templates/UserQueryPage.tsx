@@ -69,7 +69,7 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a>
                 </h2>
-                <SearchControl ref={e => this.searchControl = e}
+                <SearchControl ref={(e: SearchControl) => this.searchControl = e}
                    hideExternalButton={true}
                    findOptions={fo} />
             </div>

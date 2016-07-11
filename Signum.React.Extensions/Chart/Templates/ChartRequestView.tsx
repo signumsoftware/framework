@@ -42,7 +42,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     lastToken: QueryToken;
 
-    constructor(props) {
+    constructor(props: ChartRequestViewProps) {
         super(props);
         this.state = { };
    

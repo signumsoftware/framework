@@ -19,7 +19,7 @@ interface TimesPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
 
 export default class TimesPage extends React.Component<TimesPageProps, { times?: TimeTrackerEntry[]}> {
 
-    constructor(props){
+    constructor(props: TimesPageProps) {
         super(props);
         this.state =  { times : null};
     }
@@ -132,8 +132,8 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
     
     renderTable(){
-        
-        var getColor = f => `rgb(255, ${(1-f)*255}, ${(1-f)*255})`;
+
+        var getColor = (f: number) => `rgb(255, ${(1 - f) * 255}, ${(1 - f) * 255})`;
 
         var times = this.state.times;
 

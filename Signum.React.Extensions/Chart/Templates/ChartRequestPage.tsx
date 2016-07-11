@@ -18,8 +18,8 @@ interface ChartRequestPageProps extends ReactRouter.RouteComponentProps<{}, { qu
 }
 
 export default class ChartRequestPage extends React.Component<ChartRequestPageProps, { chartRequest?: ChartRequest }> {
-    
-    constructor(props) {
+
+    constructor(props: ChartRequestPageProps) {
         super(props);
         this.state = {};
     }

@@ -81,11 +81,11 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
             mode: "javascript",
             extraKeys: {
                 "Ctrl-Space": "autocomplete",
-                "Ctrl-K": cm => cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
-                "Ctrl-U": cm => cm.uncomment(cm.getCursor(true), cm.getCursor(false)),
-                "Ctrl-I": cm => cm.autoFormatRange(cm.getCursor(true), cm.getCursor(false)),
-                "F11": cm => cm.setOption("fullScreen", !cm.getOption("fullScreen")),
-                "Esc": cm => {
+                "Ctrl-K": (cm: any) => cm.lineComment(cm.getCursor(true), cm.getCursor(false)),
+                "Ctrl-U": (cm: any) => cm.uncomment(cm.getCursor(true), cm.getCursor(false)),
+                "Ctrl-I": (cm: any) => cm.autoFormatRange(cm.getCursor(true), cm.getCursor(false)),
+                "F11": (cm: any) => cm.setOption("fullScreen", !cm.getOption("fullScreen")),
+                "Esc": (cm: any) => {
                     if (cm.getOption("fullScreen"))
                         cm.setOption("fullScreen", false);
                 }

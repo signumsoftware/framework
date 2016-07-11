@@ -1,5 +1,6 @@
 ﻿/// <reference path="../../../../framework/signum.react/typings/d3/d3.d.ts" />
 import * as d3 from "d3"
+import { ChartValue, ChartTable, ChartColumn,  } from "../ChartClient"
 
 
 (Array.prototype as any as d3.Selection<any>).enterData = function (data: any, tag: string, cssClass: string) {
@@ -9,7 +10,7 @@ import * as d3 from "d3"
         .attr("class", cssClass);
 };
 
-export function fillAllTokenValueFuntions(data) {
+export function fillAllTokenValueFuntions(data: ChartTable) {
 
     for (var i = 0; ; i++) {
         if (data.columns['c' + i] === undefined)
@@ -21,7 +22,7 @@ export function fillAllTokenValueFuntions(data) {
     }
 }
 
-export function makeItTokenValue(value) {
+export function makeItTokenValue(value: ChartValue) {
 
     if (value === null || value === undefined)
         return;
@@ -65,7 +66,7 @@ export function ellipsis(elem: SVGTextElement, width: number, padding?: number, 
     }
 }
 
-export function getClickKeys(row, columns) {
+export function getClickKeys(row: any, columns: any) {
     var options = "";
     for (var k in columns) {
         var col = columns[k];
@@ -113,7 +114,7 @@ export function matrix(a: number, b: number, c: number, d: number, e: number, f:
     return 'matrix(' + a + ',' + b + ',' + c + ',' + d + ',' + e + ',' + f + ')';
 }
 
-export function scaleFor(column, values, minRange, maxRange, scaleName: string): { (x: any): any; } {
+export function scaleFor(column: { type: string }, values: any[], minRange: number, maxRange: number, scaleName: string): { (x: any): any; } {
 
     if (scaleName == "Elements")
         return d3.scale.ordinal()
@@ -131,7 +132,7 @@ export function scaleFor(column, values, minRange, maxRange, scaleName: string):
                 .domain([new Date(<any>d3.min(values)), new Date(<any>d3.max(values))])
                 .range([minRange, maxRange]);
 
-            var f = function (d) { return scale(new Date(d)); };
+            var f = function (d: string) { return scale(new Date(d)); };
             (<any>f).ticks = scale.ticks;
             (<any>f).tickFormat = scale.tickFormat;
             return f;
@@ -213,11 +214,11 @@ export class Rule {
         }
     }
 
-    static isStar(val) {
+    static isStar(val: string) {
         return typeof val === 'string' && val[val.length - 1] == '*';
     }
 
-    static getStar(val) {
+    static getStar(val: string) {
         if (val === '*')
             return 1;
 
@@ -225,23 +226,23 @@ export class Rule {
     }
 
 
-    size(name) {
+    size(name: string) {
         return this.sizes[name];
     }
 
-    start(name) {
+    start(name: string) {
         return this.starts[name];
     }
 
-    end(name) {
+    end(name: string) {
         return this.ends[name];
     }
 
-    middle(name) {
+    middle(name: string) {
         return this.starts[name] + this.sizes[name] / 2;
     }
 
-    debugX(chart) {
+    debugX(chart: d3.Selection<any>) {
 
         var keys = d3.keys(this.sizes);
 
@@ -266,7 +267,7 @@ export class Rule {
             .text(function (d) { return d; });
     }
 
-    debugY(chart) {
+    debugY(chart: d3.Selection<any>) {
 
         var keys = d3.keys(this.sizes);
 
@@ -292,7 +293,7 @@ export class Rule {
 
 export function toTree<T>(elements: T[], getKey: (elem: T) => string, getParent: (elem: T) => T): Node<T>[] {
 
-    var root = { item: null, children: [] };
+    var root: Node<T> = { item: null, children: [] };
 
     var dic: { [key: string]: Node<T> } = {};
 
@@ -303,7 +304,7 @@ export function toTree<T>(elements: T[], getKey: (elem: T) => string, getParent:
         if (dic[key])
             return dic[key];
 
-        var node = { item: elem, children: [] };
+        var node: Node<T> = { item: elem, children: [] };
 
         var parent = getParent(elem);
 

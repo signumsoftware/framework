@@ -103,7 +103,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
     }
 
     handleAddConditionClick = (remainig: TypeConditionSymbol[], taac: TypeAllowedAndConditions) => {
-        SelectorModal.chooseElement(remainig, a => a.toStr.tryAfter(".") || a.toStr)
+        SelectorModal.chooseElement(remainig, { display: a => a.toStr.tryAfter(".") || a.toStr })
             .then(tc => taac.conditions.push(TypeConditionRule.New(tcr => { tcr.typeCondition = tc; tcr.allowed = "None"; })))
             .then(() => this.forceUpdate())
             .done();
@@ -248,7 +248,8 @@ let values: TypeAllowedBasic[] = ["Create", "Modify", "Read", "None"];
 
 function combine(val1: TypeAllowedBasic, val2: TypeAllowedBasic): TypeAllowed {
 
-    let db, ui: TypeAllowedBasic;
+    let db: TypeAllowedBasic;
+    let ui: TypeAllowedBasic;
     if (values.indexOf(val1) < values.indexOf(val2)) {
         db = val1;
         ui = val2;

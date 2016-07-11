@@ -139,17 +139,17 @@ export function isChartColumnType(token: QueryToken, ct: ChartColumnType): boole
             "Enum"].contains(type);
 
         case "Magnitude": return [
-             "Integer",
-             "Real",
-             "RealGroupable"].contains(type);
+            "Integer",
+            "Real",
+            "RealGroupable"].contains(type);
 
         case "Positionable": return [
-             "Integer",
-             "Real",
-             "RealGroupable",
-             "Date",
-             "DateTime",
-             "Enum"].contains(type);
+            "Integer",
+            "Real",
+            "RealGroupable",
+            "Date",
+            "DateTime",
+            "Enum"].contains(type);
     }
 
 
@@ -165,7 +165,7 @@ export function getChartColumnType(token: QueryToken): ChartColumnType {
         case "String":
         case "Guid": return "String";
         case "Integer": return "Integer";
-        case "Decimal": return token.isGroupable ? "RealGroupable": "Real";
+        case "Decimal": return token.isGroupable ? "RealGroupable" : "Real";
         case "DateTime": return token.isGroupable ? "Date" : "DateTime";
     }
 
@@ -281,7 +281,7 @@ function defaultParameterValue(parameter: ChartScriptParameterEntity, relatedCol
     }
 
 }
-    
+
 
 export module Encoder {
 
@@ -327,7 +327,7 @@ export function parseTokens(chartRequest: ChartRequest): Promise<ChartRequest> {
         promises.push(...chartRequest.orderOptions.map(oo => completer.complete(oo, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate)));
 
     if (chartRequest.columns)
-        promises.push(...chartRequest.columns.map(a => a.element.token).filter(te=> te != null).map(te => {
+        promises.push(...chartRequest.columns.map(a => a.element.token).filter(te => te != null).map(te => {
             if (te.token && te.token.fullKey == te.tokenString)
                 return Promise.resolve(null);
 
@@ -356,17 +356,17 @@ export module Decoder {
             cr.parameters = Decoder.decodeParameters(query);
         });
 
-        return getChartScripts().then(scripts => { 
+        return getChartScripts().then(scripts => {
 
-            
 
-            chartRequest.chartScript = query.script == null ? scripts.first("ChartScript").first():
+
+            chartRequest.chartScript = query.script == null ? scripts.first("ChartScript").first() :
                 scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
 
             return parseTokens(chartRequest);
         });
     }
-    
+
 
     const unscapeTildes = Finder.Decoder.unscapeTildes;
     const valuesInOrder = Finder.Decoder.valuesInOrder;
@@ -377,7 +377,7 @@ export module Decoder {
             element: ChartColumnEntity.New(cc => {
                 const ts = (val.contains("~") ? val.before("~") : val).trim();
 
-                cc.token = !!ts ? QueryTokenEntity.New(qte=> {
+                cc.token = !!ts ? QueryTokenEntity.New(qte => {
                     qte.tokenString = ts;
                 }) : null;
                 cc.displayName = unscapeTildes(val.tryAfter("~"));
@@ -399,30 +399,7 @@ export module Decoder {
 
 export module API {
 
-    export interface ChartValue {
-        key: string,
-        toStr: string,
-        color: string
-    }
 
-    export interface ChartTable {
-        columns: {
-            [name: string]: {
-                title?: string;
-                displayName?: string;
-                token?: string;
-                isGroupKey?: boolean;
-                type?: string;
-            }
-        },
-        parameters: { [name: string]: string },
-        rows: { [name: string]: ChartValue }[]
-    }
-
-    export interface ExecuteChartResult {
-        resultTable: ResultTable;
-        chartTable: ChartTable;
-    }
 
     export function cleanedChartRequest(request: ChartRequest) {
         const clone = Dic.copy(request);
@@ -443,6 +420,11 @@ export module API {
         return ajaxPost<ExecuteChartResult>({
             url: "~/api/chart/execute"
         }, clone);
+
+    }
+    export interface ExecuteChartResult {
+        resultTable: ResultTable;
+        chartTable: ChartTable;
     }
 
     export function fetchScripts(): Promise<ChartScriptEntity[][]> {
@@ -456,6 +438,27 @@ export module API {
             url: "~/api/chart/colorPalettes"
         });
     }
-
-  
 }
+
+
+export interface ChartValue {
+    key: string,
+    toStr: string,
+    color: string,
+    niceToString(): string;
+}
+
+export interface ChartTable {
+    columns: { [name: string]: ChartColumn },
+    parameters: { [name: string]: string },
+    rows: { [name: string]: ChartValue }[]
+}
+
+export interface ChartColumn {
+    title?: string;
+    displayName?: string;
+    token?: string;
+    isGroupKey?: boolean;
+    type?: string;
+}
+

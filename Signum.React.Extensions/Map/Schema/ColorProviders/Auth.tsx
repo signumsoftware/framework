@@ -17,7 +17,7 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
         getStroke: t => t.extra[p.name + "-ui"] == null ? "white" : "url(#" + t.extra[p.name + "-ui"] + ")",
         getTooltip: t => t.extra[p.name + "-tooltip"] == null ? null : t.extra[p.name + "-tooltip"],
         defs: i == 0 ? getDefs(info) : null
-    }));
+    }) as ClientColorProvider);
 }
 
 

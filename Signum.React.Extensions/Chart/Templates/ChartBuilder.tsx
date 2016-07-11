@@ -30,7 +30,7 @@ export interface ChartBuilderState {
 
 export default class ChartBuilder extends React.Component<ChartBuilderProps, ChartBuilderState> {
 
-    constructor(props) {
+    constructor(props: ChartBuilderProps) {
         super(props);
 
         this.state = { expanded: null };
@@ -71,7 +71,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
         return css;
     }
 
-    handleOnToggleInfo = (index) => {
+    handleOnToggleInfo = (index: number) => {
         this.state.expanded[index] = !this.state.expanded[index];
         this.forceUpdate();
     }

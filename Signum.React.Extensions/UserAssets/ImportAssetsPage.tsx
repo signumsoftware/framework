@@ -26,7 +26,7 @@ interface ImportAssetsPageState {
 
 export default class ImportAssetsPage extends React.Component<ImportAssetsPageProps, ImportAssetsPageState> {
 
-    constructor(props) {
+    constructor(props: ImportAssetsPageProps) {
         super(props);
         this.state = { fileVer: 0 };
     }

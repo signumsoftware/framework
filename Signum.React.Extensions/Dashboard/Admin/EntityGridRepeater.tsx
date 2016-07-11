@@ -85,7 +85,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                                             onResizerDragStart: p.ctx.readOnly || !s.resize ? null : (resizer, e) => this.handleResizeDragStart(resizer, e, p.ctx),
                                             onTitleDragStart: p.ctx.readOnly || !s.move ? null : (e) => this.handleMoveDragStart(e, p.ctx),
                                             onRemove: p.ctx.readOnly || !s.remove ? null : (e) => this.handleRemoveElementClick(e, p.index),
-                                        });
+                                        } as EntityGridItemProps);
 
                                         const last = j == 0 ? null : list[j - 1].ctx.value;
 
@@ -290,8 +290,8 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
 
 
 export interface EntityGridItemProps {
-    title: React.ReactElement<any>;
-    bsStyle: string;
+    title?: React.ReactElement<any>;
+    bsStyle?: string;
     children?: React.ReactNode;
 
     onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent) => void;

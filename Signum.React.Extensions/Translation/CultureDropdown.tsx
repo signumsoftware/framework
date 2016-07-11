@@ -20,7 +20,7 @@ export interface CultureDropdownState {
 
 export default class CultureDropdown extends React.Component<CultureDropdownProps, CultureDropdownState> {
 
-    constructor(props) {
+    constructor(props: CultureDropdownProps) {
         super(props);
         this.state = {};
     }

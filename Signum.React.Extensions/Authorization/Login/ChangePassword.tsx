@@ -12,7 +12,7 @@ import * as AuthClient from '../AuthClient'
 
 export default class ChangePassword extends React.Component<{}, { modelState?: ModelState; success?: boolean }> {
 
-    constructor(props) {
+    constructor(props: {}) {
         super(props);
         this.state = {};
     }

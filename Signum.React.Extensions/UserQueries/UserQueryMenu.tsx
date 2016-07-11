@@ -17,7 +17,7 @@ export interface UserQueryMenuProps {
 
 export default class UserQueryMenu extends React.Component<UserQueryMenuProps, { currentUserQuery?: Lite<UserQueryEntity>, userQueries?: Lite<UserQueryEntity>[] }> {
 
-    constructor(props) {
+    constructor(props: UserQueryMenuProps) {
         super(props);
         this.state = { };
     }

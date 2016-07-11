@@ -19,13 +19,13 @@ declare global {
         lineNumber: number;
     }
 
-    interface Window {       
-        changeScript(chartScript: ChartScriptEntity);
+    interface Window {
+        changeScript(chartScript: ChartScriptEntity): void;
         getExceptionNumber(): number;
     }
 }
 
-export default class ChartRenderer extends React.Component<{ data: ChartClient.API.ChartTable; chartRequest: ChartRequest }, void> {
+export default class ChartRenderer extends React.Component<{ data: ChartClient.ChartTable; chartRequest: ChartRequest }, void> {
 
     exceptionLine: number;
 
@@ -81,7 +81,7 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.A
 
         node.addEventListener("click", this.handleOnClick);
 
-        var func;
+        var func: (chart: d3.Selection<any>, data: ChartClient.ChartTable) => void;
         var __baseLineNumber__: number;
         try {
             var width = rect.width;
@@ -149,11 +149,11 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.A
         }
     }
 
-    showError(e, __baseLineNumber__: number, chart: d3.Selection<any>) {
+    showError(e: any, __baseLineNumber__: number, chart: d3.Selection<any>) {
         var message = e.toString();
 
         var regex = /(DrawChart.*@.*:(.*))|(DrawChart .*:(.*):.*\)\))|(DrawChart .*:(.*):.*\))/;
-        var match;
+        var match: RegExpExecArray;
         if (e.stack != undefined && (match = regex.exec(e.stack)) != null) {
             var lineNumber = parseInt(match[2] || match[4] || match[6]) - (__baseLineNumber__ || 0);
             if (isNaN(lineNumber))
