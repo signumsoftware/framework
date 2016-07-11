@@ -722,14 +722,14 @@ namespace Signum.Entities
 
     public class StringCaseValidatorAttribute : ValidatorAttribute
     {
-        private Case textCase;
-        public Case TextCase
+        private StringCase textCase;
+        public StringCase TextCase
         {
             get { return this.textCase; }
             set { this.textCase = value; }
         }
 
-        public StringCaseValidatorAttribute(Case textCase)
+        public StringCaseValidatorAttribute(StringCase textCase)
         {
             this.textCase = textCase;
         }
@@ -740,10 +740,10 @@ namespace Signum.Entities
 
             string str = (string)value;
 
-            if ((this.textCase == Case.Uppercase) && (str != str.ToUpper()))
+            if ((this.textCase == StringCase.Uppercase) && (str != str.ToUpper()))
                 return ValidationMessage._0HasToBeUppercase.NiceToString();
 
-            if ((this.textCase == Case.Lowercase) && (str != str.ToLower()))
+            if ((this.textCase == StringCase.Lowercase) && (str != str.ToLower()))
                 return ValidationMessage._0HasToBeLowercase.NiceToString();
 
             return null;
@@ -756,7 +756,7 @@ namespace Signum.Entities
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]
-    public enum Case
+    public enum StringCase
     {
         Uppercase,
         Lowercase
