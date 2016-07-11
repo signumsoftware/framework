@@ -555,7 +555,7 @@ declare module "react-bootstrap" {
         Brand: NavbarBrandClass;
         Toggle: NavbarToggleClass;
         Header: NavbarHeaderClass;
-        Collapse: NavbarCollapse;
+        Collapse: NavbarCollapseClass;
     }
     var Navbar: NavbarClass;
     

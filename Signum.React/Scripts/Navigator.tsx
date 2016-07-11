@@ -13,14 +13,21 @@ import * as Operations from './Operations';
 import ModalFrame from './Frames/ModalFrame';
 import { ViewReplacer } from  './Frames/ReactVisitor'
 
-export let NotFound: __React.ComponentClass<any>;
+export let currentHistory: HistoryModule.History;
+export function setCurentHistory(history: HistoryModule.History) {
+    currentHistory = history;
+}
 
 export let currentUser: IUserEntity;
-export let currentHistory: HistoryModule.History;
+export function setCurentUser(user: IUserEntity) {
+    currentUser = user;
+}
 
+export module Expanded {
+    export let getExpanded: () => boolean;
+    export let setExpanded: (isExpanded: boolean) => void;
+}
 
-export var getExpanded : () => boolean;
-export var setExpanded : (isExpanded: boolean) => void;
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default)) } ></Route>);

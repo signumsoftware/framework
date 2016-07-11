@@ -150,7 +150,7 @@ Array.prototype.flatMap = function (selector: (element: any, index: number, arra
 
 Array.prototype.groupsOf = function (maxCount: number) {
 
-    var array = this as [];
+    var array: any[] = this;
 
     var result: any[][] = [];
     var newList: any[] = [];
