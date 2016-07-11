@@ -22,7 +22,7 @@ export default class Notify extends React.Component<void, NotifyOptions>{
 
     static singletone: Notify;
 
-    constructor(props) {
+    constructor(props: void) {
         super(props);
         this.state = { text: null, type: null };
 

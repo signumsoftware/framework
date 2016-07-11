@@ -344,9 +344,11 @@ export interface NumericTextBoxProps {
 
 export class NumericTextBox extends React.Component<NumericTextBoxProps, { text: string }> {
 
-    state = { text: null };
-
-
+    constructor(props: NumericTextBoxProps) {
+        super(props);
+        this.state = { text: null };
+    }
+    
     render() {
 
         var value = this.state.text != null ? this.state.text :
@@ -459,8 +461,10 @@ export interface DurationTextBoxProps {
 
 export class DurationTextBox extends React.Component<DurationTextBoxProps, { text: string }> {
 
-    state = { text: null };
-
+    constructor(props: NumericTextBoxProps) {
+        super(props);
+        this.state = { text: null };
+    }
 
     render() {
         const ticksPerMillisecond = 10000;

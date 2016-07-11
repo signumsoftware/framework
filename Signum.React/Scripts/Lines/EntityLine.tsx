@@ -43,7 +43,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         count: 5
     });
 
-    defaultAutCompleteRenderItem = (lite, query) => Typeahead.highlightedText(lite.toStr, query);
+    defaultAutCompleteRenderItem = (lite: Lite<Entity>, query: string) => Typeahead.highlightedText(lite.toStr, query);
     
 
     handleOnSelect = (lite: Lite<Entity>, event: React.SyntheticEvent) => {
@@ -68,7 +68,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
             </span>
         );
 
-        if (!buttons.props.children.some(a => a))
+        if (!buttons.props.children.some((a: any) => a))
             buttons = null;
 
         return (

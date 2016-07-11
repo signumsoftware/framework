@@ -26,7 +26,7 @@ export interface RenderEntityState {
 
 export class RenderEntity extends React.Component<RenderEntityProps, RenderEntityState> {
 
-    constructor(props) {
+    constructor(props: RenderEntityProps) {
         super(props);
 
         this.state = { getComponent: null, lastLoadedType: null };

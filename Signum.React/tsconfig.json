@@ -4,7 +4,9 @@
     "sourceMap": true,
     "module": "commonjs",
     "jsx": "react",
-    "noEmit": true
+    "noEmit": true,
+    "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true
   },
   "exclude": [ "node_modules" ]
 }

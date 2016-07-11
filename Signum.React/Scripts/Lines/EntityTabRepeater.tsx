@@ -34,12 +34,13 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
             </span>
         );
 
-        if (!buttons.props.children.some(a => a))
+        if (!buttons.props.children.some((a : any) => a))
             buttons = null;
 
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.errorClass) }
+                {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>

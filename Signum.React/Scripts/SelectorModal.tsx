@@ -14,7 +14,7 @@ interface SelectorModalProps extends React.Props<SelectorModal>, IModalProps {
 
 export default class SelectorModal extends React.Component<SelectorModalProps, { show: boolean }>  {
 
-    constructor(props) {
+    constructor(props: SelectorModalProps) {
         super(props);
 
         this.state = { show: true };

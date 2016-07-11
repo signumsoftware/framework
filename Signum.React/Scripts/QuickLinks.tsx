@@ -94,10 +94,13 @@ export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): P
     });
 }
 
+export interface QuickLinkWidgetProps {
+    ctx: WidgetContext
+}
 
-export class QuickLinkWidget extends React.Component<{ ctx: WidgetContext }, { links: QuickLink[] }> {
+export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { links: QuickLink[] }> {
 
-    constructor(props) {
+    constructor(props: QuickLinkWidgetProps) {
         super(props);
         this.state = { links: null };
     }

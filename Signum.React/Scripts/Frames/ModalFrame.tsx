@@ -46,7 +46,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         getComponent: null,
     }
 
-    constructor(props) {
+    constructor(props: ModalFrameProps) {
         super(props);
         this.state = this.calculateState(props);
         this.state.prefix = "modal" + (modalCount++);
@@ -59,7 +59,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             .done();
     }
 
-    componentWillReceiveProps(props) {
+    componentWillReceiveProps(props: ModalFrameProps) {
         this.setState(this.calculateState(props));
 
         Navigator.toEntityPack(props.entityOrPack, this.props.showOperations)
@@ -222,7 +222,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
                 { this.entityComponent && <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />}
                 <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve}/>
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
-                    { this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: c => this.setComponent(c) }) }
+                    { this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any,any>) => this.setComponent(c) }) }
                 </div>
             </Modal.Body>
         );

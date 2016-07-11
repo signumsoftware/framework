@@ -58,7 +58,6 @@ namespace Signum.TSGenerator
     {
         public string Process(string templateFile, string referenceList, string projectFile)
         {
-
             var options = new Options
             {
                 TemplateFileName = templateFile,

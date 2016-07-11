@@ -87,7 +87,7 @@ function geOrCreateToStringFunction(type: string) {
     return f;
 }
 
-export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>) 
+export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>) : string
 {
     if (entityOrLite == null)
         return null;

@@ -140,7 +140,7 @@ Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any,
 
 Array.prototype.flatMap = function (selector: (element: any, index: number, array: any[]) => any[]): any {
 
-    const result = [];
+    const result : any[] = [];
     (<Array<any>>this).forEach((item, index, array) =>
         selector(item, index, array).forEach(item2 =>
             result.push(item2)
@@ -240,7 +240,7 @@ Array.prototype.contains = function (element) {
     return (this as Array<any>).indexOf(element) != -1;
 };
 
-Array.prototype.removeAt = function (index) {
+Array.prototype.removeAt = function (index: number) {
     (this as Array<any>).splice(index, 1);
 };
 
@@ -303,7 +303,7 @@ Array.range = function (min, maxNotIncluded) {
     return result;
 }
 
-Array.repeat = function (count, val) {
+Array.repeat = function (count: number, val: any) : any[] {
     
     const result = new Array(count);
     for (let i = 0; i < count; i++) {
@@ -331,7 +331,7 @@ String.prototype.formatWith = function () {
 
     const args = arguments;
 
-    return this.replace(regex, function (match) {
+    return (this as string).replace(regex, match => {
         //match will look like {sample-match}
         //key will be 'sample-match';
         const key = match.substr(1, match.length - 2);
@@ -391,7 +391,7 @@ export function isNumber(n: any): boolean {
 }
 
 
-String.prototype.replaceAll = function (from, to) {
+String.prototype.replaceAll = function (from: string, to: string) {
     return this.split(from).join(to)
 };
 
@@ -507,11 +507,6 @@ String.prototype.repeat = function (n: number) {
     return result;
 };
 
-String.prototype.replaceAll = function (search, replacement) {
-    var target = this;
-    return target.split(search).join(replacement);
-};
-
 if (typeof String.prototype.trim !== 'function') {
     String.prototype.trim = function () {
         return this.replace(/^\s+|\s+$/, '');
@@ -592,7 +587,7 @@ export module Dic {
     export function extend<O, U>(out: O, arg1: U): O & U;
     export function extend<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
     export function extend<O, U, V>(out: O, ...args: Object[]): any;
-    export function extend(out) {
+    export function extend(out: any) {
         out = out || {};
 
         for (let i = 1; i < arguments.length; i++) {
@@ -647,7 +642,7 @@ export function combineFunction<F extends Function>(func1: F, func2: F) : F {
     if (!func2)
         return func1;
 
-    return function combined(...args) {
+    return function combined(...args: any[]) {
         func1.apply(this, args);
         func2.apply(this, args);
     } as any;

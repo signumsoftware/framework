@@ -11,15 +11,15 @@ export function configure(){
 
     if (!hasLocaleData) throw new TypeError('The Moment localizer depends on the `localeData` api, please provide a moment object v2.2.0 or higher');
 
-    function getMoment(culture, value, format) {
+    function getMoment(culture: string, value: any, format: string) {
         return culture ? moment(value, format)[localField](culture) : moment(value, format);
     }
 
-    function endOfDecade(date) {
+    function endOfDecade(date: Date) {
         return moment(date).add(10, 'year').add(-1, 'millisecond').toDate();
     }
 
-    function endOfCentury(date) {
+    function endOfCentury(date: Date) {
         return moment(date).add(100, 'year').add(-1, 'millisecond').toDate();
     }
 
@@ -35,27 +35,27 @@ export function configure(){
             month: 'MMM',
             year: 'YYYY',
 
-            decade: function decade(date, culture, localizer) {
+            decade: function decade(date: Date, culture: string, localizer: any) {
                 return localizer.format(date, 'YYYY', culture) + ' - ' + localizer.format(endOfDecade(date), 'YYYY', culture);
             },
 
-            century: function century(date, culture, localizer) {
+            century: function century(date: Date, culture: string, localizer: any) {
                 return localizer.format(date, 'YYYY', culture) + ' - ' + localizer.format(endOfCentury(date), 'YYYY', culture);
             }
         },
 
-        firstOfWeek: function firstOfWeek(culture) {
+        firstOfWeek: function firstOfWeek(culture: string) {
             return (moment.localeData(culture) as any).firstDayOfWeek();
         },
 
-        parse: function parse(value, format, culture) {
+        parse: function parse(value: string, format: string, culture: string) {
             if (value == null || value == "")
                 return null;
 
             return getMoment(culture, value, format).toDate();
         },
 
-        format: function format(value, _format, culture) {
+        format: function format(value: Date, _format: string, culture: string) {
             if (value == null)
                 return "";
 

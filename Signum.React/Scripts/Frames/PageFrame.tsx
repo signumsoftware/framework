@@ -25,7 +25,7 @@ interface PageFrameState {
 
 export default class PageFrame extends React.Component<PageFrameProps, PageFrameState> {
 
-    constructor(props) {
+    constructor(props: PageFrameProps) {
         super(props);
         this.state = this.calculateState(props);
 
@@ -40,12 +40,12 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     calculateState(props: PageFrameProps) {
-        
+
         return { componentClass: null, pack: null } as PageFrameState;
     }
 
 
-    componentWillReceiveProps(newProps) {
+    componentWillReceiveProps(newProps: PageFrameProps) {
         this.setState(this.calculateState(newProps), () => {
             this.load(newProps);
         });
@@ -58,11 +58,11 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     loadEntity(props: PageFrameProps): Promise<void> {
-        
+
         const ti = this.getTypeInfo();
 
         if (this.props.routeParams.id) {
-            
+
             const id = ti.members["Id"].type.name == "number" ? parseInt(props.routeParams.id) : props.routeParams.id;
 
             const lite: Lite<Entity> = {
@@ -76,10 +76,10 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         } else {
 
             return Constructor.construct(ti.name)
-                .then(pack => this.setState({ pack : pack as EntityPack<Entity> }));
+                .then(pack => this.setState({ pack: pack as EntityPack<Entity> }));
         }
     }
-    
+
 
     loadComponent(): Promise<void> {
         return Navigator.getComponent(this.state.pack.entity)
@@ -114,7 +114,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         }
 
         const entity = this.state.pack.entity;
-        
+
         const frame: EntityFrame<Entity> = {
             frameComponent: this,
             entityComponent: this.entityComponent,
@@ -152,7 +152,10 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
                 <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve}/>
                 { embeddedWidgets.top }
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
-                    {this.state.componentClass && React.createElement(this.state.componentClass, { ctx: ctx, ref: c => this.setComponent(c) } as any) }
+                    {
+                        this.state.componentClass && React.createElement(this.state.componentClass,
+                            { ctx: ctx, ref: (c: React.Component<any, any>) => this.setComponent(c) } as any)
+                    }
                 </div>
                 { embeddedWidgets.bottom }
             </div>

@@ -43,7 +43,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         }
     }
 
-    componentWillReceiveProps(newProps: EntityCheckboxListProps, newContext) {
+    componentWillReceiveProps(newProps: EntityCheckboxListProps, newContext: any) {
         if (!!newProps.data && !this.props.data)
             console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCheckboxList: ${this.state.type.name}`);
 

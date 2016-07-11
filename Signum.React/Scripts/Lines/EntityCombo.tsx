@@ -43,7 +43,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         }
     }
 
-    componentWillReceiveProps(newProps: EntityComboProps, newContext) {
+    componentWillReceiveProps(newProps: EntityComboProps, newContext: any) {
         if (!!newProps.data && !this.props.data)
             console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.state.type.name}`);
 
@@ -90,12 +90,14 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
             </span>
         );
 
-        if (!buttons.props.children.some(a => a))
+        if (!buttons.props.children.some((a: any) => a))
             buttons = null;
 
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps} >
+            <FormGroup ctx={s.ctx} labelText={s.labelText}
+                htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }
+                labelProps={s.labelHtmlProps} >
                 <div className="SF-entity-combo">
                     <div className={buttons ? "input-group" : null}>
                         { this.renderSelect() }

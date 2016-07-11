@@ -35,7 +35,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         count: 5
     });
 
-    defaultAutCompleteRenderItem = (lite, query) => Typeahead.highlightedText(lite.toStr, query);
+    defaultAutCompleteRenderItem = (lite: Lite<Entity>, query: string) => Typeahead.highlightedText(lite.toStr, query);
 
 
     renderInternal() {

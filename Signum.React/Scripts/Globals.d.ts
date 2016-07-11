@@ -46,10 +46,10 @@ interface Array<T> {
     singleOrNull(errorContext?: string): T;
     contains(element: T): boolean;
     remove(element: T): boolean;
-    removeAt(index: number);
-    insertAt(index: number, element: T);
+    removeAt(index: number): void;
+    insertAt(index: number, element: T): void;
     clone(): T[];
-    joinComma(lastSeparator: string);
+    joinComma(lastSeparator: string): string;
     extract(filter: (element: T) => boolean): T[]; 
     notNull(): T[]; 
 }
@@ -68,7 +68,7 @@ interface String {
     forGenderAndNumber(number: number): string;
     forGenderAndNumber(gender: string): string;
     forGenderAndNumber(gender: any, number: number): string;
-    replaceAll(from: string, to: string);
+    replaceAll(from: string, to: string): string;
     after(separator: string): string;
     before(separator: string): string;
     tryAfter(separator: string): string;
@@ -97,6 +97,6 @@ declare module moment {
     }
 
     interface MomentStatic {
-        smartNow();
+        smartNow(): Moment;
     }
 }

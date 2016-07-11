@@ -17,7 +17,7 @@ interface ErrorModalProps extends IModalProps {
 
 export default class ErrorModal extends React.Component<ErrorModalProps, { showDetails?: boolean; show?: boolean; }>  {
 
-    constructor(props) {
+    constructor(props: ErrorModalProps) {
         super(props);
 
         this.state = {

@@ -2137,7 +2137,7 @@ declare namespace JSX {
     }
 
     interface IntrinsicClassAttributes<T> {
-        ref?: string | ((classInstance: T) => void);
+        ref?: ((classInstance: T) => void) | string;
     }
 
     interface IntrinsicElements {

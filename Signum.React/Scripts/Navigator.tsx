@@ -45,9 +45,9 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute) {
 }
 
 
-export function navigateRoute(entity: Entity);
-export function navigateRoute(lite: Lite<Entity>);
-export function navigateRoute(type: PseudoType, id: any);
+export function navigateRoute(entity: Entity): string;
+export function navigateRoute(lite: Lite<Entity>): string;
+export function navigateRoute(type: PseudoType, id: any): string;
 export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: any = null) {
     let typeName: string;
     if (isEntity(typeOrEntity)) {
@@ -545,9 +545,9 @@ String.prototype.formatHtml = function () {
 
     const args = arguments;
 
-    const parts = this.split(regex);
+    const parts = (this as string).split(regex);
 
-    const result = [];
+    const result: (string | React.ReactElement<any>)[] = [];
     for (let i = 0; i < parts.length - 4; i += 4) {
         result.push(parts[i]);
         result.push(args[parts[i + 1]]);

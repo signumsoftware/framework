@@ -18,12 +18,10 @@ interface SearchModalProps extends React.Props<SearchModal>, IModalProps {
 
 export default class SearchModal extends React.Component<SearchModalProps, { show: boolean; }>  {
 
-    constructor(props) {
+    constructor(props: SearchModalProps) {
         super(props);
 
-        this.state = {
-            show: true
-        };
+        this.state = { show: true };
     }
 
     selectedEntites: Lite<Entity>[] = [];
@@ -82,7 +80,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
 
                 <Modal.Body>
                     <SearchControl hideExternalButton={true}
-                        ref={e => this.searchControl = e}
+                        ref={(e: SearchControl) => this.searchControl = e}
                         findOptions={this.props.findOptions}
                         onSelectionChanged={this.handleSelectionChanged}
                         onDoubleClick={this.props.findMode == FindMode.Find ? this.handleDoubleClick : null}

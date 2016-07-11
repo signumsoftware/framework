@@ -365,7 +365,7 @@ export interface IBinding<T> {
     setValue(val: T): void;
     suffix: string;
     getError(): string;
-    setError(value: string);
+    setError(value: string): void;
 }
 
 export class Binding<T> implements IBinding<T> {
@@ -452,7 +452,7 @@ export class ReadonlyBinding<T> implements IBinding<T> {
         return null;
     }
 
-    setError(name: string) {
+    setError(name: string): void {
         return null;
     }
 }
@@ -471,7 +471,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
         return new ReadonlyBinding<T>(parentValue as T, "");
 
     body = body.replace(partialMixinRegex,
-        (...m) => `${m[2]}.mixins["${m[4]}"]`);
+        (...m: string[]) => `${m[2]}.mixins["${m[4]}"]`);
 
     const m = memberRegex.exec(body);
 
@@ -760,7 +760,7 @@ export class PropertyRoute {
         return current;
     }
 
-    findRootType() {
+    findRootType(): TypeInfo {
         return this.rootType || this.parent.findRootType();
     }
 
@@ -928,8 +928,8 @@ export class GraphExplorer {
     }
 
     //cycle detection
-    private modified = [];
-    private notModified = [];
+    private modified : any[] = [];
+    private notModified: any[] = [];
 
     private modelStateMode: "collect" | "set" | "clean";
 

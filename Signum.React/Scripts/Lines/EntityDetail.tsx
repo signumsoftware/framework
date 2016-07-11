@@ -38,11 +38,12 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
             </span>
         );
 
-        if (!buttons.props.children.some(a => a))
+        if (!buttons.props.children.some((a : any) => a))
             buttons = null;
 
         return (
-            <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }>
+            <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass) }
+                {...Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{s.labelText}</span>

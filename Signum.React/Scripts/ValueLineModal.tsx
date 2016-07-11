@@ -14,7 +14,7 @@ interface ValueLinePopupModal extends React.Props<ValueLineModal>, IModalProps {
 
 export default class ValueLineModal extends React.Component<ValueLinePopupModal, { show: boolean; value?: any }>  {
 
-    constructor(props) {
+    constructor(props: ValueLinePopupModal) {
         super(props);
 
         this.state = { show: true, value: this.props.options.value };

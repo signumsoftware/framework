@@ -35,7 +35,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
         );
 
 
-        if (!buttons.props.children.some(a => a))
+        if (!buttons.props.children.some((a : any) => a))
             buttons = null;
 
         return (

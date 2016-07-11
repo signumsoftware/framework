@@ -29,7 +29,7 @@ export interface TypeaheadState {
 
 export default class Typeahead extends React.Component<TypeaheadProps, TypeaheadState>
 {
-    constructor(props) {
+    constructor(props: TypeaheadProps) {
         super(props);
         this.state = {
             shown: false,

@@ -148,7 +148,7 @@ export function hasAggregate(token: QueryToken): boolean {
 }
 
 export function getTokenParents(token: QueryToken): QueryToken[] {
-    const result = [];
+    const result: QueryToken[] = [];
     while (token != null) {
         result.insertAt(0, token);
         token = token.parent;

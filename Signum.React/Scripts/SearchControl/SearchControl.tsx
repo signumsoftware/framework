@@ -339,7 +339,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         if (!Finder.isFindable(fo.queryName))
             return null;
 
-        var sfb = this.state.simpleFilterBuilder && React.cloneElement(this.state.simpleFilterBuilder, { ref: (e) => { this.simpleFilterBuilderInstance = e } });
+        var sfb = this.state.simpleFilterBuilder &&
+            React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e } });
 
         return (
             <div className="sf-search-control SF-control-container" ref="container" data-search-count={this.state.searchCount} data-query-key={getQueryKey(fo.queryName)}>
