@@ -268,6 +268,13 @@ namespace Signum.Entities
             return ident;
         }
 
+        public static T SetModified<T>(this T ident)
+            where T : Modifiable
+        {
+            ident.Modified = ModifiedState.SelfModified;
+            return ident;
+        }
+
         public static T SetNotModifiedGraph<T>(this T ident, PrimaryKey id)
             where T : Entity
         {

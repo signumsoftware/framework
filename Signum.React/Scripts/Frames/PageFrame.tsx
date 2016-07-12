@@ -8,7 +8,7 @@ import ButtonBar from './ButtonBar'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, JavascriptMessage, entityInfo } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, GraphExplorer } from '../Reflection'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, getTypeInfos, GraphExplorer, parseId } from '../Reflection'
 import { renderWidgets, renderEmbeddedWidgets, WidgetContext } from './Widgets'
 import ValidationErrors from './ValidationErrors'
 
@@ -62,12 +62,10 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         const ti = this.getTypeInfo();
 
         if (this.props.routeParams.id) {
-
-            const id = ti.members["Id"].type.name == "number" ? parseInt(props.routeParams.id) : props.routeParams.id;
-
+            
             const lite: Lite<Entity> = {
                 EntityType: ti.name,
-                id: id,
+                id: parseId(ti, props.routeParams.id),
             };
 
             return Navigator.API.fetchEntityPack(lite)
@@ -90,7 +88,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         if (Finder.isFindable(this.state.pack.entity.Type))
             Navigator.currentHistory.push(Finder.findOptionsPath({ queryName: this.state.pack.entity.Type }));
         else
-            Navigator.currentHistory.push("/");
+            Navigator.currentHistory.push("~/");
     }
 
 

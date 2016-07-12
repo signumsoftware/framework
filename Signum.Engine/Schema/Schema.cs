@@ -478,7 +478,7 @@ namespace Signum.Engine.Maps
 
         public Table Table(Type type)
         {
-            return Tables.GetOrThrow(type, "Table {0} not loaded in schema");
+            return Tables.GetOrThrow(type, "Table {0} not included in the schema. Consider sb.Include<{0}>()");
         }
 
         internal static Field FindField(IFieldFinder fieldFinder, MemberInfo[] members)

@@ -45,7 +45,8 @@ export default class SearchPage extends React.Component<SearchPageProps, { findO
                     </a>
                 </h2>
                 <SearchControl ref={(e: SearchControl) => this.searchControl = e}
-                   hideExternalButton={true}
+                   showBarExtension={true}
+                   hideFullScreenButton={true}
                    findOptions={fo} />
             </div>
         );

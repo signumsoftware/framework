@@ -42,7 +42,7 @@ namespace Signum.React.Filters
                 e.ControllerName = ctx.ActionContext.ActionDescriptor.ControllerDescriptor.ControllerName;
                 e.UserAgent = req.Headers.UserAgent.ToString();
                 e.RequestUrl = req.RequestUri.ToString();
-                e.UrlReferer = req.Headers.Referrer.ToString();
+                e.UrlReferer = req.Headers.Referrer?.ToString();
                 e.UserHostAddress = GetClientIp(req);
                 e.UserHostName = GetClientName(req);
                 e.QueryString = ExceptionEntity.Dump(req.RequestUri.ParseQueryString());

@@ -54,8 +54,8 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute) {
 
 export function navigateRoute(entity: Entity): string;
 export function navigateRoute(lite: Lite<Entity>): string;
-export function navigateRoute(type: PseudoType, id: any): string;
-export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: any = null) {
+export function navigateRoute(type: PseudoType, id: number | string): string;
+export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: number | string = null): string {
     let typeName: string;
     if (isEntity(typeOrEntity)) {
         typeName = typeOrEntity.Type;
@@ -467,8 +467,8 @@ export module API {
     }
     
     export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
-    export function fetchEntity(type: PseudoType, id: any): Promise<Entity>;
-    export function fetchEntity(type: PseudoType, id?: any): Promise<Entity> {
+    export function fetchEntity(type: PseudoType, id: number | string): Promise<Entity>;
+    export function fetchEntity(type: PseudoType, id?: number | string): Promise<Entity> {
 
         const typeName = getTypeName(type);
         let idVal = id;
@@ -478,8 +478,8 @@ export module API {
 
 
     export function fetchEntityPack<T extends Entity>(lite: Lite<T>): Promise<EntityPack<T>>;
-    export function fetchEntityPack<T extends Entity>(type: Type<T>, id: any): Promise<EntityPack<T>>;
-    export function fetchEntityPack(type: PseudoType, id: any): Promise<EntityPack<Entity>>;
+    export function fetchEntityPack<T extends Entity>(type: Type<T>, id: number | string): Promise<EntityPack<T>>;
+    export function fetchEntityPack(type: PseudoType, id: number | string): Promise<EntityPack<Entity>>;
     export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<EntityPack<Entity>> {
 
         const typeName = (typeOrLite as Lite<any>).EntityType || getTypeName(typeOrLite as PseudoType);

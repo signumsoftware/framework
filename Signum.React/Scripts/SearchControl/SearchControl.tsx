@@ -33,7 +33,8 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     onSelectionChanged?: (entity: Lite<Entity>[]) => void;
     onFiltersChanged?: (filters: FilterOption[]) => void;
     onResult?: (table: ResultTable) => void;
-    hideExternalButton?: boolean;
+    hideFullScreenButton?: boolean;
+    showBarExtension?: boolean;
 }
 
 export interface SearchControlState {
@@ -417,7 +418,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                 </a>}
                 {this.props.showContextMenu != false && this.renderSelecterButton() }
                 {Finder.ButtonBarQuery.getButtonBarElements({ findOptions: fo, searchControl: this }).map((a, i) => React.cloneElement(a, { key: i })) }
-                {!this.props.hideExternalButton &&
+                {!this.props.hideFullScreenButton &&
                     <a className="sf-query-button btn btn-default" href="#" onClick={this.handleFullScreenClick} >
                         <span className="glyphicon glyphicon-new-window"></span>
                     </a> }
@@ -839,6 +840,9 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
     handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
 
+        if ((e.target as HTMLElement).parentElement != e.currentTarget) //directly in the td
+            return;
+
         if (this.props.onDoubleClick) {
             e.preventDefault();
             this.props.onDoubleClick(e, row);
@@ -893,7 +897,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             const mark = this.getMarkedRow(row.entity);
 
             const tr = (
-                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity) }  onDoubleClick={e => this.handleDoubleClick(e, row) }
+                <tr key={i} data-row-index={i} data-entity={liteKey(row.entity)} onDoubleClick={e => this.handleDoubleClick(e, row) }
                     className={mark && mark.style} 
                     {...rowAttributes ? rowAttributes(row, this.state.resultTable.columns) : null}>                    
                     {this.props.allowSelection &&
