@@ -297,7 +297,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 { ValueLine.withUnit(s.unitText,
                     <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>
-                        {numbro(s.ctx.value).format(numeralFormat) }
+                        {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numeralFormat) }
                     </FormControlStatic>) }
             </FormGroup>
         );
