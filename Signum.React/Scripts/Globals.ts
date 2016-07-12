@@ -1,9 +1,9 @@
 ﻿
 Array.prototype.clear = function (): void {
-    (this as any[]).length = 0;
+    this.length = 0;
 };
 
-Array.prototype.groupBy = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
+Array.prototype.groupBy = function (this:any[], keySelector: (element: any) => string): { key: string; elements: any[] }[] {
     const result: { key: string; elements: any[] }[] = [];
     const objectGrouped = this.groupToObject(keySelector);
     for (const prop in objectGrouped) {
@@ -13,7 +13,7 @@ Array.prototype.groupBy = function (keySelector: (element: any) => string): { ke
     return result;
 };
 
-Array.prototype.groupToObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
+Array.prototype.groupToObject = function (this: any[], keySelector: (element: any) => string): { [key: string]: any[] } {
     const result: { [key: string]: any[] } = {};
 
     for (let i = 0; i < this.length; i++) {
@@ -26,7 +26,7 @@ Array.prototype.groupToObject = function (keySelector: (element: any) => string)
     return result;
 };
 
-Array.prototype.groupWhen = function (isGroupKey: (element: any) => boolean, includeKeyInGroup = false, initialGroup = false): {key: any, elements: any[]}[] {
+Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) => boolean, includeKeyInGroup = false, initialGroup = false): {key: any, elements: any[]}[] {
     const result: {key: any, elements: any[]}[] = [];
 
     let group: {key: any, elements: any[]} = null;
@@ -55,7 +55,7 @@ Array.prototype.groupWhen = function (isGroupKey: (element: any) => boolean, inc
     return result;
 };
 
-Array.prototype.groupWhenChange = function (getGroupKey: (element: any) => string): {key: string, elements: any[]}[] {
+Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: any) => string): {key: string, elements: any[]}[] {
     const result: {key: any, elements: any[]}[] = [];
 
     let current: {key: string, elements: any[]} = null;
@@ -82,8 +82,8 @@ Array.prototype.groupWhenChange = function (getGroupKey: (element: any) => strin
     return result;
 };
 
-Array.prototype.orderBy = function (keySelector: (element: any) => any): any[] {
-    const cloned = (<any[]>this).slice(0);
+Array.prototype.orderBy = function (this: any[], keySelector: (element: any) => any): any[] {
+    const cloned = this.slice(0);
     cloned.sort((e1, e2) => {
         const v1 = keySelector(e1);
         const v2 = keySelector(e2);
@@ -96,8 +96,8 @@ Array.prototype.orderBy = function (keySelector: (element: any) => any): any[] {
     return cloned;
 };
 
-Array.prototype.orderByDescending = function (keySelector: (element: any) => any): any[] {
-    const cloned = (<any[]>this).slice(0);
+Array.prototype.orderByDescending = function (this: any[], keySelector: (element: any) => any): any[] {
+    const cloned = this.slice(0);
     cloned.sort((e1, e2) => {
         const v1 = keySelector(e1);
         const v2 = keySelector(e2);
@@ -110,10 +110,10 @@ Array.prototype.orderByDescending = function (keySelector: (element: any) => any
     return cloned;
 };
 
-Array.prototype.toObject = function (keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
+Array.prototype.toObject = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
     const obj: any = {};
 
-    (<Array<any>>this).forEach(item=> {
+    this.forEach(item=> {
         const key = keySelector(item);
 
         if (obj[key])
@@ -125,10 +125,10 @@ Array.prototype.toObject = function (keySelector: (element: any) => any, valueSe
     return obj;
 };
 
-Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
+Array.prototype.toObjectDistinct = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
     const obj: any = {};
 
-    (<Array<any>>this).forEach(item=> {
+    this.forEach(item=> {
         const key = keySelector(item);
 
         obj[key] = valueSelector ? valueSelector(item) : item;
@@ -137,10 +137,10 @@ Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any,
     return obj;
 };
 
-Array.prototype.flatMap = function (selector: (element: any, index: number, array: any[]) => any[]): any {
+Array.prototype.flatMap = function (this: any[], selector: (element: any, index: number, array: any[]) => any[]): any {
 
     const result : any[] = [];
-    (<Array<any>>this).forEach((item, index, array) =>
+    this.forEach((item, index, array) =>
         selector(item, index, array).forEach(item2 =>
             result.push(item2)
         ));
@@ -148,14 +148,13 @@ Array.prototype.flatMap = function (selector: (element: any, index: number, arra
     return result;
 };
 
-Array.prototype.groupsOf = function (maxCount: number) {
-
-    var array: any[] = this;
+Array.prototype.groupsOf = function (this: any[], maxCount: number) {
+    
 
     var result: any[][] = [];
     var newList: any[] = [];
 
-    array.map(item => {
+    this.map(item => {
         newList.push(item);
         if (newList.length == maxCount) {
             result.push(newList);
@@ -170,16 +169,16 @@ Array.prototype.groupsOf = function (maxCount: number) {
 
 }
 
-Array.prototype.max = function () {
+Array.prototype.max = function (this: any[]) {
     return Math.max.apply(null, this);
 };
 
-Array.prototype.min = function () {
+Array.prototype.min = function (this: any[]) {
     return Math.min.apply(null, this);
 };
 
 
-Array.prototype.first = function (errorContext) {
+Array.prototype.first = function (this: any[], errorContext: string) {
 
     if (this.length == 0)
         throw new Error("No " + (errorContext || "element") + " found");
@@ -188,7 +187,7 @@ Array.prototype.first = function (errorContext) {
 };
 
 
-Array.prototype.firstOrNull = function () {
+Array.prototype.firstOrNull = function (this: any[]) {
 
     if (this.length == 0)
         return null;
@@ -196,7 +195,7 @@ Array.prototype.firstOrNull = function () {
     return this[0];
 };
 
-Array.prototype.last = function (errorContext) {
+Array.prototype.last = function (this: any[], errorContext: string) {
 
     if (this.length == 0)
         throw new Error("No " + (errorContext || "element") + " found");
@@ -205,7 +204,7 @@ Array.prototype.last = function (errorContext) {
 };
 
 
-Array.prototype.lastOrNull = function () {
+Array.prototype.lastOrNull = function (this: any[]) {
 
     if (this.length == 0)
         return null;
@@ -213,7 +212,7 @@ Array.prototype.lastOrNull = function () {
     return this[this.length - 1];
 };
 
-Array.prototype.single = function (errorContext) {
+Array.prototype.single = function (this: any[], errorContext: string) {
 
     if (this.length == 0)
         throw new Error("No " + (errorContext || "element")  + " found");
@@ -224,7 +223,7 @@ Array.prototype.single = function (errorContext) {
     return this[0];
 };
 
-Array.prototype.singleOrNull = function (errorContext) {
+Array.prototype.singleOrNull = function (this: any[], errorContext: string) {
 
     if (this.length == 0)
         return null;
@@ -235,33 +234,33 @@ Array.prototype.singleOrNull = function (errorContext) {
     return this[0];
 };
 
-Array.prototype.contains = function (element) {
-    return (this as Array<any>).indexOf(element) != -1;
+Array.prototype.contains = function (this: any[], element: any) {
+    return this.indexOf(element) != -1;
 };
 
-Array.prototype.removeAt = function (index: number) {
-    (this as Array<any>).splice(index, 1);
+Array.prototype.removeAt = function (this: any[], index: number) {
+    this.splice(index, 1);
 };
 
-Array.prototype.remove = function (element) {
+Array.prototype.remove = function (this: any[], element: any) {
 
-    const index = (this as Array<any>).indexOf(element);
+    const index = this.indexOf(element);
     if (index == -1)
         return false;
 
-    (this as Array<any>).splice(index, 1);
+    this.splice(index, 1);
     return true;
 };
 
-Array.prototype.insertAt = function (index, element) {
-    (this as Array<any>).splice(index, 0, element);
+Array.prototype.insertAt = function (this: any[], index: number, element: any) {
+    this.splice(index, 0, element);
 };
 
-Array.prototype.clone = function () {
-    return (this as Array<any>).slice(0);
+Array.prototype.clone = function (this: any[]) {
+    return this.slice(0);
 };
 
-Array.prototype.joinComma = function (lastSeparator: string) {
+Array.prototype.joinComma = function (this: any[], lastSeparator: string) {
     const array = this as any[];
 
     if (array.length == 0)
@@ -277,21 +276,19 @@ Array.prototype.joinComma = function (lastSeparator: string) {
     return rest + lastSeparator + (array[lastIndex] == null ? "" : array[lastIndex].toString()); 
 };
 
-Array.prototype.extract = function (predicate: (element: any) => boolean) {
-    const array = this as any[];
-    const result = array.filter(predicate);
+Array.prototype.extract = function (this: any[], predicate: (element: any) => boolean) {
+    const result = this.filter(predicate);
 
-    result.forEach(element => { array.remove(element) });
+    result.forEach(element => { this.remove(element) });
 
     return result;
 };
 
-Array.prototype.notNull = function () {
-    return (this as any[]).filter(a => !!a);
+Array.prototype.notNull = function (this: any[]) {
+    return this.filter(a => !!a);
 };
 
-Array.range = function (min, maxNotIncluded) {
-
+Array.range = function (min: number, maxNotIncluded: number) {
     const length = maxNotIncluded - min;
 
     const result = new Array(length);
@@ -340,7 +337,7 @@ String.prototype.formatWith = function () {
 };
 
 
-String.prototype.forGenderAndNumber = function (gender: any, number?: number) {
+String.prototype.forGenderAndNumber = function (this: string, gender: any, number?: number) {
 
     if (!number && !isNaN(parseFloat(gender))) {
         number = gender;
@@ -390,7 +387,7 @@ export function isNumber(n: any): boolean {
 }
 
 
-String.prototype.replaceAll = function (from: string, to: string) {
+String.prototype.replaceAll = function (this: string, from: string, to: string) {
     return this.split(from).join(to)
 };
 
@@ -458,8 +455,8 @@ String.prototype.tryAfterLast = function (separator) {
     return this.substring(index + separator.length);
 };
 
-String.prototype.etc = function (maxLength: number) {
-    var str = this as string;
+String.prototype.etc = function (this: string, maxLength: number) {
+    var str = this;
 
     str = str.tryBefore("\n") || str;
 
@@ -470,15 +467,15 @@ String.prototype.etc = function (maxLength: number) {
 };
 
 String.prototype.firstUpper = function () {
-    return (this[0] as string).toUpperCase() + this.substring(1);
+    return this[0].toUpperCase() + this.substring(1);
 };
 
 String.prototype.firstLower = function () {
-    return (this[0] as string).toLowerCase() + this.substring(1);
+    return this[0].toLowerCase() + this.substring(1);
 };
 
-String.prototype.trimStart = function (char: string) {
-    var result = this as string;
+String.prototype.trimStart = function (char) {
+    var result = this;
     if (char == "")
         throw new Error("Empty char");
 
@@ -488,8 +485,8 @@ String.prototype.trimStart = function (char: string) {
     return result;
 };
 
-String.prototype.trimEnd = function (char: string) {
-    var result = this as string;
+String.prototype.trimEnd = function (char) {
+    var result = this;
     if (char == "")
         throw new Error("Empty char");
 
@@ -499,21 +496,15 @@ String.prototype.trimEnd = function (char: string) {
     return result;
 };
 
-String.prototype.repeat = function (n: number) {
+String.prototype.repeat = function (n) {
     var result = ""; 
     for (var i = 0; i < n; i++)
         result += this;
     return result;
 };
 
-if (typeof String.prototype.trim !== 'function') {
-    String.prototype.trim = function () {
-        return this.replace(/^\s+|\s+$/, '');
-    }
-}
-
 Promise.prototype.done = function () {
-    (this as Promise<any>).catch(error => setTimeout(() => { throw error; }, 0));
+    this.catch(error => setTimeout(() => { throw error; }, 0));
 };
 
 export module Dic {
@@ -641,7 +632,7 @@ export function combineFunction<F extends Function>(func1: F, func2: F) : F {
     if (!func2)
         return func1;
 
-    return function combined(...args: any[]) {
+    return function combined(this: any, ...args: any[]) {
         func1.apply(this, args);
         func2.apply(this, args);
     } as any;

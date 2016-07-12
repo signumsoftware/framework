@@ -765,14 +765,14 @@ declare module D3 {
         * to compare, and should return either a negative, positive, or zero value to indicate
         * their relative order.
         */
-        sort<T>(comparator?: (a: T, b: T) => number): Selection<T>;
+        sort<T>(comparator?: (a: T, b: T) => number): this;
 
         /**
         * Re-inserts elements into the document such that the document order matches the selection
         * order. This is equivalent to calling sort() if the data is already sorted, but much
         * faster.
         */
-        order: () => Selection<T>;
+        order: () => this;
 
         /**
         * Returns the first non-null element in the current selection. If the selection is empty,

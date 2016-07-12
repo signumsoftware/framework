@@ -774,7 +774,7 @@ declare module d3 {
          * Invoke the given function for each element in the selection. The return value of the function is ignored.
          * @param func the function to invoke
          */
-        each(func: (datum: Datum, index: number, outerIndex: number) => any): Selection<Datum>;
+        each(func: (this: Element, datum: Datum, index: number, outerIndex: number) => any): Selection<Datum>;
 
         /**
          * Call a function on the selection. sel.call(foo) is equivalent to foo(sel).

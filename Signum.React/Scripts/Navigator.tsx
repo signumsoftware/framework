@@ -129,7 +129,7 @@ function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<
 
     var baseRender = component.prototype.render as () => void;
 
-    component.prototype.render = function () {
+    component.prototype.render = function (this: React.Component<any, any>) {
 
         var ctx = this.props.ctx;
 
@@ -547,12 +547,12 @@ declare global {
     }
 }
 
-String.prototype.formatHtml = function () {
+String.prototype.formatHtml = function (this: string) {
     const regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
     const args = arguments;
 
-    const parts = (this as string).split(regex);
+    const parts = this.split(regex);
 
     const result: (string | React.ReactElement<any>)[] = [];
     for (let i = 0; i < parts.length - 4; i += 4) {
