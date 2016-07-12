@@ -177,8 +177,9 @@ export class SchemaMapD3 {
             .style("cursor", d => (d as TableInfo).typeName ? "pointer" : null)
             .text(d => d.niceName)
             .each(function (d) {
-                wrap(this, 60);
-                const b = this.getBBox();
+                var text = this as SVGTextElement;
+                wrap(text, 60);
+                const b = text.getBBox();
                 d.width = b.width + margin * 2;
                 d.height = b.height + margin * 2;
             });

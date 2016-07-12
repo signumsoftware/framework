@@ -3,9 +3,8 @@ import * as d3 from "d3"
 import { ChartValue, ChartTable, ChartColumn,  } from "../ChartClient"
 
 
-(Array.prototype as any as d3.Selection<any>).enterData = function (data: any, tag: string, cssClass: string) {
-
-    return (this as d3.Selection<any>).selectAll(tag + "." + cssClass).data(data)
+(Array.prototype as any as d3.Selection<any>).enterData = function (this: d3.Selection<any>, data: any, tag: string, cssClass: string) {
+    return this.selectAll(tag + "." + cssClass).data(data)
         .enter().append("svg:" + tag)
         .attr("class", cssClass);
 };
@@ -27,16 +26,16 @@ export function makeItTokenValue(value: ChartValue) {
     if (value === null || value === undefined)
         return;
 
-    value.toString = function () {
+    value.toString = function (this: ChartValue) {
         var key = (this.key !== undefined ? this.key : this);
 
         if (key === null || key === undefined)
             return "null";
 
-        return key;
+        return key.toString();
     };
 
-    value.niceToString = function () {
+    value.niceToString = function (this: ChartValue) {
         var result = (this.toStr !== undefined ? this.toStr : this);
 
         if (result === null || result === undefined)
@@ -249,8 +248,8 @@ export class Rule {
         //paint x-axis rule
         chart.append('svg:g').attr('class', 'x-rule-tick')
             .enterData(keys, 'line', 'x-rule-tick')
-            .attr('x1', function (d) { return this.ends[d]; })
-            .attr('x2', function (d) { return this.ends[d]; })
+            .attr('x1', d => this.ends[d])
+            .attr('x2', d => this.ends[d])
             .attr('y1', 0)
             .attr('y2', 10000)
             .style('stroke-width', 2)
@@ -259,12 +258,12 @@ export class Rule {
         //paint y-axis rule labels
         chart.append('svg:g').attr('class', 'x-axis-rule-label')
             .enterData(keys, 'text', 'x-axis-rule-label')
-            .attr('transform', function (d, i) {
+            .attr('transform', (d, i) => {
                 return translate(this.starts[d] + this.sizes[d] / 2 - 5, 10 + 100 * (i % 3)) +
                     rotate(90);
             })
             .attr('fill', 'DeepPink')
-            .text(function (d) { return d; });
+            .text(d => d);
     }
 
     debugY(chart: d3.Selection<any>) {
@@ -276,17 +275,17 @@ export class Rule {
             .enterData(keys, 'line', 'y-rule-tick')
             .attr('x1', 0)
             .attr('x2', 10000)
-            .attr('y1', function (d) { return this.ends[d]; })
-            .attr('y2', function (d) { return this.ends[d]; })
+            .attr('y1', d => this.ends[d])
+            .attr('y2', d => this.ends[d])
             .style('stroke-width', 2)
             .style('stroke', 'Violet');
 
         //paint y-axis rule labels
         chart.append('svg:g').attr('class', 'y-axis-rule-label')
             .enterData(keys, 'text', 'y-axis-rule-label')
-            .attr('transform', function (d, i) { return translate(100 * (i % 3), this.starts[d] + this.sizes[d] / 2 + 4); })
+            .attr('transform', (d, i) => translate(100 * (i % 3), this.starts[d] + this.sizes[d] / 2 + 4))
             .attr('fill', 'DarkViolet')
-            .text(function (d) { return d; });
+            .text(d => d);
     }
 }
 

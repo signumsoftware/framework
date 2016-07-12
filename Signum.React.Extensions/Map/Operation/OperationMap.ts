@@ -161,9 +161,10 @@ export class OperationMapD3 {
             .attr("class", "state")
             .style("cursor", d => d.token ? "pointer" : null)
             .text(d => d.niceName)
-            .each(function (d) {
-                wrap(this, 60);
-                var b = this.getBBox();
+            .each(function(d) {
+                var svg = this as SVGTextElement;
+                wrap(svg, 60);
+                var b = svg.getBBox();
                 d.width = b.width + margin * 2;
                 d.height = b.height + margin * 2;
             });
@@ -218,8 +219,9 @@ export class OperationMapD3 {
             .style("cursor", "pointer")
             .text(d => d.niceName)
             .each(function (d) {
-                wrap(this, 60);
-                var b = this.getBBox();
+                var svg = this as SVGTextElement;
+                wrap(svg, 60);
+                var b = svg.getBBox();
                 d.width = b.width + margin * 2;
                 d.height = b.height + margin * 2;
             });
