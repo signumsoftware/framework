@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
-import { ModifiableEntity, EntityPack } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
+import { ModifiableEntity, EntityPack, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities';
 import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Services from '../../../Framework/Signum.React/Scripts/Services';
@@ -103,7 +103,7 @@ export function queryIsFindable(queryKey: string) {
 }
 
 export function onOperationAuthorized(oi: OperationInfo) {
-    var member = getTypeInfo(oi.key.before(".")).members[oi.key.after(".")];
+    const member = getTypeInfo(oi.key.before(".")).members[oi.key.after(".")];
     return member.operationAllowed;
 }
 
@@ -111,7 +111,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
     if (state.ctx.propertyRoute &&
         state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
 
-        var member = state.ctx.propertyRoute.member;
+        const member = state.ctx.propertyRoute.member;
 
         switch ((member as any).propertyAllowed as PropertyAllowed) {
             case "None":
@@ -127,7 +127,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
 }
 
 export function navigatorIsReadOnly(typeName: string, entityPack?: EntityPack<ModifiableEntity>) {
-    var ti = getTypeInfo(typeName);
+    const ti = getTypeInfo(typeName);
 
     if (ti == null)
         return false;
@@ -139,7 +139,7 @@ export function navigatorIsReadOnly(typeName: string, entityPack?: EntityPack<Mo
 }
 
 export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<ModifiableEntity>) {
-    var ti = getTypeInfo(typeName);
+    const ti = getTypeInfo(typeName);
 
     if (ti == null)
         return false;
@@ -151,7 +151,7 @@ export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<Mo
 }
 
 export function navigatorIsCreable(typeName: string) {
-    var ti = getTypeInfo(typeName);
+    const ti = getTypeInfo(typeName);
   
     return ti == null || ti.typeAllowed == "Create";
 }
@@ -160,18 +160,21 @@ export function currentUser(): UserEntity {
     return Navigator.currentUser as UserEntity;
 }
 
-export var onCurrentUserChanged: Array<(newUser: UserEntity) => void> = [];
+export const onCurrentUserChanged: Array<(newUser: UserEntity) => void> = [];
 
 export function setCurrentUser(user: UserEntity) {
 
+    const changed = !is(Navigator.currentUser, user, true);
+
     Navigator.setCurentUser(user);
 
-    onCurrentUserChanged.forEach(f => f(user));
+    if (changed)
+        onCurrentUserChanged.forEach(f => f(user));
 }
 
 export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Promise<Response>): Promise<Response> {
 
-    var token = getAuthToken();
+    const token = getAuthToken();
 
     if (!token)
         return makeCall();
@@ -184,9 +187,13 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
     return makeCall()
         .catch(ifError(ServiceError, e => {
             if (e.status == 426 && e.httpError.ExceptionType.endsWith(".NewTokenRequiredException")) {
+
+                if (token != getAuthToken())
+                    return makeCall();
+
                 return Api.refreshToken(token).then(resp => {
-                    setCurrentUser(resp.userEntity)
                     setAuthToken(resp.token);
+                    setCurrentUser(resp.userEntity)
 
                     options.headers["Authorization"] = "Bearer " + resp.token;
 
@@ -254,11 +261,9 @@ export function autoLogin(): Promise<UserEntity> {
 export function logout() {
 
     Api.logout().then(() => {
-
+        onLogout();
         setCurrentUser(null);
         setAuthToken(null);
-
-        onLogout();
     }).done();
 }
 
@@ -279,7 +284,7 @@ export function changeOnLogin(newOnLogin: () => void) {
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol) {
-    var member = getTypeInfo(permission.key.before(".")).members[permission.key.after(".")];
+    const member = getTypeInfo(permission.key.before(".")).members[permission.key.after(".")];
     return member.permissionAllowed;
 }
 
@@ -307,7 +312,7 @@ export module Api {
     }
 
     export function loginFromCookie(): Promise<LoginResponse> {
-        return ajaxPost<LoginResponse>({ url: "~/api/auth/loginFromCookie" }, null);
+        return ajaxPost<LoginResponse>({ url: "~/api/auth/loginFromCookie", avoidAuthToken: true }, null);
     }
 
     export function refreshToken(oldToken: string): Promise<LoginResponse> {

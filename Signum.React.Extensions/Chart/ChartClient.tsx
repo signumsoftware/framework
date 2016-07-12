@@ -31,7 +31,7 @@ export function start(options: { routes: JSX.Element[] }) {
     </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-        if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
+        if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
             return null;
 
         return <ChartButton searchControl={ctx.searchControl}/>;

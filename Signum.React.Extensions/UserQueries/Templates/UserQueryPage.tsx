@@ -70,8 +70,9 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
                     </a>
                 </h2>
                 <SearchControl ref={(e: SearchControl) => this.searchControl = e}
-                   hideExternalButton={true}
-                   findOptions={fo} />
+                    hideFullScreenButton={true}
+                    showBarExtension={true}
+                    findOptions={fo} />
             </div>
         );
     }
