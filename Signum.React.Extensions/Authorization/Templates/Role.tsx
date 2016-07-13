@@ -5,7 +5,7 @@ import { ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, TypeCont
 export default class Role extends React.Component<{ ctx: TypeContext<RoleEntity> }, void> {
 
     render() {
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(e => e.name)} />

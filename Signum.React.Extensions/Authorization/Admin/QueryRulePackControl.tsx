@@ -27,7 +27,7 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
             .then(() => Api.fetchQueryRulePack(pack.type.cleanName, pack.role.id))
             .then(newPack => {
                 notifySuccess();
-                bc.frame.onReload({ entity: newPack, canExecute: null });
+                bc.frame.onReload({ entity: newPack, canExecute: undefined });
             })
             .done();
     }

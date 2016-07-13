@@ -20,9 +20,9 @@ export default class ChartButton extends React.Component<ChartButtonProps, void>
 
     handleClick = (e: React.MouseEvent) => {
 
-        var fo = this.props.searchControl.state.findOptions;
+        const fo = this.props.searchControl.state.findOptions;
 
-        var path = ChartClient.Encoder.chartRequestPath(ChartRequest.New(cr => {
+        const path = ChartClient.Encoder.chartRequestPath(ChartRequest.New(cr => {
             cr.queryKey = getQueryKey(fo.queryName);
             cr.filterOptions = fo.filterOptions;
         }));

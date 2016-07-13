@@ -9,7 +9,7 @@ export default class Package extends React.Component<{ ctx: TypeContext<PackageE
 
     render() {
         
-        var e = this.props.ctx;
+        const e = this.props.ctx;
 
         return (
             <div>

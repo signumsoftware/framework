@@ -9,7 +9,7 @@ import { colorScale, colorScaleSqr  } from '../../Utils'
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
 
     if (!isPermissionAuthorized(CachePermission.ViewCache))
-        return null;
+        return undefined;
 
 
     return [
@@ -23,17 +23,17 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
 function getColorProvider(info: SchemaMapInfo, name: string, title: string, withDefs: boolean): ClientColorProvider {
 
 
-    var max = info.tables.map(a => a.extra[name]).filter(n => n != undefined).max();
+    const max = info.tables.map(a => a.extra[name]).filter(n => n != undefined).max();
 
-    var color = colorScale(max);
+    const color = colorScale(max);
 
     return {
         name: name,
 
         getFill: t => t.extra["cache-semi"] == undefined ? "lightgray" : color(t.extra[name]),
 
-        getMask: t => t.extra["cache-semi"] == undefined ? null :
-            t.extra["cache-semi"] ? "url(#mask-stripe)" : null,
+        getMask: t => t.extra["cache-semi"] == undefined ? undefined :
+            t.extra["cache-semi"] ? "url(#mask-stripe)" : undefined,
 
         getTooltip: t => t.extra["cache-semi"] == undefined ? "NO Cached" :
             t.extra["cache-semi"] == true ? ("SEMI Cached - " + t.extra[name] + "  " + title) :
@@ -45,7 +45,7 @@ function getColorProvider(info: SchemaMapInfo, name: string, title: string, with
             <mask id="mask-stripe">
                 <rect x="0" y= "0" width= "100% " height= "100% " fill= "url(#pattern - stripe)"></rect >
             </mask>
-        ] : null
+        ] : undefined
     }
 
 }

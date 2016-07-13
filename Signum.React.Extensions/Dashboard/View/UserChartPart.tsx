@@ -34,7 +34,7 @@ export interface UserChartPartState {
 
 export default class UserChartPart extends React.Component<UserChartPartProps, UserChartPartState> {
     
-    state = { chartRequest: null, result: null } as UserChartPartState;
+    state = { chartRequest: undefined, result: undefined } as UserChartPartState;
     
     componentWillMount(){
         this.loadChartRequest(this.props);
@@ -51,11 +51,11 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
 
     loadChartRequest(props: UserChartPartProps) {
        
-        this.setState({chartRequest: null, result: null, error: null });
+        this.setState({chartRequest: undefined, result: undefined, error: undefined });
 
         UserChartClient.Converter.toChartRequest(props.part.userChart, props.entity)
             .then(cr => {
-                this.setState({chartRequest: cr, result: null });
+                this.setState({chartRequest: cr, result: undefined });
                 this.makeQuery();
             })
             .done();
@@ -63,7 +63,7 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
 
     makeQuery(){
 
-        this.setState({ result: null, error: null });
+        this.setState({ result: undefined, error: undefined });
 
         ChartClient.API.executeChart(this.state.chartRequest)
             .then(rt => this.setState({ result: rt }))
@@ -73,7 +73,7 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
 
     render(){
         
-        var s = this.state;
+        const s = this.state;
         if(s.error)
         {
             return ( 
@@ -95,9 +95,9 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
 
     renderError(e : any){
 
-         var se = e instanceof ServiceError ? (e as ServiceError) : null;
+         const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
 
-         if (se == null)
+         if (se == undefined)
             return <p className="text-danger"> { e.message ? e.message : e }</p>;
 
         return (

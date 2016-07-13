@@ -53,7 +53,7 @@ export function start(options: { routes: JSX.Element[] }) {
     Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => new Promise(resolve => require(['./Admin/UserQueryPart'], resolve))));
 
     options.routes.push(<Route path="dashboard">
-        <Route path=":dashboardId" getComponent={ (loc, cb) => require(["./View/DashboardPage"], (Comp) => cb(null, Comp.default)) } />
+        <Route path=":dashboardId" getComponent={ (loc, cb) => require(["./View/DashboardPage"], (Comp) => cb(undefined, Comp.default)) } />
     </Route>);
 
     registerRenderer(CountSearchControlPartEntity, { 
@@ -91,15 +91,15 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     });
 
-    onEmbeddedWidgets.push(ctx => !isEntity(ctx.pack.entity.Type) || ctx.pack.entity.isNew || !AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard) ? null :
+    onEmbeddedWidgets.push(ctx => !isEntity(ctx.pack.entity.Type) || ctx.pack.entity.isNew || !AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard) ? undefined :
         { position: "Top", embeddedWidget: <DashboardWidget position="Top" pack={ ctx.pack as EntityPack<Entity> } /> });
 
-    onEmbeddedWidgets.push(ctx => !isEntity(ctx.pack.entity.Type) || ctx.pack.entity.isNew || !AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard)? null :
+    onEmbeddedWidgets.push(ctx => !isEntity(ctx.pack.entity.Type) || ctx.pack.entity.isNew || !AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard)? undefined :
         { position: "Bottom", embeddedWidget: <DashboardWidget position="Bottom" pack={ ctx.pack as EntityPack<Entity> } /> });
 
     QuickLinks.registerGlobalQuickLink(ctx => {
         if (!AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
-            return null;
+            return undefined;
 
         return API.forEntityType(ctx.lite.EntityType).then(das =>
             das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr, e => {
@@ -110,7 +110,7 @@ export function start(options: { routes: JSX.Element[] }) {
     QuickLinks.registerQuickLink(DashboardEntity, ctx => new QuickLinks.QuickLinkAction("preview", DashboardMessage.Preview.niceToString(),
         e => Navigator.API.fetchAndRemember(ctx.lite)
             .then(db => {
-                if (db.entityType == null)
+                if (db.entityType == undefined)
                     navigateOrWindowsOpen(e, "~/dashboard/" + ctx.lite.id);
                 else
                     Navigator.API.fetchAndRemember(db.entityType)
@@ -155,7 +155,7 @@ export interface DashboardWidgetState {
 
 export class DashboardWidget extends React.Component<DashboardWidgetProps, DashboardWidgetState> {
 
-    state = { dashboard: null } as DashboardWidgetState;
+    state = { dashboard: undefined } as DashboardWidgetState;
     
     componentWillMount() {
         this.load(this.props);
@@ -170,10 +170,10 @@ export class DashboardWidget extends React.Component<DashboardWidgetProps, Dashb
     load(props: DashboardWidgetProps) {      
 
         if (props.pack.entity.isNew) {
-            this.setState({ dashboard: null });
+            this.setState({ dashboard: undefined });
 
         } else {
-            this.setState({ dashboard: null });
+            this.setState({ dashboard: undefined });
 
             API.embedded(props.pack.entity.Type, props.position)
                 .then(d => {
@@ -187,7 +187,7 @@ export class DashboardWidget extends React.Component<DashboardWidgetProps, Dashb
     render() {
 
         if (!this.state.dashboard || !this.state.component)
-            return null;
+            return undefined;
 
         return React.createElement(this.state.component, {
             dashboard: this.state.dashboard,

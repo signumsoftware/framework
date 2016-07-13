@@ -38,10 +38,10 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
     render() {
         document.title = "SchedulerLogic state";
 
-        if (this.state == null)
+        if (this.state == undefined)
             return <h2>SchedulerLogic state (loading...) </h2>;
 
-        var s = this.state;
+        const s = this.state;
 
         return (
             <div>
@@ -60,7 +60,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                     <br />
                     SchedulerMargin: {s.SchedulerMargin}
                     <br />
-                    NextExecution: { s.NextExecution} ({ s.NextExecution == null ? "-None-" : moment(s.NextExecution).toNow() })
+                    NextExecution: { s.NextExecution} ({ s.NextExecution == undefined ? "-None-" : moment(s.NextExecution).toNow() })
                     <br />
                     { this.renderTable() }
                     <br />
@@ -89,7 +89,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
     }
 
     renderTable() {
-        var s = this.state;
+        const s = this.state;
         return (
             <div>
                 <h3>In Memory Queue</h3>
@@ -109,7 +109,7 @@ export default class SchedulerPanelPage extends React.Component<SchedulerPanelPr
                             <tr key={i}>
                                 <td><EntityLink lite={item.ScheduledTask} inSearch={true} /></td>
                                 <td>{ item.Rule } </td>
-                                <td>{ item.NextExecution} ({ item.NextExecution == null ? "-None-" : moment(item.NextExecution).toNow() }) </td>
+                                <td>{ item.NextExecution} ({ item.NextExecution == undefined ? "-None-" : moment(item.NextExecution).toNow() }) </td>
                             </tr>)
                         }
                     </tbody>

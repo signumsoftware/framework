@@ -9,8 +9,8 @@ export default class ScheduleRuleWeekDays extends React.Component<{ ctx: TypeCon
 
     render() {
         
-        var ctx4 = this.props.ctx.subCtx({ labelColumns: {sm: 4}});
-        var ctx2 = this.props.ctx.subCtx({ labelColumns: {sm: 2}});
+        const ctx4 = this.props.ctx.subCtx({ labelColumns: {sm: 4}});
+        const ctx2 = this.props.ctx.subCtx({ labelColumns: {sm: 2}});
 
         return (
             <div>    

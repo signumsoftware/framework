@@ -30,17 +30,17 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
         result.Filters.forEach(f => {
             array.push(<span> </span>);
 
-            var last: string = null;
+            let last: string = undefined;
             if (f.QueryTokenMatches)
                 f.QueryTokenMatches.map(m => {
-                    if (last != null)
+                    if (last != undefined)
                         array.push(<span>.</span>);
                     this.renderMatch(m, array);
                     last = m.Text;
                 });
 
             if (f.QueryToken.niceName != last) {
-                if (last != null)
+                if (last != undefined)
                     array.push(<span>.</span>);
 
                 array.push(this.coloredSpan(f.QueryTokenOmniboxPascal.tryAfterLast(".") || f.QueryTokenOmniboxPascal, "gray"));
@@ -48,15 +48,15 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
 
             if (f.CanFilter && f.CanFilter.length)
                 array.push(this.coloredSpan(f.CanFilter, "red"));
-            else if (f.Operation != null) {
+            else if (f.Operation != undefined) {
 
                 array.push(<strong>{f.OperationToString}</strong>);
 
                 if (f.Value == UNKNOWN)
                     array.push(this.coloredSpan(OmniboxMessage.Unknown.niceToString(), "red"));
-                else if (f.ValueMatch != null)
+                else if (f.ValueMatch != undefined)
                     this.renderMatch(f.ValueMatch, array);
-                else if (f.Syntax != null && f.Syntax.Completion == FilterSyntaxCompletion.Complete)
+                else if (f.Syntax != undefined && f.Syntax.Completion == FilterSyntaxCompletion.Complete)
                     array.push(<b>{f.ValueToString}</b>);
                 else
                     array.push(this.coloredSpan(f.ValueToString, "gray"));
@@ -89,18 +89,18 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
     }
 
     toString(result: DynamicQueryOmniboxResult) {
-        var queryName = result.QueryNameMatch.Text;
+        const queryName = result.QueryNameMatch.Text;
 
-        var filters = result.Filters.map(f => {
+        const filters = result.Filters.map(f => {
 
-            var token = f.QueryTokenOmniboxPascal;
+            const token = f.QueryTokenOmniboxPascal;
 
-            if (f.Syntax == null || f.Syntax.Completion == FilterSyntaxCompletion.Token || f.CanFilter && f.CanFilter.length > 1)
+            if (f.Syntax == undefined || f.Syntax.Completion == FilterSyntaxCompletion.Token || f.CanFilter && f.CanFilter.length > 1)
                 return token;
 
-            var oper = f.OperationToString;
+            const oper = f.OperationToString;
 
-            if (f.Syntax.Completion == FilterSyntaxCompletion.Operation && f.Value == null ||
+            if (f.Syntax.Completion == FilterSyntaxCompletion.Operation && f.Value == undefined ||
                 (f.Value == UNKNOWN))
                 return token + oper;
 

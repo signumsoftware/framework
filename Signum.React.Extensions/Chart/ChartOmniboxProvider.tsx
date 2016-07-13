@@ -23,14 +23,14 @@ export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxRe
 
     renderItem(result: ChartOmniboxResult): React.ReactChild[] {
 
-        var array: React.ReactChild[] = [];
+        const array: React.ReactChild[] = [];
 
         array.push(this.icon());
 
         this.renderMatch(result.KeywordMatch, array);
         array.push("\u0020");
 
-        if (result.QueryNameMatch != null)
+        if (result.QueryNameMatch != undefined)
             this.renderMatch(result.QueryNameMatch, array);
         else
             array.push(this.coloredSpan(OmniboxMessage.Omnibox_Query.niceToString() + "...", "lightgray"));
@@ -40,10 +40,10 @@ export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxRe
 
     navigateTo(result: ChartOmniboxResult) {
 
-        if (result.QueryNameMatch == null)
-            return null;
+        if (result.QueryNameMatch == undefined)
+            return undefined;
 
-        var path = ChartClient.Encoder.chartRequestPath(ChartRequest.New(cr => {
+        const path = ChartClient.Encoder.chartRequestPath(ChartRequest.New(cr => {
             cr.queryKey = getQueryKey(result.QueryName);
         }));
 
@@ -51,7 +51,7 @@ export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxRe
     }
 
     toString(result: ChartOmniboxResult) {
-        if (result.QueryNameMatch == null)
+        if (result.QueryNameMatch == undefined)
             return result.KeywordMatch.Text;
 
         return "{0} {1}".formatWith(result.KeywordMatch.Text, result.QueryNameMatch.Text);

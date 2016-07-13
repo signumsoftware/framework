@@ -23,7 +23,7 @@ export default class UserQueryOmniboxProvider extends OmniboxProvider<UserQueryO
 
     renderItem(result: UserQueryOmniboxResult): React.ReactChild[] {
 
-        var array: React.ReactChild[] = [];
+        const array: React.ReactChild[] = [];
 
         array.push(this.icon());
 
@@ -34,11 +34,11 @@ export default class UserQueryOmniboxProvider extends OmniboxProvider<UserQueryO
 
     navigateTo(result: UserQueryOmniboxResult) {
 
-        if (result.UserQuery == null)
-            return null;
+        if (result.UserQuery == undefined)
+            return undefined;
 
         return Navigator.API.fetchAndForget(result.UserQuery)
-            .then(uq => UserQueryClient.Converter.toFindOptions(uq, null))
+            .then(uq => UserQueryClient.Converter.toFindOptions(uq, undefined))
             .then(fo => Finder.findOptionsPath(fo, { userQuery: liteKey(result.UserQuery) }));
     }
 

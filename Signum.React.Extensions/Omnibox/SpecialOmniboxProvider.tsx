@@ -20,7 +20,7 @@ export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmnib
 
     renderItem(result: SpecialOmniboxResult): React.ReactChild[] {
 
-        var array: React.ReactChild[] = [];
+        const array: React.ReactChild[] = [];
 
         array.push(this.icon());
 

@@ -17,14 +17,14 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
 {
     handleOnSelect = (result: OmniboxClient.OmniboxResult, e: React.SyntheticEvent) => {
 
-        var ke = e as React.KeyboardEvent;
+        const ke = e as React.KeyboardEvent;
 
         if (ke.keyCode && ke.keyCode == 9) {
             return OmniboxClient.toString(result);
         }
 
-        var ctrlKey = ke.ctrlKey;
-        var promise = OmniboxClient.navigateTo(result);
+        const ctrlKey = ke.ctrlKey;
+        const promise = OmniboxClient.navigateTo(result);
         if (promise) {
             promise.then(url => {
                 if (url) {
@@ -45,16 +45,16 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
 
     render() {
 
-        var inputAttr = this.props.inputAttrs;
+        let inputAttr = this.props.inputAttrs;
 
-        if (inputAttr == null)
+        if (inputAttr == undefined)
             inputAttr = {};
 
-        if (inputAttr.placeholder == null)
+        if (inputAttr.placeholder == undefined)
             inputAttr.placeholder = OmniboxMessage.Search.niceToString();
 
 
-        var result = (
+        const result = (
             <Typeahead ref={ta => this.typeahead = ta} getItems={OmniboxClient.API.getResults} 
                 renderItem={OmniboxClient.renderItem}
                 onSelect={this.handleOnSelect}

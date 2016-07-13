@@ -30,23 +30,23 @@ export function start(options: { routes: JSX.Element[] }) {
         name: "Lite",
         isApplicable: col => col.token.type.name === "WebDownload",
         formatter: col => new CellFormatter((cell: WebDownload) =>
-            !cell ? null : <a href={cell.FullWebPath} download={cell.FileName}>{cell.FileName}</a>)
+            !cell ? undefined : <a href={cell.FullWebPath} download={cell.FileName}>{cell.FileName}</a>)
     });
 
     Finder.formatRules.push({
         name: "Lite",
         isApplicable: col => col.token.type.name === "WebImage",
         formatter: col => new CellFormatter((cell: WebImage) =>
-            !cell ? null : <img src={cell.FullWebPath}/>)
+            !cell ? undefined : <img src={cell.FullWebPath}/>)
     });
 }
 
 
 function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
     DynamicComponent.specificComponents[type.typeName] = ctx => {
-        var tr = ctx.propertyRoute.typeReference();
+        const tr = ctx.propertyRoute.typeReference();
         if (tr.isCollection)
-            return null;
+            return undefined;
         return <FileLine ctx={ctx}/>;
     };
 }

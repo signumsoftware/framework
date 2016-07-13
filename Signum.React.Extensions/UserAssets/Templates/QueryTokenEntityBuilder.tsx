@@ -21,8 +21,8 @@ interface QueryTokenEntityBuilderProps {
 export default class QueryTokenEntityBuilder extends React.Component<QueryTokenEntityBuilderProps, { }> {
 
     handleTokenChanged = (newToken: QueryToken) => {
-        if (newToken == null)
-            this.props.ctx.value = null;
+        if (newToken == undefined)
+            this.props.ctx.value = undefined;
         else
             this.props.ctx.value = QueryTokenEntity.New(t => {
                 t.tokenString = newToken.fullKey;

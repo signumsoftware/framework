@@ -32,8 +32,8 @@ export function getAllProviders(info: SchemaMapInfo): Promise<ClientColorProvide
 export function start(options: { routes: JSX.Element[], auth: boolean; cache: boolean; disconnected: boolean; isolation: boolean }) {
 
     options.routes.push(<Route path="map">
-        <IndexRoute getComponent={ (loc, cb) => require(["./Schema/SchemaMapPage"], (Comp) => cb(null, Comp.default)) } />
-        <Route path=":type" getComponent={ (loc, cb) => require(["./Operation/OperationMapPage"], (Comp) => cb(null, Comp.default)) } />
+        <IndexRoute getComponent={ (loc, cb) => require(["./Schema/SchemaMapPage"], (Comp) => cb(undefined, Comp.default)) } />
+        <Route path=":type" getComponent={ (loc, cb) => require(["./Operation/OperationMapPage"], (Comp) => cb(undefined, Comp.default)) } />
     </Route>);
     
     getProviders.push((smi) => new Promise<ClientColorProvider[]>(resolve => {

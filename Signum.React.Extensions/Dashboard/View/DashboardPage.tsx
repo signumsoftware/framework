@@ -29,7 +29,7 @@ interface DashboardPageState {
 
 export default class DashboardPage extends React.Component<DashboardPageProps, DashboardPageState> {
 
-    state = { dashboard: null, entity: null } as DashboardPageState;
+    state = { dashboard: undefined, entity: undefined } as DashboardPageState;
 
     componentWillMount() {
         this.loadDashboard(this.props);
@@ -45,14 +45,14 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
     }
 
     loadDashboard(props: DashboardPageProps) {
-        this.setState({ dashboard: null });
+        this.setState({ dashboard: undefined });
         Navigator.API.fetchEntity(DashboardEntity, props.routeParams.dashboardId)
             .then(d => this.setState({ dashboard: d }))
             .done();
     }
 
     loadEntity(props: DashboardPageProps) {
-        this.setState({ entity: null });
+        this.setState({ entity: undefined });
         if (props.location.query["entity"])
             Navigator.API.fetchAndForget(parseLite(props.location.query["entity"]))
                 .then(e => this.setState({ entity: e }))
@@ -72,19 +72,19 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
                     <div style={{ float: "right", textAlign: "right" }}>
                         {!entity ? <h3>{JavascriptMessage.loading.niceToString() }</h3> :
                         <h3>
-                            { Navigator.isNavigable({ entity: entity, canExecute: null } as EntityPack<Entity>) ?
+                            { Navigator.isNavigable({ entity: entity, canExecute: undefined } as EntityPack<Entity>) ?
                                     <Link className="sf-entity-title" to={Navigator.navigateRoute(entity) }>{getToString(entity) }</Link> :
                                     <span className="sf-entity-title">{getToString(entity) }</span>
                                 }
                                 <br />
-                                <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, null) }</small>
+                                <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined) }</small>
                             </h3>
                         }
                     </div> }
 
                 {!dashboard ? <h2>{JavascriptMessage.loading.niceToString() }</h2> :
                     <h2>
-                        {Navigator.isNavigable({ entity: dashboard, canExecute: null } as EntityPack<Entity>) ?
+                        {Navigator.isNavigable({ entity: dashboard, canExecute: undefined } as EntityPack<Entity>) ?
                             <Link to={Navigator.navigateRoute(dashboard) }>{getToString(dashboard) }</Link> :
                             <span>{getToString(dashboard) }</span>
                         }

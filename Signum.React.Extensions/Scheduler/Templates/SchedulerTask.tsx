@@ -9,7 +9,7 @@ export default class ScheduledTask extends React.Component<{ ctx: TypeContext<Sc
 
     render() {
         
-        var e = this.props.ctx;
+        const e = this.props.ctx;
 
         return (
             <div>    

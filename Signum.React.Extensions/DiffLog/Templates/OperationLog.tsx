@@ -17,8 +17,8 @@ export default class OperationLog extends React.Component<{ ctx: TypeContext<Ope
 
     render() {
         
-        var ctx = this.props.ctx;
-        var ctx6 = ctx.subCtx({ labelColumns: { sm: 3 } });
+        const ctx = this.props.ctx;
+        const ctx6 = ctx.subCtx({ labelColumns: { sm: 3 } });
 
         return (
             <div>
@@ -45,7 +45,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 {
     constructor(props: any) {
         super(props);
-        this.state = { result: null };
+        this.state = { result: undefined };
     }
 
     componentWillMount() {
@@ -97,9 +97,9 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
     renderPrevDiff() {
 
-        var eq = isEqual(this.state.result.diffPrev);
+        const eq = isEqual(this.state.result.diffPrev);
 
-        var title =  (
+        const title =  (
             <span title={ DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.niceToString()}>
                 <span className={`glyphicon glyphicon-fast-backward colorIcon red ${eq ? "mini" : ""}`}></span>
                 <span className={`glyphicon glyphicon-step-backward colorIcon green ${eq ? "mini" : ""}`}></span>
@@ -127,9 +127,9 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
             return <Tab eventKey="diff" title={JavascriptMessage.loading.niceToString() } />
         }
 
-        var eq = !this.state.result.diff || isEqual(this.state.result.diff);
+        const eq = !this.state.result.diff || isEqual(this.state.result.diff);
 
-        var title = (
+        const title = (
             <span title={ DiffLogMessage.DifferenceBetweenInitialStateAndFinalState.niceToString() }>
                 <span className={`glyphicon glyphicon-step-backward colorIcon red ${eq ? "mini" : ""}`}></span>
                 <span className={`glyphicon glyphicon-step-forward colorIcon green ${eq ? "mini" : ""}`}></span>
@@ -153,9 +153,9 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
     renderNextDiff() {
 
-        var eq = isEqual(this.state.result.diffNext);
+        const eq = isEqual(this.state.result.diffNext);
 
-        var title = (
+        const title = (
             <span title={ DiffLogMessage.DifferenceBetweenFinalStateAndTheInitialStateOfNextLog.niceToString() }>
                 <span className={`glyphicon glyphicon-step-forward colorIcon red ${eq ? "mini" : ""}`}></span>
                 <span className={`glyphicon glyphicon-fast-forward colorIcon green ${eq ? "mini" : ""}`}></span>
@@ -205,7 +205,7 @@ function isEqual(diff: Array<DiffPair<Array<DiffPair<string>>>>) {
 
 function renderDiffDocument(diff: Array<DiffPair<Array<DiffPair<string>>>>): React.ReactElement<any> {
 
-    var result = diff.flatMap(line => {
+    const result = diff.flatMap(line => {
         if (line.Action == "Removed") {
             return [<span style={{ backgroundColor: "#FFD1D1" }}>{renderDiffLine(line.Value) }</span>];
         }
@@ -232,7 +232,7 @@ function renderDiffDocument(diff: Array<DiffPair<Array<DiffPair<string>>>>): Rea
 
 function renderDiffLine(list: Array<DiffPair<string>>): Array<React.ReactElement<any>>
 {
-   var result = list.map((a,i) => {
+   const result = list.map((a,i) => {
         if (a.Action == "Equal")
             return <span key={i}>{a.Value}</span>;
         else if (a.Action == "Added")

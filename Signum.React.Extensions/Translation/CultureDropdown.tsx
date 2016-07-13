@@ -36,14 +36,14 @@ export default class CultureDropdown extends React.Component<CultureDropdownProp
     }
 
     render() {
-        var cultures = this.state.cultures;
+        const cultures = this.state.cultures;
 
-        if (cultures == null)
+        if (!cultures)
             return null;
 
-        var current = CultureClient.currentCulture;
+        const current = CultureClient.currentCulture;
 
-        var pair = Dic.map(cultures, (name, c) => ({ name, c })).filter(p => is(p.c, current)).singleOrNull();
+        const pair = Dic.map(cultures, (name, c) => ({ name, c })).filter(p => is(p.c, current)).singleOrNull();
 
         return (
             <NavDropdown id="culture-dropdown" title={current.toStr} data-culture={pair.name}>

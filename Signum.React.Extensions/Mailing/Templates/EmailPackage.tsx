@@ -10,7 +10,7 @@ export default class EmailPackage extends React.Component<{ ctx: TypeContext<Ema
 
     render() {
 
-        var e = this.props.ctx;
+        const e = this.props.ctx;
 
         return (
             <div>

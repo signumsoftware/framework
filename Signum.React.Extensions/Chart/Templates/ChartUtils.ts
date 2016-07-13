@@ -11,11 +11,11 @@ import { ChartValue, ChartTable, ChartColumn,  } from "../ChartClient"
 
 export function fillAllTokenValueFuntions(data: ChartTable) {
 
-    for (var i = 0; ; i++) {
-        if (data.columns['c' + i] === undefined)
+    for (let i = 0; ; i++) {
+        if (data.columns['c' + i] == undefined)
             break;
 
-        for (var j = 0; j < data.rows.length; j++) {
+        for (let j = 0; j < data.rows.length; j++) {
             makeItTokenValue(data.rows[j]['c' + i]);
         }
     }
@@ -23,22 +23,22 @@ export function fillAllTokenValueFuntions(data: ChartTable) {
 
 export function makeItTokenValue(value: ChartValue) {
 
-    if (value === null || value === undefined)
+    if (value == undefined)
         return;
 
     value.toString = function (this: ChartValue) {
-        var key = (this.key !== undefined ? this.key : this);
+        const key = (this.key !== undefined ? this.key : this);
 
-        if (key === null || key === undefined)
+        if (key == undefined)
             return "null";
 
         return key.toString();
     };
 
     value.niceToString = function (this: ChartValue) {
-        var result = (this.toStr !== undefined ? this.toStr : this);
+        const result = (this.toStr !== undefined ? this.toStr : this);
 
-        if (result === null || result === undefined)
+        if (result == undefined)
             return this.key != undefined ? "[ no text ]" : "[ null ]";
 
         return result.toString();
@@ -47,15 +47,15 @@ export function makeItTokenValue(value: ChartValue) {
 
 export function ellipsis(elem: SVGTextElement, width: number, padding?: number, ellipsisSymbol?: string) {
 
-    if (ellipsisSymbol === null || ellipsisSymbol == undefined)
+    if (ellipsisSymbol === undefined || ellipsisSymbol == undefined)
         ellipsisSymbol = '…';
 
     if (padding)
         width -= padding * 2;
 
-    var self = d3.select(elem);
-    var textLength = (<any>self.node()).getComputedTextLength();
-    var text = self.text();
+    const self = d3.select(elem);
+    let textLength = (<any>self.node()).getComputedTextLength();
+    let text = self.text();
     while (textLength > width && text.length > 0) {
         text = text.slice(0, -1);
         while (text[text.length - 1] == ' ' && text.length > 0)
@@ -66,12 +66,12 @@ export function ellipsis(elem: SVGTextElement, width: number, padding?: number, 
 }
 
 export function getClickKeys(row: any, columns: any) {
-    var options = "";
-    for (var k in columns) {
-        var col = columns[k];
+    let options = "";
+    for (const k in columns) {
+        const col = columns[k];
         if (col.isGroupKey == true) {
-            var tokenValue = row[k];
-            if (tokenValue != null) {
+            const tokenValue = row[k];
+            if (tokenValue != undefined) {
                 options += "&" + k + "=" + (tokenValue.keyForFilter || tokenValue.toString());
             }
         }
@@ -81,21 +81,21 @@ export function getClickKeys(row: any, columns: any) {
 }
 
 export function translate(x: number, y: number) {
-    if (y === undefined)
+    if (y == undefined)
         return 'translate(' + x + ')';
 
     return 'translate(' + x + ',' + y + ')';
 }
 
 export function scale(x: number, y: number) {
-    if (y === undefined)
+    if (y == undefined)
         return 'scale(' + x + ')';
 
     return 'scale(' + x + ',' + y + ')';
 }
 
 export function rotate(angle: number, x?: number, y?: number): string {
-    if (x === undefined || y == undefined)
+    if (x == undefined || y == undefined)
         return 'rotate(' + angle + ')';
 
     return 'rotate(' + angle + ',' + y + ',' + y + ')';
@@ -127,11 +127,11 @@ export function scaleFor(column: { type: string }, values: any[], minRange: numb
 
     if (scaleName == "MinMax") {
         if (column.type == "Date" || column.type == "DateTime") {
-            var scale = d3.time.scale()
+            const scale = d3.time.scale()
                 .domain([new Date(<any>d3.min(values)), new Date(<any>d3.max(values))])
                 .range([minRange, maxRange]);
 
-            var f = function (d: string) { return scale(new Date(d)); };
+            const f = function (d: string) { return scale(new Date(d)); };
             (<any>f).ticks = scale.ticks;
             (<any>f).tickFormat = scale.tickFormat;
             return f;
@@ -172,10 +172,10 @@ export class Rule {
 
     constructor(object: any, totalSize?: number) {
 
-        var fixed = 0;
-        var proportional = 0;
-        for (var p in object) {
-            var value = object[p];
+        let fixed = 0;
+        let proportional = 0;
+        for (const p in object) {
+            const value = object[p];
             if (typeof value === 'number')
                 fixed += value;
             else if (Rule.isStar(value))
@@ -193,20 +193,20 @@ export class Rule {
 
         this.totalSize = totalSize;
 
-        var remaining = totalSize - fixed;
-        var star = proportional <= 0 ? 0 : remaining / proportional;
+        const remaining = totalSize - fixed;
+        const star = proportional <= 0 ? 0 : remaining / proportional;
 
-        for (var p in object) {
-            var value = object[p];
+        for (const p in object) {
+            const value = object[p];
             if (typeof value === 'number')
                 this.sizes[p] = value;
             else if (Rule.isStar(value))
                 this.sizes[p] = Rule.getStar(value) * star;
         }
 
-        var acum = 0;
+        let acum = 0;
 
-        for (var p in this.sizes) {
+        for (const p in this.sizes) {
             this.starts[p] = acum;
             acum += this.sizes[p];
             this.ends[p] = acum;
@@ -243,7 +243,7 @@ export class Rule {
 
     debugX(chart: d3.Selection<any>) {
 
-        var keys = d3.keys(this.sizes);
+        const keys = d3.keys(this.sizes);
 
         //paint x-axis rule
         chart.append('svg:g').attr('class', 'x-rule-tick')
@@ -268,7 +268,7 @@ export class Rule {
 
     debugY(chart: d3.Selection<any>) {
 
-        var keys = d3.keys(this.sizes);
+        const keys = d3.keys(this.sizes);
 
         //paint y-axis rule
         chart.append('svg:g').attr('class', 'y-rule-tick')
@@ -292,23 +292,23 @@ export class Rule {
 
 export function toTree<T>(elements: T[], getKey: (elem: T) => string, getParent: (elem: T) => T): Node<T>[] {
 
-    var root: Node<T> = { item: null, children: [] };
+    const root: Node<T> = { item: undefined, children: [] };
 
-    var dic: { [key: string]: Node<T> } = {};
+    const dic: { [key: string]: Node<T> } = {};
 
     function getOrCreateNode(elem: T) {
 
-        var key = getKey(elem);
+        const key = getKey(elem);
 
         if (dic[key])
             return dic[key];
 
-        var node: Node<T> = { item: elem, children: [] };
+        const node: Node<T> = { item: elem, children: [] };
 
-        var parent = getParent(elem);
+        const parent = getParent(elem);
 
         if (parent) {
-            var parentNode = getOrCreateNode(parent);
+            const parentNode = getOrCreateNode(parent);
 
             parentNode.children.push(node);
         } else {

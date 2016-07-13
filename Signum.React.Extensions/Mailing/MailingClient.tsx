@@ -21,7 +21,7 @@ require("!style!css!./Mailing.css");
 
 export function start(options: { routes: JSX.Element[], smtpConfig: boolean, newsletter: boolean, pop3Config: boolean, sendEmailTask: boolean, quickLinksFrom: PseudoType[] }) {
     options.routes.push(<Route path="asyncEmailSender">
-        <Route path="view" getComponent={(loc, cb) => require(["./AsyncEmailSenderPage"], (Comp) => cb(null, Comp.default)) }/>
+        <Route path="view" getComponent={(loc, cb) => require(["./AsyncEmailSenderPage"], (Comp) => cb(undefined, Comp.default)) }/>
     </Route>);
 
     OmniboxClient.registerSpecialAction({
@@ -30,8 +30,8 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
         onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/asyncEmailSender/view"))
     });
 
-    registerToString(EmailTemplateMessageEntity, a => a.cultureInfo == null ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName);
-    registerToString(EmailMasterTemplateMessageEntity, a => a.cultureInfo == null ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName);
+    registerToString(EmailTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName);
+    registerToString(EmailMasterTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName);
 
     Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => new Promise(resolve => require(['./Templates/EmailMessage'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => new Promise(resolve => require(['./Templates/EmailTemplate'], resolve))));
@@ -64,7 +64,7 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
             if (options.quickLinksFrom.some(e => getTypeName(e) == ctx.lite.EntityType))
                 return new QuickLinks.QuickLinkExplore({ queryName: EmailMessageEntity, parentColumn: "Target", parentValue: ctx.lite });
 
-            return null;
+            return undefined;
         });
     }
 
@@ -73,11 +73,11 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
 
 export module API {
     export function start(): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/asyncEmailSender/start" }, null);
+        return ajaxPost<void>({ url: "~/api/asyncEmailSender/start" }, undefined);
     }
 
     export function stop(): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/asyncEmailSender/stop" }, null);
+        return ajaxPost<void>({ url: "~/api/asyncEmailSender/stop" }, undefined);
     }
 
     export function view(): Promise<AsyncEmailSenderState> {

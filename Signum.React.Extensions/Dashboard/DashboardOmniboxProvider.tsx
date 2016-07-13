@@ -21,7 +21,7 @@ export default class DashboardOmniboxProvider extends OmniboxProvider<DashboardO
 
     renderItem(result: DashboardOmniboxResult): React.ReactChild[] {
 
-        var array: React.ReactChild[] = [];
+        const array: React.ReactChild[] = [];
 
         array.push(this.icon());
 
@@ -32,8 +32,8 @@ export default class DashboardOmniboxProvider extends OmniboxProvider<DashboardO
 
     navigateTo(result: DashboardOmniboxResult) {
 
-        if (result.Dashboard == null)
-            return null;
+        if (result.Dashboard == undefined)
+            return undefined;
 
         return Promise.resolve(Navigator.currentHistory.createHref("~/dashboard/" + result.Dashboard.id));
     }

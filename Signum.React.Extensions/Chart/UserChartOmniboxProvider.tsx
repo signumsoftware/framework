@@ -24,7 +24,7 @@ export default class UserChartOmniboxProvider extends OmniboxProvider<UserChartO
 
     renderItem(result: UserChartOmniboxResult): React.ReactChild[] {
 
-        var array: React.ReactChild[] = [];
+        const array: React.ReactChild[] = [];
 
         array.push(this.icon());
 
@@ -35,11 +35,11 @@ export default class UserChartOmniboxProvider extends OmniboxProvider<UserChartO
 
     navigateTo(result: UserChartOmniboxResult) {
 
-        if (result.UserChart == null)
-            return null;
+        if (result.UserChart == undefined)
+            return undefined;
 
         return Navigator.API.fetchAndForget(result.UserChart)
-            .then(a => UserChartClient.Converter.toChartRequest(a, null))
+            .then(a => UserChartClient.Converter.toChartRequest(a, undefined))
             .then(cr => ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(result.UserChart)}));
     }
 

@@ -15,7 +15,7 @@ import { UserChartPartEntity } from '../Signum.Entities.Dashboard'
 export default class UserChartPart extends React.Component<{ ctx: TypeContext<UserChartPartEntity> }, void> {
 
     render() {
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
         
         return (
             <div >

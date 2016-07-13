@@ -20,27 +20,27 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
 
     renderItem(result: EntityOmniboxResult): React.ReactChild[] {
 
-        var array: React.ReactChild[] = [];
+        const array: React.ReactChild[] = [];
 
         array.push(this.icon());
 
         this.renderMatch(result.TypeMatch, array)
         array.push(<span> </span>);
 
-        if (result.Id == null && result.ToStr == null) {
+        if (result.Id == undefined && result.ToStr == undefined) {
             throw Error("Invalid EntityOmniboxProvider result");
         } else {
 
-            if (result.Id != null) {
+            if (result.Id != undefined) {
                 array.push(`${result.Id}: `);
 
-                if (result.Lite == null) {
+                if (result.Lite == undefined) {
                     array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
                 } else {
                     array.push(result.Lite.toStr);
                 }
             } else {
-                if (result.Lite == null) {
+                if (result.Lite == undefined) {
                     array.push(`'${result.ToStr}': `);
                     array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
                 } else {
@@ -56,8 +56,8 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
 
     navigateTo(result: EntityOmniboxResult): Promise<string> {
 
-        if (result.Lite == null)
-            return null;
+        if (result.Lite == undefined)
+            return undefined;
 
         return Promise.resolve(Navigator.navigateRoute(result.Lite));
     }

@@ -12,7 +12,7 @@ export default class NewsletterDelivery extends React.Component<{ ctx: TypeConte
 
     render() {
 
-         var nc = this.props.ctx;
+         const nc = this.props.ctx;
 
         return (
             <div>

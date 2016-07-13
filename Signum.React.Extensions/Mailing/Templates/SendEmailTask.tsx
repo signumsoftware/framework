@@ -27,13 +27,13 @@ export default class SendEmailTask extends React.Component<{ ctx: TypeContext<Se
                 .done();
         }
         else
-            this.setState({ type: null });
+            this.setState({ type: undefined });
     }
 
     render() {
 
-        var sc = this.props.ctx;
-        var ac = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
+        const sc = this.props.ctx;
+        const ac = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
 
         return (
             <div>

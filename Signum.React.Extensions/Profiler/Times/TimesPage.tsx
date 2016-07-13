@@ -21,7 +21,7 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
     constructor(props: TimesPageProps) {
         super(props);
-        this.state =  { times : null};
+        this.state =  { times : undefined};
     }
 
     componentWillMount() {
@@ -41,7 +41,7 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
     render() {
         document.title = "Times state";
 
-        if (this.state.times == null)
+        if (this.state.times == undefined)
             return <h3>Times (loading...)</h3>;
 
 
@@ -70,12 +70,12 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
     renderBars(){
 
-        var maxWith = 600;
+        const maxWith = 600;
 
-        var maxValue = this.state.times.map(a => a.maxTime).max();
-        var maxTotal = this.state.times.map(a => a.totalTime).max();
+        const maxValue = this.state.times.map(a => a.maxTime).max();
+        const maxTotal = this.state.times.map(a => a.totalTime).max();
 
-        var ratio = maxWith / maxValue;
+        const ratio = maxWith / maxValue;
 
         return (
              <table className="table">
@@ -85,7 +85,7 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
                                 <td width="300">
                                     <div>
                                         <span className="processName"> { pair.key.tryBefore(' ') || pair.key }</span>
-                                                { pair.key.tryAfter(' ') != null && <span className="entityName"> { pair.key.after(' ') } </span> }
+                                                { pair.key.tryAfter(' ') != undefined && <span className="entityName"> { pair.key.after(' ') } </span> }
                                     </div>
                                     <div>
                                          <span className="numTimes">Executed { pair.count } {pair.count == 1? "time": "times"} Total { pair.totalTime} ms </span>
@@ -133,11 +133,11 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
     
     renderTable(){
 
-        var getColor = (f: number) => `rgb(255, ${(1 - f) * 255}, ${(1 - f) * 255})`;
+        const getColor = (f: number) => `rgb(255, ${(1 - f) * 255}, ${(1 - f) * 255})`;
 
-        var times = this.state.times;
+        const times = this.state.times;
 
-         var max =  {
+         const max =  {
             count : times.map(a => a.count).max(),
             lastTime : times.map(a => a.lastTime).max(),
             minTime : times.map(a => a.minTime).max(),

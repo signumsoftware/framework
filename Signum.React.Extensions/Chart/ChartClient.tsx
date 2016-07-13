@@ -27,12 +27,12 @@ import * as UserChartClient from './UserChart/UserChartClient'
 export function start(options: { routes: JSX.Element[] }) {
 
     options.routes.push(<Route path="chart">
-        <Route path=":queryName" getComponent={ (loc, cb) => require(["./Templates/ChartRequestPage"], (Comp) => cb(null, Comp.default)) } />
+        <Route path=":queryName" getComponent={ (loc, cb) => require(["./Templates/ChartRequestPage"], (Comp) => cb(undefined, Comp.default)) } />
     </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
         if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
-            return null;
+            return undefined;
 
         return <ChartButton searchControl={ctx.searchControl}/>;
     });
@@ -53,7 +53,7 @@ export namespace ButtonBarChart {
     export const onButtonBarElements: ((ctx: ButtonBarChartContext) => React.ReactElement<any>)[] = [];
 
     export function getButtonBarElements(ctx: ButtonBarChartContext): React.ReactElement<any>[] {
-        return onButtonBarElements.map(f => f(ctx)).filter(a => a != null);
+        return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined);
     }
 }
 
@@ -86,10 +86,10 @@ export function isCompatibleWith(chartScript: ChartScriptEntity, chartBase: ICha
         chartScript.columns.map(mle => mle.element),
         chartBase.columns.map(mle => mle.element), (s, c) => {
 
-            if (s == null)
-                return c.token == null;
+            if (s == undefined)
+                return c.token == undefined;
 
-            if (c == null || c.token == null)
+            if (c == undefined || c.token == undefined)
                 return s.isOptional;
 
             if (!isChartColumnType(c.token.token, s.columnType))
@@ -108,20 +108,20 @@ export function zipOrDefault<T, S, R>(arrayT: T[], arrayS: S[], selector: (t: T,
     const result: R[] = [];
     for (let i = 0; i < max; i++) {
         result.push(selector(
-            i < arrayT.length ? arrayT[i] : null,
-            i < arrayS.length ? arrayS[i] : null));
+            i < arrayT.length ? arrayT[i] : undefined,
+            i < arrayS.length ? arrayS[i] : undefined));
     }
 
     return result;
 }
 
 export function isChartColumnType(token: QueryToken, ct: ChartColumnType): boolean {
-    if (token == null)
+    if (token == undefined)
         return false;
 
     const type = getChartColumnType(token);
 
-    if (type == null)
+    if (type == undefined)
         return false;
 
     if (ct == type)
@@ -169,7 +169,7 @@ export function getChartColumnType(token: QueryToken): ChartColumnType {
         case "DateTime": return token.isGroupable ? "Date" : "DateTime";
     }
 
-    return null;
+    return undefined;
 }
 
 
@@ -179,13 +179,13 @@ export function synchronizeColumns(chart: IChartBase) {
 
     const chartScript = chart.chartScript;
 
-    if (chartScript == null) {
+    if (chartScript == undefined) {
         chart.columns.clear();
     }
 
     for (let i = 0; i < chartScript.columns.length; i++) {
         if (chart.columns.length <= i) {
-            chart.columns.push({ rowId: null, element: ChartColumnEntity.New() });
+            chart.columns.push({ rowId: undefined, element: ChartColumnEntity.New() });
         }
     }
 
@@ -203,23 +203,23 @@ export function synchronizeColumns(chart: IChartBase) {
         chartScript.parameters.forEach(sp => {
             let cp = byName[sp.element.name];
 
-            if (cp == null) {
+            if (cp == undefined) {
                 cp = ChartParameterEntity.New();
                 cp.name = sp.element.name;
-                const column = sp.element.columnIndex == null ? null : chart.columns[sp.element.columnIndex].element;
+                const column = sp.element.columnIndex == undefined ? undefined : chart.columns[sp.element.columnIndex].element;
                 cp.value = defaultParameterValue(sp.element, column && column.token && column.token.token);
             }
             else {
-                const column = sp.element.columnIndex == null ? null : chart.columns[sp.element.columnIndex].element;
+                const column = sp.element.columnIndex == undefined ? undefined : chart.columns[sp.element.columnIndex].element;
                 if (isValidParameterValue(cp.value, sp.element, column && column.token && column.token.token))
                     defaultParameterValue(sp.element, column && column.token && column.token.token);
             }
 
-            chart.parameters.push({ rowId: null, element: cp });
+            chart.parameters.push({ rowId: undefined, element: cp });
         });
     }
 
-    if (chart.groupResults == null) {
+    if (chart.groupResults == undefined) {
         chart.groupResults = true;
     }
 
@@ -236,7 +236,7 @@ export function synchronizeColumns(chart: IChartBase) {
             const sc = chart.chartScript.columns[i]
             if (chart.groupResults == false || sc && sc.element.isGroupKey) {
                 const parentToken = cc.token.token.parent;
-                cc.token = parentToken == null ? null : QueryTokenEntity.New(t => {
+                cc.token = parentToken == undefined ? undefined : QueryTokenEntity.New(t => {
                     t.tokenString = parentToken && parentToken.fullKey;
                     t.token = parentToken;
                 });
@@ -247,9 +247,9 @@ export function synchronizeColumns(chart: IChartBase) {
     });
 
     if (chart.Type == ChartRequest.typeName) {
-        var cr = chart as ChartRequest;
+        const cr = chart as ChartRequest;
 
-        var keys = chart.columns.filter((a, i) => a.element.token && chartScript.columns[i].element.isGroupKey).map(a => a.element.token.token.fullKey);
+        const keys = chart.columns.filter((a, i) => a.element.token && chartScript.columns[i].element.isGroupKey).map(a => a.element.token.token.fullKey);
 
         cr.orderOptions = cr.orderOptions.filter(o => {
             if (chart.groupResults)
@@ -263,7 +263,7 @@ export function synchronizeColumns(chart: IChartBase) {
 function isValidParameterValue(value: string, parameter: ChartScriptParameterEntity, relatedColumn: QueryToken) {
 
     switch (parameter.type) {
-        case "Enum": return parameter.enumValues.filter(a => a.typeFilter == null || relatedColumn == null || isChartColumnType(relatedColumn, a.typeFilter)).some(a => a.name == value);
+        case "Enum": return parameter.enumValues.filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).some(a => a.name == value);
         case "Number": return !isNaN(parseFloat(value));
         case "String": return true;
         default: throw new Error("Unexpected parameter type");
@@ -274,7 +274,7 @@ function isValidParameterValue(value: string, parameter: ChartScriptParameterEnt
 function defaultParameterValue(parameter: ChartScriptParameterEntity, relatedColumn: QueryToken) {
 
     switch (parameter.type) {
-        case "Enum": return parameter.enumValues.filter(a => a.typeFilter == null || relatedColumn == null || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
+        case "Enum": return parameter.enumValues.filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
         case "Number": return parseFloat(parameter.valueDefinition).toString();
         case "String": return parameter.valueDefinition;
         default: throw new Error("Unexpected parameter type");
@@ -327,9 +327,9 @@ export function parseTokens(chartRequest: ChartRequest): Promise<ChartRequest> {
         promises.push(...chartRequest.orderOptions.map(oo => completer.complete(oo, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate)));
 
     if (chartRequest.columns)
-        promises.push(...chartRequest.columns.map(a => a.element.token).filter(te => te != null).map(te => {
+        promises.push(...chartRequest.columns.map(a => a.element.token).filter(te => te != undefined).map(te => {
             if (te.token && te.token.fullKey == te.tokenString)
-                return Promise.resolve(null);
+                return Promise.resolve(undefined);
 
             return completer.request(te.tokenString, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement).then(t => {
                 te.token = t;
@@ -360,7 +360,7 @@ export module Decoder {
 
 
 
-            chartRequest.chartScript = query.script == null ? scripts.first("ChartScript").first() :
+            chartRequest.chartScript = query.script == undefined ? scripts.first("ChartScript").first() :
                 scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
 
             return parseTokens(chartRequest);
@@ -373,13 +373,13 @@ export module Decoder {
 
     export function decodeColumns(query: any): MList<ChartColumnEntity> {
         return valuesInOrder(query, "column").map(val => ({
-            rowId: null,
+            rowId: undefined,
             element: ChartColumnEntity.New(cc => {
                 const ts = (val.contains("~") ? val.before("~") : val).trim();
 
                 cc.token = !!ts ? QueryTokenEntity.New(qte => {
                     qte.tokenString = ts;
-                }) : null;
+                }) : undefined;
                 cc.displayName = unscapeTildes(val.tryAfter("~"));
             })
         }));
@@ -387,7 +387,7 @@ export module Decoder {
 
     export function decodeParameters(query: any): MList<ChartParameterEntity> {
         return valuesInOrder(query, "param").map(val => ({
-            rowId: null,
+            rowId: undefined,
             element: ChartParameterEntity.New(cp => {
                 cp.name = unscapeTildes(val.before("~"));
                 cp.value = unscapeTildes(val.after("~"));

@@ -8,7 +8,7 @@ import { ScheduleRuleMinutelyEntity } from '../Signum.Entities.Scheduler'
 export default class ScheduleRuleMinutely extends React.Component<{ ctx: TypeContext<ScheduleRuleMinutelyEntity> }, void> {
 
     render() {
-        var ctx4 = this.props.ctx.subCtx({ labelColumns: {sm: 2}});
+        const ctx4 = this.props.ctx.subCtx({ labelColumns: {sm: 2}});
 
         return (
             <div>    

@@ -44,14 +44,14 @@ export class ChartColumn extends React.Component<ChartColumnProps, { }> {
 
     render() {
 
-        var sc = this.props.scriptColumn;
-        var cb = this.props.chartBase;
+        const sc = this.props.scriptColumn;
+        const cb = this.props.chartBase;
 
-        var groupVisible = this.props.chartBase.chartScript.groupBy != "Never" && sc.isGroupKey;
+        const groupVisible = this.props.chartBase.chartScript.groupBy != "Never" && sc.isGroupKey;
         
-        var groupResults = cb.groupResults == null ? true : cb.groupResults;
+        const groupResults = cb.groupResults == undefined ? true : cb.groupResults;
 
-        var subTokenOptions = SubTokensOptions.CanElement | (groupResults && !sc.isGroupKey ? SubTokensOptions.CanAggregate : 0)
+        const subTokenOptions = SubTokensOptions.CanElement | (groupResults && !sc.isGroupKey ? SubTokensOptions.CanAggregate : 0)
 
         return (
             <tr className="sf-chart-token">
@@ -83,11 +83,11 @@ export interface ChartColumnInfoProps {
 export class ChartColumnInfo extends React.Component<ChartColumnInfoProps, void> {
 
     getColorPalettes() {
-        var token = this.props.ctx.value.token;
+        const token = this.props.ctx.value.token;
 
         const t = token && token.token.type;
 
-        if (t == null || Navigator.isReadOnly(ChartColorEntity))
+        if (t == undefined || Navigator.isReadOnly(ChartColorEntity))
             return [];
 
         if (!t.isLite && !t.isEnum)
@@ -98,7 +98,7 @@ export class ChartColumnInfo extends React.Component<ChartColumnInfoProps, void>
 
     render() {
 
-        var ctx = this.props.ctx.subCtx({ formGroupSize: "Small", formGroupStyle: "Basic" });
+        const ctx = this.props.ctx.subCtx({ formGroupSize: "Small", formGroupStyle: "Basic" });
 
 
 
@@ -133,7 +133,7 @@ export interface ChartLinkProps {
     ctx: StyleContext;
 }
 
-export var ChartLink = (props: ChartLinkProps) =>
+export const ChartLink = (props: ChartLinkProps) =>
     <FormGroup ctx={props.ctx as any}
         labelText={ChartMessage.ColorsFor0.niceToString(props.type.niceName) }>
         <a href={"/chartColors/" + props.type.name} className="form-control">

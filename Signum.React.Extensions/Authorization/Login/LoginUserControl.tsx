@@ -10,7 +10,7 @@ import * as AuthClient from '../AuthClient'
 export default class LoginUserControl extends React.Component<{}, { user: UserEntity }> {
 
     render() {
-        var user = AuthClient.currentUser();
+        const user = AuthClient.currentUser();
 
         if (!user)
             return <LinkContainer to="~/auth/login"><NavItem  className="sf-login">{AuthMessage.Login.niceToString() }</NavItem></LinkContainer>;

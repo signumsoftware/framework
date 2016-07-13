@@ -9,14 +9,14 @@ export default class HolidayCalendar extends React.Component<{ ctx: TypeContext<
 
     render() {
         
-        var e = this.props.ctx;
+        const e = this.props.ctx;
 
         return (
             <div>    
                 <ValueLine ctx={e.subCtx(f => f.name)}  />
                 <div>
                     <EntityRepeater ctx={e.subCtx(f => f.holidays) } getComponent={(ctx: TypeContext<HolidayEntity>) => {
-                        var ct4 = ctx.subCtx({ labelColumns: { sm: 4 } });
+                        const ct4 = ctx.subCtx({ labelColumns: { sm: 4 } });
                         return (
                             <div className="row">
                                 <div className="col-sm-4">

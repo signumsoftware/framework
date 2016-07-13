@@ -27,7 +27,7 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
             .then(() => Api.fetchPropertyRulePack(pack.type.cleanName, pack.role.id))
             .then(newPack => {
                 notifySuccess();
-                bc.frame.onReload({ entity: newPack, canExecute: null });
+                bc.frame.onReload({ entity: newPack, canExecute: undefined });
             })
             .done();
     }

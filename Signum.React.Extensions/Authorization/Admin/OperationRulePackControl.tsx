@@ -27,7 +27,7 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
             .then(() => Api.fetchOperationRulePack(pack.type.cleanName, pack.role.id))
             .then(newPack => {
                 notifySuccess();
-                bc.frame.onReload({ entity: newPack, canExecute: null });
+                bc.frame.onReload({ entity: newPack, canExecute: undefined });
             })
             .done();
     }

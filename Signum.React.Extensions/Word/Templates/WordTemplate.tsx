@@ -21,10 +21,10 @@ export default class WordTemplate extends React.Component<{ ctx: TypeContext<Wor
 
     render() {
 
-        var e = this.props.ctx;
+        const e = this.props.ctx;
 
-        var ec = e.subCtx({ labelColumns: { sm: 4 } });
-        var sc = ec.subCtx({ formGroupStyle: "Basic" });
+        const ec = e.subCtx({ labelColumns: { sm: 4 } });
+        const sc = ec.subCtx({ formGroupStyle: "Basic" });
 
 
         return (

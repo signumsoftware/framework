@@ -23,13 +23,13 @@ export interface TemplateControlsState {
 
 export default class TemplateControls extends React.Component<TemplateControlsProps, TemplateControlsState>{
 
-    state = { currentToken: null } as TemplateControlsState;
+    state = { currentToken: undefined } as TemplateControlsState;
 
     render() {
-        var ct = this.state.currentToken;
+        const ct = this.state.currentToken;
 
         if (!this.props.queryKey)
-            return null;
+            return undefined;
 
         return (
             <div className="form-sm">
@@ -60,7 +60,7 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
     canElement(): string {
         let token = this.state.currentToken;
 
-        if (token == null)
+        if (token == undefined)
             return TemplateTokenMessage.NoColumnSelected.niceToString();
 
         if (token.type.isCollection)
@@ -69,14 +69,14 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
         if (hasAnyOrAll(token))
             return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
 
-        return null;
+        return undefined;
     }
 
 
     canIf(): string {
         let token = this.state.currentToken;
 
-        if (token == null)
+        if (token == undefined)
             return TemplateTokenMessage.NoColumnSelected.niceToString();
 
         if (token.type.isCollection)
@@ -85,39 +85,39 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
         if (hasAnyOrAll(token))
             return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
 
-        return null;
+        return undefined;
     }
 
     canForeach(): string {
 
         let token = this.state.currentToken;
 
-        if (token == null)
+        if (token == undefined)
             return TemplateTokenMessage.NoColumnSelected.niceToString();
 
         if (token.type.isCollection)
             return TemplateTokenMessage.YouHaveToAddTheElementTokenToUseForeachOnCollectionFields.niceToString();
 
-        if (token.key != "Element" || token.parent == null || !token.parent.type.isCollection)
+        if (token.key != "Element" || token.parent == undefined || !token.parent.type.isCollection)
             return TemplateTokenMessage.YouCanOnlyAddForeachBlocksWithCollectionFields.niceToString();
 
         if (hasAnyOrAll(token))
             return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
 
-        return null;
+        return undefined;
     }
 
     canAny() {
 
         let token = this.state.currentToken;
 
-        if (token == null)
+        if (token == undefined)
             return TemplateTokenMessage.NoColumnSelected.niceToString();
 
         if (hasAnyOrAll(token))
             return TemplateTokenMessage.YouCannotAddBlocksWithAllOrAny.niceToString();
 
-        return null;
+        return undefined;
     }
 }
 

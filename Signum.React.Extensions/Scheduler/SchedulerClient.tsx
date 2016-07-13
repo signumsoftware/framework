@@ -16,7 +16,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="scheduler">
-        <Route path="view" getComponent={(loc, cb) => require(["./SchedulerPanelPage"], (Comp) => cb(null, Comp.default))}/>
+        <Route path="view" getComponent={(loc, cb) => require(["./SchedulerPanelPage"], (Comp) => cb(undefined, Comp.default))}/>
     </Route>);
 
     Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => new Promise(resolve => require(['./Templates/SchedulerTask'], resolve))));
@@ -36,11 +36,11 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
     export function start(): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/scheduler/start" }, null);
+        return ajaxPost<void>({ url: "~/api/scheduler/start" }, undefined);
     }
 
     export function stop(): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/scheduler/stop" }, null);
+        return ajaxPost<void>({ url: "~/api/scheduler/stop" }, undefined);
     }
 
     export function view(): Promise<SchedulerState> {

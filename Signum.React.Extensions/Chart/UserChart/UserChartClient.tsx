@@ -26,20 +26,20 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetsClient.registerExportAssertLink(UserChartEntity);
 
     options.routes.push(<Route path="userChart">
-        <Route path=":userChartId(/:entity)" getComponent={ (loc, cb) => require(["./UserChartPage"], (Comp) => cb(null, Comp.default)) } />
+        <Route path=":userChartId(/:entity)" getComponent={ (loc, cb) => require(["./UserChartPage"], (Comp) => cb(undefined, Comp.default)) } />
     </Route>);
 
 
     ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
         if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
-            return null;
+            return undefined;
 
         return <UserChartMenu chartRequestView={ctx.chartRequestView}/>;
     }); 
 
     QuickLinks.registerGlobalQuickLink(ctx => {
         if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting))
-            return null;
+            return undefined;
 
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr, e => {
@@ -50,7 +50,7 @@ export function start(options: { routes: JSX.Element[] }) {
     QuickLinks.registerQuickLink(UserChartEntity, ctx => new QuickLinks.QuickLinkAction("preview", ChartMessage.Preview.niceToString(),
         e => {
             Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
-                if (uc.entityType == null)
+                if (uc.entityType == undefined)
                     window.open(Navigator.currentHistory.createHref(`~/userChart/${uc.id}`));
                 else
                     Navigator.API.fetchAndForget(uc.entityType)
@@ -74,7 +74,7 @@ export module Converter {
 
     export function applyUserChart(cr: ChartRequest, uq: UserChartEntity, entity: Lite<Entity>): Promise<ChartRequest> {
 
-        var convertedFilters = UserAssetsClient.API.parseFilters({
+        const convertedFilters = UserAssetsClient.API.parseFilters({
             queryKey: uq.query.key,
             canAggregate: false,
             entity: entity,
@@ -99,7 +99,7 @@ export module Converter {
             }
 
             cr.parameters = uq.parameters.map(mle => ({
-                rowId: null,
+                rowId: undefined,
                 element: ChartParameterEntity.New(p => {
                     p.name = mle.element.name;
                     p.value = mle.element.value;
@@ -107,7 +107,7 @@ export module Converter {
             }));
 
             cr.columns = uq.columns.map(mle => ({
-                rowId: null,
+                rowId: undefined,
                 element: ChartColumnEntity.New(c => {
                     c.displayName = mle.element.displayName;
                     c.token = mle.element.token;
@@ -124,7 +124,7 @@ export module Converter {
     }
 
     export function toChartRequest(uq: UserChartEntity, entity: Lite<Entity>): Promise<ChartRequest> {
-        var cs = ChartRequest.New(cr => cr.queryKey = uq.query.key); 
+        const cs = ChartRequest.New(cr => cr.queryKey = uq.query.key); 
         return applyUserChart(cs, uq, entity);
     }
 }
@@ -141,7 +141,7 @@ export module API {
 
     export function fromChartRequest(chartRequest: ChartRequest): Promise<UserChartEntity> {
 
-        var clone = ChartClient.API.cleanedChartRequest(chartRequest)
+        const clone = ChartClient.API.cleanedChartRequest(chartRequest)
 
         return ajaxPost<UserChartEntity>({ url: "~/api/userChart/fromChartRequest/" }, clone);
     }

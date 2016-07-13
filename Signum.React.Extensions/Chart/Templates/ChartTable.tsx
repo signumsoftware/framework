@@ -11,11 +11,11 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
 
         const tokenStr = (e.currentTarget as HTMLElement).getAttribute("data-column-name");
 
-        var cr = this.props.chartRequest;
+        const cr = this.props.chartRequest;
 
         const prev = cr.orderOptions.filter(a => a.token.fullKey == tokenStr).firstOrNull();
 
-        if (prev != null) {
+        if (prev != undefined) {
             prev.orderType = prev.orderType == "Ascending" as OrderType ? "Descending" : "Ascending";
             if (!e.shiftKey)
                 cr.orderOptions = [prev];
@@ -37,13 +37,13 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
 
     render() {
 
-        var resultTable = this.props.resultTable;
+        const resultTable = this.props.resultTable;
 
-        var chartRequest = this.props.chartRequest;
+        const chartRequest = this.props.chartRequest;
         
-        var qs = Finder.getQuerySettings(chartRequest.queryKey);
+        const qs = Finder.getQuerySettings(chartRequest.queryKey);
 
-        const columns = chartRequest.columns.map(c => c.element).filter(cc => cc.token != null)
+        const columns = chartRequest.columns.map(c => c.element).filter(cc => cc.token != undefined)
             .map(cc => ({ token: cc.token.token, columnName: cc.displayName } as ColumnOption))
             .map(co => ({
                 column: co,
@@ -71,7 +71,7 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
                                 { !chartRequest.groupResults && <td>{ ((qs && qs.entityFormatter) || Finder.entityFormatRules.filter(a => a.isApplicable(row)).last("EntityFormatRules").formatter)(row, resultTable.columns) }</td> }
                                 { columns.map((c, j) =>
                                     <td key={j} style={{ textAlign: c.cellFormatter && c.cellFormatter.textAllign }}>
-                                        {c.resultIndex == -1 || c.cellFormatter == null ? null : c.cellFormatter.formatter(row.columns[c.resultIndex]) }
+                                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex]) }
                                     </td>)
                                 }
                             </tr>
@@ -85,13 +85,13 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
 
     orderClassName(column: ColumnOption) {
 
-        if (column.token == null)
+        if (column.token == undefined)
             return "";
 
         const orders = this.props.chartRequest.orderOptions;
 
         const o = orders.filter(a => a.token.fullKey == column.token.fullKey).firstOrNull();
-        if (o == null)
+        if (o == undefined)
             return "";
 
         let asc = (o.orderType == "Ascending" as OrderType ? "asc" : "desc");

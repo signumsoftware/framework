@@ -10,7 +10,7 @@ import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity,
    ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 import * as ChartClient from '../ChartClient'
 
-var colorbrewer = require("colorbrewer");
+const colorbrewer = require("colorbrewer");
 
 require("!style!css!../Chart.css");
 
@@ -39,11 +39,11 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
             this.forceUpdate();
         };
         window.getExceptionNumber = () => {
-            if (this.exceptionLine == null || this.exceptionLine == undefined)
-                return null;
+            if (this.exceptionLine == undefined || this.exceptionLine == undefined)
+                return undefined;
 
-            var temp = this.exceptionLine;
-            this.exceptionLine = null;
+            const temp = this.exceptionLine;
+            this.exceptionLine = undefined;
             return temp;
         };
 
@@ -59,13 +59,13 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
 
     redraw() {
 
-        var node = ReactDOM.findDOMNode(this);
+        const node = ReactDOM.findDOMNode(this);
         while (node.firstChild) {
             node.removeChild(node.firstChild);
         }
-        var rect = node.getBoundingClientRect();
+        const rect = node.getBoundingClientRect();
 
-        var data = this.props.data;
+        const data = this.props.data;
 
         ChartUtils.fillAllTokenValueFuntions(data);
 
@@ -76,26 +76,26 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
                 data.columns["c" + i] = {};
         }); 
 
-        var chart = d3.select(node)
+        const chart = d3.select(node)
             .append('svg:svg').attr('width', rect.width).attr('height', rect.height);
 
         node.addEventListener("click", this.handleOnClick);
 
-        var func: (chart: d3.Selection<any>, data: ChartClient.ChartTable) => void;
-        var __baseLineNumber__: number;
+        let func: (chart: d3.Selection<any>, data: ChartClient.ChartTable) => void;
+        let __baseLineNumber__: number;
         try {
-            var width = rect.width;
-            var height = rect.height;
-            var getClickKeys = ChartUtils.getClickKeys;
-            var translate = ChartUtils.translate;
-            var scale = ChartUtils.scale;
-            var rotate = ChartUtils.rotate;
-            var skewX = ChartUtils.skewX;
-            var skewY = ChartUtils.skewY;
-            var matrix = ChartUtils.matrix;
-            var scaleFor = ChartUtils.scaleFor;
-            var rule = ChartUtils.rule;
-            var ellipsis = ChartUtils.ellipsis;
+            const width = rect.width;
+            const height = rect.height;
+            const getClickKeys = ChartUtils.getClickKeys;
+            const translate = ChartUtils.translate;
+            const scale = ChartUtils.scale;
+            const rotate = ChartUtils.rotate;
+            const skewX = ChartUtils.skewX;
+            const skewY = ChartUtils.skewY;
+            const matrix = ChartUtils.matrix;
+            const scaleFor = ChartUtils.scaleFor;
+            const rule = ChartUtils.rule;
+            const ellipsis = ChartUtils.ellipsis;
             __baseLineNumber__ = new Error().lineNumber;
             func = eval("(" + this.props.chartRequest.chartScript.script + ")");
         } catch (e) {
@@ -104,8 +104,8 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
         }
 
         if (this.props.data.rows.length == 0) {
-            var height = parseInt(chart.attr("height"));
-            var width = parseInt(chart.attr("width"));
+            const height = parseInt(chart.attr("height"));
+            const width = parseInt(chart.attr("width"));
 
             chart.select(".sf-chart-error").remove();
             chart.append('svg:rect').attr('class', 'sf-chart-error').attr("x", width / 4).attr("y", (height / 2) - 10).attr("fill", "#EFF4FB").attr("stroke", "#FAC0DB").attr("width", width / 2).attr("height", 20);
@@ -121,16 +121,16 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
     }
 
     handleOnClick = (e: MouseEvent) => {
-        var element = DomUtils.closest(e.target as HTMLElement, "[data-click]", e.currentTarget as Node);
+        const element = DomUtils.closest(e.target as HTMLElement, "[data-click]", e.currentTarget as Node);
         if (element)
         {
-            var val = element.getAttribute("data-click");
+            const val = element.getAttribute("data-click");
 
-            var cr = this.props.chartRequest;
+            const cr = this.props.chartRequest;
 
-            var filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
+            const filters = cr.filterOptions.filter(a => !hasAggregate(a.token));
 
-            var obj = val.split("&").filter(a => !!a).toObject(a => a.before("="), a => a.after("="));
+            const obj = val.split("&").filter(a => !!a).toObject(a => a.before("="), a => a.after("="));
 
             cr.columns.map((a, i) => {
                 if (obj.hasOwnProperty("c" + i))
@@ -150,12 +150,12 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
     }
 
     showError(e: any, __baseLineNumber__: number, chart: d3.Selection<any>) {
-        var message = e.toString();
+        let message = e.toString();
 
-        var regex = /(DrawChart.*@.*:(.*))|(DrawChart .*:(.*):.*\)\))|(DrawChart .*:(.*):.*\))/;
-        var match: RegExpExecArray;
-        if (e.stack != undefined && (match = regex.exec(e.stack)) != null) {
-            var lineNumber = parseInt(match[2] || match[4] || match[6]) - (__baseLineNumber__ || 0);
+        const regex = /(DrawChart.*@.*:(.*))|(DrawChart .*:(.*):.*\)\))|(DrawChart .*:(.*):.*\))/;
+        let match: RegExpExecArray;
+        if (e.stack != undefined && (match = regex.exec(e.stack)) != undefined) {
+            let lineNumber = parseInt(match[2] || match[4] || match[6]) - (__baseLineNumber__ || 0);
             if (isNaN(lineNumber))
                 lineNumber = 1;
             this.exceptionLine = lineNumber;
@@ -164,8 +164,8 @@ export default class ChartRenderer extends React.Component<{ data: ChartClient.C
             this.exceptionLine = 1;
         }
 
-        var height = parseInt(chart.attr("height"));
-        var width = parseInt(chart.attr("width"));
+        const height = parseInt(chart.attr("height"));
+        const width = parseInt(chart.attr("width"));
 
         chart.select(".sf-chart-error").remove();
         chart.append('svg:rect').attr('class', 'sf-chart-error').attr("y", (height / 2) - 10).attr("fill", "#FBEFFB").attr("stroke", "#FAC0DB").attr("width", width - 1).attr("height", 20);

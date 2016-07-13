@@ -15,7 +15,7 @@ export function start(...params: OmniboxProvider<OmniboxResult>[]) {
     params.forEach(op => registerProvider(op));
 }
 
-export var providers: { [resultTypeName: string]: OmniboxProvider<OmniboxResult> } = {}; 
+export const providers: { [resultTypeName: string]: OmniboxProvider<OmniboxResult> } = {}; 
 export function registerProvider(prov: OmniboxProvider<OmniboxResult>) {
     if (providers[prov.getProviderName()])
         throw new Error(`Provider '${prov.getProviderName()}' already registered`);
@@ -25,7 +25,7 @@ export function registerProvider(prov: OmniboxProvider<OmniboxResult>) {
 
 
 
-export var specialActions: { [resultTypeName: string]: SpecialOmniboxAction } = {};
+export const specialActions: { [resultTypeName: string]: SpecialOmniboxAction } = {};
 export function registerSpecialAction(action: SpecialOmniboxAction) {
     if (specialActions[action.key])
         throw new Error(`Action '${action.key}' already registered`);
@@ -47,20 +47,20 @@ export interface HelpOmniboxResult extends OmniboxResult {
 
 
 export function renderItem(result: OmniboxResult): React.ReactChild {
-    var items = result.ResultTypeName == "HelpOmniboxResult" ?
+    const items = result.ResultTypeName == "HelpOmniboxResult" ?
         renderHelpItem(result as HelpOmniboxResult) :
         getProvider(result.ResultTypeName).renderItem(result);
-    return React.createElement("span", null, ...items);
+    return React.createElement("span", undefined, ...items);
 }
 
 function renderHelpItem(help: HelpOmniboxResult): React.ReactNode[] {
 
-    var result: React.ReactNode[] = [];
+    const result: React.ReactNode[] = [];
 
     if (help.ReferencedTypeName)
         result.push(getProvider(help.ReferencedTypeName).icon());
 
-    var str = help.Text
+    const str = help.Text
         .replaceAll("(", "<strong>")
         .replaceAll(")", "</strong>");
 
@@ -72,7 +72,7 @@ function renderHelpItem(help: HelpOmniboxResult): React.ReactNode[] {
 export function navigateTo(result: OmniboxResult): Promise<string> {
 
     if (result.ResultTypeName == "HelpOmniboxResult")
-        return Promise.resolve(null);
+        return Promise.resolve(undefined);
 
     return getProvider(result.ResultTypeName).navigateTo(result);
 }
@@ -82,7 +82,7 @@ export function toString(result: OmniboxResult): string {
 }
 
 function getProvider(resultTypeName: string) {
-    var prov = providers[resultTypeName];
+    const prov = providers[resultTypeName];
 
     if (!prov)
         throw new Error(`No provider for '${resultTypeName}'`);
@@ -109,10 +109,10 @@ export abstract class OmniboxProvider<T extends OmniboxResult> {
     
     renderMatch(match: OmniboxMatch, array: React.ReactNode[]) {
 
-        var regex = /#+/g;
+        const regex = /#+/g;
 
-        var last = 0;
-        var m: RegExpExecArray;
+        let last = 0;
+        let m: RegExpExecArray;
         while (m = regex.exec(match.BoldMask)) {
             if (m.index > last)
                 array.push(<span>{match.Text.substr(last, m.index - last) }</span>);

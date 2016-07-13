@@ -14,7 +14,7 @@ interface CacheStatisticsPageProps extends ReactRouter.RouteComponentProps<{}, {
 
 export default class CacheStatisticsPage extends React.Component<CacheStatisticsPageProps, CacheState> {
 
-    state: CacheState = { tables: null, isEnabled: null };
+    state: CacheState = { tables: undefined, isEnabled: undefined };
 
     componentWillMount() {
         this.loadState().done();
@@ -40,7 +40,7 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
     render() {
         document.title = "Cache Statistics";    
 
-        var list: React.ReactNode[] = [];
+        const list: React.ReactNode[] = [];
         if (this.state.tables)
             this.state.tables.forEach(st => this.showTree(list, st, 0));
 
@@ -75,7 +75,7 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
 
     showTree(list: React.ReactNode[], table: CacheTable, depth: number) {
 
-        var opacity =
+        const opacity =
             depth == 0 ? 1 :
                 depth == 1 ? .7 :
                     depth == 2 ? .5 :
@@ -85,7 +85,7 @@ export default class CacheStatisticsPage extends React.Component<CacheStatistics
             <tr style={{ opacity: opacity }} key={list.length}>
                 <td> { Array.repeat(depth, " → ").join("") + table.tableName }</td >
                 <td> { table.typeName} </td>
-                <td> { table.count != null ? table.count.toString() : "-- not loaded --"} </td>
+                <td> { table.count != undefined ? table.count.toString() : "-- not loaded --"} </td>
                 <td> { table.hits} </td>
                 <td> { table.invalidations }</td>
                 <td> { table.loads }</td>

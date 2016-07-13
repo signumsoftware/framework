@@ -18,7 +18,7 @@ export default class LinkListPart extends React.Component<{ part: LinkListPartEn
 
     render() {
 
-        var entity = this.props.part;
+        const entity = this.props.part;
 
         return (
 
@@ -28,7 +28,7 @@ export default class LinkListPart extends React.Component<{ part: LinkListPartEn
                         .map((le, i) =>
                             <li key={i} >
                                 <a href={Navigator.currentHistory.createHref(le.link) }
-                                    onClick={le.link.startsWith("~") ? (e => { e.preventDefault(); Navigator.currentHistory.push(le.link) }) : null}
+                                    onClick={le.link.startsWith("~") ? (e => { e.preventDefault(); Navigator.currentHistory.push(le.link) }) : undefined}
                                     title={le.label}>
                                     {le.label}
                                 </a>

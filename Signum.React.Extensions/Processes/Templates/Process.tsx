@@ -19,10 +19,10 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<Proces
     }
 
     reloadIfNecessary(e : ProcessEntity){
-        if((e.state == "Executing" || e.state == "Queued") && this.handler == null) {
+        if((e.state == "Executing" || e.state == "Queued") && this.handler == undefined) {
             this.handler = setTimeout(()=> {
-                this.handler = null;
-                var lite = toLite(e);
+                this.handler = undefined;
+                const lite = toLite(e);
                 Navigator.API.fetchEntityPack(lite)
                     .then(pack => this.props.ctx.frame.onReload(pack))
                     .done(); 
@@ -33,9 +33,9 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<Proces
 
     render() {
 
-        var ctx4 = this.props.ctx.subCtx({ labelColumns: { sm: 4 } });
-        var ctx5 = this.props.ctx.subCtx({ labelColumns: { sm: 5 } });
-        var ctx3 = this.props.ctx.subCtx({ labelColumns: { sm: 3 } });
+        const ctx4 = this.props.ctx.subCtx({ labelColumns: { sm: 4 } });
+        const ctx5 = this.props.ctx.subCtx({ labelColumns: { sm: 5 } });
+        const ctx3 = this.props.ctx.subCtx({ labelColumns: { sm: 3 } });
 
         return (
             <div>
@@ -74,15 +74,15 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<Proces
 
     renderProgress() {
 
-        var p = this.props.ctx.value;
+        const p = this.props.ctx.value;
 
-        var val = p.progress != null ? p.progress * 100 :
+        const val = p.progress != undefined ? p.progress * 100 :
             ((p.state == "Queued" || p.state == "Suspended" || p.state == "Finished" || p.state == "Error") ? 100 : 0);
 
-        var progressContainerClass =
+        const progressContainerClass =
             p.state == "Executing" || p.state == "Queued" || p.state == "Suspending" ? "progress-striped active" : "";
 
-        var progressClass =
+        const progressClass =
             p.state == "Queued" ? "progress-bar-info" :
                 p.state == "Executing" ? "" :
                     p.state == "Finished" ? "progress-bar-success" :

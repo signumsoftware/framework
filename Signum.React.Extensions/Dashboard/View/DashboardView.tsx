@@ -27,7 +27,7 @@ export default class DashboardView extends React.Component<{ dashboard?: Dashboa
         const db = this.props.dashboard;
         const entity = this.props.entity;
 
-        var ctx = TypeContext.root(DashboardEntity, db);
+        const ctx = TypeContext.root(DashboardEntity, db);
 
         return (
             <div>
@@ -39,7 +39,7 @@ export default class DashboardView extends React.Component<{ dashboard?: Dashboa
                                 <div className="row row-control-panel" key={"row" + gr.key}>
                                     { gr.elements.orderBy(ctx => ctx.value.startColumn).map((c, j, list) => {
                     
-                                        const last = j == 0 ? null : list[j - 1].value;
+                                        const last = j == 0 ? undefined : list[j - 1].value;
 
                                         const offset = c.value.startColumn - (last ? (last.startColumn + last.columns) : 0);
 
@@ -69,7 +69,7 @@ export interface PanelPartState {
 
 export class PanelPart extends React.Component<PanelPartProps , PanelPartState>{    
 
-    state = { component: null, lastType : null } as PanelPartState;
+    state = { component: undefined, lastType : undefined } as PanelPartState;
 
     componentWillMount(){
          this.loadComponent(this.props);
@@ -83,8 +83,8 @@ export class PanelPart extends React.Component<PanelPartProps , PanelPartState>{
     }
 
     loadComponent(props: PanelPartProps  ){
-        var content = props.ctx.value.content;
-        this.setState({ component: null, lastType: null })
+        const content = props.ctx.value.content;
+        this.setState({ component: undefined, lastType: undefined })
         DashboardClient.partRenderers[content.Type].component()
             .then(c => this.setState({ component: c, lastType: content.Type }))
             .done();
@@ -93,18 +93,18 @@ export class PanelPart extends React.Component<PanelPartProps , PanelPartState>{
     render(){
 
         if(!this.state.component)
-            return null;
+            return undefined;
         
-        var p = this.props.ctx.value;
+        const p = this.props.ctx.value;
 
-        var renderer = DashboardClient.partRenderers[p.content.Type];
+        const renderer = DashboardClient.partRenderers[p.content.Type];
 
-        var title = p.title ||  getToString(p.content);
+        const title = p.title ||  getToString(p.content);
 
         return (
-            <div className={classes("panel", "panel-" + (p.style == null ? "default" : p.style.firstLower())) }>
+            <div className={classes("panel", "panel-" + (p.style == undefined ? "default" : p.style.firstLower())) }>
                 <div className="panel-heading">
-                    {renderer.handleTitleClick == null ? title : <a href="#" onClick={e => renderer.handleTitleClick(p.content, toLite(this.props.entity), e) }>{title}</a> }
+                    {renderer.handleTitleClick == undefined ? title : <a href="#" onClick={e => renderer.handleTitleClick(p.content, toLite(this.props.entity), e) }>{title}</a> }
                     &nbsp;
                     {renderer.handleFullScreenClick &&
                         <a className="sf-ftbl-header-fullscreen" href="#" onClick={e => renderer.handleFullScreenClick(p.content, toLite(this.props.entity), e) }>

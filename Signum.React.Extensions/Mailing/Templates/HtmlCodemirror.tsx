@@ -37,10 +37,10 @@ export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<s
     exceptionHandler: number;
 
     handleOnChange = (newValue: string) => {
-        var { ctx, onChange } = this.props;
+        const { ctx, onChange } = this.props;
 
         ctx.value = newValue;
-        if (onChange != null)
+        if (onChange != undefined)
             onChange(ctx.value);
     };
     
@@ -48,9 +48,9 @@ export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<s
     
     render() {
 
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
 
-        var options = {
+        const options = {
             lineNumbers: true,
             mode: "htmlmixed",
             extraKeys: {

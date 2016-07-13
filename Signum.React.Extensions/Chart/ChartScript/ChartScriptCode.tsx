@@ -47,7 +47,7 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         this.props.ctx.value.script = newValue;
         this.props.ctx.value.modified = true;
 
-        if (opener != null && opener != undefined) {
+        if (opener != undefined && opener != undefined) {
             clearTimeout(this.changedHandler);
             this.changedHandler = setTimeout(this.updatePreview, 150);
         }
@@ -63,20 +63,20 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
     codeMirrorComponent: CodeMirrorComponent;
     lineHandle: CodeMirror.LineHandle;
     getException = () => {
-        var number = (opener as any).getExceptionNumber();
+        const number = (opener as any).getExceptionNumber();
         clearTimeout(this.exceptionHandler);
-        if (this.lineHandle != null)
-            this.codeMirrorComponent.codeMirror.removeLineClass(this.lineHandle, null, null);
+        if (this.lineHandle != undefined)
+            this.codeMirrorComponent.codeMirror.removeLineClass(this.lineHandle, undefined, undefined);
         if (number != -1)
-            this.lineHandle = this.codeMirrorComponent.codeMirror.addLineClass(number - 1, null, "exceptionLine");
+            this.lineHandle = this.codeMirrorComponent.codeMirror.addLineClass(number - 1, undefined, "exceptionLine");
 
     }
 
     render() {
 
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
 
-        var options = {
+        const options = {
             lineNumbers: true,
             mode: "javascript",
             extraKeys: {
@@ -95,7 +95,7 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         (options as any).highlightSelectionMatches = true;
         (options as any).matchBrackets = true;
 
-        var css = ".exceptionLine { background: 'pink' }";
+        const css = ".exceptionLine { background: 'pink' }";
 
 
         return (
@@ -109,13 +109,13 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
         );
     }
 
-    static example = `//var chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
-//var data = { 
+    static example = `//const chart = d3.select('#sfChartControl .sf-chart-container').append('svg:svg').attr('width', width).attr('height', height))
+//const data = { 
 //              "columns": { "c0": { "title":"Product", "token":"Product", "isGroupKey":true, ... }, 
                              "c1": { "title":"Count", "token":"Count", "isGroupKey":true, ...} 
                           },
-//              "rows": [ { "c0": { "key": "Product;1", "toStr": "Apple", "color": null }, "c1": { "key": "140", "toStr": "140" } },
-//                        { "c0": { "key": "Product;2", "toStr": "Orange", "color": null }, "c1": { "key": "179", "toStr": "179" } }, ...
+//              "rows": [ { "c0": { "key": "Product;1", "toStr": "Apple", "color": undefined }, "c1": { "key": "140", "toStr": "140" } },
+//                        { "c0": { "key": "Product;2", "toStr": "Orange", "color": undefined }, "c1": { "key": "179", "toStr": "179" } }, ...
 //                      ]
 //           }
 // DrawChart(chart, data);

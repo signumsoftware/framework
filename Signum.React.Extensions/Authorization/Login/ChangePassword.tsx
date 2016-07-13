@@ -53,7 +53,7 @@ export default class ChangePassword extends React.Component<{}, { modelState?: M
         if (this.newPassword.value && this.newPassword2.value && this.newPassword2.value != this.newPassword.value)
             this.setState({ modelState: { ["newPassword"]: AuthMessage.PasswordsAreDifferent.niceToString() } });
         else
-            this.setState({ modelState: null });
+            this.setState({ modelState: undefined });
     }
 
     isEnabled() {

@@ -32,7 +32,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
     }
 
     componentWillReceiveProps(newProps: HeavyEntryProps){
-        if(this.state.entries == null || !this.state.entries.some(a=>a.FullIndex == newProps.routeParams.selectedIndex))
+        if(this.state.entries == undefined || !this.state.entries.some(a=>a.FullIndex == newProps.routeParams.selectedIndex))
             this.loadEntries(newProps);
 
         this.loadStackTrace(newProps);
@@ -69,10 +69,10 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 
     render() {
 
-        var index = this.props.routeParams.selectedIndex;
+        const index = this.props.routeParams.selectedIndex;
 
         document.title = "Heavy Profiler > Entry " + index;
-        if (this.state.entries == null)
+        if (this.state.entries == undefined)
             return <h3>Heavy Profiler > Entry {index} (loading...) </h3>;
 
         let current = this.selectedEntry();
@@ -105,7 +105,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
                 <br />
                 <h3>StackTrace</h3>
                 {
-                    this.state.stackTrace == null ? <span>No Stacktrace</span> : 
+                    this.state.stackTrace == undefined ? <span>No Stacktrace</span> : 
                         <StackFrameTable stackTrace={this.state.stackTrace}/>
                 }
             </div>
@@ -123,7 +123,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
 export class StackFrameTable extends React.Component<{stackTrace : StackTraceTS[]}, void>{
 
     render(){
-        if(this.props.stackTrace == null)
+        if(this.props.stackTrace == undefined)
             return <span>No StackTrace</span>;
 
         return (
@@ -206,9 +206,9 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
 
         let ne = e.nativeEvent as MouseEvent;
 
-        var rect = elem.getBoundingClientRect();
+        const rect = elem.getBoundingClientRect();
 
-        var ratio = (ne.clientX - rect.left) / rect.width;
+        const ratio = (ne.clientX - rect.left) / rect.width;
 
         let newMin = this.state.min - dist * delta * (ratio);
         let newMax = this.state.max + dist * delta * (1 - ratio);
@@ -263,12 +263,12 @@ export class HeavyProfilerDetailsD3 extends React.Component<{entries: HeavyProfi
 
     mountChart (){
 
-        if (this.chartContainer == null)
+        if (this.chartContainer == undefined)
             throw new Error("chartContainer not mounted!");
 
         let data = this.props.entries;
 
-        if (data == null)
+        if (data == undefined)
             throw new Error("no entries");
 
         let fontSize = 12;

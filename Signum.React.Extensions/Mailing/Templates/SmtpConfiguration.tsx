@@ -10,7 +10,7 @@ export default class SmtpConfiguration extends React.Component<{ ctx: TypeContex
 
     render() {
 
-        var sc = this.props.ctx;
+        const sc = this.props.ctx;
 
         return (
             <div>

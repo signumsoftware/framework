@@ -47,7 +47,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
     }
 
     renderInternal() {
-        var s = this.state;
+        const s = this.state;
         return (
             <fieldset className={classes("SF-grid-repeater-field SF-control-container", this.state.ctx.errorClass) }>
                 <legend>
@@ -66,7 +66,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                         </div>
                     ) }
                 </div>
-                <div className={s.dragMode == "move" ? "sf-dragging" : null} onDrop={this.handleOnDrop}>
+                <div className={s.dragMode == "move" ? "sf-dragging" : undefined} onDrop={this.handleOnDrop}>
                     {
                         mlistItemContext(this.state.ctx)
                             .map((mlec, i) => ({
@@ -82,12 +82,12 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                                         let item = this.props.getComponent(p.ctx);
                                         const s = this.state;
                                         item = React.cloneElement(item, {
-                                            onResizerDragStart: p.ctx.readOnly || !s.resize ? null : (resizer, e) => this.handleResizeDragStart(resizer, e, p.ctx),
-                                            onTitleDragStart: p.ctx.readOnly || !s.move ? null : (e) => this.handleMoveDragStart(e, p.ctx),
-                                            onRemove: p.ctx.readOnly || !s.remove ? null : (e) => this.handleRemoveElementClick(e, p.index),
+                                            onResizerDragStart: p.ctx.readOnly || !s.resize ? undefined : (resizer, e) => this.handleResizeDragStart(resizer, e, p.ctx),
+                                            onTitleDragStart: p.ctx.readOnly || !s.move ? undefined : (e) => this.handleMoveDragStart(e, p.ctx),
+                                            onRemove: p.ctx.readOnly || !s.remove ? undefined : (e) => this.handleRemoveElementClick(e, p.index),
                                         } as EntityGridItemProps);
 
-                                        const last = j == 0 ? null : list[j - 1].ctx.value;
+                                        const last = j == 0 ? undefined : list[j - 1].ctx.value;
 
                                         const offset = p.ctx.value.startColumn - (last ? (last.startColumn + last.columns) : 0);
 
@@ -110,7 +110,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
 
     renderSeparator(rowIndex: number) {
         return (
-            <div className={classes("row separator-row", this.state.currentRow == rowIndex ? "sf-over" : null) } key={"sep" + rowIndex}
+            <div className={classes("row separator-row", this.state.currentRow == rowIndex ? "sf-over" : undefined) } key={"sep" + rowIndex}
                 onDragOver = {e => this.handleRowDragOver(e, rowIndex) }
                 onDragEnter = {e => this.handleRowDragOver(e, rowIndex) }
                 onDragLeave = {() => this.handleRowDragLeave() }
@@ -127,14 +127,14 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
     }
 
     handleRowDragLeave = () => {
-        this.setState({ currentRow: null });
+        this.setState({ currentRow: undefined });
     }
 
     handleRowDrop = (e: React.DragEvent, row: number) => {
 
         const list = this.state.ctx.value.map(a => a.element as ModifiableEntity & IGridEntity);
 
-        var c = this.state.currentItem.value;
+        const c = this.state.currentItem.value;
 
         list.filter(a => a != c && a.row >= row).forEach(a => a.row++);
         c.row = row;
@@ -142,11 +142,11 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         c.columns = 12;
 
         this.setState({
-            dragMode: null,
-            initialPageX: null,
-            originalStartColumn: null,
-            currentItem: null,
-            currentRow: null,
+            dragMode: undefined,
+            initialPageX: undefined,
+            originalStartColumn: undefined,
+            currentItem: undefined,
+            currentRow: undefined,
         });
     }
 
@@ -168,25 +168,25 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
                     throw new Error("Should be an entity");
 
                 const list = this.props.ctx.value;
-                if (e.row == null)
+                if (e.row == undefined)
                     e.row = list.length == 0 ? 0 : list.map(a => (a.element as any as IGridEntity).row).max() + 1;
-                if (e.startColumn == null)
+                if (e.startColumn == undefined)
                     e.startColumn = 0;
-                if (e.columns == null)
+                if (e.columns == undefined)
                     e.columns = 12;
 
-                list.push({ rowId: null, element: e });
+                list.push({ rowId: undefined, element: e });
                 this.setValue(list);
             }).done();
     };
 
     handleOnDrop = (event: React.SyntheticEvent) => {
         this.setState({
-            dragMode: null,
-            initialPageX: null,
-            originalStartColumn: null,
-            currentItem: null,
-            currentRow: null,
+            dragMode: undefined,
+            initialPageX: undefined,
+            originalStartColumn: undefined,
+            currentItem: undefined,
+            currentRow: undefined,
         });
     }
 
@@ -197,10 +197,10 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         const de = e.nativeEvent as DragEvent;
         this.setState({
             dragMode: resizer,
-            initialPageX: null,
-            originalStartColumn: null,
+            initialPageX: undefined,
+            originalStartColumn: undefined,
             currentItem: mlec,
-            currentRow: null,
+            currentRow: undefined,
         });
         this.forceUpdate();
     }
@@ -213,7 +213,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
             initialPageX: de.pageX,
             originalStartColumn: mlec.value.startColumn,
             currentItem: mlec,
-            currentRow: null,
+            currentRow: undefined,
         });
         this.forceUpdate();
     }
@@ -222,7 +222,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
         const de = e.nativeEvent as DragEvent;
-        var s = this.state;
+        const s = this.state;
         const list = s.ctx.value.map(a => a.element as ModifiableEntity & IGridEntity);
         const c = s.currentItem.value;
         const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
@@ -232,7 +232,7 @@ export class EntityGridRepeater extends EntityListBase<EntityGridRepeaterProps, 
         if (s.dragMode == "move") {
             const offset = de.pageX - s.initialPageX;
             const dCol = Math.round((offset / rect.width) * 12);
-            var newCol = s.originalStartColumn + dCol;
+            let newCol = s.originalStartColumn + dCol;
             let start = list.filter(a => a != c && a.row == row && a.startColumn <= newCol).map(a => a.startColumn + a.columns).max();
             if (!isFinite(start))
                 start = 0;

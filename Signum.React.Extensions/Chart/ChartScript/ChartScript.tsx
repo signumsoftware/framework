@@ -35,8 +35,8 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Char
 
     render() {
 
-        var ctx = this.props.ctx;
-        var icon = ctx.value.icon;
+        const ctx = this.props.ctx;
+        const icon = ctx.value.icon;
 
       
         return (
@@ -82,7 +82,7 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Char
     }
 
     renderParameter = (ctx: TypeContext<ChartScriptParameterEntity>) => {
-        var cc = ctx.subCtx({ formGroupStyle: "Basic" });
+        const cc = ctx.subCtx({ formGroupStyle: "Basic" });
         return (
             <div>
                 <div className="form-vertical">

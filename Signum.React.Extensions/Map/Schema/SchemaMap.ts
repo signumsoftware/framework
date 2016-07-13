@@ -123,7 +123,7 @@ export class SchemaMapD3 {
             .data(map.allLinks)
             .enter().append("path")
             .attr("class", "link")
-            .style("stroke-dasharray", d => (<RelationInfo>d).lite ? "2, 2" : null)
+            .style("stroke-dasharray", d => (<RelationInfo>d).lite ? "2, 2" : undefined)
             .style("stroke", "black")
             .attr("marker-end", d => "url(#" + (d.isMList ? "mlist_arrow" : (<RelationInfo>d).lite ? "lite_arrow" : "normal_arrow") + ")");
 
@@ -138,10 +138,10 @@ export class SchemaMapD3 {
             .data(map.allNodes)
             .enter()
             .append("svg:g").attr("class", "nodeGroup")
-            .style("cursor", d => (d as TableInfo).typeName && Finder.isFindable((d as TableInfo).typeName) ? "pointer" : null)
+            .style("cursor", d => (d as TableInfo).typeName && Finder.isFindable((d as TableInfo).typeName) ? "pointer" : undefined)
             .on("click", d => {
 
-                this.selectedTable = this.selectedTable == d ? null : d;
+                this.selectedTable = this.selectedTable == d ? undefined : d;
 
                 this.selectedLinks();
                 this.selectedNode();
@@ -174,10 +174,10 @@ export class SchemaMapD3 {
 
         this.label = this.nodeGroup.append("text")
             .attr("class", d => "node " + d.entityBaseType)
-            .style("cursor", d => (d as TableInfo).typeName ? "pointer" : null)
+            .style("cursor", d => (d as TableInfo).typeName ? "pointer" : undefined)
             .text(d => d.niceName)
             .each(function (d) {
-                var text = this as SVGTextElement;
+                const text = this as SVGTextElement;
                 wrap(text, 60);
                 const b = text.getBBox();
                 d.width = b.width + margin * 2;
@@ -223,14 +223,14 @@ export class SchemaMapD3 {
             return false;
         };
 
-        this.nodes = this.map.allNodes.filter((n, i) => this.filter == null ||
+        this.nodes = this.map.allNodes.filter((n, i) => this.filter == undefined ||
             isMatch(n.namespace.toLowerCase() + "|" + n.tableName.toLowerCase() + "|" + n.niceName.toLowerCase()));
 
         this.links = this.map.allLinks.filter(l =>
             this.nodes.indexOf(<ITableInfo>l.source) != -1 &&
             this.nodes.indexOf(<ITableInfo>l.target) != -1);
 
-        var numNodes = this.nodes.length;
+        const numNodes = this.nodes.length;
 
         const distance =
             numNodes < 10 ? 80 :
@@ -249,14 +249,14 @@ export class SchemaMapD3 {
     }
 
     selectedLinks() {
-        var selectedTable = this.selectedTable;
+        const selectedTable = this.selectedTable;
         this.link
             .style("stroke-width", d => d.source == selectedTable || d.target == selectedTable ? 1.5 : d.isMList ? 1.5 : 1)
             .style("opacity", d => d.source == selectedTable || d.target == selectedTable ? 1 : d.isMList ? 0.8 : Math.max(.1, this.getOpacity((<RelationInfo>d).toTable)));
     }
 
     selectedNode() {
-        this.label.style("font-weight", d => d == this.selectedTable ? "bold" : null);
+        this.label.style("font-weight", d => d == this.selectedTable ? "bold" : undefined);
     }
 
     showHideNodes() {
@@ -292,7 +292,7 @@ export class SchemaMapD3 {
     }
 
     drawColor() {
-        var cp = this.providers[this.color];
+        const cp = this.providers[this.color];
 
         this.node.style("fill", cp.getFill)
             .style("stroke", cp.getStroke || cp.getFill)
@@ -337,15 +337,15 @@ export class SchemaMapD3 {
 
     getPathExpression(l: IRelationInfo) {
 
-        var s = l.sourcePoint;
-        var t = l.targetPoint;
+        const s = l.sourcePoint;
+        const t = l.targetPoint;
 
         if (l.source == l.target) {
 
-            var dx = (l.repetitions % 2) * 2 - 1;
-            var dy = ((l.repetitions + 1 ) % 2) * 2 - 1;
+            const dx = (l.repetitions % 2) * 2 - 1;
+            const dy = ((l.repetitions + 1 ) % 2) * 2 - 1;
 
-            var c = calculatePoint(l.source, {
+            const c = calculatePoint(l.source, {
                 x: l.source.x + dx * (l.source.width / 2),
                 y: l.source.y + dy * (l.source.height / 2),
             });
@@ -359,25 +359,25 @@ export class SchemaMapD3 {
 
     getPointRepetitions(s: Point, t: Point, repetitions: number): Point {
 
-        var m: Point = {
+        const m: Point = {
             x: (s.x + t.x) / 2,
             y: (s.y + t.y) / 2
         };
 
-        var d: Point = {
+        const d: Point = {
             x: (s.x - t.x),
             y: (s.y - t.y)
         };
 
-        var h = Math.sqrt(d.x * d.x + d.y * d.y);
+        let h = Math.sqrt(d.x * d.x + d.y * d.y);
 
         if (h == 0)
             h = 1;
 
         //0, 10, -10, 20, -20, 30, -30
-        var repPixels = Math.floor(repetitions + 1 / 2) * ((repetitions % 2) * 2 - 1);
+        const repPixels = Math.floor(repetitions + 1 / 2) * ((repetitions % 2) * 2 - 1);
 
-        var p: Point = {
+        const p: Point = {
             x: m.x + (d.y / h) * 20 * repPixels,
             y: m.y - (d.x / h) * 20 * repPixels
         };
@@ -411,7 +411,7 @@ export class SchemaMapD3 {
             .x(p => p.x)
             .y(p => p.y)(this.nodes);
 
-        var numNodes = this.nodes.length;
+        const numNodes = this.nodes.length;
 
         const constant =
             numNodes < 10 ? 100 :
@@ -443,7 +443,7 @@ export class SchemaMapD3 {
                         y = (Math.random() - 0.5) * 10;
                     }
 
-                    var l = Math.sqrt(x * x + y * y);
+                    const l = Math.sqrt(x * x + y * y);
 
                     const lx = x / l;
                     const ly = y / l;

@@ -20,10 +20,10 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
     render() {
 
-        var e = this.props.ctx;
+        const e = this.props.ctx;
 
-        var ec = e.subCtx({ labelColumns: { sm: 3 } });
-        var sc = e.subCtx({ formGroupStyle: "Basic" });
+        const ec = e.subCtx({ labelColumns: { sm: 3 } });
+        const sc = e.subCtx({ formGroupStyle: "Basic" });
 
 
         return (
@@ -32,7 +32,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
                     <div className="col-sm-8">
                         <ValueLine ctx={ec.subCtx(e => e.name) }  />
                         <EntityCombo ctx={ec.subCtx(e => e.systemEmail) }  />
-                        <EntityLine ctx={ec.subCtx(e => e.query) } onChange={() => this.forceUpdate() } remove={e.value.from == null && e.value.recipients.length == 0 && e.value.messages.length == 0} />
+                        <EntityLine ctx={ec.subCtx(e => e.query) } onChange={() => this.forceUpdate() } remove={e.value.from == undefined && e.value.recipients.length == 0 && e.value.messages.length == 0} />
                         <div className="row">
                             <div className="col-sm-4">
                                 <ValueLine ctx={ec.subCtx(e => e.editableMessage) } inlineCheckbox={true} />
@@ -60,7 +60,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
     }
 
     renderQueryPart() {
-        var ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
+        const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
 
         return (
             <div>
@@ -82,7 +82,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
     renderContact = (ec: TypeContext<EmailTemplateContactEntity>) => {
 
-        var sc = ec.subCtx({ formGroupStyle: "Basic" });
+        const sc = ec.subCtx({ formGroupStyle: "Basic" });
 
         return (
             <div>
@@ -111,7 +111,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
     renderRecipient = (ec: TypeContext<EmailTemplateRecipientEntity>) => {
 
-        var sc = ec.subCtx({ formGroupStyle: "Basic" });
+        const sc = ec.subCtx({ formGroupStyle: "Basic" });
 
         return (
             <div>
@@ -166,7 +166,7 @@ export class EmailTemplateMessageComponent extends React.Component<EmailTemplate
 
     render() {
 
-        var ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
+        const ec = this.props.ctx.subCtx({ labelColumns: { sm: 2 } });
         return (
             <div className="sf-email-template-message">
                 <EntityCombo ctx={ec.subCtx(e => e.cultureInfo) } labelText={EmailTemplateViewMessage.Language.niceToString() } onChange={this.props.invalidate} />

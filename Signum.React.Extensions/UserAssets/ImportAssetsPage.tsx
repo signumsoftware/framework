@@ -79,12 +79,12 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
         API.importAssets({
             file: this.state.file,
             model: this.state.model
-        }).then(model => this.setState({ success: true, model: null, file: null }))
+        }).then(model => this.setState({ success: true, model: undefined, file: undefined }))
             .done();
     }
 
     renderModel() {
-        var tc = TypeContext.root(UserAssetPreviewModel, this.state.model, null);
+        const tc = TypeContext.root(UserAssetPreviewModel, this.state.model, undefined);
 
         return (
             <div>

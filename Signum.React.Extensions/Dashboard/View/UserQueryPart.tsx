@@ -24,7 +24,7 @@ export default class UserQueryPart extends React.Component<UserQueryPartProps, {
 
     constructor(props: any) {
         super(props);
-        this.state = { fo: null };
+        this.state = { fo: undefined };
     }
 
     

@@ -85,15 +85,15 @@ export class OperationMapD3 {
             //.linkStrength(20)
             .size([width, height]);
 
-        var colorStates = colorScale(map.states.map(a => a.count).max());
-        var colorOperations = colorScale(map.operations.map(a => a.count).max());
+        const colorStates = colorScale(map.states.map(a => a.count).max());
+        const colorOperations = colorScale(map.operations.map(a => a.count).max());
 
         this.force
             .nodes(map.allNodes)
             .links(map.allLinks)
             .start();
 
-        var svg = d3.select(svgElement)
+        const svg = d3.select(svgElement)
             .attr("width", width)
             .attr("height", height);
 
@@ -124,15 +124,15 @@ export class OperationMapD3 {
             .data(this.map.states)
             .enter()
             .append("svg:g").attr("class", "stateGroup")
-            .style("cursor", d => d.token ? "pointer" : null)
+            .style("cursor", d => d.token ? "pointer" : undefined)
             .on("click", d => {
 
-                this.selectedNode = this.selectedNode == d ? null : d;
+                this.selectedNode = this.selectedNode == d ? undefined : d;
 
                 this.selectLinks();
                 this.selectNodes();
 
-                var event = d3.event;
+                const event = d3.event;
                 if (event.defaultPrevented)
                     return;
 
@@ -149,22 +149,22 @@ export class OperationMapD3 {
         this.nodeStates = this.statesGroup.append("rect")
             .attr("class", d => "state " + (
                 d.isSpecial ? "special" :
-                d.ignored ? "ignore" : null))
+                d.ignored ? "ignore" : undefined))
             .attr("rx", 5)
             .attr('fill-opacity', 0.1);
 
         this.onStateColorChange();
 
-        var margin = 3;
+        const margin = 3;
 
         this.labelStates = this.statesGroup.append("text")
             .attr("class", "state")
-            .style("cursor", d => d.token ? "pointer" : null)
+            .style("cursor", d => d.token ? "pointer" : undefined)
             .text(d => d.niceName)
             .each(function(d) {
-                var svg = this as SVGTextElement;
+                const svg = this as SVGTextElement;
                 wrap(svg, 60);
-                var b = svg.getBBox();
+                const b = svg.getBBox();
                 d.width = b.width + margin * 2;
                 d.height = b.height + margin * 2;
             });
@@ -191,12 +191,12 @@ export class OperationMapD3 {
             .style("cursor", "pointer")
             .on("click", d => {
 
-                this.selectedNode = this.selectedNode == d ? null : d;
+                this.selectedNode = this.selectedNode == d ? undefined : d;
 
                 this.selectLinks();
                 this.selectNodes();
 
-                var event = d3.event;
+                const event = d3.event;
                 if (event.defaultPrevented)
                     return;
 
@@ -212,16 +212,16 @@ export class OperationMapD3 {
         this.nodeOperations = this.operationsGroup.append("rect")
             .attr("class", "operation")
 
-        var margin = 1;
+        const margin = 1;
 
         this.labelOperations = this.operationsGroup.append("text")
             .attr("class", "operation")
             .style("cursor", "pointer")
             .text(d => d.niceName)
             .each(function (d) {
-                var svg = this as SVGTextElement;
+                const svg = this as SVGTextElement;
                 wrap(svg, 60);
-                var b = svg.getBBox();
+                const b = svg.getBBox();
                 d.width = b.width + margin * 2;
                 d.height = b.height + margin * 2;
             });
@@ -244,8 +244,8 @@ export class OperationMapD3 {
     }
 
     selectNodes() {
-        this.labelStates.style("font-weight", d => d == this.selectedNode ? "bold" : null);
-        this.labelOperations.style("font-weight", d => d == this.selectedNode ? "bold" : null);
+        this.labelStates.style("font-weight", d => d == this.selectedNode ? "bold" : undefined);
+        this.labelOperations.style("font-weight", d => d == this.selectedNode ? "bold" : undefined);
     }
 
 
@@ -263,7 +263,7 @@ export class OperationMapD3 {
             const colorStates = colorScale(this.map.states.map(a => a.count).max());
             c = d => colorStates(d.count);
         } else {
-            var scale = d3.scale.category10();
+            const scale = d3.scale.category10();
             c = d => d.color || (d.isSpecial ? "lightgray" : scale(d.key));
         }
 
@@ -319,8 +319,8 @@ export class OperationMapD3 {
     getPathExpression(t: Transition) {
         if (t.fromState == t.toState) {
 
-            var dx = t.sourcePoint.x - t.operation.x;
-            var dy = t.sourcePoint.y - t.operation.y;
+            const dx = t.sourcePoint.x - t.operation.x;
+            const dy = t.sourcePoint.y - t.operation.y;
 
             return `M${t.sourcePoint.x} ${t.sourcePoint.y} C ${t.operation.x - dy} ${t.operation.y + dx} ${t.operation.x + dy} ${t.operation.y - dx} ${t.targetPoint.x} ${t.targetPoint.y}`;
         }
@@ -351,10 +351,10 @@ export class OperationMapD3 {
 
     gravityDim(v: number, min: number, max: number): number {
 
-        var minF = min + 100;
-        var maxF = max - 100;
+        const minF = min + 100;
+        const maxF = max - 100;
 
-        var dist =
+        const dist =
             maxF < v ? maxF - v :
                 v < minF ? minF - v : 0;
 

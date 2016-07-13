@@ -34,7 +34,7 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
             .then(() => Api.fetchTypeRulePack(pack.role.id))
             .then(newPack => {
                 notifySuccess();
-                bc.frame.onReload({ entity: newPack, canExecute: null });
+                bc.frame.onReload({ entity: newPack, canExecute: undefined });
             })
             .done();
     }
@@ -192,8 +192,8 @@ export default class TypesRulesPackControl extends React.Component<{ ctx: TypeCo
 
     link(icon: string, allowed: AuthThumbnail, action: () => Promise<ModelEntity>) {
 
-        if (allowed == null)
-            return null;
+        if (allowed == undefined)
+            return undefined;
 
         let onClick = () => {
             GraphExplorer.propagateAll(this.props.ctx.value);

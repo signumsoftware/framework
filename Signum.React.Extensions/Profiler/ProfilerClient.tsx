@@ -17,9 +17,9 @@ import * as AuthClient from '../Authorization/AuthClient'
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="profiler">
-        <Route path="times" getComponent={(loc, cb) => require(["./Times/TimesPage"], (Comp) => cb(null, Comp.default))}/>
-        <Route path="heavy" getComponent={(loc, cb) => require(["./Heavy/HeavyListPage"], (Comp) => cb(null, Comp.default)) }/>
-        <Route path="heavy/entry/:selectedIndex" getComponent={(loc, cb) => require(["./Heavy/HeavyEntryPage"], (Comp) => cb(null, Comp.default)) }/>
+        <Route path="times" getComponent={(loc, cb) => require(["./Times/TimesPage"], (Comp) => cb(undefined, Comp.default))}/>
+        <Route path="heavy" getComponent={(loc, cb) => require(["./Heavy/HeavyListPage"], (Comp) => cb(undefined, Comp.default)) }/>
+        <Route path="heavy/entry/:selectedIndex" getComponent={(loc, cb) => require(["./Heavy/HeavyEntryPage"], (Comp) => cb(undefined, Comp.default)) }/>
     </Route>);
 
     //Navigator.addSettings(new EntitySettings(ProcessEntity, e => new Promise(resolve => require(['./Templates/Process'], resolve))));
@@ -61,7 +61,7 @@ export module API {
 
     export module  Heavy {
         export function setEnabled(isEnabled: boolean): Promise<void> {
-            return ajaxPost<void>({ url: "~/api/profilerHeavy/setEnabled/" + isEnabled }, null);
+            return ajaxPost<void>({ url: "~/api/profilerHeavy/setEnabled/" + isEnabled }, undefined);
         }
 
         export function isEnabled(): Promise<boolean> {
@@ -69,7 +69,7 @@ export module API {
         }
 
         export function clear(): Promise<void> {
-            return ajaxPost<void>({ url: "~/api/profilerHeavy/clear" }, null);
+            return ajaxPost<void>({ url: "~/api/profilerHeavy/clear" }, undefined);
         }
 
         export function entries(): Promise<HeavyProfilerEntry[]> {
@@ -98,7 +98,7 @@ export module API {
     export module Times {
 
         export function clear(): Promise<void> {
-            return ajaxPost<void>({ url: "~/api/profilerTimes/clear" }, null);
+            return ajaxPost<void>({ url: "~/api/profilerTimes/clear" }, undefined);
         }
 
         export function fetchInfo(): Promise<TimeTrackerEntry[]> {

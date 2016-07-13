@@ -27,7 +27,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
 
     handleSelectedToggle = (isOpen: boolean) => {
 
-        if (isOpen && this.state.excelReport == null)
+        if (isOpen && this.state.excelReport == undefined)
             this.reloadList().done();
     }
 
@@ -66,7 +66,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
         if (this.props.plainExcel && !this.props.excelReport)
             return <button className={"sf-query-button sf-search btn btn-default"} onClick={this.handlePlainExcel}>{label} </button>;
 
-        var excelReports = this.state.excelReport;
+        const excelReports = this.state.excelReport;
         return (
             <DropdownButton title={label} label={label} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 onToggle={this.handleSelectedToggle}>

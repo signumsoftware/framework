@@ -26,7 +26,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
 
     handleSelectedToggle = (isOpen: boolean) => {
 
-        if (isOpen && this.state.userCharts == null)
+        if (isOpen && this.state.userCharts == undefined)
             this.reloadList().done();
     }
 
@@ -39,8 +39,8 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
     handleSelect = (uc: Lite<UserChartEntity>) => {
 
         Navigator.API.fetchAndForget(uc).then(userChart => {
-            var oldFindOptions = this.props.chartRequestView.props.chartRequest;
-            UserChartClient.Converter.applyUserChart(oldFindOptions, userChart, null)
+            const oldFindOptions = this.props.chartRequestView.props.chartRequest;
+            UserChartClient.Converter.applyUserChart(oldFindOptions, userChart, undefined)
                 .then(newChartRequest => {
                     this.props.chartRequestView.props.onChange(newChartRequest);
                     this.setState({ currentUserChart: userChart, });
@@ -72,7 +72,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
 
     render() {
         const label = UserChartEntity.nicePluralName();
-        var userCharts = this.state.userCharts;
+        const userCharts = this.state.userCharts;
         return (
             <DropdownButton title={label} label={label} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 onToggle={this.handleSelectedToggle}>

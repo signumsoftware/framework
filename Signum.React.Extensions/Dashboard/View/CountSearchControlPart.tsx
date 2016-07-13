@@ -41,7 +41,7 @@ export interface CountUserQueryElementProps {
 
 export class CountUserQueryElement extends React.Component<CountUserQueryElementProps, {fo?: FindOptions }> {
     
-    state = { fo: null } as { fo?: FindOptions };
+    state = { fo: undefined } as { fo?: FindOptions };
 
     componentWillMount(){
         this.loadFindOptions(this.props);
@@ -64,7 +64,7 @@ export class CountUserQueryElement extends React.Component<CountUserQueryElement
 
     render(){
 
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
 
         if (!this.state.fo)
             return <span>{ JavascriptMessage.loading.niceToString() }</span>;

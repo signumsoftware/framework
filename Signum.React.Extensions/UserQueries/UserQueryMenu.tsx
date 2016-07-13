@@ -23,10 +23,10 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     }
 
     componentWillMount() {
-        var props = this.props as RouteComponentProps<any, any>;
-        var userQuery = window.location.search.tryAfter("userQuery=");
+        const props = this.props as RouteComponentProps<any, any>;
+        const userQuery = window.location.search.tryAfter("userQuery=");
         if (userQuery) {
-            var uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
+            const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
             Navigator.API.fillToStrings([uq])
                 .then(() => this.setState({ currentUserQuery: uq }))
                 .done();
@@ -35,7 +35,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
 
     handleSelectedToggle = (isOpen: boolean) => {
 
-        if (isOpen && this.state.userQueries == null)
+        if (isOpen && this.state.userQueries == undefined)
             this.reloadList().done();
     }
 
@@ -48,8 +48,8 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     handleSelect = (uq: Lite<UserQueryEntity>) => {
 
         Navigator.API.fetchAndForget(uq).then(userQuery => {
-            var oldFindOptions = this.props.searchControl.state.findOptions;
-            UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, null)
+            const oldFindOptions = this.props.searchControl.state.findOptions;
+            UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined)
                 .then(newFindOptions => {
                     this.props.searchControl.resetFindOptions(newFindOptions);
                     this.setState({ currentUserQuery: uq });
@@ -83,7 +83,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
 
     render() {
         const label = UserQueryMessage.UserQueries_UserQueries.niceToString();
-        var userQueries = this.state.userQueries;
+        const userQueries = this.state.userQueries;
         return (
             <DropdownButton title={label} label={label} id="userQueriesDropDown" className="sf-userquery-dropdown"
                 onToggle={this.handleSelectedToggle}>

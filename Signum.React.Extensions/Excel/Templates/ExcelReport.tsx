@@ -10,7 +10,7 @@ export default class ExcelReport extends React.Component<{ ctx: TypeContext<Exce
 
     render() {
         
-        var e = this.props.ctx;
+        const e = this.props.ctx;
 
         return (
             <div>

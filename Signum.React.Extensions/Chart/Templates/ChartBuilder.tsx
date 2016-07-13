@@ -33,7 +33,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
     constructor(props: ChartBuilderProps) {
         super(props);
 
-        this.state = { expanded: null };
+        this.state = { expanded: undefined };
     }
 
     componentWillMount() {
@@ -46,18 +46,18 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
             this.setState({ colorPalettes: colorPalettes }))
             .done();
 
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
 
         ChartClient.synchronizeColumns(ctx.value);
         this.setState({ expanded: Array.repeat(ctx.value.columns.length, false) });
     }
 
     chartTypeImgClass(script: ChartScriptEntity): string {
-        var cb = this.props.ctx.value;
+        const cb = this.props.ctx.value;
 
-        var css = "sf-chart-img";
+        let css = "sf-chart-img";
 
-        if (!cb.columns.some(a => a.element.token != null && a.element.token.parseException != null) && ChartClient.isCompatibleWith(script, cb))
+        if (!cb.columns.some(a => a.element.token != undefined && a.element.token.parseException != undefined) && ChartClient.isCompatibleWith(script, cb))
             css += " sf-chart-img-equiv";
 
         if (is(cb.chartScript, script)){
@@ -88,7 +88,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
     handleChartScriptOnClick = (cs: ChartScriptEntity) => {
 
-        var chart = this.props.ctx.value;
+        const chart = this.props.ctx.value;
         let compatible = ChartClient.isCompatibleWith(cs, chart)
         chart.chartScript = cs;
         ChartClient.synchronizeColumns(chart);
@@ -101,7 +101,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
     render() {
 
-        var chart = this.props.ctx.value;
+        const chart = this.props.ctx.value;
 
         return (
             <div className="row sf-chart-builder">
@@ -168,9 +168,9 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
     getParameterValueLine(ctx: TypeContext<ChartParameterEntity>, scriptParameter: ChartScriptParameterEntity) {
 
-        var chart = this.props.ctx.value;
+        const chart = this.props.ctx.value;
 
-        var vl: ValueLineProps = {
+        const vl: ValueLineProps = {
             ctx: ctx.subCtx(a => a.value, { labelColumns: { sm: 6 } }),
             labelText: scriptParameter.name,
         };
@@ -181,14 +181,14 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
         else if (scriptParameter.type == "Enum") {
             vl.valueLineType = ValueLineType.Enum;
 
-            var tokenEntity = scriptParameter.columnIndex == null ? null : chart.columns[scriptParameter.columnIndex].element.token;
+            const tokenEntity = scriptParameter.columnIndex == undefined ? undefined : chart.columns[scriptParameter.columnIndex].element.token;
 
-            var compatible = scriptParameter.enumValues.filter(a => a.typeFilter == null || tokenEntity == null || ChartClient.isChartColumnType(tokenEntity.token, a.typeFilter));
+            const compatible = scriptParameter.enumValues.filter(a => a.typeFilter == undefined || tokenEntity == undefined || ChartClient.isChartColumnType(tokenEntity.token, a.typeFilter));
             if (compatible.length <= 1)
                 vl.ctx.styleOptions.readOnly = true;
 
             vl.comboBoxItems = compatible.map(ev => ({ name: ev.name, niceName: ev.name }));
-            vl.valueHtmlProps = { size: null };
+            vl.valueHtmlProps = { size: undefined };
         }
 
         vl.onChange = this.handleOnRedraw;

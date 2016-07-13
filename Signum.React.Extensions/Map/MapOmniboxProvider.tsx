@@ -22,14 +22,14 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
 
     renderItem(result: MapOmniboxResult): React.ReactChild[] {
 
-        var array: React.ReactChild[] = [];
+        const array: React.ReactChild[] = [];
 
         array.push(this.icon());
 
         this.renderMatch(result.KeywordMatch, array);
         array.push("\u0020");
 
-        if (result.TypeMatch != null)
+        if (result.TypeMatch != undefined)
             this.renderMatch(result.TypeMatch, array);
         
         return array;
@@ -37,14 +37,14 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
 
     navigateTo(result: MapOmniboxResult) {
 
-        if (result.KeywordMatch == null)
-            return null;
+        if (result.KeywordMatch == undefined)
+            return undefined;
 
         return Promise.resolve(Navigator.currentHistory.createPath("~/Map" + (result.TypeName ? "/" + result.TypeName : "")));
     }
 
     toString(result: MapOmniboxResult) {
-        if (result.TypeMatch == null)
+        if (result.TypeMatch == undefined)
             return result.KeywordMatch.Text;
 
         return "{0} {1}".formatWith(result.KeywordMatch.Text, result.TypeMatch.Text);

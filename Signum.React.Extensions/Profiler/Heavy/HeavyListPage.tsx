@@ -61,7 +61,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
 
 
     handleDownload = () => {
-        API.Heavy.download(null);
+        API.Heavy.download(undefined);
     }
 
     handleInputChange = (e: React.FormEvent) => {
@@ -77,7 +77,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
             let fileName = this.state.fileToUpload.name;
 
             API.Heavy.upload({ fileName, content })
-                .then(() => this.setState({ fileToUpload: null, fileVer: this.state.fileVer + 1 }))
+                .then(() => this.setState({ fileToUpload: undefined, fileVer: this.state.fileVer + 1 }))
                 .then(() => this.loadEntries())
                 .done();
         };
@@ -87,7 +87,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
     render() {
         document.title = "Heavy Profiler";
 
-        if (this.state.entries == null)
+        if (this.state.entries == undefined)
             return <h3>Heavy Profiler (loading...) </h3>;
 
         return (
@@ -126,7 +126,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
 
     mountChart() {
 
-        if (this.chartContainer == null)
+        if (this.chartContainer == undefined)
             return;
 
         let data = this.state.entries;

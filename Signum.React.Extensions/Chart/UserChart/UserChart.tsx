@@ -15,9 +15,9 @@ const CurrentEntityKey = "[CurrentEntity]";
 export default class UserChart extends React.Component<{ ctx: TypeContext<UserChartEntity> }, void> {
 
     render() {
-        var ctx = this.props.ctx;
-        var entity = ctx.value;
-        var queryKey = entity.query.key;
+        const ctx = this.props.ctx;
+        const entity = ctx.value;
+        const queryKey = entity.query.key;
 
         return (
             <div>
@@ -57,7 +57,7 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
     };
 
     renderFilter = (ctx: TypeContext<QueryFilterEntity>) => {
-        var ctx2 = ctx.subCtx({ formGroupStyle: "None" });
+        const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
                 <QueryTokenEntityBuilder
@@ -73,7 +73,7 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
     }
 
     renderOrder = (ctx: TypeContext<QueryOrderEntity>) => {
-        var ctx2 = ctx.subCtx({ formGroupStyle: "None" });
+        const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
                 <QueryTokenEntityBuilder

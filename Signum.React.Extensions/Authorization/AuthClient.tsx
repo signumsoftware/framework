@@ -29,8 +29,8 @@ export function startPublic(options: { routes: JSX.Element[], userTicket: boolea
     resetPassword = options.resetPassword;
 
     options.routes.push(<Route path="auth">
-        <Route path="login" getComponent={(loc, cb) => require(["./Login/Login"], (Comp) => cb(null, Comp.default))}/>
-        <Route path="changePassword" getComponent={(loc, cb) => require(["./Login/ChangePassword"], (Comp) => cb(null, Comp.default)) }/>
+        <Route path="login" getComponent={(loc, cb) => require(["./Login/Login"], (Comp) => cb(undefined, Comp.default))}/>
+        <Route path="changePassword" getComponent={(loc, cb) => require(["./Login/ChangePassword"], (Comp) => cb(undefined, Comp.default)) }/>
     </Route>);
 }
 
@@ -94,7 +94,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     OmniboxClient.registerSpecialAction({
         allowed: () => isPermissionAuthorized(BasicPermission.AdminRules),
         key: "DownloadAuthRules",
-        onClick: () => { Api.downloadAuthRules(); return null; }
+        onClick: () => { Api.downloadAuthRules(); return undefined; }
     });
 }
 
@@ -129,7 +129,7 @@ export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBa
 export function navigatorIsReadOnly(typeName: string, entityPack?: EntityPack<ModifiableEntity>) {
     const ti = getTypeInfo(typeName);
 
-    if (ti == null)
+    if (ti == undefined)
         return false;
 
     if (entityPack && entityPack.typeAllowed)
@@ -141,7 +141,7 @@ export function navigatorIsReadOnly(typeName: string, entityPack?: EntityPack<Mo
 export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<ModifiableEntity>) {
     const ti = getTypeInfo(typeName);
 
-    if (ti == null)
+    if (ti == undefined)
         return false;
 
     if (entityPack && entityPack.typeAllowed)
@@ -153,7 +153,7 @@ export function navigatorIsViewable(typeName: string, entityPack?: EntityPack<Mo
 export function navigatorIsCreable(typeName: string) {
     const ti = getTypeInfo(typeName);
   
-    return ti == null || ti.typeAllowed == "Create";
+    return ti == undefined || ti.typeAllowed == "Create";
 }
 
 export function currentUser(): UserEntity {
@@ -179,7 +179,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
     if (!token)
         return makeCall();
     
-    if (options.headers == null)
+    if (options.headers == undefined)
         options.headers = {}; 
 
     options.headers["Authorization"] = "Bearer " + token;   
@@ -199,14 +199,14 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 
                     return makeCall();
                 }, e2 => {
-                    setAuthToken(null);
+                    setAuthToken(undefined);
                     Navigator.currentHistory.push("~/auth/login");
                     throw e;
                 });
             }
 
             if (e.httpError.ExceptionType && e.httpError.ExceptionType.endsWith(".AuthenticationException")) {
-                setAuthToken(null);
+                setAuthToken(undefined);
                 Navigator.currentHistory.push("~/auth/login");
             }
 
@@ -215,7 +215,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
 }
 
 export function getAuthToken(): string {
-    return sessionStorage.getItem("authToken") || null;
+    return sessionStorage.getItem("authToken") || undefined;
 }
 
 export function setAuthToken(authToken: string): void{
@@ -246,7 +246,7 @@ export function autoLogin(): Promise<UserEntity> {
                     .then(respo => {
 
                         if (!respo) {
-                            resolve(null);
+                            resolve(undefined);
                         } else {
                             setAuthToken(respo.token);
                             setCurrentUser(respo.userEntity);
@@ -262,8 +262,8 @@ export function logout() {
 
     Api.logout().then(() => {
         onLogout();
-        setCurrentUser(null);
-        setAuthToken(null);
+        setCurrentUser(undefined);
+        setAuthToken(undefined);
     }).done();
 }
 
@@ -312,7 +312,7 @@ export module Api {
     }
 
     export function loginFromCookie(): Promise<LoginResponse> {
-        return ajaxPost<LoginResponse>({ url: "~/api/auth/loginFromCookie", avoidAuthToken: true }, null);
+        return ajaxPost<LoginResponse>({ url: "~/api/auth/loginFromCookie", avoidAuthToken: true }, undefined);
     }
 
     export function refreshToken(oldToken: string): Promise<LoginResponse> {
@@ -333,7 +333,7 @@ export module Api {
     }
 
     export function logout(): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/auth/logout" }, null);
+        return ajaxPost<void>({ url: "~/api/auth/logout" }, undefined);
     }
 
     export function fetchPermissionRulePack(roleId: number | string): Promise<PermissionRulePack> {

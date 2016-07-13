@@ -13,7 +13,7 @@ export default class EmailMasterTemplate extends React.Component<{ ctx: TypeCont
 
     render() {
 
-        var e = this.props.ctx;
+        const e = this.props.ctx;
 
         return (
             <div>
@@ -51,7 +51,7 @@ export class EmailTemplateMessageComponent extends React.Component<EmailMasterTe
 
     render() {
 
-        var ec = this.props.ctx;
+        const ec = this.props.ctx;
         return (
             <div className="sf-email-template-message">
                 <EntityCombo ctx={ec.subCtx(e => e.cultureInfo) } labelText={EmailTemplateViewMessage.Language.niceToString() } onChange={this.props.invalidate} />

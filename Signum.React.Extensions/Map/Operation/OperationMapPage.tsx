@@ -9,7 +9,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOpti
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition} from './OperationMap'
-var colorbrewer = require("colorbrewer");
+const colorbrewer = require("colorbrewer");
 
 require("!style!css!./operationMap.css");
 
@@ -48,7 +48,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
         MapClient.API.operations(this.props.routeParams.type)
             .then(omi => {
-                var parsedQuery = this.getParsedQuery();
+                const parsedQuery = this.getParsedQuery();
 
                 this.setState({
                     operationMapInfo: omi,
@@ -60,7 +60,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
 
     componentWillUnmount(){
-        if (Expanded.setExpanded && this.wasExpanded != null){
+        if (Expanded.setExpanded && this.wasExpanded != undefined){
             Expanded.setExpanded(this.wasExpanded);
         }
     }
@@ -69,9 +69,9 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
     getParsedQuery(): ParsedQueryString {
     
-        var result: ParsedQueryString = { nodes: {} };
+        const result: ParsedQueryString = { nodes: {} };
 
-        var query = this.props.location.query as { [name: string]: string };
+        const query = this.props.location.query as { [name: string]: string };
         if (!query)
             return result;
 
@@ -97,7 +97,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
             return;
 
         this.div = div;
-        var rect = div.getBoundingClientRect();
+        const rect = div.getBoundingClientRect();
         this.setState({ width: rect.width, height: window.innerHeight - 200 });
     }
 
@@ -105,13 +105,13 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
     render() {
 
         if (Expanded.getExpanded && !Expanded.getExpanded())
-            return null;
+            return undefined;
 
-        var s = this.state;
+        const s = this.state;
         return (
             <div ref={this.handleSetInitialSize}>
                 {this.renderFilter() }
-                {!s.operationMapInfo || this.div == null ?
+                {!s.operationMapInfo || this.div == undefined ?
                     <span>{ JavascriptMessage.loading.niceToString() }</span> :
                     <OperationMapRenderer operationMapInfo={s.operationMapInfo} parsedQuery={s.parsedQuery} color={s.color}  height={s.height} width={s.width} queryName={this.props.routeParams.type} />}
             </div>
@@ -128,24 +128,24 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
         e.preventDefault();
 
-        var s = this.state;
+        const s = this.state;
 
-        var tables = s.operationMapInfo.allNodes.filter(a => a.fixed)
+        const tables = s.operationMapInfo.allNodes.filter(a => a.fixed)
             .toObject(a => a.key, a =>
                 (a.x / s.width).toPrecision(4) + "," +
                 (a.y / s.height).toPrecision(4));
 
 
-        var query = Dic.extend(tables, { color: s.color });
+        const query = Dic.extend(tables, { color: s.color });
 
-        var url = currentHistory.createHref({ pathname: "~/map/" + this.props.routeParams.type, query: query });
+        const url = currentHistory.createHref({ pathname: "~/map/" + this.props.routeParams.type, query: query });
 
         window.open(url);
     }
 
     renderFilter() {
 
-        var s = this.state;
+        const s = this.state;
 
         return (
             <div className="form-inline form-sm container" style={{ marginTop: "10px" }}>
@@ -177,11 +177,11 @@ export interface OperationMapRendererProps extends OperationMapPropsState {
 export class OperationMapRenderer extends React.Component<OperationMapRendererProps, { mapD3: OperationMapD3 }> { 
 
     componentDidMount() {
-        var p = this.props;
+        const p = this.props;
 
         this.fixSchemaMap(p.operationMapInfo, p.parsedQuery);
 
-        var d3 = new OperationMapD3(this.svg, p.queryName, p.operationMapInfo, p.color, p.width, p.height);
+        const d3 = new OperationMapD3(this.svg, p.queryName, p.operationMapInfo, p.color, p.width, p.height);
         this.setState({ mapD3: d3 });
     }
 
@@ -199,12 +199,12 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
             }
         });
         
-        var statesDic = map.states.toObject(g => g.key);
+        const statesDic = map.states.toObject(g => g.key);
 
-        var fromRelationships = map.operations.filter(op => op.fromStates != null)
+        const fromRelationships = map.operations.filter(op => op.fromStates != undefined)
             .flatMap(op => op.fromStates.map(s => ({ source: statesDic[s], target: op, isFrom: true }) as ForceLink));
 
-        var toRelationships = map.operations.filter(op => op.toStates != null)
+        const toRelationships = map.operations.filter(op => op.toStates != undefined)
             .flatMap(op => op.toStates.map(s => ({ source: op, target: statesDic[s], isFrom: false }) as ForceLink));
 
         map.allLinks = fromRelationships.concat(toRelationships);
@@ -214,8 +214,8 @@ export class OperationMapRenderer extends React.Component<OperationMapRendererPr
             toState: statesDic[t]
         }) as Transition)));
 
-        var fanOut = map.operations.flatMap(a => a.fromStates.map(s => ({ s: s, weight: 1.0 / a.fromStates.length }))).groupToObject(a => a.s);
-        var fanIn = map.operations.flatMap(a => a.toStates.map(s => ({ s: s, weight: 1.0 / a.toStates.length }))).groupToObject(a => a.s);
+        const fanOut = map.operations.flatMap(a => a.fromStates.map(s => ({ s: s, weight: 1.0 / a.fromStates.length }))).groupToObject(a => a.s);
+        const fanIn = map.operations.flatMap(a => a.toStates.map(s => ({ s: s, weight: 1.0 / a.toStates.length }))).groupToObject(a => a.s);
 
         map.states.forEach(m => {
             m.fanOut = (fanOut[m.key] ? fanOut[m.key].reduce((acum, e) => acum + e.weight, 0) : 0);

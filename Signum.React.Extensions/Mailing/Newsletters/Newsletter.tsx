@@ -13,7 +13,7 @@ export default class Newsletter extends React.Component<{ ctx: TypeContext<Newsl
 
     render() {
 
-        var nc = this.props.ctx;
+        const nc = this.props.ctx;
         
         
 

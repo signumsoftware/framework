@@ -36,15 +36,15 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
     }
 
     loadSync() {
-        var { assembly, culture } = this.props.routeParams;
+        const { assembly, culture } = this.props.routeParams;
         return API.sync(assembly, culture).then(result => this.setState({ result }))
     }
 
     render() {
 
-        var {assembly, culture } = this.props.routeParams;
+        const {assembly, culture } = this.props.routeParams;
 
-        var message = TranslationMessage.Synchronize0In1.niceToString(assembly,
+        const message = TranslationMessage.Synchronize0In1.niceToString(assembly,
                 this.state.cultures ? this.state.cultures[culture].toStr : culture);
 
         return (
@@ -57,7 +57,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
     }
 
     handleSearch = (filter: string) => {
-        var {assembly, culture} = this.props.routeParams;
+        const {assembly, culture} = this.props.routeParams;
 
         return API.retrieve(assembly, culture || "", filter)
             .then(result => this.setState({ result: result }))
@@ -66,8 +66,8 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
     renderTable() {
 
-        if (this.state.result == null)
-            return null;
+        if (this.state.result == undefined)
+            return undefined;
 
 
         if (Dic.getKeys(this.state.result).length == 0)
@@ -83,7 +83,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
     handleSave = (e: React.FormEvent) => {
         e.preventDefault();
-        var params = this.props.routeParams;
+        const params = this.props.routeParams;
         API.save(params.assembly, params.culture || "", this.state.result)
             .then(() => notifySuccess())
             .then(() => this.loadSync())

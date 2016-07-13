@@ -12,8 +12,8 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
 
     render() {
 
-        var queryKey = this.props.ctx.value.query.key;
-        var ctx = this.props.ctx;
+        const queryKey = this.props.ctx.value.query.key;
+        const ctx = this.props.ctx;
 
         return (
             <div>
@@ -59,7 +59,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
     }
 
     renderFilter = (ctx: TypeContext<QueryFilterEntity>) => {
-        var ctx2 = ctx.subCtx({ formGroupStyle: "None" });
+        const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
                 <QueryTokenEntityBuilder
@@ -75,7 +75,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
     }
 
     renderColumn = (ctx: TypeContext<QueryColumnEntity>) => {
-        var ctx2 = ctx.subCtx({ formGroupStyle: "None" });
+        const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
                 <QueryTokenEntityBuilder
@@ -90,7 +90,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<UserQu
     }
 
     renderOrder = (ctx: TypeContext<QueryOrderEntity>) => {
-        var ctx2 = ctx.subCtx({ formGroupStyle: "None" });
+        const ctx2 = ctx.subCtx({ formGroupStyle: "None" });
         return (
             <div>
                 <QueryTokenEntityBuilder

@@ -17,14 +17,14 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
 
     render() {
         const ctx = this.props.ctx.subCtx({ labelColumns: { sm: 3 } });
-        var entity = this.props.ctx.value;
+        const entity = this.props.ctx.value;
 
         return (
             <div>
                 <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true }) } />
                 <ValueLine ctx={ctx.subCtx(e => e.userName) } />
                 { entity.isNew || this.state.withPassword ?
-                    <DoublePassword ctx={new TypeContext<string>(ctx, null, null, Binding.create(ctx.value, v => v.newPassword)) }/> :
+                    <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined, Binding.create(ctx.value, v => v.newPassword)) }/> :
                     !ctx.readOnly && this.renderButton(ctx)
                 }
                 <EntityCombo ctx={ctx.subCtx(e => e.role) } />
@@ -51,13 +51,13 @@ class DoublePassword extends React.Component<{ ctx: TypeContext<string> }, void>
 
     handlePasswordBlur = (event: React.SyntheticEvent) => {
 
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
 
         if (this.newPass.value && this.newPass2.value && this.newPass.value != this.newPass2.value) {
             ctx.error = AuthMessage.PasswordsAreDifferent.niceToString()
         }
         else {
-            ctx.error = null;
+            ctx.error = undefined;
             ctx.value = this.newPass.value;
         }
 

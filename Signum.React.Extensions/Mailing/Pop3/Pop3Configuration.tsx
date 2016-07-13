@@ -11,7 +11,7 @@ export default class Pop3Configuration extends React.Component<{ ctx: TypeContex
 
     render() {
 
-         var sc = this.props.ctx;
+         const sc = this.props.ctx;
 
         return (
             <div>

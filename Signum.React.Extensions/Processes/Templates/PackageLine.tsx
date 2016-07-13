@@ -9,7 +9,7 @@ export default class Package extends React.Component<{ ctx: TypeContext<PackageL
 
     render() {
         
-        var e = this.props.ctx.subCtx({readOnly: true});
+        const e = this.props.ctx.subCtx({readOnly: true});
 
         return (
             <div>    

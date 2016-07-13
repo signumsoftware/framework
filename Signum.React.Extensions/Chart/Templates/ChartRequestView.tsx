@@ -67,7 +67,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
     }
 
     handleOnInvalidate = () => {
-        this.setState({ chartResult: null });
+        this.setState({ chartResult: undefined });
     }
 
     handleOnRedraw = () => {
@@ -76,7 +76,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     handleOnDrawClick = () => {
 
-        this.setState({ chartResult: null });
+        this.setState({ chartResult: undefined });
 
         ChartClient.API.executeChart(this.props.chartRequest)
             .then(rt => this.setState({ chartResult: rt }),
@@ -101,10 +101,10 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         const cr = this.props.chartRequest;
         const qd = this.state.queryDescription;
 
-        if (cr == null || qd == null)
-            return null;
+        if (cr == undefined || qd == undefined)
+            return undefined;
 
-        var tc = new TypeContext<ChartRequest>(null, null, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(this.props.chartRequest, ""));
+        const tc = new TypeContext<ChartRequest>(undefined, undefined, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(this.props.chartRequest, ""));
 
         return (
             <div>

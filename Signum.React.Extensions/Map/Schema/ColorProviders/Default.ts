@@ -6,15 +6,15 @@ import { MapMessage } from '../../Signum.Entities.Map'
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
 
-    var namespaceColor = d3.scale.category20();
-    var namespace: ClientColorProvider = {
+    const namespaceColor = d3.scale.category20();
+    const namespace: ClientColorProvider = {
         name: "namespace",
         getFill: t => namespaceColor(t.namespace),
         getTooltip: t => t.namespace
     };
 
 
-    var f: { [ek: number]: string } = {};
+    const f: { [ek: number]: string } = {};
 
     f[EntityKind.SystemString] = "#8c564b";
     f[EntityKind.System] = "#7f7f7f";
@@ -25,36 +25,36 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
     f[EntityKind.Part] = "#ff7f0e";
     f[EntityKind.SharedPart] = "#bcbd22";
 
-    var entityKind: ClientColorProvider = {
+    const entityKind: ClientColorProvider = {
         name: "entityKind",
         getFill: t => f[t.entityKind],
         getTooltip: t => EntityKind[t.entityKind]
     };
 
 
-    var entityData: ClientColorProvider = {
+    const entityData: ClientColorProvider = {
         name: "entityData",
         getFill: t => t.entityData == EntityData.Master ? "#2ca02c" :
             t.entityData == EntityData.Transactional ? "#d62728" : "black",
         getTooltip: t => EntityData[t.entityData]
     };
 
-    var rowsColor = colorScaleSqr(info.tables.map(a => a.rows).max());
-    var rows: ClientColorProvider = {
+    const rowsColor = colorScaleSqr(info.tables.map(a => a.rows).max());
+    const rows: ClientColorProvider = {
         name: "rows",
         getFill: t => <any>rowsColor(t.rows),
         getTooltip: t => t.rows + " " + MapMessage.Rows.niceToString()
     };
 
-    var columnsColor = colorScaleSqr(info.tables.map(a => a.columns).max());
-    var columns: ClientColorProvider = {
+    const columnsColor = colorScaleSqr(info.tables.map(a => a.columns).max());
+    const columns: ClientColorProvider = {
         name: "columns",
         getFill: t => <any>columnsColor(t.columns),
         getTooltip: t => t.columns + " " + MapMessage.Columns.niceToString()
     };
 
-    var tableSizeColor = colorScaleSqr(info.tables.map(a => a.total_size_kb).max());
-    var tableSize: ClientColorProvider = {
+    const tableSizeColor = colorScaleSqr(info.tables.map(a => a.total_size_kb).max());
+    const tableSize: ClientColorProvider = {
         name: "tableSize",
         getFill: t => <any>tableSizeColor(t.total_size_kb),
         getTooltip: t => t.total_size_kb + " KB"

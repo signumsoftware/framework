@@ -11,7 +11,7 @@ export default class Pop3Reception extends React.Component<{ ctx: TypeContext<Po
 
     render() {
 
-         var sc = this.props.ctx;
+         const sc = this.props.ctx;
 
         return (
             <div>

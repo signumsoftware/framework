@@ -9,25 +9,25 @@ import { colorScale, colorScaleSqr  } from '../../Utils'
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {   
     
     if (!isPermissionAuthorized(BasicPermission.AdminRules))
-        return null;
+        return undefined;
 
     return info.providers.filter(p => p.name.startsWith("role-")).map((p, i) => ({
         name: p.name,
-        getFill: t => t.extra[p.name + "-db"] == null ? "white" : "url(#" + t.extra[p.name + "-db"] + ")",
-        getStroke: t => t.extra[p.name + "-ui"] == null ? "white" : "url(#" + t.extra[p.name + "-ui"] + ")",
-        getTooltip: t => t.extra[p.name + "-tooltip"] == null ? null : t.extra[p.name + "-tooltip"],
-        defs: i == 0 ? getDefs(info) : null
+        getFill: t => t.extra[p.name + "-db"] == undefined ? "white" : "url(#" + t.extra[p.name + "-db"] + ")",
+        getStroke: t => t.extra[p.name + "-ui"] == undefined ? "white" : "url(#" + t.extra[p.name + "-ui"] + ")",
+        getTooltip: t => t.extra[p.name + "-tooltip"] == undefined ? undefined : t.extra[p.name + "-tooltip"],
+        defs: i == 0 ? getDefs(info) : undefined
     }) as ClientColorProvider);
 }
 
 
 function getDefs(info: SchemaMapInfo): JSX.Element[]{
-    var roles = info.providers.filter(p => p.name.startsWith("role-")).map(a => a.name);
+    const roles = info.providers.filter(p => p.name.startsWith("role-")).map(a => a.name);
 
-    var distinctValues = info.tables.flatMap(t => roles.flatMap(r => [
+    const distinctValues = info.tables.flatMap(t => roles.flatMap(r => [
         t.extra[r + "-db"] as string,
         t.extra[r + "-ui"] as string]))
-        .filter(a => a != null)
+        .filter(a => a != undefined)
         .groupBy(a => a)
         .map(gr => gr.key);
 
@@ -37,7 +37,7 @@ function getDefs(info: SchemaMapInfo): JSX.Element[]{
 
 function gradient(name: string) {
 
-    var list = name.after("auth-").split("-").map(a=>a as TypeAllowedBasic);
+    const list = name.after("auth-").split("-").map(a=>a as TypeAllowedBasic);
 
     return (
         <linearGradient id={name} x1="0%" y1="0% " x2="100% " y2="0%">
@@ -54,7 +54,7 @@ function color(typeAllowedBasic: TypeAllowedBasic) : string
 {
     switch (typeAllowedBasic)
     {
-        case null: return "black";
+        case undefined: return "black";
         case "Create": return "#0066FF";
         case "Modify": return "green";
         case "Read": return "gold";

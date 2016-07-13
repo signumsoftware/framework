@@ -10,7 +10,7 @@ import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOpti
 import { MapMessage } from '../Signum.Entities.Map'
 import * as MapClient from '../MapClient'
 import { SchemaMapInfo, EntityBaseType, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
-var colorbrewer = require("colorbrewer");
+const colorbrewer = require("colorbrewer");
 
 require("!style!css!./schemaMap.css");
 
@@ -52,14 +52,14 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
         MapClient.API.types()
             .then(smi => {
-                var parsedQuery = this.getParsedQuery();
+                const parsedQuery = this.getParsedQuery();
                 MapClient.getAllProviders(smi).then(providers => {
 
-                    var missingProviders = smi.providers.filter(p => !providers.some(p2 => p2.name == p.name));
+                    const missingProviders = smi.providers.filter(p => !providers.some(p2 => p2.name == p.name));
                     if (missingProviders.length)
                         throw new Error(`Missing ClientColorProvider for ${missingProviders.map(a => "'" + a.name + "'").joinComma("and")} found`);
 
-                    var extraProviders = providers.filter(p => !smi.providers.some(p2 => p2.name == p.name));
+                    const extraProviders = providers.filter(p => !smi.providers.some(p2 => p2.name == p.name));
                     if (extraProviders.length)
                         throw new Error(`Extra ClientColorProvider for ${extraProviders.map(a => "'" + a.name + "'").joinComma("and")} found`);
 
@@ -76,7 +76,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
 
     componentWillUnmount(){
-        if (Expanded.setExpanded && this.wasExpanded != null){
+        if (Expanded.setExpanded && this.wasExpanded != undefined){
             Expanded.setExpanded(this.wasExpanded);
         }
     }
@@ -85,9 +85,9 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
     getParsedQuery(): ParsedQueryString {
     
-        var result: ParsedQueryString = { tables: {} };
+        const result: ParsedQueryString = { tables: {} };
 
-        var query = this.props.location.query as { [name: string]: string };
+        const query = this.props.location.query as { [name: string]: string };
         if (!query)
             return result;
 
@@ -115,7 +115,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
             return;
 
         this.div = div;
-        var rect = div.getBoundingClientRect();
+        const rect = div.getBoundingClientRect();
         this.setState({ width: rect.width, height: window.innerHeight - 200 });
     }
 
@@ -123,13 +123,13 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
     render() {
         
         if (Expanded.getExpanded && !Expanded.getExpanded())
-            return null;
+            return undefined;
 
-        var s = this.state;
+        const s = this.state;
         return (
             <div ref={this.handleSetInitialSize}>
                 {this.renderFilter() }
-                {!s.schemaMapInfo || this.div == null ?
+                {!s.schemaMapInfo || this.div == undefined ?
                     <span>{ JavascriptMessage.loading.niceToString() }</span> :
                     <SchemaMapRenderer schemaMapInfo={s.schemaMapInfo} parsedQuery={s.parsedQuery} filter={s.filter} color={s.color}  height={s.height} width={s.width} providers={s.providers} />}
             </div>
@@ -152,24 +152,24 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
         e.preventDefault();
 
-        var s = this.state;
+        const s = this.state;
 
-        var tables = s.schemaMapInfo.allNodes.filter(a => a.fixed)
+        const tables = s.schemaMapInfo.allNodes.filter(a => a.fixed)
             .toObject(a => a.tableName, a =>
                 (a.x / s.width).toPrecision(4) + "," +
                 (a.y / s.height).toPrecision(4));
 
 
-        var query = Dic.extend(tables, { filter: s.filter, color: s.color });
+        const query = Dic.extend(tables, { filter: s.filter, color: s.color });
 
-        var url = Navigator.currentHistory.createHref({ pathname: "~/map", query: query });
+        const url = Navigator.currentHistory.createHref({ pathname: "~/map", query: query });
 
         window.open(url);
     }
 
     renderFilter() {
 
-        var s = this.state;
+        const s = this.state;
 
         return (
             <div className="form-inline form-sm container" style={{ marginTop: "10px" }}>
@@ -206,11 +206,11 @@ export type SchemaMapRendererProps = SchemaMapPropsState;
 export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, { mapD3: SchemaMapD3 }> { 
 
     componentDidMount() {
-        var p = this.props;
+        const p = this.props;
 
         this.fixSchemaMap(p.schemaMapInfo, p.parsedQuery);
 
-        var d3 = new SchemaMapD3(this.svg, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height);
+        const d3 = new SchemaMapD3(this.svg, p.providers, p.schemaMapInfo, p.filter, p.color, p.width, p.height);
         this.setState({ mapD3: d3 });
     }
 
@@ -245,14 +245,14 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
         map.allLinks = map.relations.map(a => a as IRelationInfo)
             .concat(map.tables.flatMap(t => t.mlistTables.map(tm => ({ source: t, target: tm, isMList: true }) as MListRelationInfo)));
         
-        var repsDic : {[tableName: string]: number} = {};
+        const repsDic : {[tableName: string]: number} = {};
 
         map.allLinks.forEach(l=>{
-            var relName = l.source.tableName > l.target.tableName ? 
+            const relName = l.source.tableName > l.target.tableName ? 
                 l.source.tableName + "-" + l.target.tableName : 
                 l.target.tableName + "-" + l.source.tableName ;
 
-            if(repsDic[relName] == null)
+            if(repsDic[relName] == undefined)
                 repsDic[relName] = 0;
 
             l.repetitions = repsDic[relName];

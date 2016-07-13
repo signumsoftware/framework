@@ -25,7 +25,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
         const request: AuthClient.Api.LoginRequest = {
             userName: this.userName.value,
             password: this.password.value,
-            rememberMe: this.rememberMe ? this.rememberMe.checked : null,
+            rememberMe: this.rememberMe ? this.rememberMe.checked : undefined,
         };
 
         AuthClient.Api.login(request)
@@ -62,7 +62,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                 </div>
                 <div className="form-horizontal">
 
-                    <div className={classes("form-group", this.error("userName") ? "has-error" : null) }>
+                    <div className={classes("form-group", this.error("userName") ? "has-error" : undefined) }>
                         <label htmlFor="userName" className="col-sm-offset-2 col-sm-2 control-label">{AuthMessage.Username.niceToString() }</label>
                         <div className="col-sm-4">
                             <input type="text" className="form-control" id="userName" ref={r => this.userName = r} placeholder={AuthMessage.Username.niceToString() }/>
@@ -70,7 +70,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
                         </div>
                     </div>
 
-                    <div className={classes("form-group", this.error("password") ? "has-error" : null) }>
+                    <div className={classes("form-group", this.error("password") ? "has-error" : undefined) }>
                         <label htmlFor="password" className="col-sm-offset-2 col-sm-2 control-label">{AuthMessage.Password.niceToString() }</label>
                         <div className="col-sm-4">
                             <input type="password" className="form-control" id="password" ref={r => this.password = r} placeholder={AuthMessage.Password.niceToString() }/>

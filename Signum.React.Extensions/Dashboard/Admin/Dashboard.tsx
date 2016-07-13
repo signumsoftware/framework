@@ -21,8 +21,8 @@ require("!style!css!../Dashboard.css");
 export default class ChartScript extends React.Component<{ ctx: TypeContext<DashboardEntity> }, void> {
 
     render() {
-        var ctx = this.props.ctx;
-        var sc = ctx.subCtx({ formGroupStyle: "Basic" });
+        const ctx = this.props.ctx;
+        const sc = ctx.subCtx({ formGroupStyle: "Basic" });
         return (
             <div>
                 <div className="form-vertical">
@@ -55,10 +55,10 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Dash
     }
 
     handleOnCreate = () => {
-        var pr = DashboardEntity.memberInfo(a => a.parts[0].element.content);
+        const pr = DashboardEntity.memberInfo(a => a.parts[0].element.content);
 
         return SelectorModal.chooseType(getTypeInfos(pr.type))
-            .then(ti => ti == null ? null : PanelPartEntity.New(p => {
+            .then(ti => ti == undefined ? undefined : PanelPartEntity.New(p => {
                 p.content = basicConstruct(ti.name) as any as IPartEntity;
                 p.style = "Default";
             }));
@@ -66,7 +66,7 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Dash
 
     renderPart = (tc: TypeContext<PanelPartEntity>) => {
 
-        var title = (
+        const title = (
             <div>
                 <ValueLine ctx={tc.subCtx(pp => pp.title, { formGroupStyle: "None", placeholderLabels: true }) }  />
                 &nbsp;

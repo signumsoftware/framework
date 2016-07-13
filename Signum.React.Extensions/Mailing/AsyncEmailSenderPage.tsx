@@ -38,10 +38,10 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
     render() {
         document.title = "AsyncEmailSender state";
 
-        if (this.state == null)
+        if (this.state == undefined)
             return <h2>AsyncEmailSender state (loading...) </h2>;
 
-        var s = this.state;
+        const s = this.state;
 
         return (
             <div>
@@ -63,7 +63,7 @@ export default class AsyncEmailSenderPage extends React.Component<AsyncEmailSend
                     <br />
                     AsyncSenderPeriod: { s.AsyncSenderPeriod} sec
                     <br />
-                    NextPlannedExecution: { s.NextPlannedExecution} ({ s.NextPlannedExecution == null ? "-None-" : moment(s.NextPlannedExecution).toNow() })
+                    NextPlannedExecution: { s.NextPlannedExecution} ({ s.NextPlannedExecution == undefined ? "-None-" : moment(s.NextPlannedExecution).toNow() })
                     <br />
                     IsCancelationRequested: { s.IsCancelationRequested }
                     <br />

@@ -22,7 +22,7 @@ export default class TranslationCodeStatus extends React.Component<TranslationCo
 
     constructor(props: TranslationCodeStatusProps) {
         super(props);
-        this.state = { result: null };
+        this.state = { result: undefined };
     }
 
     componentWillMount() {
@@ -49,14 +49,14 @@ export default class TranslationCodeStatus extends React.Component<TranslationCo
     }
 
     renderTable() {
-        if (this.state.result == null)
+        if (this.state.result == undefined)
             return <strong>{JavascriptMessage.loading.niceToString() }</strong>;
 
-        var tree = this.state.result.groupBy(a => a.assembly)
+        const tree = this.state.result.groupBy(a => a.assembly)
             .toObject(gr => gr.key, gr => gr.elements.toObject(a => a.culture));
 
-        var assemblies = Dic.getKeys(tree);
-        var cultures = Dic.getKeys(tree[assemblies.first()]);
+        const assemblies = Dic.getKeys(tree);
+        const cultures = Dic.getKeys(tree[assemblies.first()]);
 
 
         return (

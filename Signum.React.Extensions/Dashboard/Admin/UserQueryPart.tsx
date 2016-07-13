@@ -15,7 +15,7 @@ import { UserQueryPartEntity } from '../Signum.Entities.Dashboard'
 export default class UserQueryPart extends React.Component<{ ctx: TypeContext<UserQueryPartEntity> }, void> {
 
     render() {
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
         
         return (
             <div >

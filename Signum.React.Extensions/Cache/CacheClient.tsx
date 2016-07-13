@@ -14,7 +14,7 @@ import * as AuthClient from '../Authorization/AuthClient'
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="cache">
-        <Route path="statistics" getComponent={(loc, cb) => require(["./CacheStatisticsPage"], (Comp) => cb(null, Comp.default))}/>
+        <Route path="statistics" getComponent={(loc, cb) => require(["./CacheStatisticsPage"], (Comp) => cb(undefined, Comp.default))}/>
     </Route>);
 
     OmniboxClient.registerSpecialAction({
@@ -28,15 +28,15 @@ export function start(options: { routes: JSX.Element[] }) {
 export module API {
 
     export function enable(): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/cache/enable" }, null);
+        return ajaxPost<void>({ url: "~/api/cache/enable" }, undefined);
     }
 
     export function disable(): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/cache/disable" }, null);
+        return ajaxPost<void>({ url: "~/api/cache/disable" }, undefined);
     }
 
     export function clear(): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/cache/clear" }, null);
+        return ajaxPost<void>({ url: "~/api/cache/clear" }, undefined);
     }
 
     export function view(): Promise<CacheState> {

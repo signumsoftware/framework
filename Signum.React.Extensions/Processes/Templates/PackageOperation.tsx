@@ -9,7 +9,7 @@ export default class PackageOperation extends React.Component<{ ctx: TypeContext
 
     render() {
         
-        var e = this.props.ctx;
+        const e = this.props.ctx;
 
         return (
             <div>

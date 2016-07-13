@@ -10,8 +10,8 @@ export default class EmailConfiguration extends React.Component<{ ctx: TypeConte
 
     render() {
 
-        var sc = this.props.ctx;
-        var ac = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
+        const sc = this.props.ctx;
+        const ac = this.props.ctx.subCtx({ formGroupStyle: "Basic" });
 
         return (
             <div>

@@ -16,13 +16,13 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
 
     render() {
 
-        var e = this.props.ctx;
+        let e = this.props.ctx;
 
         if (e.value.state != "Created")
             e = e.subCtx({ readOnly: true });
 
-        var sc4 = e.subCtx({ labelColumns: { sm: 4 } });
-        var sc1 = e.subCtx({ labelColumns: { sm: 1 } });
+        const sc4 = e.subCtx({ labelColumns: { sm: 4 } });
+        const sc1 = e.subCtx({ labelColumns: { sm: 1 } });
 
         return (
             <Tabs id="newsletterTabs">
@@ -66,7 +66,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
 
     renderEmailReceptionMixin = () => {
 
-        var ri = this.props.ctx.subCtx(a => getMixin(a, EmailReceptionMixin).receptionInfo);
+        const ri = this.props.ctx.subCtx(a => getMixin(a, EmailReceptionMixin).receptionInfo);
 
         return <Tab title={EmailReceptionMixin.niceName() }>
             <fieldset>
@@ -86,7 +86,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
 
 
     renderAttachment = (ec: TypeContext<EmailAttachmentEntity>) => {
-        var sc = ec.subCtx({ formGroupStyle: "SrOnly" });
+        const sc = ec.subCtx({ formGroupStyle: "SrOnly" });
         return (
             <div>
                 <FileLine ctx={ec.subCtx(a => a.file) } remove={false}

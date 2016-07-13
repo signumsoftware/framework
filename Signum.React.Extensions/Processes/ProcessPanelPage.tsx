@@ -39,10 +39,10 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
     render() {
         document.title = "ProcessLogic state";
 
-        if (this.state == null)
+        if (this.state == undefined)
             return <h2>ProcesLogic state (loading...) </h2>;
 
-        var s = this.state;
+        const s = this.state;
 
         return (
             <div>

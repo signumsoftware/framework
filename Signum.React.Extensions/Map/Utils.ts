@@ -28,11 +28,11 @@ export function colorScaleSqr(max: number): d3.scale.Pow<string, string>{
 
 export function calculatePoint(rectangle: Rectangle, point: Point): Point {
 
-    var vector = { x: point.x - rectangle.x, y: point.y - rectangle.y };
+    const vector = { x: point.x - rectangle.x, y: point.y - rectangle.y };
 
-    var v2 = { x: rectangle.width / 2, y: rectangle.height / 2 };
+    const v2 = { x: rectangle.width / 2, y: rectangle.height / 2 };
 
-    var ratio = getRatio(vector, v2);
+    const ratio = getRatio(vector, v2);
 
     return { x: rectangle.x + vector.x * ratio, y: rectangle.y + vector.y * ratio };
 }
@@ -40,7 +40,7 @@ export function calculatePoint(rectangle: Rectangle, point: Point): Point {
 
 function getRatio(vOut: Point, vIn: Point) {
 
-    var vOut2 = { x: vOut.x, y: vOut.y };
+    const vOut2 = { x: vOut.x, y: vOut.y };
 
     if (vOut2.x < 0)
         vOut2.x = -vOut2.x;
@@ -49,7 +49,7 @@ function getRatio(vOut: Point, vIn: Point) {
         vOut2.y = -vOut2.y;
 
     if (vOut2.x == 0 && vOut2.y == 0)
-        return null;
+        return undefined;
 
     if (vOut2.x == 0)
         return vIn.y / vOut2.y;
@@ -68,7 +68,7 @@ export function wrap(textElement: SVGTextElement, width: number) {
     let word: string;
 
     let line: string[] = [];
-    let tspan = text.text(null).append("tspan")
+    let tspan = text.text(undefined).append("tspan")
         .attr("x", 0)
         .attr("dy", "1.2em");
 

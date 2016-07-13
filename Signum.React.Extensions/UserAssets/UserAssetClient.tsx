@@ -22,7 +22,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return;
 
     options.routes.push(<Route path="userAssets">
-        <Route path="import" getComponent={(loc, cb) => require(["./ImportAssetsPage"], (Comp) => cb(null, Comp.default)) }/>
+        <Route path="import" getComponent={(loc, cb) => require(["./ImportAssetsPage"], (Comp) => cb(undefined, Comp.default)) }/>
     </Route>);
 
     OmniboxClient.registerSpecialAction({
@@ -38,7 +38,7 @@ export function start(options: { routes: JSX.Element[] }) {
 export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
     QuickLinks.registerQuickLink(type, ctx => {
         if (!AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
-            return null;
+            return undefined;
         
         return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, UserAssetMessage.ExportToXml.niceToString(), e => {
             API.exportAsset(ctx.lite);

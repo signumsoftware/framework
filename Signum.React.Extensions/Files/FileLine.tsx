@@ -42,7 +42,7 @@ export interface FileLineState extends FileLineProps {
 export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
     static defaultProps: FileLineProps = {
-        ctx: null,
+        ctx: undefined,
         download: DownloadBehaviour.SaveAs,
         dragAndDrop: true
     }
@@ -57,7 +57,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
         if (!this.state.configuration)
             throw new Error(`No FileLineConfiguration found for '${this.state.type.name}'`)
 
-        var ctx = this.state.ctx;
+        const ctx = this.state.ctx;
         if (ctx.value && (ctx.value as Lite<IFile & Entity>).EntityType)
             Navigator.API.fetchAndRemember(ctx.value as Lite<IFile & Entity>)
                 .then(() => this.forceUpdate())
@@ -81,15 +81,15 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
     renderFile() {
 
-        var val = this.state.ctx.value;
-        var entity = (val as Lite<IFile & Entity>).EntityType ?
+        const val = this.state.ctx.value;
+        const entity = (val as Lite<IFile & Entity>).EntityType ?
             (val as Lite<IFile & Entity>).entity :
             (val as IFile & Entity);
 
         return (
             <div className="input-group">
                 {
-                    entity == null ? <span className="form-control file-control">{JavascriptMessage.loading.niceToString() }</span> :
+                    entity == undefined ? <span className="form-control file-control">{JavascriptMessage.loading.niceToString() }</span> :
                         this.state.download == DownloadBehaviour.None || entity.isNew ? <span className="form-control file-control">{entity.fileName}</span> :
                             this.renderLink(entity)
                 }
@@ -103,12 +103,12 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
     renderLink(entity: IFile) {
 
-        var dl = this.state.configuration.downloadLink(entity);
+        const dl = this.state.configuration.downloadLink(entity);
 
         return (
             <a className="form-control file-control"
                 onClick={dl.requiresToken && ((e) => this.handleDownloadClick(e, dl.url)) }
-                download={this.state.download == DownloadBehaviour.View ? null : entity.fileName}
+                download={this.state.download == DownloadBehaviour.View ? undefined : entity.fileName}
                 href={dl.requiresToken ? "#" : dl.url}
                 title={entity.fileName}>
                 {entity.fileName}
@@ -138,7 +138,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
         e.preventDefault();
         this.setState({ isOver: false, isLoading: true });
 
-        var file = e.dataTransfer.files[0];
+        const file = e.dataTransfer.files[0];
 
         this.uploadFile(file);
     }
@@ -152,10 +152,10 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
     }
 
     uploadFile(file: File) {
-        var fileReader = new FileReader();
+        const fileReader = new FileReader();
         fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
         fileReader.onload = e => {
-            var newEntity = {
+            const newEntity = {
                 Type: this.state.type.name,
                 isNew: true,
                 modified: true,
@@ -180,7 +180,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
             <div className="sf-file-line-new">
                 <input type='file' className='form-control' accept={this.props.accept} onChange={this.handleFileChange}/>
                 {this.state.isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString() }</div> :
-                    (this.state.dragAndDrop && <div className={classes("sf-file-drop", this.state.isOver ? "sf-file-drop-over" : null) }
+                    (this.state.dragAndDrop && <div className={classes("sf-file-drop", this.state.isOver ? "sf-file-drop-over" : undefined) }
                         onDragOver={this.handleDragOver}
                         onDragLeave={this.handleDragLeave}
                         onDrop={this.handleDrop}

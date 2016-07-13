@@ -79,7 +79,7 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
     render() {
         const editorClassName = classes(
             'ReactCodeMirror',
-            this.state.isFocused ? 'ReactCodeMirror--focused' : null,
+            this.state.isFocused ? 'ReactCodeMirror--focused' : undefined,
             this.props.className
         );
         return (

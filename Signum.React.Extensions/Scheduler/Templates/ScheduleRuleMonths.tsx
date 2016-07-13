@@ -9,8 +9,8 @@ export default class ScheduleRuleMonths extends React.Component<{ ctx: TypeConte
 
     render() {
         
-        var ctx4 = this.props.ctx.subCtx({ labelColumns: {sm: 4}});
-        var ctx2 = this.props.ctx.subCtx({ labelColumns: {sm: 2}});
+        const ctx4 = this.props.ctx.subCtx({ labelColumns: {sm: 4}});
+        const ctx2 = this.props.ctx.subCtx({ labelColumns: {sm: 2}});
 
         return (
             <div>    

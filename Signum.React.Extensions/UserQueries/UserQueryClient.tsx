@@ -23,19 +23,19 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetsClient.registerExportAssertLink(UserQueryEntity);
 
     options.routes.push(<Route path="userQuery">
-        <Route path=":userQueryId(/:entity)" getComponent={ (loc, cb) => require(["./Templates/UserQueryPage"], (Comp) => cb(null, Comp.default)) } />
+        <Route path=":userQueryId(/:entity)" getComponent={ (loc, cb) => require(["./Templates/UserQueryPage"], (Comp) => cb(undefined, Comp.default)) } />
     </Route>);
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
         if (!ctx.searchControl.props.showBarExtension || !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
-            return null;
+            return undefined;
 
         return <UserQueryMenu searchControl={ctx.searchControl}/>;
     }); 
 
     QuickLinks.registerGlobalQuickLink(ctx => {
         if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
-            return null;
+            return undefined;
 
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
             uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr, e => {
@@ -46,7 +46,7 @@ export function start(options: { routes: JSX.Element[] }) {
     QuickLinks.registerQuickLink(UserQueryEntity, ctx => new QuickLinks.QuickLinkAction("preview", UserQueryMessage.Preview.niceToString(),
         e => {
             Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
-                if (uq.entityType == null)
+                if (uq.entityType == undefined)
                     window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}`));
                 else
                     Navigator.API.fetchAndForget(uq.entityType)
@@ -73,7 +73,7 @@ export module Converter {
 
     export function applyUserQuery(fo: FindOptions, uq: UserQueryEntity, entity: Lite<Entity>): Promise<FindOptions> {
 
-        var convertedFilters = uq.withoutFilters ? Promise.resolve([] as FilterRequest[]) : UserAssetsClient.API.parseFilters({
+        const convertedFilters = uq.withoutFilters ? Promise.resolve([] as FilterRequest[]) : UserAssetsClient.API.parseFilters({
             queryKey: uq.query.key,
             canAggregate: false,
             entity: entity,
@@ -108,12 +108,12 @@ export module Converter {
             }) as OrderOption);
 
 
-            var qs = Finder.querySettings[uq.query.key];
+            const qs = Finder.querySettings[uq.query.key];
 
-            fo.pagination = uq.paginationMode == null ?
+            fo.pagination = uq.paginationMode == undefined ?
                 ((qs && qs.pagination) || Finder.defaultPagination) : {
                 mode: uq.paginationMode,
-                currentPage: null,
+                currentPage: undefined,
                 elementsPerPage: uq.elementsPerPage
             };
 
@@ -122,7 +122,7 @@ export module Converter {
     }
 
     export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity>): Promise<FindOptions> {
-        var fo: FindOptions = { queryName: uq.query.key }; 
+        const fo: FindOptions = { queryName: uq.query.key }; 
         return applyUserQuery(fo, uq, entity);
     }
 }

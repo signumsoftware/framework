@@ -19,7 +19,7 @@ require("!style!css!./Processes.css");
 
 export function start(options: { routes: JSX.Element[], packages: boolean, packageOperations: boolean }) {
     options.routes.push(<Route path="processes">
-        <Route path="view" getComponent={(loc, cb) => require(["./ProcessPanelPage"], (Comp) => cb(null, Comp.default))}/>
+        <Route path="view" getComponent={(loc, cb) => require(["./ProcessPanelPage"], (Comp) => cb(undefined, Comp.default))}/>
     </Route>);
 
     Navigator.addSettings(new EntitySettings(ProcessEntity, e => new Promise(resolve => require(['./Templates/Process'], resolve))));
@@ -47,14 +47,14 @@ export function start(options: { routes: JSX.Element[], packages: boolean, packa
 
 }
 
-export var processOperationSettings :{ [key: string]: Operations.ContextualOperationSettings<any> } = {}; 
+export const processOperationSettings :{ [key: string]: Operations.ContextualOperationSettings<any> } = {}; 
 export function register<T extends Entity>(...settings : Operations.ContextualOperationSettings<T>[]){
     settings.forEach(s => Dic.addOrThrow(processOperationSettings, s.operationSymbol.key, s));
 }
 
 function monkeyPatchCreateContextualMenuItem(){
 
-    var base = ContextualOperations.MenuItemConstructor.createContextualMenuItem;
+    const base = ContextualOperations.MenuItemConstructor.createContextualMenuItem;
 
     ContextualOperations.MenuItemConstructor.createContextualMenuItem = (coc: Operations.ContextualOperationContext<Entity>, defaultClick: (coc: Operations.ContextualOperationContext<Entity>, event: React.MouseEvent) => void, key: any) => {
         
@@ -68,32 +68,32 @@ function monkeyPatchCreateContextualMenuItem(){
         if(coc.context.lites.length <= 1)
             return base(coc, defaultClick, key);
 
-        var settings = processOperationSettings[coc.operationInfo.key];
+        const settings = processOperationSettings[coc.operationInfo.key];
 
-        if(settings != null){
+        if(settings != undefined){
             if(settings.isVisible && !settings.isVisible(coc))
                 return base(coc, defaultClick, key);
 
-            if(settings.hideOnCanExecute && coc.canExecute != null)
+            if(settings.hideOnCanExecute && coc.canExecute != undefined)
                 return base(coc, defaultClick, key);
         }
 
 
-         var text = coc.settings && coc.settings.text ? coc.settings.text() :
+         const text = coc.settings && coc.settings.text ? coc.settings.text() :
         coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
             coc.operationInfo.niceName;
 
-        var bsStyle = coc.settings && coc.settings.style || Operations.autoStyleFunction(coc.operationInfo);
+        const bsStyle = coc.settings && coc.settings.style || Operations.autoStyleFunction(coc.operationInfo);
 
-        var disabled = !!coc.canExecute;
+        const disabled = !!coc.canExecute;
 
-        var onClick = coc.settings && coc.settings.onClick ?
+        const onClick = coc.settings && coc.settings.onClick ?
             (me: React.MouseEvent) => coc.settings.onClick(coc, me) :
             (me: React.MouseEvent) => defaultClick(coc, me);
 
-        var menuItem = <MenuItem
-            className={classes("btn-" + bsStyle, disabled ? "disabled" : null) }
-            onClick={disabled ? null : onClick}
+        const menuItem = <MenuItem
+            className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined) }
+            onClick={disabled ? undefined : onClick}
             data-operation={coc.operationInfo.key}
             key={key}>
             {text}
@@ -124,7 +124,7 @@ function defaultConstructFromMany(coc: Operations.ContextualOperationContext<Ent
         if (!pack || !pack.entity)
             return;
 
-        var es = Navigator.getSettings(pack.entity.Type);
+        const es = Navigator.getSettings(pack.entity.Type);
         if (es.avoidPopup || event.ctrlKey || event.button == 1) {
             Navigator.currentHistory.pushState(pack, '/Create/');
             return;
@@ -143,11 +143,11 @@ export module API {
     }
 
     export function start(): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/processes/start" }, null);
+        return ajaxPost<void>({ url: "~/api/processes/start" }, undefined);
     }
 
     export function stop(): Promise<void> {
-        return ajaxPost<void>({ url: "~/api/processes/stop" }, null);
+        return ajaxPost<void>({ url: "~/api/processes/stop" }, undefined);
     }
 
     export function view(): Promise<ProcessLogicState> {

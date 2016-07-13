@@ -37,9 +37,9 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
 
     load(props: UserQueryPageProps) {
 
-        var { userQueryId, entity } = this.props.routeParams;
+        const { userQueryId, entity } = this.props.routeParams;
 
-        var lite = entity == null ? null : parseLite(entity);
+        const lite = entity == undefined ? undefined : parseLite(entity);
 
         Navigator.API.fillToStrings(lite ? [lite] : [])
             .then(() => Navigator.API.fetchEntity(UserQueryEntity, userQueryId))
@@ -58,8 +58,8 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
         const uq = this.state.userQuery;
         const fo = this.state.findOptions;
 
-        if (fo == null || uq == null)
-            return null;
+        if (fo == undefined || uq == undefined)
+            return undefined;
 
         return (
             <div id="divSearchPage">
