@@ -61,7 +61,7 @@ export interface ConstructSymbol_Simple<T extends Entity> extends OperationSymbo
 export interface ConstructSymbol_From<T extends Entity, F extends Entity> extends OperationSymbol { _constructFrom_: T, _from_?: F /*TRICK*/ };
 export interface ConstructSymbol_FromMany<T extends Entity, F extends Entity> extends OperationSymbol {  _constructFromMany_: T, _from_?: F /*TRICK*/ };
 
-export var toStringDictionary: { [name: string]: (entity: ModifiableEntity) => string } = {};
+export const toStringDictionary: { [name: string]: (entity: ModifiableEntity) => string | null } = {};
 
 export function registerToString<T extends ModifiableEntity>(type: Type<T>, toStringFunc: (e: T) => string) {
     toStringDictionary[type.typeName] = toStringFunc;
@@ -69,12 +69,13 @@ export function registerToString<T extends ModifiableEntity>(type: Type<T>, toSt
 
 
 import { getTypeInfo } from './Reflection' 
-function geOrCreateToStringFunction(type: string) {
-    var f = toStringDictionary[type];
-    if (f != null || f === null)
+
+function getOrCreateToStringFunction(type: string)  {
+    let f = toStringDictionary[type];
+    if (f || f === null)
         return f; 
 
-    var ti = getTypeInfo(type);
+    const ti = getTypeInfo(type);
 
     try {
         f = ti && ti.toStringFunction ? eval("(" + ti.toStringFunction + ")") : null;
@@ -89,15 +90,15 @@ function geOrCreateToStringFunction(type: string) {
 
 export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>) : string
 {
-    if (entityOrLite == null)
-        return null;
+    if (entityOrLite == undefined)
+        return undefined;
 
-    var lite = entityOrLite as Lite<Entity>;
+    const lite = entityOrLite as Lite<Entity>;
     if (lite.EntityType) 
         return lite.entity ? getToString(lite.entity) : lite.toStr;
 
-    var entity = entityOrLite as ModifiableEntity;
-    var toStr = geOrCreateToStringFunction(entity.Type);
+    const entity = entityOrLite as ModifiableEntity;
+    const toStr = getOrCreateToStringFunction(entity.Type);
     if (toStr)
         return toStr(entity);
 
@@ -106,8 +107,8 @@ export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>) : str
 
 export function toLite<T extends Entity>(entity: T, fat?: boolean, toStr?: string) : Lite<T> {
 
-    if(entity == null)
-        return null;
+    if(entity == undefined)
+        return undefined;
 
     if(fat)
        return toLiteFat(entity);
@@ -124,8 +125,8 @@ export function toLite<T extends Entity>(entity: T, fat?: boolean, toStr?: strin
 
 export function toLiteFat<T extends Entity>(entity: T) : Lite<T> {
     
-    if(entity == null)
-        return null;
+    if(entity == undefined)
+        return undefined;
     
     return {
        entity : entity,
@@ -137,8 +138,8 @@ export function toLiteFat<T extends Entity>(entity: T) : Lite<T> {
 
 export function liteKey(lite: Lite<Entity>) {
     
-    if(lite == null)
-        return null;
+    if(lite == undefined)
+        return undefined;
     
     return lite.EntityType + ";" + (lite.id || "");
 }
@@ -152,14 +153,14 @@ export function parseLite(lite: string) : Lite<Entity> {
 
 export function is<T extends Entity>(a: Lite<T> | T, b: Lite<T> | T, compareTicks = false) {
 
-    if(a == null && b == null)
+    if(a == undefined && b == undefined)
         return true;
 		
-    if(a == null || b == null)
+    if(a == undefined || b == undefined)
         return false;
 
-    var aType = (a as T).Type || (a as Lite<T>).EntityType;
-    var bType = (a as T).Type || (a as Lite<T>).EntityType;
+    const aType = (a as T).Type || (a as Lite<T>).EntityType;
+    const bType = (a as T).Type || (a as Lite<T>).EntityType;
 
 	if(!aType || !bType)
 		throw new Error("No Type found");
@@ -167,44 +168,43 @@ export function is<T extends Entity>(a: Lite<T> | T, b: Lite<T> | T, compareTick
     if (aType != bType)
         return false;
 
-    if (a.id != null || b.id != null)
+    if (a.id != undefined || b.id != undefined)
         return a.id == b.id && (!compareTicks || (a as T).ticks == (b as T).ticks);
 
-    var aEntity = (a as T).Type ? a as T : (a as Lite<T>).entity;
-    var bEntity = (b as T).Type ? b as T : (b as Lite<T>).entity;
+    const aEntity = (a as T).Type ? a as T : (a as Lite<T>).entity;
+    const bEntity = (b as T).Type ? b as T : (b as Lite<T>).entity;
     
     return aEntity == bEntity;
 }
 
 export function isLite(obj: any): obj is Lite<Entity> {
-    return (obj as Lite<Entity>).EntityType != null;
+    return (obj as Lite<Entity>).EntityType != undefined;
 }
 
 export function isModifiableEntity(obj: any): obj is ModifiableEntity {
-    return (obj as ModifiableEntity).Type != null;
+    return (obj as ModifiableEntity).Type != undefined;
 }
 
 export function isEntity(obj: any): obj is Entity {
-    return (obj as Entity).Type != null;
+    return (obj as Entity).Type != undefined;
 }
 
 export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity>{
-    return (obj as EntityPack<ModifiableEntity>).entity != null &&
+    return (obj as EntityPack<ModifiableEntity>).entity != undefined &&
         (obj as EntityPack<ModifiableEntity>).canExecute !== undefined;
 }
 
 export function entityInfo(entity: ModifiableEntity | Lite<Entity>)
 {
 	if (!entity)
-		return "null";
+		return "undefined";
 
-	var type = isLite(entity) ? entity.EntityType : entity.Type;
-    var id = isLite(entity) ? entity.id : isEntity(entity) ? entity.id : "";
-    var isNew = isLite(entity) ? entity.entity && entity.entity.isNew : entity.isNew;
+	const type = isLite(entity) ? entity.EntityType : entity.Type;
+    const id = isLite(entity) ? entity.id : isEntity(entity) ? entity.id : "";
+    const isNew = isLite(entity) ? entity.entity && entity.entity.isNew : entity.isNew;
 
 	return  `${type};${id || ""};${isNew || ""}`;
 }
-
 export const BooleanEnum = new EnumType<BooleanEnum>("BooleanEnum");
 export type BooleanEnum =
     "False" |

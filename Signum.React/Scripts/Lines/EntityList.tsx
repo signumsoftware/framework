@@ -47,7 +47,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         const s = this.state;
         const list = this.state.ctx.value;
 
-        const hasSelected = s.selectedIndex != null;
+        const hasSelected = s.selectedIndex != undefined;
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
@@ -86,7 +86,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
                     s.selectedIndex--;
 
                 if (s.selectedIndex == -1)
-                    s.selectedIndex = null;
+                    s.selectedIndex = undefined;
 
                 this.setValue(s.ctx.value);
             })
@@ -103,14 +103,14 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
 
         const pr = ctx.propertyRoute.add(a => a[0]);
 
-        var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
 
         const onView = this.state.onView ?
             this.state.onView(entity, pr) :
             this.defaultView(entity, pr);
 
         onView.then(e => {
-            if (e == null)
+            if (e == undefined)
                 return;
 
             this.convert(e).then(m => {

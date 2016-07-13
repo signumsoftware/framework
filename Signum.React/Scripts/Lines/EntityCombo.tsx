@@ -55,7 +55,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
         if (current.value != liteKey(this.getLite())) {
             if (!current.value) {
-                this.setValue(null);
+                this.setValue(undefined);
             } else {
                 const lite = this.state.data.filter(a => liteKey(a) == current.value).single();
 
@@ -66,8 +66,8 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
     getLite() {
         const v = this.state.ctx.value;
-        if (v == null)
-            return null;
+        if (v == undefined)
+            return undefined;
 
         if ((v as Entity).Type)
             return toLite(v as Entity);
@@ -76,12 +76,12 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
     }
 
     renderInternal() {
-        var s = this.state;
+        const s = this.state;
 
         const hasValue = !!s.ctx.value;
 
        
-        var buttons = (
+        let buttons = (
             <span className="input-group-btn">
                 {!hasValue && this.renderCreateButton(true) }
                 {!hasValue && this.renderFindButton(true) }
@@ -91,7 +91,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         );
 
         if (!buttons.props.children.some((a: any) => a))
-            buttons = null;
+            buttons = undefined;
 
 
         return (
@@ -99,7 +99,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
                 htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }
                 labelProps={s.labelHtmlProps} >
                 <div className="SF-entity-combo">
-                    <div className={buttons ? "input-group" : null}>
+                    <div className={buttons ? "input-group" : undefined}>
                         { this.renderSelect() }
                         { buttons }
                     </div>
@@ -113,7 +113,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
         const lite = this.getLite();
 
-        var ctx = this.state.ctx;
+        const ctx = this.state.ctx;
 
         if (ctx.readOnly)
             return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
@@ -128,12 +128,12 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
     renderOptions() {
 
-        if (this.state.data == null)
-            return null;
+        if (this.state.data == undefined)
+            return undefined;
         
         const lite = this.getLite();
 
-        const elements: Lite<Entity>[] = [null].concat(this.state.data);
+        const elements: Lite<Entity>[] = [undefined].concat(this.state.data);
         if (lite && !elements.some(a => is(a, lite)))
             elements.insertAt(1, lite);
 

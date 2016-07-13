@@ -6,7 +6,7 @@ import { ValueLine, ValueLineType, EntityLine, TypeContext } from '../Lines'
 
 export default class Exception extends React.Component<{ ctx: TypeContext<ExceptionEntity> }, void> {
     render() {
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
         const sc = this.props.ctx.subCtx({ labelColumns: { sm: 4 } });
         return (
             <div>
@@ -47,7 +47,7 @@ export default class Exception extends React.Component<{ ctx: TypeContext<Except
         const tc = this.props.ctx.subCtx(property);
 
         if (!tc.value || tc.value == "")
-            return null;
+            return undefined;
 
         return <Tab title={tc.propertyRoute.member.niceName} eventKey={eventKey}>
             <pre>

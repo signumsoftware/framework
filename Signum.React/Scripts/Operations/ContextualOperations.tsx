@@ -17,12 +17,12 @@ import { operationInfos, getSettings, ContextualOperationSettings, ContextualOpe
 
 export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
     if (ctx.lites.length == 0)
-        return null;
+        return undefined;
 
     const types = ctx.lites.groupBy(lite => lite.EntityType);
 
     if (types.length != 1)
-        return null;
+        return undefined;
 
     const ti = getTypeInfo(types[0].key);
 
@@ -36,18 +36,18 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
                 settings: os,
             } as ContextualOperationContext<Entity>;
 
-            if (os == null || os.isVisible == null || os.isVisible(coc))
+            if (os == undefined || os.isVisible == undefined || os.isVisible(coc))
                 return coc;
 
-            return null;
+            return undefined;
         })
-        .filter(coc => coc != null)
+        .filter(coc => coc != undefined)
         .orderBy(coc => coc.settings && coc.settings.order)
         .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany, i));
 
 
     if (!menuItems.length)
-        return null;
+        return undefined;
 
     return Promise.resolve({
         header: SearchMessage.Create.niceToString(),
@@ -72,7 +72,7 @@ export function navigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent)
     if (!pack || !pack.entity)
         return;
 
-    var es = Navigator.getSettings(pack.entity.Type);
+    const es = Navigator.getSettings(pack.entity.Type);
     if (es.avoidPopup || event.ctrlKey || event.button == 1) {
         Navigator.currentHistory.pushState(pack, '/Create/');
         return;
@@ -84,12 +84,12 @@ export function navigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent)
 
 export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
     if (ctx.lites.length == 0)
-        return null;
+        return undefined;
 
     const types = ctx.lites.groupBy(coc => coc.EntityType);
 
     if (types.length != 1)
-        return null;
+        return undefined;
 
     const ti = getTypeInfo(types[0].key);
 
@@ -97,7 +97,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
         .filter(oi => isEntityOperation(oi.operationType))
         .map(oi => {
             const eos = getSettings(oi.key) as EntityOperationSettings<Entity>;
-            const cos = eos == null ? null :
+            const cos = eos == undefined ? undefined :
                 ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
             const coc = {
                 context: ctx,
@@ -106,22 +106,22 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
                 entityOperationSettings: eos,
             } as ContextualOperationContext<Entity>;
 
-            var visibleByDefault = oi.lite && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
+            const visibleByDefault = oi.lite && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
 
-            if (cos == null ? visibleByDefault :
-                cos.isVisible == null ? visibleByDefault && eos.isVisible == null && (eos.onClick == null || cos.onClick != null) :
+            if (cos == undefined ? visibleByDefault :
+                cos.isVisible == undefined ? visibleByDefault && eos.isVisible == undefined && (eos.onClick == undefined || cos.onClick != undefined) :
                     cos.isVisible(coc))
                 return coc;
 
-            return null;
+            return undefined;
         })
-        .filter(coc=>coc!= null)
+        .filter(coc=>coc!= undefined)
         .orderBy(coc => coc.settings && coc.settings.order);
     
     if (!contexts.length)
-        return null;
+        return undefined;
 
-    var contextPromise: Promise<ContextualOperationContext<Entity>[]> = null;
+    let contextPromise: Promise<ContextualOperationContext<Entity>[]> = undefined;
     if (ctx.lites.length == 1 && contexts.some(coc => coc.operationInfo.hasCanExecute)) {
         contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
             contexts.forEach(coc => coc.canExecute = ep.canExecute[coc.operationInfo.key]);
@@ -139,13 +139,13 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
 
 
     return contextPromise.then(ctxs => {
-        var menuItems = ctxs.filter(coc => coc.canExecute == null || !hideOnCanExecute(coc))
-            .orderBy(coc => coc.settings && coc.settings.order != null ? coc.settings.order :
-                coc.entityOperationSettings && coc.entityOperationSettings.order != null ? coc.entityOperationSettings.order : 0)
+        const menuItems = ctxs.filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
+            .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
+                coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
             .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultContextualClick, i));
 
         if (menuItems.length == 0)
-            return null;
+            return undefined;
 
         return {
             header: SearchMessage.Operations.niceToString(),
@@ -156,10 +156,10 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
 
 
 function hideOnCanExecute(coc: ContextualOperationContext<Entity>) {
-    if (coc.settings && coc.settings.hideOnCanExecute != null)
+    if (coc.settings && coc.settings.hideOnCanExecute != undefined)
         return coc.settings.hideOnCanExecute;
 
-    if (coc.entityOperationSettings && coc.entityOperationSettings.hideOnCanExecute != null)
+    if (coc.entityOperationSettings && coc.entityOperationSettings.hideOnCanExecute != undefined)
         return coc.entityOperationSettings.hideOnCanExecute;
 
     return false;
@@ -169,16 +169,16 @@ function hideOnCanExecute(coc: ContextualOperationContext<Entity>) {
 
 export function confirmInNecessary(coc: ContextualOperationContext<Entity>): boolean {
 
-    var confirmMessage = getConfirmMessage(coc);
+    const confirmMessage = getConfirmMessage(coc);
 
-    return confirmMessage == null || confirm(confirmMessage);
+    return confirmMessage == undefined || confirm(confirmMessage);
 }
 
 function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
-    if (coc.settings && coc.settings.confirmMessage === null)
-        return null;
+    if (coc.settings && coc.settings.confirmMessage === undefined)
+        return undefined;
 
-    if (coc.settings && coc.settings.confirmMessage != null)
+    if (coc.settings && coc.settings.confirmMessage != undefined)
         return coc.settings.confirmMessage(coc);
 
     //eoc.settings.confirmMessage === undefined
@@ -187,7 +187,7 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
             OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.niceToString() :
             OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.niceToString();
 
-    return null;
+    return undefined;
 }
 
 
@@ -195,21 +195,21 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 
     export function createContextualMenuItem(coc: ContextualOperationContext<Entity>, defaultClick: (coc: ContextualOperationContext<Entity>, event: React.MouseEvent) => void, key: any) {
 
-        var text = coc.settings && coc.settings.text ? coc.settings.text() :
+        const text = coc.settings && coc.settings.text ? coc.settings.text() :
             coc.entityOperationSettings && coc.entityOperationSettings.text ? coc.entityOperationSettings.text() :
                 coc.operationInfo.niceName;
 
-        var bsStyle = coc.settings && coc.settings.style || autoStyleFunction(coc.operationInfo);
+        const bsStyle = coc.settings && coc.settings.style || autoStyleFunction(coc.operationInfo);
 
-        var disabled = !!coc.canExecute;
+        const disabled = !!coc.canExecute;
 
-        var onClick = coc.settings && coc.settings.onClick ?
+        const onClick = coc.settings && coc.settings.onClick ?
             (me: React.MouseEvent) => coc.settings.onClick(coc, me) :
             (me: React.MouseEvent) => defaultClick(coc, me)
 
-        var menuItem = <MenuItem
-            className={classes("btn-" + bsStyle, disabled ? "disabled" : null) }
-            onClick={disabled ? null : onClick}
+        const menuItem = <MenuItem
+            className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined) }
+            onClick={disabled ? undefined : onClick}
             data-operation={coc.operationInfo.key}
             key={key}>
             {text}

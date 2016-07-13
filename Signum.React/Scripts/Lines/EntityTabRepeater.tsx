@@ -27,7 +27,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
     renderInternal() {
 
-        var buttons = (
+        let buttons = (
             <span className="pull-right">
                 {this.renderCreateButton(false) }
                 {this.renderFindButton(false) }
@@ -35,7 +35,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
         );
 
         if (!buttons.props.children.some((a : any) => a))
-            buttons = null;
+            buttons = undefined;
 
 
         return (

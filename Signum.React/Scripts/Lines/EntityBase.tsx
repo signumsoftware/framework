@@ -70,7 +70,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         const tr = this.state.type;
 
-        const isLite = (entityOrLite as Lite<Entity>).EntityType != null;
+        const isLite = (entityOrLite as Lite<Entity>).EntityType != undefined;
         const entityType = (entityOrLite as Lite<Entity>).EntityType || (entityOrLite as ModifiableEntity).Type;
 
 
@@ -111,10 +111,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         const ctx = this.state.ctx;
         const entity = ctx.value;
 
-        var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
         if (openWindow) {
             event.preventDefault();
-            var route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
+            const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
             window.open(route);
         }
         else {
@@ -123,7 +123,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 this.defaultView(entity, ctx.propertyRoute);
 
             onView.then(e => {
-                if (e == null)
+                if (e == undefined)
                     return;
 
                 this.convert(e).then(m => this.setValue(m)).done();
@@ -133,10 +133,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     renderViewButton(btn: boolean) {
         if (!this.state.view)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-view", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-view", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleViewClick}
                 title={EntityControlMessage.View.niceToString() }>
                 <span className="glyphicon glyphicon-arrow-right"/>
@@ -153,14 +153,14 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         const tis = getTypeInfos(t).filter(ti => predicate(ti));
 
         return SelectorModal.chooseType(tis)
-            .then(ti => ti ? ti.name : null);
+            .then(ti => ti ? ti.name : undefined);
     }
 
     defaultCreate(): Promise<ModifiableEntity | Lite<Entity>> {
 
         return this.chooseType(t => Navigator.isCreable(t, !!this.props.getComponent, false))
-            .then(typeName => typeName ? Constructor.construct(typeName) : null)
-            .then(e => e ? e.entity : null);
+            .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
+            .then(e => e ? e.entity : undefined);
     }
 
     handleCreateClick = (event: React.SyntheticEvent) => {
@@ -172,8 +172,8 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         onCreate.then(e => {
 
-            if (e == null)
-                return null;
+            if (e == undefined)
+                return undefined;
 
             if (!this.state.viewOnCreate)
                 return Promise.resolve(e);
@@ -193,10 +193,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     renderCreateButton(btn: boolean) {
         if (!this.state.create || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-create", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleCreateClick}
                 title={EntityControlMessage.Create.niceToString() }>
                 <span className="glyphicon glyphicon-plus"/>
@@ -214,7 +214,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     defaultFind(): Promise<ModifiableEntity | Lite<Entity>> {
         return this.chooseType(Finder.isFindable)
-            .then(qn => qn == null ? null : Finder.find({ queryName: qn } as FindOptions));
+            .then(qn => qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
     }
     handleFindClick = (event: React.SyntheticEvent) => {
 
@@ -231,10 +231,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     };
     renderFindButton(btn: boolean) {
         if (!this.state.find || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-find", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-find", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleFindClick}
                 title={EntityControlMessage.Find.niceToString() }>
                 <span className="glyphicon glyphicon-search"/>
@@ -251,15 +251,15 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 if (result == false)
                     return;
 
-                this.setValue(null);
+                this.setValue(undefined);
             }).done();
     };
     renderRemoveButton(btn: boolean) {
         if (!this.state.remove || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-remove", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-remove", btn ? "btn btn-default" : undefined) }
                 onClick={this.handleRemoveClick}
                 title={EntityControlMessage.Remove.niceToString() }>
                 <span className="glyphicon glyphicon-remove"/>

@@ -37,14 +37,14 @@ export function expandParentColumn(findOptions: FindOptions) {
     if (!findOptions.parentColumn)
         return findOptions; 
 
-    var fo = Dic.extend({}, findOptions) as FindOptions;
+    const fo = Dic.extend({}, findOptions) as FindOptions;
 
     fo.filterOptions = [
         { columnName: fo.parentColumn, operation: "EqualTo", value: fo.parentValue, frozen: true },
         ...(fo.filterOptions || [])
     ];
 
-    if (!fo.parentColumn.contains(".") && (fo.columnOptionsMode == null || fo.columnOptionsMode == "Remove")) {
+    if (!fo.parentColumn.contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
         fo.columnOptions = [
             { columnName: fo.parentColumn },
             ...(fo.columnOptions || [])
@@ -53,11 +53,11 @@ export function expandParentColumn(findOptions: FindOptions) {
         fo.columnOptionsMode = "Remove";
     }
 
-    if (fo.searchOnLoad == null)
+    if (fo.searchOnLoad == undefined)
         fo.searchOnLoad = true;
 
-    fo.parentColumn = null;
-    fo.parentValue = null;
+    fo.parentColumn = undefined;
+    fo.parentValue = undefined;
 
     return fo;
 }
@@ -128,7 +128,7 @@ export enum QueryTokenType {
 }
 
 export function hasAnyOrAll(token: QueryToken) : boolean {
-    if(token == null)
+    if(token == undefined)
         return false;
 
     if(token.queryTokenType == QueryTokenType.AnyOrAll)
@@ -138,7 +138,7 @@ export function hasAnyOrAll(token: QueryToken) : boolean {
 }
 
 export function hasAggregate(token: QueryToken): boolean {
-    if (token == null)
+    if (token == undefined)
         return false;
 
     if (token.queryTokenType == QueryTokenType.Aggregate)
@@ -149,7 +149,7 @@ export function hasAggregate(token: QueryToken): boolean {
 
 export function getTokenParents(token: QueryToken): QueryToken[] {
     const result: QueryToken[] = [];
-    while (token != null) {
+    while (token != undefined) {
         result.insertAt(0, token);
         token = token.parent;
     }

@@ -50,8 +50,8 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                             mlistItemContext(this.state.ctx).map((mlec, i) =>
                                 (<EntityStripElement key={i}
                                     ctx={mlec}
-                                    onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : null}
-                                    onView={this.state.view ? e => this.handleViewElement(e, i) : null}
+                                    onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : undefined}
+                                    onView={this.state.view ? e => this.handleViewElement(e, i) : undefined}
                                     />))
                         }
                         <li className="sf-strip-input input-group">
@@ -72,7 +72,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         this.convert(lite)
             .then(e => {
                 const list = this.props.ctx.value;
-                list.push({ rowId: null, element: e });
+                list.push({ rowId: undefined, element: e });
                 this.setValue(list);
             }).done();
         return "";
@@ -84,13 +84,13 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         event.preventDefault();
 
         const ctx = this.state.ctx;
-        var mle = ctx.value[index];
+        const mle = ctx.value[index];
         const entity = mle.element;
 
-        var openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
         if (openWindow) {
             event.preventDefault();
-            var route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
+            const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
             window.open(route);
         }
         else {
@@ -99,7 +99,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                 this.defaultView(entity, ctx.propertyRoute);
 
             onView.then(e => {
-                if (e == null)
+                if (e == undefined)
                     return;
 
                 this.convert(e).then(m => {
@@ -118,7 +118,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
     renderAutoComplete() {
 
         if (!this.state.autoComplete || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
             <Typeahead

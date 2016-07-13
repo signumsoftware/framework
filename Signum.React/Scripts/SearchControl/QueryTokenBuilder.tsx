@@ -26,7 +26,7 @@ export default class QueryTokenBuilder extends React.Component<QueryTokenBuilder
     render() {
 
         const tokenList = getTokenParents(this.props.queryToken);
-        tokenList.push(null);
+        tokenList.push(undefined);
 
         return (
             <div className={classes("sf-query-token-builder", this.props.className) }>
@@ -35,7 +35,7 @@ export default class QueryTokenBuilder extends React.Component<QueryTokenBuilder
                     readOnly={this.props.readOnly}
                     onTokenSelected={this.props.onTokenChange}
                     subTokenOptions={this.props.subTokenOptions}
-                    parentToken={i == 0 ? null : tokenList[i - 1]}
+                    parentToken={i == 0 ? undefined : tokenList[i - 1]}
                     selectedToken={a} />) }
             </div>
         );
@@ -57,7 +57,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
     constructor(props: QueryTokenPartProps) {
         super(props);
 
-        this.state = { data: null };      
+        this.state = { data: undefined };      
     }
 
     componentWillMount() {
@@ -67,14 +67,14 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
 
     componentWillReceiveProps(newProps: QueryTokenPartProps) {
         if (!newProps.readOnly && (!areEqual(this.props.parentToken, newProps.parentToken, a => a.fullKey) || this.props.subTokenOptions != newProps.subTokenOptions)) {
-            this.setState({ data: null });
+            this.setState({ data: undefined });
             this.requestSubTokens(newProps);
         }
     }
 
     requestSubTokens(props: QueryTokenPartProps) {
         Finder.API.subTokens(props.queryKey, props.parentToken, props.subTokenOptions).then(tokens=>
-            this.setState({ data: tokens.length == 0 ? tokens : [null].concat(tokens) })
+            this.setState({ data: tokens.length == 0 ? tokens : [undefined].concat(tokens) })
         ).done();
     }
 
@@ -90,8 +90,8 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
 
     render() {
 
-        if (this.state.data != null && this.state.data.length == 0)
-            return null;
+        if (this.state.data != undefined && this.state.data.length == 0)
+            return undefined;
         
         return (
             <div className="sf-query-token-part">
@@ -105,7 +105,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
                     textField="toString"
                     valueComponent={QueryTokenItem}
                     itemComponent={QueryTokenOptionalItem}
-                    busy={!this.props.readOnly && this.state.data == null}
+                    busy={!this.props.readOnly && this.state.data == undefined}
                     />
             </div>
         );
@@ -115,10 +115,10 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
 export class QueryTokenItem extends React.Component<{ item: QueryToken }, {}> {
     render() {
 
-        var item = this.props.item;
+        const item = this.props.item;
 
-        if (item == null)
-            return null;
+        if (item == undefined)
+            return undefined;
 
         return (
             <span
@@ -139,12 +139,12 @@ export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken }
     render() {
 
 
-        var item = this.props.item;
+        const item = this.props.item;
 
-        if (item == null)
+        if (item == undefined)
             return <span> - </span>;
 
-        var parentToken = (this.context as any).parentToken;
+        const parentToken = (this.context as any).parentToken;
 
         return (
             <span data-token={item.key}

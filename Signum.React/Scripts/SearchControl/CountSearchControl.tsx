@@ -28,7 +28,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
     constructor(props: CountSearchControlProps) {
         super(props);
         this.state = {
-            count: null,
+            count: undefined,
         };
     }
 
@@ -45,7 +45,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
         if (!Finder.isFindable(this.props.findOptions.queryName))
             return;
 
-        var newFindOptions = expandParentColumn(this.props.findOptions);
+        const newFindOptions = expandParentColumn(this.props.findOptions);
 
         Finder.parseTokens(newFindOptions)
             .then(fo => Finder.API.queryCount(this.getQueryRequest(fo)))
@@ -57,7 +57,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
 
     render() {
         if (!Finder.isFindable(this.props.findOptions.queryName))
-            return null;
+            return undefined;
 
         if (this.props.style == "Badge")
             return this.renderBadget();
@@ -80,9 +80,9 @@ export default class CountSearchControl extends React.Component<CountSearchContr
         return (
             <div>
                 <span className={this.state.count > 0 ? "count-search count-with-results badge" : "count-search count-no-results"}>
-                    {this.state.count == null ? "…" : this.state.count}
+                    {this.state.count == undefined ? "…" : this.state.count}
                 </span>
-                {this.state.count != null &&
+                {this.state.count != undefined &&
                     <a className="sf-line-button sf-view" onClick={this.handleClick}>
                         <span className={"glyphicon glyphicon-arrow-right"}>
                         </span>
@@ -94,20 +94,20 @@ export default class CountSearchControl extends React.Component<CountSearchContr
 
     renderAsLink() {
         return (<a onClick={this.handleClick}>
-            {this.state.count == null ? "…" : this.state.count}
+            {this.state.count == undefined ? "…" : this.state.count}
         </a>);
     }
 
 
     renderBadget() {
         return <a className={this.state.count > 0 ? "count-search count-with-results badge" : "count-search count-no-results"}  onClick={this.handleClick}>
-            {this.state.count == null ? "…" : this.state.count}
+            {this.state.count == undefined ? "…" : this.state.count}
         </a>;
     }
 
     renderSpan() {
         return <span>
-            {this.state.count == null ? "…" : this.state.count}
+            {this.state.count == undefined ? "…" : this.state.count}
         </span>;
     }
 }

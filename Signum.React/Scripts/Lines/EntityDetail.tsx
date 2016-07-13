@@ -30,7 +30,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
 
         const hasValue = !!s.ctx.value;
 
-        var buttons = (
+        let buttons = (
             <span className="pull-right">
                 {!hasValue && this.renderCreateButton(false) }
                 {!hasValue && this.renderFindButton(false) }
@@ -39,7 +39,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
         );
 
         if (!buttons.props.children.some((a : any) => a))
-            buttons = null;
+            buttons = undefined;
 
         return (
             <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass) }

@@ -11,11 +11,11 @@ export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
     render() {
 
         const { position } = this.props;
-        const props = Dic.without(this.props, { position, ref: null });
+        const props = Dic.without(this.props, { position, ref: undefined });
 
         const style: React.CSSProperties = { left: position.pageX + "px", top: position.pageY + "px", zIndex: 999, display: "block", position: "absolute" };
 
-        var childrens = React.Children.map(this.props.children,
+        const childrens = React.Children.map(this.props.children,
             (c: React.ReactElement<any>) => React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, this.props.onHide) }));
 
         const ul = (

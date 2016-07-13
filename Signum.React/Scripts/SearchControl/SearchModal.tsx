@@ -43,7 +43,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
     }
 
     handleOnExited = () => {
-        this.props.onExited(this.okPressed ? this.selectedEntites : null);
+        this.props.onExited(this.okPressed ? this.selectedEntites : undefined);
     }
 
     handleDoubleClick = (e: React.MouseEvent, row: ResultRow) => {
@@ -83,7 +83,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
                         ref={(e: SearchControl) => this.searchControl = e}
                         findOptions={this.props.findOptions}
                         onSelectionChanged={this.handleSelectionChanged}
-                        onDoubleClick={this.props.findMode == FindMode.Find ? this.handleDoubleClick : null}
+                        onDoubleClick={this.props.findMode == FindMode.Find ? this.handleDoubleClick : undefined}
                         />
                 </Modal.Body>
             </Modal>
@@ -97,7 +97,7 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
             findMode={FindMode.Find}
             isMany={false}
             title={title || getQueryNiceName(findOptions.queryName) } />)
-            .then(a => a ? a[0] : null);
+            .then(a => a ? a[0] : undefined);
     }
 
     static openMany(findOptions: FindOptions, title?: string): Promise<Lite<Entity>[]> {

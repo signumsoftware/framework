@@ -16,9 +16,9 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
         const fo = this.props.findOptions;
 
         const tokensObj = fo.columnOptions.map(a=> a.token)
-            .concat(fo.filterOptions.filter(a=> a.operation != null).map(a=> a.token))
+            .concat(fo.filterOptions.filter(a=> a.operation != undefined).map(a=> a.token))
             .concat(fo.orderOptions.map(a=> a.token))
-            .filter(a=> a != null)
+            .filter(a=> a != undefined)
             .flatMap(a=> getTokenParents(a))
             .filter(a=> a.queryTokenType == QueryTokenType.Element)
             .toObjectDistinct(a=> a.fullKey);
@@ -26,7 +26,7 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
         const tokens = Dic.getValues(tokensObj);
 
         if (tokens.length == 0)
-            return null;
+            return undefined;
 
         const message = ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.niceToString().formatWith(
             getTypeInfos(this.props.mainType).map(a=> a.nicePluralName).joinComma(External.CollectionMessage.And.niceToString()),

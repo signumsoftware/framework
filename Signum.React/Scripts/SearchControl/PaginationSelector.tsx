@@ -22,7 +22,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
     render() {
 
         if (!this.props.pagination)
-            return null;
+            return undefined;
 
         return (
             <div className="sf-search-footer">
@@ -75,8 +75,8 @@ export default class PaginationSelector extends React.Component<PaginationSelect
 
         const p: Pagination = {
             mode: mode,
-            elementsPerPage: mode != "All" ? Finder.defaultPagination.elementsPerPage : null,
-            currentPage: mode == "Paginate" ? 1 : null
+            elementsPerPage: mode != "All" ? Finder.defaultPagination.elementsPerPage : undefined,
+            currentPage: mode == "Paginate" ? 1 : undefined
         };
 
         this.props.onPagination(p);

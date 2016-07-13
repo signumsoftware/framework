@@ -28,9 +28,9 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
 
         this.props.filterOptions.push({
             token: this.props.lastToken,
-            columnName: null,
-            operation: !this.props.lastToken ? null : (filterOperations[this.props.lastToken.filterType] || []).firstOrNull(),
-            value: null,
+            columnName: undefined,
+            operation: !this.props.lastToken ? undefined : (filterOperations[this.props.lastToken.filterType] || []).firstOrNull(),
+            value: undefined,
         });
 
 
@@ -115,16 +115,16 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
 
         const f = this.props.filter;
 
-        if (newToken == null) {
-            f.operation = null;
-            f.value = null;
+        if (newToken == undefined) {
+            f.operation = undefined;
+            f.value = undefined;
         }
         else {
 
             if (!areEqual(f.token, newToken, a => a.filterType)) {
                 const operations = filterOperations[newToken.filterType];
                 f.operation = operations && operations.firstOrNull();
-                f.value = isList(f.operation) ? [null] : null;
+                f.value = isList(f.operation) ? [undefined] : undefined;
             }
         }
         f.token = newToken;
@@ -138,7 +138,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     
 
     handleChangeOperation = (event: React.FormEvent) => {
-        var operation = (event.currentTarget as HTMLSelectElement).value as any;
+        const operation = (event.currentTarget as HTMLSelectElement).value as any;
         if (isList(operation) != isList(this.props.filter.operation))
             this.props.filter.value = isList(operation) ? [this.props.filter.value] : this.props.filter.value[0];
         
@@ -190,14 +190,14 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         if (isList(f.operation))
             return <MultiValue values={f.value} createAppropiateControl={this.handleCreateAppropiateControl} frozen={this.props.filter.frozen} onChange={this.handleValueChange}/>;
 
-        const ctx = new TypeContext<any>(null, { formGroupStyle: "None", readOnly: f.frozen }, null, Binding.create(f, a => a.value));
+        const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: f.frozen }, undefined, Binding.create(f, a => a.value));
 
         return this.handleCreateAppropiateControl(ctx);
     }
 
     handleCreateAppropiateControl = (ctx: TypeContext<any>): React.ReactElement<any> => {
 
-        var token = this.props.filter.token;
+        const token = this.props.filter.token;
 
         switch (token.filterType) {
             case "Lite":
@@ -242,7 +242,7 @@ export class MultiValue extends React.Component<MultiValueProps, void> {
     }
 
     handleAddValue = () => {
-        this.props.values.push(null);
+        this.props.values.push(undefined);
         this.props.onChange();
         this.forceUpdate();
     }
@@ -263,11 +263,11 @@ export class MultiValue extends React.Component<MultiValueProps, void> {
                                         </a>}
                                 </td>
                                 <td>
-                                    {this.props.createAppropiateControl(new TypeContext<any>(null,
+                                    {this.props.createAppropiateControl(new TypeContext<any>(undefined,
                                         {
                                             formGroupStyle: "None",
                                             readOnly: this.props.frozen
-                                        }, null, new Binding<any>(this.props.values, i))) }
+                                        }, undefined, new Binding<any>(this.props.values, i))) }
                                 </td>
                             </tr>)
                     }

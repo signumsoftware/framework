@@ -41,7 +41,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
     calculateState(props: PageFrameProps) {
 
-        return { componentClass: null, pack: null } as PageFrameState;
+        return { componentClass: undefined, pack: undefined } as PageFrameState;
     }
 
 
@@ -125,14 +125,14 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             },
         };
 
-        var ti = this.getTypeInfo();
+        const ti = this.getTypeInfo();
 
         const styleOptions: StyleOptions = {
             readOnly: Navigator.isReadOnly(ti),
             frame: frame
         };
 
-        const ctx = new TypeContext<Entity>(null, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, ""));
+        const ctx = new TypeContext<Entity>(undefined, styleOptions, PropertyRoute.root(ti), new ReadonlyBinding(entity, ""));
 
 
         const wc: WidgetContext = {
@@ -173,7 +173,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             <h3>
                 <span className="sf-entity-title">{ getToString(entity) }</span>
                 <br/>
-                <small className="sf-type-nice-name">{ Navigator.getTypeTitle(entity, null) }</small>
+                <small className="sf-type-nice-name">{ Navigator.getTypeTitle(entity, undefined) }</small>
             </h3>
         );
     }

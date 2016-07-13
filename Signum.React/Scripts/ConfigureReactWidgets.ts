@@ -49,17 +49,17 @@ export function configure(){
         },
 
         parse: function parse(value: string, format: string, culture: string) {
-            if (value == null || value == "")
-                return null;
+            if (value == undefined || value == "")
+                return undefined;
 
             return getMoment(culture, value, format).toDate();
         },
 
         format: function format(value: Date, _format: string, culture: string) {
-            if (value == null)
+            if (value == undefined)
                 return "";
 
-            return getMoment(culture, value, null).format(_format);
+            return getMoment(culture, value, undefined).format(_format);
         }
     };
 

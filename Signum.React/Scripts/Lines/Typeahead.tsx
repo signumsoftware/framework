@@ -33,8 +33,8 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         super(props);
         this.state = {
             shown: false,
-            items: null,
-            selectedIndex : null,
+            items: undefined,
+            selectedIndex : undefined,
         };
     }
 
@@ -52,7 +52,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     }
 
     static defaultProps: TypeaheadProps = {
-        getItems: null,
+        getItems: undefined,
         getItemsTimeout: 200,
         minLength: 1,
         renderItem: Typeahead.highlightedText,
@@ -85,11 +85,11 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
     popupate() {
 
         if (this.input.value.length < this.props.minLength) {
-            this.setState({ shown: false, items: null, selectedIndex: null });
+            this.setState({ shown: false, items: undefined, selectedIndex: undefined });
             return;
         }
 
-        //this.setState({ shown: true, items: null });
+        //this.setState({ shown: true, items: undefined });
                
         const query = this.input.value;
         this.props.getItems(query).then(items => this.setState({
@@ -168,7 +168,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
             case 9: // tab
             case 13: // enter
-                if (this.state.selectedIndex == null) return;
+                if (this.state.selectedIndex == undefined) return;
                 this.select(e);
                 break;
 
@@ -199,7 +199,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     handleElementMouseLeave = (event: React.MouseEvent) => {
         this.mouseover = false;
-        this.setState({ selectedIndex: null });
+        this.setState({ selectedIndex: undefined });
         if (!this.focused && this.state.shown)
             this.setState({ shown: false });
     }
@@ -238,7 +238,7 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
                 {this.state.shown && <ul className="typeahead dropdown-menu" {...this.props.menuAttrs} ref={this.onMenuLoad}>
                     { /*!this.state.items ? <li className="loading"><a><small>{this.props.loadingMessage}</small></a></li> :*/
                         !this.state.items.length ? <li className="no-results"><a><small>{this.props.noResultsMessage}</small></a></li> :
-                            this.state.items.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : null} data-index={i} 
+                            this.state.items.map((item, i) => <li key={i} className={i == this.state.selectedIndex ? "active" : undefined} data-index={i} 
                                 onMouseEnter={this.handleElementMouseEnter}
                                 onMouseLeave={this.handleElementMouseLeave}
                                 {...this.props.liAttrs && this.props.liAttrs(item) }>

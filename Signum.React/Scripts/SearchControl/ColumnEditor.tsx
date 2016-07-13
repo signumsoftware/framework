@@ -31,17 +31,17 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps, {}>
 
     handleOnChange = (event: React.FormEvent) => {
         this.props.columnOption.displayName = (event.currentTarget as HTMLInputElement).value;
-        this.props.onChange(null);
+        this.props.onChange(undefined);
     }
 
     render() {
         const co = this.props.columnOption;
 
-        var isCollection = co.token && co.token.type.isCollection;
+        const isCollection = co.token && co.token.type.isCollection;
 
         return (
-            <div className={classes("sf-column-editor", "form-xs", isCollection ? "error" : null) }
-                title={isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : null }>
+            <div className={classes("sf-column-editor", "form-xs", isCollection ? "error" : undefined) }
+                title={isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined }>
                 <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
                 <QueryTokenBuilder
                     queryToken={co.token}

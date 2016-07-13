@@ -14,9 +14,9 @@ export interface EntityLinkProps extends React.Props<EntityLink> {
 export default class EntityLink extends React.Component<EntityLinkProps, void>{
 
     render() {
-        var lite = this.props.lite;
+        const lite = this.props.lite;
 
-        if (!Navigator.isNavigable(lite.EntityType, null, this.props.inSearch || false))
+        if (!Navigator.isNavigable(lite.EntityType, undefined, this.props.inSearch || false))
             return <span data-entity={liteKey(lite) }>{this.props.children || lite.toStr}</span>;
         
         return (
@@ -32,11 +32,11 @@ export default class EntityLink extends React.Component<EntityLinkProps, void>{
 
     handleClick = (event: React.MouseEvent) => {
 
-        var lite = this.props.lite;
+        const lite = this.props.lite;
 
-        var s = Navigator.getSettings(lite.EntityType)
+        const s = Navigator.getSettings(lite.EntityType)
 
-        var avoidPopup = s != null && s.avoidPopup;
+        const avoidPopup = s != undefined && s.avoidPopup;
 
         if (avoidPopup || event.ctrlKey || event.button == 1)
             return;

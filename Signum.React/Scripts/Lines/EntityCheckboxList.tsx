@@ -53,8 +53,8 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     handleOnChange = (event: React.FormEvent, lite: Lite<Entity>) => {
         const current = event.currentTarget as HTMLSelectElement;
 
-        var list = this.state.ctx.value;
-        var toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))
+        const list = this.state.ctx.value;
+        const toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))
 
         if (toRemove.length) {
             toRemove.forEach(mle => list.remove(mle));
@@ -63,7 +63,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         else {
             this.convert(lite).then(e => {
                 list.push({
-                    rowId: null,
+                    rowId: undefined,
                     element: e
                 });
                 this.forceUpdate();
@@ -72,7 +72,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     }
 
     getColumnStyle(): React.CSSProperties {
-        var s = this.state;
+        const s = this.state;
 
         if (s.columnCount && s.columnWidth)
             return {
@@ -95,11 +95,11 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
                 WebkitColumnWidth: s.columnWidth,
             };
 
-        return null;
+        return undefined;
     }
 
     maybeToLite(entityOrLite: Entity | Lite<Entity>) {
-        var entity = entityOrLite as Entity;
+        const entity = entityOrLite as Entity;
 
         if (entity.Type)
             return toLite(entity, entity.isNew);
@@ -129,11 +129,11 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
 
 
     renderContent() {
-        if (this.state.data == null)
-            return null;
+        if (this.state.data == undefined)
+            return undefined;
 
 
-        var data = [...this.state.data];
+        const data = [...this.state.data];
 
         this.state.ctx.value.forEach(mle => {
             if (!data.some(d => is(d, mle.element as Entity | Lite<Entity>)))

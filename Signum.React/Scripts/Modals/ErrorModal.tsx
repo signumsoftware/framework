@@ -32,7 +32,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
     }
 
     handleOnExited = () => {
-        this.props.onExited(null);
+        this.props.onExited(undefined);
     }
 
     handleCloseClicked = () => {
@@ -41,9 +41,9 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
 
     render() {
 
-        var e = this.props.error;
+        const e = this.props.error;
 
-        var se = e instanceof ServiceError ? (e as ServiceError) : null;
+        const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
 
         return (
             <Modal onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
@@ -74,7 +74,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
     }
 
     renderTitle(e: any, se: ServiceError) {
-        if (se == null || se.httpError.ExceptionType == null)
+        if (se == undefined || se.httpError.ExceptionType == undefined)
             return <h4 className="modal-title text-danger"><span className="glyphicon glyphicon-alert"></span> Error </h4>;
 
         return (<h4 className="modal-title text-danger">
@@ -88,7 +88,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
     }
 
     renderMessage(e: any, se: ServiceError) {
-        if (se == null)
+        if (se == undefined)
             return <p className="text-danger"> { e.message ? e.message : e }</p>;
 
         return (

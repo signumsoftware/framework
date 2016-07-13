@@ -38,7 +38,7 @@ export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Prom
         const result: React.ReactElement<any>[] = []
         blocks.forEach(block => {
 
-            if (block == null || block.menuItems == null || block.menuItems.length == 0)
+            if (block == undefined || block.menuItems == undefined || block.menuItems.length == 0)
                 return;
 
             if (result.length)

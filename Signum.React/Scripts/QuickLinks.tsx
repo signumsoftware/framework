@@ -22,28 +22,28 @@ export interface QuickLinkContext<T extends Entity> {
     contextualContext?: ContextualItemsContext<T>;
 }
 
-export var onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>> = [];
+export const onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>> = [];
 export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>)
 {
     onGlobalQuickLinks.push(quickLinkGenerator);
 }
 
-export var onQuickLinks: { [typeName: string]: Array<(ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>> } = {};
+export const onQuickLinks: { [typeName: string]: Array<(ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>> } = {};
 export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>)
 {
-    var typeName = getTypeName(type);
+    const typeName = getTypeName(type);
 
-    var col = onQuickLinks[typeName] || (onQuickLinks[typeName] = []);
+    const col = onQuickLinks[typeName] || (onQuickLinks[typeName] = []);
 
     col.push(quickLinkGenerator);
 }
 
 export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[]>{
 
-    var promises = onGlobalQuickLinks.map(f => asPromiseArray<QuickLink>(f(ctx)));
+    let promises = onGlobalQuickLinks.map(f => asPromiseArray<QuickLink>(f(ctx)));
 
     if (onQuickLinks[ctx.lite.EntityType]) {
-        var specificPromises = onQuickLinks[ctx.lite.EntityType].map(f => asPromiseArray<QuickLink>(f(ctx)));
+        const specificPromises = onQuickLinks[ctx.lite.EntityType].map(f => asPromiseArray<QuickLink>(f(ctx)));
 
         promises = promises.concat(specificPromises);
     }
@@ -54,7 +54,7 @@ export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[
 function asPromiseArray<T>(valueOrPromiseOrArray: T | T[] | Promise<T> | Promise<T[]>): Promise<T[]> {
 
     if (!valueOrPromiseOrArray)
-        return Promise.resolve(null);
+        return Promise.resolve(undefined);
 
     if ((valueOrPromiseOrArray as Promise<T | T[]>).then)
         return (valueOrPromiseOrArray as Promise<T | T[]>).then(a => asArray(a));
@@ -77,7 +77,7 @@ export function getQuickLinkWidget(ctx: WidgetContext): React.ReactElement<any> 
 export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
 
     if (ctx.lites.length != 1)
-        return Promise.resolve(null);
+        return Promise.resolve(undefined);
 
     return getQuickLinks({
         lite: ctx.lites[0],
@@ -85,7 +85,7 @@ export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): P
     }).then(links => {
 
         if (links.length == 0)
-            return null;
+            return undefined;
 
         return {
             header: QuickLinkMessage.Quicklinks.niceToString(),
@@ -102,7 +102,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
 
     constructor(props: QuickLinkWidgetProps) {
         super(props);
-        this.state = { links: null };
+        this.state = { links: undefined };
     }
 
     componentWillMount() {
@@ -116,9 +116,9 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
     }
 
     makeRequest(props: { ctx: WidgetContext }) {
-        this.setState({ links: null });
+        this.setState({ links: undefined });
 
-        var entity = props.ctx.pack.entity;
+        const entity = props.ctx.pack.entity;
 
         if (entity.isNew || !getTypeInfo(entity.Type) || !getTypeInfo(entity.Type).entityKind) {
             this.setState({ links: [] });
@@ -133,12 +133,12 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
 
     render() {
 
-        var links = this.state.links;
+        const links = this.state.links;
 
-        if (links != null && links.length == 0)
-            return null;
+        if (links != undefined && links.length == 0)
+            return undefined;
 
-        var a = (
+        const a = (
             <a
                 className={classes("badge", "sf-widgets-active", "sf-quicklinks") }
                 title={QuickLinkMessage.Quicklinks.niceToString() }
@@ -188,8 +188,8 @@ export abstract class QuickLink {
     abstract toMenuItem(key: any): React.ReactElement<any>;
 
     icon() {
-        if (this.glyphicon == null)
-            return null;
+        if (this.glyphicon == undefined)
+            return undefined;
 
         return (
             <span

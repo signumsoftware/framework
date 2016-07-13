@@ -29,7 +29,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             throw new Error(`'onFind' property is not applicable to '${this}'. Use 'onFindMany' instead`);
 
 
-        if(props.ctx.value == null)
+        if(props.ctx.value == undefined)
             props.ctx.value = [];
 
         super.calculateDefaultState(props);
@@ -51,10 +51,10 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
     renderMoveUp(btn: boolean, index: number) {
         if (!this.state.move || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : undefined) }
                 onClick={() => this.moveUp(index) }
                 title={EntityControlMessage.MoveUp.niceToString() }>
                 <span className="glyphicon glyphicon-chevron-up"/>
@@ -75,10 +75,10 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     renderMoveDown(btn: boolean, index: number) {
         if (!this.state.move || this.state.ctx.readOnly)
-            return null;
+            return undefined;
 
         return (
-            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : null) }
+            <a className={classes("sf-line-button", "sf-move", btn ? "btn btn-default" : undefined) }
                 onClick={() => this.moveDown(index) }
                 title={EntityControlMessage.MoveUp.niceToString() }>
                 <span className="glyphicon glyphicon-chevron-down"/>
@@ -95,8 +95,8 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
         onCreate
             .then(e => {
 
-                if (e == null)
-                    return null;
+                if (e == undefined)
+                    return undefined;
 
                 if (!this.state.viewOnCreate)
                     return Promise.resolve(e);
@@ -114,7 +114,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
                 this.convert(e).then(m => {
                     const list = this.props.ctx.value;
-                    list.push({ rowId: null, element: e });
+                    list.push({ rowId: undefined, element: e });
                     this.setValue(list);
                 }).done();
             }).done();
@@ -122,7 +122,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
     defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[]> {
         return this.chooseType(Finder.isFindable)
-            .then(qn => qn == null ? null : Finder.findMany({ queryName: qn } as FindOptions));
+            .then(qn => qn == undefined ? undefined : Finder.findMany({ queryName: qn } as FindOptions));
     }
 
 
@@ -138,7 +138,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
             Promise.all(lites.map(a => this.convert(a))).then(entites => {
                 const list = this.props.ctx.value;
-                entites.forEach(e => list.push({ rowId: null, element: e }));
+                entites.forEach(e => list.push({ rowId: undefined, element: e }));
                 this.setValue(list);
             }).done();
         }).done();
@@ -148,7 +148,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
         event.preventDefault();
 
-        var mle = this.props.ctx.value[index];
+        const mle = this.props.ctx.value[index];
 
         (this.props.onRemove ? this.props.onRemove(mle.element) : Promise.resolve(true))
             .then(result => {

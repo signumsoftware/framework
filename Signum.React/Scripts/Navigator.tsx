@@ -30,8 +30,8 @@ export module Expanded {
 
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default)) } ></Route>);
-    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default))} ></Route>);
+    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default)) } ></Route>);
+    options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default))} ></Route>);
 }
 
 
@@ -55,7 +55,7 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute) {
 export function navigateRoute(entity: Entity): string;
 export function navigateRoute(lite: Lite<Entity>): string;
 export function navigateRoute(type: PseudoType, id: number | string): string;
-export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: number | string = null): string {
+export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: number | string = undefined): string {
     let typeName: string;
     if (isEntity(typeOrEntity)) {
         typeName = typeOrEntity.Type;
@@ -96,16 +96,16 @@ export let fallbackGetComponent: (entity: ModifiableEntity) => Promise<{ default
 
 export function getComponent<T extends ModifiableEntity>(entity: T): Promise<React.ComponentClass<{ ctx: TypeContext<T> }>> {
 
-    var settings = getSettings(entity.Type) as EntitySettings<T>;
+    const settings = getSettings(entity.Type) as EntitySettings<T>;
 
-    if (settings == null) {
+    if (settings == undefined) {
         if (fallbackGetComponent)
             return fallbackGetComponent(entity).then(a => a.default);
 
         throw new Error(`No settings for '${entity.Type}'`);
     }
 
-    if (settings.getComponent == null) {
+    if (settings.getComponent == undefined) {
         if (fallbackGetComponent)
             return fallbackGetComponent(entity).then(a => a.default);
 
@@ -120,22 +120,22 @@ function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<
     if (!component.prototype.render)
         throw new Error("render function not defined in " + component);
 
-    if (setting.viewOverrides == null || setting.viewOverrides.length == 0)
+    if (setting.viewOverrides == undefined || setting.viewOverrides.length == 0)
         return component;
 
 
     if (component.prototype.render.withViewOverrides)
         return component;
 
-    var baseRender = component.prototype.render as () => void;
+    const baseRender = component.prototype.render as () => void;
 
     component.prototype.render = function (this: React.Component<any, any>) {
 
-        var ctx = this.props.ctx;
+        const ctx = this.props.ctx;
 
-        var view = baseRender.call(this);
+        const view = baseRender.call(this);
 
-        var replacer = new ViewReplacer<T>(view, ctx);
+        const replacer = new ViewReplacer<T>(view, ctx);
         setting.viewOverrides.forEach(vo => vo(replacer));
         return replacer.result;
     };
@@ -161,17 +161,17 @@ export function isCreable(type: PseudoType, customView = false, isSearch = false
 }
 
 function hasAllowedConstructor(typeName: string) {
-    var ti = getTypeInfo(typeName);
+    const ti = getTypeInfo(typeName);
 
-    if (ti == null || ti.operations == null)
+    if (ti == undefined || ti.operations == undefined)
         return true;
 
-    var constructOperations = Dic.getValues(ti.operations).filter(a => a.operationType == OperationType.Constructor);
+    const constructOperations = Dic.getValues(ti.operations).filter(a => a.operationType == OperationType.Constructor);
 
     if (!constructOperations.length)
         return true;
     
-    var allowed = constructOperations.filter(oi => Operations.isOperationAllowed(oi));
+    const allowed = constructOperations.filter(oi => Operations.isOperationAllowed(oi));
 
     return allowed.length > 0;
 }
@@ -179,11 +179,11 @@ function hasAllowedConstructor(typeName: string) {
 function typeIsCreable(typeName: string): EntityWhen {
 
     const es = entitySettings[typeName];
-    if (es != null && es.isCreable != null)
+    if (es != undefined && es.isCreable != undefined)
         return es.isCreable;
     
     const typeInfo = getTypeInfo(typeName);
-    if (typeInfo == null)
+    if (typeInfo == undefined)
         return "IsLine";
 
     if (typeInfo.kind == KindOfType.Enum)
@@ -207,7 +207,7 @@ export const isReadonlyEvent: Array<(typeName: string, entity?: EntityPack<Modif
 
 export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>) {
 
-    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : null;
+    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
     const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
@@ -220,11 +220,11 @@ export function isReadOnly(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 function typeIsReadOnly(typeName: string): boolean {
 
     const es = entitySettings[typeName];
-    if (es != null && es.isReadOnly != null)
+    if (es != undefined && es.isReadOnly != undefined)
         return es.isReadOnly;
     
     const typeInfo = getTypeInfo(typeName);
-    if (typeInfo == null)
+    if (typeInfo == undefined)
         return false;
 
     if (typeInfo.kind == KindOfType.Enum)
@@ -258,11 +258,11 @@ function typeIsFindable(typeName: string) {
 
     const es = entitySettings[typeName];
 
-    if (es != null && es.isFindable != null)
+    if (es != undefined && es.isFindable != undefined)
         return es.isFindable;
 
     const typeInfo = getTypeInfo(typeName);
-    if (typeInfo == null)
+    if (typeInfo == undefined)
         return false;
 
     if (typeInfo.kind == KindOfType.Enum)
@@ -285,7 +285,7 @@ export const isViewableEvent: Array<(typeName: string, entityPack?: EntityPack<M
 
 export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false): boolean{
 
-    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : null;
+    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
     const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
@@ -309,11 +309,11 @@ function typeIsViewable(typeName: string): boolean {
 
     const es = entitySettings[typeName];
 
-    if (es != null && es.isViewable != null)
+    if (es != undefined && es.isViewable != undefined)
         return es.isViewable;
 
     const typeInfo = getTypeInfo(typeName);
-    if (typeInfo == null)
+    if (typeInfo == undefined)
         return true;
 
     if (typeInfo.kind == KindOfType.Enum)
@@ -334,7 +334,7 @@ function typeIsViewable(typeName: string): boolean {
 
 export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false, isSearch = false): boolean {
 
-    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : null;
+    const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
     const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
@@ -351,11 +351,11 @@ function typeIsNavigable(typeName: string): EntityWhen {
 
     const es = entitySettings[typeName];
 
-    if (es != null && es.isViewable != null)
+    if (es != undefined && es.isViewable != undefined)
         return es.isNavigable;
 
     const typeInfo = getTypeInfo(typeName);
-    if (typeInfo == null)
+    if (typeInfo == undefined)
         return "Never";
 
     if (typeInfo.kind == KindOfType.Enum)
@@ -423,7 +423,7 @@ export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity
         entityOrEntityPack as ModifiableEntity :
         (entityOrEntityPack as Lite<Entity> | EntityPack<ModifiableEntity>).entity;
 
-    if (entity == null)
+    if (entity == undefined)
         return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
 
     if (!showOperations || !needsCanExecute(entity))
@@ -440,7 +440,7 @@ export module API {
 
     export function fillToStrings<T extends Entity>(lites: Lite<T>[]): Promise<void> {
 
-        var realLites = lites.filter(a => a.toStr == null && a.entity == null);
+        const realLites = lites.filter(a => a.toStr == undefined && a.entity == undefined);
 
         if (!realLites.length)
             return Promise.resolve<void>();
@@ -518,7 +518,7 @@ export class EntitySettings<T extends ModifiableEntity> {
     isReadOnly: boolean;
 
     overrideView(override: (replacer: ViewReplacer<T>) => void) {
-        if (this.viewOverrides == null)
+        if (this.viewOverrides == undefined)
             this.viewOverrides = [];
 
         this.viewOverrides.push(override);
@@ -561,7 +561,7 @@ String.prototype.formatHtml = function (this: string) {
     }
     result.push(parts[parts.length - 1]);
 
-    return React.createElement("span", null, ...result);
+    return React.createElement("span", undefined, ...result);
 };
 
 

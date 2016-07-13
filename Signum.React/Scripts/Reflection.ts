@@ -156,24 +156,24 @@ export function getTypeName(pseudoType: IType | TypeInfo | string): string {
 }
 
 export function isEntity(type: PseudoType): boolean {
-    var ti = getTypeInfo(type);
+    const ti = getTypeInfo(type);
     return ti && !!ti.members["Id"];
 }
 
 export function isModel(type: PseudoType): boolean {
-    var ti = getTypeInfo(type);
+    const ti = getTypeInfo(type);
     return ti && !ti.members["Id"];
 }
 
 export function isEmbedded(type: PseudoType): boolean {
-    var ti = getTypeInfo(type);
+    const ti = getTypeInfo(type);
     return !ti;
 }
 
 
 export function getTypeInfo(type: PseudoType): TypeInfo {
 
-    if ((type as TypeInfo).kind != null)
+    if ((type as TypeInfo).kind != undefined)
         return type as TypeInfo;
 
     if ((type as IType).typeName)
@@ -200,7 +200,7 @@ export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
 
 export function getQueryNiceName(queryName: PseudoType | QueryKey) {
 
-    if ((queryName as TypeInfo).kind != null)
+    if ((queryName as TypeInfo).kind != undefined)
         return (queryName as TypeInfo).nicePluralName;
 
     if (queryName instanceof Type)
@@ -232,21 +232,21 @@ export function getQueryInfo(queryName: PseudoType | QueryKey): MemberInfo | Typ
         return queryName.memberInfo();
     }
     else {
-        var ti = getTypeInfo(queryName);
+        const ti = getTypeInfo(queryName);
         if (ti)
             return ti;
 
-        var mi = _queryNames[(queryName as string).toLowerCase()];
+        const mi = _queryNames[(queryName as string).toLowerCase()];
 
         if (mi)
             return mi;
 
-        return null;
+        return undefined;
     }
 }
 
 export function getQueryKey(queryName: PseudoType | QueryKey): string {
-    if ((queryName as TypeInfo).kind != null)
+    if ((queryName as TypeInfo).kind != undefined)
         return (queryName as TypeInfo).name;
 
     if (queryName instanceof Type)
@@ -269,11 +269,11 @@ export function getQueryKey(queryName: PseudoType | QueryKey): string {
         return str;
     }
 
-    return null;
+    return undefined;
 }
 
 export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
-    if ((queryName as TypeInfo).kind != null)
+    if ((queryName as TypeInfo).kind != undefined)
         return (queryName as TypeInfo).queryDefined;
 
     if (queryName instanceof Type)
@@ -317,7 +317,7 @@ export function setTypes(types: TypeInfoDictionary) {
             }
         }
 
-        if (t.requiresSaveOperation == null && t.entityKind)
+        if (t.requiresSaveOperation == undefined && t.entityKind)
             t.requiresSaveOperation = calculateRequiresSaveOperation(t.entityKind);
 
         Object.freeze(t);
@@ -378,7 +378,7 @@ export class Binding<T> implements IBinding<T> {
     }
 
     static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T) {
-        var members = getLambdaMembers(fieldAccessor);
+        const members = getLambdaMembers(fieldAccessor);
 
         if (members.length != 1 || members[0].type != LambdaMemberType.Member)
             throw Error("invalid function 'fieldAccessor'");
@@ -416,7 +416,7 @@ export class Binding<T> implements IBinding<T> {
     }
 
     setError(value: string) {
-        var parent = this.parentValue as ModifiableEntity;
+        const parent = this.parentValue as ModifiableEntity;
 
         if (!value) {
 
@@ -451,11 +451,11 @@ export class ReadonlyBinding<T> implements IBinding<T> {
     }
 
     getError(): string {
-        return null;
+        return undefined;
     }
 
     setError(name: string): void {
-        return null;
+        return undefined;
     }
 }
 
@@ -463,7 +463,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 
     const lambdaMatch = functionRegex.exec((lambda as any).toString());
 
-    if (lambdaMatch == null)
+    if (lambdaMatch == undefined)
         throw Error("invalid function");
 
     const parameter = lambdaMatch[1];
@@ -477,7 +477,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 
     const m = memberRegex.exec(body);
 
-    if (m == null) {
+    if (m == undefined) {
         const realParentValue = eval(`(function(${parameter}){ return ${body};})`)(parentValue);
 
         return new ReadonlyBinding<T>(realParentValue as T, "");
@@ -502,12 +502,12 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
     
     const lambdaMatch = functionRegex.exec((lambda as any).toString());
 
-    if (lambdaMatch == null)
+    if (lambdaMatch == undefined)
         throw Error("invalid function");
 
     const parameter = lambdaMatch[1];
     let body = lambdaMatch[3];
-    var result: LambdaMember[] = [];
+    let result: LambdaMember[] = [];
 
     while (body != parameter) {
         let m: RegExpExecArray;
@@ -548,13 +548,13 @@ export enum LambdaMemberType {
 
 export function basicConstruct(type: PseudoType): ModifiableEntity {
 
-    var ti = getTypeInfo(type);
+    const ti = getTypeInfo(type);
 
-    var result = { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
+    const result = { Type: getTypeName(type), isNew: true, modified: true } as any as ModifiableEntity;
 
     if (ti) {
 
-        var mixins = Dic.getKeys(ti.members)
+        const mixins = Dic.getKeys(ti.members)
             .filter(a => a.startsWith("["))
             .map(a => a.after("[").before("]"))
             .toObjectDistinct(a => a, a => ({ Type: a, isNew: true, modified: true, }) as MixinEntity);
@@ -574,7 +574,7 @@ export class Type<T extends ModifiableEntity> implements IType {
 
     New(modify?: (entity: T) => void): T {
 
-        var result =  basicConstruct(this.typeName) as T;
+        const result =  basicConstruct(this.typeName) as T;
 
         if (modify)
             modify(result);
@@ -591,7 +591,7 @@ export class Type<T extends ModifiableEntity> implements IType {
 
     typeInfo(): TypeInfo {
 
-        var result = this.tryTypeInfo();
+        const result = this.tryTypeInfo();
 
         if (!result)
             throw new Error(`Type ${this.typeName} has no TypeInfo. Maybe is an embedded?`);
@@ -633,7 +633,7 @@ export class EnumType<T extends string> {
 
     niceName(value?: T): string {
 
-        if (value == null)
+        if (value == undefined)
             return this.typeInfo().niceName;
 
         return this.typeInfo().members[value as string].niceName;
@@ -721,27 +721,27 @@ export class PropertyRoute {
     mixinName: string; //Mixin
 
     static root(type: PseudoType) {
-        var typeInfo = getTypeInfo(type);
+        const typeInfo = getTypeInfo(type);
         if (!typeInfo) {
             throw Error(`No TypeInfo for "${getTypeName(type)}" found. Consider calling ReflectionServer.RegisterLike on the server side.`);
         }
-        return new PropertyRoute(null, PropertyRouteType.Root, typeInfo, null, null);
+        return new PropertyRoute(undefined, PropertyRouteType.Root, typeInfo, undefined, undefined);
     }
 
     static member(parent: PropertyRoute, member: MemberInfo) {
-        return new PropertyRoute(parent, PropertyRouteType.Field, null, member, null);
+        return new PropertyRoute(parent, PropertyRouteType.Field, undefined, member, undefined);
     }
 
     static mixin(parent: PropertyRoute, mixinName: string) {
-        return new PropertyRoute(parent, PropertyRouteType.Mixin, null, null, mixinName);
+        return new PropertyRoute(parent, PropertyRouteType.Mixin, undefined, undefined, mixinName);
     }
 
     static mlistItem(parent: PropertyRoute) {
-        return new PropertyRoute(parent, PropertyRouteType.MListItem, null, null, null);
+        return new PropertyRoute(parent, PropertyRouteType.MListItem, undefined, undefined, undefined);
     }
 
     static liteEntity(parent: PropertyRoute) {
-        return new PropertyRoute(parent, PropertyRouteType.LiteEntity, null, null, null);
+        return new PropertyRoute(parent, PropertyRouteType.LiteEntity, undefined, undefined, undefined);
     }
 
     constructor(parent: PropertyRoute, propertyRouteType: PropertyRouteType, rootType: TypeInfo, member: MemberInfo, mixinName: string) {
@@ -856,7 +856,7 @@ export class PropertyRoute {
 
     subMembers(): { [subMemberName: string]: MemberInfo } {
 
-        var type = this.closestTypeInfo();
+        const type = this.closestTypeInfo();
 
         function containsDotOrSlash(name: string) {
             return name.contains(".") || name.contains("/");
@@ -868,7 +868,7 @@ export class PropertyRoute {
                 
             case PropertyRouteType.MListItem: 
                 {
-                    var path = this.propertyPath();
+                    const path = this.propertyPath();
                     return Dic.getValues(type.members)
                         .filter(m => m.name != path && m.name.startsWith(path))
                         .filter(m => !containsDotOrSlash(m.name.substring(path.length)))
@@ -909,13 +909,13 @@ export class GraphExplorer {
     static propagateAll(...args: any[]) {
         const ge = new GraphExplorer();
         ge.modelStateMode = "clean";
-        args.forEach(o => ge.isModified(o, null));
+        args.forEach(o => ge.isModified(o, undefined));
     }
 
     static setModelState(e: ModifiableEntity, modelState: ModelState, initialPrefix: string) {
         const ge = new GraphExplorer();
         ge.modelStateMode = "set";
-        ge.modelState = modelState == null ? {} : Dic.copy(modelState);
+        ge.modelState = modelState == undefined ? {} : Dic.copy(modelState);
         ge.isModifiableObject(e, initialPrefix);
         if (Dic.getValues(ge.modelState).length) //Assign remaining
             e.error = Dic.extend(e.error || {}, ge.modelState);
@@ -940,7 +940,7 @@ export class GraphExplorer {
 
     isModified(obj: any, modelStatePrefix: string): boolean {
 
-        if (obj == null)
+        if (obj == undefined)
             return false;
 
         const t = typeof obj;
@@ -972,14 +972,14 @@ export class GraphExplorer {
 
         const mle = obj as MListElement<any>;
         if (mle.hasOwnProperty("rowId"))
-            return this.isModified(mle.element, dot(modelStatePrefix, "element")) || mle.rowId == null;
+            return this.isModified(mle.element, dot(modelStatePrefix, "element")) || mle.rowId == undefined;
 
         const lite = obj as Lite<Entity>
         if (lite.EntityType)
-            return lite.entity != null && this.isModified(lite.entity, dot(modelStatePrefix, "entity"));
+            return lite.entity != undefined && this.isModified(lite.entity, dot(modelStatePrefix, "entity"));
 
         const mod = obj as ModifiableEntity;
-        if (mod.Type == null) {
+        if (mod.Type == undefined) {
             let result = false;
             for (const p in obj) {
                 if (obj.hasOwnProperty(p)) {
@@ -992,7 +992,7 @@ export class GraphExplorer {
         }
 
         if (this.modelStateMode == "collect") {
-            if (mod.error != null) {
+            if (mod.error != undefined) {
                 for (const p in mod.error) {
                     const propertyPrefix = dot(modelStatePrefix, p);
 
@@ -1003,13 +1003,13 @@ export class GraphExplorer {
         }
         else if (this.modelStateMode == "set") {
 
-            mod.error = null;
+            mod.error = undefined;
 
             const prefix = dot(modelStatePrefix, "");
             for (const key in this.modelState) {
                 const propName = key.tryAfter(prefix)
                 if (propName && !propName.contains(".")) {
-                    if (mod.error == null)
+                    if (mod.error == undefined)
                         mod.error = {};
 
                     mod.error[propName] = this.modelState[key];
@@ -1018,7 +1018,7 @@ export class GraphExplorer {
                 }
             }
 
-            if (mod.error == null)
+            if (mod.error == undefined)
                 delete mod.error;
         }
         else if (this.modelStateMode == "clean") {
@@ -1042,7 +1042,7 @@ export class GraphExplorer {
 }
 
 function dot(prev: string, property: string) {
-    if (prev == null || prev == "")
+    if (prev == undefined || prev == "")
         return property;
 
     return prev + "." + property

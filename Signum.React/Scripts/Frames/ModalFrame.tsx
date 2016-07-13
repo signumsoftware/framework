@@ -37,13 +37,13 @@ interface ModalFrameState {
     prefix?: string;
 }
 
-var modalCount = 0;
+let modalCount = 0;
 
 export default class ModalFrame extends React.Component<ModalFrameProps, ModalFrameState>  {
 
     static defaultProps: ModalFrameProps = {
         showOperations: true,
-        getComponent: null,
+        getComponent: undefined,
     }
 
     constructor(props: ModalFrameProps) {
@@ -108,7 +108,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         if (this.props.getComponent) {
             this.setState({ getComponent: this.props.getComponent });
-            return Promise.resolve(null);
+            return Promise.resolve(undefined);
         }
 
         return Navigator.getComponent(this.state.pack.entity)
@@ -155,7 +155,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     hasChanges() {
 
-        var entity = this.state.pack.entity;
+        const entity = this.state.pack.entity;
 
         GraphExplorer.propagateAll(entity);
 
@@ -163,12 +163,12 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     }
 
     handleOnExited = () => {
-        this.props.onExited(this.okClicked ? this.state.pack.entity : null);
+        this.props.onExited(this.okClicked ? this.state.pack.entity : undefined);
     }
 
     render() {
 
-        var pack = this.state.pack;
+        const pack = this.state.pack;
 
         return (
             <Modal bsSize="lg" onHide={this.handleCancelClicked} show={this.state.show} onExited={this.handleOnExited} className="sf-popup-control">
@@ -195,11 +195,11 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     renderBody() {
         
-        var frame: EntityFrame<Entity> = {
+        const frame: EntityFrame<Entity> = {
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: pack => this.setPack(pack),
-            onClose: () => this.props.onExited(null),
+            onClose: () => this.props.onExited(undefined),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
             setError: (modelState, initialPrefix = "") => {
                 GraphExplorer.setModelState(this.state.pack.entity, modelState, initialPrefix);
@@ -208,13 +208,13 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         };
 
         const styleOptions: StyleOptions = {
-            readOnly: this.props.readOnly != null ? this.props.readOnly : Navigator.isReadOnly(this.getTypeName()),
+            readOnly: this.props.readOnly != undefined ? this.props.readOnly : Navigator.isReadOnly(this.getTypeName()),
             frame: frame,
         };
 
-        var pack = this.state.pack;
+        const pack = this.state.pack;
 
-        var ctx = new TypeContext(null, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity, this.state.prefix));
+        const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity, this.state.prefix));
 
         return (
             <Modal.Body>
@@ -251,13 +251,13 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     renderExpandLink() {
         const entity = this.state.pack.entity;
 
-        if (entity == null || entity.isNew)
-            return null;
+        if (entity == undefined || entity.isNew)
+            return undefined;
 
         const ti = getTypeInfo(entity.Type);
 
-        if (ti == null || !Navigator.isNavigable(ti, false)) //Embedded
-            return null;
+        if (ti == undefined || !Navigator.isNavigable(ti, false)) //Embedded
+            return undefined;
 
         return (
             <a href={ Navigator.navigateRoute(entity as Entity) } className="sf-popup-fullscreen" onClick={this.handlePopupFullScreen}>
@@ -288,13 +288,13 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             showOperations={options.showOperations}
             requiresSaveOperation={options.requiresSaveOperation}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
-            validate={options.validate == null ? ModalFrame.isModelEntity(entityOrPack) : options.validate }
+            validate={options.validate == undefined ? ModalFrame.isModelEntity(entityOrPack) : options.validate }
             title={options.title}
             isNavigate={false}/>);
     }
 
     static isModelEntity(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>) {
-        var typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type :
+        const typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type :
             isLite(entityOrPack) ? entityOrPack.EntityType : entityOrPack.Type;
 
         return isModel(typeName);
@@ -305,10 +305,10 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         return openModal<void>(<ModalFrame
             entityOrPack={entityOrPack}
             readOnly={options.readOnly}
-            propertyRoute={null}
+            propertyRoute={undefined}
             getComponent={options.getComponent}
             showOperations={true}
-            requiresSaveOperation={null}
+            requiresSaveOperation={undefined}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
             isNavigate={true}/>);
     }

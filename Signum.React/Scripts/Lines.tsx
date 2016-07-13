@@ -110,18 +110,18 @@ export let maxValueLineSize = 100;
 
 tasks.push(taskSetHtmlProperties);
 export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineBaseProps) {
-    var vl = lineBase instanceof ValueLine ? lineBase as ValueLine : null;
-    var pr = state.ctx.propertyRoute;
-    var s = state as ValueLineProps;
+    const vl = lineBase instanceof ValueLine ? lineBase as ValueLine : undefined;
+    const pr = state.ctx.propertyRoute;
+    const s = state as ValueLineProps;
     if (vl && pr && pr.propertyRouteType == PropertyRouteType.Field && (s.valueLineType == ValueLineType.TextBox || s.valueLineType == ValueLineType.TextArea)) {
-        if (pr.member.maxLength != null) {
+        if (pr.member.maxLength != undefined) {
 
             if (!s.valueHtmlProps)
                 s.valueHtmlProps = {};
 
             s.valueHtmlProps.maxLength = pr.member.maxLength;
 
-            s.valueHtmlProps.size = maxValueLineSize == null ? pr.member.maxLength : Math.min(maxValueLineSize, pr.member.maxLength);
+            s.valueHtmlProps.size = maxValueLineSize == undefined ? pr.member.maxLength : Math.min(maxValueLineSize, pr.member.maxLength);
         }
 
         if (pr.member.isMultiline)

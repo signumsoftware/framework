@@ -25,11 +25,11 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const tCtx = ctx as TypeContext<any>;
 
-        var errorClass = tCtx.errorClass;
+        const errorClass = tCtx.errorClass;
 
         if (ctx.formGroupStyle == "None") {
 
-            var c = this.props.children as React.ReactElement<any>;
+            const c = this.props.children as React.ReactElement<any>;
          
             return (
                 <span {...this.props.htmlProps} className={ errorClass }>
@@ -114,51 +114,51 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     }
 
     validate() {
-        var error = this.state.onValidate ? this.state.onValidate(this.state.ctx.value) : this.defaultValidate(this.state.ctx.value);
+        const error = this.state.onValidate ? this.state.onValidate(this.state.ctx.value) : this.defaultValidate(this.state.ctx.value);
         this.state.ctx.error = error;
         if (this.state.ctx.frame)
             this.state.ctx.frame.revalidate();
     }
 
     defaultValidate(val: any) {
-        if (this.state.type.isNotNullable && val == null)
+        if (this.state.type.isNotNullable && val == undefined)
             return ValidationMessage._0IsNotSet.niceToString(this.state.ctx.niceName());
 
-        return null;
+        return undefined;
     }
 
     render() {
 
-        if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == null)
-            return null;
+        if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == undefined)
+            return undefined;
 
         return this.renderInternal();
     }
 
     calculateState(props: P): S {
 
-        var so = {
-            formControlStaticAsFormControlReadonly: null,
-            formGroupSize: null,
-            formGroupStyle: null,
-            labelColumns: null,
-            placeholderLabels: null,
-            readOnly: null,
-            valueColumns: null,
+        const so = {
+            formControlStaticAsFormControlReadonly: undefined,
+            formGroupSize: undefined,
+            formGroupStyle: undefined,
+            labelColumns: undefined,
+            placeholderLabels: undefined,
+            readOnly: undefined,
+            valueColumns: undefined,
         } as StyleOptions;
 
-        var cleanProps = Dic.without(props, so);
+        const cleanProps = Dic.without(props, so);
 
         const state = { ctx: cleanProps.ctx.subCtx(so), type: (cleanProps.type || cleanProps.ctx.propertyRoute.member.type) } as LineBaseProps as S;
         this.calculateDefaultState(state);
         runTasks(this, state);
-        var overridenProps = Dic.without(cleanProps, { ctx: null, type: null }) as LineBaseProps as S;
+        const overridenProps = Dic.without(cleanProps, { ctx: undefined, type: undefined }) as LineBaseProps as S;
         this.overrideProps(state, overridenProps);
         return state;
     }
     
     overrideProps(state: S, overridenProps: S) {
-        var labelHtmlProps = Dic.extend(state.labelHtmlProps, overridenProps.labelHtmlProps);
+        const labelHtmlProps = Dic.extend(state.labelHtmlProps, overridenProps.labelHtmlProps);
         Dic.extend(state, overridenProps);
         state.labelHtmlProps = labelHtmlProps;
     }

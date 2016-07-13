@@ -29,7 +29,7 @@ export function baseUrl(options: AjaxOptions): string {
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
     return ajaxGetRaw(options)
-        .then(a=> a.status == 204 ? null : a.json<T>());
+        .then(a=> a.status == 204 ? undefined : a.json<T>());
 }
 
 export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
@@ -47,7 +47,7 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
     return ajaxPostRaw(options, data)
-        .then(a=> a.status == 204 ? null : a.json<T>());
+        .then(a=> a.status == 204 ? undefined : a.json<T>());
 }
 
 
@@ -74,7 +74,7 @@ export function ajaxPostRaw(options: AjaxOptions, data: any) : Promise<Response>
 export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response>
 {
     if (!options.avoidThrowError) {
-        var call = makeCall;
+        const call = makeCall;
         makeCall = () => ThrowErrorFilter.throwError(call);
     }
 
@@ -88,7 +88,7 @@ export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Respon
         makeCall = () => NotifyPendingFilter.onPendingRequest(call);
     }
     
-    var promise = makeCall();
+    const promise = makeCall();
 
     if (!(promise as any).__proto__.done)
         (promise as any).__proto__.done = Promise.prototype.done;
@@ -150,7 +150,7 @@ export function saveFile(response: Response) {
         if (window.navigator.msSaveBlob)
             window.navigator.msSaveBlob(blob, fileName);
         else {
-            var url = window.URL.createObjectURL(blob);
+            const url = window.URL.createObjectURL(blob);
             a.href = url;
 
 
@@ -225,7 +225,7 @@ window.addEventListener("storage", se => {
     } else if (se.key == 'sessionStorage' && !sessionStorage.length) {
         // sessionStorage is empty -> fill it
 
-        var data = JSON.parse(se.newValue);
+        const data = JSON.parse(se.newValue);
 
         for (let key in data) {
             sessionStorage.setItem(key, data[key]);

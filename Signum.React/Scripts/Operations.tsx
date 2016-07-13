@@ -42,7 +42,7 @@ export function getSettings(operation: OperationSymbol | string): OperationSetti
     return operationSettings[operationKey];
 }
 
-export var isOperationAllowedEvent: Array<(oi: OperationInfo) => boolean> = [];
+export const isOperationAllowedEvent: Array<(oi: OperationInfo) => boolean> = [];
 
 export function isOperationAllowed(oi: OperationInfo) {
     return isOperationAllowedEvent.every(a => a(oi));
@@ -138,7 +138,7 @@ export interface ContextualOperationContext<T extends Entity> {
 
 export interface EntityOperationContext<T extends Entity> {
     frame: EntityFrame<T>;
-    tag: string;
+    tag?: string;
     entity: T;
     operationInfo: OperationInfo;
     showOperations: boolean;
@@ -164,8 +164,8 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
         Dic.extend(this, options);
 
-        this.contextual = options.contextual ? new ContextualOperationSettings(operationSymbol as any, options.contextual) : null;
-        this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol as any, options.contextualFromMany) : null;
+        this.contextual = options.contextual ? new ContextualOperationSettings(operationSymbol as any, options.contextual) : undefined;
+        this.contextualFromMany = options.contextualFromMany ? new ContextualOperationSettings(operationSymbol as any, options.contextualFromMany) : undefined;
     }
 }
 
@@ -187,11 +187,11 @@ export interface EntityOperationOptions<T extends Entity> {
 
 
 
-export var CreateGroup: EntityOperationGroup = {
+export const CreateGroup: EntityOperationGroup = {
     key: "create",
     text: () => OperationMessage.Create.niceToString(),
     simplifyName: cs => {
-        var array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(cs);
+        const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(cs);
         return array ? array[1].firstUpper() : cs;
     },
     cssClass: "sf-operation",

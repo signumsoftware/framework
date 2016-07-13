@@ -65,13 +65,13 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
 
     static chooseElement<T>(options: T[], config?: SelectorConfig<T>): Promise < T > {
 
-        var {display, name, title, message} = config;
+        const {display, name, title, message} = config;
 
         if (options.length == 1)
             return Promise.resolve(options.single());
 
         if (options.length == 0)
-            return Promise.resolve(null);
+            return Promise.resolve(undefined);
 
         return openModal<T>(<SelectorModal
             options={options.map(a => ({

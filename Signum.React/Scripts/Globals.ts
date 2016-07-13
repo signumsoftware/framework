@@ -29,7 +29,7 @@ Array.prototype.groupToObject = function (this: any[], keySelector: (element: an
 Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) => boolean, includeKeyInGroup = false, initialGroup = false): {key: any, elements: any[]}[] {
     const result: {key: any, elements: any[]}[] = [];
 
-    let group: {key: any, elements: any[]} = null;
+    let group: {key: any, elements: any[]} = undefined;
 
     for (let i = 0; i < this.length; i++) {
         const item: any = this[i];
@@ -40,12 +40,12 @@ Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) =>
         }
         else
         {
-            if (group == null)
+            if (group == undefined)
             {
                 if(!initialGroup)
                     throw new Error("Parameter initialGroup is false");
 
-                group = { key: null, elements : []};
+                group = { key: undefined, elements : []};
                 result.push(group);
             }
 
@@ -58,10 +58,10 @@ Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) =>
 Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: any) => string): {key: string, elements: any[]}[] {
     const result: {key: any, elements: any[]}[] = [];
 
-    let current: {key: string, elements: any[]} = null;
+    let current: {key: string, elements: any[]} = undefined;
     for (let i = 0; i < this.length; i++) {
         const item: any = this[i];
-        if (current == null)
+        if (current == undefined)
         {
             current =  { key: getGroupKey(getGroupKey(item)), elements : [item]};
         }
@@ -76,7 +76,7 @@ Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: 
         }
     }
 
-    if (current != null)
+    if (current != undefined)
          result.push(current);
 
     return result;
@@ -151,8 +151,8 @@ Array.prototype.flatMap = function (this: any[], selector: (element: any, index:
 Array.prototype.groupsOf = function (this: any[], maxCount: number) {
     
 
-    var result: any[][] = [];
-    var newList: any[] = [];
+    const result: any[][] = [];
+    let newList: any[] = [];
 
     this.map(item => {
         newList.push(item);
@@ -170,11 +170,11 @@ Array.prototype.groupsOf = function (this: any[], maxCount: number) {
 }
 
 Array.prototype.max = function (this: any[]) {
-    return Math.max.apply(null, this);
+    return Math.max.apply(undefined, this);
 };
 
 Array.prototype.min = function (this: any[]) {
-    return Math.min.apply(null, this);
+    return Math.min.apply(undefined, this);
 };
 
 
@@ -190,7 +190,7 @@ Array.prototype.first = function (this: any[], errorContext: string) {
 Array.prototype.firstOrNull = function (this: any[]) {
 
     if (this.length == 0)
-        return null;
+        return undefined;
 
     return this[0];
 };
@@ -207,7 +207,7 @@ Array.prototype.last = function (this: any[], errorContext: string) {
 Array.prototype.lastOrNull = function (this: any[]) {
 
     if (this.length == 0)
-        return null;
+        return undefined;
 
     return this[this.length - 1];
 };
@@ -226,7 +226,7 @@ Array.prototype.single = function (this: any[], errorContext: string) {
 Array.prototype.singleOrNull = function (this: any[], errorContext: string) {
 
     if (this.length == 0)
-        return null;
+        return undefined;
 
     if (this.length > 1)
         throw new Error("More than one " + (errorContext || "element")  + " found");
@@ -267,13 +267,13 @@ Array.prototype.joinComma = function (this: any[], lastSeparator: string) {
         return "";
 
     if (array.length == 1)
-        return array[0] == null ? "" : array[0].toString(); 
+        return array[0] == undefined ? "" : array[0].toString(); 
 
     const lastIndex = array.length - 1;
 
     const rest = array.slice(0, lastIndex).join(", ");
 
-    return rest + lastSeparator + (array[lastIndex] == null ? "" : array[lastIndex].toString()); 
+    return rest + lastSeparator + (array[lastIndex] == undefined ? "" : array[lastIndex].toString()); 
 };
 
 Array.prototype.extract = function (this: any[], predicate: (element: any) => boolean) {
@@ -318,7 +318,7 @@ String.prototype.startsWith = function (str) {
 }
 
 String.prototype.endsWith = function (str) {
-    var index = this.lastIndexOf(str);
+    const index = this.lastIndexOf(str);
     return index !== -1 && index === (this.length - str.length); //keep it
 }
 
@@ -341,10 +341,10 @@ String.prototype.forGenderAndNumber = function (this: string, gender: any, numbe
 
     if (!number && !isNaN(parseFloat(gender))) {
         number = gender;
-        gender = null;
+        gender = undefined;
     }
 
-    if ((gender == null || gender == "") && number == null)
+    if ((gender == undefined || gender == "") && number == undefined)
         return this;
 
     function replacePart(textToReplace: string, ...prefixes: string[]): string {
@@ -354,7 +354,7 @@ String.prototype.forGenderAndNumber = function (this: string, gender: any, numbe
             for (let i = 0; i < prefixes.length; i++){
                 const pr = prefixes[i];
                 const capture = captures.filter(c => c.startsWith(pr)).firstOrNull();
-                if (capture != null)
+                if (capture != undefined)
                     return capture.substr(pr.length);
             }
 
@@ -363,10 +363,10 @@ String.prototype.forGenderAndNumber = function (this: string, gender: any, numbe
     }
              
 
-    if (number == null)
+    if (number == undefined)
         return replacePart(this, gender + ":");
 
-    if (gender == null) {
+    if (gender == undefined) {
         if (number == 1)
             return replacePart(this, "1:");
 
@@ -410,7 +410,7 @@ String.prototype.after = function (separator) {
 String.prototype.tryBefore = function (separator) {
     const index = this.indexOf(separator);
     if (index == -1)
-        return null;
+        return undefined;
 
     return this.substring(0, index);
 };
@@ -418,7 +418,7 @@ String.prototype.tryBefore = function (separator) {
 String.prototype.tryAfter = function (separator) {
     const index = this.indexOf(separator);
     if (index == -1)
-        return null;
+        return undefined;
 
     return this.substring(index + separator.length);
 };
@@ -442,7 +442,7 @@ String.prototype.afterLast = function (separator) {
 String.prototype.tryBeforeLast = function (separator) {
     const index = this.lastIndexOf(separator);
     if (index == -1)
-        return null;
+        return undefined;
 
     return this.substring(0, index);
 };
@@ -450,13 +450,13 @@ String.prototype.tryBeforeLast = function (separator) {
 String.prototype.tryAfterLast = function (separator) {
     const index = this.lastIndexOf(separator);
     if (index == -1)
-        return null;
+        return undefined;
 
     return this.substring(index + separator.length);
 };
 
 String.prototype.etc = function (this: string, maxLength: number) {
-    var str = this;
+    let str = this;
 
     str = str.tryBefore("\n") || str;
 
@@ -475,7 +475,7 @@ String.prototype.firstLower = function () {
 };
 
 String.prototype.trimStart = function (char) {
-    var result = this;
+    let result = this;
     if (char == "")
         throw new Error("Empty char");
 
@@ -486,7 +486,7 @@ String.prototype.trimStart = function (char) {
 };
 
 String.prototype.trimEnd = function (char) {
-    var result = this;
+    let result = this;
     if (char == "")
         throw new Error("Empty char");
 
@@ -497,8 +497,8 @@ String.prototype.trimEnd = function (char) {
 };
 
 String.prototype.repeat = function (n) {
-    var result = ""; 
-    for (var i = 0; i < n; i++)
+    let result = ""; 
+    for (let i = 0; i < n; i++)
         result += this;
     return result;
 };
@@ -641,10 +641,10 @@ export function combineFunction<F extends Function>(func1: F, func2: F) : F {
 
 
 export function areEqual<T>(a: T, b: T, field: (value: T) => any) {
-    if (a == null)
-        return b == null;
+    if (a == undefined)
+        return b == undefined;
 
-    if (b == null)
+    if (b == undefined)
         return false;
 
     return field(a) == field(b);
@@ -697,7 +697,7 @@ export module DomUtils {
         // guard against orphans
         while (!matches(element, selector)) {
             if (element == context)
-                return null;
+                return undefined;
 
             element = element.parentNode as HTMLElement;
         }
@@ -707,12 +707,12 @@ export module DomUtils {
 
     export function offsetParent(element: HTMLElement): HTMLElement {
 
-        var isRelativeOrAbsolute = (str: string) => str === "relative" || str === "absolute";
+        const isRelativeOrAbsolute = (str: string) => str === "relative" || str === "absolute";
 
         // guard against orphans
         while (!isRelativeOrAbsolute(window.getComputedStyle(element).position)) {
             if (element.parentNode == document)
-                return null;
+                return undefined;
 
             element = element.parentNode as HTMLElement;
         }

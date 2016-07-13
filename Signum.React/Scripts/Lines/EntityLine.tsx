@@ -59,7 +59,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         const hasValue = !!s.ctx.value;
 
-        var buttons = (
+        let buttons = (
             <span className="input-group-btn">
                 {!hasValue && this.renderCreateButton(true) }
                 {!hasValue && this.renderFindButton(true) }
@@ -69,12 +69,12 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         );
 
         if (!buttons.props.children.some((a: any) => a))
-            buttons = null;
+            buttons = undefined;
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
-                    <div className={buttons ? "input-group" : null}>
+                    <div className={buttons ? "input-group" : undefined}>
                         { hasValue ? this.renderLink() : this.renderAutoComplete() }
                         {buttons}
                     </div>
@@ -85,7 +85,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     renderAutoComplete() {
 
-        var ctx = this.state.ctx;
+        const ctx = this.state.ctx;
 
         if (!this.state.autoComplete || ctx.readOnly)
             return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;

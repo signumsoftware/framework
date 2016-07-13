@@ -27,7 +27,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
     renderInternal() {
 
-        var buttons = (
+        let buttons = (
             <span className="pull-right">
                 {!this.state.createAsLink && this.renderCreateButton(false) }
                 {this.renderFindButton(false) }
@@ -36,7 +36,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
 
         if (!buttons.props.children.some((a : any) => a))
-            buttons = null;
+            buttons = undefined;
 
         return (
             <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
@@ -50,9 +50,9 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                     {
                         mlistItemContext(this.state.ctx).map((mlec, i) =>
                             (<EntityRepeaterElement key={i}
-                                onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : null}
-                                onMoveDown ={this.state.move? e => this.moveDown(i) : null}
-                                onMoveUp ={this.state.move? e => this.moveUp(i) : null}
+                                onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : undefined}
+                                onMoveDown ={this.state.move? e => this.moveDown(i) : undefined}
+                                onMoveUp ={this.state.move? e => this.moveUp(i) : undefined}
                                 ctx={mlec}
                                 getComponent={this.props.getComponent} />))
                     }

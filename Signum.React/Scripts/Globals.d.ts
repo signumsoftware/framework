@@ -12,7 +12,7 @@
 /// <reference path="../typings/moment-duration-format/moment-duration-format.d.ts"/>
 /// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
-declare var require: {
+declare const require: {
     <T>(path: string): T;
     (paths: string[], callback: (...modules: any[]) => void): void;
     ensure: (paths: string[], callback: (require: <T>(path: string) => T) => void) => void;
