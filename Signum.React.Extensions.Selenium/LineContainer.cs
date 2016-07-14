@@ -267,14 +267,14 @@ namespace Signum.React.Selenium
             return new QueryTokenBuilderProxy(lineLocator.ElementLocator.WaitVisible());
         }
 
-        public static void SelectTab(this ILineContainer lineContainer, string title)
+        public static void SelectTab(this ILineContainer lineContainer, string tabsId, string tabEventKey)
         {
-            var tabs = lineContainer.Element.FindElement(By.CssSelector("ul[role=tablist]"));
+            lineContainer.SelectTab(tabsId + "-tab-" + tabEventKey);
+        }
 
-            var tab = tabs.FindElements(By.CssSelector("a[role=tab]")).Single(a => a.Text.Contains(title));
-
-            tab.Click();
-
+        public static void SelectTab(this ILineContainer lineContainer, string tabId)
+        {
+            lineContainer.Element.WaitElementVisible(By.CssSelector($"a[role=tab][id={tabId}]")).Click();
         }
 
         public static SearchControlProxy GetSearchControl(this ILineContainer lineContainer, object queryName)
