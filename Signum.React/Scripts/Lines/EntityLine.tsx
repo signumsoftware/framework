@@ -34,16 +34,16 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
     calculateDefaultState(state: EntityLineProps) {
         super.calculateDefaultState(state);
-        state.autoComplete = !state.type.isEmbedded && state.type.name != IsByAll;
+        state.autoComplete = !state.type!.isEmbedded && state.type!.name != IsByAll;
     }
     
     defaultAutoCompleteGetItems = (query: string) => Finder.API.findLiteLike({
-        types: this.state.type.name,
+        types: this.state.type!.name,
         subString: query,
         count: 5
     });
 
-    defaultAutCompleteRenderItem = (lite: Lite<Entity>, query: string) => Typeahead.highlightedText(lite.toStr, query);
+    defaultAutCompleteRenderItem = (lite: Lite<Entity>, query: string) => Typeahead.highlightedText(lite.toStr || "" , query);
     
 
     handleOnSelect = (lite: Lite<Entity>, event: React.SyntheticEvent) => {
@@ -59,7 +59,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         const hasValue = !!s.ctx.value;
 
-        let buttons = (
+        const buttons = (
             <span className="input-group-btn">
                 {!hasValue && this.renderCreateButton(true) }
                 {!hasValue && this.renderFindButton(true) }
@@ -67,16 +67,13 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
                 {hasValue && this.renderRemoveButton(true) }
             </span>
         );
-
-        if (!buttons.props.children.some((a: any) => a))
-            buttons = undefined;
-
+        
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
                     <div className={buttons ? "input-group" : undefined}>
-                        { hasValue ? this.renderLink() : this.renderAutoComplete() }
-                        {buttons}
+                        {hasValue ? this.renderLink() : this.renderAutoComplete()}
+                        {React.Children.count(buttons) ? buttons : undefined}
                     </div>
                 </div>
             </FormGroup>

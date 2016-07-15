@@ -14,7 +14,7 @@ import { operationInfos, getSettings, EntityOperationSettings, EntityOperationCo
     CreateGroup, API, isEntityOperation, autoStyleFunction } from '../Operations'
 
 
-export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any>> {
+export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.ReactElement<any> | undefined> | undefined {
     const ti = getTypeInfo(ctx.pack.entity.Type);
 
     if (ti == undefined)
@@ -41,7 +41,8 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
 
             return undefined;
         })
-        .filter(eoc => eoc != undefined);
+        .filter(eoc => eoc != undefined)
+        .map(eoc => eoc!);
 
     const groups = operations.groupBy(eoc => {
 
@@ -60,6 +61,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
                 button: createDefaultButton(eoc, undefined, false, i + "-" + j)
             }));
         } else {
+
             const group = getDefaultGroup(gr.elements[0]);
 
 
@@ -103,7 +105,7 @@ function getDefaultGroup(eoc: EntityOperationContext<Entity>) {
     return undefined;
 }
 
-function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityOperationGroup, asMenuItem: boolean, key: any) {
+function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityOperationGroup | undefined, asMenuItem: boolean, key: any) {
 
     const text = eoc.settings && eoc.settings.text ? eoc.settings.text() :
         group && group.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :

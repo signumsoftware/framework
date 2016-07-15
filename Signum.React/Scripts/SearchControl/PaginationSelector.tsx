@@ -19,10 +19,11 @@ interface PaginationSelectorProps {
 
 
 export default class PaginationSelector extends React.Component<PaginationSelectorProps, {}> {
+
     render() {
 
         if (!this.props.pagination)
-            return undefined;
+            return null;
 
         return (
             <div className="sf-search-footer">
@@ -60,11 +61,13 @@ export default class PaginationSelector extends React.Component<PaginationSelect
             case "Paginate":
                 return (
                     <span>{SearchMessage._01of2Results_N.niceToString().forGenderAndNumber(resultTable.totalElements).formatHtml(
-                        <span className={"sf-pagination-strong"} key={1}>{PaginateMath.startElementIndex(pagination) }</span>,
-                        <span className={"sf-pagination-strong"} key={2}>{PaginateMath.endElementIndex(pagination, resultTable.rows.length) }</span>,
+                        <span className={"sf-pagination-strong"} key={1}>{PaginateMath.startElementIndex(pagination)}</span>,
+                        <span className={"sf-pagination-strong"} key={2}>{PaginateMath.endElementIndex(pagination, resultTable.rows.length)}</span>,
                         <span className={"sf-pagination-strong"} key={3}>{resultTable.totalElements}</span>)
                     }</span>
                 );
+            default:
+                throw new Error("Unexpected pagination mode");
         }
 
     }
@@ -102,7 +105,7 @@ export default class PaginationSelector extends React.Component<PaginationSelect
                         <option key={mode} value={mode.toString() }>{PaginationMode.niceName(mode) }</option>) }
                 </select>
                 {this.props.pagination.mode != "All" &&
-                    <select value={ this.props.pagination.elementsPerPage.toString() } onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control sf-elements-per-page">
+                    <select value={ this.props.pagination.elementsPerPage!.toString() } onChange={this.handleElementsPerPage} ref="elementsPerPage" className="form-control sf-elements-per-page">
                         {[5, 10, 20, 50, 100, 200].map(elem =>
                             <option key={elem} value={elem.toString() }>{elem}</option>) }
                     </select>

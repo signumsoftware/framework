@@ -44,7 +44,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 {
     calculateDefaultState(state: S) {
 
-        const type = state.type;
+        const type = state.type!;
 
         state.create = type.isEmbedded ? Navigator.isCreable(type.name, !!this.props.getComponent, false) :
             type.name == IsByAll ? false :
@@ -68,22 +68,22 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
     convert(entityOrLite: ModifiableEntity | Lite<Entity>): Promise<ModifiableEntity | Lite<Entity>> {
 
-        const tr = this.state.type;
+        const type = this.state.type!;
 
         const isLite = (entityOrLite as Lite<Entity>).EntityType != undefined;
         const entityType = (entityOrLite as Lite<Entity>).EntityType || (entityOrLite as ModifiableEntity).Type;
 
 
-        if (tr.isEmbedded) {
-            if (entityType != tr.name || isLite)
-                throw new Error(`Impossible to convert '${entityType}' to '${tr.name}'`);
+        if (type.isEmbedded) {
+            if (entityType != type.name || isLite)
+                throw new Error(`Impossible to convert '${entityType}' to '${type.name}'`);
 
             return Promise.resolve(entityOrLite as ModifiableEntity);
         } else {
-            if (tr.name != IsByAll && !tr.name.split(',').map(a => a.trim()).contains(entityType))
-                throw new Error(`Impossible to convert '${entityType}' to '${tr.name}'`);
+            if (type.name != IsByAll && !type.name.split(',').map(a => a.trim()).contains(entityType))
+                throw new Error(`Impossible to convert '${entityType}' to '${type.name}'`);
 
-            if (!!isLite == !!tr.isLite)
+            if (!!isLite == !!type.isLite)
                 return Promise.resolve(entityOrLite);
 
             if (isLite) {
@@ -111,7 +111,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         const ctx = this.state.ctx;
         const entity = ctx.value;
 
-        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type!.isEmbedded;
         if (openWindow) {
             event.preventDefault();
             const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
@@ -145,7 +145,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
     chooseType(predicate: (ti: TypeInfo) => boolean): Promise<string> {
-        const t = this.state.type;
+        const t = this.state.type!;
 
         if (t.isEmbedded)
             return Promise.resolve(t.name);
@@ -156,7 +156,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             .then(ti => ti ? ti.name : undefined);
     }
 
-    defaultCreate(): Promise<ModifiableEntity | Lite<Entity>> {
+    defaultCreate(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
 
         return this.chooseType(t => Navigator.isCreable(t, !!this.props.getComponent, false))
             .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
@@ -170,7 +170,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         const onCreate = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
-        onCreate.then(e => {
+        onCreate.then<ModifiableEntity | Lite<Entity> | undefined>(e => {
 
             if (e == undefined)
                 return undefined;
@@ -212,9 +212,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
     }
 
 
-    defaultFind(): Promise<ModifiableEntity | Lite<Entity>> {
+    defaultFind(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
         return this.chooseType(Finder.isFindable)
-            .then(qn => qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
+            .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
+                qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));
     }
     handleFindClick = (event: React.SyntheticEvent) => {
 

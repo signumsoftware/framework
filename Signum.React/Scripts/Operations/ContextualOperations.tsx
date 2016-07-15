@@ -15,7 +15,7 @@ import { operationInfos, getSettings, ContextualOperationSettings, ContextualOpe
     CreateGroup, API, autoStyleFunction, isEntityOperation } from '../Operations'
 
 
-export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
+export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
     if (ctx.lites.length == 0)
         return undefined;
 
@@ -42,6 +42,7 @@ export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<
             return undefined;
         })
         .filter(coc => coc != undefined)
+        .map(coc => coc!)
         .orderBy(coc => coc.settings && coc.settings.order)
         .map((coc, i) => MenuItemConstructor.createContextualMenuItem(coc, defaultConstructFromMany, i));
 
@@ -82,7 +83,7 @@ export function navigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent)
     }
 }
 
-export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
+export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> | undefined {
     if (ctx.lites.length == 0)
         return undefined;
 
@@ -115,13 +116,14 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
 
             return undefined;
         })
-        .filter(coc=>coc!= undefined)
+        .filter(coc => coc != undefined)
+        .map(coc => coc!)
         .orderBy(coc => coc.settings && coc.settings.order);
     
     if (!contexts.length)
         return undefined;
 
-    let contextPromise: Promise<ContextualOperationContext<Entity>[]> = undefined;
+    let contextPromise: Promise<ContextualOperationContext<Entity>[]>;
     if (ctx.lites.length == 1 && contexts.some(coc => coc.operationInfo.hasCanExecute)) {
         contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
             contexts.forEach(coc => coc.canExecute = ep.canExecute[coc.operationInfo.key]);

@@ -11,7 +11,7 @@ export default class ValidationErrors extends React.Component<{ entity: Modifiab
         const modelState = GraphExplorer.collectModelState(this.props.entity, "");
 
         if (!modelState || Dic.getKeys(modelState).length == 0)
-            return undefined;
+            return null;
 
         return (
             <ul className="validaton-summary alert alert-danger">

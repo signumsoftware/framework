@@ -10,7 +10,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
 
     render() {
 
-        const subContexts = this.subContext(this.props.ctx).filter(m => m.propertyRoute.member.name != "Id");
+        const subContexts = this.subContext(this.props.ctx).filter(m => m.propertyRoute.member!.name != "Id");
 
         const components = subContexts.map(ctx => DynamicComponent.appropiateComponent(ctx));
 

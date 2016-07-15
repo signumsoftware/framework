@@ -18,7 +18,7 @@ require("!style!css!./Frames.css");
 
 interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     title?: string;
-    entityOrPack?: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
+    entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>;
     propertyRoute?: PropertyRoute;
     showOperations?: boolean;
     validate?: boolean;
@@ -44,6 +44,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     static defaultProps: ModalFrameProps = {
         showOperations: true,
         getComponent: undefined,
+        entityOrPack: null as any
     }
 
     constructor(props: ModalFrameProps) {
@@ -199,7 +200,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             frameComponent: this,
             entityComponent: this.entityComponent,
             onReload: pack => this.setPack(pack),
-            onClose: () => this.props.onExited(undefined),
+            onClose: () => this.props.onExited!(undefined),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
             setError: (modelState, initialPrefix = "") => {
                 GraphExplorer.setModelState(this.state.pack.entity, modelState, initialPrefix);

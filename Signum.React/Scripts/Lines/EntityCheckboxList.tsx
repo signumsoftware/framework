@@ -30,14 +30,14 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         state.columnWidth = 200;
 
         if (!state.data) {
-            if (this.state && this.state.type.name == state.type.name)
+            if (this.state && this.state.type!.name == state.type!.name)
                 state.data = this.state.data;
         }
     }
 
     componentWillMount() {
         if (!this.state.data) {
-            Finder.API.findAllLites({ types: this.state.type.name })
+            Finder.API.findAllLites({ types: this.state.type!.name })
                 .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
                 .done();
         }
@@ -45,7 +45,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
 
     componentWillReceiveProps(newProps: EntityCheckboxListProps, newContext: any) {
         if (!!newProps.data && !this.props.data)
-            console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCheckboxList: ${this.state.type.name}`);
+            console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCheckboxList: ${this.state.type!.name}`);
 
         super.componentWillReceiveProps(newProps, newContext);
     }
@@ -71,7 +71,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         }
     }
 
-    getColumnStyle(): React.CSSProperties {
+    getColumnStyle(): React.CSSProperties | undefined {
         const s = this.state;
 
         if (s.columnCount && s.columnWidth)

@@ -15,9 +15,9 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 export interface EntityListBaseProps extends EntityBaseProps {
     move?: boolean;
-    onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[]>;
+    onFindMany?: () => Promise<(ModifiableEntity | Lite<Entity>)[] | undefined>;
 
-    ctx?: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
+    ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
 }
 
 
@@ -93,7 +93,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
             this.props.onCreate() : this.defaultCreate();
 
         onCreate
-            .then(e => {
+            .then<ModifiableEntity | Lite<Entity> | undefined>(e => {
 
                 if (e == undefined)
                     return undefined;
@@ -114,15 +114,15 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
                 this.convert(e).then(m => {
                     const list = this.props.ctx.value;
-                    list.push({ rowId: undefined, element: e });
+                    list.push({ rowId: undefined, element: m });
                     this.setValue(list);
                 }).done();
             }).done();
     };
 
-    defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[]> {
+    defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> {
         return this.chooseType(Finder.isFindable)
-            .then(qn => qn == undefined ? undefined : Finder.findMany({ queryName: qn } as FindOptions));
+            .then<(ModifiableEntity | Lite<Entity>)[] | undefined>(qn => qn == undefined ? undefined : Finder.findMany({ queryName: qn } as FindOptions));
     }
 
 

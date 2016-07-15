@@ -15,7 +15,7 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 
 export interface RenderEntityProps {
-    ctx?: TypeContext<ModifiableEntity | Lite<Entity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity>>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
@@ -61,7 +61,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     }
 
 
-    toEntity(entityOrLite: ModifiableEntity | Lite<Entity>): ModifiableEntity {
+    toEntity(entityOrLite: ModifiableEntity | Lite<Entity>): ModifiableEntity | undefined {
 
         if (!entityOrLite)
             return undefined;
@@ -101,22 +101,31 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         });
     }
 
+    entityComponent: React.Component<any, any>;
+
+    setComponent(c: React.Component<any, any>) {
+        if (c && this.entityComponent != c) {
+            this.entityComponent = c;
+            this.forceUpdate();
+        }
+    }
+
     render() {
         const entity = this.toEntity(this.props.ctx.value);
 
         if (entity == undefined)
-            return undefined;
+            return null;
 
         let getComponent = this.props.getComponent;
 
         if (getComponent == undefined) {
             if (entity.Type != this.state.lastLoadedType)
-                return undefined;
+                return null;
 
             getComponent = this.state.getComponent;
 
             if (getComponent == undefined)
-                return undefined;
+                return null;
         }
 
        
@@ -129,7 +138,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
         const frame: EntityFrame<ModifiableEntity> = {
             frameComponent: this,
-            entityComponent: undefined,
+            entityComponent: this.entityComponent,
             revalidate: () => this.props.ctx.frame && this.props.ctx.frame.revalidate(),
             onClose: () => { throw new Error("Not implemented Exception"); },
             onReload: pack => { throw new Error("Not implemented Exception"); },
@@ -140,7 +149,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
 
         return (
             <div data-propertypath={ctx.propertyPath}>
-                {getComponent(newCtx) }
+                {React.cloneElement(getComponent(newCtx), { ref: (c: React.Component<any, any>) => this.setComponent(c) }) }
             </div>
         );
     }

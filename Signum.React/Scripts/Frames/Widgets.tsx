@@ -15,7 +15,7 @@ export interface WidgetContext {
 
 export const onWidgets: Array<(ctx: WidgetContext) => React.ReactElement<any>> = [];
 
-export function renderWidgets(wc: WidgetContext): React.ReactNode
+export function renderWidgets(wc: WidgetContext): React.ReactNode | undefined
 {
     const widgets = onWidgets.map(a => a(wc)).filter(a => a != undefined);
 

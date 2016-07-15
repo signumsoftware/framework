@@ -24,18 +24,18 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     calculateDefaultState(state: EntityStripProps) {
         super.calculateDefaultState(state);
-        state.autoComplete = !state.type.isEmbedded && state.type.name != IsByAll;
+        state.autoComplete = !state.type!.isEmbedded && state.type!.name != IsByAll;
         state.create = false;
         state.find = false;
     }
 
     defaultAutoCompleteGetItems = (query: string) => Finder.API.findLiteLike({
-        types: this.state.type.name,
+        types: this.state.type!.name,
         subString: query,
         count: 5
     });
 
-    defaultAutCompleteRenderItem = (lite: Lite<Entity>, query: string) => Typeahead.highlightedText(lite.toStr, query);
+    defaultAutCompleteRenderItem = (lite: Lite<Entity>, query: string) => Typeahead.highlightedText(lite.toStr || "", query);
 
 
     renderInternal() {
@@ -43,11 +43,11 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         const s = this.state;
 
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} labelProps={s.labelHtmlProps} {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <FormGroup ctx={s.ctx!} labelText={s.labelText} labelProps={s.labelHtmlProps} {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal") }>
                         {
-                            mlistItemContext(this.state.ctx).map((mlec, i) =>
+                            mlistItemContext(s.ctx!).map((mlec, i) =>
                                 (<EntityStripElement key={i}
                                     ctx={mlec}
                                     onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : undefined}
@@ -67,11 +67,11 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         );
 
     }
-
+    
     handleOnSelect = (lite: Lite<Entity>, event: React.SyntheticEvent) => {
         this.convert(lite)
             .then(e => {
-                const list = this.props.ctx.value;
+                const list = this.props.ctx!.value;
                 list.push({ rowId: undefined, element: e });
                 this.setValue(list);
             }).done();
@@ -83,11 +83,11 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
         event.preventDefault();
 
-        const ctx = this.state.ctx;
+        const ctx = this.state.ctx!;
         const mle = ctx.value[index];
         const entity = mle.element;
 
-        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type!.isEmbedded;
         if (openWindow) {
             event.preventDefault();
             const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
@@ -117,7 +117,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     renderAutoComplete() {
 
-        if (!this.state.autoComplete || this.state.ctx.readOnly)
+        if (!this.state.autoComplete || this.state.ctx!.readOnly)
             return undefined;
 
         return (
@@ -133,8 +133,8 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
 
 export interface EntityStripElementProps {
-    onRemove: (event: React.MouseEvent) => void;
-    onView: (event: React.MouseEvent) => void;
+    onRemove?: (event: React.MouseEvent) => void;
+    onView?: (event: React.MouseEvent) => void;
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
 }
 

@@ -36,7 +36,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
 
         return {
             queryKey: getQueryKey(fo.queryName),
-            filters: (fo.filterOptions || []).map(fo => ({ token: fo.token.fullKey, operation: fo.operation, value: fo.value })),
+            filters: (fo.filterOptions || []).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value })),
         };
     }
 
@@ -57,7 +57,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
 
     render() {
         if (!Finder.isFindable(this.props.findOptions.queryName))
-            return undefined;
+            return null;
 
         if (this.props.style == "Badge")
             return this.renderBadget();

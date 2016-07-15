@@ -27,29 +27,27 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
     renderInternal() {
 
-        let buttons = (
+        const buttons = (
             <span className="pull-right">
                 {this.renderCreateButton(false) }
                 {this.renderFindButton(false) }
             </span>
         );
 
-        if (!buttons.props.children.some((a : any) => a))
-            buttons = undefined;
-
+        var ctx = this.state.ctx!;
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.errorClass) }
+            <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) }
                 {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        {buttons}
+                        {React.Children.count(buttons) ? buttons : undefined}
                     </div>
                 </legend>
-                <Tabs id={this.props.ctx.compose("tabs")}>
+                <Tabs id={ctx.compose("tabs")}>
                     {
-                        mlistItemContext(this.state.ctx).map((mlec, i) =>
+                        mlistItemContext(ctx).map((mlec, i) =>
                             <Tab className="sf-repeater-element" eventKey={i} key={i} {...EntityListBase.entityHtmlProps(mlec.value) }
                                 title={
                                     <div>

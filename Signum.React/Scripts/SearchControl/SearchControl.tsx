@@ -122,11 +122,11 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         this.simpleFilterBuilderInstance = undefined;
 
-        const qd = this.state.queryDescription;
+        const qd = this.state.queryDescription!;
 
         const ti = getTypeInfos(qd.columns["Entity"].type);
 
-        const findOptions = Dic.extend({
+        const findOptions: FindOptions = Dic.extend({
             searchOnLoad: true,
             showHeader: true,
             showFilters: false,
@@ -142,8 +142,8 @@ export default class SearchControl extends React.Component<SearchControlProps, S
             filterOptions: []
         }, expandParentColumn(propsFindOptions));
 
-        findOptions.columnOptions = Finder.mergeColumns(Dic.getValues(qd.columns), findOptions.columnOptionsMode, findOptions.columnOptions)
-        if (!findOptions.orderOptions.length) {
+        findOptions.columnOptions = Finder.mergeColumns(Dic.getValues(qd.columns), findOptions.columnOptionsMode!, findOptions.columnOptions!)
+        if (!findOptions.orderOptions!.length) {
 
             const defaultOrder = this.state.querySettings && this.state.querySettings.defaultOrderColumn || Finder.defaultOrderColumn;
 
@@ -171,7 +171,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                     simpleFilterBuilder: sfb,
                 });
 
-                if (this.state.findOptions.searchOnLoad)
+                if (fo.searchOnLoad)
                     this.doSearch();
             }).done();
     }
@@ -304,7 +304,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         this.setState({ lastToken: token });
     }
 
-    simpleFilterBuilderInstance: ISimpleFilterBuilder;
+    simpleFilterBuilderInstance?: ISimpleFilterBuilder;
 
     getFindOptionsWithSFB(): Promise<FindOptions> {
 
@@ -335,10 +335,10 @@ export default class SearchControl extends React.Component<SearchControlProps, S
 
         const fo = this.state.findOptions;
         if (!fo)
-            return undefined;
+            return null;
 
         if (!Finder.isFindable(fo.queryName))
-            return undefined;
+            return null;
 
         const sfb = this.state.simpleFilterBuilder &&
             React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e } });

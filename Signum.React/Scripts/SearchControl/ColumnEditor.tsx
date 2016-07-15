@@ -44,7 +44,7 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps, {}>
                 title={isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() : undefined }>
                 <button type="button" className="close" aria-label="Close" onClick={this.props.close} ><span aria-hidden="true">×</span></button>
                 <QueryTokenBuilder
-                    queryToken={co.token}
+                    queryToken={co.token!}
                     onTokenChange={this.handleTokenChanged}
                     queryKey={this.props.queryDescription.queryKey}
                     subTokenOptions={this.props.subTokensOptions}

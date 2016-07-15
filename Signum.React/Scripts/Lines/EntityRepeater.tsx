@@ -27,28 +27,26 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
     renderInternal() {
 
-        let buttons = (
+        const buttons = (
             <span className="pull-right">
                 {!this.state.createAsLink && this.renderCreateButton(false) }
                 {this.renderFindButton(false) }
             </span>
         );
 
-
-        if (!buttons.props.children.some((a : any) => a))
-            buttons = undefined;
+        let ctx = this.state.ctx;
 
         return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        {buttons}
+                        {React.Children.count(buttons) ? buttons : undefined}
                     </div>
                 </legend>
                 <div className="sf-repater-elements">
                     {
-                        mlistItemContext(this.state.ctx).map((mlec, i) =>
+                        mlistItemContext(ctx).map((mlec, i) =>
                             (<EntityRepeaterElement key={i}
                                 onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : undefined}
                                 onMoveDown ={this.state.move? e => this.moveDown(i) : undefined}
@@ -73,10 +71,10 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
 export interface EntityRepeaterElementProps {
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-    getComponent: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    onRemove: (event: React.MouseEvent) => void;
-    onMoveUp: (event: React.MouseEvent) => void;
-    onMoveDown: (event: React.MouseEvent) => void;
+    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    onRemove?: (event: React.MouseEvent) => void;
+    onMoveUp?: (event: React.MouseEvent) => void;
+    onMoveDown?: (event: React.MouseEvent) => void;
 }
 
 export class EntityRepeaterElement extends React.Component<EntityRepeaterElementProps, void>

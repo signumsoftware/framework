@@ -30,14 +30,14 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         state.find = false;
 
         if (!state.data) {
-            if (this.state && this.state.type.name == state.type.name)
+            if (this.state && this.state.type!.name == state.type!.name)
                 state.data = this.state.data;
         }
     }
 
     componentDidMount() {
         if (!this.state.data) {
-            Finder.API.findAllLites({ types: this.state.type.name })
+            Finder.API.findAllLites({ types: this.state.type!.name })
                 .then(data => this.setState({ data: data.orderBy(a => a.toStr) } as any))
                 .done();
         }
@@ -45,19 +45,19 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
     componentWillReceiveProps(newProps: EntityComboProps, newContext: any) {
         if (!!newProps.data && !this.props.data)
-            console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.state.type.name}`);
+            console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${this.state.type!.name}`);
 
         super.componentWillReceiveProps(newProps, newContext);
     }
 
     handleOnChange = (event: React.FormEvent) => {
         const current = event.currentTarget as HTMLSelectElement;
-
-        if (current.value != liteKey(this.getLite())) {
+        
+        if (current.value != this.getLiteKey()) {
             if (!current.value) {
                 this.setValue(undefined);
             } else {
-                const lite = this.state.data.filter(a => liteKey(a) == current.value).single();
+                const lite = this.state.data!.filter(a => liteKey(a) == current.value).single();
 
                 this.convert(lite).then(v => this.setValue(v)).done();
             }
@@ -75,13 +75,19 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         return v as Lite<Entity>;
     }
 
+    getLiteKey() {
+        const lite = this.getLite();
+
+        return lite ? liteKey(lite) : undefined;
+    }
+
     renderInternal() {
         const s = this.state;
 
         const hasValue = !!s.ctx.value;
 
        
-        let buttons = (
+        const buttons = (
             <span className="input-group-btn">
                 {!hasValue && this.renderCreateButton(true) }
                 {!hasValue && this.renderFindButton(true) }
@@ -90,18 +96,14 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
             </span>
         );
 
-        if (!buttons.props.children.some((a: any) => a))
-            buttons = undefined;
-
-
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText}
                 htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }
                 labelProps={s.labelHtmlProps} >
                 <div className="SF-entity-combo">
                     <div className={buttons ? "input-group" : undefined}>
-                        { this.renderSelect() }
-                        { buttons }
+                        {this.renderSelect()}
+                        {React.Children.count(buttons) ? buttons : undefined}
                     </div>
                 </div>
             </FormGroup>
@@ -119,7 +121,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
             return <FormControlStatic ctx={ctx}>{ctx.value && ctx.value.toStr}</FormControlStatic>;
 
         return (
-            <select className="form-control" onChange={this.handleOnChange} value={liteKey(lite) || ""} disabled={ctx.readOnly}>
+            <select className="form-control" onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""} disabled={ctx.readOnly}>
                 {this.renderOptions() }
             </select>
         );
@@ -133,7 +135,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         
         const lite = this.getLite();
 
-        const elements: Lite<Entity>[] = [undefined].concat(this.state.data);
+        const elements = [undefined, ...this.state.data];
         if (lite && !elements.some(a => is(a, lite)))
             elements.insertAt(1, lite);
 

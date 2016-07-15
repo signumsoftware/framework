@@ -36,7 +36,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     getTypeInfo(): TypeInfo {
-        return getTypeInfo(this.props.routeParams.type);
+        return getTypeInfo(this.props.routeParams!.type);
     }
 
     calculateState(props: PageFrameProps) {
@@ -61,11 +61,11 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
         const ti = this.getTypeInfo();
 
-        if (this.props.routeParams.id) {
+        if (this.props.routeParams!.id) {
             
             const lite: Lite<Entity> = {
                 EntityType: ti.name,
-                id: parseId(ti, props.routeParams.id),
+                id: parseId(ti, props.routeParams!.id!),
             };
 
             return Navigator.API.fetchEntityPack(lite)
@@ -80,13 +80,13 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
 
     loadComponent(): Promise<void> {
-        return Navigator.getComponent(this.state.pack.entity)
+        return Navigator.getComponent(this.state.pack!.entity)
             .then(c => this.setState({ componentClass: c }));
     }
 
     onClose() {
-        if (Finder.isFindable(this.state.pack.entity.Type))
-            Navigator.currentHistory.push(Finder.findOptionsPath({ queryName: this.state.pack.entity.Type }));
+        if (Finder.isFindable(this.state.pack!.entity.Type))
+            Navigator.currentHistory.push(Finder.findOptionsPath({ queryName: this.state.pack!.entity.Type }));
         else
             Navigator.currentHistory.push("~/");
     }
@@ -119,8 +119,8 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
             onReload: pack => this.setState({ pack }),
             onClose: () => this.onClose(),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
-            setError: (ms, initialPrefix = "") => {
-                GraphExplorer.setModelState(entity, ms, initialPrefix);
+            setError: (ms, initialPrefix) => {
+                GraphExplorer.setModelState(entity, ms, initialPrefix || "");
                 this.forceUpdate()
             },
         };

@@ -25,21 +25,26 @@ export interface EntityListState extends EntityListBaseProps {
 export abstract class EntityList extends EntityListBase<EntityListProps, EntityListState>
 {
     static defaultProps: EntityListProps = {
-        size: 5
+        size: 5,
+        ctx: undefined as any,
     };
 
     moveUp(index: number) {
         super.moveUp(index);
-        this.setState({ selectedIndex: this.state.selectedIndex - 1 } as any);
+        this.state.selectedIndex = this.state.selectedIndex - 1;
+        this.forceUpdate();
     }
 
     moveDown(index: number) {
         super.moveDown(index);
-        this.setState({ selectedIndex: this.state.selectedIndex + 1 } as any);
+        this.state.selectedIndex = this.state.selectedIndex + 1;
+        this.forceUpdate();
     }
 
     handleOnSelect = (e: React.FormEvent) => {
-        this.setState({ selectedIndex: (e.currentTarget as HTMLSelectElement).selectedIndex });
+
+        this.state.selectedIndex = (e.currentTarget as HTMLSelectElement).selectedIndex;
+        this.forceUpdate();
     }
 
     renderInternal() {
@@ -61,8 +66,8 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
                             { this.renderFindButton(true) }
                             { hasSelected && this.renderViewButton(true) }
                             { hasSelected && this.renderRemoveButton(true) }
-                            { hasSelected && this.state.move && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex) }
-                            { hasSelected && this.state.move && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex) }
+                            { hasSelected && this.state.move && s.selectedIndex > 0 && this.renderMoveUp(true, s.selectedIndex!) }
+                            { hasSelected && this.state.move && s.selectedIndex < list.length - 1 && this.renderMoveDown(true, s.selectedIndex!) }
                         </span>
                     </div>
                 </div>
@@ -76,12 +81,12 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
 
         const s = this.state;
 
-        (s.onRemove ? s.onRemove(s.ctx.value[s.selectedIndex].element) : Promise.resolve(true))
+        (s.onRemove ? s.onRemove(s.ctx.value[s.selectedIndex!].element) : Promise.resolve(true))
             .then(result => {
                 if (result == false)
                     return;
 
-                s.ctx.value.removeAt(s.selectedIndex);
+                s.ctx.value.removeAt(s.selectedIndex!);
                 if (s.ctx.value.length == s.selectedIndex)
                     s.selectedIndex--;
 
@@ -98,12 +103,12 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
         event.preventDefault();
 
         const ctx = this.state.ctx;
-        const selectedIndex = this.state.selectedIndex;
+        const selectedIndex = this.state.selectedIndex!;
         const entity = ctx.value[selectedIndex].element;
 
         const pr = ctx.propertyRoute.add(a => a[0]);
 
-        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type.isEmbedded;
+        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type!.isEmbedded;
 
         const onView = this.state.onView ?
             this.state.onView(entity, pr) :

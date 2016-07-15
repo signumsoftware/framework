@@ -14,7 +14,7 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityDetailProps extends EntityBaseProps {
-    ctx?: TypeContext<ModifiableEntity | Lite<Entity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity>>;
 }
 
 export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProps> {
@@ -30,7 +30,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
 
         const hasValue = !!s.ctx.value;
 
-        let buttons = (
+        const buttons = (
             <span className="pull-right">
                 {!hasValue && this.renderCreateButton(false) }
                 {!hasValue && this.renderFindButton(false) }
@@ -38,19 +38,16 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
             </span>
         );
 
-        if (!buttons.props.children.some((a : any) => a))
-            buttons = undefined;
-
         return (
             <fieldset className={classes("sf-entity-line-details", s.ctx.errorClass) }
                 {...Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{s.labelText}</span>
-                        {buttons}
+                        {React.Children.count(buttons) ? buttons : undefined}
                     </div>
                 </legend>
-                <RenderEntity ctx={this.state.ctx} getComponent={this.props.getComponent}/>
+                <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent}/>
             </fieldset>
         );
     }

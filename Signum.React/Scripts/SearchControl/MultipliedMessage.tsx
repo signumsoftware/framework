@@ -15,9 +15,9 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
     render() {
         const fo = this.props.findOptions;
 
-        const tokensObj = fo.columnOptions.map(a=> a.token)
-            .concat(fo.filterOptions.filter(a=> a.operation != undefined).map(a=> a.token))
-            .concat(fo.orderOptions.map(a=> a.token))
+        const tokensObj = fo.columnOptions!.map(a=> a.token)
+            .concat(fo.filterOptions!.filter(a=> a.operation != undefined).map(a=> a.token))
+            .concat(fo.orderOptions!.map(a=> a.token))
             .filter(a=> a != undefined)
             .flatMap(a=> getTokenParents(a))
             .filter(a=> a.queryTokenType == QueryTokenType.Element)
@@ -26,11 +26,11 @@ export default class MultipliedMessage extends React.Component<{ findOptions: Fi
         const tokens = Dic.getValues(tokensObj);
 
         if (tokens.length == 0)
-            return undefined;
+            return null;
 
         const message = ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.niceToString().formatWith(
             getTypeInfos(this.props.mainType).map(a=> a.nicePluralName).joinComma(External.CollectionMessage.And.niceToString()),
-            tokens.map(a=> a.parent.niceName).joinComma(External.CollectionMessage.And.niceToString()))
+            tokens.map(a=> a.parent!.niceName).joinComma(External.CollectionMessage.And.niceToString()))
 
         return (
             <div className="sf-td-multiply alert alert-warning">

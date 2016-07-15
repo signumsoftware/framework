@@ -17,8 +17,13 @@ interface NotifyOptions
     type: NotifyType;
 }
 
+interface NotifyState {
+    text?: React.ReactChild;
+    type?: NotifyType;
+}
 
-export default class Notify extends React.Component<void, NotifyOptions>{
+
+export default class Notify extends React.Component<void, NotifyState>{
 
     static singletone: Notify;
 
