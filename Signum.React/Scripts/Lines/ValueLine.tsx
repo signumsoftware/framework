@@ -85,13 +85,13 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
     renderInternal() {
 
         if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == undefined)
-            return undefined;
+            return null;
 
-        return ValueLine.renderers[this.state.valueLineType](this);
+        return ValueLine.renderers[this.state.valueLineType!](this);
 
     }
 
-    static withUnit(unit: string, input: JSX.Element): JSX.Element {
+    static withUnit(unit: string | undefined, input: JSX.Element): JSX.Element {
         if (!unit)
             return input;
 
@@ -225,7 +225,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
         vl.setValue(input.value);
     };
 
-    let handleBlur: (e: React.SyntheticEvent) => void;
+    let handleBlur: ((e: React.SyntheticEvent) => void) | undefined = undefined;
     if (s.autoTrim == undefined || s.autoTrim == true) {
         handleBlur = (e: React.SyntheticEvent) => {
             const input = e.currentTarget as HTMLInputElement;
@@ -248,7 +248,7 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
     );
 };
 
-function asString(reactChild: React.ReactChild) {
+function asString(reactChild: React.ReactChild | undefined): string | undefined{
     if (typeof reactChild == "string")
         return reactChild as string;
 
@@ -325,7 +325,7 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
     );
 }
 
-function toNumeralFormat(format: string) {
+function toNumeralFormat(format: string | undefined) {
 
     if (format == undefined)
         return undefined;
@@ -350,13 +350,13 @@ function toNumeralFormat(format: string) {
 
 export interface NumericTextBoxProps {
     value: number;
-    onChange: (newValue: number) => void;
+    onChange: (newValue?: number) => void;
     validateKey: React.KeyboardEventHandler;
-    format: string;
+    format?: string;
     htmlProps: React.HTMLAttributes;
 }
 
-export class NumericTextBox extends React.Component<NumericTextBoxProps, { text: string }> {
+export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?: string }> {
 
     constructor(props: NumericTextBoxProps) {
         super(props);
@@ -467,13 +467,13 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
 
 export interface DurationTextBoxProps {
     value: number;
-    onChange: (newValue: number) => void;
+    onChange: (newValue?: number) => void;
     validateKey: React.KeyboardEventHandler;
-    format: string;
+    format?: string;
     htmlProps: React.HTMLAttributes;
 }
 
-export class DurationTextBox extends React.Component<DurationTextBoxProps, { text: string }> {
+export class DurationTextBox extends React.Component<DurationTextBoxProps, { text?: string }> {
 
     constructor(props: NumericTextBoxProps) {
         super(props);

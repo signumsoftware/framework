@@ -54,8 +54,7 @@ interface Array<T> {
     insertAt(this: Array<T>, index: number, element: T): void;
     clone(this: Array<T>, ): T[];
     joinComma(this: Array<T>, lastSeparator: string): string;
-    extract(this: Array<T>, filter: (element: T) => boolean): T[]; 
-    notNull(this: Array<T>, ): T[]; 
+    extract(this: Array<T>, filter: (element: T) => boolean): T[];
 }
 
 interface ArrayConstructor {
@@ -70,17 +69,17 @@ interface String {
     endsWith(this: string, str: string): boolean;
     formatWith(this: string, ...parameters: any[]): string;
     forGenderAndNumber(this: string, number: number): string;
-    forGenderAndNumber(this: string, gender: string): string;
-    forGenderAndNumber(this: string, gender: any, number: number): string;
+    forGenderAndNumber(this: string, gender: string | undefined): string;
+    forGenderAndNumber(this: string, gender: any , number?: number): string;
     replaceAll(this: string, from: string, to: string): string;
     after(this: string, separator: string): string;
     before(this: string, separator: string): string;
-    tryAfter(this: string, separator: string): string;
-    tryBefore(this: string, separator: string): string;
+    tryAfter(this: string, separator: string): string | undefined;
+    tryBefore(this: string, separator: string): string | undefined;
     afterLast(this: string, separator: string): string;
     beforeLast(this: string, separator: string): string;
-    tryAfterLast(this: string, separator: string): string;
-    tryBeforeLast(this: string, separator: string): string;
+    tryAfterLast(this: string, separator: string): string | undefined;
+    tryBeforeLast(this: string, separator: string): string | undefined;
     etc(this: string, maxLength: number): string;
 
     replaceAll(this: string, search: string, replacement: string): string;

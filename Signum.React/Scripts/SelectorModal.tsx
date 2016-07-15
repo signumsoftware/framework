@@ -33,7 +33,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
     }
 
     handleOnExited = () => {
-        this.props.onExited(this.selectedValue);
+        this.props.onExited!(this.selectedValue);
     }
 
     render() {
@@ -63,9 +63,9 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
         </Modal>;
     }
 
-    static chooseElement<T>(options: T[], config?: SelectorConfig<T>): Promise < T > {
+    static chooseElement<T>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> {
 
-        const {display, name, title, message} = config;
+        const {display, name, title, message} = config!;
 
         if (options.length == 1)
             return Promise.resolve(options.single());
@@ -86,7 +86,7 @@ export default class SelectorModal extends React.Component<SelectorModalProps, {
     static chooseType(options: TypeInfo[]): Promise<TypeInfo> {
         return SelectorModal.chooseElement(options,
             {
-                display: a => a.niceName,
+                display: a => a.niceName || "",
                 name: a => a.name,
                 title: SelectorMessage.TypeSelector.niceToString(),
                 message: SelectorMessage.PleaseSelectAType.niceToString()

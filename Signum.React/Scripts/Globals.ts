@@ -29,7 +29,7 @@ Array.prototype.groupToObject = function (this: any[], keySelector: (element: an
 Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) => boolean, includeKeyInGroup = false, initialGroup = false): {key: any, elements: any[]}[] {
     const result: {key: any, elements: any[]}[] = [];
 
-    let group: {key: any, elements: any[]} = undefined;
+    let group: { key: any, elements: any[] } | undefined = undefined;
 
     for (let i = 0; i < this.length; i++) {
         const item: any = this[i];
@@ -58,7 +58,8 @@ Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) =>
 Array.prototype.groupWhenChange = function (this: any[], getGroupKey: (element: any) => string): {key: string, elements: any[]}[] {
     const result: {key: any, elements: any[]}[] = [];
 
-    let current: {key: string, elements: any[]} = undefined;
+    let current: { key: string, elements: any[] } | undefined = undefined;
+
     for (let i = 0; i < this.length; i++) {
         const item: any = this[i];
         if (current == undefined)
@@ -284,10 +285,6 @@ Array.prototype.extract = function (this: any[], predicate: (element: any) => bo
     return result;
 };
 
-Array.prototype.notNull = function (this: any[]) {
-    return this.filter(a => !!a);
-};
-
 Array.range = function (min: number, maxNotIncluded: number) {
     const length = maxNotIncluded - min;
 
@@ -476,8 +473,13 @@ String.prototype.firstLower = function () {
 
 String.prototype.trimStart = function (char) {
     let result = this;
+
+    if (!char)
+        char = " ";
+
     if (char == "")
         throw new Error("Empty char");
+
 
     while (result.startsWith(char))
         result = result.substr(char.length);
@@ -487,6 +489,10 @@ String.prototype.trimStart = function (char) {
 
 String.prototype.trimEnd = function (char) {
     let result = this;
+
+    if (!char)
+        char = " ";
+
     if (char == "")
         throw new Error("Empty char");
 
@@ -613,11 +619,11 @@ export module Dic {
 
 
 
-export function classes(...classNames: string[]) {
+export function classes(...classNames: (string | null | undefined)[]) {
     return classNames.filter(a=> a && a != "").join(" ");
 }
 
-export function addClass(props: { className?: string }, newClasses: string) {
+export function addClass(props: { className?: string } | undefined, newClasses: string) {
     if (!props || !props.className)
         return newClasses;
 
@@ -640,7 +646,7 @@ export function combineFunction<F extends Function>(func1: F, func2: F) : F {
 
 
 
-export function areEqual<T>(a: T, b: T, field: (value: T) => any) {
+export function areEqual<T>(a: T | undefined, b: T | undefined, field: (value: T) => any): boolean {
     if (a == undefined)
         return b == undefined;
 
@@ -692,7 +698,7 @@ export module DomUtils {
         return false;
     }
 
-    export function closest(element: HTMLElement, selector: string, context?: Node): HTMLElement {
+    export function closest(element: HTMLElement, selector: string, context?: Node): HTMLElement | undefined {
         context = context || document;
         // guard against orphans
         while (!matches(element, selector)) {
@@ -705,9 +711,9 @@ export module DomUtils {
         return element;
     }
 
-    export function offsetParent(element: HTMLElement): HTMLElement {
+    export function offsetParent(element: HTMLElement): HTMLElement | undefined {
 
-        const isRelativeOrAbsolute = (str: string) => str === "relative" || str === "absolute";
+        const isRelativeOrAbsolute = (str: string | null) => str === "relative" || str === "absolute";
 
         // guard against orphans
         while (!isRelativeOrAbsolute(window.getComputedStyle(element).position)) {

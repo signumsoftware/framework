@@ -11,7 +11,7 @@ export function configure(){
 
     if (!hasLocaleData) throw new TypeError('The Moment localizer depends on the `localeData` api, please provide a moment object v2.2.0 or higher');
 
-    function getMoment(culture: string, value: any, format: string) {
+    function getMoment(culture: string, value: any, format: string | undefined) {
         return culture ? localField(moment(value, format))(culture) : moment(value, format);
     }
 

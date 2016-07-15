@@ -121,7 +121,7 @@ declare namespace __React {
         //setState(f: (prevState: S, props: P) => S, callback?: () => any): void;
         setState(state: S, callback?: () => any): void;
         forceUpdate(callBack?: () => any): void;
-        render(): JSX.Element;
+        render(): JSX.Element | null;
         props: P;
         state: S;
         context: {};
@@ -196,7 +196,7 @@ declare namespace __React {
     }
 
     interface ComponentSpec<P, S> extends Mixin<P, S> {
-        render(): ReactElement<any>;
+        render(): ReactElement<any> | null;
 
         [propertyName: string]: any;
     }
@@ -2083,11 +2083,11 @@ declare namespace __React {
     // ----------------------------------------------------------------------
 
     interface ReactChildren {
-        map<T>(children: ReactNode, fn: (child: ReactChild, index: number) => T): T[];
-        forEach(children: ReactNode, fn: (child: ReactChild, index: number) => any): void;
-        count(children: ReactNode): number;
-        only(children: ReactNode): ReactElement<any>;
-        toArray(children: ReactNode): ReactChild[];
+        map<T>(children: ReactNode | undefined, fn: (child: ReactChild, index: number) => T): T[];
+        forEach(children: ReactNode | undefined, fn: (child: ReactChild, index: number) => any): void;
+        count(children: ReactNode | undefined): number;
+        only(children: ReactNode | undefined): ReactElement<any>;
+        toArray(children: ReactNode | undefined): ReactChild[];
     }
 
     //
@@ -2128,7 +2128,7 @@ declare namespace JSX {
 
     interface Element extends React.ReactElement<any> { }
     interface ElementClass extends React.Component<any, any> {
-        render(): JSX.Element;
+        render(): JSX.Element | null;
     }
     interface ElementAttributesProperty { props: {}; }
 

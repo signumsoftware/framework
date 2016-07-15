@@ -33,11 +33,11 @@ export interface FindOptions {
 }
 
 export function expandParentColumn(findOptions: FindOptions) {
-
-    if (!findOptions.parentColumn)
-        return findOptions; 
-
+    
     const fo = Dic.extend({}, findOptions) as FindOptions;
+
+    if (!fo.parentColumn)
+        return findOptions; 
 
     fo.filterOptions = [
         { columnName: fo.parentColumn, operation: "EqualTo", value: fo.parentValue, frozen: true },
@@ -127,7 +127,7 @@ export enum QueryTokenType {
     AnyOrAll = "AnyOrAll" as any,
 }
 
-export function hasAnyOrAll(token: QueryToken) : boolean {
+export function hasAnyOrAll(token: QueryToken | undefined) : boolean {
     if(token == undefined)
         return false;
 
@@ -137,7 +137,7 @@ export function hasAnyOrAll(token: QueryToken) : boolean {
     return hasAnyOrAll(token.parent);
 }
 
-export function hasAggregate(token: QueryToken): boolean {
+export function hasAggregate(token: QueryToken | undefined): boolean {
     if (token == undefined)
         return false;
 
@@ -147,7 +147,7 @@ export function hasAggregate(token: QueryToken): boolean {
     return hasAggregate(token.parent);
 }
 
-export function getTokenParents(token: QueryToken): QueryToken[] {
+export function getTokenParents(token: QueryToken | undefined): QueryToken[] {
     const result: QueryToken[] = [];
     while (token != undefined) {
         result.insertAt(0, token);

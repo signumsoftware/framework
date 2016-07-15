@@ -35,12 +35,12 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 
-export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute) {
+export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
 
     const typeInfo = getTypeInfo(entity.Type)
 
     if (!typeInfo) {
-        return pr.typeReference().typeNiceName;
+        return pr!.typeReference().typeNiceName;
     }
 
     else {
@@ -55,7 +55,7 @@ export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute) {
 export function navigateRoute(entity: Entity): string;
 export function navigateRoute(lite: Lite<Entity>): string;
 export function navigateRoute(type: PseudoType, id: number | string): string;
-export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: number | string = undefined): string {
+export function navigateRoute(typeOrEntity: Entity | Lite<Entity> | PseudoType, id: number | string | undefined = undefined): string {
     let typeName: string;
     if (isEntity(typeOrEntity)) {
         typeName = typeOrEntity.Type;
@@ -459,10 +459,17 @@ export module API {
         if (lite.entity)
             return Promise.resolve(lite.entity);
 
+        if (lite.id == null)
+            throw new Error("Lite has no Id");
+
         return fetchEntity(lite.EntityType, lite.id).then(e => lite.entity = e as T);
     }
 
     export function fetchAndForget<T extends Entity>(lite: Lite<T>): Promise<T> {
+
+        if (lite.id == null)
+            throw new Error("Lite has no Id");
+
         return fetchEntity(lite.EntityType, lite.id);
     }
     
@@ -566,7 +573,7 @@ String.prototype.formatHtml = function (this: string) {
 
 
 
-function fixBaseName<T>(baseFunction: (location: HistoryModule.LocationDescriptorObject | string) => T, baseName: string): (location: HistoryModule.LocationDescriptorObject | string) => T {
+function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescriptorObject | string) => T, baseName: string): (location?: HistoryModule.LocationDescriptorObject | string) => T {
 
     function fixUrl(url: string): string {
         if (url && url.startsWith("~/"))
@@ -583,7 +590,7 @@ function fixBaseName<T>(baseFunction: (location: HistoryModule.LocationDescripto
         if (typeof location === "string") {
             return baseFunction(fixUrl(location));
         } else {
-            location.pathname = fixUrl(location.pathname);
+            location!.pathname = fixUrl(location!.pathname!);
             return baseFunction(location);
         }
     };

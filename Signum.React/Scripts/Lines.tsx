@@ -56,7 +56,7 @@ export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBasePro
     if (!state.labelText &&
         state.ctx.propertyRoute &&
         state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
-        state.labelText = state.ctx.propertyRoute.member.niceName;
+        state.labelText = state.ctx.propertyRoute.member!.niceName;
     }
 }
 
@@ -68,7 +68,7 @@ export function taskSetUnit(lineBase: LineBase<any, any>, state: LineBaseProps) 
         if (!vProps.unitText &&
             state.ctx.propertyRoute &&
             state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
-            vProps.unitText = state.ctx.propertyRoute.member.unit;
+            vProps.unitText = state.ctx.propertyRoute.member!.unit;
         }
     }
 }
@@ -81,7 +81,7 @@ export function taskSetFormat(lineBase: LineBase<any, any>, state: LineBaseProps
         if (!vProps.formatText &&
             state.ctx.propertyRoute &&
             state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
-            vProps.formatText = state.ctx.propertyRoute.member.format;
+            vProps.formatText = state.ctx.propertyRoute.member!.format;
         }
     }
 }
@@ -91,7 +91,7 @@ export function taskSetReadOnly(lineBase: LineBase<any, any>, state: LineBasePro
     if (!state.ctx.readOnly &&
         state.ctx.propertyRoute &&
         state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
-        state.ctx.propertyRoute.member.isReadOnly) {
+        state.ctx.propertyRoute.member!.isReadOnly) {
         state.ctx.readOnly = true;
     }
 }
@@ -101,7 +101,7 @@ export function taskSetMove(lineBase: LineBase<any, any>, state: LineBaseProps) 
     if (lineBase instanceof EntityListBase &&
         state.ctx.propertyRoute &&
         state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field &&
-        state.ctx.propertyRoute.member.preserveOrder) {
+        state.ctx.propertyRoute.member!.preserveOrder) {
         (state as EntityListBaseProps).move = true;
     }
 }
@@ -114,17 +114,20 @@ export function taskSetHtmlProperties(lineBase: LineBase<any, any>, state: LineB
     const pr = state.ctx.propertyRoute;
     const s = state as ValueLineProps;
     if (vl && pr && pr.propertyRouteType == PropertyRouteType.Field && (s.valueLineType == ValueLineType.TextBox || s.valueLineType == ValueLineType.TextArea)) {
-        if (pr.member.maxLength != undefined) {
+
+        var member = pr.member!;
+
+        if (member.maxLength != undefined) {
 
             if (!s.valueHtmlProps)
                 s.valueHtmlProps = {};
 
-            s.valueHtmlProps.maxLength = pr.member.maxLength;
+            s.valueHtmlProps.maxLength = member.maxLength;
 
-            s.valueHtmlProps.size = maxValueLineSize == undefined ? pr.member.maxLength : Math.min(maxValueLineSize, pr.member.maxLength);
+            s.valueHtmlProps.size = maxValueLineSize == undefined ? member.maxLength : Math.min(maxValueLineSize, member.maxLength);
         }
 
-        if (pr.member.isMultiline)
+        if (member.isMultiline)
             s.valueLineType = ValueLineType.TextArea;
     }
 }

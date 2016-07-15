@@ -10,7 +10,7 @@ export interface ModifiableEntity {
     toStr: string;	
     modified : boolean;
     isNew: boolean;
-	error: { [member: string]: string };
+	error?: { [member: string]: string };
 }
 
 export interface Entity extends ModifiableEntity {
@@ -61,7 +61,7 @@ export interface ConstructSymbol_Simple<T extends Entity> extends OperationSymbo
 export interface ConstructSymbol_From<T extends Entity, F extends Entity> extends OperationSymbol { _constructFrom_: T, _from_?: F /*TRICK*/ };
 export interface ConstructSymbol_FromMany<T extends Entity, F extends Entity> extends OperationSymbol {  _constructFromMany_: T, _from_?: F /*TRICK*/ };
 
-export const toStringDictionary: { [name: string]: (entity: ModifiableEntity) => string | null } = {};
+export const toStringDictionary: { [name: string]: ((entity: ModifiableEntity) => string) | null } = {};
 
 export function registerToString<T extends ModifiableEntity>(type: Type<T>, toStringFunc: (e: T) => string) {
     toStringDictionary[type.typeName] = toStringFunc;
@@ -88,7 +88,7 @@ function getOrCreateToStringFunction(type: string)  {
     return f;
 }
 
-export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>) : string
+export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>): string | undefined
 {
     if (entityOrLite == undefined)
         return undefined;
@@ -105,10 +105,7 @@ export function getToString(entityOrLite: ModifiableEntity | Lite<Entity>) : str
     return entity.toStr || entity.Type;
 }
 
-export function toLite<T extends Entity>(entity: T, fat?: boolean, toStr?: string) : Lite<T> {
-
-    if(entity == undefined)
-        return undefined;
+export function toLite<T extends Entity>(entity: T, fat?: boolean, toStr?: string): Lite<T> {
 
     if(fat)
        return toLiteFat(entity);
@@ -125,9 +122,6 @@ export function toLite<T extends Entity>(entity: T, fat?: boolean, toStr?: strin
 
 export function toLiteFat<T extends Entity>(entity: T) : Lite<T> {
     
-    if(entity == undefined)
-        return undefined;
-    
     return {
        entity : entity,
        EntityType  :entity.Type,
@@ -137,10 +131,6 @@ export function toLiteFat<T extends Entity>(entity: T) : Lite<T> {
 }
 
 export function liteKey(lite: Lite<Entity>) {
-    
-    if(lite == undefined)
-        return undefined;
-    
     return lite.EntityType + ";" + (lite.id || "");
 }
 

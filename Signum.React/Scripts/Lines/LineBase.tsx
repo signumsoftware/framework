@@ -40,11 +40,10 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
         const labelClasses = classes(ctx.formGroupStyle == "SrOnly" && "sr-only",
             ctx.formGroupStyle == "LabelColumns" && ("control-label " + ctx.labelColumnsCss));
-
-
+        
         const label = (
-            <label htmlFor={this.props.controlId} {...this.props.labelProps } className= { addClass(this.props.labelProps, labelClasses) } >
-                { this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member.niceName }
+            <label htmlFor={this.props.controlId} {...this.props.labelProps } className= {addClass(this.props.labelProps, labelClasses)} >
+                { this.props.labelText || tCtx.propertyRoute && tCtx.propertyRoute.member!.niceName }
             </label>
         );
 
@@ -80,7 +79,7 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
 }
 
 export interface LineBaseProps extends StyleOptions {
-    ctx?: TypeContext<any>;
+    ctx: TypeContext<any>;
     type?: TypeReference;
     labelText?: React.ReactChild;
     visible?: boolean;
@@ -130,7 +129,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     render() {
 
         if (this.state.visible == false || this.state.hideIfNull && this.state.ctx.value == undefined)
-            return undefined;
+            return null;
 
         return this.renderInternal();
     }
@@ -149,7 +148,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
 
         const cleanProps = Dic.without(props, so);
 
-        const state = { ctx: cleanProps.ctx.subCtx(so), type: (cleanProps.type || cleanProps.ctx.propertyRoute.member.type) } as LineBaseProps as S;
+        const state = { ctx: cleanProps.ctx.subCtx(so), type: (cleanProps.type || cleanProps.ctx.propertyRoute.member!.type) } as LineBaseProps as S;
         this.calculateDefaultState(state);
         runTasks(this, state);
         const overridenProps = Dic.without(cleanProps, { ctx: undefined, type: undefined }) as LineBaseProps as S;
@@ -173,7 +172,7 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     calculateDefaultState(state: S) {
     }
 
-    abstract renderInternal(): JSX.Element;
+    abstract renderInternal(): JSX.Element | null;
 }
 
 

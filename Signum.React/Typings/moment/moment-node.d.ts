@@ -104,7 +104,7 @@ declare module moment {
     }
 
     interface Moment {
-        format(format: string): string;
+        format(format: string | undefined): string;
         format(): string;
 
         fromNow(withoutSuffix?: boolean): string;

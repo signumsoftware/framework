@@ -11,7 +11,7 @@ export function getEnumInfo(enumTypeName: string, enumId: number) {
     if (!ti || ti.kind != KindOfType.Enum)
         throw new Error(`${enumTypeName} is not an Enum`);
 
-    return ti.membersById[enumId];
+    return ti.membersById![enumId];
 }
 
 export interface TypeInfo {
@@ -26,7 +26,7 @@ export interface TypeInfo {
     isLowPopupation?: boolean;
     requiresSaveOperation?: boolean;
     queryDefined?: boolean;
-    members?: { [name: string]: MemberInfo };
+    members: { [name: string]: MemberInfo };
     membersById?: { [name: string]: MemberInfo };
 
     operations?: { [name: string]: OperationInfo };
@@ -67,7 +67,7 @@ export enum OperationType {
 
 //https://msdn.microsoft.com/en-us/library/az4se3k1%28v=vs.110%29.aspx?f=255&MSPPError=-2147217396
 //http://momentjs.com/docs/#/displaying/format/
-export function toMomentFormat(format: string): any {
+export function toMomentFormat(format: string | undefined): string | undefined {
 
     switch (format) {
         case "d": return "L"; // or "l"
@@ -79,7 +79,7 @@ export function toMomentFormat(format: string): any {
         case "M":
         case "m": return "D MMM";
         case "u":
-        case "s": return moment.ISO_8601;
+        case "s": return moment.ISO_8601 as any;
         case "t": return "LT";
         case "T": return "LTS";
         case "y": return "LTS";
@@ -91,7 +91,11 @@ export function toMomentFormat(format: string): any {
 
 //https://msdn.microsoft.com/en-us/library/ee372286(v=vs.110).aspx
 //https://github.com/jsmreese/moment-duration-format
-export function toMomentDurationFormat(format: string) {
+export function toMomentDurationFormat(format: string | undefined): string | undefined{
+
+    if (format == undefined)
+        return undefined;
+
     return format.replace("\:", ":");
 }
 
@@ -241,7 +245,7 @@ export function getQueryInfo(queryName: PseudoType | QueryKey): MemberInfo | Typ
         if (mi)
             return mi;
 
-        return undefined;
+        throw Error("Unexpected query type");
     }
 }
 
@@ -269,15 +273,15 @@ export function getQueryKey(queryName: PseudoType | QueryKey): string {
         return str;
     }
 
-    return undefined;
+    throw Error("Unexpected query type");
 }
 
 export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
     if ((queryName as TypeInfo).kind != undefined)
-        return (queryName as TypeInfo).queryDefined;
+        return (queryName as TypeInfo).queryDefined || false;
 
     if (queryName instanceof Type)
-        return getTypeInfo(queryName).queryDefined;
+        return getTypeInfo(queryName).queryDefined || false;
 
     if (queryName instanceof QueryKey)
         return !!_queryNames[queryName.name.toLowerCase()];
@@ -287,7 +291,7 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
 
         const type = _types[str.toLowerCase()];
         if (type) {
-            return type.queryDefined;
+            return type.queryDefined || false;
         }
 
         const qn = _queryNames[str.toLowerCase()];
@@ -366,8 +370,8 @@ export interface IBinding<T> {
     getValue(): T;
     setValue(val: T): void;
     suffix: string;
-    getError(): string;
-    setError(value: string): void;
+    getError(): string | undefined;
+    setError(value: string | undefined): void;
 }
 
 export class Binding<T> implements IBinding<T> {
@@ -410,12 +414,12 @@ export class Binding<T> implements IBinding<T> {
         }
     }
 
-    getError(): string {
+    getError(): string | undefined {
         const parentErrors = (this.parentValue as ModifiableEntity).error;
         return parentErrors && parentErrors[this.member];
     }
 
-    setError(value: string) {
+    setError(value: string | undefined) {
         const parent = this.parentValue as ModifiableEntity;
 
         if (!value) {
@@ -450,7 +454,7 @@ export class ReadonlyBinding<T> implements IBinding<T> {
         throw new Error("Readonly Binding");
     }
 
-    getError(): string {
+    getError(): string | undefined {
         return undefined;
     }
 
@@ -510,7 +514,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[]{
     let result: LambdaMember[] = [];
 
     while (body != parameter) {
-        let m: RegExpExecArray;
+        let m: RegExpExecArray | null;
         if (m = memberRegex.exec(body)) {
             result.push({ name: m[2], type: LambdaMemberType.Member });
             body = m[1];
@@ -600,7 +604,12 @@ export class Type<T extends ModifiableEntity> implements IType {
     }
 
     memberInfo(lambdaToProperty: (v: T) => any): MemberInfo {
-        return PropertyRoute.root(this.typeInfo()).add(lambdaToProperty).member;
+        var pr = this.propertyRoute(lambdaToProperty);
+
+        if (!pr.member)
+            throw new Error(`${pr.propertyPath()} has no member`);
+
+        return pr.member;
     }
 
     propertyRoute(lambdaToProperty: (v: T) => any): PropertyRoute {
@@ -615,7 +624,7 @@ export class Type<T extends ModifiableEntity> implements IType {
         return this.typeInfo().nicePluralName;
     }
 
-    nicePropertyName(lambdaToProperty: (v: T) => any): string {
+    nicePropertyName(lambdaToProperty: (v: T) => any): string  {
         return this.memberInfo(lambdaToProperty).niceName;
     }
 }
@@ -631,7 +640,7 @@ export class EnumType<T extends string> {
         return Dic.getKeys(this.typeInfo().members) as T[];
     }
 
-    niceName(value?: T): string {
+    niceName(value?: T): string | undefined {
 
         if (value == undefined)
             return this.typeInfo().niceName;
@@ -715,10 +724,10 @@ export function registerSymbol<T extends ISymbol>(symbol: T): any {
 export class PropertyRoute {
     
     propertyRouteType: PropertyRouteType;
-    parent: PropertyRoute; //!Root
-    rootType: TypeInfo; //Root
-    member: MemberInfo; //Member
-    mixinName: string; //Mixin
+    parent?: PropertyRoute; //!Root
+    rootType?: TypeInfo; //Root
+    member?: MemberInfo; //Member
+    mixinName?: string; //Mixin
 
     static root(type: PseudoType) {
         const typeInfo = getTypeInfo(type);
@@ -744,7 +753,12 @@ export class PropertyRoute {
         return new PropertyRoute(parent, PropertyRouteType.LiteEntity, undefined, undefined, undefined);
     }
 
-    constructor(parent: PropertyRoute, propertyRouteType: PropertyRouteType, rootType: TypeInfo, member: MemberInfo, mixinName: string) {
+    constructor(
+        parent: PropertyRoute | undefined,
+        propertyRouteType: PropertyRouteType,
+        rootType: TypeInfo | undefined,
+        member: MemberInfo | undefined,
+        mixinName: string | undefined) {
 
         this.propertyRouteType = propertyRouteType;
         this.parent = parent;
@@ -763,16 +777,17 @@ export class PropertyRoute {
     }
 
     findRootType(): TypeInfo {
-        return this.rootType || this.parent.findRootType();
+        return this.rootType || this.parent!.findRootType();
     }
 
     typeReference(): TypeReference {
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: return { name: this.rootType.name };
-            case PropertyRouteType.Field: return this.member.type;
+            case PropertyRouteType.Root: return { name: this.rootType!.name };
+            case PropertyRouteType.Field: return this.member!.type;
             case PropertyRouteType.Mixin: throw new Error("mixins can not be used alone");
-            case PropertyRouteType.MListItem: return Dic.extend({}, this.parent.typeReference(), { isCollection: false });
-            case PropertyRouteType.LiteEntity: return Dic.extend({}, this.parent.typeReference(), { isLite: false });
+            case PropertyRouteType.MListItem: return Dic.extend({}, this.parent!.typeReference(), { isCollection: false });
+            case PropertyRouteType.LiteEntity: return Dic.extend({}, this.parent!.typeReference(), { isLite: false });
+            default: throw new Error("Unexpected propertyRouteType");
         }
     }
 
@@ -782,21 +797,23 @@ export class PropertyRoute {
 
     closestTypeInfo(): TypeInfo {
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: return this.rootType;
-            case PropertyRouteType.Field: return this.parent.closestTypeInfo();
-            case PropertyRouteType.Mixin: return this.parent.closestTypeInfo();
-            case PropertyRouteType.MListItem: return this.parent.closestTypeInfo();
-            case PropertyRouteType.LiteEntity: return this.parent.closestTypeInfo();
+            case PropertyRouteType.Root: return this.rootType!;
+            case PropertyRouteType.Field: return this.parent!.closestTypeInfo();
+            case PropertyRouteType.Mixin: return this.parent!.closestTypeInfo();
+            case PropertyRouteType.MListItem: return this.parent!.closestTypeInfo();
+            case PropertyRouteType.LiteEntity: return this.parent!.closestTypeInfo();
+            default: throw new Error("Unexpected propertyRouteType");
         }
     }
 
-    propertyPath(): string{
+    propertyPath(): string {
         switch (this.propertyRouteType) {
             case PropertyRouteType.Root: throw new Error("Root has no PropertyString");
-            case PropertyRouteType.Field: return this.member.name;
+            case PropertyRouteType.Field: return this.member!.name;
             case PropertyRouteType.Mixin: return "[" + this.mixinName + "]";
-            case PropertyRouteType.MListItem: return this.parent.propertyPath() + "/";
-            case PropertyRouteType.LiteEntity: return this.parent.propertyPath() + ".entity";
+            case PropertyRouteType.MListItem: return this.parent!.propertyPath() + "/";
+            case PropertyRouteType.LiteEntity: return this.parent!.propertyPath() + ".entity";
+            default: throw new Error("Unexpected propertyRouteType");
         }
     }
 
@@ -877,12 +894,13 @@ export class PropertyRoute {
             case PropertyRouteType.LiteEntity:
             case PropertyRouteType.Field:
                 {
-                    const member = this.member;
+                    const member = this.member!;
                     return Dic.getValues(type.members)
                         .filter(m => m.name.startsWith(member.name + "."))
                         .filter(m => !containsDotOrSlash(m.name.substring(member.name.length + 1)))
                         .toObject(m => m.name.substring(member.name.length + 1));
                 }
+            default: throw new Error("Unexpected propertyRouteType");
 
         }
     }
@@ -909,10 +927,10 @@ export class GraphExplorer {
     static propagateAll(...args: any[]) {
         const ge = new GraphExplorer();
         ge.modelStateMode = "clean";
-        args.forEach(o => ge.isModified(o, undefined));
+        args.forEach(o => ge.isModified(o, ""));
     }
 
-    static setModelState(e: ModifiableEntity, modelState: ModelState, initialPrefix: string) {
+    static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {
         const ge = new GraphExplorer();
         ge.modelStateMode = "set";
         ge.modelState = modelState == undefined ? {} : Dic.copy(modelState);

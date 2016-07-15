@@ -50,7 +50,7 @@ export function isOperationAllowed(oi: OperationInfo) {
 
 
 export function operationInfos(ti: TypeInfo) {
-    return Dic.getValues(ti.operations).filter(isOperationAllowed);
+    return Dic.getValues(ti.operations!).filter(isOperationAllowed);
 }
 
 /**
@@ -74,7 +74,7 @@ export abstract class OperationSettings {
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
     isVisible: (ctx: ConstructorOperationContext<T>) => boolean;
-    onConstruct: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T>>;
+    onConstruct: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined>;
 
     constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
         super(operationSymbol);
@@ -148,8 +148,8 @@ export interface EntityOperationContext<T extends Entity> {
 
 export class EntityOperationSettings<T extends Entity> extends OperationSettings {
 
-    contextual: ContextualOperationSettings<T>;
-    contextualFromMany: ContextualOperationSettings<T>;
+    contextual?: ContextualOperationSettings<T>;
+    contextualFromMany?: ContextualOperationSettings<T>;
     
     isVisible: (ctx: EntityOperationContext<T>) => boolean;
     confirmMessage: (ctx: EntityOperationContext<T>) => string;

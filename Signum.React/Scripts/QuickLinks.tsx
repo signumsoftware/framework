@@ -51,7 +51,7 @@ export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[
     return Promise.all(promises).then(links => links.flatMap(a => a || []).filter(a => a && a.isVisible).orderBy(a => a.order));
 }
 
-function asPromiseArray<T>(valueOrPromiseOrArray: T | T[] | Promise<T> | Promise<T[]>): Promise<T[]> {
+function asPromiseArray<T>(valueOrPromiseOrArray: T | T[] | Promise<T> | Promise<T[]>): Promise<T[] | undefined> {
 
     if (!valueOrPromiseOrArray)
         return Promise.resolve(undefined);
@@ -74,7 +74,7 @@ export function getQuickLinkWidget(ctx: WidgetContext): React.ReactElement<any> 
     return <QuickLinkWidget ctx={ctx}/>;
 }
 
-export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock> {
+export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> {
 
     if (ctx.lites.length != 1)
         return Promise.resolve(undefined);
@@ -98,7 +98,7 @@ export interface QuickLinkWidgetProps {
     ctx: WidgetContext
 }
 
-export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { links: QuickLink[] }> {
+export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { links?: QuickLink[] }> {
 
     constructor(props: QuickLinkWidgetProps) {
         super(props);
@@ -136,7 +136,7 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
         const links = this.state.links;
 
         if (links != undefined && links.length == 0)
-            return undefined;
+            return null;
 
         const a = (
             <a
@@ -179,7 +179,7 @@ export abstract class QuickLink {
     glyphiconColor: string;
     ctx: QuickLinkContext<Entity>;
 
-    constructor(name: string, options: QuickLinkOptions) {
+    constructor(name: string, options?: QuickLinkOptions) {
         this.name = name;
 
         Dic.extend(this, { isVisible: true, text: "", order: 0 } as QuickLinkOptions, options);

@@ -19,7 +19,7 @@ export class StyleContext {
     styleOptions: StyleOptions;
     parent: StyleContext;
 
-    constructor(parent: StyleContext, styleOptions: StyleOptions) {
+    constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined) {
         this.parent = parent || StyleContext.default;
         this.styleOptions = styleOptions || {};
 
@@ -84,8 +84,8 @@ export class StyleContext {
         this.styleOptions.readOnly = value;
     }
 
-    
-    get frame(): EntityFrame<ModifiableEntity> {
+
+    get frame(): EntityFrame<ModifiableEntity> | undefined {
         return this.styleOptions.frame ? this.styleOptions.frame :
             this.parent ? this.parent.frame : undefined;
     }
@@ -103,7 +103,7 @@ export class StyleContext {
     static bsColumnsInvert(bs: BsColumns): BsColumns {
         return {
             xs: bs.xs ? (12 - bs.xs) : undefined,
-            sm: bs.sm ? (12 - bs.sm) : undefined,
+            sm: (12 - bs.sm),
             md: bs.md ? (12 - bs.md) : undefined,
             lg: bs.lg ? (12 - bs.lg) : undefined,
         };
@@ -111,7 +111,6 @@ export class StyleContext {
 }
 
 export interface StyleOptions {
-
     formGroupStyle?: FormGroupStyle;
     formGroupSize?: FormGroupSize;
     placeholderLabels?: boolean;
@@ -142,7 +141,7 @@ export class TypeContext<T> extends StyleContext {
 
     get value() {
         if (this.binding == undefined)
-            return undefined; //React Dev Tools
+            return undefined as any; //React Dev Tools
 
         return this.binding.getValue();
     }
@@ -154,12 +153,12 @@ export class TypeContext<T> extends StyleContext {
 
     get error() {
         if (this.binding == undefined)
-            return undefined; //React Dev Tools
+            return undefined as any; //React Dev Tools
 
         return this.binding.getError();
     }
 
-    set error(val: string) {
+    set error(val: string | undefined) {
         this.binding.setError(val);
     }
 
@@ -168,7 +167,7 @@ export class TypeContext<T> extends StyleContext {
         return new TypeContext(undefined, styleOptions, PropertyRoute.root(type), new ReadonlyBinding<T>(value, ""));
     }
 
-    constructor(parent: StyleContext, styleOptions: StyleOptions, propertyRoute: PropertyRoute, binding: IBinding<T>) {
+    constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined, propertyRoute: PropertyRoute, binding: IBinding<T>) {
         super(parent, styleOptions);
         this.propertyRoute = propertyRoute;
         this.binding = binding;
@@ -197,22 +196,22 @@ export class TypeContext<T> extends StyleContext {
         return result;
     }
 
-    niceName(property?: (val: T) => any) {
+    niceName(property?: (val: T) => any): string | undefined  {
 
         if (this.propertyRoute == undefined)
             return undefined;
 
         if (property == undefined)
-            return this.propertyRoute.member.niceName;
+            return this.propertyRoute.member!.niceName;
 
-        return this.propertyRoute.add(property).member.niceName;
+        return this.propertyRoute.add(property).member!.niceName;
     }
 
-    compose(suffix: string) {
+    compose(suffix: string): string {
         return compose(this.prefix, suffix);
     }
 
-    tryFindParent<S extends ModifiableEntity>(type: Type<S>): S {
+    tryFindParent<S extends ModifiableEntity>(type: Type<S>): S | undefined {
 
         let current: TypeContext<any> = this;
 
@@ -248,7 +247,7 @@ export class TypeContext<T> extends StyleContext {
         return this.propertyRoute ? this.propertyRoute.propertyPath() : undefined;
     }
 
-    get errorClass(): string {
+    get errorClass(): string | undefined {
         return !!this.error ? "has-error" : undefined;
     }
 }
@@ -274,12 +273,12 @@ export interface EntityFrame<T extends ModifiableEntity> {
 }
 
 
-function compose(prefix: string, suffix: string){
+function compose(prefix: string | undefined, suffix: string | undefined): string {
     if (!prefix || prefix == "")
-        return suffix;
+        return suffix || "";
 
     if (!suffix || suffix == "")
-        return prefix;
+        return prefix || "";
 
     return prefix + "_" + suffix;
 }

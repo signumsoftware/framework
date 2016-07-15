@@ -29,7 +29,7 @@ export function baseUrl(options: AjaxOptions): string {
 
 export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
     return ajaxGetRaw(options)
-        .then(a=> a.status == 204 ? undefined : a.json<T>());
+        .then(a=> a.status == 204 ? undefined as any : a.json<T>());
 }
 
 export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
@@ -47,7 +47,7 @@ export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
     return ajaxPostRaw(options, data)
-        .then(a=> a.status == 204 ? undefined : a.json<T>());
+        .then(a=> a.status == 204 ? undefined as any : a.json<T>());
 }
 
 
@@ -196,12 +196,12 @@ export interface WebApiHttpError {
 }
 
 export class ValidationError extends Error {
-    modelState: ModelState;
+    modelState?: ModelState;
     message: string;
 
     constructor(public statusText: string, json: WebApiHttpError) {
         super(statusText)
-        this.message = json.Message;
+        this.message = json.Message || "";
         this.modelState = json.ModelState;
     }
 
@@ -225,7 +225,7 @@ window.addEventListener("storage", se => {
     } else if (se.key == 'sessionStorage' && !sessionStorage.length) {
         // sessionStorage is empty -> fill it
 
-        const data = JSON.parse(se.newValue);
+        const data = JSON.parse(se.newValue!);
 
         for (let key in data) {
             sessionStorage.setItem(key, data[key]);

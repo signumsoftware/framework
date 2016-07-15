@@ -11,16 +11,15 @@ import * as Navigator from './Navigator';
 
 export const customConstructors: { [typeName: string]: (typeName: string) => ModifiableEntity | Promise<ModifiableEntity> } = { }
 
-export function construct<T extends ModifiableEntity>(type: Type<T>): Promise<EntityPack<T>>;
-export function construct(type: string): Promise<EntityPack<ModifiableEntity>>;
-export function construct(type: string | Type<any>): Promise<EntityPack<ModifiableEntity>> {
+export function construct<T extends ModifiableEntity>(type: Type<T>): Promise<EntityPack<T> | undefined>;
+export function construct(type: string): Promise<EntityPack<ModifiableEntity> | undefined>;
+export function construct(type: string | Type<any>): Promise<EntityPack<ModifiableEntity> | undefined> {
     
     const typeName = (type as Type<any>).typeName || type as string;
 
     const c = customConstructors[typeName];
     if (c)
-        return asPromise(c(typeName)).then(e =>
-        {
+        return asPromise(c(typeName)).then<EntityPack<ModifiableEntity> | undefined>(e => {
             if (e == undefined)
                 return undefined;
 
@@ -32,7 +31,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
 
     if (ti) {
 
-        const constructOperations = Dic.getValues(ti.operations).filter(a => a.operationType == OperationType.Constructor);
+        const constructOperations = Dic.getValues(ti.operations!).filter(a => a.operationType == OperationType.Constructor);
 
         if (constructOperations.length) {
 
@@ -43,6 +42,10 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
 
             return SelectorModal.chooseElement(ctrs, { display: c => c.niceName, name: c => c.key, message: SelectorMessage.PleaseSelectAConstructor.niceToString() })
                 .then(oi => {
+
+                    if (!oi)
+                        return undefined;
+
                     const settings = Operations.getSettings(oi.key) as Operations.ConstructorOperationSettings<Entity>;
 
                     if (settings && settings.onConstruct)

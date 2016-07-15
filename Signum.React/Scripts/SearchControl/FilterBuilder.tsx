@@ -28,7 +28,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
 
         this.props.filterOptions.push({
             token: this.props.lastToken,
-            columnName: undefined,
+            columnName: undefined as any,
             operation: !this.props.lastToken ? undefined : (filterOperations[this.props.lastToken.filterType] || []).firstOrNull(),
             value: undefined,
         });
@@ -139,7 +139,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
 
     handleChangeOperation = (event: React.FormEvent) => {
         const operation = (event.currentTarget as HTMLSelectElement).value as any;
-        if (isList(operation) != isList(this.props.filter.operation))
+        if (isList(operation) != isList(this.props.filter.operation!))
             this.props.filter.value = isList(operation) ? [this.props.filter.value] : this.props.filter.value[0];
         
         this.props.filter.operation = operation;
@@ -164,11 +164,11 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                 </td>
                 <td>
                     <QueryTokenBuilder
-                        queryToken={f.token}
+                        queryToken={f.token!}
                         onTokenChange={this.handleTokenChanged}
                         queryKey={ this.props.queryDescription.queryKey }
                         subTokenOptions={this.props.subTokenOptions}
-                        readOnly={f.frozen}/></td>
+                        readOnly={!!f.frozen}/></td>
                 <td className="sf-filter-operation">
                     {f.token && f.operation &&
                         <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
@@ -187,17 +187,17 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
     renderValue() {
         const f = this.props.filter;
 
-        if (isList(f.operation))
-            return <MultiValue values={f.value} createAppropiateControl={this.handleCreateAppropiateControl} frozen={this.props.filter.frozen} onChange={this.handleValueChange}/>;
+        if (isList(f.operation!))
+            return <MultiValue values={f.value} createAppropiateControl={this.handleCreateAppropiateControl} frozen={!!this.props.filter.frozen} onChange={this.handleValueChange}/>;
 
-        const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: f.frozen }, undefined, Binding.create(f, a => a.value));
+        const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: f.frozen }, undefined as any, Binding.create(f, a => a.value));
 
         return this.handleCreateAppropiateControl(ctx);
     }
 
     handleCreateAppropiateControl = (ctx: TypeContext<any>): React.ReactElement<any> => {
 
-        const token = this.props.filter.token;
+        const token = this.props.filter.token!;
 
         switch (token.filterType) {
             case "Lite":
@@ -263,11 +263,13 @@ export class MultiValue extends React.Component<MultiValueProps, void> {
                                         </a>}
                                 </td>
                                 <td>
-                                    {this.props.createAppropiateControl(new TypeContext<any>(undefined,
+                                    {
+                                        this.props.createAppropiateControl(new TypeContext<any>(undefined,
                                         {
                                             formGroupStyle: "None",
                                             readOnly: this.props.frozen
-                                        }, undefined, new Binding<any>(this.props.values, i))) }
+                                        }, undefined as any, new Binding<any>(this.props.values, i)))
+                                    }
                                 </td>
                             </tr>)
                     }
