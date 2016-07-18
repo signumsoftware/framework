@@ -262,8 +262,8 @@ export function logout() {
 
     Api.logout().then(() => {
         onLogout();
-        setCurrentUser(null);
         setAuthToken(null);
+        setCurrentUser(null);
     }).done();
 }
 
