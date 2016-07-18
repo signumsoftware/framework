@@ -118,7 +118,7 @@ export class TranslationTypeTable extends React.Component<{ type: LocalizableTyp
     render() {
 
         let {type, result} = this.props;
-
+        
         return (
             <table style={{ width: "100%", margin: "10px 0" }} className="st" key={type.type}>
                 <thead>
@@ -136,7 +136,7 @@ export class TranslationTypeTable extends React.Component<{ type: LocalizableTyp
                     </tr>
                 </thead>
                 <tbody>
-                    {!type.hasDescription ? [] : Dic.getValues(type.cultures).map(loc =>
+                    {Dic.getValues(type.cultures).filter(c => !!c.typeDescription).map(loc =>
                         <TranslationTypeDescription key={loc.culture } edit={this.editCulture(loc) } loc={loc} result={this.props.result} type={type} />) }
                     {this.renderMembers(type) }
                 </tbody>
@@ -239,6 +239,8 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
 
         var {type, loc, edit } = this.props;
 
+        var td = loc.typeDescription;
+
         var pronoms = this.props.result.cultures[loc.culture].pronoms || [];
 
         return (
@@ -246,27 +248,27 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
                 <th className="leftCell">{ loc.culture }</th>
                 <th className="smallCell monospaceCell">
                     {type.hasGender && (edit ?
-                        <select value={loc.gender || ""} onChange={(e) => loc.gender = (e.currentTarget as HTMLSelectElement).value }>
-                            { initialElementIf(loc.gender == null).concat(
+                        <select value={td.gender || ""} onChange={(e) => td.gender = (e.currentTarget as HTMLSelectElement).value }>
+                            { initialElementIf(td.gender == null).concat(
                                 pronoms.map(a => <option key={a.Gender} value={a.Gender}>{a.Singular}</option>)) }
                         </select> :
-                        (pronoms.filter(a => a.Gender == loc.gender).map(a => a.Singular).singleOrNull()))
+                        (pronoms.filter(a => a.Gender == td.gender).map(a => a.Singular).singleOrNull()))
                     }
                 </th>
                 <th className="monospaceCell">
-                    { edit ? this.renderEdit() : loc.description
+                    { edit ? this.renderEdit() : td.description
                     }
                 </th>
                 <th className="smallCell">
                     { type.hasPluralDescription && type.hasGender &&
-                        pronoms.filter(a => a.Gender == loc.gender).map(a => a.Plural).singleOrNull()
+                        pronoms.filter(a => a.Gender == td.gender).map(a => a.Plural).singleOrNull()
                     }
                 </th>
                 <th className="monospaceCell">
                     {
                         type.hasPluralDescription && (edit ?
-                            <textarea style={{ height: "24px", width: "90%" }} value={loc.pluralDescription || ""} onChange={(e) => { loc.pluralDescription = (e.currentTarget as HTMLSelectElement).value; this.forceUpdate(); } } /> :
-                            loc.pluralDescription)
+                            <textarea style={{ height: "24px", width: "90%" }} value={td.pluralDescription || ""} onChange={(e) => { td.pluralDescription = (e.currentTarget as HTMLSelectElement).value; this.forceUpdate(); } } /> :
+                            td.pluralDescription)
                     }
                 </th>
             </tr>
@@ -275,15 +277,16 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
 
     handleOnChange = (e: React.FormEvent) => {
         var { loc } = this.props;
-        loc.description = (e.currentTarget as HTMLSelectElement).value;
+        var td = loc.typeDescription;
+        td.description = (e.currentTarget as HTMLSelectElement).value;
 
-        API.pluralize(loc.culture, loc.description).then(plural => {
-            loc.pluralDescription = plural;
+        API.pluralize(loc.culture, td.description).then(plural => {
+            td.pluralDescription = plural;
             this.forceUpdate();
         }).done();
 
-        API.gender(loc.culture, loc.description).then(gender => {
-            loc.gender = gender;
+        API.gender(loc.culture, td.description).then(gender => {
+            td.gender = gender;
             this.forceUpdate();
         }).done();
 
@@ -297,16 +300,17 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
 
     renderEdit() {
         var { loc } = this.props;
+        var td = loc.typeDescription;
 
-        var translatedTypes = Dic.getValues(this.props.type.cultures).filter(a => !!a.translatedDescription);
+        var translatedTypes = Dic.getValues(this.props.type.cultures).filter(a => !!a.typeDescription.translatedDescription);
         if (!translatedTypes.length || this.state.avoidCombo)
-            return (<textarea style={{ height: "24px", width: "90%" }} value={loc.description || ""} onChange={this.handleOnChange} />);
+            return (<textarea style={{ height: "24px", width: "90%" }} value={td.description || ""} onChange={this.handleOnChange} />);
 
         return (
             <span>
-                <select value={loc.description || ""} onChange={this.handleOnChange}>
-                    {  initialElementIf(loc.description == null).concat(
-                        translatedTypes.map(a => <option key={a.culture} value={a.translatedDescription}>{a.translatedDescription}</option>)) }
+                <select value={td.description || ""} onChange={this.handleOnChange}>
+                    {  initialElementIf(td.description == null).concat(
+                        translatedTypes.map(a => <option key={a.culture} value={a.typeDescription.translatedDescription}>{a.typeDescription.translatedDescription}</option>)) }
                 </select>
                 &nbsp;
                 <a href="#" onClick={this.handleAvoidCombo}>{TranslationMessage.Edit.niceToString() }</a>

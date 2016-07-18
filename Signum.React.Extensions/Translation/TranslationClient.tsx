@@ -65,6 +65,7 @@ export interface TranslationFileStatus {
 export type TranslatedSummaryState = "Completed" | "Pending" | "None";
 
 export interface AssemblyResult {
+    totalTypes: number;
     cultures: {
         [cultureName: string]: {
             name: string;
@@ -83,13 +84,17 @@ export interface LocalizableType {
     cultures: { [culture: string]: LocalizedType };
 }
 
-export interface LocalizedType {   
+export interface LocalizedType {
     culture: string;
+    typeDescription: LocalizedDescription;
+    members: { [member: string]: LocalizedMember };
+}
+
+export interface LocalizedDescription {
     gender: string;
     description: string;
     pluralDescription: string;
     translatedDescription: string;
-    members: { [member: string]: LocalizedMember };
 }
 
 export interface LocalizedMember {

@@ -44,8 +44,21 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
         var {assembly, culture } = this.props.routeParams;
 
+
+        if (this.state.result && this.state.result.totalTypes == 0) {
+            return (
+                <div>
+                    <h2>{TranslationMessage._0AlreadySynchronized.niceToString(this.props.routeParams.assembly) }</h2>
+                </div>
+            );
+        }
+
         var message = TranslationMessage.Synchronize0In1.niceToString(assembly,
                 this.state.cultures ? this.state.cultures[culture].toStr : culture);
+
+        if (this.state.result) {
+            message += ` [${Dic.getKeys(this.state.result.types).length}/${this.state.result.totalTypes}]`;
+        }
 
         return (
             <div>
@@ -55,6 +68,8 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
             </div>
         );
     }
+
+
 
     handleSearch = (filter: string) => {
         var {assembly, culture} = this.props.routeParams;
