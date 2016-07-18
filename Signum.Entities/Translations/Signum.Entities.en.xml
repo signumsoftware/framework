@@ -3,7 +3,6 @@
   <Type Name="AggregateFunction" />
   <Type Name="BooleanEnum" />
   <Type Name="CalendarMessage" />
-  <Type Name="Case" />
   <Type Name="CollectionElementType" />
   <Type Name="ColorEntity" />
   <Type Name="ColumnOptionsMode" />
@@ -73,6 +72,7 @@
     <Member Name="PleaseSelectAConstructor" Description="Please Select a Constructor" />
   </Type>
   <Type Name="SemiSymbol" />
+  <Type Name="StringCase" />
   <Type Name="Symbol" />
   <Type Name="SynchronizerMessage" />
   <Type Name="TypeEntity" />
