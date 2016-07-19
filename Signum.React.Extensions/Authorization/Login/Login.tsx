@@ -32,7 +32,7 @@ export default class Login extends React.Component<{}, { modelState?: ModelState
             .then(response => {
                 AuthClient.setAuthToken(response.token);
                 AuthClient.setCurrentUser(response.userEntity);
-                AuthClient.onLogin();
+                AuthClient.Options.onLogin();
             })
             .catch((e: ValidationError) => {
                 if (e.modelState)

@@ -166,7 +166,7 @@ export function setCurrentUser(user: UserEntity) {
 
     const changed = !is(Navigator.currentUser, user, true);
 
-    Navigator.currentUser = user;
+    Navigator.setCurrentUser(user);
 
     if (changed)
         onCurrentUserChanged.forEach(f => f(user));
@@ -261,18 +261,20 @@ export function autoLogin(): Promise<UserEntity> {
 export function logout() {
 
     Api.logout().then(() => {
-        onLogout();
+        Options.onLogout();
         setAuthToken(null);
         setCurrentUser(null);
     }).done();
 }
 
-export let onLogout = () => {
-    Navigator.currentHistory.push("~/");
-}
+export namespace Options {
+    export let onLogout = () => {
+        Navigator.currentHistory.push("~/");
+    }
 
-export let onLogin = () => {
-    Navigator.currentHistory.push("~/");
+    export let onLogin = () => {
+        Navigator.currentHistory.push("~/");
+    }
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol) {

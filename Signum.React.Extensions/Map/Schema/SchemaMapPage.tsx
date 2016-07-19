@@ -41,12 +41,12 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
     componentWillMount() {
 
-        if(Navigator.setExpanded){
-            if(Navigator.getExpanded) {
-                this.wasExpanded = Navigator.getExpanded();
+        if (Navigator.Expander.setExpanded) {
+            if (Navigator.Expander.getExpanded) {
+                this.wasExpanded = Navigator.Expander.getExpanded();
             }
 
-            Navigator.setExpanded(true);
+            Navigator.Expander.setExpanded(true);
         }
 
         MapClient.API.types()
@@ -75,8 +75,8 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
 
     componentWillUnmount(){
-        if(Navigator.setExpanded && this.wasExpanded != null){
-            Navigator.setExpanded(this.wasExpanded);
+        if (Navigator.Expander.setExpanded && this.wasExpanded != null){
+            Navigator.Expander.setExpanded(this.wasExpanded);
         }
     }
 
@@ -121,7 +121,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
     render() {
         
-        if(Navigator.getExpanded && !Navigator.getExpanded())
+        if (Navigator.Expander.getExpanded && !Navigator.Expander.getExpanded())
             return null;
 
         var s = this.state;
