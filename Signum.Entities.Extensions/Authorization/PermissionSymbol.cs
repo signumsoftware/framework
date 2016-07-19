@@ -12,20 +12,20 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class PermissionSymbol : Symbol
     {
-        private PermissionSymbol() { } 
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public PermissionSymbol([CallerMemberName]string memberName = null) : 
-            base(new StackFrame(1, false), memberName)
+        private PermissionSymbol() { }
+        
+        public PermissionSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
         {
         }
     }
 
+    [AutoInit]
     public static class BasicPermission
     {
-        public static readonly PermissionSymbol AdminRules = new PermissionSymbol();
-        public static readonly PermissionSymbol AutomaticUpgradeOfProperties = new PermissionSymbol();
-        public static readonly PermissionSymbol AutomaticUpgradeOfQueries = new PermissionSymbol();
-        public static readonly PermissionSymbol AutomaticUpgradeOfOperations = new PermissionSymbol();
+        public static PermissionSymbol AdminRules;
+        public static PermissionSymbol AutomaticUpgradeOfProperties;
+        public static PermissionSymbol AutomaticUpgradeOfQueries;
+        public static PermissionSymbol AutomaticUpgradeOfOperations;
     }
 }

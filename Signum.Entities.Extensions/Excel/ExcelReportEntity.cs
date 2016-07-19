@@ -8,49 +8,37 @@ using Signum.Utilities;
 using Signum.Entities.Files;
 using System.Linq.Expressions;
 using System.ComponentModel;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Excel
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ExcelReportEntity : Entity
     {
-        QueryEntity query;
         [NotNullValidator]
-        public QueryEntity Query
-        {
-            get { return query; }
-            set { Set(ref query, value); }
-        }
-  
+        public QueryEntity Query { get; set; }
+
         [NotNullable]
-        string displayName;
         [StringLengthValidator(Min = 3)]
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { SetToStr(ref displayName, value); }
-        }
+        public string DisplayName { get; set; }
 
         [NotNullable]
-        EmbeddedFileEntity file;
         [NotNullValidator]
-        public EmbeddedFileEntity File
-        {
-            get { return file; }
-            set { Set(ref file, value); }
-        }
+        public EmbeddedFileEntity File { get; set; }
 
-        static readonly Expression<Func<ExcelReportEntity, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<ExcelReportEntity, string>> ToStringExpression = e => e.DisplayName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
     }
 
+    [AutoInit]
     public static class ExcelReportOperation
     {
-        public static readonly ExecuteSymbol<ExcelReportEntity> Save = OperationSymbol.Execute<ExcelReportEntity>();
-        public static readonly DeleteSymbol<ExcelReportEntity> Delete = OperationSymbol.Delete<ExcelReportEntity>();
+        public static ExecuteSymbol<ExcelReportEntity> Save;
+        public static DeleteSymbol<ExcelReportEntity> Delete;
     }
 
     public enum ExcelMessage

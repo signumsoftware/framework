@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {
@@ -16,26 +17,17 @@ namespace Signum.Entities.Mailing
     public class EmailMasterTemplateEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
+        public string Name { get; set; }
 
         [NotifyCollectionChanged, NotNullable]
-        MList<EmailMasterTemplateMessageEntity> messages = new MList<EmailMasterTemplateMessageEntity>();
-        public MList<EmailMasterTemplateMessageEntity> Messages
-        {
-            get { return messages; }
-            set { Set(ref messages, value); }
-        }
+        public MList<EmailMasterTemplateMessageEntity> Messages { get; set; } = new MList<EmailMasterTemplateMessageEntity>();
 
         [Ignore]
         public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
-        static Expression<Func<EmailMasterTemplateEntity, string>> ToStringExpression = e => e.name;
+        static Expression<Func<EmailMasterTemplateEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -43,7 +35,7 @@ namespace Signum.Entities.Mailing
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Is(() => Messages))
+            if (pi.Name == nameof(Messages))
             {
                 if (Messages == null || !Messages.Any())
                     return EmailTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();
@@ -57,7 +49,7 @@ namespace Signum.Entities.Mailing
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            if (sender == messages)
+            if (sender == Messages)
             {
                 if (args.OldItems != null)
                     foreach (var item in args.OldItems.Cast<EmailMasterTemplateMessageEntity>())
@@ -73,14 +65,15 @@ namespace Signum.Entities.Mailing
         {
             base.PreSaving(ref graphModified);
 
-            messages.ForEach(e => e.MasterTemplate = this);
+            Messages.ForEach(e => e.MasterTemplate = this);
         }
     }
 
+    [AutoInit]
     public static class EmailMasterTemplateOperation
     {
-        public static readonly ConstructSymbol<EmailMasterTemplateEntity>.Simple Create = OperationSymbol.Construct<EmailMasterTemplateEntity>.Simple();
-        public static readonly ExecuteSymbol<EmailMasterTemplateEntity> Save = OperationSymbol.Execute<EmailMasterTemplateEntity>();
+        public static ConstructSymbol<EmailMasterTemplateEntity>.Simple Create;
+        public static ExecuteSymbol<EmailMasterTemplateEntity> Save;
     }
 
     [Serializable]
@@ -102,31 +95,21 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        CultureInfoEntity cultureInfo;
         [NotNullValidator]
-        public CultureInfoEntity CultureInfo
-        {
-            get { return cultureInfo; }
-            set { Set(ref cultureInfo, value); }
-        }
+        public CultureInfoEntity CultureInfo { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string text;
-        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
-        public string Text
-        {
-            get { return text; }
-            set { Set(ref text, value); }
-        }
+        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
+        public string Text { get; set; }
 
         public override string ToString()
         {
-            return cultureInfo.TryToString();
+            return CultureInfo?.ToString();
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Text) && !EmailMasterTemplateEntity.MasterTemplateContentRegex.IsMatch(Text))
+            if (pi.Name == nameof(Text) && !EmailMasterTemplateEntity.MasterTemplateContentRegex.IsMatch(Text))
             {
                 throw new ApplicationException(EmailTemplateMessage.TheTextMustContain0IndicatingReplacementPoint.NiceToString().FormatWith("@[content]"));
             }

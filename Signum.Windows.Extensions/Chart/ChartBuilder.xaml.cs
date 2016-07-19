@@ -27,6 +27,7 @@ using Signum.Entities.Reflection;
 using System.IO;
 using Signum.Entities.Files;
 using System.Collections.ObjectModel;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Windows.Chart
 {
@@ -64,6 +65,44 @@ namespace Signum.Windows.Chart
         {
             InitializeComponent();
         }
+
+        private void ValueLine_Loaded(object sender, RoutedEventArgs e)
+        {
+            BindParameter((ValueLine)sender);
+        }
+
+        private void BindParameter(ValueLine vl)
+        {
+            vl.Bind(ValueLine.ItemSourceProperty, "", EnumValues);
+            vl.Bind(ValueLine.ValueLineTypeProperty, "ScriptParameter.Type", ParameterType);
+        }
+
+        public static IValueConverter EnumValues = ConverterFactory.New((ChartParameterEntity cp) =>
+        {
+            if (cp == null || cp.ScriptParameter.Type != ChartParameterType.Enum)
+                return null;
+
+            var t = cp.ScriptParameter.GetToken(cp.ParentChart);
+
+            return cp.ScriptParameter.GetEnumValues()
+                .Where(a => a.CompatibleWith(t))
+                .Select(a => a.Name)
+                .ToList();
+        });
+
+        public static IValueConverter ParameterType = ConverterFactory.New((ChartParameterType type) =>
+        {
+            if (type == ChartParameterType.Enum)
+                return ValueLineType.Enum;
+
+            if (type == ChartParameterType.Number)
+                return ValueLineType.Number;
+
+            if (type == ChartParameterType.String)
+                return ValueLineType.String;
+
+            return ValueLineType.String;
+        });
     }
 
 

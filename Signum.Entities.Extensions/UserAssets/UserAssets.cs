@@ -13,51 +13,21 @@ namespace Signum.Entities.UserAssets
     [Serializable]
     public class UserAssetPreviewModel : ModelEntity
     {
-        MList<UserAssetPreviewLine> lines = new MList<UserAssetPreviewLine>();
-        public MList<UserAssetPreviewLine> Lines
-        {
-            get { return lines; }
-            set { Set(ref lines, value); }
-        }
+        public MList<UserAssetPreviewLine> Lines { get; set; } = new MList<UserAssetPreviewLine>();
     }
 
     [Serializable]
     public class UserAssetPreviewLine : EmbeddedEntity
     {
-        Type type;
-        public Type Type
-        {
-            get { return type; }
-            set { Set(ref type, value); }
-        }
+        public Type Type { get; set; }
 
-        string text;
-        public string Text
-        {
-            get { return text; }
-            set { Set(ref text, value); }
-        }
+        public string Text { get; set; }
 
-        EntityAction action;
-        public EntityAction Action
-        {
-            get { return action; }
-            set { Set(ref action, value); }
-        }
+        public EntityAction Action { get; set; }
 
-        bool overrideEntity;
-        public bool OverrideEntity
-        {
-            get { return overrideEntity; }
-            set { Set(ref overrideEntity, value); }
-        }
+        public bool OverrideEntity { get; set; }
 
-        Guid guid;
-        public Guid Guid
-        {
-            get { return guid; }
-            set { Set(ref guid, value); }
-        }
+        public Guid Guid { get; set; }
 
         [HiddenProperty]
         public bool OverrideVisible
@@ -82,9 +52,10 @@ namespace Signum.Entities.UserAssets
         SucessfullyImported,
     }
 
+    [AutoInit]
     public static class UserAssetPermission
     {
-        public static readonly PermissionSymbol UserAssetsToXML = new PermissionSymbol();
+        public static PermissionSymbol UserAssetsToXML;
     }
 
     public interface IToXmlContext

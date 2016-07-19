@@ -181,7 +181,8 @@ namespace Signum.Web.AuthAdmin
             if(!BasicPermission.AdminRules.IsAuthorized())
                 return new MapColorProvider[0];
 
-            var roleRules = AuthLogic.RolesInOrder().ToDictionary(r=>r, r=>TypeAuthLogic.GetTypeRules(r).Rules.ToDictionary(a=>Navigator.ResolveWebTypeName(a.Resource.ToType()), a=>a.Allowed));
+            var roleRules = AuthLogic.RolesInOrder().ToDictionary(r => r,
+                r => TypeAuthLogic.GetTypeRules(r).Rules.ToDictionary(a => Navigator.ResolveWebTypeName(a.Resource.ToType()), a => a.Allowed));
 
             return roleRules.Keys.Select((r, i) => new MapColorProvider
             {

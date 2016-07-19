@@ -1,8 +1,0 @@
-﻿@using Signum.Engine
-@using Signum.Entities.Scheduler
-@using System.Globalization
-
-@using (var e = Html.TypeContext<ScheduleRuleDailyEntity>())
-{     
-    @Html.ValueLine(e, srd => srd.StartingOn)
-}

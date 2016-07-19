@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Engine</RootNamespace>
     <AssemblyName>Signum.Engine.Extensions</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>
     </SccProjectName>
@@ -126,8 +126,11 @@
     <Compile Include="Disconnected\ImportManager.cs" />
     <Compile Include="Disconnected\DisconnectedLogic.cs" />
     <Compile Include="Disconnected\ExportManager.cs" />
+    <Compile Include="Excel\ExcelAttachmentLogic.cs" />
+    <Compile Include="Files\EmbeddedFilePathLogic.cs" />
     <Compile Include="Files\FileLogic.cs" />
     <Compile Include="Files\FilePathLogic.cs" />
+    <Compile Include="Files\FileTypeLogic.cs" />
     <Compile Include="Help\HelpSearch.cs" />
     <Compile Include="Help\HelpUrls.cs" />
     <Compile Include="Help\HelpWiki.cs" />
@@ -138,6 +141,9 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Isolation\IsolationLogic.cs" />
+    <Compile Include="Mailing\AsyncEmailSenderLogic.cs" />
+    <Compile Include="Map\MapLogic.cs" />
+    <Compile Include="Mailing\SendEmailTaskLogic.cs" />
     <Compile Include="Templating\CommonTemplate.cs" />
     <Compile Include="Mailing\EmailMasterTemplateLogic.cs" />
     <Compile Include="Mailing\EmailTemplateParser.Nodes.cs" />
@@ -198,7 +204,7 @@
       <Name>Signum.Entities</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
-      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
+      <Project>{f7d3f72d-741d-4f67-8cf8-cd41b9035fed}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
@@ -253,7 +259,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Analyzer Include="..\..\Framework\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -262,4 +270,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <UsingTask TaskName="SignumTask" AssemblyFile="..\..\Framework\Signum.MSBuildTask\Binaries\Signum.MSBuildTask.dll" />
+  <Target Name="AfterCompile" DependsOnTargets="CoreCompile">
+    <SignumTask Assembly="@(IntermediateAssembly)" References="@(ReferencePath)" KeyFile="$(KeyOriginatorFile)" />
+  </Target>
 </Project>

@@ -20,14 +20,8 @@ namespace Signum.Web.Selenium
 {
     public static class SeleniumExtensions
     {
-        //public static string PageLoadTimeout = "20000";
         public static TimeSpan DefaultTimeout = TimeSpan.FromMilliseconds(20 * 1000);
         public static TimeSpan DefaultPoolingInterval = TimeSpan.FromMilliseconds(200);
-
-        //public static void WaitForPageToLoad(this RemoteWebDriver selenium)
-        //{
-        //    selenium.WaitForPageToLoad(PageLoadTimeout);
-        //}
 
         public static T Wait<T>(this RemoteWebDriver selenium, Func<T> condition, Func<string> actionDescription = null, TimeSpan? timeout = null)
         {
@@ -39,7 +33,7 @@ namespace Signum.Web.Selenium
                     PollingInterval = DefaultPoolingInterval
                 };
 
-                wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(NoAlertPresentException));
+                wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(NoAlertPresentException), typeof(StaleElementReferenceException));
                 
                 return wait.Until(_ => condition());
             }
@@ -265,6 +259,23 @@ namespace Signum.Web.Selenium
             }
 
             button.Click();
+        }
+
+        public static void SafeClick(this IWebElement element)
+        {
+            if (!element.Displayed || element.Location.Y < 150)//Nav
+            {
+                element.GetDriver().ScrollTo(element);
+            }
+
+            element.Click();
+        }
+
+        public static void ScrollTo(this RemoteWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript("arguments[0].scrollIntoView(false);", element);
+            Thread.Sleep(500);
         }
 
         public static void LoseFocus(this RemoteWebDriver driver, IWebElement element)

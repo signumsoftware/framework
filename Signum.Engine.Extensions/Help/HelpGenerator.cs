@@ -24,7 +24,7 @@ namespace Signum.Engine.Help
     {
         public static string GetPropertyHelp(PropertyRoute pr)
         {
-            string validations = Validator.TryGetPropertyValidator(pr).Try(vs => vs.Validators.CommaAnd(v => v.HelpMessage));
+            string validations = Validator.TryGetPropertyValidator(pr)?.Let(vs => vs.Validators.CommaAnd(v => v.HelpMessage));
 
             if (validations.HasText())
                 validations = HelpMessage.Should.NiceToString() + validations;
@@ -101,7 +101,7 @@ namespace Signum.Engine.Help
         {
             Type type = pr.Type;
             string format = Reflector.FormatString(pr);
-            string unit = pr.PropertyInfo.GetCustomAttribute<UnitAttribute>().Try(u=>u.UnitName);
+            string unit = pr.PropertyInfo.GetCustomAttribute<UnitAttribute>()?.UnitName;
             return ValueType(type, format, unit);
         }
 

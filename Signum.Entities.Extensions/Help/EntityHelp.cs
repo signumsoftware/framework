@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Help
 {
@@ -14,57 +15,29 @@ namespace Signum.Entities.Help
     public class EntityHelpEntity : Entity
     {
         [NotNullable]
-        TypeEntity type;
         [NotNullValidator]
-        public TypeEntity Type
-        {
-            get { return type; }
-            set { SetToStr(ref type, value); }
-        }
+        public TypeEntity Type { get; set; }
 
         [NotNullable]
-        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoEntity Culture
-        {
-            get { return culture; }
-            set { Set(ref culture, value); }
-        }
+        public CultureInfoEntity Culture { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        string description;
-        public string Description
-        {
-            get { return description; }
-            set { Set(ref description, value); }
-        }
+		[StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
+        public string Description { get; set; }
 
         [NotNullable]
-        MList<PropertyRouteHelpEntity> properties = new MList<PropertyRouteHelpEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<PropertyRouteHelpEntity> Properties
-        {
-            get { return properties; }
-            set { Set(ref properties, value); }
-        }
+        public MList<PropertyRouteHelpEntity> Properties { get; set; } = new MList<PropertyRouteHelpEntity>();
 
         [Ignore]
-        MList<OperationHelpEntity> operations = new MList<OperationHelpEntity>();
-        public MList<OperationHelpEntity> Operations
-        {
-            get { return operations; }
-            set { Set(ref operations, value); }
-        }
+        public MList<OperationHelpEntity> Operations { get; set; } = new MList<OperationHelpEntity>();
 
         [Ignore]
-        MList<QueryHelpEntity> queries = new MList<QueryHelpEntity>();
-        public MList<QueryHelpEntity> Queries
-        {
-            get { return queries; }
-            set { Set(ref queries, value); }
-        }
+        public MList<QueryHelpEntity> Queries { get; set; } = new MList<QueryHelpEntity>();
 
         static Expression<Func<EntityHelpEntity, string>> ToStringExpression = e => e.Type.ToString();
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -77,41 +50,33 @@ namespace Signum.Entities.Help
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Is(() => IsEmpty) && IsEmpty)
+            if (pi.Name == nameof(IsEmpty) && IsEmpty)
                 return "IsEmpty is true";
 
             return base.PropertyValidation(pi);
         }
     }
 
+    [AutoInit]
     public static class EntityHelpOperation
     {
-        public static readonly ExecuteSymbol<EntityHelpEntity> Save = OperationSymbol.Execute<EntityHelpEntity>();
+        public static ExecuteSymbol<EntityHelpEntity> Save;
     }
 
     [Serializable]
     public class PropertyRouteHelpEntity : EmbeddedEntity
     {
         [NotNullable]
-        PropertyRouteEntity property;
         [NotNullValidator]
-        public PropertyRouteEntity Property
-        {
-            get { return property; }
-            set { Set(ref property, value); }
-        }
+        public PropertyRouteEntity Property { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string description;
-        public string Description
-        {
-            get { return description; }
-            set { Set(ref description, value); }
-        }
+		[StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        public string Description { get; set; }
 
         public override string ToString()
         {
-            return this.Property.TryToString();
+            return this.Property?.ToString();
         }
     }
 

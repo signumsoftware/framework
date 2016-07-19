@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
 using System.Globalization;
 using Signum.Entities.Translation;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Authorization
 {
@@ -35,16 +36,11 @@ namespace Signum.Entities.Authorization
             return null;
         }
 
-        [NotNullable, UniqueIndex(AvoidAttachToUniqueIndexes=true), SqlDbType(Size = 100)]
-        string userName;
+        [NotNullable, UniqueIndex(AvoidAttachToUniqueIndexes = true), SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 100)]
-        public string UserName
-        {
-            get { return userName; }
-            set { SetToStr(ref userName, value); }
-        }
+        public string UserName { get; set; }
 
-        [NotNullable, SqlDbType(Size=128)]
+        [NotNullable, SqlDbType(Size = 128)]
         byte[] passwordHash;
         [NotNullValidator]
         public byte[] PasswordHash
@@ -57,69 +53,35 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        DateTime passwordSetDate;
-        public DateTime PasswordSetDate
-        {
-            get { return passwordSetDate; }
-            private set { Set(ref passwordSetDate, value); }
-        }
+        public DateTime PasswordSetDate { get; private set; }
 
-        bool passwordNeverExpires;
-        public bool PasswordNeverExpires
-        {
-            get { return passwordNeverExpires; }
-            set { Set(ref passwordNeverExpires, value); }
-        }
-       
-        RoleEntity role;
+        public bool PasswordNeverExpires { get; set; }
+
         [NotNullValidator]
-        public RoleEntity Role
-        {
-            get { return role; }
-            set { Set(ref role, value); }
-        }
+        public RoleEntity Role { get; set; }
 
-        string email;
         [EMailValidator]
-        public string Email
-        {
-            get { return email; }
-            set { Set(ref email, value); }
-        }
+        public string Email { get; set; }
 
-        CultureInfoEntity cultureInfo;
-        public CultureInfoEntity CultureInfo
-        {
-            get { return cultureInfo; }
-            set { Set(ref cultureInfo, value); }
-        }
+        public CultureInfoEntity CultureInfo { get; set; }
 
-        DateTime? anulationDate;
-        public DateTime? AnulationDate
-        {
-            get { return anulationDate; }
-            set { Set(ref anulationDate, value); }
-        }
+        public DateTime? AnulationDate { get; set; }
 
-        UserState state = UserState.New;
-        public UserState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
+        public UserState State { get; set; } = UserState.New;
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => State))
+            if (pi.Name == nameof(State))
             {
-                if (anulationDate != null && state != UserState.Disabled)
+                if (AnulationDate != null && State != UserState.Disabled)
                     return AuthMessage.TheUserStateMustBeDisabled.NiceToString();
             }
 
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<UserEntity, string>> ToStringExpression = e => e.userName;
+        static Expression<Func<UserEntity, string>> ToStringExpression = e => e.UserName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -131,16 +93,17 @@ namespace Signum.Entities.Authorization
             set { UserHolder.Current = value; }
         }
 
-        public static Expression<Func<UserEntity, EmailOwnerData>> EmailOwnerDataExpression = entity => new EmailOwnerData
+        public static Expression<Func<UserEntity, EmailOwnerData>> EmailOwnerDataExpression = u => new EmailOwnerData
         {
-            Owner = entity.ToLite(),
-            CultureInfo = entity.CultureInfo,
-            DisplayName = entity.UserName,
-            Email = entity.Email,
+            Owner = u.ToLite(),
+            CultureInfo = u.CultureInfo,
+            DisplayName = u.UserName,
+            Email = u.Email,
         };
+        [ExpressionField]
         public EmailOwnerData EmailOwnerData
         {
-            get{ return EmailOwnerDataExpression.Evaluate(this); }
+            get { return EmailOwnerDataExpression.Evaluate(this); }
         }
     }
 
@@ -152,14 +115,15 @@ namespace Signum.Entities.Authorization
         Disabled,
     }
 
+    [AutoInit]
     public static class UserOperation
     {
-        public static readonly ConstructSymbol<UserEntity>.Simple Create = OperationSymbol.Construct<UserEntity>.Simple();
-        public static readonly ExecuteSymbol<UserEntity> SaveNew = OperationSymbol.Execute<UserEntity>();
-        public static readonly ExecuteSymbol<UserEntity> Save = OperationSymbol.Execute<UserEntity>();
-        public static readonly ExecuteSymbol<UserEntity> Enable = OperationSymbol.Execute<UserEntity>();
-        public static readonly ExecuteSymbol<UserEntity> Disable = OperationSymbol.Execute<UserEntity>();
-        public static readonly ExecuteSymbol<UserEntity> SetPassword = OperationSymbol.Execute<UserEntity>();
+        public static ConstructSymbol<UserEntity>.Simple Create;
+        public static ExecuteSymbol<UserEntity> SaveNew;
+        public static ExecuteSymbol<UserEntity> Save;
+        public static ExecuteSymbol<UserEntity> Enable;
+        public static ExecuteSymbol<UserEntity> Disable;
+        public static ExecuteSymbol<UserEntity> SetPassword;
     }
 
     [Serializable]
@@ -170,7 +134,8 @@ namespace Signum.Entities.Authorization
         protected IncorrectUsernameException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+            : base(info, context)
+        { }
     }
 
     [Serializable]
@@ -181,6 +146,7 @@ namespace Signum.Entities.Authorization
         protected IncorrectPasswordException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+            : base(info, context)
+        { }
     }
 }

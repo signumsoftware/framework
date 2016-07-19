@@ -78,12 +78,12 @@ namespace Signum.Engine.Word
 
                             if (start.Interval.Min < interval.Min)
                             {
-                                Run firstRunPart = new Run { RunProperties = startRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
+                                Run firstRunPart = new Run { RunProperties = startRun.RunProperties?.Let(r => (RunProperties)r.CloneNode(true)) };
                                 firstRunPart.AppendChild(new Text { Text = start.Text.Substring(0, m.Index - start.Interval.Min), Space = SpaceProcessingModeValues.Preserve });
                                 par.Append(firstRunPart);
                             }
 
-                            par.Append(new MatchNode(m) { RunProperties = startRun.RunProperties.TryDo(r => r.Remove()) });
+                            par.Append(new MatchNode(m) { RunProperties = startRun.RunProperties?.Let(r => (RunProperties)r.CloneNode(true)) });
 
                             ElementInfo end = start;
                             while (end.Interval.Max < interval.Max) //Ignore
@@ -94,7 +94,7 @@ namespace Signum.Engine.Word
                                 Run endRun = (Run)end.Element;
 
                                 var textPart = end.Text.Substring(interval.Max - end.Interval.Min);
-                                Run endRunPart = new Run { RunProperties = endRun.RunProperties.Try(r => (RunProperties)r.CloneNode(true)) };
+                                Run endRunPart = new Run { RunProperties = endRun.RunProperties?.Let(r => (RunProperties)r.CloneNode(true)) };
                                 endRunPart.AppendChild(new Text { Text = textPart, Space = SpaceProcessingModeValues.Preserve });
 
                                 stack.Push(new ElementInfo
@@ -146,7 +146,7 @@ namespace Signum.Engine.Word
 
         private static string GetText(Run r)
         {
-            return r.ChildElements.OfType<Text>().SingleOrDefault().Try(t => t.Text) ?? "";
+            return r.ChildElements.OfType<Text>().SingleOrDefault()?.Text ?? "";
         }
 
         Stack<BlockContainerNode> stack = new Stack<BlockContainerNode>();
@@ -169,18 +169,16 @@ namespace Signum.Engine.Word
                     switch (keyword)
                     {
                         case "":
-                            var tok = TemplateUtils.TokenFormatRegex.Match(token);
-                            if (!tok.Success)
+                            var s = TemplateUtils.SplitToken(token);
+                            if (s == null)
                                 AddError(true, "{0} has invalid format".FormatWith(token));
                             else
                             {
-                                var vp = TryParseValueProvider(type, tok.Groups["token"].Value, dec);
-
-                                var format = tok.Groups["format"].Value.DefaultText(null);
-
-                                matchNode.Parent.ReplaceChild(new TokenNode(vp, format)
+                                var vp = TryParseValueProvider(type, s.Value.Token, dec);
+                                
+                                matchNode.Parent.ReplaceChild(new TokenNode(vp, s.Value.Format)
                                 {
-                                    RunProperties = matchNode.RunProperties.TryDo(d => d.Remove()) 
+                                    RunProperties = matchNode.RunProperties?.Do(d => d.Remove()) 
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -192,7 +190,7 @@ namespace Signum.Engine.Word
 
                                 matchNode.Parent.ReplaceChild(new DeclareNode(vp, this.AddError)
                                 {
-                                    RunProperties = matchNode.RunProperties.TryDo(d => d.Remove()) 
+                                    RunProperties = matchNode.RunProperties?.Do(d => d.Remove()) 
                                 }, matchNode);
 
                                 DeclareVariable(vp);
@@ -224,16 +222,21 @@ namespace Signum.Engine.Word
                         case "notany":
                             {
                                 var an = PeekBlock<AnyNode>();
-                                an.NotAnyToken = new MatchNodePair(matchNode);
+                                if (an != null)
+                                {
+                                    an.NotAnyToken = new MatchNodePair(matchNode);
+                                }
                                 break;
                             }
                         case "endany":
                             {
                                 var an = PopBlock<AnyNode>();
-                                an.EndAnyToken = new MatchNodePair(matchNode);
+                                if (an != null)
+                                {
+                                    an.EndAnyToken = new MatchNodePair(matchNode);
 
-                                an.ReplaceBlock();
-
+                                    an.ReplaceBlock();
+                                }
                                 break;
                             }
                         case "if":
@@ -263,17 +266,21 @@ namespace Signum.Engine.Word
                         case "else":
                             {
                                 var an = PeekBlock<IfNode>();
-                                an.ElseToken = new MatchNodePair(matchNode);
-
+                                if (an != null)
+                                {
+                                    an.ElseToken = new MatchNodePair(matchNode);
+                                }
                                 break;
                             }
                         case "endif":
                             {
                                 var ifn = PopBlock<IfNode>();
-                                ifn.EndIfToken = new MatchNodePair(matchNode);
+                                if (ifn != null)
+                                {
+                                    ifn.EndIfToken = new MatchNodePair(matchNode);
 
-                                ifn.ReplaceBlock();
-
+                                    ifn.ReplaceBlock();
+                                }
                                 break;
                             }
                         case "foreach":
@@ -288,9 +295,12 @@ namespace Signum.Engine.Word
                         case "endforeach":
                             {
                                 var fn = PopBlock<ForeachNode>();
-                                fn.EndForeachToken = new MatchNodePair(matchNode);
+                                if (fn != null)
+                                {
+                                    fn.EndForeachToken = new MatchNodePair(matchNode);
 
-                                fn.ReplaceBlock();
+                                    fn.ReplaceBlock();
+                                }
                                 break;
                             }
                         default:
@@ -318,7 +328,7 @@ namespace Signum.Engine.Word
             BlockContainerNode n = stack.Pop();
             if (n == null || !(n is T))
             {
-                AddError(true, "Unexpected '{0}'".FormatWith(BlockContainerNode.UserString(n.Try(p => p.GetType()))));
+                AddError(true, "Unexpected '{0}'".FormatWith(BlockContainerNode.UserString(n?.GetType())));
                 return null;
             }
 
@@ -337,7 +347,7 @@ namespace Signum.Engine.Word
             BlockContainerNode n = stack.Peek();
             if (n == null || !(n is T))
             {
-                AddError(true, "Unexpected '{0}'".FormatWith(BlockContainerNode.UserString(n.Try(p => p.GetType()))));
+                AddError(true, "Unexpected '{0}'".FormatWith(BlockContainerNode.UserString(n?.GetType())));
                 return null;
             }
 

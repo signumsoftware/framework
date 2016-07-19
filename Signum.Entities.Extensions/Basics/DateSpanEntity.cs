@@ -4,40 +4,27 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
     [Serializable]
     public class DateSpanEntity : EmbeddedEntity
     {
-        int years;
-        public int Years
-        {
-            get { return years; }
-            set { SetToStr(ref years, value); }
-        }
+        public int Years { get; set; }
 
-        int months;
-        public int Months
-        {
-            get { return months; }
-            set { SetToStr(ref months, value); }
-        }
+        public int Months { get; set; }
 
-        int days;
-        public int Days
-        {
-            get { return days; }
-            set { SetToStr(ref days, value); }
-        }
+        public int Days { get; set; }
 
         public bool IsZero()
         {
-            return years == 0 && months == 0 && days == 0;
+            return Years == 0 && Months == 0 && Days == 0;
         }
 
         static Expression<Func<DateSpanEntity, DateTime, DateTime>> AddExpression =
              (ds, dt) => dt.AddYears(ds.Years).AddMonths(ds.Months).AddDays(ds.Days);
+        [ExpressionField]
         public DateTime Add(DateTime date)
         {
             return AddExpression.Evaluate(this, date);
@@ -45,6 +32,7 @@ namespace Signum.Entities.Basics
 
         static Expression<Func<DateSpanEntity, DateTime, DateTime>> SubtractExpression =
            (ds, dt) => dt.AddYears(-ds.Years).AddMonths(-ds.Months).AddDays(-ds.Days);
+        [ExpressionField]
         public DateTime Subtract(DateTime date)
         {
             return SubtractExpression.Evaluate(this, date);
@@ -52,7 +40,7 @@ namespace Signum.Entities.Basics
 
         public DateSpan ToDateSpan()
         {
-            return new DateSpan(years, months, days);
+            return new DateSpan(Years, Months, Days);
         }
 
         public override string ToString()
@@ -65,8 +53,8 @@ namespace Signum.Entities.Basics
 
             DateSpanEntity ds = new DateSpanEntity
             {
-                Days = this.days,
-                Months = this.months,
+                Days = this.Days,
+                Months = this.Months,
                 Years = this.Years,
             };
 

@@ -112,7 +112,7 @@ namespace Signum.Engine.Mailing
                 variables = variables.Previous;
                 if (n.owner == null || n.owner.GetType() != type)
                 {
-                    AddError(true, "Unexpected '{0}'".FormatWith(BlockNode.UserString(n.owner.Try(p => p.GetType()))));
+                    AddError(true, "Unexpected '{0}'".FormatWith(BlockNode.UserString(n.owner?.GetType())));
                     return null;
                 }
                 return n;
@@ -126,161 +126,175 @@ namespace Signum.Engine.Mailing
 
             void ParseInternal()
             {
-                this.mainBlock = new BlockNode(null);
-                this.stack = new Stack<BlockNode>();
-                this.errors = new List<TemplateError>(); 
-                PushBlock(mainBlock);
-
-                var matches = TemplateUtils.KeywordsRegex.Matches(text);
-
-                if (matches.Count == 0)
+                try
                 {
-                    stack.Peek().Nodes.Add(new LiteralNode { Text = text });
+                    this.mainBlock = new BlockNode(null);
+                    this.stack = new Stack<BlockNode>();
+                    this.errors = new List<TemplateError>();
+                    PushBlock(mainBlock);
+
+                    var matches = TemplateUtils.KeywordsRegex.Matches(text);
+
+                    if (matches.Count == 0)
+                    {
+                        stack.Peek().Nodes.Add(new LiteralNode { Text = text });
+                        stack.Pop();
+                        return;
+                    }
+
+                    int index = 0;
+                    foreach (Match match in matches)
+                    {
+                        if (index < match.Index)
+                        {
+                            stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(index, match.Index - index) });
+                        }
+                        var type = match.Groups["type"].Value;
+                        var token = match.Groups["token"].Value;
+                        var keyword = match.Groups["keyword"].Value;
+                        var dec = match.Groups["dec"].Value;
+                        switch (keyword)
+                        {
+                            case "":
+                            case "raw":
+                                var s = TemplateUtils.SplitToken(token);
+                                if (s == null)
+                                    AddError(true, "{0} has invalid format".FormatWith(token));
+                                else
+                                {
+                                    var t = TryParseValueProvider(type, s.Value.Token, dec);
+
+                                    stack.Peek().Nodes.Add(new ValueNode(t, s.Value.Format, isRaw: keyword.Contains("raw")));
+
+                                    DeclareVariable(t);
+                                }
+                                break;
+                            case "declare":
+                                {
+                                    var t = TryParseValueProvider(type, token, dec);
+
+                                    stack.Peek().Nodes.Add(new DeclareNode(t, this.AddError));
+
+                                    DeclareVariable(t);
+                                }
+                                break;
+                            case "any":
+                                {
+                                    AnyNode any;
+                                    ValueProviderBase vp;
+                                    var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
+                                    if (!filter.Success)
+                                    {
+                                        vp = TryParseValueProvider(type, token, dec);
+
+                                        any = new AnyNode(vp);
+                                    }
+                                    else
+                                    {
+                                        vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
+                                        var comparer = filter.Groups["comparer"].Value;
+                                        var value = filter.Groups["value"].Value;
+                                        any = new AnyNode(vp, comparer, value, this.AddError);
+
+                                    }
+                                    stack.Peek().Nodes.Add(any);
+                                    PushBlock(any.AnyBlock);
+
+                                    DeclareVariable(vp);
+                                    break;
+                                }
+                            case "notany":
+                                {
+                                    var an = (AnyNode)PopBlock(typeof(AnyNode)).owner;
+                                    if (an != null)
+                                        PushBlock(an.CreateNotAny());
+                                    break;
+                                }
+                            case "endany":
+                                {
+                                    PopBlock(typeof(AnyNode));
+                                    break;
+                                }
+                            case "foreach":
+                                {
+                                    ValueProviderBase vp = TryParseValueProvider(type, token, dec);
+                                    var fn = new ForeachNode(vp);
+                                    stack.Peek().Nodes.Add(fn);
+                                    PushBlock(fn.Block);
+                                    vp.IsForeach = true;
+                                    DeclareVariable(vp);
+                                    break;
+                                }
+                            case "endforeach":
+                                {
+                                    PopBlock(typeof(ForeachNode));
+                                }
+                                break;
+                            case "if":
+                                {
+                                    IfNode ifn;
+                                    ValueProviderBase vp;
+                                    var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
+                                    if (!filter.Success)
+                                    {
+                                        vp = TryParseValueProvider(type, token, dec);
+                                        ifn = new IfNode(vp, this);
+                                    }
+                                    else
+                                    {
+                                        vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
+                                        var comparer = filter.Groups["comparer"].Value;
+                                        var value = filter.Groups["value"].Value;
+                                        ifn = new IfNode(vp, comparer, value, this.AddError);
+                                    }
+                                    stack.Peek().Nodes.Add(ifn);
+                                    PushBlock(ifn.IfBlock);
+                                    DeclareVariable(vp);
+                                    break;
+                                }
+                            case "else":
+                                {
+                                    var ifn = (IfNode)PopBlock(typeof(IfNode)).owner;
+                                    if (ifn != null)
+                                        PushBlock(ifn.CreateElse());
+                                    break;
+                                }
+                            case "endif":
+                                {
+                                    PopBlock(typeof(IfNode));
+                                    break;
+                                }
+                            default:
+                                AddError(true, "'{0}' is deprecated".FormatWith(keyword));
+                                break;
+                        }
+                        index = match.Index + match.Length;
+                    }
+
+                    if (stack.Count != 1)
+                        AddError(true, "Last block is not closed: {0}".FormatWith(stack.Peek()));
+
+                    var lastM = matches.Cast<Match>().LastOrDefault();
+                    if (lastM != null && lastM.Index + lastM.Length < text.Length)
+                        stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(lastM.Index + lastM.Length) });
+
                     stack.Pop();
-                    return;
                 }
-
-                int index = 0;
-                foreach (Match match in matches)
+                catch (Exception e)
                 {
-                    if (index < match.Index)
-                    {
-                        stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(index, match.Index - index) });
-                    }
-                    var type = match.Groups["type"].Value;
-                    var token = match.Groups["token"].Value;
-                    var keyword = match.Groups["keyword"].Value;
-                    var dec = match.Groups["dec"].Value;
-                    switch (keyword)
-                    {
-                        case "":
-                        case "raw":
-                            var tok = TemplateUtils.TokenFormatRegex.Match(token);
-                            if (!tok.Success)
-                                AddError(true, "{0} has invalid format".FormatWith(token));
-                            else
-                            {
-                                var t = TryParseValueProvider(type, tok.Groups["token"].Value, dec);
-
-                                stack.Peek().Nodes.Add(new ValueNode(t, tok.Groups["format"].Value.DefaultText(null), isRaw: keyword.Contains("raw")));
-
-                                DeclareVariable(t);
-                            }
-                            break;
-                        case "declare":
-                            {
-                                var t = TryParseValueProvider(type, token, dec);
-
-                                stack.Peek().Nodes.Add(new DeclareNode(t, this.AddError));
-
-                                DeclareVariable(t);
-                            }
-                            break;
-                        case "any":
-                            {
-                                AnyNode any;
-                                ValueProviderBase vp;
-                                var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
-                                if (!filter.Success)
-                                {
-                                    vp = TryParseValueProvider(type, token, dec);
-
-                                    any = new AnyNode(vp);
-                                }
-                                else
-                                {
-                                    vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
-                                    var comparer = filter.Groups["comparer"].Value;
-                                    var value = filter.Groups["value"].Value;
-                                    any = new AnyNode(vp, comparer, value, this.AddError);
-
-                                }
-                                stack.Peek().Nodes.Add(any);
-                                PushBlock(any.AnyBlock);
-
-                                DeclareVariable(vp);
-                                break;
-                            }
-                        case "notany":
-                            {
-                                var an = (AnyNode)PopBlock(typeof(AnyNode)).owner;
-                                PushBlock(an.CreateNotAny());
-                                break;
-                            }
-                        case "endany":
-                            {
-                                PopBlock(typeof(AnyNode));
-                                break;
-                            }
-                        case "foreach":
-                            {
-                                ValueProviderBase vp = TryParseValueProvider(type, token, dec);
-                                var fn = new ForeachNode(vp);
-                                stack.Peek().Nodes.Add(fn);
-                                PushBlock(fn.Block);
-
-                                DeclareVariable(vp);
-                                break;
-                            }
-                        case "endforeach":
-                            {
-                                PopBlock(typeof(ForeachNode));
-                            }
-                            break;
-                        case "if":
-                            {
-                                IfNode ifn;
-                                ValueProviderBase vp;
-                                var filter = TemplateUtils.TokenOperationValueRegex.Match(token);
-                                if (!filter.Success)
-                                {
-                                    vp = TryParseValueProvider(type, token, dec);
-                                    ifn = new IfNode(vp, this);
-                                }
-                                else
-                                {
-                                    vp = TryParseValueProvider(type, filter.Groups["token"].Value, dec);
-                                    var comparer = filter.Groups["comparer"].Value;
-                                    var value = filter.Groups["value"].Value;
-                                    ifn = new IfNode(vp, comparer, value, this.AddError);
-                                }
-                                stack.Peek().Nodes.Add(ifn);
-                                PushBlock(ifn.IfBlock);
-                                DeclareVariable(vp);
-                                break;
-                            }
-                        case "else":
-                            {
-                                var ifn = (IfNode)PopBlock(typeof(IfNode)).owner;
-                                PushBlock(ifn.CreateElse());
-                                break;
-                            }
-                        case "endif":
-                            {
-                                PopBlock(typeof(IfNode));
-                                break;
-                            }
-                        default :
-                            AddError(true, "'{0}' is deprecated".FormatWith(keyword));
-                            break;
-                    }
-                    index = match.Index + match.Length;
+                    AddError(true, e.Message);
                 }
-
-                if (stack.Count != 1)
-                    AddError(true, "Last block is not closed: {0}".FormatWith(stack.Peek()));
-
-                var lastM = matches.Cast<Match>().LastOrDefault();
-                if (lastM != null && lastM.Index + lastM.Length < text.Length)
-                    stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(lastM.Index + lastM.Length) });
-
-                stack.Pop();
             }
 
             public ValueProviderBase TryParseValueProvider(string type, string token, string variable)
             {
                 return ValueProviderBase.TryParse(type, token, variable, this.modelType, this.qd, this.variables, this.AddError);
             }
+        }
+
+        internal static object Parse(string title, object queryDescription, object modelType)
+        {
+            throw new NotImplementedException();
         }
 
         private static string Synchronize(string text, SyncronizationContext sc)

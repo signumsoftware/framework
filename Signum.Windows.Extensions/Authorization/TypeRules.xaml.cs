@@ -330,23 +330,30 @@ namespace Signum.Windows.Authorization
             set { Set(ref availableConditions, value); }
         }
 
-        public TypeEntity Resource { get; set; }
+        /*Avoid auto-properties*/
+        TypeEntity resource;
+        public TypeEntity Resource => resource;
 
-        public AuthThumbnail? Properties { get; set; }
-        public AuthThumbnail? Operations { get; set; }
-        public AuthThumbnail? Queries { get; set; }
+        AuthThumbnail? properties;
+        public AuthThumbnail? Properties => properties;
+
+        AuthThumbnail? operations;
+        public AuthThumbnail? Operations => operations;
+
+        AuthThumbnail? queries;
+        public AuthThumbnail? Queries => queries;
 
         public TypeRuleBuilder(TypeAllowedRule rule)
         {
             this.allowed = new TypeAllowedBuilder(rule.Allowed.Fallback);
             this.conditions = rule.Allowed.Conditions.Select(c => new TypeConditionRuleBuilder(c.TypeCondition, c.Allowed)).ToMList();
             this.availableConditions = rule.AvailableConditions;
-            this.allowedBase = rule.AllowedBase; 
-            this.Resource = rule.Resource;
+            this.allowedBase = rule.AllowedBase;
+            this.resource = rule.Resource;
 
-            this.Properties = rule.Properties;
-            this.Operations = rule.Operations;
-            this.Queries = rule.Queries;
+            this.properties = rule.Properties;
+            this.operations = rule.Operations;
+            this.queries = rule.Queries;
 
             this.RebindEvents();
         }

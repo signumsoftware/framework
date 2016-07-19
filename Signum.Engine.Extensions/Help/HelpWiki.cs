@@ -21,11 +21,11 @@ namespace Signum.Engine.Help
         static HelpWiki()
         {
             DefaultWikiSettings = new WikiSettings(true);
-            DefaultWikiSettings.TokenParser += s => LinkParser(s).Try(wl => wl.ToHtmlString());
+            DefaultWikiSettings.TokenParser += s => LinkParser(s)?.ToHtmlString();
             DefaultWikiSettings.TokenParser += ProcessImages;
 
             NoLinkWikiSettings = new WikiSettings(false) { LineBreaks = false };
-            NoLinkWikiSettings.TokenParser += s => LinkParser(s).Try(wl => wl.Text);
+            NoLinkWikiSettings.TokenParser += s => LinkParser(s)?.Text;
             NoLinkWikiSettings.TokenParser += RemoveImages;
         }
 

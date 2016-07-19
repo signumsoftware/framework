@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Help
 {
@@ -13,40 +14,20 @@ namespace Signum.Entities.Help
     public class QueryHelpEntity : Entity
     {
         [NotNullable]
-        QueryEntity query;
         [NotNullValidator]
-        public QueryEntity Query
-        {
-            get { return query; }
-            set { SetToStr(ref query, value); }
-        }
+        public QueryEntity Query { get; set; }
 
         [NotNullable]
-        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoEntity Culture
-        {
-            get { return culture; }
-            set { Set(ref culture, value); }
-        }
+        public CultureInfoEntity Culture { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        string description;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
-        public string Description
-        {
-            get { return description; }
-            set { Set(ref description, value); }
-        }
+        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
+        public string Description { get; set; }
 
         [NotNullable, PreserveOrder]
-        MList<QueryColumnHelpEntity> columns = new MList<QueryColumnHelpEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<QueryColumnHelpEntity> Columns
-        {
-            get { return columns; }
-            set { Set(ref columns, value); }
-        }
+        public MList<QueryColumnHelpEntity> Columns { get; set; } = new MList<QueryColumnHelpEntity>();
 
         public bool IsEmpty
         {
@@ -55,13 +36,14 @@ namespace Signum.Entities.Help
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Is(() => IsEmpty) && IsEmpty)
+            if (pi.Name == nameof(IsEmpty) && IsEmpty)
                 return "IsEmpty is true";
 
             return base.PropertyValidation(pi);
         }
 
         static Expression<Func<QueryHelpEntity, string>> ToStringExpression = e => e.Query.ToString();
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -72,22 +54,12 @@ namespace Signum.Entities.Help
     public class QueryColumnHelpEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        string columnName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string ColumnName
-        {
-            get { return columnName; }
-            set { Set(ref columnName, value); }
-        }
+        public string ColumnName { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        string description;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
-        public string Description
-        {
-            get { return description; }
-            set { Set(ref description, value); }
-        }
+        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
+        public string Description { get; set; }
 
         public override string ToString()
         {
@@ -95,8 +67,9 @@ namespace Signum.Entities.Help
         }
     }
 
+    [AutoInit]
     public static class QueryHelpOperation
     {
-        public static readonly ExecuteSymbol<QueryHelpEntity> Save = OperationSymbol.Execute<QueryHelpEntity>();
+        public static ExecuteSymbol<QueryHelpEntity> Save;
     }
 }

@@ -36,6 +36,14 @@ namespace Signum.Web.Chart
                 UserAssetsClient.Start();
                 UserAssetsClient.RegisterExportAssertLink<UserChartEntity>();
 
+                LinksClient.RegisterEntityLinks<UserChartEntity>((lite, ctx) => new[]
+                {
+                   new QuickLinkAction(ChartMessage.Preview, RouteHelper.New().Action<ChartController>(cc => cc.ViewUserChart(lite, null)))
+                   {
+                       IsVisible = ChartPermission.ViewCharting.IsAuthorized()
+                   }
+                });
+
                 Func<SubTokensOptions, Mapping<QueryTokenEntity>> qtMapping = ops=>ctx =>
                 {
                     string tokenStr = UserAssetsHelper.GetTokenString(ctx);
@@ -51,7 +59,7 @@ namespace Signum.Web.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<UserChartEntity> { PartialViewName = _ => ChartClient.ViewPrefix.FormatWith("UserChart") }
+                    new EntitySettings<UserChartEntity> { PartialViewName = _ => ChartClient.ViewPrefix.FormatWith("UserChart"),IsCreable= EntityWhen.Never }
                 });
 
                 Navigator.EntitySettings<UserChartEntity>().MappingMain = Navigator.EntitySettings<UserChartEntity>().MappingLine = 
@@ -69,7 +77,8 @@ namespace Signum.Web.Chart
                             ElementMapping = new EntityMapping<QueryOrderEntity>(false)
                                 .CreateProperty(a => a.OrderType)
                                 .SetProperty(a => a.Token, qtMapping(SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement))
-                        }); 
+                        })
+                        .SetProperty(cb => cb.Parameters, new MListDictionaryMapping<ChartParameterEntity, string>(p => p.Name) { OnlyIfPossible = true }); 
 
                 RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
                      new { controller = "Chart", action = "ViewUserChart" });
@@ -148,7 +157,7 @@ namespace Signum.Web.Chart
             if (items.Count > 0)
                 items.Add(new MenuItemSeparator());
 
-            if (Navigator.IsCreable(typeof(UserChartEntity), isSearch: true))
+            if (Navigator.IsCreable(typeof(UserChartEntity), isSearch: null))
             {
                 string uqNewText = ChartMessage.CreateNew.NiceToString();
                 items.Add(new MenuItem(prefix, "qbUserChartNew")

@@ -14,13 +14,20 @@ namespace Signum.Web.ViewLog
 {
     public class ViewLogClient
     {
+        public static string ViewPrefix = "~/ViewLog/Views/{0}.cshtml";
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 Navigator.Manager.RetrievingForView += Manager_RetrievingForView;
+                
+                Navigator.RegisterArea(typeof(ViewLogClient));
 
-                LinksClient.RegisterEntityLinks<Entity>((ident, ctx) => new[] { new QuickLinkExplore(typeof(ViewLogEntity), "Target", ident) });
+                Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<ViewLogEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ViewLog") },             
+                });              
             }
         }
 
@@ -28,5 +35,7 @@ namespace Signum.Web.ViewLog
         {
             return ViewLogLogic.LogView(lite, "WebRetrieve");
         }
+
+      
     }
 }

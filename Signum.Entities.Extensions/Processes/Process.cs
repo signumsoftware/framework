@@ -20,11 +20,10 @@ namespace Signum.Entities.Processes
     [Serializable]
     public class ProcessAlgorithmSymbol : Symbol
     {
-        private ProcessAlgorithmSymbol() { } 
+        private ProcessAlgorithmSymbol() { }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public ProcessAlgorithmSymbol([CallerMemberName]string memberName = null) : 
-            base(new StackFrame(1, false), memberName)
+        public ProcessAlgorithmSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
         {
         }
     }
@@ -46,86 +45,41 @@ namespace Signum.Entities.Processes
             get { return algorithm; }
         }
 
-        IProcessDataEntity data;
-        public IProcessDataEntity Data
-        {
-            get { return data; }
-            set { Set(ref data, value); }
-        }
+        public IProcessDataEntity Data { get; set; }
 
         public const string None = "none";
 
         [SqlDbType(Size = 100), NotNullable]
-        string machineName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string MachineName
-        {
-            get { return machineName; }
-            set { Set(ref machineName, value); }
-        }
+        public string MachineName { get; set; }
 
         [SqlDbType(Size = 100), NotNullable]
-        string applicationName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string ApplicationName
-        {
-            get { return applicationName; }
-            set { Set(ref applicationName, value); }
-        }
+        public string ApplicationName { get; set; }
 
         [NotNullable]
-        Lite<IUserEntity> user;
         [NotNullValidator]
-        public Lite<IUserEntity> User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
+        public Lite<IUserEntity> User { get; set; }
 
-        ProcessState state;
-        public ProcessState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
+        public ProcessState State { get; set; }
 
-        DateTime creationDate = TimeZoneManager.Now;
-        public DateTime CreationDate
-        {
-            get { return creationDate; }
-            private set { Set(ref creationDate, value); }
-        }
+        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        DateTime? plannedDate;
         [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
-        public DateTime? PlannedDate
-        {
-            get { return plannedDate; }
-            set { Set(ref plannedDate, value); }
-        }
+        public DateTime? PlannedDate { get; set; }
 
-        DateTime? cancelationDate;
         [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
-        public DateTime? CancelationDate
-        {
-            get { return cancelationDate; }
-            set { Set(ref cancelationDate, value); }
-        }
+        public DateTime? CancelationDate { get; set; }
 
-        DateTime? queuedDate;
         [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
-        public DateTime? QueuedDate
-        {
-            get { return queuedDate; }
-            set { Set(ref queuedDate, value); }
-        }
+        public DateTime? QueuedDate { get; set; }
 
         DateTime? executionStart;
         [DateTimePrecissionValidator(DateTimePrecision.Milliseconds)]
         public DateTime? ExecutionStart
         {
             get { return executionStart; }
-            set { if (Set(ref executionStart, value))Notify(() => ExecutionEnd); }
+            set { if (Set(ref executionStart, value)) Notify(() => ExecutionEnd); }
         }
 
         DateTime? executionEnd;
@@ -133,52 +87,32 @@ namespace Signum.Entities.Processes
         public DateTime? ExecutionEnd
         {
             get { return executionEnd; }
-            set { if (Set(ref executionEnd, value))Notify(() => ExecutionStart); }
+            set { if (Set(ref executionEnd, value)) Notify(() => ExecutionStart); }
         }
 
         static Expression<Func<ProcessEntity, double?>> DurationExpression =
          log => (double?)(log.ExecutionEnd - log.ExecutionStart).Value.TotalMilliseconds;
+        [ExpressionField("DurationExpression")]
         public double? Duration
         {
             get { return ExecutionEnd == null ? null : DurationExpression.Evaluate(this); }
         }
 
-        DateTime? suspendDate;
-        public DateTime? SuspendDate
-        {
-            get { return suspendDate; }
-            set { Set(ref suspendDate, value); }
-        }
+        public DateTime? SuspendDate { get; set; }
 
-        DateTime? exceptionDate;
-        public DateTime? ExceptionDate
-        {
-            get { return exceptionDate; }
-            set { Set(ref exceptionDate, value); }
-        }
+        public DateTime? ExceptionDate { get; set; }
 
-        [SqlDbType(Size = int.MaxValue)]
-        Lite<ExceptionEntity> exception;
-        public Lite<ExceptionEntity> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value); }
-        }
+        public Lite<ExceptionEntity> Exception { get; set; }
 
-        decimal? progress;
         [NumberBetweenValidator(0, 1), Format("p")]
-        public decimal? Progress
-        {
-            get { return progress; }
-            set { Set(ref progress, value); }
-        }
+        public decimal? Progress { get; set; }
 
         static StateValidator<ProcessEntity, ProcessState> stateValidator = new StateValidator<ProcessEntity, ProcessState>
-        (e => e.State, e => e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e => e.ExceptionDate, e => e.Exception, e=> e.MachineName, e=>e.ApplicationName)
+        (e => e.State, e => e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e => e.ExceptionDate, e => e.Exception, e => e.MachineName, e => e.ApplicationName)
         {
-       {ProcessState.Created,   false,          false,                  false,             false,                 false,               false,              false,           false,               false,          null,          null }, 
-       {ProcessState.Planned,   true,           null,                   null,              null,                  false,               null,               null,            null,                null ,          null,          null }, 
-       {ProcessState.Canceled,  null,           true,                   null,              null,                  false,               null,               null,            null,                null ,          null,          null }, 
+       {ProcessState.Created,   false,          false,                  false,             false,                 false,               false,              false,           false,               false,          null,          null },
+       {ProcessState.Planned,   true,           null,                   null,              null,                  false,               null,               null,            null,                null ,          null,          null },
+       {ProcessState.Canceled,  null,           true,                   null,              null,                  false,               null,               null,            null,                null ,          null,          null },
        {ProcessState.Queued,    null,           null,                   true,              false,                 false,               false,              false,           false,               false,          null,          null },
        {ProcessState.Executing, null,           null,                   true,              true,                  false,               false,              true,            false,               false,          true,          true },
        {ProcessState.Suspending,null,           null,                   true,              true,                  false,               true,               true,            false,               false,          true,          true },
@@ -189,7 +123,7 @@ namespace Signum.Entities.Processes
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => ExecutionStart) || pi.Is(() => ExecutionEnd))
+            if (pi.Name == nameof(ExecutionStart) || pi.Name == nameof(ExecutionEnd))
             {
                 if (this.ExecutionEnd < this.ExecutionStart)
                     return ProcessMessage.ProcessStartIsGreaterThanProcessEnd.NiceToString();
@@ -204,15 +138,15 @@ namespace Signum.Entities.Processes
 
         public override string ToString()
         {
-            switch (state)
+            switch (State)
             {
-                case ProcessState.Created: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Created.NiceToString(), creationDate);
-                case ProcessState.Planned: return "{0} {1} for {2}".FormatWith(algorithm, ProcessState.Planned.NiceToString(), plannedDate);
-                case ProcessState.Canceled: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Canceled.NiceToString(), cancelationDate);
-                case ProcessState.Queued: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Queued.NiceToString(), queuedDate);
+                case ProcessState.Created: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Created.NiceToString(), CreationDate);
+                case ProcessState.Planned: return "{0} {1} for {2}".FormatWith(algorithm, ProcessState.Planned.NiceToString(), PlannedDate);
+                case ProcessState.Canceled: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Canceled.NiceToString(), CancelationDate);
+                case ProcessState.Queued: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Queued.NiceToString(), QueuedDate);
                 case ProcessState.Executing: return "{0} {1} since {2}".FormatWith(algorithm, ProcessState.Executing.NiceToString(), executionStart);
-                case ProcessState.Suspending: return "{0} {1} since {2}".FormatWith(algorithm, ProcessState.Suspending.NiceToString(), suspendDate);
-                case ProcessState.Suspended: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Suspended.NiceToString(), suspendDate);
+                case ProcessState.Suspending: return "{0} {1} since {2}".FormatWith(algorithm, ProcessState.Suspending.NiceToString(), SuspendDate);
+                case ProcessState.Suspended: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Suspended.NiceToString(), SuspendDate);
                 case ProcessState.Finished: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Finished.NiceToString(), executionEnd);
                 case ProcessState.Error: return "{0} {1} on {2}".FormatWith(algorithm, ProcessState.Error.NiceToString(), executionEnd);
                 default: return "{0} ??".FormatWith(algorithm);
@@ -242,19 +176,21 @@ namespace Signum.Entities.Processes
         Error,
     }
 
+    [AutoInit]
     public static class ProcessOperation
     {
-        public static readonly ExecuteSymbol<ProcessEntity> Plan = OperationSymbol.Execute<ProcessEntity>();
-        public static readonly ExecuteSymbol<ProcessEntity> Save = OperationSymbol.Execute<ProcessEntity>();
-        public static readonly ExecuteSymbol<ProcessEntity> Cancel = OperationSymbol.Execute<ProcessEntity>();
-        public static readonly ExecuteSymbol<ProcessEntity> Execute = OperationSymbol.Execute<ProcessEntity>();
-        public static readonly ExecuteSymbol<ProcessEntity> Suspend = OperationSymbol.Execute<ProcessEntity>();
-        public static readonly ConstructSymbol<ProcessEntity>.From<ProcessEntity> Retry = OperationSymbol.Construct<ProcessEntity>.From<ProcessEntity>();
+        public static ExecuteSymbol<ProcessEntity> Plan;
+        public static ExecuteSymbol<ProcessEntity> Save;
+        public static ExecuteSymbol<ProcessEntity> Cancel;
+        public static ExecuteSymbol<ProcessEntity> Execute;
+        public static ExecuteSymbol<ProcessEntity> Suspend;
+        public static ConstructSymbol<ProcessEntity>.From<ProcessEntity> Retry;
     }
 
+    [AutoInit]
     public static class ProcessPermission
     {
-        public static readonly PermissionSymbol ViewProcessPanel = new PermissionSymbol();
+        public static PermissionSymbol ViewProcessPanel;
     }
 
     public enum ProcessMessage
@@ -274,30 +210,15 @@ namespace Signum.Entities.Processes
     public class ProcessExceptionLineEntity : Entity
     {
         [NotNullable]
-        Lite<IProcessLineDataEntity> line;
         [NotNullValidator]
-        public Lite<IProcessLineDataEntity> Line
-        {
-            get { return line; }
-            set { Set(ref line, value); }
-        }
+        public Lite<IProcessLineDataEntity> Line { get; set; }
 
         [NotNullable]
-        Lite<ProcessEntity> process;
         [NotNullValidator]
-        public Lite<ProcessEntity> Process
-        {
-            get { return process; }
-            set { Set(ref process, value); }
-        }
+        public Lite<ProcessEntity> Process { get; set; }
 
         [NotNullable]
-        Lite<ExceptionEntity> exception;
         [NotNullValidator]
-        public Lite<ExceptionEntity> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value); }
-        }
+        public Lite<ExceptionEntity> Exception { get; set; }
     }
 }

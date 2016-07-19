@@ -15,6 +15,7 @@ using Signum.Engine.Dashboard;
 using Signum.Engine.Authorization;
 using Signum.Web.UserAssets;
 using System.Web.Mvc.Html;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Web.Dashboard
 {
@@ -81,7 +82,7 @@ namespace Signum.Web.Dashboard
                     new EmbeddedEntitySettings<LinkElementEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("LinkElement") },
                 });
 
-                Constructor.Register(ctx => new DashboardEntity { Owner = UserEntity.Current.ToLite() });
+                Constructor.Register(ctx => new DashboardEntity { Owner = UserQueryUtils.DefaultOwner() });
 
                 LinksClient.RegisterEntityLinks<DashboardEntity>((cp, ctx) => new[]
                 {

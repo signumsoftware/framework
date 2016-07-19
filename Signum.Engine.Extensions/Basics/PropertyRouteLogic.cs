@@ -10,6 +10,7 @@ using Signum.Utilities;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Basics
 {
@@ -17,6 +18,7 @@ namespace Signum.Engine.Basics
     {
         static Expression<Func<PropertyRouteEntity, PropertyRoute, bool>> IsPropertyRouteExpression = 
             (prdn, pr) => prdn.RootType == pr.RootType.ToTypeEntity() && prdn.Path == pr.PropertyString() ;
+        [ExpressionField]
         public static bool IsPropertyRoute(this PropertyRouteEntity prdn, PropertyRoute pr)
         {
             return IsPropertyRouteExpression.Evaluate(prdn, pr);
@@ -39,7 +41,7 @@ namespace Signum.Engine.Basics
         {
             var current = Administrator.TryRetrieveAll<PropertyRouteEntity>(rep).AgGroupToDictionary(a => a.RootType.FullClassName, g => g.ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
 
-            var should = TypeLogic.TryDNToType(rep).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
+            var should = TypeLogic.TryEntityToType(rep).SelectDictionary(dn => dn.FullClassName, (dn, t) => GenerateProperties(t, dn).ToDictionary(f => f.Path, "PropertyEntity in the database with path"));
 
             Table table = Schema.Current.Table<PropertyRouteEntity>();
 
@@ -66,7 +68,7 @@ namespace Signum.Engine.Basics
             var retrieve = Database.Query<PropertyRouteEntity>().Where(f => f.RootType == typeEntity).ToDictionary(a => a.Path);
             var generate = GenerateProperties(TypeLogic.DnToType[typeEntity], typeEntity).ToDictionary(a => a.Path);
 
-            return generate.Select(kvp => retrieve.TryGetC(kvp.Key).TryDo(pi => pi.Route = kvp.Value.Route) ?? kvp.Value).ToList();
+            return generate.Select(kvp => retrieve.TryGetC(kvp.Key)?.Do(pi => pi.Route = kvp.Value.Route) ?? kvp.Value).ToList();
         }
 
         public static List<PropertyRouteEntity> GenerateProperties(Type type, TypeEntity typeEntity)
@@ -89,7 +91,7 @@ namespace Signum.Engine.Basics
         {
             TypeEntity type = TypeLogic.TypeToEntity[route.RootType];
             string path = route.PropertyString();
-            return Database.Query<PropertyRouteEntity>().SingleOrDefaultEx(f => f.RootType == type && f.Path == path).TryDo(pi => pi.Route = route) ??
+            return Database.Query<PropertyRouteEntity>().SingleOrDefaultEx(f => f.RootType == type && f.Path == path)?.Do(pi => pi.Route = route) ??
                  new PropertyRouteEntity
                  {
                      Route = route,

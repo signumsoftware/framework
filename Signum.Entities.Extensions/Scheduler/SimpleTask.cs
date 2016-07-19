@@ -16,10 +16,9 @@ namespace Signum.Entities.Scheduler
     public class SimpleTaskSymbol : Symbol, ITaskEntity
     {
         private SimpleTaskSymbol() { } 
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public SimpleTaskSymbol([CallerMemberName]string memberName = null) :
-            base(new StackFrame(1, false), memberName)
+        
+        public SimpleTaskSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
         {
         }
     }

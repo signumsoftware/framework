@@ -42,7 +42,7 @@
 
         var first = v.First();
         
-        <h4><a href="@first.Link">@(first.Type.Try(t => t.NiceName()) ?? first.ObjectName)</a> <small>(@first.TypeSearchResult.NiceToString())</small></h4>
+        <h4><a href="@first.Link">@(first.Type?.NiceName() ?? first.ObjectName)</a> <small>(@first.TypeSearchResult.NiceToString())</small></h4>
             
         <ul>
             @foreach (var sr in v)

@@ -10,43 +10,27 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailConfigurationEntity : EmbeddedEntity
     {
-        CultureInfoEntity defaultCulture;
         [NotNullValidator]
-        public CultureInfoEntity DefaultCulture
-        {
-            get { return defaultCulture; }
-            set { Set(ref defaultCulture, value); }
-        }
+        public CultureInfoEntity DefaultCulture { get; set; }
 
-        string urlLeft;
-        public string UrlLeft
-        {
-            get { return urlLeft; }
-            set { Set(ref urlLeft, value); }
-        }
+        public string UrlLeft { get; set; }
 
-        bool sendEmails;
-        public bool SendEmails
-        {
-            get { return sendEmails; }
-            set { Set(ref sendEmails, value); }
-        }
+        public bool SendEmails { get; set; }
 
-        bool reciveEmails;
-        public bool ReciveEmails
-        {
-            get { return reciveEmails; }
-            set { Set(ref reciveEmails, value); }
-        }
-
+        public bool ReciveEmails { get; set; }
 
         [SqlDbType(Size = 100)]
-        string overrideEmailAddress;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100), EMailValidator]
-        public string OverrideEmailAddress
-        {
-            get { return overrideEmailAddress; }
-            set { Set(ref overrideEmailAddress, value); }
-        }
+        public string OverrideEmailAddress { get; set; }
+
+        [Unit("hs")]
+        public double? AvoidSendingEmailsOlderThan { get; set; }
+
+        public int ChunkSizeSendingEmails { get; set; } = 100;
+
+        public int MaxEmailSendRetries { get; set; } = 3;
+
+        [Unit("sec")]
+        public int AsyncSenderPeriod { get; set; } = 5 * 60; //5 minutes
     }
 }

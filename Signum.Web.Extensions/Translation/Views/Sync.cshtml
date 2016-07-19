@@ -110,14 +110,14 @@ else
                                 {
                                     var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName);
 
-                                    var list = gd.Try(a => a.Pronoms).EmptyIfNull()
+                                    var list = gd?.Pronoms.EmptyIfNull()
                                             .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
 
                                     if (typeChanges.Type.Gender == null)
                                     {
                                         list.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
                                     }
-                                    @Html.DropDownList(locKey(typeChanges.Type) + ".Gender", list);
+                                    @Html.SafeDropDownList(locKey(typeChanges.Type) + ".Gender", list);
                                 }
 
                             </th>
@@ -133,7 +133,7 @@ else
                                 }
                                 else
                                 {
-                                    @Html.DropDownList(elemName, items, new { style = "width:90%" });
+                                    @Html.SafeDropDownList(elemName, items, new { style = "width:90%" });
                                     <a class="edit">@TranslationMessage.Edit.NiceToString()</a>
                                 }
                                 }
@@ -193,7 +193,7 @@ else
                         }
                         else
                         {
-                            @Html.DropDownList(elemName, items);
+                            @Html.SafeDropDownList(elemName, items);
                                     <a class="edit">@TranslationMessage.Edit.NiceToString()</a>
                         }
                                 }

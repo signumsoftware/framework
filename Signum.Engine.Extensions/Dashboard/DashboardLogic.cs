@@ -18,6 +18,7 @@ using Signum.Entities.Chart;
 using Signum.Entities.Basics;
 using Signum.Engine.UserAssets;
 using Signum.Engine.ViewLog;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Engine.Dashboard
 {
@@ -32,7 +33,7 @@ namespace Signum.Engine.Dashboard
             {
                 PermissionAuthLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
 
-                UserAssetsImporter.UserAssetNames.Add("Dashboard", typeof(DashboardEntity));
+                UserAssetsImporter.RegisterName<DashboardEntity>("Dashboard");
 
                 UserAssetsImporter.PartNames.AddRange(new Dictionary<string, Type>
                 {
@@ -124,7 +125,8 @@ namespace Signum.Engine.Dashboard
                 Dashboards = sb.GlobalLazy(() => Database.Query<DashboardEntity>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(DashboardEntity)));
 
-                DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null).GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
+                DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null)
+                .GroupToDictionary(a => TypeLogic.IdToType.GetOrThrow(a.EntityType.Id), a => a.ToLite()),
                     new InvalidateWith(typeof(DashboardEntity)));
             }
         }
@@ -135,7 +137,7 @@ namespace Signum.Engine.Dashboard
             {
                 new Construct(DashboardOperation.Create)
                 {
-                    Construct = (_) => new DashboardEntity { Owner = UserQueryUtils.DefaultRelated() }
+                    Construct = (_) => new DashboardEntity { Owner = UserQueryUtils.DefaultOwner() }
                 }.Register();
 
                 new Execute(DashboardOperation.Save)

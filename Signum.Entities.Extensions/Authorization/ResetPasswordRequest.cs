@@ -9,33 +9,13 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ResetPasswordRequestEntity : Entity
     {
-        string code;
-        public string Code
-        {
-            get { return code; }
-            set { Set(ref code, value); }
-        }
+        public string Code { get; set; }
 
-        UserEntity user;
         [NotNullValidator]
-        public UserEntity User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
+        public UserEntity User { get; set; }
 
-        DateTime requestDate;
-        public DateTime RequestDate
-        {
-            get { return requestDate; }
-            set { Set(ref requestDate, value); }
-        }
+        public DateTime RequestDate { get; set; }
 
-        bool lapsed;
-        public bool Lapsed
-        {
-            get { return lapsed; }
-            set { Set(ref lapsed, value); }
-        }
+        public bool Lapsed { get; set; }
     }
 }

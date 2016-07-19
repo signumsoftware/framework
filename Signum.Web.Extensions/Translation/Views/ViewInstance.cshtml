@@ -26,7 +26,7 @@
         li.Instance.Id.ToString() == filter ||
         li.Route.PropertyString().Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
         master.GetOrThrow(li).Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
-        cultures.Any(ci => Model.TryGetC(ci).TryGetC(li).Try(t => t.TranslatedText).DefaultText("").Contains(filter, StringComparison.InvariantCultureIgnoreCase));
+        cultures.Any(ci => (Model.TryGetC(ci)?.TryGetC(li)?.TranslatedText ?? "").Contains(filter, StringComparison.InvariantCultureIgnoreCase));
 }
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 
@@ -101,7 +101,7 @@ else
                         }
                         else
                         {
-                            TranslatedInstanceEntity trans = Model.TryGetC(ci).TryGetC(key);
+                            TranslatedInstanceEntity trans = Model.TryGetC(ci)?.TryGetC(key);
 
                             if (trans != null && editCulture(ci))
                             {
@@ -122,7 +122,7 @@ else
                                     <td class="monospaceCell">
                                         @if (editCulture(ci))
                                         {
-                                            @Html.TextArea(formName, trans.Try(t => t.TranslatedText), new { style = "width:90%;" })
+                                            @Html.TextArea(formName, trans?.TranslatedText, new { style = "width:90%;" })
                                         }
                                         else if (TranslatedInstanceLogic.RouteType(key.Route).Value == TraducibleRouteType.Html)
                                         {

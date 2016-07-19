@@ -211,7 +211,7 @@ namespace Signum.Engine.Cache
                 var connector = (SqlConnector)Connector.Current;
                 Table table = connector.Schema.Table(typeof(T));
 
-                var subConnector = connector.ForDatabase(table.Name.Schema.Try(s => s.Database));
+                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
 
                 Dictionary<PrimaryKey, object> result = new Dictionary<PrimaryKey, object>();
                 using (MeasureLoad())
@@ -396,7 +396,7 @@ namespace Signum.Engine.Cache
 
                 var connector = (SqlConnector)Connector.Current;
 
-                var subConnector = connector.ForDatabase(table.Name.Schema.Try(s => s.Database));
+                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
 
                 Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>> result = new Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>();
 
@@ -557,7 +557,7 @@ namespace Signum.Engine.Cache
 
                 var connector = (SqlConnector)Connector.Current;
 
-                var subConnector = connector.ForDatabase(table.Name.Schema.Try(s => s.Database));
+                var subConnector = connector.ForDatabase(table.Name.Schema?.Database);
 
                 Dictionary<PrimaryKey, string> result = new Dictionary<PrimaryKey, string>();
 
@@ -586,7 +586,10 @@ namespace Signum.Engine.Cache
 
         protected override void Reset()
         {
-            if (CacheLogic.LogWriter != null)
+            if (toStrings == null)
+                return;
+
+            if (CacheLogic.LogWriter != null )
                 CacheLogic.LogWriter.WriteLine((toStrings.IsValueCreated ? "RESET {0}" : "Reset {0}").FormatWith(GetType().TypeName()));
 
             toStrings.Reset();
@@ -594,6 +597,9 @@ namespace Signum.Engine.Cache
 
         protected override void Load()
         {
+            if (toStrings == null)
+                return;
+
             toStrings.Load();
         }
 
@@ -602,7 +608,7 @@ namespace Signum.Engine.Cache
         {
             Interlocked.Increment(ref hits);
 
-            return retriever.ModifiablePostRetrieving((LiteImp<T>)Lite.Create<T>(id, toStrings.Value[id]));
+            return retriever.ModifiablePostRetrieving((LiteImp<T>)Lite.Create<T>(id,toStrings==null?null: toStrings.Value[id]));
         }
 
         public override int? Count

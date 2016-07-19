@@ -13,6 +13,7 @@ using System.ComponentModel;
 using Signum.Entities.Authorization;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.UserQueries
 {
@@ -27,37 +28,17 @@ namespace Signum.Entities.UserQueries
 
         [Ignore]
         internal object queryName;
-        
-        QueryEntity query;
+
         [NotNullValidator]
-        public QueryEntity Query
-        {
-            get { return query; }
-            set { Set(ref query, value); }
-        }
+        public QueryEntity Query { get; set; }
 
-        Lite<TypeEntity> entityType;
-        public Lite<TypeEntity> EntityType
-        {
-            get { return entityType; }
-            set { Set(ref entityType, value); }
-        }
+        public Lite<TypeEntity> EntityType { get; set; }
 
-        Lite<Entity> owner;
-        public Lite<Entity> Owner
-        {
-            get { return owner; }
-            set { Set(ref owner, value); }
-        }
+        public Lite<Entity> Owner { get; set; }
 
         [NotNullable]
-        string displayName;
         [StringLengthValidator(Min = 1)]
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { SetToStr(ref displayName, value); }
-        }
+        public string DisplayName { get; set; }
 
         bool withoutFilters;
         public bool WithoutFilters
@@ -66,40 +47,21 @@ namespace Signum.Entities.UserQueries
             set
             {
                 if (Set(ref withoutFilters, value) && withoutFilters)
-                    filters.Clear();
+                    Filters.Clear();
             }
         }
 
-        [NotNullable, PreserveOrder]
-        MList<QueryFilterEntity> filters = new MList<QueryFilterEntity>();
-        public MList<QueryFilterEntity> Filters
-        {
-            get { return filters; }
-            set { Set(ref filters, value); }
-        }
 
         [NotNullable, PreserveOrder]
-        MList<QueryOrderEntity> orders = new MList<QueryOrderEntity>();
-        public MList<QueryOrderEntity> Orders
-        {
-            get { return orders; }
-            set { Set(ref orders, value); }
-        }
-
-        ColumnOptionsMode columnsMode;
-        public ColumnOptionsMode ColumnsMode
-        {
-            get { return columnsMode; }
-            set { Set(ref columnsMode, value); }
-        }
+        public MList<QueryFilterEntity> Filters { get; set; } = new MList<QueryFilterEntity>();
 
         [NotNullable, PreserveOrder]
-        MList<QueryColumnEntity> columns = new MList<QueryColumnEntity>();
-        public MList<QueryColumnEntity>  Columns
-        {
-            get { return columns; }
-            set { Set(ref columns, value); }
-        }
+        public MList<QueryOrderEntity> Orders { get; set; } = new MList<QueryOrderEntity>();
+
+        public ColumnOptionsMode ColumnsMode { get; set; }
+
+        [NotNullable, PreserveOrder]
+        public MList<QueryColumnEntity> Columns { get; set; } = new MList<QueryColumnEntity>();
 
         PaginationMode? paginationMode;
         public PaginationMode? PaginationMode
@@ -108,23 +70,14 @@ namespace Signum.Entities.UserQueries
             set { if (Set(ref paginationMode, value)) Notify(() => ShouldHaveElements); }
         }
 
-        int? elementsPerPage;
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 1)]
-        public int? ElementsPerPage
-        {
-            get { return elementsPerPage; }
-            set { Set(ref elementsPerPage, value); }
-        }
+        public int? ElementsPerPage { get; set; }
 
         [UniqueIndex]
-        Guid guid = Guid.NewGuid();
-        public Guid Guid
-        {
-            get { return guid; }
-            set { Set(ref guid, value); }
-        }
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
-        static readonly Expression<Func<UserQueryEntity, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<UserQueryEntity, string>> ToStringExpression = e => e.DisplayName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -132,16 +85,16 @@ namespace Signum.Entities.UserQueries
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => ElementsPerPage))
+            if (pi.Name == nameof(ElementsPerPage))
             {
                 if (ElementsPerPage != null && !ShouldHaveElements)
-                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.Try(pm=>pm.NiceToString()) ?? "" );
+                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode?.Let(pm => pm.NiceToString()) ?? "");
 
                 if (ElementsPerPage == null && ShouldHaveElements)
                     return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().FormatWith(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
             }
 
-            if (pi.Is(() => Filters) && WithoutFilters && Filters.Any())
+            if (pi.Name == nameof(Filters) && WithoutFilters && Filters.Any())
                 return UserQueryMessage._0ShouldBeEmptyIf1IsSet.NiceToString().FormatWith(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => WithoutFilters).NiceName());
 
             return base.PropertyValidation(pi);
@@ -192,15 +145,15 @@ namespace Signum.Entities.UserQueries
         {
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             DisplayName = element.Attribute("DisplayName").Value;
-            EntityType = element.Attribute("EntityType").Try(a => ctx.GetType(a.Value));
-            Owner = element.Attribute("Owner").Try(a => Lite.Parse(a.Value));
-            WithoutFilters = element.Attribute("WithoutFilters").Try(a => a.Value == true.ToString()) ?? false;
-            ElementsPerPage = element.Attribute("ElementsPerPage").Try(a => int.Parse(a.Value));
-            PaginationMode = element.Attribute("PaginationMode").Try(a => a.Value.ToEnum<PaginationMode>());
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse(a.Value));
+            WithoutFilters = element.Attribute("WithoutFilters")?.Let(a => a.Value == true.ToString()) ?? false;
+            ElementsPerPage = element.Attribute("ElementsPerPage")?.Let(a => int.Parse(a.Value));
+            PaginationMode = element.Attribute("PaginationMode")?.Let(a => a.Value.ToEnum<PaginationMode>());
             ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
-            Filters.Syncronize(element.Element("Filters").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
-            Columns.Syncronize(element.Element("Columns").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x)=>c.FromXml(x, ctx));
-            Orders.Syncronize(element.Element("Orders").Try(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
+            Filters.Syncronize(element.Element("Filters")?.Elements().EmptyIfNull().ToList(), (f, x) => f.FromXml(x, ctx));
+            Columns.Syncronize(element.Element("Columns")?.Elements().EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
+            Orders.Syncronize(element.Element("Orders")?.Elements().EmptyIfNull().ToList(), (o, x) => o.FromXml(x, ctx));
             ParseData(ctx.GetQueryDescription(Query));
         }
 
@@ -216,15 +169,17 @@ namespace Signum.Entities.UserQueries
         }
     }
 
+    [AutoInit]
     public static class UserQueryPermission
     {
-        public static readonly PermissionSymbol ViewUserQuery = new PermissionSymbol();
+        public static PermissionSymbol ViewUserQuery;
     }
 
+    [AutoInit]
     public static class UserQueryOperation
     {
-        public static readonly ExecuteSymbol<UserQueryEntity> Save = OperationSymbol.Execute<UserQueryEntity>();
-        public static readonly DeleteSymbol<UserQueryEntity> Delete = OperationSymbol.Delete<UserQueryEntity>();
+        public static ExecuteSymbol<UserQueryEntity> Save;
+        public static DeleteSymbol<UserQueryEntity> Delete;
     }
 
 
@@ -232,21 +187,10 @@ namespace Signum.Entities.UserQueries
     public class QueryOrderEntity : EmbeddedEntity
     {
         [NotNullable]
-        QueryTokenEntity token;
         [NotNullValidator]
-        public QueryTokenEntity Token
-        {
-            get { return token; }
-            set { Set(ref token, value); }
-        }
+        public QueryTokenEntity Token { get; set; }
 
-
-        OrderType orderType;
-        public OrderType OrderType
-        {
-            get { return orderType; }
-            set { Set(ref orderType, value); }
-        }
+        public OrderType OrderType { get; set; }
 
         public XElement ToXml(IToXmlContext ctx)
         {
@@ -263,14 +207,14 @@ namespace Signum.Entities.UserQueries
 
         public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
-            token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
+            Token.ParseData(context, description, options & ~SubTokensOptions.CanAnyAll);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Token) && token != null && token.Token != null)
+            if (pi.Name == nameof(Token) && Token != null && Token.Token != null)
             {
-                return QueryUtils.CanOrder(token.Token);
+                return QueryUtils.CanOrder(Token.Token);
             }
 
             return base.PropertyValidation(pi);
@@ -278,7 +222,7 @@ namespace Signum.Entities.UserQueries
 
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(token, orderType);
+            return "{0} {1}".FormatWith(Token, OrderType);
         }
     }
 
@@ -286,13 +230,8 @@ namespace Signum.Entities.UserQueries
     public class QueryColumnEntity : EmbeddedEntity
     {
         [NotNullable]
-        QueryTokenEntity token;
         [NotNullValidator]
-        public QueryTokenEntity Token
-        {
-            get { return token; }
-            set { Set(ref token, value); }
-        }
+        public QueryTokenEntity Token { get; set; }
 
         string displayName;
         public string DisplayName
@@ -311,19 +250,19 @@ namespace Signum.Entities.UserQueries
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
             Token = new QueryTokenEntity(element.Attribute("Token").Value);
-            DisplayName = element.Attribute("DisplayName").Try(a => a.Value);
+            DisplayName = element.Attribute("DisplayName")?.Value;
         }
 
         public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
-            token.ParseData(context, description, options);
+            Token.ParseData(context, description, options);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Token) && token != null && token.Token != null)
+            if (pi.Name == nameof(Token) && Token != null && Token.Token != null)
             {
-                return QueryUtils.CanColumn(token.Token);
+                return QueryUtils.CanColumn(Token.Token);
             }
 
             return base.PropertyValidation(pi);
@@ -331,7 +270,7 @@ namespace Signum.Entities.UserQueries
 
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(token, displayName);
+            return "{0} {1}".FormatWith(Token, displayName);
         }
     }
 
@@ -356,21 +295,11 @@ namespace Signum.Entities.UserQueries
             }
         }
 
-        FilterOperation operation;
-        public FilterOperation Operation
-        {
-            get { return operation; }
-            set { Set(ref operation, value); }
-        }
+        public FilterOperation Operation { get; set; }
 
         [SqlDbType(Size = 300)]
-        string valueString;
         [StringLengthValidator(AllowNulls = true, Max = 300)]
-        public string ValueString
-        {
-            get { return valueString; }
-            set { SetToStr(ref valueString, value); }
-        }
+        public string ValueString { get; set; }
 
         public void ParseData(Entity context, QueryDescription description, SubTokensOptions options)
         {
@@ -381,26 +310,26 @@ namespace Signum.Entities.UserQueries
         {
             if (token != null)
             {
-                if (pi.Is(() => Token) && token.Token != null)
+                if (pi.Name == nameof(Token) && token.Token != null)
                 {
                     return QueryUtils.CanFilter(token.Token);
                 }
 
-                if (pi.Is(() => Operation))
+                if (pi.Name == nameof(Operation))
                 {
                     FilterType? filterType = QueryUtils.TryGetFilterType(Token.Token.Type);
 
                     if (filterType == null)
                         return UserQueryMessage._0IsNotFilterable.NiceToString().FormatWith(token);
 
-                    if (!QueryUtils.GetFilterOperations(filterType.Value).Contains(operation))
-                        return UserQueryMessage.TheFilterOperation0isNotCompatibleWith1.NiceToString().FormatWith(operation, filterType);
+                    if (!QueryUtils.GetFilterOperations(filterType.Value).Contains(Operation))
+                        return UserQueryMessage.TheFilterOperation0isNotCompatibleWith1.NiceToString().FormatWith(Operation, filterType);
                 }
 
-                if (pi.Is(() => ValueString))
+                if (pi.Name == nameof(ValueString))
                 {
                     object val;
-                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out val, operation == FilterOperation.IsIn);
+                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out val, Operation == FilterOperation.IsIn);
                 }
             }
 
@@ -424,15 +353,15 @@ namespace Signum.Entities.UserQueries
 
         public override string ToString()
         {
-            return "{0} {1} {2}".FormatWith(token, operation, ValueString);
+            return "{0} {1} {2}".FormatWith(token, Operation, ValueString);
         }
 
-      
+
     }
 
     public static class UserQueryUtils
     {
-        public static Func<Lite<Entity>> DefaultRelated = () => UserEntity.Current.ToLite();
+        public static Func<Lite<Entity>> DefaultOwner = () => (Lite<Entity>)UserHolder.Current?.ToLite();
 
         public static UserQueryEntity ToUserQuery(this QueryRequest request, QueryDescription qd, QueryEntity query, Pagination defaultPagination, bool withoutFilters)
         {
@@ -450,7 +379,7 @@ namespace Signum.Entities.UserQueries
             {
                 Query = query,
                 WithoutFilters = withoutFilters,
-                Owner = DefaultRelated(),
+                Owner = DefaultOwner(),
                 Filters = withoutFilters ? new MList<QueryFilterEntity>() : request.Filters.Select(f => new QueryFilterEntity
                 {
                     Token = new QueryTokenEntity(f.Token),
@@ -477,7 +406,7 @@ namespace Signum.Entities.UserQueries
 
             foreach (var item in current)
             {
-                if(item.Token.NiceName() == item.DisplayName)
+                if (item.Token.NiceName() == item.DisplayName)
                     item.DisplayName = null;
             }
 
@@ -547,6 +476,7 @@ namespace Signum.Entities.UserQueries
         [Description("{0} is not filterable")]
         _0IsNotFilterable,
         [Description("Use {0} to filter current entity")]
-        Use0ToFilterCurrentEntity
+        Use0ToFilterCurrentEntity,
+        Preview
     }
 }

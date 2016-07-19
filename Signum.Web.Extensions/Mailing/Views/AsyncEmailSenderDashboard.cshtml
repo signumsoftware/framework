@@ -1,0 +1,55 @@
+﻿@using Signum.Entities.Mailing
+@using Signum.Engine.Mailing
+@using Signum.Web.Mailing
+@using Signum.Entities.DynamicQuery
+@model AsyncEmailSenderState
+<div id="emailAsyncMainDiv">
+    <h2>Async Email Sender State</h2>
+    <div>
+        <a href="@(Url.Action<AsyncEmailSenderController>(pc => pc.Stop()))" class="sf-button btn btn-default active" style="@(Model.Running ? "" : "display:none");color:red" id="sfEmailAsyncProcessDisable">Stop </a>
+        <a href="@(Url.Action<AsyncEmailSenderController>(pc => pc.Start()))" class="sf-button btn btn-default" style="@(!Model.Running ? "" : "display:none")" id="sfEmailAsyncProcessEnable">Start </a>
+    </div>
+
+    <div>
+        <br />
+        State: <strong>
+            @if (Model.Running)
+            {
+                <span style="color: green">RUNNING</span>
+            }
+            else
+            {
+                <span style="color: red">STOPPED</span>
+            }
+        </strong>
+        <br />
+        CurrentProcessIdentifier: @Model.CurrentProcessIdentifier
+        <br />
+        AsyncSenderPeriod: @Model.AsyncSenderPeriod sec
+        <br />
+        NextPlannedExecution: @Model.NextPlannedExecution (@(Model.NextPlannedExecution == null ? "-None-" : Model.NextPlannedExecution.Value.ToAgoString()))
+        <br />
+        IsCancelationRequested: @Model.IsCancelationRequested
+        <br />
+        QueuedItems: @Model.QueuedItems
+        <br />
+        MachineName: @Model.MachineName
+        <br />
+        ApplicationName: @Model.ApplicationName
+    </div>
+    <br />
+    @Html.AntiForgeryToken()
+    @Html.SearchControl(new FindOptions(typeof(EmailMessageEntity))
+{
+    OrderOptions = { new OrderOption("Entity.CreationDate", OrderType.Descending) },
+    ShowFilters = false,
+    SearchOnLoad = true,
+    Pagination = new Pagination.Firsts(10),
+}, new Context(null, "em"))
+    <script>
+        $(function () {
+            @(MailingClient.AsyncEmailSenderModule["initDashboard"](Url.Action<AsyncEmailSenderController>(p => p.View())))
+        });
+    </script>
+</div>
+

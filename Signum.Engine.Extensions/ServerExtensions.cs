@@ -49,8 +49,12 @@ namespace Signum.Services
     {
         public override Entity Retrieve(Type type, PrimaryKey id)
         {
-            using (ViewLogLogic.LogView(Lite.Create(type, id), "WCFRetrieve"))
-                return base.Retrieve(type, id);
+            return Return(MethodInfo.GetCurrentMethod(), type.Name,
+                () =>
+                {
+                    using (ViewLogLogic.LogView(Lite.Create(type, id), "WCFRetrieve"))
+                        return Database.Retrieve(type, id);
+                });
         }
 
 
@@ -295,7 +299,7 @@ namespace Signum.Services
         public byte[] ExecutePlainExcel(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ExcelLogic.ExecutePlainExcel(request));
+                () => ExcelLogic.ExecutePlainExcel(request, QueryUtils.GetNiceName(request.QueryName)));
         }
 
         #endregion

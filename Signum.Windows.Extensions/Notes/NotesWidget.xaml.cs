@@ -39,7 +39,7 @@ namespace Signum.Windows.Notes
             {
                 Target = entity.ToLite(),
                 CreationDate = Server.Return((IBaseServer s) => s.ServerNow()),
-                CreatedBy = UserEntity.Current.ToLite(),
+                CreatedBy = UserHolder.Current.ToLite(),
             };
         }
 

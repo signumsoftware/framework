@@ -12,7 +12,7 @@
     <div class="row">
         <div class="col-sm-11">
             @Html.ValueLine(cc, c => c.Name)
-            @Html.FileLine(cc, c => c.Icon.Try(i => i.Retrieve()), fl =>
+            @Html.FileLineLite(cc, c => c.Icon, fl =>
     {
         fl.LabelText = Html.PropertyNiceName(() => cc.Value.Icon);
         fl.AttachFunction = ChartClient.ModuleScript["refreshIcon"](fl, imageRoute);
@@ -32,6 +32,6 @@
     <div class="sf-chartscript-columns">
         @Html.EntityRepeater(cc, c => c.Columns)
     </div>
-    
+    @Html.EntityRepeater(cc, c => c.Parameters)
     @Html.Partial(Signum.Web.Chart.ChartClient.ChartScriptCodeView, cc)
 }

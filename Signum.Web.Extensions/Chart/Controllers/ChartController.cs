@@ -20,6 +20,7 @@ using Signum.Entities.Basics;
 using Signum.Engine.Authorization;
 using Signum.Engine.Excel;
 using Signum.Entities.UserAssets;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Web.Chart
 {
@@ -62,7 +63,7 @@ namespace Signum.Web.Chart
         {
             string lastToken = Request["lastTokenChanged"];
             
-            var request = this.ExtractChartRequestCtx(lastToken.Try(int.Parse)).Value;   
+            var request = this.ExtractChartRequestCtx(lastToken?.Let(int.Parse)).Value;   
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
             
@@ -224,7 +225,7 @@ namespace Signum.Web.Chart
 
             var resultTable = ChartLogic.ExecuteChart(request);
 
-            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable);
+            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable, QueryUtils.GetNiceName(request.QueryName));
 
             return File(binaryFile, MimeType.FromExtension(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + ".xlsx");
         }
@@ -241,7 +242,7 @@ namespace Signum.Web.Chart
             if (lastTokenChanged != null)
             {
                 if (lastTokenChanged == -1)
-                    chart.ChartScript.SyncronizeColumns(chart, changeParameters: true); 
+                    chart.ChartScript.SyncronizeColumns(chart); 
                 else
                     chart.Columns[lastTokenChanged.Value].TokenChanged();
             }
@@ -269,7 +270,7 @@ namespace Signum.Web.Chart
 
             var userChart = request.ToUserChart();
 
-            userChart.Owner = UserEntity.Current.ToLite();
+            userChart.Owner = UserQueryUtils.DefaultOwner();
 
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 

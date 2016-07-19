@@ -17,15 +17,4 @@
         </div>
     </div>
     }
-    
-    using(var sc= cc.SubContext())
-    {
-        sc.FormGroupSize = FormGroupSize.Small;
-        
-        <div class="chart-column-parameters">
-            @Html.EntityDetail(cc, c => c.Parameter1)
-            @Html.EntityDetail(cc, c => c.Parameter2)
-            @Html.EntityDetail(cc, c => c.Parameter3)
-        </div>
-    }
 }

@@ -111,7 +111,7 @@ namespace Signum.Web.Maps
                         new ObjectName(new SchemaName(dbName, t.Schema().name), t.name),
                         new RuntimeStats
                         {
-                            rows = t.Indices().SingleOrDefault(a => a.is_primary_key).Partition().rows,
+                            rows = ((int?)t.Indices().SingleOrDefault(a => a.is_primary_key).Partition().rows) ?? 0,
                             total_size_kb = t.Indices().SelectMany(i => i.Partition().AllocationUnits()).Sum(a => a.total_pages) * 8
                         })).ToDictionary();
 

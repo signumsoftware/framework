@@ -14,70 +14,44 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ScheduledTaskEntity : Entity
     {
-        [ImplementedBy(typeof(ScheduleRuleDailyEntity), typeof(ScheduleRuleWeeklyEntity), typeof(ScheduleRuleWeekDaysEntity), typeof(ScheduleRuleMinutelyEntity), typeof(ScheduleRuleHourlyEntity))]
-        IScheduleRuleEntity rule;
+        [ImplementedBy(
+            typeof(ScheduleRuleMinutelyEntity), 
+            typeof(ScheduleRuleWeekDaysEntity), 
+            typeof(ScheduleRuleMonthsEntity))]
         [NotNullValidator]
-        public IScheduleRuleEntity Rule
-        {
-            get { return rule; }
-            set { SetToStr(ref rule, value); }
-        }
+        public IScheduleRuleEntity Rule { get; set; }
 
         [ImplementedBy(typeof(SimpleTaskSymbol))]
-        ITaskEntity task;
         [NotNullValidator]
-        public ITaskEntity Task
-        {
-            get { return task; }
-            set { SetToStr(ref task, value); }
-        }
+        public ITaskEntity Task { get; set; }
 
-        bool suspended;
-        public bool Suspended
-        {
-            get { return suspended; }
-            set { Set(ref suspended, value); }
-        }
+        public bool Suspended { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string machineName = None;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string MachineName
-        {
-            get { return machineName; }
-            set { Set(ref machineName, value); }
-        }
+        public string MachineName { get; set; } = None;
 
         [NotNullable]
-        Lite<IUserEntity> user;
         [NotNullValidator]
-        public Lite<IUserEntity> User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
+        public Lite<IUserEntity> User { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string applicationName = None;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string ApplicationName
-        {
-            get { return applicationName; }
-            set { Set(ref applicationName, value); }
-        }
+        public string ApplicationName { get; set; } = None;
 
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(task, rule) + (suspended ? " [{0}]".FormatWith(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");
+            return "{0} {1}".FormatWith(Task, Rule) + (Suspended ? " [{0}]".FormatWith(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");
         }
 
         public const string None = "none";
     }
 
+    [AutoInit]
     public static class ScheduledTaskOperation
     {
-        public static readonly ExecuteSymbol<ScheduledTaskEntity> Save = OperationSymbol.Execute<ScheduledTaskEntity>();
-        public static readonly DeleteSymbol<ScheduledTaskEntity> Delete = OperationSymbol.Delete<ScheduledTaskEntity>();
+        public static ExecuteSymbol<ScheduledTaskEntity> Save;
+        public static DeleteSymbol<ScheduledTaskEntity> Delete;
     }
 
     public enum TaskMessage
@@ -87,16 +61,19 @@ namespace Signum.Entities.Scheduler
         LastExecution
     }
 
+    [AutoInit]
     public static class TaskOperation
     {
-        public static readonly ConstructSymbol<IEntity>.From<ITaskEntity> ExecuteSync = OperationSymbol.Construct<IEntity>.From<ITaskEntity>();
-        public static readonly ExecuteSymbol<ITaskEntity> ExecuteAsync = OperationSymbol.Execute<ITaskEntity>();
+        public static ConstructSymbol<IEntity>.From<ITaskEntity> ExecuteSync;
+        public static ExecuteSymbol<ITaskEntity> ExecuteAsync;
     }
 
 
+
+    [AutoInit]
     public static class SchedulerPermission
     {
-        public static readonly PermissionSymbol ViewSchedulerPanel = new PermissionSymbol();
+        public static PermissionSymbol ViewSchedulerPanel;
     }
 
     public interface ITaskEntity : IEntity

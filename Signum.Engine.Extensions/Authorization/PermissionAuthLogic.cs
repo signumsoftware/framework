@@ -20,20 +20,32 @@ namespace Signum.Engine.Authorization
 
     public static class PermissionAuthLogic
     {
-        static List<PermissionSymbol> permissions = new List<PermissionSymbol>();
-        public static void RegisterPermissions(params PermissionSymbol[] type)
+        static HashSet<PermissionSymbol> permissions = new HashSet<PermissionSymbol>();
+        public static void RegisterPermissions(params PermissionSymbol[] permissions)
         {
-            permissions.AddRange(type.NotNull()); 
+            foreach (var p in permissions)
+            {
+                if (p == null)
+                    throw AutoInitAttribute.ArgumentNullException(typeof(PermissionSymbol), nameof(permissions));
+
+                PermissionAuthLogic.permissions.Add(p);
+            }
         }
 
         public static void RegisterTypes(params Type[] types)
         {
-            foreach (var t in types.NotNull())
+            foreach (var t in types)
             {
                 if (!t.IsStaticClass())
                     throw new ArgumentException("{0} is not a static class".FormatWith(t.Name));
 
-                permissions.AddRange(t.GetFields(BindingFlags.Public | BindingFlags.Static).Select(fi => fi.GetValue(null)).Cast<PermissionSymbol>());
+                foreach (var p in t.GetFields(BindingFlags.Public | BindingFlags.Static).Select(fi => fi.GetValue(null)).Cast<PermissionSymbol>())
+                {
+                    if (p == null)
+                        throw AutoInitAttribute.ArgumentNullException(typeof(PermissionSymbol), nameof(permissions));
+
+                    PermissionAuthLogic.permissions.Add(p);
+                }
             }
         }
 
@@ -107,22 +119,27 @@ namespace Signum.Engine.Authorization
 
         public static bool IsAuthorized(this PermissionSymbol permissionSymbol)
         {
+            AssertRegistered(permissionSymbol);
+
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal || cache == null)
                 return true;
 
             return cache.GetAllowed(RoleEntity.Current.ToLite(), permissionSymbol);
         }
-
+        
         public static bool IsAuthorized(this PermissionSymbol permissionSymbol, Lite<RoleEntity> role)
         {
-            //if (permissionSymbol == BasicPermission.AutomaticUpgradeOfOperations ||
-            //  permissionSymbol == BasicPermission.AutomaticUpgradeOfProperties ||
-            //  permissionSymbol == BasicPermission.AutomaticUpgradeOfQueries)
-            //    return true;
+            AssertRegistered(permissionSymbol);
 
             return cache.GetAllowed(role, permissionSymbol);
         }
 
+        private static void AssertRegistered(PermissionSymbol permissionSymbol)
+        {
+            if (!permissions.Contains(permissionSymbol))
+                throw new InvalidOperationException($"The permission '{permissionSymbol}' has not been registered");
+        }
+        
         public static DefaultDictionary<PermissionSymbol, bool> ServicePermissionRules()
         {
             return cache.GetDefaultDictionary();

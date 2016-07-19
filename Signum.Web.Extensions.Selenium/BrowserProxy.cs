@@ -103,11 +103,9 @@ namespace Signum.Web.Selenium
 
         public virtual string GetCurrentUser()
         {
-            if (Selenium.IsElementVisible(By.CssSelector(".sf-login")))
+            var element = Selenium.WaitElementPresent(By.CssSelector("a.sf-user, .sf-login"));
+            if (element.HasClass("sf-login"))
                 return null;
-
-            if (!Selenium.IsElementPresent(By.CssSelector("a.sf-user")))
-                throw new InvalidOperationException("No login or logout button found");
 
             var result = (string)Selenium.ExecuteScript("return $('.sf-user span').text()");
 

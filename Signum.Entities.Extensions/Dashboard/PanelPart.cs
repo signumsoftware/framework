@@ -16,63 +16,33 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class PanelPartEntity : EmbeddedEntity, IGridEntity
     {
-        string title;
-        public string Title
-        {
-            get { return title; }
-            set { Set(ref title, value); }
-        }
+        public string Title { get; set; }
 
-        int row;
         [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
-        public int Row
-        {
-            get { return row; }
-            set { Set(ref row, value); }
-        }
+        public int Row { get; set; }
 
-        int startColumn;
         [NumberBetweenValidator(0, 11)]
-        public int StartColumn
-        {
-            get { return startColumn; }
-            set { Set(ref startColumn, value); }
-        }
+        public int StartColumn { get; set; }
 
-        int columns;
         [NumberBetweenValidator(1, 12)]
-        public int Columns
-        {
-            get { return columns; }
-            set { Set(ref columns, value); }
-        }
+        public int Columns { get; set; }
 
-        PanelStyle style;
-        public PanelStyle Style
-        {
-            get { return style; }
-            set { Set(ref style, value); }
-        }
+        public PanelStyle Style { get; set; }
 
         [ImplementedBy(typeof(UserChartPartEntity), typeof(UserQueryPartEntity), typeof(CountSearchControlPartEntity), typeof(LinkListPartEntity))]
-        IPartEntity content;
-        public IPartEntity Content
-        {
-            get { return content; }
-            set { Set(ref content, value); }
-        }
+        public IPartEntity Content { get; set; }
 
         public override string ToString()
         {
-            return title.HasText() ? title : content.ToString();
+            return Title.HasText() ? Title : Content.ToString();
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
+            if (pi.Name == nameof(Title) && string.IsNullOrEmpty(Title))
             {
-                if (content != null && content.RequiresTitle)
-                    return DashboardMessage.DashboardDN_TitleMustBeSpecifiedFor0.NiceToString().FormatWith(content.GetType().NicePluralName());
+                if (Content != null && Content.RequiresTitle)
+                    return DashboardMessage.DashboardDN_TitleMustBeSpecifiedFor0.NiceToString().FormatWith(Content.GetType().NicePluralName());
             }
 
             return base.PropertyValidation(pi);
@@ -84,7 +54,7 @@ namespace Signum.Entities.Dashboard
             {
                 Columns = Columns,
                 StartColumn = StartColumn,
-                Content = content.Clone(),
+                Content = Content.Clone(),
                 Title = Title
             };
         }
@@ -110,7 +80,7 @@ namespace Signum.Entities.Dashboard
             Row = int.Parse(x.Attribute("Row").Value);
             StartColumn = int.Parse(x.Attribute("StartColumn").Value);
             Columns = int.Parse(x.Attribute("Columns").Value);
-            Title = x.Attribute("Title").Try(a => a.Value);
+            Title = x.Attribute("Title")?.Value;
             Content = ctx.GetPart(Content, x.Elements().Single());
         }
 
@@ -150,17 +120,14 @@ namespace Signum.Entities.Dashboard
     public class UserQueryPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        UserQueryEntity userQuery;
         [NotNullValidator]
-        public UserQueryEntity UserQuery
-        {
-            get { return userQuery; }
-            set { Set(ref userQuery, value); }
-        }
-
+        public UserQueryEntity UserQuery { get; set; }
+        
+        public bool AllowSelection { get; set; }
+        
         public override string ToString()
         {
-            return userQuery.TryToString();
+            return UserQuery?.ToString();
         }
 
         public bool RequiresTitle
@@ -192,24 +159,14 @@ namespace Signum.Entities.Dashboard
     public class UserChartPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        UserChartEntity userChart;
         [NotNullValidator]
-        public UserChartEntity UserChart
-        {
-            get { return userChart; }
-            set { Set(ref userChart, value); }
-        }
+        public UserChartEntity UserChart { get; set; }
 
-        bool showData = false;
-        public bool ShowData
-        {
-            get { return showData; }
-            set { Set(ref showData, value); }
-        }
+        public bool ShowData { get; set; } = false;
 
         public override string ToString()
         {
-            return userChart.TryToString();
+            return UserChart?.ToString();
         }
 
         public bool RequiresTitle
@@ -243,16 +200,11 @@ namespace Signum.Entities.Dashboard
     public class CountSearchControlPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        MList<CountUserQueryElementEntity> userQueries = new MList<CountUserQueryElementEntity>();
-        public MList<CountUserQueryElementEntity> UserQueries
-        {
-            get { return userQueries; }
-            set { Set(ref userQueries, value); }
-        }
+        public MList<CountUserQueryElementEntity> UserQueries { get; set; } = new MList<CountUserQueryElementEntity>();
 
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(userQueries.Count, typeof(UserQueryEntity).NicePluralName());
+            return "{0} {1}".FormatWith(UserQueries.Count, typeof(UserQueryEntity).NicePluralName());
         }
 
         public bool RequiresTitle
@@ -286,24 +238,15 @@ namespace Signum.Entities.Dashboard
         string label;
         public string Label
         {
-            get { return label ?? UserQuery.Try(uq => uq.DisplayName); }
+            get { return label ?? UserQuery?.DisplayName; }
             set { Set(ref label, value); }
         }
 
-        UserQueryEntity userQuery;
         [NotNullValidator]
-        public UserQueryEntity UserQuery
-        {
-            get { return userQuery; }
-            set { Set(ref userQuery, value); }
-        }
+        public UserQueryEntity UserQuery { get; set; }
 
-        string href;
-        public string Href
-        {
-            get { return href; }
-            set { Set(ref href, value); }
-        }
+        public string Href { get; set; }
+
         public CountUserQueryElementEntity Clone()
         {
             return new CountUserQueryElementEntity
@@ -324,8 +267,8 @@ namespace Signum.Entities.Dashboard
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Label = element.Attribute("Label").Try(a => a.Value);
-            Href = element.Attribute("Href").Try(a => a.Value);
+            Label = element.Attribute("Label")?.Value;
+            Href = element.Attribute("Href")?.Value;
             UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
         }
     }
@@ -334,16 +277,11 @@ namespace Signum.Entities.Dashboard
     public class LinkListPartEntity : Entity, IPartEntity
     {
         [NotNullable]
-        MList<LinkElementEntity> links = new MList<LinkElementEntity>();
-        public MList<LinkElementEntity> Links
-        {
-            get { return links; }
-            set { Set(ref links, value); }
-        }
+        public MList<LinkElementEntity> Links { get; set; } = new MList<LinkElementEntity>();
 
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(links.Count, typeof(LinkElementEntity).NicePluralName());
+            return "{0} {1}".FormatWith(Links.Count, typeof(LinkElementEntity).NicePluralName());
         }
 
         public bool RequiresTitle
@@ -375,22 +313,12 @@ namespace Signum.Entities.Dashboard
     [Serializable]
     public class LinkElementEntity : EmbeddedEntity
     {
-        string label;
         [NotNullValidator]
-        public string Label
-        {
-            get { return label; }
-            set { Set(ref label, value); }
-        }
+        public string Label { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        string link;
-        [URLValidator, NotNullValidator]
-        public string Link
-        {
-            get { return link; }
-            set { Set(ref link, value); }
-        }
+        [URLValidator(absolute: true, aspNetSiteRelative: true), StringLengthValidator(AllowNulls = false)]
+        public string Link { get; set; }
 
         public LinkElementEntity Clone()
         {

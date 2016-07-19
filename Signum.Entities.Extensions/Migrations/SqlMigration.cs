@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Migrations
 {
@@ -12,14 +13,10 @@ namespace Signum.Entities.Migrations
     public class SqlMigrationEntity : Entity
     {
         [UniqueIndex]
-        string versionNumber;
-        public string VersionNumber
-        {
-            get { return versionNumber; }
-            set { Set(ref versionNumber, value); }
-        }
+        public string VersionNumber { get; set; }
 
         static Expression<Func<SqlMigrationEntity, string>> ToStringExpression = e => e.VersionNumber;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

@@ -12,10 +12,9 @@ namespace Signum.Entities.Basics
     public class TypeConditionSymbol : Symbol
     {
         private TypeConditionSymbol() { } 
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public TypeConditionSymbol( [CallerMemberName]string memberName = null) : 
-            base(new StackFrame(1, false), memberName)
+        
+        public TypeConditionSymbol(Type declaringType, string fieldName) : 
+            base(declaringType, fieldName)
         {
         }
     }

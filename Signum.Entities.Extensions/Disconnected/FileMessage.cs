@@ -6,6 +6,7 @@ using System.ServiceModel;
 using System.IO;
 using Signum.Services;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.Disconnected
 {
@@ -60,14 +61,14 @@ namespace Signum.Entities.Disconnected
         public Lite<DisconnectedExportEntity> DownloadStatistics;
 
         [MessageHeader(MustUnderstand = true)]
-        public Lite<UserEntity> User;
+        public Lite<IUserEntity> User;
     }
 
     [MessageContract]
     public class UploadDatabaseRequest: FileMessage
     {
         [MessageHeader(MustUnderstand = true)]
-        public Lite<UserEntity> User;
+        public Lite<IUserEntity> User;
 
         [MessageHeader(MustUnderstand = true)]
         public Lite<DisconnectedMachineEntity> Machine; 
@@ -80,7 +81,7 @@ namespace Signum.Entities.Disconnected
         UploadDatabaseResult UploadDatabase(UploadDatabaseRequest request);
 
         [OperationContract, NetDataContractAttribute]
-        Lite<DisconnectedExportEntity> BeginExportDatabase(Lite<UserEntity> user, Lite<DisconnectedMachineEntity> machine);
+        Lite<DisconnectedExportEntity> BeginExportDatabase(Lite<IUserEntity> user, Lite<DisconnectedMachineEntity> machine);
 
         [OperationContract, NetDataContractAttribute]
         FileMessage EndExportDatabase(DownloadDatabaseRequests request);

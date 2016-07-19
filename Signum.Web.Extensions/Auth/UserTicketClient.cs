@@ -11,7 +11,9 @@ namespace Signum.Web.Auth
 {
     public class UserTicketClient
     {
-        public static string CookieName = "sfUser";
+        //public static string CookieName = "sfUser";
+        public static Func<string> CookieNameFunc = () => "sfUser";
+        public static string CookieName { get { return CookieNameFunc(); } }
 
         public static bool LoginFromCookie()
         {

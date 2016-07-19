@@ -5,98 +5,57 @@ using System.Text;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ScheduledTaskLogEntity : Entity
     {
-        ScheduledTaskEntity scheduledTask;
-        public ScheduledTaskEntity ScheduledTask
-        {
-            get { return scheduledTask; }
-            set { Set(ref scheduledTask, value); }
-        }
+        public ScheduledTaskEntity ScheduledTask { get; set; }
 
-        Lite<IUserEntity> user;
-        public Lite<IUserEntity> User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
+        [NotNullable]
+        [NotNullValidator]
+        public Lite<IUserEntity> User { get; set; }
 
         [ImplementedBy(typeof(SimpleTaskSymbol))]
-        ITaskEntity task;
         [NotNullValidator]
-        public ITaskEntity Task
-        {
-            get { return task; }
-            set { Set(ref task, value); }
-        }
+        public ITaskEntity Task { get; set; }
 
-        DateTime startTime;
         [Format("G")]
-        public DateTime StartTime
-        {
-            get { return startTime; }
-            set { Set(ref startTime, value); }
-        }
+        public DateTime StartTime { get; set; }
 
-        DateTime? endTime;
         [Format("G")]
-        public DateTime? EndTime
-        {
-            get { return endTime; }
-            set { Set(ref endTime, value); }
-        }
+        public DateTime? EndTime { get; set; }
 
         static Expression<Func<ScheduledTaskLogEntity, double?>> DurationExpression =
             log => (double?)(log.EndTime - log.StartTime).Value.TotalMilliseconds;
+        [ExpressionField("DurationExpression")]
         public double? Duration
         {
             get { return EndTime == null ? null : DurationExpression.Evaluate(this); }
         }
 
         [NotNullable, SqlDbType(Size = 200)]
-        string machineName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
-        public string MachineName
-        {
-            get { return machineName; }
-            set { Set(ref machineName, value); }
-        }
+        public string MachineName { get; set; }
 
         [NotNullable, SqlDbType(Size = 200)]
-        string applicationName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
-        public string ApplicationName
-        {
-            get { return applicationName; }
-            set { Set(ref applicationName, value); }
-        }
+        public string ApplicationName { get; set; }
 
         [ImplementedByAll]
-        Lite<IEntity> productEntity;
-        public Lite<IEntity> ProductEntity
-        {
-            get { return productEntity; }
-            set { Set(ref productEntity, value); }
-        }
+        public Lite<IEntity> ProductEntity { get; set; }
 
-        Lite<ExceptionEntity> exception;
-        public Lite<ExceptionEntity> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value); }
-        }
+        public Lite<ExceptionEntity> Exception { get; set; }
 
         public override string ToString()
         {
-            if (endTime.HasValue)
-                return "{0}-{1}".FormatWith(startTime, endTime);
-            else if (exception != null)
-                return "{0} Error: {1}".FormatWith(startTime, exception);
-            return startTime.ToString();
+            if (EndTime.HasValue)
+                return "{0}-{1}".FormatWith(StartTime, EndTime);
+            else if (Exception != null)
+                return "{0} Error: {1}".FormatWith(StartTime, Exception);
+            return StartTime.ToString();
         }
     }
 }

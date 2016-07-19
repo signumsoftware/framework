@@ -1,0 +1,18 @@
+﻿﻿@using Signum.Entities.ViewLog
+@using (var cp = Html.TypeContext<ViewLogEntity>())
+{
+    <div class="row">
+        <div class="col-sm-6">
+            @Html.EntityLine(cp, d => d.Target)
+            @Html.ValueLine(cp, d => d.StartDate)
+        </div>
+
+        <div class="col-sm-6">
+            @Html.EntityLine(cp, d => d.User)
+            @Html.ValueLine(cp, d => d.EndDate)
+        </div>
+    </div>
+
+    <h3 style="color: rgb(139,0,0)">@cp.Value.ViewAction</h3>
+    <pre><code>@cp.Value.Data</code></pre>
+}

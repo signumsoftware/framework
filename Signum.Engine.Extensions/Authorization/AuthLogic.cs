@@ -345,6 +345,11 @@ namespace Signum.Engine.Authorization
             return roles.Value.IndirectlyRelatedTo(RoleEntity.Current.ToLite(), true);
         }
 
+        public static HashSet<Lite<RoleEntity>> RolesFromRole(Lite<RoleEntity> role)
+        {
+            return roles.Value.IndirectlyRelatedTo(role, true);
+        }
+
         internal static int Rank(Lite<RoleEntity> role)
         {
             return roles.Value.IndirectlyRelatedTo(role).Count;
@@ -392,7 +397,7 @@ namespace Signum.Engine.Authorization
                     var r = rolesDic[kvp.Key];
 
                     var current = GetMergeStrategy(r);
-                    var should = kvp.Value.Attribute("MergeStrategy").Try(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
+                    var should = kvp.Value.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
 
                     if (current != should)
                         throw new InvalidOperationException("Merge strategy of {0} is {1} in the database but is {2} in the file".FormatWith(r, current, should));
@@ -465,7 +470,7 @@ namespace Signum.Engine.Authorization
             var roleInfos = doc.Root.Element("Roles").Elements("Role").Select(x => new
             {
                 Name = x.Attribute("Name").Value,
-                MergeStrategy = x.Attribute("MergeStrategy").Try(ms => ms.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union,
+                MergeStrategy = x.Attribute("MergeStrategy")?.Let(ms => ms.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union,
                 SubRoles = x.Attribute("Contains").Value.SplitNoEmpty(',' )
             }).ToList();
 
@@ -505,7 +510,7 @@ namespace Signum.Engine.Authorization
                     {
                         var oldName = role.Name;
                         role.Name = name;
-                        role.MergeStrategy = xElement.Attribute("MergeStrategy").Try(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
+                        role.MergeStrategy = xElement.Attribute("MergeStrategy")?.Let(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
                         return table.UpdateSqlSync(role, includeCollections: false, comment: oldName);
                     }, Spacing.Double);
 
@@ -564,6 +569,30 @@ namespace Signum.Engine.Authorization
             }
         }
 
+        public static void AutomaticImportAuthRules()
+        {
+            AutomaticImportAuthRules("AuthRules.xml");
+        }
+
+        public static void AutomaticImportAuthRules(string fileName)
+        {
+            Schema.Current.Initialize();
+            var script = AuthLogic.ImportRulesScript(XDocument.Load(fileName), interactive: false);
+            if (script == null)
+            {
+                SafeConsole.WriteColor(ConsoleColor.Green, "AuthRules already synchronized");
+                return;
+            }
+
+            using (var tr = new Transaction())
+            {
+                SafeConsole.WriteColor(ConsoleColor.Yellow, "Executing AuthRules changes...");
+                SafeConsole.WriteColor(ConsoleColor.DarkYellow, script.PlainSql());
+
+                script.PlainSqlCommand().ExecuteLeaves();
+                tr.Commit();
+            }
+        }
 
         public static void ImportExportAuthRules()
         {

@@ -24,16 +24,10 @@ namespace Signum.Web.Notes
         {
             var ident = (Entity)ctx.Entity;
 
-            var findOptions = new FindOptions
+            var findOptions = new FindOptions(typeof(NoteEntity), "Target", ident.ToLite())
             {
-                QueryName = typeof(NoteEntity),
                 Create = false,
-                SearchOnLoad = true,
-                ShowFilters = false,
                 ShowFilterButton = false,
-                FilterOptions = { new FilterOption("Target", ident.ToLite()) },
-                ColumnOptions = { new ColumnOption("Target") },
-                ColumnOptionsMode = ColumnOptionsMode.Remove,
             }.ToJS(ctx.Prefix, "New");
 
 

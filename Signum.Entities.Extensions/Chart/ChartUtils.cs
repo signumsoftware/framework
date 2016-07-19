@@ -38,7 +38,7 @@ namespace Signum.Entities.Chart
                 case FilterType.String:
                 case FilterType.Guid: return ChartColumnType.String;
                 case FilterType.Integer: return ChartColumnType.Integer;
-                case FilterType.Decimal: return ChartColumnType.Real;
+                case FilterType.Decimal: return token.IsRealGroupable ? ChartColumnType.RealGroupable :  ChartColumnType.Real;
                 case FilterType.DateTime:
                     {
                         if (IsDateOnly(token))
@@ -81,7 +81,7 @@ namespace Signum.Entities.Chart
 
         
         
-        public static bool SyncronizeColumns(this ChartScriptEntity chartScript, IChartBase chart, bool changeParameters)
+        public static bool SyncronizeColumns(this ChartScriptEntity chartScript, IChartBase chart)
         {
             bool result = false;
 
@@ -101,8 +101,6 @@ namespace Signum.Entities.Chart
 
                 chart.Columns[i].parentChart = chart;
                 chart.Columns[i].ScriptColumn = chartScript.Columns[i];
-                if (changeParameters)
-                    chart.Columns[i].SetDefaultParameters();
              
                 if (!result)
                     result = chart.Columns[i].IntegrityCheck() != null;
@@ -112,6 +110,53 @@ namespace Signum.Entities.Chart
             {
                 chart.Columns.RemoveRange(chartScript.Columns.Count, chart.Columns.Count - chartScript.Columns.Count);
                 result = true;
+            }
+
+            if (chart.Parameters.Modified != ModifiedState.Sealed)
+            {
+                if (chart.Parameters.Select(a => a.Name).OrderBy().SequenceEqual(chartScript.Parameters.Select(a => a.Name).OrderBy()))
+                {
+                    foreach (var cp in chart.Parameters)
+                    {
+                        var sp = chartScript.Parameters.FirstEx(a => a.Name == cp.Name);
+
+                        cp.parentChart = chart;
+                        cp.ScriptParameter = sp;
+                        //if (cp.PropertyCheck(() => cp.Value).HasText())
+                        //    cp.Value = sp.DefaultValue(cp.GetToken());
+                    }
+                }
+                else
+                {
+                    var byName = chart.Parameters.ToDictionary(a => a.Name);
+                    chart.Parameters.Clear();
+                    foreach (var sp in chartScript.Parameters)
+                    {
+                        var cp = byName.TryGetC(sp.Name);
+
+                        if (cp != null)
+                        {
+                            cp.parentChart = chart;
+                            cp.ScriptParameter = sp;
+
+                            //if (cp.PropertyCheck(() => cp.Value).HasText())
+                            //    cp.Value = sp.DefaultValue(cp.GetToken());
+                        }
+                        else
+                        {
+                            cp = new ChartParameterEntity
+                            {
+                                Name = sp.Name,
+                                parentChart = chart,
+                                ScriptParameter = sp,
+                            };
+
+                            cp.Value = sp.DefaultValue(sp.GetToken(chart));
+                        }
+
+                        chart.Parameters.Add(cp);
+                    }
+                }
             }
 
             if (chartScript.GroupBy == GroupByChart.Always && chart.GroupResults == false)
@@ -132,7 +177,7 @@ namespace Signum.Entities.Chart
         {
             var result = new UserChartEntity
             {
-                Owner = UserQueryUtils.DefaultRelated(),
+                Owner = UserQueryUtils.DefaultOwner(),
 
                 QueryName = request.QueryName,
 
@@ -157,9 +202,11 @@ namespace Signum.Entities.Chart
             {
                 u.Token = r.Token;
                 u.DisplayName = r.DisplayName;
-                u.Parameter1 = r.Parameter1;
-                u.Parameter2 = r.Parameter2;
-                u.Parameter3 = r.Parameter3;
+            });
+
+            result.Parameters.ForEach(u =>
+            {
+                u.Value = request.Parameters.FirstOrDefault(r => r.Name == u.Name).Value;
             });
 
             return result;
@@ -180,11 +227,12 @@ namespace Signum.Entities.Chart
             {
                 r.Token = u.Token;
                 r.DisplayName = u.DisplayName;
-                r.Parameter1 = u.Parameter1;
-                r.Parameter2 = u.Parameter2;
-                r.Parameter3 = u.Parameter3;
             });
 
+            result.Parameters.ForEach(r =>
+            {
+                r.Value = uq.Parameters.FirstOrDefault(u => u.Name == r.Name)?.Value ?? r.ScriptParameter.DefaultValue(r.ScriptParameter.GetToken(uq));
+            });
             return result;
         }
 
@@ -202,9 +250,6 @@ namespace Signum.Entities.Chart
                 title = c.GetTitle(),
                 token = c.Token == null ? null : c.Token.Token.FullKey(),
                 type = c.Token == null ? null : c.Token.Token.GetChartColumnType().ToString(),               
-                parameter1 = c.Parameter1,
-                parameter2 = c.Parameter2,
-                parameter3 = c.Parameter3,
                 isGroupKey = c.IsGroupKey,
                 converter = c.Token == null ? null : c.Converter(index++)
             }).ToList();
@@ -218,13 +263,12 @@ namespace Signum.Entities.Chart
                     title = "",
                     token = ChartColumnType.Lite.ToString(),
                     type = "entity",
-                    parameter1 = (string)null,
-                    parameter2 = (string)null,
-                    parameter3 = (string)null,
                     isGroupKey = (bool?)true,
                     converter = new Func<ResultRow, object>(r => r.Entity.Key())
                 });
             }
+
+            var parameters = request.Parameters.ToDictionary(p=> p.Name, p => p.Value);
 
             return new
             {
@@ -235,11 +279,9 @@ namespace Signum.Entities.Chart
                     a.token,
                     a.isGroupKey,
                     a.type,
-                    parameter1 = a.parameter1,
-                    parameter2 = a.parameter2,
-                    parameter3 = a.parameter3,
                 }),
-                rows = resultTable.Rows.Select(r => cols.ToDictionary(a => a.name, a => a.converter == null? null: a.converter(r))).ToList()
+                parameters = request.ChartScript.Parameters.ToDictionary(a => a.Name, a => parameters.TryGetC(a.Name) ?? a.DefaultValue(a.GetToken(request))),
+                rows = resultTable.Rows.Select(r => cols.ToDictionary(a => a.name, a => a.converter == null ? null : a.converter(r))).ToList()
             };
         }
 
@@ -257,8 +299,8 @@ namespace Signum.Entities.Chart
                     Lite<Entity> l = (Lite<Entity>)r[columnIndex];
                     return new
                     {
-                        key = l.Try(li => li.Key()),
-                        toStr = l.Try(li => li.ToString()),
+                        key = l?.Key(),
+                        toStr = l?.ToString(),
                         color = l == null ? "#555" : GetChartColor(l.EntityType, l.Id).TryToHtml(),
                     };
                 };
@@ -273,7 +315,7 @@ namespace Signum.Entities.Chart
                     return new
                     {
                         key = e == null ? (int?)null : Convert.ToInt32(e),
-                        toStr = e.Try(en => en.NiceToString()),
+                        toStr = e?.NiceToString(),
                         color = e == null ? "#555" : GetChartColor(enumEntity, Convert.ToInt32(e)).TryToHtml(),
                     };
                 };
@@ -288,8 +330,8 @@ namespace Signum.Entities.Chart
                     return new
                     {
                         key = e,
-                        keyForFilter = e.TryToString("s"),
-                        toStr = ct.Token.Token.Format.HasText() ? e.TryToString(ct.Token.Token.Format) : r[columnIndex].TryToString()
+                        keyForFilter = e?.ToString("s"),
+                        toStr = ct.Token.Token.Format.HasText() ? e?.ToString(ct.Token.Token.Format) : r[columnIndex]?.ToString()
                     };
                 };
             }
@@ -347,6 +389,17 @@ namespace Signum.Entities.Chart
 
             return result;
         }
+
+        internal static void FixParameters(ChartRequest chartRequest, ChartColumnEntity chartColumn)
+        {
+            int index = chartRequest.Columns.IndexOf(chartColumn);
+
+            foreach (var p in chartRequest.Parameters.Where(p => p.ScriptParameter.ColumnIndex == index))
+	        {
+                if (p.PropertyCheck(() => p.Value).HasText())
+                    p.Value = p.ScriptParameter.DefaultValue(chartColumn.Token?.Token);
+	        }
+        }
     }
 
     public enum ChartMessage
@@ -403,6 +456,7 @@ namespace Signum.Entities.Chart
         Data,
         ChooseABasePalette,
         DeletePalette,
+        Preview,
     }
 
 }

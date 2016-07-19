@@ -18,6 +18,7 @@ using System.IO.Compression;
 using System.Data.SqlClient;
 using Signum.Engine.Operations;
 using Signum.Entities.Basics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Disconnected
 {
@@ -37,6 +38,7 @@ namespace Signum.Engine.Disconnected
 
         static Expression<Func<DisconnectedMachineEntity, IQueryable<DisconnectedImportEntity>>> ImportsExpression =
                 m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.RefersTo(m));
+        [ExpressionField]
         public static IQueryable<DisconnectedImportEntity> Imports(this DisconnectedMachineEntity m)
         {
             return ImportsExpression.Evaluate(m);
@@ -44,15 +46,20 @@ namespace Signum.Engine.Disconnected
 
         static Expression<Func<DisconnectedMachineEntity, IQueryable<DisconnectedImportEntity>>> ExportsExpression =
                m => Database.Query<DisconnectedImportEntity>().Where(di => di.Machine.RefersTo(m));
+        [ExpressionField]
         public static IQueryable<DisconnectedImportEntity> Exports(this DisconnectedMachineEntity m)
         {
             return ExportsExpression.Evaluate(m);
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static long ServerSeed;
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, long serverSeed = 1000000000)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                ServerSeed = serverSeed;
+
                 sb.Include<DisconnectedMachineEntity>();
                 sb.Include<DisconnectedExportEntity>();
                 sb.Include<DisconnectedImportEntity>();
@@ -99,6 +106,8 @@ namespace Signum.Engine.Disconnected
 
                 sb.Schema.SchemaCompleted += AssertDisconnectedStrategies;
 
+                sb.Schema.Synchronizing += Schema_Synchronizing;
+
                 sb.Schema.EntityEventsGlobal.Saving += new SavingEventHandler<Entity>(EntityEventsGlobal_Saving);
 
                 sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
@@ -108,11 +117,28 @@ namespace Signum.Engine.Disconnected
             }
         }
 
+        private static SqlPreCommand Schema_Synchronizing(Replacements arg)
+        {
+            if (DisconnectedLogic.OfflineMode)
+                return null;
+
+            if (!arg.Interactive  && arg.SchemaOnly) // Is ImportManager
+                return null;
+
+            return Schema.Current.Tables.Values
+                .Where(t => GetStrategy(t.Type).Upload != Upload.None)
+                .SelectMany(t => t.TablesMList().Cast<ITable>().PreAnd(t))
+                .Where(t => t.PrimaryKey.Identity)
+                .Where(a => DisconnectedTools.GetNextId(a) < ServerSeed)
+                .Select(a => DisconnectedTools.SetNextIdSync(a, ServerSeed))
+                .Combine(Spacing.Simple);
+        }
+
         static string ValidateDisconnectedMachine(DisconnectedMachineEntity dm, PropertyInfo pi, bool isMin)
         {
             var conflicts = Database.Query<DisconnectedMachineEntity>()
-                .Where(e => e.SeedInterval.Overlap(dm.SeedInterval) && e != dm)
-                .Select(e => new { e.SeedInterval,  Machine = e.ToLite() } )
+                .Where(e => e.SeedInterval.Overlaps(dm.SeedInterval) && e != dm)
+                .Select(e => new { e.SeedInterval, Machine = e.ToLite() })
                 .ToList();
 
             conflicts = conflicts.Where(c => c.SeedInterval.Contains(isMin ? dm.SeedMin : dm.SeedMax) ||
@@ -242,7 +268,6 @@ namespace Signum.Engine.Disconnected
         static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((DisconnectedCreatedMixin m) => m.DisconnectedCreated, true)).GetGenericMethodDefinition();
         static Expression<Func<DisconnectedCreatedMixin, bool>> disconnectedCreated = (DisconnectedCreatedMixin m) => m.DisconnectedCreated;
 
-
         public static DisconnectedStrategy<T> Register<T>(Download download, Upload upload) where T : Entity
         {
             return Register(new DisconnectedStrategy<T>(download, null, upload, null, new BasicImporter<T>()));
@@ -281,12 +306,14 @@ namespace Signum.Engine.Disconnected
 
         public static DisconnectedExportEntity GetDownloadEstimation(Lite<DisconnectedMachineEntity> machine)
         {
-            return Database.Query<DisconnectedExportEntity>().Where(a => a.Total.HasValue).OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
+            return Database.Query<DisconnectedExportEntity>().Where(a => a.Total.HasValue)
+                .OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
         public static DisconnectedImportEntity GetUploadEstimation(Lite<DisconnectedMachineEntity> machine)
         {
-            return Database.Query<DisconnectedImportEntity>().Where(a => a.Total.HasValue).OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
+            return Database.Query<DisconnectedImportEntity>().Where(a => a.Total.HasValue)
+                .OrderBy(a => a.Machine == machine ? 0 : 1).ThenBy(a => a.Id).LastOrDefault();
         }
 
         public static Lite<DisconnectedMachineEntity> GetDisconnectedMachine(string machineName)

@@ -35,11 +35,9 @@ namespace Signum.Web.Scheduler
                     new EntitySettings<ScheduledTaskLogEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ScheduledTaskLog") },
                     new EntitySettings<ScheduledTaskEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ScheduledTask") },
                     
-                    new EntitySettings<ScheduleRuleDailyEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleDaily") },
-                    new EntitySettings<ScheduleRuleWeeklyEntity>{ PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleWeekly") },
-                    new EntitySettings<ScheduleRuleWeekDaysEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleWeekDays") },
                     new EntitySettings<ScheduleRuleMinutelyEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleMinutely") },
-                    new EntitySettings<ScheduleRuleHourlyEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleHourly") },
+                    new EntitySettings<ScheduleRuleWeekDaysEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleWeekDays") },
+                    new EntitySettings<ScheduleRuleMonthsEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ScheduleRuleMonths") },
 
                     new EntitySettings<HolidayCalendarEntity> { PartialViewName = _ => ViewPrefix.FormatWith("HolidayCalendar") },
                     new EmbeddedEntitySettings<HolidayEntity> { PartialViewName = _ => ViewPrefix.FormatWith("Holiday") },

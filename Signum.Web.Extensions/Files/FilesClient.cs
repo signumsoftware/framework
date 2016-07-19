@@ -30,7 +30,7 @@ namespace Signum.Web.Files
 
        
 
-        public static void Start(bool filePath, bool file, bool embeddedFile)
+        public static void Start(bool file, bool embeddedFile, bool filePath, bool embeddedFilePath)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -40,75 +40,7 @@ namespace Signum.Web.Files
                 {
                     { "uploadFile", url=>url.Action<FileController>(fc => fc.Upload()) },
                     { "uploadDroppedFile", url=>url.Action<FileController>(fc => fc.UploadDropped()) },
-                });  
-
-                if (filePath)
-                {
-                    RegisterFileConstructor<FilePathEntity>(data =>
-                    {
-                        if (!data.FileName.HasText())
-                            throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".FormatWith(data.FileName));
-
-                        return new FilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(data.FileType)) { FileName = data.FileName, BinaryFile = data.Content }.Save();
-                    });
-
-                    RegisterDownloadUrlConstructor<FilePathEntity>(fp =>
-                    {
-                        return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo(fp).ToString()));
-                    });
-
-                    RegisterFileDownloadResult<FilePathEntity>(ri =>
-                    {
-                        FilePathEntity fp = (FilePathEntity)ri.ToLite().Retrieve();
-
-                        return new FilePathResult(fp.FullPhysicalPath, MimeType.FromFileName(fp.FullPhysicalPath)) { FileDownloadName = fp.FileName };
-                    });
-
-                    Navigator.AddSettings(new List<EntitySettings>
-                    {
-                        new EntitySettings<FilePathEntity>{ PartialViewName = e => ViewPrefix.FormatWith("FilePath")},
-                        new EntitySettings<FileTypeSymbol>(),
-                    });
-
-                    var es = Navigator.EntitySettings<FilePathEntity>();
-                     
-                    var baseMapping = (Mapping<FilePathEntity>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
-
-                    es.MappingLine = ctx =>
-                    {
-                        RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo == null)
-                            return null;
-                        else
-                        {
-                            if (runtimeInfo.IsNew)
-                            {
-                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
-                                if (hpf != null)
-                                {
-                                    string fileType = ctx.Inputs[FileLineKeys.FileType];
-                                    return new FilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType))
-                                    {
-                                        FileName = Path.GetFileName(hpf.FileName),
-                                        BinaryFile = hpf.InputStream.ReadAllBytes(),
-                                    };
-                                }
-                                else
-                                {
-                                    throw new InvalidOperationException("Impossible to create new FilePath {0}".FormatWith(ctx.Prefix));
-                                }
-                            }
-                            else
-                                return baseMapping(ctx);
-                        }
-                    };
-
-                    es.MappingMain = es.MappingLine;
-
-                    var lm = new LiteMapping<FilePathEntity>();
-                    lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
-                    Mapping.RegisterValue<Lite<FilePathEntity>>(lm.GetValue);
-                }
+                }); 
 
                 if (file)
                 {
@@ -210,11 +142,147 @@ namespace Signum.Web.Files
                     };
                 }
 
+                if (filePath)
+                {
+                    RegisterFileConstructor<FilePathEntity>(data =>
+                    {
+                        if (!data.FileType.HasText())
+                            throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".FormatWith(data.FileName));
+
+                        return new FilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(data.FileType))
+                        {
+                            FileName = data.FileName,
+                            BinaryFile = data.Content,
+                            CalculatedDirectory = data.CalculatedDirectory
+                        }.Save();
+                    });
+
+                    RegisterDownloadUrlConstructor<FilePathEntity>(fp =>
+                    {
+                        return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo(fp).ToString()));
+                    });
+
+                    RegisterFileDownloadResult<FilePathEntity>(ri =>
+                    {
+                        FilePathEntity fp = (FilePathEntity)ri.ToLite().Retrieve();
+
+                        return new FilePathResult(fp.FullPhysicalPath, MimeType.FromFileName(fp.FullPhysicalPath)) { FileDownloadName = fp.FileName };
+                    });
+
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<FilePathEntity>{ PartialViewName = e => ViewPrefix.FormatWith("FilePath")},
+                    });
+
+                    var es = Navigator.EntitySettings<FilePathEntity>();
+
+                    var baseMapping = (Mapping<FilePathEntity>)es.MappingLine.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+
+                    es.MappingLine = ctx =>
+                    {
+                        RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                        if (runtimeInfo == null)
+                            return null;
+                        else
+                        {
+                            if (runtimeInfo.IsNew)
+                            {
+                                HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
+                                if (hpf != null)
+                                {
+                                    string fileType = ctx.Inputs[FileLineKeys.FileType];
+                                    return new FilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType))
+                                    {
+                                        FileName = Path.GetFileName(hpf.FileName),
+                                        BinaryFile = hpf.InputStream.ReadAllBytes(),
+                                    };
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException("Impossible to create new FilePath {0}".FormatWith(ctx.Prefix));
+                                }
+                            }
+                            else
+                                return baseMapping(ctx);
+                        }
+                    };
+
+                    es.MappingMain = es.MappingLine;
+
+                    var lm = new LiteMapping<FilePathEntity>();
+                    lm.EntityHasChanges = ctx => ctx.GetRuntimeInfo().IsNew;
+                    Mapping.RegisterValue<Lite<FilePathEntity>>(lm.GetValue);
+                }
+
+                if (embeddedFilePath)
+                {
+                    RegisterFileConstructor<EmbeddedFilePathEntity>(data =>
+                    {
+                        if (!data.FileType.HasText())
+                            throw new InvalidOperationException("Couldn't create FilePath with unknown FileType for file '{0}'".FormatWith(data.FileName));
+
+                        return new EmbeddedFilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(data.FileType))
+                        {
+                            FileName = data.FileName,
+                            BinaryFile = data.Content,
+                            CalculatedDirectory = data.CalculatedDirectory
+                        }.SaveFile();
+                    });
+
+                    RegisterDownloadUrlConstructor<EmbeddedFilePathEntity>(fp =>
+                    {
+                        return RouteHelper.New().Action((FileController fc) => fc.DownloadEmbedded(fp.FileType.ToLite(), fp.Suffix, fp.FileName));
+                    });
+
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EmbeddedEntitySettings<EmbeddedFilePathEntity>{ PartialViewName = e => ViewPrefix.FormatWith("EmbeddedFilePath")},
+                    });
+
+                    var es = Navigator.EmbeddedEntitySettings<EmbeddedFilePathEntity>();
+
+                    var baseMapping = (Mapping<EmbeddedFilePathEntity>)es.MappingDefault.AsEntityMapping().RemoveProperty(fp => fp.BinaryFile);
+
+                    es.MappingDefault = ctx =>
+                    {
+                        RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
+                        if (runtimeInfo == null)
+                            return null;
+                        else
+                        {
+                            HttpPostedFileBase hpf = GetHttpRequestFile(ctx);
+                            if (hpf != null)
+                            {
+                                string fileType = ctx.Inputs[FileLineKeys.FileType];
+                                return new EmbeddedFilePathEntity(SymbolLogic<FileTypeSymbol>.ToSymbol(fileType))
+                                {
+                                    FileName = Path.GetFileName(hpf.FileName),
+                                    BinaryFile = hpf.InputStream.ReadAllBytes(),
+                                };
+                            }
+                            else if (ctx.Inputs.ContainsKey(EntityBaseKeys.EntityState))
+                            {
+                                return (EmbeddedFilePathEntity)Navigator.Manager.DeserializeEntity(ctx.Inputs[EntityBaseKeys.EntityState]);
+                            }
+
+                            else
+                                return baseMapping(ctx);
+                        }
+                    };
+                }
+
+
+
+                if (filePath || embeddedFilePath)
+                {
+                    Navigator.AddSetting(new EntitySettings<FileTypeSymbol>());
+                }
+
                 var dqm = DynamicQueryManager.Current;
                
                 QuerySettings.FormatRules.Add(new FormatterRule("WebImage",
                        col => col.Type == typeof(WebImage),
-                       col => new CellFormatter((help, obj) => ((WebImage)obj).FullWebPath == null ? null :
+                       col => new CellFormatter((help, obj) => ((WebImage)obj)?.FullWebPath == null ? null :
                            new HtmlTag("img")
                            .Attr("src", RouteHelper.New().Content(((WebImage)obj).FullWebPath))
                            .Attr("alt", typeof(WebImage).NiceName())
@@ -223,8 +291,8 @@ namespace Signum.Web.Files
 
                 QuerySettings.FormatRules.Add(new FormatterRule("WebDownload",
                        col => col.Type == typeof(WebDownload),
-                       col => new CellFormatter((help, obj) => ((WebDownload)obj).FullWebPath == null ? null :
-                          new MvcHtmlString("<a href='{0}'>{1}</a>".FormatWith(RouteHelper.New().Content(((WebDownload)obj).FullWebPath), typeof(WebDownload).NiceName()))) { TextAlign = "center" }
+                       col => new CellFormatter((help, obj) =>  ((WebDownload)obj)?.FullWebPath == null ? null :
+                          new MvcHtmlString("<a href='{0}'>{1}</a>".FormatWith(RouteHelper.New().Content(((WebDownload)obj).FullWebPath), ((WebDownload)obj).FileName ?? typeof(WebDownload).NiceName()))) { TextAlign = "center" }
                 ));
 
             }
@@ -303,6 +371,6 @@ namespace Signum.Web.Files
         public string FileName;
         public byte[] Content;
         public string FileType;
-        public string ExtraData;
+        public string CalculatedDirectory;
     }
 }

@@ -49,11 +49,14 @@ namespace Signum.Web.Auth
 
         public static bool ResetPasswordStarted;
 
-        public static void Start(bool types, bool property, bool queries, bool resetPassword, bool passwordExpiration)
+        public static bool SingleSignOnMessage; 
+
+        public static void Start(bool types, bool property, bool queries, bool resetPassword, bool passwordExpiration, bool singleSignOnMessage)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 ResetPasswordStarted = resetPassword;
+                SingleSignOnMessage = singleSignOnMessage;
 
                 Navigator.RegisterArea(typeof(AuthClient));
 
@@ -244,6 +247,25 @@ namespace Signum.Web.Auth
                 {
                      AuthController.UpdateSessionUser();
                 };
+        }
+
+        public static bool LoginFromCurrentIdentity()
+        {
+            using (AuthLogic.Disable())
+            {
+                var identityName = System.Web.HttpContext.Current.User.Identity.Name;
+
+                var user = Database.Query<UserEntity>().SingleOrDefaultEx(u => u.UserName == identityName);
+
+                if (user != null && user.State != UserState.Disabled)
+                {
+                    AuthController.OnUserPreLogin(null, user);
+                    AuthController.AddUserSession(user);
+                    return true;
+                }
+
+                return false; 
+            }
         }
     }
 }

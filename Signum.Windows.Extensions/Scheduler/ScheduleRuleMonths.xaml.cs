@@ -18,13 +18,12 @@ using Signum.Entities.Scheduler;
 namespace Signum.Windows.Scheduler
 {
     /// <summary>
-    /// Interaction logic for ScheduleRuleDaily.xaml
+    /// Interaction logic for ScheduleRuleMonths.xaml
     /// </summary>
-    public partial class ScheduleRuleDaily : UserControl
+    public partial class ScheduleRuleMonths : UserControl
     {
-        public ScheduleRuleDaily()
+        public ScheduleRuleMonths()
         {
-            //using (Common.DelayRoutes())
             InitializeComponent();
         }
     }

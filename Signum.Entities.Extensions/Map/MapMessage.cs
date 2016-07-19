@@ -34,8 +34,9 @@ namespace Signum.Entities.Map
         End,
     }
 
+    [AutoInit]
     public static class MapPermission
     {
-        public static PermissionSymbol ViewMap = new PermissionSymbol();
+        public static PermissionSymbol ViewMap;
     }
 }

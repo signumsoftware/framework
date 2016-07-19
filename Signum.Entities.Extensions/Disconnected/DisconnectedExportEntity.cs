@@ -6,131 +6,62 @@ using Signum.Utilities;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Entities.Basics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Disconnected
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class DisconnectedExportEntity : Entity
     {
-        DateTime creationDate = TimeZoneManager.Now;
-        public DateTime CreationDate
-        {
-            get { return creationDate; }
-            set { Set(ref creationDate, value); }
-        }
+        public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
 
-        Lite<DisconnectedMachineEntity> machine;
         [NotNullValidator]
-        public Lite<DisconnectedMachineEntity> Machine
-        {
-            get { return machine; }
-            set { Set(ref machine, value); }
-        }
+        public Lite<DisconnectedMachineEntity> Machine { get; set; }
 
-        int? @lock;
         [Unit("ms")]
-        public int? Lock
-        {
-            get { return @lock; }
-            set { Set(ref @lock, value); }
-        }
+        public int? Lock { get; set; }
 
-        int? createDatabase;
         [Unit("ms")]
-        public int? CreateDatabase
-        {
-            get { return createDatabase; }
-            set { Set(ref createDatabase, value); }
-        }
+        public int? CreateDatabase { get; set; }
 
-        int? createSchema;
         [Unit("ms")]
-        public int? CreateSchema
-        {
-            get { return createSchema; }
-            set { Set(ref createSchema, value); }
-        }
+        public int? CreateSchema { get; set; }
 
-        int? disableForeignKeys;
         [Unit("ms")]
-        public int? DisableForeignKeys
-        {
-            get { return disableForeignKeys; }
-            set { Set(ref disableForeignKeys, value); }
-        }
+        public int? DisableForeignKeys { get; set; }
 
         [NotNullable, PreserveOrder]
-        MList<DisconnectedExportTableEntity> copies = new MList<DisconnectedExportTableEntity>();
-        public MList<DisconnectedExportTableEntity> Copies
-        {
-            get { return copies; }
-            set { Set(ref copies, value); }
-        }
+        public MList<DisconnectedExportTableEntity> Copies { get; set; } = new MList<DisconnectedExportTableEntity>();
 
-        int? enableForeignKeys;
         [Unit("ms")]
-        public int? EnableForeignKeys
-        {
-            get { return enableForeignKeys; }
-            set { Set(ref enableForeignKeys, value); }
-        }
+        public int? EnableForeignKeys { get; set; }
 
-        int? reseedIds;
         [Unit("ms")]
-        public int? ReseedIds
-        {
-            get { return reseedIds; }
-            set { Set(ref reseedIds, value); }
-        }
+        public int? ReseedIds { get; set; }
 
-        int? backupDatabase;
         [Unit("ms")]
-        public int? BackupDatabase
-        {
-            get { return backupDatabase; }
-            set { Set(ref backupDatabase, value); }
-        }
+        public int? BackupDatabase { get; set; }
 
-        int? dropDatabase;
         [Unit("ms")]
-        public int? DropDatabase
-        {
-            get { return dropDatabase; }
-            set { Set(ref dropDatabase, value); }
-        }
+        public int? DropDatabase { get; set; }
 
-        int? total;
         [Unit("ms")]
-        public int? Total
-        {
-            get { return total; }
-            set { Set(ref total, value); }
-        }
+        public int? Total { get; set; }
 
-        DisconnectedExportState state;
-        public DisconnectedExportState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
+        public DisconnectedExportState State { get; set; }
 
-        Lite<ExceptionEntity> exception;
-        public Lite<ExceptionEntity> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value); }
-        }
+        public Lite<ExceptionEntity> Exception { get; set; }
 
         public double Ratio(DisconnectedExportEntity estimation)
         {
             double total = (long)estimation.Total.Value;
- 
+
             double result = 0;
 
             if (!Lock.HasValue)
                 return result;
             result += (estimation.Lock.Value) / total;
-            
+
             if (!CreateDatabase.HasValue)
                 return result;
             result += (estimation.CreateDatabase.Value) / total;
@@ -181,6 +112,7 @@ namespace Signum.Entities.Disconnected
                 stat.ReseedIds.Value +
                 stat.BackupDatabase.Value +
                 stat.DropDatabase.Value;
+        [ExpressionField]
         public int CalculateTotal()
         {
             return CalculateTotalExpression.Evaluate(this);
@@ -190,11 +122,11 @@ namespace Signum.Entities.Disconnected
         {
             return new DisconnectedExportEntity
             {
-                Machine = machine,
+                Machine = Machine,
                 Lock = Lock,
                 CreateDatabase = CreateDatabase,
                 DisableForeignKeys = DisableForeignKeys,
-                Copies = Copies.Select(c=>new DisconnectedExportTableEntity
+                Copies = Copies.Select(c => new DisconnectedExportTableEntity
                 {
                     Type = c.Type,
                     CopyTable = c.CopyTable,
@@ -221,28 +153,13 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DisconnectedExportTableEntity : EmbeddedEntity
     {
-        Lite<TypeEntity> type;
         [NotNullValidator]
-        public Lite<TypeEntity> Type
-        {
-            get { return type; }
-            set { Set(ref type, value); }
-        }
+        public Lite<TypeEntity> Type { get; set; }
 
-        int? copyTable;
         [Unit("ms")]
-        public int? CopyTable
-        {
-            get { return copyTable; }
-            set { Set(ref copyTable, value); }
-        }
+        public int? CopyTable { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        string errors;
-        public string Errors
-        {
-            get { return errors; }
-            set { Set(ref errors, value); }
-        }
+        public string Errors { get; set; }
     }
 }

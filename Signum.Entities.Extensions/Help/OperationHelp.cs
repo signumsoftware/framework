@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Help
 {
@@ -13,33 +14,19 @@ namespace Signum.Entities.Help
     public class OperationHelpEntity : Entity
     {
         [NotNullable]
-        OperationSymbol operation;
         [NotNullValidator]
-        public OperationSymbol Operation
-        {
-            get { return operation; }
-            set { Set(ref operation, value); }
-        }
+        public OperationSymbol Operation { get; set; }
 
         [NotNullable]
-        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoEntity Culture
-        {
-            get { return culture; }
-            set { Set(ref culture, value); }
-        }
+        public CultureInfoEntity Culture { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string description;
-        [NotNullValidator]
-        public string Description
-        {
-            get { return description; }
-            set { Set(ref description, value); }
-        }
+        [StringLengthValidator(AllowNulls = false, Min = 3, MultiLine = true)]
+        public string Description { get; set; }
 
         static Expression<Func<OperationHelpEntity, string>> ToStringExpression = e => e.Operation.ToString();
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -47,8 +34,9 @@ namespace Signum.Entities.Help
     }
 
 
+    [AutoInit]
     public static class OperationHelpOperation
     {
-        public static readonly ExecuteSymbol<OperationHelpEntity> Save = OperationSymbol.Execute<OperationHelpEntity>();
+        public static ExecuteSymbol<OperationHelpEntity> Save;
     }
 }

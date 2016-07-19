@@ -25,7 +25,7 @@ namespace Signum.Web.Auth
             .SetProperty(u => u.PasswordHash, ctx =>
             {
                 string oldPassword = ctx.Parent.Inputs[OldPasswordKey];
-                if (ctx.Value != Security.EncodePassword(oldPassword))
+                if (!ctx.Value.EmptyIfNull().SequenceEqual(Security.EncodePassword(oldPassword).EmptyIfNull()))
                     return ctx.ParentNone(OldPasswordKey, AuthMessage.PasswordDoesNotMatchCurrent.NiceToString());
 
                 return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);

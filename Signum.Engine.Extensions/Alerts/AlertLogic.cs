@@ -24,6 +24,7 @@ namespace Signum.Engine.Alerts
     {
         static Expression<Func<Entity, IQueryable<AlertEntity>>> AlertsExpression =
             e => Database.Query<AlertEntity>().Where(a => a.Target.RefersTo(e));
+        [ExpressionField]
         public static IQueryable<AlertEntity> Alerts(this Entity e)
         {
             return AlertsExpression.Evaluate(e);
@@ -113,7 +114,7 @@ namespace Signum.Engine.Alerts
             var result = new AlertEntity
             {
                 AlertDate = alertDate ?? TimeZoneManager.Now,
-                CreatedBy = user ?? UserHolder.Current.ToLite(),
+                CreatedBy = user ?? UserHolder.Current?.ToLite(),
                 Text = text,
                 Title = title,
                 Target = (Lite<Entity>)entity,

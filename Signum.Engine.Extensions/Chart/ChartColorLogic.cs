@@ -124,14 +124,14 @@ namespace Signum.Engine.Chart
                 Colors = Database.RetrieveAllLite(type).Select(l => new ChartColorEntity
                 {
                     Related = (Lite<Entity>)l,
-                    Color = dic.TryGetS(l.Id).Try(c => new ColorEntity { Argb = c.ToArgb() })
+                    Color = dic.TryGetS(l.Id)?.Let(c => new ColorEntity { Argb = c.ToArgb() })
                 }).ToMList()
             };
         }
 
         public static Color? ColorFor(Type type, PrimaryKey id)
         {
-            return Colors.Value.TryGetC(type).TryGetS(id);
+            return Colors.Value.TryGetC(type)?.TryGetS(id);
         }
 
         public static Color? ColorFor(Lite<Entity> lite)

@@ -98,7 +98,7 @@ namespace Signum.Windows.Chart
             webBrowserLoaded = true;
         }
 
-        static string baseResourcePath = "Signum.Windows.Extensions.Chart.Html.";
+        static string baseResourcePath = "Signum.Windows.Chart.Html.";
 
         static ResetLazy<string> FullHtml = new ResetLazy<string>(() =>
         {
@@ -145,7 +145,7 @@ namespace Signum.Windows.Chart
                 {
                     KeyColumns = Request.Columns.Iterate()
                     .Where(a => a.Value.ScriptColumn.IsGroupKey)
-                    .Select(a => new KeyColumn { Position = a.Position, Token = a.Value.Token.Try(t=>t.Token) })
+                    .Select(a => new KeyColumn { Position = a.Position, Token = a.Value.Token?.Token })
                     .ToList(),
                     Filters = Request.Filters.Where(a => !(a.Token is AggregateToken)).Select(f => new FilterOption
                     {
@@ -229,7 +229,7 @@ namespace Signum.Windows.Chart
 
             lastRequest = null;
 
-            var keys = Request.Columns.Select(a => a.Token.Try(t => t.Token)).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
+            var keys = Request.Columns.Select(a => a.Token?.Token).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
             OrderOptions.RemoveAll(a => !(a.Token is AggregateToken) && !keys.Contains(a.Token.FullKey()));
         }
 

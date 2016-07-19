@@ -12,65 +12,35 @@ namespace Signum.Entities.Translation
     public class TranslatedInstanceEntity : Entity
     {
         [NotNullable]
-        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoEntity Culture
-        {
-            get { return culture; }
-            set { Set(ref culture, value); }
-        }
+        public CultureInfoEntity Culture { get; set; }
 
         [ImplementedByAll]
-        Lite<Entity> instance;
         [NotNullValidator]
-        public Lite<Entity> Instance
-        {
-            get { return instance; }
-            set { Set(ref instance, value); }
-        }
+        public Lite<Entity> Instance { get; set; }
 
         [NotNullable]
-        PropertyRouteEntity propertyRoute;
         [NotNullValidator]
-        public PropertyRouteEntity PropertyRoute
-        {
-            get { return propertyRoute; }
-            set { Set(ref propertyRoute, value); }
-        }
-        
-        string rowId;
-        public string RowId
-        {
-            get { return rowId; }
-            set { Set(ref rowId, value); }
-        }
+        public PropertyRouteEntity PropertyRoute { get; set; }
+
+        public string RowId { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string translatedText;
-        [StringLengthValidator(AllowNulls = false)]
-        public string TranslatedText
-        {
-            get { return translatedText; }
-            set { Set(ref translatedText, value); }
-        }
+        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
+        public string TranslatedText { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string originalText;
-        [StringLengthValidator(AllowNulls = false)]
-        public string OriginalText
-        {
-            get { return originalText; }
-            set { Set(ref originalText, value); }
-        }
+        [StringLengthValidator(AllowNulls = false, MultiLine = true)]
+        public string OriginalText { get; set; }
 
         public override string ToString()
         {
-            return "{0} {1} {2}".FormatWith(culture, instance, propertyRoute);
+            return "{0} {1} {2}".FormatWith(Culture, Instance, PropertyRoute);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => RowId) && PropertyRoute != null)
+            if (pi.Name == nameof(RowId) && PropertyRoute != null)
             {
                 if (RowId == null && PropertyRoute.Path.Contains("/"))
                     return "{0} should be set for route {1}".FormatWith(pi.NiceName(), PropertyRoute);
@@ -83,12 +53,12 @@ namespace Signum.Entities.Translation
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class TranslateFieldAttribute : Attribute
     {
         public TraducibleRouteType TraducibleRouteType = TraducibleRouteType.Text;
-        
-      
+
+
     }
 
     public enum TraducibleRouteType

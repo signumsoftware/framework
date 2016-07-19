@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {
@@ -11,14 +12,10 @@ namespace Signum.Entities.Mailing
     public class SystemEmailEntity : Entity
     {
         [NotNullable, UniqueIndex]
-        string fullClassName;
-        public string FullClassName
-        {
-            get { return fullClassName; }
-            set { Set(ref fullClassName, value); }
-        }
+        public string FullClassName { get; set; }
 
-        static readonly Expression<Func<SystemEmailEntity, string>> ToStringExpression = e => e.fullClassName;
+        static Expression<Func<SystemEmailEntity, string>> ToStringExpression = e => e.FullClassName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

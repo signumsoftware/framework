@@ -18,6 +18,7 @@ using Signum.Entities.Translation;
 using Signum.Utilities;
 using System.Xml.Linq;
 using System.IO;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Translation
 {
@@ -25,6 +26,7 @@ namespace Signum.Engine.Translation
     {
         static Expression<Func<IUserEntity, TranslatorUserEntity>> TranslatorUserExpression =
              user => Database.Query<TranslatorUserEntity>().SingleOrDefault(a => a.User.RefersTo(user));
+        [ExpressionField]
         public static TranslatorUserEntity TranslatorUser(this IUserEntity entity)
         {
             return TranslatorUserExpression.Evaluate(entity);
@@ -105,7 +107,7 @@ namespace Signum.Engine.Translation
 
                 var culture = fileName.After(assemblyName + ".").Before(".xml");
 
-                var locAssem = LocalizedAssembly.FromXml(assembly, CultureInfo.GetCultureInfo(culture), doc, replacements.Try(r => r.Inverse()));
+                var locAssem = LocalizedAssembly.FromXml(assembly, CultureInfo.GetCultureInfo(culture), doc, replacements?.Inverse());
 
                 locAssem.ToXml().Save(fileName);
             }

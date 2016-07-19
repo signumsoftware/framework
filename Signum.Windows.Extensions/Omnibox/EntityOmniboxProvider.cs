@@ -40,7 +40,7 @@ namespace Signum.Windows.Omnibox
                     }
                     else
                     {
-                        string str = result.Lite.TryToString();
+                        string str = result.Lite?.ToString();
                         if (str.HasText())
                             lines.Add(str);
                     }
@@ -78,7 +78,7 @@ namespace Signum.Windows.Omnibox
 
         public override string GetName(EntityOmniboxResult result)
         {
-            return "E:" + result.Lite.Try(l => l.Key()); 
+            return "E:" + result.Lite?.Key(); 
         }
     }
 }

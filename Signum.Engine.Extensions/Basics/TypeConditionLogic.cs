@@ -65,10 +65,10 @@ namespace Signum.Engine.Basics
             where T : Entity
         {
             if (typeCondition == null)
-                throw new ArgumentNullException("typeCondition");
+                throw AutoInitAttribute.ArgumentNullException(typeof(TypeConditionSymbol), nameof(typeCondition));
 
             if (condition == null)
-                throw new ArgumentNullException("condition");
+                throw new ArgumentNullException(nameof(condition));
 
             infos.GetOrCreate(typeof(T))[typeCondition] = new TypeConditionPair(condition, inMemoryCondition);
         }
@@ -145,7 +145,7 @@ namespace Signum.Engine.Basics
 
         public static bool IsDefined(Type type, TypeConditionSymbol typeCondition)
         {
-            return infos.TryGetC(type).TryGetC(typeCondition) != null;
+            return infos.TryGetC(type)?.TryGetC(typeCondition) != null;
         }
     }
 }

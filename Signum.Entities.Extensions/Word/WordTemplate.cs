@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Word
 {
@@ -19,107 +20,49 @@ namespace Signum.Entities.Word
     public class WordTemplateEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 200)]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         [NotNullable]
-        QueryEntity query;
         [NotNullValidator]
-        public QueryEntity Query
-        {
-            get { return query; }
-            set { Set(ref query, value); }
-        }
+        public QueryEntity Query { get; set; }
 
-        SystemWordTemplateEntity systemWordTemplate;
-        public SystemWordTemplateEntity SystemWordTemplate
-        {
-            get { return systemWordTemplate; }
-            set { Set(ref systemWordTemplate, value); }
-        }
+        public SystemWordTemplateEntity SystemWordTemplate { get; set; }
 
         [NotNullable]
-        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoEntity Culture
-        {
-            get { return culture; }
-            set { Set(ref culture, value); }
-        }
+        public CultureInfoEntity Culture { get; set; }
 
-        bool active;
-        public bool Active
-        {
-            get { return active; }
-            set { Set(ref active, value); }
-        }
+        public bool Active { get; set; }
 
-        DateTime? startDate;
         [MinutesPrecissionValidator]
-        public DateTime? StartDate
-        {
-            get { return startDate; }
-            set { Set(ref startDate, value); }
-        }
+        public DateTime? StartDate { get; set; }
 
-        DateTime? endDate;
         [MinutesPrecissionValidator]
-        public DateTime? EndDate
-        {
-            get { return endDate; }
-            set { Set(ref endDate, value); }
-        }
+        public DateTime? EndDate { get; set; }
 
-        bool disableAuthorization;
-        public bool DisableAuthorization
-        {
-            get { return disableAuthorization; }
-            set { Set(ref disableAuthorization, value); }
-        }
+        public bool DisableAuthorization { get; set; }
 
         static Expression<Func<WordTemplateEntity, bool>> IsActiveNowExpression =
-            (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
+            (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
+        [ExpressionField]
         public bool IsActiveNow()
         {
             return IsActiveNowExpression.Evaluate(this);
         }
 
-        Lite<FileEntity> template;
-        public Lite<FileEntity> Template
-        {
-            get { return template; }
-            set { Set(ref template, value); }
-        }
+        public Lite<FileEntity> Template { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), FileNameValidator]
-        public string FileName
-        {
-            get { return fileName; }
-            set { Set(ref fileName, value); }
-        }
+        public string FileName { get; set; }
 
-        WordTransformerSymbol wordTransformer;
-        public WordTransformerSymbol WordTransformer
-        {
-            get { return wordTransformer; }
-            set { Set(ref wordTransformer, value); }
-        }
+        public WordTransformerSymbol WordTransformer { get; set; }
 
-        WordConverterSymbol wordConverter;
-        public WordConverterSymbol WordConverter
-        {
-            get { return wordConverter; }
-            set { Set(ref wordConverter, value); }
-        }
+        public WordConverterSymbol WordConverter { get; set; }
 
         static Expression<Func<WordTemplateEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -127,19 +70,20 @@ namespace Signum.Entities.Word
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Template) && Template == null && Active)
+            if (pi.Name == nameof(Template) && Template == null && Active)
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
 
             return base.PropertyValidation(pi);
         }
     }
 
+    [AutoInit]
     public static class WordTemplateOperation
     {
-        public static readonly ExecuteSymbol<WordTemplateEntity> Save = OperationSymbol.Execute<WordTemplateEntity>();
-        public static readonly ExecuteSymbol<WordTemplateEntity> CreateWordReport = OperationSymbol.Execute<WordTemplateEntity>();
+        public static ExecuteSymbol<WordTemplateEntity> Save;
+        public static ExecuteSymbol<WordTemplateEntity> CreateWordReport;
 
-        public static readonly ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate = OperationSymbol.Construct<WordTemplateEntity>.From<SystemWordTemplateEntity>();
+        public static ConstructSymbol<WordTemplateEntity>.From<SystemWordTemplateEntity> CreateWordTemplateFromSystemWordTemplate;
     }
 
     public enum WordTemplateMessage
@@ -149,6 +93,8 @@ namespace Signum.Entities.Word
         [Description("Type {0} does not have a property with name {1}")]
         Type0DoesNotHaveAPropertyWithName1,
         ChooseAReportTemplate,
+        [Description("{0} {1} requires extra parameters")]
+        _01RequiresExtraParameters,
     }
 
     [Serializable]
@@ -156,9 +102,8 @@ namespace Signum.Entities.Word
     {
         private WordTransformerSymbol() { }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public WordTransformerSymbol([CallerMemberName]string memberName = null) :
-            base(new StackFrame(1, false), memberName)
+        public WordTransformerSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
         {
         }
     }
@@ -168,15 +113,15 @@ namespace Signum.Entities.Word
     {
         private WordConverterSymbol() { }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public WordConverterSymbol([CallerMemberName]string memberName = null) :
-            base(new StackFrame(1, false), memberName)
+        public WordConverterSymbol(Type declaringType, string fieldName) :
+            base(declaringType, fieldName)
         {
         }
     }
 
+    [AutoInit]
     public static class WordTemplatePermission
     {
-        public static readonly PermissionSymbol GenerateReport = new PermissionSymbol();
+        public static PermissionSymbol GenerateReport;
     }
 }

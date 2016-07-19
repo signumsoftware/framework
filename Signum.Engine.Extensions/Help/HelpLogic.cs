@@ -306,7 +306,6 @@ namespace Signum.Engine.Help
                     Lite = false,
                     Execute = (e, _) => { },
                 }.Register();
-                OperationLogic.SetProtectedSave<QueryHelpEntity>(false);
 
                 new Graph<OperationHelpEntity>.Execute(OperationHelpOperation.Save)
                 {
@@ -314,7 +313,6 @@ namespace Signum.Engine.Help
                     Lite = false,
                     Execute = (e, _) => { },
                 }.Register();
-                OperationLogic.SetProtectedSave<OperationHelpEntity>(false);
 
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
@@ -481,7 +479,7 @@ namespace Signum.Engine.Help
             using (replacements.WithReplacedDatabaseName())
                 return entities.Select(e =>
                 {
-                    e.Name = replacements.TryGetC("namespaces").TryGetC(e.Name) ?? e.Name;
+                    e.Name = replacements.TryGetC("namespaces")?.TryGetC(e.Name) ?? e.Name;
 
                     if (!data.Namespaces.Contains(e.Name))
                         return table.DeleteSqlSync(e);

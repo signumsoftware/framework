@@ -9,7 +9,7 @@
 @using (var ec = Html.TypeContext<EmailMasterTemplateMessageEntity>())
 {
     <div class="sf-email-template-message">
-        <input type="hidden" class="sf-tab-title" value="@(ec.Value.CultureInfo.TryToString())" />
+        <input type="hidden" class="sf-tab-title" value="@(ec.Value.CultureInfo?.ToString())" />
         
         @Html.EntityCombo(ec, e => e.CultureInfo, vl =>
         {

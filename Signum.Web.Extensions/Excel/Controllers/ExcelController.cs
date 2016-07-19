@@ -23,7 +23,7 @@ using Signum.Engine.Excel;
 
 namespace Signum.Web.Excel
 {
-    public class ReportController : Controller
+    public class ExcelController : Controller
     {
         [HttpPost]
         public ActionResult ToExcelPlain(QueryRequest request)
@@ -32,7 +32,7 @@ namespace Signum.Web.Excel
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().FormatWith(request.QueryName));
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
-            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult);
+            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(request.QueryName));
 
             return File(binaryFile, MimeType.FromExtension(".xlsx"), Finder.ResolveWebQueryName(request.QueryName) + ".xlsx");
         }

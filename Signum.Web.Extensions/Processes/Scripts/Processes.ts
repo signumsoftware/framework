@@ -7,7 +7,7 @@ export function initDashboard(url : string) {
 
     var refreshCallback = () => {
         $.get(url, function (data) {
-            $("div.processMainDiv").replaceWith(data);
+            $("#processMainDiv").replaceWith(data);
         });
     };
 

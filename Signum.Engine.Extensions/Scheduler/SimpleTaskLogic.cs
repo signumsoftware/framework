@@ -48,10 +48,10 @@ namespace Signum.Engine.Scheduler
         public static void Register(SimpleTaskSymbol simpleTaskSymbol, Func<Lite<IEntity>> action)
         {
             if (simpleTaskSymbol == null)
-                throw new ArgumentNullException("simpleTaskSymbol");
+                throw AutoInitAttribute.ArgumentNullException(typeof(SimpleTaskSymbol), nameof(simpleTaskSymbol));
 
             if (action == null)
-                throw new ArgumentNullException("actionKey");
+                throw new ArgumentNullException(nameof(action));
 
             tasks.Add(simpleTaskSymbol, action); 
         }      

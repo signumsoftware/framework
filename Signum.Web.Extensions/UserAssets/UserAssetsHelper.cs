@@ -12,7 +12,7 @@ namespace Signum.Web.UserAssets
     {
         public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, TypeContext<QueryTokenEntity> ctx, QueryTokenBuilderSettings settings)
         {
-            if (ctx.Value.Try(qt => qt.ParseException) != null)
+            if (ctx.Value?.ParseException != null)
             {
                 HtmlStringBuilder sb = new HtmlStringBuilder();
                 sb.Add(new HtmlTag("div").Class("ui-state-error").SetInnerText(ctx.Value.ParseException.Message).ToHtml());
@@ -22,7 +22,7 @@ namespace Signum.Web.UserAssets
             }
             else
             {
-                return helper.QueryTokenBuilder(ctx.Value.Try(ct => ct.Token), ctx, settings);
+                return helper.QueryTokenBuilder(ctx.Value?.Token, ctx, settings);
             }
         }
 

@@ -42,7 +42,7 @@ namespace Signum.Windows.Dashboard
         {
             bool canNavigate = (e.NewValue != null && Navigator.IsNavigable((IEntity)e.NewValue, isSearch: true));
             this.tbDashboard.Cursor = canNavigate ? Cursors.Hand : Cursors.Arrow;   
- 	        this.tbDashboard.Text = e.NewValue.TryToString();
+ 	        this.tbDashboard.Text = e.NewValue?.ToString();
         }
 
         private void reload_Click(object sender, RoutedEventArgs e)

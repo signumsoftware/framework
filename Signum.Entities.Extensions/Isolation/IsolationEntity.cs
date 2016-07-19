@@ -5,22 +5,19 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Isolation
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation=true)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master, IsLowPopulation = true)]
     public class IsolationEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        static Expression<Func<IsolationEntity, string>> ToStringExpression = e => e.name;
+        static Expression<Func<IsolationEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -81,9 +78,10 @@ namespace Signum.Entities.Isolation
         }
     }
 
+    [AutoInit]
     public static class IsolationOperation
     {
-        public static readonly ExecuteSymbol<IsolationEntity> Save = OperationSymbol.Execute<IsolationEntity>(); 
+        public static ExecuteSymbol<IsolationEntity> Save;
     }
 
     public enum IsolationMessage
@@ -98,17 +96,12 @@ namespace Signum.Entities.Isolation
     [Serializable]
     public class IsolationMixin : MixinEntity
     {
-        IsolationMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next) 
+        IsolationMixin(Entity mainEntity, MixinEntity next) : base(mainEntity, next)
         {
         }
 
         [NotNullable, AttachToUniqueIndexes]
-        Lite<IsolationEntity> isolation = IsRetrieving ? null : IsolationEntity.Current;
-        public Lite<IsolationEntity> Isolation
-        {
-            get { return isolation; }
-            set { Set(ref isolation, value); }
-        }
+        public Lite<IsolationEntity> Isolation { get; set; } = IsRetrieving ? null : IsolationEntity.Current;
 
         protected override void CopyFrom(MixinEntity mixin, object[] args)
         {
@@ -120,6 +113,7 @@ namespace Signum.Entities.Isolation
     {
         static Expression<Func<IEntity, Lite<IsolationEntity>>> IsolationExpression =
              entity => ((Entity)entity).Mixin<IsolationMixin>().Isolation;
+        [ExpressionField]
         public static Lite<IsolationEntity> Isolation(this IEntity entity)
         {
             return IsolationExpression.Evaluate(entity);

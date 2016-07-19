@@ -99,8 +99,9 @@ namespace Signum.Entities.Help
         }
     }
 
+    [AutoInit]
     public static class HelpPermissions
     {
-        public static readonly PermissionSymbol ViewHelp = new PermissionSymbol();
+        public static PermissionSymbol ViewHelp;
     }
 }

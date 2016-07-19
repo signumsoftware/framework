@@ -7,6 +7,7 @@ using System.Globalization;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Entities.Authorization;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
@@ -23,31 +24,16 @@ namespace Signum.Entities.Basics
         }
 
         [NotNullable, SqlDbType(Size = 10), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 2, Max = 10)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        string nativeName;
-        public string NativeName
-        {
-            get { return nativeName; }
-            private set { Set(ref nativeName, value); }
-        }
+        public string NativeName { get; private set; }
 
-        string englishName;
-        public string EnglishName
-        {
-            get { return englishName; }
-            private set { Set(ref englishName, value); }
-        }
+        public string EnglishName { get; private set; }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Name) && Name.HasText())
+            if (pi.Name == nameof(Name) && Name.HasText())
             {
                 try
                 {
@@ -78,14 +64,16 @@ namespace Signum.Entities.Basics
         }
 
         static Expression<Func<CultureInfoEntity, string>> ToStringExpression = e => e.EnglishName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
     }
 
+    [AutoInit]
     public static class CultureInfoOperation
     {
-        public static readonly ExecuteSymbol<CultureInfoEntity> Save = OperationSymbol.Execute<CultureInfoEntity>();
+        public static ExecuteSymbol<CultureInfoEntity> Save;
     }
 }

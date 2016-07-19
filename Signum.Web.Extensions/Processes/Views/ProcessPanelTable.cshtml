@@ -21,7 +21,7 @@
     <br />
     InitialDelayMiliseconds: @Model.InitialDelayMiliseconds
     <br />
-    NextPlannedExecution: @(Model.NextPlannedExecution.TryToString() ?? "-None-")
+    NextPlannedExecution: @(Model.NextPlannedExecution?.ToString() ?? "-None-")
     <br />
     <table class="table">
         <thead>
@@ -54,7 +54,7 @@
                     </td>
                     <td>@item.State
                     </td>
-                    <td>@item.Progress.TryToString("p")
+                    <td>@item.Progress?.ToString("p")
                     </td>
                     <td>@item.MachineName
                     </td>

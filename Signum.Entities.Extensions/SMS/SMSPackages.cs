@@ -6,6 +6,7 @@ using Signum.Entities;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.SMS
 {
@@ -26,19 +27,15 @@ namespace Signum.Entities.SMS
     {
         public SMSPackageEntity()
         {
-            this.name = GetType().NiceName() + ": " + TimeZoneManager.Now.ToString();
+            this.Name = GetType().NiceName() + ": " + TimeZoneManager.Now.ToString();
         }
 
         [SqlDbType(Size = 200)]
-        string name;
         [StringLengthValidator(AllowNulls = true, Max = 200)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
+        public string Name { get; set; }
 
         static Expression<Func<SMSPackageEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

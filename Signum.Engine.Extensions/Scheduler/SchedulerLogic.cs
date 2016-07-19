@@ -27,10 +27,10 @@ namespace Signum.Engine.Scheduler
 {
     public static class SchedulerLogic
     {
-        public static Func<ITaskEntity, ScheduledTaskEntity, IDisposable> ApplySession;
-
+       
         static Expression<Func<ITaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsExpression =
          ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.Task == ct);
+        [ExpressionField]
         public static IQueryable<ScheduledTaskLogEntity> Executions(this ITaskEntity e)
         {
             return ExecutionsExpression.Evaluate(e);
@@ -38,6 +38,7 @@ namespace Signum.Engine.Scheduler
 
         static Expression<Func<ITaskEntity, ScheduledTaskLogEntity>> LastExecutionExpression =
             e => e.Executions().OrderByDescending(a => a.StartTime).FirstOrDefault();
+        [ExpressionField]
         public static ScheduledTaskLogEntity LastExecution(this ITaskEntity e)
         {
             return LastExecutionExpression.Evaluate(e);
@@ -45,7 +46,7 @@ namespace Signum.Engine.Scheduler
 
         static Expression<Func<ScheduledTaskEntity, IQueryable<ScheduledTaskLogEntity>>> ExecutionsSTExpression =
             ct => Database.Query<ScheduledTaskLogEntity>().Where(a => a.ScheduledTask == ct);
-        [ExpressionField("ExecutionsSTExpression")]
+        [ExpressionField]
         public static IQueryable<ScheduledTaskLogEntity> Executions(this ScheduledTaskEntity e)
         {
             return ExecutionsSTExpression.Evaluate(e);
@@ -166,7 +167,7 @@ namespace Signum.Engine.Scheduler
 
                 new Graph<IEntity>.ConstructFrom<ITaskEntity>(TaskOperation.ExecuteSync)
                 {
-                    Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current).Try(l => l.Retrieve())
+                    Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current)?.Retrieve()
                 }.Register();
 
                 new Graph<ITaskEntity>.Execute(TaskOperation.ExecuteAsync)
@@ -192,7 +193,8 @@ namespace Signum.Engine.Scheduler
 
         static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => { Thread.Sleep(1000); ReloadPlan(); });
+            if (running)
+                Task.Factory.StartNew(() => { Thread.Sleep(1000); ReloadPlan(); });
         }
 
 
@@ -335,7 +337,9 @@ namespace Signum.Engine.Scheduler
 
         public static Lite<IEntity> ExecuteSync(ITaskEntity task, ScheduledTaskEntity scheduledTask, IUserEntity user)
         {
-            using (Disposable.Combine(ApplySession, f => f(task, scheduledTask)))
+            IUserEntity entityIUser = user ?? (IUserEntity)scheduledTask.User.Retrieve();
+
+            using (IsolationEntity.Override(entityIUser.TryIsolation()))
             {
                 ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
                 {
@@ -344,7 +348,7 @@ namespace Signum.Engine.Scheduler
                     StartTime = TimeZoneManager.Now,
                     MachineName = Environment.MachineName,
                     ApplicationName = Schema.Current.ApplicationName,
-                    User = user.ToLite(),
+                    User = entityIUser.ToLite(),
                 };
 
                 using (AuthLogic.Disable())
@@ -359,20 +363,20 @@ namespace Signum.Engine.Scheduler
 
                 try
                 {
-                    using (Transaction tr = Transaction.ForceNew())
+                    using (UserHolder.UserSession(entityIUser))
                     {
-                        using (UserHolder.UserSession(user))
+                        using (Transaction tr = Transaction.ForceNew())
                         {
                             stl.ProductEntity = ExecuteTask.Invoke(task);
-                        }
 
-                        using (AuthLogic.Disable())
-                        {
-                            stl.EndTime = TimeZoneManager.Now;
-                            stl.Save();
-                        }
+                            using (AuthLogic.Disable())
+                            {
+                                stl.EndTime = TimeZoneManager.Now;
+                                stl.Save();
+                            }
 
-                        tr.Commit();
+                            tr.Commit();
+                        }
                     }
                 }
                 catch (Exception ex)

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Entities</RootNamespace>
     <AssemblyName>Signum.Entities.Extensions</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>
     </SccProjectName>
@@ -95,9 +95,14 @@
     <Compile Include="Authorization\Role.cs" />
     <Compile Include="Authorization\ServicesData.cs" />
     <Compile Include="Authorization\User.cs" />
+    <Compile Include="Chart\ChartParameter.cs" />
+    <Compile Include="Chart\ChartScriptColumn.cs" />
     <Compile Include="Dashboard\DashboardOmniboxResultGenerator.cs" />
     <Compile Include="DiffLog\DiffLogMixin.cs" />
     <Compile Include="DiffLog\Services.cs" />
+    <Compile Include="Excel\ExcelAttachmentEntity.cs" />
+    <Compile Include="Files\EmbeddedFile.cs" />
+    <Compile Include="Files\FileUtils.cs" />
     <Compile Include="Help\AppendixHelp.cs" />
     <Compile Include="Help\IHelpServer.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
@@ -109,6 +114,7 @@
     <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationEntity.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
+    <Compile Include="Mailing\SendEmailTask.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
     <Compile Include="Mailing\SystemEmail.cs" />
     <Compile Include="Map\MapMessage.cs" />
@@ -142,7 +148,7 @@
     <Compile Include="Disconnected\DisconnectedMachineEntity.cs" />
     <Compile Include="Disconnected\DisconnectedExportEntity.cs" />
     <Compile Include="Disconnected\FileMessage.cs" />
-    <Compile Include="Files\EmbeddedFile.cs" />
+    <Compile Include="Files\EmbeddedFilePath.cs" />
     <Compile Include="Files\File.cs" />
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="Files\IFileServer.cs" />
@@ -241,10 +247,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\Framework\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
-if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -253,4 +260,8 @@ if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)
   <Target Name="AfterBuild">
   </Target>
   -->
+  <UsingTask TaskName="SignumTask" AssemblyFile="..\..\Framework\Signum.MSBuildTask\Binaries\Signum.MSBuildTask.dll" />
+  <Target Name="AfterCompile" DependsOnTargets="CoreCompile">
+    <SignumTask Assembly="@(IntermediateAssembly)" References="@(ReferencePath)" KeyFile="$(KeyOriginatorFile)" />
+  </Target>
 </Project>

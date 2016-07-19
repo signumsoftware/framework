@@ -15,87 +15,54 @@ using System.Net.Mail;
 using System.Linq.Expressions;
 using Signum.Entities.Files;
 using System.Security.Cryptography;
+using Signum.Entities.Scheduler;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
-    public class EmailMessageEntity : Entity
-    {   
+    public class EmailMessageEntity : Entity, IProcessLineDataEntity
+    {
         public EmailMessageEntity()
         {
             this.UniqueIdentifier = Guid.NewGuid();
         }
 
         [NotNullable]
-        MList<EmailRecipientEntity> recipients = new MList<EmailRecipientEntity>();
         [CountIsValidator(ComparisonType.GreaterThan, 0)]
-        public MList<EmailRecipientEntity> Recipients
-        {
-            get { return recipients; }
-            set { Set(ref recipients, value); }
-        }
+        public MList<EmailRecipientEntity> Recipients { get; set; } = new MList<EmailRecipientEntity>();
 
         [ImplementedByAll]
-        Lite<Entity> target;
-        public Lite<Entity> Target
-        {
-            get { return target; }
-            set { Set(ref target, value); }
-        }
+        public Lite<Entity> Target { get; set; }
 
         [NotNullable]
-        EmailAddressEntity from;
         [NotNullValidator]
-        public EmailAddressEntity From
-        {
-            get { return from; }
-            set { Set(ref from, value); }
-        }
+        public EmailAddressEntity From { get; set; }
 
-        Lite<EmailTemplateEntity> template;
-        public Lite<EmailTemplateEntity> Template
-        {
-            get { return template; }
-            set { Set(ref template, value); }
-        }
+        public Lite<EmailTemplateEntity> Template { get; set; }
 
-        DateTime creationTime = TimeZoneManager.Now;
-        public DateTime CreationTime
-        {
-            get { return creationTime; }
-            private set { Set(ref creationTime, value); }
-        }
+        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
-        DateTime? sent;
-        public DateTime? Sent
-        {
-            get { return sent; }
-            set { SetToStr(ref sent, value); }
-        }
+        public DateTime? Sent { get; set; }
 
-        DateTime? receptionNotified;
-        public DateTime? ReceptionNotified
-        {
-            get { return receptionNotified; }
-            set { Set(ref receptionNotified, value); }
-        }
+        public DateTime? ReceptionNotified { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
         string subject;
-        [StringLengthValidator(AllowNulls = true)]
+        [StringLengthValidator(AllowNulls = true, AllowLeadingSpaces=true, AllowTrailingSpaces=true)]
         public string Subject
         {
             get { return subject; }
-            set { if (Set(ref subject, value))CalculateHash(); }
+            set { if (Set(ref subject, value)) CalculateHash(); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
         string body;
-        [StringLengthValidator(AllowNulls = true)]
+        [StringLengthValidator(AllowNulls = true, MultiLine=true)]
         public string Body
         {
             get { return body; }
-            set { if (Set(ref body, value))CalculateHash(); }
+            set { if (Set(ref body, value)) CalculateHash(); }
         }
 
         static readonly char[] spaceChars = new[] { '\r', '\n', ' ' };
@@ -108,64 +75,28 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable, SqlDbType(Size = 150)]
-        string bodyHash;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 150)]
-        public string BodyHash
-        {
-            get { return bodyHash; }
-            set { Set(ref bodyHash, value); }
-        }
+        [StringLengthValidator(AllowNulls = true, Min = 1, Max = 150)]
+        public string BodyHash { get; set; }
 
-        bool isBodyHtml = false;
-        public bool IsBodyHtml
-        {
-            get { return isBodyHtml; }
-            set { Set(ref isBodyHtml, value); }
-        }
+        public bool IsBodyHtml { get; set; } = false;
 
-        Lite<ExceptionEntity> exception;
-        public Lite<ExceptionEntity> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value); }
-        }
+        public Lite<ExceptionEntity> Exception { get; set; }
 
-        EmailMessageState state;
-        public EmailMessageState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
+        public EmailMessageState State { get; set; }
 
-        Guid? uniqueIdentifier;
-        public Guid? UniqueIdentifier
-        {
-            get { return uniqueIdentifier; }
-            set { Set(ref uniqueIdentifier, value); }
-        }
+        public Guid? UniqueIdentifier { get; set; }
 
-        bool editableMessage = true;
-        public bool EditableMessage
-        {
-            get { return editableMessage; }
-            set { Set(ref editableMessage, value); }
-        }
+        public bool EditableMessage { get; set; } = true;
 
-        Lite<EmailPackageEntity> package;
-        public Lite<EmailPackageEntity> Package
-        {
-            get { return package; }
-            set { Set(ref package, value); }
-        }
+        public Lite<EmailPackageEntity> Package { get; set; }
+
+        public Guid? ProcessIdentifier { get; set; }
+
+        public int SendRetries { get; set; }
 
         [NotNullable]
-        MList<EmailAttachmentEntity> attachments = new MList<EmailAttachmentEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<EmailAttachmentEntity> Attachments
-        {
-            get { return attachments; }
-            set { Set(ref attachments, value); }
-        }
+        public MList<EmailAttachmentEntity> Attachments { get; set; } = new MList<EmailAttachmentEntity>();
 
         static StateValidator<EmailMessageEntity, EmailMessageState> validator = new StateValidator<EmailMessageEntity, EmailMessageState>(
             m => m.State, m => m.Exception, m => m.Sent, m => m.ReceptionNotified, m => m.Package)
@@ -178,6 +109,7 @@ namespace Signum.Entities.Mailing
             };
 
         static Expression<Func<EmailMessageEntity, string>> ToStringExpression = e => e.Subject;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -192,79 +124,39 @@ namespace Signum.Entities.Mailing
         {
         }
 
-        EmailReceptionInfoEntity receptionInfo;
-        public EmailReceptionInfoEntity ReceptionInfo
-        {
-            get { return receptionInfo; }
-            set { Set(ref receptionInfo, value); }
-        }
+        public EmailReceptionInfoEntity ReceptionInfo { get; set; }
     }
 
     [Serializable]
     public class EmailReceptionInfoEntity : EmbeddedEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex(AllowMultipleNulls = true)]
-        string uniqueId;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
-        public string UniqueId
-        {
-            get { return uniqueId; }
-            set { Set(ref uniqueId, value); }
-        }
+        public string UniqueId { get; set; }
 
         [NotNullable]
-        Lite<Pop3ReceptionEntity> reception;
         [NotNullValidator]
-        public Lite<Pop3ReceptionEntity> Reception
-        {
-            get { return reception; }
-            set { Set(ref reception, value); }
-        }
+        public Lite<Pop3ReceptionEntity> Reception { get; set; }
 
         [SqlDbType(Size = int.MaxValue), NotNullable]
-        string rawContent;
-        public string RawContent
-        {
-            get { return rawContent; }
-            set { Set(ref rawContent, value); }
-        }
+        public string RawContent { get; set; }
 
-        DateTime sentDate;
-        public DateTime SentDate
-        {
-            get { return sentDate; }
-            set { Set(ref sentDate, value); }
-        }
+        public DateTime SentDate { get; set; }
 
-        DateTime receivedDate;
-        public DateTime ReceivedDate
-        {
-            get { return receivedDate; }
-            set { Set(ref receivedDate, value); }
-        }
+        public DateTime ReceivedDate { get; set; }
 
-        DateTime? deletionDate;
-        public DateTime? DeletionDate
-        {
-            get { return deletionDate; }
-            set { Set(ref deletionDate, value); }
-        }
+        public DateTime? DeletionDate { get; set; }
     }
 
     [Serializable]
     public class EmailAttachmentEntity : EmbeddedEntity
     {
-        EmailAttachmentType type;
-        public EmailAttachmentType Type
-        {
-            get { return type; }
-            set { Set(ref type, value); }
-        }
+        public EmailAttachmentType Type { get; set; }
 
         [NotNullable]
-        FilePathEntity file;
+        EmbeddedFilePathEntity file;
         [NotNullValidator]
-        public FilePathEntity File
+        public EmbeddedFilePathEntity File
         {
             get { return file; }
             set
@@ -278,22 +170,17 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable, SqlDbType(Size = 300)]
-        string contentId;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 300)]
-        public string ContentId
-        {
-            get { return contentId; }
-            set { Set(ref contentId, value); }
-        }
+        public string ContentId { get; set; }
 
         public EmailAttachmentEntity Clone()
         {
             return new EmailAttachmentEntity
             {
-                ContentId = contentId,
+                ContentId = ContentId,
                 File = file,
-                Type = type,
-            }; 
+                Type = Type,
+            };
         }
 
         internal bool Similar(EmailAttachmentEntity a)
@@ -303,7 +190,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return file.TryToString();
+            return file?.ToString();
         }
     }
 
@@ -321,35 +208,30 @@ namespace Signum.Entities.Mailing
         public EmailRecipientEntity(EmailOwnerData data)
             : base(data)
         {
-            kind = EmailRecipientKind.To;
+            Kind = EmailRecipientKind.To;
         }
 
         public EmailRecipientEntity(MailAddress ma, EmailRecipientKind kind) : base(ma)
         {
-            this.kind = kind;
+            this.Kind = kind;
         }
 
-        EmailRecipientKind kind;
-        public EmailRecipientKind Kind
-        {
-            get { return kind; }
-            set { Set(ref kind, value); }
-        }
+        public EmailRecipientKind Kind { get; set; }
 
         public new EmailRecipientEntity Clone()
         {
             return new EmailRecipientEntity
             {
-                 DisplayName = DisplayName,
-                 EmailAddress = EmailAddress, 
-                 EmailOwner = EmailOwner,
-                 Kind = Kind,
+                DisplayName = DisplayName,
+                EmailAddress = EmailAddress,
+                EmailOwner = EmailOwner,
+                Kind = Kind,
             };
         }
 
         public bool Equals(EmailRecipientEntity other)
         {
-            return base.Equals((EmailAddressEntity)other) && kind == other.kind;
+            return base.Equals((EmailAddressEntity)other) && Kind == other.Kind;
         }
 
         public override bool Equals(object obj)
@@ -359,7 +241,7 @@ namespace Signum.Entities.Mailing
 
         public override int GetHashCode()
         {
-            return base.GetHashCode() ^ kind.GetHashCode();
+            return base.GetHashCode() ^ Kind.GetHashCode();
         }
 
         public string BaseToString()
@@ -369,12 +251,12 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return "{0}: {1}".FormatWith(kind.NiceToString(), base.ToString());
+            return "{0}: {1}".FormatWith(Kind.NiceToString(), base.ToString());
         }
     }
 
     public enum EmailRecipientKind
-    { 
+    {
         To,
         Cc,
         Bcc
@@ -387,43 +269,28 @@ namespace Signum.Entities.Mailing
 
         public EmailAddressEntity(EmailOwnerData data)
         {
-            emailOwner = data.Owner;
-            emailAddress = data.Email;
-            displayName = data.DisplayName;
+            EmailOwner = data.Owner;
+            EmailAddress = data.Email;
+            DisplayName = data.DisplayName;
         }
 
         public EmailAddressEntity(MailAddress mailAddress)
         {
-            displayName = mailAddress.DisplayName;
-            emailAddress = mailAddress.Address;
+            DisplayName = mailAddress.DisplayName;
+            EmailAddress = mailAddress.Address;
         }
 
-        Lite<IEmailOwnerEntity> emailOwner;
-        public Lite<IEmailOwnerEntity> EmailOwner
-        {
-            get { return emailOwner; }
-            set { Set(ref emailOwner, value); }
-        }
+        public Lite<IEmailOwnerEntity> EmailOwner { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string emailAddress;
         [EMailValidator, StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string EmailAddress
-        {
-            get { return emailAddress; }
-            set { Set(ref emailAddress, value); }
-        }
+        public string EmailAddress { get; set; }
 
-        string displayName;
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { Set(ref displayName, value); }
-        }
+        public string DisplayName { get; set; }
 
         public override string ToString()
         {
-            return "{0} <{1}>".FormatWith(displayName, emailAddress);
+            return "{0} <{1}>".FormatWith(DisplayName, EmailAddress);
         }
 
         public EmailAddressEntity Clone()
@@ -433,12 +300,12 @@ namespace Signum.Entities.Mailing
                 DisplayName = DisplayName,
                 EmailAddress = EmailAddress,
                 EmailOwner = EmailOwner
-            }; 
+            };
         }
 
         public bool Equals(EmailAddressEntity other)
         {
-            return other.emailAddress == emailAddress && other.displayName == displayName;
+            return other.EmailAddress == EmailAddress && other.DisplayName == DisplayName;
         }
 
         public override bool Equals(object obj)
@@ -448,17 +315,22 @@ namespace Signum.Entities.Mailing
 
         public override int GetHashCode()
         {
-            return (emailAddress ?? "").GetHashCode() ^ (displayName ?? "").GetHashCode();
+            return (EmailAddress ?? "").GetHashCode() ^ (DisplayName ?? "").GetHashCode();
         }
     }
 
     public enum EmailMessageState
     {
+        [Ignore]
         Created,
+        Draft,
+        ReadyToSend,
+        RecruitedForSending,
         Sent,
         SentException,
         ReceptionNotified,
-        Received
+        Received,
+        Outdated
     }
 
     public interface IEmailOwnerEntity : IEntity
@@ -495,19 +367,25 @@ namespace Signum.Entities.Mailing
         }
     }
 
+    [AutoInit]
     public static class EmailMessageProcess
     {
-        public static readonly ProcessAlgorithmSymbol SendEmails = new ProcessAlgorithmSymbol();
+        public static readonly ProcessAlgorithmSymbol CreateEmailsSendAsync;
+        public static ProcessAlgorithmSymbol SendEmails;
+
     }
 
+    [AutoInit]
     public static class EmailMessageOperation
     {
-        public static readonly ExecuteSymbol<EmailMessageEntity> Send = OperationSymbol.Execute<EmailMessageEntity>();
-        public static readonly ConstructSymbol<EmailMessageEntity>.From<EmailMessageEntity> ReSend = OperationSymbol.Construct<EmailMessageEntity>.From<EmailMessageEntity>();
-        public static readonly ConstructSymbol<ProcessEntity>.FromMany<EmailMessageEntity> ReSendEmails = OperationSymbol.Construct<ProcessEntity>.FromMany<EmailMessageEntity>();
-        public static readonly ConstructSymbol<EmailMessageEntity>.Simple CreateMail = OperationSymbol.Construct<EmailMessageEntity>.Simple();
-        public static readonly ConstructSymbol<EmailMessageEntity>.From<EmailTemplateEntity> CreateMailFromTemplate = OperationSymbol.Construct<EmailMessageEntity>.From<EmailTemplateEntity>();
-        public static readonly DeleteSymbol<EmailMessageEntity> Delete = OperationSymbol.Delete<EmailMessageEntity>();
+        public static ExecuteSymbol<EmailMessageEntity> Save;
+        public static ExecuteSymbol<EmailMessageEntity> ReadyToSend;
+        public static ExecuteSymbol<EmailMessageEntity> Send;
+        public static ConstructSymbol<EmailMessageEntity>.From<EmailMessageEntity> ReSend;
+        public static ConstructSymbol<ProcessEntity>.FromMany<EmailMessageEntity> ReSendEmails;
+        public static ConstructSymbol<EmailMessageEntity>.Simple CreateMail;
+        public static ConstructSymbol<EmailMessageEntity>.From<EmailTemplateEntity> CreateMailFromTemplate;
+        public static DeleteSymbol<EmailMessageEntity> Delete;
     }
 
     public enum EmailMessageMessage
@@ -522,20 +400,17 @@ namespace Signum.Entities.Mailing
         DefaultFromIsMandatory,
         From,
         To,
-        Attachments
+        Attachments,
+        [Description("{0} {1} requires extra parameters")]
+        _01requiresExtraParameters
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class EmailPackageEntity : Entity, IProcessDataEntity
     {
         [SqlDbType(Size = 200)]
-        string name;
         [StringLengthValidator(AllowNulls = true, Max = 200)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
+        public string Name { get; set; }
 
         public override string ToString()
         {
@@ -543,9 +418,16 @@ namespace Signum.Entities.Mailing
         }
     }
 
+    [AutoInit]
     public static class EmailFileType
     {
-        public static readonly FileTypeSymbol Attachment = new FileTypeSymbol();
+        public static FileTypeSymbol Attachment;
+    }
+
+    [AutoInit]
+    public static class AsyncEmailSenderPermission
+    {
+        public static PermissionSymbol ViewAsyncEmailSenderPanel;
     }
 }
 

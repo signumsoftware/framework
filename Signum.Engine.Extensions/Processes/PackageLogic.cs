@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using Signum.Engine.Operations;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Processes
 {
@@ -23,6 +24,7 @@ namespace Signum.Engine.Processes
     {
         static Expression<Func<PackageEntity, IQueryable<PackageLineEntity>>> LinesExpression =
             p => Database.Query<PackageLineEntity>().Where(pl => pl.Package.RefersTo(p));
+        [ExpressionField]
         public static IQueryable<PackageLineEntity> Lines(this PackageEntity p)
         {
             return LinesExpression.Evaluate(p);
@@ -51,9 +53,10 @@ namespace Signum.Engine.Processes
                         pl.Package,
                         pl.Id,
                         pl.Target,
+                        pl.Result,
                         pl.FinishTime,
                         LastProcess = p,
-                        Exception = pl.Exception(p)
+                        Exception = pl.Exception(p),
                     });
 
 
@@ -248,7 +251,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                ((T)(IEntity)line.Target).Delete<T, T>(DeleteSymbol, args);
+                ((T)(IEntity)line.Target).Delete(DeleteSymbol, args);
 
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();

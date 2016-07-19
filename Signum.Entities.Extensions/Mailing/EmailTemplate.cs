@@ -14,6 +14,8 @@ using System.ComponentModel;
 using Signum.Entities.Translation;
 using System.Reflection;
 using Signum.Entities.UserAssets;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Entities.Mailing
 {
@@ -31,115 +33,49 @@ namespace Signum.Entities.Mailing
         internal object queryName;
 
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        bool editableMessage = true;
-        public bool EditableMessage
-        {
-            get { return editableMessage; }
-            set { Set(ref editableMessage, value); }
-        }
+        public bool EditableMessage { get; set; } = true;
 
-        bool disableAuthorization;
-        public bool DisableAuthorization
-        {
-            get { return disableAuthorization; }
-            set { Set(ref disableAuthorization, value); }
-        }
+        public bool DisableAuthorization { get; set; }
 
         [NotNullable]
-        QueryEntity query;
         [NotNullValidator]
-        public QueryEntity Query
-        {
-            get { return query; }
-            set { Set(ref query, value); }
-        }
+        public QueryEntity Query { get; set; }
 
-        SystemEmailEntity systemEmail;
-        public SystemEmailEntity SystemEmail
-        {
-            get { return systemEmail; }
-            set { Set(ref systemEmail, value); }
-        }
+        public SystemEmailEntity SystemEmail { get; set; }
 
-        bool sendDifferentMessages;
-        public bool SendDifferentMessages
-        {
-            get { return sendDifferentMessages; }
-            set { Set(ref sendDifferentMessages, value); }
-        }
+        public bool SendDifferentMessages { get; set; }
 
-        EmailTemplateContactEntity from;
-        public EmailTemplateContactEntity From
-        {
-            get { return from; }
-            set { Set(ref from, value); }
-        }
+        public EmailTemplateContactEntity From { get; set; }
 
         [NotNullable]
-        MList<EmailTemplateRecipientEntity> recipients = new MList<EmailTemplateRecipientEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<EmailTemplateRecipientEntity> Recipients
-        {
-            get { return recipients; }
-            set { Set(ref recipients, value); }
-        }
+        public MList<EmailTemplateRecipientEntity> Recipients { get; set; } = new MList<EmailTemplateRecipientEntity>();
 
-       
-        Lite<EmailMasterTemplateEntity> masterTemplate;
-        public Lite<EmailMasterTemplateEntity> MasterTemplate
-        {
-            get { return masterTemplate; }
-            set { Set(ref masterTemplate, value); }
-        }
+        [NotNullable, PreserveOrder]
+        [NotNullValidator, NoRepeatValidator, ImplementedBy()]
+        public MList<IAttachmentGeneratorEntity> Attachments { get; set; } = new MList<IAttachmentGeneratorEntity>();
 
-        bool isBodyHtml = true;
-        public bool IsBodyHtml
-        {
-            get { return isBodyHtml; }
-            set { Set(ref isBodyHtml, value); }
-        }
+        public Lite<EmailMasterTemplateEntity> MasterTemplate { get; set; }
+
+        public bool IsBodyHtml { get; set; } = true;
 
         [NotifyCollectionChanged]
-        MList<EmailTemplateMessageEntity> messages = new MList<EmailTemplateMessageEntity>();
-        public MList<EmailTemplateMessageEntity> Messages
-        {
-            get { return messages; }
-            set { Set(ref messages, value); }
-        }
+        public MList<EmailTemplateMessageEntity> Messages { get; set; } = new MList<EmailTemplateMessageEntity>();
 
-        bool active;
-        public bool Active
-        {
-            get { return active; }
-            set { Set(ref active, value); }
-        }
+        public bool Active { get; set; }
 
-        DateTime? startDate;
         [MinutesPrecissionValidator]
-        public DateTime? StartDate
-        {
-            get { return startDate; }
-            set { Set(ref startDate, value); }
-        }
+        public DateTime? StartDate { get; set; }
 
-        DateTime? endDate;
         [MinutesPrecissionValidator]
-        public DateTime? EndDate
-        {
-            get { return endDate; }
-            set { Set(ref endDate, value); }
-        }
+        public DateTime? EndDate { get; set; }
 
         static Expression<Func<EmailTemplateEntity, bool>> IsActiveNowExpression =
-            (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
+            (mt) => mt.Active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
+        [ExpressionField]
         public bool IsActiveNow()
         {
             return IsActiveNowExpression.Evaluate(this);
@@ -147,7 +83,7 @@ namespace Signum.Entities.Mailing
 
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            if (sender == messages)
+            if (sender == Messages)
             {
                 if (args.OldItems != null)
                     foreach (var item in args.OldItems.Cast<EmailTemplateMessageEntity>())
@@ -157,24 +93,35 @@ namespace Signum.Entities.Mailing
                     foreach (var item in args.NewItems.Cast<EmailTemplateMessageEntity>())
                         item.Template = this;
             }
+
+            if (sender == Attachments)
+            {
+                if (args.OldItems != null)
+                    foreach (var item in args.OldItems.Cast<IAttachmentGeneratorEntity>())
+                        item.Template = null;
+
+                if (args.NewItems != null)
+                    foreach (var item in args.NewItems.Cast<IAttachmentGeneratorEntity>())
+                        item.Template = this;
+            }
         }
 
         protected override void PreSaving(ref bool graphModified)
         {
             base.PreSaving(ref graphModified);
 
-            messages.ForEach(e => e.Template = this);
+            Messages.ForEach(e => e.Template = this);
         }
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
-            if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
+            if (pi.Name == nameof(StartDate) || pi.Name == nameof(EndDate))
             {
                 if (EndDate != null && EndDate < StartDate)
                     return EmailTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
             }
 
-            if (pi.Is(() => Messages) && Active)
+            if (pi.Name == nameof(Messages) && Active)
             {
                 if (Messages == null || !Messages.Any())
                     return EmailTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();
@@ -187,6 +134,7 @@ namespace Signum.Entities.Mailing
         }
 
         static readonly Expression<Func<EmailTemplateEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -206,46 +154,31 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailTemplateContactEntity : EmbeddedEntity
     {
-        QueryTokenEntity token;
-        public QueryTokenEntity Token
-        {
-            get { return token; }
-            set { Set(ref token, value); }
-        }
+        public QueryTokenEntity Token { get; set; }
 
-        string emailAddress;
-        public string EmailAddress
-        {
-            get { return emailAddress; }
-            set { Set(ref emailAddress, value); }
-        }
+        public string EmailAddress { get; set; }
 
-        string displayName;
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { Set(ref displayName, value); }
-        }
+        public string DisplayName { get; set; }
 
         public override string ToString()
         {
-            return "{0} <{1}>".FormatWith(displayName, emailAddress);
+            return "{0} <{1}>".FormatWith(DisplayName, EmailAddress);
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Token))
+            if (pi.Name == nameof(Token))
             {
-                if (Token == null && emailAddress.IsNullOrEmpty())
+                if (Token == null && EmailAddress.IsNullOrEmpty())
                     return EmailTemplateMessage.TokenOrEmailAddressMustBeSet.NiceToString();
 
-                if (Token != null && !emailAddress.IsNullOrEmpty())
+                if (Token != null && !EmailAddress.IsNullOrEmpty())
                     return EmailTemplateMessage.TokenAndEmailAddressCanNotBeSetAtTheSameTime.NiceToString();
 
                 if (Token != null && Token.Token.Type != typeof(EmailOwnerData))
                     return EmailTemplateMessage.TokenMustBeA0.NiceToString(typeof(EmailOwnerData).NiceName());
             }
-            
+
             return null;
         }
     }
@@ -253,16 +186,11 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailTemplateRecipientEntity : EmailTemplateContactEntity
     {
-        EmailRecipientKind kind;
-        public EmailRecipientKind Kind
-        {
-            get { return kind; }
-            set { Set(ref kind, value); }
-        }
+        public EmailRecipientKind Kind { get; set; }
 
         public override string ToString()
         {
-            return "{0} {1} <{2}>".FormatWith(kind.NiceToString(), DisplayName, EmailAddress);
+            return "{0} {1} <{2}>".FormatWith(Kind.NiceToString(), DisplayName, EmailAddress);
         }
     }
 
@@ -285,17 +213,12 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        CultureInfoEntity cultureInfo;
         [NotNullValidator]
-        public CultureInfoEntity CultureInfo
-        {
-            get { return cultureInfo; }
-            set { Set(ref cultureInfo, value); }
-        }
+        public CultureInfoEntity CultureInfo { get; set; }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
         string text;
-        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
+        [StringLengthValidator(AllowNulls = false, MultiLine=true)]
         public string Text
         {
             get { return text; }
@@ -327,17 +250,23 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return cultureInfo.TryToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
+            return CultureInfo?.ToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
         }
     }
 
+    public interface IAttachmentGeneratorEntity : IEntity
+    {
+        EmailTemplateEntity Template { get; set; }
+    }
+
+    [AutoInit]
     public static class EmailTemplateOperation
     {
-        public static readonly ConstructSymbol<EmailTemplateEntity>.From<SystemEmailEntity> CreateEmailTemplateFromSystemEmail = OperationSymbol.Construct<EmailTemplateEntity>.From<SystemEmailEntity>();
-        public static readonly ConstructSymbol<EmailTemplateEntity>.Simple Create = OperationSymbol.Construct<EmailTemplateEntity>.Simple();
-        public static readonly ExecuteSymbol<EmailTemplateEntity> Save = OperationSymbol.Execute<EmailTemplateEntity>();
-        public static readonly ExecuteSymbol<EmailTemplateEntity> Enable = OperationSymbol.Execute<EmailTemplateEntity>();
-        public static readonly ExecuteSymbol<EmailTemplateEntity> Disable = OperationSymbol.Execute<EmailTemplateEntity>();
+        public static ConstructSymbol<EmailTemplateEntity>.From<SystemEmailEntity> CreateEmailTemplateFromSystemEmail;
+        public static ConstructSymbol<EmailTemplateEntity>.Simple Create;
+        public static ExecuteSymbol<EmailTemplateEntity> Save;
+        public static ExecuteSymbol<EmailTemplateEntity> Enable;
+        public static ExecuteSymbol<EmailTemplateEntity> Disable;
     }
 
     public enum EmailTemplateMessage
@@ -366,7 +295,7 @@ namespace Signum.Entities.Mailing
     }
 
     public enum EmailTemplateViewMessage
-    { 
+    {
         [Description("Insert message content")]
         InsertMessageContent,
         [Description("Insert")]

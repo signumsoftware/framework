@@ -333,7 +333,7 @@ namespace Signum.Engine.UserAssets
 
             while (true)
             {
-                var result = SelectInteractive(ref current, qd, options, allowRemoveToken, allowReGenerate);
+                var result = SelectInteractive(ref current, qd, options, remainingText, allowRemoveToken, allowReGenerate);
                 switch (result)
                 {
                     case UserAssetTokenAction.DeleteEntity:
@@ -374,7 +374,7 @@ namespace Signum.Engine.UserAssets
             }
         }
 
-        static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, bool allowRemoveToken, bool allowReGenerate)
+        static UserAssetTokenAction? SelectInteractive(ref QueryToken token, QueryDescription qd, SubTokensOptions options, string remainingText, bool allowRemoveToken, bool allowReGenerate)
         {
             var top = Console.CursorTop;
 
@@ -387,7 +387,10 @@ namespace Signum.Engine.UserAssets
 
                 int startingIndex = 0;
 
-                SafeConsole.WriteLineColor(ConsoleColor.Cyan, "  " + token.Try(a => a.FullKey()));
+                SafeConsole.WriteColor(ConsoleColor.Cyan, "  " + token?.FullKey());
+                if (remainingText.HasText())
+                    Console.Write(" " + remainingText);
+                Console.WriteLine();
 
                 bool isRoot = token == null;
 

@@ -14,6 +14,7 @@ using Signum.Utilities.Reflection;
 using Signum.Entities.UserAssets;
 using System.Xml.Linq;
 using Signum.Entities.Authorization;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Dashboard
 {
@@ -36,62 +37,28 @@ namespace Signum.Entities.Dashboard
             }
         }
 
-        DashboardEmbedededInEntity? embeddedInEntity;
-        public DashboardEmbedededInEntity? EmbeddedInEntity
-        {
-            get { return embeddedInEntity; }
-            set { Set(ref embeddedInEntity, value); }
-        }
+        public DashboardEmbedededInEntity? EmbeddedInEntity { get; set; }
 
-        Lite<Entity> owner;
-        public Lite<Entity> Owner
-        {
-            get { return owner; }
-            set { Set(ref owner, value); }
-        }
+        public Lite<Entity> Owner { get; set; }
 
-        int? dashboardPriority;
-        public int? DashboardPriority
-        {
-            get { return dashboardPriority; }
-            set { Set(ref dashboardPriority, value); }
-        }
+        public int? DashboardPriority { get; set; }
 
-        int? autoRefreshPeriod;
         [Unit("s"), NumberIsValidator(Entities.ComparisonType.GreaterThan, 1)]
-        public int? AutoRefreshPeriod
-        {
-            get { return autoRefreshPeriod; }
-            set { Set(ref autoRefreshPeriod, value); }
-        }
+        public int? AutoRefreshPeriod { get; set; }
 
-        string displayName;
         [StringLengthValidator(AllowNulls = false, Min = 2)]
-        public string DisplayName
-        {
-            get { return displayName; }
-            set { Set(ref displayName, value); }
-        }
+        public string DisplayName { get; set; }
 
         [ValidateChildProperty, NotifyCollectionChanged, NotifyChildProperty, NotNullable]
-        MList<PanelPartEntity> parts = new MList<PanelPartEntity>();
         [NoRepeatValidator]
-        public MList<PanelPartEntity> Parts
-        {
-            get { return parts; }
-            set { Set(ref parts, value); }
-        }
+        public MList<PanelPartEntity> Parts { get; set; } = new MList<PanelPartEntity>();
 
         [UniqueIndex]
-        Guid guid = Guid.NewGuid();
-        public Guid Guid
-        {
-            get { return guid; }
-            set { Set(ref guid, value); }
-        }
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
         static Expression<Func<DashboardEntity, IPartEntity, bool>> ContainsContentExpression =
             (cp, content) => cp.Parts.Any(p => p.Content.Is(content));
+        [ExpressionField]
         public bool ContainsContent(IPartEntity content)
         {
             return ContainsContentExpression.Evaluate(this, content);
@@ -103,19 +70,19 @@ namespace Signum.Entities.Dashboard
             {
                 PanelPartEntity part = (PanelPartEntity)sender;
 
-                if (pi.Is(() => part.StartColumn))
+                if (pi.Name == nameof(part.StartColumn))
                 {
                     if (part.StartColumn + part.Columns > 12)
                         return DashboardMessage.Part0IsTooLarge.NiceToString(part);
 
-                    var other = parts.TakeWhile(p => p != part)
-                        .FirstOrDefault(a => a.Row == part.Row && a.ColumnInterval().Overlap(part.ColumnInterval()));
+                    var other = Parts.TakeWhile(p => p != part)
+                        .FirstOrDefault(a => a.Row == part.Row && a.ColumnInterval().Overlaps(part.ColumnInterval()));
 
                     if (other != null)
                         return DashboardMessage.Part0OverlapsWith1.NiceToString(part, other);
                 }
 
-                if (entityType != null && pi.Is(() => part.Content) && part.Content != null)
+                if (entityType != null && pi.Name == nameof(part.Content) && part.Content != null)
                 {
                     var idents = GraphExplorer.FromRoot((Entity)part.Content).OfType<Entity>();
 
@@ -131,23 +98,9 @@ namespace Signum.Entities.Dashboard
             return base.ChildPropertyValidation(sender, pi);
         }
 
-        //protected override string PropertyValidation(PropertyInfo pi)
-        //{
-        //    if (pi.Is(() => Parts) && Parts.Any())
-        //    {
-        //        var rows = Parts.Select(p => p.Row).Distinct().ToList();
-        //        int maxRow = rows.Max();
-        //        var numbers = 0.To(maxRow);
-        //        if (maxRow != rows.Count)
-        //            return DashboardMessage.DashboardDN_Rows0DontHaveAnyParts.NiceToString().FormatWith(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
-        //    }
-
-        //    return base.PropertyValidation(pi);
-        //}
-
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            if(sender == Parts)
+            if (sender == Parts)
                 foreach (var pp in Parts)
                     pp.NotifyRowColumn();
 
@@ -170,7 +123,8 @@ namespace Signum.Entities.Dashboard
             base.ChildPropertyChanged(sender, e);
         }
 
-        static readonly Expression<Func<DashboardEntity, string>> ToStringExpression = e => e.displayName;
+        static readonly Expression<Func<DashboardEntity, string>> ToStringExpression = e => e.DisplayName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -195,24 +149,24 @@ namespace Signum.Entities.Dashboard
                 EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
                 Owner == null ? null : new XAttribute("Owner", Owner.Key()),
                 DashboardPriority == null ? null : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
-                EmbeddedInEntity == null ? null : new XAttribute("EmbeddedInEntity", DashboardPriority.Value.ToString()),
-                new XElement("Parts", Parts.Select(p => p.ToXml(ctx)))); 
+                EmbeddedInEntity == null ? null : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
+                new XElement("Parts", Parts.Select(p => p.ToXml(ctx))));
         }
 
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             DisplayName = element.Attribute("DisplayName").Value;
-            EntityType = element.Attribute("EntityType").Try(a => ctx.GetType(a.Value));
-            Owner = element.Attribute("Owner").Try(a => Lite.Parse<Entity>(a.Value));
-            DashboardPriority = element.Attribute("DashboardPriority").Try(a => int.Parse(a.Value));
-            EmbeddedInEntity = element.Attribute("EmbeddedInEntity").Try(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
+            EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value));
+            Owner = element.Attribute("Owner")?.Let(a => Lite.Parse<Entity>(a.Value));
+            DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
+            EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
             Parts.Syncronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => EmbeddedInEntity))
+            if (pi.Name == nameof(EmbeddedInEntity))
             {
                 if (EmbeddedInEntity == null && EntityType != null)
                     return ValidationMessage._0IsNecessary.NiceToString(pi.NiceName());
@@ -225,17 +179,19 @@ namespace Signum.Entities.Dashboard
         }
     }
 
+    [AutoInit]
     public static class DashboardPermission
     {
-        public static readonly PermissionSymbol ViewDashboard = new PermissionSymbol();
+        public static PermissionSymbol ViewDashboard;
     }
 
+    [AutoInit]
     public static class DashboardOperation
     {
-        public static readonly ConstructSymbol<DashboardEntity>.Simple Create = OperationSymbol.Construct<DashboardEntity>.Simple();
-        public static readonly ExecuteSymbol<DashboardEntity> Save = OperationSymbol.Execute<DashboardEntity>();
-        public static readonly ConstructSymbol<DashboardEntity>.From<DashboardEntity> Clone = OperationSymbol.Construct<DashboardEntity>.From<DashboardEntity>();
-        public static readonly DeleteSymbol<DashboardEntity> Delete = OperationSymbol.Delete<DashboardEntity>();
+        public static ConstructSymbol<DashboardEntity>.Simple Create;
+        public static ExecuteSymbol<DashboardEntity> Save;
+        public static ConstructSymbol<DashboardEntity>.From<DashboardEntity> Clone;
+        public static DeleteSymbol<DashboardEntity> Delete;
     }
 
     public enum DashboardMessage

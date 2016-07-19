@@ -24,6 +24,7 @@ namespace Signum.Engine.Notes
     {
         static Expression<Func<Entity, IQueryable<NoteEntity>>> NotesExpression =
             ident => Database.Query<NoteEntity>().Where(n => n.Target.RefersTo(ident));
+        [ExpressionField]
         public static IQueryable<NoteEntity> Notes(this Entity ident)
         {
             return NotesExpression.Evaluate(ident);

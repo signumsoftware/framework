@@ -66,7 +66,6 @@ namespace Signum.Engine.Isolation
                     new InvalidateWith(typeof(IsolationEntity)));
 
                 ProcessLogic.ApplySession += ProcessLogic_ApplySession;
-                SchedulerLogic.ApplySession += SchedulerLogic_ApplySession;
 
                 Validator.OverridePropertyValidator((IsolationMixin m) => m.Isolation).StaticPropertyValidation += (mi, pi) =>
                 {
@@ -84,14 +83,14 @@ namespace Signum.Engine.Isolation
             return IsolationEntity.Override(process.Data.TryIsolation());
         }
 
-        static IDisposable SchedulerLogic_ApplySession(ITaskEntity task, ScheduledTaskEntity scheduled)
+        static IDisposable SchedulerLogic_ApplySession(ITaskEntity task, ScheduledTaskEntity scheduled, IUserEntity user)
         {
-            return IsolationEntity.Override(scheduled.TryIsolation() ?? task.TryIsolation());
+            return IsolationEntity.Override(scheduled?.TryIsolation() ?? task?.TryIsolation() ?? user?.TryIsolation());
         }
 
         static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
         {
-            return IsolationEntity.Override(entity.Try(e => e.TryIsolation()) ?? args.TryGetArgC<Lite<IsolationEntity>>());
+            return IsolationEntity.Override(entity?.TryIsolation() ?? args.TryGetArgC<Lite<IsolationEntity>>());
         }
 
         static void EntityEventsGlobal_PreSaving(Entity ident, ref bool graphModified)
@@ -183,7 +182,6 @@ namespace Signum.Engine.Isolation
 
         static MethodInfo miSetMixin = ReflectionTools.GetMethodInfo((Entity a) => a.SetMixin((IsolationMixin m) => m.Isolation, null)).GetGenericMethodDefinition();
         static Expression<Func<IsolationMixin, Lite<IsolationEntity>>> isolationProperty = (IsolationMixin m) => m.Isolation;
-
 
         public static void Register<T>(IsolationStrategy strategy) where T : Entity
         {

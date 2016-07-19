@@ -123,10 +123,10 @@ namespace Signum.Entities.Omnibox
         public override string ToString()
         {
             if (Id.HasValue)
-                return "{0} {1}".FormatWith(Type.NicePluralName().ToOmniboxPascal(), Id, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
+                return "{0} {1}".FormatWith(Type.NicePluralName().ToOmniboxPascal(), Id, Lite?.ToString() ?? OmniboxMessage.NotFound.NiceToString());
 
             if (ToStr != null)
-                return "{0} \"{1}\"".FormatWith(Type.NicePluralName().ToOmniboxPascal(), ToStr, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
+                return "{0} \"{1}\"".FormatWith(Type.NicePluralName().ToOmniboxPascal(), ToStr, Lite?.ToString() ?? OmniboxMessage.NotFound.NiceToString());
 
             return Type.NicePluralName().ToOmniboxPascal();
         }

@@ -1,0 +1,12 @@
+﻿@using Signum.Entities.Excel
+@using Signum.Web.Excel
+@using Signum.Web.UserQueries
+@using (var sc = Html.TypeContext<ExcelAttachmentEntity>())
+{
+    @Html.ValueLine(sc, s => s.FileName)
+    @Html.ValueLine(sc, s => s.Title)
+    @Html.EntityLine(sc, s => s.UserQuery, el => el.AttachFunction = ExcelClient.Module["attachUserQuery"](el,
+    sc.SubContextPrefix(a => a.Related),
+    Url.Action((UserQueriesController c) => c.GetUserQueryImplementations())))
+    @Html.EntityLine(sc, s => s.Related, el => { el.Autocomplete = true; el.Find = true; })
+}

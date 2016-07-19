@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Mailing
 {
@@ -18,65 +19,35 @@ namespace Signum.Entities.Mailing
     public class NewsletterEntity : Entity, IProcessDataEntity
     {
         [NotNullable, SqlDbType(Size = 100)]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
+        public string Name { get; set; }
 
-        NewsletterState state = NewsletterState.Created;
-        public NewsletterState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
+        public NewsletterState State { get; set; } = NewsletterState.Created;
 
         [NotNullable, SqlDbType(Size = 100)]
-        string from;
         [EMailValidator, StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string From
-        {
-            get { return from; }
-            set { Set(ref from, value); }
-        }
+        public string From { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string displayFrom;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string DisplayFrom
-        {
-            get { return displayFrom; }
-            set { Set(ref displayFrom, value); }
-        }
+        public string DisplayFrom { get; set; }
 
         [SqlDbType(Size = 300)]
-        string subject;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300)]
-        public string Subject
-        {
-            get { return subject; }
-            set { Set(ref subject, value); }
-        }
+        public string Subject { get; set; }
 
         [Ignore]
         internal object SubjectParsedNode;
 
         [SqlDbType(Size = int.MaxValue)]
-        string text;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
-        public string Text
-        {
-            get { return text; }
-            set { Set(ref text, value); }
-        }
+        [StringLengthValidator(AllowNulls = true, Min = 3, MultiLine = true)]
+        public string Text { get; set; }
 
         [Ignore]
         internal object TextParsedNode;
 
         static StateValidator<NewsletterEntity, NewsletterState> stateValidator = new StateValidator<NewsletterEntity, NewsletterState>
-            (     n => n.State,            n => n.Subject, n => n.Text)
+            (n => n.State, n => n.Subject, n => n.Text)
             {
                 { NewsletterState.Created, null,           null },
                 { NewsletterState.Saved,   null,           null },
@@ -88,70 +59,47 @@ namespace Signum.Entities.Mailing
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<NewsletterEntity, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<NewsletterEntity, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
         }
 
 
-        QueryEntity query;
-        public QueryEntity Query
-        {
-            get { return query; }
-            set { Set(ref query, value); }
-        }
+        public QueryEntity Query { get; set; }
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class NewsletterDeliveryEntity : Entity, IProcessLineDataEntity
     {
-        bool sent;
-        public bool Sent
-        {
-            get { return sent; }
-            set { Set(ref sent, value); }
-        }
+        public bool Sent { get; set; }
 
-        DateTime? sendDate;
         [DateTimePrecissionValidator(DateTimePrecision.Seconds)]
-        public DateTime? SendDate
-        {
-            get { return sendDate; }
-            set { Set(ref sendDate, value); }
-        }
+        public DateTime? SendDate { get; set; }
 
-        Lite<IEmailOwnerEntity> recipient;
-        public Lite<IEmailOwnerEntity> Recipient
-        {
-            get { return recipient; }
-            set { Set(ref recipient, value); }
-        }
+        public Lite<IEmailOwnerEntity> Recipient { get; set; }
 
-        Lite<NewsletterEntity> newsletter;
-        public Lite<NewsletterEntity> Newsletter
-        {
-            get { return newsletter; }
-            set { Set(ref newsletter, value); }
-        }
+        public Lite<NewsletterEntity> Newsletter { get; set; }
     }
 
     public static class NewsletterProcess
     {
-        public static readonly ProcessAlgorithmSymbol SendNewsletter = new ProcessAlgorithmSymbol();
+        public static ProcessAlgorithmSymbol SendNewsletter;
     }
 
+    [AutoInit]
     public static class NewsletterOperation
     {
-        public static readonly ExecuteSymbol<NewsletterEntity> Save = OperationSymbol.Execute<NewsletterEntity>();
-        public static readonly ConstructSymbol<ProcessEntity>.From<NewsletterEntity> Send = OperationSymbol.Construct<ProcessEntity>.From<NewsletterEntity>();
-        public static readonly ExecuteSymbol<NewsletterEntity> AddRecipients = OperationSymbol.Execute<NewsletterEntity>();
-        public static readonly ExecuteSymbol<NewsletterEntity> RemoveRecipients = OperationSymbol.Execute<NewsletterEntity>();
-        public static readonly ConstructSymbol<NewsletterEntity>.From<NewsletterEntity> Clone = OperationSymbol.Construct<NewsletterEntity>.From<NewsletterEntity>();
+        public static ExecuteSymbol<NewsletterEntity> Save;
+        public static ConstructSymbol<ProcessEntity>.From<NewsletterEntity> Send;
+        public static ExecuteSymbol<NewsletterEntity> AddRecipients;
+        public static ExecuteSymbol<NewsletterEntity> RemoveRecipients;
+        public static ConstructSymbol<NewsletterEntity>.From<NewsletterEntity> Clone;
     }
 
     public enum NewsletterState
-    { 
+    {
         Created,
         Saved,
         Sent

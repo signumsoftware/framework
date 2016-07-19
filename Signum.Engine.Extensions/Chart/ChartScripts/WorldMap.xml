@@ -1,18 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Country Name" ColumnType="String" IsGroupKey="true">
-      <Parameter1 Name="Projection" Type="Enum" ValueDefinition=" orthographic | stereographic | gnomonic | equidistant | equalarea" />
-    </Column>
-    <Column DisplayName="Color" ColumnType="Magnitude">
-      <Parameter1 Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
-      <Parameter2 Name="ColorScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Sqrt  | Log" />
-    </Column>
+    <Column DisplayName="Country Name" ColumnType="String" IsGroupKey="true" />
+    <Column DisplayName="Color" ColumnType="Magnitude" />
   </Columns>
+  <Parameters>
+    <Parameter Name="Projection" Type="Enum" ValueDefinition="orthographic | stereographic | gnomonic | equidistant | equalarea" />
+    <Parameter Name="ColorSet" Type="Enum" ValueDefinition="YlGn|YlGnBu|GnBu|BuGn|PuBuGn|PuBu|BuPu|RdPu|PuRd|OrRd|YlOrRd|YlOrBr|Purples|Blues|Greens|Oranges|Reds|Greys|PuOr|BrBG|PRGn|PiYG|RdBu|RdGy|RdYlBu|Spectral|RdYlGn" />
+    <Parameter Name="ColorScale" Type="Enum" ValueDefinition="ZeroMax | MinMax | Sqrt  | Log" />
+  </Parameters>
   <Icon FileName="maps.png"><![CDATA[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]]></Icon>
-  <Script><![CDATA[
-
-function DrawChart(chart, data){
+  <Script><![CDATA[function DrawChart(chart, data){
   
   
   (function(){d3.geo = {};
@@ -1129,8 +1127,8 @@ d3.geo.greatCircle = d3.geo.circle;
   
   
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-  var colorSet = data.columns.c1.parameter1;
-  var scale = data.columns.c1.parameter2;
+  var colorSet = data.parameters["ColorSet"];
+  var scale = data.parameters["ColorScale"];
  
 
   var scaleFunc = scaleFor(data.columns.c1, data.rows.map(function(r){return r.c1;}), 0, 100, scale);
@@ -1146,7 +1144,7 @@ var rad = Math.min(width/2, height/2);
 var projection = d3.geo.azimuthal()
     .scale(rad)
     .origin([-71.03,42.37])
-    .mode(data.columns.c0.parameter1)
+    .mode(data.parameters["Projection"])
     .translate([width/2, height/2]);
 
 var circle = d3.geo.greatCircle()
@@ -1172,8 +1170,7 @@ chart.on("mousedown", mousedown);
   var colorMap = d3.nest()
     .key(function(r){return r.c0.toString(); })
     .rollup(function(r){return r[0].c1 })
-    .map(data.rows);
-                                                                                                     
+    .map(data.rows);                                                                              
   
 var feature  = chart.selectAll("path")
       .data(countries)
@@ -1187,7 +1184,7 @@ var feature  = chart.selectAll("path")
                                                                                                       
  feature                                                                                                     
     .append("svg:title")
-      .text(function(d) { return d.properties.name; });
+      .text(function(d) { return d.properties.name + ' ' + (colorMap[d.properties.name] || colorMap[d.id]); });
 
 
 

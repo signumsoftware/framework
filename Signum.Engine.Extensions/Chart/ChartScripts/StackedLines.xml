@@ -1,28 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ChartScript GroupBy="Always">
   <Columns>
-    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true">
-      <Parameter1 Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette " />
-      <Parameter2 Name="Order" Type="Enum" ValueDefinition="inside-out | reverse | default " />
-      <Parameter3 Name="Horizontal Margin" Type="Number" ValueDefinition="20" />
-    </Column>
+    <Column DisplayName="Horizontal Axis" ColumnType="Groupable" IsGroupKey="true" />
     <Column DisplayName="Areas" ColumnType="Groupable" IsGroupKey="true" IsOptional="true" />
-    <Column DisplayName="Height" ColumnType="Magnitude">
-      <Parameter1 Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis | bundle" />
-      <Parameter2 Name="Undefined" Type="Enum" ValueDefinition="zero | empty" />
-    </Column>
+    <Column DisplayName="Height" ColumnType="Magnitude" />
     <Column DisplayName="Height 2" ColumnType="Magnitude" IsOptional="true" />
     <Column DisplayName="Height 3" ColumnType="Magnitude" IsOptional="true" />
     <Column DisplayName="Height 4" ColumnType="Magnitude" IsOptional="true" />
     <Column DisplayName="Height 5" ColumnType="Magnitude" IsOptional="true" />
   </Columns>
+  <Parameters>
+    <Parameter Name="Undefined" Type="Enum" ValueDefinition="zero | empty" />
+    <Parameter Name="Horizontal Margin" Type="Number" ValueDefinition="20" />
+    <Parameter Name="Order" Type="Enum" ValueDefinition="inside-out | reverse | default" />
+    <Parameter Name="Stack" Type="Enum" ValueDefinition="zero | expand | wiggle | silhouette" />
+    <Parameter Name="Interpolate" Type="Enum" ValueDefinition="linear | step-before | step-after | cardinal | monotone | basis | bundle" />
+    <Parameter Name="NumberOpacity" Type="Number" ValueDefinition="0.8" />
+    <Parameter Name="NumberColor" Type="String" ValueDefinition="white" />
+  </Parameters>
   <Icon FileName="stackedareas.png"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABUNJREFUeNrsmHtsU1Ucx7+3vW3T9bFWto51g7GtIGxzo9sKiwETwEgixCiC/wiJz0zB+MBABIMKGmOiJBITwJEYcaiwaUxMRCARIg4dG4JDgzCUTZExcGNbt7VZH/d4zu27996uGwj7g5P8eh/nnN/9nO/vnN+5txwhBBO5qDDBy23AGwK46uX6CTsR+Rvp7JEX9xBezWNBTRGeXjGHm1AhfvvDw2TWzCLUzL0LbX/04pWt+8nhlg4yIQD3fttGLlxyIzvLCnAqTC8ugM5gxY5Pj2HXFy3klgM27m/DrDsLIVAUllcJPcnMNMFVXYaW37qxadtBcssAd+5tJkWF+dBotVE4gR2pcSqqpqMAPujx0HO7SV3D2NW8LsBDP54nTSf/Rn7+ZAlc9EjvWSwmOJ2l+Ol0F159/wC5aauYzbGqylLxXAkucq3iOBRSpfv63Lj/qV0pN9gHF89G7QoXlwDIVuHG2oVpp4aPvjxB7HYbTCbDqHCRemZmsxFVrvJwG8j2OXT0DANMDLFGb8HK9XtJ48Ff0wrBwaZzKC6aMia4hLYKcEKStlHALJoi7q6Zje+aO7Bz3/GUkO/UHSEOOvlVNKXcaDiiBMgqdFoNqumc6rzswfLn68mRlgsS0H0HTpP2i/3InmT9X+DYtSIgCecxljZclSWoaziO+q9PJfRo+OYXzHBMk4UT6NOvFy6FghHIEChLtDV0Mv9A08j2z5vFXjtozisosENLlU527PP50H/pLHK66+DxeMYNJ5CUCsZUZA15Xo3yshno7PZiGU20x07+hTx7jqzjQfcQ1ju/wsM1HB4gazHsHhwXXLKCvFyIhSgsEbevvLwc2HNtinOuv68fz+a+CV3uUtFXyRwb8s+twbYrW8FnWMV76cIxBo/XJ1XQ7w/KwqXaIdhxaHAI8/iPkeVYxLK1aJzGiMyyx7DO8R4MQ6fgGxlJG052DhqNJlzu6saVq71jgmPzLsPdivnlmeDUGqYT7RQMG4F+6n1YXdWKSnyGEY83LTjZOajT67H+nlPIF5rR29ufFhy79g1exTMV30NtsIdXWVCEJEIganxmMZbONaPWtgk+r2dUOFkFObpPctTZisp+zNd+gp5/r40KN9A3gNWTN0Fjc8UBCaJFQg0SEI2FPL/kXmws3gLBOwAhEFCES96kVZEFwkbO8XpUldqxyrolBKkANzw4jOW6DTAWLkkAiVlQarQYChbideduZKEDxO+ThVPMgwhDspLjmI819s3o6bkmzrN4OP+IH9OGGzB9VgV93+MVYIQ4RQOJIbc48MLcn1Fi6QQCIxI4eUDx4aqE8BimzMPawncx1HUGXq83mnh5z3ksK/kT6gxbeEBCNLTxIIpqgr56aY1YWX4WLxV/AFWQphTWN2WIxR+pQ53NiXXVB2DuOwIPDat7wI0ns9+CJrsiBsMeIPbzS0BC56EBJyvJ7tnypmNz+XYYOC9U1McoIfbLhkdtLsDj1e3I9TdBJdCX96mLpSAijDxIdBAMKmKsbbifzlqE11yNmGn+h+4aAYWdRAxfWMHQ63GEWvxl4XzU2Umrf6f5zhYCibaJax9/L1aZdCmEHxnrw2lNeKL8BFovtqOxY4EUMBTi2GpLfhgRdweDaCSqAFLDJPVXHkDsvmuKG0XGPdjQt0SqYCQ8Y1ZlLCCydYm+JlkyYDZmyLwsBEfAxSuYZnjSB1EeWIJP9vnB83IhJjEH4wjPeEDS/+ykcEHCQR1JC7KFGzU8EkxZX9zYAS1mHd44ugiJakpz0s0qd1j1seHc/o/6NuAtLv8JMADhVUxtvGMrBgAAAABJRU5ErkJggg==]]></Icon>
   <Script><![CDATA[function DrawChart(chart, data){ 
 
-   var pStack = data.columns.c0.parameter1;
-   var pOrder = data.columns.c0.parameter2;
-   var pInterpolate = data.columns.c2.parameter1;
-   var pUndefined =   data.columns.c2.parameter2;
+   var pStack = data.parameters["Stack"];
+   var pOrder = data.parameters["Order"];
+   var pInterpolate = data.parameters["Interpolate"];
+   var pUndefined =   data.parameters["Undefined"];
   
    var dim0, series, title;
   
@@ -96,14 +98,14 @@
       .entries(data.rows)
       .map(function(g){return g.values;});
      
-     title = data.columns.c2.title + " by " + data.columns.c1.title
+     title = data.columns.c2.title + " / " + data.columns.c1.title
    }
   
   var xRule = rule({
     _1 : 5,
    title : 15,
    _2 : 10, 
-   labels : parseInt(data.columns.c0.parameter3),
+   labels : parseInt(data.parameters["Horizontal Margin"]),
    _3 : 5,
    ticks: 4,
    content: '*',
@@ -234,7 +236,9 @@
   
   //paint graph - hover area trigger
   chart.enterData(series, 'g', 'hover-trigger-serie').attr('transform', translate(xRule.start('content') + x.rangeBand() / 2, yRule.end('content')))
-    .enterData(function(s) { return s.points; }, 'rect', 'point')
+   .each(function(s){
+     
+     d3.select(this).enterData(function (s) { return s.points; }, 'rect', 'point')
       .filter(function(v) {return v.value != undefined;})
       .attr('x', function(v) { return x(v.dim0) - rectRadious; })
       .attr('y', function(v) { return -y(v.y) -y(v.y0); })
@@ -246,6 +250,24 @@
       .attr('data-click', function(v) { return getClickKeys(v.rowClick, data.columns); })
       .append('svg:title')
       .text(function(v) { return v.niceToString; });
+     
+     if (x.rangeBand() > 15 && data.parameters["NumberOpacity"] > 0 )
+      {
+        d3.select(this).enterData(function (s) { return s.points; }, 'text', 'number-label')
+        .filter(function(r) {return r.value != undefined && y(r.y) > 10;})
+        .attr('x', function (r) { return x(r.dim0) })
+        .attr('y', function (r) { return -y(r.y)*0.5 -y(r.y0); })
+        .attr('fill', data.parameters["NumberColor"])
+        .attr('dominant-baseline', 'central')
+        .attr('opacity', data.parameters["NumberOpacity"])
+        .attr('text-anchor', 'middle')
+        .attr('font-weight', 'bold')
+        .text(function (r) { return r.value; })     
+        .attr('data-click', function(v) { return getClickKeys(v.rowClick, data.columns); })
+      	.append('svg:title')
+      	.text(function(v) { return v.niceToString; });;
+      }
+   });
   
   var legendScale = d3.scale.ordinal()
       .domain($.map(series, function (s, i) { return i; }))
@@ -282,6 +304,5 @@
     .attr('y2', yRule.size('content'))
     .style('stroke', 'Black'); 
   
-}
-]]></Script>
+}]]></Script>
 </ChartScript>

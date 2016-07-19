@@ -24,6 +24,8 @@ namespace Signum.Engine.Templating
     {
         public string Variable { get; set; }
 
+        public bool IsForeach { get; set; }
+
         public abstract object GetValue(TemplateParameters p);
 
         public abstract string Format { get; }
@@ -48,7 +50,7 @@ namespace Signum.Engine.Templating
             return sb.ToString();
         }
 
-        public abstract void Synchronize(SyncronizationContext sc, string p);
+        public abstract void Synchronize(SyncronizationContext sc, string remainingText);
 
         public virtual void Declare(ScopedDictionary<string, ValueProviderBase> variables)
         {
@@ -80,8 +82,14 @@ namespace Signum.Engine.Templating
 
         protected static bool ToBool(object obj)
         {
-            if (obj == null || obj is bool && ((bool)obj) == false)
+            if (obj == null)
                 return false;
+
+            if (obj is bool)
+                return ((bool)obj);
+
+            if (obj is string)
+                return ((string)obj) != "";
 
             return true;
         }
@@ -93,7 +101,13 @@ namespace Signum.Engine.Templating
 
             foreach (var item in collection)
             {
-                forEachElement();
+                using (p.Scope())
+                {
+                    if (this.Variable != null)
+                        p.RuntimeVariables.Add(this.Variable, item);
+
+                    forEachElement();
+                }
             }
         }
 
@@ -110,6 +124,21 @@ namespace Signum.Engine.Templating
             {
                 case "":
                     {
+                        if(token.StartsWith("$"))
+                        {
+                            string v = token.TryBefore('.') ?? token;
+
+                            ValueProviderBase vp;
+                            if (!variables.TryGetValue(v, out vp))
+                            {
+                                addError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
+                                return null;
+                            }
+
+                            if (!(vp is TokenValueProvider))
+                                return new ContinueValueProvider(token.TryAfter('.'), vp, addError);
+                        }
+
                         ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, qd, variables, addError);
 
                         if (result.QueryToken != null && TranslateInstanceValueProvider.IsTranslateInstanceCanditate(result.QueryToken))
@@ -133,6 +162,8 @@ namespace Signum.Engine.Templating
                     return new ModelValueProvider(token, modelType, addError) { Variable = variable };
                 case "g":
                     return new GlobalValueProvider(token, addError) { Variable = variable };
+                case "d":
+                    return new DateValueProvider(token, addError) { Variable = variable };
                 default:
                     addError(false, "{0} is not a recognized value provider (q:Query, t:Translate, m:Model, g:Global or just blank)");
                     return null;
@@ -166,6 +197,9 @@ namespace Signum.Engine.Templating
         public readonly CultureInfo Culture;
         public readonly Dictionary<QueryToken, ResultColumn> Columns;
         public IEnumerable<ResultRow> Rows { get; private set; }
+
+        public ScopedDictionary<string, object> RuntimeVariables = new ScopedDictionary<string, object>(null);
+
         public abstract object GetModel();
 
         public IDisposable OverrideRows(IEnumerable<ResultRow> rows)
@@ -173,6 +207,13 @@ namespace Signum.Engine.Templating
             var old = this.Rows;
             this.Rows = rows;
             return new Disposable(() => this.Rows = old);
+        }
+
+        internal IDisposable Scope()
+        {
+            var old = RuntimeVariables;
+            RuntimeVariables = new ScopedDictionary<string, object>(RuntimeVariables);
+            return new Disposable(() => RuntimeVariables = old);
         }
     }
 
@@ -197,7 +238,7 @@ namespace Signum.Engine.Templating
 
         public override void Foreach(TemplateParameters p, Action forEachElement)
         {
-            var groups = p.Rows.GroupBy(r => r[p.Columns[ParsedToken.QueryToken]]).ToList();
+            var groups = p.Rows.GroupBy(r => r[p.Columns[ParsedToken.QueryToken]], TemplateUtils.SemiStructuralEqualityComparer.Comparer).ToList();
             if (groups.Count == 1 && groups[0].Key == null)
                 return;
 
@@ -244,7 +285,7 @@ namespace Signum.Engine.Templating
 
         public override Type Type
         {
-            get { return ParsedToken.QueryToken.Try(t => t.Type); }
+            get { return ParsedToken.QueryToken?.Type; }
         }
 
         public override IEnumerable<object> GetFilteredRows(TemplateParameters p, FilterOperation? operation, string stringValue)
@@ -315,7 +356,7 @@ namespace Signum.Engine.Templating
             if (entityToken == null)
                 entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), 0);
 
-            if (!entityToken.Type.IsAssignableFrom(Route.RootType))
+            if (!entityToken.Type.CleanType().IsAssignableFrom(Route.RootType))
                 addError(false, "The entity of {0} ({1}) is not compatible with the property route {2}".FormatWith(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName()));
 
             return entityToken;
@@ -376,6 +417,7 @@ namespace Signum.Engine.Templating
             get { return typeof(string); }
         }
     }
+
 
     public class ParsedToken
     {
@@ -485,12 +527,21 @@ namespace Signum.Engine.Templating
 
         internal static object Getter(MemberInfo member, object systemEmail)
         {
-            var pi = member as PropertyInfo;
+            try
+            {
+                var pi = member as PropertyInfo;
 
-            if (pi != null)
-                return pi.GetValue(systemEmail, null);
+                if (pi != null)
+                    return pi.GetValue(systemEmail, null);
 
-            return ((FieldInfo)member).GetValue(systemEmail);
+                return ((FieldInfo)member).GetValue(systemEmail);
+            }
+            catch (TargetInvocationException e)
+            {
+                e.InnerException.PreserveStackTrace();
+
+                throw e.InnerException;
+            }
         }
 
         public override string Format
@@ -500,7 +551,7 @@ namespace Signum.Engine.Templating
 
         public override Type Type
         {
-            get { return Members.Try(ms => ms.Last().ReturningType().Nullify()); }
+            get { return Members?.Let(ms => ms.Last().ReturningType().Nullify()); }
         }
 
         public override void FillQueryTokens(List<QueryToken> list)
@@ -518,7 +569,7 @@ namespace Signum.Engine.Templating
                 sb.Append(" as " + Variable);
         }
 
-        public override void Synchronize(SyncronizationContext sc, string p)
+        public override void Synchronize(SyncronizationContext sc, string remainingText)
         {
             if (Members == null)
             {
@@ -597,7 +648,7 @@ namespace Signum.Engine.Templating
             get
             {
                 return Members == null ?
-                    GlobalVariables.TryGetC(globalKey).Try(v => v.Format) ?? Reflector.FormatString(Type) :
+                    GlobalVariables.TryGetC(globalKey)?.Format ?? Reflector.FormatString(Type) :
                     Reflector.FormatString(Type);
             }
         }
@@ -607,9 +658,9 @@ namespace Signum.Engine.Templating
             get
             {
                 if (remainingFieldsOrProperties.HasText())
-                    return Members.Try(ms => ms.Last().ReturningType().Nullify());
+                    return Members?.Let(ms => ms.Last().ReturningType().Nullify());
                 else
-                    return GlobalVariables.TryGetC(globalKey).Try(v => v.Type);
+                    return GlobalVariables.TryGetC(globalKey)?.Type;
             }
         }
 
@@ -633,7 +684,7 @@ namespace Signum.Engine.Templating
                 sb.Append(" as " + Variable);
         }
 
-        public override void Synchronize(SyncronizationContext sc, string p)
+        public override void Synchronize(SyncronizationContext sc, string remainingText)
         {
             globalKey = sc.Replacements.SelectInteractive(globalKey, GlobalVariables.Keys, "Globals", sc.StringDistance) ?? globalKey;
 
@@ -643,6 +694,157 @@ namespace Signum.Engine.Templating
 
                 if (Members != null)
                     remainingFieldsOrProperties = Members.ToString(a => a.Name, ".");
+            }
+
+            Declare(sc.Variables);
+        }
+    }
+
+    public class DateValueProvider : ValueProviderBase
+    {
+
+        string dateTimeExpression; 
+        public DateValueProvider(string dateTimeExpression, Action<bool, string> addError)
+        {
+            try
+            {
+                var obj = dateTimeExpression == null ? DateTime.Now: FilterValueConverter.Parse(dateTimeExpression, typeof(DateTime?), false);
+                this.dateTimeExpression = dateTimeExpression;
+            }
+            catch (Exception e)
+            {
+                addError(false, $"Invalid expression {dateTimeExpression}: {e.Message}");
+            }
+        }
+
+        public override Type Type => typeof(DateTime?);
+
+        public override object GetValue(TemplateParameters p)
+        {
+            return dateTimeExpression == null ? DateTime.Now : FilterValueConverter.Parse(this.dateTimeExpression, typeof(DateTime?), false);
+        }
+
+        public override void FillQueryTokens(List<QueryToken> list)
+        {
+        }
+
+        public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables, string afterToken)
+        {
+            sb.Append("[");
+            sb.Append("d:");
+
+            sb.Append(TemplateUtils.ScapeColon(this.dateTimeExpression));
+
+            if (afterToken.HasItems())
+                sb.Append(afterToken);
+
+            sb.Append("]");
+
+            if (Variable.HasItems())
+                sb.Append(" as " + Variable);
+        }
+
+        public override void Synchronize(SyncronizationContext sc, string remainingText)
+        { 
+
+
+        }
+
+        public override string Format => "G";
+
+    }
+
+    public class ContinueValueProvider : ValueProviderBase
+    {
+        string fieldOrPropertyChain;
+        List<MemberInfo> Members;
+        ValueProviderBase Parent; 
+
+        public ContinueValueProvider(string fieldOrPropertyChain, ValueProviderBase parent, Action<bool, string> addError)
+        {
+            this.Parent = parent;
+
+            this.Members = ParsedModel.GetMembers(ParentType(), fieldOrPropertyChain, addError);
+        }
+
+        private Type ParentType()
+        {
+            if (Parent.IsForeach)
+                return Parent.Type?.ElementType();
+
+            return Parent.Type;
+        }
+
+        public override object GetValue(TemplateParameters p)
+        {
+            object value;
+            if (!p.RuntimeVariables.TryGetValue(Parent.Variable, out value))
+                throw new InvalidOperationException("Variable {0} not found".FormatWith(Parent.Variable));
+
+            foreach (var m in Members)
+            {
+                value = Getter(m, value);
+                if (value == null)
+                    break;
+            }
+
+            return value;
+        }
+
+        internal static object Getter(MemberInfo member, object value)
+        {
+            try
+            {
+                var pi = member as PropertyInfo;
+
+                if (pi != null)
+                    return pi.GetValue(value, null);
+
+                return ((FieldInfo)member).GetValue(value);
+            }
+            catch (TargetInvocationException e)
+            {
+                e.InnerException.PreserveStackTrace();
+
+                throw e.InnerException;
+            }
+        }
+
+        public override string Format
+        {
+            get { return Reflector.FormatString(this.Type); }
+        }
+
+        public override Type Type
+        {
+            get { return Members?.Let(ms => ms.Last().ReturningType().Nullify()); }
+        }
+
+        public override void FillQueryTokens(List<QueryToken> list)
+        {
+        }
+
+        public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables, string afterToken)
+        {
+            sb.Append("[");
+            sb.Append(Parent.Variable);
+            sb.Append(".");
+            sb.Append(Members == null ? fieldOrPropertyChain : Members.ToString(a => a.Name, "."));
+            sb.Append(afterToken);
+            sb.Append("]");
+
+            if (Variable.HasItems())
+                sb.Append(" as " + Variable);
+        }
+
+        public override void Synchronize(SyncronizationContext sc, string remainingText)
+        {
+            if (Members == null)
+            {
+                Members = sc.GetMembers(fieldOrPropertyChain, ParentType());
+
+                if (Members != null)
+                    fieldOrPropertyChain = Members.ToString(a => a.Name, ".");
             }
 
             Declare(sc.Variables);

@@ -15,6 +15,11 @@ using DocumentFormat.OpenXml;
 using Signum.Utilities;
 using System.IO;
 using Signum.Engine.Operations;
+using Signum.Engine.Mailing;
+using Signum.Entities.Mailing;
+using Signum.Engine.UserQueries;
+using Signum.Entities.UserAssets;
+using System.Reflection;
 
 namespace Signum.Engine.Excel
 {
@@ -53,6 +58,8 @@ namespace Signum.Engine.Excel
             }
         }
 
+      
+
         public static List<Lite<ExcelReportEntity>> GetExcelReports(object queryName)
         {
             return (from er in Database.Query<ExcelReportEntity>()
@@ -72,11 +79,11 @@ namespace Signum.Engine.Excel
             return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
         }
 
-        public static byte[] ExecutePlainExcel(QueryRequest request)
+        public static byte[] ExecutePlainExcel(QueryRequest request, string title)
         {
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
 
-            return PlainExcelGenerator.WritePlainExcel(queryResult);
+            return PlainExcelGenerator.WritePlainExcel(queryResult, title);
         }
     }
 }

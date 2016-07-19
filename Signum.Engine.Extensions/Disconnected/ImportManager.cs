@@ -84,7 +84,7 @@ namespace Signum.Engine.Disconnected
             public CancellationTokenSource CancelationSource;
         }
 
-        Dictionary<Lite<DisconnectedImportEntity>, RunningImports> runningExports = new Dictionary<Lite<DisconnectedImportEntity>, RunningImports>();
+        Dictionary<Lite<DisconnectedImportEntity>, RunningImports> runningImports = new Dictionary<Lite<DisconnectedImportEntity>, RunningImports>();
 
         public virtual Lite<DisconnectedImportEntity> BeginImportDatabase(DisconnectedMachineEntity machine, Stream file = null)
         {
@@ -221,7 +221,7 @@ namespace Signum.Engine.Disconnected
                         }
                         finally
                         {
-                            runningExports.Remove(import);
+                            runningImports.Remove(import);
 
                             DisconnectedMachineEntity.Current = null;
 
@@ -231,7 +231,7 @@ namespace Signum.Engine.Disconnected
             });
 
 
-            runningExports.Add(import, new RunningImports { Task = task, CancelationSource = cancelationSource });
+            runningImports.Add(import, new RunningImports { Task = task, CancelationSource = cancelationSource });
 
             return import;
         }
@@ -379,7 +379,7 @@ namespace Signum.Engine.Disconnected
             using (Transaction tr = new Transaction())
             {
                 int result;
-                using (PrepareTable(table))
+                using (DisableIdentityIfNecessary(table))
                 {
                     SqlPreCommandSimple sql = InsertTableScript(table, newDatabaseName);
 
@@ -388,7 +388,7 @@ namespace Signum.Engine.Disconnected
 
                 foreach (var rt in table.TablesMList())
                 {
-                    using (PrepareTable(rt))
+                    using (DisableIdentityIfNecessary(rt))
                     {
                         SqlPreCommandSimple rsql = InsertRelationalTableScript(table, newDatabaseName, rt);
 
@@ -400,12 +400,12 @@ namespace Signum.Engine.Disconnected
             }
         }
 
-        protected IDisposable PrepareTable(ITable table)
+        protected IDisposable DisableIdentityIfNecessary(ITable table)
         {
             if (!table.PrimaryKey.Identity)
                 return null;
 
-            return Disposable.Combine(DisconnectedTools.SaveAndRestoreNextId(table), Administrator.DisableIdentity(table.Name));
+            return Administrator.DisableIdentity(table.Name);
         }
 
         protected virtual SqlPreCommandSimple InsertRelationalTableScript(Table table, DatabaseName newDatabaseName, TableMList rt)
@@ -487,7 +487,7 @@ table.PrimaryKey.Name.SqlEscape());
 
                     Executor.ExecuteNonQuery(delete);
 
-                    using (PrepareTable(rt))
+                    using (DisableIdentityIfNecessary(rt))
                     {
                         SqlPreCommandSimple insert = InsertUpdatedRelationalTableScript(machine, table, rt, newDatabaseName);
 

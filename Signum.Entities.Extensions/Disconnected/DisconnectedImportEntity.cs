@@ -5,103 +5,44 @@ using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Disconnected
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class DisconnectedImportEntity : Entity
     {
-        DateTime creationDate = TimeZoneManager.Now;
-        public DateTime CreationDate
-        {
-            get { return creationDate; }
-            set { Set(ref creationDate, value); }
-        }
+        public DateTime CreationDate { get; set; } = TimeZoneManager.Now;
 
-        Lite<DisconnectedMachineEntity> machine;
-        public Lite<DisconnectedMachineEntity> Machine
-        {
-            get { return machine; }
-            set { Set(ref machine, value); }
-        }
+        public Lite<DisconnectedMachineEntity> Machine { get; set; }
 
-        int? restoreDatabase;
         [Unit("ms")]
-        public int? RestoreDatabase
-        {
-            get { return restoreDatabase; }
-            set { Set(ref restoreDatabase, value); }
-        }
+        public int? RestoreDatabase { get; set; }
 
-        int? synchronizeSchema;       
         [Unit("ms")]
-        public int? SynchronizeSchema
-        {
-            get { return synchronizeSchema; }
-            set { Set(ref synchronizeSchema, value); }
-        }
+        public int? SynchronizeSchema { get; set; }
 
-        int? disableForeignKeys;
         [Unit("ms")]
-        public int? DisableForeignKeys
-        {
-            get { return disableForeignKeys; }
-            set { Set(ref disableForeignKeys, value); }
-        }
+        public int? DisableForeignKeys { get; set; }
 
         [NotNullable, PreserveOrder]
-        MList<DisconnectedImportTableEntity> copies = new MList<DisconnectedImportTableEntity>();
-        public MList<DisconnectedImportTableEntity> Copies
-        {
-            get { return copies; }
-            set { Set(ref copies, value); }
-        }
+        public MList<DisconnectedImportTableEntity> Copies { get; set; } = new MList<DisconnectedImportTableEntity>();
 
-        int? unlock;
         [Unit("ms")]
-        public int? Unlock
-        {
-            get { return unlock; }
-            set { Set(ref unlock, value); }
-        }
+        public int? Unlock { get; set; }
 
-        int? enableForeignKeys;
         [Unit("ms")]
-        public int? EnableForeignKeys
-        {
-            get { return enableForeignKeys; }
-            set { Set(ref enableForeignKeys, value); }
-        }
+        public int? EnableForeignKeys { get; set; }
 
-        int? dropDatabase;
         [Unit("ms")]
-        public int? DropDatabase
-        {
-            get { return dropDatabase; }
-            set { Set(ref dropDatabase, value); }
-        }
+        public int? DropDatabase { get; set; }
 
-        int? total;
         [Unit("ms")]
-        public int? Total
-        {
-            get { return total; }
-            set { Set(ref total, value); }
-        }
+        public int? Total { get; set; }
 
-        DisconnectedImportState state;
-        public DisconnectedImportState State
-        {
-            get { return state; }
-            set { Set(ref state, value); }
-        }
+        public DisconnectedImportState State { get; set; }
 
-        Lite<ExceptionEntity> exception;
-        public Lite<ExceptionEntity> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value); }
-        }
+        public Lite<ExceptionEntity> Exception { get; set; }
 
         public double Ratio(DisconnectedImportEntity orientative)
         {
@@ -130,7 +71,7 @@ namespace Signum.Entities.Disconnected
             if (!Unlock.HasValue)
                 return result;
             result += (orientative.Unlock.Value) / total;
-            
+
             if (!EnableForeignKeys.HasValue)
                 return result;
             result += (orientative.EnableForeignKeys.Value) / total;
@@ -150,6 +91,7 @@ namespace Signum.Entities.Disconnected
                 (stat.Unlock.Value) +
                 (stat.EnableForeignKeys.Value) +
                 (stat.DropDatabase.Value);
+        [ExpressionField]
         public int CalculateTotal()
         {
             return CalculateTotalExpression.Evaluate(this);
@@ -166,42 +108,17 @@ namespace Signum.Entities.Disconnected
     [Serializable]
     public class DisconnectedImportTableEntity : EmbeddedEntity
     {
-        Lite<TypeEntity> type;
         [NotNullValidator]
-        public Lite<TypeEntity> Type
-        {
-            get { return type; }
-            set { Set(ref type, value); }
-        }
+        public Lite<TypeEntity> Type { get; set; }
 
-        int? copyTable;
         [Unit("ms")]
-        public int? CopyTable
-        {
-            get { return copyTable; }
-            set { Set(ref copyTable, value); }
-        }
+        public int? CopyTable { get; set; }
 
-        bool? disableForeignKeys;
-        public bool? DisableForeignKeys
-        {
-            get { return disableForeignKeys; }
-            set { Set(ref disableForeignKeys, value); }
-        }
+        public bool? DisableForeignKeys { get; set; }
 
-        int? insertedRows;
-        public int? InsertedRows
-        {
-            get { return insertedRows; }
-            set { Set(ref insertedRows, value); }
-        }
+        public int? InsertedRows { get; set; }
 
-        int? updatedRows;
-        public int? UpdatedRows
-        {
-            get { return updatedRows; }
-            set { Set(ref updatedRows, value); }
-        }
+        public int? UpdatedRows { get; set; }
 
         public int? InsertedOrUpdated
         {

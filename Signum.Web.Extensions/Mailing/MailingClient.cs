@@ -29,6 +29,8 @@ using Signum.Web.Basic;
 using Signum.Entities.Processes;
 using Signum.Web.Cultures;
 using Signum.Web.Templating;
+using Signum.Web.Omnibox;
+using Signum.Engine.Authorization;
 
 namespace Signum.Web.Mailing
 {
@@ -36,6 +38,7 @@ namespace Signum.Web.Mailing
     {
         public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing");
+        public static JsModule AsyncEmailSenderModule = new JsModule("Extensions/Signum.Web.Extensions/Mailing/Scripts/AsyncEmailSender");
 
         private static QueryTokenEntity ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
         {
@@ -49,7 +52,7 @@ namespace Signum.Web.Mailing
             return new QueryTokenEntity(QueryUtils.Parse(tokenString, qd, SubTokensOptions.CanElement));
         }
 
-        public static void Start(bool newsletter, bool pop3Config)
+        public static void Start(bool smtpConfig, bool newsletter, bool pop3Config, bool emailReport, Type[] quickLinkFrom)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -113,10 +116,6 @@ namespace Signum.Web.Mailing
                                 return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
                             })
                     },
-
-                    new EntitySettings<SmtpConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpConfiguration") },
-                    new EmbeddedEntitySettings<SmtpNetworkDeliveryEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpNetworkDelivery") },
-                    new EmbeddedEntitySettings<ClientCertificationFileEntity> { PartialViewName = e => ViewPrefix.FormatWith("ClientCertificationFile")},
                 });
 
                 OperationClient.AddSettings(new List<OperationSettings>
@@ -129,6 +128,16 @@ namespace Signum.Web.Mailing
                             ctx.Url.Action((MailingController mc)=>mc.CreateMailFromTemplateAndEntity()))
                     }
                 });
+
+                if (smtpConfig)
+                {
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<SmtpConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpConfiguration") },
+                        new EmbeddedEntitySettings<SmtpNetworkDeliveryEntity> { PartialViewName = e => ViewPrefix.FormatWith("SmtpNetworkDelivery") },
+                        new EmbeddedEntitySettings<ClientCertificationFileEntity> { PartialViewName = e => ViewPrefix.FormatWith("ClientCertificationFile")},
+                    });
+                }
 
                 if (newsletter)
                 {
@@ -154,12 +163,33 @@ namespace Signum.Web.Mailing
                     });
                 }
 
-                if (pop3Config)
-                    Navigator.AddSettings(new List<EntitySettings>
+                if (emailReport)
                 {
-                    new EntitySettings<Pop3ConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Configuration") },
-                    new EntitySettings<Pop3ReceptionEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Reception") },
-                });
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<SendEmailTaskEntity> { PartialViewName = e => ViewPrefix.FormatWith("SendEmailTask") }
+                    });
+                }
+
+                if (pop3Config)
+                {
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<Pop3ConfigurationEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Configuration") },
+                        new EntitySettings<Pop3ReceptionEntity> { PartialViewName = e => ViewPrefix.FormatWith("Pop3Reception") },
+                    });
+                }
+
+                if (quickLinkFrom != null)
+                {
+                    LinksClient.RegisterEntityLinks<Entity>((lite,ctx) =>
+                    {
+                        if (!quickLinkFrom.Contains(lite.EntityType))
+                            return null;
+
+                        return new[] { new QuickLinkExplore(typeof(EmailMessageEntity), "Target", lite) };
+                    });
+                }
 
 
                 TasksGetWebMailBody += WebMailProcessor.ReplaceUntrusted;
@@ -172,15 +202,22 @@ namespace Signum.Web.Mailing
                     .RemoveProperty(a => a.Body)
                     .SetProperty(a => a.Body, ctx =>
                     {
+                        if (!ctx.HasInput)
+                            return ctx.None();
+
                         var email = ((EmailMessageEntity)ctx.Parent.UntypedValue);
 
-                        return SetWebMailBody(ctx.Value, new WebMailOptions
+                        return SetWebMailBody(ctx.Input, new WebMailOptions
                         {
                              Attachments = email.Attachments,
                              UntrustedImage = null,
                              Url = RouteHelper.New(),
                         });
-                    }); 
+                    });
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("AsyncEmailPanel",
+                    () => AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel.IsAuthorized(),
+                    uh => uh.Action((AsyncEmailSenderController pc) => pc.View())));
             }
         }
 

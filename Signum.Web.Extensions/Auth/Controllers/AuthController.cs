@@ -316,6 +316,12 @@ namespace Signum.Web.Auth
             if (string.IsNullOrEmpty(password))
                 return LoginError("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
+            if(UserEntity.Current != null)
+            {
+                if (UserLoggingOut != null)
+                    UserLoggingOut();
+            }
+
             // Attempt to login
             UserEntity user = null;
             try
@@ -414,8 +420,6 @@ namespace Signum.Web.Auth
 
             if (UserLoggingOut != null)
                 UserLoggingOut();
-
-            FormsAuthentication.SignOut();
 
             UserTicketClient.RemoveCookie();
             

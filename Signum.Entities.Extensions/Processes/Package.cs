@@ -13,26 +13,16 @@ namespace Signum.Entities.Processes
     public class PackageEntity : Entity, IProcessDataEntity
     {
         [SqlDbType(Size = 200)]
-        string name;
         [StringLengthValidator(AllowNulls = true, Max = 200)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value); }
-        }
+        public string Name { get; set; }
 
         [SqlDbType(Size = int.MaxValue)]
-        byte[] operationArguments;
-        public byte[] OperationArguments
-        {
-            get { return operationArguments; }
-            private set { Set(ref operationArguments, value); }
-        }
+        public byte[] OperationArguments { get; private set; }
 
         [HiddenProperty]
         public object[] OperationArgs
         {
-            get { return OperationArguments != null ? (object[])Serialization.FromBytes(OperationArguments) : null;}
+            get { return OperationArguments != null ? (object[])Serialization.FromBytes(OperationArguments) : null; }
             set { OperationArguments = value == null ? null : Serialization.ToBytes(value); }
         }
 
@@ -45,12 +35,7 @@ namespace Signum.Entities.Processes
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PackageOperationEntity : PackageEntity
     {
-        OperationSymbol operation;
-        public OperationSymbol Operation
-        {
-            get { return operation; }
-            set { SetToStr(ref operation, value); }
-        }
+        public OperationSymbol Operation { get; set; }
 
         public override string ToString()
         {
@@ -58,9 +43,10 @@ namespace Signum.Entities.Processes
         }
     }
 
+    [AutoInit]
     public static class PackageOperationProcess
     {
-        public static readonly ProcessAlgorithmSymbol PackageOperation = new ProcessAlgorithmSymbol();
+        public static ProcessAlgorithmSymbol PackageOperation;
     }
 
 
@@ -68,36 +54,16 @@ namespace Signum.Entities.Processes
     public class PackageLineEntity : Entity, IProcessLineDataEntity
     {
         [NotNullable]
-        Lite<PackageEntity> package;
         [NotNullValidator]
-        public Lite<PackageEntity> Package
-        {
-            get { return package; }
-            set { Set(ref package, value); }
-        }
+        public Lite<PackageEntity> Package { get; set; }
 
         [NotNullable, ImplementedByAll]
-        Entity target;
         [NotNullValidator]
-        public Entity Target
-        {
-            get { return target; }
-            set { Set(ref target, value); }
-        }
+        public Entity Target { get; set; }
 
         [ImplementedByAll]
-        Lite<Entity> result;
-        public Lite<Entity> Result //ConstructFrom only!
-        {
-            get { return result; }
-            set { Set(ref result, value); }
-        }
+        public Lite<Entity> Result { get; set; } //ConstructFrom only!
 
-        DateTime? finishTime;
-        public DateTime? FinishTime
-        {
-            get { return finishTime; }
-            set { Set(ref finishTime, value); }
-        }
+        public DateTime? FinishTime { get; set; }
     }
 }

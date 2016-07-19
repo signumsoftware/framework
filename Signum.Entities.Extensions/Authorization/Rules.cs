@@ -11,35 +11,20 @@ namespace Signum.Entities.Authorization
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
     public class RuleEntity<R, A> : Entity
-        where R: Entity
+        where R : Entity
     {
-        Lite<RoleEntity> role;
         [NotNullValidator]
-        public Lite<RoleEntity> Role
-        {
-            get { return role; }
-            set { Set(ref role, value); }
-        }
+        public Lite<RoleEntity> Role { get; set; }
 
         [NotNullable]
-        R resource;
         [NotNullValidator]
-        public R Resource
-        {
-            get { return resource; }
-            set { Set(ref resource, value); }
-        }
+        public R Resource { get; set; }
 
-        A allowed;
-        public A Allowed
-        {
-            get { return allowed; }
-            set { Set(ref allowed, value); }
-        }
+        public A Allowed { get; set; }
 
         public override string ToString()
         {
-            return "{0} for {1} <- {2}".FormatWith(resource, role, allowed);
+            return "{0} for {1} <- {2}".FormatWith(Resource, Role, Allowed);
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -59,53 +44,38 @@ namespace Signum.Entities.Authorization
 
     [Serializable]
     public class RulePropertyEntity : RuleEntity<PropertyRouteEntity, PropertyAllowed> { }
-   
+
     [Serializable]
-    public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed> 
+    public class RuleTypeEntity : RuleEntity<TypeEntity, TypeAllowed>
     {
-        [ValidateChildProperty, NotNullable, PreserveOrder]
-        MList<RuleTypeConditionEntity> conditions = new MList<RuleTypeConditionEntity>();
-        public MList<RuleTypeConditionEntity> Conditions
-        {
-            get { return conditions; }
-            set { Set(ref conditions, value); }
-        }
+        [NotNullable, PreserveOrder]
+        public MList<RuleTypeConditionEntity> Conditions { get; set; } = new MList<RuleTypeConditionEntity>();
     }
 
     [Serializable]
-    public class RuleTypeConditionEntity : EmbeddedEntity, IEquatable<RuleTypeConditionEntity> 
+    public class RuleTypeConditionEntity : EmbeddedEntity, IEquatable<RuleTypeConditionEntity>
     {
-        TypeConditionSymbol condition;
         [NotNullValidator]
-        public TypeConditionSymbol Condition
-        {
-            get { return condition; }
-            set { Set(ref condition, value); }
-        }
+        public TypeConditionSymbol Condition { get; set; }
 
-        TypeAllowed allowed;
-        public TypeAllowed Allowed
-        {
-            get { return allowed; }
-            set { Set(ref allowed, value); }
-        }
+        public TypeAllowed Allowed { get; set; }
 
         public bool Equals(RuleTypeConditionEntity other)
         {
-            return this.condition.Equals(other.condition) 
-                && this.allowed == other.allowed; 
+            return this.Condition.Equals(other.Condition)
+                && this.Allowed == other.Allowed;
         }
 
         public override string ToString()
         {
-            return "{0} ({1})".FormatWith(condition, allowed);
+            return "{0} ({1})".FormatWith(Condition, Allowed);
         }
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]
     public enum OperationAllowed
     {
-        None = 0, 
+        None = 0,
         DBOnly = 1,
         Allow = 2,
     }
@@ -150,18 +120,18 @@ namespace Signum.Entities.Authorization
 
         public static TypeAllowedBasic Get(this TypeAllowed allowed, bool userInterface)
         {
-            return userInterface ? allowed.GetUI() : allowed.GetDB(); 
+            return userInterface ? allowed.GetUI() : allowed.GetDB();
         }
 
         public static TypeAllowed Create(bool create, bool modify, bool read, bool none)
         {
             TypeAllowedBasic[] result = new[]
             {
-                create? TypeAllowedBasic.Create: (TypeAllowedBasic?)null, 
-                modify? TypeAllowedBasic.Modify: (TypeAllowedBasic?)null, 
-                read? TypeAllowedBasic.Read: (TypeAllowedBasic?)null, 
-                none? TypeAllowedBasic.None: (TypeAllowedBasic?)null, 
-            }.NotNull().OrderByDescending(a=>a).ToArray();
+                create? TypeAllowedBasic.Create: (TypeAllowedBasic?)null,
+                modify? TypeAllowedBasic.Modify: (TypeAllowedBasic?)null,
+                read? TypeAllowedBasic.Read: (TypeAllowedBasic?)null,
+                none? TypeAllowedBasic.None: (TypeAllowedBasic?)null,
+            }.NotNull().OrderByDescending(a => a).ToArray();
 
             if (result.Length != 1 && result.Length != 2)
                 throw new FormatException();
@@ -172,7 +142,7 @@ namespace Signum.Entities.Authorization
         public static TypeAllowed Create(TypeAllowedBasic database, TypeAllowedBasic ui)
         {
             TypeAllowed result = (TypeAllowed)(((int)database << 2) | (int)ui);
-            
+
             if (!Enum.IsDefined(typeof(TypeAllowed), result))
                 throw new FormatException("Invalid TypeAllowed");
 
@@ -181,7 +151,7 @@ namespace Signum.Entities.Authorization
 
         public static bool IsActive(this TypeAllowed allowed, TypeAllowedBasic basicAllowed)
         {
-            return allowed.GetDB() == basicAllowed || allowed.GetUI() == basicAllowed; 
+            return allowed.GetDB() == basicAllowed || allowed.GetUI() == basicAllowed;
         }
 
         public static string ToStringParts(this TypeAllowed allowed)
@@ -192,7 +162,7 @@ namespace Signum.Entities.Authorization
             if (db == ui)
                 return db.ToString();
 
-            return "{0},{1}".FormatWith(db, ui); 
+            return "{0},{1}".FormatWith(db, ui);
         }
 
         public static PropertyAllowed ToPropertyAllowed(this TypeAllowedBasic ta)
@@ -209,7 +179,7 @@ namespace Signum.Entities.Authorization
     {
         None = 0,
         Read = 1,
-        Modify = 2 ,
+        Modify = 2,
         Create = 3
     }
 }

@@ -9,28 +9,12 @@ namespace Signum.Entities.Scheduler
     public class ApplicationEventLogEntity : Entity
     {
         [SqlDbType(Size = 100), NotNullable]
-        string machineName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string MachineName
-        {
-            get { return machineName; }
-            set { Set(ref machineName, value); }
-        }
+        public string MachineName { get; set; }
 
-        DateTime date;
-        public DateTime Date
-        {
-            get { return date; }
-            set { Set(ref date, value); }
-        }
+        public DateTime Date { get; set; }
 
-        TypeEvent globalEvent;
-        public TypeEvent GlobalEvent
-        {
-            get { return globalEvent; }
-            set { Set(ref globalEvent, value); }
-        }
-
+        public TypeEvent GlobalEvent { get; set; }
     }
 
     public enum TypeEvent

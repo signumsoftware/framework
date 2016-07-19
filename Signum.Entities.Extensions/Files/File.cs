@@ -22,20 +22,10 @@ namespace Signum.Entities.Files
         }
 
         [NotNullable, SqlDbType(Size = 254)]
-        string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 254)]
-        public string FileName
-        {
-            get { return fileName; }
-            set { SetToStr(ref fileName, value); }
-        }
+        public string FileName { get; set; }
 
-        string hash;
-        public string Hash
-        {
-            get { return hash; }
-            private set { Set(ref hash, value); }
-        }
+        public string Hash { get; private set; }
 
         byte[] binaryFile;
         public byte[] BinaryFile
@@ -50,7 +40,7 @@ namespace Signum.Entities.Files
 
         public override string ToString()
         {
-            return "{0} {1}".FormatWith(fileName, BinaryFile.Try(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
+            return "{0} {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
         }
 
         public Uri WebPath

@@ -23,11 +23,14 @@ using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
 using Signum.Engine.Templating;
 using System.Net.Mail;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Mailing
 {
     public static class EmailTemplateLogic
-    {   
+    {
+        public static bool AvoidSynchronize = false;
+
         public static EmailTemplateMessageEntity GetCultureMessage(this EmailTemplateEntity template, CultureInfo ci)
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
@@ -35,12 +38,40 @@ namespace Signum.Engine.Mailing
      
         static Expression<Func<SystemEmailEntity, IQueryable<EmailTemplateEntity>>> EmailTemplatesExpression =
             se => Database.Query<EmailTemplateEntity>().Where(et => et.SystemEmail == se);
+        [ExpressionField]
         public static IQueryable<EmailTemplateEntity> EmailTemplates(this SystemEmailEntity se)
         {
             return EmailTemplatesExpression.Evaluate(se);
         }
         
         public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy;
+
+
+        public static Polymorphic<Action<IAttachmentGeneratorEntity, FillAttachmentTokenContext>> FillAttachmentTokens =
+           new Polymorphic<Action<IAttachmentGeneratorEntity, FillAttachmentTokenContext>>();
+
+        public class FillAttachmentTokenContext
+        {
+            public QueryDescription QueryDescription;
+            public Type ModelType;
+            public List<QueryToken> QueryTokens;
+        }
+
+        public static Polymorphic<Func<IAttachmentGeneratorEntity, GenerateAttachmentContext, List<EmailAttachmentEntity>>> GenerateAttachment = 
+            new Polymorphic<Func<IAttachmentGeneratorEntity, GenerateAttachmentContext, List<EmailAttachmentEntity>>>();
+
+        public class GenerateAttachmentContext
+        {
+            public QueryDescription QueryDescription;
+            public Type ModelType;
+            public EmailTemplateEntity Template;
+            public IEntity Entity;
+            public ISystemEmail SystemEmail;
+            public CultureInfo Culture;
+            public Dictionary<QueryToken, ResultColumn> ResultColumns;
+            public IEnumerable<ResultRow> CurrentRows;
+        }
+
 
         public static Func<EmailTemplateEntity, SmtpConfigurationEntity> GetSmtpConfiguration;
 
@@ -174,7 +205,7 @@ namespace Signum.Engine.Mailing
             return null;
         }
 
-        private static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateEntity template, string text, out string errorMessage)
+        public static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateEntity template, string text, out string errorMessage)
         {
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
@@ -206,6 +237,9 @@ namespace Signum.Engine.Mailing
         public static IEnumerable<EmailMessageEntity> CreateEmailMessage(this Lite<EmailTemplateEntity> liteTemplate, IEntity entity, ISystemEmail systemEmail = null)
         {
             EmailTemplateEntity template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".FormatWith(liteTemplate));
+
+            if (template.SystemEmail != null && systemEmail == null)
+                systemEmail = (ISystemEmail)SystemEmailLogic.GetEntityConstructor(template.SystemEmail.ToType()).Invoke(new[] { entity });
 
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
                 return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();
@@ -251,6 +285,9 @@ namespace Signum.Engine.Mailing
 
         static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
         {
+            if (AvoidSynchronize)
+                return null;
+
             StringDistance sd = new StringDistance();
 
             var emailTemplates = Database.Query<EmailTemplateEntity>().ToList();
@@ -264,6 +301,9 @@ namespace Signum.Engine.Mailing
 
         static SqlPreCommand Schema_Syncronize_DefaultTemplates(Replacements replacements)
         {
+            if (AvoidSynchronize)
+                return null;
+
             var table = Schema.Current.Table(typeof(EmailTemplateEntity));
 
             var systemEmails = Database.Query<SystemEmailEntity>().Where(se => !se.EmailTemplates().Any(a => a.Active)).ToList();
@@ -291,7 +331,7 @@ namespace Signum.Engine.Mailing
                 }).Combine(Spacing.Double);
 
                 if (cmd != null)
-                    return SqlPreCommand.Combine(Spacing.Double, new SqlPreCommandSimple("DECLARE @idParent INT"), cmd);
+                    return SqlPreCommand.Combine(Spacing.Double, new SqlPreCommandSimple("DECLARE @parentId INT"), cmd);
 
                 return cmd;
             }
@@ -319,9 +359,15 @@ namespace Signum.Engine.Mailing
                 throw new Exception(exceptions.ToString("\r\n\r\n"));
         }
 
-        public static void Regenerate(EmailTemplateEntity et)
+        public static bool Regenerate(EmailTemplateEntity et)
         {
-            EmailTemplateParser.Regenerate(et, null, Schema.Current.Table<EmailTemplateEntity>()).ExecuteLeaves();
+            var leaves = EmailTemplateParser.Regenerate(et, null, Schema.Current.Table<EmailTemplateEntity>());
+            
+            if (leaves == null)
+                return false;
+            
+            leaves.ExecuteLeaves();
+            return true;
         }
     }
 }

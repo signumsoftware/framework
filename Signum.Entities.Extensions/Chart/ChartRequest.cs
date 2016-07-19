@@ -15,17 +15,20 @@ using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Chart
 {
-    public interface IChartBase 
+    public interface IChartBase
     {
         ChartScriptEntity ChartScript { get; }
 
         bool GroupResults { get; set; }
 
         MList<ChartColumnEntity> Columns { get; }
+        MList<ChartParameterEntity> Parameters { get; }
 
         void InvalidateResults(bool needNewQuery);
 
         bool Invalidator { get; }
+
+        void FixParameters(ChartColumnEntity chartColumnEntity);
     }
 
     [Serializable]
@@ -52,7 +55,7 @@ namespace Signum.Entities.Chart
             {
                 if (Set(ref chartScript, value))
                 {
-                    var newQuery = chartScript.SyncronizeColumns(this, changeParameters: true);
+                    var newQuery = chartScript.SyncronizeColumns(this);
                     NotifyAllColumns();
                     InvalidateResults(newQuery);
                 }
@@ -83,12 +86,11 @@ namespace Signum.Entities.Chart
         }
 
         [NotifyCollectionChanged, ValidateChildProperty, NotNullable]
-        MList<ChartColumnEntity> columns = new MList<ChartColumnEntity>();
-        public MList<ChartColumnEntity> Columns
-        {
-            get { return columns; }
-            set { Set(ref columns, value); }
-        }
+        public MList<ChartColumnEntity> Columns { get; set; } = new MList<ChartColumnEntity>();
+
+        [NotNullable]
+        [NotNullValidator, NoRepeatValidator]
+        public MList<ChartParameterEntity> Parameters { get; set; } = new MList<ChartParameterEntity>();
 
         void NotifyAllColumns()
         {
@@ -124,23 +126,13 @@ namespace Signum.Entities.Chart
         }
 
 
-        List<Filter> filters = new List<Filter>();
-        public List<Filter> Filters
-        {
-            get { return filters; }
-            set { Set(ref filters, value); }
-        }
+        public List<Filter> Filters { get; set; } = new List<Filter>();
 
-        List<Order> orders = new List<Order>();
-        public List<Order> Orders
-        {
-            get { return orders; }
-            set { Set(ref orders, value); }
-        }
+        public List<Order> Orders { get; set; } = new List<Order>();
 
         public List<QueryToken> AllTokens()
         {
-            var allTokens = Columns.Select(a => a.Token.Try(t => t.Token)).ToList();
+            var allTokens = Columns.Select(a => a.Token?.Token).ToList();
 
             if (Filters != null)
                 allTokens.AddRange(Filters.Select(a => a.Token));
@@ -160,7 +152,7 @@ namespace Signum.Entities.Chart
         {
             if (GroupResults)
             {
-                var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token.Token);
+                var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token).NotNull().Select(a => a.Token).ToList();
 
                 Orders.RemoveAll(o => !(o.Token is AggregateToken) && !keys.Contains(o.Token));
             }
@@ -168,6 +160,12 @@ namespace Signum.Entities.Chart
             {
                 Orders.RemoveAll(o => o.Token is AggregateToken);
             }
+        }
+
+
+        public void FixParameters(ChartColumnEntity chartColumn)
+        {
+            ChartUtils.FixParameters(this, chartColumn);
         }
     }
 }

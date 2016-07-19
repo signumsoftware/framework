@@ -7,7 +7,7 @@
 {
     tc.LabelColumns = new BsColumn(4);
     <div class="sf-sms-template-message">
-        <input type="hidden" class="sf-tab-title" value="@(tc.Value.CultureInfo.TryToString())" />
+        <input type="hidden" class="sf-tab-title" value="@(tc.Value.CultureInfo?.ToString())" />
         @Html.EntityCombo(tc, e => e.CultureInfo, vl =>
         {
             vl.LabelText = SmsMessage.Language.NiceToString();

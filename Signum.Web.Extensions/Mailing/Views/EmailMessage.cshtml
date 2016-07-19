@@ -42,7 +42,7 @@
                 </fieldset>
 
 
-                <div class=" form-inline repeater-inline">
+                <div class="form-inline repeater-inline">
                     @Html.EntityDetail(e, f => f.From)
                     @Html.EntityRepeater(e, f => f.Recipients)
                     @Html.EntityRepeater(e, f => f.Attachments)
@@ -63,7 +63,7 @@
 
                     <script>
                         $(function () {
-                            @(MailingClient.Module["initHtmlEditor"](e.Compose("Body")))
+                            @(MailingClient.Module["initHtmlEditor"](e.Compose("Body"), Signum.Engine.Mailing.EmailLogic.Configuration.DefaultCulture.Name))
                         });
                     </script>
                 }
@@ -83,7 +83,7 @@
                             </iframe>
                             <script>
                                 $(function () {
-                                    var iframe = $("@e.Compose("iframe")");
+                                    var iframe = $(".sf-email-message #@e.Compose("iframe")");
                                     @(MailingClient.Module["activateIFrame"](new Newtonsoft.Json.Linq.JRaw("iframe")))
                                 });
                             </script>

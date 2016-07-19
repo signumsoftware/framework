@@ -12,55 +12,35 @@ namespace Signum.Entities.Chart
     public class ChartColorEntity : Entity
     {
         [ImplementedByAll, UniqueIndex]
-        Lite<Entity> related;
         [NotNullValidator]
-        public Lite<Entity> Related
-        {
-            get { return related; }
-            set { SetToStr(ref related, value); }
-        }
+        public Lite<Entity> Related { get; set; }
 
         [NotNullable]
-        ColorEntity color;
         //[NotNullValidator]
-        public ColorEntity Color
-        {
-            get { return color; }
-            set { SetToStr(ref color, value); }
-        }
+        public ColorEntity Color { get; set; }
 
         public override string ToString()
         {
-            if (related == null)
-                return " -> {0}".FormatWith(color);
+            if (Related == null)
+                return " -> {0}".FormatWith(Color);
 
 
-            return "{0} {1} -> {2}".FormatWith(related.GetType().NiceName(), related.Id, color);
+            return "{0} {1} -> {2}".FormatWith(Related.GetType().NiceName(), Related.Id, Color);
         }
     }
 
     [Serializable]
     public class ChartPaletteModel : ModelEntity
     {
-        TypeEntity type;
         [NotNullValidator]
-        public TypeEntity Type
-        {
-            get { return type; }
-            set { Set(ref type, value); }
-        }
+        public TypeEntity Type { get; set; }
 
         [NotNullable]
-        MList<ChartColorEntity> colors = new MList<ChartColorEntity>();
-        public MList<ChartColorEntity> Colors
-        {
-            get { return colors; }
-            set { Set(ref colors, value); }
-        }
+        public MList<ChartColorEntity> Colors { get; set; } = new MList<ChartColorEntity>();
 
         public override string ToString()
         {
-            return ChartMessage.ColorsFor0.NiceToString().FormatWith(type.CleanName);
+            return ChartMessage.ColorsFor0.NiceToString().FormatWith(Type.CleanName);
         }
     }
 }

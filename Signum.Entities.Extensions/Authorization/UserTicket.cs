@@ -16,41 +16,21 @@ namespace Signum.Entities.Authorization
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), TicksColumn(false)]
     public class UserTicketEntity : Entity
     {
-        Lite<UserEntity> user;
         [NotNullValidator]
-        public Lite<UserEntity> User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
+        public Lite<UserEntity> User { get; set; }
 
         [NotNullable, SqlDbType(Size = 38)]
-        string ticket;
         [StringLengthValidator(AllowNulls = false, Min = 36, Max = 36)]
-        public string Ticket
-        {
-            get { return ticket; }
-            set { Set(ref ticket, value); }
-        }
+        public string Ticket { get; set; }
 
-        DateTime connectionDate;
-        public DateTime ConnectionDate
-        {
-            get { return connectionDate; }
-            set { Set(ref connectionDate, value); }
-        }
+        public DateTime ConnectionDate { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string device;
-        public string Device
-        {
-            get { return device; }
-            set { Set(ref device, value); }
-        }
+        public string Device { get; set; }
 
         public string StringTicket()
         {
-            return "{0}|{1}".FormatWith(user.Id, ticket);
+            return "{0}|{1}".FormatWith(User.Id, Ticket);
         }
 
         public static Tuple<PrimaryKey, string> ParseTicket(string ticket)

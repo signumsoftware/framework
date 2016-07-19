@@ -15,31 +15,21 @@ namespace Signum.Entities.Translation
     public class TranslatorUserEntity : Entity
     {
         [NotNullable, UniqueIndex, ImplementedBy(typeof(UserEntity))]
-        Lite<IUserEntity> user;
         [NotNullValidator]
-        public Lite<IUserEntity> User
-        {
-            get { return user; }
-            set { Set(ref user, value); }
-        }
+        public Lite<IUserEntity> User { get; set; }
 
         [NotNullable, PreserveOrder]
-        MList<TranslatorUserCultureEntity> cultures = new MList<TranslatorUserCultureEntity>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<TranslatorUserCultureEntity> Cultures
-        {
-            get { return cultures; }
-            set { Set(ref cultures, value); }
-        }
+        public MList<TranslatorUserCultureEntity> Cultures { get; set; } = new MList<TranslatorUserCultureEntity>();
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Cultures))
+            if (pi.Name == nameof(Cultures))
             {
                 var error = Cultures.GroupBy(a => a.Culture).Where(a => a.Count() > 1).ToString(a => a.Key.ToString(), ", ");
 
                 if (error.HasText())
-                    return TranslationMessage.RepeatedCultures0.NiceToString().FormatWith(error); 
+                    return TranslationMessage.RepeatedCultures0.NiceToString().FormatWith(error);
             }
 
             return base.PropertyValidation(pi);
@@ -47,7 +37,7 @@ namespace Signum.Entities.Translation
 
         public override string ToString()
         {
-            return user.TryToString();
+            return User?.ToString();
         }
     }
 
@@ -55,20 +45,10 @@ namespace Signum.Entities.Translation
     public class TranslatorUserCultureEntity : EmbeddedEntity
     {
         [NotNullable]
-        CultureInfoEntity culture;
         [NotNullValidator]
-        public CultureInfoEntity Culture
-        {
-            get { return culture; }
-            set { Set(ref culture, value); }
-        }
+        public CultureInfoEntity Culture { get; set; }
 
-        TranslatedCultureAction action;
-        public TranslatedCultureAction Action
-        {
-            get { return action; }
-            set { Set(ref action, value); }
-        }
+        public TranslatedCultureAction Action { get; set; }
     }
 
     public enum TranslatedCultureAction
@@ -77,16 +57,18 @@ namespace Signum.Entities.Translation
         Read,
     }
 
+    [AutoInit]
     public static class TranslationPermission
     {
-        public static readonly PermissionSymbol TranslateCode = new PermissionSymbol();
-        public static readonly PermissionSymbol TranslateInstances = new PermissionSymbol();
+        public static PermissionSymbol TranslateCode;
+        public static PermissionSymbol TranslateInstances;
     }
 
+    [AutoInit]
     public static class TranslatorUserOperation
     {
-        public static readonly ExecuteSymbol<TranslatorUserEntity> Save = OperationSymbol.Execute<TranslatorUserEntity>();
-        public static readonly DeleteSymbol<TranslatorUserEntity> Delete = OperationSymbol.Delete<TranslatorUserEntity>();
+        public static ExecuteSymbol<TranslatorUserEntity> Save;
+        public static DeleteSymbol<TranslatorUserEntity> Delete;
     }
 
     public enum TranslationMessage

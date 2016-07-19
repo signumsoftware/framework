@@ -24,6 +24,7 @@ using Signum.Entities.Basics;
 using System.Net.Mime;
 using System.Threading;
 using Signum.Engine.Extensions.Mailing.Pop3;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Mailing.Pop3
 {
@@ -31,6 +32,7 @@ namespace Signum.Engine.Mailing.Pop3
     {
         static Expression<Func<Pop3ConfigurationEntity, IQueryable<Pop3ReceptionEntity>>> ReceptionsExpression =
             c => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.RefersTo(c));
+        [ExpressionField]
         public static IQueryable<Pop3ReceptionEntity> Receptions(this Pop3ConfigurationEntity c)
         {
             return ReceptionsExpression.Evaluate(c);
@@ -38,6 +40,7 @@ namespace Signum.Engine.Mailing.Pop3
 
         static Expression<Func<Pop3ReceptionEntity, IQueryable<EmailMessageEntity>>> EmailMessagesExpression =
             r => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.RefersTo(r));
+        [ExpressionField]
         public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r)
         {
             return EmailMessagesExpression.Evaluate(r);
@@ -45,6 +48,7 @@ namespace Signum.Engine.Mailing.Pop3
 
         static Expression<Func<Pop3ReceptionEntity, IQueryable<ExceptionEntity>>> ExceptionsExpression =
             e => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.RefersTo(e)).Select(a => a.Exception.Entity);
+        [ExpressionField]
         public static IQueryable<ExceptionEntity> Exceptions(this Pop3ReceptionEntity e)
         {
             return ExceptionsExpression.Evaluate(e);
@@ -53,6 +57,7 @@ namespace Signum.Engine.Mailing.Pop3
 
         static Expression<Func<ExceptionEntity, Pop3ReceptionEntity>> Pop3ReceptionExpression =
             ex => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.RefersTo(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx();
+        [ExpressionField]
         public static Pop3ReceptionEntity Pop3Reception(this ExceptionEntity entity)
         {
             return Pop3ReceptionExpression.Evaluate(entity);
@@ -60,13 +65,11 @@ namespace Signum.Engine.Mailing.Pop3
 
         public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client, FileTypeAlgorithm attachment)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 GetPop3Client = getPop3Client;
-
-                FilePathLogic.Register(EmailFileType.Attachment, attachment);
 
                 MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
 
