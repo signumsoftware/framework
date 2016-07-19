@@ -14,10 +14,6 @@
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Heute" />
   </Type>
-  <Type Name="Case">
-    <Member Name="Lowercase" Description="Kleinbuchstaben" />
-    <Member Name="Uppercase" Description="Großbuchstaben" />
-  </Type>
   <Type Name="CollectionElementType">
     <Member Name="All" Description="Alle" />
     <Member Name="All2" Description="Alle (2)" />
@@ -235,6 +231,7 @@
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
     <Member Name="Logs" Description="Logs" />
     <Member Name="Operation01IsNotAuthorized" Description="Operation {0} ({1}) ist nicht autorisiert." />
+    <Member Name="PleaseConfirmYouDLikeToDelete0FromTheSystem" Description="Bitte bestätigen Sie, dass Sie {0} aus dem System löschen möchten" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Bitte bestätigen Sie, dass Sie die Entität aus dem System löschen möchten" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Bitte bestätigen Sie, dass Sie die ausgewählten Elemente aus dem System löschen möchten" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Status sollte {0}  sein (statt {1})." />
@@ -352,6 +349,10 @@
   <Type Name="SemiSymbol" Description="Semi" PluralDescription="Semis">
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="StringCase">
+    <Member Name="Lowercase" Description="Kleinbuchstaben" />
+    <Member Name="Uppercase" Description="Großbuchstaben" />
   </Type>
   <Type Name="Symbol" Description="Symbol" PluralDescription="Symbole">
     <Member Name="Key" Description="Schlüssel" />

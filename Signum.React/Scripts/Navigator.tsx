@@ -3,9 +3,9 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
-import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, KindOfType, OperationType  } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, KindOfType, OperationType, TypeReference  } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
@@ -21,13 +21,19 @@ export function setCurentHistory(history: HistoryModule.History) {
 export let currentUser: IUserEntity;
 export function setCurentUser(user: IUserEntity) {
     currentUser = user;
+
+export function setCurrentUser(user: IUserEntity) {
+    currentUser = user;
 }
 
-export module Expanded {
+export function setCurrentHistory(history: HistoryModule.History) {
+    currentHistory = history;
+}
+
+export namespace Expanded {
     export let getExpanded: () => boolean;
     export let setExpanded: (isExpanded: boolean) => void;
 }
-
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default)) } ></Route>);
@@ -602,4 +608,46 @@ export function useAppRelativeBasename(history: HistoryModule.History, baseName:
     history.createHref = fixBaseName(history.createHref, baseName);
     history.createPath = fixBaseName(history.createPath, baseName);
     history.createLocation = fixBaseName(history.createLocation, baseName);
+}
+
+export function tryConvert(value: any, type: TypeReference): Promise<any> {
+
+    if (value == null)
+        return Promise.resolve(null);
+
+    if (type.isLite) {
+
+        if (isLite(value))
+            return Promise.resolve(value);
+
+        if (isEntity(value))
+            return Promise.resolve(toLite(value));
+
+        return null;
+    }
+
+    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == KindOfType.Entity) {
+
+        if (isLite(value))
+            return API.fetchAndForget(value);
+
+        if (isEntity(value))
+            return Promise.resolve(value);
+
+        return null;
+    }
+
+    if (type.name == "string" || type.name == "Guid" || type.name == "Date") {
+        if (typeof value === "string")
+            return Promise.resolve(value);
+
+        return null;
+    }
+
+    if (type.name == "number") {
+        if (typeof value === "number")
+            return Promise.resolve(value);
+    }
+
+    return null;
 }

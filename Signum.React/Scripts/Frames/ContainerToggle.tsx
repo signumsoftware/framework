@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import { classes } from '../Globals'
-import { Expanded } from '../Navigator'
+import * as Navigator from '../Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../FindOptions'
 import { Entity, Lite, is, toLite, LiteMessage, getToString, EntityPack, ModelState, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame } from '../TypeContext'
@@ -12,8 +12,8 @@ export default class ContainerToggleComponent extends React.Component<React.Prop
     
     constructor(props: React.Props<ContainerToggleComponent>) {
         super(props);
-        Expanded.getExpanded = () => this.state.fluid;
-        Expanded.setExpanded = (isExpanded: boolean) => this.setState({ fluid: isExpanded });
+        Navigator.Expander.getExpanded = () => this.state.fluid;
+        Navigator.Expander.setExpanded = (isExpanded: boolean) => this.setState({ fluid: isExpanded });
     }
 
     handleExpandToggle = () => {

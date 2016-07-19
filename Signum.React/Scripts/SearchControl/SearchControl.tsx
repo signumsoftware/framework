@@ -6,8 +6,8 @@ import { Dic, DomUtils, classes } from '../Globals'
 import * as Finder from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
     toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandParentColumn, QueryRequest } from '../FindOptions'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is } from '../Signum.Entities'
-import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType} from '../Reflection'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, is, isEntity, isLite, toLite } from '../Signum.Entities'
+import { getTypeInfos, getTypeInfo, TypeReference, IsByAll, getQueryKey, TypeInfo, EntityData, QueryKey, PseudoType } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import PaginationSelector from './PaginationSelector'
@@ -454,10 +454,38 @@ export default class SearchControl extends React.Component<SearchControlProps, S
                     if (e == undefined)
                         return;
 
-                    Navigator.navigate(e);
+                    this.setFilters(e.entity as Entity)
+                        .then(() => Navigator.navigate(e));
                 }).done();
             }
         }).done();
+    }
+
+    setFilters(e: Entity) {
+        const ti = getTypeInfo(e.Type);
+
+        return Promise.all(this.state.findOptions.filterOptions.filter(a => a.operation == "EqualTo").map(fo => {
+
+            const mi = this.getMemberForToken(ti, fo.token.fullKey);
+
+            if (mi && e[mi.name] == null) {
+                const promise = Navigator.tryConvert(fo.value, mi.type);
+
+                if (promise == null)
+                    return null;
+
+                return promise.then(v => e[mi.name.firstLower()] = v);
+            }
+        }).filter(p => !!p));
+    }
+
+    getMemberForToken(ti: TypeInfo, fullKey: string) {
+        var token = fullKey.tryAfter("Entity.") || fullKey;
+
+        if (token.contains("."))
+            return null;
+
+        return ti.members[token];
     }
 
     handleFullScreenClick = (ev: React.MouseEvent) => {
