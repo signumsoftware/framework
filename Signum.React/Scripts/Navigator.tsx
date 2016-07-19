@@ -18,9 +18,18 @@ export let NotFound: __React.ComponentClass<any>;
 export let currentUser: IUserEntity;
 export let currentHistory: HistoryModule.History;
 
+export function setCurrentUser(user: IUserEntity) {
+    currentUser = user;
+}
 
-export var getExpanded : () => boolean;
-export var setExpanded : (isExpanded: boolean) => void;
+export function setCurrentHistory(history: HistoryModule.History) {
+    currentHistory = history;
+}
+
+export namespace Expander {
+    export let getExpanded: () => boolean;
+    export let setExpanded: (isExpanded: boolean) => void;
+}
 
 export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(null, Comp.default)) } ></Route>);
