@@ -267,11 +267,11 @@ export function logout() {
     }).done();
 }
 
-export function onLogout() {
+export let onLogout = () => {
     Navigator.currentHistory.push("~/");
 }
 
-export function onLogin() {
+export let onLogin = () => {
     Navigator.currentHistory.push("~/");
 }
 
