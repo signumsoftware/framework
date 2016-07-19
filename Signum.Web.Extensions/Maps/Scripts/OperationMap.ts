@@ -177,7 +177,7 @@ export function createMap(mapId: string, svgMapId: string, colorId: string, map:
         //.style("stroke", "black");
 
 
-        function onStateColorChange() {
+        const onStateColorChange = () => {
 
             function color(d: MapState): any {
                 if (colorCombo.val() == "rows")
@@ -260,7 +260,7 @@ export function createMap(mapId: string, svgMapId: string, colorId: string, map:
             d.height = b.height + margin * 2;
         });
 
-        function onOperationColorChange() {
+        const onOperationColorChange = () => {
 
             function color(d: MapOperation): any {
                 if (colorCombo.val() == "rows")
