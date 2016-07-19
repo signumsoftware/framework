@@ -461,7 +461,6 @@ namespace Signum.Engine.Maps
             Generating += Assets.Schema_Generating;
 
             Synchronizing += SchemaSynchronizer.SnapshotIsolation;
-            Synchronizing += SchemaSynchronizer.SynchronizeSchemasScript;
             Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;
@@ -640,7 +639,7 @@ namespace Signum.Engine.Maps
 
         public List<DatabaseName> DatabaseNames()
         {
-            return GetDatabaseTables().Select(a => a.Name.Schema.Try(s => s.Database)).Distinct().ToList();
+            return GetDatabaseTables().Select(a => a.Name.Schema?.Database).Distinct().ToList();
         }
 
         public DirectedEdgedGraph<Table, RelationInfo> ToDirectedGraph()

@@ -48,7 +48,7 @@ namespace Signum.Web
                 using (sb.SurroundLine(new HtmlTag("div", entityCombo.Compose("inputGroup")).Class("input-group")))
                 {
                     if (entityCombo.ReadOnly)
-                        sb.AddLine(helper.FormControlStatic(entityCombo, entityCombo.Compose(EntityBaseKeys.ToStr), entityCombo.UntypedValue.TryToString()));
+                        sb.AddLine(helper.FormControlStatic(entityCombo, entityCombo.Compose(EntityBaseKeys.ToStr), entityCombo.UntypedValue?.ToString()));
                     else
                         sb.AddLine(DropDownList(helper, entityCombo));
 
@@ -88,13 +88,17 @@ namespace Signum.Web
             List<SelectListItem> items = new List<SelectListItem>();
             items.Add(new SelectListItem() { Text = "-", Value = "" });
 
-            IEnumerable<Lite<IEntity>> data = entityCombo.Data ?? AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value);
+            List<Lite<IEntity>> data = entityCombo.Data != null ? entityCombo.Data.ToList() :
+                AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value).Cast<Lite<IEntity>>().ToList();
 
-            var current = entityCombo.UntypedValue is IEntity ? ((IEntity)entityCombo.UntypedValue).ToLite() :
+            if (entityCombo.SortElements)
+                data = data.OrderBy(a => a.ToString()).ToList();
+
+            var current = entityCombo.UntypedValue is IEntity ? ((IEntity)entityCombo.UntypedValue)?.ToLite() :
                 entityCombo.UntypedValue as Lite<IEntity>;
 
             if (current != null && !data.Contains(current))
-                data = data.PreAnd(current);
+                data.Add(current);
 
             items.AddRange(
                 data.Select(lite => new SelectListItem()
@@ -121,13 +125,13 @@ namespace Signum.Web
             if (entityCombo.PlaceholderLabels && !entityCombo.ComboHtmlProperties.ContainsKey("placeholder"))
                 entityCombo.ComboHtmlProperties.Add("placeholder", entityCombo.LabelText);
 
-            return helper.DropDownList(
+            return helper.SafeDropDownList(
                     entityCombo.Compose(EntityComboKeys.Combo),
                     items,
                     entityCombo.ComboHtmlProperties);
         }
 
-        public static MvcHtmlString EntityCombo<T,S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
+        public static MvcHtmlString EntityCombo<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property) 
         {
             return helper.EntityCombo<T, S>(tc, property, null);
         }

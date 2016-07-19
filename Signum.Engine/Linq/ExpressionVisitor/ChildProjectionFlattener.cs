@@ -232,11 +232,11 @@ namespace Signum.Engine.Linq
             private static IEnumerable<ColumnExpression> KeysSelect(SelectExpression select)
             {
                 if (select.GroupBy.Any())
-                    return select.GroupBy.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce) /*could be improved*/).Try(cd => cd.GetReference(select.Alias))).ToList();
+                    return select.GroupBy.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce) /*could be improved*/)?.Let(cd => cd.GetReference(select.Alias))).ToList();
 
                 IEnumerable<ColumnExpression> inner = Keys(select.From);
 
-                var result = inner.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce)).Try(cd => cd.GetReference(select.Alias))).ToList();
+                var result = inner.Select(ce => select.Columns.FirstOrDefault(cd => cd.Expression.Equals(ce))?.Let(cd => cd.GetReference(select.Alias))).ToList();
 
                 if (!select.IsDistinct)
                     return result;

@@ -21,10 +21,9 @@ namespace Signum.Web.Controllers
             MappingContext context = mod.UntypedApplyChanges(this, route: route).UntypedValidate();
 
             IEntity ident = context.UntypedValue as IEntity;
-            string newLink = ident != null && ident.IdOrNull != null ? Navigator.NavigateRoute(ident) : null;
             string newToStr = context.UntypedValue.ToString();
 
-            return context.ToJsonModelState(newToStr, newLink);
+            return context.ToJsonModelState(newToStr);
         }
     }
 }

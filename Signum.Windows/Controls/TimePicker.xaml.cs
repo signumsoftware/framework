@@ -78,7 +78,7 @@ namespace Signum.Windows
 
         private void OnConverterChanged(object converter)
         {
-            AutomationProperties.SetItemStatus(this, ((TimeSpanConverter)converter).Try(c => c.Format));
+            AutomationProperties.SetItemStatus(this, ((TimeSpanConverter)converter)?.Format);
         }
 
         private void TimePartChanged(DependencyPropertyChangedEventArgs e)

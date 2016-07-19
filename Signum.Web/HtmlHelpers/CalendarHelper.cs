@@ -120,16 +120,16 @@ namespace Signum.Web
             var dateFormat = SplitDateTimeFormat(dateTimeFormat, culture);
 
             if (dateFormat.TimeFormat == null)
-                return helper.DatePicker(name, formGroup, value.TryToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps);
+                return helper.DatePicker(name, formGroup, value?.ToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps);
 
             if(dateFormat.DateFormat == null)
-                return helper.TimePicker(name, formGroup, value.TryToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps);
+                return helper.TimePicker(name, formGroup, value?.ToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps);
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
             using (sb.SurroundLine(new HtmlTag("div", name).Class("date-time")))
             {
-                sb.Add(helper.DatePicker(TypeContextUtilities.Compose(name, "Date"), formGroup, value.TryToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps));
-                sb.Add(helper.TimePicker(TypeContextUtilities.Compose(name, "Time"), formGroup, value.TryToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps));
+                sb.Add(helper.DatePicker(TypeContextUtilities.Compose(name, "Date"), formGroup, value?.ToString(dateFormat.DateFormat, culture), ToJsDateFormat(dateFormat.DateFormat), culture, htmlProps));
+                sb.Add(helper.TimePicker(TypeContextUtilities.Compose(name, "Time"), formGroup, value?.ToString(dateFormat.TimeFormat, culture), dateFormat.TimeFormat, htmlProps));
             }
             return sb.ToHtml();
         }

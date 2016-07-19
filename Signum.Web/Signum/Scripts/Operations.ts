@@ -12,6 +12,7 @@ export interface OperationOptions {
     controllerUrl?: string;
     requestExtraJsonData?: any;
     isLite?: boolean;
+    isContextual?: boolean;
     avoidReturnRedirect?: boolean;
     avoidReturnView?: boolean;
     confirmMessage?: string;
@@ -309,7 +310,7 @@ export function openPopup(entityHtml : Entities.EntityHtml) : Promise<void> {
 }
 
 export function markCells(prefix: string) {
-    $("tr.active").addClass("sf-entity-ctxmenu-success");
+    Finder.getFor(prefix).then(sc=>sc.markSelectedAsSuccess());
     notifyExecuted();
 }
 

@@ -271,8 +271,8 @@ namespace Signum.Windows
                     sb.AppendFormat(" .DataContext source {0}{1}: {2} ({3})",
                         source.BaseValueSource,
                         source.IsExpression ? " (IsExpression)" : "",
-                        fe.DataContext.TryToString() ?? "null",
-                        fe.DataContext.Try(d => "(" + d.GetType().Name + " " + d.GetHashCode()));
+                        fe.DataContext?.ToString() ?? "null",
+                        fe.DataContext?.Let(d => "(" + d.GetType().Name + " " + d.GetHashCode()));
 
                     any = true;
                 }

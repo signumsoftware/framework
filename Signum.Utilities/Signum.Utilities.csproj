@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Signum.Utilities</RootNamespace>
     <AssemblyName>Signum.Utilities</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutTools.cs" />
+    <Compile Include="ExpressionExpanderAttributes.cs" />
     <Compile Include="Extensions\ArgsExtensions.cs" />
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Extensions\ColorExtensions.cs" />
@@ -142,7 +143,7 @@
     <Compile Include="Extensions\GroupExtensions.cs" />
     <Compile Include="ExpressionTrees\ExpressionCleaner.cs" />
     <Compile Include="ExpressionTrees\ExpandableQueryProvider.cs" />
-    <Compile Include="ExpressionTrees\ExpressionExpanderSamples.cs" />
+    <Compile Include="ExpressionExpanderSamples.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="MyRandom.cs" />
     <Compile Include="Reflection\ReflectionTools.cs" />
@@ -268,8 +269,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
-if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

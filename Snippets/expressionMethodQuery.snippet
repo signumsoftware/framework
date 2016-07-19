@@ -14,8 +14,14 @@
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Utilities</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Engine</Namespace>
+        </Import>
+        <Import>
           <Namespace>System.Linq.Expressions</Namespace>
         </Import>
       </Imports>
@@ -48,7 +54,8 @@
       </Declarations>
       <Code Language="csharp">
         <![CDATA[static Expression<Func<$type$, IQueryable<$returnType$>>> $methodName$Expression = 
-            $paramName$ => Database.Query<$returnType$>().Where($paramName2$=>$paramName2$.$type$ == $paramName$); 
+            $paramName$ => Database.Query<$returnType$>().Where($paramName2$=>$paramName2$.$type$.RefersTo($paramName$));
+        [ExpressionField]
         public static IQueryable<$returnType$> $methodName$(this $type$ $paramName$)
         {
             return $methodName$Expression.Evaluate($paramName$);

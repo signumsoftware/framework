@@ -29,7 +29,7 @@ namespace Signum.Engine.Maps
 
         static string Clean(string command)
         {
-            return command.Trim(' ', '\r', '\n', ';');
+            return command.Replace("\r", "").Trim(' ', '\n', ';');
         }
 
         #region Views
@@ -40,12 +40,12 @@ namespace Signum.Engine.Maps
 
             public SqlPreCommandSimple CreateView()
             {
-                return new SqlPreCommandSimple("CREATE VIEW {0} AS ".FormatWith(Name) + Definition) { GoBefore = true };
+                return new SqlPreCommandSimple("CREATE VIEW {0} ".FormatWith(Name) + Definition) { GoBefore = true, GoAfter = true };
             }
 
             public SqlPreCommandSimple AlterView()
             {
-                return new SqlPreCommandSimple("ALTER VIEW {0} AS ".FormatWith(Name) + Definition) { GoBefore = true };
+                return new SqlPreCommandSimple("ALTER VIEW {0} ".FormatWith(Name) + Definition) { GoBefore = true, GoAfter = true };
             } 
         }
 
@@ -163,12 +163,12 @@ namespace Signum.Engine.Maps
 
             public SqlPreCommandSimple CreateSql()
             {
-                return new SqlPreCommandSimple("CREATE {0} {1} ".FormatWith(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true };
+                return new SqlPreCommandSimple("CREATE {0} {1} ".FormatWith(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true, GoAfter = true };
             }
 
             public SqlPreCommandSimple AlterSql()
             {
-                return new SqlPreCommandSimple("ALTER {0} {1} ".FormatWith(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true };
+                return new SqlPreCommandSimple("ALTER {0} {1} ".FormatWith(ProcedureType, ProcedureName) + ProcedureCodeAndArguments) { GoBefore = true, GoAfter = true };
             }
         }
         #endregion

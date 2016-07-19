@@ -82,6 +82,7 @@ public class BugEntity : Entity
     }
 
     static Expression<Func<BugEntity, string>> ToStringExpression = e => e.Description;
+    [ExpressionField]
     public override string ToString()
     {
         return ToStringExpression.Evaluate(this);
@@ -170,6 +171,7 @@ public class DeveloperEntity : Entity, IBugDiscoverer
     }
 
     static Expression<Func<DeveloperEntity, string>> ToStringExpression = e => e.Name;
+    [ExpressionField]
     public override string ToString()
     {
         return ToStringExpression.Evaluate(this);
@@ -188,6 +190,7 @@ public class CustomerEntity : Entity, IBugDiscoverer
     }
 
     static Expression<Func<CustomerEntity, string>> ToStringExpression = e => e.Name;
+    [ExpressionField]
     public override string ToString()
     {
         return ToStringExpression.Evaluate(this);

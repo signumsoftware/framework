@@ -53,8 +53,7 @@ namespace Signum.Windows
         {
             btCreate.Visibility = CanCreate() ? Visibility.Visible : Visibility.Collapsed;
             btFind.Visibility = CanFind() ? Visibility.Visible : Visibility.Collapsed;
-            btView.Visibility = CanView() ? Visibility.Visible : Visibility.Collapsed;
-            btNavigate.Visibility = CanNavigate() ? Visibility.Visible : Visibility.Collapsed;
+            btView.Visibility = CanViewOrNavigate() ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -69,7 +68,7 @@ namespace Signum.Windows
         {
             if (e.Refresh)
             {
-                var lite = (Entity as IEntity).ToLite();
+                var lite = (Entity as IEntity)?.ToLite();
 
                 if (lite != null)
                 {

@@ -16,15 +16,17 @@ using Signum.Services;
 using System.Runtime.CompilerServices;
 using System.Data;
 using System.Globalization;
+using System.Diagnostics;
+using System.Collections.Concurrent;
 
 namespace Signum.Entities
 {
     [Serializable, DescriptionOptions(DescriptionOptions.All)]
     public abstract class Entity : ModifiableEntity, IEntity
     {
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal PrimaryKey? id = null;
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         protected internal string toStr; //for queries and lites on entities with non-expression ToString 
 
         [HiddenProperty, Description("Id")]
@@ -45,7 +47,7 @@ namespace Signum.Entities
             get { return id; }
         }
 
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         bool isNew = true;
         [HiddenProperty]
         public bool IsNew
@@ -54,7 +56,7 @@ namespace Signum.Entities
             internal set { isNew = value; }
         }
 
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal long ticks = 0;
         [HiddenProperty]
         public long Ticks
@@ -101,7 +103,7 @@ namespace Signum.Entities
             return false;
         }
 
-        public virtual Dictionary<Guid, Dictionary<string, string>> IdentifiableIntegrityCheck()
+        public virtual Dictionary<Guid, Dictionary<string, string>> EntityIntegrityCheck()
         {
             using (Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
             {
@@ -127,7 +129,7 @@ namespace Signum.Entities
             mixin = MixinDeclarations.CreateMixins(this);
         }
 
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         readonly MixinEntity mixin;
         public M Mixin<M>() where M : MixinEntity
         {
@@ -215,6 +217,70 @@ namespace Signum.Entities
 
     }
 
-   
+    public static class UnsafeEntityExtensions
+    {
+        public static T SetId<T>(this T ident, PrimaryKey? id)
+        where T : Entity
+        {
+            ident.id = id;
+            return ident;
+        }
+
+        public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value)
+             where T : ModifiableEntity
+        {
+            var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
+
+            Action<T, V> setter = ReadonlySetterCache<T>.Setter<V>(pi);
+
+            setter(ident, value);
+
+            ident.SetSelfModified();
+
+            return ident;
+        }
+
+        static class ReadonlySetterCache<T> where T : ModifiableEntity
+        {
+            static ConcurrentDictionary<string, Delegate> cache = new ConcurrentDictionary<string, Delegate>();
+
+            internal static Action<T, V> Setter<V>(PropertyInfo pi)
+            {
+                return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi)));
+            }
+        }
+
+        public static T SetNew<T>(this T ident, bool isNew = true)
+            where T : Entity
+        {
+            ident.IsNew = isNew;
+            ident.SetSelfModified();
+            return ident;
+        }
+
+        public static T SetNotModified<T>(this T ident)
+            where T : Modifiable
+        {
+            if (ident is Entity)
+                ((Entity)(Modifiable)ident).IsNew = false;
+            ident.Modified = ModifiedState.Clean;
+            return ident;
+        }
+
+        public static T SetNotModifiedGraph<T>(this T ident, PrimaryKey id)
+            where T : Entity
+        {
+            foreach (var item in GraphExplorer.FromRoot(ident).Where(a => a.Modified != ModifiedState.Sealed))
+            {
+                item.SetNotModified();
+                if (item is Entity)
+                    ((Entity)item).SetId(new PrimaryKey("invalidId"));
+            }
+
+            ident.SetId(id);
+
+            return ident;
+        }
+    }
 
 }

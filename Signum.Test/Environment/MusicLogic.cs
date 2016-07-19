@@ -75,7 +75,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<BandEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Name,
                         a.LastAward,
@@ -86,7 +86,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<LabelEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Name,
                     });
@@ -96,7 +96,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<AmericanMusicAwardEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Year,
                         a.Category,
@@ -107,7 +107,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<GrammyAwardEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Year,
                         a.Category,
@@ -118,7 +118,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<PersonalAwardEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Year,
                         a.Category,
@@ -129,7 +129,7 @@ namespace Signum.Test.Environment
                     from a in Database.Query<AwardNominationEntity>()
                     select new
                     {
-                        Entity = a.ToLite(),
+                        Entity = a,
                         a.Id,
                         a.Award,
                         a.Author

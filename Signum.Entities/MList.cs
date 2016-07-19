@@ -717,7 +717,7 @@ namespace Signum.Entities
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class PreserveOrderAttribute : SqlDbTypeAttribute
     {
         public string Name { get; set; }

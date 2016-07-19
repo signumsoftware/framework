@@ -24,7 +24,7 @@ namespace Signum.Entities
             {
                 var od = new DumpVisitor(showIgnoredFields, showByteArrays);
                 od.DumpObject(o);
-                return od.Sb.TryToString();
+                return od.Sb?.ToString();
             }
         }
 
@@ -179,7 +179,7 @@ namespace Signum.Entities
                         }
                     }
                 }
-                else if (t.IsAnonymous())
+                else if (!typeof(ModifiableEntity).IsAssignableFrom(t))
                     foreach (var prop in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                     {
                         DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null));
@@ -197,18 +197,26 @@ namespace Signum.Entities
                             if (val == null)
                                 continue;
 
-                            DumpPropertyOrField(field.FieldType, field.Name, val);
+                            DumpPropertyOrField(field.FieldType, GetFieldName(field), val);
                         }
 
-                        if (!showIgnoredFields && field.IsDefined(typeof(IgnoreAttribute), false))
+                        if (!showIgnoredFields && (field.HasAttribute<IgnoreAttribute>()) || (Reflector.TryFindPropertyInfo(field)?.HasAttribute<IgnoreAttribute>() == true))
                             continue;
 
-                        DumpPropertyOrField(field.FieldType, field.Name, field.GetValue(o));
+                        DumpPropertyOrField(field.FieldType, GetFieldName(field), field.GetValue(o));
                     }
 
                 level -= 1;
                 Sb.Append("}".Indent(level));
                 return;
+            }
+
+            private static string GetFieldName(FieldInfo field)
+            {
+                if (field.Name.StartsWith("<"))
+                    return field.Name.Between('<', '>');
+
+                return field.Name;
             }
 
             private static string SafeToString(object o)
@@ -273,7 +281,7 @@ namespace Signum.Entities
 
             string DumpValue(object item)
             {
-                string value = item.TryToString() ?? "null";
+                string value = item?.ToString() ?? "null";
                 string startDelimiter = null;
                 string endDelimiter = null;
 

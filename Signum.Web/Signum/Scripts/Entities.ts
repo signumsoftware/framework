@@ -22,6 +22,7 @@ export interface TypeInfo {
     creable?: boolean;
     findable?: boolean;
     preConstruct?: (extraJsonArgs?: FormObject) => Promise<any>;
+    avoidPopup?: boolean;
 }
 
 export class RuntimeInfo {
@@ -86,18 +87,16 @@ export class RuntimeInfo {
 }
 
 export class EntityValue {
-    constructor(runtimeInfo: RuntimeInfo, toString?: string, link?: string) {
+    constructor(runtimeInfo: RuntimeInfo, toString?: string) {
         if (runtimeInfo == null)
             throw new Error("runtimeInfo is mandatory for an EntityValue");
 
         this.runtimeInfo = runtimeInfo;
         this.toStr = toString;
-        this.link = link;
     }
 
     runtimeInfo: RuntimeInfo;
     toStr: string;
-    link: string;
 
     assertPrefixAndType(prefix: string, types: TypeInfo[]) {
         if (types == null) // All
@@ -112,19 +111,21 @@ export class EntityValue {
     }
 
     public static fromKey(key: string): EntityValue {
-        if (SF.isEmpty(key))
+
+        var ri = RuntimeInfo.fromKey(key);
+
+        if (!ri)
             return null;
 
-        var index = key.indexOf(";");
-        if (index == -1)
+        var firstIndex = key.indexOf(";");
+        if (firstIndex == -1)
             throw Error("{0} not found".format(";"));
 
-        index = key.indexOf(";");
-
-        if (index == -1)
+        var secondIndex = key.indexOf(";", firstIndex + 1);
+        if (secondIndex == -1)
             return new EntityValue(RuntimeInfo.parse(key));
 
-        return new EntityValue(RuntimeInfo.parse(key.substr(0, index)), key.substr(index + 1));
+        return new EntityValue(RuntimeInfo.parse(key.substr(0, secondIndex)), key.substr(secondIndex + 1));
     }
 
     isLoaded() {
@@ -138,8 +139,8 @@ export class EntityHtml extends EntityValue {
 
     hasErrors: boolean;
 
-    constructor(prefix: string, runtimeInfo: RuntimeInfo, toString?: string, link?: string) {
-        super(runtimeInfo, toString, link);
+    constructor(prefix: string, runtimeInfo: RuntimeInfo, toString?: string) {
+        super(runtimeInfo, toString);
 
         if (prefix == null)
             throw new Error("prefix is mandatory for EntityHtml");

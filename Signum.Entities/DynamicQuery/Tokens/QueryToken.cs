@@ -25,6 +25,8 @@ namespace Signum.Entities.DynamicQuery
         public abstract string Unit { get; }
         public abstract Type Type { get; }
         public abstract string Key { get; }
+
+        public virtual bool IsRealGroupable { get { return false; } }
         protected abstract List<QueryToken> SubTokensOverride(SubTokensOptions options);
 
 
@@ -48,6 +50,9 @@ namespace Signum.Entities.DynamicQuery
 
         internal PropertyRoute AddPropertyRoute(PropertyInfo pi)
         {
+            if(typeof(ModelEntity).IsAssignableFrom(Type))
+                return PropertyRoute.Root(Type).Add(pi);
+
             Type type = Lite.Extract(Type); //Because Add doesn't work with lites
             if (type != null)
                 return PropertyRoute.Root(type).Add(pi);
@@ -113,7 +118,10 @@ namespace Signum.Entities.DynamicQuery
                 return DateTimeProperties(this, DateTimePrecision.Milliseconds);
 
             if (ut == typeof(float) || ut == typeof(double) || ut == typeof(decimal))
-                return DecimalProperties(this);
+                return StepTokens(this, 4);
+
+            if (ut == typeof(int) || ut == typeof(long) || ut == typeof(short))
+                return StepTokens(this, 0);
 
             Type cleanType = type.CleanType();
             if (cleanType.IsIEntity())
@@ -180,13 +188,22 @@ namespace Signum.Entities.DynamicQuery
             }.NotNull().ToList();
         }
 
-        public static List<QueryToken> DecimalProperties(QueryToken parent)
+        public static List<QueryToken> StepTokens(QueryToken parent, int decimals)
         {
             return new List<QueryToken>
             {
-                new CeilToken(parent),
-                new FloorToken(parent),
-            }; 
+                decimals >= 4? new StepToken(parent, 0.0001m): null,
+                decimals >= 3? new StepToken(parent, 0.001m) : null,
+                decimals >= 2? new StepToken(parent, 0.01m) : null,
+                decimals >= 1? new StepToken(parent, 0.1m) : null,
+                new StepToken(parent, 1m),
+                new StepToken(parent, 10m),
+                new StepToken(parent, 100m),
+                new StepToken(parent, 1000m),
+                new StepToken(parent, 10000m),
+                new StepToken(parent, 100000m),
+                new StepToken(parent, 1000000m),
+            }.NotNull().ToList();
         }
 
         public static List<QueryToken> CollectionProperties(QueryToken parent, SubTokensOptions options)
@@ -331,6 +348,7 @@ namespace Signum.Entities.DynamicQuery
                 default: return type.TypeName();
             }
         }
+
     }
 
     public class BuildExpressionContext
@@ -392,6 +410,10 @@ namespace Signum.Entities.DynamicQuery
         [Description("text")]
         Text,
         Year,
-        WeekNumber
+        WeekNumber,
+        [Description("{0} step {1}")]
+        _0Steps1,
+        [Description("Step {0}")]
+        Step0
     }
 }

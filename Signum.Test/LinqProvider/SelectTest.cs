@@ -555,23 +555,10 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectTryToString()
-        {
-            var list = Database.Query<AlbumEntity>().Select(a => a.TryToString()).ToList();
-        }
-
-        [TestMethod]
         public void SelectToStringLite()
         {
             var list = Database.Query<AlbumEntity>().Select(a => a.ToLite().ToString()).ToList();
         }
-
-        [TestMethod]
-        public void SelectTryToStringLite()
-        {
-            var list = Database.Query<AlbumEntity>().Select(a => a.ToLite().TryToString()).ToList();
-        }
-
 
         [TestMethod]
         public void SelectConditionEnum()
@@ -655,16 +642,26 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectWithHint()
         {
-            var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_idLabel)").Select(a => a.Label.Name).ToList();
+            var list = Database.Query<AlbumEntity>().WithHint("INDEX(IX_LabelID)").Select(a => a.Label.Name).ToList();
+        }
+
+        [TestMethod]
+        public void SelectAverageBool()
+        {
+            Expression<Func<AlbumEntity, bool>> selector = a => a.Id > 10;
+            Expression<Func<AlbumEntity, double>> selectorDouble = Expression.Lambda<Func<AlbumEntity, double>>(Expression.Convert(selector.Body, typeof(double)), selector.Parameters.SingleEx());
+
+            var list = Database.Query<AlbumEntity>().Average(selectorDouble);
         }
     }
 
     public static class AuthorExtensions
     {
         static Expression<Func<IAuthorEntity, int>> AlbumCountExpression = auth => Database.Query<AlbumEntity>().Count(a => a.Author == auth);
+        [ExpressionField]
         public static int AlbumCount(this IAuthorEntity author)
         {
-            return Database.Query<AlbumEntity>().Count(a => a.Author == author);
+            return AlbumCountExpression.Evaluate(author);
         }
     }
 }

@@ -246,7 +246,7 @@ export class SearchControl {
     types: Entities.TypeInfo[];
     simpleFilterBuilderUrl: string;
 
-    creating: () => void;
+    creating: (event: Event) => void;
     selectionChanged: (selected: Entities.EntityValue[]) => void;
 
     constructor(element: JQuery, _options: FindOptions, types: Entities.TypeInfo[], simpleFilterBuilderUrl: string) {
@@ -371,6 +371,8 @@ export class SearchControl {
             this.fullScreen(e);
         });
 
+        Navigator.attachMavigatePopupClick(this.element.find(".sf-search-results-container tbody"), this.prefix);
+        
         if (this.options.showContextMenu) {
             $tblResults.on("change", ".sf-td-selection", e=> {
                 this.changeRowSelection($(e.currentTarget), $(e.currentTarget).filter(":checked").length > 0);
@@ -540,35 +542,39 @@ export class SearchControl {
         $searchButton.addClass("sf-searching");
         var count = parseInt($searchButton.attr("data-searchCount")) || 0;
 
-        this.requestDataForSearch(RequestType.QueryRequest, page)
-            .then(data=> SF.ajaxPost({
-            url: SF.Urls.search,
-            data: data
-        })).then(r => {
-            var $tbody = this.element.find(".sf-search-results-container tbody");
-            if (!SF.isEmpty(r)) {
-                var rows = $(r);
+        this.requestDataForSearchInUrl().then(paramsUrl => {
+            var fullUrl = this.element.attr("data-find-url") + "?" + paramsUrl; 
+        
+            this.requestDataForSearch(RequestType.QueryRequest, page)
+                .then(data=> SF.ajaxPost({
+                url: SF.Urls.search,
+                data: $.extend({ queryUrl: fullUrl }, data)
+            })).then(r => {
+                var $tbody = this.element.find(".sf-search-results-container tbody");
+                if (!SF.isEmpty(r)) {
+                    var rows = $(r);
 
-                var divs = rows.filter("tr.extract").children().children();
+                    var divs = rows.filter("tr.extract").children().children();
 
-                this.element.find("div.sf-search-footer").replaceWith(divs.filter("div.sf-search-footer"));
+                    this.element.find("div.sf-search-footer").replaceWith(divs.filter("div.sf-search-footer"));
 
-                var mult = divs.filter("div.sf-td-multiply");
-                var multCurrent = this.element.find("div.sf-td-multiply");
+                    var mult = divs.filter("div.sf-td-multiply");
+                    var multCurrent = this.element.find("div.sf-td-multiply");
 
-                if (multCurrent.length)
-                    multCurrent.replaceWith(mult);
-                else
-                    this.element.find("div.sf-query-button-bar").after(mult);
+                    if (multCurrent.length)
+                        multCurrent.replaceWith(mult);
+                    else
+                        this.element.find("div.sf-query-button-bar").after(mult);
 
-                $tbody.html(rows.not("tr.extract"));
-            }
-            else {
-                $tbody.html("");
-            }
-            $searchButton.removeClass("sf-searching");
-            $searchButton.attr("data-searchCount", count + 1);
-            this.updateSelectedButton();
+                    $tbody.html(rows.not("tr.extract"));
+                }
+                else {
+                    $tbody.html("");
+                }
+                $searchButton.removeClass("sf-searching");
+                $searchButton.attr("data-searchCount", count + 1);
+                this.updateSelectedButton();
+            });
         });
     }
 
@@ -662,9 +668,7 @@ export class SearchControl {
     static getSelectedItems(prefix: string): Array<Entities.EntityValue> {
         return $("input:checkbox[name^=" + prefix.child("rowSelection") + "]:checked").toArray().map(v=> {
             var parts = (<HTMLInputElement>v).value.split("__");
-            return new Entities.EntityValue(new Entities.RuntimeInfo(parts[1], parts[0], false),
-                parts[2],
-                $(v).parent().next().children('a').attr('href'));
+            return new Entities.EntityValue(new Entities.RuntimeInfo(parts[1], parts[0], false), parts[2]);
         });
     }
 
@@ -674,6 +678,10 @@ export class SearchControl {
 
     selectedItems(): Array<Entities.EntityValue> {
         return SearchControl.getSelectedItems(this.options.prefix);
+    }
+
+    markSelectedAsSuccess() {
+        this.prefix.child('tblResults').get().find("tr.active").addClass("sf-entity-ctxmenu-success");
     }
 
     selectedItemsLiteKeys(): string {
@@ -893,13 +901,13 @@ export class SearchControl {
         });
     }
 
-    create_click() {
-        this.onCreate();
+    create_click(event: MouseEvent) {
+        this.onCreate(event);
     }
 
-    onCreate() {
+    onCreate(event: MouseEvent) {
         if (this.creating != null)
-            this.creating();
+            this.creating(event);
         else {
 
             this.typeChooseCreate().then(type => {
@@ -913,12 +921,12 @@ export class SearchControl {
                     args = $.extend(args, this.requestDataForSearchPopupCreate());
 
                     var runtimeInfo = new Entities.RuntimeInfo(type.name, null, true);
-                    if (SF.isEmpty(this.options.prefix)) {
-                        Navigator.navigate(runtimeInfo, args, false);
+
+                    if (Navigator.isOpenNewWindow(event) || type.avoidPopup) {
+                        Navigator.navigate(runtimeInfo, args, true);
                     }
                     else
-                        return Navigator.navigatePopup(new Entities.EntityHtml(this.options.prefix.child("Temp"), runtimeInfo),
-                            { requestExtraJsonData: args });
+                        return Navigator.navigatePopup(new Entities.EntityHtml(this.options.prefix.child("Temp"), runtimeInfo), { requestExtraJsonData: args });
                 });
             });
         }
@@ -1129,7 +1137,7 @@ export module QueryTokenBuilder {
 
         var index = parseInt($selectedCombo.attr("id").after("ddlTokens_"));
 
-        clearChildSubtokenCombos($selectedCombo, prefix, index);
+        clearChildSubtokenCombos($selectedCombo);
         $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
 
         var $selectedOption = $selectedCombo.children("option:selected");
@@ -1156,8 +1164,8 @@ export module QueryTokenBuilder {
             });
     };
 
-    export function clearChildSubtokenCombos($selectedCombo: JQuery, prefix: string, index: number) {
-        $selectedCombo.next("select,input[type=hidden]").remove();
+    export function clearChildSubtokenCombos($selectedCombo: JQuery) {
+        $selectedCombo.nextAll("select,input[type=hidden]").remove();
     }
 
     export function constructTokenName(prefix: string) {

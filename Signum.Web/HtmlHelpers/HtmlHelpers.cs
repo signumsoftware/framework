@@ -51,20 +51,6 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString HiddenAnonymous(this HtmlHelper html, object value)
-        {
-            return HiddenAnonymous(html, value, null);
-        }
-
-        public static MvcHtmlString HiddenAnonymous(this HtmlHelper html, object value, object htmlAttributes)
-        {
-            return new HtmlTag("input").Attrs(new
-            {
-                type = "hidden",
-                value = value.ToString()
-            }).Attrs(htmlAttributes).ToHtmlSelf();
-        }
-
         public static MvcHtmlString FormGroupStatic(this HtmlHelper html, Context context, string controlId, string label, string text)
         {
             var span = html.FormControlStatic(context, controlId, text);
@@ -207,14 +193,14 @@ namespace Signum.Web
                         .ToHtml();
         }
 
-        public static MvcHtmlString Span(this HtmlHelper html, string name, string value, string cssClass)
+        public static MvcHtmlString Span(this HtmlHelper html, string id, string value, string cssClass)
         {
-            return Span(html, name, value, cssClass, null);
+            return Span(html, id, value, cssClass, null);
         }
 
-        public static MvcHtmlString Span(this HtmlHelper html, string name, string value)
+        public static MvcHtmlString Span(this HtmlHelper html, string id, string value)
         {
-            return Span(html, name, value, null, null);
+            return Span(html, id, value, null, null);
         }
 
         public static MvcHtmlString Href(this HtmlHelper html, string url, string text)
@@ -311,6 +297,32 @@ namespace Signum.Web
         public static MvcHtmlString Lambda(this HtmlHelper html, Func<object, HelperResult> lambda)
         {
             return MvcHtmlString.Create(lambda(null).ToHtmlString());
+        }
+
+        public static MvcHtmlString SafeDropDownList(this HtmlHelper html, string idAndName, IEnumerable<SelectListItem> elements, object htmlAttributes)
+        {
+            return html.SafeDropDownList(idAndName, elements, new RouteValueDictionary(htmlAttributes));
+        }
+
+        //http://stackoverflow.com/questions/979095/asp-net-mvc-dropdownlist-pre-selected-item-ignored
+        public static MvcHtmlString SafeDropDownList(this HtmlHelper html, string idAndName, IEnumerable<SelectListItem> elements, IDictionary<string, object> htmlAttributes = null)
+        {
+            var select = new HtmlTag("select").IdName(idAndName).Attrs(htmlAttributes);
+            
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+            foreach (var se in elements)
+	        {
+                var option = new HtmlTag("option").Attr("value", se.Value).SetInnerText(se.Text);
+ 
+                if(se.Selected)
+                    option.Attr("selected", "selected");
+
+                sb.Add(option.ToHtml());
+	        }
+
+            select.InnerHtml(sb.ToHtml());
+
+            return select.ToHtml();
         }
     }
 }

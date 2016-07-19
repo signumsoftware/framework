@@ -8,7 +8,7 @@
     <div id="divMainPage" @Html.Raw(ident != null ? "data-isnew=\"" + ident.IsNew.ToString().ToLower() + "\"" : "") class="form-horizontal">
         @if (string.IsNullOrEmpty(ViewBag.Title))
         {
-            ViewBag.Title = Model.UntypedValue.TryToString();
+            ViewBag.Title = Model.UntypedValue?.ToString();
         }
         
         @{ Html.RenderPartial(Navigator.Manager.NormalControlView);}

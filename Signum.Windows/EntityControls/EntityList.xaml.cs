@@ -40,13 +40,11 @@ namespace Signum.Windows
             get { return (IList)listBox.SelectedItems; }
         }
 
-
         protected override void UpdateVisibility()
         {
             btCreate.Visibility = CanCreate().ToVisibility();
             btFind.Visibility = CanFind().ToVisibility();
-            btView.Visibility = CanView().ToVisibility();
-            btNavigate.Visibility = CanNavigate().ToVisibility();
+            btView.Visibility = CanViewOrNavigate().ToVisibility();
             btRemove.Visibility = CanRemove().ToVisibility();
             btUp.Visibility = this.CanMove() ? (CanMoveUp() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
             btDown.Visibility = this.CanMove() ? (CanMoveDown() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
@@ -123,7 +121,7 @@ namespace Signum.Windows
 
         protected override void btView_Click(object sender, RoutedEventArgs e)
         {
-            object entity = OnViewing(this.listBox.SelectedItem, false);
+            object entity = OnViewingOrNavigating(this.listBox.SelectedItem, false);
 
             if (entity != null)
             {
@@ -188,6 +186,21 @@ namespace Signum.Windows
         private void listBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             btView_Click(sender, null);
+        }
+
+        protected override void OnEntityChanged(object oldValue, object newValue)
+        {
+            listBox.SelectedItem = newValue;
+
+            base.OnEntityChanged(oldValue, newValue);
+        }
+
+        private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var newEntity = e.AddedItems.Cast<object>().SingleOrDefault();
+
+            if (this.Entity != newEntity)
+                this.Entity = newEntity;
         }
     }
 }

@@ -57,8 +57,8 @@
 			IsSynchronizedWithCurrentItem="True" 
 			Background="{DynamicResource BlueBackground}" 
 			BorderBrush="{DynamicResource BlueBorder}" BorderThickness="0,0,0,0" 
-			SelectionMode="{Binding Path=SelectionMode, ElementName=me, Mode=Default}" 
-			SelectedItem="{Binding Path=Entity, ElementName=me, Mode=Default}" 
+			SelectionMode="{Binding Path=SelectionMode, ElementName=me, Mode=Default}"
+            SelectionChanged="listBox_SelectionChanged"
             ItemsSource="{Binding Path=Entities, ElementName=me, Mode=Default}" 
 			ItemTemplate="{Binding Path=EntityTemplate, ElementName=me, Mode=Default}" 
 			ItemTemplateSelector="{Binding Path=EntityTemplateSelector, ElementName=me, Mode=Default}" 
@@ -70,7 +70,6 @@
 			<Button Focusable="False" x:Name="btCreate" Click="btCreate_Click" Style="{DynamicResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc {x:Static d:OperationMessage.Create}}"/>
 			<Button Focusable="False" x:Name="btFind" Click="btFind_Click" Style="{DynamicResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc {x:Static d:SearchMessage.Find}}"/>
 			<Button Focusable="False" x:Name="btView" Style="{DynamicResource RoundButton}" Click="btView_Click" Content="{DynamicResource View}" ToolTip="{m:Loc {x:Static d:EntityControlMessage.View}}"/>
-            <Button Focusable="False" x:Name="btNavigate" Style="{StaticResource RoundButton}" Click="btNavigate_Click"  Content="{StaticResource Navigate}" ToolTip="{m:Loc {x:Static d:EntityControlMessage.Navigate}}"/>
             <Button Focusable="False" x:Name="btRemove" Style="{DynamicResource RoundButton}" Click="btRemove_Click" Content="{DynamicResource Remove}" ToolTip="{m:Loc {x:Static d:EntityControlMessage.Remove}}"/>
 			<Button Focusable="False" x:Name="btUp" Style="{DynamicResource RoundButton}" Click="btUp_Click"  Content="{DynamicResource Up}" ToolTip="{m:Loc {x:Static d:EntityControlMessage.MoveUp}}"/>
 			<Button Focusable="False" x:Name="btDown" Style="{DynamicResource RoundButton}" Click="btDown_Click"  Content="{DynamicResource Down}" ToolTip="{m:Loc {x:Static d:EntityControlMessage.MoveDown}}"/>

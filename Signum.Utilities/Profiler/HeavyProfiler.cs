@@ -113,7 +113,7 @@ namespace Signum.Utilities
         private static Tracer CreateNewEntry(string role, Func<string> additionalData, bool stackTrace)
         {
             long beforeStart = PerfCounter.Ticks;
-
+         
             if (enabled == false || TimeLimit.Value < beforeStart)
             {
                 enabled = false;
@@ -121,50 +121,62 @@ namespace Signum.Utilities
                 return null;
             }
 
-            var saveCurrent = current.Value;
+            var parent = current.Value;
 
             var newCurrent = current.Value = new HeavyProfilerEntry()
             {
                 BeforeStart = beforeStart,
                 Role = role,
-                AdditionalData = additionalData == null ? null: additionalData(),
+                AdditionalData = additionalData == null ? null : additionalData(),
                 StackTrace = stackTrace ? new StackTrace(2, true) : null,
+                Parent = parent,
+                Depth = parent == null ? 0 : (parent.Depth + 1),
             };
 
             newCurrent.Start = PerfCounter.Ticks;
 
-            return new Tracer { saveCurrent = saveCurrent };
+            return new Tracer { newCurrent = newCurrent };
         }
 
         public class Tracer : IDisposable
         {
-            internal HeavyProfilerEntry saveCurrent;
+            internal HeavyProfilerEntry newCurrent;
 
             public void Dispose()
             {
-                var cur = current.Value;
-                cur.End = PerfCounter.Ticks;
+                if (newCurrent == null) //After a Switch sequence disabled in the middle
+                    return;
 
-                if (saveCurrent == null)
+                if (current.Value != newCurrent)
+                    throw new InvalidOperationException("Unexpected");
+
+                var cur = newCurrent;
+                cur.End = PerfCounter.Ticks;
+                var parent = newCurrent.Parent;
+
+                if (parent == null)
                 {
                     lock (Entries)
                     {
+                        if (cur.Depth != 0)
+                            throw new InvalidOperationException("Invalid depth");
                         cur.Index = Entries.Count;
-                        cur.Parent = null;
                         Entries.Add(cur);
                     }
                 }
                 else
                 {
-                    if (saveCurrent.Entries == null)
-                        saveCurrent.Entries = new List<HeavyProfilerEntry>();
+                    if (parent.Entries == null)
+                        parent.Entries = new List<HeavyProfilerEntry>();
 
-                    cur.Index = saveCurrent.Entries.Count;
-                    cur.Parent = saveCurrent;
-                    saveCurrent.Entries.Add(cur);
+                    if (cur.Depth != parent.Depth + 1)
+                        throw new InvalidOperationException("Invalid depth");
+
+                    cur.Index = parent.Entries.Count;
+                    parent.Entries.Add(cur);
                 }
 
-                current.Value = saveCurrent;
+                current.Value = parent;
             }
         }
 
@@ -179,10 +191,7 @@ namespace Signum.Utilities
 
             var newTracer = CreateNewEntry(role, additionalData, hasStackTrace);
 
-            if (newTracer != null)
-            {
-                tracer.saveCurrent = newTracer.saveCurrent; 
-            }
+            tracer.newCurrent = newTracer == null ? null : newTracer.newCurrent;
         }
 
         public static IEnumerable<HeavyProfilerEntry> AllEntries()
@@ -299,10 +308,7 @@ namespace Signum.Utilities
 
         public int Index;
 
-        public int Depth
-        {
-            get { return this.Parent == null ? 0 : this.Parent.Depth + 1; }
-        }
+        public int Depth;
 
         public string FullIndex()
         {
@@ -414,7 +420,8 @@ namespace Signum.Utilities
                 BeforeStart = long.Parse(xLog.Attribute("BeforeStart").Value),
                 Start = long.Parse(xLog.Attribute("Start").Value),
                 End = long.Parse(xLog.Attribute("End").Value),
-                AdditionalData = xLog.Attribute("AdditionalData").Try(ad => ad.Value),
+                AdditionalData = xLog.Attribute("AdditionalData")?.Value,
+                Depth = parent == null ? 0 : parent.Depth + 1
             };
 
             if (xLog.Element("Log") != null)

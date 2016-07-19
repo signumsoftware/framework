@@ -350,7 +350,7 @@ namespace Signum.Web
             if (ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
             {
                 if (!DisambiguateRuntimeInfo)
-                    return RuntimeInfo.FromFormValue(strRuntimeInfo).Try(ri => ri.EntityType);
+                    return RuntimeInfo.FromFormValue(strRuntimeInfo)?.EntityType;
                 else
                 {
                     RuntimeInfo runtimeInfo = strRuntimeInfo.Split(',')
@@ -358,11 +358,11 @@ namespace Signum.Web
                         .OrderBy(a => !a.ToLite().RefersTo((Entity)(object)ctx.Value))
                         .FirstEx();
 
-                    return runtimeInfo.Try(ri => ri.EntityType);
+                    return runtimeInfo?.EntityType;
                 }
             }
             else
-                return ctx.Value.Try(t => t.GetType());
+                return ctx.Value?.GetType();
         }
 
         static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue =
@@ -375,7 +375,7 @@ namespace Signum.Web
                 return (R)(object)ctx.None(ValidationMessage.Type0NotAllowed.NiceToString().FormatWith(typeof(R)));
             }
 
-            Mapping<R> mapping = (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
+            Mapping<R> mapping = (Mapping<R>)(AllowedMappings?.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
             SubContext<R> sc = new SubContext<R>(ctx.Prefix, null, route, ctx) { Value = ctx.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
             sc.Value = mapping(sc);
             ctx.SupressChange = sc.SupressChange;
@@ -593,7 +593,7 @@ namespace Signum.Web
             {
                 runtimeInfo = strRuntimeInfo.Split(',')
                     .Select(r => RuntimeInfo.FromFormValue(r))
-                    .OrderBy(a => !(a == null ? null : a.ToLite()).RefersTo((Entity)(object)ctx.Value))
+                    .OrderBy(a => !a?.ToLite().RefersTo((Entity)(object)ctx.Value))
                     .FirstEx();
             }
 
@@ -821,7 +821,7 @@ namespace Signum.Web
                 return lite; // If form does not contains changes to the entity
 
             if (EntityMapping == null)
-                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".FormatWith(lite.TryToString()));
+                throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".FormatWith(lite?.ToString()));
 
             var sc = new SubContext<S>(ctx.Prefix, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = lite.Retrieve() };
             sc.Value = EntityMapping(sc);
@@ -1053,6 +1053,8 @@ namespace Signum.Web
 
         public Func<S, bool> FilterElements;
 
+        public bool OnlyIfPossible;
+
         public MListDictionaryMapping(Expression<Func<S, K>> getKeyExpression)
             : this(getKeyExpression, Mapping.New<S>())
         {
@@ -1110,7 +1112,10 @@ namespace Signum.Web
 
                     subContext.Value = KeyMapping(subContext);
 
-                    itemCtx.Value = dic[subContext.Value];
+                    if (!dic.ContainsKey(subContext.Value) && OnlyIfPossible)
+                        continue;
+
+                    itemCtx.Value = dic.GetOrThrow(subContext.Value);
 
                     itemCtx.Value = ElementMapping(itemCtx);
 

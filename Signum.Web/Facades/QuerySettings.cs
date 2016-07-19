@@ -10,6 +10,7 @@ using System.Web.Mvc;
 using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using System.Web.Mvc.Html;
+using System.Globalization;
 
 namespace Signum.Web
 {
@@ -46,7 +47,7 @@ namespace Signum.Web
         public EntityFormatter EntityFormatter { get; set; }
         public RowAttributes RowAttributes { get; set; }
         public List<ColumnOption> HiddenColumns { get; set; }
-        public SimpleFilterBuilder SimpleFilterBuilder { get; set; }
+        public Func<HtmlHelper, Context, QueryDescription, FindOptions, SimpleFilterBuilder> SimpleFilterBuilder { get; set; }
 
         static QuerySettings()
         {
@@ -64,7 +65,7 @@ namespace Signum.Web
 
                 new FormatterRule("Lite", c => c.Type.UnNullify().IsLite(), c => new CellFormatter((h,o) => 
                 {
-                    return h.LightEntityLine((Lite<IEntity>)o, false);
+                    return h.LightEntityLine((Lite<IEntity>)o, isSearch: false);
                 })),
 
                  new FormatterRule("Guid", c=>c.Type.UnNullify() == typeof(Guid), c => new CellFormatter((h,o) => 
@@ -74,24 +75,24 @@ namespace Signum.Web
 
                 new FormatterRule("DateTime", c=>c.Type.UnNullify() == typeof(DateTime), c => new CellFormatter((h,o) => 
                 {
-                    return o != null ? ((DateTime)o).ToUserInterface().TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
+                    return o != null ? ((DateTime)o).ToUserInterface().ToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
                 new FormatterRule("TimeSpan",  c=>c.Type.UnNullify() == typeof(TimeSpan), c => new CellFormatter((h,o) => 
                 {
-                    return o != null ? ((TimeSpan)o).TryToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
+                    return o != null ? ((TimeSpan)o).ToString(c.Format).EncodeHtml() : MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
                 new FormatterRule("Number", c=> Reflector.IsNumber(c.Type) && c.Unit == null, c => new CellFormatter((h,o) => 
                 {
-                    return o != null? ((IFormattable)o).TryToString(c.Format).EncodeHtml(): MvcHtmlString.Empty;
+                    return o != null? ((IFormattable)o).ToString(c.Format, CultureInfo.CurrentCulture).EncodeHtml(): MvcHtmlString.Empty;
                 }){ WriteData = false, TextAlign = "right" }),
 
                 new FormatterRule("Number with Unit", c=> Reflector.IsNumber(c.Type) && c.Unit.HasText(), c => new CellFormatter((h,o) => 
                 {
                     if (o != null)
                     {
-                        string s = ((IFormattable)o).TryToString(c.Format);
+                        string s = ((IFormattable)o).ToString(c.Format, CultureInfo.CurrentCulture);
                         if (c.Unit.HasText())
                             s += " " + c.Unit;
                         return s.EncodeHtml();
@@ -114,7 +115,7 @@ namespace Signum.Web
                 new EntityFormatterRule(row => true, (h,row) => 
                 {
                     if (Navigator.IsNavigable(row.Entity.EntityType, null, isSearch: true ))
-                        return h.Href(Navigator.NavigateRoute(row.Entity), h.Encode(EntityControlMessage.View.NiceToString()));
+                        return h.LightEntityLine(row.Entity, isSearch: true, innerText: EntityControlMessage.View.NiceToString());
                     else
                         return MvcHtmlString.Empty;
                 }),
@@ -152,10 +153,10 @@ namespace Signum.Web
 
     public class SimpleFilterBuilder
     {
-        public Func<HtmlHelper, Context, QueryDescription, MvcHtmlString> Control { get; set; }
-        public Func<UrlHelper, string> Url { get; set; }
+        public MvcHtmlString Control { get; set; }
+        public string Url { get; set; }
 
-        public SimpleFilterBuilder(Func<HtmlHelper, Context, QueryDescription, MvcHtmlString> control, Func<UrlHelper, string> url)
+        public SimpleFilterBuilder(MvcHtmlString control, string url)
         {
             this.Control = control;
             this.Url = url;
@@ -208,7 +209,7 @@ namespace Signum.Web
             if(!WriteData)
                 return MvcHtmlString.Empty;
 
-            string key = value is Lite<Entity> ? ((Lite<Entity>)value).Key() : value.TryToString();
+            string key = value is Lite<Entity> ? ((Lite<Entity>)value).Key() : value?.ToString();
 
             return MvcHtmlString.Create("data-value=\"" + key + "\"");
         }

@@ -32,8 +32,8 @@ namespace Signum.Web
                 exLog.ControllerName = hei.ControllerName;
                 exLog.ActionName = hei.ActionName;
                 exLog.UserAgent = req.UserAgent;
-                exLog.RequestUrl = req.Url.TryToString();
-                exLog.UrlReferer = req.UrlReferrer.TryToString();
+                exLog.RequestUrl = req.Url?.ToString();
+                exLog.UrlReferer = req.UrlReferrer?.ToString();
                 exLog.UserHostAddress = req.UserHostAddress;
                 exLog.UserHostName = req.UserHostName;
                 exLog.QueryString = ExceptionEntity.Dump(req.QueryString);

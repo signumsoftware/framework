@@ -14,6 +14,8 @@
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Utilities</Namespace>
         </Import>
       </Imports>
@@ -24,12 +26,6 @@
 					<Default>int</Default>
 				</Literal>
 				<Literal>
-					<ID>field</ID>
-					<ToolTip>Field</ToolTip>
-					<Default>bar</Default>
-					<Function></Function>
-				</Literal>
-				<Literal>
 					<ID>property</ID>
 					<ToolTip>Property</ToolTip>
 					<Default>Bar</Default>
@@ -38,13 +34,8 @@
 			</Declarations>
 			<Code Language="csharp">
 				<![CDATA[[NotNullable, PreserveOrder]
-        MList<$type$> $field$ = new MList<$type$>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<$type$> $property$
-        {
-            get { return $field$; }
-            set { Set(ref $field$, value); }
-        }$end$]]>
+        public MList<$type$> $property$ { get; set; } = new MList<$type$>();$end$]]>
 			</Code>
 		</Snippet>
 	</CodeSnippet>

@@ -9,6 +9,11 @@ namespace Signum.Utilities
 {
     public static class RegexExtensions
     {
+        public static int EndIndex(this Match m)
+        {
+            return m.Index + m.Length;
+        }
+
         public static IEnumerable<Match> Match(this IEnumerable<string> collection, string regex)
         {
             Regex reg = new Regex(regex);

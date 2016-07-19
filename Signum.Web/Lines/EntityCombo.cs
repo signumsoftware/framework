@@ -27,9 +27,12 @@ namespace Signum.Web
         public IEnumerable<Lite<IEntity>> Data { get; set; }
         public int Size { get; set; }
 
+        public bool SortElements { get; set; }
+
         public EntityCombo(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, prefix, propertyRoute)
         {
+            SortElements = true;
             Size = 0;
             View = false;
             Create = false;
@@ -44,5 +47,6 @@ namespace Signum.Web
             Create = false;
             Remove = false;
         }
+
     }
 }

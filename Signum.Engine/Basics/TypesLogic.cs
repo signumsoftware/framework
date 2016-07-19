@@ -84,7 +84,7 @@ namespace Signum.Engine.Basics
             }
         }
 
-        public static Dictionary<TypeEntity, Type> TryDNToType(Replacements replacements)
+        public static Dictionary<TypeEntity, Type> TryEntityToType(Replacements replacements)
         {
             return (from dn in Administrator.TryRetrieveAll<TypeEntity>(replacements)
                     join t in Schema.Current.Tables.Keys on dn.FullClassName equals (EnumEntity.Extract(t) ?? t).FullName

@@ -36,7 +36,7 @@ namespace Signum.Web.Controllers
 
             using (Navigator.Manager.OnRetrievingForView(lite))
             {
-                return Navigator.NormalPage(this, Database.Retrieve(lite));
+                return Navigator.NormalPage(this, Database.RetrieveAndForget(lite));
             }
         }
 
@@ -100,7 +100,7 @@ namespace Signum.Web.Controllers
                 PartialViewName = partialViewName,
                 ReadOnly = readOnly,
                 ShowOperations = showOperations ?? true,
-                SaveProtected = saveProtected
+                RequiresSaveOperation = saveProtected
             });
         }
 
@@ -204,7 +204,7 @@ namespace Signum.Web.Controllers
                     {
                         PartialViewName = partialViewName,
                         ReadOnly = readOnly,
-                        SaveProtected = saveProtected,
+                        RequiresSaveOperation = saveProtected,
                         ShowOperations = showOperations
                     });
                 case VisualConstructStyle.PopupNavigate:

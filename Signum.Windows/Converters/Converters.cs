@@ -31,7 +31,7 @@ namespace Signum.Windows
           ConverterFactory.New((object lite) => lite is Lite<Entity> ?  ((Lite<Entity>)lite).Key() : null);
 
         public static readonly IValueConverter ToLite =
-           ConverterFactory.New((IEntity ei) => ei == null ? null : ei.ToLite());
+           ConverterFactory.New((IEntity ei) => ei?.ToLite());
 
         public static readonly IValueConverter Retrieve =
                    ConverterFactory.New((Lite<IEntity> lite) => lite == null ? null : Server.Retrieve(lite));
@@ -91,7 +91,7 @@ namespace Signum.Windows
             ConverterFactory.New((object o) => o != null);
 
         public static readonly IValueConverter ToInt =
-            ConverterFactory.New((int? val) => val.TryToString(), (string str) => str.ToInt());
+            ConverterFactory.New((int? val) => val?.ToString(), (string str) => str.ToInt());
 
         public static readonly IValueConverter BoolToSelectionMode =
             ConverterFactory.New((bool b) => b ? SelectionMode.Extended : SelectionMode.Single);
@@ -99,13 +99,13 @@ namespace Signum.Windows
         public static readonly IValueConverter Not = ConverterFactory.New((bool b) => !b, (bool b) => !b);
 
         public static readonly IValueConverter TypeContextName =
-            ConverterFactory.New((FrameworkElement b) => b.Try(fe => Common.GetPropertyRoute(fe)).Try(c => c.Type).Try(t => t.NiceName()) ?? "??");
+            ConverterFactory.New((FrameworkElement b) => b?.Let(fe => Common.GetPropertyRoute(fe))?.Type?.NiceName() ?? "??");
 
         public static readonly IValueConverter NiceName =
-            ConverterFactory.New((Type type) => type.Try(t => t.NiceName()) ?? "??");
+            ConverterFactory.New((Type type) => type?.NiceName() ?? "??");
 
         public static readonly IValueConverter TypeImage =
-            ConverterFactory.New((Type type) => type.Try(t => Navigator.Manager.GetEntityIcon(type, true)));
+            ConverterFactory.New((Type type) => type?.Let(t => Navigator.Manager.GetEntityIcon(type, true)));
 
         public static readonly IValueConverter ThicknessToCornerRadius =
             ConverterFactory.New((Thickness b) => new CornerRadius
@@ -117,7 +117,7 @@ namespace Signum.Windows
             });
 
         public static readonly IValueConverter ToStringConverter = ConverterFactory.New(
-            (object d) => d.TryToString());
+            (object d) => d?.ToString());
 
         public static readonly IValueConverter TokenOperations = ConverterFactory.New(
             (QueryToken token) => token == null ? null : QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(token.Type)));

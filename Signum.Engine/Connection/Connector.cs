@@ -45,9 +45,6 @@ namespace Signum.Engine
             set { @default = value; }
         }
 
-
-
-
         static readonly Variable<int?> scopeTimeout = Statics.ThreadVariable<int?>("scopeTimeout");
         public static int? ScopeTimeout { get { return scopeTimeout.Value; } }
         public static IDisposable CommandTimeoutScope(int? timeoutMilliseconds)
@@ -85,7 +82,7 @@ namespace Signum.Engine
                         .ToString(p => "{0} {1}: {2}".FormatWith(
                             p.ParameterName,
                             Connector.Current.GetSqlDbType(p),
-                            p.Value.Try(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
+                            p.Value?.Let(v => CSharpRenderer.Value(v, v.GetType(), null))), "\r\n"));
                 log.WriteLine();
             }
         }
@@ -97,7 +94,7 @@ namespace Signum.Engine
         protected internal abstract DataTable ExecuteDataTable(SqlPreCommandSimple command, CommandType commandType);
         protected internal abstract DbDataReader UnsafeExecuteDataReader(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
         protected internal abstract DataSet ExecuteDataSet(SqlPreCommandSimple sqlPreCommandSimple, CommandType commandType);
-        protected internal abstract void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options);
+        protected internal abstract void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout);
 
         public abstract string DatabaseName();
 

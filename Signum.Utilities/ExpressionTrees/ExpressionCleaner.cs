@@ -9,62 +9,6 @@ using System.Reflection;
 namespace Signum.Utilities.ExpressionTrees
 {
 	/// <summary>
-	/// Interface for classes that can be used to convert calls to methods
-	/// in LINQ expression trees.
-	/// </summary>
-	public interface IMethodExpander
-	{
-        Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi);
-	}
-
-	/// <summary>
-    /// Attribute to define the class that should be used to convert calls to methods
-    /// in LINQ expression trees
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-	public sealed class MethodExpanderAttribute : Attribute
-	{
-		private Type expanderType;
-        public Type ExpanderType
-        {
-            get { return expanderType; }
-        }
-
-        /// <param name="type">A class that implements IMethodExpander</param>
-		public MethodExpanderAttribute(Type type)
-		{
-			expanderType = type;
-		}
-	}
-
-    //The member is polymorphic and should be expanded in a latter stage
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
-    public sealed class PolymorphicExpansionAttribute : Attribute
-    {
-        public PolymorphicExpansionAttribute()
-        {
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class EagerBindingAttribute : Attribute
-    {
-
-    }
-
-    //The name of the field for the expression that defines the content
-    [AttributeUsage(AttributeTargets.Method| AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    public sealed class ExpressionFieldAttribute : Attribute
-    {
-        public string Name { get; set; }
-        public Type Type { get; set; }
-        public ExpressionFieldAttribute(string name)
-        {
-            this.Name =name;
-        }
-    }
-     
-	/// <summary>
     /// Implementation of SimpleExpressionVisitor that does the replacement
     /// * MethodExpanderAttribute
     /// * MemberXXXExpression static field
@@ -142,7 +86,7 @@ namespace Signum.Utilities.ExpressionTrees
                 return exp;
             }
 
-            LambdaExpression lambdaExpression = GetFieldExpansion(m.Object.Try(c => c.Type), m.Method);
+            LambdaExpression lambdaExpression = GetFieldExpansion(m.Object?.Type, m.Method);
             if (lambdaExpression != null)
             {
                 Expression[] args = m.Object == null ? m.Arguments.ToArray() : m.Arguments.PreAnd(m.Object).ToArray();
@@ -175,7 +119,7 @@ namespace Signum.Utilities.ExpressionTrees
             if (pi.HasAttributeInherit<PolymorphicExpansionAttribute>() && !allowPolymorphics)
                 return null;
 
-            LambdaExpression lambda = GetFieldExpansion(m.Expression.Try(c => c.Type), pi);
+            LambdaExpression lambda = GetFieldExpansion(m.Expression?.Type, pi);
             if (lambda == null)
                 return null;
 
@@ -221,28 +165,26 @@ namespace Signum.Utilities.ExpressionTrees
         static LambdaExpression GetExpansion(MemberInfo mi)
         {
             ExpressionFieldAttribute efa = mi.GetCustomAttribute<ExpressionFieldAttribute>();
-
-            string name = efa.Try(a => a.Name) ?? mi.Name + "Expression";
-            Type type = mi.DeclaringType;
-
-            FieldInfo fi = type.GetField(name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            if (fi == null)
-            {
-                if (efa != null)
-                    throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".FormatWith(name, type.TypeName()));
-
+            if (efa == null)
                 return null;
-            }
+
+            if (efa.Name == "auto")
+                throw new InvalidOperationException($"The {nameof(ExpressionFieldAttribute)} for {mi.DeclaringType.TypeName()}.{mi.MemberName()} has the default value 'auto'.\r\nMaybe Signum.MSBuildTask is not running in assemby {mi.DeclaringType.Assembly.GetName().Name}?");
+
+            Type type = mi.DeclaringType;
+            FieldInfo fi = type.GetField(efa.Name, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            if (fi == null)
+                throw new InvalidOperationException("Expression field '{0}' not found on '{1}'".FormatWith(efa.Name, type.TypeName()));
 
             var obj = fi.GetValue(null);
 
             if (obj == null)
-                throw new InvalidOperationException("Expression field '{0}' is null".FormatWith(name));
+                throw new InvalidOperationException("Expression field '{0}' is null".FormatWith(efa.Name));
 
             var result = obj as LambdaExpression;
 
             if (result == null)
-                throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".FormatWith(name, type.TypeName()));
+                throw new InvalidOperationException("Expression field '{0}' does not contain a lambda expression".FormatWith(efa.Name, type.TypeName()));
 
             return result;
         }

@@ -49,7 +49,7 @@ namespace Signum.Engine
             if (!Connector.Current.AllowsSetSnapshotIsolation)
                 return null;
 
-            var list = Schema.Current.DatabaseNames().Select(a => a.TryToString()).ToList();
+            var list = Schema.Current.DatabaseNames().Select(a => a?.ToString()).ToList();
 
             if (list.Contains(null))
             {

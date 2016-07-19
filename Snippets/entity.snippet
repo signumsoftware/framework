@@ -14,7 +14,12 @@
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Utilities</Namespace>
+        </Import>
+        <Import>
+          <Namespace>System.Linq.Expressions</Namespace>
         </Import>
       </Imports>
 			<Declarations>
@@ -32,9 +37,10 @@
        
     }
     
+    [AutoInit]
     public static class $entityName$Operation
     {
-        public static readonly ExecuteSymbol<$entityName$Entity> Save = OperationSymbol.Execute<$entityName$Entity>();
+        public static readonly ExecuteSymbol<$entityName$Entity> Save;
     }]]>
 			</Code>
 		</Snippet>

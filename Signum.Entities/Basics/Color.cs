@@ -35,40 +35,35 @@ namespace Signum.Entities.Basics
             return ColorEntity.FromARGB(ColorTranslator.FromHtml(htmlColor).ToArgb());
         }
 
-        int argb;
-        public int Argb
-        {
-            get { return argb; }
-            set { SetToStr(ref argb, value); }
-        }
+        public int Argb { get; set; }
 
         [HiddenProperty]
         public byte A
         {
-            get { return (byte)((argb >> 0x18) & 0xff); }
+            get { return (byte)((Argb >> 0x18) & 0xff); }
         }
 
         [HiddenProperty]
         public byte R
         {
-            get { return (byte)((argb >> 0x10) & 0xff); }
+            get { return (byte)((Argb >> 0x10) & 0xff); }
         }
 
         [HiddenProperty]
         public byte G
         {
-            get { return (byte)((argb >> 0x8) & 0xff); }
+            get { return (byte)((Argb >> 0x8) & 0xff); }
         }
 
         [HiddenProperty]
         public byte B
         {
-            get { return (byte)(argb & 0xff); }
+            get { return (byte)(Argb & 0xff); }
         }
 
         public Color ToColor()
         {
-            return Color.FromArgb(argb); 
+            return Color.FromArgb(Argb);
         }
 
         public string RGBHex()
@@ -83,7 +78,7 @@ namespace Signum.Entities.Basics
 
         public string RGBAExpression()
         {
-            return  "rgb({0:X2}, {1:X2}, {2:X2}, {3})".FormatWith(R, G, B, (A / 255.0));
+            return "rgb({0:X2}, {1:X2}, {2:X2}, {3})".FormatWith(R, G, B, (A / 255.0));
         }
 
         public override string ToString()

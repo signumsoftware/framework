@@ -262,114 +262,16 @@ namespace Signum.Utilities
             return t;
         }
 
-        public static string TryToString(this object obj)
-        {
-            if (obj == null)
-                return null;
-            return obj.ToString(); 
-        }
-
-        public static string TryToString(this IFormattable obj, string format)
-        {
-            if (obj == null)
-                return null;
-            return obj.ToString(format, CultureInfo.CurrentCulture);
-        }
-
-        public static string TryToString(this IFormattable obj, string format, IFormatProvider formatProvider)
-        {
-            if (obj == null)
-                return null;
-            return obj.ToString(format, formatProvider);
-        }
-
-        #region Map Try Do TryDo
         public static R Let<T, R>(this T t, Func<T, R> func)
         {
             return func(t);
         }
-
-        public delegate R FuncCC<in T, R>(T input)
-            where T : class
-            where R : class;
-        public static R Try<T, R>(this T input, FuncCC<T, R> lambda)
-            where T : class
-            where R : class
-        {
-            return input == null ? null : lambda(input);
-        }
-
-        public delegate R FuncCS<in T, R>(T input)
-            where T : class
-            where R : struct;
-        public static R? Try<T, R>(this T input, FuncCS<T, R> lambda)
-            where T : class
-            where R : struct
-        {
-            return input == null ? null : (R?)lambda(input);
-        }
-
-        public delegate R FuncCN<in T, R>(T input) where T : class;
-        public static R? Try<T, R>(this T input, FuncCN<T, R?> lambda)
-            where T : class
-            where R : struct
-        {
-            return input == null ? null : lambda(input);
-        }
-
-
-        public delegate R FuncSC<in T, R>(T input)
-            where T : struct
-            where R : class;
-        public static R Try<T, R>(this T? input, FuncSC<T, R> lambda)
-            where T : struct
-            where R : class
-        {
-            return input == null ? null : lambda(input.Value);
-        }
-
-        public delegate R FuncSS<in T, R>(T input)
-            where T : struct
-            where R : struct;
-        public static T? Try<R, T>(this R? input, FuncSS<R, T> lambda)
-            where R : struct
-            where T : struct
-        {
-            return input == null ? null : (T?)lambda(input.Value);
-        }
-
-        public delegate R FuncSN<in T, R>(T input) where T : struct;
-        public static R? Try<T, R>(this T? input, FuncSN<T, R?> lambda)
-            where T : struct
-            where R : struct
-        {
-            return input == null ? null : lambda(input.Value);
-        }
-
 
         public static T Do<T>(this T t, Action<T> action)
         {
             action(t);
             return t;
         }
-
-        public delegate void ActionC<T>(T obj) where T : class;
-        public static T TryDo<T>(this T t, ActionC<T> action) where T : class
-        {
-            if (t != null)
-                action(t);
-            return t;
-        }
-
-        public delegate void ActionS<T>(T obj) where T : struct;
-        public static T? TryDo<T>(this T? t, ActionS<T> action) where T : struct
-        {
-            if (t != null)
-                action(t.Value);
-            return t;
-        }
-
-        #endregion
 
         public static IEnumerable<int> To(this int start, int endNotIncluded)
         {
@@ -413,13 +315,16 @@ namespace Signum.Utilities
                 yield return i;
         }
 
+        public delegate R FuncCC<in T, R>(T input) 
+            where T : class
+            where R : class;
         public static IEnumerable<T> Follow<T>(this T start, FuncCC<T, T> next) where T : class
         {
             for (T i = start; i != null; i = next(i))
                 yield return i;
         }
 
-
+        public delegate R FuncSN<in T, R>(T input) where T : struct;
         public static IEnumerable<T> Follow<T>(this T start, FuncSN<T, T?> next) where T : struct
         {
             for (T? i = start; i.HasValue; i = next(i.Value))

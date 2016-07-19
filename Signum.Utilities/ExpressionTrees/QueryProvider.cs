@@ -32,14 +32,11 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 return (IQueryable)Activator.CreateInstance(typeof(Query<>).MakeGenericType(elementType), new object[] { this, expression });
             }
-            catch (TargetInvocationException tie)
+            catch (TargetInvocationException e)
             {
-                Action savestack = Delegate.CreateDelegate(typeof(Action), tie.InnerException, "InternalPreserveStackTrace", false, false) as Action;
+                e.InnerException.PreserveStackTrace();
 
-                if (savestack != null)
-                    savestack();
-
-                throw tie.InnerException;
+                throw e.InnerException;
             }
         }
 

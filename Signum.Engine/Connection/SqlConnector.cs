@@ -333,7 +333,7 @@ namespace Signum.Engine
 
         }
 
-        protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options)
+        protected internal override void BulkCopy(DataTable dt, ObjectName destinationTable, SqlBulkCopyOptions options, int? timeout)
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlBulkCopy bulkCopy = new SqlBulkCopy(
@@ -342,6 +342,9 @@ namespace Signum.Engine
                 options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaccion))
             using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
             {
+                if (timeout.HasValue)
+                    bulkCopy.BulkCopyTimeout = timeout.Value;
+
                 foreach (DataColumn c in dt.Columns)
                     bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
 

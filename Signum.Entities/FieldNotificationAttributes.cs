@@ -9,19 +9,19 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.Entities
 {
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class NotifyCollectionChangedAttribute : Attribute
     {
 
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class NotifyChildPropertyAttribute : Attribute
     {
 
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class ValidateChildPropertyAttribute : Attribute
     {
 
@@ -41,7 +41,7 @@ namespace Signum.Entities
             {
                 return fieldAndProperties.GetOrCreate(type, () =>
                 {
-                    var list = Reflector.InstanceFieldsInOrder(type).Where(fi => fi.HasAttribute<T>()).ToList();
+                    var list = Reflector.InstanceFieldsInOrder(type).Where(fi => fi.HasAttribute<T>() || (Reflector.TryFindPropertyInfo(fi)?.HasAttribute<T>() ?? false)).ToList();
 
                     if (list.Count == 0)
                         return null;

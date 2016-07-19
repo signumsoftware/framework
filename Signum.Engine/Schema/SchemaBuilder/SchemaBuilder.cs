@@ -199,10 +199,10 @@ namespace Signum.Engine.Maps
             using (HeavyProfiler.LogNoStackTrace("Include", () => type.TypeName()))
             {
                 if (type.IsAbstract)
-                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".FormatWith(r)) + "Impossible to include in the Schema the type {0} because is abstract".FormatWith(type));
+                    throw new InvalidOperationException(route?.Let(r => "Error on field {0}: ".FormatWith(r)) + "Impossible to include in the Schema the type {0} because is abstract".FormatWith(type));
 
                 if (!Reflector.IsEntity(type))
-                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".FormatWith(r)) + "Impossible to include in the Schema the type {0} because is not and Entity".FormatWith(type));
+                    throw new InvalidOperationException(route?.Let(r => "Error on field {0}: ".FormatWith(r)) + "Impossible to include in the Schema the type {0} because is not and Entity".FormatWith(type));
 
                 foreach (var t in type.Follow(a => a.BaseType))
                     if (!t.IsSerializable)
@@ -212,10 +212,10 @@ namespace Signum.Engine.Maps
 
                 schema.Tables.Add(type, result);
 
-                string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
+                string name = schema.Settings.desambiguatedNames?.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
 
                 if (schema.NameToType.ContainsKey(name))
-                    throw new InvalidOperationException(route.Try(r => "Error on field {0}: ".FormatWith(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".FormatWith(schema.NameToType[name].FullName, type.FullName));
+                    throw new InvalidOperationException(route?.Let(r => "Error on field {0}: ".FormatWith(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".FormatWith(schema.NameToType[name].FullName, type.FullName));
 
                 schema.NameToType[name] = type;
                 schema.TypeToName[type] = name;
@@ -256,7 +256,7 @@ namespace Signum.Engine.Maps
         {
             var should = methodBase.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
              .Where(m => !m.HasAttribute<MethodExpanderAttribute>())
-             .Select(m => m.GetCustomAttribute<ExpressionFieldAttribute>().Try(a => a.Name) ?? m.Name + "Expression").ToList();
+             .Select(m => m.GetCustomAttribute<ExpressionFieldAttribute>()?.Name ?? m.Name + "Expression").ToList();
 
             var fields = methodBase.DeclaringType.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                 .Where(f => f.Name.EndsWith("Expression") && f.FieldType.IsInstantiationOf(typeof(Expression<>)));
@@ -471,20 +471,20 @@ namespace Signum.Engine.Maps
             if (ticksAttr != null && !ticksAttr.HasTicks)
                 throw new InvalidOperationException("HastTicks is false");
 
-            Type type = ticksAttr.Try(t => t.Type) ?? route.Type;
+            Type type = ticksAttr?.Type ?? route.Type;
 
             SqlDbTypePair pair = Settings.GetSqlDbType(ticksAttr, type);
 
             return table.Ticks = new FieldTicks(route.Type)
             {
                 Type = type,
-                Name = ticksAttr.Try(a=>a.Name) ?? name.ToString(),
+                Name = ticksAttr?.Name ?? name.ToString(),
                 SqlDbType = pair.SqlDbType,
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = false,
                 Size = Settings.GetSqlSize(ticksAttr, pair.SqlDbType),
                 Scale = Settings.GetSqlScale(ticksAttr, pair.SqlDbType),
-                Default = ticksAttr.Try(a => a.Default),
+                Default = ticksAttr?.Default,
             };
         }
 
@@ -502,7 +502,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.IsNullable(route, forceNull),
                 Size = Settings.GetSqlSize(att, pair.SqlDbType),
                 Scale = Settings.GetSqlScale(att, pair.SqlDbType),
-                Default = att.Try(a=>a.Default),
+                Default = att?.Default,
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
@@ -521,7 +521,7 @@ namespace Signum.Engine.Maps
                 IsLite = false,
                 ReferenceTable = referenceTable,
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
-                Default = att.Try(a => a.Default),
+                Default = att?.Default,
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
@@ -539,7 +539,7 @@ namespace Signum.Engine.Maps
                 ReferenceTable = referenceTable,
                 AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
                 AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null,
-                Default = Settings.FieldAttribute<SqlDbTypeAttribute>(route).Try(a => a.Default)
+                Default = Settings.FieldAttribute<SqlDbTypeAttribute>(route)?.Default
             }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
         }
 
@@ -552,7 +552,7 @@ namespace Signum.Engine.Maps
 
             bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
 
-            CombineStrategy strategy = Settings.FieldAttribute<CombineStrategyAttribute>(route).Try(s => s.Strategy) ?? CombineStrategy.Case;
+            CombineStrategy strategy = Settings.FieldAttribute<CombineStrategyAttribute>(route)?.Strategy ?? CombineStrategy.Case;
 
             bool avoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null;
 
@@ -703,7 +703,7 @@ namespace Signum.Engine.Maps
         {
             SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default;
 
-            string name =  tn.Try(a => a.Name) ?? EnumEntity.Extract(type).Try(t => t.Name) ?? Reflector.CleanTypeName(type);
+            string name =  tn?.Name ?? EnumEntity.Extract(type)?.Name ?? Reflector.CleanTypeName(type);
 
             return new ObjectName(sn, name);
         }
@@ -711,7 +711,7 @@ namespace Signum.Engine.Maps
         private SchemaName GetSchemaName(TableNameAttribute tn)
         {
             ServerName server = tn.ServerName == null ? null : new ServerName(tn.ServerName);
-            DatabaseName dataBase = tn.DatabaseName == null && server == null ? null : new DatabaseName(server, tn.ServerName);
+            DatabaseName dataBase = tn.DatabaseName == null && server == null ? null : new DatabaseName(server, tn.DatabaseName);
             SchemaName schema = tn.SchemaName == null && dataBase == null ? SchemaName.Default : new SchemaName(dataBase, tn.SchemaName);
             return schema;
         }
@@ -720,7 +720,7 @@ namespace Signum.Engine.Maps
         {
             SchemaName sn = tn != null ? GetSchemaName(tn) : SchemaName.Default;
 
-            return new ObjectName(sn, tn.Try(a => a.Name) ?? (table.Name.Name + name.ToString()));
+            return new ObjectName(sn, tn?.Name ?? (table.Name.Name + name.ToString()));
         }
 
         public virtual string GenerateMListFieldName(PropertyRoute route, KindOfField kindOfField)
@@ -734,7 +734,7 @@ namespace Signum.Engine.Maps
                     return type.Name.FirstUpper();
                 case KindOfField.Enum:
                 case KindOfField.Reference:
-                    return "id" + (EnumEntity.Extract(type).Try(t => t.Name) ?? Reflector.CleanTypeName(type));
+                    return (EnumEntity.Extract(type)?.Name ?? Reflector.CleanTypeName(type)) + "ID";
                 default:
                     throw new InvalidOperationException("No field name for type {0} defined".FormatWith(type));
             }
@@ -742,7 +742,8 @@ namespace Signum.Engine.Maps
 
         public virtual string GenerateFieldName(PropertyRoute route, KindOfField kindOfField)
         {
-            string name = Reflector.PropertyName(route.FieldInfo.Name);
+            string name = route.PropertyInfo != null ? (route.PropertyInfo.Name.TryAfterLast('.') ?? route.PropertyInfo.Name) 
+                : route.FieldInfo.Name.FirstUpper();
 
             switch (kindOfField)
             {
@@ -754,7 +755,7 @@ namespace Signum.Engine.Maps
                     return name;
                 case KindOfField.Reference:
                 case KindOfField.Enum:
-                    return "id" + name;
+                    return name + "ID";
                 default:
                     throw new InvalidOperationException("No name for {0} defined".FormatWith(route.FieldInfo.Name));
             }
@@ -762,7 +763,7 @@ namespace Signum.Engine.Maps
 
         public virtual string GenerateBackReferenceName(Type type, BackReferenceColumnNameAttribute attribute)
         {
-            return attribute.Try(a => a.Name) ?? "idParent";
+            return attribute?.Name ?? "ParentID";
         }
         #endregion
 

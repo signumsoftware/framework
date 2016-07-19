@@ -60,11 +60,6 @@ namespace Signum.Windows.Operations
             return Manager.HasConstructOperationsAllowedAndVisible(type);
         }
 
-        public static bool SaveProtected(Type type)
-        {
-            return Manager.SaveProtected(type);
-        }
-
         public static readonly DependencyProperty ConstructFromOperationKeyProperty =
             DependencyProperty.RegisterAttached("ConstructFromOperationKey", typeof(OperationSymbol), typeof(OperationClient), new UIPropertyMetadata(null));
         public static OperationSymbol GetConstructFromOperationKey(DependencyObject obj)
@@ -78,12 +73,12 @@ namespace Signum.Windows.Operations
 
         public static ImageSource GetImage(Type type, OperationSymbol operation)
         {
-            return Manager.GetImage(operation, Manager.Settings.TryGetValue(type).TryGetC(operation));
+            return Manager.GetImage(operation, Manager.Settings.TryGetValue(type)?.TryGetC(operation));
         }
 
         public static string GetText(Type type, OperationSymbol operation)
         {
-            return Manager.GetText(operation, Manager.Settings.TryGetValue(type).TryGetC(operation));
+            return Manager.GetText(operation, Manager.Settings.TryGetValue(type)?.TryGetC(operation));
         }
 
         public static void AddSetting(OperationSettings setting)
@@ -139,7 +134,7 @@ namespace Signum.Windows.Operations
         public OS GetSettings<OS>(Type type, OperationSymbol operation)
             where OS : OperationSettings
         {
-            OperationSettings settings = Settings.TryGetValue(type).TryGetC(operation);
+            OperationSettings settings = Settings.TryGetValue(type)?.TryGetC(operation);
 
             if (settings != null)
             {
@@ -182,7 +177,7 @@ namespace Signum.Windows.Operations
             var operations = (from oi in OperationInfos(type)
                               where oi.IsEntityOperation && (oi.AllowsNew.Value || !ident.IsNew)
                               let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
-                              let eoc = newEntityOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? type)(ident, oi, ctx, os)
+                              let eoc = newEntityOperationContext.GetInvoker(os?.OverridenType ?? type)(ident, oi, ctx, os)
                               where (os != null && os.HasIsVisible) ? os.OnIsVisible(eoc) : ctx.ShowOperations
                               select eoc).ToList();
 
@@ -340,7 +335,7 @@ namespace Signum.Windows.Operations
             return (from oi in OperationInfos(type)
                     where oi.OperationType == OperationType.ConstructorFromMany
                     let os = GetSettings<ContextualOperationSettingsBase>(type, oi.OperationSymbol)
-                    let coc = newContextualOperationContext.GetInvoker(os.Try(a => a.OverridenType) ?? oi.BaseType)(sc, oi, os)
+                    let coc = newContextualOperationContext.GetInvoker(os?.OverridenType ?? oi.BaseType)(sc, oi, os)
                     where os == null || !os.HasIsVisible || os.OnIsVisible(coc)
                     select ConstructFromManyMenuItemConsturctor.Construct(coc))
                     .OrderBy(Common.GetOrder)
@@ -361,7 +356,7 @@ namespace Signum.Windows.Operations
             var operations = (from oi in OperationInfos(type)
                               where oi.IsEntityOperation
                               let os = GetSettings<EntityOperationSettingsBase>(type, oi.OperationSymbol)
-                              let coc = newContextualOperationContext.GetInvoker(os.Try(o => o.OverridenType) ?? sc.SelectedItem.EntityType)(sc, oi, os == null ? null : os.ContextualUntyped)
+                              let coc = newContextualOperationContext.GetInvoker(os?.OverridenType ?? sc.SelectedItem.EntityType)(sc, oi, os == null ? null : os.ContextualUntyped)
                               where os == null ? oi.Lite == true :
                                    os.ContextualUntyped.HasIsVisible ? os.ContextualUntyped.OnIsVisible(coc) :
                                    oi.Lite == true && !os.HasIsVisible && (!os.HasClick || os.ContextualUntyped.HasClick)
@@ -382,19 +377,6 @@ namespace Signum.Windows.Operations
             }
 
             return operations.Select(coc => EntityOperationMenuItemConsturctor.Construct(coc)).OrderBy(Common.GetOrder);
-        }
-
-
-        static HashSet<Type> SaveProtectedCache;
-        protected internal virtual bool SaveProtected(Type type)
-        {
-            if (!type.IsIEntity())
-                return false;
-
-            if (SaveProtectedCache == null)
-                SaveProtectedCache = Server.Return((IOperationServer o) => o.GetSaveProtectedTypes());
-
-            return SaveProtectedCache.Contains(type);
         }
 
         internal bool HasConstructOperationsAllowedAndVisible(Type type)

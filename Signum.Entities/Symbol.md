@@ -58,9 +58,8 @@ public class PermissionSymbol : Symbol
 {
     private PermissionSymbol() { } 
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    public PermissionSymbol([CallerMemberName]string memberName = null) : 
-        base(new StackFrame(1, false), memberName)
+    public PermissionSymbol(Type declaringType, string fieldName)
+        : base(declaringType, fieldName)
     {
     }
 }
@@ -71,20 +70,22 @@ public class PermissionSymbol : Symbol
 And this is how you declare a new Symbol instance/value: 
 
 ```C#
+[AutoInit]
 public static class AuthorizationPermission
 {
-    public static readonly PermissionSymbol CreateUsers = new PermissionSymbol();
-    public static readonly PermissionSymbol ModifyUsers = new PermissionSymbol();
-    public static readonly PermissionSymbol DeleteUsers = new PermissionSymbol();
+    public static PermissionSymbol CreateUsers;
+    public static PermissionSymbol ModifyUsers;
+    public static PermissionSymbol DeleteUsers;
 }
 ```
 
 But now we can create new instances of `PermissonSymbol` in another modules: 
 
 ```C#
+[AutoInit]
 public static class OrdersPermission
 {
-    public static readonly PermissionSymbol CreateOrder = new PermissionSymbol();
+    public static PermissionSymbol CreateOrder;
 }
 ```
 
@@ -94,7 +95,7 @@ So a symbol instance has two different types:
 
 ### Symbol.ToString
 
-Some magic using `CallerMemberNameAttribute` and `StackFrame` is done so symbols preserve the same smart `ToString` than `enums` have: 
+Some magic using `Signum.MSBuildTask` and `AutoInitAttribute` is done so symbols preserve the same smart `ToString` than `enums` have: 
 
 ```C#
 PermissionSymbol permission = AuthorizationPermission.CreateUsers;
@@ -141,7 +142,7 @@ There are already a few examples in Signum.Extensions of Symbols:
 * FileTypeSymbol
 * ProcessAlgorithmSymbol
 * SimpleTaskSymbol
-* OperationSymbol (but is usually hidden inside of a type-safe container)
+* OperationSymbol (but is hidden inside of a type-safe container)
 * ...
 
 Consider creating a symbol if you create a reusable module with an expansible number of options/strategies/algorithms/commands that will be defined by the client code. 

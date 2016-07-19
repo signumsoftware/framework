@@ -28,7 +28,7 @@ namespace Signum.Web
                 throw new Exception("Incorrect URL: " + controllerContext.HttpContext.Request.Url.ToString());
 
             string webQueryName = "";
-            object rawValue = bindingContext.ValueProvider.GetValue("webQueryName").Try(vp => vp.RawValue);
+            object rawValue = bindingContext.ValueProvider.GetValue("webQueryName")?.RawValue;
             if (rawValue.GetType() == typeof(string[]))
                 webQueryName = ((string[])rawValue)[0];
             else
@@ -38,6 +38,9 @@ namespace Signum.Web
                 throw new InvalidOperationException("webQueryName not provided");
 
             qr.QueryName = Finder.ResolveQueryName(webQueryName);
+
+            if (parameters.AllKeys.Contains("queryUrl"))
+                qr.QueryUrl = parameters["queryUrl"];
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(qr.QueryName);
 

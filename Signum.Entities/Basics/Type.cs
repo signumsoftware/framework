@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
@@ -11,30 +12,16 @@ namespace Signum.Entities.Basics
     public class TypeEntity : Entity
     {
         [NotNullable, UniqueIndex]
-        string fullClassName;
-        public string FullClassName
-        {
-            get { return fullClassName; }
-            set { Set(ref fullClassName, value); }
-        }
+        public string FullClassName { get; set; }
 
         [NotNullable, UniqueIndex]
-        string cleanName;
-        public string CleanName
-        {
-            get { return cleanName; }
-            set { Set(ref cleanName, value); }
-        }
+        public string CleanName { get; set; }
 
         [NotNullable, UniqueIndex]
-        string tableName;
-        public string TableName
-        {
-            get { return tableName; }
-            set { Set(ref tableName, value); }
-        }
+        public string TableName { get; set; }
 
         static Expression<Func<TypeEntity, string>> ToStringExpression = e => e.CleanName;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -76,7 +63,7 @@ namespace Signum.Entities.Basics
         }
     }
 
-    public static class TypeDNExtensions
+    public static class TypeEntityExtensions
     {
         public static Type ToType(this TypeEntity type)
         {

@@ -41,8 +41,11 @@ namespace Signum.Web
 
                 using (sb.SurroundLine(new HtmlTag("td")))
                 {
-                    sb.AddLine(helper.HiddenAnonymous(filterOptions.Token.FullKey()));
-
+                    sb.AddLine(new HtmlTag("input")
+                        .Attr("type", "hidden")
+                        .Attr("value", filterOptions.Token.FullKey())
+                        .ToHtmlSelf());
+                        
                     foreach (var t in filterOptions.Token.Follow(tok => tok.Parent).Reverse())
                     {
                         sb.AddLine(new HtmlTag("span")
@@ -60,7 +63,7 @@ namespace Signum.Web
                         dic.Add("disabled", "disabled");
 
                     sb.AddLine(
-                        helper.DropDownList(
+                        helper.SafeDropDownList(
                         context.Compose("ddlSelector", index.ToString()),
                         possibleOperations.Select(fo =>
                             new SelectListItem

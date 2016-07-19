@@ -47,7 +47,7 @@ namespace Signum.Entities
 
             var dic = validators.GetDefinition(typeof(T));
 
-            PropertyValidator<T> result = (PropertyValidator<T>)dic.TryGetC(pi.Name);
+            PropertyValidator<T> result = (PropertyValidator<T>)dic?.TryGetC(pi.Name);
 
             if (result == null)
             {
@@ -67,7 +67,7 @@ namespace Signum.Entities
 
             var dic = validators.GetDefinition(typeof(T));
 
-            PropertyValidator<T> result = (PropertyValidator<T>)dic.TryGetC(pi.Name);
+            PropertyValidator<T> result = (PropertyValidator<T>)dic?.TryGetC(pi.Name);
 
             if (result == null)
                 throw new InvalidOperationException("{0} is not defined in {1}, try calling OverridePropertyValidator".FormatWith(pi.PropertyName(), typeof(T).TypeName()));
@@ -97,20 +97,6 @@ namespace Signum.Entities
 
             return validators.GetValue(type);
         }
-
-        public static bool Is<T>(this PropertyInfo pi, Expression<Func<T>> property)
-        {
-            PropertyInfo pi2 = ReflectionTools.BasePropertyInfo(property);
-            return ReflectionTools.MemeberEquals(pi, pi2);
-        }
-
-        public static bool Is<S, T>(this PropertyInfo pi, Expression<Func<S, T>> property)
-        {
-            PropertyInfo pi2 = ReflectionTools.BasePropertyInfo(property);
-            return ReflectionTools.MemeberEquals(pi, pi2);
-        }
-
-
     }
 
     public interface IPropertyValidator

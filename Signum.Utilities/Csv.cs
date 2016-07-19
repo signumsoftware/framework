@@ -73,7 +73,7 @@ namespace Signum.Utilities
         static string EncodeCsv(string p, CultureInfo culture)
         {
             if (p == null)
-                return p;
+                return null;
 
             string separator = culture.TextInfo.ListSeparator;
 
@@ -114,63 +114,111 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null) where T : new()
+        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, CsvReadOptions<T> options = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
-                return ReadStream<T>(fs, encoding, culture, skipLines, parserFactory).ToList();
+                return ReadStream<T>(fs, encoding, culture, skipLines, options).ToList();
         }
 
-        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null) where T : new()
+        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, CsvReadOptions<T> options = null) where T : class, new()
         {
             using (MemoryStream ms = new MemoryStream(data))
-                return ReadStream<T>(ms, encoding, culture, skipLines, parserFactory).ToList();
+                return ReadStream<T>(ms, encoding, culture, skipLines, options).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1,
-            Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null)
-            where T : new()
+        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, CsvReadOptions<T> options = null) where T : class, new()
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
+            if (options == null)
+                options = new CsvReadOptions<T>();
 
             var columns = ColumnInfoCache<T>.Columns;
             var members = columns.Select(c => c.MemberEntry).ToList();
-            var parsers =  columns.Select(c => GetParser(culture, c, parserFactory)).ToList();
+            var parsers = columns.Select(c => GetParser(culture, c, options.ParserFactory)).ToList();
 
-            Regex regex = GetRegex(culture);
+            Regex regex = GetRegex(culture, options.RegexTimeout);
 
-            using (StreamReader sr = new StreamReader(stream, encoding))
+            if (options.AsumeSingleLine)
             {
-                string str = sr.ReadToEnd();
-
-                var matches = regex.Matches(str).Cast<Match>();
-
-                if (skipLines > 0)
-                    matches = matches.Skip(skipLines);
-
-                foreach (var m in matches)
+                using (StreamReader sr = new StreamReader(stream, encoding))
                 {
-                    if (m.Length > 0)
-                    {
-                        T t = ReadObject<T>(m, members, parsers);
+                    for (int i = 0; i < skipLines; i++)
+                        sr.ReadLine();
 
-                        yield return t;
+                    while(true)
+                    {
+                        string csvLine = sr.ReadLine();
+
+                        if (csvLine == null)
+                            yield break;
+
+                        Match m = null;
+                        T t = null;
+                        try
+                        {
+                            m = regex.Match(csvLine);
+                            if (m.Length > 0)
+                            {
+                                t = ReadObject<T>(m, members, parsers);
+                            }
+                        }
+                        catch(Exception e)
+                        {
+                            if (options.SkipError == null || !options.SkipError(e, m))
+                                throw;
+                        }
+
+                        if (t != null)
+                            yield return t;
+                    }
+                }
+            }
+            else
+            {
+                using (StreamReader sr = new StreamReader(stream, encoding))
+                {
+                    string str = sr.ReadToEnd();
+
+                    var matches = regex.Matches(str).Cast<Match>();
+
+                    if (skipLines > 0)
+                        matches = matches.Skip(skipLines);
+
+                    foreach (var m in matches)
+                    {
+                        if (m.Length > 0)
+                        {
+                            T t = null;
+                            try
+                            {
+                                t = ReadObject<T>(m, members, parsers);
+                            }
+                            catch (Exception e)
+                            {
+                                if (options.SkipError == null || !options.SkipError(e, m))
+                                    throw;
+                            }
+                            if (t != null)
+                                yield return t;
+                        }
                     }
                 }
             }
         }
 
-        public static T ReadLine<T>(string csvLine, CultureInfo culture = null, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory = null)
-            where T : new()
+        public static T ReadLine<T>(string csvLine, CultureInfo culture = null, CsvReadOptions<T> options = null)
+            where T : class, new()
         {
+            if (options == null)
+                options = new CsvReadOptions<T>();
+
             culture = culture ?? CultureInfo.CurrentCulture;
 
-            Regex regex = GetRegex(culture);
+            Regex regex = GetRegex(culture, options.RegexTimeout);
 
             Match m = regex.Match(csvLine);
 
@@ -178,7 +226,7 @@ namespace Signum.Utilities
 
             return ReadObject<T>(m,
                 columns.Select(c => c.MemberEntry).ToList(),
-                columns.Select(c => GetParser(culture, c, parserFactory)).ToList());
+                columns.Select(c => GetParser(culture, c, options.ParserFactory)).ToList());
         }
 
         private static Func<string, object> GetParser<T>(CultureInfo culture, CsvColumnInfo<T> column, Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> parserFactory)
@@ -199,7 +247,7 @@ namespace Signum.Utilities
             var vals = m.Groups["val"].Captures;
 
             if (vals.Count < members.Count)
-                throw new FormatException("Not enought fields on line: " + m.Value);
+                throw new FormatException("Only {0} coulumns found (instead of {1}) in line: ".FormatWith(vals.Count, members.Count, m.Value));
 
             T t = new T();
             for (int i = 0; i < members.Count; i++)
@@ -218,18 +266,18 @@ namespace Signum.Utilities
 
         static ConcurrentDictionary<char, Regex> regexCache = new ConcurrentDictionary<char, Regex>();
         const string BaseRegex = @"^((?<val>'(?:[^']+|'')*'|[^;\r\n]*))?((?!($|\r\n));(?<val>'(?:[^']+|'')*'|[^;\r\n]*))*($|\r\n)";
-        static Regex GetRegex(CultureInfo culture)
+        static Regex GetRegex(CultureInfo culture, TimeSpan timeout)
         {
             char separator = culture.TextInfo.ListSeparator.SingleEx();
 
             return regexCache.GetOrAdd(separator, s =>
-                new Regex(BaseRegex.Replace('\'', '"').Replace(';', s), RegexOptions.Multiline | RegexOptions.ExplicitCapture));
+                new Regex(BaseRegex.Replace('\'', '"').Replace(';', s), RegexOptions.Multiline | RegexOptions.ExplicitCapture, timeout));
         }
 
         static class ColumnInfoCache<T>
         {
             public static List<CsvColumnInfo<T>> Columns = MemberEntryFactory.GenerateList<T>(MemberOptions.Fields | MemberOptions.Properties | MemberOptions.Typed | MemberOptions.Setters | MemberOptions.Getter)
-                .Select((me, i) => new CsvColumnInfo<T>(i, me, me.MemberInfo.GetCustomAttribute<FormatAttribute>().Try(f => f.Format))).ToList();
+                .Select((me, i) => new CsvColumnInfo<T>(i, me, me.MemberInfo.GetCustomAttribute<FormatAttribute>()?.Format)).ToList();
         }
 
         static string DecodeCsv(string s)
@@ -272,6 +320,14 @@ namespace Signum.Utilities
 
             return Convert.ChangeType(s, type, culture);
         }
+    }
+
+    public class CsvReadOptions<T> where T: class
+    {
+        public Func<CsvColumnInfo<T>, CultureInfo, Func<string, object>> ParserFactory;
+        public bool AsumeSingleLine = false;
+        public Func<Exception, Match, bool> SkipError;
+        public TimeSpan RegexTimeout = Regex.InfiniteMatchTimeout;
     }
 
 

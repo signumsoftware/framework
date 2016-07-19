@@ -33,8 +33,7 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 var m = ((MethodCallExpression)expression);
 
-                return m.Method.DeclaringType == typeof(Queryable) ||
-                    m.Method.DeclaringType == typeof(LinqHints) && (m.Method.Name == "DisableQueryFilter" || m.Method.Name == "WithHint");
+                return m.Method.DeclaringType == typeof(Queryable) || m.Method.HasAttribute<AvoidEagerEvaluationAttribute>();
             }
 
             return expression.NodeType == ExpressionType.Parameter ||
@@ -106,6 +105,7 @@ namespace Signum.Utilities.ExpressionTrees
             return value;
         }
 
+        [AvoidEagerEvaluation]
         public static IQueryable<T> DisableQueryFilter<T>(this IQueryable<T> source)
         {
             if (source == null)
@@ -159,6 +159,7 @@ namespace Signum.Utilities.ExpressionTrees
             }
         }
 
+        [AvoidEagerEvaluation]
         public static IQueryable<T> WithHint<T>(this IQueryable<T> source, string hint)
         {
             if (source == null)

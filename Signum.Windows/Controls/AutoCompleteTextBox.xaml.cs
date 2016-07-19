@@ -32,7 +32,7 @@ namespace Signum.Windows
         public event Func<string, CancellationToken, IEnumerable> Autocompleting;
 
         public static readonly DependencyProperty SelectedItemProperty =
-            DependencyProperty.Register("SelectedItem", typeof(object), typeof(AutocompleteTextBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (s, o) => ((AutocompleteTextBox)s).txtBox.Text = o.NewValue.TryToString()));
+            DependencyProperty.Register("SelectedItem", typeof(object), typeof(AutocompleteTextBox), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, (s, o) => ((AutocompleteTextBox)s).txtBox.Text = o.NewValue?.ToString()));
         public object SelectedItem
         {
             get { return (object)GetValue(SelectedItemProperty); }
@@ -227,7 +227,7 @@ namespace Signum.Windows
         public bool Close(CloseReason reason)
         {
             pop.IsOpen = false;
-            if (SelectedItem.TryToString() != txtBox.Text)
+            if (SelectedItem?.ToString() != txtBox.Text)
             {
                 if (string.IsNullOrEmpty(txtBox.Text))
                     SelectedItem = null;

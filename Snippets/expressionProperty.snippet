@@ -14,7 +14,11 @@
       <Imports>
         <Import>
           <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Utilities</Namespace>
+        </Import>
+        <Import>
           <Namespace>System.Linq.Expressions</Namespace>
         </Import>
       </Imports>
@@ -30,11 +34,6 @@
           <Default>Entity</Default>
         </Literal>
         <Literal>
-          <ID>paramName</ID>
-          <ToolTip>Parameter Name</ToolTip>
-          <Default>entity</Default>
-        </Literal>
-        <Literal>
           <ID>returnType</ID>
           <ToolTip>Return Type</ToolTip>
           <Default>int</Default>
@@ -42,7 +41,8 @@
       </Declarations>
       <Code Language="csharp">
         <![CDATA[static Expression<Func<$type$, $returnType$>> $propertyName$Expression = 
-            $paramName$ => ;
+            @this => ;
+        [ExpressionField]
         public $returnType$ $propertyName$
         {
             get{ return $propertyName$Expression.Evaluate(this); }

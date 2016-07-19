@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
@@ -11,69 +12,34 @@ namespace Signum.Entities.Basics
     public class OperationLogEntity : Entity
     {
         [ImplementedByAll]
-        Lite<IEntity> target;
-        public Lite<IEntity> Target
-        {
-            get { return target; }
-            set { Set(ref target, value); }
-        }
+        public Lite<IEntity> Target { get; set; }
 
         [ImplementedByAll]
-        Lite<IEntity> origin;
-        public Lite<IEntity> Origin
-        {
-            get { return origin; }
-            set { Set(ref origin, value); }
-        }
-
-        OperationSymbol operation;
+        public Lite<IEntity> Origin { get; set; }
         [NotNullValidator]
-        public OperationSymbol Operation
-        {
-            get { return operation; }
-            set { SetToStr(ref operation, value); }
-        }
 
-        Lite<IUserEntity> user;
+        public OperationSymbol Operation { get; set; }
         [NotNullValidator]
-        public Lite<IUserEntity> User
-        {
-            get { return user; }
-            set { SetToStr(ref user, value); }
-        }
 
-        DateTime start;
-        public DateTime Start
-        {
-            get { return start; }
-            set { SetToStr(ref start, value); }
-        }
+        public Lite<IUserEntity> User { get; set; }
 
-        DateTime? end;
-        public DateTime? End
-        {
-            get { return end; }
-            set { Set(ref end, value); }
-        }
+        public DateTime Start { get; set; }
 
+        public DateTime? End { get; set; }
 
         static Expression<Func<OperationLogEntity, double?>> DurationExpression =
             log => (double?)(log.End - log.Start).Value.TotalMilliseconds;
+        [ExpressionField("DurationExpression")]
         public double? Duration
         {
-            get { return end == null ? null : DurationExpression.Evaluate(this); }
+            get { return End == null ? null : DurationExpression.Evaluate(this); }
         }
 
-        Lite<ExceptionEntity> exception;
-        public Lite<ExceptionEntity> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value); }
-        }
+        public Lite<ExceptionEntity> Exception { get; set; }
 
         public override string ToString()
         {
-            return "{0} {1} {2:d}".FormatWith(operation, user, start);
+            return "{0} {1} {2:d}".FormatWith(Operation, User, Start);
         }
 
         public void SetTarget(IEntity target)

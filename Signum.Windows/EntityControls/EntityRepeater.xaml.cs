@@ -167,7 +167,7 @@ namespace Signum.Windows
         {
             object entity = ((EntityRepeaterContentControl)e.OriginalSource).DataContext;
 
-            var result = OnViewing(entity, creating: false);
+            var result = OnViewingOrNavigating(entity, creating: false);
 
             if (result != null)
             {

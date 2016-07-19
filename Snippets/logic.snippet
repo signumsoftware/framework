@@ -14,8 +14,24 @@
       <Imports>
         <Import>
           <Namespace>Signum.Engine</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
           <Namespace>Signum.Utilities</Namespace>
+        </Import>
+        <Import>
+          <Namespace>Signum.Engine.DynamicQuery</Namespace>
+        </Import>
+        <Import>
+          <Namespace>Signum.Engine.Maps</Namespace>
+        </Import>
+        <Import>
+          <Namespace>Signum.Engine.Operations</Namespace>
+        </Import>
+        <Import>
+          <Namespace>System.Reflection</Namespace>
         </Import>
       </Imports>
 			<Declarations>
@@ -24,27 +40,15 @@
           <ToolTip>Name of the main entity</ToolTip>
           <Default>Foo</Default>
         </Literal>
-         <Literal>
+        <Literal>
           <ID>entityParam</ID>
           <ToolTip>Entity parameter</ToolTip>
           <Default>e</Default>
-        </Literal>
-        <Literal>
-          <ID>methodName</ID>
-          <ToolTip>Name of one extension method</ToolTip>
-          <Default>Bla</Default>
         </Literal>
 			</Declarations>
 			<Code Language="csharp">
 				<![CDATA[public static class $entityName$Logic
     {
-        static Expression<Func<$entityName$Entity, int>> $methodName$Expression = 
-            $entityParam$ => $end$; 
-        public static int $methodName$(this $entityName$Entity $entityParam$)
-        {
-            return $methodName$Expression.Evaluate($entityParam$);
-        }
-
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -60,8 +64,6 @@
                         //More fields
                     });
 
-                dqm.RegisterExpression(($entityName$Entity $entityParam$) => $entityParam$.$methodName$());
-                
                 new Graph<$entityName$Entity>.Execute($entityName$Operation.Save)
                 {
                     AllowsNew = true,

@@ -178,7 +178,7 @@ namespace Signum.Engine.Linq
                     {
                         if (where != null)
                         {
-                            where = Expression.And(fromSelect.Where, where);
+                            where = Expression.And(fromSelect.Where, where.UnNullify());
                         }
                         else
                         {
@@ -247,7 +247,7 @@ namespace Signum.Engine.Linq
                     return false;
 
                 // cannot move forward a take if outer has take or skip or distinct
-                if (fromSelect.Top != null && (select.Top != null || /*select.Skip != null ||*/ select.IsDistinct || selHasGroupBy || HasApplyJoin(select.From) ))
+                if (fromSelect.Top != null && (select.Top != null || /*select.Skip != null ||*/ select.IsDistinct || selHasGroupBy || HasApplyJoin(select.From) || select.Where != null))
                     return false;
                 // cannot move forward a skip if outer has skip or distinct
                 //if (fromSelect.Skip != null && (select.Skip != null || select.Distinct || selHasAggregates || selHasGroupBy))

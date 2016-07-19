@@ -271,12 +271,6 @@ namespace Signum.Services
                 () => OperationLogic.HasConstructOperations(entityType));
         }
 
-        public HashSet<Type> GetSaveProtectedTypes()
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                () => OperationLogic.GetSaveProtectedTypes());
-        }
-
         public Entity ExecuteOperation(IEntity entity, OperationSymbol operationSymbol, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationSymbol.ToString(),

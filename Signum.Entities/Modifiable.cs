@@ -5,14 +5,15 @@ using System.Text;
 using Signum.Utilities;
 using System.Collections.ObjectModel;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Reflection; 
+using Signum.Entities.Reflection;
+using System.Diagnostics;
 
 namespace Signum.Entities
 {
     [Serializable]
     public abstract class Modifiable 
     {
-        [Ignore]
+        [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
         ModifiedState modified;
        
         [HiddenProperty]

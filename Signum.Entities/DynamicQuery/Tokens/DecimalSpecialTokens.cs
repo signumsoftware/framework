@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,25 +7,29 @@ using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Reflection;
 
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
-    public class FloorToken : QueryToken
+    public class StepToken : QueryToken
     {
-        internal FloorToken(QueryToken parent)
+        public decimal StepSize;
+
+        internal StepToken(QueryToken parent, decimal stepSize)
             : base(parent)
         {
+            this.StepSize = stepSize;
         }
 
         public override string ToString()
         {
-            return "Floor";
+            return QueryTokenMessage.Step0.NiceToString(StepSize);
         }
 
         public override string NiceName()
         {
-            return "Floor" + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return QueryTokenMessage._0Steps1.NiceToString(Parent.NiceName(), StepSize);
         }
 
         public override string Format
@@ -33,77 +37,94 @@ namespace Signum.Entities.DynamicQuery
             get { return Parent.Format; }
         }
 
-        public override string Unit
-        {
-            get { return Parent.Unit; }
-        }
-
         public override Type Type
         {
-            get { return typeof(int?); }
+            get { return Parent.Type.Nullify(); }
         }
 
         public override string Key
         {
-            get { return "Floor"; }
+            get { return "Step" + StepSize.ToString().Replace(".", "_"); }
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
-            return new List<QueryToken>();
+            return new List<QueryToken>
+            {
+                new StepMultiplierToken(this, 1),
+                new StepMultiplierToken(this, 1.2m),
+                new StepMultiplierToken(this, 1.5m),
+                new StepMultiplierToken(this, 2),
+                new StepMultiplierToken(this, 2.5m),
+                new StepMultiplierToken(this, 3),
+                new StepMultiplierToken(this, 4),
+                new StepMultiplierToken(this, 5),
+                new StepMultiplierToken(this, 6),
+                new StepMultiplierToken(this, 8),
+            };
         }
-
-        static MethodInfo miFloorDouble = ReflectionTools.GetMethodInfo(() => Math.Floor(0.0));
-        static MethodInfo miFloorDecimal= ReflectionTools.GetMethodInfo(() => Math.Floor(0.0m));
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             var exp = Parent.BuildExpression(context);
 
-            var call = exp.Type.UnNullify() == typeof(decimal) ?
-                Expression.Call(miFloorDecimal, exp.UnNullify()) :
-                Expression.Call(miFloorDouble, Expression.Convert(exp, typeof(double)));
+            return RoundingExpressionGenerator.RoundExpression(exp, this.StepSize, RoundingType.Ceil);
+        }
 
-            return Expression.Convert(call.Nullify(), typeof(int?));
+        public override string Unit
+        {
+            get { return this.Parent.Unit; }
         }
 
         public override PropertyRoute GetPropertyRoute()
         {
-            return Parent.GetPropertyRoute();
+            return this.Parent.GetPropertyRoute();
         }
 
         public override Implementations? GetImplementations()
-        {  
-            return null;
+        {
+            return this.Parent.GetImplementations();
         }
 
         public override string IsAllowed()
         {
-            return Parent.IsAllowed();
+            return this.Parent.IsAllowed();
         }
 
         public override QueryToken Clone()
         {
-            return new FloorToken(Parent.Clone());
+            return new StepToken(this.Parent.Clone(), this.StepSize);
+        }
+
+        public override bool IsRealGroupable
+        {
+            get { return true; }
         }
     }
 
-    [Serializable]
-    public class CeilToken : QueryToken
+    public class StepMultiplierToken : QueryToken
     {
-        internal CeilToken(QueryToken parent)
-            : base(parent)
+        public decimal Multiplier;
+    
+        public StepMultiplierToken(StepToken parent, decimal multiplier) : base(parent)
         {
+            this.Multiplier = multiplier;
         }
+
 
         public override string ToString()
         {
-            return "Ceil";
+            return "x" + Multiplier;
         }
 
         public override string NiceName()
         {
-            return "Ceil" + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
+            return QueryTokenMessage._0Steps1.NiceToString(Parent.Parent.NiceName(), StepSize());
+        }
+
+        internal decimal StepSize()
+        {
+            return ((StepToken)this.Parent).StepSize * Multiplier;
         }
 
         public override string Format
@@ -111,58 +132,214 @@ namespace Signum.Entities.DynamicQuery
             get { return Parent.Format; }
         }
 
-        public override string Unit
-        {
-            get { return Parent.Unit; }
-        }
-
         public override Type Type
         {
-            get { return typeof(int?); }
+            get { return Parent.Type.Nullify(); }
         }
 
         public override string Key
         {
-            get { return "Ceil"; }
+            get { return "x" + Multiplier.ToString().Replace(".", "_"); }
+        }
+
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        {
+            var exp = Parent.Parent.BuildExpression(context);
+
+            return RoundingExpressionGenerator.RoundExpression(exp, this.StepSize(), RoundingType.Ceil);
+        }
+
+        protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
+        {
+            return new List<QueryToken>
+            {
+                new StepRoundingToken(this, RoundingType.Ceil),
+                new StepRoundingToken(this, RoundingType.Floor),
+                new StepRoundingToken(this, RoundingType.Round),
+                new StepRoundingToken(this, RoundingType.RoundMiddle),
+            };
+        }
+
+        public override QueryToken Clone()
+        {
+            return new StepMultiplierToken((StepToken)this.Parent.Clone(), this.Multiplier);
+        }
+
+        public override string Unit
+        {
+            get { return null; }
+        }
+
+        public override PropertyRoute GetPropertyRoute()
+        {
+            return this.Parent.GetPropertyRoute();
+        }
+
+        public override Implementations? GetImplementations()
+        {
+            return this.Parent.GetImplementations();
+        }
+
+        public override string IsAllowed()
+        {
+            return this.Parent.IsAllowed();
+        }
+
+        public override bool IsRealGroupable
+        {
+            get { return true; }
+        }
+    }
+
+    public class StepRoundingToken : QueryToken
+    {
+        public RoundingType Rounding;
+
+        public StepRoundingToken(StepMultiplierToken parent, RoundingType rounding)
+            : base(parent)
+        {
+            this.Rounding = rounding;
+        }
+
+        public override string ToString()
+        {
+            return Rounding.NiceToString();
+        }
+
+        public override string NiceName()
+        {
+            var num = ((StepMultiplierToken)this.Parent).StepSize();
+
+            string str = Rounding == RoundingType.Ceil ? "⌈{0}⌉" :
+                Rounding == RoundingType.Floor ? "⌊{0}⌋" :
+                Rounding == RoundingType.Round ? "[{0}]" :
+                Rounding == RoundingType.RoundMiddle ? "|{0}|" :
+                new InvalidOperationException().Throw<string>();
+
+            return QueryTokenMessage._0Steps1.NiceToString(Parent.Parent.Parent.NiceName(), str.FormatWith(num));
+        }
+
+        public override string Format
+        {
+            get { return Parent.Format; }
+        }
+
+        public override Type Type
+        {
+            get { return Parent.Type.Nullify(); }
+        }
+
+        public override string Key
+        {
+            get { return Rounding.ToString(); }
         }
 
         protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
         {
             return new List<QueryToken>();
         }
+
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        {
+            var exp = Parent.Parent.Parent.BuildExpression(context);
+
+            return RoundingExpressionGenerator.RoundExpression(exp, ((StepMultiplierToken)this.Parent).StepSize(), this.Rounding);
+        }
+
+        public override string Unit
+        {
+            get { return null; }
+        }
+
+        public override PropertyRoute GetPropertyRoute()
+        {
+            return this.Parent.GetPropertyRoute();
+        }
+
+        public override Implementations? GetImplementations()
+        {
+            return this.Parent.GetImplementations();
+        }
+
+        public override string IsAllowed()
+        {
+            return this.Parent.IsAllowed();
+        }
+
+        public override QueryToken Clone()
+        {
+            return new StepRoundingToken((StepMultiplierToken)this.Parent.Clone(), this.Rounding);
+        }
+
+        public override bool IsRealGroupable
+        {
+            get { return true; }
+        }
+    }
+
+    internal static class RoundingExpressionGenerator
+    {
+
+        static MethodInfo miFloorDouble = ReflectionTools.GetMethodInfo(() => Math.Floor(0.0));
+        static MethodInfo miFloorDecimal = ReflectionTools.GetMethodInfo(() => Math.Floor(0.0m));
 
         static MethodInfo miCeilingDouble = ReflectionTools.GetMethodInfo(() => Math.Ceiling(0.0));
         static MethodInfo miCeilingDecimal = ReflectionTools.GetMethodInfo(() => Math.Ceiling(0.0m));
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        static MethodInfo miRoundDouble = ReflectionTools.GetMethodInfo(() => Math.Round(0.0));
+        static MethodInfo miRoundDecimal = ReflectionTools.GetMethodInfo(() => Math.Round(0.0m));
+
+        public static Expression RoundExpression(Expression value, decimal multiplier, RoundingType rounding)
         {
-            var exp = Parent.BuildExpression(context);
+            var result = value;
 
-            var call = exp.Type.UnNullify() == typeof(decimal) ? 
-                Expression.Call(miCeilingDecimal, exp.UnNullify()) :
-                Expression.Call(miCeilingDouble, Expression.Convert(exp, typeof(double))); 
+            result = result.Type.UnNullify() == typeof(decimal) ?
+                result.UnNullify() :
+                Expression.Convert(result, typeof(double));
 
-            return Expression.Convert(call.Nullify(), typeof(int?));
+            if (rounding == RoundingType.RoundMiddle)
+                result = Expression.Subtract(result, Constant(multiplier / 2, result.Type));
+
+            if (multiplier != 1)
+                result = Expression.Divide(result, Constant(multiplier, result.Type));
+
+            if (rounding == RoundingType.Ceil)
+                result = result.Type.UnNullify() == typeof(decimal) ?
+                    Expression.Call(miCeilingDecimal, result.UnNullify()) :
+                    Expression.Call(miCeilingDouble, result.TryConvert(typeof(double)));
+            else if (rounding == RoundingType.Floor)
+                result = result.Type.UnNullify() == typeof(decimal) ?
+                    Expression.Call(miFloorDecimal, result.UnNullify()) :
+                    Expression.Call(miFloorDouble, result.TryConvert(typeof(double)));
+            else if (rounding == RoundingType.Round || rounding == RoundingType.RoundMiddle)
+                result = result.Type.UnNullify() == typeof(decimal) ?
+                    Expression.Call(miRoundDecimal, result.UnNullify()) :
+                    Expression.Call(miRoundDouble, result.TryConvert(typeof(double)));
+
+            if (multiplier != 1)
+                result = Expression.Multiply(result, Constant(multiplier, result.Type));
+
+            if (rounding == RoundingType.RoundMiddle)
+                result = Expression.Add(result, Constant(multiplier / 2, result.Type));
+
+            return result.Nullify().TryConvert(value.Type.Nullify());
         }
 
-        public override PropertyRoute GetPropertyRoute()
+        private static ConstantExpression Constant(decimal multiplier, Type type)
         {
-            return Parent.GetPropertyRoute();
-        }
-
-        public override Implementations? GetImplementations()
-        {
-            return null;
-        }
-
-        public override string IsAllowed()
-        {
-            return Parent.IsAllowed();
-        }
-
-        public override QueryToken Clone()
-        {
-            return new CeilToken(Parent.Clone());
+            return Expression.Constant(ReflectionTools.ChangeType(multiplier, type), type);
         }
     }
+
+    [DescriptionOptions(DescriptionOptions.Members)]
+    public enum RoundingType
+    {
+        Floor,
+        Ceil, 
+        Round,
+        RoundMiddle,
+    }
+
+
+ 
 }

@@ -440,11 +440,23 @@ namespace Signum.Engine.DynamicQuery
                 throw new ApplicationException(str);
 
             var pairs = orders.Select(o => Tuple.Create(
-                     Expression.Lambda(o.Token.BuildExpression(query.Context), query.Context.Parameter),
+                     Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(query.Context)), query.Context.Parameter),
                     o.OrderType)).ToList();
 
             return new DQueryable<T>(query.Query.OrderBy(pairs), query.Context);
         }
+
+        static Expression OnAddaptForOrderBy(Expression exp)
+        {
+            foreach (var item in AddaptForOrderBy.GetInvocationListTyped())
+            {
+                exp = item(exp);
+            }
+
+            return exp;
+        }
+
+        public static Func<Expression, Expression> AddaptForOrderBy = e => e; 
 
         public static IQueryable<object> OrderBy(this IQueryable<object> query, List<Tuple<LambdaExpression, OrderType>> orders)
         {
@@ -483,7 +495,7 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
         {
             var pairs = orders.Select(o => Tuple.Create(
-                    Expression.Lambda(o.Token.BuildExpression(collection.Context), collection.Context.Parameter),
+                    Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
                    o.OrderType)).ToList();
 
 
@@ -493,7 +505,7 @@ namespace Signum.Engine.DynamicQuery
         public static DEnumerableCount<T> OrderBy<T>(this DEnumerableCount<T> collection, List<Order> orders)
         {
             var pairs = orders.Select(o => Tuple.Create(
-                    Expression.Lambda(o.Token.BuildExpression(collection.Context), collection.Context.Parameter),
+                    Expression.Lambda(OnAddaptForOrderBy(o.Token.BuildExpression(collection.Context)), collection.Context.Parameter),
                    o.OrderType)).ToList();
 
 

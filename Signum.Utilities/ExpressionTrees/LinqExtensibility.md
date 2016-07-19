@@ -50,6 +50,7 @@ public class PersonEntity
     }
 
     static Expression<Func<PersonEntity,bool>> IsAmericanExpression = p=>p.Country == "USA"; 
+    [ExpressionField] 
     public bool IsAmerican
     { 
        get { return IsAmericanExpression.Evaluate(this); }        
@@ -86,6 +87,7 @@ Could be replaced by
 public static class PersonLogic
 {
    static Expression<Func<PersonEntity,bool>> IsAmericanExpression = p => p.Country == "USA"; 
+   [ExpressionField] 
    public static bool IsAmerican(this PersonEntity person)
    {
        return IsAmericanExpression.Invoke(person);

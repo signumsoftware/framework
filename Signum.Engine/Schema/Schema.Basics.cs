@@ -130,10 +130,7 @@ namespace Signum.Engine.Maps
 
                 if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
                 {
-                    if (Mixins == null)
-                        return null;
-
-                    return Mixins.TryGetC(mi.GetGenericArguments().Single());
+                    return Mixins?.TryGetC(mi.GetGenericArguments().Single());
                 }
 
                 return null;
@@ -141,10 +138,7 @@ namespace Signum.Engine.Maps
 
             if (member is Type)
             {
-                if (Mixins == null)
-                    return null;
-
-                return Mixins.TryGetC((Type)member);
+                return Mixins?.TryGetC((Type)member);
             }
 
             FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member);

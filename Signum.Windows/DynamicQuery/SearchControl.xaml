@@ -134,7 +134,7 @@
                 </StackPanel>
             </Button>
             <Button x:Name="btCreate" Content="{DynamicResource Create}" Click="btCreate_Click" Style="{StaticResource big}"/>
-            <Button x:Name="btNavigate" Content="{DynamicResource Navigate}" Click="btView_Click" ToolTip="{m:Loc {x:Static d:SearchMessage.ViewSelected}}" Style="{StaticResource big}"/>
+            <Button x:Name="btView" Content="{DynamicResource View}" Click="btView_Click" ToolTip="{m:Loc {x:Static d:SearchMessage.ViewSelected}}" Style="{StaticResource big}"/>
             <Button x:Name="btRemove" Content="{DynamicResource Remove}" Click="btRemove_Click" ToolTip="{m:Loc {x:Static d:EntityControlMessage.Remove}}" Style="{StaticResource big}"/>
             <Menu IsMainMenu="False" x:Name="menu" VerticalAlignment="Center" Background="Transparent"/>
         </StackPanel>

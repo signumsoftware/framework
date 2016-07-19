@@ -238,7 +238,7 @@ namespace Signum.Utilities.Reflection
 
         public static Func<T, P> CreateGetter<T, P>(MemberInfo m)
         {
-            if ((m as PropertyInfo).Try(a => !a.CanRead) ?? false)
+            if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
                 return null;
 
             ParameterExpression p = Expression.Parameter(typeof(T), "p");
@@ -248,7 +248,7 @@ namespace Signum.Utilities.Reflection
 
         public static Func<T, object> CreateGetter<T>(MemberInfo m)
         {
-            if ((m as PropertyInfo).Try(a => !a.CanRead) ?? false)
+            if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
                 return null;
 
             ParameterExpression p = Expression.Parameter(typeof(T), "p");
@@ -259,7 +259,7 @@ namespace Signum.Utilities.Reflection
 
         public static Func<object, object> CreateGetterUntyped(Type type, MemberInfo m)
         {
-            if ((m as PropertyInfo).Try(a => !a.CanRead) ?? false)
+            if ((m as PropertyInfo)?.Let(a => !a.CanRead) ?? false)
                 return null;
 
             ParameterExpression p = Expression.Parameter(typeof(object), "p");
@@ -270,7 +270,7 @@ namespace Signum.Utilities.Reflection
 
         public static Action<T, P> CreateSetter<T, P>(MemberInfo m)
         {
-            if ((m as PropertyInfo).Try(a => !a.CanWrite) ?? false)
+            if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
                 return null;
 
             ParameterExpression t = Expression.Parameter(typeof(T), "t");
@@ -282,7 +282,7 @@ namespace Signum.Utilities.Reflection
 
         public static Action<T, object> CreateSetter<T>(MemberInfo m)
         {
-            if ((m as PropertyInfo).Try(a => !a.CanWrite) ?? false)
+            if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
                 return null;
 
             ParameterExpression t = Expression.Parameter(typeof(T), "t");
@@ -296,7 +296,7 @@ namespace Signum.Utilities.Reflection
 
         public static Action<object, object> CreateSetterUntyped(Type type, MemberInfo m)
         {
-            if ((m as PropertyInfo).Try(a => !a.CanWrite) ?? false)
+            if ((m as PropertyInfo)?.Let(a => !a.CanWrite) ?? false)
                 return null;
 
             ParameterExpression t = Expression.Parameter(typeof(object), "t");

@@ -147,7 +147,7 @@ namespace Signum.Engine
 
         protected internal override int NumParameters
         {
-            get { return Parameters.Try(p => p.Count) ?? 0; }
+            get { return Parameters?.Count ?? 0; }
         }
 
         static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
@@ -164,7 +164,7 @@ namespace Signum.Engine
                 return "\'" + ((Guid)value).ToString() + "'";
 
             if (value is DateTime)
-                return "convert(datetime, '{0:s}', 126)".FormatWith(value);
+                return "convert(datetime, '{0:yyyy-MM-ddThh:mm:ss.fff}', 126)".FormatWith(value);
 
             if (value is TimeSpan)
                 return "convert(time, '{0:g}')".FormatWith(value);

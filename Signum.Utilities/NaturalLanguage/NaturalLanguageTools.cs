@@ -210,7 +210,7 @@ namespace Signum.Utilities
             return sb.ToString();
         }
 
-        /// <param name="genderAwareText">Se ha[n] encontrado [1m:un|1f:una|m:unos|f:unas] {0} eliminad[1m:o|1f:a|m:os|f:as]</param>
+        /// <param name="genderAwareText">Something like Line[s] or [1m:Man|m:Men|1f:Woman|f:Women]</param>
         /// <param name="gender">Masculine, Femenine, Neutrum, Inanimate, Animate</param>
         public static string ForGenderAndNumber(this string genderAwareText, char? gender = null, int? number = null)
         {
@@ -225,13 +225,13 @@ namespace Signum.Utilities
                 if (number.Value == 1)
                     return GetPart(genderAwareText, "1:");
 
-                return GetPart(genderAwareText, number.Value + ":", "");
+                return GetPart(genderAwareText, number.Value + ":", ":", "");
             }
 
             if (number.Value == 1)
                 return GetPart(genderAwareText, "1" + gender.Value + ":", "1:");
 
-            return GetPart(genderAwareText, gender.Value + number.Value + ":", gender.Value + ":", number.Value + ":", "");
+            return GetPart(genderAwareText, gender.Value + number.Value + ":", gender.Value + ":", number.Value + ":", ":");
         }
 
         static string GetPart(string textToReplace, params string[] prefixes)

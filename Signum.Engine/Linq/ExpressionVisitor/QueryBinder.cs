@@ -382,7 +382,7 @@ namespace Signum.Engine.Linq
             ProjectionExpression projection = this.VisitCastProjection(source);
 
             Alias alias = NextSelectAlias();
-            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, selectTrivialColumns: true);
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, isGroupKey: true, selectTrivialColumns: true);
             return new ProjectionExpression(
                 new SelectExpression(alias, true, null, pc.Columns, projection.Select, null, null, null, 0),
                 pc.Projector, null, resultType);
@@ -763,11 +763,25 @@ namespace Signum.Engine.Linq
 
             Expression key = GroupEntityCleaner.Clean(MapVisitExpand(keySelector, projection));
             ProjectedColumns keyPC = ColumnProjector.ProjectColumns(key, alias, isGroupKey: true, selectTrivialColumns: true);  // Use ProjectColumns to get group-by expressions from key expression
-            Expression elemExpr = elementSelector == null ? projection.Projector : MapVisitExpand(elementSelector, projection);
+            
+            var select = projection.Select;
+
+            if (keyPC.Columns.Any(c => ContainsAggregateVisitor.ContainsAggregate(c.Expression))) //SQL Server doesn't like to use aggregates (like Count) as grouping keys, and a intermediate query is necessary
+            {
+                select = new SelectExpression(alias, false, null, keyPC.Columns, projection.Select, null, null, null, 0);
+                alias = NextSelectAlias();
+                ColumnGenerator cg = new ColumnGenerator();
+                var newColumns = keyPC.Columns.Select(cd => cg.MapColumn(cd.GetReference(select.Alias))).ToReadOnly();
+                var dic = newColumns.ToDictionary(cd => (ColumnExpression)cd.Expression, cd => cd.GetReference(alias));
+                var newProjector = ColumnReplacerVisitor.ReplaceColumns(dic, keyPC.Projector);
+                keyPC = new ProjectedColumns(newProjector, newColumns);
+            }
+
+            Expression elemExpr = MapVisitExpand(elementSelector, projection);
 
             Expression subqueryKey = GroupEntityCleaner.Clean(MapVisitExpand(keySelector, subqueryProjection));// recompute key columns for group expressions relative to subquery (need these for doing the correlation predicate
             ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumns(subqueryKey, aliasGenerator.Raw("basura"), isGroupKey: true, selectTrivialColumns: true); // use same projection trick to get group-by expressions based on subquery
-            Expression subqueryElemExpr = elementSelector == null ? subqueryProjection.Projector : MapVisitExpand(elementSelector, subqueryProjection); // compute element based on duplicated subquery
+            Expression subqueryElemExpr = MapVisitExpand(elementSelector, subqueryProjection); // compute element based on duplicated subquery
 
             Expression subqueryCorrelation = keyPC.Columns.IsEmpty() ? null :
                 keyPC.Columns.Zip(subqueryKeyPC.Columns, (c1, c2) => SmartEqualizer.EqualNullableGroupBy(new ColumnExpression(c1.Expression.Type, alias, c1.Name), c2.Expression))
@@ -791,14 +805,47 @@ namespace Signum.Engine.Linq
             {
                 GroupAlias = alias,
                 Projector = elemExpr,
-                Source = projection.Select,
+                Source = select,
             });
 
             var result = new ProjectionExpression(
-                new SelectExpression(alias, false, null, keyPC.Columns, projection.Select, null, null, keyPC.Columns.Select(c => c.Expression), 0),
+                new SelectExpression(alias, false, null, keyPC.Columns, select, null, null, keyPC.Columns.Select(c => c.Expression), 0),
                 resultExpr, null, resultType.GetGenericTypeDefinition().MakeGenericType(resultExpr.Type));
 
             return result;
+        }
+
+        class ContainsAggregateVisitor : DbExpressionVisitor
+        {
+            bool hasAggregate;
+
+            public static bool ContainsAggregate(Expression exp)
+            {
+                var cav = new ContainsAggregateVisitor();
+                cav.Visit(exp);
+                return cav.hasAggregate;
+            }
+
+            protected internal override Expression VisitAggregate(AggregateExpression aggregate)
+            {
+                hasAggregate = true;
+                return base.VisitAggregate(aggregate);
+            }
+        }
+
+        class ColumnReplacerVisitor : DbExpressionVisitor
+        {
+            Dictionary<ColumnExpression, ColumnExpression> Replacements;
+
+            public static Expression ReplaceColumns(Dictionary<ColumnExpression, ColumnExpression> replacements, Expression exp)
+            {
+                return new ColumnReplacerVisitor { Replacements = replacements }.Visit(exp);
+            }
+
+            protected internal override Expression VisitColumn(ColumnExpression column)
+            {
+                return Replacements.TryGetC(column) ?? column;
+            }
         }
 
 
@@ -1066,14 +1113,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            if(m.Method.Name == "TryToString")
-            {
-                var toStr = BindMethodCall(Expression.Call(source, EntityExpression.ToStringMethod));
-
-                return toStr;
-            }
-
-            if (m.Method.Name == "ToString" && m.Method.GetParameters().Length == 0)
+            if(m.Method.Name == "ToString" && m.Method.GetParameters().Length == 0)
             {
                 if (source is EntityExpression)
                 {
@@ -1151,7 +1191,7 @@ namespace Signum.Engine.Linq
                 var bin = (BinaryExpression)source;
                 return Expression.Condition(
                     Expression.NotEqual(bin.Left, Expression.Constant(null, bin.Left.Type)),
-                    BindMemberAccess(Expression.MakeMemberAccess(bin.Left, m.Member)),
+                    BindMemberAccess(Expression.MakeMemberAccess(bin.Left.UnNullify(), m.Member)),
                     BindMemberAccess(Expression.MakeMemberAccess(bin.Right, m.Member)));
             }
 
@@ -1452,7 +1492,7 @@ namespace Signum.Engine.Linq
                                 return result;
                         }
 
-                        return new EntityExpression(t, new PrimaryKeyExpression(Expression.Convert(null, PrimaryKey.Type(t).Nullify())), null, null, null, false);
+                        return new EntityExpression(t, new PrimaryKeyExpression(new SqlConstantExpression(null, PrimaryKey.Type(t).Nullify())), null, null, null, false);
                     }), t));
 
                 var stra = expressions.Values.OfType<ImplementedByExpression>().Select(a => a.Strategy).Distinct().Only(); //Default Union
@@ -1926,7 +1966,7 @@ namespace Signum.Engine.Linq
             ParameterExpression toInsertParam = Expression.Parameter(toInsert.Type, "toInsert");
 
             List<ColumnAssignment> assignments = new List<ColumnAssignment>();
-            using (SetCurrentSource(pr.Select.From))
+            using (SetCurrentSource(pr.Select))
             {
                 map.Add(param, pr.Projector);
                 map.Add(toInsertParam, toInsert);
@@ -1934,6 +1974,12 @@ namespace Signum.Engine.Linq
                 FillColumnAssigments(assignments, toInsertParam, cleanedConstructor);
                 map.Remove(toInsertParam);
                 map.Remove(param);
+            }
+
+            var entityTable = table as Table;
+            if(entityTable != null && entityTable.Ticks != null && assignments.None(b => b.Column == entityTable.Ticks.Name))
+            {
+                assignments.Add(new ColumnAssignment(entityTable.Ticks.Name, Expression.Constant(0L, typeof(long))));
             }
 
             var result = new CommandAggregateExpression(new CommandExpression[]
@@ -1945,7 +1991,7 @@ namespace Signum.Engine.Linq
             return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this);
         }
 
-        static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => Administrator.SetReadonly(null, (Entity a) => a.Id, 1)).GetGenericMethodDefinition();
+        static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => UnsafeEntityExtensions.SetReadonly(null, (Entity a) => a.Id, 1)).GetGenericMethodDefinition();
         static readonly MethodInfo miSetMixin = ReflectionTools.GetMethodInfo(() => ((Entity)null).SetMixin((CorruptMixin m) => m.Corrupt, true)).GetGenericMethodDefinition();
 
         public void FillColumnAssigments(List<ColumnAssignment> assignments, ParameterExpression toInsert, Expression body)
@@ -2754,6 +2800,18 @@ namespace Signum.Engine.Linq
             return update;
         }
 
+        protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        {
+            var source = VisitSource(insertSelect.Source);
+            var assigments = Visit(insertSelect.Assigments, VisitColumnAssigment);
+            if (source != insertSelect.Source || assigments != insertSelect.Assigments)
+            {
+                var select = (source as SourceWithAliasExpression) ?? WrapSelect(source);
+                return new InsertSelectExpression(insertSelect.Table, select, assigments);
+            }
+            return insertSelect;
+        }
+
         private SelectExpression WrapSelect(SourceExpression source)
         {
             Alias newAlias = aliasGenerator.NextSelectAlias();
@@ -3037,7 +3095,7 @@ namespace Signum.Engine.Linq
             {
                 var ident = (Entity)c.Value;
 
-                Type type = ident.Try(a => PrimaryKey.Type(a.GetType()).Nullify()) ?? typeof(object);
+                Type type = ident?.Let(a => PrimaryKey.Type(a.GetType()).Nullify()) ?? typeof(object);
 
                 return GetEntityConstant(
                     ident == null ? Expression.Constant(null, type) : Expression.Constant(ident.Id.Object, type),
@@ -3054,7 +3112,7 @@ namespace Signum.Engine.Linq
 
                 using (OverrideColExpression(colLite.Reference))
                 {
-                    Type type = lite.Try(a => PrimaryKey.Type(a.EntityType).Nullify()) ?? typeof(object);
+                    Type type = lite?.Let(a => PrimaryKey.Type(a.EntityType).Nullify()) ?? typeof(object);
 
                     var entity = GetEntityConstant(
                         lite == null ? Expression.Constant(null, type) : Expression.Constant(lite.Id.Object, type),
@@ -3126,7 +3184,7 @@ namespace Signum.Engine.Linq
             var bindings = (from kvp in embedded.FieldEmbedded.EmbeddedFields
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi,
-                                !(fi.FieldType.IsByRef || fi.FieldType.IsNullable()) ? dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") :
+                                !(fi.FieldType.IsClass || fi.FieldType.IsNullable()) ? dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") :
                                 (dic.TryGetC(fi.Name) ?? Expression.Constant(null, fi.FieldType)))
                             ).ToReadOnly();
 

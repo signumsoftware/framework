@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
@@ -43,11 +44,11 @@ namespace Signum.Entities.Basics
             var dic = Ids.TryGetC(this.GetType());
             if (dic != null)
             {
-                var tup = dic.TryGetC(this.key);
+                var tup = dic.TryGetC(this.Key);
                 if (tup != null)
                     this.SetIdAndName(tup);
             }
-            Symbols.GetOrCreate(this.GetType()).Add(this.key, this);
+            Symbols.GetOrCreate(this.GetType()).Add(this.Key, this);
         }
 
         private static bool IsStaticClass(Type type)
@@ -64,14 +65,9 @@ namespace Signum.Entities.Basics
         }
 
 
-        [SqlDbType(Size = 200), UniqueIndex(AllowMultipleNulls=true)]
-        string key;
+        [SqlDbType(Size = 200), UniqueIndex(AllowMultipleNulls = true)]
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = 200)]
-        public string Key
-        {
-            get { return key; }
-            set { SetToStr(ref key, value); }
-        }
+        public string Key { get; set; }
 
         internal string NiceToString()
         {
@@ -92,15 +88,11 @@ namespace Signum.Entities.Basics
         }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { Set(ref name, value); }
-        }
+        public string Name { get; set; }
 
         static Expression<Func<SemiSymbol, string>> ToStringExpression = e => e.Name;
+        [ExpressionField]
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -127,9 +119,9 @@ namespace Signum.Entities.Basics
         private void SetIdAndName(Tuple<PrimaryKey, string> idAndName)
         {
             this.id = idAndName.Item1;
-            this.name = idAndName.Item2;
+            this.Name = idAndName.Item2;
             this.IsNew = false;
-            this.toStr = this.key;
+            this.toStr = this.Key;
             if (this.Modified != ModifiedState.Sealed)
                 this.Modified = ModifiedState.Sealed;
         }
