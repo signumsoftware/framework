@@ -20,6 +20,7 @@ using Signum.Engine.Cache;
 using Signum.Entities.Cache;
 using Signum.Engine.Authorization;
 using Signum.Engine.Maps;
+using Signum.Entities.Profiler;
 
 namespace Signum.React.Profiler
 {
@@ -28,6 +29,7 @@ namespace Signum.React.Profiler
         public static void Start(HttpConfiguration config)
         {
             SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
+            ReflectionServer.RegisterLike(typeof(ProfilerPermission));
         }
     }
 }
