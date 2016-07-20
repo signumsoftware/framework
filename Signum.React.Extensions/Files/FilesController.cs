@@ -63,14 +63,17 @@ namespace Signum.React.Files
         /// <summary>
         /// </summary>
         /// <param name="stream">No need to close</param
-        public static HttpResponseMessage GetHttpReponseMessage(Stream stream, string fileName)
+        public static HttpResponseMessage GetHttpReponseMessage(Stream stream, string fileName, bool forDownload = true)
         {
             var response = new HttpResponseMessage(HttpStatusCode.OK);
             response.Content = new StreamContent(stream);
-            response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+            if (forDownload)
             {
-                FileName = Path.GetFileName(fileName)
-            };
+                response.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+                {
+                    FileName = Path.GetFileName(fileName)
+                };
+            }
             var mime = MimeMapping.GetMimeMapping(fileName);
             response.Content.Headers.ContentType = new MediaTypeHeaderValue(mime);
             return response;
