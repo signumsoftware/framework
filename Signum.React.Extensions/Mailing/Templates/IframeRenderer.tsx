@@ -1,5 +1,5 @@
 ﻿import * as React from 'react'
-import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityDetail} from '../../../../Framework/Signum.React/Scripts/Lines'
@@ -8,7 +8,12 @@ import { getToString, Lite, is }  from '../../../../Framework/Signum.React/Scrip
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Entities.Mailing'
 
-export default class IFrameRenderer extends React.Component<{ html: string }, void> {
+export interface IFrameRendererProps extends React.HTMLAttributes {
+    html: string;
+}
+
+
+export default class IFrameRenderer extends React.Component<IFrameRendererProps, void> {
 
     componentDidMount() {
         this.load(this.props.html);
@@ -27,7 +32,10 @@ export default class IFrameRenderer extends React.Component<{ html: string }, vo
     iframe: HTMLIFrameElement;
 
     render() {
-        return (<iframe style={{ width: "100%" }} ref={e => this.iframe= e}></iframe>);
+
+        var props = Dic.without(this.props, { html: null });
+
+        return (<iframe {...props} ref={e => this.iframe = e}></iframe>);
     }
 }
 

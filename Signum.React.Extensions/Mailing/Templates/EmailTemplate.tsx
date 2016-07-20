@@ -180,7 +180,7 @@ export class EmailTemplateMessageComponent extends React.Component<EmailTemplate
                             EmailTemplateMessage.HidePreview.niceToString() :
                             EmailTemplateMessage.ShowPreview.niceToString() }
                     </a>
-                    { this.state.showPreview && <IFrameRenderer html={ec.value.text}/>}
+                    {this.state.showPreview && <IFrameRenderer style={{ width: "100%" }} html={ec.value.text}/>}
                 </div>
             </div>
         );
