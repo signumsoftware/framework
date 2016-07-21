@@ -131,7 +131,7 @@ export interface ContextualOperationContext<T extends Entity> {
     operationInfo: OperationInfo;
     settings: ContextualOperationSettings<T>;
     entityOperationSettings: EntityOperationSettings<T>;
-    canExecute: string;
+    canExecute: string | undefined;
 }
 
 
@@ -143,7 +143,7 @@ export interface EntityOperationContext<T extends Entity> {
     operationInfo: OperationInfo;
     showOperations: boolean;
     settings: EntityOperationSettings<T>;
-    canExecute: string;
+    canExecute: string | undefined;
 }
 
 export class EntityOperationSettings<T extends Entity> extends OperationSettings {

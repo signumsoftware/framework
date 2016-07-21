@@ -2,8 +2,9 @@ import * as React from 'react'
 import { DropdownButton, MenuItem, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { Dic, DomUtils } from '../Globals'
 import * as Finder from '../Finder'
-import { ResultTable, ResultRow, FindOptions, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
-    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, expandParentColumn, CountQueryRequest, QueryRequest } from '../FindOptions'
+import {
+    ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOption, QueryDescription, ColumnOption, ColumnOptionsMode, ColumnDescription,
+    toQueryToken, Pagination, PaginationMode, OrderType, OrderOption, SubTokensOptions, filterOperations, QueryToken, CountQueryRequest, QueryRequest } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, is } from '../Signum.Entities'
 import { getTypeInfos, IsByAll, getQueryKey, TypeInfo, EntityData, getQueryNiceName} from '../Reflection'
 import * as Navigator from '../Navigator'
@@ -32,27 +33,26 @@ export default class CountSearchControl extends React.Component<CountSearchContr
         };
     }
 
-    getQueryRequest(fo: FindOptions): CountQueryRequest {
+    getQueryRequest(fo: FindOptionsParsed): CountQueryRequest {
 
         return {
-            queryKey: getQueryKey(fo.queryName),
-            filters: (fo.filterOptions || []).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value })),
+            queryKey: fo.queryKey,
+            filters: fo.filterOptions.map(fo => ({ token: fo.token!.key, operation: fo.operation!, value: fo.value })),
         };
     }
 
     componentDidMount() {
 
-        if (!Finder.isFindable(this.props.findOptions.queryName))
+        var fo = this.props.findOptions;
+
+        if (!Finder.isFindable(fo.queryName))
             return;
 
-        const newFindOptions = expandParentColumn(this.props.findOptions);
-
-        Finder.parseTokens(newFindOptions)
+        Finder.getQueryDescription(fo.queryName)
+            .then(qd => Finder.parseFindOptions(fo, qd))
             .then(fo => Finder.API.queryCount(this.getQueryRequest(fo)))
-            .then(count => {
-                this.setState({ count });
-                this.forceUpdate();
-            }).done();
+            .then(count => this.setState({ count }))
+            .done();
     }
 
     render() {
@@ -66,7 +66,10 @@ export default class CountSearchControl extends React.Component<CountSearchContr
             return this.renderSpan();
 
         return (
-            <FormGroup ctx={this.props.ctx} labelText={this.props.labelText || getQueryNiceName(this.props.findOptions.queryName) } labelProps={this.props.labelProps} htmlProps={this.props.formGroupHtmlProps}>
+            <FormGroup ctx={this.props.ctx}
+                labelText={this.props.labelText || getQueryNiceName(this.props.findOptions.queryName)}
+                labelProps={this.props.labelProps}
+                htmlProps={this.props.formGroupHtmlProps}>
                 {this.props.style == "Link" ? this.renderAsLink() : this.renderAsView() }
             </FormGroup>
         );

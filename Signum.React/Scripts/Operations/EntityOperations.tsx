@@ -62,7 +62,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
             }));
         } else {
 
-            const group = getDefaultGroup(gr.elements[0]);
+            const group = getDefaultGroup(gr.elements[0])!;
 
 
             return [{
@@ -88,7 +88,7 @@ export function createEntityOperationContext<T extends Entity>(ctx: TypeContext<
         frame: ctx.frame,
         entity: ctx.value,
         settings: getSettings(operation) as EntityOperationSettings<T>,
-        operationInfo: getTypeInfo(ctx.value.Type).operations[operation.key],
+        operationInfo: getTypeInfo(ctx.value.Type).operations![operation.key],
         showOperations: true,
         canExecute: undefined,
     };

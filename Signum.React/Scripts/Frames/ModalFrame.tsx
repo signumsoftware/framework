@@ -54,7 +54,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     }
 
     componentWillMount() {
-        Navigator.toEntityPack(this.props.entityOrPack, this.props.showOperations)
+        Navigator.toEntityPack(this.props.entityOrPack, this.props.showOperations!)
             .then(ep => this.setPack(ep))
             .then(() => this.loadComponent())
             .done();
@@ -63,7 +63,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     componentWillReceiveProps(props: ModalFrameProps) {
         this.setState(this.calculateState(props));
 
-        Navigator.toEntityPack(props.entityOrPack, this.props.showOperations)
+        Navigator.toEntityPack(props.entityOrPack, this.props.showOperations!)
             .then(ep => this.setPack(ep))
             .then(() => this.loadComponent())
             .done();
@@ -112,7 +112,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             return Promise.resolve(undefined);
         }
 
-        return Navigator.getComponent(this.state.pack.entity)
+        return Navigator.getComponent(this.state.pack!.entity)
             .then(c => this.setState({ getComponent: (ctx) => React.createElement(c, { ctx: ctx }) }));
     }
 
@@ -131,14 +131,14 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             return;
         }
 
-        Navigator.API.validateEntity(this.state.pack.entity)
+        Navigator.API.validateEntity(this.state.pack!.entity)
             .then(() => {
 
                 this.okClicked = true;
                 this.setState({ show: false });
 
             }, ifError(ValidationError, e => {
-                GraphExplorer.setModelState(this.state.pack.entity, e.modelState, "entity");
+                GraphExplorer.setModelState(this.state.pack!.entity, e.modelState, "entity");
                 this.forceUpdate();
             }));
     }
@@ -156,7 +156,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     hasChanges() {
 
-        const entity = this.state.pack.entity;
+        const entity = this.state.pack!.entity;
 
         GraphExplorer.propagateAll(entity);
 
@@ -164,7 +164,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     }
 
     handleOnExited = () => {
-        this.props.onExited(this.okClicked ? this.state.pack.entity : undefined);
+        this.props.onExited!(this.okClicked ? this.state.pack!.entity : undefined);
     }
 
     render() {
@@ -203,7 +203,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             onClose: () => this.props.onExited!(undefined),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
             setError: (modelState, initialPrefix = "") => {
-                GraphExplorer.setModelState(this.state.pack.entity, modelState, initialPrefix);
+                GraphExplorer.setModelState(this.state.pack!.entity, modelState, initialPrefix!);
                 this.forceUpdate();
             },
         };
@@ -213,14 +213,14 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             frame: frame,
         };
 
-        const pack = this.state.pack;
+        const pack = this.state.pack!;
 
-        const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute, new ReadonlyBinding(pack.entity, this.state.prefix));
+        const ctx = new TypeContext(undefined, styleOptions, this.state.propertyRoute!, new ReadonlyBinding(pack.entity, this.state.prefix!));
 
         return (
             <Modal.Body>
                 {renderWidgets({ ctx: ctx, pack: pack }) }
-                { this.entityComponent && <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations} />}
+                { this.entityComponent && <ButtonBar frame={frame} pack={pack} showOperations={this.props.showOperations!} />}
                 <ValidationErrors entity={pack.entity} ref={ve => this.validationErrors = ve}/>
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
                     { this.state.getComponent && React.cloneElement(this.state.getComponent(ctx), { ref: (c: React.Component<any,any>) => this.setComponent(c) }) }
@@ -250,7 +250,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
     }
 
     renderExpandLink() {
-        const entity = this.state.pack.entity;
+        const entity = this.state.pack!.entity;
 
         if (entity == undefined || entity.isNew)
             return undefined;
@@ -273,7 +273,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
         } else {
 
-            Navigator.currentHistory.push(Navigator.navigateRoute(this.state.pack.entity as Entity));
+            Navigator.currentHistory.push(Navigator.navigateRoute(this.state.pack!.entity as Entity));
 
             e.preventDefault();
         }

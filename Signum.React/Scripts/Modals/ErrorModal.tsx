@@ -32,7 +32,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
     }
 
     handleOnExited = () => {
-        this.props.onExited(undefined);
+        this.props.onExited!(undefined);
     }
 
     handleCloseClicked = () => {
@@ -73,7 +73,7 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         );
     }
 
-    renderTitle(e: any, se: ServiceError) {
+    renderTitle(e: any, se: ServiceError | undefined) {
         if (se == undefined || se.httpError.ExceptionType == undefined)
             return <h4 className="modal-title text-danger"><span className="glyphicon glyphicon-alert"></span> Error </h4>;
 
@@ -81,13 +81,13 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
             <span className={classes("glyphicon", se.defaultIcon) }></span>&nbsp; <span>{se.httpError.ExceptionType }</span>
             ({
                 Navigator.isViewable(ExceptionEntity) ?
-                    <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID) }>{se.httpError.ExceptionID}</a> :
+                    <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID!) }>{se.httpError.ExceptionID}</a> :
                     <strong>{se.httpError.ExceptionID}</strong>
             })
         </h4>);
     }
 
-    renderMessage(e: any, se: ServiceError) {
+    renderMessage(e: any, se: ServiceError | undefined) {
         if (se == undefined)
             return <p className="text-danger"> { e.message ? e.message : e }</p>;
 

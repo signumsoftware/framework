@@ -10,6 +10,11 @@ export interface CountOptions {
     filterOptions?: FilterOption[];
 }
 
+export interface CountOptionsParsed {
+    queryKey: string;
+    filterOptions: FilterOptionParsed; 
+}
+
 export interface FindOptions {
     queryName: PseudoType | QueryKey;
     parentColumn?: string;
@@ -32,60 +37,57 @@ export interface FindOptions {
     contextMenu?: boolean;
 }
 
-export function expandParentColumn(findOptions: FindOptions) {
-    
-    const fo = Dic.extend({}, findOptions) as FindOptions;
-
-    if (!fo.parentColumn)
-        return findOptions; 
-
-    fo.filterOptions = [
-        { columnName: fo.parentColumn, operation: "EqualTo", value: fo.parentValue, frozen: true },
-        ...(fo.filterOptions || [])
-    ];
-
-    if (!fo.parentColumn.contains(".") && (fo.columnOptionsMode == undefined || fo.columnOptionsMode == "Remove")) {
-        fo.columnOptions = [
-            { columnName: fo.parentColumn },
-            ...(fo.columnOptions || [])
-        ];
-
-        fo.columnOptionsMode = "Remove";
-    }
-
-    if (fo.searchOnLoad == undefined)
-        fo.searchOnLoad = true;
-
-    fo.parentColumn = undefined;
-    fo.parentValue = undefined;
-
-    return fo;
+export interface FindOptionsParsed {
+    queryKey: string;
+    filterOptions: FilterOptionParsed[];
+    orderOptions: OrderOptionParsed[];
+    columnOptions: ColumnOptionParsed[];
+    pagination: Pagination;
+    searchOnLoad: boolean;
+    showHeader: boolean;
+    showFilters: boolean;
+    showFilterButton: boolean;
+    showFooter: boolean;
+    allowChangeColumns: boolean;
+    create: boolean;
+    navigate: boolean;
+    contextMenu: boolean;
 }
+
 
 export interface FilterOption {
     columnName: string;
-    token?: QueryToken;
     frozen?: boolean;
     operation?: FilterOperation;
     value: any;
 }
 
-
-
+export interface FilterOptionParsed {
+    token?: QueryToken;
+    frozen: boolean;
+    operation?: FilterOperation;
+    value: any;
+}
 
 export interface OrderOption {
     columnName: string;
-    token?: QueryToken;
     orderType: OrderType;
 }
 
+export interface OrderOptionParsed {
+    token: QueryToken;
+    orderType: OrderType;
+}
 
 export interface ColumnOption {
     columnName: string;
-    token?: QueryToken;
     displayName?: string;
 }
 
+export interface ColumnOptionParsed {
+    token?: QueryToken;
+    displayName?: string;
+}
 
 export const DefaultPagination: Pagination = {
     mode: "Paginate",

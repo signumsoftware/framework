@@ -4,7 +4,7 @@ import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { Dic, areEqual } from '../Globals'
 import { openModal, IModalProps } from '../Modals';
-import { FilterOption, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList, FilterOperation } from '../FindOptions'
+import { FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, FilterType, isList, FilterOperation } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
 import { Binding, IsByAll, getTypeInfos } from '../Reflection'
@@ -14,12 +14,12 @@ import QueryTokenBuilder from './QueryTokenBuilder'
 require("!style!css!./FilterBuilder.css");
 
 interface FilterBuilderProps extends React.Props<FilterBuilder> {
-    filterOptions: FilterOption[];
+    filterOptions: FilterOptionParsed[];
     subTokensOptions: SubTokensOptions;
     queryDescription: QueryDescription;
     onTokenChanged: (token: QueryToken) => void;
-    lastToken: QueryToken;
-    onFiltersChanged?: (filters: FilterOption[]) => void;
+    lastToken?: QueryToken;
+    onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
 }
 
 export default class FilterBuilder extends React.Component<FilterBuilderProps, {}>  {
@@ -28,9 +28,9 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
 
         this.props.filterOptions.push({
             token: this.props.lastToken,
-            columnName: undefined as any,
             operation: !this.props.lastToken ? undefined : (filterOperations[this.props.lastToken.filterType] || []).firstOrNull(),
             value: undefined,
+            frozen: false
         });
 
 
@@ -40,14 +40,14 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
         this.forceUpdate();
     };
 
-    handlerDeleteFilter = (filter: FilterOption) => {
+    handlerDeleteFilter = (filter: FilterOptionParsed) => {
         this.props.filterOptions.remove(filter);
         if (this.props.onFiltersChanged)
             this.props.onFiltersChanged(this.props.filterOptions);
         this.forceUpdate();
     };
 
-    handleFilterChanged = (filter: FilterOption) => {
+    handleFilterChanged = (filter: FilterOptionParsed) => {
         if (this.props.onFiltersChanged)
             this.props.onFiltersChanged(this.props.filterOptions);
     };
@@ -97,12 +97,12 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
 
 
 export interface FilterComponentProps extends React.Props<FilterComponent> {
-    filter: FilterOption;
-    onDeleteFilter: (fo: FilterOption) => void;
+    filter: FilterOptionParsed;
+    onDeleteFilter: (fo: FilterOptionParsed) => void;
     queryDescription: QueryDescription;
     subTokenOptions: SubTokensOptions;
     onTokenChanged: (token: QueryToken) => void;
-    onFilterChanged: (filter: FilterOption) => void;
+    onFilterChanged: (filter: FilterOptionParsed) => void;
 }
 
 export class FilterComponent extends React.Component<FilterComponentProps, {}>{

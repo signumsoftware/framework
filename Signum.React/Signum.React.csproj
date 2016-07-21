@@ -247,6 +247,7 @@
     <TypeScriptCompile Include="Scripts\SearchControl\CountSearchControl.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\PaginationSelector.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\QueryTokenBuilder.tsx" />
+    <TypeScriptCompile Include="Scripts\SearchControl\SearchControl.Loaded.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchControl.tsx" />
     <TypeScriptCompile Include="Scripts\SearchControl\SearchPage.tsx" />
     <TypeScriptCompile Include="Scripts\Modals\ErrorModal.tsx" />

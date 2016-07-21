@@ -50,7 +50,8 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         this.convert(lite)
             .then(entity => this.setValue(entity))
             .done();
-        return lite.toStr;
+
+        return lite.toStr || "";
     }
 
     renderInternal() {

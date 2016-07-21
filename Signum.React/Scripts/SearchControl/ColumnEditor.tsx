@@ -4,7 +4,7 @@ import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { classes } from '../Globals';
 import { openModal, IModalProps } from '../Modals';
-import { ColumnOption, QueryDescription, QueryToken, SubTokensOptions, FilterType } from '../FindOptions'
+import { ColumnOptionParsed, QueryDescription, QueryToken, SubTokensOptions, FilterType } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
 import { ValueLine, EntityLine, EntityCombo } from '../Lines'
 import { Binding, IsByAll, getTypeInfos } from '../Reflection'
@@ -13,7 +13,7 @@ import QueryTokenBuilder from './QueryTokenBuilder'
 
 
 interface ColumnEditorProps extends React.Props<ColumnEditor> {
-    columnOption: ColumnOption
+    columnOption: ColumnOptionParsed
     subTokensOptions: SubTokensOptions;
     queryDescription: QueryDescription;
     onChange: (token?: QueryToken) => void;

@@ -196,13 +196,13 @@ export interface WebApiHttpError {
 }
 
 export class ValidationError extends Error {
-    modelState?: ModelState;
+    modelState: ModelState;
     message: string;
 
     constructor(public statusText: string, json: WebApiHttpError) {
         super(statusText)
         this.message = json.Message || "";
-        this.modelState = json.ModelState;
+        this.modelState = json.ModelState!;
     }
 
     toString() {

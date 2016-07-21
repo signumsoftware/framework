@@ -10,7 +10,7 @@ export interface ModifiableEntity {
     toStr: string;	
     modified : boolean;
     isNew: boolean;
-	error?: { [member: string]: string };
+    error?: { [member: string]: string };
 }
 
 export interface Entity extends ModifiableEntity {
@@ -141,19 +141,19 @@ export function parseLite(lite: string) : Lite<Entity> {
     };
 }
 
-export function is<T extends Entity>(a: Lite<T> | T, b: Lite<T> | T, compareTicks = false) {
+export function is<T extends Entity>(a: Lite<T> | T | undefined, b: Lite<T> | T | undefined, compareTicks = false) {
 
     if(a == undefined && b == undefined)
         return true;
-		
+        
     if(a == undefined || b == undefined)
         return false;
 
     const aType = (a as T).Type || (a as Lite<T>).EntityType;
     const bType = (a as T).Type || (a as Lite<T>).EntityType;
 
-	if(!aType || !bType)
-		throw new Error("No Type found");
+    if(!aType || !bType)
+        throw new Error("No Type found");
 
     if (aType != bType)
         return false;
@@ -186,14 +186,14 @@ export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity>{
 
 export function entityInfo(entity: ModifiableEntity | Lite<Entity>)
 {
-	if (!entity)
-		return "undefined";
+    if (!entity)
+        return "undefined";
 
-	const type = isLite(entity) ? entity.EntityType : entity.Type;
+    const type = isLite(entity) ? entity.EntityType : entity.Type;
     const id = isLite(entity) ? entity.id : isEntity(entity) ? entity.id : "";
     const isNew = isLite(entity) ? entity.entity && entity.entity.isNew : entity.isNew;
 
-	return  `${type};${id || ""};${isNew || ""}`;
+    return  `${type};${id || ""};${isNew || ""}`;
 }
 export const BooleanEnum = new EnumType<BooleanEnum>("BooleanEnum");
 export type BooleanEnum =

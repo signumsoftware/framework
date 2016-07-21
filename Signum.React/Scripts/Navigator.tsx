@@ -5,27 +5,22 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, KindOfType, OperationType, TypeReference  } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, KindOfType, OperationType, TypeReference } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
 import * as Operations from './Operations';
 import ModalFrame from './Frames/ModalFrame';
-import { ViewReplacer } from  './Frames/ReactVisitor'
+import { ViewReplacer } from './Frames/ReactVisitor'
 
-export let currentHistory: HistoryModule.History;
-export function setCurentHistory(history: HistoryModule.History) {
-    currentHistory = history;
-}
+
 
 export let currentUser: IUserEntity;
-export function setCurentUser(user: IUserEntity) {
-    currentUser = user;
-
 export function setCurrentUser(user: IUserEntity) {
     currentUser = user;
 }
 
+export let currentHistory: HistoryModule.History;
 export function setCurrentHistory(history: HistoryModule.History) {
     currentHistory = history;
 }
@@ -36,7 +31,7 @@ export namespace Expanded {
 }
 
 export function start(options: { routes: JSX.Element[] }) {
-    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default)) } ></Route>);
+    options.routes.push(<Route path="view/:type/:id" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default))} ></Route>);
     options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default))} ></Route>);
 }
 
@@ -85,7 +80,7 @@ export function createRoute(type: PseudoType) {
 export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
 
 export function addSettings(...settings: EntitySettings<any>[]) {
-    settings.forEach(s=> Dic.addOrThrow(entitySettings, s.type.typeName, s));
+    settings.forEach(s => Dic.addOrThrow(entitySettings, s.type.typeName, s));
 }
 
 
@@ -156,7 +151,7 @@ export const isCreableEvent: Array<(typeName: string) => boolean> = [];
 export function isCreable(type: PseudoType, customView = false, isSearch = false) {
 
     const typeName = getTypeName(type);
-    
+
     const baseIsCreable = checkFlag(typeIsCreable(typeName), isSearch);
 
     const hasView = customView || hasRegisteredView(typeName);
@@ -176,7 +171,7 @@ function hasAllowedConstructor(typeName: string) {
 
     if (!constructOperations.length)
         return true;
-    
+
     const allowed = constructOperations.filter(oi => Operations.isOperationAllowed(oi));
 
     return allowed.length > 0;
@@ -187,7 +182,7 @@ function typeIsCreable(typeName: string): EntityWhen {
     const es = entitySettings[typeName];
     if (es != undefined && es.isCreable != undefined)
         return es.isCreable;
-    
+
     const typeInfo = getTypeInfo(typeName);
     if (typeInfo == undefined)
         return "IsLine";
@@ -228,7 +223,7 @@ function typeIsReadOnly(typeName: string): boolean {
     const es = entitySettings[typeName];
     if (es != undefined && es.isReadOnly != undefined)
         return es.isReadOnly;
-    
+
     const typeInfo = getTypeInfo(typeName);
     if (typeInfo == undefined)
         return false;
@@ -249,12 +244,12 @@ function typeIsReadOnly(typeName: string): boolean {
     }
 }
 
-export const isFindableEvent: Array<(typeName: string) => boolean> = []; 
+export const isFindableEvent: Array<(typeName: string) => boolean> = [];
 
 export function isFindable(type: PseudoType, isSearch?: boolean) {
 
     const typeName = getTypeName(type);
-    
+
     const baseIsReadOnly = typeIsFindable(typeName);
 
     return baseIsReadOnly && Finder.isFindable(typeName);
@@ -287,23 +282,23 @@ function typeIsFindable(typeName: string) {
     }
 }
 
-export const isViewableEvent: Array<(typeName: string, entityPack?: EntityPack<ModifiableEntity>) => boolean> = []; 
+export const isViewableEvent: Array<(typeName: string, entityPack?: EntityPack<ModifiableEntity>) => boolean> = [];
 
-export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false): boolean{
+export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false): boolean {
 
     const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
     const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
     const baseIsViewable = typeIsViewable(typeName);
-    
+
     const hasView = customView || hasRegisteredView(typeName);
 
     return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
 
 function hasRegisteredView(typeName: string) {
-        
+
     const es = entitySettings[typeName];
     if (es)
         return !!es.getComponent;
@@ -411,14 +406,14 @@ export interface NavigateOptions {
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
-export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions? : NavigateOptions): Promise<void> {
-    
+export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
+
     return new Promise<void>((resolve, reject) => {
         require(["./Frames/ModalFrame"], function (NP: { default: typeof ModalFrame }) {
             NP.default.openNavigate(entityOrPack, navigateOptions || {}).then(resolve, reject);
         });
     });
-} 
+}
 
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, showOperations: boolean): Promise<EntityPack<ModifiableEntity>> {
@@ -478,7 +473,7 @@ export module API {
 
         return fetchEntity(lite.EntityType, lite.id);
     }
-    
+
     export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
     export function fetchEntity(type: PseudoType, id: number | string): Promise<Entity>;
     export function fetchEntity(type: PseudoType, id?: number | string): Promise<Entity> {
@@ -610,7 +605,7 @@ export function useAppRelativeBasename(history: HistoryModule.History, baseName:
     history.createLocation = fixBaseName(history.createLocation, baseName);
 }
 
-export function tryConvert(value: any, type: TypeReference): Promise<any> {
+export function tryConvert(value: any, type: TypeReference): Promise<any> | undefined {
 
     if (value == null)
         return Promise.resolve(null);
@@ -623,7 +618,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> {
         if (isEntity(value))
             return Promise.resolve(toLite(value));
 
-        return null;
+        return undefined;
     }
 
     if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == KindOfType.Entity) {
@@ -634,14 +629,14 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> {
         if (isEntity(value))
             return Promise.resolve(value);
 
-        return null;
+        return undefined;
     }
 
     if (type.name == "string" || type.name == "Guid" || type.name == "Date") {
         if (typeof value === "string")
             return Promise.resolve(value);
 
-        return null;
+        return undefined;
     }
 
     if (type.name == "number") {
@@ -649,5 +644,5 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> {
             return Promise.resolve(value);
     }
 
-    return null;
+    return undefined;
 }

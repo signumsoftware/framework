@@ -49,7 +49,7 @@ export default class Exception extends React.Component<{ ctx: TypeContext<Except
         if (!tc.value || tc.value == "")
             return undefined;
 
-        return <Tab title={tc.propertyRoute.member.niceName} eventKey={eventKey}>
+        return <Tab title={tc.propertyRoute.member!.niceName} eventKey={eventKey}>
             <pre>
                 <code>{tc.value}</code>
             </pre>

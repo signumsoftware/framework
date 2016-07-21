@@ -83,11 +83,15 @@ export class StyleContext {
     set readOnly(value: boolean) {
         this.styleOptions.readOnly = value;
     }
+    
+    get frame(): EntityFrame<ModifiableEntity> {
+        if (this.styleOptions.frame)
+            return this.styleOptions.frame;
 
+        if (this.parent)
+            return this.parent.frame;
 
-    get frame(): EntityFrame<ModifiableEntity> | undefined {
-        return this.styleOptions.frame ? this.styleOptions.frame :
-            this.parent ? this.parent.frame : undefined;
+        throw new Error("No frame found");
     }
 
 
@@ -133,8 +137,7 @@ export interface BsColumns {
 
 
 export class TypeContext<T> extends StyleContext {
-
-
+    
     propertyRoute: PropertyRoute;
     binding: IBinding<T>;
     prefix: string;
@@ -167,7 +170,7 @@ export class TypeContext<T> extends StyleContext {
         return new TypeContext(undefined, styleOptions, PropertyRoute.root(type), new ReadonlyBinding<T>(value, ""));
     }
 
-    constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined, propertyRoute: PropertyRoute, binding: IBinding<T>) {
+    constructor(parent: StyleContext | undefined, styleOptions: StyleOptions | undefined, propertyRoute: PropertyRoute /*| undefined*/, binding: IBinding<T>) {
         super(parent, styleOptions);
         this.propertyRoute = propertyRoute;
         this.binding = binding;

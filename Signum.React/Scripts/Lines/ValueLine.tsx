@@ -43,7 +43,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     calculateValueLineType(state : ValueLineProps): ValueLineType {
 
-        const t = state.type;
+        const t = state.type!;
 
         if (t.isCollection || t.isLite)
             throw new Error("ValueLine not implemented for " + JSON.stringify(t));
@@ -166,12 +166,12 @@ ValueLine.renderers[ValueLineType.Boolean as any] = (vl) => {
 
 ValueLine.renderers[ValueLineType.Enum as any] = (vl) => {
 
-    if (vl.state.type.name == "boolean")
+    if (vl.state.type!.name == "boolean")
         return internalComboBox(vl, getTypeInfo("BooleanEnum"),
             str => str == "True" ? true : false,
             val => val == true ? "True" : "False");
 
-    return internalComboBox(vl, getTypeInfo(vl.state.type.name), str => str, str => str);
+    return internalComboBox(vl, getTypeInfo(vl.state.type!.name), str => str, str => str);
 };
 
 function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: string) => any, toStringValue: (val: any) => string) {
@@ -179,7 +179,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
     const s = vl.state;
     let items = s.comboBoxItems || Dic.getValues(typeInfo.members);
 
-    if (!s.type.isNotNullable || s.ctx.value == undefined)
+    if (!s.type!.isNotNullable || s.ctx.value == undefined)
         items = [{ name: "", niceName: " - " }].concat(items);
 
     if (s.ctx.readOnly)
@@ -233,7 +233,8 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
             if (input.value && input.value.trim() != input.value)
                 vl.setValue(input.value.trim());
 
-            vl.props.onTextboxBlur(input.value.trim());
+            if (vl.props.onTextboxBlur)
+                vl.props.onTextboxBlur(input.value.trim());
         };
     }
 

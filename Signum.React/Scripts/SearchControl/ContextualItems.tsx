@@ -24,10 +24,10 @@ export interface MarkedRowsDictionary {
 
 export interface MarkedRow {
     style: string;
-    message: string;
+    message?: string;
 }
 
-export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promise<MenuItemBlock>)[] = [];
+export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promise<MenuItemBlock | undefined> | undefined)[] = [];
 
 export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<React.ReactElement<any>[]> {
 
