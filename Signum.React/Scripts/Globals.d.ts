@@ -1,5 +1,6 @@
 ﻿/// <reference path="../typings/react/react.d.ts" />
 /// <reference path="../typings/react/react-dom.d.ts" />
+/// <reference path="../typings/react/react-addons-perf.d.ts" />
 /// <reference path="../typings/react/react-addons-transition-group.d.ts" />
 /// <reference path="../typings/react/react-addons-css-transition-group.d.ts" />
 /// <reference path="../typings/react-router/react-router.d.ts" />
@@ -56,7 +57,7 @@ interface Array<T> {
 
 interface ArrayConstructor {
 
-    range(min: number, max: number): number[];
+    range(min: number, maxNotIncluded: number): number[];
     repeat<T>(count: number, value: T): T[];
 }
 
