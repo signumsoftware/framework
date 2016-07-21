@@ -372,9 +372,12 @@ export interface IBinding<T> {
 
 export class Binding<T> implements IBinding<T> {
 
+    initialValue: T; // For deep compare
+
     constructor(
         public parentValue: any,
         public member: string | number) {
+        this.initialValue = this.parentValue[member];
     }
 
     static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T) {
