@@ -379,7 +379,10 @@ namespace Signum.Engine.Translation
 
         public static FilePair ExportExcelFile(Type type, CultureInfo culture)
         {
-            var result = TranslatedInstanceLogic.TranslationsForType(type, culture).Single().Value;
+            var isAllowed = Schema.Current.GetInMemoryFilter<TranslatedInstanceEntity>(userInterface: true);
+            var result = TranslatedInstanceLogic.TranslationsForType(type, culture).Single().Value
+                .Where(a => isAllowed(a.Value))
+                .ToDictionary();
 
             var list = result
                 .OrderBy(a=>a.Key.Instance.Id)
