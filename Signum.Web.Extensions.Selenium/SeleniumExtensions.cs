@@ -272,10 +272,10 @@ namespace Signum.Web.Selenium
 
         public static void SafeClick(this IWebElement element)
         {
-            if (!element.Displayed || element.Location.Y < 150)//Nav
-            {
-                element.GetDriver().ScrollTo(element);
-            }
+            //if (!element.Displayed || element.Location.Y < 150)//Nav
+            //{
+               element.GetDriver().ScrollTo(element);
+            //}
 
             element.Click();
         }
