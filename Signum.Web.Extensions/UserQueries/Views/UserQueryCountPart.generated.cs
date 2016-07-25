@@ -69,14 +69,14 @@ namespace ASP
         }
         public override void Execute()
         {
-WriteLiteral("\r\n");
+WriteLiteral("\n");
 
             
             #line 7 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
  using (var e = Html.TypeContext<UserQueryCountPartEntity>())
 {
     var uq = e.Value.UserQuery.Retrieve();
-    object queryName = Finder.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
+    object queryName = Signum.Engine.Basics.QueryLogic.ToQueryName(uq.Query);
     FindOptions fo = new FindOptions(queryName)
     {
         ShowFilters = false
@@ -92,27 +92,27 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <a");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 584), Tuple.Create("\"", 641)
+WriteAttribute("class", Tuple.Create(" class=\"", 523), Tuple.Create("\"", 580)
             
             #line 20 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-, Tuple.Create(Tuple.Create("", 592), Tuple.Create<System.Object, System.Int32>(!e.Value.ShowName ? "dashboard-tooltip" : null
+, Tuple.Create(Tuple.Create("", 531), Tuple.Create<System.Object, System.Int32>(!e.Value.ShowName ? "dashboard-tooltip" : null
             
             #line default
             #line hidden
-, 592), false)
+, 531), false)
 );
 
-WriteAttribute("href", Tuple.Create(" href=\"", 642), Tuple.Create("\"", 663)
+WriteAttribute("href", Tuple.Create(" href=\"", 581), Tuple.Create("\"", 602)
             
             #line 20 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-, Tuple.Create(Tuple.Create("", 649), Tuple.Create<System.Object, System.Int32>(fo.ToString()
+, Tuple.Create(Tuple.Create("", 588), Tuple.Create<System.Object, System.Int32>(fo.ToString()
             
             #line default
             #line hidden
-, 649), false)
+, 588), false)
 );
 
-WriteLiteral("\r\n       data-toggle=\"tooltip\"");
+WriteLiteral("\n       data-toggle=\"tooltip\"");
 
 WriteLiteral(" data-placement=\"top\"");
 
@@ -127,7 +127,7 @@ WriteLiteral(" data-original-title=\"");
             #line hidden
 WriteLiteral("\"");
 
-WriteLiteral(">\r\n\r\n");
+WriteLiteral(">\n\n");
 
             
             #line 23 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
@@ -145,18 +145,18 @@ WriteLiteral(">\r\n\r\n");
             #line hidden
 WriteLiteral("            <i");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 825), Tuple.Create("\"", 861)
-, Tuple.Create(Tuple.Create("", 833), Tuple.Create("glyphicon", 833), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 759), Tuple.Create("\"", 795)
+, Tuple.Create(Tuple.Create("", 767), Tuple.Create("glyphicon", 767), true)
             
             #line 25 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-, Tuple.Create(Tuple.Create(" ", 842), Tuple.Create<System.Object, System.Int32>(e.Value.IconClass
+, Tuple.Create(Tuple.Create(" ", 776), Tuple.Create<System.Object, System.Int32>(e.Value.IconClass
             
             #line default
             #line hidden
-, 843), false)
+, 777), false)
 );
 
-WriteLiteral("></i>\r\n");
+WriteLiteral("></i>\n");
 
             
             #line 26 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
@@ -165,7 +165,7 @@ WriteLiteral("></i>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
+WriteLiteral("\n");
 
             
             #line 28 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
@@ -181,7 +181,7 @@ WriteLiteral("\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\n\n");
 
             
             #line 32 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
@@ -212,21 +212,21 @@ WriteLiteral("\r\n\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n        &nbsp;\r\n        <div");
+WriteLiteral("\n        &nbsp;\n        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1096), Tuple.Create("\"", 1109)
+WriteAttribute("id", Tuple.Create(" id=\"", 1017), Tuple.Create("\"", 1030)
             
             #line 38 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-, Tuple.Create(Tuple.Create("", 1101), Tuple.Create<System.Object, System.Int32>(context
+, Tuple.Create(Tuple.Create("", 1022), Tuple.Create<System.Object, System.Int32>(context
             
             #line default
             #line hidden
-, 1101), false)
+, 1022), false)
 );
 
 WriteLiteral(" class=\"badge\"");
 
-WriteLiteral("></div>\r\n\r\n");
+WriteLiteral("></div>\n\n");
 
             
             #line 40 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
@@ -244,7 +244,7 @@ WriteLiteral("></div>\r\n\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\n\n");
 
 WriteLiteral("        ");
 
@@ -255,7 +255,7 @@ WriteLiteral("        ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </a>\r\n");
+WriteLiteral("\n    </a>\n");
 
             
             #line 48 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
@@ -264,12 +264,12 @@ WriteLiteral("\r\n    </a>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n<style");
+WriteLiteral("\n<style");
 
 WriteLiteral(" type=\"text/css\"");
 
-WriteLiteral(">\r\n    div.tooltip-inner {\r\n        max-width: none;\r\n        white-space: nowrap" +
-";\r\n    }\r\n</style>\r\n\r\n");
+WriteLiteral(">\n    div.tooltip-inner {\n        max-width: none;\n        white-space: nowrap;\n " +
+"   }\n</style>\n\n");
 
         }
     }

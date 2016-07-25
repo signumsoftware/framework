@@ -65,7 +65,6 @@ namespace Signum.Web.Auth
 
             if (authCookie != null && authCookie.Value.HasText())
             {
-                ticketText = authCookie.Value;
                 httpContext.Response.Cookies[CookieName].Expires = DateTime.UtcNow.AddDays(-10);
 				Database.Query<UserTicketEntity>().Where(u => u.Ticket == authCookie.Value).UnsafeDelete();
             }

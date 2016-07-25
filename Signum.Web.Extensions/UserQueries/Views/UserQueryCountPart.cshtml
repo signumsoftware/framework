@@ -7,7 +7,7 @@
 @using (var e = Html.TypeContext<UserQueryCountPartEntity>())
 {
     var uq = e.Value.UserQuery.Retrieve();
-    object queryName = Finder.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
+    object queryName = Signum.Engine.Basics.QueryLogic.ToQueryName(uq.Query);
     FindOptions fo = new FindOptions(queryName)
     {
         ShowFilters = false

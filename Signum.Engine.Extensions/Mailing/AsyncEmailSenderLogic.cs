@@ -177,7 +177,7 @@ namespace Signum.Engine.Mailing
             }, TaskCreationOptions.LongRunning);
         }
 
-		static sqlDependencyRegistered = false;
+		static bool sqlDependencyRegistered = false;
         private static void SetSqlDepndency()
         {
 			if(sqlDependencyRegistered)

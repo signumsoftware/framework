@@ -87,7 +87,7 @@ namespace Signum.Engine.Translation
             var typeUsed = mi != null ? mi.ReflectedType : type;
 
 
-            var dict = GetRoleNotLocalizedMemebers(UserEntity.Current.Role.ToLite());
+            var dict = GetRoleNotLocalizedMemebers(UserEntity.Current.Role);
             var typeMiLongDit = dict.GetTypeMiLongDit(ci, typeUsed);
 
             if (mi == null)
