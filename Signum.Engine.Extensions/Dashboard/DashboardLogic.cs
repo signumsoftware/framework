@@ -186,7 +186,8 @@ namespace Signum.Engine.Dashboard
 
             var result = Dashboards.Value.Values
                 .Where(d =>
-                    d.ForNavbar == forNavbar && d.Key == key
+                    d.ForNavbar == forNavbar
+                     && (!key.HasText() || d.Key == key)
                     && d.EntityType == null && d.DashboardPriority.HasValue && isAllowed(d))
                 .OrderByDescending(a => a.DashboardPriority)
                 .FirstOrDefault();
