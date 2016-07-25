@@ -152,7 +152,7 @@ return new UserEntity
    Password = Security.EncodePassword("jamaica")
 }.SetMixin((UserEmployeeMixin m) => m.Employee, new EmployeeEntity
 	{
-       FirsName = "Bob",
+       FirstName = "Bob",
        LastName = "Marley"
 	});
 ```

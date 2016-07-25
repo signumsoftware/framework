@@ -426,7 +426,7 @@ namespace Signum.React.Facades
 
         public TypeReferenceTS(Type type, Implementations? implementations)
         {
-            this.IsCollection = type != typeof(string) && type.ElementType() != null;
+            this.IsCollection = type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;
             
             var clean = type == typeof(string) ? type :  (type.ElementType() ?? type);
             this.IsLite = clean.IsLite();
