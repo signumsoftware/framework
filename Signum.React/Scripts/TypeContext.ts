@@ -257,6 +257,7 @@ export interface ButtonsContext {
     pack: EntityPack<ModifiableEntity>;
     frame: EntityFrame<ModifiableEntity>;
     showOperations: boolean;
+    tag?: string;
 }
 
 export interface IRenderButtons {

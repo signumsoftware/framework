@@ -185,7 +185,9 @@ export function getTypeInfo(type: PseudoType): TypeInfo {
     throw new Error("Unexpected type: " + type);
 }
 
-
+export function parseId(ti: TypeInfo, id: string): string | number {
+    return ti.members["Id"].type.name == "number" ? parseInt(id) : id;
+}
 
 export const IsByAll = "[ALL]";
 export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
@@ -370,9 +372,12 @@ export interface IBinding<T> {
 
 export class Binding<T> implements IBinding<T> {
 
+    initialValue: T; // For deep compare
+
     constructor(
         public parentValue: any,
         public member: string | number) {
+        this.initialValue = this.parentValue[member];
     }
 
     static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T) {

@@ -99,6 +99,10 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
         this.state = this.calculateState(props);
     }
 
+    shouldComponentUpdate(nextProps: LineBaseProps, nextState: LineBaseProps) {
+        return !Dic.equals(this.state, nextState, true);
+    }
+
     componentWillReceiveProps(nextProps: P, nextContext: any) {
         this.setState(this.calculateState(nextProps));
     }

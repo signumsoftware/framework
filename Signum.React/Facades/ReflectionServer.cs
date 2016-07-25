@@ -349,6 +349,7 @@ namespace Signum.React.Facades
         public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
 
 
+        public override string ToString() => $"{Kind} {NiceName} {EntityKind} {EntityData}";
     }
 
     public class MemberInfoTS

@@ -12,11 +12,12 @@ import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from 
 
 export interface ValueLineProps extends LineBaseProps, React.Props<ValueLine> {
     valueLineType?: ValueLineType;
-    unitText?: string;
+    unitText?: React.ReactChild;
     formatText?: string;
     autoTrim?: boolean;
     inlineCheckbox?: boolean;
     comboBoxItems?: { name: string, niceName: string }[];
+    onTextboxBlur?: (val: any) => void;
     valueHtmlProps?: React.HTMLAttributes;
 }
 
@@ -91,7 +92,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
     }
 
-    static withUnit(unit: string, input: JSX.Element): JSX.Element {
+    static withUnit(unit: React.ReactNode, input: JSX.Element): JSX.Element {
         if (!unit)
             return input;
 
@@ -231,6 +232,9 @@ ValueLine.renderers[ValueLineType.TextBox as any] = (vl) => {
             const input = e.currentTarget as HTMLInputElement;
             if (input.value && input.value.trim() != input.value)
                 vl.setValue(input.value.trim());
+
+            if (vl.props.onTextboxBlur)
+                vl.props.onTextboxBlur(input.value.trim());
         };
     }
 
@@ -271,9 +275,23 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
         vl.setValue(input.value);
     };
 
+    let handleBlur: (e: React.SyntheticEvent) => void;
+    if (s.autoTrim == true) {
+        handleBlur = (e: React.SyntheticEvent) => {
+            const input = e.currentTarget as HTMLInputElement;
+            if (input.value && input.value.trim() != input.value)
+                vl.setValue(input.value.trim());
+
+            if (vl.props.onTextboxBlur)
+                vl.props.onTextboxBlur(input.value.trim());
+        };
+    }
+
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value || ""} onChange={handleTextOnChange}
+            <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control")} value={s.ctx.value || ""}
+                onChange={handleTextOnChange}
+                onBlur={handleBlur}
                 placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : null}/>
         </FormGroup>
     );

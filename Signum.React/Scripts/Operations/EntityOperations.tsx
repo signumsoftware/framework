@@ -28,6 +28,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
             const eoc: EntityOperationContext<Entity> = {
                 entity: ctx.pack.entity as Entity,
                 frame: ctx.frame,
+                tag: ctx.tag,
                 canExecute: ctx.pack.canExecute[oi.key],
                 operationInfo: oi,
                 showOperations: ctx.showOperations,
