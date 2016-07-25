@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -143,7 +143,14 @@ namespace Signum.Web.Controllers
 
             foreach (var item in lites)
             {
-                OperationLogic.ServiceExecuteLite(item, operationSymbol);
+                try
+                {
+                    OperationLogic.ServiceExecuteLite(item, operationSymbol);
+                }
+                catch (Exception ex)
+                {
+                	ex.LogException();
+                }
             }
 
             return null;
@@ -158,7 +165,14 @@ namespace Signum.Web.Controllers
 
             foreach (var item in lites)
             {
-                OperationLogic.ServiceDelete(item, operationSymbol);
+             	try
+                {
+                	OperationLogic.ServiceDelete(item, operationSymbol);
+                }
+                catch (Exception ex)
+                {
+                	ex.LogException();
+                }
             }
 
             return null;
@@ -173,7 +187,14 @@ namespace Signum.Web.Controllers
 
             foreach (var item in lites)
             {
-                OperationLogic.ServiceConstructFromLite(item, operationSymbol);
+            	try
+                {
+                	OperationLogic.ServiceConstructFromLite(item, operationSymbol);
+                }
+                catch (Exception ex)
+                {
+                	ex.LogException();
+                }
             }
 
             return null;
