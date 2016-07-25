@@ -220,7 +220,12 @@ export class GridRepeater extends Lines.EntityRepeater {
             de.dataTransfer.dropEffect = "move";
 
             $(e.currentTarget).removeClass("sf-over");
-        }); 
+        });
+
+        container.on("drop", ".items-row", e=> {
+            var de = <DragEvent><Event>e.originalEvent;
+            de.preventDefault();
+        });
 
         container.on("drop", ".separator-row", e=> {
             var de = <DragEvent><Event>e.originalEvent;
