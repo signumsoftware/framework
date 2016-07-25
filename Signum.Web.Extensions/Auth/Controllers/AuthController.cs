@@ -352,14 +352,14 @@ namespace Signum.Web.Auth
 
             OnUserPreLogin(this, user);
 
-            UserEntity.Current = user;
+            AddUserSession(user);
 
             if (rememberMe == true)
             {
                 UserTicketClient.SaveCookie();
             }
 
-            AddUserSession(user);
+           
 
             TempData["Message"] = AuthLogic.OnLoginMessage();
 
