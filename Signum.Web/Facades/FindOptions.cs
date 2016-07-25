@@ -119,10 +119,10 @@ namespace Signum.Web
             set { allowSelection = value; }
         }
 
-        bool allowOrder = true;
+        bool? allowOrder ;
         public bool AllowOrder
         {
-            get { return allowOrder; }
+            get { return allowOrder ?? Finder.Manager.AllowOrder(); }
             set { allowOrder = value; }
         }
 
