@@ -12,28 +12,31 @@
     {
         ShowFilters = false
     };
-    
+
     fo.ApplyUserQuery(uq);
 
-    <a href="@fo.ToString()">
+    var queryNiceName = QueryUtils.GetNiceName(fo.QueryName);
 
-        @if (e.Value.IconClass.HasText()) 
-        { 
-            <i class="glyphicon @e.Value.IconClass"></i> 
+    <a class="@(!e.Value.ShowName ? "dashboard-tooltip" : null)" href="@fo.ToString()"
+       data-toggle="tooltip" data-placement="top" data-original-title="@queryNiceName">
+
+        @if (e.Value.IconClass.HasText())
+        {
+            <i class="glyphicon @e.Value.IconClass"></i>
         }
-  
+
         @{
             var context = new Context(e, "{0}_cnt".FormatWith(e.Value.Id));
         }
 
         @if (e.Value.ShowName)
         {
-            @QueryUtils.GetNiceName(fo.QueryName)
+            @queryNiceName
         }
-        
+
         &nbsp;
         <div id="@context" class="badge"></div>
-        
+
         @{
             var function = JsModule.Finder["count"](
                 fo.ToJS(context.Prefix),
@@ -42,6 +45,12 @@
 
         @MvcHtmlString.Create("<script>" + function.ToHtmlString() + "</script>")
     </a>
-
 }
+
+<style type="text/css">
+    div.tooltip-inner {
+        max-width: none;
+        white-space: nowrap;
+    }
+</style>
 

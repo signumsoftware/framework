@@ -5,7 +5,7 @@
 
 @model DashboardEntity
 
-<div class="navbar-collapse collapse">
+<div id="dashboard-@Model.Id" class="navbar-collapse collapse">
     <ul class="nav navbar-nav">
         @{
             var parts = Model.Parts.AgGroupToDictionary(p => p.Row,gr=>gr.OrderBy(p=>p.StartColumn))
@@ -20,3 +20,9 @@
         }
     </ul>
 </div>
+
+<script>
+    $(function () {
+        $('#dashboard-@Model.Id .dashboard-tooltip[data-toggle="tooltip"]').tooltip();
+    })
+</script>

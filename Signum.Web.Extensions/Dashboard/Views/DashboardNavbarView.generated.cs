@@ -65,6 +65,17 @@ WriteLiteral("\r\n");
 
 WriteLiteral("<div");
 
+WriteAttribute("id", Tuple.Create(" id=\"", 140), Tuple.Create("\"", 164)
+, Tuple.Create(Tuple.Create("", 145), Tuple.Create("dashboard-", 145), true)
+            
+            #line 8 "..\..\Dashboard\Views\DashboardNavbarView.cshtml"
+, Tuple.Create(Tuple.Create("", 155), Tuple.Create<System.Object, System.Int32>(Model.Id
+            
+            #line default
+            #line hidden
+, 155), false)
+);
+
 WriteLiteral(" class=\"navbar-collapse collapse\"");
 
 WriteLiteral(">\r\n    <ul");
@@ -111,7 +122,16 @@ WriteLiteral("\r\n                </li>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </ul>\r\n</div>");
+WriteLiteral("\r\n    </ul>\r\n</div>\r\n\r\n<script>\r\n    $(function () {\r\n        $(\'#dashboard-");
+
+            
+            #line 26 "..\..\Dashboard\Views\DashboardNavbarView.cshtml"
+                 Write(Model.Id);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(" .dashboard-tooltip[data-toggle=\"tooltip\"]\').tooltip();\r\n    })\r\n</script>\r\n");
 
         }
     }

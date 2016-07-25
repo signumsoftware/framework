@@ -81,8 +81,10 @@ WriteLiteral("\r\n");
     {
         ShowFilters = false
     };
-    
+
     fo.ApplyUserQuery(uq);
+
+    var queryNiceName = QueryUtils.GetNiceName(fo.QueryName);
 
 
             
@@ -90,64 +92,89 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 523), Tuple.Create("\"", 544)
+WriteAttribute("class", Tuple.Create(" class=\"", 584), Tuple.Create("\"", 641)
             
-            #line 18 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-, Tuple.Create(Tuple.Create("", 530), Tuple.Create<System.Object, System.Int32>(fo.ToString()
+            #line 20 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+, Tuple.Create(Tuple.Create("", 592), Tuple.Create<System.Object, System.Int32>(!e.Value.ShowName ? "dashboard-tooltip" : null
             
             #line default
             #line hidden
-, 530), false)
+, 592), false)
 );
+
+WriteAttribute("href", Tuple.Create(" href=\"", 642), Tuple.Create("\"", 663)
+            
+            #line 20 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+, Tuple.Create(Tuple.Create("", 649), Tuple.Create<System.Object, System.Int32>(fo.ToString()
+            
+            #line default
+            #line hidden
+, 649), false)
+);
+
+WriteLiteral("\r\n       data-toggle=\"tooltip\"");
+
+WriteLiteral(" data-placement=\"top\"");
+
+WriteLiteral(" data-original-title=\"");
+
+            
+            #line 21 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+                                                                  Write(queryNiceName);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"");
 
 WriteLiteral(">\r\n\r\n");
 
             
-            #line 20 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+            #line 23 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 20 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-         if (e.Value.IconClass.HasText()) 
-        { 
+            #line 23 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+         if (e.Value.IconClass.HasText())
+        {
 
             
             #line default
             #line hidden
 WriteLiteral("            <i");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 620), Tuple.Create("\"", 656)
-, Tuple.Create(Tuple.Create("", 628), Tuple.Create("glyphicon", 628), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 825), Tuple.Create("\"", 861)
+, Tuple.Create(Tuple.Create("", 833), Tuple.Create("glyphicon", 833), true)
             
-            #line 22 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-, Tuple.Create(Tuple.Create(" ", 637), Tuple.Create<System.Object, System.Int32>(e.Value.IconClass
+            #line 25 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+, Tuple.Create(Tuple.Create(" ", 842), Tuple.Create<System.Object, System.Int32>(e.Value.IconClass
             
             #line default
             #line hidden
-, 638), false)
+, 843), false)
 );
 
-WriteLiteral("></i> \r\n");
+WriteLiteral("></i>\r\n");
 
             
-            #line 23 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+            #line 26 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
         }
 
             
             #line default
             #line hidden
-WriteLiteral("  \r\n");
+WriteLiteral("\r\n");
 
             
-            #line 25 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+            #line 28 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 25 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+            #line 28 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
           
             var context = new Context(e, "{0}_cnt".FormatWith(e.Value.Id));
         
@@ -157,13 +184,13 @@ WriteLiteral("  \r\n");
 WriteLiteral("\r\n\r\n");
 
             
-            #line 29 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+            #line 32 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 29 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+            #line 32 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
          if (e.Value.ShowName)
         {
             
@@ -171,44 +198,44 @@ WriteLiteral("\r\n\r\n");
             #line default
             #line hidden
             
-            #line 31 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-       Write(QueryUtils.GetNiceName(fo.QueryName));
+            #line 34 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+       Write(queryNiceName);
 
             
             #line default
             #line hidden
             
-            #line 31 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-                                                 
+            #line 34 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+                          
         }
 
             
             #line default
             #line hidden
-WriteLiteral("        \r\n        &nbsp;\r\n        <div");
+WriteLiteral("\r\n        &nbsp;\r\n        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 925), Tuple.Create("\"", 938)
+WriteAttribute("id", Tuple.Create(" id=\"", 1096), Tuple.Create("\"", 1109)
             
-            #line 35 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-, Tuple.Create(Tuple.Create("", 930), Tuple.Create<System.Object, System.Int32>(context
+            #line 38 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+, Tuple.Create(Tuple.Create("", 1101), Tuple.Create<System.Object, System.Int32>(context
             
             #line default
             #line hidden
-, 930), false)
+, 1101), false)
 );
 
 WriteLiteral(" class=\"badge\"");
 
-WriteLiteral("></div>\r\n        \r\n");
+WriteLiteral("></div>\r\n\r\n");
 
             
-            #line 37 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+            #line 40 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 37 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+            #line 40 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
           
             var function = JsModule.Finder["count"](
                 fo.ToJS(context.Prefix),
@@ -222,7 +249,7 @@ WriteLiteral("\r\n\r\n");
 WriteLiteral("        ");
 
             
-            #line 43 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
+            #line 46 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
    Write(MvcHtmlString.Create("<script>" + function.ToHtmlString() + "</script>"));
 
             
@@ -231,14 +258,18 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </a>\r\n");
 
             
-            #line 45 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
-
+            #line 48 "..\..\UserQueries\Views\UserQueryCountPart.cshtml"
 }
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
+WriteLiteral("\r\n<style");
+
+WriteLiteral(" type=\"text/css\"");
+
+WriteLiteral(">\r\n    div.tooltip-inner {\r\n        max-width: none;\r\n        white-space: nowrap" +
+";\r\n    }\r\n</style>\r\n\r\n");
 
         }
     }
