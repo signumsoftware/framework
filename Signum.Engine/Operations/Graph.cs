@@ -207,7 +207,7 @@ namespace Signum.Engine.Operations
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
                         User = UserHolder.Current?.ToLite(),
-                        Origin = origin.ToLiteFat(),
+                        Origin = origin.ToLite(origin.IsNew),
                     };
 
                     try
