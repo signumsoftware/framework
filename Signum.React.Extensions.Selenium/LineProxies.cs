@@ -574,7 +574,7 @@ arguments[0].dispatchEvent(new Event('blur'));";
 
         public virtual WebElementLocator ItemsContainerElement
         {
-            get { return this.Element.WithLocator(By.CssSelector("sf-repater-elements")); }
+            get { return this.Element.WithLocator(By.CssSelector(".sf-repater-elements")); }
         }
 
         public virtual WebElementLocator ItemElement(int index)
@@ -604,7 +604,7 @@ arguments[0].dispatchEvent(new Event('blur'));";
         
         public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
         {
-            return new LineContainer<T>(ItemElement(index).Find(), this.Route);
+            return new LineContainer<T>(ItemElement(index).Find(), this.ItemRoute);
         }
 
         public IWebElement RemoveElementIndex(int index)
