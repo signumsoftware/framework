@@ -328,7 +328,9 @@
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="EmbeddedInEntity" Description="Incrustado en entidad" />
     <Member Name="EntityType" Description="Tipo de entidad" />
+    <Member Name="ForNavbar" Description="Para la barra de navegación" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="Key" Description="Clave" />
     <Member Name="Owner" Description="Propietario" />
     <Member Name="Parts" Description="Partes" />
   </Type>
@@ -468,6 +470,7 @@
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="EmailAddress" Description="Dirección email" />
     <Member Name="EmailOwner" Description="Propietario email" />
+    <Member Name="InvalidEmail" Description="Correo electrónico no válida" />
   </Type>
   <Type Name="EmailAttachmentEntity" Description="Archivo adjunto de email">
     <Member Name="ContentId" Description="Content id" />
@@ -884,6 +887,10 @@
     <Member Name="Links" Description="Enlaces" />
     <Member Name="RequiresTitle" Description="Requiere título" />
   </Type>
+  <Type Name="LinkPartEntity" Description="Link parte">
+    <Member Name="Link" Description="Enlace" />
+    <Member Name="RequiresTitle" Description="Requiere título" />
+  </Type>
   <Type Name="MapMessage">
     <Member Name="Color" Description="Color" />
     <Member Name="Columns" Description="Columnas" />
@@ -997,6 +1004,9 @@
     <Member Name="Search" Description="Buscar..." />
     <Member Name="Unknown" Description="Desconocido" />
     <Member Name="Yes" Description="sí" />
+  </Type>
+  <Type Name="OmniboxPanelPartEntity" Description="Panel de Omnibox parte">
+    <Member Name="RequiresTitle" Description="Requiere título" />
   </Type>
   <Type Name="OperationAllowed">
     <Member Name="Allow" Description="Permitir" />
@@ -1613,6 +1623,12 @@
     <Member Name="Save" Description="Guardar" />
     <Member Name="SaveNew" Description="Alta" />
     <Member Name="SetPassword" Description="Establecer la contraseña" />
+  </Type>
+  <Type Name="UserQueryCountPartEntity" Description="Consulta de usuario contador parte">
+    <Member Name="IconClass" Description="Clase de icono" />
+    <Member Name="RequiresTitle" Description="Requiere título" />
+    <Member Name="ShowName" Description="Mostrar nombre" />
+    <Member Name="UserQuery" Description="Consulta de usuario" />
   </Type>
   <Type Name="UserQueryEntity" Description="Consulta de Usuario">
     <Member Name="AllowSelection" Description="Permitir la selección" />
