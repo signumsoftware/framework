@@ -144,7 +144,7 @@ export function saveFile(response: Response) {
     let fileName = "file.dat";
     let match = /attachment; filename=(.+)/.exec(response.headers.get("Content-Disposition"));
     if (match)
-        fileName = match[1];
+        fileName = match[1].trimEnd("\"").trimStart("\"");
 
     response.blob().then(blob => {
         
