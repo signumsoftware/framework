@@ -76,12 +76,21 @@ Write(Html.ScriptCss("~/Dashboard/Content/Dashboard.css"));
             
             #line default
             #line hidden
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n");
+
+            
+            #line 9 "..\..\Dashboard\Views\Dashboard.cshtml"
+Write(Html.AntiForgeryToken());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n\r\n\r\n");
 
 });
 
             
-            #line 11 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 13 "..\..\Dashboard\Views\Dashboard.cshtml"
   
     var currentEntity = (Entity)ViewData["currentEntity"];
 
@@ -91,7 +100,7 @@ WriteLiteral("\r\n\r\n");
 WriteLiteral("\r\n\r\n");
 
             
-            #line 15 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 17 "..\..\Dashboard\Views\Dashboard.cshtml"
  if (currentEntity != null)
 {
 
@@ -105,13 +114,13 @@ WriteLiteral(" style=\"float: right; text-align:right\"");
 WriteLiteral(">\r\n        <h3>\r\n");
 
             
-            #line 19 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 21 "..\..\Dashboard\Views\Dashboard.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 19 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 21 "..\..\Dashboard\Views\Dashboard.cshtml"
              if (Navigator.IsNavigable(currentEntity, null))
             {
 
@@ -122,20 +131,20 @@ WriteLiteral("                <a");
 
 WriteLiteral(" class=\"sf-entity-title\"");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 516), Tuple.Create("\"", 562)
+WriteAttribute("href", Tuple.Create(" href=\"", 544), Tuple.Create("\"", 590)
             
-            #line 21 "..\..\Dashboard\Views\Dashboard.cshtml"
-, Tuple.Create(Tuple.Create("", 523), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(currentEntity)
+            #line 23 "..\..\Dashboard\Views\Dashboard.cshtml"
+, Tuple.Create(Tuple.Create("", 551), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(currentEntity)
             
             #line default
             #line hidden
-, 523), false)
+, 551), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 21 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 23 "..\..\Dashboard\Views\Dashboard.cshtml"
                                                                                      Write(currentEntity.ToString());
 
             
@@ -144,7 +153,7 @@ WriteLiteral(">");
 WriteLiteral("</a>\r\n");
 
             
-            #line 22 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 24 "..\..\Dashboard\Views\Dashboard.cshtml"
             }
             else
             {
@@ -159,7 +168,7 @@ WriteLiteral(" class=\"sf-entity-title\"");
 WriteLiteral(">");
 
             
-            #line 25 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 27 "..\..\Dashboard\Views\Dashboard.cshtml"
                                          Write(currentEntity.ToString());
 
             
@@ -168,7 +177,7 @@ WriteLiteral(">");
 WriteLiteral("</span>\r\n");
 
             
-            #line 26 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 28 "..\..\Dashboard\Views\Dashboard.cshtml"
             }
 
             
@@ -181,7 +190,7 @@ WriteLiteral(" class=\"sf-type-nice-name\"");
 WriteLiteral(">");
 
             
-            #line 28 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 30 "..\..\Dashboard\Views\Dashboard.cshtml"
                                         Write(Navigator.Manager.GetTypeTitle(currentEntity));
 
             
@@ -190,7 +199,7 @@ WriteLiteral(">");
 WriteLiteral("</small>\r\n        </h3>\r\n    </div>\r\n");
 
             
-            #line 31 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 33 "..\..\Dashboard\Views\Dashboard.cshtml"
 }
 
             
@@ -199,7 +208,7 @@ WriteLiteral("</small>\r\n        </h3>\r\n    </div>\r\n");
 WriteLiteral("\r\n");
 
             
-            #line 33 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 35 "..\..\Dashboard\Views\Dashboard.cshtml"
  using (Html.BeginForm("DoPostBack", "Signum", "POST"))
 {
 
@@ -209,13 +218,13 @@ WriteLiteral("\r\n");
 WriteLiteral("    <h2>\r\n");
 
             
-            #line 36 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 38 "..\..\Dashboard\Views\Dashboard.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 36 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 38 "..\..\Dashboard\Views\Dashboard.cshtml"
          if (Navigator.IsNavigable(Model, null, isSearch: true))
         { 
 
@@ -224,20 +233,20 @@ WriteLiteral("    <h2>\r\n");
             #line hidden
 WriteLiteral("            <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 1053), Tuple.Create("\"", 1119)
+WriteAttribute("href", Tuple.Create(" href=\"", 1081), Tuple.Create("\"", 1147)
             
-            #line 38 "..\..\Dashboard\Views\Dashboard.cshtml"
-, Tuple.Create(Tuple.Create("", 1060), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(typeof(DashboardEntity), Model.Id)
+            #line 40 "..\..\Dashboard\Views\Dashboard.cshtml"
+, Tuple.Create(Tuple.Create("", 1088), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(typeof(DashboardEntity), Model.Id)
             
             #line default
             #line hidden
-, 1060), false)
+, 1088), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 38 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 40 "..\..\Dashboard\Views\Dashboard.cshtml"
                                                                              Write(Model.DisplayName);
 
             
@@ -246,7 +255,7 @@ WriteLiteral(">");
 WriteLiteral("</a>\r\n");
 
             
-            #line 39 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 41 "..\..\Dashboard\Views\Dashboard.cshtml"
         }
         else
         {
@@ -255,14 +264,14 @@ WriteLiteral("</a>\r\n");
             #line default
             #line hidden
             
-            #line 42 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 44 "..\..\Dashboard\Views\Dashboard.cshtml"
        Write(Model.DisplayName);
 
             
             #line default
             #line hidden
             
-            #line 42 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 44 "..\..\Dashboard\Views\Dashboard.cshtml"
                               
         }
 
@@ -272,7 +281,7 @@ WriteLiteral("</a>\r\n");
 WriteLiteral("    </h2>\r\n");
 
             
-            #line 45 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 47 "..\..\Dashboard\Views\Dashboard.cshtml"
     
       
 
@@ -292,7 +301,7 @@ WriteLiteral(">\r\n        $(function () {\r\n            setTimeout(function ()
 " window.location.href = window.location.href;\r\n            }, ");
 
             
-            #line 56 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 58 "..\..\Dashboard\Views\Dashboard.cshtml"
            Write(Model.AutoRefreshPeriod.Value * 1000);
 
             
@@ -301,7 +310,7 @@ WriteLiteral(">\r\n        $(function () {\r\n            setTimeout(function ()
 WriteLiteral(");\r\n        });\r\n    </script>\r\n");
 
             
-            #line 59 "..\..\Dashboard\Views\Dashboard.cshtml"
+            #line 61 "..\..\Dashboard\Views\Dashboard.cshtml"
         }
 }
 

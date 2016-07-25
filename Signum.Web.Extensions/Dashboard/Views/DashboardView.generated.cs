@@ -78,12 +78,21 @@ Write(Html.ScriptCss("~/Dashboard/Content/Dashboard.css"));
             #line hidden
 WriteLiteral("\r\n");
 
+            
+            #line 9 "..\..\Dashboard\Views\DashboardView.cshtml"
+Write(Html.AntiForgeryToken());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
 });
 
 WriteLiteral("\r\n");
 
             
-            #line 11 "..\..\Dashboard\Views\DashboardView.cshtml"
+            #line 12 "..\..\Dashboard\Views\DashboardView.cshtml"
   
     var currentEntity = (Entity)ViewData["currentEntity"];
 
@@ -93,7 +102,7 @@ WriteLiteral("\r\n");
 WriteLiteral("\r\n\r\n");
 
             
-            #line 15 "..\..\Dashboard\Views\DashboardView.cshtml"
+            #line 16 "..\..\Dashboard\Views\DashboardView.cshtml"
  using (Model.EntityType == null ? null : CurrentEntityConverter.SetCurrentEntity(currentEntity))
 {
     foreach (var gr in Model.Parts.GroupBy(a => a.Row).OrderBy(a => a.Key))
@@ -110,13 +119,13 @@ WriteLiteral(" class=\"row row-control-panel\"");
 WriteLiteral(">\r\n");
 
             
-            #line 21 "..\..\Dashboard\Views\DashboardView.cshtml"
+            #line 22 "..\..\Dashboard\Views\DashboardView.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 21 "..\..\Dashboard\Views\DashboardView.cshtml"
+            #line 22 "..\..\Dashboard\Views\DashboardView.cshtml"
          foreach (var part in gr.OrderBy(a => a.StartColumn))
         {
             var offset = part.StartColumn - lastEnd;
@@ -126,23 +135,23 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("            <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 698), Tuple.Create("\"", 795)
-, Tuple.Create(Tuple.Create("", 706), Tuple.Create("part-control-panel", 706), true)
-, Tuple.Create(Tuple.Create(" ", 724), Tuple.Create("col-sm-", 725), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 724), Tuple.Create("\"", 821)
+, Tuple.Create(Tuple.Create("", 732), Tuple.Create("part-control-panel", 732), true)
+, Tuple.Create(Tuple.Create(" ", 750), Tuple.Create("col-sm-", 751), true)
             
-            #line 24 "..\..\Dashboard\Views\DashboardView.cshtml"
-, Tuple.Create(Tuple.Create("", 732), Tuple.Create<System.Object, System.Int32>(part.Columns
-            
-            #line default
-            #line hidden
-, 732), false)
-            
-            #line 24 "..\..\Dashboard\Views\DashboardView.cshtml"
-, Tuple.Create(Tuple.Create(" ", 745), Tuple.Create<System.Object, System.Int32>(offset == 0 ? null : "col-sm-offset-" + offset
+            #line 25 "..\..\Dashboard\Views\DashboardView.cshtml"
+, Tuple.Create(Tuple.Create("", 758), Tuple.Create<System.Object, System.Int32>(part.Columns
             
             #line default
             #line hidden
-, 746), false)
+, 758), false)
+            
+            #line 25 "..\..\Dashboard\Views\DashboardView.cshtml"
+, Tuple.Create(Tuple.Create(" ", 771), Tuple.Create<System.Object, System.Int32>(offset == 0 ? null : "col-sm-offset-" + offset
+            
+            #line default
+            #line hidden
+, 772), false)
 );
 
 WriteLiteral(">\r\n");
@@ -150,7 +159,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 25 "..\..\Dashboard\Views\DashboardView.cshtml"
+            #line 26 "..\..\Dashboard\Views\DashboardView.cshtml"
            Write(Html.Partial(DashboardClient.ViewPrefix.FormatWith("PanelPartView"), part));
 
             
@@ -159,7 +168,7 @@ WriteLiteral("                ");
 WriteLiteral("\r\n\r\n            </div>\r\n");
 
             
-            #line 28 "..\..\Dashboard\Views\DashboardView.cshtml"
+            #line 29 "..\..\Dashboard\Views\DashboardView.cshtml"
             lastEnd = part.StartColumn + part.Columns;
         }
 
@@ -169,7 +178,7 @@ WriteLiteral("\r\n\r\n            </div>\r\n");
 WriteLiteral("    </div>\r\n");
 
             
-            #line 31 "..\..\Dashboard\Views\DashboardView.cshtml"
+            #line 32 "..\..\Dashboard\Views\DashboardView.cshtml"
     }
 }
 
