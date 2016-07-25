@@ -252,6 +252,7 @@
   <Type Name="QueryEntity" />
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} como {1})" />
+    <Member Name="_0Steps1" Description="paso de {0} {1}" />
     <Member Name="And" Description=" y " />
     <Member Name="AnyEntity" Description="cualquier entidad" />
     <Member Name="As0" Description="As {0}" />
@@ -276,6 +277,7 @@
     <Member Name="Number" Description="número" />
     <Member Name="Of" Description=" de " />
     <Member Name="Second" Description="Segundo" />
+    <Member Name="Step0" Description="Paso {0}" />
     <Member Name="Text" Description="texto" />
     <Member Name="WeekNumber" Description="Número semana" />
     <Member Name="Year" Description="Año" />
@@ -285,6 +287,12 @@
     <Member Name="Quicklinks" Description="Vínculos rápidos" />
   </Type>
   <Type Name="RoundingType" />
+  <Type Name="RoundingType">
+    <Member Name="Ceil" Description="Cielo" />
+    <Member Name="Floor" Description="Piso" />
+    <Member Name="Round" Description="Redondeo" />
+    <Member Name="RoundMiddle" Description="Medio medio" />
+  </Type>
   <Type Name="SearchMessage">
     <Member Name="_01of2Results_N" Description="{0} - {1} de {2} resultado[s]." />
     <Member Name="_0Results_N" Description="{0} resultado[s]." />
@@ -351,12 +359,12 @@
     <Member Name="TableName" Description="Table Name" />
   </Type>
   <Type Name="ValidationMessage">
-    <Member Name="_0DoesNotHaveAValid0Format" Description="{{0}} no tiene un formato válido {0}" />
+    <Member Name="_0DoesNotHaveAValid1Format" Description="{0} no tiene un formato válido {1}" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} tiene un formato inválido" />
     <Member Name="_0HasAPrecissionOf1InsteadOf2" Description="{0} tiene una precisión de {1} en lugar de {2}" />
-    <Member Name="_0HasMoreThan0DecimalPlaces" Description="{{0}} tiene más de {0} decimales" />
-    <Member Name="_0HasSomeRepeatedElements0" Description="{{0}} tiene algunos elementos repetidos: {0}" />
-    <Member Name="_0HasToBeBetween0And1" Description="{{0}} Tiene que estar entre {0} y {1}" />
+    <Member Name="_0HasMoreThan1DecimalPlaces" Description="{0} tiene más de {1} decimales " />
+    <Member Name="_0HasSomeRepeatedElements1" Description="{0} tiene elementos repetidos: {1}" />
+    <Member Name="_0HasToBeBetween1And2" Description="{0} tiene que ser entre {1} y {2}" />
     <Member Name="_0HasToBeLowercase" Description="{0} debe estar en minúsculas" />
     <Member Name="_0HasToBeUppercase" Description="{0} debe estar en mayúsculas" />
     <Member Name="_0IsMandatoryWhen1IsNotSet" Description="{0} es obligatorio si {1} no está establecido" />
@@ -374,6 +382,9 @@
     <Member Name="_0ShouldBeNull" Description="{0} debe ser nulo" />
     <Member Name="_0ShouldBeNullWhen1IsNotSet" Description="{0} debe ser nulo si {1} no está establecido" />
     <Member Name="_0ShouldBeNullWhen1IsSet" Description="{0} debe ser nulo si {1} se establece" />
+    <Member Name="_0ShouldNotHaveBreakLines" Description="{0} no debe tener líneas de retorno de carro" />
+    <Member Name="_0ShouldNotHaveFinalSpaces" Description="{0} no debe tener espacios finales" />
+    <Member Name="_0ShouldNotHaveInitialSpaces" Description="{0} no debe tener espacios iniciales" />
     <Member Name="Be" Description="ser " />
     <Member Name="BeA0_G" Description="ser [m:un|f:una] {0}" />
     <Member Name="BeBetween0And1" Description="estar entre {0} y {1}" />
@@ -394,11 +405,11 @@
     <Member Name="Numeric" Description="Numérico" />
     <Member Name="OrBeNull" Description="o ser nulo" />
     <Member Name="Telephone" Description="Teléfono" />
-    <Member Name="TheLenghtOf0HasToBeEqualTo0" Description="La longitud de {{0}} ha de ser {0}" />
-    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo0" Description="La longitud de {{0}} ha de ser mayor o igual a {0}" />
-    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo0" Description="La longitud de {{0}} ha de ser menor o igual a {0}" />
+    <Member Name="TheLenghtOf0HasToBeEqualTo1" Description="La longitud de {0} tiene que ser igual a {1}" />
+    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo1" Description="La longitud de {0} tiene que ser mayor o igual a {1}" />
+    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo1" Description="La longitud de {0} tiene que ser menor o igual a {1}" />
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="El número de {0} está siendo multiplicado por {1}" />
-    <Member Name="TheNumberOfElementsOf0HasToBe01" Description="El número de elementos en {{0}} ha de ser {0} {1}" />
+    <Member Name="TheNumberOfElementsOf0HasToBe12" Description="El número de elementos de {0} ha de ser {0} {1}" />
     <Member Name="Type0NotAllowed" Description="El tipo {0} no está permitido" />
   </Type>
   <Type Name="VoidEnumMessage">
