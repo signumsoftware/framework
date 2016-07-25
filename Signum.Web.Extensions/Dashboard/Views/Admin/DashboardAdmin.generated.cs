@@ -81,94 +81,94 @@ WriteLiteral("\r\n\r\n\r\n");
     using (var sc = tc.SubContext())
     {
         sc.FormGroupStyle = FormGroupStyle.Basic;
-    
+
 
             
             #line default
             #line hidden
-WriteLiteral("    <div");
+WriteLiteral("        <div");
 
 WriteLiteral(" class=\"form-vertical\"");
 
-WriteLiteral(">\r\n        <div");
+WriteLiteral(">\r\n            <div");
 
 WriteLiteral(" class=\"row\"");
 
-WriteLiteral(">\r\n            <div");
+WriteLiteral(">\r\n                <div");
 
 WriteLiteral(" class=\"col-sm-6\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("                    ");
 
             
             #line 18 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-           Write(Html.ValueLine(sc, cp => cp.DisplayName));
+               Write(Html.ValueLine(sc, cp => cp.DisplayName));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </div>\r\n            <div");
+WriteLiteral("\r\n                </div>\r\n                <div");
 
 WriteLiteral(" class=\"col-sm-3\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("                    ");
 
             
             #line 21 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-           Write(Html.ValueLine(sc, cp => cp.DashboardPriority));
+               Write(Html.ValueLine(sc, cp => cp.DashboardPriority));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </div>\r\n             <div");
+WriteLiteral("\r\n                </div>\r\n                <div");
 
 WriteLiteral(" class=\"col-sm-3\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("                    ");
 
             
             #line 24 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-           Write(Html.ValueLine(sc, cp => cp.AutoRefreshPeriod));
+               Write(Html.ValueLine(sc, cp => cp.AutoRefreshPeriod));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </div>\r\n        </div>\r\n        <div");
+WriteLiteral("\r\n                </div>\r\n            </div>\r\n            <div");
 
 WriteLiteral(" class=\"row\"");
 
-WriteLiteral(">\r\n            <div");
+WriteLiteral(">\r\n                <div");
 
 WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("                    ");
 
             
             #line 29 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-           Write(Html.EntityLine(sc, cp => cp.Owner, el => el.Create = false));
+               Write(Html.EntityLine(sc, cp => cp.Owner, el => el.Create = false));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </div>\r\n            <div");
+WriteLiteral("\r\n                </div>\r\n                <div");
 
 WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                ");
+WriteLiteral("                    ");
 
             
             #line 32 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-           Write(Html.EntityLine(sc, cp => cp.EntityType, el => { 
+               Write(Html.EntityLine(sc, cp => cp.EntityType, el => {
                el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
                el.AttachFunction = UserAssetsClient.Module["attachShowEmbeddedInEntity"](el);
            }));
@@ -176,34 +176,70 @@ WriteLiteral("                ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </div>\r\n             <div");
+WriteLiteral("\r\n                </div>\r\n                <div");
 
 WriteLiteral(" class=\"col-sm-4\"");
 
 WriteLiteral(">\r\n");
 
-WriteLiteral("                 ");
+WriteLiteral("                    ");
 
             
             #line 38 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-            Write(Html.ValueLine(sc, f => f.EmbeddedInEntity));
+               Write(Html.ValueLine(sc, f => f.EmbeddedInEntity));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n             </div>\r\n        </div>\r\n    </div>\r\n");
+WriteLiteral("\r\n                </div>\r\n            </div>\r\n\r\n            <fieldset>\r\n         " +
+"       <legend>Navbar</legend>\r\n                <div");
+
+WriteLiteral(" class=\"row\"");
+
+WriteLiteral(">\r\n                    <div");
+
+WriteLiteral(" class=\"col-sm-4\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("                        ");
 
             
-            #line 42 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
-    
+            #line 46 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+                   Write(Html.ValueLine(sc, cp => cp.ForNavbar));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                    </div>\r\n                    <div");
+
+WriteLiteral(" class=\"col-sm-4\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("                        ");
+
+            
+            #line 49 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+                   Write(Html.ValueLine(sc, cp => cp.Key));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                    </div>\r\n                </div>\r\n            </fieldset>\r\n  " +
+"      </div>\r\n");
+
+            
+            #line 54 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+
     }
-    
+
     
             
             #line default
             #line hidden
             
-            #line 45 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 57 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
 Write(Html.GridRepeater(tc, cp => cp.Parts, grid =>
         {
             grid.PartialViewName = DashboardClient.AdminViewPrefix.FormatWith("PanelPartViewAdmin");
@@ -216,7 +252,7 @@ Write(Html.GridRepeater(tc, cp => cp.Parts, grid =>
             #line default
             #line hidden
             
-            #line 51 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
+            #line 63 "..\..\Dashboard\Views\Admin\DashboardAdmin.cshtml"
           ;
 }
 

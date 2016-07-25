@@ -22,6 +22,7 @@ using Signum.Web.Basic;
 using Signum.Web.UserQueries;
 using Signum.Entities.UserAssets;
 using Signum.Web.UserAssets;
+using Signum.Web.Dashboard;
 
 namespace Signum.Web.UserQueries
 {
@@ -93,6 +94,8 @@ namespace Signum.Web.UserQueries
                             .CreateProperty(a=>a.OrderType)
                             
                     },
+
+                    new EntitySettings<UserQueryCountPartEntity>()
                 });
 
                 ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
@@ -113,6 +116,10 @@ namespace Signum.Web.UserQueries
                     return UserQueryLogic.GetUserQueriesEntity(entity.EntityType)
                         .Select(cp => new UserQueryQuickLink(cp, entity)).ToArray();
                 });
+
+                DashboardClient.PanelPartViews.Add(
+                   typeof(UserQueryCountPartEntity),
+                   new DashboardClient.PartViews(ViewPrefix.FormatWith("UserQueryCountPart"), ViewPrefix.FormatWith("UserQueryCountPartAdmin")));
             }
         }
 

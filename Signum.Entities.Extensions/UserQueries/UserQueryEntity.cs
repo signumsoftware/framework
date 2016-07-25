@@ -14,6 +14,7 @@ using Signum.Entities.Authorization;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Dashboard;
 
 namespace Signum.Entities.UserQueries
 {
@@ -181,6 +182,51 @@ namespace Signum.Entities.UserQueries
     {
         public static ExecuteSymbol<UserQueryEntity> Save;
         public static DeleteSymbol<UserQueryEntity> Delete;
+    }
+
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    public class UserQueryCountPartEntity : Entity, IPartEntity
+    {
+        bool requiresTitle;
+        public bool RequiresTitle
+        {
+            get { return requiresTitle; }
+            set { Set(ref requiresTitle, value); }
+        }
+
+        Lite<UserQueryEntity> userQuery;
+        public Lite<UserQueryEntity> UserQuery
+        {
+            get { return userQuery; }
+            set { Set(ref userQuery, value); }
+        }
+
+        string iconClass;
+        public string IconClass
+        {
+            get { return iconClass; }
+            set { Set(ref iconClass, value); }
+        }
+
+        bool showName;
+        public bool ShowName
+        {
+            get { return showName; }
+            set { Set(ref showName, value); }
+        }
+
+        public IPartEntity Clone()
+        {
+            return new UserQueryPartEntity();
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("UserQueryPartEntity", this);
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        { }
     }
 
 

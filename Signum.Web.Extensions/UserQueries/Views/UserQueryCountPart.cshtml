@@ -1,0 +1,47 @@
+﻿@using Signum.Entities.UserQueries
+@using Signum.Entities.DynamicQuery
+@using Signum.Engine
+@using Signum.Web.UserQueries
+@using Newtonsoft.Json.Linq
+
+@using (var e = Html.TypeContext<UserQueryCountPartEntity>())
+{
+    var uq = e.Value.UserQuery.Retrieve();
+    object queryName = Finder.Manager.QuerySettings.Keys.FirstEx(k => QueryUtils.GetQueryUniqueKey(k) == uq.Query.Key);
+    FindOptions fo = new FindOptions(queryName)
+    {
+        ShowFilters = false
+    };
+    
+    fo.ApplyUserQuery(uq);
+
+    <a href="@fo.ToString()">
+
+        @if (e.Value.IconClass.HasText()) 
+        { 
+            <i class="glyphicon @e.Value.IconClass"></i> 
+        }
+  
+        @{
+            var context = new Context(e, "{0}_cnt".FormatWith(e.Value.Id));
+        }
+
+        @if (e.Value.ShowName)
+        {
+            @QueryUtils.GetNiceName(fo.QueryName)
+        }
+        
+        &nbsp;
+        <div id="@context" class="badge"></div>
+        
+        @{
+            var function = JsModule.Finder["count"](
+                fo.ToJS(context.Prefix),
+                new JRaw("'" + context.Prefix + "'.get()"));
+        }
+
+        @MvcHtmlString.Create("<script>" + function.ToHtmlString() + "</script>")
+    </a>
+
+}
+

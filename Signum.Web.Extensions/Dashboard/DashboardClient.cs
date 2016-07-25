@@ -47,6 +47,7 @@ namespace Signum.Web.Dashboard
             { typeof(UserQueryPartEntity), new PartViews(ViewPrefix.FormatWith("SearchControlPart"), AdminViewPrefix.FormatWith("SearchControlPart")) { HasFullScreenLink = true, TitleLink = p=> NavigateRoute(((UserQueryPartEntity)p).UserQuery) }},
             { typeof(CountSearchControlPartEntity), new PartViews(ViewPrefix.FormatWith("CountSearchControlPart"), AdminViewPrefix.FormatWith("CountSearchControlPart")) },
             { typeof(LinkListPartEntity), new PartViews(ViewPrefix.FormatWith("LinkListPart"), AdminViewPrefix.FormatWith("LinkListPart")) },
+            { typeof(LinkPartEntity), new PartViews(ViewPrefix.FormatWith("LinkPart"), AdminViewPrefix.FormatWith("LinkPart")) },
         };
 
         static string NavigateRoute(Entity entity)
@@ -79,6 +80,7 @@ namespace Signum.Web.Dashboard
                     new EmbeddedEntitySettings<CountUserQueryElementEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("CountUserQueryElement") },
                     
                     new EntitySettings<LinkListPartEntity>(),
+                    new EntitySettings<LinkPartEntity>(),
                     new EmbeddedEntitySettings<LinkElementEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("LinkElement") },
                 });
 

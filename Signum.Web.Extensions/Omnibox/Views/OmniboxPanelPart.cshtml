@@ -1,0 +1,11 @@
+﻿@using Signum.Web.Omnibox
+@using Signum.Entities.Omnibox
+@using Signum.Utilities
+
+@if (OmniboxClient.CanSee())
+{
+    <input id="sfOmnibox" name="sfOmnibox" type="text" class="form-control" placeholder="@OmniboxMessage.Search.NiceToString()" />
+    <script type="text/javascript">
+        @(OmniboxClient.Module["initialize"]("sfOmnibox", Url.Action("Autocomplete", "Omnibox")))
+    </script>
+}
