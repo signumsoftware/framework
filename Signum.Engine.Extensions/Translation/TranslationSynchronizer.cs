@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using Signum.Utilities;
+using Signum.Engine.Translation;
+using Signum.Entities.Authorization;
+using Signum.Entities;
 
 namespace Signum.Engine.Translation
 {
@@ -12,11 +15,15 @@ namespace Signum.Engine.Translation
     {
         public static int MaxTotalSyncCharacters = 800;
 
-        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, bool translatedOnly, out int totalTypes)
+        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, bool translatedOnly, Lite<RoleEntity> role, out int totalTypes )
         {
             var types = GetMergeChanges(target, master, support);
 
             totalTypes = types.Count;
+
+            if (role != null)
+                types = types.Where(t => TranslationLogic.GetCountNotLocalizedMemebers(role, t.Type.Assembly.Culture,t.Type.Type) > 0).ToList();
+
 
             if (!translatedOnly && types.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)
                 types = types.GroupsOf(a => a.TotalOriginalLength(), MaxTotalSyncCharacters).First().ToList();

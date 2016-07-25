@@ -63,7 +63,11 @@ namespace Signum.Web.Translation
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("TranslateCode",
                     () => TranslationPermission.TranslateCode.IsAuthorized(),
-                    uh => uh.Action((TranslationController tc) => tc.Index())));
+                    uh => uh.Action((TranslationController tc) => tc.Index(null))));
+
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("LocalizableTypeUsedNotLocalized",
+                   () => TranslationPermission.TranslateCode.IsAuthorized(),
+                   uh => uh.Action((TranslationController tc) => tc.LocalizableTypeUsedNotLocalized(null))));
 
                 if (instanceTranslator)
                 {
@@ -71,6 +75,7 @@ namespace Signum.Web.Translation
                         () => TranslationPermission.TranslateInstances.IsAuthorized(),
                         uh => uh.Action((TranslatedInstanceController tic) => tic.Index())));
                 }
+
 
                 if (copyNewTranslationsToRootFolder)
                 {

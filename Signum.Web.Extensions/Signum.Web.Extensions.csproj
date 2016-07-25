@@ -898,6 +898,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Translation\Views\LocalizableTypeUsedNotLocalized.generated.cs">
+      <DependentUpon>LocalizableTypeUsedNotLocalized.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Translation\Views\TranslationReplacement.generated.cs">
       <DependentUpon>TranslationReplacement.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -1847,6 +1852,10 @@
     <Content Include="UserAssets\Views\ImportUserAsset.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ImportUserAsset.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\LocalizableTypeUsedNotLocalized.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>LocalizableTypeUsedNotLocalized.generated.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>

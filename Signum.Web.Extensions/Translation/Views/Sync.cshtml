@@ -6,15 +6,17 @@
 @using Signum.Web.Translation
 @using Signum.Web.Translation.Controllers
 @using Signum.Entities.Translation
+@using Signum.Entities.Authorization;
 @{
     CultureInfo culture = ViewBag.Culture;
     int totalTypes = ViewBag.TotalTypes;
+    Lite<RoleEntity> selectedRole = ViewBag.Role;
 
     ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().FormatWith(Model.LocalizedAssembly.Assembly.GetName().Name, Model.LocalizedAssembly.Culture.DisplayName);
 
     if (Model.Types.Count < totalTypes)
     {
-        ViewBag.Title = ViewBag.Title + " [{0}/{1}]".FormatWith(Model.Types.Count, totalTypes);
+        ViewBag.Title = ViewBag.Title + " [{0}/{1} {2}]".FormatWith(Model.Types.Count, totalTypes, selectedRole);
     }
 
     Func<IEnumerable<string>, List<SelectListItem>> selectListItems = values =>

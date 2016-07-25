@@ -3,20 +3,46 @@
 @using Signum.Web.Translation.Controllers
 @using System.Globalization;
 @using Signum.Entities.Translation
+@using Signum.Entities.Authorization
+@using Signum.Engine.Translation
 @{
-    ViewBag.Title = TranslationMessage.CodeTranslations.NiceToString();        
+    ViewBag.Title = TranslationMessage.CodeTranslations.NiceToString();
+
+    Lite<RoleEntity> selectedRole = ViewBag.Role;
 }
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 
 @if (Model.IsEmpty())
 {
-    <h2>@TranslationMessage.NothingToTranslate.NiceToString()</h2>   
+    <h2>@TranslationMessage.NothingToTranslate.NiceToString()</h2>
 }
 else
 {
     <h2>@ViewBag.Title</h2>
-    
+
     var langs = Model.First().Value.Keys;
+
+
+    <div>
+        <div class="dropdown">
+            <button onclick="document.getElementById('myDropdown').classList.toggle('show');" class="dropbtn">
+                @if (selectedRole == null)
+                {@TranslationMessage.All.NiceToString() }
+                else
+                { @selectedRole.ToString() }
+            </button>
+            <div id="myDropdown" class="dropdown-content">
+
+                @Html.ActionLink(TranslationMessage.All.NiceToString(), (TranslationController tc) => tc.Index(null))
+
+                @foreach (var role in TranslationLogic.Occurrences.LocalizableTypeUsedNotLocalized.Keys)
+                {
+                    @Html.ActionLink(role.ToString(), (TranslationController tc) => tc.Index(role))
+                }
+            </div>
+        </div>
+    </div>
+
 
     <table class="st">
         <tr>
@@ -41,7 +67,7 @@ else
                         <br />
                         @if (!tf.IsDefault && tf.CultureInfo.IsNeutralCulture)
                         {
-                        @Html.ActionLink(TranslationMessage.Sync.NiceToString(), (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name, false), new { @class = "status-" + tf.Status().ToString() })    
+                            @Html.ActionLink(TranslationMessage.Sync.NiceToString(), (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name, false, selectedRole), new { @class = "status-" + tf.Status(selectedRole).ToString() })
                         }
                     </td>
                 }

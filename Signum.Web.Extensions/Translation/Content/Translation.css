@@ -1,28 +1,23 @@
-﻿.status-None
-{
+﻿.status-None {
     color: red;
 }
 
-.status-Pending
-{
+.status-Pending {
     color: #ffc300;
 }
 
-.status-Completed
-{
+.status-Completed {
     color: green;
 }
 
 
-table.st
-{
+table.st {
     border-collapse: collapse;
     margin: 20px;
     text-align: left;
 }
 
-    table.st th
-    {   
+    table.st th {
         border-top: 1px solid #E8EDFF;
         background: #C9D7F1;
         color: #039;
@@ -31,53 +26,47 @@ table.st
         padding: 4px;
     }
 
-    table.st td
-    {
+    table.st td {
         background: #E8EDFF;
         border-top: 1px solid white;
         color: #669;
         padding: 4px;
     }
 
-    table.st select, table.st textarea
-    {
-        vertical-align:middle;
+    table.st select, table.st textarea {
+        vertical-align: middle;
     }
 
-    table.st thead th
-    {
+    table.st thead th {
         background: #B9C9FE;
     }
 
-    table.st .leftCell
-    {
+    table.st .leftCell {
         font-weight: bold;
-        width:1px;
-        text-align:right;
+        width: 1px;
+        text-align: right;
     }
 
-    table.st .smallCell
-    {
-        text-align:right;
-        width:1px;
+    table.st .smallCell {
+        text-align: right;
+        width: 1px;
     }
 
-    table.st .titleCell
-    {
-        font-weight:bold;
+    table.st .titleCell {
+        font-weight: bold;
     }
 
-    table.st .monospaceCell
-    {
+    table.st .monospaceCell {
         font-family: monospace;
-        font-size:14px;
+        font-size: 14px;
     }
 
-        table.st .monospaceCell pre
-        {
-            padding:0px;
+        table.st .monospaceCell pre {
+            padding: 0px;
             color: rgb(102, 102, 153);
-            background-color:transparent;
-            border:none;
-            font-size:14px;
+            background-color: transparent;
+            border: none;
+            font-size: 14px;
         }
+
+    }

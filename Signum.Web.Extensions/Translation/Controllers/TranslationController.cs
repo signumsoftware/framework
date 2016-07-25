@@ -12,6 +12,8 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Translation;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
+using Signum.Entities;
+using Signum.Engine;
 
 namespace Signum.Web.Translation.Controllers
 {
@@ -23,7 +25,9 @@ namespace Signum.Web.Translation.Controllers
             return AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>());
         }
 
-        public ActionResult Index()
+
+
+        public ActionResult Index(Lite<RoleEntity> role)
         {
             var cultures = TranslationLogic.CurrentCultureInfos(CultureInfo.GetCultureInfo("en"));
 
@@ -40,8 +44,23 @@ namespace Signum.Web.Translation.Controllers
                     FileName = LocalizedAssembly.TranslationFileName(a, ci)
                 }).ToDictionary(tf => tf.CultureInfo));
 
+
+            if (role != null)
+                ViewBag.Role = role.InDB().Select(e => e.ToLite()).SingleEx();
+
             return base.View(TranslationClient.ViewPrefix.FormatWith("Index"), dic);
         }
+
+
+
+        public ActionResult LocalizableTypeUsedNotLocalized(Lite<RoleEntity> role)
+        {
+
+            if (role != null)
+                ViewBag.Role = role.InDB().Select(e => e.ToLite()).SingleEx();
+            return base.View(TranslationClient.ViewPrefix.FormatWith("LocalizableTypeUsedNotLocalized"), TranslationLogic.Occurrences);
+        }
+
 
         [HttpGet]
         public ActionResult View(string assembly, string culture, bool searchPressed, string filter)
@@ -53,9 +72,9 @@ namespace Signum.Web.Translation.Controllers
 
             Dictionary<CultureInfo, LocalizedAssembly> reference = !searchPressed ? null :
                 (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture)
-                let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
-                where la != null || ci == defaultCulture || ci == targetCulture
-                select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true))).ToDictionary();
+                 let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
+                 where la != null || ci == defaultCulture || ci == targetCulture
+                 select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true))).ToDictionary();
 
             ViewBag.filter = filter;
             ViewBag.searchPressed = searchPressed;
@@ -68,7 +87,7 @@ namespace Signum.Web.Translation.Controllers
 
         [HttpPost]
         public ActionResult SaveView(string assembly, string culture, string filter)
-        {   
+        {
             var currentAssembly = AssembliesToLocalize().Single(a => a.GetName().Name == assembly);
 
             List<TranslationRecord> list = GetTranslationRecords();
@@ -87,7 +106,7 @@ namespace Signum.Web.Translation.Controllers
             }
             else
             {
-                Dictionary<string, LocalizedAssembly> locAssemblies = TranslationLogic.CurrentCultureInfos(CultureInfo.GetCultureInfo("en")).ToDictionary(ci => ci.Name, 
+                Dictionary<string, LocalizedAssembly> locAssemblies = TranslationLogic.CurrentCultureInfos(CultureInfo.GetCultureInfo("en")).ToDictionary(ci => ci.Name,
                     ci => LocalizedAssembly.ImportXml(currentAssembly, ci, forceCreate: true));
 
                 Dictionary<string, List<TranslationRecord>> groups = list.GroupToDictionary(a => a.Lang);
@@ -169,7 +188,7 @@ namespace Signum.Web.Translation.Controllers
             Member,
         }
 
-        public ActionResult Sync(string assembly, string culture, bool translatedOnly)
+        public ActionResult Sync(string assembly, string culture, bool translatedOnly, Lite<RoleEntity> role)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
             CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
@@ -182,11 +201,12 @@ namespace Signum.Web.Translation.Controllers
                                                                     select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true))).ToDictionary();
             var master = reference.Extract(defaultCulture);
 
-            var target = reference.Extract(targetCulture); 
+            var target = reference.Extract(targetCulture);
             DictionaryByTypeName(target); //To avoid finding duplicated types on save
             int totalTypes;
-            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList(), false, out totalTypes);
+            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList(), false, role, out totalTypes);
 
+            ViewBag.Role = role;
             ViewBag.TotalTypes = totalTypes;
             ViewBag.Culture = targetCulture;
             return base.View(TranslationClient.ViewPrefix.FormatWith("Sync"), changes);
@@ -231,8 +251,9 @@ namespace Signum.Web.Translation.Controllers
         public string FileName;
         public bool IsDefault;
 
-        public TranslatedSummaryState Status()
+        public TranslatedSummaryState Status(Lite<RoleEntity> role)
         {
+
             if (!System.IO.File.Exists(FileName))
                 return TranslatedSummaryState.None;
 
@@ -243,8 +264,10 @@ namespace Signum.Web.Translation.Controllers
 
             var result = TranslationSynchronizer.GetMergeChanges(target, master, new List<LocalizedAssembly>());
 
-            if (result.Any())
+
+            if (result.Any(r => role == null || TranslationLogic.GetCountNotLocalizedMemebers(role, CultureInfo, r.Type.Type) > 0))
                 return TranslatedSummaryState.Pending;
+
 
             return TranslatedSummaryState.Completed;
         }

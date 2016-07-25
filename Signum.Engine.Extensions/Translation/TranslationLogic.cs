@@ -19,11 +19,15 @@ using Signum.Utilities;
 using System.Xml.Linq;
 using System.IO;
 using Signum.Utilities.ExpressionTrees;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine.Translation
 {
     public static class TranslationLogic
     {
+        public static TranslationOccurrences Occurrences = new TranslationOccurrences();
+
+
         static Expression<Func<IUserEntity, TranslatorUserEntity>> TranslatorUserExpression =
              user => Database.Query<TranslatorUserEntity>().SingleOrDefault(a => a.User.RefersTo(user));
         [ExpressionField]
@@ -32,8 +36,8 @@ namespace Signum.Engine.Translation
             return TranslatorUserExpression.Evaluate(entity);
         }
 
-  
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool notLocalizedMemeberRegister)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -67,8 +71,78 @@ namespace Signum.Engine.Translation
                 {
                     Delete = (e, _) => { e.Delete(); }
                 }.Register();
+
+                if (notLocalizedMemeberRegister)
+                    DescriptionManager.NotLocalizedMemeber += DescriptionManager_NotLocalizedMemeber;
+
+
             }
         }
+
+        private static void DescriptionManager_NotLocalizedMemeber(CultureInfo ci, Type type, MemberInfo mi)
+        {
+            if (UserEntity.Current == null)
+                return;
+
+            var typeUsed = mi != null ? mi.ReflectedType : type;
+
+
+            var dict = GetRoleNotLocalizedMemebers(UserEntity.Current.Role.ToLite());
+            var typeMiLongDit = dict.GetTypeMiLongDit(ci, typeUsed);
+
+            if (mi == null)
+                typeMiLongDit.AddOrUpdate(type, new TypeOccurrentes { Ocurrences = 1 }, (id, e) => { e.Ocurrences += 1; return e; });
+            else {
+                var miLongDit = typeMiLongDit.GetMiLongDit(typeUsed);
+                miLongDit.DictMi.AddOrUpdate(mi, 1, (id, count) => count + 1);
+            }
+        }
+
+        public static ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>> GetRoleNotLocalizedMemebers(Lite<RoleEntity> role)
+        {
+            return Occurrences.LocalizableTypeUsedNotLocalized.GetOrCreate(role, new ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>());
+        }
+
+        public static ConcurrentDictionary<Type, TypeOccurrentes> GetTypeMiLongDit(this ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>> dict, CultureInfo ci, Type type)
+        {
+            return dict.GetOrCreate(ci, new ConcurrentDictionary<Type, TypeOccurrentes>());
+        }
+
+
+        public static TypeOccurrentes GetMiLongDit(this ConcurrentDictionary<Type, TypeOccurrentes> dict, Type type)
+        {
+            return dict.GetOrCreate(type, new TypeOccurrentes());
+        }
+
+
+
+        public static long GetCountNotLocalizedMemebers(Lite<RoleEntity> role, CultureInfo ci, MemberInfo mi)
+        {
+            var dict = GetRoleNotLocalizedMemebers(role);
+            var typeMiLongDit = dict.GetTypeMiLongDit(ci, mi.ReflectedType);
+
+
+            var miLongDit = typeMiLongDit.GetMiLongDit(mi.ReflectedType);
+
+            return miLongDit.DictMi.GetOrCreate(mi, 0);
+
+        }
+
+        public static long GetCountNotLocalizedMemebers(Lite<RoleEntity> role, CultureInfo ci, Type type)
+        {
+
+            var dict = GetRoleNotLocalizedMemebers(role);
+            var typeMiLongDit = dict.GetTypeMiLongDit(ci, type);
+
+          
+            var miLongDit = typeMiLongDit.GetMiLongDit(type);
+
+            return miLongDit.Ocurrences + miLongDit.DictMi.Values.Sum(e => e);
+
+        }
+
+
+
 
         public static List<CultureInfo> CurrentCultureInfos(CultureInfo defaultCulture)
         {
@@ -94,7 +168,7 @@ namespace Signum.Engine.Translation
                                         where opts != DescriptionOptions.None
                                         select t.Name).ToHashSet();
 
-            Dictionary<string, string> memory = new Dictionary<string,string>();
+            Dictionary<string, string> memory = new Dictionary<string, string>();
 
 
             foreach (var fileName in Directory.EnumerateFiles(directoryName, "{0}.*.xml".FormatWith(assemblyName)))
@@ -143,12 +217,26 @@ namespace Signum.Engine.Translation
             }
 
             var toDelete = oldNames.Except(newNames);
-            if(answers != null)
+            if (answers != null)
                 toDelete = toDelete.Except(answers.Keys);
 
             memory.SetRange(toDelete.Select(n => KVP.Create(n, (string)null)));
 
             return result;
         }
+
+    }
+
+    public class TranslationOccurrences
+    {
+        public ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>> LocalizableTypeUsedNotLocalized =
+           new ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>>();
+
+    }
+
+    public class TypeOccurrentes
+    {
+        public long Ocurrences;
+        public ConcurrentDictionary<MemberInfo, long> DictMi = new ConcurrentDictionary<MemberInfo, long>();
     }
 }
