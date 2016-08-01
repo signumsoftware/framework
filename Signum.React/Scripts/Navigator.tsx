@@ -527,7 +527,7 @@ export class EntitySettings<T extends ModifiableEntity> {
     }
 
     constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
-        options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean }) {
+        options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean, avoidPopup?: boolean }) {
 
         this.type = type;
         this.getComponent = getComponent;
