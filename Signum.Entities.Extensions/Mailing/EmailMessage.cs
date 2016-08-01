@@ -283,21 +283,12 @@ namespace Signum.Entities.Mailing
 
         public Lite<IEmailOwnerEntity> EmailOwner { get; set; }
 
-        string emailAddress;
         [NotNullable, SqlDbType(Size = 100)]
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string EmailAddress
-        {
-            get { return emailAddress; }
-            set
-            {
-                if (Set(ref emailAddress, value))
-                    InvalidEmail = !EMailValidatorAttribute.EmailRegex.IsMatch(EmailAddress);
-            }
-        }
+        public string EmailAddress { get; set; }
 
         public bool InvalidEmail { get; set; }
-        
+
         protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Name == nameof(EmailAddress) && !InvalidEmail && !EMailValidatorAttribute.EmailRegex.IsMatch(EmailAddress))

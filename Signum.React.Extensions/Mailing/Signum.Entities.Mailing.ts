@@ -34,6 +34,7 @@ export const EmailAddressEntity = new Type<EmailAddressEntity>("EmailAddressEnti
 export interface EmailAddressEntity extends Entities.EmbeddedEntity {
     emailOwner: Entities.Lite<IEmailOwnerEntity>;
     emailAddress: string;
+    invalidEmail: boolean;
     displayName: string;
 }
 
