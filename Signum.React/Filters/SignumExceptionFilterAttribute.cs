@@ -1,6 +1,5 @@
 ﻿using Signum.Engine;
 using Signum.Engine.Basics;
-using Signum.Engine.Profiler;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
