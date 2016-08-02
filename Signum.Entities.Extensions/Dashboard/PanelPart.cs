@@ -129,9 +129,9 @@ namespace Signum.Entities.Dashboard
         [NotNullable]
         [NotNullValidator]
         public UserQueryEntity UserQuery { get; set; }
-        
+
         public bool AllowSelection { get; set; }
-        
+
         public override string ToString()
         {
             return UserQuery?.ToString();
@@ -320,16 +320,11 @@ namespace Signum.Entities.Dashboard
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class LinkPartEntity : Entity, IPartEntity
     {
-        LinkElementEntity link;
-        public LinkElementEntity Link
-        {
-            get { return link; }
-            set { Set(ref link, value); }
-        }
+        public LinkElementEntity Link { get; set; }
 
         public override string ToString()
         {
-            return "{0} ({1})".FormatWith(link.Label, link.Link);
+            return "{0} ({1})".FormatWith(Link.Label, Link.Link);
         }
 
         public bool RequiresTitle
@@ -341,7 +336,7 @@ namespace Signum.Entities.Dashboard
         {
             return new LinkPartEntity
             {
-                 Link=this.Link.Clone()
+                Link = this.Link.Clone()
             };
         }
 
@@ -350,7 +345,7 @@ namespace Signum.Entities.Dashboard
             return new XElement("LinkPart",
                 this.ToXml(ctx));
         }
-        
+
         public void FromXml(XElement element, IFromXmlContext ctx)
         { }
     }

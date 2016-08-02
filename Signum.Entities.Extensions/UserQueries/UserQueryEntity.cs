@@ -187,33 +187,13 @@ namespace Signum.Entities.UserQueries
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserQueryCountPartEntity : Entity, IPartEntity
     {
-        bool requiresTitle;
-        public bool RequiresTitle
-        {
-            get { return requiresTitle; }
-            set { Set(ref requiresTitle, value); }
-        }
+        public bool RequiresTitle { get; set; }
 
-        Lite<UserQueryEntity> userQuery;
-        public Lite<UserQueryEntity> UserQuery
-        {
-            get { return userQuery; }
-            set { Set(ref userQuery, value); }
-        }
+        public Lite<UserQueryEntity> UserQuery { get; set; }
 
-        string iconClass;
-        public string IconClass
-        {
-            get { return iconClass; }
-            set { Set(ref iconClass, value); }
-        }
+        public string IconClass { get; set; }
 
-        bool showName;
-        public bool ShowName
-        {
-            get { return showName; }
-            set { Set(ref showName, value); }
-        }
+        public bool ShowName { get; set; }
 
         public IPartEntity Clone()
         {

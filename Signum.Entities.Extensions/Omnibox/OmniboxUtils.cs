@@ -96,19 +96,19 @@ namespace Signum.Entities.Omnibox
 
         public static OmniboxMatch Contains(object value, string identifier, string pattern)
         {
-            var parts = pattern.SplitNoEmpty(' ' );
+            var parts = pattern.SplitNoEmpty(' ');
 
             char[] mask = new string('_', identifier.Length).ToCharArray();
 
             foreach (var p in parts)
-	        {
+            {
                 int index = identifier.IndexOf(p, StringComparison.InvariantCultureIgnoreCase);
                 if (index == -1)
                     return null;
 
                 for (int i = 0; i < p.Length; i++)
                     mask[index + i] = '#';
-	        }
+            }
 
             return new OmniboxMatch(value,
                 remaining: identifier.Length - pattern.Length,
@@ -118,7 +118,7 @@ namespace Signum.Entities.Omnibox
 
         public static string CleanCommas(string str)
         {
-            return str.Trim('\'', '"');;
+            return str.Trim('\'', '"'); ;
         }
     }
 
@@ -141,7 +141,7 @@ namespace Signum.Entities.Omnibox
         }
 
         [JsonIgnore]
-        public object Value; 
+        public object Value;
 
         public float Distance;
         public string Text;
@@ -196,12 +196,7 @@ namespace Signum.Entities.Omnibox
     [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class OmniboxPanelPartEntity : Entity, IPartEntity
     {
-        bool requiresTitle;
-        public bool RequiresTitle
-        {
-            get { return requiresTitle; }
-            set { Set(ref requiresTitle, value); }
-        }
+        public bool RequiresTitle { get; set; }
 
         public IPartEntity Clone()
         {
