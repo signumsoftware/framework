@@ -58,7 +58,7 @@ namespace Signum.Web.Dashboard
             return Navigator.NavigateRoute(entity);
         }
 
-        public static void Start()
+        public static void Start(bool navBar)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -83,6 +83,23 @@ namespace Signum.Web.Dashboard
                     new EntitySettings<LinkPartEntity>(),
                     new EmbeddedEntitySettings<LinkElementEntity> { PartialViewName = e => AdminViewPrefix.FormatWith("LinkElement") },
                 });
+
+
+                if(navBar)
+                {
+
+                    Navigator.AddSetting(new EntitySettings<OmniboxPanelPartEntity>());
+                    Navigator.AddSetting(new EntitySettings<UserQueryCountPartEntity>());
+
+                    DashboardClient.PanelPartViews.Add(
+                       typeof(OmniboxPanelPartEntity),
+                       new DashboardClient.PartViews(ViewPrefix.FormatWith("OmniboxPanelPart"), ViewPrefix.FormatWith("OmniboxPanelPart")));
+
+                    DashboardClient.PanelPartViews.Add(
+                     typeof(UserQueryCountPartEntity),
+                     new DashboardClient.PartViews(ViewPrefix.FormatWith("UserQueryCountPart"), ViewPrefix.FormatWith("UserQueryCountPartAdmin")));
+                }
+
 
                 Constructor.Register(ctx => new DashboardEntity { Owner = UserQueryUtils.DefaultOwner() });
 

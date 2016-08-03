@@ -22,7 +22,7 @@ namespace Signum.Web.Omnibox
         static Func<bool> CanSeeFunc;
         public static bool CanSee()
         {
-            return CanSeeFunc != null && CanSeeFunc();
+            return CanSeeFunc == null || CanSeeFunc();
         }
 
         public static string ViewPrefix = "~/Omnibox/Views/{0}.cshtml";
@@ -37,15 +37,7 @@ namespace Signum.Web.Omnibox
 
                 Navigator.RegisterArea(typeof(OmniboxClient));
 
-                Navigator.AddSetting(new EntitySettings<OmniboxPanelPartEntity>()
-                {
-                    PartialViewName = _ => ViewPrefix.FormatWith("OmniboxPanelPart")
-                });
-
-                DashboardClient.PanelPartViews.Add(
-                   typeof(OmniboxPanelPartEntity),
-                   new DashboardClient.PartViews(ViewPrefix.FormatWith("OmniboxPanelPart"), ViewPrefix.FormatWith("OmniboxPanelPart")));
-
+              
                 OmniboxParser.Manager = new WebOmniboxManager();
             }
         }

@@ -22,7 +22,7 @@ using Signum.Web.Basic;
 using Signum.Web.UserQueries;
 using Signum.Entities.UserAssets;
 using Signum.Web.UserAssets;
-using Signum.Web.Dashboard;
+using Signum.Entities.Dashboard;
 
 namespace Signum.Web.UserQueries
 {
@@ -116,10 +116,6 @@ namespace Signum.Web.UserQueries
                     return UserQueryLogic.GetUserQueriesEntity(entity.EntityType)
                         .Select(cp => new UserQueryQuickLink(cp, entity)).ToArray();
                 });
-
-                DashboardClient.PanelPartViews.Add(
-                   typeof(UserQueryCountPartEntity),
-                   new DashboardClient.PartViews(ViewPrefix.FormatWith("UserQueryCountPart"), ViewPrefix.FormatWith("UserQueryCountPartAdmin")));
             }
         }
 
