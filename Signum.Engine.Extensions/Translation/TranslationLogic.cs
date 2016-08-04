@@ -37,7 +37,7 @@ namespace Signum.Engine.Translation
         }
 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool notLocalizedMemeberRegister)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool countLocalizationHits)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -72,7 +72,7 @@ namespace Signum.Engine.Translation
                     Delete = (e, _) => { e.Delete(); }
                 }.Register();
 
-                if (notLocalizedMemeberRegister)
+                if (countLocalizationHits)
                     DescriptionManager.NotLocalizedMemeber += DescriptionManager_NotLocalizedMemeber;
 
 
@@ -92,7 +92,8 @@ namespace Signum.Engine.Translation
 
             if (mi == null)
                 typeMiLongDit.AddOrUpdate(type, new TypeOccurrentes { Ocurrences = 1 }, (id, e) => { e.Ocurrences += 1; return e; });
-            else {
+            else
+            {
                 var miLongDit = typeMiLongDit.GetMiLongDit(typeUsed);
                 miLongDit.DictMi.AddOrUpdate(mi, 1, (id, count) => count + 1);
             }
