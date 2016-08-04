@@ -234,6 +234,11 @@ sb.Schema.Settings.FieldAttributes(({0} a) => a.{1}).Replace(new ImplementedByAt
     {
     }
 
+
+    /// <summary>
+    /// Very rare. Reference types (classes) or Nullable are already nullable in the database.
+    /// This attribute is only necessary in the case an entity field is not-nullable but you can not make the DB column nullable because of legacy data, or cycles in a graph of entities.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class NullableAttribute : Attribute
     {
