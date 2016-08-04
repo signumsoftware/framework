@@ -471,6 +471,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
     renderSelecterButton() {
 
+        if (this.state.selectedRows == undefined)
+            return null;
+
         const title = JavascriptMessage.Selected.niceToString() + " (" + this.state.selectedRows!.length + ")";
 
         return (

@@ -15,7 +15,7 @@ import { EntityBase, EntityBaseProps } from './EntityBase'
 
 
 export interface EntityComboProps extends EntityBaseProps {
-    ctx: TypeContext<ModifiableEntity | Lite<Entity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
 
     data?: Lite<Entity>[];
 }
@@ -55,7 +55,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
         
         if (current.value != this.getLiteKey()) {
             if (!current.value) {
-                this.setValue(undefined);
+                this.setValue(null);
             } else {
                 const lite = this.state.data!.filter(a => liteKey(a) == current.value).single();
 

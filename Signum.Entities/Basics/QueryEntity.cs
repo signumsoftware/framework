@@ -11,7 +11,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false), InTypeScript(Undefined = false)]
     public class QueryEntity : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

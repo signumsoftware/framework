@@ -21,7 +21,7 @@ import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQue
 import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable } from './Navigator';
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
-import SearchControl from './SearchControl/SearchControl.Loaded';
+import SearchControl from './SearchControl/SearchControlLoaded';
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -646,10 +646,10 @@ export module ButtonBarQuery {
         findOptions: FindOptionsParsed;
     }
 
-    export const onButtonBarElements: ((ctx: ButtonBarQueryContext) => React.ReactElement<any>)[] = [];
+    export const onButtonBarElements: ((ctx: ButtonBarQueryContext) => React.ReactElement<any> | undefined)[] = [];
 
     export function getButtonBarElements(ctx: ButtonBarQueryContext): React.ReactElement<any>[] {
-        return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined);
+        return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a!);
     }
 }
 
@@ -671,7 +671,7 @@ export interface QuerySettings {
     formatters?: { [columnName: string]: CellFormatter };
     rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes;
     entityFormatter?: EntityFormatter;
-    simpleFilterBuilder?: (qd: QueryDescription, initialFindOptions: FindOptionsParsed) => React.ReactElement<any>;
+    simpleFilterBuilder?: (qd: QueryDescription, initialFindOptions: FindOptionsParsed) => React.ReactElement<any> | undefined;
 }
 
 export interface FormatRule {

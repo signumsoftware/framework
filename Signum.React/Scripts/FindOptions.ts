@@ -149,9 +149,9 @@ export function hasAggregate(token: QueryToken | undefined): boolean {
     return hasAggregate(token.parent);
 }
 
-export function getTokenParents(token: QueryToken | undefined): QueryToken[] {
+export function getTokenParents(token: QueryToken | null | undefined): QueryToken[] {
     const result: QueryToken[] = [];
-    while (token != undefined) {
+    while (token) {
         result.insertAt(0, token);
         token = token.parent;
     }

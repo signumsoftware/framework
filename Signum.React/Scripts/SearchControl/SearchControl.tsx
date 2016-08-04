@@ -19,7 +19,7 @@ import MultipliedMessage from './MultipliedMessage'
 import { renderContextualItems, ContextualItemsContext, MarkedRowsDictionary, MarkedRow } from './ContextualItems'
 import ContextMenu from './ContextMenu'
 import SelectorModal from '../SelectorModal'
-import SearchControlLoaded from './SearchControl.Loaded'
+import SearchControlLoaded from './SearchControlLoaded'
 
 require("!style!css!./Search.css");
 
@@ -107,7 +107,7 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         if (!Finder.isFindable(fo.queryKey))
             return null;
 
-        return <SearchControlLoaded ref={lo => this.searchControlLoaded = lo}
+        return <SearchControlLoaded ref={(lo: SearchControlLoaded) => this.searchControlLoaded = lo}
             allowSelection={this.props.allowSelection}
             onDoubleClick={this.props.onDoubleClick}
             showContextMenu={this.props.showContextMenu}

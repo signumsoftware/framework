@@ -21,9 +21,9 @@ export interface EntityBaseProps extends LineBaseProps {
     find?: boolean;
     remove?: boolean;
 
-    onView?: (entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity>;
-    onCreate?: () => Promise<ModifiableEntity | Lite<Entity>>;
-    onFind?: () => Promise<ModifiableEntity | Lite<Entity>>;
+    onView?: (entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined;
+    onCreate?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
+    onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
     onRemove?: (entity: ModifiableEntity | Lite<Entity>) => Promise<boolean>;
 
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
@@ -118,11 +118,14 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
             window.open(route);
         }
         else {
-            const onView = this.props.onView ?
+            const promise = this.props.onView ?
                 this.props.onView(entity, ctx.propertyRoute) :
                 this.defaultView(entity, ctx.propertyRoute);
 
-            onView.then(e => {
+            if (!promise)
+                return;
+
+            promise.then(e => {
                 if (e == undefined)
                     return;
 
@@ -167,10 +170,13 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         event.preventDefault();
 
-        const onCreate = this.props.onCreate ?
+        const promise = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
-        onCreate.then<ModifiableEntity | Lite<Entity> | undefined>(e => {
+        if (!promise)
+            return;
+
+        promise.then<ModifiableEntity | Lite<Entity> | undefined>(e => {
 
             if (e == undefined)
                 return undefined;
@@ -204,7 +210,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         );
     }
 
-    static entityHtmlProps(entity: ModifiableEntity | Lite<Entity>): React.HTMLAttributes {
+    static entityHtmlProps(entity: ModifiableEntity | Lite<Entity> | undefined | null): React.HTMLAttributes {
 
         return {
             'data-entity': entityInfo(entity)
@@ -221,9 +227,12 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         event.preventDefault();
 
-        const result = this.props.onFind ? this.props.onFind() : this.defaultFind();
+        const promise = this.props.onFind ? this.props.onFind() : this.defaultFind();
 
-        result.then(entity => {
+        if (!promise)
+            return;
+
+        promise.then(entity => {
             if (!entity)
                 return;
 
@@ -252,9 +261,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
                 if (result == false)
                     return;
 
-                this.setValue(undefined);
+                this.setValue(null);
             }).done();
     };
+
     renderRemoveButton(btn: boolean) {
         if (!this.state.remove || this.state.ctx.readOnly)
             return undefined;

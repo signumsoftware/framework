@@ -33,8 +33,8 @@ export function getMixin<M extends MixinEntity>(entity: Entity, type: Type<M>) {
 export type MList<T> = Array<MListElement<T>>;
 
 export interface MListElement<T> {
+    rowId: number | string | null;
     element: T;
-    rowId?: number | string;
 }
 
 export interface Lite<T extends Entity> {
@@ -141,7 +141,7 @@ export function parseLite(lite: string) : Lite<Entity> {
     };
 }
 
-export function is<T extends Entity>(a: Lite<T> | T | undefined, b: Lite<T> | T | undefined, compareTicks = false) {
+export function is<T extends Entity>(a: Lite<T> | T | null | undefined, b: Lite<T> | T | null | undefined, compareTicks = false) {
 
     if(a == undefined && b == undefined)
         return true;
@@ -184,7 +184,7 @@ export function isEntityPack(obj: any): obj is EntityPack<ModifiableEntity>{
         (obj as EntityPack<ModifiableEntity>).canExecute !== undefined;
 }
 
-export function entityInfo(entity: ModifiableEntity | Lite<Entity>)
+export function entityInfo(entity: ModifiableEntity | Lite<Entity> | null | undefined)
 {
     if (!entity)
         return "undefined";
@@ -211,7 +211,8 @@ export module ConnectionMessage {
 
 export const CorruptMixin = new Type<CorruptMixin>("CorruptMixin");
 export interface CorruptMixin extends MixinEntity {
-    corrupt: boolean;
+    Type: "CorruptMixin";
+    corrupt?: boolean;
 }
 
 export interface EmbeddedEntity extends ModifiableEntity {
@@ -241,7 +242,7 @@ export module EntityControlMessage {
 }
 
 export interface ImmutableEntity extends Entity {
-    allowChange: boolean;
+    allowChange?: boolean;
 }
 
 export module JavascriptMessage {
@@ -336,6 +337,7 @@ export module OperationMessage {
 
 export const OperationSymbol = new Type<OperationSymbol>("Operation");
 export interface OperationSymbol extends Symbol {
+    Type: "Operation";
 }
 
 export const OperationType = new EnumType<OperationType>("OperationType");

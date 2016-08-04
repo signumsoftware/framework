@@ -14,7 +14,7 @@ import { default as SearchControl, SearchControlProps} from './SearchControl'
 require("!style!css!./QueryTokenBuilder.css");
 
 interface QueryTokenBuilderProps extends React.Props<QueryTokenBuilder> {
-    queryToken: QueryToken;
+    queryToken: QueryToken | undefined | null;
     onTokenChange: (newToken: QueryToken) => void;
     queryKey: string;
     subTokenOptions: SubTokensOptions;

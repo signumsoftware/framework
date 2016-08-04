@@ -83,15 +83,15 @@ export class StyleContext {
     set readOnly(value: boolean) {
         this.styleOptions.readOnly = value;
     }
-    
-    get frame(): EntityFrame<ModifiableEntity> {
+
+    get frame(): EntityFrame<ModifiableEntity> | undefined{
         if (this.styleOptions.frame)
             return this.styleOptions.frame;
 
         if (this.parent)
             return this.parent.frame;
 
-        throw new Error("No frame found");
+        return undefined;
     }
 
 
@@ -288,7 +288,7 @@ function compose(prefix: string | undefined, suffix: string | undefined): string
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
     
-    return ctx.value.map((mle, i) =>
+    return ctx.value!.map((mle, i) =>
         new TypeContext<T>(ctx, undefined,
             ctx.propertyRoute.addMember({ name: "", type: LambdaMemberType.Indexer }),
             new ReadonlyBinding(mle.element, i.toString())));

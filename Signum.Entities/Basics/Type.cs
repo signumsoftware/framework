@@ -8,7 +8,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Master), TicksColumn(false), InTypeScript(Undefined = false)]
     public class TypeEntity : Entity
     {
         [NotNullable, UniqueIndex]

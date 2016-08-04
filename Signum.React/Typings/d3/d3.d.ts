@@ -421,7 +421,7 @@ declare module d3 {
     /**
      * Administrivia: JavaScript primitive types, or "things that toString() predictably".
      */
-    export type Primitive = number | string | boolean;
+    export type Primitive = number | string | boolean | null | undefined;
 
     /**
      * Administrivia: anything with a valueOf(): number method is comparable, so we allow it in numeric operations
@@ -525,7 +525,7 @@ declare module d3 {
          * @param value the function to derive the value
          * @param priority if specified, either null or the string "important" (no exclamation mark)
          */
-        style(name: string, value: (datum: Datum, index: number, outerIndex: number) => Primitive, priority?: string): Selection<Datum>;
+        style(name: string, value: ((datum: Datum, index: number, outerIndex: number) => Primitive) | undefined, priority?: string): Selection<Datum>;
 
         /**
          * Set a large number of CSS properties from an object.

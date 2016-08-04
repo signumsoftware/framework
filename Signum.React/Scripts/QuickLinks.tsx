@@ -22,14 +22,16 @@ export interface QuickLinkContext<T extends Entity> {
     contextualContext?: ContextualItemsContext<T>;
 }
 
-export const onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>> = [];
-export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>)
+type Seq<T> = (T | undefined)[] | T | undefined;
+
+export const onGlobalQuickLinks: Array<(ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>> = [];
+export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>)
 {
     onGlobalQuickLinks.push(quickLinkGenerator);
 }
 
-export const onQuickLinks: { [typeName: string]: Array<(ctx: QuickLinkContext<Entity>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>> } = {};
-export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => QuickLink | QuickLink[] | Promise<QuickLink> | Promise<QuickLink[]>)
+export const onQuickLinks: { [typeName: string]: Array<(ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>> } = {};
+export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>)
 {
     const typeName = getTypeName(type);
 
@@ -51,20 +53,23 @@ export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[
     return Promise.all(promises).then(links => links.flatMap(a => a || []).filter(a => a && a.isVisible).orderBy(a => a.order));
 }
 
-function asPromiseArray<T>(valueOrPromiseOrArray: T | T[] | Promise<T> | Promise<T[]>): Promise<T[] | undefined> {
+function asPromiseArray<T>(value: Seq<T> | Promise<Seq<T>>): Promise<T[]> {
 
-    if (!valueOrPromiseOrArray)
-        return Promise.resolve(undefined);
+    if (!value)
+        return Promise.resolve([] as T[]);
 
-    if ((valueOrPromiseOrArray as Promise<T | T[]>).then)
-        return (valueOrPromiseOrArray as Promise<T | T[]>).then(a => asArray(a));
+    if ((value as Promise<Seq<T>>).then)
+        return (value as Promise<Seq<T>>).then(a => asArray(a));
 
-    return Promise.resolve(asArray(valueOrPromiseOrArray as T | T[]))
+    return Promise.resolve(asArray(value as Seq<T>))
 }
 
-function asArray<T>(valueOrArray: T | T[]): T[] {
+function asArray<T>(valueOrArray: Seq<T>): T[] {
+    if (!valueOrArray)
+        return [];
+
     if (Array.isArray(valueOrArray))
-        return valueOrArray;
+        return valueOrArray.filter(a => a != null).map(a => a!);
     else
         return [valueOrArray];
 }

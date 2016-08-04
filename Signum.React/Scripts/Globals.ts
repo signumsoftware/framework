@@ -594,7 +594,7 @@ export module Dic {
                 continue;
 
             for (const key in a) {
-                if (a.hasOwnProperty(key) && a[key] !== undefined)
+                if (a.hasOwnProperty(key))
                     out[key] = a[key];
             }
         }
@@ -625,7 +625,7 @@ export function classes(...classNames: (string | null | undefined)[]) {
     return classNames.filter(a=> a && a != "").join(" ");
 }
 
-export function addClass(props: { className?: string } | undefined, newClasses: string) {
+export function addClass(props: { className?: string } | null | undefined, newClasses: string) {
     if (!props || !props.className)
         return newClasses;
 

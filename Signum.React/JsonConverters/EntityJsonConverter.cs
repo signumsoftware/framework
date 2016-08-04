@@ -37,8 +37,12 @@ namespace Signum.React.Json
         {
             var ts = pi.GetCustomAttribute<InTypeScriptAttribute>();
             if (ts != null)
-                return ts.InTypeScript;
+            {
+                var v = ts.GetInTypeScript();
 
+                if (v.HasValue)
+                    return v.Value;
+            }
             if (pi.HasAttribute<HiddenPropertyAttribute>() || pi.HasAttribute<ExpressionFieldAttribute>())
                 return false;
 

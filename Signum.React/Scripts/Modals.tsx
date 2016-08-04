@@ -28,8 +28,7 @@ export class GlobalModalContainer extends React.Component<{}, GlobalModalContain
     }
 }
 
-
-export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T> {
+export function openModal<T>(modal: React.ReactElement<IModalProps>): Promise<T | undefined> {
 
     return new Promise<T>((resolve) => {
         let cloned: React.ReactElement<IModalProps>;

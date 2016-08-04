@@ -53,7 +53,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
     handleOnChange = (event: React.FormEvent, lite: Lite<Entity>) => {
         const current = event.currentTarget as HTMLSelectElement;
 
-        const list = this.state.ctx.value;
+        const list = this.state.ctx.value!;
         const toRemove = list.filter(mle => is(mle.element as Lite<Entity> | Entity, lite))
 
         if (toRemove.length) {
@@ -63,7 +63,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         else {
             this.convert(lite).then(e => {
                 list.push({
-                    rowId: undefined,
+                    rowId: null,
                     element: e
                 });
                 this.forceUpdate();
@@ -135,7 +135,10 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
 
         const data = [...this.state.data];
 
-        this.state.ctx.value.forEach(mle => {
+
+        const list = this.state.ctx.value!;
+
+        list.forEach(mle => {
             if (!data.some(d => is(d, mle.element as Entity | Lite<Entity>)))
                 data.insertAt(0, this.maybeToLite(mle.element as Entity | Lite<Entity>))
         });
@@ -143,7 +146,7 @@ export class EntityCheckboxList extends EntityListBase<EntityCheckboxListProps, 
         return data.map((lite, i) =>
             <label className="sf-checkbox-element" key={i}>
                 <input type="checkbox"
-                    checked={this.state.ctx.value.some(mle => is(mle.element as Entity | Lite<Entity>, lite)) }
+                    checked={list.some(mle => is(mle.element as Entity | Lite<Entity>, lite))}
                     disabled={this.state.ctx.readOnly}
                     name={liteKey(lite) }
                     onChange={e => this.handleOnChange(e, lite) }  />

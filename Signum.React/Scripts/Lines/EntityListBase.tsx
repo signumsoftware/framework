@@ -40,7 +40,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
 
     moveUp(index: number) {
-        const list = this.props.ctx.value;
+        const list = this.props.ctx.value!;
         if (index == 0)
             return;
 
@@ -63,7 +63,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     }
 
     moveDown(index: number) {
-        const list = this.props.ctx.value;
+        const list = this.props.ctx.value!;
         if (index == list.length - 1)
             return;
   
@@ -89,10 +89,13 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
         event.preventDefault();
 
-        const onCreate = this.props.onCreate ?
+        const promise = this.props.onCreate ?
             this.props.onCreate() : this.defaultCreate();
 
-        onCreate
+        if (promise == null)
+            return;
+
+        promise
             .then<ModifiableEntity | Lite<Entity> | undefined>(e => {
 
                 if (e == undefined)
@@ -113,8 +116,8 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                     return;
 
                 this.convert(e).then(m => {
-                    const list = this.props.ctx.value;
-                    list.push({ rowId: undefined, element: m });
+                    const list = this.props.ctx.value!;
+                    list.push({ rowId: null, element: m });
                     this.setValue(list);
                 }).done();
             }).done();
@@ -137,8 +140,8 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                 return;
 
             Promise.all(lites.map(a => this.convert(a))).then(entites => {
-                const list = this.props.ctx.value;
-                entites.forEach(e => list.push({ rowId: undefined, element: e }));
+                const list = this.props.ctx.value!;
+                entites.forEach(e => list.push({ rowId: null, element: e }));
                 this.setValue(list);
             }).done();
         }).done();
@@ -148,14 +151,16 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
         event.preventDefault();
 
-        const mle = this.props.ctx.value[index];
+
+        const list = this.props.ctx.value!;
+        const mle = list[index];
 
         (this.props.onRemove ? this.props.onRemove(mle.element) : Promise.resolve(true))
             .then(result => {
                 if (result == false)
                     return;
 
-                this.props.ctx.value.remove(mle);
+                list.remove(mle);
                 this.forceUpdate();
             }).done();
     };

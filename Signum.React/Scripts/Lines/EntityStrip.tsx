@@ -47,7 +47,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                 <div className="SF-entity-strip SF-control-container">
                     <ul className={classes("sf-strip", this.props.vertical ? "sf-strip-vertical" : "sf-strip-horizontal") }>
                         {
-                            mlistItemContext(s.ctx!).map((mlec, i) =>
+                            mlistItemContext(s.ctx).map((mlec, i) =>
                                 (<EntityStripElement key={i}
                                     ctx={mlec}
                                     onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : undefined}
@@ -71,8 +71,8 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
     handleOnSelect = (lite: Lite<Entity>, event: React.SyntheticEvent) => {
         this.convert(lite)
             .then(e => {
-                const list = this.props.ctx!.value;
-                list.push({ rowId: undefined, element: e });
+                const list = this.props.ctx.value!;
+                list.push({ rowId: null, element: e });
                 this.setValue(list);
             }).done();
         return "";
@@ -83,8 +83,9 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
         event.preventDefault();
 
-        const ctx = this.state.ctx!;
-        const mle = ctx.value[index];
+        const ctx = this.state.ctx;
+        const list = ctx.value!;
+        const mle = list[index];
         const entity = mle.element;
 
         const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type!.isEmbedded;
@@ -94,21 +95,24 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
             window.open(route);
         }
         else {
-            const onView = this.props.onView ?
+            const promise = this.props.onView ?
                 this.props.onView(entity, ctx.propertyRoute) :
                 this.defaultView(entity, ctx.propertyRoute);
 
-            onView.then(e => {
+            if (promise == null)
+                return;
+
+            promise.then(e => {
                 if (e == undefined)
                     return;
 
                 this.convert(e).then(m => {
-                    if (is(ctx.value[index].element as Entity, e as Entity))
-                        ctx.value[index].element = m;
+                    if (is(list[index].element as Entity, e as Entity))
+                        list[index].element = m;
                     else
-                        ctx.value[index] = { element: m };
+                        list[index] = { rowId: null, element: m };
 
-                    this.setValue(ctx.value);
+                    this.setValue(list);
                 }).done();
             }).done();
         }

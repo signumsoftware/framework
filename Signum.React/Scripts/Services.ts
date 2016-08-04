@@ -186,10 +186,10 @@ export class ServiceError extends Error {
 }
 
 export interface WebApiHttpError {
-    Message?: string;
+    Message: string;
     ModelState?: { [member: string]: string }
     ExceptionMessage?: string;
-    ExceptionType?: string;
+    ExceptionType: string;
     StackTrace?: string;
     MessageDetail?: string;
     ExceptionID?: string;

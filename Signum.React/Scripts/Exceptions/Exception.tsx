@@ -13,7 +13,7 @@ export default class Exception extends React.Component<{ ctx: TypeContext<Except
                 <div className="row">
                     <div className="col-sm-6">
                         <ValueLine ctx={sc.subCtx(f => f.environment) } />
-                        <ValueLine ctx={sc.subCtx(f => f.creationDate) } unitText={moment(sc.value.creationDate).toUserInterface().fromNow() } />
+                        <ValueLine ctx={sc.subCtx(f => f.creationDate) } unitText={moment(sc.value.creationDate!).toUserInterface().fromNow() } />
                         <EntityLine ctx={sc.subCtx(f => f.user) } />
                         <ValueLine ctx={sc.subCtx(f => f.version) } />
                         <ValueLine ctx={sc.subCtx(f => f.threadId) } />

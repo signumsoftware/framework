@@ -39,12 +39,12 @@ declare namespace ReactRouter {
     //   this.props.history. ...
     // ...
     interface RouteComponentProps<P, R> {
-        history?: History
-        location?: H.Location
-        params?: P
-        route?: PlainRoute
-        routeParams?: R
-        routes?: PlainRoute[]
+        history: History
+        location: H.Location
+        params: P
+        route: PlainRoute
+        routeParams: R
+        routes: PlainRoute[]
         children?: React.ReactElement<any>
     }
 

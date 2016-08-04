@@ -38,7 +38,7 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
     }
 
     static specificComponents: {
-        [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any>;
+        [typeName: string]: (ctx: TypeContext<any>) => React.ReactElement<any> | undefined;
     } = {};
 
     static appropiateComponent = (ctx: TypeContext<any>): React.ReactElement<any> => {

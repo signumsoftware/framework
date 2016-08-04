@@ -16,7 +16,7 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 export interface EntityLineProps extends EntityBaseProps {
 
-    ctx: TypeContext<ModifiableEntity | Lite<Entity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
 
     autoComplete?: boolean;
     autoCompleteGetItems?: (query: string) => Promise<Lite<Entity>[]>;
@@ -25,7 +25,7 @@ export interface EntityLineProps extends EntityBaseProps {
 
 export interface EntityLineState extends EntityBaseProps {
 
-    ctx: TypeContext<ModifiableEntity | Lite<Entity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
 
     autoComplete?: boolean;
 }
@@ -70,7 +70,7 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         );
         
         return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
+            <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value!), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
                     <div className={buttons ? "input-group" : undefined}>
                         {hasValue ? this.renderLink() : this.renderAutoComplete()}
@@ -102,21 +102,23 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
 
         const s = this.state;
 
+        var value = s.ctx.value!;
+
         if (s.ctx.readOnly)
-            return <FormControlStatic ctx={s.ctx}>{getToString(s.ctx.value) }</FormControlStatic>
+            return <FormControlStatic ctx={s.ctx}>{getToString(value) }</FormControlStatic>
 
         if (s.navigate && s.view) {
             return (
                 <a href="#" onClick={this.handleViewClick}
                     className="form-control btn-default sf-entity-line-entity"
                     title={JavascriptMessage.navigate.niceToString() }>
-                    {  s.ctx.value.toStr }
+                    { value.toStr }
                 </a>
             );
         } else {
             return (
                 <span className="form-control btn-default sf-entity-line-entity">
-                    {s.ctx.value.toStr }
+                    { value.toStr }
                 </span>
             );
         }

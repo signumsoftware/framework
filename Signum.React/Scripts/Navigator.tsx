@@ -15,8 +15,8 @@ import { ViewReplacer } from './Frames/ReactVisitor'
 
 
 
-export let currentUser: IUserEntity;
-export function setCurrentUser(user: IUserEntity) {
+export let currentUser: IUserEntity | undefined;
+export function setCurrentUser(user: IUserEntity | undefined) {
     currentUser = user;
 }
 

@@ -458,8 +458,7 @@ export class ReadonlyBinding<T> implements IBinding<T> {
         return undefined;
     }
 
-    setError(name: string): void {
-        return undefined;
+    setError(name: string | undefined): void {        
     }
 }
 
@@ -558,13 +557,22 @@ export function basicConstruct(type: PseudoType): ModifiableEntity {
 
     if (ti) {
 
+        var e = result as Entity;
+
         const mixins = Dic.getKeys(ti.members)
             .filter(a => a.startsWith("["))
-            .map(a => a.after("[").before("]"))
-            .toObjectDistinct(a => a, a => ({ Type: a, isNew: true, modified: true, }) as MixinEntity);
+            .groupBy(a => a.after("[").before("]"))
+            .forEach(gr => {
 
-        if (Dic.getKeys(mixins).length)
-            (result as Entity).mixins = mixins;
+                var m = ({ Type: gr.key, isNew: true, modified: true, }) as MixinEntity;
+
+                if (!e.mixins)
+                    e.mixins = {};
+
+                e.mixins[gr.key] = m;
+            });
+
+        Dic.getValues(ti.members).filter(a => a.type.isCollection).forEach(m => (result as any)[m.name.firstLower()] = []); //TODO: Collections in Embeddeds...
     }
 
     return result;

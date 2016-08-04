@@ -495,7 +495,12 @@ namespace Signum.Engine.CodeGeneration
             {
                 var ts = pi.GetCustomAttribute<InTypeScriptAttribute>();
                 if (ts != null)
-                    return ts.InTypeScript;
+                {
+                    var inTS = ts.GetInTypeScript();
+
+                    if (inTS != null)
+                        return inTS.Value;
+                }
 
                 if (pi.HasAttribute<HiddenPropertyAttribute>() || pi.HasAttribute<ExpressionFieldAttribute>())
                     return false;

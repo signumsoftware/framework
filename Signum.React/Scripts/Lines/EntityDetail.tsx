@@ -14,7 +14,7 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityDetailProps extends EntityBaseProps {
-    ctx: TypeContext<ModifiableEntity | Lite<Entity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
 }
 
 export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProps> {

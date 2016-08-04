@@ -15,7 +15,7 @@ import { EntityBase, EntityBaseProps} from './EntityBase'
 
 
 export interface RenderEntityProps {
-    ctx: TypeContext<ModifiableEntity | Lite<Entity>>;
+    ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
 
@@ -61,7 +61,7 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
     }
 
 
-    toEntity(entityOrLite: ModifiableEntity | Lite<Entity>): ModifiableEntity | undefined {
+    toEntity(entityOrLite: ModifiableEntity | Lite<Entity> | undefined | null): ModifiableEntity | undefined {
 
         if (!entityOrLite)
             return undefined;

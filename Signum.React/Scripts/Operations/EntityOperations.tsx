@@ -84,11 +84,14 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
 
 export function createEntityOperationContext<T extends Entity>(ctx: TypeContext<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<T, any>): EntityOperationContext<T> {
 
+    if (!ctx.frame)
+        throw new Error("a frame is necessary");
+
     return {
         frame: ctx.frame,
         entity: ctx.value,
         settings: getSettings(operation) as EntityOperationSettings<T>,
-        operationInfo: getTypeInfo(ctx.value.Type).operations![operation.key],
+        operationInfo: getTypeInfo(ctx.value.Type).operations![operation.key!],
         showOperations: true,
         canExecute: undefined,
     };

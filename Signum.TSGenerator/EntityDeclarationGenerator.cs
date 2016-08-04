@@ -299,18 +299,33 @@ namespace Signum.TSGenerator
                 baseTypes.Add(TypeScriptName(i, type, options, $"By type {type.Name}"));
             
             sb.AppendLine($"export interface {TypeScriptName(type, type, options, "declaring " + type.Name)} extends {string.Join(", ", baseTypes)} {{");
+            if (!type.IsAbstract && Parents(type.BaseType).All(a => a.IsAbstract))
+                sb.AppendLine($"    Type: \"{CleanTypeName(type)}\";");
 
             var properties = GetProperties(type, declaredOnly: true);
 
             foreach (var prop in properties)
             {
                 string context = $"By type {type.Name} and property {prop.Name}";
-                var propertyType = TypeScriptName(prop.PropertyType, type, options, context);
-                sb.AppendLine($"    {FirstLower(prop.Name)}: {propertyType};");
+                var propertyType = TypeScriptName(prop.PropertyType, type, options, context) +
+                    (prop.GetTypescriptNull() ? " | null" : "");
+
+                var undefined = prop.GetTypescriptUndefined() ? "?" : "";
+
+                sb.AppendLine($"    {FirstLower(prop.Name)}{undefined}: {propertyType};");
             }
             sb.AppendLine(@"}");
 
             return sb.ToString();
+        }
+
+        private static IEnumerable<Type> Parents(Type type)
+        {
+            while (type != Cache.ModifiableEntity && type != null)
+            {
+                yield return type;
+                type = type.BaseType;
+            }
         }
 
         static string CleanTypeName(Type t)
@@ -343,7 +358,7 @@ namespace Signum.TSGenerator
             return type.GetProperties(BindingFlags.Instance | BindingFlags.Public | (declaredOnly ? BindingFlags.DeclaredOnly : 0))
                             .Where(p => (p.InTypeScript() ?? !(p.ContainsAttribute("HiddenPropertyAttribute") || p.ContainsAttribute("ExpressionFieldAttribute"))));
         }
-
+        
         public static bool ContainsAttribute(this MemberInfo p, string attributeName)
         {
             return p.GetCustomAttributes().Any(a => a.GetType().Name == attributeName);
@@ -356,8 +371,49 @@ namespace Signum.TSGenerator
             if (attr == null)
                 return null;
 
-            return (bool)((dynamic)attr).InTypeScript;
+            return (bool?)((dynamic)attr).GetInTypeScript();
         }
+
+        public static bool GetTypescriptUndefined(this PropertyInfo p)
+        {
+            var attr = p.GetCustomAttribute(Cache.InTypeScriptAttribute, inherit: false);
+
+            var b = attr == null ? null : (bool?)((dynamic)attr).GetUndefined();
+
+            if (b != null)
+                return b.Value;
+
+            if (IsCollection(p.PropertyType))
+                return false;
+
+            return GetTypescriptUndefined(p.DeclaringType) ?? true;
+        }
+
+        private static bool? GetTypescriptUndefined(Type declaringType)
+        {
+            var attr = declaringType.GetCustomAttribute(Cache.InTypeScriptAttribute, inherit: true);
+
+            return attr == null ? null : (bool?)((dynamic)attr).GetUndefined();
+        }
+
+        public static bool GetTypescriptNull(this PropertyInfo p)
+        {
+            var attr = p.GetCustomAttribute(Cache.InTypeScriptAttribute, inherit: false);
+
+            var b = attr == null ? null : (bool?)((dynamic)attr).GetNull();
+            if (b != null)
+                return b.Value;
+
+            if (IsCollection(p.PropertyType))
+                return false;
+
+            if (GetTypescriptUndefined(p.DeclaringType) == false &&
+                p.CustomAttributes.Any(a => a.AttributeType.Name == "NotNullableAttribute" || a.AttributeType.Name == "NotNullValidatorAttribute"))
+                return false;
+
+            return p.PropertyType.IsClass || Nullable.GetUnderlyingType(p.PropertyType) != null;
+        }
+
 
         private static string FirstLower(string name)
         {
@@ -441,6 +497,11 @@ namespace Signum.TSGenerator
 
                 return CombineNamespace(nsReference.VariableName, BaseTypeScriptName(type));
             }
+        }
+
+        public static bool IsCollection(this Type type)
+        {
+            return type != typeof(byte[]) && type != typeof(string) && type.GetInterfaces().Contains(typeof(IEnumerable));
         }
 
         public static NamespaceTSReference GetNamespaceReference(Options options, Type type)

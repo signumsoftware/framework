@@ -195,7 +195,7 @@ function internalComboBox(vl: ValueLine, typeInfo: TypeInfo, parseValue: (str: s
     const handleEnumOnChange = (e: React.SyntheticEvent) => {
         const input = e.currentTarget as HTMLInputElement;
         const val = input.value;
-        vl.setValue(val == "" ? undefined : parseValue(val));
+        vl.setValue(val == "" ? null : parseValue(val));
     };
 
     return (

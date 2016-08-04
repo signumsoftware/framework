@@ -32,7 +32,7 @@ export function start() {
 export const operationSettings: { [operationKey: string]: OperationSettings } = {};
 
 export function addSettings(...settings: OperationSettings[]) {
-    settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol.key, s));
+    settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol.key!, s));
 }
 
 
@@ -74,7 +74,7 @@ export abstract class OperationSettings {
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
     isVisible: (ctx: ConstructorOperationContext<T>) => boolean;
-    onConstruct: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined>;
+    onConstruct: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
 
     constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
         super(operationSymbol);
@@ -86,7 +86,7 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
 export interface ConstructorOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: ConstructorOperationContext<T>) => boolean;
-    onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T>>;
+    onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
 }
 
 export interface ConstructorOperationContext<T extends Entity> {

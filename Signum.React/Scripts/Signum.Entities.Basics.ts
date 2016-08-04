@@ -8,43 +8,46 @@ import * as Entities from './Signum.Entities'
 
 export const ColorEntity = new Type<ColorEntity>("ColorEntity");
 export interface ColorEntity extends Entities.EmbeddedEntity {
-    argb: number;
+    Type: "ColorEntity";
+    argb?: number;
 }
 
 export const DeleteLogParametersEntity = new Type<DeleteLogParametersEntity>("DeleteLogParametersEntity");
 export interface DeleteLogParametersEntity extends Entities.EmbeddedEntity {
-    deleteLogsWithMoreThan: number;
-    dateLimit: string;
-    chunkSize: number;
-    maxChunks: number;
+    Type: "DeleteLogParametersEntity";
+    deleteLogsWithMoreThan?: number;
+    dateLimit?: string;
+    chunkSize?: number;
+    maxChunks?: number;
 }
 
 export const ExceptionEntity = new Type<ExceptionEntity>("Exception");
 export interface ExceptionEntity extends Entities.Entity {
-    creationDate: string;
-    exceptionType: string;
-    exceptionMessage: string;
-    exceptionMessageHash: number;
-    stackTrace: string;
-    stackTraceHash: number;
-    threadId: number;
-    user: Entities.Lite<IUserEntity>;
-    environment: string;
-    version: string;
-    userAgent: string;
-    requestUrl: string;
-    controllerName: string;
-    actionName: string;
-    urlReferer: string;
-    machineName: string;
-    applicationName: string;
-    userHostAddress: string;
-    userHostName: string;
-    form: string;
-    queryString: string;
-    session: string;
-    data: string;
-    referenced: boolean;
+    Type: "Exception";
+    creationDate?: string;
+    exceptionType?: string | null;
+    exceptionMessage?: string | null;
+    exceptionMessageHash?: number;
+    stackTrace?: string | null;
+    stackTraceHash?: number;
+    threadId?: number;
+    user?: Entities.Lite<IUserEntity>;
+    environment?: string | null;
+    version?: string | null;
+    userAgent?: string | null;
+    requestUrl?: string | null;
+    controllerName?: string | null;
+    actionName?: string | null;
+    urlReferer?: string | null;
+    machineName?: string | null;
+    applicationName?: string | null;
+    userHostAddress?: string | null;
+    userHostName?: string | null;
+    form?: string | null;
+    queryString?: string | null;
+    session?: string | null;
+    data?: string | null;
+    referenced?: boolean;
 }
 
 export interface IUserEntity extends Entities.Entity {
@@ -52,38 +55,42 @@ export interface IUserEntity extends Entities.Entity {
 
 export const OperationLogEntity = new Type<OperationLogEntity>("OperationLog");
 export interface OperationLogEntity extends Entities.Entity {
+    Type: "OperationLog";
     target: Entities.Lite<Entities.Entity>;
     origin: Entities.Lite<Entities.Entity>;
     operation: Entities.OperationSymbol;
     user: Entities.Lite<IUserEntity>;
     start: string;
-    end: string;
+    end: string | null;
     exception: Entities.Lite<ExceptionEntity>;
 }
 
 export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
-    path: string;
-    rootType: TypeEntity;
+    Type: "PropertyRoute";
+    path?: string | null;
+    rootType?: TypeEntity | null;
 }
 
 export const QueryEntity = new Type<QueryEntity>("Query");
 export interface QueryEntity extends Entities.Entity {
+    Type: "Query";
     key: string;
 }
 
 export interface SemiSymbol extends Entities.Entity {
-    key: string;
-    name: string;
+    key?: string | null;
+    name?: string | null;
 }
 
 export const TypeEntity = new Type<TypeEntity>("Type");
 export interface TypeEntity extends Entities.Entity {
+    Type: "Type";
     fullClassName: string;
     cleanName: string;
     tableName: string;
-    namespace: string;
-    className: string;
+    namespace: string | null;
+    className: string | null;
 }
 
 export namespace External {
