@@ -89,7 +89,7 @@ namespace Signum.Web
 
         public static List<Lite<T>> ParseLiteKeys<T>(string liteKeys) where T : class, IEntity
         {
-            return liteKeys.SplitNoEmpty(',').Select(e=>e.Replace("#coma#", ",")).Select(Lite.Parse<T>).ToList();
+            return liteKeys.SplitNoEmpty(",").Select(Lite.Parse<T>).ToList();
         }
 
 
@@ -119,7 +119,8 @@ namespace Signum.Web
         public static string ViewPrefix = "~/Signum/Views/{0}.cshtml";
 
         public Func<bool> AllowChangeColumns = () => true;
-        
+        public Func<bool> AllowOrder = () => true;
+
         public string SearchPopupControlView = ViewPrefix.FormatWith("SearchPopupControl");
         public string SearchPageView = ViewPrefix.FormatWith("SearchPage");
         public string SearchControlView = ViewPrefix.FormatWith("SearchControl");

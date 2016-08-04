@@ -31,6 +31,8 @@
     <Member Name="_0Year" Description="{0} Año" />
     <Member Name="_0Years" Description="{0} Años" />
     <Member Name="In0" Description="en {0}" />
+    <Member Name="Last0" Description="Último {0}" />
+    <Member Name="This0" Description="Este {0}" />
     <Member Name="Today" Description="Hoy" />
     <Member Name="Tomorrow" Description="Mañana" />
     <Member Name="Yesterday" Description="Ayer" />
