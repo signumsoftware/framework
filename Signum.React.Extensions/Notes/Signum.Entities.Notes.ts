@@ -9,12 +9,13 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 
 export const NoteEntity = new Type<NoteEntity>("Note");
 export interface NoteEntity extends Entities.Entity {
-    title: string;
-    target: Entities.Lite<Entities.Entity>;
-    creationDate: string;
-    text: string;
-    createdBy: Entities.Lite<Basics.IUserEntity>;
-    noteType: NoteTypeEntity;
+    Type: "Note";
+    title?: string | null;
+    target?: Entities.Lite<Entities.Entity>;
+    creationDate?: string;
+    text?: string | null;
+    createdBy?: Entities.Lite<Basics.IUserEntity>;
+    noteType?: NoteTypeEntity | null;
 }
 
 export module NoteMessage {
@@ -35,6 +36,7 @@ export module NoteOperation {
 
 export const NoteTypeEntity = new Type<NoteTypeEntity>("NoteType");
 export interface NoteTypeEntity extends Basics.SemiSymbol {
+    Type: "NoteType";
 }
 
 export module NoteTypeOperation {

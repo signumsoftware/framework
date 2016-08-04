@@ -55,7 +55,7 @@ export module API {
     export interface ParseFiltersRequest {
         queryKey: string;
         filters: ParseFilterRequest[];
-        entity: Lite<Entity>;
+        entity: Lite<Entity> | undefined;
         canAggregate: boolean
     }
 

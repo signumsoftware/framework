@@ -9,9 +9,9 @@ import * as Patterns from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 export interface IFile
 {
-    binaryFile: string;
-    fileName: string 
-    fullWebPath : string 
+    binaryFile?: string | null;
+    fileName?: string | null;
+    fullWebPath?: string | null; 
 }
 
 export interface FileEntity extends IFile { }
@@ -19,35 +19,38 @@ export interface EmbeddedFileEntity extends IFile { }
 
 export interface IFilePath extends IFile
 {
-   fullPhysicalPath : string
-   fileType: FileTypeSymbol 
-   suffix : string
+   fullPhysicalPath?: string | null;
+   fileType?: FileTypeSymbol | null; 
+   suffix?: string | null;
 }
 
 export interface FilePathEntity extends IFilePath { }
 export interface EmbeddedFilePathEntity extends IFilePath { }
 export const EmbeddedFileEntity = new Type<EmbeddedFileEntity>("EmbeddedFileEntity");
 export interface EmbeddedFileEntity extends Entities.EmbeddedEntity {
-    fileName: string;
-    binaryFile: string;
+    Type: "EmbeddedFileEntity";
+    fileName?: string | null;
+    binaryFile?: string | null;
 }
 
 export const EmbeddedFilePathEntity = new Type<EmbeddedFilePathEntity>("EmbeddedFilePathEntity");
 export interface EmbeddedFilePathEntity extends Entities.EmbeddedEntity {
-    fileName: string;
-    binaryFile: string;
-    fileLength: number;
-    fileLengthString: string;
-    suffix: string;
-    calculatedDirectory: string;
-    fileType: FileTypeSymbol;
+    Type: "EmbeddedFilePathEntity";
+    fileName?: string | null;
+    binaryFile?: string | null;
+    fileLength?: number;
+    fileLengthString?: string | null;
+    suffix?: string | null;
+    calculatedDirectory?: string | null;
+    fileType?: FileTypeSymbol | null;
 }
 
 export const FileEntity = new Type<FileEntity>("File");
 export interface FileEntity extends Entities.ImmutableEntity {
-    fileName: string;
-    hash: string;
-    binaryFile: string;
+    Type: "File";
+    fileName?: string | null;
+    hash?: string | null;
+    binaryFile?: string | null;
 }
 
 export module FileMessage {
@@ -69,14 +72,15 @@ export module FileMessage {
 
 export const FilePathEntity = new Type<FilePathEntity>("FilePath");
 export interface FilePathEntity extends Patterns.LockableEntity {
-    creationDate: string;
-    fileName: string;
-    binaryFile: string;
-    fileLength: number;
-    fileLengthString: string;
-    suffix: string;
-    calculatedDirectory: string;
-    fileType: FileTypeSymbol;
+    Type: "FilePath";
+    creationDate?: string;
+    fileName?: string | null;
+    binaryFile?: string | null;
+    fileLength?: number;
+    fileLengthString?: string | null;
+    suffix?: string | null;
+    calculatedDirectory?: string | null;
+    fileType?: FileTypeSymbol | null;
 }
 
 export module FilePathOperation {
@@ -85,6 +89,7 @@ export module FilePathOperation {
 
 export const FileTypeSymbol = new Type<FileTypeSymbol>("FileType");
 export interface FileTypeSymbol extends Entities.Symbol {
+    Type: "FileType";
 }
 
 

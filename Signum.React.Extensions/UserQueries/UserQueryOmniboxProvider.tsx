@@ -50,6 +50,6 @@ export default class UserQueryOmniboxProvider extends OmniboxProvider<UserQueryO
 interface UserQueryOmniboxResult extends OmniboxResult {
     ToStr: string;
     ToStrMatch: OmniboxMatch;
-    
+
     UserQuery: Lite<UserQueryEntity>;
 }

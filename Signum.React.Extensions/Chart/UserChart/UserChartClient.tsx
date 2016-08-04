@@ -10,7 +10,7 @@ import { Entity, Lite, liteKey } from '../../../../Framework/Signum.React/Script
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../../Framework/Signum.React/Scripts/QuickLinks'
-import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { FindOptions, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEntity, ChartColumnEntity  } from '../Signum.Entities.Chart'
 import { QueryFilterEntity, QueryOrderEntity } from '../../UserQueries/Signum.Entities.UserQueries'
@@ -42,7 +42,7 @@ export function start(options: { routes: JSX.Element[] }) {
             return undefined;
 
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
-            uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr, e => {
+            uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), uc.toStr || "", e => {
                 window.open(Navigator.currentHistory.createHref(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
             }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));
     });
@@ -72,59 +72,62 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export module Converter {
 
-    export function applyUserChart(cr: ChartRequest, uq: UserChartEntity, entity: Lite<Entity>): Promise<ChartRequest> {
+    export function applyUserChart(cr: ChartRequest, uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequest> {
 
-        const convertedFilters = UserAssetsClient.API.parseFilters({
+        const promise = UserAssetsClient.API.parseFilters({
             queryKey: uq.query.key,
             canAggregate: false,
             entity: entity,
-            filters: uq.filters.map(mle => mle.element).map(f => ({
-                tokenString: f.token.tokenString,
+            filters: uq.filters!.map(mle => mle.element).map(f => ({
+                tokenString: f.token!.tokenString,
                 operation: f.operation,
                 valueString: f.valueString
             }) as UserAssetsClient.API.ParseFilterRequest)
         });
 
-        return convertedFilters.then(filters => {
-
-            cr.chartScript = uq.chartScript;
+        return promise.then(filters => {
 
             if (filters) {
                 cr.filterOptions = (cr.filterOptions || []).filter(f => f.frozen);
-                cr.filterOptions.push(...filters.map(f => ({
-                    columnName: f.token,
-                    operation: f.operation,
-                    value: f.value,
-                }) as FilterOption));
+                cr.filterOptions.push(...uq.filters.map((f, i) => ({
+                    token: f.element.token,
+                    operation: f.element.operation!,
+                    value: filters[i].value,
+                    frozen: false,
+                }) as FilterOptionParsed));
             }
 
-            cr.parameters = uq.parameters.map(mle => ({
-                rowId: undefined,
+            cr.parameters = uq.parameters!.map(mle => ({
+                rowId: null,
                 element: ChartParameterEntity.New(p => {
                     p.name = mle.element.name;
                     p.value = mle.element.value;
                 })
             }));
 
-            cr.columns = uq.columns.map(mle => ({
-                rowId: undefined,
+            cr.columns = uq.columns!.map(mle => ({
+                rowId: null,
                 element: ChartColumnEntity.New(c => {
                     c.displayName = mle.element.displayName;
-                    c.token = mle.element.token;
+                    c.token = QueryTokenEntity.New(qt => {
+                        qt.token = mle.element.token!.token;
+                        qt.tokenString = mle.element.token!.tokenString;
+                    });
                 })
             }));
-            
-            cr.orderOptions = (uq.orders || []).map(f => ({
-                columnName: f.element.token.tokenString,
-                orderType: f.element.orderType
-            }) as OrderOption);
 
-            return ChartClient.parseTokens(cr);
+            cr.orderOptions = (uq.orders || []).map(f => ({
+                token: f.element.token!.token,
+                orderType: f.element.orderType
+            }) as OrderOptionParsed);
+
+
+            return cr;
         });
     }
 
-    export function toChartRequest(uq: UserChartEntity, entity: Lite<Entity>): Promise<ChartRequest> {
-        const cs = ChartRequest.New(cr => cr.queryKey = uq.query.key); 
+    export function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequest> {
+        const cs = ChartRequest.New(cr => cr.queryKey = uq.query!.key); 
         return applyUserChart(cs, uq, entity);
     }
 }

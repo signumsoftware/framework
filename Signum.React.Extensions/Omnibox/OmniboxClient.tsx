@@ -36,7 +36,7 @@ export function registerSpecialAction(action: SpecialOmniboxAction) {
 export interface SpecialOmniboxAction {
     key: string;
     allowed: () => boolean;
-    onClick: () => Promise<string>;
+    onClick: () => Promise<string | undefined>;
 }
 
 
@@ -69,10 +69,10 @@ function renderHelpItem(help: HelpOmniboxResult): React.ReactNode[] {
     return result;
 }
 
-export function navigateTo(result: OmniboxResult): Promise<string> {
+export function navigateTo(result: OmniboxResult) {
 
     if (result.ResultTypeName == "HelpOmniboxResult")
-        return Promise.resolve(undefined);
+        return undefined;
 
     return getProvider(result.ResultTypeName).navigateTo(result);
 }
@@ -103,7 +103,7 @@ export namespace API {
 export abstract class OmniboxProvider<T extends OmniboxResult> {
     abstract getProviderName(): string;
     abstract renderItem(result: T): React.ReactNode[];
-    abstract navigateTo(result: T): Promise<string>;
+    abstract navigateTo(result: T): Promise<string | undefined> | undefined;
     abstract toString(result: T): string;
     abstract icon(): React.ReactNode;
     
@@ -113,7 +113,7 @@ export abstract class OmniboxProvider<T extends OmniboxResult> {
 
         let last = 0;
         let m: RegExpExecArray;
-        while (m = regex.exec(match.BoldMask)) {
+        while (m = regex.exec(match.BoldMask)!) {
             if (m.index > last)
                 array.push(<span>{match.Text.substr(last, m.index - last) }</span>);
 
@@ -137,8 +137,8 @@ export abstract class OmniboxProvider<T extends OmniboxResult> {
 
 
 export interface OmniboxResult {
-    ResultTypeName?: string;
-    Distance?: number;
+    ResultTypeName: string;
+    Distance: number;
 }
 
 export interface OmniboxMatch {

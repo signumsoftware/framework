@@ -19,7 +19,7 @@ import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
 require("!style!css!./Mailing.css");
 
-export function start(options: { routes: JSX.Element[], smtpConfig: boolean, newsletter: boolean, pop3Config: boolean, sendEmailTask: boolean, quickLinksFrom: PseudoType[] }) {
+export function start(options: { routes: JSX.Element[], smtpConfig: boolean, newsletter: boolean, pop3Config: boolean, sendEmailTask: boolean, quickLinksFrom: PseudoType[] | undefined }) {
     options.routes.push(<Route path="asyncEmailSender">
         <Route path="view" getComponent={(loc, cb) => require(["./AsyncEmailSenderPage"], (Comp) => cb(undefined, Comp.default)) }/>
     </Route>);
@@ -30,8 +30,8 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
         onClick: () => Promise.resolve(Navigator.currentHistory.createHref("~/asyncEmailSender/view"))
     });
 
-    registerToString(EmailTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName);
-    registerToString(EmailMasterTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName);
+    registerToString(EmailTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
+    registerToString(EmailMasterTemplateMessageEntity, a => a.cultureInfo == undefined ? JavascriptMessage.newEntity.niceToString() : a.cultureInfo.englishName!);
 
     Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => new Promise(resolve => require(['./Templates/EmailMessage'], resolve))));
     Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => new Promise(resolve => require(['./Templates/EmailTemplate'], resolve))));
@@ -61,7 +61,7 @@ export function start(options: { routes: JSX.Element[], smtpConfig: boolean, new
 
     if (options.quickLinksFrom) {
         QuickLinks.registerGlobalQuickLink(ctx => {
-            if (options.quickLinksFrom.some(e => getTypeName(e) == ctx.lite.EntityType))
+            if (options.quickLinksFrom!.some(e => getTypeName(e) == ctx.lite.EntityType))
                 return new QuickLinks.QuickLinkExplore({ queryName: EmailMessageEntity, parentColumn: "Target", parentValue: ctx.lite });
 
             return undefined;

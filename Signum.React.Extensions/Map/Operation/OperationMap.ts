@@ -34,8 +34,8 @@ export interface MapState extends ForceNode {
 
 export interface ForceNode extends d3.layout.force.Node, Rectangle {
     key: string;
-    nx: number;
-    ny: number;
+    nx?: number;
+    ny?: number;
 }
 
 export interface ForceLink extends d3.layout.force.Link<ForceNode> {
@@ -44,11 +44,11 @@ export interface ForceLink extends d3.layout.force.Link<ForceNode> {
 
 
 export interface Transition {
-    sourcePoint?: Point;
+    sourcePoint: Point;
     fromState: MapState;
     operation: MapOperation;
     toState: MapState;
-    targetPoint?: Point;
+    targetPoint: Point;
 }
 
 export class OperationMapD3 {
@@ -56,7 +56,7 @@ export class OperationMapD3 {
     static opacities = [1, .5, .3, .2, .1];
 
     force: d3.layout.Force<ForceLink, ForceNode>;
-    selectedNode: ForceNode;
+    selectedNode: ForceNode | undefined;
     link: d3.Selection<Transition>;
 
     statesGroup: d3.Selection<MapState>;
@@ -344,8 +344,8 @@ export class OperationMapD3 {
 
     gravity() {
         this.map.allNodes.forEach(n => {
-            n.nx += this.gravityDim(n.x, 0, this.width);
-            n.ny += this.gravityDim(n.y, 0, this.height);
+            n.nx += this.gravityDim(n.x!, 0, this.width);
+            n.ny += this.gravityDim(n.y!, 0, this.height);
         });
     }
 

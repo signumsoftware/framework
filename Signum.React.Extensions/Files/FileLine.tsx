@@ -7,9 +7,9 @@ import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructo
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, basicConstruct } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, EmbeddedFileEntity, EmbeddedFilePathEntity } from './Signum.Entities.Files'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
@@ -19,7 +19,7 @@ require("!style!css!./Files.css");
 export { FileTypeSymbol };
 
 export interface FileLineProps extends EntityBaseProps {
-    ctx?: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity>>;
+    ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>;
     download?: DownloadBehaviour;
     dragAndDrop?: boolean;
     dragAndDropMessage?: string;
@@ -41,21 +41,20 @@ export interface FileLineState extends FileLineProps {
 
 export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
-    static defaultProps: FileLineProps = {
-        ctx: undefined,
+    static defaultProps = {
         download: DownloadBehaviour.SaveAs,
         dragAndDrop: true
     }
 
     calculateDefaultState(state: FileLineProps) {
         super.calculateDefaultState(state);
-        state.configuration = FileLine.configurtions[state.type.name];
+        state.configuration = FileLine.configurtions[state.type!.name];
     }
 
     componentWillMount() {
 
         if (!this.state.configuration)
-            throw new Error(`No FileLineConfiguration found for '${this.state.type.name}'`)
+            throw new Error(`No FileLineConfiguration found for '${this.state.type!.name}'`)
 
         const ctx = this.state.ctx;
         if (ctx.value && (ctx.value as Lite<IFile & Entity>).EntityType)
@@ -103,14 +102,14 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
     renderLink(entity: IFile) {
 
-        const dl = this.state.configuration.downloadLink(entity);
+        const dl = this.state.configuration!.downloadLink(entity);
 
         return (
             <a className="form-control file-control"
                 onClick={dl.requiresToken && ((e) => this.handleDownloadClick(e, dl.url)) }
                 download={this.state.download == DownloadBehaviour.View ? undefined : entity.fileName}
                 href={dl.requiresToken ? "#" : dl.url}
-                title={entity.fileName}>
+                title={entity.fileName || undefined}>
                 {entity.fileName}
             </a>
         );
@@ -126,18 +125,22 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
     handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
-        this.setState({ isOver: true });
+        this.state.isOver = true;
+        this.forceUpdate();
     }
 
     handleDragLeave = (e: React.DragEvent) => {
         e.preventDefault();
-        this.setState({ isOver: false });
+        this.state.isOver = false;
+        this.forceUpdate();
     }
 
     handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
-        this.setState({ isOver: false, isLoading: true });
-
+        this.state.isOver = false;
+        this.state.isLoading = true;
+        this.forceUpdate();
+        
         const file = e.dataTransfer.files[0];
 
         this.uploadFile(file);
@@ -145,30 +148,28 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
     handleFileChange = (e: React.FormEvent) => {
         e.preventDefault();
-        this.setState({ isOver: false, isLoading: true });
+        this.state.isOver = false;
+        this.state.isLoading = true;
+        this.forceUpdate();
 
-
-        this.uploadFile((e.target as HTMLInputElement).files[0]);
+        this.uploadFile((e.target as HTMLInputElement).files![0]);
     }
 
     uploadFile(file: File) {
         const fileReader = new FileReader();
         fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
         fileReader.onload = e => {
-            const newEntity = {
-                Type: this.state.type.name,
-                isNew: true,
-                modified: true,
-                fileName: file.name,
-                binaryFile: ((e.target as any).result as string).after("base64,")
-            } as ModifiableEntity & IFile;
+            const newEntity = basicConstruct(this.state.type!.name) as ModifiableEntity & IFile;
+            newEntity.fileName = file.name;
+            newEntity.binaryFile = ((e.target as any).result as string).after("base64,");
 
             if (this.state.fileType)
                 (newEntity as any as IFilePath).fileType = this.state.fileType;
 
             this.convert(newEntity).then(e => {
                 this.setValue(e);
-                this.setState({ isLoading: false });
+                this.state.isLoading = false;
+                this.forceUpdate();
             }).done();
         };
         fileReader.readAsDataURL(file);
@@ -221,7 +222,7 @@ FileLine.configurtions[EmbeddedFileEntity.typeName] = {
 FileLine.configurtions[EmbeddedFilePathEntity.typeName] = {
     downloadLink: e => ({
         url: Navigator.currentHistory.createHref({
-            pathname: "~/api/files/downloadEmbeddedFilePath/" + e.fileType.key,
+            pathname: "~/api/files/downloadEmbeddedFilePath/" + e.fileType!.key,
             query: {  suffix: e.suffix, fileName: e.fileName }
         }),
         requiresToken: true

@@ -9,7 +9,7 @@ import { colorScale, colorScaleSqr  } from '../../Utils'
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {   
     
     if (!isPermissionAuthorized(BasicPermission.AdminRules))
-        return undefined;
+        return [];
 
     return info.providers.filter(p => p.name.startsWith("role-")).map((p, i) => ({
         name: p.name,

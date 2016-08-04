@@ -66,7 +66,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
         Navigator.addSettings(new EntitySettings(TypeRulePack, e => new Promise(resolve => require(['./Admin/TypeRulePackControl'], resolve))));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
-            e => Api.fetchTypeRulePack(ctx.lite.id).then(pack => Navigator.navigate(pack)).done(),
+            e => Api.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
             { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
     }
 
@@ -87,14 +87,14 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
         Navigator.addSettings(new EntitySettings(PermissionRulePack, e => new Promise(resolve => require(['./Admin/PermissionRulePackControl'], resolve))));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", AuthAdminMessage.PermissionRules.niceToString(),
-            e => Api.fetchPermissionRulePack(ctx.lite.id).then(pack => Navigator.navigate(pack)).done(),
+            e => Api.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
             { isVisible: isPermissionAuthorized(BasicPermission.AdminRules) }));
     }
 
     OmniboxClient.registerSpecialAction({
         allowed: () => isPermissionAuthorized(BasicPermission.AdminRules),
         key: "DownloadAuthRules",
-        onClick: () => { Api.downloadAuthRules(); return undefined; }
+        onClick: () => { Api.downloadAuthRules(); return Promise.resolve(undefined); }
     });
 }
 
@@ -160,13 +160,13 @@ export function currentUser(): UserEntity {
     return Navigator.currentUser as UserEntity;
 }
 
-export const onCurrentUserChanged: Array<(newUser: UserEntity) => void> = [];
+export const onCurrentUserChanged: Array<(newUser: UserEntity | undefined) => void> = [];
 
-export function setCurrentUser(user: UserEntity) {
+export function setCurrentUser(user: UserEntity | undefined) {
 
     const changed = !is(Navigator.currentUser, user, true);
 
-    Navigator.setCurentUser(user);
+    Navigator.setCurrentUser(user);
 
     if (changed)
         onCurrentUserChanged.forEach(f => f(user));
@@ -195,7 +195,7 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
                     setAuthToken(resp.token);
                     setCurrentUser(resp.userEntity)
 
-                    options.headers["Authorization"] = "Bearer " + resp.token;
+                    options.headers!["Authorization"] = "Bearer " + resp.token;
 
                     return makeCall();
                 }, e2 => {
@@ -214,11 +214,11 @@ export function addAuthToken(options: Services.AjaxOptions, makeCall: () => Prom
         }));
 }
 
-export function getAuthToken(): string {
+export function getAuthToken(): string | undefined {
     return sessionStorage.getItem("authToken") || undefined;
 }
 
-export function setAuthToken(authToken: string): void{
+export function setAuthToken(authToken: string | undefined): void{
     sessionStorage.setItem("authToken", authToken || "");
 }
 

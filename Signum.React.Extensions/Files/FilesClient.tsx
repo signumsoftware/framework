@@ -28,14 +28,14 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Finder.formatRules.push({
         name: "Lite",
-        isApplicable: col => col.token.type.name === "WebDownload",
+        isApplicable: col => col.token!.type.name === "WebDownload",
         formatter: col => new CellFormatter((cell: WebDownload) =>
             !cell ? undefined : <a href={cell.FullWebPath} download={cell.FileName}>{cell.FileName}</a>)
     });
 
     Finder.formatRules.push({
         name: "Lite",
-        isApplicable: col => col.token.type.name === "WebImage",
+        isApplicable: col => col.token!.type.name === "WebImage",
         formatter: col => new CellFormatter((cell: WebImage) =>
             !cell ? undefined : <img src={cell.FullWebPath}/>)
     });

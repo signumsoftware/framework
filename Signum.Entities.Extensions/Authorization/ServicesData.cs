@@ -62,7 +62,7 @@ namespace Signum.Entities.Authorization
     }
 
 
-    [Serializable]
+    [Serializable, InTypeScript(Undefined = false)]
     public abstract class BaseRulePack<T> : ModelEntity
     {
         [NotNullValidator]
@@ -70,11 +70,11 @@ namespace Signum.Entities.Authorization
 
         [HiddenProperty]
         public MergeStrategy MergeStrategy { get; set; }
-
-        [NotNullable]
+        
         [HiddenProperty]
         public MList<Lite<RoleEntity>> SubRoles { get; set; } = new MList<Lite<RoleEntity>>();
 
+        [NotNullValidator]
         public string Strategy
         {
             get
@@ -89,15 +89,16 @@ namespace Signum.Entities.Authorization
         [NotNullValidator]
         public TypeEntity Type { get; internal set; }
 
-        [NotNullable]
+        [NotNullValidator]
         public MList<T> Rules { get; set; } = new MList<T>();
     }
 
-    [Serializable]
+    [Serializable, InTypeScript(Undefined = false)]
     public abstract class AllowedRule<R, A> : ModelEntity
         where R : Entity
     {
         A allowedBase;
+        [InTypeScript(Null = false)]
         public A AllowedBase
         {
             get { return allowedBase; }
@@ -105,6 +106,7 @@ namespace Signum.Entities.Authorization
         }
 
         A allowed;
+        [InTypeScript(Null = false)]
         public A Allowed
         {
             get { return allowed; }
@@ -128,6 +130,7 @@ namespace Signum.Entities.Authorization
             get { return !allowed.Equals(allowedBase); }
         }
 
+        [InTypeScript(Null = false)]
         public R Resource { get; set; }
 
         public override string ToString()
@@ -154,7 +157,7 @@ namespace Signum.Entities.Authorization
         public AuthThumbnail? Operations { get; set; }
 
         public AuthThumbnail? Queries { get; set; }
-
+        
         public ReadOnlyCollection<TypeConditionSymbol> AvailableConditions { get; set; }
     }
 
@@ -178,6 +181,7 @@ namespace Signum.Entities.Authorization
         }
 
         TypeAllowed? fallback;
+        [InTypeScript(Undefined =false)]
         public TypeAllowed? Fallback
         {
             get { return fallback; }
@@ -191,6 +195,7 @@ namespace Signum.Entities.Authorization
         }
 
         ReadOnlyCollection<TypeConditionRule> conditions;
+        [InTypeScript(Undefined =false)]
         public ReadOnlyCollection<TypeConditionRule> Conditions
         {
             get { return conditions; }
@@ -280,7 +285,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable, DescriptionOptions(DescriptionOptions.None)]
+    [Serializable, DescriptionOptions(DescriptionOptions.None), InTypeScript(Undefined = false)]
     public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
     {
         private TypeConditionRule() { }
@@ -290,9 +295,10 @@ namespace Signum.Entities.Authorization
             this.TypeCondition = typeCondition;
             this.Allowed = allowed;
         }
-
+        
+        [InTypeScript(Null = false)]
         public TypeConditionSymbol TypeCondition { get; set; }
-
+        
         public TypeAllowed Allowed { get; set; }
 
         public bool Equals(TypeConditionRule other)

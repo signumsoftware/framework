@@ -16,12 +16,13 @@ export type TranslatedCultureAction =
 
 export const TranslatedInstanceEntity = new Type<TranslatedInstanceEntity>("TranslatedInstance");
 export interface TranslatedInstanceEntity extends Entities.Entity {
-    culture: Basics.CultureInfoEntity;
-    instance: Entities.Lite<Entities.Entity>;
-    propertyRoute: Signum.PropertyRouteEntity;
-    rowId: string;
-    translatedText: string;
-    originalText: string;
+    Type: "TranslatedInstance";
+    culture?: Basics.CultureInfoEntity | null;
+    instance?: Entities.Lite<Entities.Entity>;
+    propertyRoute?: Signum.PropertyRouteEntity | null;
+    rowId?: string | null;
+    translatedText?: string | null;
+    originalText?: string | null;
 }
 
 export module TranslationJavascriptMessage {
@@ -62,9 +63,10 @@ export module TranslationPermission {
 
 export const TranslationReplacementEntity = new Type<TranslationReplacementEntity>("TranslationReplacement");
 export interface TranslationReplacementEntity extends Entities.Entity {
-    cultureInfo: Basics.CultureInfoEntity;
-    wrongTranslation: string;
-    rightTranslation: string;
+    Type: "TranslationReplacement";
+    cultureInfo?: Basics.CultureInfoEntity | null;
+    wrongTranslation?: string | null;
+    rightTranslation?: string | null;
 }
 
 export module TranslationReplacementOperation {
@@ -74,13 +76,15 @@ export module TranslationReplacementOperation {
 
 export const TranslatorUserCultureEntity = new Type<TranslatorUserCultureEntity>("TranslatorUserCultureEntity");
 export interface TranslatorUserCultureEntity extends Entities.EmbeddedEntity {
-    culture: Basics.CultureInfoEntity;
-    action: TranslatedCultureAction;
+    Type: "TranslatorUserCultureEntity";
+    culture?: Basics.CultureInfoEntity | null;
+    action?: TranslatedCultureAction;
 }
 
 export const TranslatorUserEntity = new Type<TranslatorUserEntity>("TranslatorUser");
 export interface TranslatorUserEntity extends Entities.Entity {
-    user: Entities.Lite<Signum.IUserEntity>;
+    Type: "TranslatorUser";
+    user?: Entities.Lite<Signum.IUserEntity>;
     cultures: Entities.MList<TranslatorUserCultureEntity>;
 }
 

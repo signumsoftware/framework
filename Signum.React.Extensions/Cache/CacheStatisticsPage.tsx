@@ -12,9 +12,18 @@ interface CacheStatisticsPageProps extends ReactRouter.RouteComponentProps<{}, {
 
 }
 
-export default class CacheStatisticsPage extends React.Component<CacheStatisticsPageProps, CacheState> {
+interface CacheStatisticsPageState {
+    isEnabled?: boolean;
+    tables?: CacheTable[];
+}
 
-    state: CacheState = { tables: undefined, isEnabled: undefined };
+export default class CacheStatisticsPage extends React.Component<CacheStatisticsPageProps, CacheStatisticsPageState > {
+
+    constructor(props: CacheStatisticsPageProps) {
+        super(props);
+
+        this.state = { tables: undefined, isEnabled: undefined };
+    }
 
     componentWillMount() {
         this.loadState().done();

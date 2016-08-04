@@ -47,7 +47,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
     }
 
     handleInputChange = (e: React.FormEvent) => {
-        let f = (e.currentTarget as HTMLInputElement).files[0];
+        let f = (e.currentTarget as HTMLInputElement).files![0];
         let fileReader = new FileReader();
         fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
         fileReader.onload = e => {
@@ -59,7 +59,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
                 fileVer: this.state.fileVer + 1
             });
 
-            API.importPreview(this.state.file).then(model => this.setState({ model, success: false })).done();
+            API.importPreview(this.state.file!).then(model => this.setState({ model, success: false })).done();
         };
         fileReader.readAsDataURL(f);
     }
@@ -77,31 +77,32 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
 
     handleImport = () => {
         API.importAssets({
-            file: this.state.file,
-            model: this.state.model
-        }).then(model => this.setState({ success: true, model: undefined, file: undefined }))
-            .done();
+            file: this.state.file!,
+            model: this.state.model!
+        })
+        .then(model => this.setState({ success: true, model: undefined, file: undefined }))
+        .done();
     }
 
     renderModel() {
-        const tc = TypeContext.root(UserAssetPreviewModel, this.state.model, undefined);
+        const tc = TypeContext.root(UserAssetPreviewModel, this.state.model!, undefined);
 
         return (
             <div>
                 <table className="table">
                     <thead>
                         <tr>
-                            <th> { UserAssetPreviewModel.nicePropertyName(a => a.lines[0].element.action) } </th>
-                            <th> { UserAssetPreviewModel.nicePropertyName(a => a.lines[0].element.overrideEntity) } </th>
-                            <th> { UserAssetPreviewModel.nicePropertyName(a => a.lines[0].element.type) } </th>
-                            <th> { UserAssetPreviewModel.nicePropertyName(a => a.lines[0].element.text) } </th>
+                            <th> { UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.action) } </th>
+                            <th> { UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.overrideEntity) } </th>
+                            <th> { UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.type) } </th>
+                            <th> { UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.text) } </th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {
-                            tc.value.lines.map(mle =>
-                                <tr key={mle.element.type.cleanName}>
+                            tc.value.lines!.map(mle =>
+                                <tr key={mle.element.type!.cleanName}>
                                     <td> {EntityAction.niceName(mle.element.action) } </td>
                                     <td>
                                         { mle.element.action == "Different" &&
@@ -111,7 +112,7 @@ export default class ImportAssetsPage extends React.Component<ImportAssetsPagePr
                                             } }></input>
                                         }
                                     </td>
-                                    <td> { getTypeInfo(mle.element.type.cleanName).niceName } </td>
+                                    <td> { getTypeInfo(mle.element.type!.cleanName).niceName } </td>
                                     <td> {mle.element.text }</td>
                                 </tr>
                             )

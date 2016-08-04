@@ -78,10 +78,10 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
         this.setState({ chartResult: undefined });
 
-        ChartClient.API.executeChart(this.props.chartRequest)
+        ChartClient.API.executeChart(this.props.chartRequest!)
             .then(rt => this.setState({ chartResult: rt }),
             ifError(ValidationError, e => {
-                GraphExplorer.setModelState(this.props.chartRequest, e.modelState, "request");
+                GraphExplorer.setModelState(this.props.chartRequest!, e.modelState, "request");
                 this.forceUpdate();
             }))
             .done();
@@ -89,11 +89,11 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
 
     handleOnFullScreen = (e: React.MouseEvent) => {
         e.preventDefault();
-        Navigator.currentHistory.push(ChartClient.Encoder.chartRequestPath(this.props.chartRequest));
+        Navigator.currentHistory.push(ChartClient.Encoder.chartRequestPath(this.props.chartRequest!));
     }
 
     handleEditScript = (e: React.MouseEvent) => {
-        window.open(Navigator.navigateRoute(this.props.chartRequest.chartScript));
+        window.open(Navigator.navigateRoute(this.props.chartRequest!.chartScript));
     }
 
     render() {
@@ -102,9 +102,9 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
         const qd = this.state.queryDescription;
 
         if (cr == undefined || qd == undefined)
-            return undefined;
+            return null;
 
-        const tc = new TypeContext<ChartRequest>(undefined, undefined, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(this.props.chartRequest, ""));
+        const tc = new TypeContext<ChartRequest>(undefined, undefined, PropertyRoute.root(getTypeInfo(cr.Type)), new ReadonlyBinding(this.props.chartRequest!, ""));
 
         return (
             <div>
@@ -117,7 +117,7 @@ export default class ChartRequestView extends React.Component<ChartRequestViewPr
                 <ValidationErrors entity={cr}/>
                 <div className="sf-chart-control SF-control-container" >
                     <div>
-                        <FilterBuilder filterOptions={cr.filterOptions} queryDescription={this.state.queryDescription}
+                        <FilterBuilder filterOptions={cr.filterOptions} queryDescription={this.state.queryDescription!}
                             subTokensOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
                             lastToken={this.lastToken} onTokenChanged={t => this.lastToken = t} />
 

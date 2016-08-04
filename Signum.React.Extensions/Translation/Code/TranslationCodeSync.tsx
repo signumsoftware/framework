@@ -75,7 +75,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
 
         return (
             <div>
-                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={this.state.result} currentCulture={this.props.routeParams.culture} />) }
+                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={this.state.result!} currentCulture={this.props.routeParams.culture} />) }
                 <input type="submit" value={ TranslationMessage.Save.niceToString() } className="btn btn-primary" onClick={this.handleSave}/>
             </div>
         );
@@ -84,7 +84,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
     handleSave = (e: React.FormEvent) => {
         e.preventDefault();
         const params = this.props.routeParams;
-        API.save(params.assembly, params.culture || "", this.state.result)
+        API.save(params.assembly, params.culture || "", this.state.result!)
             .then(() => notifySuccess())
             .then(() => this.loadSync())
             .done();

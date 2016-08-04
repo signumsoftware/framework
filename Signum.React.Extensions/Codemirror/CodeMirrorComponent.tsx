@@ -11,7 +11,7 @@ export interface CodeMirrorProps {
     onFocusChange?: (focused: boolean) => void,
     options?: CodeMirror.EditorConfiguration,
     path?: string,
-    value?: string,
+    value?: string | null,
     className?: string,
     defaultValue?: string;
 }
@@ -44,7 +44,7 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
     }
     componentWillReceiveProps(nextProps: CodeMirrorProps) {
         if (this.codeMirror) {
-            if (nextProps.value !== undefined && this._currentCodemirrorValue !== nextProps.value) {
+            if (nextProps.value != undefined && this._currentCodemirrorValue !== nextProps.value) {
                 this.codeMirror.setValue(nextProps.value);
             }
 
@@ -84,7 +84,7 @@ export default class CodeMirrorComponent extends React.Component<CodeMirrorProps
         );
         return (
             <div className={editorClassName}>
-                <textarea ref={ta => this.textArea = ta} name={this.props.path} defaultValue={this.props.value} autoComplete="off" />
+                <textarea ref={ta => this.textArea = ta} name={this.props.path} defaultValue={this.props.value || undefined} autoComplete="off" />
             </div>
         );
     }

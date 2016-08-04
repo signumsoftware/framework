@@ -12,7 +12,7 @@ import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Ref
 const CurrentEntityKey = "[CurrentEntity]";
 
 interface QueryTokenEntityBuilderProps {
-    ctx: TypeContext<QueryTokenEntity>;
+    ctx: TypeContext<QueryTokenEntity | null | undefined>;
     queryKey: string;
     subTokenOptions: SubTokensOptions;
     onTokenChanged?: (newToken: QueryToken) => void;

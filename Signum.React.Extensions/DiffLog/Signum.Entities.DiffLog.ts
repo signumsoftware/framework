@@ -23,9 +23,10 @@ export module DiffLogMessage {
 
 export const DiffLogMixin = new Type<DiffLogMixin>("DiffLogMixin");
 export interface DiffLogMixin extends Entities.MixinEntity {
-    initialState: string;
-    finalState: string;
-    cleaned: boolean;
+    Type: "DiffLogMixin";
+    initialState?: string | null;
+    finalState?: string | null;
+    cleaned?: boolean;
 }
 
 

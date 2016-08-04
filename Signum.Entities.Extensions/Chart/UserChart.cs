@@ -19,7 +19,7 @@ namespace Signum.Entities.Chart
         Lite<TypeEntity> EntityType { get; }
     }
 
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master), InTypeScript(Undefined = false)]
     public class UserChartEntity : Entity, IChartBase, IHasEntitytype, IUserAssetEntity
     {
         public UserChartEntity() { }

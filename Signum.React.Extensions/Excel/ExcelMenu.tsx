@@ -7,12 +7,12 @@ import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import SearchControl from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
+import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage } from './Signum.Entities.Excel'
 import * as ExcelClient from './ExcelClient'
 
 export interface ExcelMenuProps {
-    searchControl: SearchControl;
+    searchControl: SearchControlLoaded;
 
     plainExcel: boolean;
     excelReport: boolean;
@@ -32,7 +32,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
     }
 
     reloadList(): Promise<void> {
-        return ExcelClient.API.forQuery(this.props.searchControl.getQueryKey())
+        return ExcelClient.API.forQuery(this.props.searchControl.props.findOptions.queryKey)
             .then(list => this.setState({ excelReport: list }));
     }
 
@@ -47,7 +47,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
     }
 
     handleCreate = () => {
-        Finder.API.fetchQueryEntity(this.props.searchControl.getQueryKey())
+        Finder.API.fetchQueryEntity(this.props.searchControl.props.findOptions.queryKey)
             .then(qe => ExcelReportEntity.New(er => er.query = qe))
             .then(er => Navigator.view(er))
             .then(() => this.reloadList())
@@ -55,7 +55,7 @@ export default class ExcelMenu extends React.Component<ExcelMenuProps, { excelRe
     }
 
     handleAdmnister = () => {
-        Finder.explore({ queryName: ExcelReportEntity, parentColumn: "Query.Key", parentValue: this.props.searchControl.getQueryKey() })
+        Finder.explore({ queryName: ExcelReportEntity, parentColumn: "Query.Key", parentValue: this.props.searchControl.props.findOptions.queryKey })
             .then(() => this.reloadList())
             .done();
     }

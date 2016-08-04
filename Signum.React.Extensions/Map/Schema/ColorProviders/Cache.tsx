@@ -9,7 +9,7 @@ import { colorScale, colorScaleSqr  } from '../../Utils'
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
 
     if (!isPermissionAuthorized(CachePermission.ViewCache))
-        return undefined;
+        return [];
 
 
     return [

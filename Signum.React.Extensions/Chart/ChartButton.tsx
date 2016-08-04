@@ -8,22 +8,23 @@ import { Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Ent
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import { default as SearchControl } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
+import { default as SearchControlLoaded } from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
 import { ChartMessage, ChartRequest } from './Signum.Entities.Chart'
 import * as ChartClient from './ChartClient'
 
 export interface ChartButtonProps {
-    searchControl: SearchControl;
+    searchControl: SearchControlLoaded;
 }
 
 export default class ChartButton extends React.Component<ChartButtonProps, void> {
 
     handleClick = (e: React.MouseEvent) => {
 
-        const fo = this.props.searchControl.state.findOptions;
+        const fo = this.props.searchControl.props.findOptions;
 
         const path = ChartClient.Encoder.chartRequestPath(ChartRequest.New(cr => {
-            cr.queryKey = getQueryKey(fo.queryName);
+            cr.queryKey = fo.queryKey;
+            cr.orderOptions = [];
             cr.filterOptions = fo.filterOptions;
         }));
 

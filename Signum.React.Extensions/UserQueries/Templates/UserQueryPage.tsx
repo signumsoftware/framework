@@ -37,7 +37,7 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
 
     load(props: UserQueryPageProps) {
 
-        const { userQueryId, entity } = this.props.routeParams;
+        const { userQueryId, entity } = this.props.routeParams!;
 
         const lite = entity == undefined ? undefined : parseLite(entity);
 
@@ -59,7 +59,7 @@ export default class UserQueryPage extends React.Component<UserQueryPageProps, {
         const fo = this.state.findOptions;
 
         if (fo == undefined || uq == undefined)
-            return undefined;
+            return null;
 
         return (
             <div id="divSearchPage">

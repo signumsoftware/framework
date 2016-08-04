@@ -9,7 +9,7 @@ import { Entity, Lite, liteKey } from '../../../Framework/Signum.React/Scripts/S
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
+import { FindOptionsParsed, FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption, FilterRequest, QueryRequest, Pagination } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage,
     QueryFilterEntity, QueryColumnEntity, QueryOrderEntity} from './Signum.Entities.UserQueries'
@@ -38,7 +38,7 @@ export function start(options: { routes: JSX.Element[] }) {
             return undefined;
 
         return API.forEntityType(ctx.lite.EntityType).then(uqs =>
-            uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr, e => {
+            uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), uq.toStr || "", e => {
                 window.open(Navigator.currentHistory.createHref(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
             }, { glyphicon: "glyphicon-list-alt", glyphiconColor: "dodgerblue" })));
     });
@@ -71,14 +71,18 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export module Converter {
 
-    export function applyUserQuery(fo: FindOptions, uq: UserQueryEntity, entity: Lite<Entity>): Promise<FindOptions> {
+    export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
+
+        var query = uq.query!;
+
+        var fo = { queryName: query.key } as FindOptions;
 
         const convertedFilters = uq.withoutFilters ? Promise.resolve([] as FilterRequest[]) : UserAssetsClient.API.parseFilters({
-            queryKey: uq.query.key,
+            queryKey: query.key,
             canAggregate: false,
             entity: entity,
-            filters: uq.filters.map(mle => mle.element).map(f => ({
-                tokenString: f.token.tokenString,
+            filters: uq.filters!.map(mle => mle.element).map(f => ({
+                tokenString: f.token!.tokenString,
                 operation: f.operation,
                 valueString: f.valueString
             }) as UserAssetsClient.API.ParseFilterRequest)
@@ -92,38 +96,47 @@ export module Converter {
                     columnName: f.token,
                     operation: f.operation,
                     value: f.value,
+                    frozen: false
                 }) as FilterOption));
             }
 
             fo.columnOptionsMode = uq.columnsMode;
 
             fo.columnOptions = (uq.columns || []).map(f => ({
-                columnName: f.element.token.tokenString,
+                columnName: f.element.token!.tokenString,
                 displayName: f.element.displayName
             }) as ColumnOption);
 
             fo.orderOptions = (uq.orders || []).map(f => ({
-                columnName: f.element.token.tokenString,
+                columnName: f.element.token!.tokenString,
                 orderType: f.element.orderType
             }) as OrderOption);
 
 
-            const qs = Finder.querySettings[uq.query.key];
+            const qs = Finder.querySettings[query.key];
 
             fo.pagination = uq.paginationMode == undefined ?
                 ((qs && qs.pagination) || Finder.defaultPagination) : {
-                mode: uq.paginationMode,
-                currentPage: undefined,
-                elementsPerPage: uq.elementsPerPage
-            };
+                    mode: uq.paginationMode,
+                    currentPage: undefined,
+                    elementsPerPage: uq.elementsPerPage
+                } as Pagination;
 
-            return Finder.parseTokens(fo);
+            return fo;
         });
     }
 
-    export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity>): Promise<FindOptions> {
-        const fo: FindOptions = { queryName: uq.query.key }; 
-        return applyUserQuery(fo, uq, entity);
+    export function applyUserQuery(fop: FindOptionsParsed, uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptionsParsed> {
+        return toFindOptions(uq, entity)
+            .then(fo => Finder.getQueryDescription(fo.queryName).then(qd => Finder.parseFindOptions(fo, qd)))
+            .then(fop2 => {
+                fop.filterOptions = fop.filterOptions.filter(a => a.frozen);
+                fop.filterOptions.push(...fop2.filterOptions);
+                fop.orderOptions = fop2.orderOptions;
+                fop.columnOptions = fop2.columnOptions;
+                fop.pagination = fop2.pagination;
+                return fop;
+            });
     }
 }
 

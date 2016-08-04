@@ -35,7 +35,7 @@ export default class CountSearchControlPart extends React.Component<{ part: Coun
 }
 
 export interface CountUserQueryElementProps {
-    ctx?: TypeContext<CountUserQueryElementEntity>
+    ctx: TypeContext<CountUserQueryElementEntity>
     entity?: Lite<Entity>; 
 }
 
@@ -57,8 +57,8 @@ export class CountUserQueryElement extends React.Component<CountUserQueryElement
 
     loadFindOptions(props: CountUserQueryElementProps) {
 
-        UserQueryClient.Converter.toFindOptions(props.ctx.value.userQuery,  this.props.entity)
-            .then(fo=>this.setState({fo: fo }))
+        UserQueryClient.Converter.toFindOptions(props.ctx.value.userQuery!, this.props.entity)
+            .then(fo => this.setState({ fo: fo }))
             .done();
     }
 

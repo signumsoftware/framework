@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.UserAssets
 {
-    [Serializable]
+    [Serializable, InTypeScript(Undefined = false)]
     public sealed class QueryTokenEntity : EmbeddedEntity, IEquatable<QueryTokenEntity>
     {
         private QueryTokenEntity()

@@ -72,7 +72,7 @@ export function wrap(textElement: SVGTextElement, width: number) {
         .attr("x", 0)
         .attr("dy", "1.2em");
 
-    while (word = words.pop()) {
+    while (word = words.pop()!) {
         line.push(word);
         tspan.text(line.join(" "));
         if ((<SVGTSpanElement>tspan.node()).getComputedTextLength() > width && line.length > 1) {

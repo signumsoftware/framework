@@ -55,13 +55,18 @@ export default class ChartScript extends React.Component<{ ctx: TypeContext<Dash
     }
 
     handleOnCreate = () => {
-        const pr = DashboardEntity.memberInfo(a => a.parts[0].element.content);
+        const pr = DashboardEntity.memberInfo(a => a.parts![0].element.content);
 
         return SelectorModal.chooseType(getTypeInfos(pr.type))
-            .then(ti => ti == undefined ? undefined : PanelPartEntity.New(p => {
-                p.content = basicConstruct(ti.name) as any as IPartEntity;
-                p.style = "Default";
-            }));
+            .then(ti => {
+                if (ti == undefined)
+                    return undefined;
+
+                return PanelPartEntity.New(p => {
+                    p.content = basicConstruct(ti.name) as any as IPartEntity;
+                    p.style = "Default";
+                });
+            });
     }
 
     renderPart = (tc: TypeContext<PanelPartEntity>) => {

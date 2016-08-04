@@ -24,7 +24,7 @@ export default class User extends React.Component<{ ctx: TypeContext<UserEntity>
                 <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true }) } />
                 <ValueLine ctx={ctx.subCtx(e => e.userName) } />
                 { entity.isNew || this.state.withPassword ?
-                    <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined, Binding.create(ctx.value, v => v.newPassword)) }/> :
+                    <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword)) }/> :
                     !ctx.readOnly && this.renderButton(ctx)
                 }
                 <EntityCombo ctx={ctx.subCtx(e => e.role) } />
@@ -61,7 +61,7 @@ class DoublePassword extends React.Component<{ ctx: TypeContext<string> }, void>
             ctx.value = this.newPass.value;
         }
 
-        ctx.frame.revalidate();
+        ctx.frame!.revalidate();
     }
 
     newPass: HTMLInputElement;

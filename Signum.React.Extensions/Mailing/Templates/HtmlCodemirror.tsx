@@ -27,7 +27,7 @@ require("codemirror/addon/search/match-highlighter");
 require("codemirror/addon/search/search");
 require("codemirror/addon/search/searchcursor");
 
-export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<string>, onChange?: (newValue: string) => void  }, void> {
+export default class HtmlCodemirror extends React.Component<{ ctx: TypeContext<string | null | undefined>, onChange?: (newValue: string) => void }, void> {
 
     get entity() {
         return this.props.ctx.value;

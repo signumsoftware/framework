@@ -18,18 +18,21 @@ export interface TemplateControlsProps {
 }
 
 export interface TemplateControlsState {
-    currentToken: QueryToken
+    currentToken: QueryToken | undefined
 }
 
 export default class TemplateControls extends React.Component<TemplateControlsProps, TemplateControlsState>{
 
-    state = { currentToken: undefined } as TemplateControlsState;
+    constructor(props: TemplateControlsProps) {
+        super(props);
+        this.state = { currentToken: undefined } as TemplateControlsState;
+    }
 
     render() {
         const ct = this.state.currentToken;
 
         if (!this.props.queryKey)
-            return undefined;
+            return null;
 
         return (
             <div className="form-sm">
@@ -50,14 +53,14 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
         );
     }
 
-    renderButton(text: string, canClick: string, buildPattern: (key: string) => string) {
+    renderButton(text: string, canClick: string | undefined, buildPattern: (key: string) => string) {
         return <input type="button" disabled={!!canClick} className="btn btn-default btn-sm sf-button"
             title={canClick} value={text}
             onClick={() => this.props.onInsert(buildPattern(this.state.currentToken ? this.state.currentToken.fullKey : "")) }/>;
     }
 
 
-    canElement(): string {
+    canElement(): string | undefined {
         let token = this.state.currentToken;
 
         if (token == undefined)
@@ -73,7 +76,7 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
     }
 
 
-    canIf(): string {
+    canIf(): string | undefined {
         let token = this.state.currentToken;
 
         if (token == undefined)
@@ -88,7 +91,7 @@ export default class TemplateControls extends React.Component<TemplateControlsPr
         return undefined;
     }
 
-    canForeach(): string {
+    canForeach(): string | undefined {
 
         let token = this.state.currentToken;
 

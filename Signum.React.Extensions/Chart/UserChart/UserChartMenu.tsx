@@ -31,7 +31,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
     }
 
     reloadList(): Promise<void> {
-        return UserChartClient.API.forQuery(this.props.chartRequestView.props.chartRequest.queryKey)
+        return UserChartClient.API.forQuery(this.props.chartRequestView.props.chartRequest!.queryKey)
             .then(list => this.setState({ userCharts: list }));
     }
 
@@ -39,8 +39,8 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
     handleSelect = (uc: Lite<UserChartEntity>) => {
 
         Navigator.API.fetchAndForget(uc).then(userChart => {
-            const oldFindOptions = this.props.chartRequestView.props.chartRequest;
-            UserChartClient.Converter.applyUserChart(oldFindOptions, userChart, undefined)
+            const chartRequest = this.props.chartRequestView.props.chartRequest!;
+            UserChartClient.Converter.applyUserChart(chartRequest, userChart, undefined)
                 .then(newChartRequest => {
                     this.props.chartRequestView.props.onChange(newChartRequest);
                     this.setState({ currentUserChart: userChart, });
@@ -50,7 +50,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
     }
 
     handleEdit = () => {
-        Navigator.API.fetchAndForget(toLite(this.state.currentUserChart))
+        Navigator.API.fetchAndForget(toLite(this.state.currentUserChart!))
             .then(userQuery => Navigator.navigate(userQuery))
             .then(() => this.reloadList())
             .done();
@@ -59,7 +59,7 @@ export default class UserChartMenu extends React.Component<UserChartMenuProps, {
 
     handleCreate = () => {
 
-        UserChartClient.API.fromChartRequest(this.props.chartRequestView.props.chartRequest)
+        UserChartClient.API.fromChartRequest(this.props.chartRequestView.props.chartRequest!)
             .then(userQuery => Navigator.view(userQuery))
             .then(uc => {
                 if (uc && uc.id) {

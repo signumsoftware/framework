@@ -12,37 +12,41 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 export const QueryColumnEntity = new Type<QueryColumnEntity>("QueryColumnEntity");
 export interface QueryColumnEntity extends Entities.EmbeddedEntity {
-    token: UserAssets.QueryTokenEntity;
-    displayName: string;
+    Type: "QueryColumnEntity";
+    token?: UserAssets.QueryTokenEntity | null;
+    displayName?: string | null;
 }
 
 export const QueryFilterEntity = new Type<QueryFilterEntity>("QueryFilterEntity");
 export interface QueryFilterEntity extends Entities.EmbeddedEntity {
-    token: UserAssets.QueryTokenEntity;
-    operation: DynamicQuery.FilterOperation;
-    valueString: string;
+    Type: "QueryFilterEntity";
+    token?: UserAssets.QueryTokenEntity | null;
+    operation?: DynamicQuery.FilterOperation;
+    valueString?: string | null;
 }
 
 export const QueryOrderEntity = new Type<QueryOrderEntity>("QueryOrderEntity");
 export interface QueryOrderEntity extends Entities.EmbeddedEntity {
-    token: UserAssets.QueryTokenEntity;
-    orderType: DynamicQuery.OrderType;
+    Type: "QueryOrderEntity";
+    token?: UserAssets.QueryTokenEntity | null;
+    orderType?: DynamicQuery.OrderType;
 }
 
 export const UserQueryEntity = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
-    query: Basics.QueryEntity;
-    entityType: Entities.Lite<Basics.TypeEntity>;
-    owner: Entities.Lite<Entities.Entity>;
-    displayName: string;
-    withoutFilters: boolean;
+    Type: "UserQuery";
+    query?: Basics.QueryEntity | null;
+    entityType?: Entities.Lite<Basics.TypeEntity>;
+    owner?: Entities.Lite<Entities.Entity>;
+    displayName?: string | null;
+    withoutFilters?: boolean;
     filters: Entities.MList<QueryFilterEntity>;
     orders: Entities.MList<QueryOrderEntity>;
-    columnsMode: DynamicQuery.ColumnOptionsMode;
+    columnsMode?: DynamicQuery.ColumnOptionsMode;
     columns: Entities.MList<QueryColumnEntity>;
-    paginationMode: DynamicQuery.PaginationMode;
-    elementsPerPage: number;
-    guid: string;
+    paginationMode?: DynamicQuery.PaginationMode | null;
+    elementsPerPage?: number | null;
+    guid?: string;
 }
 
 export module UserQueryMessage {

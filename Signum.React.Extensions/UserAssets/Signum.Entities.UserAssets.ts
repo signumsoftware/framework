@@ -24,11 +24,12 @@ export type EntityAction =
     "New";
 
 export interface IUserAssetEntity extends Entities.Entity {
-    guid: string;
+    guid?: string;
 }
 
 export const QueryTokenEntity = new Type<QueryTokenEntity>("QueryTokenEntity");
 export interface QueryTokenEntity extends Entities.EmbeddedEntity {
+    Type: "QueryTokenEntity";
     tokenString: string;
 }
 
@@ -47,15 +48,17 @@ export module UserAssetPermission {
 
 export const UserAssetPreviewLine = new Type<UserAssetPreviewLine>("UserAssetPreviewLine");
 export interface UserAssetPreviewLine extends Entities.EmbeddedEntity {
-    type: Basics.TypeEntity;
-    text: string;
-    action: EntityAction;
-    overrideEntity: boolean;
-    guid: string;
+    Type: "UserAssetPreviewLine";
+    type?: Basics.TypeEntity | null;
+    text?: string | null;
+    action?: EntityAction;
+    overrideEntity?: boolean;
+    guid?: string;
 }
 
 export const UserAssetPreviewModel = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");
 export interface UserAssetPreviewModel extends Entities.ModelEntity {
+    Type: "UserAssetPreviewModel";
     lines: Entities.MList<UserAssetPreviewLine>;
 }
 

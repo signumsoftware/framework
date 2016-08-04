@@ -17,7 +17,7 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
     render() {
         const ctx = this.props.ctx;
         const entity = ctx.value;
-        const queryKey = entity.query.key;
+        const queryKey = entity.query!.key;
 
         return (
             <div>
@@ -42,7 +42,7 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
                         <EntityRepeater ctx={ctx.subCtx(e => e.filters) } getComponent={this.renderFilter}/>
                     </div>
                 </div>
-                <ChartBuilder queryKey={entity.query.key} onInvalidate={this.handleNull} onRedraw={this.handleNull} ctx={this.props.ctx} />
+                <ChartBuilder queryKey={queryKey} onInvalidate={this.handleNull} onRedraw={this.handleNull} ctx={this.props.ctx} />
                 <div className="form-xs">
                     <div className="repeater-inline form-inline sf-filters-list ">
                         <EntityRepeater ctx={ctx.subCtx(e => e.orders) } getComponent={this.renderOrder}/>
@@ -62,7 +62,7 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
             <div>
                 <QueryTokenEntityBuilder
                     ctx={ctx2.subCtx(a => a.token, { formGroupStyle: "None" }) }
-                    queryKey={this.props.ctx.value.query.key}
+                    queryKey={this.props.ctx.value.query!.key}
                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
                 <span style={{ margin: "0px 10px" }}>
                     <ValueLine ctx={ctx2.subCtx(e => e.operation) } />
@@ -78,7 +78,7 @@ export default class UserChart extends React.Component<{ ctx: TypeContext<UserCh
             <div>
                 <QueryTokenEntityBuilder
                     ctx={ctx2.subCtx(a => a.token, { formGroupStyle: "None" }) }
-                    queryKey={this.props.ctx.value.query.key}
+                    queryKey={this.props.ctx.value.query!.key}
                     subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate} />
                 <span style={{ margin: "0px 10px" }}>
                     <ValueLine ctx={ctx2.subCtx(e => e.orderType) } />

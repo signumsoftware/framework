@@ -8,7 +8,7 @@ import { getToString, Lite, is }  from '../../../../Framework/Signum.React/Scrip
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Entities.Mailing'
 
-export default class IFrameRenderer extends React.Component<{ html: string }, void> {
+export default class IFrameRenderer extends React.Component<{ html: string | null | undefined }, void> {
 
     componentDidMount() {
         this.load(this.props.html);
@@ -18,10 +18,10 @@ export default class IFrameRenderer extends React.Component<{ html: string }, vo
         this.load(newProps.html);
     }
 
-    load(html: string) {
+    load(html: string | null | undefined) {
         const cd = this.iframe.contentDocument;
 
-        cd.body.innerHTML = html;
+        cd.body.innerHTML = html || "";
     }
 
     iframe: HTMLIFrameElement;

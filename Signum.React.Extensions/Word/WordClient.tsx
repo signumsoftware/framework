@@ -21,7 +21,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
     Operations.addSettings(new EntityOperationSettings(WordTemplateOperation.CreateWordReport, {
         onClick: ctx => {
-            Finder.find({ queryName: ctx.entity.query.key }).then(lite => {
+            Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
                 if (!lite)
                     return;
 

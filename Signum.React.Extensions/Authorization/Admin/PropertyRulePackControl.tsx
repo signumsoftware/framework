@@ -24,10 +24,10 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
         let pack = this.props.ctx.value;
 
         Api.savePropertyRulePack(pack)
-            .then(() => Api.fetchPropertyRulePack(pack.type.cleanName, pack.role.id))
+            .then(() => Api.fetchPropertyRulePack(pack.type.cleanName!, pack.role.id!))
             .then(newPack => {
                 notifySuccess();
-                bc.frame.onReload({ entity: newPack, canExecute: undefined });
+                bc.frame.onReload({ entity: newPack, canExecute: {} });
             })
             .done();
     }
@@ -100,7 +100,7 @@ export default class PropertyRulesPackControl extends React.Component<{ ctx: Typ
 
     renderRadio(c: PropertyAllowedRule, allowed: PropertyAllowed, color: string) {
 
-        if (c.coercedValues.contains(allowed))
+        if (c.coercedValues!.contains(allowed))
             return;
 
         return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; this.forceUpdate() } }/>;

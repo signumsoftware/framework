@@ -9,12 +9,13 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 
 export const ViewLogEntity = new Type<ViewLogEntity>("ViewLog");
 export interface ViewLogEntity extends Entities.Entity {
-    target: Entities.Lite<Entities.Entity>;
-    user: Entities.Lite<Basics.IUserEntity>;
-    viewAction: string;
-    startDate: string;
-    endDate: string;
-    data: string;
+    Type: "ViewLog";
+    target?: Entities.Lite<Entities.Entity>;
+    user?: Entities.Lite<Basics.IUserEntity>;
+    viewAction?: string | null;
+    startDate?: string;
+    endDate?: string;
+    data?: string | null;
 }
 
 

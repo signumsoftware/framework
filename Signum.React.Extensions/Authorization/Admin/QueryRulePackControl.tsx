@@ -24,10 +24,10 @@ export default class QueryRulesPackControl extends React.Component<{ ctx: TypeCo
         let pack = this.props.ctx.value;
 
         Api.saveQueryRulePack(pack)
-            .then(() => Api.fetchQueryRulePack(pack.type.cleanName, pack.role.id))
+            .then(() => Api.fetchQueryRulePack(pack.type.cleanName!, pack.role.id!))
             .then(newPack => {
                 notifySuccess();
-                bc.frame.onReload({ entity: newPack, canExecute: undefined });
+                bc.frame.onReload({ entity: newPack, canExecute: {} });
             })
             .done();
     }

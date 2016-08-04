@@ -11,6 +11,7 @@ import { API, AsyncEmailSenderState } from './MailingClient'
 import { EmailMessageEntity } from './Signum.Entities.Mailing'
 
 
+
 interface AsyncEmailSenderPageProps extends ReactRouter.RouteComponentProps<{}, {}> {
 
 }

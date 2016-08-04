@@ -168,12 +168,12 @@ declare module CodeMirror {
         "background"(a background element that will be behind the selection),
         or "wrap" (the wrapper node that wraps all of the line's elements, including gutter elements).
         class should be the name of the class to apply. */
-        addLineClass(line: any, where: string, _class_: string): CodeMirror.LineHandle;
+        addLineClass(line: any, where: string | undefined, _class_: string): CodeMirror.LineHandle;
 
         /** Remove a CSS class from a line.line can be a line handle or number.
         where should be one of "text", "background", or "wrap"(see addLineClass).
         class can be left off to remove all classes for the specified node, or be a string to remove only a specific class. */
-        removeLineClass(line: any, where: string, class_: string): CodeMirror.LineHandle;
+        removeLineClass(line: any, where: string | undefined, class_: string | undefined): CodeMirror.LineHandle;
 
         /** Returns the line number, text content, and marker status of the given line, which can be either a number or a line handle. */
         lineInfo(line: any): {

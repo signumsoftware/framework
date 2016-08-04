@@ -41,9 +41,9 @@ export type EntityBaseType =
 
 export interface IRelationInfo extends d3.layout.force.Link<ITableInfo> {
     isMList?: boolean;
-    repetitions?: number;
-    sourcePoint?: Point;
-    targetPoint?: Point;
+    repetitions: number;
+    sourcePoint: Point;
+    targetPoint: Point;
 }
 
 
@@ -67,8 +67,8 @@ export interface SchemaMapInfo {
     relations: RelationInfo[];
     providers: ColorProviderInfo[];
 
-    allNodes?: ITableInfo[];
-    allLinks?: IRelationInfo[];
+    allNodes: ITableInfo[]; /*after*/
+    allLinks: IRelationInfo[]; /*after*/
 }
 
 
@@ -77,7 +77,7 @@ export interface ClientColorProvider {
     getFill: (t: ITableInfo) => string;
     getStroke?: (t: ITableInfo) => string;
     getTooltip: (t: ITableInfo) => string;
-    getMask?: (t: ITableInfo) => string;
+    getMask?: (t: ITableInfo) => string | undefined;
     defs?: JSX.Element[];
 }
 
@@ -88,7 +88,7 @@ export class SchemaMapD3 {
     force: d3.layout.Force<IRelationInfo, ITableInfo>;
     fanIn: { [key: string]: IRelationInfo[] };
 
-    selectedTable: ITableInfo;
+    selectedTable: ITableInfo | undefined;
 
     link: d3.Selection<IRelationInfo>;
 
@@ -389,8 +389,8 @@ export class SchemaMapD3 {
 
     gravity() {
         this.nodes.forEach(n => {
-            n.nx += this.gravityDim(n.x, 0, this.width);
-            n.ny += this.gravityDim(n.y, 0, this.height);
+            n.nx += this.gravityDim(n.x!, 0, this.width);
+            n.ny += this.gravityDim(n.y!, 0, this.height);
         });         
     }
 
@@ -408,8 +408,8 @@ export class SchemaMapD3 {
 
     namespaceClustering() {
         const quadtree = d3.geom.quadtree<ITableInfo>()
-            .x(p => p.x)
-            .y(p => p.y)(this.nodes);
+            .x(p => p.x!)
+            .y(p => p.y!)(this.nodes);
 
         const numNodes = this.nodes.length;
 
@@ -461,8 +461,8 @@ export class SchemaMapD3 {
                     d.ny += ly * f;
                 }
 
-                const dx = distance(d.x, x1, x2);
-                const dy = distance(d.y, y1, y2);
+                const dx = distance(d.x!, x1, x2);
+                const dy = distance(d.y!, y1, y2);
 
                 const dist = Math.sqrt(dx * dx + dy * dy);
 

@@ -12,27 +12,30 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 export const SystemWordTemplateEntity = new Type<SystemWordTemplateEntity>("SystemWordTemplate");
 export interface SystemWordTemplateEntity extends Entities.Entity {
-    fullClassName: string;
+    Type: "SystemWordTemplate";
+    fullClassName?: string | null;
 }
 
 export const WordConverterSymbol = new Type<WordConverterSymbol>("WordConverter");
 export interface WordConverterSymbol extends Entities.Symbol {
+    Type: "WordConverter";
 }
 
 export const WordTemplateEntity = new Type<WordTemplateEntity>("WordTemplate");
 export interface WordTemplateEntity extends Entities.Entity {
-    name: string;
-    query: Basics.QueryEntity;
-    systemWordTemplate: SystemWordTemplateEntity;
-    culture: Signum.CultureInfoEntity;
-    active: boolean;
-    startDate: string;
-    endDate: string;
-    disableAuthorization: boolean;
-    template: Entities.Lite<Files.FileEntity>;
-    fileName: string;
-    wordTransformer: WordTransformerSymbol;
-    wordConverter: WordConverterSymbol;
+    Type: "WordTemplate";
+    name?: string | null;
+    query?: Basics.QueryEntity | null;
+    systemWordTemplate?: SystemWordTemplateEntity | null;
+    culture?: Signum.CultureInfoEntity | null;
+    active?: boolean;
+    startDate?: string | null;
+    endDate?: string | null;
+    disableAuthorization?: boolean;
+    template?: Entities.Lite<Files.FileEntity>;
+    fileName?: string | null;
+    wordTransformer?: WordTransformerSymbol | null;
+    wordConverter?: WordConverterSymbol | null;
 }
 
 export module WordTemplateMessage {
@@ -54,6 +57,7 @@ export module WordTemplatePermission {
 
 export const WordTransformerSymbol = new Type<WordTransformerSymbol>("WordTransformer");
 export interface WordTransformerSymbol extends Entities.Symbol {
+    Type: "WordTransformer";
 }
 
 

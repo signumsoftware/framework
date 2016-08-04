@@ -26,16 +26,16 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
         const ctrlKey = ke.ctrlKey;
         const promise = OmniboxClient.navigateTo(result);
         if (promise) {
-            promise.then(url => {
-                if (url) {
-                    if (ctrlKey)
-                        window.open(url);
-                    else
-                        Navigator.currentHistory.push(url);
-                }
-            }).done();
+            promise
+                .then(url => {
+                    if (url) {
+                        if (ctrlKey)
+                            window.open(url);
+                        else
+                            Navigator.currentHistory.push(url);
+                    }
+                }).done();
         }
-
         this.typeahead.blur();
 
         return "";

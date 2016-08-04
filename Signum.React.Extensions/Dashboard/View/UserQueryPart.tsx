@@ -43,7 +43,7 @@ export default class UserQueryPart extends React.Component<UserQueryPartProps, {
 
     loadFindOptions(props: UserQueryPartProps) {
 
-        UserQueryClient.Converter.toFindOptions(props.part.userQuery,  props.entity)
+        UserQueryClient.Converter.toFindOptions(props.part.userQuery!,  props.entity)
             .then(fo => {
                 fo.showHeader = false;
                 fo.showFooter = false;

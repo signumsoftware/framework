@@ -32,7 +32,10 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
                     <div className="col-sm-8">
                         <ValueLine ctx={ec.subCtx(e => e.name) }  />
                         <EntityCombo ctx={ec.subCtx(e => e.systemEmail) }  />
-                        <EntityLine ctx={ec.subCtx(e => e.query) } onChange={() => this.forceUpdate() } remove={e.value.from == undefined && e.value.recipients.length == 0 && e.value.messages.length == 0} />
+                        <EntityLine ctx={ec.subCtx(e => e.query)} onChange={() => this.forceUpdate()}
+                            remove={e.value.from == undefined &&
+                                (e.value.recipients == null || e.value.recipients.length == 0) &&
+                                (e.value.messages == null || e.value.messages.length == 0)} />
                         <div className="row">
                             <div className="col-sm-4">
                                 <ValueLine ctx={ec.subCtx(e => e.editableMessage) } inlineCheckbox={true} />
@@ -74,7 +77,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
 
                 <div className="sf-email-replacements-container">
                     <EntityTabRepeater ctx={ec.subCtx(a => a.messages) } onChange={() => this.forceUpdate() } getComponent={(ctx: TypeContext<EmailTemplateMessageEntity>) =>
-                        <EmailTemplateMessageComponent ctx={ctx} queryKey={ec.value.query && ec.value.query.key} invalidate={() => this.forceUpdate() } /> } />
+                        <EmailTemplateMessageComponent ctx={ctx} queryKey={ec.value.query!.key!} invalidate={() => this.forceUpdate() } /> } />
                 </div>
             </div>
         );
@@ -88,7 +91,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
             <div>
                 <div className="row form-vertical">
                     <div className="col-sm-2" >
-                        <FormGroup labelText={EmailTemplateEntity.nicePropertyName(a => a.recipients[0].element.kind) } ctx={sc}>
+                        <FormGroup labelText={EmailTemplateEntity.nicePropertyName(a => a.recipients![0].element.kind) } ctx={sc}>
                             <span className="form-control">{ EmailTemplateEntity.nicePropertyName(a => a.from) } </span>
                         </FormGroup>
                     </div>
@@ -130,7 +133,7 @@ export default class EmailTemplate extends React.Component<{ ctx: TypeContext<Em
                 </div>
                 { this.props.ctx.value.query &&
                     <QueryTokenEntityBuilder
-                        ctx={ec.subCtx(a => a.token) }
+                        ctx={ec.subCtx(a => a.token)}
                         queryKey={this.props.ctx.value.query.key}
                         subTokenOptions={ SubTokensOptions.CanElement} />
                 }

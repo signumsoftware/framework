@@ -43,7 +43,7 @@ export default class ChartRequestPage extends React.Component<ChartRequestPagePr
 
     render() {
         return <ChartRequestView
-            chartRequest={this.state.chartRequest}
+            chartRequest={this.state.chartRequest!}
             onChange={cr => this.setState({ chartRequest: cr }) }/>;
     }
 }

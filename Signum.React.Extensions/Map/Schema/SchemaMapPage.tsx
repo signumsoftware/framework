@@ -36,7 +36,10 @@ interface ParsedQueryString {
 
 export default class SchemaMapPage extends React.Component<SchemaMapPageProps, SchemaMapPropsState> {
 
-    state = { filter: "", color: "" } as SchemaMapPropsState;
+    constructor(props: SchemaMapPageProps) {
+        super(props);
+        this.state = { filter: "", color: "" };
+    }
 
     wasExpanded: boolean;
 
@@ -87,7 +90,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
     
         const result: ParsedQueryString = { tables: {} };
 
-        const query = this.props.location.query as { [name: string]: string };
+        const query = this.props.location!.query as { [name: string]: string };
         if (!query)
             return result;
 
@@ -123,7 +126,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
     render() {
         
         if (Expanded.getExpanded && !Expanded.getExpanded())
-            return undefined;
+            return null;
 
         const s = this.state;
         return (
@@ -131,7 +134,14 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
                 {this.renderFilter() }
                 {!s.schemaMapInfo || this.div == undefined ?
                     <span>{ JavascriptMessage.loading.niceToString() }</span> :
-                    <SchemaMapRenderer schemaMapInfo={s.schemaMapInfo} parsedQuery={s.parsedQuery} filter={s.filter} color={s.color}  height={s.height} width={s.width} providers={s.providers} />}
+                    <SchemaMapRenderer
+                        schemaMapInfo={s.schemaMapInfo}
+                        parsedQuery={s.parsedQuery!}
+                        filter={s.filter!}
+                        color={s.color!}
+                        height={s.height!}
+                        width={s.width!}
+                        providers={s.providers!} />}
             </div>
         );
     }
@@ -154,7 +164,7 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
         const s = this.state;
 
-        const tables = s.schemaMapInfo.allNodes.filter(a => a.fixed)
+        const tables = s.schemaMapInfo!.allNodes.filter(a => a.fixed)
             .toObject(a => a.tableName, a =>
                 (a.x / s.width).toPrecision(4) + "," +
                 (a.y / s.height).toPrecision(4));
@@ -201,7 +211,15 @@ export default class SchemaMapPage extends React.Component<SchemaMapPageProps, S
 
 }
 
-export type SchemaMapRendererProps = SchemaMapPropsState;
+export interface SchemaMapRendererProps {
+    schemaMapInfo: SchemaMapInfo;
+    filter: string;
+    color: string;
+    width: number;
+    height: number;
+    providers: { [name: string]: ClientColorProvider };
+    parsedQuery: ParsedQueryString;
+}
 
 export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, { mapD3: SchemaMapD3 }> { 
 
@@ -243,7 +261,11 @@ export class SchemaMapRenderer extends React.Component<SchemaMapRendererProps, {
         
 
         map.allLinks = map.relations.map(a => a as IRelationInfo)
-            .concat(map.tables.flatMap(t => t.mlistTables.map(tm => ({ source: t, target: tm, isMList: true }) as MListRelationInfo)));
+            .concat(map.tables.flatMap(t => t.mlistTables.map(tm => ({
+                source: t,
+                target: tm,
+                isMList: true,
+            }) as any as MListRelationInfo)));
         
         const repsDic : {[tableName: string]: number} = {};
 

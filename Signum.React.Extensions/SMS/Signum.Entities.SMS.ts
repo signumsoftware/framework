@@ -17,9 +17,10 @@ export type MessageLengthExceeded =
 
 export const MultipleSMSModel = new Type<MultipleSMSModel>("MultipleSMSModel");
 export interface MultipleSMSModel extends Entities.ModelEntity {
-    message: string;
-    from: string;
-    certified: boolean;
+    Type: "MultipleSMSModel";
+    message?: string | null;
+    from?: string | null;
+    certified?: boolean;
 }
 
 export module SMSCharactersMessage {
@@ -36,25 +37,27 @@ export module SMSCharactersMessage {
 
 export const SMSConfigurationEntity = new Type<SMSConfigurationEntity>("SMSConfigurationEntity");
 export interface SMSConfigurationEntity extends Entities.EmbeddedEntity {
-    defaultCulture: Basics.CultureInfoEntity;
+    Type: "SMSConfigurationEntity";
+    defaultCulture?: Basics.CultureInfoEntity | null;
 }
 
 export const SMSMessageEntity = new Type<SMSMessageEntity>("SMSMessage");
 export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
-    template: Entities.Lite<SMSTemplateEntity>;
-    message: string;
-    editableMessage: boolean;
-    from: string;
-    sendDate: string;
-    state: SMSMessageState;
-    destinationNumber: string;
-    messageID: string;
-    certified: boolean;
-    sendPackage: Entities.Lite<SMSSendPackageEntity>;
-    updatePackage: Entities.Lite<SMSUpdatePackageEntity>;
-    updatePackageProcessed: boolean;
-    referred: Entities.Lite<Entities.Entity>;
-    exception: Entities.Lite<Signum.ExceptionEntity>;
+    Type: "SMSMessage";
+    template?: Entities.Lite<SMSTemplateEntity>;
+    message?: string | null;
+    editableMessage?: boolean;
+    from?: string | null;
+    sendDate?: string | null;
+    state?: SMSMessageState;
+    destinationNumber?: string | null;
+    messageID?: string | null;
+    certified?: boolean;
+    sendPackage?: Entities.Lite<SMSSendPackageEntity>;
+    updatePackage?: Entities.Lite<SMSUpdatePackageEntity>;
+    updatePackageProcessed?: boolean;
+    referred?: Entities.Lite<Entities.Entity>;
+    exception?: Entities.Lite<Signum.ExceptionEntity>;
 }
 
 export module SMSMessageOperation {
@@ -81,26 +84,28 @@ export type SMSMessageState =
     "Failed";
 
 export interface SMSPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
-    name: string;
+    name?: string | null;
 }
 
 export const SMSSendPackageEntity = new Type<SMSSendPackageEntity>("SMSSendPackage");
 export interface SMSSendPackageEntity extends SMSPackageEntity {
+    Type: "SMSSendPackage";
 }
 
 export const SMSTemplateEntity = new Type<SMSTemplateEntity>("SMSTemplate");
 export interface SMSTemplateEntity extends Entities.Entity {
-    name: string;
-    certified: boolean;
-    editableMessage: boolean;
-    associatedType: Signum.TypeEntity;
+    Type: "SMSTemplate";
+    name?: string | null;
+    certified?: boolean;
+    editableMessage?: boolean;
+    associatedType?: Signum.TypeEntity | null;
     messages: Entities.MList<SMSTemplateMessageEntity>;
-    from: string;
-    messageLengthExceeded: MessageLengthExceeded;
-    removeNoSMSCharacters: boolean;
-    active: boolean;
-    startDate: string;
-    endDate: string;
+    from?: string | null;
+    messageLengthExceeded?: MessageLengthExceeded;
+    removeNoSMSCharacters?: boolean;
+    active?: boolean;
+    startDate?: string;
+    endDate?: string | null;
 }
 
 export module SMSTemplateMessage {
@@ -113,9 +118,10 @@ export module SMSTemplateMessage {
 
 export const SMSTemplateMessageEntity = new Type<SMSTemplateMessageEntity>("SMSTemplateMessageEntity");
 export interface SMSTemplateMessageEntity extends Entities.EmbeddedEntity {
-    template: SMSTemplateEntity;
-    cultureInfo: Basics.CultureInfoEntity;
-    message: string;
+    Type: "SMSTemplateMessageEntity";
+    template?: SMSTemplateEntity | null;
+    cultureInfo?: Basics.CultureInfoEntity | null;
+    message?: string | null;
 }
 
 export module SMSTemplateOperation {
@@ -125,6 +131,7 @@ export module SMSTemplateOperation {
 
 export const SMSUpdatePackageEntity = new Type<SMSUpdatePackageEntity>("SMSUpdatePackage");
 export interface SMSUpdatePackageEntity extends SMSPackageEntity {
+    Type: "SMSUpdatePackage";
 }
 
 

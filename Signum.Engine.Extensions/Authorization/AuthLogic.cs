@@ -78,8 +78,18 @@ namespace Signum.Engine.Authorization
                 CultureInfoLogic.AssertStarted(sb); 
 
                 sb.Include<UserEntity>();
-                
-                sb.Include<RoleEntity>();
+
+                sb.Include<RoleEntity>()
+                    .WithSave(RoleOperation.Save)
+                    .WithDelete(RoleOperation.Delete)
+                    .WithQuery(dqm, r => new
+                    {
+                        Entity = r,
+                        r.Id,
+                        r.Name,
+                    });
+
+
                 sb.Include<LastAuthRulesImportEntity>(); 
 
                 roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
@@ -107,16 +117,7 @@ namespace Signum.Engine.Authorization
                 }, new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
 
                 sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
-
-                dqm.RegisterQuery(typeof(RoleEntity), () =>
-                    from r in Database.Query<RoleEntity>()
-                    select new
-                    {
-                        Entity = r,
-                        r.Id,
-                        r.Name,
-                    });
-
+                
                 dqm.RegisterQuery(RoleQuery.RolesReferedBy, () =>
                     from r in Database.Query<RoleEntity>()
                     from rc in r.Roles
@@ -142,20 +143,7 @@ namespace Signum.Engine.Authorization
 
                 UserGraph.Register();
 
-                new Graph<RoleEntity>.Execute(RoleOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (r, args) => { }
-                }.Register();
-
-                new Graph<RoleEntity>.Delete(RoleOperation.Delete)
-                {
-                    Delete = (r, args) =>
-                    {
-                        r.Delete();
-                    }
-                }.Register();
+             
             }
         }
 

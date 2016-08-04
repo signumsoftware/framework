@@ -46,7 +46,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
             Expanded.setExpanded(true);
         }
 
-        MapClient.API.operations(this.props.routeParams.type)
+        MapClient.API.operations(this.props.routeParams!.type)
             .then(omi => {
                 const parsedQuery = this.getParsedQuery();
 
@@ -71,7 +71,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
     
         const result: ParsedQueryString = { nodes: {} };
 
-        const query = this.props.location.query as { [name: string]: string };
+        const query = this.props.location!.query as { [name: string]: string };
         if (!query)
             return result;
 
@@ -105,7 +105,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
     render() {
 
         if (Expanded.getExpanded && !Expanded.getExpanded())
-            return undefined;
+            return null;
 
         const s = this.state;
         return (
@@ -113,7 +113,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
                 {this.renderFilter() }
                 {!s.operationMapInfo || this.div == undefined ?
                     <span>{ JavascriptMessage.loading.niceToString() }</span> :
-                    <OperationMapRenderer operationMapInfo={s.operationMapInfo} parsedQuery={s.parsedQuery} color={s.color}  height={s.height} width={s.width} queryName={this.props.routeParams.type} />}
+                    <OperationMapRenderer operationMapInfo={s.operationMapInfo} parsedQuery={s.parsedQuery!} color={s.color!}  height={s.height!} width={s.width!} queryName={this.props.routeParams!.type} />}
             </div>
         );
     }
@@ -130,7 +130,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
         const s = this.state;
 
-        const tables = s.operationMapInfo.allNodes.filter(a => a.fixed)
+        const tables = s.operationMapInfo!.allNodes.filter(a => a.fixed)
             .toObject(a => a.key, a =>
                 (a.x / s.width).toPrecision(4) + "," +
                 (a.y / s.height).toPrecision(4));
@@ -138,7 +138,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
         const query = Dic.extend(tables, { color: s.color });
 
-        const url = currentHistory.createHref({ pathname: "~/map/" + this.props.routeParams.type, query: query });
+        const url = currentHistory.createHref({ pathname: "~/map/" + this.props.routeParams!.type, query: query });
 
         window.open(url);
     }
@@ -170,8 +170,13 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
 }
 
-export interface OperationMapRendererProps extends OperationMapPropsState {
+export interface OperationMapRendererProps {
     queryName: string;
+    operationMapInfo: OperationMapInfo;
+    width: number;
+    height: number;
+    parsedQuery: ParsedQueryString;
+    color: string;
 }
 
 export class OperationMapRenderer extends React.Component<OperationMapRendererProps, { mapD3: OperationMapD3 }> { 

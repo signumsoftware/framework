@@ -24,10 +24,10 @@ export default class PermissionRulesPackControl extends React.Component<{ ctx: T
         let pack = this.props.ctx.value;
 
         Api.savePermissionRulePack(pack)
-            .then(() => Api.fetchPermissionRulePack(pack.role.id))
+            .then(() => Api.fetchPermissionRulePack(pack.role.id!))
             .then(newPack => {
                 notifySuccess();
-                bc.frame.onReload({ entity: newPack, canExecute: undefined });
+                bc.frame.onReload({ entity: newPack, canExecute: {} });
             })
             .done();
     }

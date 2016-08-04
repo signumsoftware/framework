@@ -1,16 +1,16 @@
 ﻿
 
-import { FilterOption, OrderOption, FilterRequest, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions' 
+import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions' 
 
 //Partial
 export interface ChartRequest {
-    queryKey?: string;
+    queryKey: string;
 
-	filterOptions?: FilterOption[];
-    orderOptions?: OrderOption[];
+	filterOptions: FilterOptionParsed[];
+    orderOptions: OrderOptionParsed[];
 
-    filters?: FilterRequest[];
-    orders?: OrderRequest[];
+    filters: FilterRequest[];
+    orders: OrderRequest[];
 }
 
 export interface ChartScriptParameterEntity {

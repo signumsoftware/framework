@@ -43,10 +43,7 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
         if (this.state.times == undefined)
             return <h3>Times (loading...)</h3>;
-
-
-  
-
+        
         return (
             <div>
                 <h3>Times</h3>
@@ -72,15 +69,17 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
         const maxWith = 600;
 
-        const maxValue = this.state.times.map(a => a.maxTime).max();
-        const maxTotal = this.state.times.map(a => a.totalTime).max();
+
+        const times = this.state.times!;
+        const maxValue = times.map(a => a.maxTime).max();
+        const maxTotal = times.map(a => a.totalTime).max();
 
         const ratio = maxWith / maxValue;
 
         return (
              <table className="table">
                     {
-                        this.state.times.orderByDescending(a => a.totalTime).map((pair, i)=>
+                        times.orderByDescending(a => a.totalTime).map((pair, i)=>
                             <tr className="task" key={i}>
                                 <td width="300">
                                     <div>
@@ -135,7 +134,7 @@ export default class TimesPage extends React.Component<TimesPageProps, { times?:
 
         const getColor = (f: number) => `rgb(255, ${(1 - f) * 255}, ${(1 - f) * 255})`;
 
-        const times = this.state.times;
+        const times = this.state.times!;
 
          const max =  {
             count : times.map(a => a.count).max(),

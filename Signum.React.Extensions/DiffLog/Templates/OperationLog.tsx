@@ -3,8 +3,8 @@ import { Tabs, Tab } from 'react-bootstrap'
 import { LinkContainer } from 'react-router-bootstrap'
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater} from '../../../../Framework/Signum.React/Scripts/Lines'
-import { Entity, getMixin, is, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
+import { Entity, getMixin, is, JavascriptMessage, Lite } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { OperationLogEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import { DiffLogMixin, DiffLogMessage } from '../Signum.Entities.DiffLog'
 import { API, DiffLogResult, DiffPair } from '../DiffLogClient'
@@ -41,7 +41,7 @@ export default class OperationLog extends React.Component<{ ctx: TypeContext<Ope
     }
 }
 
-export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationLogEntity> }, { result: DiffLogResult }>
+export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationLogEntity> }, { result?: DiffLogResult }>
 {
     constructor(props: any) {
         super(props);
@@ -68,23 +68,25 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
     }
 
     render() {
+        const result = this.state.result;
+
         return (
             <Tabs id="diffTabs" defaultActiveKey="diff">
-                {this.state.result && this.state.result.prev && this.renderPrev() }
-                {this.state.result && this.state.result.diffPrev && this.renderPrevDiff() }
+                {result && result.prev && this.renderPrev(result.prev)}
+                {result && result.diffPrev && this.renderPrevDiff(result.diffPrev)}
                 {this.renderInitialState() }
                 {this.renderDiff() }
-                {this.renderFinalState() }
-                {this.state.result && this.state.result.diffNext && this.renderNextDiff() }
-                {this.state.result && (this.state.result.next ? this.renderNext() : this.renderCurrentEntity()) }            
+                {this.renderFinalState()}
+                {result && result.diffNext && this.renderNextDiff(result.diffNext)}
+                {result && (result.next ? this.renderNext(result.next) : this.renderCurrentEntity(this.props.ctx.value.target))}            
             </Tabs>
         );
     }
 
-    renderPrev() {
+    renderPrev(prev: Lite<OperationLogEntity>) {
         return (
             <Tab eventKey="prev" className="linkTab" title={
-                <LinkContainer to={Navigator.navigateRoute(this.state.result.prev) }>
+                <LinkContainer to={Navigator.navigateRoute(prev) }>
                     <span title={DiffLogMessage.NavigatesToThePreviousOperationLog.niceToString() }>
                         {DiffLogMessage.PreviousLog.niceToString() }
                         &nbsp;
@@ -95,9 +97,9 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         );
     }
 
-    renderPrevDiff() {
+    renderPrevDiff(diffPrev: Array<DiffPair<Array<DiffPair<string>>>>) {
 
-        const eq = isEqual(this.state.result.diffPrev);
+        const eq = isEqual(diffPrev);
 
         const title =  (
             <span title={ DiffLogMessage.DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState.niceToString()}>
@@ -108,7 +110,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
         return (
             <Tab eventKey="prevDiff" title={title}>
-                {renderDiffDocument(this.state.result.diffPrev) }
+                {renderDiffDocument(diffPrev) }
             </Tab>
         );
     }
@@ -151,9 +153,9 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         );
     }
 
-    renderNextDiff() {
+    renderNextDiff(diffNext: Array<DiffPair<Array<DiffPair<string>>>>) {
 
-        const eq = isEqual(this.state.result.diffNext);
+        const eq = isEqual(diffNext);
 
         const title = (
             <span title={ DiffLogMessage.DifferenceBetweenFinalStateAndTheInitialStateOfNextLog.niceToString() }>
@@ -164,15 +166,15 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
         return (
             <Tab eventKey="nextDiff" title={title}>
-                {renderDiffDocument(this.state.result.diffNext)}
+                {renderDiffDocument(diffNext)}
             </Tab>
         );
     }
 
-    renderNext() {
+    renderNext(next: Lite<OperationLogEntity>) {
         return (
             <Tab eventKey="next" className="linkTab" title={
-                <LinkContainer to={Navigator.navigateRoute(this.state.result.next) }>
+                <LinkContainer to={Navigator.navigateRoute(next) }>
                     <span title={DiffLogMessage.NavigatesToTheNextOperationLog.niceToString() }>
                         {DiffLogMessage.NextLog.niceToString() }
                         &nbsp;
@@ -183,10 +185,10 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
         ); 
     }
 
-    renderCurrentEntity() {
+    renderCurrentEntity(target: Lite<Entity>) {
         return (
             <Tab eventKey="next" className="linkTab" title={
-                <LinkContainer to={Navigator.navigateRoute(this.props.ctx.value.target) }>
+                <LinkContainer to={Navigator.navigateRoute(target) }>
                     <span title={DiffLogMessage.NavigatesToTheCurrentEntity.niceToString() }>
                         {DiffLogMessage.CurrentEntity.niceToString() }
                         &nbsp;
@@ -210,19 +212,21 @@ function renderDiffDocument(diff: Array<DiffPair<Array<DiffPair<string>>>>): Rea
             return [<span style={{ backgroundColor: "#FFD1D1" }}>{renderDiffLine(line.Value) }</span>];
         }
         if (line.Action == "Added") {
-            return [<span style={{ backgroundColor: "#CEF3CE" }}>{renderDiffLine(line.Value) }</span>];
+            return [<span style={{ backgroundColor: "#CEF3CE" }}>{renderDiffLine(line.Value)}</span>];
         }
         else if (line.Action == "Equal") {
             if (line.Value.length == 1) {
-                return [<span>{renderDiffLine(line.Value) }</span>];
+                return [<span>{renderDiffLine(line.Value)}</span>];
             }
             else {
                 return [
-                    <span style={{ backgroundColor: "#FFD1D1" }}>{renderDiffLine(line.Value.filter(a => a.Action == "Removed" || a.Action == "Equal")) }</span>,
-                    <span style={{ backgroundColor: "#CEF3CE" }}>{renderDiffLine(line.Value.filter(a => a.Action == "Added" || a.Action == "Equal")) }</span>
+                    <span style={{ backgroundColor: "#FFD1D1" }}>{renderDiffLine(line.Value.filter(a => a.Action == "Removed" || a.Action == "Equal"))}</span>,
+                    <span style={{ backgroundColor: "#CEF3CE" }}>{renderDiffLine(line.Value.filter(a => a.Action == "Added" || a.Action == "Equal"))}</span>
                 ];
             }
         }
+        else
+            throw new Error("Unexpected");
     });
 
 
@@ -230,17 +234,18 @@ function renderDiffDocument(diff: Array<DiffPair<Array<DiffPair<string>>>>): Rea
 }
 
 
-function renderDiffLine(list: Array<DiffPair<string>>): Array<React.ReactElement<any>>
-{
-   const result = list.map((a,i) => {
+function renderDiffLine(list: Array<DiffPair<string>>): Array<React.ReactElement<any>> {
+    const result = list.map((a, i) => {
         if (a.Action == "Equal")
             return <span key={i}>{a.Value}</span>;
         else if (a.Action == "Added")
             return <span key={i} style={{ backgroundColor: "#72F272" }}>{a.Value}</span>;
         else if (a.Action == "Removed")
             return <span key={i} style={{ backgroundColor: "#FF8B8B" }}>{a.Value}</span>;
+        else
+            throw Error("");
     });
 
-   result.push(<br key={result.length}/>);
-   return result;
+    result.push(<br key={result.length}/>);
+    return result;
 }

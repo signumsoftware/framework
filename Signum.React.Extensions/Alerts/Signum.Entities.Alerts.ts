@@ -9,16 +9,17 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 
 export const AlertEntity = new Type<AlertEntity>("Alert");
 export interface AlertEntity extends Entities.Entity {
-    target: Entities.Lite<Entities.Entity>;
-    creationDate: string;
-    alertDate: string;
-    attendedDate: string;
-    title: string;
-    text: string;
-    createdBy: Entities.Lite<Basics.IUserEntity>;
-    attendedBy: Entities.Lite<Basics.IUserEntity>;
-    alertType: AlertTypeEntity;
-    state: AlertState;
+    Type: "Alert";
+    target?: Entities.Lite<Entities.Entity>;
+    creationDate?: string;
+    alertDate?: string | null;
+    attendedDate?: string | null;
+    title?: string | null;
+    text?: string | null;
+    createdBy?: Entities.Lite<Basics.IUserEntity>;
+    attendedBy?: Entities.Lite<Basics.IUserEntity>;
+    alertType?: AlertTypeEntity | null;
+    state?: AlertState;
 }
 
 export module AlertMessage {
@@ -50,6 +51,7 @@ export type AlertState =
 
 export const AlertTypeEntity = new Type<AlertTypeEntity>("AlertType");
 export interface AlertTypeEntity extends Basics.SemiSymbol {
+    Type: "AlertType";
 }
 
 export module AlertTypeOperation {

@@ -30,7 +30,7 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
         result.Filters.forEach(f => {
             array.push(<span> </span>);
 
-            let last: string = undefined;
+            let last: string | undefined = undefined;
             if (f.QueryTokenMatches)
                 f.QueryTokenMatches.map(m => {
                     if (last != undefined)
@@ -74,15 +74,14 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
         };
 
         result.Filters.forEach(f => {
-            fo.filterOptions.push({
+            fo.filterOptions!.push({
                 columnName: f.QueryToken.fullKey,
-                token: f.QueryToken,
                 operation: f.Operation,
                 value: f.Value,
             });
         });
 
-        if (fo.filterOptions.length)
+        if (fo.filterOptions!.length)
             fo.searchOnLoad = true;
 
         return Promise.resolve(Finder.findOptionsPath(fo));

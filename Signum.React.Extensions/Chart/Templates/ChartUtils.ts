@@ -292,7 +292,7 @@ export class Rule {
 
 export function toTree<T>(elements: T[], getKey: (elem: T) => string, getParent: (elem: T) => T): Node<T>[] {
 
-    const root: Node<T> = { item: undefined, children: [] };
+    const root: Node<T> = { item: undefined as any, children: [] };
 
     const dic: { [key: string]: Node<T> } = {};
 

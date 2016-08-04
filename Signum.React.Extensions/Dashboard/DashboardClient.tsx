@@ -32,9 +32,9 @@ export interface PanelPartContentProps<T extends IPartEntity> {
 }
 
 export interface PartRenderer<T extends IPartEntity>{
-    component: ()=>Promise<React.ComponentClass<PanelPartContentProps<T>>>;
-    handleTitleClick?: (part: T, entity: Lite<Entity>, e: React.MouseEvent) => void;
-    handleFullScreenClick?: (part: T, entity: Lite<Entity>, e: React.MouseEvent) => void;
+    component: () => Promise<React.ComponentClass<PanelPartContentProps<T>>>;
+    handleTitleClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent) => void;
+    handleFullScreenClick?: (part: T, entity: Lite<Entity> | undefined, e: React.MouseEvent) => void;
 }
 
 
@@ -66,12 +66,12 @@ export function start(options: { routes: JSX.Element[] }) {
         component: () => new Promise(resolve => require(['./View/UserChartPart'], resolve)).then((a: any) => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
-            navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userChart));
+            navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userChart!));
         },
         handleFullScreenClick: (p, e, ev) => {
             ev.preventDefault();
-            UserChartClient.Converter.toChartRequest(p.userChart, e)
-                .then(cr => navigateOrWindowsOpen(ev, ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart)) })))
+            UserChartClient.Converter.toChartRequest(p.userChart!, e)
+                .then(cr => navigateOrWindowsOpen(ev, ChartClient.Encoder.chartRequestPath(cr, { userChart: liteKey(toLite(p.userChart!)) })))
                 .done();
         }
     });
@@ -81,12 +81,12 @@ export function start(options: { routes: JSX.Element[] }) {
         component: () => new Promise(resolve => require(['./View/UserQueryPart'], resolve)).then((a: any) => a.default),
         handleTitleClick: (p, e, ev) => {
             ev.preventDefault();
-            navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userQuery));
+            navigateOrWindowsOpen(ev, Navigator.navigateRoute(p.userQuery!));
         },
         handleFullScreenClick: (p, e, ev) => {
             ev.preventDefault();
-            UserQueryClient.Converter.toFindOptions(p.userQuery, e)
-                .then(cr => navigateOrWindowsOpen(ev, Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery)) })))
+            UserQueryClient.Converter.toFindOptions(p.userQuery!, e)
+                .then(cr => navigateOrWindowsOpen(ev, Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(p.userQuery!)) })))
                 .done()
         }
     });
@@ -102,7 +102,7 @@ export function start(options: { routes: JSX.Element[] }) {
             return undefined;
 
         return API.forEntityType(ctx.lite.EntityType).then(das =>
-            das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr, e => {
+            das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), d.toStr || "", e => {
                 navigateOrWindowsOpen(e, "~/dashboard/" + d.id + "?entity=" + liteKey(ctx.lite))
             }, { glyphicon: "glyphicon-th-large", glyphiconColor: "darkslateblue" })));
     });
@@ -187,7 +187,7 @@ export class DashboardWidget extends React.Component<DashboardWidgetProps, Dashb
     render() {
 
         if (!this.state.dashboard || !this.state.component)
-            return undefined;
+            return null;
 
         return React.createElement(this.state.component, {
             dashboard: this.state.dashboard,

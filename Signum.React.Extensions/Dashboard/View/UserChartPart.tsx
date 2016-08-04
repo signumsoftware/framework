@@ -53,7 +53,7 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
        
         this.setState({chartRequest: undefined, result: undefined, error: undefined });
 
-        UserChartClient.Converter.toChartRequest(props.part.userChart, props.entity)
+        UserChartClient.Converter.toChartRequest(props.part.userChart!, props.entity)
             .then(cr => {
                 this.setState({chartRequest: cr, result: undefined });
                 this.makeQuery();
@@ -65,7 +65,7 @@ export default class UserChartPart extends React.Component<UserChartPartProps, U
 
         this.setState({ result: undefined, error: undefined });
 
-        ChartClient.API.executeChart(this.state.chartRequest)
+        ChartClient.API.executeChart(this.state.chartRequest!)
             .then(rt => this.setState({ result: rt }))
             .catch(e => { this.setState({ error: e }); })
             .done();

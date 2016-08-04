@@ -65,7 +65,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
     }
 
     handleInputChange = (e: React.FormEvent) => {
-        let f = (e.currentTarget as HTMLInputElement).files[0];
+        let f = (e.currentTarget as HTMLInputElement).files![0];
         this.setState({ fileToUpload: f });
     }
 
@@ -74,14 +74,14 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
         fileReader.onload = e => {
             let content = ((e.target as any).result as string).after("base64,");
-            let fileName = this.state.fileToUpload.name;
+            let fileName = this.state.fileToUpload!.name;
 
             API.Heavy.upload({ fileName, content })
                 .then(() => this.setState({ fileToUpload: undefined, fileVer: this.state.fileVer + 1 }))
                 .then(() => this.loadEntries())
                 .done();
         };
-        fileReader.readAsDataURL(this.state.fileToUpload);
+        fileReader.readAsDataURL(this.state.fileToUpload!);
     }
 
     render() {
@@ -129,7 +129,7 @@ export default class HeavyList extends React.Component<HeavyListProps, { enabled
         if (this.chartContainer == undefined)
             return;
 
-        let data = this.state.entries;
+        let data = this.state.entries!;
 
         let fontSize = 12;
         let fontPadding = 4;

@@ -53,12 +53,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
             .then(stackTrace => this.setState({stackTrace}))
             .done();
     }
-
-    selectedEntry(){
-        return this.state.entries.filter(a=>a.FullIndex == this.props.routeParams.selectedIndex).single();
-    }
-
-
+    
     handleDownload = () => {
 
         let selectedIndex = this.props.routeParams.selectedIndex;
@@ -75,7 +70,7 @@ export default class HeavyEntry extends React.Component<HeavyEntryProps, { entri
         if (this.state.entries == undefined)
             return <h3>Heavy Profiler > Entry {index} (loading...) </h3>;
 
-        let current = this.selectedEntry();
+        let current = this.state.entries.filter(a => a.FullIndex == this.props.routeParams.selectedIndex).single();
         return (
             <div>
                 <h2><Link to="~/profiler/heavy">Heavy Profiler</Link> > Entry {index}</h2>

@@ -7,9 +7,9 @@ import * as Navigator  from '../../../../Framework/Signum.React/Scripts/Navigato
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { ProcessEntity, ProcessState, ProcessExceptionLineEntity } from '../Signum.Entities.Processes'
 
-export default class UserQuery extends React.Component<{ ctx: TypeContext<ProcessEntity> }, void> {
+export default class Process extends React.Component<{ ctx: TypeContext<ProcessEntity> }, void> {
 
-    handler: number;
+    handler: number | undefined;
     componentWillMount(){
         this.reloadIfNecessary(this.props.ctx.value);
     }
@@ -24,7 +24,7 @@ export default class UserQuery extends React.Component<{ ctx: TypeContext<Proces
                 this.handler = undefined;
                 const lite = toLite(e);
                 Navigator.API.fetchEntityPack(lite)
-                    .then(pack => this.props.ctx.frame.onReload(pack))
+                    .then(pack => this.props.ctx.frame!.onReload(pack))
                     .done(); 
             });
         }

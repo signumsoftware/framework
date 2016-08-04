@@ -7,12 +7,12 @@ import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { SearchMessage, JavascriptMessage, parseLite, is, Lite, toLite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
-import SearchControl from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControl'
+import SearchControlLoaded from '../../../Framework/Signum.React/Scripts/SearchControl/SearchControlLoaded'
 import { UserQueryEntity, UserQueryMessage  } from './Signum.Entities.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 
 export interface UserQueryMenuProps {
-    searchControl: SearchControl;
+    searchControl: SearchControlLoaded;
 }
 
 export default class UserQueryMenu extends React.Component<UserQueryMenuProps, { currentUserQuery?: Lite<UserQueryEntity>, userQueries?: Lite<UserQueryEntity>[] }> {
@@ -23,7 +23,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     }
 
     componentWillMount() {
-        const props = this.props as RouteComponentProps<any, any>;
+        const props = this.props as any as RouteComponentProps<any, any>;
         const userQuery = window.location.search.tryAfter("userQuery=");
         if (userQuery) {
             const uq = parseLite(decodeURIComponent(userQuery.tryBefore("&") || userQuery)) as Lite<UserQueryEntity>;
@@ -40,7 +40,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     }
 
     reloadList(): Promise<void> {
-        return UserQueryClient.API.forQuery(this.props.searchControl.getQueryKey())
+        return UserQueryClient.API.forQuery(this.props.searchControl.props.findOptions.queryKey)
             .then(list => this.setState({ userQueries: list }));
     }
 
@@ -48,10 +48,10 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     handleSelect = (uq: Lite<UserQueryEntity>) => {
 
         Navigator.API.fetchAndForget(uq).then(userQuery => {
-            const oldFindOptions = this.props.searchControl.state.findOptions;
+            const oldFindOptions = this.props.searchControl.props.findOptions;
             UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined)
                 .then(newFindOptions => {
-                    this.props.searchControl.resetFindOptions(newFindOptions);
+                    this.props.searchControl.forceUpdate();
                     this.setState({ currentUserQuery: uq });
                 })
                 .done();
@@ -59,7 +59,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
     }
 
     handleEdit = () => {
-        Navigator.API.fetchAndForget(this.state.currentUserQuery)
+        Navigator.API.fetchAndForget(this.state.currentUserQuery!)
             .then(userQuery => Navigator.navigate(userQuery))
             .then(() => this.reloadList())
             .done();
@@ -70,7 +70,7 @@ export default class UserQueryMenu extends React.Component<UserQueryMenuProps, {
 
         UserQueryClient.API.fromQueryRequest({
             queryRequest: this.props.searchControl.getQueryRequest(),
-            defaultPagination: this.props.searchControl.defaultPagination()
+            defaultPagination: Finder.defaultPagination
         }).then(userQuery => Navigator.view(userQuery))
             .then(uq => {
                 if (uq && uq.id) {

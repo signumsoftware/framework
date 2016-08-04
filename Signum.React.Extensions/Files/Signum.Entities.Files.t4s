@@ -1,9 +1,9 @@
 ﻿
 export interface IFile
 {
-    binaryFile: string;
-    fileName: string 
-    fullWebPath : string 
+    binaryFile?: string | null;
+    fileName?: string | null;
+    fullWebPath?: string | null; 
 }
 
 export interface FileEntity extends IFile { }
@@ -11,9 +11,9 @@ export interface EmbeddedFileEntity extends IFile { }
 
 export interface IFilePath extends IFile
 {
-   fullPhysicalPath : string
-   fileType: FileTypeSymbol 
-   suffix : string
+   fullPhysicalPath?: string | null;
+   fileType?: FileTypeSymbol | null; 
+   suffix?: string | null;
 }
 
 export interface FilePathEntity extends IFilePath { }

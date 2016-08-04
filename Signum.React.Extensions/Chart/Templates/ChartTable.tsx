@@ -1,6 +1,6 @@
 ﻿import * as React from 'react'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption, OrderOption, OrderType } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOptionParsed, OrderOptionParsed, OrderType } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { ChartColumnEntity, ChartScriptColumnEntity, ChartScriptParameterEntity, ChartRequest, GroupByChart, ChartMessage,
    ChartColorEntity, ChartScriptEntity, ChartParameterEntity, ChartParameterType } from '../Signum.Entities.Chart'
 
@@ -22,9 +22,9 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
 
         } else {
 
-            const token = cr.columns.map(mle => mle.element.token).filter(t => t && t.token.fullKey == tokenStr).first("Column");
+            const token = cr.columns.map(mle => mle.element.token!).filter(t => t && t.token!.fullKey == tokenStr).first("Column");
 
-            const newOrder: OrderOption = { token: token.token, orderType: "Ascending", columnName: token.token.fullKey };
+            const newOrder: OrderOptionParsed = { token: token.token!, orderType: "Ascending" };
 
             if (e.shiftKey)
                 cr.orderOptions.push(newOrder);
@@ -44,11 +44,11 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
         const qs = Finder.getQuerySettings(chartRequest.queryKey);
 
         const columns = chartRequest.columns.map(c => c.element).filter(cc => cc.token != undefined)
-            .map(cc => ({ token: cc.token.token, columnName: cc.displayName } as ColumnOption))
+            .map(cc => ({ token: cc.token!.token, columnName: cc.displayName } as ColumnOptionParsed))
             .map(co => ({
                 column: co,
-                cellFormatter: (qs && qs.formatters && qs.formatters[co.token.fullKey]) || Finder.formatRules.filter(a => a.isApplicable(co)).last("FormatRules").formatter(co),
-                resultIndex: resultTable.columns.indexOf(co.token.fullKey)
+                cellFormatter: (qs && qs.formatters && qs.formatters[co.token!.fullKey]) || Finder.formatRules.filter(a => a.isApplicable(co)).last("FormatRules").formatter(co),
+                resultIndex: resultTable.columns.indexOf(co.token!.fullKey)
             }));
 
         return (
@@ -57,11 +57,11 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
                     <tr>
                         { !chartRequest.groupResults && <th></th> }
                         { columns.map((col, i) =>
-                            <th key={i}  data-column-name={col.column.token.fullKey}
+                            <th key={i}  data-column-name={col.column.token!.fullKey}
                                 onClick={this.handleHeaderClick}>
-                                <span className={"sf-header-sort " + this.orderClassName(col.column) }/>
-                                <span> { col.column.displayName || col.column.token.niceName }</span>
-                            </th>) }
+                                <span className={"sf-header-sort " + this.orderClassName(col.column)}/>
+                                <span> {col.column.displayName || col.column.token!.niceName}</span>
+                            </th>)}
                     </tr>
                 </thead>
                 <tbody>
@@ -83,14 +83,14 @@ export default class ChartTable extends React.Component<{ resultTable: ResultTab
         );
     }
 
-    orderClassName(column: ColumnOption) {
+    orderClassName(column: ColumnOptionParsed) {
 
         if (column.token == undefined)
             return "";
 
         const orders = this.props.chartRequest.orderOptions;
 
-        const o = orders.filter(a => a.token.fullKey == column.token.fullKey).firstOrNull();
+        const o = orders.filter(a => a.token.fullKey == column.token!.fullKey).firstOrNull();
         if (o == undefined)
             return "";
 

@@ -12,17 +12,17 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 
-import { FilterOption, OrderOption, FilterRequest, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions' 
+import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions' 
 
 //Partial
 export interface ChartRequest {
-    queryKey?: string;
+    queryKey: string;
 
-	filterOptions?: FilterOption[];
-    orderOptions?: OrderOption[];
+	filterOptions: FilterOptionParsed[];
+    orderOptions: OrderOptionParsed[];
 
-    filters?: FilterRequest[];
-    orders?: OrderRequest[];
+    filters: FilterRequest[];
+    orders: OrderRequest[];
 }
 
 export interface ChartScriptParameterEntity {
@@ -32,14 +32,16 @@ export interface ChartScriptParameterEntity {
 export type IChartBase = ChartRequest | UserChartEntity;
 export const ChartColorEntity = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
-    related: Entities.Lite<Entities.Entity>;
-    color: Basics.ColorEntity;
+    Type: "ChartColor";
+    related?: Entities.Lite<Entities.Entity>;
+    color?: Basics.ColorEntity | null;
 }
 
 export const ChartColumnEntity = new Type<ChartColumnEntity>("ChartColumnEntity");
 export interface ChartColumnEntity extends Entities.EmbeddedEntity {
-    token: UserAssets.QueryTokenEntity;
-    displayName: string;
+    Type: "ChartColumnEntity";
+    token?: UserAssets.QueryTokenEntity | null;
+    displayName?: string | null;
 }
 
 export const ChartColumnType = new EnumType<ChartColumnType>("ChartColumnType");
@@ -93,14 +95,16 @@ export module ChartMessage {
 
 export const ChartPaletteModel = new Type<ChartPaletteModel>("ChartPaletteModel");
 export interface ChartPaletteModel extends Entities.ModelEntity {
-    type: Basics.TypeEntity;
+    Type: "ChartPaletteModel";
+    type?: Basics.TypeEntity | null;
     colors: Entities.MList<ChartColorEntity>;
 }
 
 export const ChartParameterEntity = new Type<ChartParameterEntity>("ChartParameterEntity");
 export interface ChartParameterEntity extends Entities.EmbeddedEntity {
-    name: string;
-    value: string;
+    Type: "ChartParameterEntity";
+    name?: string | null;
+    value?: string | null;
 }
 
 export const ChartParameterType = new EnumType<ChartParameterType>("ChartParameterType");
@@ -115,6 +119,7 @@ export module ChartPermission {
 
 export const ChartRequest = new Type<ChartRequest>("ChartRequest");
 export interface ChartRequest extends Entities.ModelEntity {
+    Type: "ChartRequest";
     chartScript: ChartScriptEntity;
     groupResults: boolean;
     columns: Entities.MList<ChartColumnEntity>;
@@ -124,21 +129,23 @@ export interface ChartRequest extends Entities.ModelEntity {
 
 export const ChartScriptColumnEntity = new Type<ChartScriptColumnEntity>("ChartScriptColumnEntity");
 export interface ChartScriptColumnEntity extends Entities.EmbeddedEntity {
-    displayName: string;
-    isOptional: boolean;
-    columnType: ChartColumnType;
-    isGroupKey: boolean;
+    Type: "ChartScriptColumnEntity";
+    displayName?: string | null;
+    isOptional?: boolean;
+    columnType?: ChartColumnType;
+    isGroupKey?: boolean;
 }
 
 export const ChartScriptEntity = new Type<ChartScriptEntity>("ChartScript");
 export interface ChartScriptEntity extends Entities.Entity {
-    name: string;
-    icon: Entities.Lite<Files.FileEntity>;
-    script: string;
-    groupBy: GroupByChart;
+    Type: "ChartScript";
+    name?: string | null;
+    icon?: Entities.Lite<Files.FileEntity>;
+    script?: string | null;
+    groupBy?: GroupByChart;
     columns: Entities.MList<ChartScriptColumnEntity>;
     parameters: Entities.MList<ChartScriptParameterEntity>;
-    columnsStructure: string;
+    columnsStructure?: string | null;
 }
 
 export module ChartScriptOperation {
@@ -149,10 +156,11 @@ export module ChartScriptOperation {
 
 export const ChartScriptParameterEntity = new Type<ChartScriptParameterEntity>("ChartScriptParameterEntity");
 export interface ChartScriptParameterEntity extends Entities.EmbeddedEntity {
-    name: string;
-    type: ChartParameterType;
-    columnIndex: number;
-    valueDefinition: string;
+    Type: "ChartScriptParameterEntity";
+    name?: string | null;
+    type?: ChartParameterType;
+    columnIndex?: number | null;
+    valueDefinition?: string | null;
 }
 
 export const GroupByChart = new EnumType<GroupByChart>("GroupByChart");
@@ -163,6 +171,7 @@ export type GroupByChart =
 
 export const UserChartEntity = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
+    Type: "UserChart";
     query: Basics.QueryEntity;
     entityType: Entities.Lite<Basics.TypeEntity>;
     owner: Entities.Lite<Entities.Entity>;

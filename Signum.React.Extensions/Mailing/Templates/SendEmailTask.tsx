@@ -8,7 +8,7 @@ import { getToString, Lite, is }  from '../../../../Framework/Signum.React/Scrip
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Entities.Mailing'
 
-export default class SendEmailTask extends React.Component<{ ctx: TypeContext<SendEmailTaskEntity> }, { type: string }> {
+export default class SendEmailTask extends React.Component<{ ctx: TypeContext<SendEmailTaskEntity> }, { type?: string }> {
 
     componentWillMount() {
         this.loadEntity(this.props.ctx.value.emailTemplate);
@@ -19,10 +19,10 @@ export default class SendEmailTask extends React.Component<{ ctx: TypeContext<Se
             this.loadEntity(newProps.ctx.value.emailTemplate);
     }
 
-    loadEntity(lite: Lite<EmailTemplateEntity>) {
+    loadEntity(lite: Lite<EmailTemplateEntity> | undefined) {
         if (lite) {
             Navigator.API.fetchAndForget(lite)
-                .then(a => Finder.getQueryDescription(a.query.key))
+                .then(et => Finder.getQueryDescription(et.query!.key))
                 .then(qd => this.setState({ type: qd.columns["Entity"].type.name }))
                 .done();
         }

@@ -24,10 +24,10 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
         let pack = this.props.ctx.value;
 
         Api.saveOperationRulePack(pack)
-            .then(() => Api.fetchOperationRulePack(pack.type.cleanName, pack.role.id))
+            .then(() => Api.fetchOperationRulePack(pack.type.cleanName!, pack.role.id!))
             .then(newPack => {
                 notifySuccess();
-                bc.frame.onReload({ entity: newPack, canExecute: undefined });
+                bc.frame.onReload({ entity: newPack, canExecute: {} });
             })
             .done();
     }
@@ -74,7 +74,7 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
                         { ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
                             <tr key={i}>
                                 <td>
-                                    {c.value.resource.toStr}
+                                    {c.value.resource!.toStr}
                                 </td>
                                 <td style={{ textAlign: "center" }}>
                                     {this.renderRadio(c.value, "Allow", "green") }
@@ -100,7 +100,7 @@ export default class OperationRulePackControl extends React.Component<{ ctx: Typ
 
     renderRadio(c: OperationAllowedRule, allowed: OperationAllowed, color: string) {
 
-        if (c.coercedValues.contains(allowed))
+        if (c.coercedValues!.contains(allowed))
             return;
 
         return <ColorRadio checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; this.forceUpdate() } }/>;

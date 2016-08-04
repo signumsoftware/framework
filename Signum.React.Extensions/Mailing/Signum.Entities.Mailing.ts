@@ -26,22 +26,25 @@ export type CertFileType =
 
 export const ClientCertificationFileEntity = new Type<ClientCertificationFileEntity>("ClientCertificationFileEntity");
 export interface ClientCertificationFileEntity extends Entities.EmbeddedEntity {
-    fullFilePath: string;
-    certFileType: CertFileType;
+    Type: "ClientCertificationFileEntity";
+    fullFilePath?: string | null;
+    certFileType?: CertFileType;
 }
 
 export const EmailAddressEntity = new Type<EmailAddressEntity>("EmailAddressEntity");
 export interface EmailAddressEntity extends Entities.EmbeddedEntity {
-    emailOwner: Entities.Lite<IEmailOwnerEntity>;
-    emailAddress: string;
-    displayName: string;
+    Type: "EmailAddressEntity";
+    emailOwner?: Entities.Lite<IEmailOwnerEntity>;
+    emailAddress?: string | null;
+    displayName?: string | null;
 }
 
 export const EmailAttachmentEntity = new Type<EmailAttachmentEntity>("EmailAttachmentEntity");
 export interface EmailAttachmentEntity extends Entities.EmbeddedEntity {
-    type: EmailAttachmentType;
-    file: Files.EmbeddedFilePathEntity;
-    contentId: string;
+    Type: "EmailAttachmentEntity";
+    type?: EmailAttachmentType;
+    file?: Files.EmbeddedFilePathEntity | null;
+    contentId?: string | null;
 }
 
 export const EmailAttachmentType = new EnumType<EmailAttachmentType>("EmailAttachmentType");
@@ -51,15 +54,16 @@ export type EmailAttachmentType =
 
 export const EmailConfigurationEntity = new Type<EmailConfigurationEntity>("EmailConfigurationEntity");
 export interface EmailConfigurationEntity extends Entities.EmbeddedEntity {
-    defaultCulture: Basics.CultureInfoEntity;
-    urlLeft: string;
-    sendEmails: boolean;
-    reciveEmails: boolean;
-    overrideEmailAddress: string;
-    avoidSendingEmailsOlderThan: number;
-    chunkSizeSendingEmails: number;
-    maxEmailSendRetries: number;
-    asyncSenderPeriod: number;
+    Type: "EmailConfigurationEntity";
+    defaultCulture?: Basics.CultureInfoEntity | null;
+    urlLeft?: string | null;
+    sendEmails?: boolean;
+    reciveEmails?: boolean;
+    overrideEmailAddress?: string | null;
+    avoidSendingEmailsOlderThan?: number | null;
+    chunkSizeSendingEmails?: number;
+    maxEmailSendRetries?: number;
+    asyncSenderPeriod?: number;
 }
 
 export module EmailFileType {
@@ -68,14 +72,16 @@ export module EmailFileType {
 
 export const EmailMasterTemplateEntity = new Type<EmailMasterTemplateEntity>("EmailMasterTemplate");
 export interface EmailMasterTemplateEntity extends Entities.Entity {
-    name: string;
+    Type: "EmailMasterTemplate";
+    name?: string | null;
     messages: Entities.MList<EmailMasterTemplateMessageEntity>;
 }
 
 export const EmailMasterTemplateMessageEntity = new Type<EmailMasterTemplateMessageEntity>("EmailMasterTemplateMessageEntity");
 export interface EmailMasterTemplateMessageEntity extends Entities.EmbeddedEntity {
-    cultureInfo: Basics.CultureInfoEntity;
-    text: string;
+    Type: "EmailMasterTemplateMessageEntity";
+    cultureInfo?: Basics.CultureInfoEntity | null;
+    text?: string | null;
 }
 
 export module EmailMasterTemplateOperation {
@@ -85,24 +91,25 @@ export module EmailMasterTemplateOperation {
 
 export const EmailMessageEntity = new Type<EmailMessageEntity>("EmailMessage");
 export interface EmailMessageEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
+    Type: "EmailMessage";
     recipients: Entities.MList<EmailRecipientEntity>;
-    target: Entities.Lite<Entities.Entity>;
-    from: EmailAddressEntity;
-    template: Entities.Lite<EmailTemplateEntity>;
-    creationDate: string;
-    sent: string;
-    receptionNotified: string;
-    subject: string;
-    body: string;
-    bodyHash: string;
-    isBodyHtml: boolean;
-    exception: Entities.Lite<Signum.ExceptionEntity>;
-    state: EmailMessageState;
-    uniqueIdentifier: string;
-    editableMessage: boolean;
-    package: Entities.Lite<EmailPackageEntity>;
-    processIdentifier: string;
-    sendRetries: number;
+    target?: Entities.Lite<Entities.Entity>;
+    from?: EmailAddressEntity | null;
+    template?: Entities.Lite<EmailTemplateEntity>;
+    creationDate?: string;
+    sent?: string | null;
+    receptionNotified?: string | null;
+    subject?: string | null;
+    body?: string | null;
+    bodyHash?: string | null;
+    isBodyHtml?: boolean;
+    exception?: Entities.Lite<Signum.ExceptionEntity>;
+    state?: EmailMessageState;
+    uniqueIdentifier?: string | null;
+    editableMessage?: boolean;
+    package?: Entities.Lite<EmailPackageEntity>;
+    processIdentifier?: string | null;
+    sendRetries?: number;
     attachments: Entities.MList<EmailAttachmentEntity>;
 }
 
@@ -149,27 +156,30 @@ export type EmailMessageState =
 
 export const EmailPackageEntity = new Type<EmailPackageEntity>("EmailPackage");
 export interface EmailPackageEntity extends Entities.Entity, Processes.IProcessDataEntity {
-    name: string;
+    Type: "EmailPackage";
+    name?: string | null;
 }
 
 export const EmailReceptionInfoEntity = new Type<EmailReceptionInfoEntity>("EmailReceptionInfoEntity");
 export interface EmailReceptionInfoEntity extends Entities.EmbeddedEntity {
-    uniqueId: string;
-    reception: Entities.Lite<Pop3ReceptionEntity>;
-    rawContent: string;
-    sentDate: string;
-    receivedDate: string;
-    deletionDate: string;
+    Type: "EmailReceptionInfoEntity";
+    uniqueId?: string | null;
+    reception?: Entities.Lite<Pop3ReceptionEntity>;
+    rawContent?: string | null;
+    sentDate?: string;
+    receivedDate?: string;
+    deletionDate?: string | null;
 }
 
 export const EmailReceptionMixin = new Type<EmailReceptionMixin>("EmailReceptionMixin");
 export interface EmailReceptionMixin extends Entities.MixinEntity {
-    receptionInfo: EmailReceptionInfoEntity;
+    Type: "EmailReceptionMixin";
+    receptionInfo?: EmailReceptionInfoEntity | null;
 }
 
 export const EmailRecipientEntity = new Type<EmailRecipientEntity>("EmailRecipientEntity");
 export interface EmailRecipientEntity extends EmailAddressEntity {
-    kind: EmailRecipientKind;
+    kind?: EmailRecipientKind;
 }
 
 export const EmailRecipientKind = new EnumType<EmailRecipientKind>("EmailRecipientKind");
@@ -180,28 +190,30 @@ export type EmailRecipientKind =
 
 export const EmailTemplateContactEntity = new Type<EmailTemplateContactEntity>("EmailTemplateContactEntity");
 export interface EmailTemplateContactEntity extends Entities.EmbeddedEntity {
-    token: UserAssets.QueryTokenEntity;
-    emailAddress: string;
-    displayName: string;
+    Type: "EmailTemplateContactEntity";
+    token?: UserAssets.QueryTokenEntity | null;
+    emailAddress?: string | null;
+    displayName?: string | null;
 }
 
 export const EmailTemplateEntity = new Type<EmailTemplateEntity>("EmailTemplate");
 export interface EmailTemplateEntity extends Entities.Entity {
-    name: string;
-    editableMessage: boolean;
-    disableAuthorization: boolean;
-    query: Signum.QueryEntity;
-    systemEmail: SystemEmailEntity;
-    sendDifferentMessages: boolean;
-    from: EmailTemplateContactEntity;
+    Type: "EmailTemplate";
+    name?: string | null;
+    editableMessage?: boolean;
+    disableAuthorization?: boolean;
+    query?: Signum.QueryEntity | null;
+    systemEmail?: SystemEmailEntity | null;
+    sendDifferentMessages?: boolean;
+    from?: EmailTemplateContactEntity | null;
     recipients: Entities.MList<EmailTemplateRecipientEntity>;
     attachments: Entities.MList<IAttachmentGeneratorEntity>;
-    masterTemplate: Entities.Lite<EmailMasterTemplateEntity>;
-    isBodyHtml: boolean;
+    masterTemplate?: Entities.Lite<EmailMasterTemplateEntity>;
+    isBodyHtml?: boolean;
     messages: Entities.MList<EmailTemplateMessageEntity>;
-    active: boolean;
-    startDate: string;
-    endDate: string;
+    active?: boolean;
+    startDate?: string | null;
+    endDate?: string | null;
 }
 
 export module EmailTemplateMessage {
@@ -223,9 +235,10 @@ export module EmailTemplateMessage {
 
 export const EmailTemplateMessageEntity = new Type<EmailTemplateMessageEntity>("EmailTemplateMessageEntity");
 export interface EmailTemplateMessageEntity extends Entities.EmbeddedEntity {
-    cultureInfo: Basics.CultureInfoEntity;
-    text: string;
-    subject: string;
+    Type: "EmailTemplateMessageEntity";
+    cultureInfo?: Basics.CultureInfoEntity | null;
+    text?: string | null;
+    subject?: string | null;
 }
 
 export module EmailTemplateOperation {
@@ -238,7 +251,7 @@ export module EmailTemplateOperation {
 
 export const EmailTemplateRecipientEntity = new Type<EmailTemplateRecipientEntity>("EmailTemplateRecipientEntity");
 export interface EmailTemplateRecipientEntity extends EmailTemplateContactEntity {
-    kind: EmailRecipientKind;
+    kind?: EmailRecipientKind;
 }
 
 export module EmailTemplateViewMessage {
@@ -248,7 +261,7 @@ export module EmailTemplateViewMessage {
 }
 
 export interface IAttachmentGeneratorEntity extends Entities.Entity {
-    template: EmailTemplateEntity;
+    template?: EmailTemplateEntity | null;
 }
 
 export interface IEmailOwnerEntity extends Entities.Entity {
@@ -256,21 +269,23 @@ export interface IEmailOwnerEntity extends Entities.Entity {
 
 export const NewsletterDeliveryEntity = new Type<NewsletterDeliveryEntity>("NewsletterDelivery");
 export interface NewsletterDeliveryEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
-    sent: boolean;
-    sendDate: string;
-    recipient: Entities.Lite<IEmailOwnerEntity>;
-    newsletter: Entities.Lite<NewsletterEntity>;
+    Type: "NewsletterDelivery";
+    sent?: boolean;
+    sendDate?: string | null;
+    recipient?: Entities.Lite<IEmailOwnerEntity>;
+    newsletter?: Entities.Lite<NewsletterEntity>;
 }
 
 export const NewsletterEntity = new Type<NewsletterEntity>("Newsletter");
 export interface NewsletterEntity extends Entities.Entity, Processes.IProcessDataEntity {
-    name: string;
-    state: NewsletterState;
-    from: string;
-    displayFrom: string;
-    subject: string;
-    text: string;
-    query: Signum.QueryEntity;
+    Type: "Newsletter";
+    name?: string | null;
+    state?: NewsletterState;
+    from?: string | null;
+    displayFrom?: string | null;
+    subject?: string | null;
+    text?: string | null;
+    query?: Signum.QueryEntity | null;
 }
 
 export module NewsletterOperation {
@@ -297,14 +312,15 @@ export module Pop3ConfigurationAction {
 
 export const Pop3ConfigurationEntity = new Type<Pop3ConfigurationEntity>("Pop3Configuration");
 export interface Pop3ConfigurationEntity extends Entities.Entity, Scheduler.ITaskEntity {
-    active: boolean;
-    port: number;
-    host: string;
-    username: string;
-    password: string;
-    enableSSL: boolean;
-    readTimeout: number;
-    deleteMessagesAfter: number;
+    Type: "Pop3Configuration";
+    active?: boolean;
+    port?: number;
+    host?: string | null;
+    username?: string | null;
+    password?: string | null;
+    enableSSL?: boolean;
+    readTimeout?: number;
+    deleteMessagesAfter?: number | null;
     clientCertificationFiles: Entities.MList<ClientCertificationFileEntity>;
 }
 
@@ -315,25 +331,28 @@ export module Pop3ConfigurationOperation {
 
 export const Pop3ReceptionEntity = new Type<Pop3ReceptionEntity>("Pop3Reception");
 export interface Pop3ReceptionEntity extends Entities.Entity {
-    pop3Configuration: Entities.Lite<Pop3ConfigurationEntity>;
-    startDate: string;
-    endDate: string;
-    newEmails: number;
-    exception: Entities.Lite<Signum.ExceptionEntity>;
+    Type: "Pop3Reception";
+    pop3Configuration?: Entities.Lite<Pop3ConfigurationEntity>;
+    startDate?: string;
+    endDate?: string | null;
+    newEmails?: number;
+    exception?: Entities.Lite<Signum.ExceptionEntity>;
 }
 
 export const Pop3ReceptionExceptionEntity = new Type<Pop3ReceptionExceptionEntity>("Pop3ReceptionException");
 export interface Pop3ReceptionExceptionEntity extends Entities.Entity {
-    reception: Entities.Lite<Pop3ReceptionEntity>;
-    exception: Entities.Lite<Signum.ExceptionEntity>;
+    Type: "Pop3ReceptionException";
+    reception?: Entities.Lite<Pop3ReceptionEntity>;
+    exception?: Entities.Lite<Signum.ExceptionEntity>;
 }
 
 export const SendEmailTaskEntity = new Type<SendEmailTaskEntity>("SendEmailTask");
 export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEntity {
-    name: string;
-    emailTemplate: Entities.Lite<EmailTemplateEntity>;
-    uniqueTarget: Entities.Lite<Entities.Entity>;
-    targetsFromUserQuery: Entities.Lite<UserQueries.UserQueryEntity>;
+    Type: "SendEmailTask";
+    name?: string | null;
+    emailTemplate?: Entities.Lite<EmailTemplateEntity>;
+    uniqueTarget?: Entities.Lite<Entities.Entity>;
+    targetsFromUserQuery?: Entities.Lite<UserQueries.UserQueryEntity>;
 }
 
 export module SendEmailTaskOperation {
@@ -342,12 +361,13 @@ export module SendEmailTaskOperation {
 
 export const SmtpConfigurationEntity = new Type<SmtpConfigurationEntity>("SmtpConfiguration");
 export interface SmtpConfigurationEntity extends Entities.Entity {
-    name: string;
-    deliveryFormat: External.SmtpDeliveryFormat;
-    deliveryMethod: External.SmtpDeliveryMethod;
-    network: SmtpNetworkDeliveryEntity;
-    pickupDirectoryLocation: string;
-    defaultFrom: EmailAddressEntity;
+    Type: "SmtpConfiguration";
+    name?: string | null;
+    deliveryFormat?: External.SmtpDeliveryFormat;
+    deliveryMethod?: External.SmtpDeliveryMethod;
+    network?: SmtpNetworkDeliveryEntity | null;
+    pickupDirectoryLocation?: string | null;
+    defaultFrom?: EmailAddressEntity | null;
     additionalRecipients: Entities.MList<EmailRecipientEntity>;
 }
 
@@ -357,18 +377,20 @@ export module SmtpConfigurationOperation {
 
 export const SmtpNetworkDeliveryEntity = new Type<SmtpNetworkDeliveryEntity>("SmtpNetworkDeliveryEntity");
 export interface SmtpNetworkDeliveryEntity extends Entities.EmbeddedEntity {
-    host: string;
-    port: number;
-    username: string;
-    password: string;
-    useDefaultCredentials: boolean;
-    enableSSL: boolean;
+    Type: "SmtpNetworkDeliveryEntity";
+    host?: string | null;
+    port?: number;
+    username?: string | null;
+    password?: string | null;
+    useDefaultCredentials?: boolean;
+    enableSSL?: boolean;
     clientCertificationFiles: Entities.MList<ClientCertificationFileEntity>;
 }
 
 export const SystemEmailEntity = new Type<SystemEmailEntity>("SystemEmail");
 export interface SystemEmailEntity extends Entities.Entity {
-    fullClassName: string;
+    Type: "SystemEmail";
+    fullClassName?: string | null;
 }
 
 export namespace External {

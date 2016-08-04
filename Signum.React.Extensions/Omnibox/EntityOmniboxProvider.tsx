@@ -37,7 +37,7 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
                 if (result.Lite == undefined) {
                     array.push(this.coloredSpan(OmniboxMessage.NotFound.niceToString(), "gray"));
                 } else {
-                    array.push(result.Lite.toStr);
+                    array.push(result.Lite.toStr!);
                 }
             } else {
                 if (result.Lite == undefined) {
@@ -54,7 +54,7 @@ export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmnibox
 
     }
 
-    navigateTo(result: EntityOmniboxResult): Promise<string> {
+    navigateTo(result: EntityOmniboxResult) {
 
         if (result.Lite == undefined)
             return undefined;

@@ -85,7 +85,7 @@ export class ChartColumnInfo extends React.Component<ChartColumnInfoProps, void>
     getColorPalettes() {
         const token = this.props.ctx.value.token;
 
-        const t = token && token.token.type;
+        const t = token && token.token!.type;
 
         if (t == undefined || Navigator.isReadOnly(ChartColorEntity))
             return [];

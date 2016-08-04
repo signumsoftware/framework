@@ -58,7 +58,7 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
                             <ValueLine ctx={e.subCtx(f => f.body) } valueLineType={ValueLineType.TextArea} valueHtmlProps={{ style: { width: "100%", height: "180px" } }} formGroupStyle="SrOnly"/>
                     }
                 </Tab>
-                {getMixin(e.value, EmailReceptionMixin) && this.renderEmailReceptionMixin() }
+                {getMixin(e.value, EmailReceptionMixin) && getMixin(e.value, EmailReceptionMixin).receptionInfo && this.renderEmailReceptionMixin() }
             </Tabs>
         );
     }
@@ -66,8 +66,8 @@ export default class EmailMessage extends React.Component<{ ctx: TypeContext<Ema
 
     renderEmailReceptionMixin = () => {
 
-        const ri = this.props.ctx.subCtx(a => getMixin(a, EmailReceptionMixin).receptionInfo);
-
+        const ri = this.props.ctx.subCtx(a => getMixin(a, EmailReceptionMixin).receptionInfo!);
+        
         return <Tab title={EmailReceptionMixin.niceName() }>
             <fieldset>
                 <legend>Properties</legend>

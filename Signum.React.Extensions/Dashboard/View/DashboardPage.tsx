@@ -1,7 +1,7 @@
 ﻿
 import * as React from 'react'
 import { Link } from 'react-router'
-import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity} from '../../../../Framework/Signum.React/Scripts/Lines'
+import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater, RenderEntity } from '../../../../Framework/Signum.React/Scripts/Lines'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { QueryDescription, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { getQueryNiceName, PropertyRoute, getTypeInfos } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -10,7 +10,7 @@ import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEntityBuilder'
-import FileLine, {FileTypeSymbol} from '../../Files/FileLine'
+import FileLine, { FileTypeSymbol } from '../../Files/FileLine'
 import { DashboardEntity, PanelPartEntity, IPartEntity } from '../Signum.Entities.Dashboard'
 import DashboardView from './DashboardView'
 
@@ -68,28 +68,28 @@ export default class DashboardPage extends React.Component<DashboardPageProps, D
 
         return (
             <div>
-                { withEntity &&
+                {withEntity &&
                     <div style={{ float: "right", textAlign: "right" }}>
-                        {!entity ? <h3>{JavascriptMessage.loading.niceToString() }</h3> :
-                        <h3>
-                            { Navigator.isNavigable({ entity: entity, canExecute: undefined } as EntityPack<Entity>) ?
-                                    <Link className="sf-entity-title" to={Navigator.navigateRoute(entity) }>{getToString(entity) }</Link> :
-                                    <span className="sf-entity-title">{getToString(entity) }</span>
+                        {!entity ? <h3>{JavascriptMessage.loading.niceToString()}</h3> :
+                            <h3>
+                                {Navigator.isNavigable({ entity: entity, canExecute: {} } as EntityPack<Entity>) ?
+                                    <Link className="sf-entity-title" to={Navigator.navigateRoute(entity)}>{getToString(entity)}</Link> :
+                                    <span className="sf-entity-title">{getToString(entity)}</span>
                                 }
                                 <br />
-                                <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined) }</small>
+                                <small className="sf-type-nice-name">{Navigator.getTypeTitle(entity, undefined)}</small>
                             </h3>
                         }
-                    </div> }
+                    </div>}
 
-                {!dashboard ? <h2>{JavascriptMessage.loading.niceToString() }</h2> :
+                {!dashboard ? <h2>{JavascriptMessage.loading.niceToString()}</h2> :
                     <h2>
-                        {Navigator.isNavigable({ entity: dashboard, canExecute: undefined } as EntityPack<Entity>) ?
-                            <Link to={Navigator.navigateRoute(dashboard) }>{getToString(dashboard) }</Link> :
-                            <span>{getToString(dashboard) }</span>
+                        {Navigator.isNavigable({ entity: dashboard, canExecute: {} } as EntityPack<Entity>) ?
+                            <Link to={Navigator.navigateRoute(dashboard)}>{getToString(dashboard)}</Link> :
+                            <span>{getToString(dashboard)}</span>
                         }
                     </h2>}
-                { dashboard && (!withEntity || entity) && <DashboardView dashboard={dashboard} entity={entity}/> }
+                {dashboard && (!withEntity || entity) && <DashboardView dashboard={dashboard} entity={entity}/>}
             </div>
         );
     }

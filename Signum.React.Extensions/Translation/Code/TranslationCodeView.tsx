@@ -66,12 +66,14 @@ export default class TranslationCodeView extends React.Component<TranslationCode
             return undefined;
 
 
-        if (Dic.getKeys(this.state.result).length == 0)
+        const result = this.state.result;
+
+        if (Dic.getKeys(result).length == 0)
             return <strong> {TranslationMessage.NoResultsFound.niceToString() }</strong>;
 
         return (
             <div>
-                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={this.state.result} currentCulture={this.props.routeParams.culture} />) }
+                { Dic.getValues(this.state.result.types).map(type => <TranslationTypeTable key={type.type} type={type} result={result} currentCulture={this.props.routeParams.culture} />) }
                 <input type="submit" value={ TranslationMessage.Save.niceToString() } className="btn btn-primary" onClick={this.handleSave}/>
             </div>
         );
@@ -80,7 +82,7 @@ export default class TranslationCodeView extends React.Component<TranslationCode
     handleSave = (e: React.FormEvent) => {
         e.preventDefault();
         const params = this.props.routeParams;
-        API.save(params.assembly, params.culture || "", this.state.result).then(() => notifySuccess()).done();
+        API.save(params.assembly, params.culture || "", this.state.result!).then(() => notifySuccess()).done();
     }
 }
 
@@ -114,7 +116,7 @@ export class TranslateSearchBox extends React.Component<{ search: (newValue: str
     }
 }
 
-export class TranslationTypeTable extends React.Component<{ type: LocalizableType, result?: AssemblyResult, currentCulture: string }, void>{
+export class TranslationTypeTable extends React.Component<{ type: LocalizableType, result: AssemblyResult, currentCulture: string }, void>{
     render() {
 
         let {type, result} = this.props;
@@ -228,7 +230,7 @@ function initialElementIf(condition: boolean) {
 
                 
 
-export class TranslationTypeDescription extends React.Component<{ type: LocalizableType, loc: LocalizedType, edit: boolean, result?: AssemblyResult }, { avoidCombo?: boolean }>{
+export class TranslationTypeDescription extends React.Component<{ type: LocalizableType, loc: LocalizedType, edit: boolean, result: AssemblyResult }, { avoidCombo?: boolean }>{
 
     constructor(props: any) {
         super(props);
@@ -237,7 +239,7 @@ export class TranslationTypeDescription extends React.Component<{ type: Localiza
 
     render() {
 
-        const {type, loc, edit } = this.props;
+        const { type, loc, edit } = this.props;
 
         const pronoms = this.props.result.cultures[loc.culture].pronoms || [];
 

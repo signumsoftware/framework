@@ -64,7 +64,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
             css += " sf-chart-img-curr";
 
-            if(cb.chartScript.script != script.script)
+            if(cb.chartScript!.script != script.script)
                 css += " edited";
         }
 
@@ -72,7 +72,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
     }
 
     handleOnToggleInfo = (index: number) => {
-        this.state.expanded[index] = !this.state.expanded[index];
+        this.state.expanded![index] = !this.state.expanded![index];
         this.forceUpdate();
     }
 
@@ -140,9 +140,9 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                                 </thead>
                                 <tbody>
                                     { this.state.expanded && mlistItemContext(this.props.ctx.subCtx(c => c.columns, { formGroupSize: "ExtraSmall" })).flatMap((ctx, i) => [
-                                        <ChartColumn chartBase={chart} ctx={ctx} key={"C" + i} scriptColumn={chart.chartScript.columns[i].element} queryKey={this.props.queryKey}
-                                            onToggleInfo={() => this.handleOnToggleInfo(i) } onInvalidate={this.handleOnInvalidate } />,
-                                        this.state.expanded[i] && <ChartColumnInfo ctx= { ctx } key= { "CI" + i } colorPalettes={this.state.colorPalettes} onRedraw={this.handleOnRedraw} />
+                                        <ChartColumn chartBase={chart} ctx={ctx} key={"C" + i} scriptColumn={chart.chartScript!.columns[i].element} queryKey={this.props.queryKey}
+                                            onToggleInfo={() => this.handleOnToggleInfo(i)} onInvalidate={this.handleOnInvalidate} />,
+                                        this.state.expanded![i] && this.state.colorPalettes && <ChartColumnInfo ctx= { ctx } key= { "CI" + i } colorPalettes= {this.state.colorPalettes} onRedraw= { this.handleOnRedraw } />
                                     ]) }
                                 </tbody>
                             </table>
@@ -172,7 +172,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
 
         const vl: ValueLineProps = {
             ctx: ctx.subCtx(a => a.value, { labelColumns: { sm: 6 } }),
-            labelText: scriptParameter.name,
+            labelText: scriptParameter.name!,
         };
 
         if (scriptParameter.type == "Number" || scriptParameter.type == "String") {

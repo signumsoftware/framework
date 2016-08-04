@@ -8,9 +8,10 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 
 export const CultureInfoEntity = new Type<CultureInfoEntity>("CultureInfo");
 export interface CultureInfoEntity extends Entities.Entity {
-    name: string;
-    nativeName: string;
-    englishName: string;
+    Type: "CultureInfo";
+    name?: string | null;
+    nativeName?: string | null;
+    englishName?: string | null;
 }
 
 export module CultureInfoOperation {
@@ -19,13 +20,15 @@ export module CultureInfoOperation {
 
 export const DateSpanEntity = new Type<DateSpanEntity>("DateSpanEntity");
 export interface DateSpanEntity extends Entities.EmbeddedEntity {
-    years: number;
-    months: number;
-    days: number;
+    Type: "DateSpanEntity";
+    years?: number;
+    months?: number;
+    days?: number;
 }
 
 export const TypeConditionSymbol = new Type<TypeConditionSymbol>("TypeCondition");
 export interface TypeConditionSymbol extends Entities.Symbol {
+    Type: "TypeCondition";
 }
 
 

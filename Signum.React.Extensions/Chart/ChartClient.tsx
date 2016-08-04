@@ -11,7 +11,8 @@ import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructo
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 import { PseudoType, QueryKey, getQueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption,
+import {
+    FindOptions, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption,
     FilterRequest, QueryRequest, Pagination, QueryTokenType, QueryToken, FilterType, SubTokensOptions, ResultTable, OrderRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { QueryFilterEntity, QueryColumnEntity, QueryOrderEntity } from '../UserQueries/Signum.Entities.UserQueries'
@@ -50,10 +51,10 @@ export namespace ButtonBarChart {
         chartRequest: ChartRequest;
     }
 
-    export const onButtonBarElements: ((ctx: ButtonBarChartContext) => React.ReactElement<any>)[] = [];
+    export const onButtonBarElements: ((ctx: ButtonBarChartContext) => React.ReactElement<any> | undefined)[] = [];
 
     export function getButtonBarElements(ctx: ButtonBarChartContext): React.ReactElement<any>[] {
-        return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined);
+        return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a!);
     }
 }
 
@@ -83,26 +84,26 @@ export function isCompatibleWith(chartScript: ChartScriptEntity, chartBase: ICha
         return false;
 
     return zipOrDefault(
-        chartScript.columns.map(mle => mle.element),
-        chartBase.columns.map(mle => mle.element), (s, c) => {
+        chartScript.columns!.map(mle => mle.element),
+        chartBase.columns!.map(mle => mle.element), (s, c) => {
 
             if (s == undefined)
-                return c.token == undefined;
+                return c!.token == undefined;
 
             if (c == undefined || c.token == undefined)
-                return s.isOptional;
+                return s.isOptional!;
 
-            if (!isChartColumnType(c.token.token, s.columnType))
+            if (!isChartColumnType(c.token.token, s.columnType!))
                 return false;
 
-            if (c.token.token.queryTokenType == QueryTokenType.Aggregate)
+            if (c.token.token!.queryTokenType == QueryTokenType.Aggregate)
                 return !s.isGroupKey;
             else
                 return s.isGroupKey || !chartBase.groupResults;
         }).every(b => b);
 }
 
-export function zipOrDefault<T, S, R>(arrayT: T[], arrayS: S[], selector: (t: T, s: S) => R): R[] {
+export function zipOrDefault<T, S, R>(arrayT: T[], arrayS: S[], selector: (t: T | undefined, s: S | undefined) => R): R[] {
     const max = Math.max(arrayT.length, arrayS.length);
 
     const result: R[] = [];
@@ -115,7 +116,7 @@ export function zipOrDefault<T, S, R>(arrayT: T[], arrayS: S[], selector: (t: T,
     return result;
 }
 
-export function isChartColumnType(token: QueryToken, ct: ChartColumnType): boolean {
+export function isChartColumnType(token: QueryToken | undefined, ct: ChartColumnType): boolean {
     if (token == undefined)
         return false;
 
@@ -156,7 +157,7 @@ export function isChartColumnType(token: QueryToken, ct: ChartColumnType): boole
     return false;
 }
 
-export function getChartColumnType(token: QueryToken): ChartColumnType {
+export function getChartColumnType(token: QueryToken): ChartColumnType | undefined {
 
     switch (token.filterType) {
         case "Lite": return "Lite";
@@ -177,15 +178,21 @@ export function getChartColumnType(token: QueryToken): ChartColumnType {
 
 export function synchronizeColumns(chart: IChartBase) {
 
-    const chartScript = chart.chartScript;
+    const chartScript = chart.chartScript!;
+
+    if (chart.columns == null ||
+        chartScript.columns == null ||
+        chartScript.parameters == null ||
+        chart.parameters == null)
+        throw Error("no Columns");
 
     if (chartScript == undefined) {
-        chart.columns.clear();
+        chart.columns!.clear();
     }
 
-    for (let i = 0; i < chartScript.columns.length; i++) {
+    for (let i = 0; i < chartScript.columns!.length; i++) {
         if (chart.columns.length <= i) {
-            chart.columns.push({ rowId: undefined, element: ChartColumnEntity.New() });
+            chart.columns.push({ rowId: null, element: ChartColumnEntity.New() });
         }
     }
 
@@ -194,28 +201,28 @@ export function synchronizeColumns(chart: IChartBase) {
     }
 
 
-    if (chart.parameters.map(a => a.element.name).orderBy(n => n).join(" ") !=
-        chartScript.parameters.map(a => a.element.name).orderBy(n => n).join(" ")) {
+    if (chart.parameters.map(a => a.element.name!).orderBy(n => n).join(" ") !=
+        chartScript.parameters.map(a => a.element.name!).orderBy(n => n).join(" ")) {
 
-        const byName = chart.parameters.map(a => a.element).toObject(a => a.name);
+        const byName = chart.parameters.map(a => a.element).toObject(a => a.name!);
         chart.parameters.clear();
 
         chartScript.parameters.forEach(sp => {
-            let cp = byName[sp.element.name];
+            let cp = byName[sp.element.name!];
 
             if (cp == undefined) {
                 cp = ChartParameterEntity.New();
                 cp.name = sp.element.name;
-                const column = sp.element.columnIndex == undefined ? undefined : chart.columns[sp.element.columnIndex].element;
+                const column = sp.element.columnIndex == undefined ? undefined : chart.columns![sp.element.columnIndex].element;
                 cp.value = defaultParameterValue(sp.element, column && column.token && column.token.token);
             }
             else {
-                const column = sp.element.columnIndex == undefined ? undefined : chart.columns[sp.element.columnIndex].element;
+                const column = sp.element.columnIndex == undefined ? undefined : chart.columns![sp.element.columnIndex].element;
                 if (isValidParameterValue(cp.value, sp.element, column && column.token && column.token.token))
                     defaultParameterValue(sp.element, column && column.token && column.token.token);
             }
 
-            chart.parameters.push({ rowId: undefined, element: cp });
+            chart.parameters!.push({ rowId: null, element: cp });
         });
     }
 
@@ -231,11 +238,11 @@ export function synchronizeColumns(chart: IChartBase) {
     }
 
     chart.columns.map(mle => mle.element).forEach((cc, i) => {
-        if (cc.token && cc.token.token.queryTokenType == QueryTokenType.Aggregate) {
+        if (cc.token && cc.token.token!.queryTokenType == QueryTokenType.Aggregate) {
 
-            const sc = chart.chartScript.columns[i]
+            const sc = chart.chartScript!.columns![i]
             if (chart.groupResults == false || sc && sc.element.isGroupKey) {
-                const parentToken = cc.token.token.parent;
+                const parentToken = cc.token.token!.parent;
                 cc.token = parentToken == undefined ? undefined : QueryTokenEntity.New(t => {
                     t.tokenString = parentToken && parentToken.fullKey;
                     t.token = parentToken;
@@ -249,34 +256,34 @@ export function synchronizeColumns(chart: IChartBase) {
     if (chart.Type == ChartRequest.typeName) {
         const cr = chart as ChartRequest;
 
-        const keys = chart.columns.filter((a, i) => a.element.token && chartScript.columns[i].element.isGroupKey).map(a => a.element.token.token.fullKey);
+        const keys = chart.columns.filter((a, i) => a.element.token && chartScript.columns![i].element.isGroupKey).map(a => a.element.token!.token!.fullKey);
 
-        cr.orderOptions = cr.orderOptions.filter(o => {
+        cr.orderOptions = cr.orderOptions!.filter(o => {
             if (chart.groupResults)
-                return o.token.queryTokenType == QueryTokenType.Aggregate || keys.contains(o.token.fullKey);
+                return o.token!.queryTokenType == QueryTokenType.Aggregate || keys.contains(o.token!.fullKey);
             else
-                return o.token.queryTokenType != QueryTokenType.Aggregate;
+                return o.token!.queryTokenType != QueryTokenType.Aggregate;
         });
     }
 }
 
-function isValidParameterValue(value: string, parameter: ChartScriptParameterEntity, relatedColumn: QueryToken) {
+function isValidParameterValue(value: string | null | undefined, scrptParameter: ChartScriptParameterEntity, relatedColumn: QueryToken | null | undefined) {
 
-    switch (parameter.type) {
-        case "Enum": return parameter.enumValues.filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).some(a => a.name == value);
-        case "Number": return !isNaN(parseFloat(value));
+    switch (scrptParameter.type) {
+        case "Enum": return scrptParameter.enumValues.filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).some(a => a.name == value);
+        case "Number": return !isNaN(parseFloat(value!));
         case "String": return true;
         default: throw new Error("Unexpected parameter type");
     }
 
 }
 
-function defaultParameterValue(parameter: ChartScriptParameterEntity, relatedColumn: QueryToken) {
+function defaultParameterValue(scriptParameter: ChartScriptParameterEntity, relatedColumn: QueryToken | null |  undefined) {
 
-    switch (parameter.type) {
-        case "Enum": return parameter.enumValues.filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
-        case "Number": return parseFloat(parameter.valueDefinition).toString();
-        case "String": return parameter.valueDefinition;
+    switch (scriptParameter.type) {
+        case "Enum": return scriptParameter.enumValues.filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
+        case "Number": return parseFloat(scriptParameter.valueDefinition!).toString();
+        case "String": return scriptParameter.valueDefinition;
         default: throw new Error("Unexpected parameter type");
     }
 
@@ -291,8 +298,8 @@ export module Encoder {
             groupResults: cr.groupResults,
         };
 
-        Finder.Encoder.encodeFilters(query, cr.filterOptions);
-        Finder.Encoder.encodeOrders(query, cr.orderOptions);
+        Finder.Encoder.encodeFilters(query, cr.filterOptions.map(a => ({ columnName: a.token!.fullKey, operation: a.operation, value: a.value, frozen: a.frozen } as FilterOption)));
+        Finder.Encoder.encodeOrders(query, cr.orderOptions.map(a => ({ columnName: a.token!.fullKey, orderType: a.orderType } as OrderOption)));
         encodeParameters(query, cr.parameters);
 
         encodeColumn(query, cr.columns);
@@ -310,60 +317,48 @@ export module Encoder {
     }
     export function encodeParameters(query: any, parameters: MList<ChartParameterEntity>) {
         if (parameters)
-            parameters.map((p, i) => query["param" + i] = scapeTilde(p.element.name) + "~" + scapeTilde(p.element.value));
+            parameters.map((p, i) => query["param" + i] = scapeTilde(p.element.name!) + "~" + scapeTilde(p.element.value!));
     }
 }
 
-export function parseTokens(chartRequest: ChartRequest): Promise<ChartRequest> {
-
-    const completer = new Finder.TokenCompleter(chartRequest.queryKey);
-
-    const promises: Promise<void>[] = [];
-
-    if (chartRequest.filterOptions)
-        promises.push(...chartRequest.filterOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate)));
-
-    if (chartRequest.orderOptions)
-        promises.push(...chartRequest.orderOptions.map(oo => completer.complete(oo, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate)));
-
-    if (chartRequest.columns)
-        promises.push(...chartRequest.columns.map(a => a.element.token).filter(te => te != undefined).map(te => {
-            if (te.token && te.token.fullKey == te.tokenString)
-                return Promise.resolve(undefined);
-
-            return completer.request(te.tokenString, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement).then(t => {
-                te.token = t;
-            });
-        }));
-
-    completer.finished();
-
-    return Promise.all(promises)
-        .then(() => Finder.parseFilterValues(chartRequest.filterOptions))
-        .then(() => chartRequest);
-}
 
 export module Decoder {
 
     export function parseChartRequest(queryName: string, query: any): Promise<ChartRequest> {
-
-        const chartRequest = ChartRequest.New(cr => {
-            cr.queryKey = getQueryKey(queryName);
-            cr.groupResults = query.groupResults;
-            cr.filterOptions = Finder.Decoder.decodeFilters(query);
-            cr.orderOptions = Finder.Decoder.decodeOrders(query);
-            cr.columns = Decoder.decodeColumns(query);
-            cr.parameters = Decoder.decodeParameters(query);
-        });
-
+        
         return getChartScripts().then(scripts => {
+            return Finder.getQueryDescription(queryName).then(qd => {
 
+                const completer = new Finder.TokenCompleter(qd);
 
+                const fos = Finder.Decoder.decodeFilters(query);
+                fos.forEach(fo => completer.request(fo.columnName, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate));
 
-            chartRequest.chartScript = query.script == undefined ? scripts.first("ChartScript").first() :
-                scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
+                const oos = Finder.Decoder.decodeOrders(query);
+                oos.forEach(oo => completer.request(oo.columnName, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
 
-            return parseTokens(chartRequest);
+                const cols = Decoder.decodeColumns(query);
+                cols.map(a => a.element.token).filter(te => te != undefined).forEach(te =>completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement));
+
+                return completer.finished().then(() => {
+
+                    cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.token!.fullKey));
+
+                    const chartRequest = ChartRequest.New(cr => {
+                        cr.chartScript = query.script == undefined ? scripts.first("ChartScript").first() :
+                            scripts.flatMap(a => a).filter(cs => cs.name == query.script).single(`ChartScript '${query.queryKey}'`);
+                        cr.queryKey = getQueryKey(queryName);
+                        cr.groupResults = query.groupResults;
+                        cr.filterOptions = fos.map(fo => ({ token: completer.get(fo.columnName), operation: fo.operation, value: fo.value, frozen: fo.frozen }) as FilterOptionParsed);
+                        cr.orderOptions = oos.map(oo => ({ token: completer.get(oo.columnName), orderType: oo.orderType }) as OrderOptionParsed);
+                        cr.columns = cols;
+                        cr.parameters = Decoder.decodeParameters(query);
+                    });
+
+                    return Finder.parseFilterValues(chartRequest.filterOptions)
+                        .then(() => chartRequest);
+                });
+            });
         });
     }
 
@@ -373,7 +368,7 @@ export module Decoder {
 
     export function decodeColumns(query: any): MList<ChartColumnEntity> {
         return valuesInOrder(query, "column").map(val => ({
-            rowId: undefined,
+            rowId: null,
             element: ChartColumnEntity.New(cc => {
                 const ts = (val.contains("~") ? val.before("~") : val).trim();
 
@@ -387,7 +382,7 @@ export module Decoder {
 
     export function decodeParameters(query: any): MList<ChartParameterEntity> {
         return valuesInOrder(query, "param").map(val => ({
-            rowId: undefined,
+            rowId: null,
             element: ChartParameterEntity.New(cp => {
                 cp.name = unscapeTildes(val.before("~"));
                 cp.value = unscapeTildes(val.after("~"));
@@ -404,10 +399,10 @@ export module API {
     export function cleanedChartRequest(request: ChartRequest) {
         const clone = Dic.copy(request);
 
-        clone.orders = clone.orderOptions.map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
+        clone.orders = clone.orderOptions!.map(oo => ({ token: oo.token.key, orderType: oo.orderType }) as OrderRequest);
         delete clone.orderOptions;
 
-        clone.filters = clone.filterOptions.map(fo => ({ token: fo.token.fullKey, operation: fo.operation, value: fo.value }) as FilterRequest);
+        clone.filters = clone.filterOptions!.filter(a => a.token != null).map(fo => ({ token: fo.token!.key, operation: fo.operation, value: fo.value }) as FilterRequest);
         delete clone.filterOptions;
 
         return clone;
@@ -450,7 +445,7 @@ export interface ChartValue {
 
 export interface ChartTable {
     columns: { [name: string]: ChartColumn },
-    parameters: { [name: string]: string },
+    parameters: { [name: string]: string | null | undefined },
     rows: { [name: string]: ChartValue }[]
 }
 
