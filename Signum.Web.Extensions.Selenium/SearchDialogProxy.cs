@@ -122,6 +122,16 @@ namespace Signum.Web.Selenium
 
             return new PopupControl<T>(Selenium, "Temp").WaitVisible();
         }
+
+        public NormalPage<T> CreateNormalPage<T>() where T : ModifiableEntity
+        {
+            Selenium.FindElement(SearchControl.CreateButtonLocator).Click();
+
+            //Opens in new tab => switch Selenium to target it
+            Selenium.SwitchTo().Window(Selenium.WindowHandles.Last()); 
+
+            return new NormalPage<T>(Selenium).WaitLoaded();
+        }
         
         public PopupControl<T> CreateChoose<T>() where T : ModifiableEntity
         {
