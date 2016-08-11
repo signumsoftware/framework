@@ -125,9 +125,12 @@ namespace Signum.Web.Selenium
 
         public NormalPage<T> CreateNormalPage<T>() where T : ModifiableEntity
         {
+            var tabsCount = Selenium.WindowHandles.Count;
+
             Selenium.FindElement(SearchControl.CreateButtonLocator).Click();
 
             //Opens in new tab => switch Selenium to target it
+            Selenium.Wait(() => Selenium.WindowHandles.Count == tabsCount + 1);
             Selenium.SwitchTo().Window(Selenium.WindowHandles.Last()); 
 
             return new NormalPage<T>(Selenium).WaitLoaded();
