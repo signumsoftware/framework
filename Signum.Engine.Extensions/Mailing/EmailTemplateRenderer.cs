@@ -211,7 +211,7 @@ namespace Signum.Engine.Mailing
                         new EmailOwnerRecipientData(new EmailOwnerData { CultureInfo = null, DisplayName = r.DisplayName, Email = r.EmailAddress, Owner = r.EmailOwner }) { Kind = r.Kind }));
                 }
 
-                if (recipients.Any())
+                if (recipients.Where(r=>r.OwnerData.Email.HasText()).Any())
                     yield return recipients;
             }
         }
