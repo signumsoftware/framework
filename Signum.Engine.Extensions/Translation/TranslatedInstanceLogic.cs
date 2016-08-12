@@ -19,6 +19,7 @@ using System.Collections.Concurrent;
 using Signum.Utilities.ExpressionTrees;
 using System.IO;
 using Signum.Engine.Excel;
+using Signum.Entities.Isolation;
 
 namespace Signum.Engine.Translation
 {
@@ -380,6 +381,11 @@ namespace Signum.Engine.Translation
         public static FilePair ExportExcelFile(Type type, CultureInfo culture)
         {
             var result = TranslatedInstanceLogic.TranslationsForType(type, culture).Single().Value;
+
+            result = result.Where(kvp => 
+                !MixinDeclarations.IsDeclared(kvp.Value.GetType(), typeof(IsolationMixin)) || 
+                kvp.Value.Isolation().Is(IsolationEntity.Current)
+                ).ToDictionary();
 
             var list = result
                 .OrderBy(a=>a.Key.Instance.Id)
