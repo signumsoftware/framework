@@ -395,7 +395,7 @@ namespace Signum.Engine.Translation
             return new FilePair
             {
                 Content = PlainExcelGenerator.WritePlainExcel<ExcelRow>(list),
-                FileName = "{0}.{1}.View.xlsx".FormatWith(type, culture.Name)
+                FileName = "{0}.{1}.View.xlsx".FormatWith(TypeLogic.GetCleanName(type), culture.Name)
             };
         }
 
@@ -418,7 +418,7 @@ namespace Signum.Engine.Translation
             return new FilePair
             {
                 Content = PlainExcelGenerator.WritePlainExcel<ExcelRow>(list),
-                FileName = "{0}.{1}.Sync.xlsx".FormatWith(type, culture.Name)
+                FileName = "{0}.{1}.Sync.xlsx".FormatWith(TypeLogic.GetCleanName(type), culture.Name)
             };
         }
 
