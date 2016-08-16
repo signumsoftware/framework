@@ -88,7 +88,7 @@ namespace Signum.Engine.Isolation
             return IsolationEntity.Override(scheduled?.TryIsolation() ?? task?.TryIsolation() ?? user?.TryIsolation());
         }
 
-        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args, OperationLogException exception)
+        static IDisposable OperationLogic_SurroundOperation(IOperation operation, OperationLogEntity log, Entity entity, object[] args)
         {
             return IsolationEntity.Override(entity?.TryIsolation() ?? args.TryGetArgC<Lite<IsolationEntity>>());
         }
