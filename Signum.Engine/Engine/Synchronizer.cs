@@ -272,13 +272,25 @@ namespace Signum.Engine
             return sel.NewValue;
         }
 
-        public static Func<string, List<string>, Selection?> AutoReplacement; 
+        public class AutoReplacementContext
+        {
+            public string ReplacementKey;
+            public string OldValue;
+            public List<string> NewValues; 
+        }
+
+        public static Func<AutoReplacementContext, Selection?> AutoReplacement; 
 
         private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
         {
             if (AutoReplacement != null)
             {
-                Selection? selection = AutoReplacement(oldValue, newValues);
+                Selection? selection = AutoReplacement(new AutoReplacementContext
+                {
+                    ReplacementKey = replacementsKey,
+                    OldValue = oldValue,
+                    NewValues = newValues
+                });
                 if (selection != null)
                 {
                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "AutoReplacement:");
@@ -309,6 +321,9 @@ namespace Signum.Engine
 
             while (true)
             {
+
+
+
                 string answer = Console.ReadLine();
                 
                  answer= answer.ToLower();
