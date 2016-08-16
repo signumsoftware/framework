@@ -133,6 +133,16 @@ namespace Signum.Entities
         readonly MixinEntity mixin;
         public M Mixin<M>() where M : MixinEntity
         {
+            var result = TryMixin<M>();
+            if (result != null)
+                return result;
+
+            throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
+                .FormatWith(typeof(M).TypeName(), GetType().TypeName()));
+        }
+
+        public M TryMixin<M>() where M : MixinEntity
+        {
             var current = mixin;
             while (current != null)
             {
@@ -141,8 +151,7 @@ namespace Signum.Entities
                 current = current.Next;
             }
 
-            throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
-                .FormatWith(typeof(M).TypeName(), GetType().TypeName()));
+            return null;
         }
 
         public MixinEntity GetMixin(Type mixinType)
