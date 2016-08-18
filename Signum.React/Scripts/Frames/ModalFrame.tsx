@@ -6,7 +6,7 @@ import * as Navigator from '../Navigator'
 import ButtonBar from './ButtonBar'
 
 import { ValidationError } from '../Services'
-import { ifError } from '../Globals'
+import { ifError, Dic } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IRenderButtons } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState, entityInfo, isEntityPack, isLite } from '../Signum.Entities'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isModel, parseId } from '../Reflection'
@@ -25,6 +25,7 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    extraComponentProps?: {};
     isNavigate?: boolean;
     readOnly?: boolean;
 }
@@ -112,7 +113,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         }
 
         return Navigator.getComponent(this.state.pack.entity)
-            .then(c => this.setState({ getComponent: (ctx) => React.createElement(c, { ctx: ctx }) }));
+            .then(c => this.setState({ getComponent: (ctx) => React.createElement(c, Dic.extend({ ctx: ctx }, this.props.extraComponentProps)) }));
     }
 
     okClicked: boolean;
@@ -285,6 +286,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}
             getComponent={options.getComponent}
+            extraComponentProps={options.extraComponentProps}
             showOperations={options.showOperations}
             requiresSaveOperation={options.requiresSaveOperation}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
@@ -307,6 +309,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             readOnly={options.readOnly}
             propertyRoute={null}
             getComponent={options.getComponent}
+            extraComponentProps={options.extraComponentProps}
             showOperations={true}
             requiresSaveOperation={null}
             avoidPromptLooseChange={options.avoidPromptLooseChange}

@@ -15,6 +15,8 @@ import { ViewReplacer } from  './Frames/ReactVisitor'
 
 export let NotFound: __React.ComponentClass<any>;
 
+Dic.skipClasses.push(React.Component);
+
 export let currentUser: IUserEntity;
 export let currentHistory: HistoryModule.History;
 
@@ -386,6 +388,7 @@ export interface ViewOptions {
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    extraComponentProps?: {};
 }
 
 export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T>;
@@ -405,6 +408,7 @@ export interface NavigateOptions {
     readOnly?: boolean;
     avoidPromptLooseChange?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    extraComponentProps?: {};
 }
 
 export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions? : NavigateOptions): Promise<void> {
