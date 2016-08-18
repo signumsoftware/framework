@@ -6,15 +6,23 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Int32;
 
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class RequestEntity : Entity
     {
-        [NotNullable, SqlDbType(Size = 100)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [NotNullable, SqlDbType(Size = MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Max = MaxValue)]
         public string Request { get; set; }
+
+        [NotNullable, SqlDbType(Size = MaxValue)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = MaxValue, MultiLine = true)]
+        public string Response { get; set; }
+
+        public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
+
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]

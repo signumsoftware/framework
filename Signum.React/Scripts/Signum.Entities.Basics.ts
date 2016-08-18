@@ -75,6 +75,8 @@ export interface QueryEntity extends Entities.Entity {
 export const RequestEntity = new Type<RequestEntity>("Request");
 export interface RequestEntity extends Entities.Entity {
     request: string;
+    response: string;
+    creationDate: string;
     values: Entities.MList<RequestValueEntity>;
 }
 
