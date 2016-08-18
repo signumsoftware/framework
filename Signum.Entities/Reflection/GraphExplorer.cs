@@ -322,13 +322,18 @@ namespace Signum.Entities.Reflection
 
         public static void SetValidationErrors(DirectedGraph<Modifiable> directedGraph, Dictionary<Guid, Dictionary<string, string>> dictionary)
         {
+            var copy = dictionary.ToDictionary();
             foreach (var mod in directedGraph.OfType<ModifiableEntity>())
             {
-                var dic = dictionary.TryGetC(mod.temporalId);
-
-                if (dic != null)
+                if (copy.ContainsKey(mod.temporalId))
+                {
+                    var dic = copy.Extract(mod.temporalId);
                     mod.SetTemporalErrors(dic);
+                }
             }
+
+            if (copy.Any())
+                throw new InvalidOperationException(copy.Values.SelectMany(a => a.Values).ToString("\n"));       
         }
     }
 
