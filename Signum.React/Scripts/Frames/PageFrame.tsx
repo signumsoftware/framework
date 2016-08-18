@@ -116,7 +116,12 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
         const frame: EntityFrame<Entity> = {
             frameComponent: this,
             entityComponent: this.entityComponent,
-            onReload: pack => this.setState({ pack }),
+            onReload: pack => {
+                if (pack.entity.id != null && entity.id == null)
+                    Navigator.currentHistory.push(Navigator.navigateRoute(pack.entity));
+                else
+                    this.setState({ pack });
+            },
             onClose: () => this.onClose(),
             revalidate: () => this.validationErrors && this.validationErrors.forceUpdate(),
             setError: (ms, initialPrefix = "") => {

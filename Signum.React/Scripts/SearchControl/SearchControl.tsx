@@ -440,13 +440,13 @@ export default class SearchControl extends React.Component<SearchControlProps, S
         if (!this.state.findOptions.create)
             return;
 
-        var isPopup = ev.button == 2 || ev.ctrlKey;
+        var isWindowsOpen = ev.button == 2 || ev.ctrlKey;
 
         this.chooseType().then(tn => {
             if (tn == null)
                 return;
 
-            if (isPopup) {
+            if (isWindowsOpen || Navigator.getSettings(tn).avoidPopup) {
                 window.open(Navigator.createRoute(tn));
             } else {
                 Constructor.construct(tn).then(e => {
