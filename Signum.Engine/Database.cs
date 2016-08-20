@@ -369,18 +369,24 @@ namespace Signum.Engine
             {
                 if (ids == null)
                     throw new ArgumentNullException("ids");
-
+                List<PrimaryKey> remainingIds;
                 Dictionary<PrimaryKey, T> result = null;
                 if (EntityCache.Created)
                 {
                     result = ids.Select(id => EntityCache.Get<T>(id)).NotNull().ToDictionary(a => a.Id);
-                    if (result.Count > 0)
-                        ids.RemoveAll(result.ContainsKey);
+                    if (result.Count == 0)
+                        remainingIds = ids;
+                    else
+                        remainingIds = ids.Where(id => !result.ContainsKey(id)).ToList();
+                }
+                else
+                {
+                    remainingIds = ids;
                 }
 
-                if (ids.Count > 0)
+                if (remainingIds.Count > 0)
                 {
-                    var retrieved = RetrieveFromDatabaseOrCache<T>(ids).ToDictionary(a => a.Id);
+                    var retrieved = RetrieveFromDatabaseOrCache<T>(remainingIds).ToDictionary(a => a.Id);
 
                     var missing = ids.Except(retrieved.Keys);
 
