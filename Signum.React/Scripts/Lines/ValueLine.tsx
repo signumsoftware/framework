@@ -354,7 +354,7 @@ function toNumeralFormat(format: string | undefined) {
 
 export interface NumericTextBoxProps {
     value: number;
-    onChange: (newValue?: number) => void;
+    onChange: (newValue: number | null) => void;
     validateKey: React.KeyboardEventHandler;
     format?: string;
     htmlProps: React.HTMLAttributes;
@@ -382,7 +382,7 @@ export class NumericTextBox extends React.Component<NumericTextBoxProps, { text?
 
     handleOnBlur = (e: React.SyntheticEvent) => {
         const input = e.currentTarget as HTMLInputElement;
-        const result = input.value == undefined || input.value.length == 0 ? undefined : numbro(input.value).value();
+        const result = input.value == undefined || input.value.length == 0 ? null : numbro(input.value).value();
         this.setState({ text: undefined });
         this.props.onChange(result);
     }
@@ -417,7 +417,7 @@ ValueLine.renderers[ValueLineType.DateTime as any] = (vl) => {
     const handleDatePickerOnChange = (date: Date, str: string) => {
 
         const m = moment(date);
-        vl.setValue(m.isValid() ? m.format(moment.ISO_8601()) : undefined);
+        vl.setValue(m.isValid() ? m.format(moment.ISO_8601()) : null);
     };
 
     let currentDate = moment();
@@ -457,7 +457,7 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
     const handleOnChange = (newValue: number) => {
         const d = moment.duration(newValue);
 
-        vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : undefined);
+        vl.setValue(moment.isDuration(d) ? (d.asMilliseconds() * ticksPerMillisecond) : null);
     };
 
     const htmlProps = Dic.extend({ placeholder: s.ctx.placeholderLabels ? asString(s.labelText) : undefined } as React.HTMLAttributes, vl.props.valueHtmlProps);
@@ -471,7 +471,7 @@ function durationTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler)
 
 export interface DurationTextBoxProps {
     value: number;
-    onChange: (newValue?: number) => void;
+    onChange: (newValue: number | null) => void;
     validateKey: React.KeyboardEventHandler;
     format?: string;
     htmlProps: React.HTMLAttributes;
@@ -479,7 +479,7 @@ export interface DurationTextBoxProps {
 
 export class DurationTextBox extends React.Component<DurationTextBoxProps, { text?: string }> {
 
-    constructor(props: NumericTextBoxProps) {
+    constructor(props: DurationTextBoxProps) {
         super(props);
         this.state = { text: undefined };
     }
@@ -499,7 +499,7 @@ export class DurationTextBox extends React.Component<DurationTextBoxProps, { tex
 
     handleOnBlur = (e: React.SyntheticEvent) => {
         const input = e.currentTarget as HTMLInputElement;
-        const result = input.value == undefined || input.value.length == 0 ? undefined : moment.duration(input.value).asMilliseconds();
+        const result = input.value == undefined || input.value.length == 0 ? null : moment.duration(input.value).asMilliseconds();
         this.setState({ text: undefined });
         this.props.onChange(result);
     }
