@@ -179,7 +179,7 @@ namespace Signum.TSGenerator
             sb.AppendLine(@"//Auto-generated. Do NOT modify!//");
             sb.AppendLine(@"//////////////////////////////////");
             sb.AppendLine();
-            var path = options.AssemblyReferences["Signum.Entities"].NamespacesReferences["Signum.Entities"].Path.Replace("Signum.Entities.ts", "Reflection.ts");
+            var path = options.AssemblyReferences.GetOrThrow("Signum.Entities").NamespacesReferences.GetOrThrow("Signum.Entities").Path.Replace("Signum.Entities.ts", "Reflection.ts");
             sb.AppendLine($"import {{ MessageKey, QueryKey, Type, EnumType, registerSymbol }} from '{RelativePath(path, options.TemplateFileName)}'");
             
             foreach (var a in options.AssemblyReferences.Values)
@@ -620,7 +620,7 @@ namespace Signum.TSGenerator
         public string CurrentAssembly;
         public string CurrentNamespace;
 
-        public AssemblyReference CurrentAssemblyReference => AssemblyReferences[CurrentAssembly];
+        public AssemblyReference CurrentAssemblyReference => AssemblyReferences.GetOrThrow(CurrentAssembly);
 
         public string TemplateFileName { get; internal set; }
 
@@ -649,5 +649,17 @@ namespace Signum.TSGenerator
         public string Namespace;
         public string Path;
         public string VariableName;
+    }
+
+    public static class DictionaryExtensions
+    {
+        public static V GetOrThrow<K, V>(this Dictionary<K, V> dictionary, K key)
+        {
+            V result;
+            if (!dictionary.TryGetValue(key, out result))
+                throw new KeyNotFoundException($"Key '{key}' not found");
+
+            return result;
+        }
     }
 }

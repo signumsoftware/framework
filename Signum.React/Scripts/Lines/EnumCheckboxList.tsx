@@ -13,7 +13,7 @@ import Typeahead from '../Lines/Typeahead'
 
 export interface EnumCheckboxListProps extends LineBaseProps {
     data?: string[];
-    ctx?: TypeContext<MList<string>>;
+    ctx: TypeContext<MList<string>>;
     columnCount?: number;
     columnWidth?: number;
 }
@@ -23,7 +23,7 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
     calculateDefaultState(state: EnumCheckboxListProps) {
         super.calculateDefaultState(state);
         state.columnWidth = 200;
-        const ti = getTypeInfo(state.type.name);
+        const ti = getTypeInfo(state.type!.name);
         state.data = Dic.getKeys(ti.members);
     }
 
@@ -43,7 +43,7 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
         }
     }
 
-    getColumnStyle(): React.CSSProperties {
+    getColumnStyle(): React.CSSProperties | undefined {
         var s = this.state;
 
         if (s.columnCount && s.columnWidth)
@@ -67,7 +67,7 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
                 WebkitColumnWidth: s.columnWidth,
             };
 
-        return null;
+        return undefined;
     }
     
 
@@ -99,7 +99,7 @@ export class EnumCheckboxList extends LineBase<EnumCheckboxListProps, EnumCheckb
                 data.insertAt(0, mle.element)
         });
 
-        const ti = getTypeInfo(this.state.type.name);
+        const ti = getTypeInfo(this.state.type!.name);
 
         return data.map((val, i) =>
             <label className="sf-checkbox-element" key={i}>

@@ -26,7 +26,7 @@ export function setCurrentHistory(history: HistoryModule.History) {
     currentHistory = history;
 }
 
-export namespace Expanded {
+export namespace Expander {
     export let getExpanded: () => boolean;
     export let setExpanded: (isExpanded: boolean) => void;
 }

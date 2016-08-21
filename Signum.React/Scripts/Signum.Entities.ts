@@ -199,6 +199,7 @@ export function entityInfo(entity: ModifiableEntity | Lite<Entity> | null | unde
 
     return  `${type};${id || ""};${isNew || ""}`;
 }
+
 export const BooleanEnum = new EnumType<BooleanEnum>("BooleanEnum");
 export type BooleanEnum =
     "False" |

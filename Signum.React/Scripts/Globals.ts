@@ -516,9 +516,9 @@ Promise.prototype.done = function () {
 export module Dic {
 
     var simplesTypes = ["number", "boolean", "string"];
-    export const skipClasses = [];
+    export const skipClasses : Function[] = [];
 
-    export function equals<V>(objA: V, objB: V, deep, depth = 0, visited = []) {
+    export function equals<V>(objA: V, objB: V, deep: boolean, depth = 0, visited : any[] = []) : boolean {
 
         if (objA === objB)
             return true;
@@ -563,7 +563,7 @@ export module Dic {
         if (akeys.length != bkeys.length)
             return false;
 
-        return akeys.every(k => equals(objA[k], objB[k], deep, depth + 1, visited));
+        return akeys.every(k => equals((objA as any)[k], (objB as any)[k], deep, depth + 1, visited));
     }
 
 

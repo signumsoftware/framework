@@ -275,7 +275,7 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
         vl.setValue(input.value);
     };
 
-    let handleBlur: (e: React.SyntheticEvent) => void;
+    let handleBlur: ((e: React.SyntheticEvent) => void) | undefined = undefined;
     if (s.autoTrim == true) {
         handleBlur = (e: React.SyntheticEvent) => {
             const input = e.currentTarget as HTMLInputElement;
