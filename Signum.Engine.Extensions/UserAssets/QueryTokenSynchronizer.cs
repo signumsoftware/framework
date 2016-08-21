@@ -31,7 +31,7 @@ namespace Signum.Engine.UserAssets
                 if (Replacements.AutoReplacement == null)
                     return null;
 
-                Replacements.Selection? sel = Replacements.AutoReplacement(str, null);
+                Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext { ReplacementKey = "QueryToken", OldValue = str, NewValues = null });
 
                 if (sel == null || sel.Value.NewValue == null)
                     return null;
@@ -94,7 +94,7 @@ namespace Signum.Engine.UserAssets
 
                     if (Replacements.AutoReplacement != null)
                     {
-                        Replacements.Selection? sel = Replacements.AutoReplacement(part, result.SubTokens(qd, options).Select(a => a.Key).ToList());
+                        Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext { ReplacementKey= "QueryToken", OldValue = part, NewValues = result.SubTokens(qd, options).Select(a => a.Key).ToList() });
 
                         if (sel != null && sel.Value.NewValue != null)
                         {
@@ -201,7 +201,7 @@ namespace Signum.Engine.UserAssets
 
             if (Replacements.AutoReplacement != null)
             {
-                Replacements.Selection? sel = Replacements.AutoReplacement(valueString, null);
+                Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext { ReplacementKey = "FixValue", OldValue = valueString, NewValues = null });
 
                 if (sel != null && sel.Value.NewValue != null)
                 {
@@ -244,7 +244,7 @@ namespace Signum.Engine.UserAssets
             {
                 if (Replacements.AutoReplacement != null)
                 {
-                    Replacements.Selection? sel = Replacements.AutoReplacement(type, null);
+                    Replacements.Selection? sel = Replacements.AutoReplacement(new Replacements.AutoReplacementContext { ReplacementKey = "FixValue.Type", OldValue = type, NewValues = null });
 
                     if (sel != null && sel.Value.NewValue != null)
                         return sel.Value.NewValue;

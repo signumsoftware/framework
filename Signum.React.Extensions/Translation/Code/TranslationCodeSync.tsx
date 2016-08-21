@@ -53,7 +53,7 @@ export default class TranslationCodeSync extends React.Component<TranslationCode
             );
         }
 
-        const message = TranslationMessage.Synchronize0In1.niceToString(assembly,
+        let message = TranslationMessage.Synchronize0In1.niceToString(assembly,
                 this.state.cultures ? this.state.cultures[culture].toStr : culture);
 
         if (this.state.result) {

@@ -36,7 +36,7 @@ export interface EmailAddressEntity extends Entities.EmbeddedEntity {
     Type: "EmailAddressEntity";
     emailOwner?: Entities.Lite<IEmailOwnerEntity>;
     emailAddress?: string | null;
-	invalidEmail?: boolean;
+    invalidEmail?: boolean;
     displayName?: string | null;
 }
 

@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom'
 import * as d3 from 'd3'
 import { DomUtils, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
-import { currentHistory, Expanded } from '../../../../Framework/Signum.React/Scripts/Navigator'
+import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { is, JavascriptMessage } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken, QueryTokenType, ColumnOption } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { MapMessage } from '../Signum.Entities.Map'
@@ -138,7 +138,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
         const query = Dic.extend(tables, { color: s.color });
 
-        const url = currentHistory.createHref({ pathname: "~/map/" + this.props.routeParams!.type, query: query });
+        const url = Navigator.currentHistory.createHref({ pathname: "~/map/" + this.props.routeParams!.type, query: query });
 
         window.open(url);
     }
