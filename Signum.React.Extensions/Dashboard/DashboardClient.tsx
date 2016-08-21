@@ -116,6 +116,9 @@ export function start(options: { routes: JSX.Element[] }) {
                     Navigator.API.fetchAndRemember(db.entityType)
                         .then(t => Finder.find({ queryName: t.cleanName }))
                         .then(lite => {
+                            if (!lite)
+                                return;
+
                             navigateOrWindowsOpen(e, "~/dashboard/" + ctx.lite.id + "?entity=" + liteKey(lite));
                         }).done();
             }).done()));
