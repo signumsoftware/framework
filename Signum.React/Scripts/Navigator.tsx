@@ -578,9 +578,9 @@ function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescript
 
     function fixUrl(url: string): string {
         if (url && url.startsWith("~/"))
-            return baseName + "/" + url.after("~/");
+            return baseName + url.after("~/");
 
-        if (url.startsWith(baseName))
+        if (url.startsWith(baseName) || url.startsWith("http"))
             return url;
 
         console.warn(url);

@@ -22,7 +22,7 @@ export function baseUrl(options: AjaxOptions): string {
     const baseUrl = window.__baseUrl;
 
     if (options.url.startsWith("~/"))
-        return baseUrl + "/" + options.url.after("~/");
+        return baseUrl + options.url.after("~/");
 
     return options.url;
 }
