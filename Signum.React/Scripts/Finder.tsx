@@ -168,7 +168,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
 
     ideal = ideal.filter(a => a.name != "Entity");
 
-    current = current.filter(a => a.token == null);
+    current = current.filter(a => a.token != null);
 
     if (current.length < ideal.length) {
         const toRemove: ColumnOption[] = [];
@@ -276,7 +276,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
 
             columnOptions: (fo.columnOptions || []).map(co => ({
                 token: completer.get(co.columnName),
-                displayName: co.displayName || completer.get(co.columnName)
+                displayName: co.displayName || completer.get(co.columnName).niceName
             }) as ColumnOptionParsed),
 
             orderOptions: (fo.orderOptions || []).map(oo => ({
