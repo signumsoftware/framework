@@ -10,7 +10,7 @@ import { Entity, Lite, liteKey } from '../../../../Framework/Signum.React/Script
 import * as Constructor from '../../../../Framework/Signum.React/Scripts/Constructor'
 import * as Operations from '../../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../../Framework/Signum.React/Scripts/QuickLinks'
-import { FindOptions, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
+import { FindOptions, QueryToken, FilterOption, FilterOptionParsed, FilterOperation, OrderOption, OrderOptionParsed, ColumnOption, FilterRequest, QueryRequest, Pagination, SubTokensOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import * as AuthClient  from '../../../../Extensions/Signum.React.Extensions/Authorization/AuthClient'
 import { UserChartEntity, ChartPermission, ChartMessage, ChartRequest, ChartParameterEntity, ChartColumnEntity  } from '../Signum.Entities.Chart'
 import { QueryFilterEntity, QueryOrderEntity } from '../../UserQueries/Signum.Entities.UserQueries'
@@ -74,6 +74,8 @@ export module Converter {
 
     export function applyUserChart(cr: ChartRequest, uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequest> {
 
+        cr.chartScript = uq.chartScript;
+
         const promise = UserAssetsClient.API.parseFilters({
             queryKey: uq.query.key,
             canAggregate: false,
@@ -87,16 +89,14 @@ export module Converter {
 
         return promise.then(filters => {
 
-            if (filters) {
-                cr.filterOptions = (cr.filterOptions || []).filter(f => f.frozen);
-                cr.filterOptions.push(...uq.filters.map((f, i) => ({
-                    token: f.element.token,
-                    operation: f.element.operation!,
-                    value: filters[i].value,
-                    frozen: false,
-                }) as FilterOptionParsed));
-            }
-
+            cr.filterOptions = (cr.filterOptions || []).filter(f => f.frozen);
+            cr.filterOptions.push(...uq.filters.map((f, i) => ({
+                token: f.element.token!.token,
+                operation: f.element.operation!,
+                value: filters[i].value,
+                frozen: false,
+            }) as FilterOptionParsed));
+            
             cr.parameters = uq.parameters!.map(mle => ({
                 rowId: null,
                 element: ChartParameterEntity.New(p => {

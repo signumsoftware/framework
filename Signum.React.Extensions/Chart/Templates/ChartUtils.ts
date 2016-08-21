@@ -35,6 +35,8 @@ export function makeItTokenValue(value: ChartValue) {
         return key.toString();
     };
 
+    value.valueOf = function (this: ChartValue) { return this.key as any; };
+
     value.niceToString = function (this: ChartValue) {
         const result = (this.toStr !== undefined ? this.toStr : this);
 
@@ -47,7 +49,7 @@ export function makeItTokenValue(value: ChartValue) {
 
 export function ellipsis(elem: SVGTextElement, width: number, padding?: number, ellipsisSymbol?: string) {
 
-    if (ellipsisSymbol === undefined || ellipsisSymbol == undefined)
+    if (ellipsisSymbol == undefined)
         ellipsisSymbol = '…';
 
     if (padding)

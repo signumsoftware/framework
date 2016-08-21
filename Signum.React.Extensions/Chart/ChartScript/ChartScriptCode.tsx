@@ -63,7 +63,7 @@ export default class ChartScriptCode extends React.Component<{ ctx: TypeContext<
     codeMirrorComponent: CodeMirrorComponent;
     lineHandle: CodeMirror.LineHandle;
     getException = () => {
-        const number = (opener as any).getExceptionNumber();
+        const number = opener.getExceptionNumber();
         clearTimeout(this.exceptionHandler);
         if (this.lineHandle != undefined)
             this.codeMirrorComponent.codeMirror.removeLineClass(this.lineHandle, undefined, undefined);

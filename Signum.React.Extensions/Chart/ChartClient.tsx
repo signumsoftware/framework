@@ -342,7 +342,7 @@ export module Decoder {
 
                 return completer.finished().then(() => {
 
-                    cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.token!.fullKey));
+                    cols.filter(a => a.element.token != null).forEach(a => a.element.token!.token = completer.get(a.element.token!.tokenString));
 
                     const chartRequest = ChartRequest.New(cr => {
                         cr.chartScript = query.script == undefined ? scripts.first("ChartScript").first() :
@@ -437,7 +437,7 @@ export module API {
 
 
 export interface ChartValue {
-    key: string,
+    key: string | number | undefined,
     toStr: string,
     color: string,
     niceToString(): string;

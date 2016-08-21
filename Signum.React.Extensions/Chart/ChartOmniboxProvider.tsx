@@ -45,6 +45,8 @@ export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxRe
 
         const path = ChartClient.Encoder.chartRequestPath(ChartRequest.New(cr => {
             cr.queryKey = getQueryKey(result.QueryName);
+            cr.orderOptions = [];
+            cr.filterOptions = [];
         }));
 
         return Promise.resolve(path);
