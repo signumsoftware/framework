@@ -699,17 +699,28 @@ EXEC(@{1})".FormatWith(databaseName, variableName));
         {
             if (this.ViewName != (mix as UniqueIndex)?.ViewName)
                 return false;
-            
+
             if (this.ColumnsChanged(dif, mix))
                 return false;
-            
+
             if (this.IsPrimary != mix is PrimaryClusteredIndex)
                 return false;
-            
-            if (this.Type != (mix is PrimaryClusteredIndex ? DiffIndexType.Clustered : DiffIndexType.NonClustered))
+
+            if (this.Type != GetIndexType(mix))
                 return false;
 
             return true;
+        }
+
+        private static DiffIndexType? GetIndexType(Index mix)
+        {
+            if (mix is UniqueIndex && ((UniqueIndex)mix).ViewName != null)
+                return null;
+
+            if (mix is PrimaryClusteredIndex)
+                return DiffIndexType.Clustered;
+
+            return DiffIndexType.NonClustered;
         }
 
         bool ColumnsChanged(DiffTable dif, Index mix)

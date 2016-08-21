@@ -47,8 +47,11 @@ export { EntityTabRepeater };
 import { EntityStrip } from  './Lines/EntityStrip'
 export { EntityStrip };
 
-import { EntityCheckboxList } from  './Lines/EntityCheckBoxList'
+import { EntityCheckboxList } from  './Lines/EntityCheckboxList'
 export { EntityCheckboxList };
+
+import { EnumCheckboxList } from  './Lines/EnumCheckboxList'
+export { EnumCheckboxList };
  
 
 tasks.push(taskSetNiceName);

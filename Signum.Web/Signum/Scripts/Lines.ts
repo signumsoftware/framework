@@ -276,9 +276,10 @@ export class EntityBase {
         if (this.viewing != null)
             return this.viewing(entityHtml, event);
 
-        var type = this.options.types.filter(t=> t.name == entityHtml.runtimeInfo.type)[0];
+        var type = this.options.types == null ? null :
+            this.options.types.filter(t => t.name == entityHtml.runtimeInfo.type)[0];
 
-        if (Navigator.isOpenNewWindow(event) || type.avoidPopup) {
+        if (Navigator.isOpenNewWindow(event) || type && type.avoidPopup) {
             if (this.options.navigate && !entityHtml.runtimeInfo.isNew)
                 Navigator.navigate(entityHtml.runtimeInfo, null, true);
             return null;

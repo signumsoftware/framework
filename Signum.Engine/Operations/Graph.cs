@@ -63,22 +63,22 @@ namespace Signum.Engine.Operations
                     {
                         using (Transaction tr = new Transaction())
                         { 
-                            T result;
+                            T result = null;
                             using (OperationLogic.AllowSave<T>())
-                            using (OperationLogic.OnSuroundOperation(this, null, log, args))
-                            {
-                                result = Construct(args);
-
-                                AssertEntity(result);
-
-                                if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
+                                OperationLogic.OnSuroundOperation(this, null, log, args).EndUsing(_ =>
                                 {
-                                    log.SetTarget(result);
-                                    log.End = TimeZoneManager.Now;
-                                }
-                                else
-                                    log = null;
-                            }
+                                    result = Construct(args);
+
+                                    AssertEntity(result);
+
+                                    if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
+                                    {
+                                        log.SetTarget(result);
+                                        log.End = TimeZoneManager.Now;
+                                    }
+                                    else
+                                        log = null;
+                                });
 
                             if (log != null)
                                 using (ExecutionMode.Global())
@@ -207,32 +207,32 @@ namespace Signum.Engine.Operations
                         Operation = Symbol.Symbol,
                         Start = TimeZoneManager.Now,
                         User = UserHolder.Current?.ToLite(),
-                        Origin = origin.ToLiteFat(),
+                        Origin = origin.ToLite(origin.IsNew),
                     };
 
                     try
                     {
                         using (Transaction tr = new Transaction())
                         {
-                            T result;
+                            T result = null;
                             using (OperationLogic.AllowSave(origin.GetType()))
                             using (OperationLogic.AllowSave<T>())
-                            using (OperationLogic.OnSuroundOperation(this, log, origin, args))
-                            {
-                                result = Construct((F)origin, args);
-
-                                AssertEntity(result);
-
-                                if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
+                                OperationLogic.OnSuroundOperation(this, log, origin, args).EndUsing(_ =>
                                 {
-                                    log.End = TimeZoneManager.Now;
-                                    log.SetTarget(result);
-                                }
-                                else
-                                {
-                                    log = null;
-                                }
-                            }
+                                    result = Construct((F)origin, args);
+
+                                    AssertEntity(result);
+
+                                    if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
+                                    {
+                                        log.End = TimeZoneManager.Now;
+                                        log.SetTarget(result);
+                                    }
+                                    else
+                                    {
+                                        log = null;
+                                    }
+                                });
 
                             if (log != null)
                                 using (ExecutionMode.Global())
@@ -334,26 +334,26 @@ namespace Signum.Engine.Operations
                     {
                         using (Transaction tr = new Transaction())
                         {
-                            T result;
+                            T result = null;
 
                             using (OperationLogic.AllowSave<F>())
                             using (OperationLogic.AllowSave<T>())
-                            using (OperationLogic.OnSuroundOperation(this, log, null, args))
-                            {
-                                result = OnConstruct(lites.Cast<Lite<F>>().ToList(), args);
-
-                                AssertEntity(result);
-
-                                if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
+                                OperationLogic.OnSuroundOperation(this, log, null, args).EndUsing(_ =>
                                 {
-                                    log.End = TimeZoneManager.Now;
-                                    log.SetTarget(result);
-                                }
-                                else
-                                {
-                                    log = null;
-                                }
-                            }
+                                    result = OnConstruct(lites.Cast<Lite<F>>().ToList(), args);
+
+                                    AssertEntity(result);
+
+                                    if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
+                                    {
+                                        log.End = TimeZoneManager.Now;
+                                        log.SetTarget(result);
+                                    }
+                                    else
+                                    {
+                                        log = null;
+                                    }
+                                });
 
                             if (log != null)
                                 using (ExecutionMode.Global())
@@ -489,17 +489,17 @@ namespace Signum.Engine.Operations
                         using (Transaction tr = new Transaction())
                         {
                             using (OperationLogic.AllowSave(entity.GetType()))
-                            using (OperationLogic.OnSuroundOperation(this, log, entity, args))
-                            {
-                                Execute((T)entity, args);
+                                OperationLogic.OnSuroundOperation(this, log, entity, args).EndUsing(_ =>
+                                {
+                                    Execute((T)entity, args);
 
-                                AssertEntity((T)entity);
+                                    AssertEntity((T)entity);
 
-                                entity.Save(); //Nothing happens if already saved
+                                    entity.Save(); //Nothing happens if already saved
 
-                                log.SetTarget(entity);
-                                log.End = TimeZoneManager.Now;
-                            }
+                                    log.SetTarget(entity);
+                                    log.End = TimeZoneManager.Now;
+                                });
 
                             using (ExecutionMode.Global())
                                 log.Save();
@@ -629,46 +629,46 @@ namespace Signum.Engine.Operations
                     };
 
                     using (OperationLogic.AllowSave(entity.GetType()))
-                    using (OperationLogic.OnSuroundOperation(this, log, entity, args))
-                    {
-                        try
+                        OperationLogic.OnSuroundOperation(this, log, entity, args).EndUsing(_ =>
                         {
-                            using (Transaction tr = new Transaction())
+                            try
                             {
-                                OnDelete((T)entity, args);
+                                using (Transaction tr = new Transaction())
+                                {
+                                    OnDelete((T)entity, args);
 
-                                log.SetTarget(entity);
-                                log.End = TimeZoneManager.Now;
+                                    log.SetTarget(entity);
+                                    log.End = TimeZoneManager.Now;
 
-                                using (ExecutionMode.Global())
-                                    log.Save();
+                                    using (ExecutionMode.Global())
+                                        log.Save();
 
-                                tr.Commit();
+                                    tr.Commit();
+                                }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
+                            catch (Exception ex)
+                            {
+                                OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
 
-                            if (Transaction.InTestTransaction)
+                                if (Transaction.InTestTransaction)
+                                    throw;
+
+                                var exLog = ex.LogException();
+
+                                using (Transaction tr2 = Transaction.ForceNew())
+                                {
+                                    log.Target = entity.ToLite();
+                                    log.Exception = exLog.ToLite();
+
+                                    using (ExecutionMode.Global())
+                                        log.Save();
+
+                                    tr2.Commit();
+                                }
+
                                 throw;
-
-                            var exLog = ex.LogException();
-
-                            using (Transaction tr2 = Transaction.ForceNew())
-                            {
-                                log.Target = entity.ToLite();
-                                log.Exception = exLog.ToLite();
-
-                                using (ExecutionMode.Global())
-                                    log.Save();
-
-                                tr2.Commit();
                             }
-
-                            throw;
-                        }
-                    }
+                        });
                 }
             }
 

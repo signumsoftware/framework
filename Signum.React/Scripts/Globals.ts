@@ -515,6 +515,58 @@ Promise.prototype.done = function () {
 
 export module Dic {
 
+    var simplesTypes = ["number", "boolean", "string"];
+    export const skipClasses = [];
+
+    export function equals<V>(objA: V, objB: V, deep, depth = 0, visited = []) {
+
+        if (objA === objB)
+            return true;
+        
+        if (objA == null || objB == null)
+            return false;
+
+        if (simplesTypes.contains(typeof objA) ||
+            simplesTypes.contains(typeof objB))
+            return false; 
+        
+        if (Array.isArray(objA) !== Array.isArray(objB))
+            return false;
+
+        if (visited.indexOf(objB) != -1)
+            return false;
+        visited.push(objB);
+
+        if (visited.indexOf(objA) != -1)
+            return false;
+        visited.push(objA);
+
+        if (Array.isArray(objA)) {
+            var ar = objA as any as any[]; 
+            var br = objB as any as any[]; 
+
+            if (ar.length != br.length)
+                return false;
+
+            return Array.range(0, ar.length).every(i => equals(ar[i], br[i], deep, depth + 1, visited));
+        }
+
+        if (Object.getPrototypeOf(objA) !== Object.getPrototypeOf(objB))
+            return false;
+
+        if (skipClasses.some(c => objA instanceof c))
+            return false;
+
+        const akeys = Dic.getKeys(objA);
+        const bkeys = Dic.getKeys(objB);
+
+        if (akeys.length != bkeys.length)
+            return false;
+
+        return akeys.every(k => equals(objA[k], objB[k], deep, depth + 1, visited));
+    }
+
+
     export function getValues<V>(obj: { [key: string]: V }): V[] {
         const result: V[] = [];
 

@@ -275,9 +275,23 @@ ValueLine.renderers[ValueLineType.TextArea as any] = (vl) => {
         vl.setValue(input.value);
     };
 
+    let handleBlur: (e: React.SyntheticEvent) => void;
+    if (s.autoTrim == true) {
+        handleBlur = (e: React.SyntheticEvent) => {
+            const input = e.currentTarget as HTMLInputElement;
+            if (input.value && input.value.trim() != input.value)
+                vl.setValue(input.value.trim());
+
+            if (vl.props.onTextboxBlur)
+                vl.props.onTextboxBlur(input.value.trim());
+        };
+    }
+
     return (
         <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
-            <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control") } value={s.ctx.value || ""} onChange={handleTextOnChange}
+            <textarea {...vl.state.valueHtmlProps} className={addClass(vl.state.valueHtmlProps, "form-control")} value={s.ctx.value || ""}
+                onChange={handleTextOnChange}
+                onBlur={handleBlur}
                 placeholder={s.ctx.placeholderLabels ? asString(s.labelText) : undefined}/>
         </FormGroup>
     );

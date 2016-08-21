@@ -30,6 +30,10 @@ export interface MListElement<T> {
     element: T;
 }
 
+export function newMListElement<T>(element: T): MListElement<T> {
+    return { rowId: null, element };
+}
+
 export interface Lite<T extends Entity> {
     entity?: T;
     EntityType: string;

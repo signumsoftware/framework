@@ -99,7 +99,10 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         })).done();
     }
 
-    select(e: React.SyntheticEvent) {
+    select(e: React.SyntheticEvent) {        
+        if (this.state.items.length == 0)
+            return;
+
         this.input.value = this.props.onSelect!(this.state.items![this.state.selectedIndex || 0], e);
         this.setState({ shown: false });
     }

@@ -76,7 +76,7 @@ namespace Signum.Web
             if (error == 401) //not authorized shows a log-in
                 return 500;
 
-            if (ex.GetType() == typeof(EntityNotFoundException))
+            if (ex != null && ex.GetType() == typeof(EntityNotFoundException))
                 return 404;
 
             return error;

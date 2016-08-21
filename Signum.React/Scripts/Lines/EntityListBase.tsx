@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Link } from 'react-router'
 import { Dic, classes } from '../Globals'
-import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, JavascriptMessage, toLite, is, liteKey } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, newMListElement } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
@@ -117,7 +117,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
                 this.convert(e).then(m => {
                     const list = this.props.ctx.value!;
-                    list.push({ rowId: null, element: m });
+                    list.push(newMListElement(m));
                     this.setValue(list);
                 }).done();
             }).done();
@@ -141,7 +141,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
 
             Promise.all(lites.map(a => this.convert(a))).then(entites => {
                 const list = this.props.ctx.value!;
-                entites.forEach(e => list.push({ rowId: null, element: e }));
+                entites.forEach(e => list.push(newMListElement(e)));
                 this.setValue(list);
             }).done();
         }).done();

@@ -14,6 +14,7 @@ import ModalFrame from './Frames/ModalFrame';
 import { ViewReplacer } from './Frames/ReactVisitor'
 
 
+Dic.skipClasses.push(React.Component);
 
 export let currentUser: IUserEntity | undefined;
 export function setCurrentUser(user: IUserEntity | undefined) {
@@ -385,6 +386,7 @@ export interface ViewOptions {
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    extraComponentProps?: {};
 }
 
 export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T>;
@@ -404,6 +406,7 @@ export interface NavigateOptions {
     readOnly?: boolean;
     avoidPromptLooseChange?: boolean;
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    extraComponentProps?: {};
 }
 
 export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, navigateOptions?: NavigateOptions): Promise<void> {
@@ -533,7 +536,7 @@ export class EntitySettings<T extends ModifiableEntity> {
     }
 
     constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
-        options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean }) {
+        options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean, avoidPopup?: boolean }) {
 
         this.type = type;
         this.getComponent = getComponent;

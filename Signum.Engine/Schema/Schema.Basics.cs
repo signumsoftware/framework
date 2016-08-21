@@ -167,7 +167,8 @@ namespace Signum.Engine.Maps
 
             if (result.OfType<UniqueIndex>().Any())
             {
-                List<IColumn> attachedFields = fields.Where(f => f.FieldInfo.GetCustomAttribute<AttachToUniqueIndexesAttribute>() != null)
+                var s = Schema.Current.Settings;
+                List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo)).OfType<AttachToUniqueIndexesAttribute>().Any())
                    .SelectMany(f => Index.GetColumnsFromFields(f.Field))
                    .ToList();
 
