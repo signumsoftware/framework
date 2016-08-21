@@ -31,7 +31,7 @@ namespace Signum.Engine.Alerts
         }
 
         public static HashSet<AlertTypeEntity> SystemAlertTypes = new HashSet<AlertTypeEntity>();
-        static bool started = false;
+        public static bool Started = false;
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -89,7 +89,7 @@ namespace Signum.Engine.Alerts
                         dqm.RegisterExpression(new ExtensionInfo(type, exp, exp.Body.Type, "Alerts", () => typeof(AlertEntity).NicePluralName()));
                 }
 
-                started = true;
+                Started = true;
             }
         }
 
@@ -108,7 +108,7 @@ namespace Signum.Engine.Alerts
 
         public static AlertEntity CreateAlert<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null, string title = null) where T : class, IEntity
         {
-            if (started == false)
+            if (Started == false)
                 return null;
 
             var result = new AlertEntity
@@ -131,7 +131,7 @@ namespace Signum.Engine.Alerts
 
         public static AlertEntity CreateAlertForceNew<T>(this Lite<T> entity, string text, AlertTypeEntity alertType, DateTime? alertDate = null, Lite<IUserEntity> user = null) where T : class, IEntity
         {
-            if (started == false)
+            if (Started == false)
                 return null;
 
             using (Transaction tr = Transaction.ForceNew())

@@ -63,11 +63,6 @@ namespace Signum.React.Selenium
                 Disposing(OkPressed);
         }
 
-        public void Close()
-        {
-            this.CloseButton.Find().Click();
-        }
-
         public Action<bool> Disposing;
 
         public WebElementLocator OkButton

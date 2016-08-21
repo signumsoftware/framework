@@ -5,6 +5,9 @@ using System.Text;
 using Signum.Utilities;
 using System.ComponentModel;
 using Newtonsoft.Json;
+using Signum.Entities.Dashboard;
+using System.Xml.Linq;
+using Signum.Entities.UserAssets;
 
 namespace Signum.Entities.Omnibox
 {

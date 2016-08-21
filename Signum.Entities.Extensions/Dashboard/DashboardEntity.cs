@@ -56,6 +56,10 @@ namespace Signum.Entities.Dashboard
         [UniqueIndex]
         public Guid Guid { get; set; } = Guid.NewGuid();
 
+        public bool ForNavbar { get; set; }
+
+        public string Key { get; set; }
+
         static Expression<Func<DashboardEntity, IPartEntity, bool>> ContainsContentExpression =
             (cp, content) => cp.Parts.Any(p => p.Content.Is(content));
         [ExpressionField]

@@ -40,7 +40,6 @@ namespace Signum.Engine.Dashboard
                     {"UserChartPart", typeof(UserChartPartEntity)},
                     {"UserQueryPart", typeof(UserQueryPartEntity)},
                     {"LinkListPart", typeof(LinkListPartEntity)},
-                    {"CountSearchControlPart", typeof(CountSearchControlPartEntity)},
                 });
 
                 sb.Include<DashboardEntity>();
@@ -166,18 +165,33 @@ namespace Signum.Engine.Dashboard
 
         public static DashboardEntity GetHomePageDashboard()
         {
-            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
-
-            var result =  Dashboards.Value.Values
-                .Where(d => d.EntityType == null && d.DashboardPriority.HasValue && isAllowed(d))
-                .OrderByDescending(a => a.DashboardPriority)
-                .FirstOrDefault();
+            var result = GetDashboard(false, null);
 
             if (result == null)
                 return null;
 
             using (ViewLogLogic.LogView(result.ToLite(), "GetHomePageDashboard"))
                 return result;
+        }
+
+        public static DashboardEntity GetNavbarDashboard(string key)
+        {
+            return GetDashboard(true, key);
+        }
+
+        static DashboardEntity GetDashboard(bool forNavbar, string key)
+        {
+            var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: true);
+
+            var result = Dashboards.Value.Values
+                .Where(d =>
+                    d.ForNavbar == forNavbar
+                     && (!key.HasText() || d.Key == key)
+                    && d.EntityType == null && d.DashboardPriority.HasValue && isAllowed(d))
+                .OrderByDescending(a => a.DashboardPriority)
+                .FirstOrDefault();
+
+            return result;
         }
 
         public static DashboardEntity GetEmbeddedDashboard(Type entityType)

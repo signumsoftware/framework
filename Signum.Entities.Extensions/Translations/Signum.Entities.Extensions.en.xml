@@ -7,12 +7,17 @@
   <Type Name="AlertState" />
   <Type Name="AlertTypeEntity" />
   <Type Name="AlertTypeOperation" />
+  <Type Name="AllowedRule`2" />
+  <Type Name="AllowedRuleCoerced`2" />
   <Type Name="AppendixHelpEntity" />
   <Type Name="AppendixHelpOperation" />
   <Type Name="ApplicationEventLogEntity" />
+  <Type Name="AsyncEmailSenderPermission" />
   <Type Name="AuthAdminMessage" />
   <Type Name="AuthEmailMessage" />
   <Type Name="AuthMessage" />
+  <Type Name="AuthThumbnail" />
+  <Type Name="AuthTokenConfigurationEntity" />
   <Type Name="BaseRulePack`1" />
   <Type Name="BasicPermission" />
   <Type Name="CachePermission" />
@@ -24,6 +29,7 @@
     <Member Name="CreateNew" Description="Create" />
   </Type>
   <Type Name="ChartPaletteModel" />
+  <Type Name="ChartParameterEntity" />
   <Type Name="ChartParameterType" />
   <Type Name="ChartPermission" />
   <Type Name="ChartRequest" />
@@ -43,6 +49,7 @@
   <Type Name="DashboardOperation" />
   <Type Name="DashboardPermission" />
   <Type Name="DateSpanEntity" />
+  <Type Name="DefaultState" />
   <Type Name="DiffLogMessage" />
   <Type Name="DiffLogMixin" />
   <Type Name="DisconnectedCreatedMixin" />
@@ -84,9 +91,11 @@
   <Type Name="EmailTemplateRecipientEntity" />
   <Type Name="EmailTemplateViewMessage" />
   <Type Name="EmbeddedFileEntity" />
+  <Type Name="EmbeddedFilePathEntity" />
   <Type Name="EntityAction" />
   <Type Name="EntityHelpEntity" />
   <Type Name="EntityHelpOperation" />
+  <Type Name="ExcelAttachmentEntity" />
   <Type Name="ExcelMessage" />
   <Type Name="ExcelReportEntity" />
   <Type Name="ExcelReportOperation" />
@@ -106,6 +115,7 @@
   <Type Name="HolidayCalendarEntity" />
   <Type Name="HolidayCalendarOperation" />
   <Type Name="HolidayEntity" />
+  <Type Name="IAttachmentGeneratorEntity" />
   <Type Name="IEmailOwnerEntity" />
   <Type Name="IPartEntity" />
   <Type Name="IProcessDataEntity" />
@@ -120,6 +130,8 @@
   <Type Name="LastAuthRulesImportEntity" />
   <Type Name="LinkElementEntity" />
   <Type Name="LinkListPartEntity" />
+  <Type Name="MapMessage" />
+  <Type Name="MapPermission" />
   <Type Name="MergeStrategy" />
   <Type Name="MessageLengthExceeded" />
   <Type Name="MultipleSMSModel" />
@@ -137,6 +149,7 @@
   <Type Name="NoteTypeOperation" />
   <Type Name="OmniboxMessage" />
   <Type Name="OperationAllowed" />
+  <Type Name="OperationAllowedRule" />
   <Type Name="OperationHelpEntity" />
   <Type Name="OperationHelpOperation" />
   <Type Name="OperationRulePack" />
@@ -148,6 +161,7 @@
   <Type Name="PanelStyle" />
   <Type Name="PasswordExpiresIntervalEntity" />
   <Type Name="PasswordExpiresIntervalOperation" />
+  <Type Name="PermissionAllowedRule" />
   <Type Name="PermissionRulePack" />
   <Type Name="PermissionSymbol" />
   <Type Name="Pop3ConfigurationAction" />
@@ -164,12 +178,12 @@
   <Type Name="ProcessState" />
   <Type Name="ProfilerPermission" />
   <Type Name="PropertyAllowed" />
-  <Type Name="PropertyRouteEntity" />
+  <Type Name="PropertyAllowedRule" />
   <Type Name="PropertyRouteHelpEntity" />
   <Type Name="PropertyRulePack" />
+  <Type Name="QueryAllowedRule" />
   <Type Name="QueryColumnEntity" />
   <Type Name="QueryColumnHelpEntity" />
-  <Type Name="QueryEntity" />
   <Type Name="QueryFilterEntity" />
   <Type Name="QueryHelpEntity" />
   <Type Name="QueryHelpOperation" />
@@ -192,17 +206,16 @@
   <Type Name="ScheduledTaskOperation" />
   <Type Name="SchedulerMessage" />
   <Type Name="SchedulerPermission" />
-  <Type Name="ScheduleRuleDailyEntity" />
-  <Type Name="ScheduleRuleDayEntity" />
-  <Type Name="ScheduleRuleHourlyEntity" />
   <Type Name="ScheduleRuleMinutelyEntity" />
+  <Type Name="ScheduleRuleMonthsEntity" />
   <Type Name="ScheduleRuleWeekDaysEntity" />
-  <Type Name="ScheduleRuleWeeklyEntity" />
+  <Type Name="SendEmailTaskEntity" />
+  <Type Name="SendEmailTaskOperation" />
   <Type Name="SessionLogEntity" />
   <Type Name="SessionLogPermission" />
   <Type Name="SimpleTaskSymbol" />
+  <Type Name="SMSCharactersMessage" />
   <Type Name="SMSConfigurationEntity" />
-  <Type Name="SmsMessage" />
   <Type Name="SMSMessageEntity" />
   <Type Name="SMSMessageOperation" />
   <Type Name="SMSMessageProcess" />
@@ -234,7 +247,9 @@
   <Type Name="TranslatorUserEntity" />
   <Type Name="TranslatorUserOperation" />
   <Type Name="TypeAllowed" />
+  <Type Name="TypeAllowedAndConditions" />
   <Type Name="TypeAllowedBasic" />
+  <Type Name="TypeAllowedRule" />
   <Type Name="TypeConditionSymbol" />
   <Type Name="TypeEvent" />
   <Type Name="TypeRulePack" />

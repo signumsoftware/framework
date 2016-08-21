@@ -42,7 +42,9 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
     autoRefreshPeriod?: number | null;
     displayName?: string | null;
     parts: Entities.MList<PanelPartEntity>;
-    guid?: string;
+    guid: string;
+    forNavbar?: boolean;
+    key?: string;
 }
 
 export module DashboardMessage {
@@ -85,6 +87,17 @@ export interface LinkListPartEntity extends Entities.Entity, IPartEntity {
     requiresTitle?: boolean;
 }
 
+export const LinkPartEntity = new Type<LinkPartEntity>("LinkPart");
+export interface LinkPartEntity extends Entities.Entity, IPartEntity {
+    link: LinkElementEntity;
+    requiresTitle: boolean;
+}
+
+export const OmniboxPanelPartEntity = new Type<OmniboxPanelPartEntity>("OmniboxPanelPart");
+export interface OmniboxPanelPartEntity extends Entities.Entity, IPartEntity {
+    requiresTitle: boolean;
+}
+
 export const PanelPartEntity = new Type<PanelPartEntity>("PanelPartEntity");
 export interface PanelPartEntity extends Entities.EmbeddedEntity {
     Type: "PanelPartEntity";
@@ -111,6 +124,14 @@ export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
     userChart?: Chart.UserChartEntity | null;
     showData?: boolean;
     requiresTitle?: boolean;
+}
+
+export const UserQueryCountPartEntity = new Type<UserQueryCountPartEntity>("UserQueryCountPart");
+export interface UserQueryCountPartEntity extends Entities.Entity, IPartEntity {
+    requiresTitle: boolean;
+    userQuery: Entities.Lite<UserQueries.UserQueryEntity>;
+    iconClass: string;
+    showName: boolean;
 }
 
 export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart");

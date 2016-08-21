@@ -38,12 +38,12 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
     componentWillMount() {
 
-        if (Expanded.setExpanded){
-            if (Expanded.getExpanded) {
-                this.wasExpanded = Expanded.getExpanded();
+        if (Navigator.Expander.setExpanded) {
+            if (Navigator.Expander.getExpanded) {
+                this.wasExpanded = Navigator.Expander.getExpanded();
             }
 
-            Expanded.setExpanded(true);
+            Navigator.Expander.setExpanded(true);
         }
 
         MapClient.API.operations(this.props.routeParams!.type)
@@ -60,8 +60,8 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
 
     componentWillUnmount(){
-        if (Expanded.setExpanded && this.wasExpanded != undefined){
-            Expanded.setExpanded(this.wasExpanded);
+        if (Navigator.Expander.setExpanded && this.wasExpanded != null){
+            Navigator.Expander.setExpanded(this.wasExpanded);
         }
     }
 
@@ -104,7 +104,7 @@ export default class OperationMapPage extends React.Component<OperationMapPagePr
 
     render() {
 
-        if (Expanded.getExpanded && !Expanded.getExpanded())
+        if (Navigator.Expander.getExpanded && !Navigator.Expander.getExpanded())
             return null;
 
         const s = this.state;

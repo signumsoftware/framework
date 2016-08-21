@@ -99,10 +99,12 @@ namespace Signum.React.Translation
                  let lt = new LocalizedTypeTS
                  {
                      culture = ci.Name,
-                     gender = t.Gender?.ToString(),
-                     description = t.Description,
-                     pluralDescription = t.PluralDescription,
-
+                     typeDescription = new LocalizedDescriptionTS
+                     {
+                         gender = t.Gender?.ToString(),
+                         description = t.Description,
+                         pluralDescription = t.PluralDescription,
+                     },
                      members = t.Members.Select(kvp => new LocalizedMemberTS { name = kvp.Key, description = kvp.Value }).ToDictionary(a => a.name),
                  }
                  group lt by t.Type into g
@@ -116,9 +118,9 @@ namespace Signum.React.Translation
             if (filter.HasText())
             {
                 var complete = types.Extract((k, v) => v.type.Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
-                            v.cultures.Values.Any(lt =>
-                            lt.description != null && lt.description.Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
-                            lt.pluralDescription != null && lt.pluralDescription.Contains(filter, StringComparison.InvariantCultureIgnoreCase)));
+                            v.cultures.Values.Select(a => a.typeDescription).Any(td =>
+                              td.description != null && td.description.Contains(filter, StringComparison.InvariantCultureIgnoreCase) ||
+                              td.pluralDescription != null && td.pluralDescription.Contains(filter, StringComparison.InvariantCultureIgnoreCase)));
 
 
                 var filtered = types.Extract((k, v) =>
@@ -171,10 +173,11 @@ namespace Signum.React.Translation
             var master = reference.Extract(defaultCulture);
             var target = reference.Extract(targetCulture);
             int totalTypes;
-            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationServer.Translator, target, master, reference.Values.ToList(), false, out totalTypes);
+            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationServer.Translator, target, master, reference.Values.ToList(), false, null, out totalTypes);
 
             return new AssemblyResultTS
             {
+                totalTypes = totalTypes,
                 types = changes.Types.Select(t => new LocalizableTypeTS(t.Type.Type)
                 {
                     cultures = cultures.ToDictionary(c => c.Name, c => GetLocalizedType(t, c, c.Equals(target)))
@@ -186,14 +189,18 @@ namespace Signum.React.Translation
         private LocalizedTypeTS GetLocalizedType(LocalizedTypeChanges t, CultureInfo c, bool isTarget)
         {
             var tc = t.TypeConflict?.TryGetC(c);
-
+            
             return new LocalizedTypeTS
             {
                 culture = c.Name,
-                description = tc?.Original.Description ?? (isTarget && t.TypeConflict.Count > 3 ? t.TypeConflict.Select(a=>a.Value.Translated).Distinct().Only() : null),
-                pluralDescription = tc?.Original.PluralDescription,
-                gender = tc?.Original.Gender?.ToString(),
-                translatedDescription = tc?.Translated,
+                typeDescription = t.TypeConflict == null ? null : 
+                new LocalizedDescriptionTS
+                {
+                    description = tc?.Original.Description ?? (isTarget && t.TypeConflict.Count > 3 ? t.TypeConflict.Select(a => a.Value.Translated).Distinct().Only() : null),
+                    pluralDescription = tc?.Original.PluralDescription,
+                    gender = tc?.Original.Gender?.ToString(),
+                    translatedDescription = tc?.Translated,
+                },
                 members = t.MemberConflicts.EmptyIfNull().Select(kvp => new LocalizedMemberTS
                 {
                     name = kvp.Key,
@@ -205,6 +212,7 @@ namespace Signum.React.Translation
 
         public class AssemblyResultTS
         {
+            public int totalTypes;
             public Dictionary<string, CulturesTS> cultures;
             public Dictionary<string, LocalizableTypeTS> types;
         }
@@ -250,6 +258,12 @@ namespace Signum.React.Translation
         public class LocalizedTypeTS
         {
             public string culture;
+            public LocalizedDescriptionTS typeDescription;
+            public Dictionary<string, LocalizedMemberTS> members;
+        }
+
+        public class LocalizedDescriptionTS
+        {
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string gender;
             public string description;
@@ -257,7 +271,6 @@ namespace Signum.React.Translation
             public string translatedDescription;
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string pluralDescription;
-            public Dictionary<string, LocalizedMemberTS> members;
         }
 
         public class LocalizedMemberTS
@@ -291,9 +304,14 @@ namespace Signum.React.Translation
 
                     if (ts != null)
                     {
-                        lt.Gender = ts.gender?[0];
-                        lt.Description = ts.description;
-                        lt.PluralDescription = ts.pluralDescription;
+                        if (ts.typeDescription != null)
+                        {
+                            var td = ts.typeDescription;
+                            lt.Gender = td.gender?[0];
+                            lt.Description = td.description;
+                            lt.PluralDescription = td.pluralDescription;
+                        }
+
                         lt.Members.SetRange(ts.members.Select(a => KVP.Create(a.Key, a.Value.description)));
                     }
                 }

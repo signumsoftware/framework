@@ -22,6 +22,7 @@ using Signum.Web.Basic;
 using Signum.Web.UserQueries;
 using Signum.Entities.UserAssets;
 using Signum.Web.UserAssets;
+using Signum.Entities.Dashboard;
 
 namespace Signum.Web.UserQueries
 {
@@ -93,6 +94,8 @@ namespace Signum.Web.UserQueries
                             .CreateProperty(a=>a.OrderType)
                             
                     },
+
+                    new EntitySettings<UserQueryCountPartEntity>()
                 });
 
                 ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);

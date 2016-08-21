@@ -4,6 +4,9 @@
 @using Signum.Utilities
 @using Signum.Web.Translation.Controllers
 @using Signum.Entities.Translation
+@using Signum.Engine.Translation
+@using Signum.Entities.Authorization
+@using Signum.Entities
 @{
     CultureInfo culture = ViewBag.Culture;
     CultureInfo defaultCulture = ViewBag.DefaultCulture;
@@ -64,6 +67,7 @@ else
 
                     bool hasMembers = defaultLocType.Options.IsSet(DescriptionOptions.Members);
 
+        
                     <thead>
                         <tr>
                             <th class="leftCell">@TranslationMessage.Type.NiceToString()</th>

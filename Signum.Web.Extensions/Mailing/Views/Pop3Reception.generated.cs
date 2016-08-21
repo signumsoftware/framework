@@ -151,18 +151,8 @@ Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageEntity))
             #line default
             #line hidden
             
-            #line 17 "..\..\Mailing\Views\Pop3Reception.cshtml"
-Write(Html.CountSearchControl(new FindOptions(typeof(ExceptionEntity))
-    {
-        FilterOptions = { new FilterOption("Entity.Pop3Reception", sc.Value) }
-    }, new Context(sc, "ex"), csc => { csc.View = true; }));
-
-            
-            #line default
-            #line hidden
-            
             #line 20 "..\..\Mailing\Views\Pop3Reception.cshtml"
-                                                          ;
+                                                             
 }
 
             

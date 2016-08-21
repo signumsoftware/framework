@@ -32,7 +32,7 @@ namespace Signum.React.Translation
         [Route("api/culture/currentCulture"), HttpGet, AllowAnonymous]
         public CultureInfoEntity CurrentCulture()
         {
-            return CultureInfo.CurrentCulture.ToCultureInfoEntity();
+            return CultureInfo.CurrentCulture.TryGetCultureInfoEntity() ?? CultureInfoLogic.CultureInfoToEntity.Value.Values.FirstEx();
         }
 
         [Route("api/culture/currentCulture"), HttpPost, AllowAnonymous]

@@ -1,0 +1,11 @@
+﻿@using System.Configuration
+@using Signum.Entities.Dashboard
+@using Signum.Web.Dashboard
+@model PanelPartEntity
+
+@{
+    string prefix = "r{0}c{1}".FormatWith(Model.Row, Model.StartColumn);
+    DashboardClient.PartViews config = DashboardClient.PanelPartViews[Model.Content.GetType()];
+}
+
+@Html.Partial(config.FrontEndView, TypeContextUtilities.UntypedNew(Model.Content, prefix))

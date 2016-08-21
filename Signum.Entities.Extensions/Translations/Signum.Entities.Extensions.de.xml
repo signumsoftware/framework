@@ -161,6 +161,7 @@
     <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Es ist ein Fehler beim Senden Ihrer Anfrage zum Zurücksetzen des Passworts aufgetreten. Bitte geben Sie Ihre Login-Daten ein." />
     <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="Es gibt kein registrierter Benutzer mit dieser E-Mail-Adresse" />
     <Member Name="TheSpecifiedPasswordsDontMatch" Description="Die angegebenen Passwörter stimmen nicht überein" />
+    <Member Name="TheUserIsNotLongerInTheDatabase" Description="Der Benutzer ist nicht mehr in der Datenbank" />
     <Member Name="TheUserStateMustBeDisabled" Description="Der Benutzerstatus muss deaktiviert sein" />
     <Member Name="User0IsDisabled" Description="Benutzer {0} ist deaktiviert" />
     <Member Name="Username" Description="Benutzername" />
@@ -177,6 +178,10 @@
     <Member Name="All" Description="Alle" />
     <Member Name="Mix" Description="Mix" />
     <Member Name="None" Description="Keine" />
+  </Type>
+  <Type Name="AuthTokenConfigurationEntity" Description="Auth-token-Konfiguration">
+    <Member Name="RefreshAnyTokenPreviousTo" Description="Aktualisiere alle Token vor" />
+    <Member Name="RefreshTokenEvery" Description="Aktualisiere Token jede" />
   </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Rolle" />
@@ -631,7 +636,9 @@
   </Type>
   <Type Name="EmailTemplateMessage">
     <Member Name="EndDateMustBeHigherThanStartDate" Description="Enddatum muss größer als Startdatum sein." />
+    <Member Name="HidePreview" Description="Vorschau verstecken" />
     <Member Name="NewCulture" Description="Neue Kultur" />
+    <Member Name="ShowPreview" Description="Vorschau anzeigen" />
     <Member Name="SystemEmailShouldBeSetToAccessModel0" Description="SystemEmail sollte festgesetzt werden, um auf Modell {0} zuzugreifen" />
     <Member Name="ThereAreNoMessagesForTheTemplate" Description="Es gibt keine Nachrichten für die Vorlage" />
     <Member Name="ThereMustBeAMessageFor0" Description="Es muss eine Nachricht für {0} geben" />
@@ -667,7 +674,6 @@
   <Type Name="EmbeddedFileEntity" Description="Eingebettete Datei">
     <Member Name="BinaryFile" Description="Binärdatei" />
     <Member Name="FileName" Description="Dateiname" />
-    <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
   </Type>
   <Type Name="EmbeddedFilePathEntity" Description="Eingebettete Datei-Pfad">
     <Member Name="BinaryFile" Description="Binärdatei" />
@@ -676,8 +682,6 @@
     <Member Name="FileLengthString" Description="Dateigröße string" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FileType" Description="Dateityp" />
-    <Member Name="FullPhysicalPath" Description="Vollständiger Physischer Pfad" />
-    <Member Name="FullWebPath" Description="Vollständige Web-Pfad" />
     <Member Name="Suffix" Description="Suffix" />
   </Type>
   <Type Name="EntityAction" Description="Entity-Aktion">
@@ -729,7 +733,6 @@
   <Type Name="FileEntity" Description="Datei">
     <Member Name="BinaryFile" Description="Binärdatei" />
     <Member Name="FileName" Description="Dateiname" />
-    <Member Name="FullWebPath" Description="Vollständiger Web-Pfad" />
     <Member Name="Hash" Description="Hash" />
   </Type>
   <Type Name="FileMessage">
@@ -756,8 +759,6 @@
     <Member Name="FileLengthString" Description="Dateigröße" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FileType" Description="Dateityp" />
-    <Member Name="FullPhysicalPath" Description="Physischer Pfad" />
-    <Member Name="FullWebPath" Description="URL" />
     <Member Name="Suffix" Description="Suffix" />
   </Type>
   <Type Name="FilePathOperation">
@@ -1606,6 +1607,7 @@
     <Member Name="ImportPreview" Description="Importvorschau" />
     <Member Name="ImportUserAssets" Description="Benutzer-Assets importieren" />
     <Member Name="SelectTheEntitiesToOverride" Description="Wählen Sie die Elemente zum Überschreiben aus" />
+    <Member Name="SelectTheXmlFileWithTheUserAssetsThatYouWantToImport" Description="Wählen Sie die XML-Datei mit den Benutzer-Assets, die Sie importieren möchten" />
     <Member Name="SucessfullyImported" Description="Erfolgreich importiert" />
   </Type>
   <Type Name="UserAssetPermission">

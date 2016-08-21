@@ -1,0 +1,9 @@
+﻿@using Signum.Entities.UserQueries
+@using Signum.Entities.Dashboard
+
+@using (var e = Html.TypeContext<UserQueryCountPartEntity>())
+{
+    @Html.ValueLine(e, uq => uq.IconClass)
+    @Html.ValueLine(e, uq => uq.ShowName)
+    @Html.EntityLine(e, uq => uq.UserQuery)
+}

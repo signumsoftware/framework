@@ -1,0 +1,28 @@
+﻿@using Signum.Entities.Dashboard
+@using Signum.Web.Dashboard
+@using System.Linq
+@using Signum.Utilities
+
+@model DashboardEntity
+
+<div id="dashboard-@Model.Id" class="navbar-collapse collapse">
+    <ul class="nav navbar-nav">
+        @{
+            var parts = Model.Parts.AgGroupToDictionary(p => p.Row,gr=>gr.OrderBy(p=>p.StartColumn))
+                .OrderBy(gr => gr.Key).SelectMany(gr => gr.Value);
+
+            foreach (var p in parts)
+            {
+                <li>
+                    @Html.Partial(DashboardClient.ViewPrefix.FormatWith("DashboardNavbarPartView"), p)
+                </li>
+            }
+        }
+    </ul>
+</div>
+
+<script>
+    $(function () {
+        $('#dashboard-@Model.Id .dashboard-tooltip[data-toggle="tooltip"]').tooltip();
+    })
+</script>

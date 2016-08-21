@@ -38,7 +38,19 @@ namespace ASP
     using System.Web.Security;
     using System.Web.UI;
     using System.Web.WebPages;
+    
+    #line 7 "..\..\Translation\Views\Index.cshtml"
+    using Signum.Engine.Translation;
+    
+    #line default
+    #line hidden
     using Signum.Entities;
+    
+    #line 6 "..\..\Translation\Views\Index.cshtml"
+    using Signum.Entities.Authorization;
+    
+    #line default
+    #line hidden
     
     #line 5 "..\..\Translation\Views\Index.cshtml"
     using Signum.Entities.Translation;
@@ -64,9 +76,11 @@ namespace ASP
         public override void Execute()
         {
             
-            #line 6 "..\..\Translation\Views\Index.cshtml"
+            #line 8 "..\..\Translation\Views\Index.cshtml"
   
-    ViewBag.Title = TranslationMessage.CodeTranslations.NiceToString();        
+    ViewBag.Title = TranslationMessage.CodeTranslations.NiceToString();
+
+    Lite<RoleEntity> selectedRole = ViewBag.Role;
 
             
             #line default
@@ -74,7 +88,7 @@ namespace ASP
 WriteLiteral("\r\n");
 
             
-            #line 9 "..\..\Translation\Views\Index.cshtml"
+            #line 13 "..\..\Translation\Views\Index.cshtml"
 Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 
             
@@ -83,7 +97,7 @@ Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 WriteLiteral("\r\n\r\n");
 
             
-            #line 11 "..\..\Translation\Views\Index.cshtml"
+            #line 15 "..\..\Translation\Views\Index.cshtml"
  if (Model.IsEmpty())
 {
 
@@ -93,16 +107,16 @@ WriteLiteral("\r\n\r\n");
 WriteLiteral("    <h2>");
 
             
-            #line 13 "..\..\Translation\Views\Index.cshtml"
+            #line 17 "..\..\Translation\Views\Index.cshtml"
    Write(TranslationMessage.NothingToTranslate.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("</h2>   \r\n");
+WriteLiteral("</h2>\r\n");
 
             
-            #line 14 "..\..\Translation\Views\Index.cshtml"
+            #line 18 "..\..\Translation\Views\Index.cshtml"
 }
 else
 {
@@ -113,7 +127,7 @@ else
 WriteLiteral("    <h2>");
 
             
-            #line 17 "..\..\Translation\Views\Index.cshtml"
+            #line 21 "..\..\Translation\Views\Index.cshtml"
    Write(ViewBag.Title);
 
             
@@ -122,9 +136,122 @@ WriteLiteral("    <h2>");
 WriteLiteral("</h2>\r\n");
 
             
-            #line 18 "..\..\Translation\Views\Index.cshtml"
-    
+            #line 22 "..\..\Translation\Views\Index.cshtml"
+
     var langs = Model.First().Value.Keys;
+
+
+
+            
+            #line default
+            #line hidden
+WriteLiteral("    <div>\r\n        <div");
+
+WriteLiteral(" class=\"dropdown\"");
+
+WriteLiteral(">\r\n            <button");
+
+WriteLiteral(" onclick=\"document.getElementById(\'myDropdown\').classList.toggle(\'show\');\"");
+
+WriteLiteral(" class=\"dropbtn\"");
+
+WriteLiteral(">\r\n");
+
+            
+            #line 29 "..\..\Translation\Views\Index.cshtml"
+                
+            
+            #line default
+            #line hidden
+            
+            #line 29 "..\..\Translation\Views\Index.cshtml"
+                 if (selectedRole == null)
+                {
+            
+            #line default
+            #line hidden
+            
+            #line 30 "..\..\Translation\Views\Index.cshtml"
+            Write(TranslationMessage.All.NiceToString());
+
+            
+            #line default
+            #line hidden
+            
+            #line 30 "..\..\Translation\Views\Index.cshtml"
+                                                        }
+                else
+                { 
+            
+            #line default
+            #line hidden
+            
+            #line 32 "..\..\Translation\Views\Index.cshtml"
+             Write(selectedRole.ToString());
+
+            
+            #line default
+            #line hidden
+            
+            #line 32 "..\..\Translation\Views\Index.cshtml"
+                                           }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            </button>\r\n            <div");
+
+WriteLiteral(" id=\"myDropdown\"");
+
+WriteLiteral(" class=\"dropdown-content\"");
+
+WriteLiteral(">\r\n\r\n");
+
+WriteLiteral("                ");
+
+            
+            #line 36 "..\..\Translation\Views\Index.cshtml"
+           Write(Html.ActionLink(TranslationMessage.All.NiceToString(), (TranslationController tc) => tc.Index(null)));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n\r\n");
+
+            
+            #line 38 "..\..\Translation\Views\Index.cshtml"
+                
+            
+            #line default
+            #line hidden
+            
+            #line 38 "..\..\Translation\Views\Index.cshtml"
+                 foreach (var role in TranslationLogic.Occurrences.LocalizableTypeUsedNotLocalized.Keys)
+                {
+                    
+            
+            #line default
+            #line hidden
+            
+            #line 40 "..\..\Translation\Views\Index.cshtml"
+               Write(Html.ActionLink(role.ToString(), (TranslationController tc) => tc.Index(role)));
+
+            
+            #line default
+            #line hidden
+            
+            #line 40 "..\..\Translation\Views\Index.cshtml"
+                                                                                                   
+                }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("            </div>\r\n        </div>\r\n    </div>\r\n");
+
+            
+            #line 45 "..\..\Translation\Views\Index.cshtml"
+
 
 
             
@@ -137,7 +264,7 @@ WriteLiteral(" class=\"st\"");
 WriteLiteral(">\r\n        <tr>\r\n            <th></th>\r\n            <th>");
 
             
-            #line 24 "..\..\Translation\Views\Index.cshtml"
+            #line 50 "..\..\Translation\Views\Index.cshtml"
            Write(TranslationMessage.All.NiceToString());
 
             
@@ -146,13 +273,13 @@ WriteLiteral(">\r\n        <tr>\r\n            <th></th>\r\n            <th>");
 WriteLiteral("</th>\r\n");
 
             
-            #line 25 "..\..\Translation\Views\Index.cshtml"
+            #line 51 "..\..\Translation\Views\Index.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 25 "..\..\Translation\Views\Index.cshtml"
+            #line 51 "..\..\Translation\Views\Index.cshtml"
              foreach (var ci in langs)
             {
 
@@ -162,7 +289,7 @@ WriteLiteral("</th>\r\n");
 WriteLiteral("                <th>");
 
             
-            #line 27 "..\..\Translation\Views\Index.cshtml"
+            #line 53 "..\..\Translation\Views\Index.cshtml"
                Write(ci.Name);
 
             
@@ -171,7 +298,7 @@ WriteLiteral("                <th>");
 WriteLiteral("</th>\r\n");
 
             
-            #line 28 "..\..\Translation\Views\Index.cshtml"
+            #line 54 "..\..\Translation\Views\Index.cshtml"
             }
 
             
@@ -180,13 +307,13 @@ WriteLiteral("</th>\r\n");
 WriteLiteral("        </tr>\r\n");
 
             
-            #line 30 "..\..\Translation\Views\Index.cshtml"
+            #line 56 "..\..\Translation\Views\Index.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 30 "..\..\Translation\Views\Index.cshtml"
+            #line 56 "..\..\Translation\Views\Index.cshtml"
          foreach (var assembly in Model)
         {
 
@@ -196,7 +323,7 @@ WriteLiteral("        </tr>\r\n");
 WriteLiteral("            <tr>\r\n                <th>");
 
             
-            #line 33 "..\..\Translation\Views\Index.cshtml"
+            #line 59 "..\..\Translation\Views\Index.cshtml"
                Write(assembly.Key.GetName().Name);
 
             
@@ -207,7 +334,7 @@ WriteLiteral("</th>\r\n                <td>\r\n");
 WriteLiteral("                    ");
 
             
-            #line 35 "..\..\Translation\Views\Index.cshtml"
+            #line 61 "..\..\Translation\Views\Index.cshtml"
                Write(Html.ActionLink(TranslationMessage.View.NiceToString(), (TranslationController tc) => tc.View(assembly.Key.GetName().Name, null, false, null)));
 
             
@@ -216,13 +343,13 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </td>\r\n");
 
             
-            #line 37 "..\..\Translation\Views\Index.cshtml"
+            #line 63 "..\..\Translation\Views\Index.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 37 "..\..\Translation\Views\Index.cshtml"
+            #line 63 "..\..\Translation\Views\Index.cshtml"
                  foreach (var tf in assembly.Value.Values)
                 {
 
@@ -234,7 +361,7 @@ WriteLiteral("                    <td>\r\n");
 WriteLiteral("                        ");
 
             
-            #line 40 "..\..\Translation\Views\Index.cshtml"
+            #line 66 "..\..\Translation\Views\Index.cshtml"
                    Write(Html.ActionLink(TranslationMessage.View.NiceToString(), (TranslationController tc) => tc.View(tf.Assembly.GetName().Name, tf.CultureInfo.Name, false, null)));
 
             
@@ -243,29 +370,29 @@ WriteLiteral("                        ");
 WriteLiteral("\r\n                        <br />\r\n");
 
             
-            #line 42 "..\..\Translation\Views\Index.cshtml"
+            #line 68 "..\..\Translation\Views\Index.cshtml"
                         
             
             #line default
             #line hidden
             
-            #line 42 "..\..\Translation\Views\Index.cshtml"
+            #line 68 "..\..\Translation\Views\Index.cshtml"
                          if (!tf.IsDefault && tf.CultureInfo.IsNeutralCulture)
                         {
-                        
+                            
             
             #line default
             #line hidden
             
-            #line 44 "..\..\Translation\Views\Index.cshtml"
-                   Write(Html.ActionLink(TranslationMessage.Sync.NiceToString(), (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name, false), new { @class = "status-" + tf.Status().ToString() }));
+            #line 70 "..\..\Translation\Views\Index.cshtml"
+                       Write(Html.ActionLink(TranslationMessage.Sync.NiceToString(), (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name, false, selectedRole), new { @class = "status-" + tf.Status(selectedRole).ToString() }));
 
             
             #line default
             #line hidden
             
-            #line 44 "..\..\Translation\Views\Index.cshtml"
-                                                                                                                                                                                                                                        
+            #line 70 "..\..\Translation\Views\Index.cshtml"
+                                                                                                                                                                                                                                                                  
                         }
 
             
@@ -274,7 +401,7 @@ WriteLiteral("\r\n                        <br />\r\n");
 WriteLiteral("                    </td>\r\n");
 
             
-            #line 47 "..\..\Translation\Views\Index.cshtml"
+            #line 73 "..\..\Translation\Views\Index.cshtml"
                 }
 
             
@@ -283,7 +410,7 @@ WriteLiteral("                    </td>\r\n");
 WriteLiteral("            </tr>\r\n");
 
             
-            #line 49 "..\..\Translation\Views\Index.cshtml"
+            #line 75 "..\..\Translation\Views\Index.cshtml"
         }
 
             
@@ -292,7 +419,7 @@ WriteLiteral("            </tr>\r\n");
 WriteLiteral("    </table>\r\n");
 
             
-            #line 51 "..\..\Translation\Views\Index.cshtml"
+            #line 77 "..\..\Translation\Views\Index.cshtml"
 }
             
             #line default

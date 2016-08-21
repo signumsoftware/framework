@@ -119,6 +119,7 @@
     <Member Name="Login_Repeat" Description="Repetir:" />
     <Member Name="Login_UserName" Description="Nombre de usuario:" />
     <Member Name="Login_UserName_Watermark" Description="usuario" />
+    <Member Name="LoginWithAnotherUser" Description="Iniciar sesión con otro usuario" />
     <Member Name="Logout" Description="Desconectar" />
     <Member Name="NewPassword" Description="Nueva contraseña" />
     <Member Name="NotAllowedToSaveThis0WhileOffline" Description="No se puede guardar este {0} en modo desconectado" />
@@ -155,6 +156,7 @@
     <Member Name="Username0IsNotValid" Description="El nombre de usuario {0} no es válido" />
     <Member Name="UserNameMustHaveAValue" Description="Se debe introducir el nombre de usuario" />
     <Member Name="View" Description="Ver" />
+    <Member Name="Welcome0" Description="¡ Bienvenido {0}" />
     <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Ha solicitado crear una cuenta. Para confirmarlo haga click en el siguiente enlace:" />
     <Member Name="WeWillSendYouAnEmailWithALinkToResetYourPassword" Description="Le enviaremos un correo electrónico con un enlace para restablecer su contraseña." />
     <Member Name="YouMustRepeatTheNewPassword" Description="Debes repetir la nueva contraseña" />
@@ -186,9 +188,6 @@
   </Type>
   <Type Name="ChartColumnEntity" Description="Columna de gráfico">
     <Member Name="DisplayName" Description="Nombre para Mostrar" />
-    <Member Name="Parameter1" Description="Parámetro1" />
-    <Member Name="Parameter2" Description="Parámetro2" />
-    <Member Name="Parameter3" Description="Parámetro3" />
     <Member Name="ScriptColumn" Description="Columna de script" />
     <Member Name="Token" Description="Token" />
   </Type>
@@ -202,6 +201,7 @@
     <Member Name="Magnitude" Description="Magnitud" />
     <Member Name="Positionable" Description="Posicionable" />
     <Member Name="Real" Description="Real" />
+    <Member Name="RealGroupable" Description="Real groupable" />
     <Member Name="String" Description="Cadena" />
   </Type>
   <Type Name="ChartMessage">
@@ -234,12 +234,18 @@
     <Member Name="EditUserChart" Description="Editar gráfico de usuario" />
     <Member Name="MyCharts" Description="Mis Gráficos" />
     <Member Name="NewPalette" Description="Nueva paleta" />
+    <Member Name="Preview" Description="Vista previa" />
     <Member Name="SavePalette" Description="Guardar paleta" />
     <Member Name="ViewPalette" Description="Ver paleta" />
   </Type>
   <Type Name="ChartPaletteModel" Description="Paleta de gráfico">
     <Member Name="Colors" Description="Colores" />
     <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="ChartParameterEntity" Description="Parámetro de gráfico">
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="ScriptParameter" Description="Parámetro de secuencia de comandos" />
+    <Member Name="Value" Description="Valor" />
   </Type>
   <Type Name="ChartParameterType" Description="Tipo de parámetro del gráfico">
     <Member Name="Enum" Description="Enum" />
@@ -257,6 +263,7 @@
     <Member Name="Invalidator" Description="Invalidador" />
     <Member Name="Multiplications" Description="Multiplicaciones" />
     <Member Name="Orders" Description="Órdenes" />
+    <Member Name="Parameters" Description="Parámetros" />
     <Member Name="QueryName" Description="Nombre consulta" />
   </Type>
   <Type Name="ChartScriptColumnEntity" Description="Columna de Script de Gráfico">
@@ -264,9 +271,6 @@
     <Member Name="DisplayName" Description="Nombre para Mostrar" />
     <Member Name="IsGroupKey" Description="Es clave de grupo" />
     <Member Name="IsOptional" Description="Es opcional" />
-    <Member Name="Parameter1" Description="Parámetro1" />
-    <Member Name="Parameter2" Description="Parámetro2" />
-    <Member Name="Parameter3" Description="Parámetro3" />
   </Type>
   <Type Name="ChartScriptEntity" Description="Script de gráfico">
     <Member Name="Columns" Description="Columnas" />
@@ -274,6 +278,7 @@
     <Member Name="GroupBy" Description="Agrupar por" />
     <Member Name="Icon" Description="Icono" />
     <Member Name="Name" Description="Nombre" />
+    <Member Name="Parameters" Description="Parámetros" />
     <Member Name="Script" Description="Script" />
   </Type>
   <Type Name="ChartScriptOperation">
@@ -282,6 +287,7 @@
     <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="ChartScriptParameterEntity" Description="Parámetro de script de gráfico">
+    <Member Name="ColumnIndex" Description="Índice de columnas" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="Type" Description="Tipo" />
     <Member Name="ValueDefinition" Description="Definición de valor" />
@@ -322,7 +328,9 @@
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="EmbeddedInEntity" Description="Incrustado en entidad" />
     <Member Name="EntityType" Description="Tipo de entidad" />
+    <Member Name="ForNavbar" Description="Para la barra de navegación" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="Key" Description="Clave" />
     <Member Name="Owner" Description="Propietario" />
     <Member Name="Parts" Description="Partes" />
   </Type>
@@ -462,6 +470,7 @@
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="EmailAddress" Description="Dirección email" />
     <Member Name="EmailOwner" Description="Propietario email" />
+    <Member Name="InvalidEmail" Description="Correo electrónico no válida" />
   </Type>
   <Type Name="EmailAttachmentEntity" Description="Archivo adjunto de email">
     <Member Name="ContentId" Description="Content id" />
@@ -473,9 +482,9 @@
     <Member Name="LinkedResource" Description="Recursos vinculados" />
   </Type>
   <Type Name="EmailConfigurationEntity" Description="Configuración de email">
-    <Member Name="AsyncSenderPeriodMilliseconds" Description="Async sender period milliseconds" />
-    <Member Name="ChunkSizeToProcessEmails" Description="Chunk size to process emails" />
-    <Member Name="CreationDateHoursLimitToSendEmails" Description="Creation date hours limit to send emails" />
+    <Member Name="AsyncSenderPeriod" Description="Período de envío Asíncrono" />
+    <Member Name="AvoidSendingEmailsOlderThan" Description="Evite enviar mensajes previos a" />
+    <Member Name="ChunkSizeSendingEmails" Description="Tamaño de envío de mensajes de correo electrónico" />
     <Member Name="DefaultCulture" Description="Cultura predeterminada" />
     <Member Name="MaxEmailSendRetries" Description="Max email send retries" />
     <Member Name="OverrideEmailAddress" Description="Reemplazar dirección email" />
@@ -503,7 +512,7 @@
     <Member Name="Attachments" Description="Archivos adjuntos" />
     <Member Name="Body" Description="Cuerpo" />
     <Member Name="BodyHash" Description="Hash Cuerpo" />
-    <Member Name="CreationTime" Description="Fecha de creación" />
+    <Member Name="CreationDate" Description="Fecha de creación" />
     <Member Name="EditableMessage" Description="Mensaje editable" />
     <Member Name="Exception" Description="Error" />
     <Member Name="From" Description="De" />
@@ -642,7 +651,20 @@
   <Type Name="EmbeddedFileEntity" Description="Archivo incrustado">
     <Member Name="BinaryFile" Description="Archivo binario" />
     <Member Name="FileName" Description="Nombre de archivo" />
+    <Member Name="FileType" Description="Tipo de archivo" />
     <Member Name="FullWebPath" Description="Ruta web completa" />
+    <Member Name="RelativeFilePath" Description="Ruta de acceso relativa" />
+  </Type>
+  <Type Name="EmbeddedFilePathEntity" Description="Ruta del archivo incrustado">
+    <Member Name="BinaryFile" Description="Archivo binario" />
+    <Member Name="CalculatedDirectory" Description="Directorio calculado" />
+    <Member Name="FileLength" Description="Longitud del archivo" />
+    <Member Name="FileLengthString" Description="Cadena de la longitud de archivo" />
+    <Member Name="FileName" Description="Nombre de archivo" />
+    <Member Name="FileType" Description="Tipo de archivo" />
+    <Member Name="FullPhysicalPath" Description="Ruta de acceso física completa" />
+    <Member Name="FullWebPath" Description="Ruta web completo" />
+    <Member Name="Sufix" Description="Sufijo" />
   </Type>
   <Type Name="EntityAction" Description="Acción de la entidad">
     <Member Name="Different" Description="Diferentes" />
@@ -707,6 +729,7 @@
   </Type>
   <Type Name="FilePathEntity" Description="Ruta archivo">
     <Member Name="BinaryFile" Description="Archivo binario" />
+    <Member Name="CalculatedDirectory" Description="Directorio calculado" />
     <Member Name="CreationDate" Description="Fecha de creación" />
     <Member Name="FileLength" Description="Longitud" />
     <Member Name="FileLengthString" Description="Tamaño" />
@@ -864,6 +887,10 @@
     <Member Name="Links" Description="Enlaces" />
     <Member Name="RequiresTitle" Description="Requiere título" />
   </Type>
+  <Type Name="LinkPartEntity" Description="Link parte">
+    <Member Name="Link" Description="Enlace" />
+    <Member Name="RequiresTitle" Description="Requiere título" />
+  </Type>
   <Type Name="MapMessage">
     <Member Name="Color" Description="Color" />
     <Member Name="Columns" Description="Columnas" />
@@ -977,6 +1004,9 @@
     <Member Name="Search" Description="Buscar..." />
     <Member Name="Unknown" Description="Desconocido" />
     <Member Name="Yes" Description="sí" />
+  </Type>
+  <Type Name="OmniboxPanelPartEntity" Description="Panel de Omnibox parte">
+    <Member Name="RequiresTitle" Description="Requiere título" />
   </Type>
   <Type Name="OperationAllowed">
     <Member Name="Allow" Description="Permitir" />
@@ -1562,6 +1592,7 @@
     <Member Name="Invalidator" Description="Invalidador" />
     <Member Name="Orders" Description="Órdenes" />
     <Member Name="Owner" Description="Propietario" />
+    <Member Name="Parameters" Description="Parámetros" />
     <Member Name="Query" Description="Consulta" />
   </Type>
   <Type Name="UserChartOperation">
@@ -1593,7 +1624,14 @@
     <Member Name="SaveNew" Description="Alta" />
     <Member Name="SetPassword" Description="Establecer la contraseña" />
   </Type>
+  <Type Name="UserQueryCountPartEntity" Description="Consulta de usuario contador parte">
+    <Member Name="IconClass" Description="Clase de icono" />
+    <Member Name="RequiresTitle" Description="Requiere título" />
+    <Member Name="ShowName" Description="Mostrar nombre" />
+    <Member Name="UserQuery" Description="Consulta de usuario" />
+  </Type>
   <Type Name="UserQueryEntity" Description="Consulta de Usuario">
+    <Member Name="AllowSelection" Description="Permitir la selección" />
     <Member Name="Columns" Description="Columnas" />
     <Member Name="ColumnsMode" Description="Modo columnas" />
     <Member Name="DisplayName" Description="Nombre" />
@@ -1616,6 +1654,7 @@
     <Member Name="AreYouSureToRemove0" Description="¿Estás seguro de eliminar '{0}'?" />
     <Member Name="Edit" Description="Editar" />
     <Member Name="MyQueries" Description="Mis Queries" />
+    <Member Name="Preview" Description="Vista previa" />
     <Member Name="RemoveUserQuery" Description="¿Eliminar consulta personalizada?" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="La operación de filtro {0} no es compatible con {1}" />
     <Member Name="Use0ToFilterCurrentEntity" Description="Utilice {0} para filtrar la entidad actual" />
@@ -1644,13 +1683,6 @@
     <Member Name="Device" Description="Dispositivo" />
     <Member Name="Ticket" Description="Ticket" />
     <Member Name="User" Description="Usuario" />
-  </Type>
-  <Type Name="ViewLogConfigurationEntity" Description="Configuración de registro de vista">
-    <Member Name="Active" Description="Activo" />
-    <Member Name="QueryTextLog" Description="Registrar texto Query" />
-    <Member Name="QueryUrlLog" Description="Registrar Url Query" />
-    <Member Name="TypeList" Description="Lista de tipos" />
-    <Member Name="Types" Description="Tipos" />
   </Type>
   <Type Name="ViewLogEntity" Description="Registro de visita">
     <Member Name="Data" Description="Datos" />

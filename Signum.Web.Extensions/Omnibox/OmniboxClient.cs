@@ -13,20 +13,31 @@ using System.Web.Mvc;
 using Signum.Utilities;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
+using Signum.Web.Dashboard;
 
 namespace Signum.Web.Omnibox
 {
     public static class OmniboxClient
     {
+        static Func<bool> CanSeeFunc;
+        public static bool CanSee()
+        {
+            return CanSeeFunc == null || CanSeeFunc();
+        }
+
+        public static string ViewPrefix = "~/Omnibox/Views/{0}.cshtml";
         public static JsModule Module = new JsModule("Extensions/Signum.Web.Extensions/Omnibox/Scripts/Omnibox");
         static Dictionary<Type, OmniboxProviderBase> Providers = new Dictionary<Type, OmniboxProviderBase>();
 
-        public static void Start()
+        public static void Start(Func<bool> canSee)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                CanSeeFunc = canSee;
+
                 Navigator.RegisterArea(typeof(OmniboxClient));
 
+              
                 OmniboxParser.Manager = new WebOmniboxManager();
             }
         }

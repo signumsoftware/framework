@@ -11,37 +11,49 @@
     using (var sc = tc.SubContext())
     {
         sc.FormGroupStyle = FormGroupStyle.Basic;
-    
-    <div class="form-vertical">
-        <div class="row">
-            <div class="col-sm-6">
-                @Html.ValueLine(sc, cp => cp.DisplayName)
+
+        <div class="form-vertical">
+            <div class="row">
+                <div class="col-sm-6">
+                    @Html.ValueLine(sc, cp => cp.DisplayName)
+                </div>
+                <div class="col-sm-3">
+                    @Html.ValueLine(sc, cp => cp.DashboardPriority)
+                </div>
+                <div class="col-sm-3">
+                    @Html.ValueLine(sc, cp => cp.AutoRefreshPeriod)
+                </div>
             </div>
-            <div class="col-sm-3">
-                @Html.ValueLine(sc, cp => cp.DashboardPriority)
-            </div>
-             <div class="col-sm-3">
-                @Html.ValueLine(sc, cp => cp.AutoRefreshPeriod)
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-4">
-                @Html.EntityLine(sc, cp => cp.Owner, el => el.Create = false)
-            </div>
-            <div class="col-sm-4">
-                @Html.EntityLine(sc, cp => cp.EntityType, el => { 
+            <div class="row">
+                <div class="col-sm-4">
+                    @Html.EntityLine(sc, cp => cp.Owner, el => el.Create = false)
+                </div>
+                <div class="col-sm-4">
+                    @Html.EntityLine(sc, cp => cp.EntityType, el => {
                el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
                el.AttachFunction = UserAssetsClient.Module["attachShowEmbeddedInEntity"](el);
            })
+                </div>
+                <div class="col-sm-4">
+                    @Html.ValueLine(sc, f => f.EmbeddedInEntity)
+                </div>
             </div>
-             <div class="col-sm-4">
-                 @Html.ValueLine(sc, f => f.EmbeddedInEntity)
-             </div>
+
+            <fieldset>
+                <legend>Navbar</legend>
+                <div class="row">
+                    <div class="col-sm-4">
+                        @Html.ValueLine(sc, cp => cp.ForNavbar)
+                    </div>
+                    <div class="col-sm-4">
+                        @Html.ValueLine(sc, cp => cp.Key)
+                    </div>
+                </div>
+            </fieldset>
         </div>
-    </div>
-    
+
     }
-    
+
     @Html.GridRepeater(tc, cp => cp.Parts, grid =>
         {
             grid.PartialViewName = DashboardClient.AdminViewPrefix.FormatWith("PanelPartViewAdmin");

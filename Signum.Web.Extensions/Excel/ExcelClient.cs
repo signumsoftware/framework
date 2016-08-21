@@ -19,6 +19,7 @@ using Signum.Web.Chart;
 using Signum.Entities.Excel;
 using Signum.Engine.Excel;
 using Signum.Entities.Mailing;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web.Excel
 {
@@ -47,12 +48,12 @@ namespace Signum.Web.Excel
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryEntity)))
                         Navigator.Manager.EntitySettings.Add(typeof(QueryEntity), new EntitySettings<QueryEntity>());
 
-
+                    
                     Navigator.AddSetting(new EntitySettings<ExcelReportEntity> { PartialViewName = _ => ViewPrefix.FormatWith("ExcelReport") });
-                }
+                        }
 
                 if (toExcelPlain || excelReport)
-                    ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
+                    ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName); 
 
                 if (excelAttachment)
                 {
@@ -76,11 +77,12 @@ namespace Signum.Web.Excel
         {
             if (ctx.Prefix.HasText())
                 return null;
+            
+            if (ExcelReport && DynamicQueryManager.Current.QueryAllowed(typeof(ExcelReportEntity)))
 
-            if (ExcelReport)
             {
                 var items = new List<IMenuItem>();
-
+                
                 if (ToExcelPlain)
                     items.Add(PlainExcel(ctx).ToMenuItem());
 
@@ -104,13 +106,13 @@ namespace Signum.Web.Excel
 
                 items.Add(new MenuItemSeparator());
 
-                var current = QueryLogic.GetQueryEntity(ctx.QueryName).ToLite().Key();
+                var current =  QueryLogic.GetQueryEntity(ctx.QueryName).ToLite().Key();
 
                 items.Add(new MenuItem(ctx.Prefix, "qbReportAdminister")
                 {
                     Title = ExcelMessage.Administer.NiceToString(),
                     Text = ExcelMessage.Administer.NiceToString(),
-                    OnClick = Module["administerExcelReports"](ctx.Prefix, Finder.ResolveWebQueryName(typeof(ExcelReportEntity)), current),
+                    OnClick = Module["administerExcelReports"](ctx.Prefix, Finder.ResolveWebQueryName(typeof(ExcelReportEntity)),current),
                 });
 
                 items.Add(new MenuItem(ctx.Prefix, "qbReportCreate")
@@ -123,8 +125,8 @@ namespace Signum.Web.Excel
                 return new ToolBarButton[]
                 {
                     new ToolBarDropDown(ctx.Prefix, "tmExcel")
-                    {
-                        Title = "Excel",
+                    { 
+                        Title = "Excel", 
                         Text = "Excel",
                         Items = items
                     }

@@ -150,7 +150,7 @@ namespace Signum.React.Selenium
 
         public virtual void SetCurrentCulture()
         {
-            string culture = Selenium.WaitElementPresent(By.Id("culture-dropdown")).GetParent().GetAttribute("data-culture");
+            string culture = Selenium.WaitElementPresent(By.Id("culture-dropdown")).GetAttribute("data-culture");
             
             Thread.CurrentThread.CurrentCulture = Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
         }

@@ -261,26 +261,20 @@ export function autoLogin(): Promise<UserEntity> {
 export function logout() {
 
     Api.logout().then(() => {
-        onLogout();
-        setCurrentUser(undefined);
+        Options.onLogout();
         setAuthToken(undefined);
+        setCurrentUser(undefined);
     }).done();
 }
 
-export let onLogout = () => {
-    Navigator.currentHistory.push("~/");
-}
+export namespace Options {
+    export let onLogout = () => {
+        Navigator.currentHistory.push("~/");
+    }
 
-export function changeOnLogout(newOnLogout: () => void) {
-    onLogout = newOnLogout;
-}
-
-export let onLogin = () => {
-    Navigator.currentHistory.push("~/");
-}
-
-export function changeOnLogin(newOnLogin: () => void) {
-    onLogin = newOnLogin;
+    export let onLogin = () => {
+        Navigator.currentHistory.push("~/");
+    }
 }
 
 export function isPermissionAuthorized(permission: PermissionSymbol) {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +17,7 @@ using Signum.Entities.Files;
 using System.Security.Cryptography;
 using Signum.Entities.Scheduler;
 using Signum.Utilities.ExpressionTrees;
+using System.Reflection;
 
 namespace Signum.Entities.Mailing
 {
@@ -49,7 +50,7 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string subject;
-        [StringLengthValidator(AllowNulls = true, AllowLeadingSpaces=true, AllowTrailingSpaces=true)]
+        [StringLengthValidator(AllowNulls = true, AllowLeadingSpaces = true, AllowTrailingSpaces = true)]
         public string Subject
         {
             get { return subject; }
@@ -58,7 +59,7 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string body;
-        [StringLengthValidator(AllowNulls = true, MultiLine=true)]
+        [StringLengthValidator(AllowNulls = true, MultiLine = true)]
         public string Body
         {
             get { return body; }
@@ -283,8 +284,19 @@ namespace Signum.Entities.Mailing
         public Lite<IEmailOwnerEntity> EmailOwner { get; set; }
 
         [NotNullable, SqlDbType(Size = 100)]
-        [EMailValidator, StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string EmailAddress { get; set; }
+
+        public bool InvalidEmail { get; set; }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Name == nameof(EmailAddress) && !InvalidEmail && !EMailValidatorAttribute.EmailRegex.IsMatch(EmailAddress))
+                return ValidationMessage._0DoesNotHaveAValid1Format.NiceToString().FormatWith("{0}", pi.NiceName());
+
+
+            return base.PropertyValidation(pi);
+        }
 
         public string DisplayName { get; set; }
 

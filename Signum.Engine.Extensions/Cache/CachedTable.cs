@@ -50,7 +50,8 @@ namespace Signum.Engine.Cache
                     throw new InvalidOperationException("Invalid query for SqlDependency") { Data = { { "query", query.PlainSql() } } };
 
                 if (args.Info == SqlNotificationInfo.PreviousFire)
-                    throw new InvalidOperationException("The same transaction that loaded the data is invalidating it!") { Data = { { "query", query.PlainSql() } } };
+                    throw new InvalidOperationException("The same transaction that loaded the data is invalidating it! Table: {0} SubTables: {1} ".
+                        FormatWith(Table, subTables==null?null: subTables.Select(e=>e.Table).ToString(","))) { Data = { { "query", query.PlainSql() } } };
 
                 if (CacheLogic.LogWriter != null)
                     CacheLogic.LogWriter.WriteLine("Change {0}".FormatWith(GetType().TypeName())); 

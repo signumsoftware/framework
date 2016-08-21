@@ -14,6 +14,7 @@ using Signum.Entities.Authorization;
 using System.Xml.Linq;
 using Signum.Entities.UserAssets;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities.Dashboard;
 
 namespace Signum.Entities.UserQueries
 {
@@ -182,7 +183,7 @@ namespace Signum.Entities.UserQueries
         public static ExecuteSymbol<UserQueryEntity> Save;
         public static DeleteSymbol<UserQueryEntity> Delete;
     }
-
+    
 
     [Serializable]
     public class QueryOrderEntity : EmbeddedEntity
