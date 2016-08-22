@@ -90,7 +90,6 @@
     <Compile Include="Basics\OperationLog.cs" />
     <Compile Include="Basics\PropertyRouteEntity.cs" />
     <Compile Include="Basics\QueryEntity.cs" />
-    <Compile Include="Basics\Request.cs" />
     <Compile Include="Basics\SemiSymbol.cs" />
     <Compile Include="DynamicQuery\Tokens\AggregateToken.cs" />
     <Compile Include="DynamicQuery\Tokens\BagPropertyToken.cs" />
