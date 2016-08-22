@@ -18,13 +18,13 @@ namespace Signum.Engine.Basics
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
 
-                sb.Include<RequestEntity>().WithQuery(dqm,
+                sb.Include<RestRequestEntity>().WithQuery(dqm,
                     e => new
                     {
                         Entity = e,
                         e.CreationDate,
                         URI = e.URL,
-                        e.Values.Count
+                        e.QueryString.Count
                     });
 
             }

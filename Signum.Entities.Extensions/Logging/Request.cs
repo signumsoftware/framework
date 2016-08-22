@@ -6,27 +6,44 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Entities.Basics;
 using static System.Int32;
 
 namespace Signum.Entities.RestLogging
 {
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
-    public class RequestEntity : Entity
+    public class RestRequestEntity : Entity
     {
         [NotNullable, SqlDbType(Size = MaxValue)]
         [StringLengthValidator(AllowNulls = false, Max = MaxValue)]
         public string URL { get; set; }
 
-        [NotNullable, SqlDbType(Size = MaxValue)]
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = MaxValue, MultiLine = true)]
+        [SqlDbType(Size = MaxValue)]
+        [StringLengthValidator(AllowNulls = true, Min = 0, Max = MaxValue, MultiLine = true)]
         public string Response { get; set; }
 
         public DateTime CreationDate { get; private set; } = TimeZoneManager.Now;
 
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
 
         [NotNullable, PreserveOrder]
         [NotNullValidator, NoRepeatValidator]
-        public MList<RequestValueEntity> Values { get; set; } = new MList<RequestValueEntity>();
+        public MList<RequestValueEntity> QueryString { get; set; } = new MList<RequestValueEntity>();
+
+        public Lite<IUserEntity> User { get; set; }
+
+        [NotNullable, SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Controller { get; set; }
+
+        [NotNullable, SqlDbType(Size = 100)]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string Action { get; set; }
+
+        public Lite<ExceptionEntity> Exception { get; set; }
+
 
     }
 

@@ -1,10 +1,10 @@
 ﻿import * as React from 'react'
 import * as moment from 'moment'
 import { Tabs, Tab} from 'react-bootstrap'
-import { RequestEntity } from '../Signum.Entities.RestLogging'
+import { RestRequestEntity } from '../Signum.Entities.RestLogging'
 import { TypeContext, ValueLine, ValueLineType, EntityLine, EntityRepeater } from "../../../../Framework/Signum.React/Scripts/Lines";
 
-export default class Request extends React.Component<{ ctx: TypeContext<RequestEntity> }, void> {
+export default class Request extends React.Component<{ ctx: TypeContext<RestRequestEntity> }, void> {
     render() {
         var ctx = this.props.ctx;
         const sc = this.props.ctx.subCtx({ labelColumns: { sm: 4 } });
@@ -14,7 +14,12 @@ export default class Request extends React.Component<{ ctx: TypeContext<RequestE
                     <div className="col-sm-12">
                         <ValueLine ctx={sc.subCtx(f => f.creationDate)} unitText={moment(sc.value.creationDate).toUserInterface().fromNow()} />
                         <ValueLine ctx={sc.subCtx(f => f.uRL)} />
-                        <EntityRepeater ctx={sc.subCtx(f => f.values)}/>
+                        <ValueLine ctx={sc.subCtx(f => f.controller)}/>
+                        <ValueLine ctx={sc.subCtx(f => f.action)}/>
+                        <EntityLine ctx={sc.subCtx(f => f.exception)}/>
+
+
+                        <EntityRepeater ctx={sc.subCtx(f => f.queryString)}/>
                     </div>
 
                 </div>
