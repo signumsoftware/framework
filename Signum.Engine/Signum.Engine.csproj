@@ -93,7 +93,6 @@
     <Compile Include="Basics\ExceptionLogic.cs" />
     <Compile Include="Basics\PropertyRouteLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
-    <Compile Include="Basics\RequestLogic.cs" />
     <Compile Include="Basics\SemiSymbolLogic.cs" />
     <Compile Include="CodeGeneration\CodeGenerator.cs" />
     <Compile Include="CodeGeneration\ReactCodeConverter.cs" />

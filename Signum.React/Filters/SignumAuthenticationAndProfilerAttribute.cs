@@ -19,7 +19,7 @@ namespace Signum.React.Filters
 
         public Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
         {
-            string action = ProfilerActionSplitterAttribute.GetActionSescription(actionContext);
+            string action = ProfilerActionSplitterAttribute.GetActionDescription(actionContext);
 
             actionContext.Request.RegisterForDispose(TimeTracker.Start(action));
 

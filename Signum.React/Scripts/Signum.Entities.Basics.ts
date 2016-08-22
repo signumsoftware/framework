@@ -72,20 +72,6 @@ export interface QueryEntity extends Entities.Entity {
     key: string;
 }
 
-export const RequestEntity = new Type<RequestEntity>("Request");
-export interface RequestEntity extends Entities.Entity {
-    request: string;
-    response: string;
-    creationDate: string;
-    values: Entities.MList<RequestValueEntity>;
-}
-
-export const RequestValueEntity = new Type<RequestValueEntity>("RequestValueEntity");
-export interface RequestValueEntity extends Entities.EmbeddedEntity {
-    key: string;
-    value: string;
-}
-
 export interface SemiSymbol extends Entities.Entity {
     key: string;
     name: string;
