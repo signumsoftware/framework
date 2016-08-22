@@ -157,6 +157,7 @@
     <Compile Include="Files\FilesController.cs" />
     <Compile Include="Files\FilesServer.cs" />
     <Compile Include="Isolation\IsolationServer.cs" />
+    <Compile Include="RestLogging\WithLoggingFilter.cs" />
     <Compile Include="Mailing\MailingController.cs" />
     <Compile Include="Mailing\MailingServer.cs" />
     <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
@@ -364,6 +365,8 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Profiler\Heavy\HeavyListPage.tsx" />
     <TypeScriptCompile Include="Profiler\Times\TimesPage.tsx" />
+    <TypeScriptCompile Include="RestLogging\Templates\Request.tsx" />
+    <TypeScriptCompile Include="RestLogging\RequestClient.tsx" />
     <TypeScriptCompile Include="Templating\Signum.Entities.Templating.ts">
       <DependentUpon>Signum.Entities.Templating.t4s</DependentUpon>
     </TypeScriptCompile>
@@ -471,6 +474,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Chart\ChartColor\" />
+    <Folder Include="Requests\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Map\Signum.Entities.Map.t4s" />
@@ -486,6 +490,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Profiler\Signum.Entities.Profiler.t4s" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="RestLogging\Signum.Entities.RestLogging.t4s" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
