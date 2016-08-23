@@ -38,6 +38,8 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
         if (!buttons.props.children.some(a => a))
             buttons = null;
 
+        const readOnly = this.state.ctx.readOnly;
+
         return (
             <fieldset className={classes("SF-repeater-field SF-control-container", this.state.ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <legend>
@@ -50,14 +52,14 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                     {
                         mlistItemContext(this.state.ctx).map((mlec, i) =>
                             (<EntityRepeaterElement key={i}
-                                onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : null}
-                                onMoveDown ={this.state.move? e => this.moveDown(i) : null}
-                                onMoveUp ={this.state.move? e => this.moveUp(i) : null}
+                                onRemove={this.state.remove && !readOnly? e => this.handleRemoveElementClick(e, i) : null}
+                                onMoveDown ={this.state.move && !readOnly? e => this.moveDown(i) : null}
+                                onMoveUp ={this.state.move && !readOnly? e => this.moveUp(i) : null}
                                 ctx={mlec}
                                 getComponent={this.props.getComponent} />))
                     }
                     {
-                        this.state.createAsLink && this.state.create &&
+                        this.state.createAsLink && this.state.create && !readOnly &&
                         <a title={EntityControlMessage.Create.niceToString() }
                             className="sf-line-button sf-create"
                             onClick={this.handleCreateClick}>
