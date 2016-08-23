@@ -61,6 +61,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -205,6 +209,7 @@
     <None Include="Lite.md" />
     <None Include="Mixin.md" />
     <None Include="MList.md" />
+    <None Include="packages.config" />
     <None Include="PrimaryKey.md" />
     <None Include="PropertyAttributes.md" />
     <None Include="PropertyRoute.md" />

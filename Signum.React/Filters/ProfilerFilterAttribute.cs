@@ -39,7 +39,7 @@ namespace Signum.React.Filters
             get { return requestKey; }
         }
 
-        public static string GetActionSescription(HttpActionContext actionContext)
+        public static string GetActionDescription(HttpActionContext actionContext)
         {
             var action = actionContext.ActionDescriptor.ControllerDescriptor.ControllerName + "." + actionContext.ActionDescriptor.ActionName;
 

@@ -227,7 +227,7 @@ export function parseTokens(findOptions: FindOptions): Promise<FindOptions> {
     if (findOptions.columnOptions)
         promises.push(...findOptions.columnOptions.map(fo => completer.complete(fo, SubTokensOptions.CanElement)));
 
-    completer.finished();
+    completer.finished().done();
 
     return Promise.all(promises)
         .then(() => parseFilterValues(findOptions.filterOptions).then(() => findOptions));
