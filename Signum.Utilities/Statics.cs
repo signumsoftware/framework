@@ -143,7 +143,7 @@ namespace Signum.Utilities
 
     public class ThreadVariable<T> : Variable<T>, IThreadVariable
     {
-        ThreadLocal<T> store = new ThreadLocal<T>();
+        AsyncLocal<T> store = new AsyncLocal<T>();
 
         internal ThreadVariable(string name) : base(name) { }
 

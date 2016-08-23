@@ -4,12 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+using System.Web.Http.Routing;
 
 namespace Signum.React.Filters
 {
@@ -17,33 +19,31 @@ namespace Signum.React.Filters
     {
         public static Func<HttpActionContext, IDisposable> Authenticate;
 
-        public Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
+        public async Task<HttpResponseMessage> ExecuteAuthorizationFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
         {
             string action = ProfilerActionSplitterAttribute.GetActionDescription(actionContext);
 
-            actionContext.Request.RegisterForDispose(TimeTracker.Start(action));
-
-            IDisposable profiler = HeavyProfiler.Log("Web.API " + actionContext.Request.Method, () => actionContext.Request.RequestUri.ToString());
-            if (profiler != null)
-                actionContext.Request.RegisterForDispose(profiler);
-
-            //if (ProfilerLogic.SessionTimeout != null)
-            //{
-            //    IDisposable sessionTimeout = Connector.CommandTimeoutScope(ProfilerLogic.SessionTimeout.Value);
-            //    if (sessionTimeout != null)
-            //        actionContext.Request.RegisterForDispose(sessionTimeout);
-            //}
-
-            if (Authenticate != null)
+            using (TimeTracker.Start(action))
             {
-                var session = Authenticate(actionContext);
-                if (session != null)
-                    actionContext.Request.RegisterForDispose(session);
-            }
+                using (HeavyProfiler.Log("Web.API " + actionContext.Request.Method, () => actionContext.Request.RequestUri.ToString()))
+                {
+                    //if (ProfilerLogic.SessionTimeout != null)
+                    //{
+                    //    IDisposable sessionTimeout = Connector.CommandTimeoutScope(ProfilerLogic.SessionTimeout.Value);
+                    //    if (sessionTimeout != null)
+                    //        actionContext.Request.RegisterForDispose(sessionTimeout);
+                    //}
 
-            if (actionContext.Response != null)
-                return Task.FromResult(actionContext.Response);
-            return continuation();
+                    using (Authenticate == null ? null : Authenticate(actionContext))
+                    {
+                        if (actionContext.Response != null)
+                            return actionContext.Response;
+
+                        return await continuation();
+                    }
+
+                }
+            }
         }
     }
 }
