@@ -119,7 +119,7 @@
     <Compile Include="Help\QueryHelp.cs" />
     <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationEntity.cs" />
-    <Compile Include="Logging\Request.cs" />
+    <Compile Include="RestLog\RestLog.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\SendEmailTask.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />

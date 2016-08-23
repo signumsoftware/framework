@@ -7,24 +7,24 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
 
-export const RequestValueEntity = new Type<RequestValueEntity>("RequestValueEntity");
-export interface RequestValueEntity extends Entities.EmbeddedEntity {
+export const QueryStringValue = new Type<QueryStringValue>("QueryStringValue");
+export interface QueryStringValue extends Entities.EmbeddedEntity {
     key: string;
     value: string;
 }
 
-export const RestRequestEntity = new Type<RestRequestEntity>("RestRequest");
-export interface RestRequestEntity extends Entities.Entity {
-    uRL: string;
-    response: string;
-    creationDate: string;
+export const RestLogEntity = new Type<RestLogEntity>("RestLog");
+export interface RestLogEntity extends Entities.Entity {
+    url: string;
     startDate: string;
-    endDate: string;
-    queryString: Entities.MList<RequestValueEntity>;
+    requestBody: string;
+    queryString: Entities.MList<QueryStringValue>;
     user: Entities.Lite<Basics.IUserEntity>;
     controller: string;
     action: string;
     exception: Entities.Lite<Basics.ExceptionEntity>;
+    responseBody: string;
+    endDate: string;
 }
 
 

@@ -132,7 +132,7 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Isolation\IsolationLogic.cs" />
-    <Compile Include="Logging\RestLoggingLogic.cs" />
+    <Compile Include="RestLog\RestLogLogic.cs" />
     <Compile Include="Mailing\AsyncEmailSenderLogic.cs" />
     <Compile Include="Map\MapLogic.cs" />
     <Compile Include="Mailing\SendEmailTaskLogic.cs" />

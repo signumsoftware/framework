@@ -7,24 +7,25 @@ using System.Threading.Tasks;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
-using Signum.Entities.RestLogging;
+using Signum.Entities.RestLog;
 
-namespace Signum.Engine.Basics
+namespace Signum.Engine.RestLog
 {
-    public class RestLoggingLogic
+    public class RestLogLogic
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-
-                sb.Include<RestRequestEntity>().WithQuery(dqm,
-                    e => new
+                sb.Include<RestLogEntity>()
+                    .WithQuery(dqm, e => new
                     {
                         Entity = e,
-                        e.CreationDate,
-                        URI = e.URL,
-                        e.QueryString.Count
+                        e.StartDate,
+                        e.Duration,
+                        e.Url,
+                        e.User,
+                        e.Exception,
                     });
 
             }
