@@ -44,7 +44,7 @@ namespace Signum.Entities.RestLog
 
         static Expression<Func<RestLogEntity, double?>> DurationExpression =
           log => (double?)(log.EndDate - log.StartDate).TotalMilliseconds;
-        [Unit("ms")]
+        [Unit("ms"), ExpressionField("DurationExpression")]
         public double? Duration
         {
             get { return DurationExpression.Evaluate(this); }
