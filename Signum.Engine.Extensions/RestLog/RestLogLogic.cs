@@ -21,6 +21,7 @@ namespace Signum.Engine.RestLog
                     .WithQuery(dqm, e => new
                     {
                         Entity = e,
+                        e.Id,
                         e.StartDate,
                         e.Duration,
                         e.Url,
