@@ -112,7 +112,7 @@ namespace Signum.React.Json
         {
             var pr = JsonSerializerExtensions.CurrentPropertyRoute;
 
-            if (pr == null || typeof(IEntity).IsAssignableFrom(pr.Type))
+            if (pr == null || typeof(IRootEntity).IsAssignableFrom(pr.Type))
                 pr = PropertyRoute.Root(value.GetType());
             else if (pr.Type.ElementType() == value.GetType())
                 pr = pr.Add("Item");
