@@ -401,6 +401,8 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
                 return promise.then(v => (e as any)[mi.name.firstLower()] = v);
             }
+
+            return null;
         }).filter(p => !!p));
     }
 

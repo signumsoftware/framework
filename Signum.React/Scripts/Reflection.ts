@@ -84,7 +84,7 @@ export function toMomentFormat(format: string | undefined): string | undefined {
         case "T": return "LTS";
         case "y": return "LTS";
         case "Y": return "MMMM YYY";
-        default: format;
+        default: return format;
     }
 }
 
