@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>Model Entity</Title>
+			<Shortcut>modelEntity</Shortcut>
+			<Description>New ModelEntity</Description>
+			<Author>Signum Software</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Signum.Entities</Namespace>
+        </Import>
+        <Import>
+          <Namespace>Signum.Utilities</Namespace>
+        </Import>
+        <Import>
+          <Namespace>System.Linq.Expressions</Namespace>
+        </Import>
+      </Imports>
+			<Declarations>
+				<Literal>
+					<ID>entityName</ID>
+					<ToolTip>Name of the ModelEntity</ToolTip>
+					<Default>Foo</Default>
+				</Literal>
+				<Literal>
+				  <ID>Name</ID>
+				  <ToolTip>Name Property</ToolTip>
+				  <Default>Name</Default>
+        </Literal>
+			</Declarations>
+			<Code Language="csharp">
+				<![CDATA[[Serializable]
+    public class $entityName$Model: ModelEntity
+    {
+		[NotNullable, SqlDbType( Size = 100)]
+		[StringLengthValidator(AllowNulls=false, Min = 3, Max = 100)]
+		public string $Name$ { get; set; }
+			
+		$end$    
+	}
+    ]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
