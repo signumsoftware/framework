@@ -36,6 +36,8 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
 
         var ctx = this.state.ctx!;
 
+	   const readOnly = this.state.ctx.readOnly;
+
         return (
             <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) }
                 {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
@@ -53,7 +55,7 @@ export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, En
                                     <div>
                                         { getToString(mlec.value) }
                                         &nbsp;
-                                        { this.state.remove &&
+                                        { this.state.remove && !readOnly &&
                                             <span className={classes("sf-line-button", "sf-create") }
                                             onClick={e => this.handleRemoveElementClick(e, i) }
                                             title={EntityControlMessage.Remove.niceToString() }>
