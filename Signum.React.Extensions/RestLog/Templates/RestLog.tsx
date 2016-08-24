@@ -27,7 +27,7 @@ export default class RestLog extends React.Component<{ ctx: TypeContext<RestLogE
             </div>
         );
     }
-    renderCode(ctx: TypeContext<string>) {
+    renderCode(ctx: TypeContext<string | null>) {
         if (!ctx.value) 
             return null;
 

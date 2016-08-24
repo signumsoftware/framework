@@ -11,7 +11,7 @@ using static System.Int32;
 
 namespace Signum.Entities.RestLog
 {
-    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional), InTypeScript(Undefined = false)]
     public class RestLogEntity : Entity
     {
         [NotNullable, SqlDbType(Size = MaxValue)]
