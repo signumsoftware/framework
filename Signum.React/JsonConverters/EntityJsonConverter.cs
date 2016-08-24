@@ -235,8 +235,12 @@ namespace Signum.React.Json
             {
                 reader.Assert(JsonToken.StartObject);
 
-                ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer);
-
+                bool isModified;
+                ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer, out isModified);
+                bool isAlreadyModified = (mod == existingValue || (mod is Entity) && !((Entity)mod).IsNew) && mod.IsGraphModified;
+                if (isAlreadyModified && isModified && Debugger.IsAttached) //From cache
+                    throw new InvalidOperationException($"Two clones of the same entity ({mod.GetType()} {(mod as Entity)?.IdOrNull} '{mod}') found and one was modified");
+                
                 var pr = JsonSerializerExtensions.CurrentPropertyRoute;
                 if (pr == null || mod is Entity)
                     pr = PropertyRoute.Root(mod.GetType());
@@ -271,11 +275,10 @@ namespace Signum.React.Json
                     }
                     else
                     {
-
                         PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
 
                         reader.Read();
-                        ReadJsonProperty(reader, serializer, mod, pc, pr);
+                        ReadJsonProperty(reader, serializer, mod, pc, pr, isModified, isAlreadyModified);
 
                         reader.Read();
                     }
@@ -291,7 +294,7 @@ namespace Signum.React.Json
 
 
 
-        public void ReadJsonProperty(JsonReader reader, JsonSerializer serializer, ModifiableEntity entity, PropertyConverter pc, PropertyRoute parentRoute)
+        public void ReadJsonProperty(JsonReader reader, JsonSerializer serializer, ModifiableEntity entity, PropertyConverter pc, PropertyRoute parentRoute, bool isModified, bool isAlreadyModified)
         {
             if (pc.CustomReadJsonProperty != null)
             {
@@ -319,10 +322,10 @@ namespace Signum.React.Json
 
                     if (!IsEquals(newValue, oldValue))
                     {
-                        if (!entity.IsGraphModified)
+                        if (!isModified)
                         {
                             //Only apply changes if the client notifies it, to avoid regressions
-                            if (Debugger.IsAttached)
+                            if (!isAlreadyModified && Debugger.IsAttached)
                                 throw new InvalidOperationException($"'modified' is not set but '{pi.Name}' is modified");
 
                         }
@@ -359,19 +362,16 @@ namespace Signum.React.Json
                 throw new UnauthorizedAccessException(error);
         }
 
-        public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public ModifiableEntity GetEntity(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer, out bool isModified)
         {
-
             IdentityInfo identityInfo = ReadIdentityInfo(reader);
-            
+            isModified = identityInfo.Modified == true;
+
             Type type = GetEntityType(identityInfo.Type, objectType);
 
             if (typeof(MixinEntity).IsAssignableFrom(objectType))
             {
                 var mixin = (MixinEntity)existingValue;
-
-                if (identityInfo.Modified == true)
-                    mixin.SetSelfModified();
 
                 return mixin;
             }
@@ -400,9 +400,6 @@ namespace Signum.React.Json
                         if (identityInfo.Ticks != null)
                             existingEntity.Ticks = identityInfo.Ticks.Value;
 
-                        if (identityInfo.Modified == true)
-                            existingEntity.SetSelfModified();
-
                         return existingEntity;
                     }
                 }
@@ -410,9 +407,6 @@ namespace Signum.React.Json
                 var retrievedEntity = Database.Retrieve(type, id);
                 if (identityInfo.Ticks != null)
                     retrievedEntity.Ticks = identityInfo.Ticks.Value;
-
-                if (identityInfo.Modified == true)
-                    retrievedEntity.SetSelfModified();
 
                 return retrievedEntity;
             }
@@ -423,13 +417,11 @@ namespace Signum.React.Json
                 if (existingMod == null || existingMod.GetType() != type)
                     return (ModifiableEntity)Activator.CreateInstance(type, nonPublic: true);
 
-                if (identityInfo.Modified == true)
-                    existingMod.SetSelfModified();
-
                 return existingMod;
             }
         }
 
+ 
         public IdentityInfo ReadIdentityInfo(JsonReader reader)
         {
             IdentityInfo info = new IdentityInfo();
