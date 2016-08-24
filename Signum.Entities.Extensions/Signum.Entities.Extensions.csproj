@@ -119,6 +119,7 @@
     <Compile Include="Help\QueryHelp.cs" />
     <Compile Include="Isolation\IIsolationServer.cs" />
     <Compile Include="Isolation\IsolationEntity.cs" />
+    <Compile Include="RestLog\RestLog.cs" />
     <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\SendEmailTask.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
@@ -256,6 +257,7 @@
   <ItemGroup>
     <Analyzer Include="..\..\Framework\Signum.Analyzer\Binaries\Signum.Analyzer.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
   </PropertyGroup>
