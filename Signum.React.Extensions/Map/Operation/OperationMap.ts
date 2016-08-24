@@ -139,7 +139,6 @@ export class OperationMapD3 {
                 if ((<any>event).ctrlKey && d.token) {
                     window.open(Finder.findOptionsPath({ queryName: this.queryName, filterOptions: [{ columnName: d.token, value: d.key }] }));
                     d3.event.preventDefault();
-                    return false;
                 }
             }).on("dblclick", d => {
                 d.fixed = false;
@@ -203,7 +202,6 @@ export class OperationMapD3 {
                 if ((<any>event).ctrlKey) {
                     window.open(Finder.findOptionsPath({ queryName: OperationLogEntity, filterOptions: [{ columnName: "Operation.Key", value: d.key }] }));
                     d3.event.preventDefault();
-                    return false;
                 }
             }).on("dblclick", d => {
                 d.fixed = false;

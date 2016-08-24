@@ -153,7 +153,6 @@ export class SchemaMapD3 {
                 if ((<any>event).ctrlKey && (d as TableInfo).typeName) {
                     window.open(Finder.findOptionsPath({ queryName: (d as TableInfo).typeName }));
                     d3.event.preventDefault();
-                    return false;
                 }
             })
             .on("dblclick", d => {

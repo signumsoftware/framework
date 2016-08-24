@@ -247,8 +247,6 @@ export function synchronizeColumns(chart: IChartBase) {
                     t.tokenString = parentToken && parentToken.fullKey;
                     t.token = parentToken;
                 });
-
-                return true;
             }
         }
     });
