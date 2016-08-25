@@ -9,9 +9,9 @@ import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entiti
 export const CultureInfoEntity = new Type<CultureInfoEntity>("CultureInfo");
 export interface CultureInfoEntity extends Entities.Entity {
     Type: "CultureInfo";
-    name?: string | null;
-    nativeName?: string | null;
-    englishName?: string | null;
+    name: string;
+    nativeName: string | null;
+    englishName: string | null;
 }
 
 export module CultureInfoOperation {
