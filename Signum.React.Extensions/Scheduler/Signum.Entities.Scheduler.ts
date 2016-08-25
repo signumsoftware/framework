@@ -44,11 +44,11 @@ export interface ITaskEntity extends Entities.Entity {
 export const ScheduledTaskEntity = new Type<ScheduledTaskEntity>("ScheduledTask");
 export interface ScheduledTaskEntity extends Entities.Entity {
     Type: "ScheduledTask";
-    rule?: IScheduleRuleEntity;
-    task?: ITaskEntity;
+    rule?: IScheduleRuleEntity | null;
+    task?: ITaskEntity | null;
     suspended?: boolean;
     machineName?: string | null;
-    user?: Entities.Lite<Basics.IUserEntity>;
+    user?: Entities.Lite<Basics.IUserEntity> | null;
     applicationName?: string | null;
 }
 
@@ -56,14 +56,14 @@ export const ScheduledTaskLogEntity = new Type<ScheduledTaskLogEntity>("Schedule
 export interface ScheduledTaskLogEntity extends Entities.Entity {
     Type: "ScheduledTaskLog";
     scheduledTask?: ScheduledTaskEntity | null;
-    user?: Entities.Lite<Basics.IUserEntity>;
-    task?: ITaskEntity;
+    user?: Entities.Lite<Basics.IUserEntity> | null;
+    task?: ITaskEntity | null;
     startTime?: string;
     endTime?: string | null;
     machineName?: string | null;
     applicationName?: string | null;
-    productEntity?: Entities.Lite<Entities.Entity>;
-    exception?: Entities.Lite<Basics.ExceptionEntity>;
+    productEntity?: Entities.Lite<Entities.Entity> | null;
+    exception?: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 export module ScheduledTaskOperation {

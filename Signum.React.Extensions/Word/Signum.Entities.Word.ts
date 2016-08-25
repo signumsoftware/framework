@@ -32,7 +32,7 @@ export interface WordTemplateEntity extends Entities.Entity {
     startDate?: string | null;
     endDate?: string | null;
     disableAuthorization?: boolean;
-    template?: Entities.Lite<Files.FileEntity>;
+    template?: Entities.Lite<Files.FileEntity> | null;
     fileName?: string | null;
     wordTransformer?: WordTransformerSymbol | null;
     wordConverter?: WordConverterSymbol | null;

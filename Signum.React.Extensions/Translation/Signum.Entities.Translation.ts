@@ -18,7 +18,7 @@ export const TranslatedInstanceEntity = new Type<TranslatedInstanceEntity>("Tran
 export interface TranslatedInstanceEntity extends Entities.Entity {
     Type: "TranslatedInstance";
     culture?: Basics.CultureInfoEntity | null;
-    instance?: Entities.Lite<Entities.Entity>;
+    instance?: Entities.Lite<Entities.Entity> | null;
     propertyRoute?: Signum.PropertyRouteEntity | null;
     rowId?: string | null;
     translatedText?: string | null;
@@ -84,7 +84,7 @@ export interface TranslatorUserCultureEntity extends Entities.EmbeddedEntity {
 export const TranslatorUserEntity = new Type<TranslatorUserEntity>("TranslatorUser");
 export interface TranslatorUserEntity extends Entities.Entity {
     Type: "TranslatorUser";
-    user?: Entities.Lite<Signum.IUserEntity>;
+    user?: Entities.Lite<Signum.IUserEntity> | null;
     cultures: Entities.MList<TranslatorUserCultureEntity>;
 }
 

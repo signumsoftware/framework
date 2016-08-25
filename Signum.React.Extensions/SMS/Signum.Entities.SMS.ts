@@ -44,7 +44,7 @@ export interface SMSConfigurationEntity extends Entities.EmbeddedEntity {
 export const SMSMessageEntity = new Type<SMSMessageEntity>("SMSMessage");
 export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLineDataEntity {
     Type: "SMSMessage";
-    template?: Entities.Lite<SMSTemplateEntity>;
+    template?: Entities.Lite<SMSTemplateEntity> | null;
     message?: string | null;
     editableMessage?: boolean;
     from?: string | null;
@@ -53,11 +53,11 @@ export interface SMSMessageEntity extends Entities.Entity, Processes.IProcessLin
     destinationNumber?: string | null;
     messageID?: string | null;
     certified?: boolean;
-    sendPackage?: Entities.Lite<SMSSendPackageEntity>;
-    updatePackage?: Entities.Lite<SMSUpdatePackageEntity>;
+    sendPackage?: Entities.Lite<SMSSendPackageEntity> | null;
+    updatePackage?: Entities.Lite<SMSUpdatePackageEntity> | null;
     updatePackageProcessed?: boolean;
-    referred?: Entities.Lite<Entities.Entity>;
-    exception?: Entities.Lite<Signum.ExceptionEntity>;
+    referred?: Entities.Lite<Entities.Entity> | null;
+    exception?: Entities.Lite<Signum.ExceptionEntity> | null;
 }
 
 export module SMSMessageOperation {
