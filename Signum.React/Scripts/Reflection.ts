@@ -627,16 +627,31 @@ export class Type<T extends ModifiableEntity> implements IType {
         return PropertyRoute.root(this.typeInfo()).add(lambdaToProperty);
     }
 
-    niceName() {
-        return this.typeInfo().niceName;
+    niceName(): string {
+        const ti = this.typeInfo();
+
+        if (!ti.niceName)
+            throw new Error(`no niceName found for ${ti.name}`);
+
+        return ti.niceName;
     }
 
-    nicePluralName() {
-        return this.typeInfo().nicePluralName;
+    nicePluralName(): string {
+        const ti = this.typeInfo();
+
+        if (!ti.nicePluralName)
+            throw new Error(`no nicePluralName found for ${ti.name}`);
+
+        return ti.nicePluralName;
     }
 
     nicePropertyName(lambdaToProperty: (v: T) => any): string  {
-        return this.memberInfo(lambdaToProperty).niceName;
+        const member = this.memberInfo(lambdaToProperty);
+
+        if (!member.niceName)
+            throw new Error(`no nicePropertyName found for ${member.name}`);
+
+        return member.niceName;
     }
 }
 
