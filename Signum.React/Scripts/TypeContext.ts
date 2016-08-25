@@ -199,10 +199,10 @@ export class TypeContext<T> extends StyleContext {
         return result;
     }
 
-    niceName(property?: (val: T) => any): string | undefined  {
+    niceName(property?: (val: T) => any): string  {
 
         if (this.propertyRoute == undefined)
-            return undefined;
+            throw new Error("No propertyRoute");
 
         if (property == undefined)
             return this.propertyRoute.member!.niceName;
