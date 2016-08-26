@@ -29,6 +29,7 @@ export { EntityLine };
 import { EntityCombo } from  './Lines/EntityCombo'
 export { EntityCombo };
 
+
 import { EntityDetail } from  './Lines/EntityDetail'
 export { EntityDetail };
 
@@ -52,7 +53,10 @@ export { EntityCheckboxList };
 
 import { EnumCheckboxList } from  './Lines/EnumCheckboxList'
 export { EnumCheckboxList };
- 
+
+
+import { EntityTable } from './Lines/EntityTable'
+export { EntityTable };
 
 tasks.push(taskSetNiceName);
 export function taskSetNiceName(lineBase: LineBase<any, any>, state: LineBaseProps) {
