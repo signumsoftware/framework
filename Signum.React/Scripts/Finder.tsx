@@ -669,7 +669,7 @@ export interface QuerySettings {
     defaultOrderColumn?: string;
     hiddenColumns?: ColumnOption[];
     formatters?: { [columnName: string]: CellFormatter };
-    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes;
+    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes | undefined;
     entityFormatter?: EntityFormatter;
     simpleFilterBuilder?: (qd: QueryDescription, initialFindOptions: FindOptionsParsed) => React.ReactElement<any> | undefined;
 }

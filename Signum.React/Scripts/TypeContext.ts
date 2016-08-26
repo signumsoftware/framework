@@ -84,7 +84,7 @@ export class StyleContext {
         this.styleOptions.readOnly = value;
     }
 
-    get frame(): EntityFrame<ModifiableEntity> | undefined{
+    get frame(): EntityFrame<ModifiableEntity> | undefined {
         if (this.styleOptions.frame)
             return this.styleOptions.frame;
 
@@ -199,10 +199,10 @@ export class TypeContext<T> extends StyleContext {
         return result;
     }
 
-    niceName(property?: (val: T) => any): string | undefined  {
+    niceName(property?: (val: T) => any): string  {
 
         if (this.propertyRoute == undefined)
-            return undefined;
+            throw new Error("No propertyRoute");
 
         if (property == undefined)
             return this.propertyRoute.member!.niceName;

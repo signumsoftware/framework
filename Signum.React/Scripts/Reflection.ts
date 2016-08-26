@@ -202,10 +202,10 @@ export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
 
 }
 
-export function getQueryNiceName(queryName: PseudoType | QueryKey) {
+export function getQueryNiceName(queryName: PseudoType | QueryKey): string {
 
     if ((queryName as TypeInfo).kind != undefined)
-        return (queryName as TypeInfo).nicePluralName;
+        return (queryName as TypeInfo).nicePluralName!;
 
     if (queryName instanceof Type)
         return (queryName as Type<any>).nicePluralName();
@@ -218,7 +218,7 @@ export function getQueryNiceName(queryName: PseudoType | QueryKey) {
 
         const type = _types[str.toLowerCase()];
         if (type)
-            return type.nicePluralName;
+            return type.nicePluralName!;
 
         const qn = _queryNames[str.toLowerCase()];
         if (qn)
@@ -627,16 +627,31 @@ export class Type<T extends ModifiableEntity> implements IType {
         return PropertyRoute.root(this.typeInfo()).add(lambdaToProperty);
     }
 
-    niceName() {
-        return this.typeInfo().niceName;
+    niceName(): string {
+        const ti = this.typeInfo();
+
+        if (!ti.niceName)
+            throw new Error(`no niceName found for ${ti.name}`);
+
+        return ti.niceName;
     }
 
-    nicePluralName() {
-        return this.typeInfo().nicePluralName;
+    nicePluralName(): string {
+        const ti = this.typeInfo();
+
+        if (!ti.nicePluralName)
+            throw new Error(`no nicePluralName found for ${ti.name}`);
+
+        return ti.nicePluralName;
     }
 
     nicePropertyName(lambdaToProperty: (v: T) => any): string  {
-        return this.memberInfo(lambdaToProperty).niceName;
+        const member = this.memberInfo(lambdaToProperty);
+
+        if (!member.niceName)
+            throw new Error(`no nicePropertyName found for ${member.name}`);
+
+        return member.niceName;
     }
 }
 

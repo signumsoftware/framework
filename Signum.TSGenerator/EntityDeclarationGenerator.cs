@@ -411,7 +411,7 @@ namespace Signum.TSGenerator
                 p.CustomAttributes.Any(a => a.AttributeType.Name == "NotNullableAttribute" || a.AttributeType.Name == "NotNullValidatorAttribute"))
                 return false;
 
-            return p.PropertyType.IsClass || Nullable.GetUnderlyingType(p.PropertyType) != null;
+            return p.PropertyType.IsClass || p.PropertyType.IsInterface || Nullable.GetUnderlyingType(p.PropertyType) != null;
         }
 
 
