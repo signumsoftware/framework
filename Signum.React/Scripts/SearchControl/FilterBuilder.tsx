@@ -201,7 +201,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
 
         switch (token.filterType) {
             case "Lite":
-                if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopupation))
+                if (token.type.name == IsByAll || getTypeInfos(token.type).some(ti => !ti.isLowPopulation))
                     return <EntityLine ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange} />;
                 else
                     return <EntityCombo ctx={ctx} type={token.type} create={false} onChange={this.handleValueChange}/>

@@ -23,7 +23,7 @@ export interface TypeInfo {
     entityKind?: EntityKind;
     entityData?: EntityData;
     toStringFunction?: string;
-    isLowPopupation?: boolean;
+    isLowPopulation?: boolean;
     requiresSaveOperation?: boolean;
     queryDefined?: boolean;
     members: { [name: string]: MemberInfo };
