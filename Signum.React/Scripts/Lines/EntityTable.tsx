@@ -19,7 +19,7 @@ export interface EntityTableProps extends EntityListBaseProps {
     columns: EntityTableColumn<ModifiableEntity>[],
 }
 
-export interface EntityTableColumn<T>  {
+export interface EntityTableColumn<T> {
     property: (a: T) => any;
     header?: React.ReactNode | null;
     template?: (ctx: TypeContext<T>) => React.ReactNode | null;
@@ -42,8 +42,8 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
 
         const buttons = (
             <span className="pull-right">
-                {!this.state.createAsLink && this.renderCreateButton(false) }
-                {this.renderFindButton(false) }
+                {!this.state.createAsLink && this.renderCreateButton(false)}
+                {this.renderFindButton(false)}
             </span>
         );
 
@@ -57,7 +57,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
         const elementPr = ctx.propertyRoute.add(a => a[0].element);
 
         return (
-            <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass) } {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+            <fieldset className={classes("SF-table-field SF-control-container", ctx.errorClass)} {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
@@ -75,31 +75,30 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                             }
                         </tr>
                     </thead>
+                    <tbody>
+                        {
+                            mlistItemContext(ctx).map((mlec, i) =>
+                                (<EntityTableRow key={i}
+                                    onRemove={this.state.remove && !readOnly ? e => this.handleRemoveElementClick(e, i) : undefined}
+                                    onMoveDown ={this.state.move && !readOnly ? e => this.moveDown(i) : undefined}
+                                    onMoveUp ={this.state.move && !readOnly ? e => this.moveUp(i) : undefined}
+                                    columns={this.props.columns}
+                                    ctx={mlec} />))
+                        }
+                        {
+                            this.state.createAsLink && this.state.create && !readOnly &&
+                            <tr>
+                                <td colSpan={1 + this.props.columns.length}>
+                                    <a title={EntityControlMessage.Create.niceToString()}
+                                        className="sf-line-button sf-create"
+                                        onClick={this.handleCreateClick}>
+                                        <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString()}
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
                 </table>
-
-                <div className="sf-repater-elements">
-                    {
-                        mlistItemContext(ctx).map((mlec, i) =>
-                            (<EntityTableRow key={i}
-                                onRemove={this.state.remove && !readOnly? e => this.handleRemoveElementClick(e, i) : undefined}
-                                onMoveDown ={this.state.move && !readOnly? e => this.moveDown(i) : undefined}
-                                onMoveUp ={this.state.move && !readOnly ? e => this.moveUp(i) : undefined}
-                                columns={this.props.columns}
-                                ctx={mlec} />))
-                    }
-                    {
-                        this.state.createAsLink && this.state.create && !readOnly &&
-                        <tr>
-                            <td colSpan={1 + this.props.columns.length}>
-                                <a title={EntityControlMessage.Create.niceToString()}
-                                    className="sf-line-button sf-create"
-                                    onClick={this.handleCreateClick}>
-                                    <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString()}
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </div>
             </fieldset>
         );
     }
@@ -115,7 +114,7 @@ export interface EntityTableRowProps {
 }
 
 export class EntityTableRow extends React.Component<EntityTableRowProps, { entity: ModifiableEntity }> {
-   
+
     render() {
         var ctx = this.props.ctx;
         return (
@@ -155,6 +154,9 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { entit
         if (col.template !== undefined)
             return col.template(this.props.ctx);
 
-        return DynamicComponent.appropiateComponent(this.props.ctx);
+        if (col.property == null)
+            throw new Error("Column " + JSON.stringify(col) + " has no property and no tempalte");
+
+        return DynamicComponent.appropiateComponent(this.props.ctx.subCtx(col.property));
     }
 }
