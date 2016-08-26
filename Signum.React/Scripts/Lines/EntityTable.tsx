@@ -22,7 +22,9 @@ export interface EntityTableProps extends EntityListBaseProps {
 export interface EntityTableColumn<T> {
     property: (a: T) => any;
     header?: React.ReactNode | null;
+    headerProps?: React.HTMLProps<any>;
     template?: (ctx: TypeContext<T>) => React.ReactNode | null;
+
 }
 
 export class EntityTable extends EntityListBase<EntityTableProps, EntityTableProps> {
@@ -69,7 +71,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                         <tr>
                             <th></th>
                             {
-                                this.props.columns.map((c, i) => <th key={i}>
+                                this.props.columns.map((c, i) => <th key={i} {...c.headerProps}>
                                     {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}
                                 </th>)
                             }
