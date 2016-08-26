@@ -84,7 +84,7 @@ export class StyleContext {
         this.styleOptions.readOnly = value;
     }
 
-    get frame(): EntityFrame<ModifiableEntity> | undefined{
+    get frame(): EntityFrame<ModifiableEntity> | undefined {
         if (this.styleOptions.frame)
             return this.styleOptions.frame;
 

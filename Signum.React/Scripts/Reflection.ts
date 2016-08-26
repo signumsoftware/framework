@@ -202,10 +202,10 @@ export function getTypeInfos(typeReference: TypeReference): TypeInfo[] {
 
 }
 
-export function getQueryNiceName(queryName: PseudoType | QueryKey) {
+export function getQueryNiceName(queryName: PseudoType | QueryKey): string {
 
     if ((queryName as TypeInfo).kind != undefined)
-        return (queryName as TypeInfo).nicePluralName;
+        return (queryName as TypeInfo).nicePluralName!;
 
     if (queryName instanceof Type)
         return (queryName as Type<any>).nicePluralName();
@@ -218,7 +218,7 @@ export function getQueryNiceName(queryName: PseudoType | QueryKey) {
 
         const type = _types[str.toLowerCase()];
         if (type)
-            return type.nicePluralName;
+            return type.nicePluralName!;
 
         const qn = _queryNames[str.toLowerCase()];
         if (qn)
