@@ -11,7 +11,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master), InTypeScript(Undefined = false)]
     public class CultureInfoEntity : Entity
     {
         public CultureInfoEntity() { }
