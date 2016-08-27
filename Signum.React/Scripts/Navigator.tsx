@@ -15,6 +15,10 @@ import { ViewReplacer } from './Frames/ReactVisitor'
 
 
 Dic.skipClasses.push(React.Component);
+React.Component.prototype.changeState = function (this: React.Component<any, any>, func: (state: any) => void) {
+    func(this.state);
+    this.forceUpdate();
+}
 
 export let currentUser: IUserEntity | undefined;
 export function setCurrentUser(user: IUserEntity | undefined) {
@@ -518,7 +522,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
     getToString: (entity: T) => string;
 
-    getComponent: (entity: T) => Promise<{ default: React.ComponentClass<{ ctx: TypeContext<T> }> }>;
+    getComponent?: (entity: T) => Promise<{ default: React.ComponentClass<{ ctx: TypeContext<T> }> }>;
 
     viewOverrides: Array<(replacer: ViewReplacer<T>) => void>;
 
@@ -535,7 +539,7 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getComponent: (entity: T) => Promise<any>,
+    constructor(type: Type<T>, getComponent?: (entity: T) => Promise<any>,
         options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean, avoidPopup?: boolean }) {
 
         this.type = type;
