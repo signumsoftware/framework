@@ -28,7 +28,19 @@ namespace Signum.Utilities
             if (first == null || second == null)
                 return first ?? second;
 
-            return new Disposable(() => { try { first.Dispose(); } finally { second.Dispose(); } });
+            var firstEx = first as IDisposableException;
+            var secondEx = second as IDisposableException;
+
+            if (firstEx == null && secondEx == null)
+                return new Disposable(() => { try { first.Dispose(); } finally { second.Dispose(); } });
+
+            return new DisposableException(              
+                ex =>
+                {
+                    try { if (firstEx != null) firstEx.OnException(ex); }
+                    finally { if (secondEx != null) secondEx.OnException(ex); }
+                },
+                () => { try { first.Dispose(); } finally { second.Dispose(); } });
         }
 
         public static IDisposable Combine<Del>(Del delegated, Func<Del, IDisposable> invoke) where Del : class, ICloneable, ISerializable
@@ -58,5 +70,26 @@ namespace Signum.Utilities
 
     }
 
+    public class DisposableException : IDisposableException
+    {
+        Action<Exception> onException;
+        Action dispose;
+
+        public DisposableException(Action<Exception> onException, Action dispose)
+        {
+            this.onException = onException;
+            this.dispose = dispose;
+        }
+
+        public void OnException(Exception ex)
+        {
+            this.onException(ex);
+        }
+
+        public void Dispose()
+        {
+            this.dispose();
+        }
+    }
     
 }
