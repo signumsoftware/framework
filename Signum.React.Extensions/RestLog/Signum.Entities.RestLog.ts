@@ -21,10 +21,10 @@ export interface RestLogEntity extends Entities.Entity {
     startDate: string;
     requestBody: string;
     queryString: Entities.MList<QueryStringValue>;
-    user: Entities.Lite<Basics.IUserEntity>;
+    user: Entities.Lite<Basics.IUserEntity> | null;
     controller: string;
     action: string;
-    exception: Entities.Lite<Basics.ExceptionEntity>;
+    exception: Entities.Lite<Basics.ExceptionEntity> | null;
     responseBody: string | null;
     endDate: string;
 }

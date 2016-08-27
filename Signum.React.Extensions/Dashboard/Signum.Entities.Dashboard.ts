@@ -35,9 +35,9 @@ export type DashboardEmbedededInEntity =
 export const DashboardEntity = new Type<DashboardEntity>("Dashboard");
 export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     Type: "Dashboard";
-    entityType?: Entities.Lite<Basics.TypeEntity>;
+    entityType?: Entities.Lite<Basics.TypeEntity> | null;
     embeddedInEntity?: DashboardEmbedededInEntity | null;
-    owner?: Entities.Lite<Entities.Entity>;
+    owner?: Entities.Lite<Entities.Entity> | null;
     dashboardPriority?: number | null;
     autoRefreshPeriod?: number | null;
     displayName?: string | null;
@@ -108,7 +108,7 @@ export interface PanelPartEntity extends Entities.EmbeddedEntity {
     startColumn?: number;
     columns?: number;
     style?: PanelStyle;
-    content?: IPartEntity;
+    content?: IPartEntity | null;
 }
 
 export const PanelStyle = new EnumType<PanelStyle>("PanelStyle");
@@ -132,7 +132,7 @@ export const UserQueryCountPartEntity = new Type<UserQueryCountPartEntity>("User
 export interface UserQueryCountPartEntity extends Entities.Entity, IPartEntity {
     Type: "UserQueryCountPart";
     requiresTitle?: boolean;
-    userQuery?: Entities.Lite<UserQueries.UserQueryEntity>;
+    userQuery?: Entities.Lite<UserQueries.UserQueryEntity> | null;
     iconClass?: string | null;
     showName?: boolean;
 }

@@ -19,7 +19,7 @@ export default class SendEmailTask extends React.Component<{ ctx: TypeContext<Se
             this.loadEntity(newProps.ctx.value.emailTemplate);
     }
 
-    loadEntity(lite: Lite<EmailTemplateEntity> | undefined) {
+    loadEntity(lite: Lite<EmailTemplateEntity> | null| undefined) {
         if (lite) {
             Navigator.API.fetchAndForget(lite)
                 .then(et => Finder.getQueryDescription(et.query!.key))
