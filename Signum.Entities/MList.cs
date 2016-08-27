@@ -676,6 +676,54 @@ namespace Signum.Entities
             if (this.innerList.Any(a => a.OldIndex.HasValue))
                 this.innerList.Sort(a => a.OldIndex.Value);
         }
+
+        public bool AssignMList(MList<T> list)
+        {
+            return ((IMListPrivate<T>)this).AssignMList(((IMListPrivate<T>)list).InnerList);
+        }
+
+        bool IMListPrivate<T>.AssignMList(List<RowIdElement> newList)
+        {
+            if (((IMListPrivate<T>)this).IsEqualTo(newList))
+                return false;
+            
+            var added = newList.Select(a => a.Element).Except(innerList.Select(a => a.Element)).ToList();
+            var removed = innerList.Select(a => a.Element).Except(newList.Select(a => a.Element)).ToList();
+
+            innerList.Clear();
+            innerList.AddRange(newList);
+            ((IMListPrivate<T>)this).InnerListModified(added, removed);
+
+            return true;
+        }
+
+        public bool IsEqualTo(MList<T> list)
+        {
+            return ((IMListPrivate<T>)this).IsEqualTo(((IMListPrivate<T>)list).InnerList);
+        }
+
+        bool IMListPrivate<T>.IsEqualTo(List<MList<T>.RowIdElement> newList)
+        {
+            if (newList.IsNullOrEmpty() && innerList.IsNullOrEmpty())
+                return true;
+
+            if (newList == null || innerList == null)
+                return false;
+
+            if (newList.Count != innerList.Count)
+                return false;
+
+            //Ordering the elements by RowId could remove some false modifications due to database indeterminism
+            //but we can not be sure if order matters, and at the end the order from Json should be respected
+            for (int i = 0; i < newList.Count; i++)
+            {
+                if (newList[i].RowId != innerList[i].RowId ||
+                   !object.Equals(newList[i].Element, innerList[i].Element))
+                    return false;
+            }
+
+            return true;
+        }
     }
 
     public interface IMListPrivate
@@ -694,6 +742,9 @@ namespace Signum.Entities
     public interface IMListPrivate<T>  : IMListPrivate
     {
         List<MList<T>.RowIdElement> InnerList { get; }
+
+        bool AssignMList(List<MList<T>.RowIdElement> newList);
+        bool IsEqualTo(List<MList<T>.RowIdElement> newList);
     }
 
     internal sealed class MListDebugging<T>
