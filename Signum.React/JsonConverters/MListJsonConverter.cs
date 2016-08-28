@@ -75,7 +75,11 @@ namespace Signum.React.Json
 
             var elementPr = pr.Add("Item");
 
-            var rowIdType = GetRowIdTypeFromSchema(pr);
+            var isModel = typeof(ModelEntity).IsAssignableFrom(pr.RootType);
+
+            var rowIdType = isModel ? 
+                GetRowIdTypeFromAttribute(pr): 
+                GetRowIdTypeFromSchema(pr);
 
             reader.Assert(JsonToken.StartArray);
 
@@ -100,19 +104,29 @@ namespace Signum.React.Json
 
                     reader.Read();
                     if (rowIdValue != null && !rowIdValue.Equals(GraphExplorer.DummyRowId.Object))
-                    {
-                        if (rowIdType == null)
-                            throw new InvalidOperationException($"impossible to deterine rowId type for PropertyRoute {pr} in path {reader.Path}");
+                    { 
                         var rowId = new PrimaryKey((IComparable)ReflectionTools.ChangeType(rowIdValue, rowIdType));
+                        
+                        var oldValue = dic.TryGetS(rowId);
 
-                        var oldValue = dic.GetOrThrow(rowId, "RowID {0} not found");
-                       
-                        T newValue = (T)serializer.DeserializeValue(reader, typeof(T), oldValue.Element);
+                        if (oldValue == null)
+                        {
+                            if (!isModel)
+                                throw new KeyNotFoundException("RowID {0} not found".FormatWith(rowId));
 
-                        if (oldValue.Element.Equals(newValue))
-                            newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.OldIndex));
+                            T newValue = (T)serializer.DeserializeValue(reader, typeof(T), null);
+
+                            newList.Add(new MList<T>.RowIdElement(newValue, rowId, null));
+                        }
                         else
-                            newList.Add(new MList<T>.RowIdElement(newValue));
+                        {
+                            T newValue = (T)serializer.DeserializeValue(reader, typeof(T), oldValue.Value.Element);
+
+                            if (oldValue.Value.Element.Equals(newValue))
+                                newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.Value.OldIndex));
+                            else
+                                newList.Add(new MList<T>.RowIdElement(newValue));
+                        }
                     }
                     else
                     {
@@ -129,63 +143,40 @@ namespace Signum.React.Json
             
             reader.Assert(JsonToken.EndArray);
 
-            if (!AreEqual<T>(newList, existingValue == null ? null : existingValue.InnerList))
+            if (existingValue == null) //Strange case...
+            {
+                if (newList.IsEmpty())
+                    return null;
+                else
+                    existingValue = new MList<T>();
+            }
+
+            if (!existingValue.IsEqualTo(newList))
             {
                 EntityJsonConverter.AssertCanWrite(pr);
 
-                if (existingValue == null)
-                    existingValue = new MList<T>();
-
-                var added = newList.Select(a => a.Element).Except(existingValue.InnerList.Select(a => a.Element)).ToList();
-                var removed = existingValue.InnerList.Select(a => a.Element).Except(newList.Select(a => a.Element)).ToList();
-
-                existingValue.InnerList.Clear();
-                existingValue.InnerList.AddRange(newList);
-                existingValue.InnerListModified(added, removed);
+                existingValue.AssignMList(newList);
             }
-          
 
             return (MList<T>)existingValue;
         }
 
-        static bool AreEqual<T>(List<MList<T>.RowIdElement> newList, List<MList<T>.RowIdElement> oldList)
-        {
-            if (newList.IsNullOrEmpty() && oldList.IsNullOrEmpty())
-                return true;
-
-            if (newList == null || oldList == null)
-                return false;
-
-            if (newList.Count != oldList.Count)
-                return false;
-
-            //Ordering the elements by RowId could remove some false modifications due to database indeterminism
-            //but we can not be sure if order matters, and at the end the order from Json should be respected
-            for (int i = 0; i < newList.Count; i++)
-            {
-                if (newList[i].RowId != oldList[i].RowId ||
-                   !object.Equals(newList[i].Element, oldList[i].Element))
-                    return false;
-            }
-
-            return true;
-        }
-
         private static Type GetRowIdTypeFromSchema(PropertyRoute route)
         {
-            if (!typeof(Entity).IsAssignableFrom(route.RootType))
-                return null;
-
             var tryField = Schema.Current.TryField(route) as FieldMList;
 
             if (tryField == null)
-                return null;
+                throw new InvalidOperationException($"Impossible to determine RowId type for {route} from schema.");
 
             return tryField.TableMList.PrimaryKey.Type;
         }
 
-
-
+        private static Type GetRowIdTypeFromAttribute(PropertyRoute route)
+        {
+            var att = Schema.Current.Settings.FieldAttribute<PrimaryKeyAttribute>(route) ?? Schema.Current.Settings.DefaultPrimaryKeyAttribute;
+            
+            return att.Type;
+        }
     }
 
 

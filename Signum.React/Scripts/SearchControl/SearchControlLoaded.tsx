@@ -372,7 +372,9 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
             if (tn == undefined)
                 return;
 
-            if (isWindowsOpen || Navigator.getSettings(tn).avoidPopup) {
+            var s = Navigator.getSettings(tn);
+
+            if (isWindowsOpen || (s != null && s.avoidPopup))  {
                 window.open(Navigator.createRoute(tn));
             } else {
                 Constructor.construct(tn).then(e => {
