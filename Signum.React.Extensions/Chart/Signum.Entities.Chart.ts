@@ -33,7 +33,7 @@ export type IChartBase = ChartRequest | UserChartEntity;
 export const ChartColorEntity = new Type<ChartColorEntity>("ChartColor");
 export interface ChartColorEntity extends Entities.Entity {
     Type: "ChartColor";
-    related?: Entities.Lite<Entities.Entity>;
+    related?: Entities.Lite<Entities.Entity> | null;
     color?: Basics.ColorEntity | null;
 }
 
@@ -140,7 +140,7 @@ export const ChartScriptEntity = new Type<ChartScriptEntity>("ChartScript");
 export interface ChartScriptEntity extends Entities.Entity {
     Type: "ChartScript";
     name?: string | null;
-    icon?: Entities.Lite<Files.FileEntity>;
+    icon?: Entities.Lite<Files.FileEntity> | null;
     script?: string | null;
     groupBy?: GroupByChart;
     columns: Entities.MList<ChartScriptColumnEntity>;
@@ -173,8 +173,8 @@ export const UserChartEntity = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     Type: "UserChart";
     query: Basics.QueryEntity;
-    entityType: Entities.Lite<Basics.TypeEntity>;
-    owner: Entities.Lite<Entities.Entity>;
+    entityType: Entities.Lite<Basics.TypeEntity> | null;
+    owner: Entities.Lite<Entities.Entity> | null;
     displayName: string;
     chartScript: ChartScriptEntity;
     parameters: Entities.MList<ChartParameterEntity>;

@@ -259,7 +259,7 @@ export module RoleQuery {
 }
 
 export interface RuleEntity<R, A> extends Entities.Entity {
-    role?: Entities.Lite<RoleEntity>;
+    role?: Entities.Lite<RoleEntity> | null;
     resource?: R | null;
     allowed?: A | null;
 }
@@ -300,7 +300,7 @@ export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowe
 export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
     Type: "SessionLog";
-    user?: Entities.Lite<UserEntity>;
+    user?: Entities.Lite<UserEntity> | null;
     sessionStart?: string;
     sessionEnd?: string | null;
     sessionTimeOut?: boolean;
@@ -367,7 +367,7 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
     passwordHash?: string | null;
     passwordSetDate?: string;
     passwordNeverExpires?: boolean;
-    role?: Entities.Lite<RoleEntity>;
+    role?: Entities.Lite<RoleEntity> | null;
     email?: string | null;
     cultureInfo?: Signum.CultureInfoEntity | null;
     anulationDate?: string | null;
@@ -392,7 +392,7 @@ export type UserState =
 export const UserTicketEntity = new Type<UserTicketEntity>("UserTicket");
 export interface UserTicketEntity extends Entities.Entity {
     Type: "UserTicket";
-    user?: Entities.Lite<UserEntity>;
+    user?: Entities.Lite<UserEntity> | null;
     ticket?: string | null;
     connectionDate?: string;
     device?: string | null;

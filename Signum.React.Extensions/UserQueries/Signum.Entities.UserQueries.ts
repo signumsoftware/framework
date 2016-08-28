@@ -36,8 +36,8 @@ export const UserQueryEntity = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
     Type: "UserQuery";
     query?: Basics.QueryEntity | null;
-    entityType?: Entities.Lite<Basics.TypeEntity>;
-    owner?: Entities.Lite<Entities.Entity>;
+    entityType?: Entities.Lite<Basics.TypeEntity> | null;
+    owner?: Entities.Lite<Entities.Entity> | null;
     displayName?: string | null;
     withoutFilters?: boolean;
     filters: Entities.MList<QueryFilterEntity>;

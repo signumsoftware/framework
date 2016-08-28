@@ -10,14 +10,14 @@ import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities
 export const AlertEntity = new Type<AlertEntity>("Alert");
 export interface AlertEntity extends Entities.Entity {
     Type: "Alert";
-    target?: Entities.Lite<Entities.Entity>;
+    target?: Entities.Lite<Entities.Entity> | null;
     creationDate?: string;
     alertDate?: string | null;
     attendedDate?: string | null;
     title?: string | null;
     text?: string | null;
-    createdBy?: Entities.Lite<Basics.IUserEntity>;
-    attendedBy?: Entities.Lite<Basics.IUserEntity>;
+    createdBy?: Entities.Lite<Basics.IUserEntity> | null;
+    attendedBy?: Entities.Lite<Basics.IUserEntity> | null;
     alertType?: AlertTypeEntity | null;
     state?: AlertState;
 }

@@ -24,9 +24,9 @@ export interface PackageEntity extends Entities.Entity, IProcessDataEntity {
 export const PackageLineEntity = new Type<PackageLineEntity>("PackageLine");
 export interface PackageLineEntity extends Entities.Entity, IProcessLineDataEntity {
     Type: "PackageLine";
-    package?: Entities.Lite<PackageEntity>;
+    package?: Entities.Lite<PackageEntity> | null;
     target?: Entities.Entity | null;
-    result?: Entities.Lite<Entities.Entity>;
+    result?: Entities.Lite<Entities.Entity> | null;
     finishTime?: string | null;
 }
 
@@ -48,10 +48,10 @@ export const ProcessEntity = new Type<ProcessEntity>("Process");
 export interface ProcessEntity extends Entities.Entity {
     Type: "Process";
     algorithm?: ProcessAlgorithmSymbol | null;
-    data?: IProcessDataEntity;
+    data?: IProcessDataEntity | null;
     machineName?: string | null;
     applicationName?: string | null;
-    user?: Entities.Lite<Basics.IUserEntity>;
+    user?: Entities.Lite<Basics.IUserEntity> | null;
     state?: ProcessState;
     creationDate?: string;
     plannedDate?: string | null;
@@ -61,16 +61,16 @@ export interface ProcessEntity extends Entities.Entity {
     executionEnd?: string | null;
     suspendDate?: string | null;
     exceptionDate?: string | null;
-    exception?: Entities.Lite<Basics.ExceptionEntity>;
+    exception?: Entities.Lite<Basics.ExceptionEntity> | null;
     progress?: number | null;
 }
 
 export const ProcessExceptionLineEntity = new Type<ProcessExceptionLineEntity>("ProcessExceptionLine");
 export interface ProcessExceptionLineEntity extends Entities.Entity {
     Type: "ProcessExceptionLine";
-    line?: Entities.Lite<IProcessLineDataEntity>;
-    process?: Entities.Lite<ProcessEntity>;
-    exception?: Entities.Lite<Basics.ExceptionEntity>;
+    line?: Entities.Lite<IProcessLineDataEntity> | null;
+    process?: Entities.Lite<ProcessEntity> | null;
+    exception?: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
 export module ProcessMessage {
