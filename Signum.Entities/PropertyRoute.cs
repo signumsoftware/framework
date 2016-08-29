@@ -602,7 +602,7 @@ namespace Signum.Entities
 
         static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((Entity ident) => ident.ToStringProperty);
 
-        public bool MatchesProperty(ModifiableEntity entity, PropertyInfo pi)
+        public bool? MatchesProperty(ModifiableEntity entity, PropertyInfo pi)
         {
             if (this.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 return false;
@@ -613,7 +613,7 @@ namespace Signum.Entities
             return this.Parent.MatchesEntity(entity);
         }
 
-        private bool MatchesEntity(ModifiableEntity entity)
+        private bool? MatchesEntity(ModifiableEntity entity)
         {
             if (this.Type != entity.GetType())
                 return false;
@@ -629,8 +629,10 @@ namespace Signum.Entities
                 case PropertyRouteType.FieldOrProperty:
                     {
                         var parentEntity = entity.GetParentEntity();
-                        if (!this.Parent.MatchesEntity(parentEntity))
-                            return false;
+
+                        var result = this.Parent.MatchesEntity(parentEntity);
+                        if (result != true)
+                            return result;
 
                         return this.PropertyInfo.GetValue(parentEntity) == entity;
                     }
@@ -639,16 +641,20 @@ namespace Signum.Entities
                     {
                         var mixin = (MixinEntity)entity;
                         var mainEntity = mixin.MainEntity;
-                        if (!this.Parent.MatchesEntity(mainEntity))
-                            return false;
+
+                        var result = this.Parent.MatchesEntity(mainEntity);
+                        if (result != true)
+                            return result;
 
                         return mainEntity.Mixins.Contains(mixin);
                     }
                 case PropertyRouteType.MListItems:
                     {
                         var parentEntity = entity.GetParentEntity();
-                        if (!this.Parent.Parent.MatchesEntity(parentEntity))
-                            return false;
+
+                        var result = this.Parent.Parent.MatchesEntity(parentEntity);
+                        if (result != true)
+                            return result;
 
                         var list = (IList)this.PropertyInfo.GetValue(parentEntity);
 
