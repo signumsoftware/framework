@@ -366,7 +366,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         if (!this.props.findOptions.create)
             return;
 
-        const isWindowsOpen = ev.button == 2 || ev.ctrlKey;
+        const isWindowsOpen = ev.button == 1 || ev.ctrlKey;
 
         this.chooseType().then(tn => {
             if (tn == undefined)

@@ -83,7 +83,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         const mle = list[index];
         const entity = mle.element;
 
-        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type!.isEmbedded;
+        const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
         if (openWindow) {
             event.preventDefault();
             const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);

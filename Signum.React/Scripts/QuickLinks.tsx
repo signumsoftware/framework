@@ -276,7 +276,7 @@ export class QuickLinkExplore extends QuickLink {
     }
 
     exploreOrPopup = (e: React.MouseEvent) => {
-        if (e.ctrlKey || e.button == 2)
+        if (e.ctrlKey || e.button == 1)
             window.open(Finder.findOptionsPath(this.findOptions));
         else
             Finder.explore(this.findOptions);
@@ -306,7 +306,7 @@ export class QuickLinkNavigate extends QuickLink {
     }
 
     navigateOrPopup = (e: React.MouseEvent) => {
-        if (e.ctrlKey || e.button == 2 || Navigator.getSettings(this.lite.EntityType).avoidPopup)
+        if (e.ctrlKey || e.button == 1 || Navigator.getSettings(this.lite.EntityType).avoidPopup)
             window.open(Navigator.navigateRoute(this.lite));
         else
             Navigator.navigate(this.lite);

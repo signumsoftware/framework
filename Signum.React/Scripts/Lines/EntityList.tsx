@@ -111,7 +111,7 @@ export abstract class EntityList extends EntityListBase<EntityListProps, EntityL
 
         const pr = ctx.propertyRoute.add(a => a[0]);
 
-        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type!.isEmbedded;
+        const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
 
         const promise = this.state.onView ?
             this.state.onView(entity, pr) :

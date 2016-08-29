@@ -111,7 +111,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
         const ctx = this.state.ctx;
         const entity = ctx.value;
 
-        const openWindow = (event.button == 2 || event.ctrlKey) && !this.state.type!.isEmbedded;
+        const openWindow = (event.button == 1 || event.ctrlKey) && !this.state.type!.isEmbedded;
         if (openWindow) {
             event.preventDefault();
             const route = Navigator.navigateRoute(entity as Lite<Entity> /*or Entity*/);
