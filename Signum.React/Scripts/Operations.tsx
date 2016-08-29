@@ -58,7 +58,7 @@ export function operationInfos(ti: TypeInfo) {
  */
 export abstract class OperationSettings {
 
-    text: () => string;
+    text?: () => string;
     operationSymbol: OperationSymbol;
 
     constructor(operationSymbol: OperationSymbol) {
@@ -73,8 +73,8 @@ export abstract class OperationSettings {
  */
 export class ConstructorOperationSettings<T extends Entity> extends OperationSettings {
 
-    isVisible: (ctx: ConstructorOperationContext<T>) => boolean;
-    onConstruct: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
+    isVisible?: (ctx: ConstructorOperationContext<T>) => boolean;
+    onConstruct?: (ctx: ConstructorOperationContext<T>) => Promise<EntityPack<T> | undefined> | undefined;
 
     constructor(operationSymbol: ConstructSymbol_Simple<T>, options: ConstructorOperationOptions<T>) {
         super(operationSymbol);
@@ -102,12 +102,12 @@ export interface ConstructorOperationContext<T extends Entity> {
  */
 export class ContextualOperationSettings<T extends Entity> extends OperationSettings {
 
-    isVisible: (ctx: ContextualOperationContext<T>) => boolean;
-    hideOnCanExecute: boolean;
-    confirmMessage: (ctx: ContextualOperationContext<T>) => string;
-    onClick: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
-    style: BsStyle;
-    order: number;
+    isVisible?: (ctx: ContextualOperationContext<T>) => boolean;
+    hideOnCanExecute?: boolean;
+    confirmMessage?: (ctx: ContextualOperationContext<T>) => string;
+    onClick?: (ctx: ContextualOperationContext<T>, event: React.MouseEvent) => void;
+    style?: BsStyle;
+    order?: number;
 
     constructor(operationSymbol: ConstructSymbol_FromMany<any, T>, options: ContextualOperationOptions<T>) {
         super(operationSymbol);
@@ -151,13 +151,13 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     contextual?: ContextualOperationSettings<T>;
     contextualFromMany?: ContextualOperationSettings<T>;
     
-    isVisible: (ctx: EntityOperationContext<T>) => boolean;
-    confirmMessage: (ctx: EntityOperationContext<T>) => string;
-    onClick: (ctx: EntityOperationContext<T>) => void;
-    hideOnCanExecute: boolean;
-    group: EntityOperationGroup;
-    order: number;
-    style: BsStyle;
+    isVisible?: (ctx: EntityOperationContext<T>) => boolean;
+    confirmMessage?: (ctx: EntityOperationContext<T>) => string;
+    onClick?: (ctx: EntityOperationContext<T>) => void;
+    hideOnCanExecute?: boolean;
+    group?: EntityOperationGroup | null;
+    order?: number;
+    style?: BsStyle;
 
     constructor(operationSymbol: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, options: EntityOperationOptions<T>) {
         super(operationSymbol)
@@ -180,7 +180,7 @@ export interface EntityOperationOptions<T extends Entity> {
     confirmMessage?: (ctx: EntityOperationContext<T>) => string;
     onClick?: (ctx: EntityOperationContext<T>) => void;
     hideOnCanExecute?: boolean;
-    group?: EntityOperationGroup;
+    group?: EntityOperationGroup | null;
     order?: number;
     style?: BsStyle;
 }

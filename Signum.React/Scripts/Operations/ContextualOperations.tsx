@@ -206,7 +206,7 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
         const disabled = !!coc.canExecute;
 
         const onClick = coc.settings && coc.settings.onClick ?
-            (me: React.MouseEvent) => coc.settings.onClick(coc, me) :
+            (me: React.MouseEvent) => coc.settings.onClick!(coc, me) :
             (me: React.MouseEvent) => defaultClick(coc, me)
 
         const menuItem = <MenuItem

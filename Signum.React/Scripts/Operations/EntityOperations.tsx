@@ -99,7 +99,7 @@ export function createEntityOperationContext<T extends Entity>(ctx: TypeContext<
 
 function getDefaultGroup(eoc: EntityOperationContext<Entity>) {
     if (eoc.settings != undefined && eoc.settings.group !== undefined) {
-        return eoc.settings.group; //maybe undefined 
+        return eoc.settings.group;
     }
 
     if (eoc.operationInfo.operationType == OperationType.ConstructorFrom)
