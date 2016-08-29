@@ -83,7 +83,7 @@ namespace Signum.Entities.Chart
             }
         }
 
-        [NotifyCollectionChanged, ValidateChildProperty, NotNullable, PreserveOrder]
+        [NotifyCollectionChanged, NotifyChildProperty, NotNullable, PreserveOrder]
         public MList<ChartColumnEntity> Columns { get; set; } = new MList<ChartColumnEntity>();
 
         void NotifyAllColumns()
