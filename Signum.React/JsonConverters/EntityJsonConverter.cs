@@ -116,7 +116,7 @@ namespace Signum.React.Json
         {
             var pr = JsonSerializerExtensions.CurrentPropertyRoute;
 
-            if (pr == null || typeof(IEntity).IsAssignableFrom(pr.Type))
+            if (pr == null || typeof(IRootEntity).IsAssignableFrom(pr.Type))
                 pr = PropertyRoute.Root(value.GetType());
             else if (pr.Type.ElementType() == value.GetType())
                 pr = pr.Add("Item");
@@ -246,7 +246,7 @@ namespace Signum.React.Json
                     throw new InvalidOperationException($"Two clones of the same entity ({mod.GetType()} {(mod as Entity)?.IdOrNull} '{mod}') found and one was modified");
                 
                 var pr = JsonSerializerExtensions.CurrentPropertyRoute;
-                if (pr == null || mod is Entity)
+                if (pr == null || mod is IRootEntity)
                     pr = PropertyRoute.Root(mod.GetType());
                 else if (pr.Type.ElementType() == objectType)
                     pr = pr.Add("Item"); //Because we have a custom MListJsonConverter but not for other simpler collections

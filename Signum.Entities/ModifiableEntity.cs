@@ -250,6 +250,17 @@ namespace Signum.Entities
         [field: NonSerialized, Ignore]
         public event Func<ModifiableEntity, PropertyInfo, string> ExternalPropertyValidation;
 
+        public ModifiableEntity GetParentEntity()
+        {
+            if (PropertyChanged != null)
+                return (ModifiableEntity)PropertyChanged.Target;
+
+            if (ExternalPropertyValidation != null)
+                return (ModifiableEntity)ExternalPropertyValidation.Target;
+
+            return null;
+        }
+
         internal string OnExternalPropertyValidation(PropertyInfo pi)
         {
             if (ExternalPropertyValidation == null)

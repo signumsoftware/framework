@@ -38,11 +38,14 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         };
     }
 
-    static highlightedText = (val: string, query: string) => {
+    static highlightedText = (val: string, query?: string): React.ReactNode => {
+
+        if (query == undefined)
+            return val;
 
         const index = val.toLowerCase().indexOf(query.toLowerCase());
         if (index == -1)
-            return val as React.ReactNode;
+            return val;
 
         return [
             val.substr(0, index),

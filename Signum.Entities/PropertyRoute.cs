@@ -11,6 +11,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
+using System.Collections;
 
 namespace Signum.Entities
 {
@@ -202,6 +203,8 @@ namespace Signum.Entities
                 throw new NotSupportedException("Properties of {0} not supported".FormatWith(parent.Type));
 
         }
+
+      
 
         static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity e) => e.toStr);
 
@@ -598,6 +601,65 @@ namespace Signum.Entities
         }
 
         static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((Entity ident) => ident.ToStringProperty);
+
+        public bool MatchesProperty(ModifiableEntity entity, PropertyInfo pi)
+        {
+            if (this.PropertyRouteType != PropertyRouteType.FieldOrProperty)
+                return false;
+
+            if (!ReflectionTools.PropertyEquals(PropertyInfo, pi))
+                return false;
+
+            return this.Parent.MatchesEntity(entity);
+        }
+
+        private bool MatchesEntity(ModifiableEntity entity)
+        {
+            if (this.Type != entity.GetType())
+                return false;
+
+            if (this.PropertyRouteType == PropertyRouteType.Root)
+                return true;
+
+
+            switch (this.PropertyRouteType)
+            {
+                case PropertyRouteType.Root: return true;
+                    
+                case PropertyRouteType.FieldOrProperty:
+                    {
+                        var parentEntity = entity.GetParentEntity();
+                        if (!this.Parent.MatchesEntity(parentEntity))
+                            return false;
+
+                        return this.PropertyInfo.GetValue(parentEntity) == entity;
+                    }
+
+                case PropertyRouteType.Mixin:
+                    {
+                        var mixin = (MixinEntity)entity;
+                        var mainEntity = mixin.MainEntity;
+                        if (!this.Parent.MatchesEntity(mainEntity))
+                            return false;
+
+                        return mainEntity.Mixins.Contains(mixin);
+                    }
+                case PropertyRouteType.MListItems:
+                    {
+                        var parentEntity = entity.GetParentEntity();
+                        if (!this.Parent.Parent.MatchesEntity(parentEntity))
+                            return false;
+
+                        var list = (IList)this.PropertyInfo.GetValue(parentEntity);
+
+                        return list != null && list.Contains(entity);
+                    }
+
+                case PropertyRouteType.LiteEntity:
+                default:
+                    throw new NotImplementedException();
+            }
+        }
     }
 
     public interface IImplementationsFinder

@@ -11,32 +11,27 @@ import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, newMListElement } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
+import { AutocompleteConfig, LiteAutocompleteConfig } from './EntityLine'
 
 export interface EntityStripProps extends EntityListBaseProps {
     vertical?: boolean;
-    autoComplete?: boolean;
-
-    autoCompleteGetItems?: (query: string) => Promise<Lite<Entity>[]>;
-    autoCompleteRenderItem?: (lite: Lite<Entity>, query: string) => React.ReactNode;
+    autoComplete?: AutocompleteConfig<any> | null;
 }
 
 export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripProps> {
 
     calculateDefaultState(state: EntityStripProps) {
         super.calculateDefaultState(state);
-        state.autoComplete = !state.type!.isEmbedded && state.type!.name != IsByAll;
         state.create = false;
         state.find = false;
+        const type = state.type!
+        state.autoComplete = type.isEmbedded || type.name == IsByAll ? null :
+            new LiteAutocompleteConfig((query: string) => Finder.API.findLiteLike({
+                types: type.name,
+                subString: query,
+                count: 5
+            }), false);     
     }
-
-    defaultAutoCompleteGetItems = (query: string) => Finder.API.findLiteLike({
-        types: this.state.type!.name,
-        subString: query,
-        count: 5
-    });
-
-    defaultAutCompleteRenderItem = (lite: Lite<Entity>, query: string) => Typeahead.highlightedText(lite.toStr || "", query);
-
 
     renderInternal() {
 
@@ -49,7 +44,7 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
                         {
                             mlistItemContext(s.ctx).map((mlec, i) =>
                                 (<EntityStripElement key={i}
-                                    ctx={mlec}
+                                    ctx={mlec} autoComplete={s.autoComplete}
                                     onRemove={this.state.remove ? e => this.handleRemoveElementClick(e, i) : undefined}
                                     onView={this.state.view ? e => this.handleViewElement(e, i) : undefined}
                                     />))
@@ -121,14 +116,16 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
 
     renderAutoComplete() {
 
-        if (!this.state.autoComplete || this.state.ctx!.readOnly)
+        var ac = this.state.autoComplete;
+
+        if (!ac || this.state.ctx!.readOnly)
             return undefined;
 
         return (
             <Typeahead
                 inputAttrs={{ className: "sf-entity-autocomplete" }}
-                getItems={this.props.autoCompleteGetItems || this.defaultAutoCompleteGetItems}
-                renderItem={this.props.autoCompleteRenderItem || this.defaultAutCompleteRenderItem}
+                getItems={ac.getItems}
+                renderItem={ac.renderItem}
                 liAttrs={lite => ({ 'data-entity-key': liteKey(lite) }) }
                 onSelect={this.handleOnSelect}/>
         );
@@ -140,22 +137,35 @@ export interface EntityStripElementProps {
     onRemove?: (event: React.MouseEvent) => void;
     onView?: (event: React.MouseEvent) => void;
     ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
+    autoComplete?: AutocompleteConfig<any> | null;
 }
 
-export class EntityStripElement extends React.Component<EntityStripElementProps, void>
+export class EntityStripElement extends React.Component<EntityStripElementProps, {item?: any}>
 {
+    constructor(props: EntityStripElementProps) {
+        super(props);
+        this.state = {};
+    }
+
+    componentWillMount() {
+        if (this.props.autoComplete)
+            this.props.autoComplete.getInitialItem(this.props.ctx.value).then(item => this.changeState(s => s.item = item)).done();
+    }
+
     render() {
+
+        const toStr = this.state.item ? this.props.autoComplete!.renderItem(this.state.item) : getToString(this.props.ctx.value);
 
         return (
             <li className="sf-strip-element input-group" {...EntityListBase.entityHtmlProps(this.props.ctx.value) }>
                 {
                     this.props.onView ?
                         <a className="sf-entitStrip-link" href="#" onClick={this.props.onView}>
-                            {this.props.ctx.value.toStr}
+                            {toStr}
                         </a>
                         :
                         <span className="sf-entitStrip-link">
-                            {this.props.ctx.value.toStr}
+                            {toStr}
                         </span>
                 }
                

@@ -104,3 +104,9 @@ declare module moment {
         smartNow(this: moment.Moment): Moment;
     }
 }
+
+declare namespace __React {
+    interface Component<P, S> {
+        changeState(func: (state: S) => void): void;
+    }
+}
