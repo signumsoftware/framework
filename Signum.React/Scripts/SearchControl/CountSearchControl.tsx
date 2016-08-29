@@ -37,7 +37,7 @@ export default class CountSearchControl extends React.Component<CountSearchContr
 
         return {
             queryKey: fo.queryKey,
-            filters: fo.filterOptions.map(fo => ({ token: fo.token!.key, operation: fo.operation!, value: fo.value })),
+            filters: fo.filterOptions.map(fo => ({ token: fo.token!.fullKey, operation: fo.operation!, value: fo.value })),
         };
     }
 
