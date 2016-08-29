@@ -119,8 +119,8 @@ function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityO
     const disabled = !!eoc.canExecute;
 
     const btn = !asMenuItem ?
-        <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled? undefined : () => onClick(eoc) } data-operation={eoc.operationInfo.key} key={key}>{text}</Button> :
-        <MenuItem className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined) } onClick={disabled ? undefined : () => onClick(eoc) } data-operation={eoc.operationInfo.key} key={key}>{text}</MenuItem>;
+        <Button bsStyle={bsStyle} className={disabled ? "disabled" : undefined} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</Button> :
+        <MenuItem className={classes("btn-" + bsStyle, disabled ? "disabled" : undefined)} onClick={disabled ? undefined : e => onClick(eoc, e)} data-operation={eoc.operationInfo.key} key={key}>{text}</MenuItem>;
 
     if (!eoc.canExecute)
         return btn;
@@ -130,20 +130,22 @@ function createDefaultButton(eoc: EntityOperationContext<Entity>, group: EntityO
     return <OverlayTrigger placement="bottom" overlay={tooltip}>{btn}</OverlayTrigger>;
 }
 
-function onClick(eoc: EntityOperationContext<Entity>): void{
+function onClick(eoc: EntityOperationContext<Entity>, event: React.MouseEvent): void{
+
+    event.persist();
 
     if (eoc.settings && eoc.settings.onClick)
-        return eoc.settings.onClick(eoc);
+        return eoc.settings.onClick(eoc, event);
 
     if (eoc.operationInfo.lite) {
         switch (eoc.operationInfo.operationType) {
-            case OperationType.ConstructorFrom: defaultConstructFromLite(eoc); return;
+            case OperationType.ConstructorFrom: defaultConstructFromLite(eoc, event); return;
             case OperationType.Execute: defaultExecuteLite(eoc); return;
             case OperationType.Delete: defaultDeleteLite(eoc); return;
         }
     } else {
         switch (eoc.operationInfo.operationType) {
-            case OperationType.ConstructorFrom: defaultConstructFromEntity(eoc); return;
+            case OperationType.ConstructorFrom: defaultConstructFromEntity(eoc, event); return;
             case OperationType.Execute: defaultExecuteEntity(eoc); return;
             case OperationType.Delete: defaultDeleteEntity(eoc); return;
         }
@@ -157,24 +159,30 @@ export function notifySuccess() {
     return true;
 }
 
-export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, ...args: any[]) {
+export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
 
     if (!confirmInNecessary(eoc))
         return;
 
     API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(pack => Navigator.view(pack).then(a => notifySuccess()))
+        .then(pack => {
+            notifySuccess();
+            Navigator.createNavigateOrTab(pack, event);
+        })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }
 
-export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, ...args: any[]) {
+export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
 
     if (!confirmInNecessary(eoc))
         return;
 
     API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(pack => Navigator.view(pack).then(a => notifySuccess()))
+        .then(pack => {
+            notifySuccess();
+            Navigator.createNavigateOrTab(pack, event);
+        })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }

@@ -153,7 +153,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
     
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
     confirmMessage?: (ctx: EntityOperationContext<T>) => string;
-    onClick?: (ctx: EntityOperationContext<T>) => void;
+    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;
@@ -178,7 +178,7 @@ export interface EntityOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
     confirmMessage?: (ctx: EntityOperationContext<T>) => string;
-    onClick?: (ctx: EntityOperationContext<T>) => void;
+    onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent) => void;
     hideOnCanExecute?: boolean;
     group?: EntityOperationGroup | null;
     order?: number;

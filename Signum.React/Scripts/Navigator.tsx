@@ -422,6 +422,25 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
     });
 }
 
+export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
+    var url = createRoute(pack.entity.Type) + "?waitData=true";
+    var win = window.open(url);
+    win.parentWindowData = pack;
+}
+
+export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent) {
+    if (!pack || !pack.entity)
+        return;
+
+    const es = getSettings(pack.entity.Type);
+    if (es.avoidPopup || event.ctrlKey || event.button == 1) {
+        createInNewTab(pack);
+    }
+    else {
+        navigate(pack);
+    }
+}
+
 
 export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, showOperations: boolean): Promise<EntityPack<ModifiableEntity>> {
     if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)

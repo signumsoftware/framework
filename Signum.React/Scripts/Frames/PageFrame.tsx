@@ -14,7 +14,7 @@ import ValidationErrors from './ValidationErrors'
 
 require("!style!css!./Frames.css");
 
-interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string }> {
+interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: string; id?: string, waitData?: string }> {
 }
 
 
@@ -58,6 +58,15 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
     }
 
     loadEntity(props: PageFrameProps): Promise<void> {
+
+        if (this.props.location.query["waitData"]) {
+            if (window.parentWindowData == null)
+                throw new Error("parentWindowData not found");
+
+            this.setState({ pack: window.parentWindowData });
+            window.parentWindowData = undefined;
+            return Promise.resolve<void>();
+        }
 
         const ti = this.getTypeInfo();
 
