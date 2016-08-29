@@ -69,7 +69,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
 
     render() {
         const result = this.state.result;
-
+        const target = this.props.ctx.value.target;
         return (
             <Tabs id="diffTabs" defaultActiveKey="diff">
                 {result && result.prev && this.renderPrev(result.prev)}
@@ -78,7 +78,7 @@ export class DiffMixinTabs extends React.Component<{ ctx: TypeContext<OperationL
                 {this.renderDiff() }
                 {this.renderFinalState()}
                 {result && result.diffNext && this.renderNextDiff(result.diffNext)}
-                {result && (result.next ? this.renderNext(result.next) : this.renderCurrentEntity(this.props.ctx.value.target!))}            
+                {result && (result.next ? this.renderNext(result.next) : target && this.renderCurrentEntity(target))}            
             </Tabs>
         );
     }
