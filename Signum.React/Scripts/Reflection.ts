@@ -358,7 +358,18 @@ export function setTypes(types: TypeInfoDictionary) {
         if (t.operations) {
             Dic.foreach(t.operations, (k2, t2) => {
                 t2.key = k2;
-                t2.niceName = _types[k2.before(".").toLowerCase()].members[k2.after(".")].niceName;
+                const typeName = k2.before(".").toLowerCase();
+                const memberName = k2.after(".");
+
+                const ti = _types[typeName];
+                if (!ti)
+                    throw new Error(`Type ${typeName} not found. Consider synchronizing.`);
+
+                const member = ti.members[k2.after(".")];
+                if (!member)
+                    throw new Error(`Member ${memberName} not found in ${ti.name}. Consider synchronizing.`);
+
+                t2.niceName = member.niceName;
             });
 
             Object.freeze(t.operations);
