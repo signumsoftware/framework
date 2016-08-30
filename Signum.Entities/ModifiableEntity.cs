@@ -65,22 +65,15 @@ namespace Signum.Entities
                     col.CollectionChanged -= ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    foreach (INotifyPropertyChanged item in (IEnumerable)col)
-                        item.PropertyChanged -= ChildPropertyChanged;
-
-                if (AttributeManager<ValidateChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
                     foreach (ModifiableEntity item in (IEnumerable)col)
-                        item.ExternalPropertyValidation -= ChildPropertyValidation;
+                        item.SetParentEntity(null);
             }
 
             ModifiableEntity mod = field as ModifiableEntity;
             if (mod != null)
             {
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    mod.PropertyChanged -= ChildPropertyChanged;
-
-                if (AttributeManager<ValidateChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    mod.ExternalPropertyValidation -= ChildPropertyValidation;
+                    mod.SetParentEntity(null);
             }
 
             SetSelfModified();
@@ -93,22 +86,15 @@ namespace Signum.Entities
                     col.CollectionChanged += ChildCollectionChanged;
 
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    foreach (INotifyPropertyChanged item in (IEnumerable)col)
-                        item.PropertyChanged += ChildPropertyChanged;
-
-                if (AttributeManager<ValidateChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
                     foreach (ModifiableEntity item in (IEnumerable)col)
-                        item.ExternalPropertyValidation += ChildPropertyValidation;
+                        item.SetParentEntity(this);
             }
 
             mod = field as ModifiableEntity;
             if (mod != null)
             {
                 if (AttributeManager<NotifyChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    mod.PropertyChanged += ChildPropertyChanged;
-
-                if (AttributeManager<ValidateChildPropertyAttribute>.FieldContainsAttribute(GetType(), pi))
-                    mod.ExternalPropertyValidation += ChildPropertyValidation;
+                    mod.SetParentEntity(this);
             }
 
             NotifyPrivate(pi.Name);
@@ -119,6 +105,8 @@ namespace Signum.Entities
 
             return true;
         }
+
+    
 
         struct PropertyKey : IEquatable<PropertyKey>
         {
@@ -180,26 +168,11 @@ namespace Signum.Entities
 
                 var entity = field as ModifiableEntity;
                 if (entity != null)
-                    entity.PropertyChanged += ChildPropertyChanged;
-                else
-                {
-                    foreach (INotifyPropertyChanged item in (IEnumerable)field)
-                        item.PropertyChanged += ChildPropertyChanged;
-                }
-            }
-
-            foreach (object field in AttributeManager<ValidateChildPropertyAttribute>.FieldsWithAttribute(this))
-            {
-                if (field == null)
-                    continue;
-
-                var entity = field as ModifiableEntity;
-                if (entity != null)
-                    entity.ExternalPropertyValidation += ChildPropertyValidation;
+                    entity.SetParentEntity(this);
                 else
                 {
                     foreach (ModifiableEntity item in (IEnumerable)field)
-                        item.ExternalPropertyValidation += ChildPropertyValidation;
+                        item.SetParentEntity(this);
                 }
             }
         }
@@ -219,17 +192,16 @@ namespace Signum.Entities
             if (AttributeManager<NotifyChildPropertyAttribute>.FieldsWithAttribute(this).Contains(sender))
             {
                 if (args.NewItems != null)
-                    foreach (var p in args.NewItems.Cast<INotifyPropertyChanged>()) p.PropertyChanged += ChildPropertyChanged;
-                if (args.OldItems != null)
-                    foreach (var p in args.OldItems.Cast<INotifyPropertyChanged>()) p.PropertyChanged -= ChildPropertyChanged;
-            }
+                {
+                    foreach (var p in args.NewItems.Cast<ModifiableEntity>())
+                        p.SetParentEntity(this);
+                }
 
-            if (AttributeManager<ValidateChildPropertyAttribute>.FieldsWithAttribute(this).Contains(sender))
-            {
-                if (args.NewItems != null)
-                    foreach (var p in args.NewItems.Cast<ModifiableEntity>()) p.ExternalPropertyValidation += ChildPropertyValidation;
                 if (args.OldItems != null)
-                    foreach (var p in args.OldItems.Cast<ModifiableEntity>()) p.ExternalPropertyValidation -= ChildPropertyValidation;
+                {
+                    foreach (var p in args.OldItems.Cast<ModifiableEntity>())
+                        p.SetParentEntity(this);
+                }
             }
         }
 
@@ -248,25 +220,27 @@ namespace Signum.Entities
         public event PropertyChangedEventHandler PropertyChanged;
 
         [field: NonSerialized, Ignore]
-        public event Func<ModifiableEntity, PropertyInfo, string> ExternalPropertyValidation;
+        ModifiableEntity parentEntity;
 
         public ModifiableEntity GetParentEntity()
         {
-            if (PropertyChanged != null)
-                return (ModifiableEntity)PropertyChanged.Target;
-
-            if (ExternalPropertyValidation != null)
-                return (ModifiableEntity)ExternalPropertyValidation.Target;
-
-            return null;
+            return parentEntity;
         }
 
-        internal string OnExternalPropertyValidation(PropertyInfo pi)
+        private void SetParentEntity(ModifiableEntity p)
         {
-            if (ExternalPropertyValidation == null)
+            if (this.parentEntity != null)
+                throw new InvalidOperationException($"'{nameof(parentEntity)}' is still connected to '{parentEntity}'");
+
+            this.parentEntity = p;
+        }
+
+        internal string OnParentChildPropertyValidation(PropertyInfo pi)
+        {
+            if (parentEntity == null)
                 return null;
 
-            return ExternalPropertyValidation(this, pi);
+            return parentEntity.ChildPropertyValidation(this, pi);
         }
 
         public void Notify<T>(Expression<Func<T>> property)
@@ -287,10 +261,14 @@ namespace Signum.Entities
 
         void NotifyPrivate(string propertyName)
         {
-            var handler = PropertyChanged;
+            var parent = this.GetParentEntity();
+            if (parent != null)
+                parent.ChildPropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 
+            var handler = PropertyChanged;
             if (handler != null)
                 handler(this, new PropertyChangedEventArgs(propertyName));
+
         }
 
         
