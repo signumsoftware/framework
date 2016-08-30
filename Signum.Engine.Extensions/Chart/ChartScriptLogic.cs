@@ -149,7 +149,12 @@ namespace Signum.Engine.Chart
             Synchronizer.SynchronizeReplacing(new Replacements(), "scripts",
                 charts,
                 files,
-                (name, script) => script.ExportXml().Save(fileName(script)),
+                (name, script) => {
+                    if (script.Icon != null)
+                        script.Icon.Retrieve();
+
+                    script.ExportXml().Save(fileName(script));
+                },
                 (name, file) =>
                 {
                     if (AskYesNoAll("Remove {0} file?".FormatWith(name), ref options.RemoveOld))
