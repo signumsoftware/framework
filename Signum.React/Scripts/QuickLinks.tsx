@@ -158,11 +158,37 @@ export class QuickLinkWidget extends React.Component<QuickLinkWidgetProps, { lin
 
         return (
             <Dropdown id="quickLinksWidget" pullRight>
-                {React.cloneElement(a, { "bsRole": "toggle" }) }
+                <QuickLinkToggle bsRole="toggle" links={links} />
                 <Dropdown.Menu>
                     { links && links.orderBy(a => a.order).map((a, i) => a.toMenuItem(i)) }
                 </Dropdown.Menu>
             </Dropdown>
+
+        );
+    }
+}
+
+class QuickLinkToggle extends React.Component<{ bsRole: string, onClick?: (e: React.MouseEvent) => void, links: any[] | undefined }, void>{
+
+    handleOnClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+
+        this.props.onClick!(e);
+    }
+
+    render() {
+        var links = this.props.links;
+
+        return (
+            <a
+                className={classes("badge", "sf-widgets-active", "sf-quicklinks")}
+                title={QuickLinkMessage.Quicklinks.niceToString()}
+                role="button"
+                data-toggle="dropdown"
+                onClick={this.handleOnClick} >
+                {links && <span className="glyphicon glyphicon-star"></span>}
+                {links ? "\u00A0" + links.length : "…"}
+            </a >
         );
     }
 }

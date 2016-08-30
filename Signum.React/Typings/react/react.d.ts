@@ -145,7 +145,7 @@ declare namespace __React {
     // ----------------------------------------------------------------------
 
     interface StatelessComponent<P> {
-        (props?: P, context?: any): ReactElement<any>;
+        (props?: P, context?: any): ReactElement<any> | null;
         propTypes?: ValidationMap<P>;
         contextTypes?: ValidationMap<any>;
         defaultProps?: P;
