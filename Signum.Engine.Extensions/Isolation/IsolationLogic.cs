@@ -32,6 +32,8 @@ namespace Signum.Engine.Isolation
 
     public static class IsolationLogic
     {
+        public static bool IsStarted;
+
         public static ResetLazy<List<Lite<IsolationEntity>>> Isolations;
 
         internal static Dictionary<Type, IsolationStrategy> strategies = new Dictionary<Type, IsolationStrategy>();
@@ -74,6 +76,7 @@ namespace Signum.Engine.Isolation
 
                     return null;
                 };
+                IsStarted = true;
             }
         }
 
@@ -230,6 +233,8 @@ namespace Signum.Engine.Isolation
 
         static GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>>> giGetOnlyIsolation = 
             new GenericInvoker<Func<IEnumerable<Lite<Entity>>, Lite<IsolationEntity>>>(list => GetOnlyIsolation<Entity>(list));
+
+
         public static Lite<IsolationEntity> GetOnlyIsolation<T>(IEnumerable<Lite<Entity>> selectedEntities) where T : Entity
         {
             return selectedEntities.Cast<Lite<T>>().GroupsOf(100).Select(gr =>
