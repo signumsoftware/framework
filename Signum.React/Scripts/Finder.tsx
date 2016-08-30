@@ -1,5 +1,6 @@
 ﻿import * as React from "react"
 import * as moment from "moment"
+import * as numbro from "numbro"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
@@ -15,8 +16,10 @@ import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType } fr
 import { Entity, Lite, toLite, liteKey, parseLite, EntityControlMessage, isLite, isEntityPack, isEntity } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
-import { Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
-    getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, PseudoType, EntityData } from './Reflection';
+import {
+    Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
+    getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData
+} from './Reflection';
 
 import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable } from './Navigator';
 import SearchModal from './SearchControl/SearchModal';
@@ -721,7 +724,10 @@ export const formatRules: FormatRule[] = [
     {
         name: "Number",
         isApplicable: col => col.token!.filterType == "Integer" || col.token!.filterType == "Decimal",
-        formatter: col => new CellFormatter((cell: number) => cell && <span>{cell.toString() }</span>, "right")
+        formatter: col => {
+            const numbroFormat = toNumbroFormat(col.token!.format);
+            return new CellFormatter((cell: number) => cell == undefined ? "" : <span>{numbro(cell).format(numbroFormat)}</span>, "right");
+        }
     },
     {
         name: "Number with Unit",

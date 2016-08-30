@@ -51,7 +51,7 @@ interface QueryTokenPartProps extends React.Props<QueryTokenPart> {
     readOnly: boolean;
 }
 
-export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?: (QueryToken | undefined)[] }>
+export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?: (QueryToken | null)[] }>
 {
     constructor(props: QueryTokenPartProps) {
         super(props);
@@ -73,7 +73,7 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
 
     requestSubTokens(props: QueryTokenPartProps) {
         Finder.API.subTokens(props.queryKey, props.parentToken, props.subTokenOptions).then(tokens =>
-            this.setState({ data: tokens.length == 0 ? tokens : [undefined, ...tokens] })
+            this.setState({ data: tokens.length == 0 ? tokens : [null, ...tokens] })
         ).done();
     }
 
@@ -111,12 +111,12 @@ export class QueryTokenPart extends React.Component<QueryTokenPartProps, { data?
     }
 }
 
-export class QueryTokenItem extends React.Component<{ item: QueryToken | undefined }, {}> {
+export class QueryTokenItem extends React.Component<{ item: QueryToken | null }, {}> {
     render() {
 
         const item = this.props.item;
 
-        if (item == undefined)
+        if (item == null)
             return null;
 
         return (
@@ -130,7 +130,7 @@ export class QueryTokenItem extends React.Component<{ item: QueryToken | undefin
 }
   
 
-export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken | undefined }, {}> {
+export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken | null }, {}> {
 
     static contextTypes: React.ValidationMap<QueryTokenOptionalItem> = { "parentToken": React.PropTypes.object };
 
@@ -140,7 +140,7 @@ export class QueryTokenOptionalItem extends React.Component<{ item: QueryToken |
 
         const item = this.props.item;
 
-        if (item == undefined)
+        if (item == null)
             return <span> - </span>;
 
         const parentToken = (this.context as any).parentToken;

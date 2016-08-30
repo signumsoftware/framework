@@ -83,7 +83,7 @@ export function toMomentFormat(format: string | undefined): string | undefined {
         case "t": return "LT";
         case "T": return "LTS";
         case "y": return "LTS";
-        case "Y": return "MMMM YYY";
+        case "Y": return "L";
         default: return format;
     }
 }
@@ -97,6 +97,30 @@ export function toMomentDurationFormat(format: string | undefined): string | und
         return undefined;
 
     return format.replace("\:", ":");
+}
+
+
+export function toNumbroFormat(format: string | undefined) {
+
+    if (format == undefined)
+        return undefined;
+
+    if (format.startsWith("C"))
+        return "0." + "0".repeat(parseInt(format.after("C")));
+
+    if (format.startsWith("N"))
+        return "0." + "0".repeat(parseInt(format.after("N")));
+
+    if (format.startsWith("D"))
+        return "0".repeat(parseInt(format.after("D")));
+
+    if (format.startsWith("E"))
+        return "0." + "0".repeat(parseInt(format.after("E")));
+
+    if (format.startsWith("P"))
+        return "0." + "0".repeat(parseInt(format.after("P"))) + "%";
+
+    return format;
 }
 
 export interface TypeReference {

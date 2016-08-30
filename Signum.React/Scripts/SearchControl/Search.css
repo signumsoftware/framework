@@ -23,6 +23,10 @@ table.sf-search-results > tbody > tr > td {
     margin-bottom: 10px;
 }
 
+.sf-filter-table div.sf-query-token-builder {
+    display: table;
+}
+
 /*Drag and drop*/
 
 th.drag-left {

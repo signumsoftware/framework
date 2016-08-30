@@ -6,7 +6,7 @@ import { Dic, addClass } from '../Globals'
 import { DateTimePicker } from 'react-widgets'
 import 'react-widgets/dist/css/react-widgets.css';
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat } from '../Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat, toNumbroFormat } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from '../Lines/LineBase'
 
 
@@ -308,14 +308,14 @@ ValueLine.renderers[ValueLineType.Decimal as any] = (vl) => {
 function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) {
     const s = vl.state
 
-    const numeralFormat = toNumeralFormat(s.formatText); 
+    const numbroFormat = toNumbroFormat(s.formatText); 
 
     if (s.ctx.readOnly)
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(vl.baseHtmlProps(), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 { ValueLine.withUnit(s.unitText,
                     <FormControlStatic {...vl.state.valueHtmlProps} ctx={s.ctx} className={addClass(vl.state.valueHtmlProps, "numeric") }>
-                        {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numeralFormat) }
+                        {s.ctx.value == null ? "" : numbro(s.ctx.value).format(numbroFormat) }
                     </FormControlStatic>) }
             </FormGroup>
         );
@@ -336,34 +336,11 @@ function numericTextBox(vl: ValueLine, validateKey: React.KeyboardEventHandler) 
                     value={s.ctx.value}
                     onChange={handleOnChange}
                     validateKey={validateKey}
-                    format={ numeralFormat}
+                    format={ numbroFormat}
                     />
             ) }
         </FormGroup>
     );
-}
-
-function toNumeralFormat(format: string | undefined) {
-
-    if (format == undefined)
-        return undefined;
-
-    if (format.startsWith("C"))
-        return "0." + "0".repeat(parseInt(format.after("C")));
-
-    if (format.startsWith("N"))
-        return "0." + "0".repeat(parseInt(format.after("N")));
-
-    if (format.startsWith("D"))
-        return "0".repeat(parseInt(format.after("D")));
-
-    if (format.startsWith("E"))
-        return "0." + "0".repeat(parseInt(format.after("E")));
-
-    if (format.startsWith("P"))
-        return "0." + "0".repeat(parseInt(format.after("P"))) + "%";
-
-    return format;
 }
 
 export interface NumericTextBoxProps {
