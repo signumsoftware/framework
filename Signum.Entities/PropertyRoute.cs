@@ -602,6 +602,7 @@ namespace Signum.Entities
 
         static readonly PropertyInfo piToStringProperty = ReflectionTools.GetPropertyInfo((Entity ident) => ident.ToStringProperty);
 
+        /// <returns>null means impossible to determine because lack of NotifyChildPropertyAttribute</returns>
         public bool? MatchesProperty(ModifiableEntity entity, PropertyInfo pi)
         {
             if (this.PropertyRouteType != PropertyRouteType.FieldOrProperty)
