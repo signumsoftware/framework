@@ -21,7 +21,7 @@ export default class ValueLineModal extends React.Component<ValueLinePopupModal,
     }
 
     selectedValue: any;
-    hanleOkClick = () => {
+    handleOkClick = () => {
         this.selectedValue = this.state.value;
         this.setState({ show: false });
 
@@ -61,7 +61,7 @@ export default class ValueLineModal extends React.Component<ValueLinePopupModal,
                     formGroupStyle={o.labelText ? "Basic" : "SrOnly"}/>
             </Modal.Body>
             <Modal.Footer>
-                <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" onClick={this.hanleOkClick}>
+                <button className ="btn btn-primary sf-entity-button sf-close-button sf-ok-button" onClick={this.handleOkClick}>
                     {JavascriptMessage.ok.niceToString() }
                 </button>
             </Modal.Footer>
