@@ -49,7 +49,7 @@ namespace Signum.Entities.Dashboard
         [StringLengthValidator(AllowNulls = false, Min = 2)]
         public string DisplayName { get; set; }
 
-        [ValidateChildProperty, NotifyCollectionChanged, NotifyChildProperty, NotNullable]
+        [NotifyCollectionChanged, NotifyChildProperty, NotNullable]
         [NoRepeatValidator]
         public MList<PanelPartEntity> Parts { get; set; } = new MList<PanelPartEntity>();
 

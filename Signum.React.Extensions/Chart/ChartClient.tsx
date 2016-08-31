@@ -397,10 +397,10 @@ export module API {
     export function cleanedChartRequest(request: ChartRequest) {
         const clone = Dic.copy(request);
 
-        clone.orders = clone.orderOptions!.map(oo => ({ token: oo.token.key, orderType: oo.orderType }) as OrderRequest);
+        clone.orders = clone.orderOptions!.map(oo => ({ token: oo.token.fullKey, orderType: oo.orderType }) as OrderRequest);
         delete clone.orderOptions;
 
-        clone.filters = clone.filterOptions!.filter(a => a.token != null).map(fo => ({ token: fo.token!.key, operation: fo.operation, value: fo.value }) as FilterRequest);
+        clone.filters = clone.filterOptions!.filter(a => a.token != null).map(fo => ({ token: fo.token!.fullKey, operation: fo.operation, value: fo.value }) as FilterRequest);
         delete clone.filterOptions;
 
         return clone;
