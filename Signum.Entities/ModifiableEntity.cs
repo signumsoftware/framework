@@ -229,7 +229,7 @@ namespace Signum.Entities
 
         private void SetParentEntity(ModifiableEntity p)
         {
-            if (this.parentEntity != null)
+            if (this.parentEntity != null && this.parentEntity != p)
                 throw new InvalidOperationException($"'{nameof(parentEntity)}' is still connected to '{parentEntity}'");
 
             this.parentEntity = p;
