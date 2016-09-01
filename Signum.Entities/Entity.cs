@@ -260,7 +260,7 @@ namespace Signum.Entities
             }
         }
 
-        public static T SetNew<T>(this T ident, bool isNew = true)
+        public static T SetIsNew<T>(this T ident, bool isNew = true)
             where T : Entity
         {
             ident.IsNew = isNew;
