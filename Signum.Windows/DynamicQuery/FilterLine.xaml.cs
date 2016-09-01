@@ -16,6 +16,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Collections;
+using System.Collections.ObjectModel;
 
 namespace Signum.Windows
 {
@@ -59,7 +60,7 @@ namespace Signum.Windows
                 if (!(f.Value is IList))
                 {
                     valueContainer.Children.Clear();
-                    var list = (IList)Activator.CreateInstance(typeof(MList<>).MakeGenericType(f.Token.Type.Nullify()));
+                    var list = (IList)Activator.CreateInstance(typeof(ObservableCollection<>).MakeGenericType(f.Token.Type.Nullify()));
                     list.Add(f.Value);
                     f.Value = list; 
                     RecreateControls();
