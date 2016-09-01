@@ -141,7 +141,6 @@ export interface AuthTokenConfigurationEntity extends Entities.EmbeddedEntity {
 export interface BaseRulePack<T> extends Entities.ModelEntity {
     role: Entities.Lite<RoleEntity>;
     strategy: string;
-    type: Basics.TypeEntity;
     rules: Entities.MList<T>;
 }
 
@@ -177,6 +176,7 @@ export interface OperationAllowedRule extends AllowedRuleCoerced<Entities.Operat
 export const OperationRulePack = new Type<OperationRulePack>("OperationRulePack");
 export interface OperationRulePack extends BaseRulePack<OperationAllowedRule> {
     Type: "OperationRulePack";
+    type: Basics.TypeEntity;
 }
 
 export const PasswordExpiresIntervalEntity = new Type<PasswordExpiresIntervalEntity>("PasswordExpiresInterval");
@@ -220,6 +220,7 @@ export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyR
 export const PropertyRulePack = new Type<PropertyRulePack>("PropertyRulePack");
 export interface PropertyRulePack extends BaseRulePack<PropertyAllowedRule> {
     Type: "PropertyRulePack";
+    type: Basics.TypeEntity;
 }
 
 export const QueryAllowedRule = new Type<QueryAllowedRule>("QueryAllowedRule");
@@ -230,6 +231,7 @@ export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity,
 export const QueryRulePack = new Type<QueryRulePack>("QueryRulePack");
 export interface QueryRulePack extends BaseRulePack<QueryAllowedRule> {
     Type: "QueryRulePack";
+    type: Basics.TypeEntity;
 }
 
 export const ResetPasswordRequestEntity = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");
