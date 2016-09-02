@@ -320,8 +320,10 @@ namespace Signum.React.Selenium
             return this.Element;
         }
 
+        public Action OnDisposed; 
         public void Dispose()
         {
+            OnDisposed?.Invoke();
         }
 
         public WebElementLocator MainControl

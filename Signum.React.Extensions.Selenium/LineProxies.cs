@@ -322,7 +322,7 @@ arguments[0].dispatchEvent(new Event('blur'));";
 
         public static EntityInfoProxy Parse(string dataEntity)
         {
-            if (dataEntity == "null")
+            if (dataEntity == "null" || dataEntity == "undefined")
                 return null;
 
             var parts = dataEntity.Split(';');
