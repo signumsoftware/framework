@@ -37,7 +37,7 @@ namespace Signum.React.Selenium
 
             this.SearchControl.Results.SelectRow(lite);
 
-            this.OkWaitClosed(consumeAlert:true);
+            this.OkWaitClosed();
 
             this.Dispose();
         }
@@ -48,7 +48,7 @@ namespace Signum.React.Selenium
 
             this.SearchControl.Results.SelectRow(rowIndex);
 
-            this.OkWaitClosed(consumeAlert: true);
+            this.OkWaitClosed();
 
             this.Dispose();
         }
@@ -59,7 +59,7 @@ namespace Signum.React.Selenium
 
             this.SearchControl.Results.SelectRow(rowIndex);
 
-            this.OkWaitClosed(consumeAlert: true);
+            this.OkWaitClosed();
 
             this.Dispose();
         }
@@ -70,7 +70,7 @@ namespace Signum.React.Selenium
             this.SearchControl.Search();
             this.Results.SelectRow(0);
 
-            this.OkWaitClosed(consumeAlert: true);
+            this.OkWaitClosed();
 
             this.Dispose();
         }
@@ -82,7 +82,7 @@ namespace Signum.React.Selenium
             foreach (var index in rowIndexes)
                 this.SearchControl.Results.SelectRow(index);
 
-            this.OkWaitClosed(consumeAlert: true);
+            this.OkWaitClosed();
 
             this.Dispose();
         }
