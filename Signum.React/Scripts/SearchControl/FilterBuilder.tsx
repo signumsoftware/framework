@@ -28,7 +28,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
 
         this.props.filterOptions.push({
             token: this.props.lastToken,
-            operation: !this.props.lastToken ? undefined : (filterOperations[this.props.lastToken.filterType] || []).firstOrNull(),
+            operation: this.props.lastToken && (filterOperations[this.props.lastToken.filterType] || []).firstOrNull() || undefined,
             value: undefined,
             frozen: false
         });
@@ -123,7 +123,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
 
             if (!areEqual(f.token, newToken, a => a.filterType)) {
                 const operations = filterOperations[newToken.filterType];
-                f.operation = operations && operations.firstOrNull();
+                f.operation = operations.first();
                 f.value = isList(f.operation) ? [undefined] : undefined;
             }
         }

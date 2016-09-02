@@ -55,9 +55,9 @@ export default class DynamicComponent extends React.Component<{ ctx: TypeContext
         const ti = tis.firstOrNull();
 
         if (tr.isCollection) {
-            if (tr.isEmbedded || ti.entityKind == EntityKind.Part || ti.entityKind == EntityKind.SharedPart)
+            if (tr.isEmbedded || ti!.entityKind == EntityKind.Part || ti!.entityKind == EntityKind.SharedPart)
                 return <EntityRepeater ctx={ctx}/>;
-            else if (ti.isLowPopulation)
+            else if (ti!.isLowPopulation)
                 return <EntityCheckboxList ctx ={ctx}/>;
             else
                 return <EntityStrip ctx={ctx}/>;

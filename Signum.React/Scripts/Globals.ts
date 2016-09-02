@@ -191,7 +191,7 @@ Array.prototype.first = function (this: any[], errorContext: string) {
 Array.prototype.firstOrNull = function (this: any[]) {
 
     if (this.length == 0)
-        return undefined;
+        return null;
 
     return this[0];
 };
@@ -208,7 +208,7 @@ Array.prototype.last = function (this: any[], errorContext: string) {
 Array.prototype.lastOrNull = function (this: any[]) {
 
     if (this.length == 0)
-        return undefined;
+        return null;
 
     return this[this.length - 1];
 };
@@ -227,7 +227,7 @@ Array.prototype.single = function (this: any[], errorContext: string) {
 Array.prototype.singleOrNull = function (this: any[], errorContext: string) {
 
     if (this.length == 0)
-        return undefined;
+        return null;
 
     if (this.length > 1)
         throw new Error("More than one " + (errorContext || "element")  + " found");
