@@ -60,6 +60,7 @@ namespace Signum.React.Cache
 
             CacheLogic.ForceReset();
             GlobalLazy.ResetAll();
+            GC.Collect(2);
         }
     }
 
