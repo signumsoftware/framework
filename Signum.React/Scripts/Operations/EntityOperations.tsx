@@ -31,7 +31,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<React.Reac
                 tag: ctx.tag,
                 canExecute: ctx.pack.canExecute[oi.key],
                 operationInfo: oi,
-                showOperations: ctx.showOperations,
+                showOperations: ctx.showOperations, 
                 settings: eos
             };
 
@@ -171,6 +171,7 @@ export function defaultConstructFromEntity(eoc: EntityOperationContext<Entity>, 
         })
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
+
 }
 
 export function defaultConstructFromLite(eoc: EntityOperationContext<Entity>, event: React.MouseEvent, ...args: any[]) {
@@ -194,7 +195,7 @@ export function defaultExecuteEntity(eoc: EntityOperationContext<Entity>, ...arg
         return;
 
     API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })
+        .then(pack => { eoc.frame.onReload(pack); return notifySuccess(); })  
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "request.entity")))
         .done();
 }

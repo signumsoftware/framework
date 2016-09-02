@@ -4,19 +4,21 @@ import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react
 import { Dic } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
-import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, OperationMessage, EntityPack,
-    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol } from './Signum.Entities';
+import {
+    Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, OperationMessage, EntityPack,
+    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol
+} from './Signum.Entities';
 import { OperationLogEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, GraphExplorer  } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, GraphExplorer } from './Reflection';
 import { TypeContext, EntityFrame } from './TypeContext';
 import * as Finder from './Finder';
 import * as Navigator from './Navigator';
 import * as QuickLinks from './QuickLinks';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import ButtonBar from './Frames/ButtonBar';
-import { getEntityOperationButtons }  from './Operations/EntityOperations';
-import { getConstructFromManyContextualItems, getEntityOperationsContextualItems }  from './Operations/ContextualOperations';
-import { ContextualItemsContext }  from './SearchControl/ContextualItems';
+import { getEntityOperationButtons } from './Operations/EntityOperations';
+import { getConstructFromManyContextualItems, getEntityOperationsContextualItems } from './Operations/ContextualOperations';
+import { ContextualItemsContext } from './SearchControl/ContextualItems';
 
 export function start() {
     ButtonBar.onButtonBarRender.push(getEntityOperationButtons);
@@ -37,7 +39,7 @@ export function addSettings(...settings: OperationSettings[]) {
 
 
 export function getSettings(operation: OperationSymbol | string): OperationSettings {
-    const operationKey = (operation as OperationSymbol).key || operation as string; 
+    const operationKey = (operation as OperationSymbol).key || operation as string;
 
     return operationSettings[operationKey];
 }
@@ -82,7 +84,7 @@ export class ConstructorOperationSettings<T extends Entity> extends OperationSet
         Dic.extend(this, options);
     }
 }
- 
+
 export interface ConstructorOperationOptions<T extends Entity> {
     text?: () => string;
     isVisible?: (ctx: ConstructorOperationContext<T>) => boolean;
@@ -150,7 +152,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
     contextual?: ContextualOperationSettings<T>;
     contextualFromMany?: ContextualOperationSettings<T>;
-    
+
     isVisible?: (ctx: EntityOperationContext<T>) => boolean;
     confirmMessage?: (ctx: EntityOperationContext<T>) => string;
     onClick?: (ctx: EntityOperationContext<T>, event: React.MouseEvent) => void;
@@ -185,8 +187,6 @@ export interface EntityOperationOptions<T extends Entity> {
     style?: BsStyle;
 }
 
-
-
 export const CreateGroup: EntityOperationGroup = {
     key: "create",
     text: () => OperationMessage.Create.niceToString(),
@@ -206,7 +206,7 @@ export interface EntityOperationGroup {
     order?: number;
 }
 
-export function autoStyleFunction(oi: OperationInfo): BsStyle{
+export function autoStyleFunction(oi: OperationInfo): BsStyle {
     return oi.operationType == OperationType.Delete ? "danger" :
         oi.operationType == OperationType.Execute && oi.key.endsWith(".Save") ? "primary" : "default";
 }
@@ -279,7 +279,7 @@ export namespace API {
     }
 
 
-  
+
 
     export function getOperationKey(operationKey: string | OperationSymbol) {
         return (operationKey as OperationSymbol).key || operationKey as string;
