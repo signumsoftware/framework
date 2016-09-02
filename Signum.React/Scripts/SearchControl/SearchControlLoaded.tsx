@@ -512,7 +512,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         fo.filterOptions.push({
             token: token,
-            operation: fops && fops.firstOrNull(),
+            operation: fops && fops.firstOrNull() || undefined,
             value: cm.rowIndex == undefined || resultColumnIndex == -1 ? undefined : rt.rows[cm.rowIndex].columns[resultColumnIndex],
             frozen: false
         });

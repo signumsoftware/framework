@@ -45,11 +45,11 @@ interface Array<T> {
     max(this: Array<T>, ): T;
     min(this: Array<T>, ): T;
     first(this: Array<T>, errorContext?: string): T;
-    firstOrNull(this: Array<T>, ): T;
+    firstOrNull(this: Array<T>, ): T | null;
     last(this: Array<T>, errorContext?: string): T;
-    lastOrNull(this: Array<T>, ): T;
+    lastOrNull(this: Array<T>, ): T | null;
     single(this: Array<T>, errorContext?: string): T;
-    singleOrNull(this: Array<T>, errorContext?: string): T;
+    singleOrNull(this: Array<T>, errorContext?: string): T | null;
     contains(this: Array<T>, element: T): boolean;
     remove(this: Array<T>, element: T): boolean;
     removeAt(this: Array<T>, index: number): void;

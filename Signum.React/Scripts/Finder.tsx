@@ -534,11 +534,11 @@ export module API {
         return ajaxPost<QueryToken[]>({ url: "~/api/query/subTokens" }, { queryKey, token: token == undefined ? undefined:  token.fullKey, options }).then(list=> {
 
             if (token == undefined) {
-                const entity = list.filter(a => a.key == "Entity").singleOrNull();
+                const entity = list.filter(a => a.key == "Entity").single();
 
                 list.filter(a => a.fullKey.startsWith("Entity.")).forEach(t => t.parent = entity);
             } else {
-            list.forEach(t=> t.parent = token);
+                list.forEach(t => t.parent = token);
             }
             return list;
         });
