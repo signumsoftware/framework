@@ -31,7 +31,7 @@ namespace Signum.TSGenerator
                         string result = obj.Process(file, References, this.BuildEngine.ProjectFileOfTaskNode);
 
                         var targetFile = Path.ChangeExtension(file, ".ts");
-                        if (File.ReadAllText(targetFile) == result)
+                        if (File.Exists(targetFile) && File.ReadAllText(targetFile) == result)
                         {
                             Log.LogMessage($"Skipping {targetFile} (Up to date)");
                         }

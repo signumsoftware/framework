@@ -239,11 +239,8 @@ namespace Signum.React.Json
             {
                 reader.Assert(JsonToken.StartObject);
 
-                bool isModified;
-                ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer, out isModified);
-                bool isAlreadyModified = (mod == existingValue || (mod is Entity) && !((Entity)mod).IsNew) && mod.IsGraphModified;
-                if (isAlreadyModified && isModified && Debugger.IsAttached) //From cache
-                    throw new InvalidOperationException($"Two clones of the same entity ({mod.GetType()} {(mod as Entity)?.IdOrNull} '{mod}') found and one was modified");
+                bool markedAsModified;
+                ModifiableEntity mod = GetEntity(reader, objectType, existingValue, serializer, out markedAsModified);
                 
                 var pr = JsonSerializerExtensions.CurrentPropertyRoute;
                 if (pr == null || mod is IRootEntity)
@@ -282,7 +279,7 @@ namespace Signum.React.Json
                         PropertyConverter pc = dic.GetOrThrow((string)reader.Value);
 
                         reader.Read();
-                        ReadJsonProperty(reader, serializer, mod, pc, pr, isModified, isAlreadyModified);
+                        ReadJsonProperty(reader, serializer, mod, pc, pr, markedAsModified);
 
                         reader.Read();
                     }
@@ -298,7 +295,7 @@ namespace Signum.React.Json
 
 
 
-        public void ReadJsonProperty(JsonReader reader, JsonSerializer serializer, ModifiableEntity entity, PropertyConverter pc, PropertyRoute parentRoute, bool isModified, bool isAlreadyModified)
+        public void ReadJsonProperty(JsonReader reader, JsonSerializer serializer, ModifiableEntity entity, PropertyConverter pc, PropertyRoute parentRoute, bool markedAsModified)
         {
             if (pc.CustomReadJsonProperty != null)
             {
@@ -326,10 +323,10 @@ namespace Signum.React.Json
 
                     if (!IsEquals(newValue, oldValue))
                     {
-                        if (!isModified)
+                        if (!markedAsModified && parentRoute.RootType.IsEntity())
                         {
                             //Only apply changes if the client notifies it, to avoid regressions
-                            if (!isAlreadyModified && Debugger.IsAttached)
+                            if (!Debugger.IsAttached)
                                 throw new InvalidOperationException($"'modified' is not set but '{pi.Name}' is modified");
 
                         }

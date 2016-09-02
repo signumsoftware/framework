@@ -3,9 +3,9 @@ import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
-import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity, EmbeddedEntity, ModelEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, KindOfType, OperationType, TypeReference } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, isModel, KindOfType, OperationType, TypeReference } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
@@ -40,16 +40,23 @@ export function start(options: { routes: JSX.Element[] }) {
     options.routes.push(<Route path="create/:type" getComponent={(loc, cb) => require(["./Frames/PageFrame"], (Comp) => cb(undefined, Comp.default))} ></Route>);
 }
 
-
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
 
-    const typeInfo = getTypeInfo(entity.Type)
+    if (isEmbedded(entity.Type)) {
 
-    if (!typeInfo) {
         return pr!.typeReference().typeNiceName;
-    }
 
+    } else if (isModel(entity.Type)) {
+
+        const typeInfo = getTypeInfo(entity.Type);
+
+        return typeInfo.niceName;
+
+    }
     else {
+
+        const typeInfo = getTypeInfo(entity.Type);
+
         if (entity.isNew)
             return LiteMessage.New_G.niceToString().forGenderAndNumber(typeInfo.gender) + " " + typeInfo.niceName;
 

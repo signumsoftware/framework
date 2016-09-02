@@ -24,6 +24,8 @@ namespace Signum.Engine.Basics
             return IsPropertyRouteExpression.Evaluate(prdn, pr);
         }
 
+        public static ResetLazy<Dictionary<TypeEntity, Dictionary<string, PropertyRouteEntity>>> Properties; 
+
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -33,7 +35,15 @@ namespace Signum.Engine.Basics
                 sb.AddUniqueIndex<PropertyRouteEntity>(p => new { p.Path, p.RootType }); 
 
                 sb.Schema.Synchronizing += SynchronizeProperties;
+
+                Properties = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().AgGroupToDictionary(a => a.RootType, gr => gr.ToDictionary(a => a.Path)),
+                    new InvalidateWith(typeof(PropertyRouteEntity)));
             }
+        }
+
+        public static PropertyRouteEntity TryGetPropertyRouteEntity(TypeEntity entity, string path)
+        {
+            return Properties.Value.TryGetC(entity)?.TryGetC(path);
         }
 
         public const string PropertiesFor = "Properties For:{0}";
