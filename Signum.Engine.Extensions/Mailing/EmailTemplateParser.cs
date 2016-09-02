@@ -403,7 +403,7 @@ namespace Signum.Engine.Mailing
             var newTemplate = SystemEmailLogic.CreateDefaultTemplate(et.SystemEmail);
 
             newTemplate.SetId(et.IdOrNull);
-            newTemplate.SetNew(false);
+            newTemplate.SetIsNew(false);
             newTemplate.Ticks = et.Ticks; 
 
             using (replacements == null ? null : replacements.WithReplacedDatabaseName())

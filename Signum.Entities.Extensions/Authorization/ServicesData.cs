@@ -6,6 +6,7 @@ using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Utilities;
 using System.Collections.ObjectModel;
+using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
@@ -86,8 +87,6 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        [NotNullValidator]
-        public TypeEntity Type { get; internal set; }
 
         [NotNullValidator]
         public MList<T> Rules { get; set; } = new MList<T>();
@@ -325,6 +324,9 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
     {
+        [NotNullValidator]
+        public TypeEntity Type { get; internal set; }
+
         public override string ToString()
         {
             return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(PropertyRouteEntity).NiceName(), Role);
@@ -339,6 +341,9 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class QueryRulePack : BaseRulePack<QueryAllowedRule>
     {
+        [NotNullValidator]
+        public TypeEntity Type { get; internal set; }
+
         public override string ToString()
         {
             return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(QueryEntity).NiceName(), Role);
@@ -351,6 +356,9 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class OperationRulePack : BaseRulePack<OperationAllowedRule>
     {
+        [NotNullValidator]
+        public TypeEntity Type { get; internal set; }
+
         public override string ToString()
         {
             return AuthMessage._0RulesFor1.NiceToString().FormatWith(typeof(OperationSymbol).NiceName(), Role);

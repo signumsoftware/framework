@@ -13,6 +13,7 @@ using Signum.Services;
 using Signum.Entities.Authorization;
 using System.Collections;
 using System.Reflection;
+using System.Collections.ObjectModel;
 
 namespace Signum.Entities.UserAssets
 {
@@ -83,7 +84,7 @@ namespace Signum.Entities.UserAssets
         {
             if (isList && stringValue != null && stringValue.Contains('|'))
             {
-                IList list = (IList)Activator.CreateInstance(typeof(MList<>).MakeGenericType(type));
+                IList list = (IList)Activator.CreateInstance(typeof(ObservableCollection<>).MakeGenericType(type));
                 result = list;
                 foreach (var item in stringValue.Split('|'))
                 {
