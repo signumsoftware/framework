@@ -25,6 +25,7 @@ export interface EntityBaseProps extends LineBaseProps {
     onCreate?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
     onFind?: () => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined;
     onRemove?: (entity: ModifiableEntity | Lite<Entity>) => Promise<boolean>;
+    findOptions?: FindOptions;
 
     getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
 }
@@ -219,6 +220,11 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
 
     defaultFind(): Promise<ModifiableEntity | Lite<Entity> | undefined> {
+
+        if (this.props.findOptions) {
+            return Finder.find(this.props.findOptions);
+        }
+
         return this.chooseType(Finder.isFindable)
             .then<ModifiableEntity | Lite<Entity> | undefined>(qn =>
                 qn == undefined ? undefined : Finder.find({ queryName: qn } as FindOptions));

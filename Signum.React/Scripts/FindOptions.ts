@@ -276,8 +276,8 @@ export function isList(fo: FilterOperation) {
 
 export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};
 filterOperations["String"] = [
-    "Contains",
     "EqualTo",
+    "Contains",
     "StartsWith",
     "EndsWith",
     "Like",

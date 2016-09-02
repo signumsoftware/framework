@@ -29,6 +29,19 @@ namespace Signum.React.ApiControllers
             return AutocompleteUtils.FindLiteLike(implementations, subString, count);
         }
 
+        [Route("api/query/findLiteLikeWithFilters"), HttpPost, ProfilerActionSplitter("types")]
+        public List<Lite<Entity>> FindLiteLikeWithFilters(AutocompleteQueryRequestTS request)
+        {
+            var qn = QueryLogic.ToQueryName(request.queryKey);
+            var qd = DynamicQueryManager.Current.QueryDescription(qn);
+            var filters = request.filters.Select(a => a.ToFilter(qd, false)).ToList();
+
+            var entitiesQuery = DynamicQueryManager.Current.GetEntities(qn, filters);
+            var entityType = qd.Columns.Single(a => a.IsEntity).Implementations.Value.Types.SingleEx();
+
+            return entitiesQuery.AutocompleteUntyped(request.subString, request.count, entityType);
+        }
+
         [Route("api/query/findTypeLike"), HttpGet]
         public List<Lite<TypeEntity>> FindTypeLike(string subString, int count)
         {
@@ -143,6 +156,15 @@ namespace Signum.React.ApiControllers
 
         public override string ToString() => querykey;
     }
+
+    public class AutocompleteQueryRequestTS
+    {
+        public string queryKey;
+        public List<FilterTS> filters;
+        public string subString;
+        public int count;
+    }
+
 
     public class QueryRequestTS
     {

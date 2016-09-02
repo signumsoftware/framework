@@ -23,7 +23,7 @@ export interface EntityTableColumn<T> {
     property: (a: T) => any;
     header?: React.ReactNode | null;
     headerProps?: React.HTMLProps<any>;
-    template?: (ctx: TypeContext<T>) => React.ReactNode | null;
+    template?: (ctx: TypeContext<T>, row: EntityTableRow) => React.ReactNode | null;
 
 }
 
@@ -154,7 +154,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { entit
             return null;
 
         if (col.template !== undefined)
-            return col.template(this.props.ctx);
+            return col.template(this.props.ctx, this);
 
         if (col.property == null)
             throw new Error("Column " + JSON.stringify(col) + " has no property and no tempalte");

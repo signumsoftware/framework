@@ -11,7 +11,7 @@ import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, newMListElement } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
-import { AutocompleteConfig, LiteAutocompleteConfig } from './EntityLine'
+import { AutocompleteConfig, LiteAutocompleteConfig, FindOptionsAutocompleteConfig } from './EntityLine'
 
 export interface EntityStripProps extends EntityListBaseProps {
     vertical?: boolean;
@@ -25,12 +25,14 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
         state.create = false;
         state.find = false;
         const type = state.type!
-        state.autoComplete = type.isEmbedded || type.name == IsByAll ? null :
-            new LiteAutocompleteConfig((query: string) => Finder.API.findLiteLike({
-                types: type.name,
-                subString: query,
-                count: 5
-            }), false);     
+        state.autoComplete =
+            type.isEmbedded || type.name == IsByAll ? null :
+                this.props.findOptions ? new FindOptionsAutocompleteConfig(this.props.findOptions, 5, false) :
+                    new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
+                        types: type.name,
+                        subString: subStr,
+                        count: 5
+                    }), false);    
     }
 
     renderInternal() {

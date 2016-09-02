@@ -9,7 +9,8 @@ import {
     QueryDescription, CountQueryRequest, QueryRequest, FindOptions, 
     FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, CountOptionsParsed,
     QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination, ResultColumn,
-    ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode } from './FindOptions';
+    ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest
+} from './FindOptions';
 
 import { PaginationMode, OrderType, FilterOperation, FilterType, UniqueType } from './Signum.Entities.DynamicQuery';
 
@@ -218,14 +219,14 @@ export function parseFilterOptions(filterOptions: FilterOption[], qd: QueryDescr
     const completer = new TokenCompleter(qd);
     filterOptions.forEach(a => completer.request(a.columnName, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll));
 
-    return completer.finished().then(() => {
-        return filterOptions.map(fo => ({
+    return completer.finished()
+        .then(() => filterOptions.map(fo => ({
             token: completer.get(fo.columnName),
             operation: fo.operation || "EqualTo",
             value: fo.value,
             frozen: fo.frozen || false,
-        }) as FilterOptionParsed);
-    });
+        }) as FilterOptionParsed))
+        .then(filters => parseFilterValues(filters).then(() => filters));
 }
 
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {
@@ -506,6 +507,10 @@ export module API {
         return ajaxGet<Lite<Entity>[]>({
             url: currentHistory.createHref({ pathname: "~/api/query/findLiteLike", query: request })
         });
+    }
+
+    export function findLiteLikeWithFilters(request: { queryKey: string, filters: FilterRequest[], subString: string, count: number }): Promise<Lite<Entity>[]> {
+        return ajaxPost<Lite<Entity>[]>({ url: "~/api/query/findLiteLikeWithFilters" }, request);
     }
 
     export function findTypeLike(request: { subString: string, count: number }): Promise<Lite<TypeEntity>[]> {

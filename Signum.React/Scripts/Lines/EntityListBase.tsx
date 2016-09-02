@@ -124,6 +124,11 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
     };
 
     defaultFindMany(): Promise<(ModifiableEntity | Lite<Entity>)[] | undefined> {
+
+        if (this.props.findOptions) {
+            return Finder.findMany(this.props.findOptions);
+        }
+
         return this.chooseType(Finder.isFindable)
             .then<(ModifiableEntity | Lite<Entity>)[] | undefined>(qn => qn == undefined ? undefined : Finder.findMany({ queryName: qn } as FindOptions));
     }
