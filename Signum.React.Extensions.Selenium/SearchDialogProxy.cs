@@ -37,7 +37,7 @@ namespace Signum.React.Selenium
 
             this.SearchControl.Results.SelectRow(lite);
 
-            this.OkWaitClosed();
+            this.OkWaitClosed(consumeAlert:true);
 
             this.Dispose();
         }
@@ -48,7 +48,7 @@ namespace Signum.React.Selenium
 
             this.SearchControl.Results.SelectRow(rowIndex);
 
-            this.OkWaitClosed();
+            this.OkWaitClosed(consumeAlert: true);
 
             this.Dispose();
         }
@@ -59,7 +59,7 @@ namespace Signum.React.Selenium
 
             this.SearchControl.Results.SelectRow(rowIndex);
 
-            this.OkWaitClosed();
+            this.OkWaitClosed(consumeAlert: true);
 
             this.Dispose();
         }
@@ -70,7 +70,7 @@ namespace Signum.React.Selenium
             this.SearchControl.Search();
             this.Results.SelectRow(0);
 
-            this.OkWaitClosed();
+            this.OkWaitClosed(consumeAlert: true);
 
             this.Dispose();
         }
@@ -82,7 +82,7 @@ namespace Signum.React.Selenium
             foreach (var index in rowIndexes)
                 this.SearchControl.Results.SelectRow(index);
 
-            this.OkWaitClosed();
+            this.OkWaitClosed(consumeAlert: true);
 
             this.Dispose();
         }
@@ -121,6 +121,31 @@ namespace Signum.React.Selenium
 
             return new PopupFrame<T>(popup);
         }
+
+        public PageFrame<T> CreateInTab<T>() where T : ModifiableEntity
+        {
+            var oldCount = Selenium.WindowHandles.Count;
+            
+            SearchControl.CreateButton.Find().Click();
+
+            Selenium.Wait(() => Selenium.WindowHandles.Count > oldCount);
+
+            var windowHandles = Selenium.WindowHandles;
+
+            var currentIndex = windowHandles.IndexOf(Selenium.CurrentWindowHandle);
+
+            Selenium.SwitchTo().Window(windowHandles[currentIndex +1]);
+
+            var result = new PageFrame<T>(this.Selenium);
+
+            result.OnDisposed += () =>
+            {
+                Selenium.SwitchTo().Window(windowHandles[currentIndex]);
+            };
+
+            return result;
+        }
+
 
         public void Dispose()
         {
