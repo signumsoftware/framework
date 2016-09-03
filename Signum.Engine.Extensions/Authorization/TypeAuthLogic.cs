@@ -156,6 +156,12 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(RoleEntity.Current, type);
         }
 
+        public static bool GetAllowedCurrentRoleFor(Type type, TypeAllowed allowedFor)
+        {
+            return TypeAuthLogic.GetAllowed(UserEntity.Current.Role, type).MaxCombined() >= allowedFor;
+
+        }
+
         public static TypeAllowedAndConditions GetAllowed(Lite<RoleEntity> role, Type type)
         {
             return cache.GetAllowed(role, type);
