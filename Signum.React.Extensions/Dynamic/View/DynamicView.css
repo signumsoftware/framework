@@ -1,0 +1,41 @@
+﻿div.design-main {
+    display: flex;
+    flex-direction: column;
+}
+
+div.design-left {
+    background-color: #f7f7f9;
+    border: 1px solid #e1e1e8;
+    padding: 2px;
+}
+
+    div.design-left.open {
+        padding: 9px 14px;
+    }
+
+.design-left h3 {
+    margin-top: 0px;
+}
+
+div.design-content {
+    padding: 10px;
+}
+
+.design-open-icon{
+    opacity: 0.4;
+}
+
+.design-open-icon:hover{
+    opacity: 0.6;
+}
+
+@media screen and (min-width: 600px) {
+
+    div.design-main {
+        flex-direction: row;
+    }
+
+        div.design-main.open .design-left {
+            width: 30%;
+        }
+}
