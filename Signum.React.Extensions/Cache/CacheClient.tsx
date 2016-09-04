@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import { PseudoType, QueryKey } from '../../../Framework/Signum.React/Scripts/Reflection'

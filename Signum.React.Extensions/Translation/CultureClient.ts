@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import { Entity, Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'

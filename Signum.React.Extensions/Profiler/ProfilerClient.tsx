@@ -4,7 +4,7 @@ import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
@@ -22,18 +22,18 @@ export function start(options: { routes: JSX.Element[] }) {
         <Route path="heavy/entry/:selectedIndex" getComponent={(loc, cb) => require(["./Heavy/HeavyEntryPage"], (Comp) => cb(undefined, Comp.default)) }/>
     </Route>);
 
-    //Navigator.addSettings(new EntitySettings(ProcessEntity, e => new Promise(resolve => require(['./Templates/Process'], resolve))));
+    //Navigator.addSettings(new EntitySettings(ProcessEntity, e => new ViewPromise(resolve => require(['./Templates/Process'], resolve))));
 
     //if (options.packages || options.packageOperations) {
-    //    Navigator.addSettings(new EntitySettings(PackageLineEntity, e => new Promise(resolve => require(['./Templates/PackageLine'], resolve))));
+    //    Navigator.addSettings(new EntitySettings(PackageLineEntity, e => new ViewPromise(resolve => require(['./Templates/PackageLine'], resolve))));
     //}
 
     //if (options.packages) {
-    //    Navigator.addSettings(new EntitySettings(PackageEntity, e => new Promise(resolve => require(['./Templates/Package'], resolve))));
+    //    Navigator.addSettings(new EntitySettings(PackageEntity, e => new ViewPromise(resolve => require(['./Templates/Package'], resolve))));
     //}
 
     //if (options.packageOperations) {
-    //    Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => new Promise(resolve => require(['./Templates/PackageOperation'], resolve))));
+    //    Navigator.addSettings(new EntitySettings(PackageOperationEntity, e => new ViewPromise(resolve => require(['./Templates/PackageOperation'], resolve))));
     //}
 
     OmniboxClient.registerSpecialAction({

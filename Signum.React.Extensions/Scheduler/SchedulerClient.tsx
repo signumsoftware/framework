@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { Lite } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
@@ -19,11 +19,11 @@ export function start(options: { routes: JSX.Element[] }) {
         <Route path="view" getComponent={(loc, cb) => require(["./SchedulerPanelPage"], (Comp) => cb(undefined, Comp.default))}/>
     </Route>);
 
-    Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => new Promise(resolve => require(['./Templates/SchedulerTask'], resolve))));
-    Navigator.addSettings(new EntitySettings(ScheduleRuleMinutelyEntity, e => new Promise(resolve => require(['./Templates/ScheduleRuleMinutely'], resolve))));
-    Navigator.addSettings(new EntitySettings(ScheduleRuleWeekDaysEntity, e => new Promise(resolve => require(['./Templates/ScheduleRuleWeekDays'], resolve))));
-    Navigator.addSettings(new EntitySettings(ScheduleRuleMonthsEntity, e => new Promise(resolve => require(['./Templates/ScheduleRuleMonths'], resolve))));
-    Navigator.addSettings(new EntitySettings(HolidayCalendarEntity, e => new Promise(resolve => require(['./Templates/HolidayCalendar'], resolve))));
+    Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => new ViewPromise(resolve => require(['./Templates/SchedulerTask'], resolve))));
+    Navigator.addSettings(new EntitySettings(ScheduleRuleMinutelyEntity, e => new ViewPromise(resolve => require(['./Templates/ScheduleRuleMinutely'], resolve))));
+    Navigator.addSettings(new EntitySettings(ScheduleRuleWeekDaysEntity, e => new ViewPromise(resolve => require(['./Templates/ScheduleRuleWeekDays'], resolve))));
+    Navigator.addSettings(new EntitySettings(ScheduleRuleMonthsEntity, e => new ViewPromise(resolve => require(['./Templates/ScheduleRuleMonths'], resolve))));
+    Navigator.addSettings(new EntitySettings(HolidayCalendarEntity, e => new ViewPromise(resolve => require(['./Templates/HolidayCalendar'], resolve))));
     
     OmniboxClient.registerSpecialAction({
         allowed: () => AuthClient.isPermissionAuthorized(SchedulerPermission.ViewSchedulerPanel),

@@ -106,7 +106,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
         return (
             <a className="form-control file-control"
-                onClick={dl.requiresToken && ((e) => this.handleDownloadClick(e, dl.url)) }
+                onClick={dl.requiresToken ? ((e) => this.handleDownloadClick(e, dl.url)) : undefined}
                 download={this.state.download == DownloadBehaviour.View ? undefined : entity.fileName}
                 href={dl.requiresToken ? "#" : dl.url}
                 title={entity.fileName || undefined}>

@@ -3,7 +3,7 @@ import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings} from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { QueryRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -19,7 +19,7 @@ import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
 
 export function start(options: { routes: JSX.Element[] }) {
 
-    Navigator.addSettings(new EntitySettings(OperationLogEntity, e => new Promise(resolve => require(['./Templates/OperationLog'], resolve))))    
+    Navigator.addSettings(new EntitySettings(OperationLogEntity, e => new ViewPromise(resolve => require(['./Templates/OperationLog'], resolve))))    
 }
 
 export namespace API {

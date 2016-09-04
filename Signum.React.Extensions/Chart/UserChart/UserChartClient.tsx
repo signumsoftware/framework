@@ -1,7 +1,7 @@
 ﻿import * as React from 'react'
 import { Route } from 'react-router'
 import { ajaxPost, ajaxGet } from '../../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise } from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { getQueryKey } from '../../../../Framework/Signum.React/Scripts/Reflection'
@@ -66,7 +66,7 @@ export function start(options: { routes: JSX.Element[] }) {
         }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) }));
 
 
-    Navigator.addSettings(new EntitySettings(UserChartEntity, e => new Promise(resolve => require(['./UserChart'], resolve)), { isCreable: "Never" }));
+    Navigator.addSettings(new EntitySettings(UserChartEntity, e => new ViewPromise(resolve => require(['./UserChart'], resolve)), { isCreable: "Never" }));
 }
 
 

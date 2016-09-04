@@ -2,7 +2,7 @@
 import { Route } from 'react-router'
 import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
@@ -38,7 +38,7 @@ export function start(options: { routes: JSX.Element[] }) {
         return <ChartButton searchControl={ctx.searchControl}/>;
     });
 
-    Navigator.addSettings(new EntitySettings(ChartScriptEntity, e => new Promise(resolve => require(['./ChartScript/ChartScript'], resolve))));
+    Navigator.addSettings(new EntitySettings(ChartScriptEntity, e => new ViewPromise(resolve => require(['./ChartScript/ChartScript'], resolve))));
 
     UserChartClient.start({ routes: options.routes });
 }
