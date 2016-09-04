@@ -193,11 +193,11 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         event.stopPropagation();
 
         const td = DomUtils.closest(event.target as HTMLElement, "td, th") !;
-        const columnIndex = td.getAttribute("data-column-index") && parseInt(td.getAttribute("data-column-index")!);
+        const columnIndex = td.getAttribute("data-column-index") ? parseInt(td.getAttribute("data-column-index") !) : null;
 
 
         const tr = td.parentNode as HTMLElement;
-        const rowIndex = tr.getAttribute("data-row-index") && parseInt(tr.getAttribute("data-row-index")!);
+        const rowIndex = tr.getAttribute("data-row-index") ? parseInt(tr.getAttribute("data-row-index") !) : null;
 
 
         const op = DomUtils.offsetParent(this.refs["container"] as HTMLElement);
@@ -381,41 +381,12 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
                     if (e == undefined)
                         return;
 
-                    this.setFilters(e.entity as Entity)
+                    Finder.setFilters(e.entity as Entity, this.props.findOptions.filterOptions)
                         .then(() => Navigator.navigate(e!));
                 }).done();
             }
         }).done();
-    }
-
-    setFilters(e: Entity) {
-        const ti = getTypeInfo(e.Type);
-
-        return Promise.all(this.props.findOptions.filterOptions.filter(fo => fo.token && fo.operation == "EqualTo").map(fo => {
-
-            const mi = this.getMemberForToken(ti, fo.token!.fullKey);
-
-            if (mi && (e as any)[mi.name] == null) {
-                const promise = Navigator.tryConvert(fo.value, mi.type);
-
-                if (promise == null)
-                    return null;
-
-                return promise.then(v => (e as any)[mi.name.firstLower()] = v);
-            }
-
-            return null;
-        }).filter(p => !!p));
-    }
-
-    getMemberForToken(ti: TypeInfo, fullKey: string) {
-        var token = fullKey.tryAfter("Entity.") || fullKey;
-
-        if (token.contains("."))
-            return null;
-
-        return ti.members[token];
-    }
+    }   
 
     handleFullScreenClick = (ev: React.MouseEvent) => {
 
