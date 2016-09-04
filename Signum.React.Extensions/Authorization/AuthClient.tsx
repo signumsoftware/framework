@@ -4,7 +4,7 @@ import { ModifiableEntity, EntityPack, is } from '../../../Framework/Signum.Reac
 import { ifError } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Services from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import { tasks, LineBase, LineBaseProps } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
@@ -48,14 +48,14 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     queries = options.queries;
     permissions = options.permissions;
 
-    Navigator.addSettings(new EntitySettings(UserEntity, e => new Promise(resolve => require(['./Templates/User'], resolve))));
-    Navigator.addSettings(new EntitySettings(RoleEntity, e => new Promise(resolve => require(['./Templates/Role'], resolve))));
+    Navigator.addSettings(new EntitySettings(UserEntity, e => new ViewPromise(resolve => require(['./Templates/User'], resolve))));
+    Navigator.addSettings(new EntitySettings(RoleEntity, e => new ViewPromise(resolve => require(['./Templates/Role'], resolve))));
     Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
 
     if (options.properties) {
         tasks.push(taskAuthorizeProperties);
 
-        Navigator.addSettings(new EntitySettings(PropertyRulePack, e => new Promise(resolve => require(['./Admin/PropertyRulePackControl'], resolve))));
+        Navigator.addSettings(new EntitySettings(PropertyRulePack, e => new ViewPromise(resolve => require(['./Admin/PropertyRulePackControl'], resolve))));
     }
 
     if (options.types) {
@@ -63,7 +63,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
         Navigator.isReadonlyEvent.push(navigatorIsReadOnly);
         Navigator.isViewableEvent.push(navigatorIsViewable);
 
-        Navigator.addSettings(new EntitySettings(TypeRulePack, e => new Promise(resolve => require(['./Admin/TypeRulePackControl'], resolve))));
+        Navigator.addSettings(new EntitySettings(TypeRulePack, e => new ViewPromise(resolve => require(['./Admin/TypeRulePackControl'], resolve))));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", AuthAdminMessage.TypeRules.niceToString(),
             e => Api.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),
@@ -73,18 +73,18 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
     if (options.operations) {
         Operations.isOperationAllowedEvent.push(onOperationAuthorized);
 
-        Navigator.addSettings(new EntitySettings(OperationRulePack, e => new Promise(resolve => require(['./Admin/OperationRulePackControl'], resolve))));
+        Navigator.addSettings(new EntitySettings(OperationRulePack, e => new ViewPromise(resolve => require(['./Admin/OperationRulePackControl'], resolve))));
     }
 
     if (options.queries) {
         Finder.isFindableEvent.push(queryIsFindable);
 
-        Navigator.addSettings(new EntitySettings(QueryRulePack, e => new Promise(resolve => require(['./Admin/QueryRulePackControl'], resolve))));
+        Navigator.addSettings(new EntitySettings(QueryRulePack, e => new ViewPromise(resolve => require(['./Admin/QueryRulePackControl'], resolve))));
     }
 
     if (options.permissions) {
 
-        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => new Promise(resolve => require(['./Admin/PermissionRulePackControl'], resolve))));
+        Navigator.addSettings(new EntitySettings(PermissionRulePack, e => new ViewPromise(resolve => require(['./Admin/PermissionRulePackControl'], resolve))));
 
         QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", AuthAdminMessage.PermissionRules.niceToString(),
             e => Api.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.navigate(pack)).done(),

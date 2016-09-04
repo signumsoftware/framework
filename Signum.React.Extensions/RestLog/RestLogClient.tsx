@@ -1,7 +1,8 @@
 ﻿import * as React from 'react'
 import { RestLogEntity } from './Signum.Entities.RestLog'
-import { addSettings, EntitySettings } from "../../../Framework/Signum.React/Scripts/Navigator";
+import { EntitySettings, ViewPromise } from "../../../Framework/Signum.React/Scripts/Navigator";
+import * as Navigator from "../../../Framework/Signum.React/Scripts/Navigator";
 
 export function start(options: { routes: JSX.Element[] }) {
-    addSettings(new EntitySettings(RestLogEntity, e => new Promise(resolve => require(['./Templates/RestLog'], resolve))));
+    Navigator.addSettings(new EntitySettings(RestLogEntity, e => new ViewPromise(resolve => require(['./Templates/RestLog'], resolve))));
 }

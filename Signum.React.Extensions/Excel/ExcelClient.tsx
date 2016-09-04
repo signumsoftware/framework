@@ -3,7 +3,7 @@ import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { Button, OverlayTrigger, Tooltip, MenuItem } from "react-bootstrap"
 import { ajaxPost, ajaxPostRaw, ajaxGet, saveFile } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings} from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { QueryRequest } from '../../../Framework/Signum.React/Scripts/FindOptions'
@@ -21,7 +21,7 @@ import ExcelMenu from './ExcelMenu'
 export function start(options: { routes: JSX.Element[], plainExcel: boolean, excelReport: boolean }) {
     
     if (options.excelReport) {
-        Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => new Promise(resolve => require(['./Templates/ExcelReport'], resolve))));
+        Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => new ViewPromise(resolve => require(['./Templates/ExcelReport'], resolve))));
     }
 
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {

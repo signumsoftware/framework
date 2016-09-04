@@ -2,7 +2,7 @@
 import { Route } from 'react-router'
 import { Dic, classes } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
-import { EntitySettings } from '../../../Framework/Signum.React/Scripts/Navigator'
+import { EntitySettings, ViewPromise } from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
@@ -45,12 +45,12 @@ export function start(options: { routes: JSX.Element[] }) {
     UserAssetClient.start({ routes: options.routes });
     UserAssetClient.registerExportAssertLink(DashboardEntity);
 
-    Navigator.addSettings(new EntitySettings(DashboardEntity, e => new Promise(resolve => require(['./Admin/Dashboard'], resolve))));
+    Navigator.addSettings(new EntitySettings(DashboardEntity, e => new ViewPromise(resolve => require(['./Admin/Dashboard'], resolve))));
 
-    Navigator.addSettings(new EntitySettings(CountSearchControlPartEntity, e => new Promise(resolve => require(['./Admin/CountSearchControlPart'], resolve))));
-    Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => new Promise(resolve => require(['./Admin/LinkListPart'], resolve))));
-    Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => new Promise(resolve => require(['./Admin/UserChartPart'], resolve))));
-    Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => new Promise(resolve => require(['./Admin/UserQueryPart'], resolve))));
+    Navigator.addSettings(new EntitySettings(CountSearchControlPartEntity, e => new ViewPromise(resolve => require(['./Admin/CountSearchControlPart'], resolve))));
+    Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => new ViewPromise(resolve => require(['./Admin/LinkListPart'], resolve))));
+    Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => new ViewPromise(resolve => require(['./Admin/UserChartPart'], resolve))));
+    Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => new ViewPromise(resolve => require(['./Admin/UserQueryPart'], resolve))));
 
     options.routes.push(<Route path="dashboard">
         <Route path=":dashboardId" getComponent={ (loc, cb) => require(["./View/DashboardPage"], (Comp) => cb(undefined, Comp.default)) } />
