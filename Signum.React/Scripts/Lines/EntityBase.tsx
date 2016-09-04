@@ -164,7 +164,18 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
         return this.chooseType(t => Navigator.isCreable(t, !!this.props.getComponent, false))
             .then(typeName => typeName ? Constructor.construct(typeName) : undefined)
-            .then(e => e ? e.entity : undefined);
+            .then(e => {
+                if (!e)
+                    return Promise.resolve(undefined);
+
+                var fo = this.props.findOptions;
+                if (!fo || !fo.filterOptions)
+                    return e.entity as Entity;
+
+                return Finder.getQueryDescription(fo.queryName)
+                    .then(qd => Finder.parseFilterOptions(fo!.filterOptions || [], qd))
+                    .then(filters => Finder.setFilters(e.entity as Entity, filters));
+            });
     }
 
     handleCreateClick = (event: React.SyntheticEvent) => {
