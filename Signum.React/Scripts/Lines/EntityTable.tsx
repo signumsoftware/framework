@@ -23,14 +23,15 @@ export interface EntityTableColumn<T> {
     property: (a: T) => any;
     header?: React.ReactNode | null;
     headerProps?: React.HTMLProps<any>;
+    cellProps?: React.HTMLProps<any>;
     template?: (ctx: TypeContext<T>, row: EntityTableRow) => React.ReactNode | null;
 
 }
 
 export class EntityTable extends EntityListBase<EntityTableProps, EntityTableProps> {
 
-    static typedColumns<T extends ModifiableEntity>(type: Type<T>, columns: EntityTableColumn<T>[]) {
-        return columns;
+    static typedColumns<T extends ModifiableEntity>(type: Type<T>, columns: (EntityTableColumn<T> | null | undefined)[]): EntityTableColumn<T>[]{
+        return columns.filter(a => a != null).map(a => a!);
     }
 
     calculateDefaultState(state: EntityTableProps) {
@@ -66,10 +67,10 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                         {React.Children.count(buttons) ? buttons : undefined}
                     </div>
                 </legend>
-                <table className="table form-vertical">
+                <table className="table table-condensed form-vertical">
                     <thead>
                         <tr>
-                            <th></th>
+                            <th style={{ width: "20px" }}></th>
                             {
                                 this.props.columns.map((c, i) => <th key={i} {...c.headerProps}>
                                     {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}
@@ -142,7 +143,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { entit
                         </a>}
                     </div>
                 </td>
-                {this.props.columns.map((c, i) => <td key={i}>{this.getTemplate(c)}</td>)}
+                {this.props.columns.map((c, i) => <td key={i} {...c.cellProps}>{this.getTemplate(c)}</td>)}
             </tr>
         );
     }
