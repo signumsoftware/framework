@@ -4,7 +4,7 @@ import { Dic, } from './Globals';
 import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, ModelEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
-import { IUserEntity } from './Signum.Entities.Basics';
+import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
 import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, isModel, KindOfType, OperationType, TypeReference } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
@@ -104,59 +104,35 @@ export function getSettings(type: PseudoType): EntitySettings<ModifiableEntity> 
     return entitySettings[typeName];
 }
 
-export let fallbackGetComponent: (entity: ModifiableEntity) => Promise<{ default: React.ComponentClass<{ ctx: TypeContext<ModifiableEntity> }> }> =
-    e => new Promise(resolve => require(['./Lines/DynamicComponent'], resolve));
+export function setFallbackViewPromise(newFallback: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity>) {
+    fallbackViewPromise = newFallback;
+}
 
-export function getComponent<T extends ModifiableEntity>(entity: T): Promise<React.ComponentClass<{ ctx: TypeContext<T> }>> {
+export let fallbackViewPromise: (entity: ModifiableEntity) => ViewPromise<ModifiableEntity> =
+    e => new ViewPromise<ModifiableEntity>(resolve => require(['./Lines/DynamicComponent'], resolve));
+
+export function getViewPromise<T extends ModifiableEntity>(entity: T): ViewPromise<ModifiableEntity> {
 
     const settings = getSettings(entity.Type) as EntitySettings<T>;
 
     if (settings == undefined) {
-        if (fallbackGetComponent)
-            return fallbackGetComponent(entity).then(a => a.default);
+        if (fallbackViewPromise)
+            return fallbackViewPromise(entity);
 
         throw new Error(`No settings for '${entity.Type}'`);
     }
 
-    if (settings.getComponent == undefined) {
-        if (fallbackGetComponent)
-            return fallbackGetComponent(entity).then(a => a.default);
+    if (settings.getViewPromise == undefined) {
+        if (fallbackViewPromise)
+            return fallbackViewPromise(entity);
 
         throw new Error(`No getComponent set for settings for '${entity.Type}'`);
     }
 
-    return settings.getComponent(entity).then(a => applyViewOverrides(settings, a.default));
+    return settings.getViewPromise(entity).applyViewOverrides(settings);
 }
 
-function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<T>, component: React.ComponentClass<{ ctx: TypeContext<T> }>) {
 
-    if (!component.prototype.render)
-        throw new Error("render function not defined in " + component);
-
-    if (setting.viewOverrides == undefined || setting.viewOverrides.length == 0)
-        return component;
-
-
-    if (component.prototype.render.withViewOverrides)
-        return component;
-
-    const baseRender = component.prototype.render as () => void;
-
-    component.prototype.render = function (this: React.Component<any, any>) {
-
-        const ctx = this.props.ctx;
-
-        const view = baseRender.call(this);
-
-        const replacer = new ViewReplacer<T>(view, ctx);
-        setting.viewOverrides.forEach(vo => vo(replacer));
-        return replacer.result;
-    };
-
-    component.prototype.render.withViewOverrides = true;
-
-    return component;
-}
 
 export const isCreableEvent: Array<(typeName: string) => boolean> = [];
 
@@ -313,9 +289,9 @@ function hasRegisteredView(typeName: string) {
 
     const es = entitySettings[typeName];
     if (es)
-        return !!es.getComponent;
+        return !!es.getViewPromise;
 
-    return !!fallbackGetComponent;
+    return !!fallbackViewPromise;
 }
 
 function typeIsViewable(typeName: string): boolean {
@@ -396,7 +372,7 @@ export interface ViewOptions {
     validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    viewPromise?: ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
 }
 
@@ -416,7 +392,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
 export interface NavigateOptions {
     readOnly?: boolean;
     avoidPromptLooseChange?: boolean;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    viewPromise?: ViewPromise<ModifiableEntity>;
     extraComponentProps?: {};
 }
 
@@ -538,6 +514,15 @@ export module API {
     export function validateEntity(entity: ModifiableEntity): Promise<void> {
         return ajaxPost<void>({ url: "~/api/validateEntity" }, entity);
     }
+
+    export function getPropertyRoutes(typeName: string): Promise<Array<string>> {
+        return ajaxGet<Array<string>>({ url: `~/api/reflection/propertyRoutes/${typeName}` });
+    }
+
+    export function getType(typeName: string): Promise<TypeEntity> {
+
+        return ajaxGet<TypeEntity>({ url: `~/api/reflection/typeEntity/${typeName}` });
+    }
 }
 
 
@@ -548,7 +533,7 @@ export class EntitySettings<T extends ModifiableEntity> {
 
     getToString: (entity: T) => string;
 
-    getComponent?: (entity: T) => Promise<{ default: React.ComponentClass<{ ctx: TypeContext<T> }> }>;
+    getViewPromise?: (entity: T) => ViewPromise<T>;
 
     viewOverrides: Array<(replacer: ViewReplacer<T>) => void>;
 
@@ -565,15 +550,83 @@ export class EntitySettings<T extends ModifiableEntity> {
         this.viewOverrides.push(override);
     }
 
-    constructor(type: Type<T>, getComponent?: (entity: T) => Promise<any>,
+    constructor(type: Type<T>, getViewPromise?: (entity: T) => ViewPromise<any>,
         options?: { isCreable?: EntityWhen, isFindable?: boolean; isViewable?: boolean; isNavigable?: EntityWhen; isReadOnly?: boolean, avoidPopup?: boolean }) {
 
         this.type = type;
-        this.getComponent = getComponent;
+        this.getViewPromise = getViewPromise;
 
         Dic.extend(this, options);
     }
 }
+
+export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentClass<{ ctx: TypeContext<T> }> };
+
+export class ViewPromise<T extends ModifiableEntity> {
+    promise: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
+
+    constructor(callback: (loadModule: (module: ViewModule<T>) => void) => void) {
+        this.promise = new Promise<ViewModule<T>>(callback)
+            .then(mod => {
+                return (ctx: TypeContext<T>) => React.createElement(mod.default, { ctx });
+            });
+    }
+
+    withProps(componentParams: {} | Promise<{}>): ViewPromise<T> {
+        this.promise = this.promise.then(func =>
+            Promise.resolve(componentParams).then(params => {
+                return (ctx: TypeContext<T>) => {
+                    var result = func(ctx);
+                    return React.cloneElement(result, params);
+                };
+            }));
+
+        return this;
+    }
+
+    applyViewOverrides(setting: EntitySettings<T>): ViewPromise<T> {
+        this.promise = this.promise.then(func => {
+            return (ctx: TypeContext<T>) => {
+                var result = func(ctx);
+                applyViewOverrides(setting, result.type as React.ComponentClass<{ ctx: TypeContext<T> }>);
+                return result;
+            };
+        });
+
+        return this;
+    }
+}
+
+function applyViewOverrides<T extends ModifiableEntity>(setting: EntitySettings<T>, component: React.ComponentClass<{ ctx: TypeContext<T> }>) {
+
+    if (!component.prototype.render)
+        throw new Error("render function not defined in " + component);
+
+    if (setting.viewOverrides == undefined || setting.viewOverrides.length == 0)
+        return component;
+
+
+    if (component.prototype.render.withViewOverrides)
+        return component;
+
+    const baseRender = component.prototype.render as () => void;
+
+    component.prototype.render = function (this: React.Component<any, any>) {
+
+        const ctx = this.props.ctx;
+
+        const view = baseRender.call(this);
+
+        const replacer = new ViewReplacer<T>(view, ctx);
+        setting.viewOverrides.forEach(vo => vo(replacer));
+        return replacer.result;
+    };
+
+    component.prototype.render.withViewOverrides = true;
+
+    return component;
+}
+
 
 export function checkFlag(entityWhen: EntityWhen, isSearch: boolean) {
     return entityWhen == "Always" ||
@@ -604,8 +657,6 @@ String.prototype.formatHtml = function (this: string) {
 
     return React.createElement("span", undefined, ...result);
 };
-
-
 
 function fixBaseName<T>(baseFunction: (location?: HistoryModule.LocationDescriptorObject | string) => T, baseName: string): (location?: HistoryModule.LocationDescriptorObject | string) => T {
 
