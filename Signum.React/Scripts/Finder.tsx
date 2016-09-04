@@ -19,10 +19,11 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
     Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
-    getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData
+    getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
+    TypeInfo,
 } from './Reflection';
 
-import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable } from './Navigator';
+import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable, tryConvert } from './Navigator';
 import SearchModal from './SearchControl/SearchModal';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControl from './SearchControl/SearchControlLoaded';
@@ -227,6 +228,36 @@ export function parseFilterOptions(filterOptions: FilterOption[], qd: QueryDescr
             frozen: fo.frozen || false,
         }) as FilterOptionParsed))
         .then(filters => parseFilterValues(filters).then(() => filters));
+}
+
+export function setFilters(e: Entity, filterOptionsParsed: FilterOptionParsed[]) : Promise<Entity> {
+
+    function getMemberForToken(ti: TypeInfo, fullKey: string) {
+        var token = fullKey.tryAfter("Entity.") || fullKey;
+
+        if (token.contains("."))
+            return null;
+
+        return ti.members[token];
+    }
+
+    const ti = getTypeInfo(e.Type);
+
+    return Promise.all(filterOptionsParsed.filter(fo => fo.token && fo.operation == "EqualTo").map(fo => {
+
+        const mi = getMemberForToken(ti, fo.token!.fullKey);
+
+        if (mi && (e as any)[mi.name] == null) {
+            const promise = tryConvert(fo.value, mi.type);
+
+            if (promise == null)
+                return null;
+
+            return promise.then(v => (e as any)[mi.name.firstLower()] = v);
+        }
+
+        return null;
+    }).filter(p => !!p)).then(() => e);
 }
 
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription): Promise<FindOptionsParsed> {

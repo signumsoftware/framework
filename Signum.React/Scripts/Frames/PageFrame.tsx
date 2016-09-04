@@ -20,7 +20,7 @@ interface PageFrameProps extends ReactRouter.RouteComponentProps<{}, { type: str
 
 interface PageFrameState {
     pack?: EntityPack<Entity>;
-    componentClass?: React.ComponentClass<{ ctx: TypeContext<Entity> }>;
+    getComponent?: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
 }
 
 export default class PageFrame extends React.Component<PageFrameProps, PageFrameState> {
@@ -89,8 +89,8 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
 
 
     loadComponent(): Promise<void> {
-        return Navigator.getComponent(this.state.pack!.entity)
-            .then(c => this.setState({ componentClass: c }));
+        return Navigator.getViewPromise(this.state.pack!.entity).promise
+            .then(c => this.setState({ getComponent: c }));
     }
 
     onClose() {
@@ -164,10 +164,7 @@ export default class PageFrame extends React.Component<PageFrameProps, PageFrame
                 <ValidationErrors entity={this.state.pack.entity} ref={ve => this.validationErrors = ve}/>
                 { embeddedWidgets.top }
                 <div className="sf-main-control form-horizontal" data-test-ticks={new Date().valueOf() } data-main-entity={entityInfo(ctx.value) }>
-                    {
-                        this.state.componentClass && React.createElement(this.state.componentClass,
-                            { ctx: ctx, ref: (c: React.Component<any, any>) => this.setComponent(c) } as any)
-                    }
+                    {this.state.getComponent && React.cloneElement(this.state.getComponent(ctx),  { ref: (c: React.Component<any, any>) => this.setComponent(c) }) }
                 </div>
                 { embeddedWidgets.bottom }
             </div>

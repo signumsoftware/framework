@@ -90,12 +90,9 @@ export class RenderEntity extends React.Component<RenderEntityProps, RenderEntit
         if (this.state.lastLoadedType == e.Type)
             return Promise.resolve(undefined);
 
-
-        return Navigator.getComponent(e).then(c => {
+        return Navigator.getViewPromise(e).promise.then(c => {
             this.setState({
-                getComponent: (ctx) => React.createElement<{ ctx: TypeContext<ModifiableEntity> }>(c, {
-                    ctx: ctx
-                }),
+                getComponent: c,
                 lastLoadedType: e.Type
             });
         });

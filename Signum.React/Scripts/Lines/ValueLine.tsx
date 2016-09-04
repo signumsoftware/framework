@@ -73,7 +73,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
     }
 
     overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
-        const valueHtmlProps = Dic.extend(state.valueHtmlProps, overridenProps.valueHtmlProps);
+        const valueHtmlProps = Dic.extendUndefined(state.valueHtmlProps, overridenProps.valueHtmlProps);
         super.overrideProps(state, overridenProps);
         state.valueHtmlProps = valueHtmlProps;
     }

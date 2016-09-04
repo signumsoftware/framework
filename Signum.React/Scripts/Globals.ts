@@ -502,7 +502,7 @@ String.prototype.trimEnd = function (char) {
     return result;
 };
 
-String.prototype.repeat = function (n) {
+String.prototype.repeat = function (this: string, n: number) {
     let result = ""; 
     for (let i = 0; i < n; i++)
         result += this;
@@ -654,6 +654,32 @@ export module Dic {
         return out;
     };
 
+    export function extendUndefined<O>(out: O): O;
+    export function extendUndefined<O, U>(out: O, arg1: U): O & U;
+    export function extendUndefined<O, U, V>(out: O, arg1: U, arg2: V): O & U & V;
+    export function extendUndefined<O, U, V>(out: O, ...args: Object[]): any;
+    export function extendUndefined(out: any) {
+        out = out || {};
+
+        for (let i = 1; i < arguments.length; i++) {
+
+            const a = arguments[i];
+
+            if (!a)
+                continue;
+
+            for (const key in a) {
+                if (a.hasOwnProperty(key) && a[key] !== undefined)
+                    out[key] = a[key];
+            }
+        }
+
+        return out;
+    };
+    
+
+   
+
     /**  Waiting for https://github.com/Microsoft/TypeScript/issues/2103 */
     export function without<T>(obj: T, toRemove: {}): T {
         const result: any = {};
@@ -673,7 +699,7 @@ export function coalesce<T>(value: T | undefined | null, defaultValue: T): T {
     return value != null ? value : defaultValue;
 }
 
-export function classes(...classNames: (string | null | undefined)[]) {
+export function classes(...classNames: (string | null | undefined | false)[]) {
     return classNames.filter(a=> a && a != "").join(" ");
 }
 

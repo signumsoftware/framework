@@ -24,8 +24,7 @@ interface ModalFrameProps extends React.Props<ModalFrame>, IModalProps {
     validate?: boolean;
     requiresSaveOperation?: boolean;
     avoidPromptLooseChange?: boolean;
-    getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-    extraComponentProps?: {};
+    viewPromise?: Navigator.ViewPromise<ModifiableEntity>;
     isNavigate?: boolean;
     readOnly?: boolean;
 }
@@ -44,7 +43,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     static defaultProps: ModalFrameProps = {
         showOperations: true,
-        getComponent: undefined,
+        viewPromise: undefined,
         entityOrPack: null as any
     }
 
@@ -83,7 +82,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         return getTypeInfo(typeName);
     }
 
-    calculateState(props: ModalFrameState): ModalFrameState {
+    calculateState(props: ModalFrameProps): ModalFrameState {
 
         const typeInfo = this.getTypeInfo();
 
@@ -108,13 +107,13 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
 
     loadComponent() {
 
-        if (this.props.getComponent) {
-            this.setState({ getComponent: this.props.getComponent });
-            return Promise.resolve(undefined);
+        if (this.props.viewPromise) {
+            return this.props.viewPromise.promise
+                .then(c => this.setState({ getComponent: c }));
         }
 
-        return Navigator.getComponent(this.state.pack!.entity)
-            .then(c => this.setState({ getComponent: (ctx) => React.createElement(c, Dic.extend({ ctx: ctx }, this.props.extraComponentProps)) }));
+        return Navigator.getViewPromise(this.state.pack!.entity).promise
+            .then(c => this.setState({ getComponent: c }));
     }
 
     okClicked: boolean;
@@ -286,8 +285,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             entityOrPack={entityOrPack}
             readOnly={options.readOnly}
             propertyRoute={options.propertyRoute}
-            getComponent={options.getComponent}
-            extraComponentProps={options.extraComponentProps}
+            viewPromise={options.viewPromise}
             showOperations={options.showOperations}
             requiresSaveOperation={options.requiresSaveOperation}
             avoidPromptLooseChange={options.avoidPromptLooseChange}
@@ -309,8 +307,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
             entityOrPack={entityOrPack}
             readOnly={options.readOnly}
             propertyRoute={undefined}
-            getComponent={options.getComponent}
-            extraComponentProps={options.extraComponentProps}
+            viewPromise={options.viewPromise}
             showOperations={true}
             requiresSaveOperation={undefined}
             avoidPromptLooseChange={options.avoidPromptLooseChange}

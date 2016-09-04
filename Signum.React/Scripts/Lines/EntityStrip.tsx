@@ -23,18 +23,23 @@ export class EntityStrip extends EntityListBase<EntityStripProps, EntityStripPro
     calculateDefaultState(state: EntityStripProps) {
         super.calculateDefaultState(state);
         state.create = false;
-        state.find = false;
-        const type = state.type!
-        state.autoComplete =
-            type.isEmbedded || type.name == IsByAll ? null :
-                this.props.findOptions ? new FindOptionsAutocompleteConfig(this.props.findOptions, 5, false) :
+        state.find = false;      
+    }
+
+
+    overrideProps(state: EntityStripProps, overridenProps: EntityStripProps) {
+        super.overrideProps(state, overridenProps);
+        if (state.autoComplete === undefined) {
+            const type = state.type!;
+            state.autoComplete = type.isEmbedded || type.name == IsByAll ? null :
+                overridenProps.findOptions ? new FindOptionsAutocompleteConfig(overridenProps.findOptions, 5, false) :
                     new LiteAutocompleteConfig((subStr: string) => Finder.API.findLiteLike({
                         types: type.name,
                         subString: subStr,
                         count: 5
-                    }), false);    
+                    }), false);
+        }
     }
-
     renderInternal() {
 
         const s = this.state;

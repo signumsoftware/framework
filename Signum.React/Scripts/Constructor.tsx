@@ -4,7 +4,7 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Dic } from './Globals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, SelectorMessage, EntityPack, MixinEntity } from './Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType, getTypeName, basicConstruct } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationType, getTypeName, basicConstruct, OperationInfo } from './Reflection';
 import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
 import * as Navigator from './Navigator';
@@ -41,7 +41,7 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
                 throw new Error("No constructor is allowed!");
 
             return SelectorModal.chooseElement(ctrs, { display: c => c.niceName, name: c => c.key, message: SelectorMessage.PleaseSelectAConstructor.niceToString() })
-                .then(oi => {
+                .then((oi: OperationInfo | undefined) => {
 
                     if (!oi)
                         return undefined;
@@ -51,8 +51,8 @@ export function construct(type: string | Type<any>): Promise<EntityPack<Modifiab
                     if (settings && settings.onConstruct)
                         return settings.onConstruct({ operationInfo: oi, settings: settings, typeInfo: ti });
 
-                    return Operations.API.construct(ti.name, oi.key)
-                }).then(p => {
+                    return Operations.API.construct(ti.name, oi.key) as Promise<EntityPack<Entity> | undefined>
+                }).then((p: EntityPack<Entity> | undefined) => {
                     if (p == undefined)
                         return undefined;
 
