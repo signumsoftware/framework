@@ -164,8 +164,8 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     }
     
     overrideProps(state: S, overridenProps: S) {
-        const labelHtmlProps = Dic.extend(state.labelHtmlProps, overridenProps.labelHtmlProps);
-        Dic.extend(state, overridenProps);
+        const labelHtmlProps = Dic.extendUndefined(state.labelHtmlProps, overridenProps.labelHtmlProps);
+        Dic.extendUndefined(state, overridenProps);
         state.labelHtmlProps = labelHtmlProps;
     }
 
