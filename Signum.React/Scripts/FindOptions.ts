@@ -117,7 +117,7 @@ export interface QueryToken {
     typeColor: string;
     niceTypeName: string;
     isGroupable: boolean;
-    filterType: FilterType;
+    filterType?: FilterType;
     fullKey: string;
     queryTokenType?: QueryTokenType;
     parent?: QueryToken;

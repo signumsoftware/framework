@@ -28,7 +28,7 @@ export default class FilterBuilder extends React.Component<FilterBuilderProps, {
 
         this.props.filterOptions.push({
             token: this.props.lastToken,
-            operation: this.props.lastToken && (filterOperations[this.props.lastToken.filterType] || []).firstOrNull() || undefined,
+            operation: this.props.lastToken && (filterOperations[this.props.lastToken.filterType!] || []).firstOrNull() || undefined,
             value: undefined,
             frozen: false
         });
@@ -122,9 +122,8 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
         else {
 
             if (!areEqual(f.token, newToken, a => a.filterType)) {
-                const operations = filterOperations[newToken.filterType];
-                f.operation = operations.first();
-                f.value = isList(f.operation) ? [undefined] : undefined;
+                f.operation = newToken.filterType && filterOperations[newToken.filterType].first();
+                f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
             }
         }
         f.token = newToken;
@@ -172,7 +171,7 @@ export class FilterComponent extends React.Component<FilterComponentProps, {}>{
                 <td className="sf-filter-operation">
                     {f.token && f.operation &&
                         <select className="form-control" value={f.operation as any} disabled={f.frozen} onChange={this.handleChangeOperation}>
-                            { filterOperations[f.token.filterType]
+                            { filterOperations[f.token.filterType!]
                                 .map((ft, i) => <option key={i} value={ft as any}>{ FilterOperation.niceName(ft) }</option>) }
                         </select> }
                 </td>
