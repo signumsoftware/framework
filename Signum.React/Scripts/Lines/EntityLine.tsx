@@ -260,7 +260,12 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<Lite<En
         if (lite.id == undefined)
             return Promise.resolve(lite);
 
-        return this.getItems(lite.id!.toString()).then(lites => {
+        return Finder.API.findLiteLikeWithFilters({
+            queryKey: getQueryKey(this.findOptions.queryName),
+            filters:  [{ token: "Entity.Id", operation: "EqualTo", value: lite.id }],
+            count: 1,
+            subString: ""
+        }).then(lites => {
 
             const result = lites.filter(a => a.id == lite.id).firstOrNull();
 
