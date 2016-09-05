@@ -188,7 +188,7 @@ export default class ChartBuilder extends React.Component<ChartBuilderProps, Cha
                 vl.ctx.styleOptions.readOnly = true;
 
             vl.comboBoxItems = compatible.map(ev => ({ name: ev.name, niceName: ev.name }));
-            vl.valueHtmlProps = { size: undefined };
+            vl.valueHtmlProps = { size: null as any };
         }
 
         vl.onChange = this.handleOnRedraw;
