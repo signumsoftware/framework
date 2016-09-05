@@ -6,7 +6,6 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../F
 import * as Entities from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import * as Basics from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 
-
 interface IEvaluator {}
 export const DynamicValidationEntity = new Type<DynamicValidationEntity>("DynamicValidation");
 export interface DynamicValidationEntity extends Entities.Entity {
