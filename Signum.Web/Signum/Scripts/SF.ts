@@ -37,7 +37,7 @@ module SF {
         }
     }
 
-    once("setupAjaxRedirectPrefilter",() => {
+    once("setupAjaxRedirectPrefilter", () => {
         setupAjaxRedirect();
         setupAjaxExtraParameters();
     });
@@ -110,7 +110,7 @@ module SF {
                 (c == 189) /*-*/ ||
                 (e.ctrlKey && c == 86) /*Ctrl + v*/ ||
                 (e.ctrlKey && c == 67) /*Ctrl + v*/
-                );
+            );
         }
 
         export function isDecimal(e: KeyboardEvent): boolean {
@@ -120,7 +120,7 @@ module SF {
                 (c == 110) /*NumPad Decimal*/ ||
                 (c == 190) /*.*/ ||
                 (c == 188) /*,*/
-                );
+            );
         }
     }
 
@@ -285,7 +285,7 @@ interface FormObject {
     [formKey: string]: any
 }
 
-once("serializeObject",() => {
+once("serializeObject", () => {
     $.fn.serializeObject = function () {
         var o = {};
         var a = this.serializeArray();
@@ -312,7 +312,7 @@ interface Array<T> {
     min(): T;
 }
 
-once("arrayExtensions",() => {
+once("arrayExtensions", () => {
     Array.prototype.groupBy = function (keySelector: (element: any) => string): { key: string; elements: any[] }[] {
         var result: { key: string; elements: any[] }[] = [];
         var objectGrouped = (this as any[]).groupToObject(keySelector);
@@ -367,7 +367,7 @@ once("arrayExtensions",() => {
     Array.prototype.toObject = function (keySelector: (element: any) => any): any {
         var obj = {};
 
-        (<Array<any>>this).forEach(item=> {
+        (<Array<any>>this).forEach(item => {
             var key = keySelector(item);
 
             if (obj[key])
@@ -382,7 +382,7 @@ once("arrayExtensions",() => {
     Array.prototype.toObjectDistinct = function (keySelector: (element: any) => any): any {
         var obj = {};
 
-        (<Array<any>>this).forEach(item=> {
+        (<Array<any>>this).forEach(item => {
             var key = keySelector(item);
 
             obj[key] = item;
@@ -395,10 +395,10 @@ once("arrayExtensions",() => {
 
         var array = [];
 
-        (<Array<any>>this).forEach(item=>
+        (<Array<any>>this).forEach(item =>
             selector(item).forEach(item2 =>
                 array.push(item2)
-                ));
+            ));
 
         return array;
     };
@@ -440,7 +440,7 @@ interface String {
     tryGetChild(pathPart: string): JQuery;
 }
 
-once("stringExtensions",() => {
+once("stringExtensions", () => {
     String.prototype.hasText = function () {
         return (this == null || this == undefined || this == '') ? false : true;
     }
@@ -652,7 +652,7 @@ interface Date {
     addYear(inc: number): Date;
 }
 
-once("dateExtensions",() => {
+once("dateExtensions", () => {
 
     Date.prototype.addMiliseconds = function (inc: number) {
         var n = new Date(this.valueOf());
