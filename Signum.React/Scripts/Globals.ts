@@ -699,7 +699,7 @@ export function coalesce<T>(value: T | undefined | null, defaultValue: T): T {
     return value != null ? value : defaultValue;
 }
 
-export function classes(...classNames: (string | null | undefined | false)[]) {
+export function classes(...classNames: (string | null | undefined | boolean)[]) {
     return classNames.filter(a=> a && a != "").join(" ");
 }
 

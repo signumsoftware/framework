@@ -174,7 +174,7 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
                 return Finder.getQueryDescription(fo.queryName)
                     .then(qd => Finder.parseFilterOptions(fo!.filterOptions || [], qd))
-                    .then(filters => Finder.setFilters(e.entity as Entity, filters));
+                    .then(filters => Finder.setFilters(e!.entity as Entity, filters));
             });
     }
 
