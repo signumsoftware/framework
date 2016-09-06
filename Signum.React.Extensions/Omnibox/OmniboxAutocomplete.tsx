@@ -1,6 +1,7 @@
 ﻿
 import * as React from 'react'
 import { Route } from 'react-router'
+import { Dic } from '../../../Framework/Signum.React/Scripts/Globals';
 import { ajaxPost, ajaxGet } from '../../../Framework/Signum.React/Scripts/Services';
 import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
@@ -38,28 +39,21 @@ export default class OmniboxAutocomplete extends React.Component<OmniboxAutocomp
         }
         this.typeahead.blur();
 
-        return "";
+        return null;
     }
 
     typeahead: Typeahead;
 
     render() {
 
-        let inputAttr = this.props.inputAttrs;
-
-        if (inputAttr == undefined)
-            inputAttr = {};
-
-        if (inputAttr.placeholder == undefined)
-            inputAttr.placeholder = OmniboxMessage.Search.niceToString();
-
-
+        let inputAttr = Dic.extend({ tabIndex: -1, placeholder: OmniboxMessage.Search.niceToString() }, this.props.inputAttrs);
+        
         const result = (
             <Typeahead ref={ta => this.typeahead = ta} getItems={OmniboxClient.API.getResults} 
                 renderItem={OmniboxClient.renderItem}
                 onSelect={this.handleOnSelect}
                 spanAttrs={this.props.spanAttrs}
-                inputAttrs={this.props.inputAttrs}
+                inputAttrs={inputAttr}
                 menuAttrs={this.props.menuAttrs}
                 minLength={0}
                 ></Typeahead>  
