@@ -78,7 +78,7 @@ export module Converter {
 
         const promise = UserAssetsClient.API.parseFilters({
             queryKey: uq.query.key,
-            canAggregate: false,
+            canAggregate: true,
             entity: entity,
             filters: uq.filters!.map(mle => mle.element).map(f => ({
                 tokenString: f.token!.tokenString,
