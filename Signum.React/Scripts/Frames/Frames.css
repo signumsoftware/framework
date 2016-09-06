@@ -59,3 +59,9 @@ a.expand-window:hover {
 .btn-toolbar.right .input-group {
   float: right;
 }
+
+.btn-toolbar > .btn, 
+.btn-toolbar > .btn-group, 
+.btn-toolbar > .input-group {
+    margin-bottom: 5px;
+}

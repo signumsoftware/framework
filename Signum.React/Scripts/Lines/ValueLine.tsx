@@ -57,7 +57,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "datetime")
             return ValueLineType.DateTime;
 
-        if (t.name == "string" || t.name == "TimeSpan")
+        if (t.name == "string" || t.name == "TimeSpan" || t.name == "Guid")
             return ValueLineType.TextBox;
 
         if (t.name == "number")
