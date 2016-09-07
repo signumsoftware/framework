@@ -10,6 +10,12 @@ import { SendEmailTaskEntity, EmailTemplateEntity } from '../Signum.Entities.Mai
 
 export default class SendEmailTask extends React.Component<{ ctx: TypeContext<SendEmailTaskEntity> }, { type?: string }> {
 
+    constructor(props: any) {
+        super(props);
+        this.state = { type: undefined };
+    }
+
+
     componentWillMount() {
         this.loadEntity(this.props.ctx.value.emailTemplate);
     }
