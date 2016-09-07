@@ -111,3 +111,11 @@ declare namespace __React {
         changeState(func: (state: S) => void): void;
     }
 }
+
+interface FetchAbortController { //Signum patch
+    abort?: () => void;
+}
+
+interface RequestInit {
+    abortController?: FetchAbortController;
+}

@@ -14,7 +14,12 @@ declare class Request extends Body {
 	referrer: string;
 	mode: string|RequestMode;
 	credentials: string|RequestCredentials;
-	cache: string|RequestCache;
+    cache: string | RequestCache;   
+    abortController?: FetchAbortController; 
+}
+
+interface FetchAbortController { //Signum patch
+    abort?: () => void; 
 }
 
 interface RequestInit {
@@ -23,7 +28,8 @@ interface RequestInit {
 	body?: BodyInit;
 	mode?: string|RequestMode;
 	credentials?: string|RequestCredentials;
-	cache?: string|RequestCache;
+    cache?: string | RequestCache;
+    abortController?: FetchAbortController;
 }
 
 declare enum RequestContext {
