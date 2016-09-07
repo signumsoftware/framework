@@ -14,6 +14,12 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class SmtpConfigurationEntity : Entity
     {
+        static SmtpConfigurationEntity()
+        {
+            DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryFormat), m => m.Name);
+            DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryMethod), m => m.Name);
+        }
+
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
         public string Name { get; set; }
