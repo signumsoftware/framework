@@ -68,8 +68,8 @@ namespace Signum.React.Filters
 
                 using (var stream = new MemoryStream())
                 {
-                    httpContextBase.Request.InputStream.Seek(0, SeekOrigin.Begin);
-                    httpContextBase.Request.InputStream.CopyTo(stream);
+                    var s = httpContextBase.Request.GetBufferedInputStream();
+                    s.CopyTo(stream);
                     string requestBody = Encoding.UTF8.GetString(stream.ToArray());
                     return requestBody;
                 }
