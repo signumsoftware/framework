@@ -129,6 +129,12 @@ namespace Signum.Utilities
         public static event Func<MemberInfo, bool> ShouldLocalizeMemeber = m => true;
         public static event Action<CultureInfo,Type,MemberInfo> NotLocalizedMemeber ;
 
+        public static Dictionary<Type, Func<MemberInfo, string>> ExternalEnums = new Dictionary<Type, Func<MemberInfo, string>>
+        {
+            { typeof(DayOfWeek), m => CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)m).GetValue(null)] }
+        };
+
+
         static string Fallback(Type type, Func<LocalizedType, string> typeValue, Action<LocalizedType> notLocalized)
         {
             var cc = CultureInfo.CurrentUICulture;
@@ -254,8 +260,10 @@ namespace Signum.Utilities
 
             if (!LocalizedAssembly.HasDefaultAssemblyCulture(type.Assembly))
             {
-                if (type == typeof(DayOfWeek))
-                    return CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)memberInfo).GetValue(null)];
+                var f = ExternalEnums.TryGetC(type);
+
+                if (f != null)
+                    return f(memberInfo);
 
                 return memberInfo.GetCustomAttribute<DescriptionAttribute>()?.Description ?? memberInfo.Name.NiceName();
             }
@@ -406,7 +414,7 @@ namespace Signum.Utilities
             if (def != null)
                 return type.IsGenericTypeDefinition ? def.Value & DescriptionOptions.Members : def.Value;
 
-            if (type == typeof(DayOfWeek))
+            if (DescriptionManager.ExternalEnums.ContainsKey(type))
                 return DescriptionOptions.Members;
 
             return DescriptionOptions.None;

@@ -135,8 +135,17 @@ namespace Signum.React.Facades
             return EntityAssemblies.SelectMany(kvp =>
             {
                 var normalTypes = kvp.Key.GetTypes().Where(t => kvp.Value.Contains(t.Namespace));
+
+                var usedEnums = (from type in normalTypes
+                                 where typeof(ModifiableEntity).IsAssignableFrom(type)
+                                 from p in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                                 let pt = p.PropertyType.UnNullify()
+                                 where pt.IsEnum && !EntityAssemblies.ContainsKey(pt.Assembly)
+                                 select pt).Distinct().ToList();
+                
+
                 var importedTypes = kvp.Key.GetCustomAttributes<ImportInTypeScriptAttribute>().Where(a => kvp.Value.Contains(a.ForNamesace)).Select(a => a.Type);
-                return normalTypes.Concat(importedTypes).ToList();
+                return normalTypes.Concat(importedTypes).Concat(usedEnums).ToList();
             });
         }
 
