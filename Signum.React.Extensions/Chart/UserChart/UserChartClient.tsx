@@ -78,7 +78,7 @@ export module Converter {
 
         const promise = UserAssetsClient.API.parseFilters({
             queryKey: uq.query.key,
-            canAggregate: false,
+            canAggregate: true,
             entity: entity,
             filters: uq.filters!.map(mle => mle.element).map(f => ({
                 tokenString: f.token!.tokenString,
@@ -109,9 +109,10 @@ export module Converter {
                 rowId: null,
                 element: ChartColumnEntity.New(c => {
                     c.displayName = mle.element.displayName;
-                    c.token = QueryTokenEntity.New(qt => {
-                        qt.token = mle.element.token!.token;
-                        qt.tokenString = mle.element.token!.tokenString;
+                    var t = mle.element.token;
+                    c.token = t && QueryTokenEntity.New(qt => {
+                        qt.token = t!.token;
+                        qt.tokenString = t!.tokenString;
                     });
                 })
             }));
