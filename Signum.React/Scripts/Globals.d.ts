@@ -42,6 +42,7 @@ interface Array<T> {
     flatMap<R>(this: Array<T>, selector: (element: T, index: number, array: T[]) => R[]): R[];
     clear(this: Array<T>): void;
     groupsOf(this: Array<T>, maxCount: number): T[][];
+    sum(this: Array<T>, ): T;
     max(this: Array<T>, ): T;
     min(this: Array<T>, ): T;
     first(this: Array<T>, errorContext?: string): T;

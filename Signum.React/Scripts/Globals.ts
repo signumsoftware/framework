@@ -174,6 +174,12 @@ Array.prototype.max = function (this: any[]) {
     return Math.max.apply(undefined, this);
 };
 
+Array.prototype.sum = function (this: any[]) {
+    var result = 0;
+    this.forEach(v => result += v);
+    return result;
+};
+
 Array.prototype.min = function (this: any[]) {
     return Math.min.apply(undefined, this);
 };
