@@ -16,7 +16,7 @@ export default class ContextMenu extends React.Component<ContextMenuProps, {}> {
         const style: React.CSSProperties = { left: position.pageX + "px", top: position.pageY + "px", zIndex: 999, display: "block", position: "absolute" };
 
         const childrens = React.Children.map(this.props.children,
-            (c: React.ReactElement<any>) => React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, onHide) }));
+            (c: React.ReactElement<any>) => c && React.cloneElement(c, { "onSelect": combineFunction(c.props.onSelect, onHide) }));
 
         const ul = (
             <ul {...props as any}  className={classes(props.className, "dropdown-menu sf-context-menu") } style={style}>
