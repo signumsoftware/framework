@@ -4,12 +4,12 @@ import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Sig
 import { classes } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { DesignerContext, BaseNode } from './Nodes'
+import { DesignerContext, BaseNode, DesignerNode } from './Nodes'
 import * as Nodes from './Nodes'
-import { DynamicViewInspector } from './Designer'
+import { DynamicViewInspector,  } from './Designer'
 import { DynamicViewTree } from './DynamicViewTree'
 import { DynamicViewEntity } from '../Signum.Entities.Dynamic'
 
@@ -20,13 +20,21 @@ export interface DynamicViewComponentProps {
     dynamicView: DynamicViewEntity;
 }
 
-export default class DynamicViewComponent extends React.Component<DynamicViewComponentProps, { isDesignerOpen: boolean , rootNode: BaseNode }>{
+export default class DynamicViewComponent extends React.Component<DynamicViewComponentProps, { isDesignerOpen: boolean, rootNode: DesignerNode<BaseNode> }>{
 
     constructor(props: DynamicViewComponentProps) {
         super(props);
+
+        var dn = new DesignerNode(JSON.parse(props.dynamicView.viewContent!) as BaseNode, undefined);
+        dn.route = PropertyRoute.root(props.ctx.value.Type);
+        dn.context = {
+            onClose: this.handleClose,
+            refreshView: () => this.forceUpdate()
+        };
+
         this.state = {
             isDesignerOpen: false,
-            rootNode: JSON.parse(props.dynamicView.viewContent!) as BaseNode
+            rootNode: dn
         };
     }
 
@@ -39,13 +47,12 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
     }
 
     render() {
-
         return (<div className="design-main">
             <div className={classes("design-left", this.state.isDesignerOpen && "open")}>
 
                 {!this.state.isDesignerOpen ?
                     <i className="fa fa-pencil-square-o design-open-icon" aria-hidden="true" onClick={this.handleOpen}></i> :
-                    <DynamicViewDesigner rootNode={this.state.rootNode} dynamicView={this.props.dynamicView} dc={{ refreshView: () => this.forceUpdate(), onClose: this.handleClose }} />
+                    <DynamicViewDesigner rootNode={this.state.rootNode} dynamicView={this.props.dynamicView} />
                 }
             </div>
             <div className={classes("design-content", this.state.isDesignerOpen && "open")}>
@@ -56,34 +63,37 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 }
 
 interface DynamicViewDesignerProps {
-    rootNode: BaseNode;
+    rootNode: DesignerNode<BaseNode>;
     dynamicView: DynamicViewEntity;
-    dc: DesignerContext;
 }
 
-class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps , { selectedNode?: BaseNode }>{
+
+class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { selectedNode?: DesignerNode<BaseNode> }>{
 
     constructor(props: any) {
         super(props);
         this.state = { selectedNode: undefined };
     }
 
-    handleSelectedNode = (selectedNode: BaseNode) => {
+    handleSelectedNode = (selectedNode: DesignerNode<BaseNode>) => {
         this.changeState(s => s.selectedNode = selectedNode);
     }
 
     render() {
         var dv = this.props.dynamicView;
         var ctx = TypeContext.root(DynamicViewEntity, dv);
+
         return (
             <div className="form-vertical">
-                <button type="button" className="close" aria-label="Close" onClick={this.props.dc.onClose}><span aria-hidden="true">×</span></button>
+                <button type="button" className="close" aria-label="Close" onClick={this.props.rootNode.context.onClose}><span aria-hidden="true">×</span></button>
                 <h3>
                     <small>{Navigator.getTypeTitle(this.props.dynamicView, undefined)}</small>
                 </h3>
                 <ValueLine ctx={ctx.subCtx(e => e.viewName)} formGroupStyle="Basic" />
-                <DynamicViewTree rootNode={this.props.rootNode} dc={this.props.dc} selectedNode={this.state.selectedNode} onSelected={this.handleSelectedNode} />
-                <DynamicViewInspector selectedNode={this.state.selectedNode} dc={this.props.dc} />
+                <DynamicViewTree rootNode={this.props.rootNode}
+                    selectedNode={this.state.selectedNode}
+                    onSelected={this.handleSelectedNode} />
+                <DynamicViewInspector selectedNode={this.state.selectedNode} />
             </div>
         );
     }
