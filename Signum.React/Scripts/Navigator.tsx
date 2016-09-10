@@ -142,7 +142,7 @@ export function isCreable(type: PseudoType, customView = false, isSearch = false
 
     const baseIsCreable = checkFlag(typeIsCreable(typeName), isSearch);
 
-    const hasView = customView || hasRegisteredView(typeName);
+    const hasView = customView || hasRegisteredViewPromise(typeName);
 
     const hasConstructor = hasAllowedConstructor(typeName);
 
@@ -280,12 +280,12 @@ export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 
     const baseIsViewable = typeIsViewable(typeName);
 
-    const hasView = customView || hasRegisteredView(typeName);
+    const hasView = customView || hasRegisteredViewPromise(typeName);
 
     return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
 
-function hasRegisteredView(typeName: string) {
+function hasRegisteredViewPromise(typeName: string) {
 
     const es = entitySettings[typeName];
     if (es)
@@ -321,7 +321,7 @@ function typeIsViewable(typeName: string): boolean {
     }
 }
 
-export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false, isSearch = false): boolean {
+export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customComponent = false, isSearch = false): boolean {
 
     const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
@@ -329,7 +329,7 @@ export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEnti
 
     const baseTypeName = checkFlag(typeIsNavigable(typeName), isSearch);
 
-    const hasView = customView || hasRegisteredView(typeName);
+    const hasView = customComponent || hasRegisteredViewPromise(typeName);
 
     return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
