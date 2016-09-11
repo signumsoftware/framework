@@ -561,11 +561,18 @@ export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentC
 export class ViewPromise<T extends ModifiableEntity> {
     promise: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
 
-    constructor(callback: (loadModule: (module: ViewModule<T>) => void) => void) {
-        this.promise = new Promise<ViewModule<T>>(callback)
-            .then(mod => {
-                return (ctx: TypeContext<T>) => React.createElement(mod.default, { ctx });
-            });
+    constructor(callback?: (loadModule: (module: ViewModule<T>) => void) => void) {
+        if (callback)
+            this.promise = new Promise<ViewModule<T>>(callback)
+                .then(mod => {
+                    return (ctx: TypeContext<T>) => React.createElement(mod.default, { ctx });
+                });
+    }
+
+    static resolve<T extends ModifiableEntity>(getComponent: (ctx: TypeContext<T>) => React.ReactElement<any>) {
+        var result = new ViewPromise();
+        result.promise = Promise.resolve(getComponent);
+        return result;
     }
 
     withProps(componentParams: {} | Promise<{}>): ViewPromise<T> {

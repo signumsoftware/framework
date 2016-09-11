@@ -105,8 +105,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
 
     defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
-
-        return Navigator.view(value, { propertyRoute: propertyRoute, component: this.props.getComponent } as Navigator.ViewOptions);
+        return Navigator.view(value, {
+            propertyRoute: propertyRoute,
+            viewPromise: this.props.getComponent && Navigator.ViewPromise.resolve(this.props.getComponent)
+        });
     }
 
 
