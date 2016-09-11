@@ -31,7 +31,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
 
         var parsedValue = p.type != "number" ? value : (parseFloat(value as string) || null);
 
-        if (parsedValue == "")
+        if (parsedValue === "")
             parsedValue = null;
 
         if (parsedValue == p.defaultValue)
@@ -75,7 +75,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
                 <label>
                     <i className={classes("fa fa-calculator fa-1 formula", expr && "active")} onClick={this.handleToggleExpression}></i>
                     {this.renderCheckbox(value)}
-                    {p.member}
+                    {this.renderMember(value)}
                 </label>
             </div>);
         }
@@ -84,7 +84,7 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
             <div className="form-group">
                 <label className="control-label">
                     <i className={classes("fa fa-calculator fa-1 formula", expr && "active")} onClick={this.handleToggleExpression}></i>
-                    {p.member}
+                    { this.renderMember(value) }
                 </label>
                 <div>
                     {expr ? this.renderExpression(expr, p.dn.parent!) : this.renderValue(value)}
@@ -93,6 +93,12 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         );
     }
 
+    renderMember(value: number | string | null | undefined): React.ReactNode {
+        return (<span
+            className={value === undefined ? "design-default" : "design-changed"}>
+            {this.props.member}
+        </span>);
+    }
 
     renderValue(value: number | string | null | undefined) {
 

@@ -198,7 +198,9 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
         var container = dn.node as ContainerNode;
 
         const error = NodeUtils.validate(dn);
-        
+
+
+
         return (
             <li>
                 {this.renderIcon()}
@@ -208,11 +210,7 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
                     onClick={e => this.props.onSelected(dn)}
                     onContextMenu={e => this.props.onContextMenu(dn, e)}
                     >
-                    {dn.node.kind}
-                    {(dn.node as LineBaseNode).field &&
-                        <span>:&nbsp; 
-                        <strong>{(dn.node as LineBaseNode).field}</strong>
-                        </span>}
+                    {NodeUtils.registeredNodes[dn.node.kind].renderTreeNode(dn)}
                 </span>
 
                 {container.children && container.children.length > 0 && (this.state.isOpened) &&

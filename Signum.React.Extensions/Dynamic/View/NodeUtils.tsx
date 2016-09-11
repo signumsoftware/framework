@@ -30,6 +30,7 @@ export interface NodeOptions<N extends BaseNode> {
     hasEntity?: boolean;
     hasCollection?: boolean;
     render: (node: DesignerNode<N>, ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
+    renderTreeNode: (node: DesignerNode<N>) => React.ReactElement<any>;
     renderDesigner: (node: DesignerNode<N>) => React.ReactElement<any>;
     validate?: (node: DesignerNode<N>) => string | null | undefined;
     validParent?: string;
@@ -93,13 +94,28 @@ export function register<T extends BaseNode>(options: NodeOptions<T>) {
     registeredNodes[options.kind] = options;
 }
 
+export function treeNodeKind(dn: DesignerNode<BaseNode>) {
+    return <small>{dn.node.kind}</small>;
+}
+
+export function treeNodeKindField(dn: DesignerNode<LineBaseNode>) {
+    return <span><small>{dn.node.kind}:</small> <strong>{dn.node.field}</strong></span>;
+}
+
+export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNode>) {
+    return <span><small>ETColumn:</small> <strong>{dn.node.property}</strong></span>;
+}
+
 export function render(dn: DesignerNode<BaseNode>, ctx: TypeContext<ModifiableEntity>) {
 
     const error = validate(dn);
     if (error)
-        return (<div className="alert alert-danger">{getErrorTitle(dn)}&nbsp;{error}</div>);
+        return (<div className="alert alert-danger">{getErrorTitle(dn)} {error}</div>);
 
     try {
+        if (evaluateAndValidate(ctx, dn, "visible", isBooleanOrNull) == false)
+            return null;
+
         return registeredNodes[dn.node.kind].render(dn, ctx);
     } catch (e) {
         return (<div className="alert alert-danger">{getErrorTitle(dn)}&nbsp;{(e as Error).message}</div>);
@@ -115,7 +131,12 @@ export function getErrorTitle(dn: DesignerNode<BaseNode>) {
 }
 
 export function renderDesigner(dn: DesignerNode<BaseNode>) {
-    return registeredNodes[dn.node.kind].renderDesigner(dn);
+    return (
+        <div>
+            <ExpressionOrValueComponent dn={dn} member="visible" type="boolean" defaultValue={true} />
+            {registeredNodes[dn.node.kind].renderDesigner(dn)}
+        </div>
+    );
 }
 
 export function asFunction(expression: Expression<any>, memberName: string): (e: ModifiableEntity) => any {
@@ -226,7 +247,7 @@ export function isFindOptionsOrNull(val: any) {
 
 
 export function withChildrens(dn: DesignerNode<ContainerNode>, ctx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {
-    var nodes = dn.node.children && dn.node.children.map(c => render(dn.createChild(c), ctx));
+    var nodes = dn.node.children && dn.node.children.map(c => render(dn.createChild(c), ctx)).filter(a => a != null).map(a => a!);
     return React.cloneElement(element, undefined, ...nodes);
 }
 
@@ -234,7 +255,7 @@ export function mandatory(dn: DesignerNode<BaseNode>, member: string) {
     if (!(dn.node as any)[member])
         return DynamicViewValidationMessage.Member0IsMandatoryFor1.niceToString(member, dn.node.kind);
 
-    return undefined
+    return undefined;
 }
 
 export function validateFieldMandatory(dn: DesignerNode<LineBaseNode>) {
@@ -314,7 +335,8 @@ export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { is
   
     const m = dn.route.member;
     return (<div>
-        <FieldComponent dn={dn} member="field"/>
+        <FieldComponent dn={dn} member="field" />
+       
         <ExpressionOrValueComponent dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
         <ExpressionOrValueComponent dn={dn} member="visible" type="boolean" defaultValue={true} />
         <ExpressionOrValueComponent dn={dn} member="readOnly" type="boolean" defaultValue={false} />

@@ -21,6 +21,14 @@ div.design-content {
     padding: 10px;
 }
 
+span.design-changed {
+    color: black;
+}
+
+span.design-default {
+    color: #777;
+}
+
 .design-open-icon{
     opacity: 0.4;
 }

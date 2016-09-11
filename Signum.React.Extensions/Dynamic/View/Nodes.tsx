@@ -17,6 +17,7 @@ import * as NodeUtils from './NodeUtils'
 
 export interface BaseNode {
     kind: string;
+    visible?: ExpressionOrValue<boolean>;
 }
 
 export interface ContainerNode extends BaseNode {
@@ -32,8 +33,10 @@ NodeUtils.register<DivNode>({
     group: "Container",
     order: 0,
     isContainer: true,
+    renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, ctx) => NodeUtils.withChildrens(dn, ctx, <div />),
-    renderDesigner: node => (<div></div>),
+    renderDesigner: dn => (<div>
+    </div>),
 });
 
 export interface RowNode extends ContainerNode {
@@ -46,8 +49,10 @@ NodeUtils.register<RowNode>({
     order: 1,
     isContainer: true,
     validChild: "Column",
+    renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, ctx) => NodeUtils.withChildrens(dn, ctx, <div className="row" />),
-    renderDesigner: node => (<div></div>),
+    renderDesigner: dn => (<div>
+    </div>),
 });
 
 
@@ -64,6 +69,7 @@ NodeUtils.register<ColumnNode>({
     validParent: "Row",
     validate: dn => NodeUtils.mandatory(dn, "width"),
     initialize: dn => dn.width = 6,
+    renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, ctx) => {
         const column = NodeUtils.evaluateAndValidate(ctx, dn, "width", NodeUtils.isNumber);
         const offset = NodeUtils.evaluateAndValidate(ctx, dn, "offset", NodeUtils.isNumberOrNull);
@@ -88,6 +94,7 @@ NodeUtils.register<TabsNode>({
     isContainer: true,
     validChild: "Tab",
     initialize: dn => dn.id = "tabs", 
+    renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, ctx) => {
         return NodeUtils.withChildrens(dn, ctx, <Tabs id={ctx.compose(NodeUtils.evaluateAndValidate(ctx, dn, "id", NodeUtils.isString) !)} />);
     },
@@ -109,6 +116,7 @@ NodeUtils.register<TabNode>({
     isContainer: true,
     validParent: "Tabs",
     initialize: dn => dn.title = "My Tab",
+    renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, ctx) => {
         return NodeUtils.withChildrens(dn, ctx, <Tab title={NodeUtils.evaluateAndValidate(ctx, dn, "title", NodeUtils.isString)} />);
     },
@@ -129,6 +137,7 @@ NodeUtils.register<FieldsetNode>({
     order: 3,
     isContainer: true,
     initialize: dn => dn.legend = "My Fieldset",
+    renderTreeNode: NodeUtils.treeNodeKind, 
     render: (dn, ctx) => {
         return (<fieldset>
             <legend>{NodeUtils.evaluateAndValidate(ctx, dn, "legend", NodeUtils.isString)}</legend>
@@ -143,7 +152,6 @@ NodeUtils.register<FieldsetNode>({
 export interface LineBaseNode extends BaseNode {
     labelText?: ExpressionOrValue<string>;
     field: string;
-    visible?: ExpressionOrValue<boolean>;
     readOnly?: ExpressionOrValue<boolean>;
     redrawOnChange?: boolean;
 }
@@ -162,12 +170,12 @@ NodeUtils.register<ValueLineNode>({
     group: "Property",
     order: 0,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField, 
     render: (dn, ctx) => (<ValueLine
         ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field))}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn, "labelText", NodeUtils.isStringOrNull)}
         unitText={NodeUtils.evaluateAndValidate(ctx, dn, "unitText", NodeUtils.isStringOrNull)}
         formatText={NodeUtils.evaluateAndValidate(ctx, dn, "formatText", NodeUtils.isStringOrNull)}
-        visible={NodeUtils.evaluateAndValidate(ctx, dn, "visible", NodeUtils.isBooleanOrNull)}
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn, "readOnly", NodeUtils.isBooleanOrNull)}
         inlineCheckbox={NodeUtils.evaluateAndValidate(ctx, dn, "inlineCheckbox", NodeUtils.isBooleanOrNull)}
         valueLineType={NodeUtils.evaluateAndValidate(ctx, dn, "textArea", NodeUtils.isBooleanOrNull) ? ValueLineType.TextArea : undefined}
@@ -181,7 +189,6 @@ NodeUtils.register<ValueLineNode>({
             <ExpressionOrValueComponent dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
             <ExpressionOrValueComponent dn={dn} member="unitText" type="string" defaultValue={m && m.unit || ""} />
             <ExpressionOrValueComponent dn={dn} member="format" type="string" defaultValue={m && m.format || ""} />
-            <ExpressionOrValueComponent dn={dn} member="visible" type="boolean" defaultValue={true} />
             <ExpressionOrValueComponent dn={dn} member="readOnly" type="boolean" defaultValue={false} />
             <ExpressionOrValueComponent dn={dn} member="inlineCheckbox" type="boolean" defaultValue={false} />
             <ExpressionOrValueComponent dn={dn} member="textArea" type="boolean" defaultValue={false} />
@@ -212,6 +219,7 @@ NodeUtils.register<EntityLineNode>({
     isContainer: true,
     hasEntity: true,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EntityLine {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete : true }) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: true, showAutoComplete: true }),
 });
@@ -228,6 +236,7 @@ NodeUtils.register<EntityComboNode>({
     isContainer: true,
     hasEntity: true,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EntityCombo {...NodeUtils.getEntityBaseProps(dn, ctx, {}) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: false, isFindable: false, isViewable: false, showAutoComplete: false }),
 });
@@ -243,6 +252,7 @@ NodeUtils.register<EntityDetailNode>({
     isContainer: true,
     hasEntity: true,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EntityDetail {...NodeUtils.getEntityBaseProps(dn, ctx, {}) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false }),
 });
@@ -258,11 +268,12 @@ NodeUtils.register<EnumCheckboxListNode>({
     kind: "EnumCheckboxList",
     group: "Collection",
     order: 0,
+    hasCollection: true,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EnumCheckboxList
         ctx={ctx.subCtx(NodeUtils.asFieldFunction(dn.node.field))}
         labelText={NodeUtils.evaluateAndValidate(ctx, dn, "labelText", NodeUtils.isStringOrNull)}
-        visible={NodeUtils.evaluateAndValidate(ctx, dn, "visible", NodeUtils.isBooleanOrNull)}
         readOnly={NodeUtils.evaluateAndValidate(ctx, dn, "readOnly", NodeUtils.isBooleanOrNull)}
         columnCount={NodeUtils.evaluateAndValidate(ctx, dn, "columnCount", NodeUtils.isNumberOrNull)}
         columnWidth={NodeUtils.evaluateAndValidate(ctx, dn, "columnWidth", NodeUtils.isNumberOrNull)}
@@ -273,7 +284,6 @@ NodeUtils.register<EnumCheckboxListNode>({
         return (<div>
             <FieldComponent dn={dn} member="field" />
             <ExpressionOrValueComponent dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
-            <ExpressionOrValueComponent dn={dn} member="visible" type="boolean" defaultValue={true} />
             <ExpressionOrValueComponent dn={dn} member="readOnly" type="boolean" defaultValue={false} />
             <ExpressionOrValueComponent dn={dn} member="columnCount" type="number" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} member="columnWidth" type="number" defaultValue={200} />
@@ -296,7 +306,10 @@ NodeUtils.register<EntityCheckboxListNode>({
     kind: "EntityCheckboxList",
     group: "Collection",
     order: 1,
+    hasEntity: true,
+    hasCollection: true,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: false }) }
         columnCount={NodeUtils.evaluateAndValidate(ctx, dn, "columnCount", NodeUtils.isNumberOrNull)}
         columnWidth={NodeUtils.evaluateAndValidate(ctx, dn, "columnWidth", NodeUtils.isNumberOrNull)}
@@ -320,6 +333,7 @@ NodeUtils.register<EntityListNode>({
     hasEntity: true,
     hasCollection: true,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EntityList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: true, showAutoComplete: false, showMove: true })
 });
@@ -338,6 +352,7 @@ NodeUtils.register<EntityStripNode>({
     hasEntity: true,
     hasCollection: true,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EntityStrip
         {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, showMove: false }) }
         vertical={NodeUtils.evaluateAndValidate(ctx, dn, "vertical", NodeUtils.isBooleanOrNull)}
@@ -362,6 +377,7 @@ NodeUtils.register<EntityRepeaterNode>({
     hasEntity: true,
     hasCollection: true,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EntityRepeater {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })
 });
@@ -378,6 +394,7 @@ NodeUtils.register<EntityTabRepeaterNode>({
     hasEntity: true,
     hasCollection: true,
     validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
     render: (dn, ctx) => (<EntityTabRepeater {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
     renderDesigner: dn => NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })
 });
@@ -396,10 +413,13 @@ NodeUtils.register<EntityTableNode>({
     hasEntity: true,
     hasCollection: true,
     validChild: "EntityTableColumn",
-    validate: (dn) => NodeUtils.validateFieldMandatory(dn) && dn.node.children.map(c => NodeUtils.validate(dn.createChild(c))).filter(error => error != null).firstOrNull(),
+    validate: (dn) => NodeUtils.validateFieldMandatory(dn),
+    renderTreeNode: NodeUtils.treeNodeKindField,
+
     render: (dn, ctx) => (<EntityTable
-        columns={dn.node.children.map((col: EntityTableColumnNode) => NodeUtils.render(dn.createChild(col), ctx) as any)}
+        columns={dn.node.children.filter(c => NodeUtils.validate(dn.createChild(c)) == null).map((col: EntityTableColumnNode) => NodeUtils.render(dn.createChild(col), ctx) as any)}
         {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: true }) } />),
+
     renderDesigner: dn => <div>
         {NodeUtils.designEntityBase(dn, { isCreable: true, isFindable: true, isViewable: false, showAutoComplete: false, showMove: true })}
     </div>
@@ -409,6 +429,7 @@ export interface EntityTableColumnNode extends ContainerNode {
     kind: "EntityTableColumn",
     property?: string;
     header?: string;
+    width?: string;
 }
 
 NodeUtils.register<EntityTableColumnNode>({
@@ -418,14 +439,17 @@ NodeUtils.register<EntityTableColumnNode>({
     isContainer: true,
     validParent: "EntityTable",
     validate: (dn) => dn.node.property ? NodeUtils.validateTableColumnProperty(dn) : NodeUtils.mandatory(dn, "header"),
+    renderTreeNode: NodeUtils.treeNodeTableColumnProperty,
     render: (dn, ctx) => ({
         property: dn.node.property && NodeUtils.asFieldFunction(dn.node.property),
         header: NodeUtils.evaluateAndValidate(ctx, dn, "header", NodeUtils.isStringOrNull),
+        headerProps: dn.node.width ? { style: { width: dn.node.width } } : undefined,
         template: dn.node.children && dn.node.children.length > 0 ? NodeUtils.getGetComponent(dn, ctx) : undefined
     }) as EntityTableColumn<ModifiableEntity> as any, //HACK
     renderDesigner: dn => <div>
         <FieldComponent dn={dn} member="property" />
         <ExpressionOrValueComponent dn={dn} member="header" type="string" defaultValue={null} />
+        <ExpressionOrValueComponent dn={dn} member="width" type="string" defaultValue={null} />
     </div>
 });
 
