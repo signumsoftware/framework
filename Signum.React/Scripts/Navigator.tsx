@@ -286,12 +286,8 @@ export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 }
 
 function hasRegisteredViewPromise(typeName: string) {
-
     const es = entitySettings[typeName];
-    if (es)
-        return !!es.getViewPromise;
-
-    return !!fallbackViewPromise;
+    return es && !!es.getViewPromise || !!fallbackViewPromise;
 }
 
 function typeIsViewable(typeName: string): boolean {
