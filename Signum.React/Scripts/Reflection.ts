@@ -860,13 +860,13 @@ export class PropertyRoute {
         return getTypeInfo(this.typeReference().name);
     }
 
-    closestTypeInfo(): TypeInfo {
+    rootTypeInfo(): TypeInfo {
         switch (this.propertyRouteType) {
             case PropertyRouteType.Root: return this.rootType!;
-            case PropertyRouteType.Field: return this.parent!.closestTypeInfo();
-            case PropertyRouteType.Mixin: return this.parent!.closestTypeInfo();
-            case PropertyRouteType.MListItem: return this.parent!.closestTypeInfo();
-            case PropertyRouteType.LiteEntity: return this.parent!.closestTypeInfo();
+            case PropertyRouteType.Field: return this.parent!.rootTypeInfo();
+            case PropertyRouteType.Mixin: return this.parent!.rootTypeInfo();
+            case PropertyRouteType.MListItem: return this.parent!.rootTypeInfo();
+            case PropertyRouteType.LiteEntity: return this.parent!.rootTypeInfo();
             default: throw new Error("Unexpected propertyRouteType");
         }
     }
@@ -886,7 +886,8 @@ export class PropertyRoute {
 
         if (member.type == LambdaMemberType.Member) {
 
-            if (this.propertyRouteType == PropertyRouteType.Field) {
+            if (this.propertyRouteType == PropertyRouteType.Field  ||
+                this.propertyRouteType == PropertyRouteType.MListItem) {
                 const ref = this.typeReference();
 
                 if (ref.isLite) {
@@ -911,7 +912,7 @@ export class PropertyRoute {
                 this.propertyRouteType == PropertyRouteType.MListItem ? this.propertyPath() + member.name.firstUpper() :
                     this.propertyPath() + "." + member.name.firstUpper();
 
-            const m = this.closestTypeInfo().members[memberName];
+            const m = this.rootTypeInfo().members[memberName];
             if (!m)
                 throw new Error(`member '${memberName}' not found`)
 
@@ -925,10 +926,13 @@ export class PropertyRoute {
             return PropertyRoute.mixin(this, member.name);
         }
 
-
         if (member.type == LambdaMemberType.Indexer) {
             if (this.propertyRouteType != PropertyRouteType.Field)
-                throw new Error("invalid mixin at this stage");
+                throw new Error("invalid indexer at this stage");
+
+            const tr = this.typeReference();
+            if (!tr.isCollection)
+                throw new Error(`${this.propertyPath()} is not a collection`);
 
             return PropertyRoute.mlistItem(this);
         }
@@ -938,37 +942,41 @@ export class PropertyRoute {
 
     subMembers(): { [subMemberName: string]: MemberInfo } {
 
-        const type = this.closestTypeInfo();
+        function simpleMembersAfter(type: TypeInfo, path: string) {
+            return Dic.getValues(type.members)
+                .filter(m => {
+                    if (m.name == path && !m.name.startsWith(path))
+                        return false;
 
-        function containsDotOrSlash(name: string) {
-            return name.contains(".") || name.contains("/");
+                    var name = m.name.substring(path.length);
+                    if (name.contains(".") || name.contains("/"))
+                        return false;
+
+                    return true;
+                })
+                .toObject(m => m.name.substring(path.length))
         }
+        
 
         switch (this.propertyRouteType) {
-            case PropertyRouteType.Root: return Dic.getValues(type.members).filter(m => !containsDotOrSlash(m.name)).toObject(m => m.name);
-            case PropertyRouteType.Mixin:
-                
+            case PropertyRouteType.Root: return simpleMembersAfter(this.rootTypeInfo(), "");
+            case PropertyRouteType.Mixin: return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath());                
+            case PropertyRouteType.LiteEntity: return simpleMembersAfter(this.typeReferenceInfo(), "");
+            case PropertyRouteType.Field:
             case PropertyRouteType.MListItem: 
                 {
-                    const path = this.propertyPath();
-                    return Dic.getValues(type.members)
-                        .filter(m => m.name != path && m.name.startsWith(path))
-                        .filter(m => !containsDotOrSlash(m.name.substring(path.length)))
-                        .toObject(m => m.name.substring(path.length));
-                }
-            case PropertyRouteType.LiteEntity:
-            case PropertyRouteType.Field:
-                {
-                    const member = this.member!;
-                    return Dic.getValues(type.members)
-                        .filter(m => m.name.startsWith(member.name + "."))
-                        .filter(m => !containsDotOrSlash(m.name.substring(member.name.length + 1)))
-                        .toObject(m => m.name.substring(member.name.length + 1));
+                    const ti = getTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations");
+                    if (isTypeEntity(ti))
+                        return simpleMembersAfter(this.typeReferenceInfo(), "");
+                    else
+                        return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath() + (this.propertyRouteType == PropertyRouteType.Field ? "." : ""));
                 }
             default: throw new Error("Unexpected propertyRouteType");
 
         }
     }
+
+    
 
     toString() {
         if (this.propertyRouteType == PropertyRouteType.Root)
