@@ -66,7 +66,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "decimal")
             return ValueLineType.Decimal;
 
-        if (t.name == "timespan")
+        if (t.name == "TimeSpan")
             return ValueLineType.TimeSpan;
 
         throw new Error(`No value line found for '${t.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
