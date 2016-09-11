@@ -10,7 +10,7 @@ import { Entity, Lite, liteKey, MList, toLite, is, EntityPack } from '../../../F
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { PseudoType, QueryKey, getQueryKey, Type, isEntity } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PseudoType, QueryKey, getQueryKey, Type, isTypeEntity } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { WidgetContext, onEmbeddedWidgets, EmbeddedWidgetPosition } from '../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption,
@@ -91,10 +91,10 @@ export function start(options: { routes: JSX.Element[] }) {
         }
     });
 
-    onEmbeddedWidgets.push(ctx => !isEntity(ctx.pack.entity.Type) || ctx.pack.entity.isNew || !AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard) ? undefined :
+    onEmbeddedWidgets.push(ctx => !isTypeEntity(ctx.pack.entity.Type) || ctx.pack.entity.isNew || !AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard) ? undefined :
         { position: "Top", embeddedWidget: <DashboardWidget position="Top" pack={ ctx.pack as EntityPack<Entity> } /> });
 
-    onEmbeddedWidgets.push(ctx => !isEntity(ctx.pack.entity.Type) || ctx.pack.entity.isNew || !AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard)? undefined :
+    onEmbeddedWidgets.push(ctx => !isTypeEntity(ctx.pack.entity.Type) || ctx.pack.entity.isNew || !AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard)? undefined :
         { position: "Bottom", embeddedWidget: <DashboardWidget position="Bottom" pack={ ctx.pack as EntityPack<Entity> } /> });
 
     QuickLinks.registerGlobalQuickLink(ctx => {

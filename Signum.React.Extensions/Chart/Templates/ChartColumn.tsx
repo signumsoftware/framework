@@ -7,7 +7,7 @@ import { Lite, toLite } from '../../../../Framework/Signum.React/Scripts/Signum.
 import { ResultTable, FindOptions, FilterOption, QueryDescription, SubTokensOptions, QueryToken } from '../../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, FormGroupSize, FormGroupStyle, StyleOptions, StyleContext } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { SearchMessage, JavascriptMessage, parseLite, is } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
-import { getTypeInfos, TypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getTypeInfos, TypeInfo, isTypeEnum } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { ValueLine, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { ChartColumnEntity, ChartScriptColumnEntity, IChartBase, GroupByChart, ChartMessage, ChartColorEntity } from '../Signum.Entities.Chart'
@@ -90,7 +90,7 @@ export class ChartColumnInfo extends React.Component<ChartColumnInfoProps, void>
         if (t == undefined || Navigator.isReadOnly(ChartColorEntity))
             return [];
 
-        if (!t.isLite && !t.isEnum)
+        if (!t.isLite && !isTypeEnum(t.name))
             return [];
 
         return getTypeInfos(t);

@@ -11,7 +11,7 @@ import { Entity, Lite, liteKey, MList, toLite, is, EntityPack } from '../../../F
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import * as QuickLinks from '../../../Framework/Signum.React/Scripts/QuickLinks'
-import { PseudoType, QueryKey, getQueryKey, Type, isEntity, EntityData, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { PseudoType, QueryKey, getQueryKey, Type, EntityData, EntityKind } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
 import { WidgetContext, onEmbeddedWidgets, EmbeddedWidgetPosition } from '../../../Framework/Signum.React/Scripts/Frames/Widgets'
 import { FindOptions, FilterOption, FilterOperation, OrderOption, ColumnOption,
