@@ -6,7 +6,7 @@ import { Dic, addClass } from '../Globals'
 import { DateTimePicker } from 'react-widgets'
 import 'react-widgets/dist/css/react-widgets.css';
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
-import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat, toNumbroFormat } from '../Reflection'
+import { PropertyRouteType, MemberInfo, getTypeInfo, TypeInfo, TypeReference, toMomentFormat, toMomentDurationFormat, toNumbroFormat, isTypeEnum } from '../Reflection'
 import { LineBase, LineBaseProps, runTasks, FormGroup, FormControlStatic } from '../Lines/LineBase'
 
 
@@ -47,8 +47,8 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
 
         if (t.isCollection || t.isLite)
             throw new Error("ValueLine not implemented for " + JSON.stringify(t));
-
-        if (t.isEnum || t.name == "boolean" && !t.isNotNullable)
+        
+        if (isTypeEnum(t.name) || t.name == "boolean" && !t.isNotNullable)
             return ValueLineType.Enum;
 
         if (t.name == "boolean")
@@ -66,7 +66,7 @@ export class ValueLine extends LineBase<ValueLineProps, ValueLineProps> {
         if (t.name == "decimal")
             return ValueLineType.Decimal;
 
-        if (t.name == "timespan")
+        if (t.name == "TimeSpan")
             return ValueLineType.TimeSpan;
 
         throw new Error(`No value line found for '${t.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);

@@ -108,7 +108,8 @@ export abstract class LineBase<P extends LineBaseProps, S extends LineBaseProps>
     }
 
     componentWillReceiveProps(nextProps: P, nextContext: any) {
-        this.setState(this.calculateState(nextProps));
+        this.state = this.calculateState(nextProps);
+        this.forceUpdate();
     }
 
     changes = 0;
