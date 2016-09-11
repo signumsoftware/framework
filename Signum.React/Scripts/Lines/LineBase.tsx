@@ -59,8 +59,8 @@ export class FormGroup extends React.Component<FormGroupProps, {}> {
 
 
 export interface FormControlStaticProps extends React.Props<FormControlStatic> {
-    controlId?: string;
     ctx: StyleContext;
+    htmlProps?: React.HTMLAttributes;
     className?: string
 }
 
@@ -69,9 +69,11 @@ export class FormControlStatic extends React.Component<FormControlStaticProps, {
     render() {
         const ctx = this.props.ctx;
 
+        var p = this.props.htmlProps;
+
+        const className = ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static";
         return (
-            <p id={ this.props.controlId }
-                className ={classes(ctx.formControlStaticAsFormControlReadonly ? "form-control readonly" : "form-control-static", this.props.className) }>
+            <p {...p} className={classes(className, p && p.className, this.props.className)} >
                 { this.props.children }
             </p>
         );
