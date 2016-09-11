@@ -5,7 +5,7 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, ModelEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, isModel, KindOfType, OperationType, TypeReference } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
@@ -42,11 +42,11 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
 
-    if (isEmbedded(entity.Type)) {
+    if (isTypeEmbeddedOrValue(entity.Type)) {
 
         return pr!.typeReference().typeNiceName;
 
-    } else if (isModel(entity.Type)) {
+    } else if (isTypeModel(entity.Type)) {
 
         const typeInfo = getTypeInfo(entity.Type);
 

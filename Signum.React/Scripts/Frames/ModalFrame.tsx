@@ -9,7 +9,7 @@ import { ValidationError } from '../Services'
 import { ifError, Dic } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IRenderButtons } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, NormalWindowMessage, toLite, getToString, EntityPack, ModelState, entityInfo, isEntityPack, isLite } from '../Signum.Entities'
-import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isModel, parseId } from '../Reflection'
+import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, parseId } from '../Reflection'
 import ValidationErrors from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
 import { needsCanExecute } from '../Operations/EntityOperations'
@@ -298,7 +298,7 @@ export default class ModalFrame extends React.Component<ModalFrameProps, ModalFr
         const typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type :
             isLite(entityOrPack) ? entityOrPack.EntityType : entityOrPack.Type;
 
-        return isModel(typeName);
+        return isTypeModel(typeName);
     }
 
     static openNavigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, options: Navigator.NavigateOptions): Promise<void> {

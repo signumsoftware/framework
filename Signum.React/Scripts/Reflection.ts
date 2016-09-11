@@ -129,7 +129,6 @@ export interface TypeReference {
     isCollection?: boolean;
     isLite?: boolean;
     isNotNullable?: boolean;
-    isEnum?: boolean;
     isEmbedded?: boolean;
 }
 
@@ -183,17 +182,22 @@ export function getTypeName(pseudoType: IType | TypeInfo | string): string {
     throw new Error("Unexpected pseudoType " + pseudoType);
 }
 
-export function isEntity(type: PseudoType): boolean {
+export function isTypeEntity(type: PseudoType): boolean {
     const ti = getTypeInfo(type);
-    return ti && !!ti.members["Id"];
+    return ti && ti.kind == KindOfType.Entity && !!ti.members["Id"];
 }
 
-export function isModel(type: PseudoType): boolean {
+export function isTypeEnum(type: PseudoType): boolean {
     const ti = getTypeInfo(type);
-    return ti && !ti.members["Id"];
+    return ti && ti.kind == KindOfType.Enum;
 }
 
-export function isEmbedded(type: PseudoType): boolean {
+export function isTypeModel(type: PseudoType): boolean {
+    const ti = getTypeInfo(type);
+    return ti && ti.kind == KindOfType.Entity && !ti.members["Id"];
+}
+
+export function isTypeEmbeddedOrValue(type: PseudoType): boolean {
     const ti = getTypeInfo(type);
     return !ti;
 }
