@@ -105,20 +105,22 @@ export function toNumbroFormat(format: string | undefined) {
     if (format == undefined)
         return undefined;
 
-    if (format.startsWith("C"))
-        return "0." + "0".repeat(parseInt(format.after("C")));
+    const f = format.toUpperCase();
 
-    if (format.startsWith("N"))
-        return "0." + "0".repeat(parseInt(format.after("N")));
+    if (f.startsWith("C"))
+        return "0." + "0".repeat(parseInt(f.after("C")));
 
-    if (format.startsWith("D"))
-        return "0".repeat(parseInt(format.after("D")));
+    if (f.startsWith("N"))
+        return "0." + "0".repeat(parseInt(f.after("N")));
 
-    if (format.startsWith("E"))
-        return "0." + "0".repeat(parseInt(format.after("E")));
+    if (f.startsWith("D"))
+        return "0".repeat(parseInt(f.after("D")));
 
-    if (format.startsWith("P"))
-        return "0." + "0".repeat(parseInt(format.after("P"))) + "%";
+    if (f.startsWith("E"))
+        return "0." + "0".repeat(parseInt(f.after("E")));
+
+    if (f.startsWith("P"))
+        return "0." + "0".repeat(parseInt(f.after("P"))) + "%";
 
     return format;
 }
