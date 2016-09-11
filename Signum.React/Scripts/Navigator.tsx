@@ -515,10 +515,6 @@ export module API {
         return ajaxPost<void>({ url: "~/api/validateEntity" }, entity);
     }
 
-    export function getPropertyRoutes(typeName: string): Promise<Array<string>> {
-        return ajaxGet<Array<string>>({ url: `~/api/reflection/propertyRoutes/${typeName}` });
-    }
-
     export function getType(typeName: string): Promise<TypeEntity> {
 
         return ajaxGet<TypeEntity>({ url: `~/api/reflection/typeEntity/${typeName}` });

@@ -25,14 +25,6 @@ namespace Signum.React.ApiControllers
             return ReflectionServer.GetTypeInfoTS();
         }
 
-        [Route("api/reflection/propertyRoutes/{typeName}"), HttpGet]
-        public List<string> GetPropertyRoutes(string typeName)
-        {
-            Type type = TypeLogic.GetType(typeName);
-            var res = PropertyRoute.GenerateRoutes(type).Select(a => a.PropertyString()).ToList();
-            return res;
-        }
-
         [Route("api/reflection/typeEntity/{typeName}"), HttpGet]
         public TypeEntity GetTypeEntity(string typeName)
         {
