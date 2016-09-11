@@ -158,7 +158,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { entit
             return col.template(this.props.ctx, this);
 
         if (col.property == null)
-            throw new Error("Column " + JSON.stringify(col) + " has no property and no tempalte");
+            throw new Error("Column has no property and no template");
 
         return DynamicComponent.appropiateComponent(this.props.ctx.subCtx(col.property));
     }

@@ -419,8 +419,6 @@ namespace Signum.React.Facades
 
     public class TypeReferenceTS
     {
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isEnum")]
-        public bool IsEnum { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isCollection")]
         public bool IsCollection { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, PropertyName = "isLite")]
@@ -441,8 +439,8 @@ namespace Signum.React.Facades
             var clean = type == typeof(string) ? type :  (type.ElementType() ?? type);
             this.IsLite = clean.IsLite();
             this.IsNotNullable = clean.IsValueType && !clean.IsNullable();
-            this.IsEnum = clean.UnNullify().IsEnum;
             this.IsEmbedded = clean.IsEmbeddedEntity();
+
             if (this.IsEmbedded && !this.IsCollection)
                 this.TypeNiceName = type.NiceName();
 
