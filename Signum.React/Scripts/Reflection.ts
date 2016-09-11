@@ -887,7 +887,8 @@ export class PropertyRoute {
         if (member.type == LambdaMemberType.Member) {
 
             if (this.propertyRouteType == PropertyRouteType.Field  ||
-                this.propertyRouteType == PropertyRouteType.MListItem) {
+                this.propertyRouteType == PropertyRouteType.MListItem ||
+                this.propertyRouteType == PropertyRouteType.LiteEntity) {
                 const ref = this.typeReference();
 
                 if (ref.isLite) {
@@ -896,8 +897,8 @@ export class PropertyRoute {
 
                     return PropertyRoute.liteEntity(this);
                 }
-          
-                const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations");
+
+                const ti = getTypeInfos(ref).filter(a => isTypeEntity(a)).singleOrNull("Ambiguity due to multiple Implementations");
                 if (ti) {
                     const memberName = member.name.firstUpper();
                     const m = ti.members[memberName];
@@ -905,6 +906,8 @@ export class PropertyRoute {
                         throw new Error(`member '${memberName}' not found`);
 
                     return PropertyRoute.member(PropertyRoute.root(ti), m);
+                } else if (this.propertyRouteType == PropertyRouteType.LiteEntity) {
+                    throw Error("Unexpected lite case");
                 }
             }
 
@@ -965,9 +968,9 @@ export class PropertyRoute {
             case PropertyRouteType.Field:
             case PropertyRouteType.MListItem: 
                 {
-                    const ti = getTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations");
-                    if (isTypeEntity(ti))
-                        return simpleMembersAfter(this.typeReferenceInfo(), "");
+                    const ti = getTypeInfos(this.typeReference()).filter(a => isTypeEntity(a)).singleOrNull("Ambiguity due to multiple Implementations");
+                    if (ti && isTypeEntity(ti))
+                        return simpleMembersAfter(ti, "");
                     else
                         return simpleMembersAfter(this.rootTypeInfo(), this.propertyPath() + (this.propertyRouteType == PropertyRouteType.Field ? "." : ""));
                 }
