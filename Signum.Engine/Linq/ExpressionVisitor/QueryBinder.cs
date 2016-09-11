@@ -1130,7 +1130,7 @@ namespace Signum.Engine.Linq
                 {
                     LiteReferenceExpression lite = (LiteReferenceExpression)source;
 
-                    var toStr = BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
+                    var toStr = lite.CustomToStr ?? BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
 
                     return toStr;
                 }
@@ -1791,7 +1791,7 @@ namespace Signum.Engine.Linq
 
                 Expression entity = EntityCasting(lite.Reference, Lite.Extract(uType));
 
-                return MakeLite(entity, null);
+                return MakeLite(entity, lite.CustomToStr);
             }
 
             return null;

@@ -117,7 +117,7 @@ export interface QueryToken {
     typeColor: string;
     niceTypeName: string;
     isGroupable: boolean;
-    filterType: FilterType;
+    filterType?: FilterType;
     fullKey: string;
     queryTokenType?: QueryTokenType;
     parent?: QueryToken;
@@ -276,8 +276,8 @@ export function isList(fo: FilterOperation) {
 
 export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};
 filterOperations["String"] = [
-    "EqualTo",
     "Contains",
+    "EqualTo",
     "StartsWith",
     "EndsWith",
     "Like",

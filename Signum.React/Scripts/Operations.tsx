@@ -38,7 +38,7 @@ export function addSettings(...settings: OperationSettings[]) {
 }
 
 
-export function getSettings(operation: OperationSymbol | string): OperationSettings {
+export function getSettings(operation: OperationSymbol | string): OperationSettings | undefined {
     const operationKey = (operation as OperationSymbol).key || operation as string;
 
     return operationSettings[operationKey];

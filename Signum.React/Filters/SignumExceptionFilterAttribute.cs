@@ -26,32 +26,36 @@ namespace Signum.React.Filters
     {
         static Func<HttpActionExecutedContext, bool> IncludeErrorDetails = ctx => true;
 
-
+        public static readonly List<Type> IgnoreExceptions = new List<Type> { typeof(OperationCanceledException) };
+        
         public override void OnException(HttpActionExecutedContext ctx)
         {
-            var statusCode = GetStatus(ctx.Exception.GetType());
-
-            var error = new HttpError(ctx.Exception, IncludeErrorDetails(ctx));
-
-            var req = ctx.Request;
-
-            var exLog = ctx.Exception.LogException(e =>
+            if (!IgnoreExceptions.Contains(ctx.Exception.GetType()))
             {
-                e.ActionName = ctx.ActionContext.ActionDescriptor.ActionName;
-                e.ControllerName = ctx.ActionContext.ActionDescriptor.ControllerDescriptor.ControllerName;
-                e.UserAgent = req.Headers.UserAgent.ToString();
-                e.RequestUrl = req.RequestUri.ToString();
-                e.UrlReferer = req.Headers.Referrer?.ToString();
-                e.UserHostAddress = GetClientIp(req);
-                e.UserHostName = GetClientName(req);
-                e.QueryString = ExceptionEntity.Dump(req.RequestUri.ParseQueryString());
-                e.Form = GetForm(req);
-                e.Session = GetSession(req);
-            });
+                var statusCode = GetStatus(ctx.Exception.GetType());
 
-            error["ExceptionID"] = exLog.Id.ToString();
+                var error = new HttpError(ctx.Exception, IncludeErrorDetails(ctx));
 
-            ctx.Response = ctx.Request.CreateResponse<HttpError>(statusCode, error);
+                var req = ctx.Request;
+
+                var exLog = ctx.Exception.LogException(e =>
+                {
+                    e.ActionName = ctx.ActionContext.ActionDescriptor.ActionName;
+                    e.ControllerName = ctx.ActionContext.ActionDescriptor.ControllerDescriptor.ControllerName;
+                    e.UserAgent = req.Headers.UserAgent.ToString();
+                    e.RequestUrl = req.RequestUri.ToString();
+                    e.UrlReferer = req.Headers.Referrer?.ToString();
+                    e.UserHostAddress = GetClientIp(req);
+                    e.UserHostName = GetClientName(req);
+                    e.QueryString = ExceptionEntity.Dump(req.RequestUri.ParseQueryString());
+                    e.Form = GetForm(req);
+                    e.Session = GetSession(req);
+                });
+
+                error["ExceptionID"] = exLog.Id.ToString();
+
+                ctx.Response = ctx.Request.CreateResponse<HttpError>(statusCode, error);
+            }
 
             base.OnException(ctx);
         }
@@ -64,8 +68,8 @@ namespace Signum.React.Filters
 
                 using (var stream = new MemoryStream())
                 {
-                    httpContextBase.Request.InputStream.Seek(0, SeekOrigin.Begin);
-                    httpContextBase.Request.InputStream.CopyTo(stream);
+                    var s = httpContextBase.Request.GetBufferedInputStream();
+                    s.CopyTo(stream);
                     string requestBody = Encoding.UTF8.GetString(stream.ToArray());
                     return requestBody;
                 }

@@ -86,7 +86,7 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
     const contexts = operationInfos(ti)
         .filter(oi => isEntityOperation(oi.operationType))
         .map(oi => {
-            const eos = getSettings(oi.key) as EntityOperationSettings<Entity>;
+            const eos = getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
             const cos = eos == undefined ? undefined :
                 ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
             const coc = {
@@ -98,8 +98,8 @@ export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<E
 
             const visibleByDefault = oi.lite && (ctx.lites.length == 1 || oi.operationType != OperationType.ConstructorFrom)
 
-            if (cos == undefined ? visibleByDefault :
-                cos.isVisible == undefined ? visibleByDefault && eos.isVisible == undefined && (eos.onClick == undefined || cos.onClick != undefined) :
+            if (eos == undefined ? visibleByDefault :
+                cos == undefined || cos.isVisible == undefined ? (visibleByDefault && eos.isVisible == undefined && (eos.onClick == undefined || cos != undefined && cos.onClick != undefined)) :
                     cos.isVisible(coc))
                 return coc;
 

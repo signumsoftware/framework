@@ -9,7 +9,7 @@ export interface TypeaheadProps {
     getItemsTimeout?: number;
     minLength?: number;
     renderItem?: (item: any, query: string) => React.ReactNode;
-    onSelect?: (item: any, e: React.SyntheticEvent) => string;
+    onSelect?: (item: any, e: React.SyntheticEvent) => string | null;
     scrollHeight?: number;
     spanAttrs?: React.HTMLAttributes;
     inputAttrs?: React.HTMLAttributes;
@@ -102,12 +102,15 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
         })).done();
     }
 
-    select(e: React.SyntheticEvent) {        
+    select(e: React.SyntheticEvent): boolean {        
         if (this.state.items!.length == 0)
-            return;
+            return false;
 
-        this.input.value = this.props.onSelect!(this.state.items![this.state.selectedIndex || 0], e);
+        const val = this.props.onSelect!(this.state.items![this.state.selectedIndex || 0], e);
+
+        this.input.value = val || "";
         this.setState({ shown: false });
+        return val != null;
     }
 
     focused = false;
@@ -188,8 +191,8 @@ export default class Typeahead extends React.Component<TypeaheadProps, Typeahead
 
     handleMenuClick = (e: React.MouseEvent) => {
         e.preventDefault();
-        this.select(e);
-        this.input.focus();
+        if (this.select(e))
+            this.input.focus();
     }
 
     mouseover = true;

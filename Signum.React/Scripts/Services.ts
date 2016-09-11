@@ -3,6 +3,8 @@ import { ModelState } from './Signum.Entities'
 import { Dic } from './Globals'
 import { GraphExplorer } from './Reflection'
 
+var fetchWithAbortModule = require('./fetchWithAbort') as { fetch: typeof fetch };
+
 export interface AjaxOptions {
     url: string;
     avoidNotifyPendingRequests?: boolean;
@@ -15,6 +17,7 @@ export interface AjaxOptions {
     mode?: string | RequestMode;
     credentials?: string | RequestCredentials;
     cache?: string | RequestCache;
+    abortController?: { abort?: () => void };
 }
 
 
@@ -34,15 +37,16 @@ export function ajaxGet<T>(options: AjaxOptions): Promise<T> {
 
 export function ajaxGetRaw(options: AjaxOptions) : Promise<Response> {
     return wrapRequest(options, () =>
-        fetch(baseUrl(options), {
+        fetchWithAbortModule.fetch(baseUrl(options), {
             method: "GET",
             headers: Dic.extend({
                 'Accept': 'application/json',
             }, options.headers),
             mode: options.mode,
             credentials: options.credentials || "same-origin",
-            cache: options.cache
-        }));
+            cache: options.cache,
+            abortController: options.abortController
+        } as RequestInit));
 }
 
 export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
@@ -51,13 +55,13 @@ export function ajaxPost<T>(options: AjaxOptions, data: any): Promise<T> {
 }
 
 
-export function ajaxPostRaw(options: AjaxOptions, data: any) : Promise<Response> {
+export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> {
     if (!options.avoidGraphExplorer) {
         GraphExplorer.propagateAll(data);
     }
-
+    
     return wrapRequest(options, () =>
-        fetch(baseUrl(options), {
+        fetchWithAbortModule.fetch(baseUrl(options), {
             method: "POST",
             credentials: options.credentials || "same-origin",
             headers: Dic.extend({
@@ -67,8 +71,12 @@ export function ajaxPostRaw(options: AjaxOptions, data: any) : Promise<Response>
             mode: options.mode,
             cache: options.cache,
             body: JSON.stringify(data),
-        }));
+            abortController: options.abortController
+        } as RequestInit));
 }
+
+
+
 
 
 export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Response>): Promise<Response>
@@ -211,18 +219,23 @@ export class ValidationError extends Error {
 }
 
 
+var _appName: string = "";
+
+export function setAppName(appName: string) {
+    _appName = appName;
+}
 
 //http://blog.guya.net/2015/06/12/sharing-sessionstorage-between-tabs-for-secure-multi-tab-authentication/
 //To share session storage between tabs
 window.addEventListener("storage", se => {
 
-    if (se.key == 'getSessionStorage') {
+    if (se.key == 'getSessionStorage' + _appName) {
         // Some tab asked for the sessionStorage -> send it
 
-        localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
-        localStorage.removeItem('sessionStorage');
+        localStorage.setItem('sessionStorage' + _appName, JSON.stringify(sessionStorage));
+        localStorage.removeItem('sessionStorage' + _appName);
 
-    } else if (se.key == 'sessionStorage' && !sessionStorage.length) {
+    } else if (se.key == ('sessionStorage' + _appName) && !sessionStorage.length) {
         // sessionStorage is empty -> fill it
 
         const data = JSON.parse(se.newValue!);
@@ -237,3 +250,43 @@ if (!sessionStorage.length) {
     // Ask other tabs for session storage
     localStorage.setItem('getSessionStorage', new Date().toString());
 };
+
+
+
+export function makeAbortable<T>(makeCall: (abortController: FetchAbortController) => Promise<T>): () => Promise<T | undefined> {
+
+    let requestIndex = 0;
+    let responseIndex = 0;
+    let abortController: FetchAbortController | undefined = undefined;
+
+    return () => {
+
+        if (abortController) {
+            if (abortController.abort) {
+                abortController.abort!();
+            }
+            abortController = undefined;
+        }
+
+        requestIndex++;
+
+        var myIndex = requestIndex;
+
+        abortController = {};
+
+        return makeCall(abortController).then(result => {
+
+            if (myIndex <= responseIndex) //request is too old
+                return undefined;
+
+            abortController = undefined;
+            responseIndex = myIndex;
+            return result;
+        }, (error: TypeError) => {
+            if (error.message == "Aborted request")
+                return undefined;
+
+            throw error
+        });
+    }
+}

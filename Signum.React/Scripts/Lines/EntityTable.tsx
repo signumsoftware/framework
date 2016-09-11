@@ -70,7 +70,7 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                 <table className="table table-condensed form-vertical">
                     <thead>
                         <tr>
-                            <th style={{ width: "20px" }}></th>
+                            <th></th>
                             {
                                 this.props.columns.map((c, i) => <th key={i} {...c.headerProps}>
                                     {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}

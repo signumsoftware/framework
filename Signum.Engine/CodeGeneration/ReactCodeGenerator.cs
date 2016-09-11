@@ -255,7 +255,7 @@ namespace Signum.Engine.CodeGeneration
             sb.AppendLine("import * as React from 'react'");
             sb.AppendLine("import { Route } from 'react-router'");
             sb.AppendLine("import { ajaxPost, ajaxGet } from '" + fra + "Signum.React/Scripts/Services';");
-            sb.AppendLine("import { EntitySettings } from '" + fra + "Signum.React/Scripts/Navigator'");
+            sb.AppendLine("import { EntitySettings, ViewPromise } from '" + fra + "Signum.React/Scripts/Navigator'");
             sb.AppendLine("import * as Navigator from '" + fra + "Signum.React/Scripts/Navigator'");
             sb.AppendLine("import { EntityOperationSettings } from '" + fra + "Signum.React/Scripts/Operations'");
             sb.AppendLine("import * as Operations from '" + fra + "Signum.React/Scripts/Operations'");

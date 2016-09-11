@@ -47,7 +47,7 @@ namespace Signum.Engine
     public static class GlobalLazy
     {
         static HashSet<IResetLazy> registeredLazyList = new HashSet<IResetLazy>();
-        public static ResetLazy<T> WithoutInvalidations<T>(Func<T> func) where T : class
+        public static ResetLazy<T> WithoutInvalidations<T>(Func<T> func, LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication) where T : class
         {
             ResetLazy<T> result = new ResetLazy<T>(() =>
             {
@@ -63,7 +63,7 @@ namespace Signum.Engine
 
                     return value;
                 }
-            }, mode: LazyThreadSafetyMode.ExecutionAndPublication, 
+            }, mode, 
             declaringType: func.Method.DeclaringType);
 
             registeredLazyList.Add(result);
