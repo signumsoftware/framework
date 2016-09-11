@@ -11,8 +11,10 @@ import ContextMenu from '../../../../Framework/Signum.React/Scripts/SearchContro
 import SelectorModal from '../../../../Framework/Signum.React/Scripts/SelectorModal'
 import { MenuItem } from 'react-bootstrap'
 
-import * as Nodes from './Nodes'
-import { DesignerContext, BaseNode, ContainerNode, DesignerNode } from './Nodes'
+import * as NodeUtils from './NodeUtils'
+import NodeSelectorModal from './NodeSelectorModal'
+import { DesignerContext, DesignerNode } from './NodeUtils'
+import { BaseNode, ContainerNode, LineBaseNode } from './Nodes'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
 require("!style!css!./DynamicViewTree.css");
@@ -83,7 +85,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
 
         const dn = this.props.selectedNode;
 
-        const isContainer = Nodes.registeredNodes[dn.node.kind].isContainer;
+        const isContainer = NodeUtils.registeredNodes[dn.node.kind].isContainer;
         const isRoot = (dn == this.props.rootNode);
         
         return (
@@ -102,12 +104,12 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
     handleAddChildren = () => {
         const parent = this.props.selectedNode! as DesignerNode<ContainerNode>;
 
-        this.newNode().then(n => {
+        this.newNode(parent.node.kind).then(n => {
             if (!n)
                 return;
 
             parent.node.children.push(n);
-            this.props.onSelected(new DesignerNode(n, parent));
+            this.props.onSelected(parent.createChild(n));
             parent.context.refreshView();
         });
     }
@@ -115,12 +117,12 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
     handleAddSibling = () => {
         var sibling = this.props.selectedNode!;
         var parent = sibling.parent! as DesignerNode<ContainerNode>;
-        this.newNode().then(n => {
+        this.newNode(parent.node.kind).then(n => {
             if (!n)
                 return;
 
             parent.node.children.insertAt(parent.node.children.indexOf(sibling.node) + 1, n);
-            this.props.onSelected(new DesignerNode(n, parent));
+            this.props.onSelected(parent.createChild(n));
             parent.context.refreshView();
         });
     }
@@ -136,19 +138,21 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
         parent.context.refreshView();
     }
 
-    newNode(): Promise<BaseNode | undefined>{
-        return SelectorModal.chooseElement(Dic.getValues(Nodes.registeredNodes),
-            { message: DynamicViewMessage.SelectATypeOfComponent.niceToString(), display: a => a.kind }).then(t => {
+    newNode(parentType: string): Promise<BaseNode | undefined>{
+        return NodeSelectorModal.chooseElement(parentType).then(t => {
 
                 if (!t)
                     return undefined;
 
-                var newElement: BaseNode = { kind: t.kind };
+                var node: BaseNode = { kind: t.kind };
 
                 if (t.isContainer)
-                    (newElement as ContainerNode).children = [];
+                    (node as ContainerNode).children = [];
 
-                return newElement;
+                if (t.initialize)
+                    t.initialize(node);  
+
+                return node;
             });
     }
 }
@@ -177,7 +181,9 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     }
 
     renderIcon() {
-        if (!Nodes.registeredNodes[this.props.node.node.kind].isContainer)
+        var c = this.props.node.node as ContainerNode;
+
+        if (!c.children || c.children.length == 0)
             return <span className="place-holder" />;
 
         if (this.state.isOpened) 
@@ -189,14 +195,9 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
     render(): React.ReactElement<any> {
         var dn = this.props.node;
 
-        var title = dn.node.kind;
-
-        if ((dn.node as Nodes.LineBaseNode).field)
-            title += ": " + (dn.node as Nodes.LineBaseNode).field;  
-
         var container = dn.node as ContainerNode;
 
-        const error = Nodes.validate(dn);
+        const error = NodeUtils.validate(dn);
         
         return (
             <li>
@@ -207,7 +208,11 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
                     onClick={e => this.props.onSelected(dn)}
                     onContextMenu={e => this.props.onContextMenu(dn, e)}
                     >
-                    {title}
+                    {dn.node.kind}
+                    {(dn.node as LineBaseNode).field &&
+                        <span>:&nbsp; 
+                        <strong>{(dn.node as LineBaseNode).field}</strong>
+                        </span>}
                 </span>
 
                 {container.children && container.children.length > 0 && (this.state.isOpened) &&
@@ -217,7 +222,7 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
                             selectedNode={this.props.selectedNode}
                             onContextMenu={this.props.onContextMenu}
                             onSelected={this.props.onSelected}
-                            key={i} node={new DesignerNode(c, dn)} />)}
+                            key={i} node={dn.createChild(c)} />)}
                     </ul>
                 }
             </li>

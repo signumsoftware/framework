@@ -53,6 +53,12 @@ export module DynamicViewValidationMessage {
     export const OnlyChildNodesOfType0Allowed = new MessageKey("DynamicViewValidationMessage", "OnlyChildNodesOfType0Allowed");
     export const Type0DoesNotContainsField1 = new MessageKey("DynamicViewValidationMessage", "Type0DoesNotContainsField1");
     export const Member0IsMandatoryFor1 = new MessageKey("DynamicViewValidationMessage", "Member0IsMandatoryFor1");
+    export const _0RequiresA1 = new MessageKey("DynamicViewValidationMessage", "_0RequiresA1");
+    export const Entity = new MessageKey("DynamicViewValidationMessage", "Entity");
+    export const CollectionOfEntities = new MessageKey("DynamicViewValidationMessage", "CollectionOfEntities");
+    export const Value = new MessageKey("DynamicViewValidationMessage", "Value");
+    export const CollectionOfEnums = new MessageKey("DynamicViewValidationMessage", "CollectionOfEnums");
+    export const EntityOrValue = new MessageKey("DynamicViewValidationMessage", "EntityOrValue");
 }
 
 export interface EvalEntity<T> extends Entities.EmbeddedEntity {

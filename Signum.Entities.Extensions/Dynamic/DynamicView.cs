@@ -55,5 +55,14 @@ namespace Signum.Entities.Dynamic
 
         [Description("Member '{0}' is mandatory for '{1}'")]
         Member0IsMandatoryFor1,
+
+        [Description("{0} requires a {1}")]
+        _0RequiresA1,
+
+        Entity,
+        CollectionOfEntities,
+        Value,
+        CollectionOfEnums,
+        EntityOrValue,
     }
 }

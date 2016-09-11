@@ -7,8 +7,9 @@ import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOpti
 import { getQueryNiceName, MemberInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { Expression, ExpressionOrValue, DesignerContext, BaseNode, DesignerNode, LineBaseNode } from './Nodes'
-import * as Nodes from './Nodes'
+import { Expression, ExpressionOrValue, DesignerContext, DesignerNode } from './NodeUtils'
+import { BaseNode, LineBaseNode } from './Nodes'
+import * as NodeUtils from './NodeUtils'
 import ExpressionComponent from './ExpressionComponent'
 import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Entities.Dynamic'
 
@@ -29,7 +30,10 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
         var p = this.props;
 
         var parsedValue = p.type != "number" ? value : (parseFloat(value as string) || null);
-        
+
+        if (parsedValue == "")
+            parsedValue = null;
+
         if (parsedValue == p.defaultValue)
             delete (p.dn.node as any)[p.member];
         else
@@ -91,9 +95,10 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
 
 
     renderValue(value: number | string | null | undefined) {
+
+        const val = value === undefined ? this.props.defaultValue : value;
+
         if (this.props.options) {
-            const val = value === undefined ? this.props.defaultValue : value;
-            
             return (
                 <select className="form-control" value={val == null ? "" : val.toString()} onChange={this.handleChangeSelectOrInput} >
                     {this.props.options.map((o, i) =>
@@ -101,11 +106,12 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
                     }
                 </select>);
         }
-        else
+        else {
             return (<input className="form-control"
                 type="text"
-                value={value == null ? this.props.defaultValue!.toString() : value.toString()}
+                value={val == null ? "" : val.toString()}
                 onChange={this.handleChangeSelectOrInput} />);
+        }
     }
 
 
@@ -126,7 +132,8 @@ export class ExpressionOrValueComponent extends React.Component<ExpressionOrValu
 
 
 export interface FieldComponentProps  {
-    dn: DesignerNode<LineBaseNode>
+    dn: DesignerNode<BaseNode>,
+    member: string,
 }
 
 export class FieldComponent extends React.Component<FieldComponentProps, void> {
@@ -136,16 +143,16 @@ export class FieldComponent extends React.Component<FieldComponentProps, void> {
 
         const node = this.props.dn.node;
         if (!sender.value)
-            delete node.field;
+            delete (node as any)[this.props.member];
         else
-            node.field = sender.value;
+            (node as any)[this.props.member] = sender.value;
 
         this.props.dn.context.refreshView();
     }
     
     render() {
         var p = this.props;
-        var value = p.dn.node.field;
+        var value = (p.dn.node as any)[this.props.member];
         
         return (
             <div className="form-group">
@@ -161,16 +168,16 @@ export class FieldComponent extends React.Component<FieldComponentProps, void> {
 
     renderValue(value: string | null | undefined) {
 
-        var strValue = value == null ? "" : value.toString();
+        const strValue = value == null ? "" : value.toString();
 
-        const route = this.props.dn.parent!.route;
-
-        var subMembers = Dic.getValues(route.subMembers()).filter(m => m.name != "Id") as Array<MemberInfo | null>;
-        subMembers.insertAt(0, null);
+        const route = this.props.dn.parent!.fixRoute();
+        
+        const subMembers = route.subMembers();
 
         return (<select className="form-control" value={strValue} onChange={this.handleChange} >
-            {subMembers.map((o, i) =>
-                <option key={i} value={o == null ? "" : o.name}>{o == null ? " - " : o.niceName}</option>)
+            <option  value=""> - </option>
+            {Dic.getKeys(subMembers).filter(k => subMembers[k].name != "Id").map((name, i) =>
+                <option key={i} value={name}>{name}</option>)
             })
         </select>);
     }
@@ -191,12 +198,12 @@ export class DynamicViewInspector extends React.Component<{ selectedNode?: Desig
         if (!this.props.selectedNode)
             return <h4>{DynamicViewMessage.SelectANodeFirst.niceToString()}</h4>;
 
-        const error = Nodes.validate(this.props.selectedNode);
+        const error = NodeUtils.validate(this.props.selectedNode);
 
         return (<div className="form-sm form-horizontal">
             <h3>{this.props.selectedNode.node.kind}</h3>
             {error && <div className="alert alert-danger">{error}</div>}
-            {Nodes.renderDesigner(this.props.selectedNode)}
+            {NodeUtils.renderDesigner(this.props.selectedNode)}
         </div>);
     }
 }

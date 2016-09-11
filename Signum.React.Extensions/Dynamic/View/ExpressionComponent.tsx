@@ -8,7 +8,7 @@ import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/
 import CodeMirrorComponent from '../../../../Extensions/Signum.React.Extensions/Codemirror/CodeMirrorComponent'
 import { EvalEntity } from '../Signum.Entities.Dynamic'
 import * as CodeMirror from 'codemirror'
-import { Expression } from './Nodes'
+import { Expression } from './NodeUtils'
 
 require("!style!css!codemirror/lib/codemirror.css");
 require("!style!css!codemirror/addon/dialog/dialog.css");

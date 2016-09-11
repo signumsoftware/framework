@@ -170,10 +170,12 @@
     <TypeScriptCompile Include="Dynamic\View\DynamicViewComponent.tsx" />
     <TypeScriptCompile Include="Dynamic\View\Designer.tsx" />
     <TypeScriptCompile Include="Dynamic\View\ExpressionComponent.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\NodeUtils.tsx" />
     <TypeScriptCompile Include="Dynamic\View\Nodes.tsx" />
     <TypeScriptCompile Include="Dynamic\DynamicValidationClient.tsx" />
     <TypeScriptCompile Include="Dynamic\Validation\CSharpScriptCode.tsx" />
     <TypeScriptCompile Include="Dynamic\Validation\DynamicValidation.tsx" />
+    <TypeScriptCompile Include="Dynamic\View\NodeSelectorModal.tsx" />
     <TypeScriptCompile Include="Mailing\Templates\IFrameRenderer.tsx" />
     <Compile Include="Map\MapServer.cs" />
     <Compile Include="Map\MapController.cs" />

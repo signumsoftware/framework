@@ -7,8 +7,9 @@ import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOpti
 import { getQueryNiceName, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
-import { DesignerContext, BaseNode, DesignerNode } from './Nodes'
-import * as Nodes from './Nodes'
+import { BaseNode } from './Nodes'
+import { DesignerContext, DesignerNode } from './NodeUtils'
+import * as NodeUtils from './NodeUtils'
 import { DynamicViewInspector,  } from './Designer'
 import { DynamicViewTree } from './DynamicViewTree'
 import { DynamicViewEntity } from '../Signum.Entities.Dynamic'
@@ -25,16 +26,16 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
     constructor(props: DynamicViewComponentProps) {
         super(props);
 
-        var dn = new DesignerNode(JSON.parse(props.dynamicView.viewContent!) as BaseNode, undefined);
-        dn.route = PropertyRoute.root(props.ctx.value.Type);
-        dn.context = {
+        var baseNode = JSON.parse(props.dynamicView.viewContent!) as BaseNode;
+
+        var context = {
             onClose: this.handleClose,
             refreshView: () => this.forceUpdate()
-        };
+        } as DesignerContext;
 
         this.state = {
             isDesignerOpen: false,
-            rootNode: dn
+            rootNode: DesignerNode.root(baseNode, context, props.ctx.value.Type)
         };
     }
 
@@ -56,7 +57,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
                 }
             </div>
             <div className={classes("design-content", this.state.isDesignerOpen && "open")}>
-                {Nodes.render(this.state.rootNode, this.props.ctx)}
+                {NodeUtils.render(this.state.rootNode, this.props.ctx)}
             </div>
         </div>);
     }

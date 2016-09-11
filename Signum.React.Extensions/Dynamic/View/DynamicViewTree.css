@@ -19,6 +19,10 @@
     margin-bottom: 0px;
 }
 
+.dynamic-view-tree > ul{
+    padding-left: 0px;
+}
+
 .dynamic-view-tree ul li {
     list-style:none
 }
