@@ -55,7 +55,7 @@ namespace Signum.React.RestLog
             
             if (actionExecutedContext.Exception==null)
             {
-                request.ResponseBody = actionExecutedContext.Response.Content.ReadAsStringAsync().Result;
+                request.ResponseBody = actionExecutedContext.Response.Content?.ReadAsStringAsync()?.Result;
             }
 
             if (actionExecutedContext.Exception != null)
