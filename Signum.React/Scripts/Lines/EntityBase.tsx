@@ -42,6 +42,10 @@ export interface EntityBaseState extends LineBaseProps {
 
 export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseState> extends LineBase<T, S>
 {
+    static hasChildrens(element: React.ReactElement<any>) {
+        return element.props.children && React.Children.toArray(element.props.children).length;
+    }
+
     static defaultIsCreable(type: TypeReference, customComponent: boolean) {
         return type.isEmbedded ? Navigator.isCreable(type.name, customComponent , false) :
             type.name == IsByAll ? false :

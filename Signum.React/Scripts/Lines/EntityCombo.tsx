@@ -101,9 +101,9 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
                 htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }
                 labelProps={s.labelHtmlProps} >
                 <div className="SF-entity-combo">
-                    <div className={buttons ? "input-group" : undefined}>
+                    <div className={EntityBase.hasChildrens(buttons) ? "input-group" : undefined}>
                         {this.renderSelect()}
-                        {React.Children.count(buttons) ? buttons : undefined}
+                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>
                 </div>
             </FormGroup>
