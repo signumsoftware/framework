@@ -36,7 +36,7 @@ export interface PackageOperationEntity extends PackageEntity {
 }
 
 export module PackageOperationProcess {
-    export const PackageOperation : ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "PackageOperationProcess.PackageOperation" });
+    export const PackageOperation : ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "PackageOperationProcess.PackageOperation");
 }
 
 export const ProcessAlgorithmSymbol = new Type<ProcessAlgorithmSymbol>("ProcessAlgorithm");
@@ -83,16 +83,16 @@ export module ProcessMessage {
 }
 
 export module ProcessOperation {
-    export const Plan : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol({ Type: "Operation", key: "ProcessOperation.Plan" });
-    export const Save : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol({ Type: "Operation", key: "ProcessOperation.Save" });
-    export const Cancel : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol({ Type: "Operation", key: "ProcessOperation.Cancel" });
-    export const Execute : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol({ Type: "Operation", key: "ProcessOperation.Execute" });
-    export const Suspend : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol({ Type: "Operation", key: "ProcessOperation.Suspend" });
-    export const Retry : Entities.ConstructSymbol_From<ProcessEntity, ProcessEntity> = registerSymbol({ Type: "Operation", key: "ProcessOperation.Retry" });
+    export const Plan : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Plan");
+    export const Save : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Save");
+    export const Cancel : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Cancel");
+    export const Execute : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Execute");
+    export const Suspend : Entities.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Suspend");
+    export const Retry : Entities.ConstructSymbol_From<ProcessEntity, ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Retry");
 }
 
 export module ProcessPermission {
-    export const ViewProcessPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "ProcessPermission.ViewProcessPanel" });
+    export const ViewProcessPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "ProcessPermission.ViewProcessPanel");
 }
 
 export const ProcessState = new EnumType<ProcessState>("ProcessState");

@@ -25,7 +25,7 @@ export interface IsolationMixin extends Entities.MixinEntity {
 }
 
 export module IsolationOperation {
-    export const Save : Entities.ExecuteSymbol<IsolationEntity> = registerSymbol({ Type: "Operation", key: "IsolationOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<IsolationEntity> = registerSymbol("Operation", "IsolationOperation.Save");
 }
 
 

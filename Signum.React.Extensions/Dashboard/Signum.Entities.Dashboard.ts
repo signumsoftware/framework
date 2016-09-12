@@ -59,14 +59,14 @@ export module DashboardMessage {
 }
 
 export module DashboardOperation {
-    export const Create : Entities.ConstructSymbol_Simple<DashboardEntity> = registerSymbol({ Type: "Operation", key: "DashboardOperation.Create" });
-    export const Save : Entities.ExecuteSymbol<DashboardEntity> = registerSymbol({ Type: "Operation", key: "DashboardOperation.Save" });
-    export const Clone : Entities.ConstructSymbol_From<DashboardEntity, DashboardEntity> = registerSymbol({ Type: "Operation", key: "DashboardOperation.Clone" });
-    export const Delete : Entities.DeleteSymbol<DashboardEntity> = registerSymbol({ Type: "Operation", key: "DashboardOperation.Delete" });
+    export const Create : Entities.ConstructSymbol_Simple<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Create");
+    export const Save : Entities.ExecuteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Save");
+    export const Clone : Entities.ConstructSymbol_From<DashboardEntity, DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Clone");
+    export const Delete : Entities.DeleteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Delete");
 }
 
 export module DashboardPermission {
-    export const ViewDashboard : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "DashboardPermission.ViewDashboard" });
+    export const ViewDashboard : Authorization.PermissionSymbol = registerSymbol("Permission", "DashboardPermission.ViewDashboard");
 }
 
 export interface IPartEntity extends Entities.Entity {

@@ -57,8 +57,8 @@ export module TranslationMessage {
 }
 
 export module TranslationPermission {
-    export const TranslateCode : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "TranslationPermission.TranslateCode" });
-    export const TranslateInstances : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "TranslationPermission.TranslateInstances" });
+    export const TranslateCode : Authorization.PermissionSymbol = registerSymbol("Permission", "TranslationPermission.TranslateCode");
+    export const TranslateInstances : Authorization.PermissionSymbol = registerSymbol("Permission", "TranslationPermission.TranslateInstances");
 }
 
 export const TranslationReplacementEntity = new Type<TranslationReplacementEntity>("TranslationReplacement");
@@ -70,8 +70,8 @@ export interface TranslationReplacementEntity extends Entities.Entity {
 }
 
 export module TranslationReplacementOperation {
-    export const Save : Entities.ExecuteSymbol<TranslationReplacementEntity> = registerSymbol({ Type: "Operation", key: "TranslationReplacementOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<TranslationReplacementEntity> = registerSymbol({ Type: "Operation", key: "TranslationReplacementOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<TranslationReplacementEntity> = registerSymbol("Operation", "TranslationReplacementOperation.Save");
+    export const Delete : Entities.DeleteSymbol<TranslationReplacementEntity> = registerSymbol("Operation", "TranslationReplacementOperation.Delete");
 }
 
 export const TranslatorUserCultureEntity = new Type<TranslatorUserCultureEntity>("TranslatorUserCultureEntity");
@@ -89,8 +89,8 @@ export interface TranslatorUserEntity extends Entities.Entity {
 }
 
 export module TranslatorUserOperation {
-    export const Save : Entities.ExecuteSymbol<TranslatorUserEntity> = registerSymbol({ Type: "Operation", key: "TranslatorUserOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<TranslatorUserEntity> = registerSymbol({ Type: "Operation", key: "TranslatorUserOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<TranslatorUserEntity> = registerSymbol("Operation", "TranslatorUserOperation.Save");
+    export const Delete : Entities.DeleteSymbol<TranslatorUserEntity> = registerSymbol("Operation", "TranslatorUserOperation.Delete");
 }
 
 

@@ -46,13 +46,13 @@ export module WordTemplateMessage {
 }
 
 export module WordTemplateOperation {
-    export const Save : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol({ Type: "Operation", key: "WordTemplateOperation.Save" });
-    export const CreateWordReport : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol({ Type: "Operation", key: "WordTemplateOperation.CreateWordReport" });
-    export const CreateWordTemplateFromSystemWordTemplate : Entities.ConstructSymbol_From<WordTemplateEntity, SystemWordTemplateEntity> = registerSymbol({ Type: "Operation", key: "WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate" });
+    export const Save : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.Save");
+    export const CreateWordReport : Entities.ExecuteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.CreateWordReport");
+    export const CreateWordTemplateFromSystemWordTemplate : Entities.ConstructSymbol_From<WordTemplateEntity, SystemWordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.CreateWordTemplateFromSystemWordTemplate");
 }
 
 export module WordTemplatePermission {
-    export const GenerateReport : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "WordTemplatePermission.GenerateReport" });
+    export const GenerateReport : Authorization.PermissionSymbol = registerSymbol("Permission", "WordTemplatePermission.GenerateReport");
 }
 
 export const WordTransformerSymbol = new Type<WordTransformerSymbol>("WordTransformer");

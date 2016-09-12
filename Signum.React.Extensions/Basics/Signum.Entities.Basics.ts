@@ -15,7 +15,7 @@ export interface CultureInfoEntity extends Entities.Entity {
 }
 
 export module CultureInfoOperation {
-    export const Save : Entities.ExecuteSymbol<CultureInfoEntity> = registerSymbol({ Type: "Operation", key: "CultureInfoOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<CultureInfoEntity> = registerSymbol("Operation", "CultureInfoOperation.Save");
 }
 
 export const DateSpanEntity = new Type<DateSpanEntity>("DateSpanEntity");

@@ -23,7 +23,7 @@ export interface DynamicValidationEval extends EvalEntity<IEvaluator> {
 }
 
 export module DynamicValidationOperation {
-    export const Save : Entities.ExecuteSymbol<DynamicValidationEntity> = registerSymbol({ Type: "Operation", key: "DynamicValidationOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<DynamicValidationEntity> = registerSymbol("Operation", "DynamicValidationOperation.Save");
 }
 
 export const DynamicViewEntity = new Type<DynamicViewEntity>("DynamicView");
@@ -43,9 +43,9 @@ export module DynamicViewMessage {
 }
 
 export module DynamicViewOperation {
-    export const Clone : Entities.ConstructSymbol_From<DynamicViewEntity, DynamicViewEntity> = registerSymbol({ Type: "Operation", key: "DynamicViewOperation.Clone" });
-    export const Save : Entities.ExecuteSymbol<DynamicViewEntity> = registerSymbol({ Type: "Operation", key: "DynamicViewOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<DynamicViewEntity> = registerSymbol({ Type: "Operation", key: "DynamicViewOperation.Delete" });
+    export const Clone : Entities.ConstructSymbol_From<DynamicViewEntity, DynamicViewEntity> = registerSymbol("Operation", "DynamicViewOperation.Clone");
+    export const Save : Entities.ExecuteSymbol<DynamicViewEntity> = registerSymbol("Operation", "DynamicViewOperation.Save");
+    export const Delete : Entities.DeleteSymbol<DynamicViewEntity> = registerSymbol("Operation", "DynamicViewOperation.Delete");
 }
 
 export module DynamicViewValidationMessage {

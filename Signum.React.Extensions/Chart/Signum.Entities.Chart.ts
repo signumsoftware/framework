@@ -114,7 +114,7 @@ export type ChartParameterType =
     "String";
 
 export module ChartPermission {
-    export const ViewCharting : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "ChartPermission.ViewCharting" });
+    export const ViewCharting : Authorization.PermissionSymbol = registerSymbol("Permission", "ChartPermission.ViewCharting");
 }
 
 export const ChartRequest = new Type<ChartRequest>("ChartRequest");
@@ -149,9 +149,9 @@ export interface ChartScriptEntity extends Entities.Entity {
 }
 
 export module ChartScriptOperation {
-    export const Save : Entities.ExecuteSymbol<ChartScriptEntity> = registerSymbol({ Type: "Operation", key: "ChartScriptOperation.Save" });
-    export const Clone : Entities.ConstructSymbol_From<ChartScriptEntity, ChartScriptEntity> = registerSymbol({ Type: "Operation", key: "ChartScriptOperation.Clone" });
-    export const Delete : Entities.DeleteSymbol<ChartScriptEntity> = registerSymbol({ Type: "Operation", key: "ChartScriptOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<ChartScriptEntity> = registerSymbol("Operation", "ChartScriptOperation.Save");
+    export const Clone : Entities.ConstructSymbol_From<ChartScriptEntity, ChartScriptEntity> = registerSymbol("Operation", "ChartScriptOperation.Clone");
+    export const Delete : Entities.DeleteSymbol<ChartScriptEntity> = registerSymbol("Operation", "ChartScriptOperation.Delete");
 }
 
 export const ChartScriptParameterEntity = new Type<ChartScriptParameterEntity>("ChartScriptParameterEntity");
@@ -187,8 +187,8 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
 }
 
 export module UserChartOperation {
-    export const Save : Entities.ExecuteSymbol<UserChartEntity> = registerSymbol({ Type: "Operation", key: "UserChartOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<UserChartEntity> = registerSymbol({ Type: "Operation", key: "UserChartOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<UserChartEntity> = registerSymbol("Operation", "UserChartOperation.Save");
+    export const Delete : Entities.DeleteSymbol<UserChartEntity> = registerSymbol("Operation", "UserChartOperation.Delete");
 }
 
 

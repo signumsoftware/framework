@@ -43,8 +43,8 @@ export interface ExcelReportEntity extends Entities.Entity {
 }
 
 export module ExcelReportOperation {
-    export const Save : Entities.ExecuteSymbol<ExcelReportEntity> = registerSymbol({ Type: "Operation", key: "ExcelReportOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<ExcelReportEntity> = registerSymbol({ Type: "Operation", key: "ExcelReportOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<ExcelReportEntity> = registerSymbol("Operation", "ExcelReportOperation.Save");
+    export const Delete : Entities.DeleteSymbol<ExcelReportEntity> = registerSymbol("Operation", "ExcelReportOperation.Delete");
 }
 
 
