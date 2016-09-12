@@ -900,7 +900,7 @@ export class PropertyRoute {
                     return PropertyRoute.liteEntity(this);
                 }
 
-                const ti = getTypeInfos(ref).filter(a => isTypeEntity(a)).singleOrNull("Ambiguity due to multiple Implementations");
+                const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations"); //[undefined]
                 if (ti) {
                     const memberName = member.name.firstUpper();
                     const m = ti.members[memberName];
@@ -970,7 +970,7 @@ export class PropertyRoute {
             case PropertyRouteType.Field:
             case PropertyRouteType.MListItem: 
                 {
-                    const ti = getTypeInfos(this.typeReference()).filter(a => isTypeEntity(a)).singleOrNull("Ambiguity due to multiple Implementations");
+                    const ti = getTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); // [undefined]
                     if (ti && isTypeEntity(ti))
                         return simpleMembersAfter(ti, "");
                     else

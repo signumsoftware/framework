@@ -15,64 +15,64 @@ import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
-    createAsLink?: boolean;
+	createAsLink?: boolean;
 }
 
 export class EntityTabRepeater extends EntityListBase<EntityTabRepeaterProps, EntityTabRepeaterProps> {
 
-    calculateDefaultState(state: EntityTabRepeaterProps) {
-        super.calculateDefaultState(state);
-        state.viewOnCreate = false;
-    }
+	calculateDefaultState(state: EntityTabRepeaterProps) {
+		super.calculateDefaultState(state);
+		state.viewOnCreate = false;
+	}
 
-    renderInternal() {
+	renderInternal() {
 
-        const buttons = (
-            <span className="pull-right">
-                {this.renderCreateButton(false) }
-                {this.renderFindButton(false) }
-            </span>
-        );
+		const buttons = (
+			<span className="pull-right">
+				{this.renderCreateButton(false) }
+				{this.renderFindButton(false) }
+			</span>
+		);
 
-        var ctx = this.state.ctx!;
+		var ctx = this.state.ctx!;
 
 	   const readOnly = this.state.ctx.readOnly;
 
-        return (
-            <fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) }
-                {...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
-                <legend>
-                    <div>
-                        <span>{this.state.labelText}</span>
-                        {React.Children.count(buttons) ? buttons : undefined}
-                    </div>
-                </legend>
-                <Tabs id={ctx.compose("tabs")}>
-                    {
-                        mlistItemContext(ctx).map((mlec, i) =>
-                            <Tab className="sf-repeater-element" eventKey={i} key={i} {...EntityListBase.entityHtmlProps(mlec.value) }
-                                title={
-                                    <div>
-                                        { getToString(mlec.value) }
-                                        &nbsp;
-                                        { this.state.remove && !readOnly &&
-                                            <span className={classes("sf-line-button", "sf-create") }
-                                            onClick={e => this.handleRemoveElementClick(e, i) }
-                                            title={EntityControlMessage.Remove.niceToString() }>
-                                            <span className="glyphicon glyphicon-remove"/>
-                                            </span>
-                                        }
-                                    </div>
-                                }>
-                                <RenderEntity ctx={mlec} getComponent={this.props.getComponent}/>
-                            </Tab>
-                        )
-                        
-                    }
-                    <Tab eventKey={"x"} disabled></Tab> {/*Temporal hack*/}
-                </Tabs>
-            </fieldset>
-        );
-    }
+		return (
+			<fieldset className={classes("SF-repeater-field SF-control-container", ctx.errorClass) }
+				{...Dic.extend(this.baseHtmlProps(), this.state.formGroupHtmlProps) }>
+				<legend>
+					<div>
+						<span>{this.state.labelText}</span>
+						{React.Children.count(buttons) ? buttons : undefined}
+					</div>
+				</legend>
+				<Tabs id={ctx.compose("tabs")}>
+					{
+						mlistItemContext(ctx).map((mlec, i) =>
+							<Tab className="sf-repeater-element" eventKey={i} key={i} {...EntityListBase.entityHtmlProps(mlec.value) }
+								title={
+									<div>
+										{ getToString(mlec.value) }
+										&nbsp;
+										{ this.state.remove && !readOnly &&
+											<span className={classes("sf-line-button", "sf-create") }
+											onClick={e => this.handleRemoveElementClick(e, i) }
+											title={EntityControlMessage.Remove.niceToString() }>
+											<span className="glyphicon glyphicon-remove"/>
+											</span>
+										}
+									</div>
+								}>
+								<RenderEntity ctx={mlec} getComponent={this.props.getComponent}/>
+							</Tab>
+						)
+						
+					}
+					<Tab eventKey={"x"} disabled></Tab> {/*Temporal hack*/}
+				</Tabs>
+			</fieldset>
+		);
+	}
 }
 
