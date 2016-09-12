@@ -3,6 +3,7 @@ using Signum.Entities.Basics;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -41,5 +42,27 @@ namespace Signum.Entities.Dynamic
         AddSibling,
         Remove,
         SelectATypeOfComponent,
+        SelectANodeFirst
+    }
+
+    public enum DynamicViewValidationMessage
+    {
+        [Description("Only child nodes of type '{0}' allowed")]
+        OnlyChildNodesOfType0Allowed,
+
+        [Description("Type '{0}' does not contain field '{1}'")]
+        Type0DoesNotContainsField1,
+
+        [Description("Member '{0}' is mandatory for '{1}'")]
+        Member0IsMandatoryFor1,
+
+        [Description("{0} requires a {1}")]
+        _0RequiresA1,
+
+        Entity,
+        CollectionOfEntities,
+        Value,
+        CollectionOfEnums,
+        EntityOrValue,
     }
 }

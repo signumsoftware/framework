@@ -1,5 +1,6 @@
 ﻿import * as React from 'react'
 import { Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
+import { MemberInfo, getTypeInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import { DynamicValidationEntity } from '../Signum.Entities.Dynamic'
 import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, ValueLineType, FormGroup } from '../../../../Framework/Signum.React/Scripts/Lines'
 import { TypeEntity, PropertyRouteEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
@@ -38,27 +39,7 @@ interface PropertyRouteLineProps {
     onChange?: () => void;
 }
 
-class PropertyRouteCombo extends React.Component<PropertyRouteLineProps, { propertyRoutes?: Array<string> }> {
-
-    constructor(props: PropertyRouteLineProps) {
-        super(props);
-        this.state = { };
-    }
-
-    loadPropertyRoutes(type: TypeEntity): void {
-        Navigator.API.getPropertyRoutes(type.cleanName)
-            .then(prs => this.changeState(s => { s.propertyRoutes = prs; }))
-            .done();
-    }
-
-    componentWillMount() {
-        this.loadPropertyRoutes(this.props.type);
-    }
-
-    componentWillReceiveProps(newProps: PropertyRouteLineProps) {
-        if (newProps.type != this.props.type)
-            this.loadPropertyRoutes(newProps.type);
-    }
+class PropertyRouteCombo extends React.Component<PropertyRouteLineProps, void> {
 
     handleChange = (e: React.FormEvent) => {
         var currentValue = (e.currentTarget as HTMLSelectElement).value;
@@ -71,10 +52,12 @@ class PropertyRouteCombo extends React.Component<PropertyRouteLineProps, { prope
     render() {
         var ctx = this.props.ctx;
 
+        var members = Dic.getValues(getTypeInfo(this.props.type.cleanName).members);
+
         return (
             <select className="form-control" value={ctx.value && ctx.value.path || ""}  onChange={this.handleChange} >
-                {this.state.propertyRoutes && this.state.propertyRoutes.map(pr =>
-                    <option value={pr}>{pr}</option>
+                {members.map(m =>
+                    <option value={m.name}>{m.name}</option>
                 )}
             </select>
             );  
