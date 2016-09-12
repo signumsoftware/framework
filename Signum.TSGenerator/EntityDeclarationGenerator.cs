@@ -276,7 +276,7 @@ namespace Signum.TSGenerator
                 var propertyType = TypeScriptName(field.FieldType, type, options, context);
 
                 var cleanType = field.FieldType.IsInterface && field.FieldType.GetInterface("IOperationSymbolContainer") != null ? "Operation" : CleanTypeName(field.FieldType);
-                sb.AppendLine($"    export const {field.Name} : {propertyType} = registerSymbol({{ Type: \"{cleanType}\", key: \"{type.Name}.{field.Name}\" }});");
+                sb.AppendLine($"    export const {field.Name} : {propertyType} = registerSymbol(\"{cleanType}\", \"{type.Name}.{field.Name}\");");
             }
             sb.AppendLine(@"}");
 
