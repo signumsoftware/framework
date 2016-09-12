@@ -1,9 +1,11 @@
 ﻿import * as React from "react"
 import { Router, Route, Redirect, IndexRoute } from "react-router"
 import { Button, OverlayTrigger, Tooltip, MenuItem, DropdownButton } from "react-bootstrap"
-import { Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
-    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString } from '../Signum.Entities';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType  } from '../Reflection';
+import {
+    Lite, Entity, ModifiableEntity, EmbeddedEntity, LiteMessage, EntityPack, toLite, JavascriptMessage,
+    OperationSymbol, ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, ExecuteSymbol, DeleteSymbol, OperationMessage, getToString, NormalControlMessage
+} from '../Signum.Entities';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, OperationInfo, OperationType, LambdaMemberType, GraphExplorer } from '../Reflection';
 import { classes, ifError } from '../Globals';
 import { ButtonsContext } from '../TypeContext';
 import * as Navigator from '../Navigator';
@@ -234,7 +236,14 @@ export function defaultDeleteLite(eoc: EntityOperationContext<Entity>, ...args: 
 }
 
 
-export function confirmInNecessary(eoc: EntityOperationContext<Entity>): boolean {
+export function confirmInNecessary(eoc: EntityOperationContext<Entity>, checkLite = true): boolean {
+
+    if (eoc.operationInfo.lite) {
+        GraphExplorer.propagateAll(eoc.entity);
+
+        if (eoc.entity.modified)
+            throw new Error(NormalControlMessage.SaveChangesFirst.niceToString());
+    }
 
     const confirmMessage = getConfirmMessage(eoc);
 
