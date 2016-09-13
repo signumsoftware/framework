@@ -211,7 +211,9 @@ Lose changes?")]
     {
         Save,
         [Description("View for type {0} is not allowed")]
-        ViewForType0IsNotAllowed
+        ViewForType0IsNotAllowed,
+
+        SaveChangesFirst
     }
 
 

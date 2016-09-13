@@ -576,20 +576,14 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
         return this.state.resultTable != undefined && this.state.resultTable.rows.length != 0 && this.state.resultTable.rows.length == this.state.selectedRows!.length;
     }
 
-
     handleToggleAll = () => {
 
         if (!this.state.resultTable)
             return;
 
-        this.setState({ selectedRows: !this.allSelected() ? this.state.resultTable.rows.clone() : [] });
+        this.changeState(s => s.selectedRows = !this.allSelected() ? this.state.resultTable!.rows.clone() : []);
         this.notifySelectedRowsChanged();
-        this.forceUpdate();
     }
-
-
-
-
 
     handleHeaderClick = (e: React.MouseEvent) => {
 

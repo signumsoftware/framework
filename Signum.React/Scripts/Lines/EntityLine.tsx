@@ -99,9 +99,9 @@ export class EntityLine extends EntityBase<EntityLineProps, EntityLineState> {
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value!), s.formGroupHtmlProps) } labelProps={s.labelHtmlProps}>
                 <div className="SF-entity-line">
-                    <div className={buttons ? "input-group" : undefined}>
+                    <div className={EntityBase.hasChildrens(buttons) ? "input-group" : undefined}>
                         {hasValue ? this.renderLink() : this.renderAutoComplete()}
-                        {React.Children.count(buttons) ? buttons : undefined}
+                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>
                 </div>
             </FormGroup>

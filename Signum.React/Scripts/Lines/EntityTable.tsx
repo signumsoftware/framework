@@ -10,6 +10,7 @@ import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
+import { EntityBase } from './EntityBase'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import DynamicComponent from './DynamicComponent'
 import { RenderEntity } from './RenderEntity'
@@ -64,13 +65,13 @@ export class EntityTable extends EntityListBase<EntityTableProps, EntityTablePro
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        {React.Children.count(buttons) ? buttons : undefined}
+                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>
                 </legend>
                 <table className="table table-condensed form-vertical">
                     <thead>
                         <tr>
-                            <th style={{ width: "20px" }}></th>
+                            <th></th>
                             {
                                 this.props.columns.map((c, i) => <th key={i} {...c.headerProps}>
                                     {c.header === undefined && c.property ? elementPr.add(c.property).member!.niceName : c.header}
@@ -158,7 +159,7 @@ export class EntityTableRow extends React.Component<EntityTableRowProps, { entit
             return col.template(this.props.ctx, this);
 
         if (col.property == null)
-            throw new Error("Column " + JSON.stringify(col) + " has no property and no tempalte");
+            throw new Error("Column has no property and no template");
 
         return DynamicComponent.appropiateComponent(this.props.ctx.subCtx(col.property));
     }

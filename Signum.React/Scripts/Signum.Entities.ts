@@ -310,6 +310,7 @@ export interface ModelEntity extends EmbeddedEntity {
 export module NormalControlMessage {
     export const Save = new MessageKey("NormalControlMessage", "Save");
     export const ViewForType0IsNotAllowed = new MessageKey("NormalControlMessage", "ViewForType0IsNotAllowed");
+    export const SaveChangesFirst = new MessageKey("NormalControlMessage", "SaveChangesFirst");
 }
 
 export module NormalWindowMessage {

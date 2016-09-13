@@ -5,7 +5,7 @@ import { ajaxGet, ajaxPost } from './Services';
 import { openModal } from './Modals';
 import { Lite, Entity, ModifiableEntity, EmbeddedEntity, ModelEntity, LiteMessage, EntityPack, isEntity, isLite, isEntityPack, toLite } from './Signum.Entities';
 import { IUserEntity, TypeEntity } from './Signum.Entities.Basics';
-import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isEmbedded, isModel, KindOfType, OperationType, TypeReference } from './Reflection';
+import { PropertyRoute, PseudoType, EntityKind, TypeInfo, IType, Type, getTypeInfo, getTypeName, isTypeEmbeddedOrValue, isTypeModel, KindOfType, OperationType, TypeReference } from './Reflection';
 import { TypeContext } from './TypeContext';
 import * as Finder from './Finder';
 import { needsCanExecute } from './Operations/EntityOperations';
@@ -42,11 +42,11 @@ export function start(options: { routes: JSX.Element[] }) {
 
 export function getTypeTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined) {
 
-    if (isEmbedded(entity.Type)) {
+    if (isTypeEmbeddedOrValue(entity.Type)) {
 
         return pr!.typeReference().typeNiceName;
 
-    } else if (isModel(entity.Type)) {
+    } else if (isTypeModel(entity.Type)) {
 
         const typeInfo = getTypeInfo(entity.Type);
 
@@ -142,7 +142,7 @@ export function isCreable(type: PseudoType, customView = false, isSearch = false
 
     const baseIsCreable = checkFlag(typeIsCreable(typeName), isSearch);
 
-    const hasView = customView || hasRegisteredView(typeName);
+    const hasView = customView || hasRegisteredViewPromise(typeName);
 
     const hasConstructor = hasAllowedConstructor(typeName);
 
@@ -280,18 +280,14 @@ export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 
     const baseIsViewable = typeIsViewable(typeName);
 
-    const hasView = customView || hasRegisteredView(typeName);
+    const hasView = customView || hasRegisteredViewPromise(typeName);
 
     return baseIsViewable && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
 
-function hasRegisteredView(typeName: string) {
-
+function hasRegisteredViewPromise(typeName: string) {
     const es = entitySettings[typeName];
-    if (es)
-        return !!es.getViewPromise;
-
-    return !!fallbackViewPromise;
+    return es && !!es.getViewPromise || !!fallbackViewPromise;
 }
 
 function typeIsViewable(typeName: string): boolean {
@@ -321,7 +317,7 @@ function typeIsViewable(typeName: string): boolean {
     }
 }
 
-export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customView = false, isSearch = false): boolean {
+export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEntity>, customComponent = false, isSearch = false): boolean {
 
     const entityPack = isEntityPack(typeOrEntity) ? typeOrEntity : undefined;
 
@@ -329,7 +325,7 @@ export function isNavigable(typeOrEntity: PseudoType | EntityPack<ModifiableEnti
 
     const baseTypeName = checkFlag(typeIsNavigable(typeName), isSearch);
 
-    const hasView = customView || hasRegisteredView(typeName);
+    const hasView = customComponent || hasRegisteredViewPromise(typeName);
 
     return baseTypeName && hasView && isViewableEvent.every(f => f(typeName, entityPack));
 }
@@ -408,7 +404,8 @@ export function navigate(entityOrPack: Lite<Entity> | ModifiableEntity | EntityP
 export function createInNewTab(pack: EntityPack<ModifiableEntity>) {
     var url = createRoute(pack.entity.Type) + "?waitData=true";
     var win = window.open(url);
-    win.parentWindowData = pack;
+    if (win) //blocked pop-up
+        win.parentWindowData = pack;
 }
 
 export function createNavigateOrTab(pack: EntityPack<Entity>, event: React.MouseEvent) {
@@ -515,10 +512,6 @@ export module API {
         return ajaxPost<void>({ url: "~/api/validateEntity" }, entity);
     }
 
-    export function getPropertyRoutes(typeName: string): Promise<Array<string>> {
-        return ajaxGet<Array<string>>({ url: `~/api/reflection/propertyRoutes/${typeName}` });
-    }
-
     export function getType(typeName: string): Promise<TypeEntity> {
 
         return ajaxGet<TypeEntity>({ url: `~/api/reflection/typeEntity/${typeName}` });
@@ -565,11 +558,18 @@ export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentC
 export class ViewPromise<T extends ModifiableEntity> {
     promise: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
 
-    constructor(callback: (loadModule: (module: ViewModule<T>) => void) => void) {
-        this.promise = new Promise<ViewModule<T>>(callback)
-            .then(mod => {
-                return (ctx: TypeContext<T>) => React.createElement(mod.default, { ctx });
-            });
+    constructor(callback?: (loadModule: (module: ViewModule<T>) => void) => void) {
+        if (callback)
+            this.promise = new Promise<ViewModule<T>>(callback)
+                .then(mod => {
+                    return (ctx: TypeContext<T>) => React.createElement(mod.default, { ctx });
+                });
+    }
+
+    static resolve<T extends ModifiableEntity>(getComponent: (ctx: TypeContext<T>) => React.ReactElement<any>) {
+        var result = new ViewPromise();
+        result.promise = Promise.resolve(getComponent);
+        return result;
     }
 
     withProps(componentParams: {} | Promise<{}>): ViewPromise<T> {

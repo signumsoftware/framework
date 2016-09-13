@@ -6,7 +6,7 @@ import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle, EntityFrame } from '../TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLiteFat, is, liteKey, isLite, isEntity, entityInfo } from '../Signum.Entities'
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import Typeahead from '../Lines/Typeahead'
@@ -34,7 +34,6 @@ export interface EntityBaseProps extends LineBaseProps {
 export interface EntityBaseState extends LineBaseProps {
     view?: boolean;
     viewOnCreate?: boolean;
-    navigate?: boolean;
     create?: boolean;
     find?: boolean;
     remove?: boolean;
@@ -43,25 +42,35 @@ export interface EntityBaseState extends LineBaseProps {
 
 export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBaseState> extends LineBase<T, S>
 {
+    static hasChildrens(element: React.ReactElement<any>) {
+        return element.props.children && React.Children.toArray(element.props.children).length;
+    }
+
+    static defaultIsCreable(type: TypeReference, customComponent: boolean) {
+        return type.isEmbedded ? Navigator.isCreable(type.name, customComponent , false) :
+            type.name == IsByAll ? false :
+                getTypeInfos(type).some(ti => Navigator.isCreable(ti, customComponent, false));
+    }
+
+    static defaultIsViewable(type: TypeReference, customComponent: boolean) {
+        return type.isEmbedded ? Navigator.isViewable(type.name, customComponent) :
+            type.name == IsByAll ? true :
+                getTypeInfos(type).some(ti => Navigator.isViewable(ti, customComponent));
+    }
+
+    static defaultIsFindable(type: TypeReference) {
+        return type.isEmbedded ? false :
+            type.name == IsByAll ? false :
+                getTypeInfos(type).some(ti => Navigator.isFindable(ti));
+    }
+    
     calculateDefaultState(state: S) {
 
         const type = state.type!;
 
-        state.create = type.isEmbedded ? Navigator.isCreable(type.name, !!this.props.getComponent, false) :
-            type.name == IsByAll ? false :
-                getTypeInfos(type).some(ti => Navigator.isCreable(ti, !!this.props.getComponent, false));
-
-        state.view = type.isEmbedded ? Navigator.isViewable(type.name, !!this.props.getComponent) :
-            type.name == IsByAll ? true :
-                getTypeInfos(type).some(ti => Navigator.isViewable(ti, !!this.props.getComponent));
-
-        state.navigate = type.isEmbedded ? Navigator.isNavigable(type.name, !!this.props.getComponent) :
-            type.name == IsByAll ? true :
-                getTypeInfos(type).some(ti => Navigator.isNavigable(ti, !!this.props.getComponent));
-
-        state.find = type.isEmbedded ? false :
-            type.name == IsByAll ? false :
-                getTypeInfos(type).some(ti => Navigator.isFindable(ti));
+        state.create = EntityBase.defaultIsCreable(type, !!this.props.getComponent);
+        state.view = EntityBase.defaultIsViewable(type, !!this.props.getComponent);
+        state.find = EntityBase.defaultIsFindable(type);
 
         state.viewOnCreate = true;
         state.remove = true;
@@ -100,8 +109,10 @@ export abstract class EntityBase<T extends EntityBaseProps, S extends EntityBase
 
 
     defaultView(value: ModifiableEntity | Lite<Entity>, propertyRoute: PropertyRoute): Promise<ModifiableEntity> {
-
-        return Navigator.view(value, { propertyRoute: propertyRoute, component: this.props.getComponent } as Navigator.ViewOptions);
+        return Navigator.view(value, {
+            propertyRoute: propertyRoute,
+            viewPromise: this.props.getComponent && Navigator.ViewPromise.resolve(this.props.getComponent)
+        });
     }
 
 
