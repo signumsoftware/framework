@@ -145,10 +145,10 @@ export interface BaseRulePack<T> extends Entities.ModelEntity {
 }
 
 export module BasicPermission {
-    export const AdminRules : PermissionSymbol = registerSymbol({ Type: "Permission", key: "BasicPermission.AdminRules" });
-    export const AutomaticUpgradeOfProperties : PermissionSymbol = registerSymbol({ Type: "Permission", key: "BasicPermission.AutomaticUpgradeOfProperties" });
-    export const AutomaticUpgradeOfQueries : PermissionSymbol = registerSymbol({ Type: "Permission", key: "BasicPermission.AutomaticUpgradeOfQueries" });
-    export const AutomaticUpgradeOfOperations : PermissionSymbol = registerSymbol({ Type: "Permission", key: "BasicPermission.AutomaticUpgradeOfOperations" });
+    export const AdminRules : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AdminRules");
+    export const AutomaticUpgradeOfProperties : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfProperties");
+    export const AutomaticUpgradeOfQueries : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfQueries");
+    export const AutomaticUpgradeOfOperations : PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfOperations");
 }
 
 export const LastAuthRulesImportEntity = new Type<LastAuthRulesImportEntity>("LastAuthRulesImport");
@@ -188,7 +188,7 @@ export interface PasswordExpiresIntervalEntity extends Entities.Entity {
 }
 
 export module PasswordExpiresIntervalOperation {
-    export const Save : Entities.ExecuteSymbol<PasswordExpiresIntervalEntity> = registerSymbol({ Type: "Operation", key: "PasswordExpiresIntervalOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<PasswordExpiresIntervalEntity> = registerSymbol("Operation", "PasswordExpiresIntervalOperation.Save");
 }
 
 export const PermissionAllowedRule = new Type<PermissionAllowedRule>("PermissionAllowedRule");
@@ -252,8 +252,8 @@ export interface RoleEntity extends Entities.Entity {
 }
 
 export module RoleOperation {
-    export const Save : Entities.ExecuteSymbol<RoleEntity> = registerSymbol({ Type: "Operation", key: "RoleOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<RoleEntity> = registerSymbol({ Type: "Operation", key: "RoleOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<RoleEntity> = registerSymbol("Operation", "RoleOperation.Save");
+    export const Delete : Entities.DeleteSymbol<RoleEntity> = registerSymbol("Operation", "RoleOperation.Delete");
 }
 
 export module RoleQuery {
@@ -311,7 +311,7 @@ export interface SessionLogEntity extends Entities.Entity {
 }
 
 export module SessionLogPermission {
-    export const TrackSession : PermissionSymbol = registerSymbol({ Type: "Permission", key: "SessionLogPermission.TrackSession" });
+    export const TrackSession : PermissionSymbol = registerSymbol("Permission", "SessionLogPermission.TrackSession");
 }
 
 export const TypeAllowed = new EnumType<TypeAllowed>("TypeAllowed");
@@ -377,12 +377,12 @@ export interface UserEntity extends Entities.Entity, Mailing.IEmailOwnerEntity, 
 }
 
 export module UserOperation {
-    export const Create : Entities.ConstructSymbol_Simple<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.Create" });
-    export const SaveNew : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.SaveNew" });
-    export const Save : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.Save" });
-    export const Enable : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.Enable" });
-    export const Disable : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.Disable" });
-    export const SetPassword : Entities.ExecuteSymbol<UserEntity> = registerSymbol({ Type: "Operation", key: "UserOperation.SetPassword" });
+    export const Create : Entities.ConstructSymbol_Simple<UserEntity> = registerSymbol("Operation", "UserOperation.Create");
+    export const SaveNew : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.SaveNew");
+    export const Save : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Save");
+    export const Enable : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Enable");
+    export const Disable : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Disable");
+    export const SetPassword : Entities.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.SetPassword");
 }
 
 export const UserState = new EnumType<UserState>("UserState");

@@ -19,7 +19,7 @@ export interface AppendixHelpEntity extends Entities.Entity {
 }
 
 export module AppendixHelpOperation {
-    export const Save : Entities.ExecuteSymbol<AppendixHelpEntity> = registerSymbol({ Type: "Operation", key: "AppendixHelpOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<AppendixHelpEntity> = registerSymbol("Operation", "AppendixHelpOperation.Save");
 }
 
 export const EntityHelpEntity = new Type<EntityHelpEntity>("EntityHelp");
@@ -35,7 +35,7 @@ export interface EntityHelpEntity extends Entities.Entity {
 }
 
 export module EntityHelpOperation {
-    export const Save : Entities.ExecuteSymbol<EntityHelpEntity> = registerSymbol({ Type: "Operation", key: "EntityHelpOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<EntityHelpEntity> = registerSymbol("Operation", "EntityHelpOperation.Save");
 }
 
 export module HelpKindMessage {
@@ -93,7 +93,7 @@ export module HelpMessage {
 }
 
 export module HelpPermissions {
-    export const ViewHelp : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "HelpPermissions.ViewHelp" });
+    export const ViewHelp : Authorization.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ViewHelp");
 }
 
 export module HelpSearchMessage {
@@ -142,7 +142,7 @@ export interface NamespaceHelpEntity extends Entities.Entity {
 }
 
 export module NamespaceHelpOperation {
-    export const Save : Entities.ExecuteSymbol<NamespaceHelpEntity> = registerSymbol({ Type: "Operation", key: "NamespaceHelpOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<NamespaceHelpEntity> = registerSymbol("Operation", "NamespaceHelpOperation.Save");
 }
 
 export const OperationHelpEntity = new Type<OperationHelpEntity>("OperationHelp");
@@ -154,7 +154,7 @@ export interface OperationHelpEntity extends Entities.Entity {
 }
 
 export module OperationHelpOperation {
-    export const Save : Entities.ExecuteSymbol<OperationHelpEntity> = registerSymbol({ Type: "Operation", key: "OperationHelpOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<OperationHelpEntity> = registerSymbol("Operation", "OperationHelpOperation.Save");
 }
 
 export const PropertyRouteHelpEntity = new Type<PropertyRouteHelpEntity>("PropertyRouteHelpEntity");
@@ -182,7 +182,7 @@ export interface QueryHelpEntity extends Entities.Entity {
 }
 
 export module QueryHelpOperation {
-    export const Save : Entities.ExecuteSymbol<QueryHelpEntity> = registerSymbol({ Type: "Operation", key: "QueryHelpOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<QueryHelpEntity> = registerSymbol("Operation", "QueryHelpOperation.Save");
 }
 
 

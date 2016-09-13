@@ -22,7 +22,7 @@ export module MapMessage {
 }
 
 export module MapPermission {
-    export const ViewMap : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "MapPermission.ViewMap" });
+    export const ViewMap : Authorization.PermissionSymbol = registerSymbol("Permission", "MapPermission.ViewMap");
 }
 
 

@@ -24,8 +24,8 @@ export interface HolidayCalendarEntity extends Entities.Entity {
 }
 
 export module HolidayCalendarOperation {
-    export const Save : Entities.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol({ Type: "Operation", key: "HolidayCalendarOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<HolidayCalendarEntity> = registerSymbol({ Type: "Operation", key: "HolidayCalendarOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Save");
+    export const Delete : Entities.DeleteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Delete");
 }
 
 export const HolidayEntity = new Type<HolidayEntity>("HolidayEntity");
@@ -67,8 +67,8 @@ export interface ScheduledTaskLogEntity extends Entities.Entity {
 }
 
 export module ScheduledTaskOperation {
-    export const Save : Entities.ExecuteSymbol<ScheduledTaskEntity> = registerSymbol({ Type: "Operation", key: "ScheduledTaskOperation.Save" });
-    export const Delete : Entities.DeleteSymbol<ScheduledTaskEntity> = registerSymbol({ Type: "Operation", key: "ScheduledTaskOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Save");
+    export const Delete : Entities.DeleteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Delete");
 }
 
 export module SchedulerMessage {
@@ -105,7 +105,7 @@ export module SchedulerMessage {
 }
 
 export module SchedulerPermission {
-    export const ViewSchedulerPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "SchedulerPermission.ViewSchedulerPanel" });
+    export const ViewSchedulerPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "SchedulerPermission.ViewSchedulerPanel");
 }
 
 export const ScheduleRuleMinutelyEntity = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
@@ -160,8 +160,8 @@ export module TaskMessage {
 }
 
 export module TaskOperation {
-    export const ExecuteSync : Entities.ConstructSymbol_From<Entities.Entity, ITaskEntity> = registerSymbol({ Type: "Operation", key: "TaskOperation.ExecuteSync" });
-    export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol({ Type: "Operation", key: "TaskOperation.ExecuteAsync" });
+    export const ExecuteSync : Entities.ConstructSymbol_From<Entities.Entity, ITaskEntity> = registerSymbol("Operation", "TaskOperation.ExecuteSync");
+    export const ExecuteAsync : Entities.ExecuteSymbol<ITaskEntity> = registerSymbol("Operation", "TaskOperation.ExecuteAsync");
 }
 
 export const TypeEvent = new EnumType<TypeEvent>("TypeEvent");

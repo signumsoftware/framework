@@ -124,23 +124,24 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
     };
 
     handleDragOver = (e: React.DragEvent) => {
+        e.stopPropagation();
         e.preventDefault();
-        this.state.isOver = true;
-        this.forceUpdate();
+        this.changeState(s=>s.isOver = true);
     }
 
     handleDragLeave = (e: React.DragEvent) => {
+        e.stopPropagation();
         e.preventDefault();
-        this.state.isOver = false;
-        this.forceUpdate();
+        this.changeState(s=>s.isOver = false);
     }
 
     handleDrop = (e: React.DragEvent) => {
+        e.stopPropagation();
         e.preventDefault();
-        this.state.isOver = false;
-        this.state.isLoading = true;
-        this.forceUpdate();
-        
+        this.changeState(s => {
+            s.isOver = false;
+            s.isLoading = true;
+        });
         const file = e.dataTransfer.files[0];
 
         this.uploadFile(file);
@@ -148,9 +149,10 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
     handleFileChange = (e: React.FormEvent) => {
         e.preventDefault();
-        this.state.isOver = false;
-        this.state.isLoading = true;
-        this.forceUpdate();
+        this.changeState(s => {
+            s.isOver = false;
+            s.isLoading = true;
+        });
 
         this.uploadFile((e.target as HTMLInputElement).files![0]);
     }
@@ -168,8 +170,7 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
 
             this.convert(newEntity).then(e => {
                 this.setValue(e);
-                this.state.isLoading = false;
-                this.forceUpdate();
+                this.changeState(s => s.isLoading = false);
             }).done();
         };
         fileReader.readAsDataURL(file);
@@ -181,7 +182,8 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
             <div className="sf-file-line-new">
                 <input type='file' className='form-control' accept={this.props.accept} onChange={this.handleFileChange}/>
                 {this.state.isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString() }</div> :
-                    (this.state.dragAndDrop && <div className={classes("sf-file-drop", this.state.isOver ? "sf-file-drop-over" : undefined) }
+                    (this.state.dragAndDrop && <div className={classes("sf-file-drop", this.state.isOver ? "sf-file-drop-over" : undefined)}
+                        onDragEnter={this.handleDragOver}
                         onDragOver={this.handleDragOver}
                         onDragLeave={this.handleDragLeave}
                         onDrop={this.handleDrop}

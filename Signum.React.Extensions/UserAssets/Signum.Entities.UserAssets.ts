@@ -43,7 +43,7 @@ export module UserAssetMessage {
 }
 
 export module UserAssetPermission {
-    export const UserAssetsToXML : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "UserAssetPermission.UserAssetsToXML" });
+    export const UserAssetsToXML : Authorization.PermissionSymbol = registerSymbol("Permission", "UserAssetPermission.UserAssetsToXML");
 }
 
 export const UserAssetPreviewLine = new Type<UserAssetPreviewLine>("UserAssetPreviewLine");

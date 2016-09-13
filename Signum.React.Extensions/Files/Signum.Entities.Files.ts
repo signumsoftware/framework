@@ -84,7 +84,7 @@ export interface FilePathEntity extends Patterns.LockableEntity {
 }
 
 export module FilePathOperation {
-    export const Save : Entities.ExecuteSymbol<FilePathEntity> = registerSymbol({ Type: "Operation", key: "FilePathOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<FilePathEntity> = registerSymbol("Operation", "FilePathOperation.Save");
 }
 
 export const FileTypeSymbol = new Type<FileTypeSymbol>("FileType");

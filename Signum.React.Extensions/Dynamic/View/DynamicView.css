@@ -21,6 +21,14 @@ div.design-content {
     padding: 10px;
 }
 
+span.design-changed {
+    color: black;
+}
+
+span.design-default {
+    color: #777;
+}
+
 .design-open-icon{
     opacity: 0.4;
 }
@@ -36,6 +44,24 @@ div.design-content {
     }
 
         div.design-main.open .design-left {
-            width: 30%;
+            width: 40%;
         }
+}
+
+
+i.formula {
+    margin-right: 5px;
+    color: #ccc;
+}
+
+input[type=checkbox].design-check-box{
+    margin-right: 5px;
+}
+
+i.formula:hover {
+    color: #aaa;
+}
+
+i.formula.active {
+    color:black;
 }

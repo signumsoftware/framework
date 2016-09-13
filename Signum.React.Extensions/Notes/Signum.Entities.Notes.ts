@@ -30,8 +30,8 @@ export module NoteMessage {
 }
 
 export module NoteOperation {
-    export const CreateNoteFromEntity : Entities.ConstructSymbol_From<NoteEntity, Entities.Entity> = registerSymbol({ Type: "Operation", key: "NoteOperation.CreateNoteFromEntity" });
-    export const Save : Entities.ExecuteSymbol<NoteEntity> = registerSymbol({ Type: "Operation", key: "NoteOperation.Save" });
+    export const CreateNoteFromEntity : Entities.ConstructSymbol_From<NoteEntity, Entities.Entity> = registerSymbol("Operation", "NoteOperation.CreateNoteFromEntity");
+    export const Save : Entities.ExecuteSymbol<NoteEntity> = registerSymbol("Operation", "NoteOperation.Save");
 }
 
 export const NoteTypeEntity = new Type<NoteTypeEntity>("NoteType");
@@ -40,7 +40,7 @@ export interface NoteTypeEntity extends Basics.SemiSymbol {
 }
 
 export module NoteTypeOperation {
-    export const Save : Entities.ExecuteSymbol<NoteTypeEntity> = registerSymbol({ Type: "Operation", key: "NoteTypeOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<NoteTypeEntity> = registerSymbol("Operation", "NoteTypeOperation.Save");
 }
 
 

@@ -91,9 +91,9 @@ export interface DisconnectedMachineEntity extends Entities.Entity {
 }
 
 export module DisconnectedMachineOperation {
-    export const Save : Entities.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol({ Type: "Operation", key: "DisconnectedMachineOperation.Save" });
-    export const UnsafeUnlock : Entities.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol({ Type: "Operation", key: "DisconnectedMachineOperation.UnsafeUnlock" });
-    export const FixImport : Entities.ConstructSymbol_From<DisconnectedImportEntity, DisconnectedMachineEntity> = registerSymbol({ Type: "Operation", key: "DisconnectedMachineOperation.FixImport" });
+    export const Save : Entities.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol("Operation", "DisconnectedMachineOperation.Save");
+    export const UnsafeUnlock : Entities.ExecuteSymbol<DisconnectedMachineEntity> = registerSymbol("Operation", "DisconnectedMachineOperation.UnsafeUnlock");
+    export const FixImport : Entities.ConstructSymbol_From<DisconnectedImportEntity, DisconnectedMachineEntity> = registerSymbol("Operation", "DisconnectedMachineOperation.FixImport");
 }
 
 export const DisconnectedMachineState = new EnumType<DisconnectedMachineState>("DisconnectedMachineState");

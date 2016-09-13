@@ -16,7 +16,7 @@ import * as Authorization from '../Authorization/Signum.Entities.Authorization'
 
 
 export module AsyncEmailSenderPermission {
-    export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol({ Type: "Permission", key: "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel" });
+    export const ViewAsyncEmailSenderPanel : Authorization.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
 }
 
 export const CertFileType = new EnumType<CertFileType>("CertFileType");
@@ -68,7 +68,7 @@ export interface EmailConfigurationEntity extends Entities.EmbeddedEntity {
 }
 
 export module EmailFileType {
-    export const Attachment : Files.FileTypeSymbol = registerSymbol({ Type: "FileType", key: "EmailFileType.Attachment" });
+    export const Attachment : Files.FileTypeSymbol = registerSymbol("FileType", "EmailFileType.Attachment");
 }
 
 export const EmailMasterTemplateEntity = new Type<EmailMasterTemplateEntity>("EmailMasterTemplate");
@@ -86,8 +86,8 @@ export interface EmailMasterTemplateMessageEntity extends Entities.EmbeddedEntit
 }
 
 export module EmailMasterTemplateOperation {
-    export const Create : Entities.ConstructSymbol_Simple<EmailMasterTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailMasterTemplateOperation.Create" });
-    export const Save : Entities.ExecuteSymbol<EmailMasterTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailMasterTemplateOperation.Save" });
+    export const Create : Entities.ConstructSymbol_Simple<EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Create");
+    export const Save : Entities.ExecuteSymbol<EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Save");
 }
 
 export const EmailMessageEntity = new Type<EmailMessageEntity>("EmailMessage");
@@ -128,19 +128,19 @@ export module EmailMessageMessage {
 }
 
 export module EmailMessageOperation {
-    export const Save : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.Save" });
-    export const ReadyToSend : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.ReadyToSend" });
-    export const Send : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.Send" });
-    export const ReSend : Entities.ConstructSymbol_From<EmailMessageEntity, EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.ReSend" });
-    export const ReSendEmails : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.ReSendEmails" });
-    export const CreateMail : Entities.ConstructSymbol_Simple<EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.CreateMail" });
-    export const CreateMailFromTemplate : Entities.ConstructSymbol_From<EmailMessageEntity, EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.CreateMailFromTemplate" });
-    export const Delete : Entities.DeleteSymbol<EmailMessageEntity> = registerSymbol({ Type: "Operation", key: "EmailMessageOperation.Delete" });
+    export const Save : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.Save");
+    export const ReadyToSend : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.ReadyToSend");
+    export const Send : Entities.ExecuteSymbol<EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.Send");
+    export const ReSend : Entities.ConstructSymbol_From<EmailMessageEntity, EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.ReSend");
+    export const ReSendEmails : Entities.ConstructSymbol_FromMany<Processes.ProcessEntity, EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.ReSendEmails");
+    export const CreateMail : Entities.ConstructSymbol_Simple<EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.CreateMail");
+    export const CreateMailFromTemplate : Entities.ConstructSymbol_From<EmailMessageEntity, EmailTemplateEntity> = registerSymbol("Operation", "EmailMessageOperation.CreateMailFromTemplate");
+    export const Delete : Entities.DeleteSymbol<EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.Delete");
 }
 
 export module EmailMessageProcess {
-    export const CreateEmailsSendAsync : Processes.ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "EmailMessageProcess.CreateEmailsSendAsync" });
-    export const SendEmails : Processes.ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "EmailMessageProcess.SendEmails" });
+    export const CreateEmailsSendAsync : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "EmailMessageProcess.CreateEmailsSendAsync");
+    export const SendEmails : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "EmailMessageProcess.SendEmails");
 }
 
 export const EmailMessageState = new EnumType<EmailMessageState>("EmailMessageState");
@@ -243,11 +243,11 @@ export interface EmailTemplateMessageEntity extends Entities.EmbeddedEntity {
 }
 
 export module EmailTemplateOperation {
-    export const CreateEmailTemplateFromSystemEmail : Entities.ConstructSymbol_From<EmailTemplateEntity, SystemEmailEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.CreateEmailTemplateFromSystemEmail" });
-    export const Create : Entities.ConstructSymbol_Simple<EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.Create" });
-    export const Save : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.Save" });
-    export const Enable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.Enable" });
-    export const Disable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol({ Type: "Operation", key: "EmailTemplateOperation.Disable" });
+    export const CreateEmailTemplateFromSystemEmail : Entities.ConstructSymbol_From<EmailTemplateEntity, SystemEmailEntity> = registerSymbol("Operation", "EmailTemplateOperation.CreateEmailTemplateFromSystemEmail");
+    export const Create : Entities.ConstructSymbol_Simple<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Create");
+    export const Save : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Save");
+    export const Enable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Enable");
+    export const Disable : Entities.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Disable");
 }
 
 export const EmailTemplateRecipientEntity = new Type<EmailTemplateRecipientEntity>("EmailTemplateRecipientEntity");
@@ -290,15 +290,15 @@ export interface NewsletterEntity extends Entities.Entity, Processes.IProcessDat
 }
 
 export module NewsletterOperation {
-    export const Save : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol({ Type: "Operation", key: "NewsletterOperation.Save" });
-    export const Send : Entities.ConstructSymbol_From<Processes.ProcessEntity, NewsletterEntity> = registerSymbol({ Type: "Operation", key: "NewsletterOperation.Send" });
-    export const AddRecipients : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol({ Type: "Operation", key: "NewsletterOperation.AddRecipients" });
-    export const RemoveRecipients : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol({ Type: "Operation", key: "NewsletterOperation.RemoveRecipients" });
-    export const Clone : Entities.ConstructSymbol_From<NewsletterEntity, NewsletterEntity> = registerSymbol({ Type: "Operation", key: "NewsletterOperation.Clone" });
+    export const Save : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol("Operation", "NewsletterOperation.Save");
+    export const Send : Entities.ConstructSymbol_From<Processes.ProcessEntity, NewsletterEntity> = registerSymbol("Operation", "NewsletterOperation.Send");
+    export const AddRecipients : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol("Operation", "NewsletterOperation.AddRecipients");
+    export const RemoveRecipients : Entities.ExecuteSymbol<NewsletterEntity> = registerSymbol("Operation", "NewsletterOperation.RemoveRecipients");
+    export const Clone : Entities.ConstructSymbol_From<NewsletterEntity, NewsletterEntity> = registerSymbol("Operation", "NewsletterOperation.Clone");
 }
 
 export module NewsletterProcess {
-    export const SendNewsletter : Processes.ProcessAlgorithmSymbol = registerSymbol({ Type: "ProcessAlgorithm", key: "NewsletterProcess.SendNewsletter" });
+    export const SendNewsletter : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "NewsletterProcess.SendNewsletter");
 }
 
 export const NewsletterState = new EnumType<NewsletterState>("NewsletterState");
@@ -308,7 +308,7 @@ export type NewsletterState =
     "Sent";
 
 export module Pop3ConfigurationAction {
-    export const ReceiveAllActivePop3Configurations : Scheduler.SimpleTaskSymbol = registerSymbol({ Type: "SimpleTask", key: "Pop3ConfigurationAction.ReceiveAllActivePop3Configurations" });
+    export const ReceiveAllActivePop3Configurations : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "Pop3ConfigurationAction.ReceiveAllActivePop3Configurations");
 }
 
 export const Pop3ConfigurationEntity = new Type<Pop3ConfigurationEntity>("Pop3Configuration");
@@ -326,8 +326,8 @@ export interface Pop3ConfigurationEntity extends Entities.Entity, Scheduler.ITas
 }
 
 export module Pop3ConfigurationOperation {
-    export const Save : Entities.ExecuteSymbol<Pop3ConfigurationEntity> = registerSymbol({ Type: "Operation", key: "Pop3ConfigurationOperation.Save" });
-    export const ReceiveEmails : Entities.ConstructSymbol_From<Pop3ReceptionEntity, Pop3ConfigurationEntity> = registerSymbol({ Type: "Operation", key: "Pop3ConfigurationOperation.ReceiveEmails" });
+    export const Save : Entities.ExecuteSymbol<Pop3ConfigurationEntity> = registerSymbol("Operation", "Pop3ConfigurationOperation.Save");
+    export const ReceiveEmails : Entities.ConstructSymbol_From<Pop3ReceptionEntity, Pop3ConfigurationEntity> = registerSymbol("Operation", "Pop3ConfigurationOperation.ReceiveEmails");
 }
 
 export const Pop3ReceptionEntity = new Type<Pop3ReceptionEntity>("Pop3Reception");
@@ -357,7 +357,7 @@ export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEnt
 }
 
 export module SendEmailTaskOperation {
-    export const Save : Entities.ExecuteSymbol<SendEmailTaskEntity> = registerSymbol({ Type: "Operation", key: "SendEmailTaskOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<SendEmailTaskEntity> = registerSymbol("Operation", "SendEmailTaskOperation.Save");
 }
 
 export const SmtpConfigurationEntity = new Type<SmtpConfigurationEntity>("SmtpConfiguration");
@@ -373,7 +373,7 @@ export interface SmtpConfigurationEntity extends Entities.Entity {
 }
 
 export module SmtpConfigurationOperation {
-    export const Save : Entities.ExecuteSymbol<SmtpConfigurationEntity> = registerSymbol({ Type: "Operation", key: "SmtpConfigurationOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<SmtpConfigurationEntity> = registerSymbol("Operation", "SmtpConfigurationOperation.Save");
 }
 
 export const SmtpNetworkDeliveryEntity = new Type<SmtpNetworkDeliveryEntity>("SmtpNetworkDeliveryEntity");

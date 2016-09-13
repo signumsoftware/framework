@@ -36,11 +36,11 @@ export module AlertMessage {
 }
 
 export module AlertOperation {
-    export const CreateAlertFromEntity : Entities.ConstructSymbol_From<AlertEntity, Entities.Entity> = registerSymbol({ Type: "Operation", key: "AlertOperation.CreateAlertFromEntity" });
-    export const SaveNew : Entities.ExecuteSymbol<AlertEntity> = registerSymbol({ Type: "Operation", key: "AlertOperation.SaveNew" });
-    export const Save : Entities.ExecuteSymbol<AlertEntity> = registerSymbol({ Type: "Operation", key: "AlertOperation.Save" });
-    export const Attend : Entities.ExecuteSymbol<AlertEntity> = registerSymbol({ Type: "Operation", key: "AlertOperation.Attend" });
-    export const Unattend : Entities.ExecuteSymbol<AlertEntity> = registerSymbol({ Type: "Operation", key: "AlertOperation.Unattend" });
+    export const CreateAlertFromEntity : Entities.ConstructSymbol_From<AlertEntity, Entities.Entity> = registerSymbol("Operation", "AlertOperation.CreateAlertFromEntity");
+    export const SaveNew : Entities.ExecuteSymbol<AlertEntity> = registerSymbol("Operation", "AlertOperation.SaveNew");
+    export const Save : Entities.ExecuteSymbol<AlertEntity> = registerSymbol("Operation", "AlertOperation.Save");
+    export const Attend : Entities.ExecuteSymbol<AlertEntity> = registerSymbol("Operation", "AlertOperation.Attend");
+    export const Unattend : Entities.ExecuteSymbol<AlertEntity> = registerSymbol("Operation", "AlertOperation.Unattend");
 }
 
 export const AlertState = new EnumType<AlertState>("AlertState");
@@ -55,7 +55,7 @@ export interface AlertTypeEntity extends Basics.SemiSymbol {
 }
 
 export module AlertTypeOperation {
-    export const Save : Entities.ExecuteSymbol<AlertTypeEntity> = registerSymbol({ Type: "Operation", key: "AlertTypeOperation.Save" });
+    export const Save : Entities.ExecuteSymbol<AlertTypeEntity> = registerSymbol("Operation", "AlertTypeOperation.Save");
 }
 
 

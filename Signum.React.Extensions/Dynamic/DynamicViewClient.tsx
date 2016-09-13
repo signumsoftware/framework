@@ -7,7 +7,7 @@ import * as Navigator from '../../../Framework/Signum.React/Scripts/Navigator'
 import { EntityOperationSettings } from '../../../Framework/Signum.React/Scripts/Operations'
 import * as Operations from '../../../Framework/Signum.React/Scripts/Operations'
 import { TypeContext } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { isEntity, getTypeInfo, } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { isTypeEntity, getTypeInfo, } from '../../../Framework/Signum.React/Scripts/Reflection'
 import { Entity } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { TypeEntity } from '../../../Framework/Signum.React/Scripts/Signum.Entities.Basics'
 import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructor'
@@ -22,7 +22,7 @@ export function start(options: { routes: JSX.Element[] }) {
     //Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => new ViewPromise(resolve => require(['./View/DynamicViewEntity'], resolve))));
 
     Navigator.setFallbackViewPromise(mod => {
-        if (!isEntity(mod.Type))
+        if (!isTypeEntity(mod.Type))
             return new ViewPromise(resolve => require(['../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'], resolve));
 
         return new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve))
