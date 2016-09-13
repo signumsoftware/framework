@@ -69,6 +69,9 @@ export enum OperationType {
 //http://momentjs.com/docs/#/displaying/format/
 export function toMomentFormat(format: string | undefined): string | undefined {
 
+    if (!format)
+        return undefined;
+
     switch (format) {
         case "d": return "L"; // or "l"
         case "D": return "LL";
@@ -84,7 +87,16 @@ export function toMomentFormat(format: string | undefined): string | undefined {
         case "T": return "LTS";
         case "y": return "LTS";
         case "Y": return "L";
-        default: return format;
+        default: return format
+            .replaceAll("y", "Y")
+            .replaceAll("f", "S")
+            .replaceAll("tt", "A")
+            .replaceAll("t", "a")
+            .replaceAll("dddd", "ßßßß") 
+            .replaceAll("ddd", "ßßß")
+            .replaceAll("d", "D") //replace only d -> D and dd -> DD
+            .replaceAll("ßßß", "ddd")
+            .replaceAll("ßßßß", "dddd");
     }
 }
 
