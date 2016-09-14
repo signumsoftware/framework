@@ -28,7 +28,7 @@ export default class ChartButton extends React.Component<ChartButtonProps, void>
             cr.filterOptions = fo.filterOptions;
         }));
 
-        if (e.ctrlKey || e.button == 2)
+        if (e.ctrlKey || e.button == 1)
             window.open(path);
         else
             Navigator.currentHistory.push(path);
