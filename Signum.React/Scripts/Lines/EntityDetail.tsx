@@ -44,7 +44,7 @@ export class EntityDetail extends EntityBase<EntityDetailProps, EntityDetailProp
                 <legend>
                     <div>
                         <span>{s.labelText}</span>
-                        {React.Children.count(buttons) ? buttons : undefined}
+                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>
                 </legend>
                 <RenderEntity ctx={s.ctx} getComponent={this.props.getComponent}/>

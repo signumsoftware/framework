@@ -69,6 +69,9 @@ export enum OperationType {
 //http://momentjs.com/docs/#/displaying/format/
 export function toMomentFormat(format: string | undefined): string | undefined {
 
+    if (!format)
+        return undefined;
+
     switch (format) {
         case "d": return "L"; // or "l"
         case "D": return "LL";
@@ -84,7 +87,16 @@ export function toMomentFormat(format: string | undefined): string | undefined {
         case "T": return "LTS";
         case "y": return "LTS";
         case "Y": return "L";
-        default: return format;
+        default: return format
+            .replaceAll("y", "Y")
+            .replaceAll("f", "S")
+            .replaceAll("tt", "A")
+            .replaceAll("t", "a")
+            .replaceAll("dddd", "ßßßß") 
+            .replaceAll("ddd", "ßßß")
+            .replaceAll("d", "D") //replace only d -> D and dd -> DD
+            .replaceAll("ßßß", "ddd")
+            .replaceAll("ßßßß", "dddd");
     }
 }
 
@@ -386,9 +398,12 @@ export function setTypes(types: TypeInfoDictionary) {
 
     Object.freeze(_queryNames);
 
-    missingSymbols = missingSymbols.filter(s => !setSymbolId(s));
+    missingSymbols = missingSymbols.filter(s => {
+        const m = getMember(s.key);
+        if (m)
+            s.id = m.id;
+    });
 }
-
 
 function calculateRequiresSaveOperation(entityKind: EntityKind): boolean 
 {
@@ -754,33 +769,29 @@ interface ISymbol {
 
 let missingSymbols: ISymbol[] = [];
 
-function setSymbolId(s: ISymbol): boolean {
+function getMember(key: string): MemberInfo | undefined {
 
-    const type = _types[s.key.before(".").toLowerCase()];
+    const type = _types[key.before(".").toLowerCase()];
 
     if (!type)
-        return false;
+        return undefined;
 
-    const member = type.members[s.key.after(".")];
+    const member: MemberInfo | undefined = type.members[key.after(".")];
 
-    if (!member)
-        return false;
-
-    const key = s.key;
-    delete s.key;
-
-    s.id = member.id;
-
-    s.key = key; //Key should be after id
-
-
-    return true;
+    return member;
 }
 
+export function registerSymbol(type: string, key: string): any /*ISymbol*/ {
 
-export function registerSymbol<T extends ISymbol>(symbol: T): any {
+    const mi = getMember(key);
 
-    if (!setSymbolId(symbol))
+    var symbol = {
+        Type: type,
+        id: mi && mi.id || null,
+        key: key
+    } as ISymbol;
+
+    if (symbol.id == null)
         missingSymbols.push(symbol);
 
     return symbol as any;
@@ -898,7 +909,7 @@ export class PropertyRoute {
                     return PropertyRoute.liteEntity(this);
                 }
 
-                const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations");
+                const ti = getTypeInfos(ref).single("Ambiguity due to multiple Implementations"); //[undefined]
                 if (ti) {
                     const memberName = member.name.firstUpper();
                     const m = ti.members[memberName];
@@ -968,7 +979,7 @@ export class PropertyRoute {
             case PropertyRouteType.Field:
             case PropertyRouteType.MListItem: 
                 {
-                    const ti = getTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations");
+                    const ti = getTypeInfos(this.typeReference()).single("Ambiguity due to multiple Implementations"); //[undefined]
                     if (ti && isTypeEntity(ti))
                         return simpleMembersAfter(ti, "");
                     else
