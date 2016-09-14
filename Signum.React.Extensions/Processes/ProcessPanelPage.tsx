@@ -48,8 +48,8 @@ export default class ProcessPanelPage extends React.Component<ProcessPanelProps,
             <div>
                 <h2>ProcessLogic state</h2>
                 <div className="btn-toolbar">
-                    {s.Running && <a href="#" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
-                    {!s.Running && <a href="#" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
+                    {s.Running && <a href="" className="sf-button btn btn-default active" style={{ color: "red" }} onClick={this.handleStop}>Stop</a> }
+                    {!s.Running && <a href="" className="sf-button btn btn-default" style={{ color: "green" }} onClick={this.handleStart}>Start</a> }
                 </div >
                 <div id="processMainDiv">
                     <br />

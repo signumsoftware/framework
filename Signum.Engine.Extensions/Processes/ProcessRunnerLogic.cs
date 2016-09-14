@@ -137,176 +137,182 @@ namespace Signum.Engine.Processes
             if (running)
                 throw new InvalidOperationException("ProcessLogic is running");
 
-
-            Task.Factory.StartNew(() =>
-            {
-                var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema?.Database; 
-
-                using (AuthLogic.Disable())
+            using (ExecutionContext.SuppressFlow())
+                Task.Factory.StartNew(() =>
                 {
-                    try
+                    var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema?.Database;
+
+                    using (AuthLogic.Disable())
                     {
-                        running = true;
-
-                        (from p in Database.Query<ProcessEntity>()
-                         where p.IsMine() && (p.State == ProcessState.Executing || p.State == ProcessState.Suspending || p.State == ProcessState.Suspended) ||
-                         p.IsShared() && p.State == ProcessState.Suspended
-                         select p).SetAsQueued();
-
-                        CancelNewProcesses = new CancellationTokenSource();
-
-                        autoResetEvent.Set();
-
-                        timerNextExecution = new Timer(ob => WakeUp("TimerNextExecution", null), // main timer
-                             null,
-                             Timeout.Infinite,
-                             Timeout.Infinite);
-
-                        if (!CacheLogic.WithSqlDependency)
-                            timerPeriodic = new Timer(ob => WakeUp("TimerPeriodic", null), null, PoolingPeriodMilliseconds, PoolingPeriodMilliseconds);
-
-                        while (autoResetEvent.WaitOne())
+                        try
                         {
-                            if (CancelNewProcesses.IsCancellationRequested)
-                                return;
+                            running = true;
 
-                            using (HeavyProfiler.Log("PWL", () => "Process Runner"))
+                            (from p in Database.Query<ProcessEntity>()
+                             where p.IsMine() && (p.State == ProcessState.Executing || p.State == ProcessState.Suspending || p.State == ProcessState.Suspended) ||
+                             p.IsShared() && p.State == ProcessState.Suspended
+                             select p).SetAsQueued();
+
+                            CancelNewProcesses = new CancellationTokenSource();
+
+                            autoResetEvent.Set();
+
+                            timerNextExecution = new Timer(ob => WakeUp("TimerNextExecution", null), // main timer
+                                 null,
+                                 Timeout.Infinite,
+                                 Timeout.Infinite);
+
+                            if (!CacheLogic.WithSqlDependency)
+                                timerPeriodic = new Timer(ob => WakeUp("TimerPeriodic", null), null, PoolingPeriodMilliseconds, PoolingPeriodMilliseconds);
+
+                            while (autoResetEvent.WaitOne())
                             {
-                                (from p in Database.Query<ProcessEntity>()
-                                 where p.State == ProcessState.Planned && p.PlannedDate <= TimeZoneManager.Now
-                                 select p).SetAsQueued();
+                                if (CancelNewProcesses.IsCancellationRequested)
+                                    return;
 
-                                var list = Database.Query<ProcessEntity>()
-                                        .Where(p => p.IsMine() || p.IsShared())
-                                        .Where(p => p.State == ProcessState.Planned)
-                                        .Select(p => p.PlannedDate)
-                                        .ToListWakeup("Planned dependency");
-
-                                SetNextPannedExecution(list.Min());
-
-                                lock (executing)
+                                using (HeavyProfiler.Log("PWL", () => "Process Runner"))
                                 {
-                                    int remaining = MaxDegreeOfParallelism - executing.Count;
+                                    (from p in Database.Query<ProcessEntity>()
+                                     where p.State == ProcessState.Planned && p.PlannedDate <= TimeZoneManager.Now
+                                     select p).SetAsQueued();
 
-                                    if (remaining > 0)
-                                    {
-
-                                    retry:
-                                        var queued = Database.Query<ProcessEntity>()
-                                            .Where(p => p.State == ProcessState.Queued)
+                                    var list = Database.Query<ProcessEntity>()
                                             .Where(p => p.IsMine() || p.IsShared())
-                                            .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
+                                            .Where(p => p.State == ProcessState.Planned)
+                                            .Select(p => p.PlannedDate)
                                             .ToListWakeup("Planned dependency");
 
-                                        var afordable = queued
-                                            .OrderByDescending(p => p.MachineName == Environment.MachineName)
-                                            .OrderBy(a => a.QueuedDate)
-                                            .Take(remaining).ToList();
+                                    SetNextPannedExecution(list.Min());
 
-                                        var taken = afordable.Where(p => p.MachineName == ProcessEntity.None).Select(a => a.Process).ToList();
+                                    lock (executing)
+                                    {
+                                        int remaining = MaxDegreeOfParallelism - executing.Count;
 
-                                        if (taken.Any())
+                                        if (remaining > 0)
                                         {
-                                            using (Transaction tr = Transaction.ForceNew())
-                                            {
-                                                Database.Query<ProcessEntity>()
-                                                    .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessEntity.None)
-                                                    .UnsafeUpdate()
-                                                    .Set(p => p.MachineName, p => Environment.MachineName)
-                                                    .Set(p => p.ApplicationName, p => Schema.Current.ApplicationName)
-                                                    .Execute();
 
-                                                tr.Commit();
+                                            retry:
+                                            var queued = Database.Query<ProcessEntity>()
+                                                .Where(p => p.State == ProcessState.Queued)
+                                                .Where(p => p.IsMine() || p.IsShared())
+                                                .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
+                                                .ToListWakeup("Planned dependency");
+
+                                            var afordable = queued
+                                                .OrderByDescending(p => p.MachineName == Environment.MachineName)
+                                                .OrderBy(a => a.QueuedDate)
+                                                .Take(remaining).ToList();
+
+                                            var taken = afordable.Where(p => p.MachineName == ProcessEntity.None).Select(a => a.Process).ToList();
+
+                                            if (taken.Any())
+                                            {
+                                                using (Transaction tr = Transaction.ForceNew())
+                                                {
+                                                    Database.Query<ProcessEntity>()
+                                                        .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessEntity.None)
+                                                        .UnsafeUpdate()
+                                                        .Set(p => p.MachineName, p => Environment.MachineName)
+                                                        .Set(p => p.ApplicationName, p => Schema.Current.ApplicationName)
+                                                        .Execute();
+
+                                                    tr.Commit();
+                                                }
+
+
+                                                goto retry;
                                             }
 
 
-                                            goto retry;
-                                        }
-
-                                        foreach (var pair in afordable)
-                                        {
-                                            ProcessEntity pro = pair.Process.Retrieve();
-
-                                            IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(pro.Algorithm);
-
-                                            ExecutingProcess executingProcess = new ExecutingProcess(algorithm, pro);
-
-                                            executing.Add(pro.ToLite(), executingProcess);
-
-                                            executingProcess.TakeForThisMachine();
-
-                                            Task.Factory.StartNew(() =>
+                                            foreach (var pair in afordable)
                                             {
-                                                try
-                                                {
-                                                    executingProcess.Execute();
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    try
+                                                ProcessEntity pro = pair.Process.Retrieve();
+
+                                                IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(pro.Algorithm);
+
+                                                ExecutingProcess executingProcess = new ExecutingProcess(algorithm, pro);
+
+                                                executing.Add(pro.ToLite(), executingProcess);
+
+                                                executingProcess.TakeForThisMachine();
+
+                                                using (ExecutionContext.SuppressFlow())
+                                                    Task.Factory.StartNew(() =>
                                                     {
-                                                        ex.LogException(edn =>
+                                                        try
                                                         {
-                                                            edn.ControllerName = "ProcessWorker";
-                                                            edn.ActionName = executingProcess.CurrentExecution.ToLite().Key();
-                                                        });
-                                                    }
-                                                    catch { }
-                                                }
-                                                finally
-                                                {
-                                                    lock (executing)
-                                                    {
-                                                        executing.Remove(pro.ToLite());
-                                                        WakeUp("Process ended", null);
-                                                    }
-                                                }
-                                            });
-                                        }
+                                                            executingProcess.Execute();
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+                                                            try
+                                                            {
+                                                                ex.LogException(edn =>
+                                                                {
+                                                                    edn.ControllerName = "ProcessWorker";
+                                                                    edn.ActionName = executingProcess.CurrentExecution.ToLite().Key();
+                                                                });
+                                                            }
+                                                            catch { }
+                                                        }
+                                                        finally
+                                                        {
+                                                            lock (executing)
+                                                            {
+                                                                executing.Remove(pro.ToLite());
+                                                                WakeUp("Process ended", null);
+                                                            }
+                                                        }
+                                                    });
 
-                                        var suspending = Database.Query<ProcessEntity>()
-                                                .Where(p => p.State == ProcessState.Suspending)
-                                                .Where(p => p.IsMine())
-                                                .Select(a => a.ToLite())
-                                                .ToListWakeup("Suspending dependency");
+                                            }
 
-                                        foreach (var s in suspending)
-                                        {
-                                            ExecutingProcess execProc = executing.GetOrThrow(s);
+                                            var suspending = Database.Query<ProcessEntity>()
+                                                    .Where(p => p.State == ProcessState.Suspending)
+                                                    .Where(p => p.IsMine())
+                                                    .Select(a => a.ToLite())
+                                                    .ToListWakeup("Suspending dependency");
 
-                                            if (execProc.CurrentExecution.State != ProcessState.Finished)
+                                            foreach (var s in suspending)
                                             {
-                                                execProc.CurrentExecution = s.Retrieve();
-                                                execProc.CancelationSource.Cancel();
+                                                ExecutingProcess execProc = executing.GetOrThrow(s);
+
+                                                if (execProc.CurrentExecution.State != ProcessState.Finished)
+                                                {
+                                                    execProc.CurrentExecution = s.Retrieve();
+                                                    execProc.CancelationSource.Cancel();
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                    catch (ThreadAbortException)
-                    {
-                        //Ignore
-                    }
-                    catch (Exception e)
-                    {
-                        try
+                        catch (ThreadAbortException)
                         {
-                            e.LogException(edn =>
-                            {
-                                edn.ControllerName = "ProcessWorker";
-                                edn.ActionName = "MainLoop";
-                            });
+                            //Ignore
                         }
-                        catch { }
+                        catch (Exception e)
+                        {
+                            try
+                            {
+                                e.LogException(edn =>
+                                {
+                                    edn.ControllerName = "ProcessWorker";
+                                    edn.ActionName = "MainLoop";
+                                });
+                            }
+                            catch { }
+                        }
+                        finally
+                        {
+                            lock (executing)
+                                executing.Clear();
+
+                            running = false;
+                        }
                     }
-                    finally
-                    {
-                        running = false;
-                    }
-                }
-            }, TaskCreationOptions.LongRunning);
+                }, TaskCreationOptions.LongRunning);
         }
 
         internal static bool WakeUp(string reason, SqlNotificationEventArgs args)
@@ -421,6 +427,7 @@ namespace Signum.Engine.Processes
         {
             CurrentExecution.State = ProcessState.Executing;
             CurrentExecution.ExecutionStart = TimeZoneManager.Now;
+            CurrentExecution.ExecutionEnd = null;
             CurrentExecution.Progress = 0;
             CurrentExecution.MachineName = Environment.MachineName;
             CurrentExecution.ApplicationName = Schema.Current.ApplicationName;
