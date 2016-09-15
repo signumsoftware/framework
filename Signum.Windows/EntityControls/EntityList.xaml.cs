@@ -40,7 +40,6 @@ namespace Signum.Windows
             get { return (IList)listBox.SelectedItems; }
         }
 
-
         protected override void UpdateVisibility()
         {
             btCreate.Visibility = CanCreate().ToVisibility();
@@ -187,6 +186,21 @@ namespace Signum.Windows
         private void listBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             btView_Click(sender, null);
+        }
+
+        protected override void OnEntityChanged(object oldValue, object newValue)
+        {
+            listBox.SelectedItem = newValue;
+
+            base.OnEntityChanged(oldValue, newValue);
+        }
+
+        private void listBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var newEntity = e.AddedItems.Cast<object>().SingleOrDefault();
+
+            if (this.Entity != newEntity)
+                this.Entity = newEntity;
         }
     }
 }
