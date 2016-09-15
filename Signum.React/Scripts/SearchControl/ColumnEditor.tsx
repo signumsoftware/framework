@@ -30,7 +30,7 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps, {}>
     }
 
     handleOnChange = (event: React.FormEvent) => {
-        this.props.columnOption.displayName = (event.currentTarget as HTMLInputElement).value;
+        this.props.columnOption.displayName = (event.currentTarget as HTMLInputElement).value || undefined;
         this.props.onChange(undefined);
     }
 
@@ -50,7 +50,7 @@ export default class ColumnEditor extends React.Component<ColumnEditorProps, {}>
                     subTokenOptions={this.props.subTokensOptions}
                     readOnly={false}/>
                 <input className="form-control"
-                    value={co.displayName}
+                    value={co.displayName || ""}
                     onChange={this.handleOnChange} />
             </div>
         );
