@@ -287,6 +287,7 @@ namespace Signum.React.ApiControllers
         public string format;
         public string displayName;
         public bool isGroupable;
+        public string propertyRoute;
 
         public ColumnDescriptionTS(ColumnDescription a, object queryName)
         {
@@ -301,6 +302,7 @@ namespace Signum.React.ApiControllers
             this.unit = a.Unit;
             this.format = a.Format;
             this.displayName = a.DisplayName;
+            this.propertyRoute = token.GetPropertyRoute()?.ToString();
         }
     }
     

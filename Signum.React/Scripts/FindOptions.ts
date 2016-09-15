@@ -172,6 +172,7 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
         niceTypeName: cd.niceTypeName,
         filterType: cd.filterType,
         isGroupable: cd.isGroupable,
+        propertyRoute: cd.propertyRoute
     };
 }
 
@@ -267,6 +268,7 @@ export interface ColumnDescription {
     format?: string;
     displayName: string;
     isGroupable: boolean;
+    propertyRoute?: string;
 }
 
 export function isList(fo: FilterOperation) {
