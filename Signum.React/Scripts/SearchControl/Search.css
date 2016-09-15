@@ -41,6 +41,11 @@ th.drag-right {
     text-align: center;
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
+    cursor: pointer;
+}
+
+.sf-search-results > thead > tr > th.noOrder{
+    cursor:not-allowed;
 }
 
     .sf-search-results > thead > tr > th > span {
