@@ -961,7 +961,7 @@ export class PropertyRoute {
         function simpleMembersAfter(type: TypeInfo, path: string) {
             return Dic.getValues(type.members)
                 .filter(m => {
-                    if (m.name == path && !m.name.startsWith(path))
+                    if (m.name == path || !m.name.startsWith(path))
                         return false;
 
                     var name = m.name.substring(path.length);
