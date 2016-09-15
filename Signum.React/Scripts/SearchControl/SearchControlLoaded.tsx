@@ -807,7 +807,7 @@ export default class SearchControlLoaded extends React.Component<SearchControlLo
 
         const columns = this.props.findOptions.columnOptions.map(co => ({
             columnOption: co,
-            cellFormatter: co.token == undefined ? undefined : (qs && qs.formatters && qs.formatters[co.token.fullKey]) || Finder.formatRules.filter(a => a.isApplicable(co)).last("FormatRules").formatter(co),
+            cellFormatter: Finder.getCellFormatter(qs, co),
             resultIndex: co.token == undefined ? -1 : resultTable.columns.indexOf(co.token.fullKey)
         }));
 

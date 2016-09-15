@@ -121,6 +121,7 @@ export interface QueryToken {
     fullKey: string;
     queryTokenType?: QueryTokenType;
     parent?: QueryToken;
+    propertyRoute?: string;
 }
 
 export enum QueryTokenType {

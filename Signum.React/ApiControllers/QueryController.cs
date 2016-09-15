@@ -320,6 +320,7 @@ namespace Signum.React.ApiControllers
             this.niceTypeName = qt.NiceTypeName;
             this.queryTokenType = GetQueryTokenType(qt);
             this.isGroupable = qt.IsGroupable;
+            this.propertyRoute = qt.GetPropertyRoute()?.ToString();
             if (recursive && qt.Parent != null)
                 this.parent = new QueryTokenTS(qt.Parent, recursive);
         }
@@ -358,7 +359,8 @@ namespace Signum.React.ApiControllers
         public string format;
         public string unit;
         public bool isGroupable;
-        public QueryTokenTS parent; 
+        public QueryTokenTS parent;
+        private string propertyRoute;
     }
 
     public enum QueryTokenType
