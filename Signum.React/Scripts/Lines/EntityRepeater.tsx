@@ -10,6 +10,7 @@ import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos
 import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks, } from '../Lines/LineBase'
 import { ModifiableEntity, Lite, Entity, MList, MListElement, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import Typeahead from '../Lines/Typeahead'
+import { EntityBase } from './EntityBase'
 import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 
@@ -43,7 +44,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                 <legend>
                     <div>
                         <span>{this.state.labelText}</span>
-                        {React.Children.count(buttons) ? buttons : undefined}
+                        {EntityBase.hasChildrens(buttons) ? buttons : undefined}
                     </div>
                 </legend>
                 <div className="sf-repater-elements">

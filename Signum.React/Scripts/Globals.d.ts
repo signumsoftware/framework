@@ -85,7 +85,6 @@ interface String {
     tryBeforeLast(this: string, separator: string): string | undefined;
     etc(this: string, maxLength: number): string;
 
-    replaceAll(this: string, search: string, replacement: string): string;
     firstUpper(this: string): string;
     firstLower(this: string, ): string;
 
