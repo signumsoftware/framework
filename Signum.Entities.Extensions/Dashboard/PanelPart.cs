@@ -153,12 +153,14 @@ namespace Signum.Entities.Dashboard
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("UserQueryPart",
-                new XAttribute("UserQuery", ctx.Include(UserQuery)));
+                new XAttribute("UserQuery", ctx.Include(UserQuery)),
+                new XAttribute("AllowSelection", AllowSelection.ToString()) );
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+            AllowSelection= bool.Parse(element.Attribute("AllowSelection").Value);
         }
     }
 
