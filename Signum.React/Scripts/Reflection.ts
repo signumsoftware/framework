@@ -554,7 +554,7 @@ export function createBinding<T>(parentValue: any, lambda: (obj: any) => T): IBi
 }
 
 
-const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*(.*)\s*;\s*}$/;
+const functionRegex = /^function\s*\(\s*([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)\s*{\s*(\"use strict\"\;)?\s*return\s*(.*)\s*;?\s*}$/;
 const memberRegex = /^(.*)\.([$a-zA-Z_][0-9a-zA-Z_$]*)$/;
 const indexRegex = /^(.*)\[(\d+)\]$/;
 const mixinRegex = /^(.*?\.?)getMixin\((.*),\s*(.*?\.?)([$a-zA-Z_][0-9a-zA-Z_$]*)\s*\)$/
