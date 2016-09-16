@@ -1129,7 +1129,8 @@ export class GraphExplorer {
                 delete mod.error;
         }
         else if (this.modelStateMode == "clean") {
-            delete mod.error;
+            if (mod.error)
+                delete mod.error
         }
 
         
