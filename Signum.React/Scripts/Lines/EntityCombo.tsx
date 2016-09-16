@@ -10,7 +10,7 @@ import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../TypeContext'
 import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll } from '../Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../Lines/LineBase'
+import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../Lines/LineBase'
 import { EntityBase, EntityBaseProps } from './EntityBase'
 
 
@@ -52,7 +52,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
     handleOnChange = (event: React.FormEvent) => {
         const current = event.currentTarget as HTMLSelectElement;
-        
+
         if (current.value != this.getLiteKey()) {
             if (!current.value) {
                 this.setValue(null);
@@ -86,19 +86,19 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
         const hasValue = !!s.ctx.value;
 
-       
+
         const buttons = (
             <span className="input-group-btn">
-                {!hasValue && this.renderCreateButton(true) }
-                {!hasValue && this.renderFindButton(true) }
-                {hasValue && this.renderViewButton(true) }
-                {hasValue && this.renderRemoveButton(true) }
+                {!hasValue && this.renderCreateButton(true)}
+                {!hasValue && this.renderFindButton(true)}
+                {hasValue && this.renderViewButton(true)}
+                {hasValue && this.renderRemoveButton(true)}
             </span>
         );
 
         return (
             <FormGroup ctx={s.ctx} labelText={s.labelText}
-                htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }
+                htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps)}
                 labelProps={s.labelHtmlProps} >
                 <div className="SF-entity-combo">
                     <div className={EntityBase.hasChildrens(buttons) ? "input-group" : undefined}>
@@ -122,7 +122,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
         return (
             <select className="form-control" onChange={this.handleOnChange} value={lite ? liteKey(lite) : ""} disabled={ctx.readOnly}>
-                {this.renderOptions() }
+                {this.renderOptions()}
             </select>
         );
     }
@@ -132,7 +132,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
 
         if (this.state.data == undefined)
             return undefined;
-        
+
         const lite = this.getLite();
 
         const elements = [undefined, ...this.state.data];
@@ -140,7 +140,7 @@ export class EntityCombo extends EntityBase<EntityComboProps, EntityComboProps> 
             elements.insertAt(1, lite);
 
         return (
-            elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? e.toStr : " - "}</option>) 
+            elements.map((e, i) => <option key={i} value={e ? liteKey(e) : ""}>{e ? e.toStr : " - "}</option>)
         );
     }
 }

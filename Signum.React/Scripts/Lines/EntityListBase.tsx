@@ -166,7 +166,7 @@ export abstract class EntityListBase<T extends EntityListBaseProps, S extends En
                     return;
 
                 list.remove(mle);
-                this.forceUpdate();
+                this.setValue(list);
             }).done();
     };
 

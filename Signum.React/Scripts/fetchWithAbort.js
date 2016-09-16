@@ -1,14 +1,14 @@
 ﻿(function (self) {
     'use strict';
 
-    if (self.fetch) {
-        return
-    }
+    //if (self.fetch) {
+    //    return
+    //}
 
     var support = {
-        searchParams: 'URLSearchParams' in self,
-        iterable: 'Symbol' in self && 'iterator' in Symbol,
-        blob: 'FileReader' in self && 'Blob' in self && (function () {
+        searchParams: 'URLSearchParams' in window,
+        iterable: 'Symbol' in window && 'iterator' in Symbol,
+        blob: 'FileReader' in window && 'Blob' in window && (function () {
             try {
                 new Blob()
                 return true
@@ -16,8 +16,8 @@
                 return false
             }
         })(),
-        formData: 'FormData' in self,
-        arrayBuffer: 'ArrayBuffer' in self
+        formData: 'FormData' in window,
+        arrayBuffer: 'ArrayBuffer' in window
     }
 
     function normalizeName(name) {
