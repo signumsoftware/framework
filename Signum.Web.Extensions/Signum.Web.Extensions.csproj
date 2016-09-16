@@ -2028,4 +2028,7 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <Import Project="..\..\packages\Microsoft.TypeScript.MSBuild.2.0.0-beta\tools\Microsoft.TypeScript.targets" Condition="Exists('..\..\packages\Microsoft.TypeScript.MSBuild.2.0.0-beta\tools\Microsoft.TypeScript.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /b "$(ProjectDir)obj\Debug\$(TargetName).pdb" +,,</PostBuildEvent>
+  </PropertyGroup>
 </Project>
