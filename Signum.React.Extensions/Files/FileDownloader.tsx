@@ -25,14 +25,9 @@ export interface FileLineProps extends EntityBaseProps {
     dragAndDropMessage?: string;
     fileType?: FileTypeSymbol;
     accept?: string;
-    configuration?: FileLineConfiguration<IFile>;
+    configuration?: FileDownloaderConfiguration<IFile>;
 }
 
-export enum DownloadBehaviour {
-    SaveAs,
-    View,
-    None
-}
 
 export interface FileLineState extends FileLineProps {
     isLoading?: boolean;
@@ -100,28 +95,8 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
     }
 
 
-    renderLink(entity: IFile) {
+    
 
-        const dl = this.state.configuration!.downloadLink(entity);
-
-        return (
-            <a className="form-control file-control"
-                onClick={dl.requiresToken ? ((e) => this.handleDownloadClick(e, dl.url)) : undefined}
-                download={this.state.download == DownloadBehaviour.View ? undefined : entity.fileName}
-                href={dl.requiresToken ? "#" : dl.url}
-                title={entity.fileName || undefined}>
-                {entity.fileName}
-            </a>
-        );
-
-    }
-
-    handleDownloadClick = (e: React.MouseEvent, url: string) => {
-        e.preventDefault();
-        Services.ajaxGetRaw({ url: url })
-            .then(resp => Services.saveFile(resp))
-            .done();
-    };
 
     handleDragOver = (e: React.DragEvent) => {
         e.stopPropagation();
@@ -195,21 +170,60 @@ export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
         );
     }
 
-    static configurtions: { [typeName: string]: FileLineConfiguration<IFile> } = {};
+  
+}
+
+export enum DownloadBehaviour {
+    SaveAs,
+    View,
+    None
+}
+
+export interface FileDownloaderProps {
+    ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>;
+    download: DownloadBehaviour;
+    configuration?: FileDownloaderConfiguration<IFile>;
 }
 
 
-export class FileDownloader extends React.Component<{}, void>{
-
+export interface FileDownloaderState {
+    configuration?: FileDownloaderConfiguration<IFile>;
 }
 
-export class FileUploader extends React.Component<{}, void> {
+export class FileDownloader extends React.Component<FileDownloaderProps, {}>{
+    static configurtions: { [typeName: string]: FileDownloaderConfiguration<IFile> } = {};
 
+
+    static defaultProps = {
+        download: DownloadBehaviour.SaveAs,
+    }
+
+    handleDownloadClick = (e: React.MouseEvent, url: string) => {
+        e.preventDefault();
+        Services.ajaxGetRaw({ url: url })
+            .then(resp => Services.saveFile(resp))
+            .done();
+    };
+
+    render(entity: IFile) {
+
+        const dl = this.state.configuration!.downloadLink(entity);
+
+        return (
+            <a className="form-control file-control"
+                onClick={dl.requiresToken ? ((e) => this.handleDownloadClick(e, dl.url)) : undefined}
+                download={this.state.download == DownloadBehaviour.View ? undefined : entity.fileName}
+                href={dl.requiresToken ? "#" : dl.url}
+                title={entity.fileName || undefined}>
+                {entity.fileName}
+            </a>
+        );
+
+    }
 }
 
 
-
-interface FileLineConfiguration<T extends IFile> {
+interface FileDownloaderConfiguration<T extends IFile> {
     downloadLink: (entity: T) => DownloadLinkResult;
 }
 
@@ -221,15 +235,15 @@ interface DownloadLinkResult {
 
 FileLine.configurtions[FileEntity.typeName] = {
     downloadLink: e => ({ url: Navigator.currentHistory.createHref("~/api/files/downloadFile/" + e.id.toString()), requiresToken: true })
-} as FileLineConfiguration<FileEntity>;
+} as FileDownloaderConfiguration<FileEntity>;
 
 FileLine.configurtions[FilePathEntity.typeName] = {
     downloadLink: e => ({ url: Navigator.currentHistory.createHref("~/api/files/downloadFilePath/" + e.id.toString()), requiresToken: true })
-} as FileLineConfiguration<FilePathEntity>;
+} as FileDownloaderConfiguration<FilePathEntity>;
 
 FileLine.configurtions[EmbeddedFileEntity.typeName] = {
     downloadLink: e => ({ url: "data:application/octet-stream;base64," + e.binaryFile, requiresToken: false })
-} as FileLineConfiguration<EmbeddedFileEntity>;
+} as FileDownloaderConfiguration<EmbeddedFileEntity>;
 
 FileLine.configurtions[EmbeddedFilePathEntity.typeName] = {
     downloadLink: e => ({
@@ -239,4 +253,4 @@ FileLine.configurtions[EmbeddedFilePathEntity.typeName] = {
         }),
         requiresToken: true
     })
-} as FileLineConfiguration<EmbeddedFilePathEntity>;
+} as FileDownloaderConfiguration<EmbeddedFilePathEntity>;
