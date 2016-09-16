@@ -20,7 +20,7 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 import {
     Type, IType, EntityKind, QueryKey, getQueryNiceName, getQueryKey, isQueryDefined, TypeReference,
     getTypeInfo, getTypeInfos, getEnumInfo, toMomentFormat, toNumbroFormat, PseudoType, EntityData,
-    TypeInfo,
+    TypeInfo, PropertyRoute
 } from './Reflection';
 
 import { navigateRoute, isNavigable, currentHistory, API as NavAPI, isCreable, tryConvert } from './Navigator';
@@ -724,6 +724,31 @@ export class CellFormatter {
         public formatter: (cell: any) => React.ReactChild | undefined,
         public textAllign = "left") {
     }
+}
+
+
+export function getCellFormatter(qs: QuerySettings, co: ColumnOptionParsed): CellFormatter | undefined {
+    if (!co.token)
+        return undefined;
+
+    const result = qs && qs.formatters && qs.formatters[co.token.fullKey];
+
+    if (result)
+        return result; 
+
+    const prRoute = registeredPropertyFormatters[co.token.propertyRoute!];
+    if (prRoute)
+        return prRoute;
+
+    const rule = formatRules.filter(a => a.isApplicable(co)).last("FormatRules");
+    
+    return rule.formatter(co)
+}
+
+export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
+
+export function registerPropertyFormatter(pr: PropertyRoute, formater: CellFormatter) {
+    registeredPropertyFormatters[pr.toString()] = formater;
 }
 
 

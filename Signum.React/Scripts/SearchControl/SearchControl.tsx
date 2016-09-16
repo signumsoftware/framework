@@ -38,6 +38,7 @@ export interface SearchControlProps extends React.Props<SearchControl> {
     onResult?: (table: ResultTable) => void;
     hideFullScreenButton?: boolean;
     showBarExtension?: boolean;
+    throwIfNotFindable?: boolean;
 }
 
 export interface SearchControlState {
@@ -80,7 +81,12 @@ export default class SearchControl extends React.Component<SearchControlProps, S
     initialLoad(propsFindOptions: FindOptions) {
 
         if (!Finder.isFindable(propsFindOptions.queryName))
+        {
+            if (this.props.throwIfNotFindable)
+                throw Error(`Query ${propsFindOptions.queryName} not allowed`);
+
             return;
+        }
 
         Finder.getQueryDescription(propsFindOptions.queryName).then(qd => {
             Finder.parseFindOptions(propsFindOptions, qd).then(fop => {
