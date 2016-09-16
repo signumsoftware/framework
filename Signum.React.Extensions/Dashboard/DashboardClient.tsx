@@ -125,7 +125,7 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 function navigateOrWindowsOpen(e: React.MouseEvent, url: string){
-    if (e.ctrlKey || e.button == 2) {
+    if (e.ctrlKey || e.button == 1) {
         window.open(url);
     } else {
         Navigator.currentHistory.push(url);
