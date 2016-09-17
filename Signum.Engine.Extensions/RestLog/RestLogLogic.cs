@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
@@ -30,6 +31,12 @@ namespace Signum.Engine.RestLog
                     });
 
             }
+            ExceptionLogic.DeleteLogs += DeleteRestLogs;
+        }
+
+        private static void DeleteRestLogs(DeleteLogParametersEntity parameters)
+        {
+            Database.Query<RestLogEntity>().Where(a => a.StartDate < parameters.DateLimit).UnsafeDeleteChunks(parameters.ChunkSize,parameters.MaxChunks);
         }
     }
 }
