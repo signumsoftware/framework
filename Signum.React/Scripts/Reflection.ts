@@ -144,6 +144,7 @@ export interface TypeReference {
     isEmbedded?: boolean;
 }
 
+
 export enum KindOfType {
     Entity = "Entity" as any,
     Enum = "Enum" as any,
@@ -890,6 +891,14 @@ export class PropertyRoute {
             case PropertyRouteType.MListItem: return this.parent!.propertyPath() + "/";
             case PropertyRouteType.LiteEntity: return this.parent!.propertyPath() + ".entity";
             default: throw new Error("Unexpected propertyRouteType");
+        }
+    }
+
+    tryAddMember(member: LambdaMember): PropertyRoute | undefined {
+        try {
+            return this.addMember(member);
+        } catch (e) {
+            return undefined;
         }
     }
 
