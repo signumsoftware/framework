@@ -47,8 +47,7 @@ export class DesignerNode<N extends BaseNode> {
     parent?: DesignerNode<BaseNode>;
     context: DesignerContext;
     node: N;
-    route: PropertyRoute;
-
+    route?: PropertyRoute;
 
     static root<N extends BaseNode>(node: N, context: DesignerContext, typeName: string) {
         var res = new DesignerNode();
@@ -65,14 +64,20 @@ export class DesignerNode<N extends BaseNode> {
         res.node = node;
         res.route = this.fixRoute();
         const lbn = node as BaseNode as LineBaseNode;
-        if (lbn.field)
-            lbn.field.split(".").forEach(p =>
-                res.route = res.route.addMember({ name: p, type: LambdaMemberType.Member })
-            );
+        if (lbn.field && res.route) {
+            try {
+                res.route = res.route.addMember({ name: lbn.field, type: LambdaMemberType.Member });
+            } catch (e) {
+                res.route = undefined;
+            }
+        }
         return res;
     }
 
-    fixRoute() {
+    fixRoute(): PropertyRoute | undefined {
+        if (!this.route)
+            return undefined;
+
         let res = this.route;
         const options = registeredNodes[this.node.kind];
         if (options.hasCollection)
@@ -265,10 +270,15 @@ export function validateFieldMandatory(dn: DesignerNode<LineBaseNode>) {
 
 export function validateField(dn: DesignerNode<LineBaseNode>) {
 
-    const m = dn.parent!.route.subMembers()[dn.node.field!]
+    const parentRoute = dn.parent!.route;
+
+    if (parentRoute == undefined)
+        return undefined;
+    
+    const m = parentRoute.subMembers()[dn.node.field!]
 
     if (!m)
-        return DynamicViewValidationMessage.Type0DoesNotContainsField1.niceToString(dn.route.typeReference().name, dn.node.field);
+        return DynamicViewValidationMessage.Type0DoesNotContainsField1.niceToString(parentRoute.typeReference().name, dn.node.field);
 
     const options = registeredNodes[dn.node.kind]
 
@@ -288,7 +298,12 @@ export function validateField(dn: DesignerNode<LineBaseNode>) {
 
 export function validateTableColumnProperty(dn: DesignerNode<EntityTableColumnNode>) {
 
-    const m = dn.parent!.route.subMembers()[dn.node.property!]
+    const parentRoute = dn.parent!.route;
+
+    if (parentRoute == undefined)
+        return undefined;
+
+    const m = parentRoute.subMembers()[dn.node.property!]
     const DVVM = DynamicViewValidationMessage;
 
     if ( m.type.isCollection)
@@ -332,8 +347,8 @@ export function getGetComponent(dn: DesignerNode<ContainerNode>, ctx: TypeContex
 }
 
 export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { isCreable: boolean; isFindable: boolean; isViewable: boolean; showAutoComplete: boolean, showMove?: boolean }) {
-  
-    const m = dn.route.member;
+
+    const m = dn.route && dn.route.member;
     return (<div>
         <FieldComponent dn={dn} member="field" />
        

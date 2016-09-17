@@ -22,10 +22,19 @@ require("!style!css!./DynamicViewTree.css");
 export interface DynamicViewTreeProps {
     rootNode: DesignerNode<BaseNode>;
     selectedNode?: DesignerNode<BaseNode>;
-    onSelected: (newNode: DesignerNode<BaseNode>) => void 
+    onSelected: (newNode: DesignerNode<BaseNode>) => void;
 }
 
+export type DraggedPosition = "Top" | "Bottom" | "Middle";
+export type DraggedError = "Error" | "Warning" | "Ok";
+
 export interface DnamicViewTreeState {
+    draggedNode?: DesignerNode<BaseNode>;
+    draggedOver?: {
+        dn: DesignerNode<BaseNode>;
+        position: DraggedPosition;
+        error: DraggedError
+    }
     contextualMenu?: {
         position: { pageX: number, pageY: number };
     };
@@ -67,10 +76,7 @@ export class DynamicViewTree extends React.Component<DynamicViewTreeProps, Dnami
                     <ul>
                         <DynamicViewNode
                             node={this.props.rootNode}
-                            selectedNode={sn && sn.node}
-                            onContextMenu={this.handleNodeTextContextMenu}
-                            onSelected={this.props.onSelected}
-                            />
+                            dynamicTreeView={this} />
                     </ul>
                 </div>
                 {this.state.contextualMenu && this.renderContextualMenu()}
@@ -164,9 +170,7 @@ function allNodes(node: BaseNode): BaseNode[] {
 
 export interface DynamicViewNodeProps {
     node: DesignerNode<BaseNode>;
-    selectedNode?: BaseNode;
-    onSelected: (newNode: DesignerNode<BaseNode>) => void;
-    onContextMenu: (n: DesignerNode<BaseNode>, e: React.MouseEvent) => void;
+    dynamicTreeView: DynamicViewTree;
 }
 
 export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isOpened: boolean }>{
@@ -192,6 +196,102 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
             return <span onClick={this.handleIconClick} className="tree-icon fa fa-plus-square-o" />;
     }
 
+    handleDragStart = (e: React.DragEvent) => {
+        e.dataTransfer.effectAllowed = "move";
+        this.props.dynamicTreeView.changeState(s => s.draggedNode = this.props.node);
+    }
+
+    handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        const dn = this.props.node;
+        const span = e.currentTarget as HTMLElement;
+        const newPosition = this.getOffset((e.nativeEvent as DragEvent).pageY, span.getBoundingClientRect(), 7);
+        const newError = this.getError(newPosition);
+        e.dataTransfer.dropEffect = newError == "Error" ? "none" : "move";
+
+        const s = this.props.dynamicTreeView.state;
+
+        if (s.draggedOver == null ||
+            s.draggedOver.dn.node != dn.node ||
+            s.draggedOver.position != newPosition ||
+            s.draggedOver.error != newError) {
+
+            this.props.dynamicTreeView.changeState(s => {
+                s.draggedOver = {
+                    dn: dn,
+                    position: newPosition,
+                    error: newError
+                };
+            });
+        }
+    }
+
+    handleDragEnd = (e: React.DragEvent) => {
+        this.props.dynamicTreeView.changeState(s => { s.draggedNode = undefined; s.draggedOver = undefined; });
+    }
+    
+    handleDrop = (e: React.DragEvent) => {
+
+        const dragged = this.props.dynamicTreeView.state.draggedNode!;
+        const over = this.props.dynamicTreeView.state.draggedOver!;
+
+        this.props.dynamicTreeView.changeState(s => { s.draggedNode = undefined; s.draggedOver = undefined; });
+
+        if (over.error == "Error")
+            return;
+
+        const cn = dragged.parent!.node as ContainerNode;
+        cn.children.remove(dragged.node);
+
+        if (over.position == "Middle") {
+            (over.dn.node as ContainerNode).children.push(dragged.node);
+            this.props.dynamicTreeView.props.onSelected(over.dn.createChild(dragged.node));
+        } else {
+            const parent = over.dn.parent!.node as ContainerNode;
+            const index = parent.children.indexOf(over.dn.node);
+            parent.children.insertAt(index + (over.position == "Top" ? 0 : 1), dragged.node);
+            this.props.dynamicTreeView.props.onSelected(over.dn.parent!.createChild(dragged.node));
+        }
+    }
+
+
+    getOffset(pageY: number, rect: ClientRect, margin: number): DraggedPosition {
+        
+        const height = Math.round(rect.height / 5) * 5;
+        const offsetY = pageY - rect.top;
+
+        if (offsetY < margin)
+            return "Top";
+
+        if (offsetY > (height - margin))
+            return "Bottom";
+
+        return "Middle";
+    }
+
+    getError(position: DraggedPosition): DraggedError{
+        const parent = position == "Middle" ? this.props.node : this.props.node.parent;
+
+        if (!parent)
+            return "Error";
+
+        const parentOptions = NodeUtils.registeredNodes[parent.node.kind];    
+        if (!parentOptions.isContainer)
+            return "Error";
+
+        const dragged = this.props.dynamicTreeView.state.draggedNode!;
+        const draggedOptions = NodeUtils.registeredNodes[dragged.node.kind];
+        if (parentOptions.validChild && parentOptions.validChild != dragged.node.kind ||
+            draggedOptions.validParent && draggedOptions.validParent != parent.node.kind)
+            return "Error";
+
+        const draggedField = (dragged.node as LineBaseNode).field;
+        if (draggedField && (parent.route == undefined || parent.route.subMembers()[draggedField] === undefined))
+            return "Warning";
+
+        return "Ok";
+    }
+
     render(): React.ReactElement<any> {
         var dn = this.props.node;
 
@@ -199,31 +299,73 @@ export class DynamicViewNode extends React.Component<DynamicViewNodeProps, { isO
 
         const error = NodeUtils.validate(dn);
 
+        const tree = this.props.dynamicTreeView;
 
+        const sn = tree.props.selectedNode;
+
+        const className = classes("tree-label", sn && dn.node == sn.node && "tree-selected", error && "tree-error"); 
 
         return (
-            <li>
-                {this.renderIcon()}
+            <li >
+                <div draggable={dn.parent != null}
+                    onDragStart={this.handleDragStart}
+                    onDragEnter={this.handleDragOver}
+                    onDragOver={this.handleDragOver}
+                    onDragEnd={this.handleDragEnd}
+                    onDrop={this.handleDrop}
+                    style={this.getDragAndDropStyle()}>
 
-                <span className={classes("tree-label", dn.node == this.props.selectedNode && "tree-selected", error && "tree-error")}
-                    title={error || undefined}
-                    onClick={e => this.props.onSelected(dn)}
-                    onContextMenu={e => this.props.onContextMenu(dn, e)}
-                    >
-                    {NodeUtils.registeredNodes[dn.node.kind].renderTreeNode(dn)}
-                </span>
+                    {this.renderIcon()}
+                    <span
+                        className={className}
+                        title={error || undefined}
+                        onClick={e => tree.props.onSelected(dn)}
+                        onContextMenu={e => tree.handleNodeTextContextMenu(dn, e)}>
+                        {NodeUtils.registeredNodes[dn.node.kind].renderTreeNode(dn)}
+                    </span>
+                </div>
 
                 {container.children && container.children.length > 0 && (this.state.isOpened) &&
                     <ul>
-                        {container.children.map((c, i) =>
+                    {container.children.map((c, i) =>
                         <DynamicViewNode
-                            selectedNode={this.props.selectedNode}
-                            onContextMenu={this.props.onContextMenu}
-                            onSelected={this.props.onSelected}
+                            dynamicTreeView={tree}
                             key={i} node={dn.createChild(c)} />)}
                     </ul>
                 }
             </li>
         );
+    }
+
+    getDragAndDropStyle(): React.CSSProperties | undefined {
+        const ts = this.props.dynamicTreeView.state;
+
+        const dn = this.props.node;
+
+        if (ts.draggedNode == undefined)
+            return undefined;
+
+        if (dn.node == ts.draggedNode.node)
+            return { opacity: 0.5 };
+
+        const over = ts.draggedOver;
+
+        if (over && dn.node == over.dn.node) {
+
+            const color =
+                over.error == "Error" ? "rgb(193, 0, 0)" :
+                    over.error == "Warning" ? "rgb(255, 153, 0)" :
+                        over.error == "Ok" ? "rgb(10, 162, 0)" : "";
+            
+
+            if (over.position == "Top")
+                return { borderTop: "2px dashed " + color };
+            if (over.position == "Bottom")
+                return { borderBottom: "2px solid " + color };
+            else
+                return { backgroundColor: color.replace("(", "a(").replace(")", ", 0.2)") };
+        }
+
+        return undefined;
     }
 }

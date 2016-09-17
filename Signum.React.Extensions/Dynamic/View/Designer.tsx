@@ -177,8 +177,8 @@ export class FieldComponent extends React.Component<FieldComponentProps, void> {
         const strValue = value == null ? "" : value.toString();
 
         const route = this.props.dn.parent!.fixRoute();
-        
-        const subMembers = route.subMembers();
+
+        const subMembers = route ? route.subMembers() : {};
 
         return (<select className="form-control" value={strValue} onChange={this.handleChange} >
             <option  value=""> - </option>

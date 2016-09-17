@@ -183,7 +183,7 @@ NodeUtils.register<ValueLineNode>({
         onChange={NodeUtils.evaluateOnChange(ctx, dn.node.redrawOnChange)}
         />),
     renderDesigner: (dn) => {
-        const m = dn.route.member;
+        const m = dn.route && dn.route.member;
         return (<div>
             <FieldComponent dn={dn} member="field"/>
             <ExpressionOrValueComponent dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
@@ -280,7 +280,7 @@ NodeUtils.register<EnumCheckboxListNode>({
         onChange={NodeUtils.evaluateOnChange(ctx, dn.node.redrawOnChange)}
         />),
     renderDesigner: (dn) => {
-        const m = dn.route.member;
+        const m = dn.route && dn.route.member;
         return (<div>
             <FieldComponent dn={dn} member="field" />
             <ExpressionOrValueComponent dn={dn} member="labelText" type="string" defaultValue={m && m.niceName || ""} />
