@@ -21,7 +21,7 @@ export interface DynamicViewComponentProps {
     dynamicView: DynamicViewEntity;
 }
 
-export default class DynamicViewComponent extends React.Component<DynamicViewComponentProps, { isDesignerOpen: boolean, rootNode: DesignerNode<BaseNode> }>{
+export default class DynamicViewComponent extends React.Component<DynamicViewComponentProps, { isDesignerOpen: boolean, rootNode: DesignerNode<BaseNode>, selectedNode: DesignerNode<BaseNode> }>{
 
     constructor(props: DynamicViewComponentProps) {
         super(props);
@@ -30,12 +30,17 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
         var context = {
             onClose: this.handleClose,
-            refreshView: () => this.forceUpdate()
+            refreshView: () => this.forceUpdate(),
+            getSelectedNode: () => this.state.isDesignerOpen ? this.state.selectedNode : undefined,
+            setSelectedNode: (newNode) => this.changeState(s => s.selectedNode = newNode)
         } as DesignerContext;
+
+        var root = DesignerNode.root(baseNode, context, props.ctx.value.Type);
 
         this.state = {
             isDesignerOpen: false,
-            rootNode: DesignerNode.root(baseNode, context, props.ctx.value.Type)
+            rootNode: root,
+            selectedNode: root
         };
     }
 
@@ -69,17 +74,7 @@ interface DynamicViewDesignerProps {
 }
 
 
-class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { selectedNode?: DesignerNode<BaseNode> }>{
-
-    constructor(props: any) {
-        super(props);
-        this.state = { selectedNode: undefined };
-    }
-
-    handleSelectedNode = (selectedNode: DesignerNode<BaseNode>) => {
-        this.changeState(s => s.selectedNode = selectedNode);
-    }
-
+class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, void>{
     render() {
         var dv = this.props.dynamicView;
         var ctx = TypeContext.root(DynamicViewEntity, dv);
@@ -91,10 +86,8 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { se
                     <small>{Navigator.getTypeTitle(this.props.dynamicView, undefined)}</small>
                 </h3>
                 <ValueLine ctx={ctx.subCtx(e => e.viewName)} formGroupStyle="Basic" />
-                <DynamicViewTree rootNode={this.props.rootNode}
-                    selectedNode={this.state.selectedNode}
-                    onSelected={this.handleSelectedNode} />
-                <DynamicViewInspector selectedNode={this.state.selectedNode} />
+                <DynamicViewTree rootNode={this.props.rootNode} />
+                <DynamicViewInspector selectedNode={this.props.rootNode.context.getSelectedNode()} />
             </div>
         );
     }

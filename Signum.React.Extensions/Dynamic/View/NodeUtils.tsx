@@ -35,12 +35,15 @@ export interface NodeOptions<N extends BaseNode> {
     validate?: (node: DesignerNode<N>) => string | null | undefined;
     validParent?: string;
     validChild?: string;
+    avoidHighlight?: boolean;
     initialize?: (node: N) => void
 }
 
 export interface DesignerContext {
     refreshView: () => void;
     onClose: () => void;
+    getSelectedNode: () => DesignerNode<BaseNode> | undefined;
+    setSelectedNode: (newSelectedNode: DesignerNode<BaseNode>) => void;
 }
 
 export class DesignerNode<N extends BaseNode> {
@@ -121,7 +124,16 @@ export function render(dn: DesignerNode<BaseNode>, ctx: TypeContext<ModifiableEn
         if (evaluateAndValidate(ctx, dn, "visible", isBooleanOrNull) == false)
             return null;
 
+        const sn = dn.context.getSelectedNode();
+
+        if (sn && sn.node == dn.node)
+            return (
+                <div style={{ border: "1px solid #337ab7", borderRadius: "2px" }}>
+                    {registeredNodes[dn.node.kind].render(dn, ctx)}
+                </div>);
+    
         return registeredNodes[dn.node.kind].render(dn, ctx);
+
     } catch (e) {
         return (<div className="alert alert-danger">{getErrorTitle(dn)}&nbsp;{(e as Error).message}</div>);
     }
