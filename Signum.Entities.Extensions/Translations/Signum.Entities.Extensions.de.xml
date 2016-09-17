@@ -187,7 +187,6 @@
     <Member Name="Role" Description="Rolle" />
     <Member Name="Rules" Description="Regeln" />
     <Member Name="Strategy" Description="Strategie" />
-    <Member Name="Type" Description="Typ" />
   </Type>
   <Type Name="BasicPermission">
     <Member Name="AdminRules" Description="Admin-Regeln" />
@@ -348,7 +347,9 @@
     <Member Name="DisplayName" Description="Name" />
     <Member Name="EmbeddedInEntity" Description="Eingebettet in Entität" />
     <Member Name="EntityType" Description="Entitätstyp" />
+    <Member Name="ForNavbar" Description="Für die Navigationsleiste" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="Key" Description="Schlüssel" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parts" Description="Teile" />
   </Type>
@@ -485,10 +486,50 @@
     <Member Name="DisconnectedMachine" Description="Getrennter Computer" />
     <Member Name="LastOnlineTicks" Description="Letzte Onlineticks" />
   </Type>
+  <Type Name="DynamicValidationEntity" Description="Dynamische Validierung">
+    <Member Name="EntityType" Description="Entitätstyp" />
+    <Member Name="Eval" Description="Auswertung" />
+    <Member Name="IsGlobalyEnabled" Description="Ist Global aktiviert" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="PropertyRoute" Description="Eigenschaftenroute" />
+  </Type>
+  <Type Name="DynamicValidationEval" Description="Dynamische Validierung auswerten" />
+  <Type Name="DynamicValidationOperation">
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="DynamicViewEntity" Description="Dynamische Ansicht" PluralDescription="Dynamische Ansichten" Gender="f">
+    <Member Name="EntityType" Description="Entitätstyp" />
+    <Member Name="ViewContent" Description="Anzeige Inhalt" />
+    <Member Name="ViewName" Description="Ansichtsname" />
+  </Type>
+  <Type Name="DynamicViewMessage">
+    <Member Name="AddChild" Description="Kind hinzufügen" />
+    <Member Name="AddSibling" Description="Geschwister hinzufügen" />
+    <Member Name="Remove" Description="Entfernen" />
+    <Member Name="SelectANodeFirst" Description="Wählen Sie zuerst einen Knoten" />
+    <Member Name="SelectATypeOfComponent" Description="Wählen Sie einen Komponententyp" />
+  </Type>
+  <Type Name="DynamicViewOperation">
+    <Member Name="Clone" Description="Klonen" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="DynamicViewValidationMessage">
+    <Member Name="_0RequiresA1" Description="{0} erfordert eine {1}" />
+    <Member Name="CollectionOfEntities" Description="Sammlung von Entitäten" />
+    <Member Name="CollectionOfEnums" Description="Sammlung von Enumerationen" />
+    <Member Name="Entity" Description="Entität" />
+    <Member Name="EntityOrValue" Description="Entität oder Wert" />
+    <Member Name="Member0IsMandatoryFor1" Description="Mitglied &quot;{0}&quot; ist für &quot;{1}&quot; pflicht" />
+    <Member Name="OnlyChildNodesOfType0Allowed" Description="Nur untergeordnete Knoten vom Typ &quot;{0}&quot; erlaubt" />
+    <Member Name="Type0DoesNotContainsField1" Description="Typ &quot;{0}&quot; enthält kein Feld &quot;{1}&quot;" />
+    <Member Name="Value" Description="Wert" />
+  </Type>
   <Type Name="EmailAddressEntity" Description="E-Mail-Adresse">
     <Member Name="DisplayName" Description="Namen" />
     <Member Name="EmailAddress" Description="E-Mail-Adresse" />
     <Member Name="EmailOwner" Description="E-Mail-Besitzer" />
+    <Member Name="InvalidEmail" Description="Ungültige e-Mail" />
   </Type>
   <Type Name="EmailAttachmentEntity" Description="E-Mail-Anhang">
     <Member Name="ContentId" Description="Content-id" />
@@ -701,6 +742,9 @@
   <Type Name="EntityHelpOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="EvalEntity`1">
+    <Member Name="Script" Description="Skript" />
+  </Type>
   <Type Name="ExcelAttachmentEntity" Description="Excel-Anlage">
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Related" Description="In Beziehung mit" />
@@ -912,6 +956,10 @@
     <Member Name="Links" Description="Links" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
   </Type>
+  <Type Name="LinkPartEntity" Description="Link Teil" Gender="m">
+    <Member Name="Link" Description="Link" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
   <Type Name="MapMessage">
     <Member Name="Color" Description="Farbe" />
     <Member Name="Columns" Description="Spalten" />
@@ -1026,6 +1074,9 @@
     <Member Name="Unknown" Description="Unbekannt" />
     <Member Name="Yes" Description="Ja" />
   </Type>
+  <Type Name="OmniboxPanelPartEntity" Description="Omnibox Panel Teil" Gender="m">
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
   <Type Name="OperationAllowed">
     <Member Name="Allow" Description="Erlauben" />
     <Member Name="DBOnly" Description="Nur DB" />
@@ -1040,7 +1091,9 @@
   <Type Name="OperationHelpOperation">
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="OperationRulePack" Description="Operationsregelpack" />
+  <Type Name="OperationRulePack" Description="Operationsregelpack">
+    <Member Name="Type" Description="Typ" />
+  </Type>
   <Type Name="PackageEntity" Description="Paket" PluralDescription="Pakete" Gender="n">
     <Member Name="Name" Description="Name" />
     <Member Name="OperationArguments" Description="Operationsargumente" />
@@ -1183,7 +1236,9 @@
     <Member Name="Description" Description="Beschreibung" />
     <Member Name="Property" Description="Eigenschaft" />
   </Type>
-  <Type Name="PropertyRulePack" Description="Eigenschaftsregelpack" />
+  <Type Name="PropertyRulePack" Description="Eigenschaftsregelpack">
+    <Member Name="Type" Description="Typ" />
+  </Type>
   <Type Name="QueryAllowedRule" Description="Erlaubte Abfrageregel" />
   <Type Name="QueryColumnEntity" Description="Abfrage-Spalte">
     <Member Name="DisplayName" Description="Angezeigter Name" />
@@ -1212,7 +1267,13 @@
     <Member Name="OrderType" Description="Reihenfolgentyp" />
     <Member Name="Token" Description="Token" />
   </Type>
-  <Type Name="QueryRulePack" Description="Abfrageregelpack" />
+  <Type Name="QueryRulePack" Description="Abfrageregelpack">
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="QueryStringValue" Description="Query string value">
+    <Member Name="Key" Description="Schlüssel" />
+    <Member Name="Value" Description="Wert" />
+  </Type>
   <Type Name="QueryTokenEntity" Description="Abfrage Token">
     <Member Name="TokenString" Description="Token string" />
   </Type>
@@ -1220,6 +1281,19 @@
     <Member Name="Code" Description="Code" />
     <Member Name="Lapsed" Description="Verfallen" />
     <Member Name="RequestDate" Description="Datum der Anfrage" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="RestLogEntity" Description="Rest-Protokoll" PluralDescription="Rest-Protokolle" Gender="n">
+    <Member Name="Action" Description="Aktion" />
+    <Member Name="Controller" Description="Controller" />
+    <Member Name="Duration" Description="Dauer" />
+    <Member Name="EndDate" Description="Enddatum" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="QueryString" Description="Query string" />
+    <Member Name="RequestBody" Description="Request body" />
+    <Member Name="ResponseBody" Description="Response body" />
+    <Member Name="StartDate" Description="Startdatum" />
+    <Member Name="Url" Description="URL" />
     <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="RoleEntity" Description="Rolle">
@@ -1665,6 +1739,12 @@
     <Member Name="Save" Description="Speichern" />
     <Member Name="SaveNew" Description="Speichern" />
     <Member Name="SetPassword" Description="Passwort festlegen" />
+  </Type>
+  <Type Name="UserQueryCountPartEntity" Description="Benutzer Abfrage Zähler Bereich">
+    <Member Name="IconClass" Description="Symbol-Klasse" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="ShowName" Description="Name anzeigen" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
   </Type>
   <Type Name="UserQueryEntity" Description="Benutzer-Abfrage">
     <Member Name="Columns" Description="Spalten" />

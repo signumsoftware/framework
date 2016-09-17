@@ -21,7 +21,7 @@ export default class EmailRecipient extends React.Component<{ ctx: TypeContext<E
                     <EntityLine ctx={sc.subCtx(ea => ea.emailOwner)}  />
                 </div>
                 <div className="col-sm-3">
-                    <ValueLine ctx={sc.subCtx(c => c.emailAddress)}  />{/*vl.ValueHtmlProps.Remove("size"*/})
+                    <ValueLine ctx={sc.subCtx(c => c.emailAddress)}  />
                 </div>
                 <div className="col-sm-3">
                     <ValueLine ctx={sc.subCtx(c => c.displayName)}  />

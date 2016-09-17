@@ -64,6 +64,13 @@
   <Type Name="DisconnectedMachineState" />
   <Type Name="DisconnectedMessage" />
   <Type Name="DisconnectedSubsetMixin" />
+  <Type Name="DynamicValidationEntity" />
+  <Type Name="DynamicValidationEval" />
+  <Type Name="DynamicValidationOperation" />
+  <Type Name="DynamicViewEntity" />
+  <Type Name="DynamicViewMessage" />
+  <Type Name="DynamicViewOperation" />
+  <Type Name="DynamicViewValidationMessage" />
   <Type Name="EmailAddressEntity" />
   <Type Name="EmailAttachmentEntity" />
   <Type Name="EmailAttachmentType" />
@@ -95,6 +102,7 @@
   <Type Name="EntityAction" />
   <Type Name="EntityHelpEntity" />
   <Type Name="EntityHelpOperation" />
+  <Type Name="EvalEntity`1" />
   <Type Name="ExcelAttachmentEntity" />
   <Type Name="ExcelMessage" />
   <Type Name="ExcelReportEntity" />
@@ -130,6 +138,7 @@
   <Type Name="LastAuthRulesImportEntity" />
   <Type Name="LinkElementEntity" />
   <Type Name="LinkListPartEntity" />
+  <Type Name="LinkPartEntity" />
   <Type Name="MapMessage" />
   <Type Name="MapPermission" />
   <Type Name="MergeStrategy" />
@@ -148,6 +157,7 @@
   <Type Name="NoteTypeEntity" />
   <Type Name="NoteTypeOperation" />
   <Type Name="OmniboxMessage" />
+  <Type Name="OmniboxPanelPartEntity" />
   <Type Name="OperationAllowed" />
   <Type Name="OperationAllowedRule" />
   <Type Name="OperationHelpEntity" />
@@ -189,8 +199,10 @@
   <Type Name="QueryHelpOperation" />
   <Type Name="QueryOrderEntity" />
   <Type Name="QueryRulePack" />
+  <Type Name="QueryStringValue" />
   <Type Name="QueryTokenEntity" />
   <Type Name="ResetPasswordRequestEntity" />
+  <Type Name="RestLogEntity" />
   <Type Name="RoleEntity" />
   <Type Name="RoleOperation" />
   <Type Name="RoleQuery" />
@@ -263,6 +275,7 @@
   <Type Name="UserChartPartEntity" />
   <Type Name="UserEntity" />
   <Type Name="UserOperation" />
+  <Type Name="UserQueryCountPartEntity" />
   <Type Name="UserQueryEntity" />
   <Type Name="UserQueryMessage" />
   <Type Name="UserQueryOperation" />

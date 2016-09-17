@@ -28,6 +28,8 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Excel;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Excel;
+using Signum.Entities.Chart;
+using Signum.Engine.Chart;
 
 namespace Signum.React.Excel
 {
@@ -44,6 +46,18 @@ namespace Signum.React.Excel
             var fileName = request.queryKey + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
             return FilesController.GetHttpReponseMessage(new MemoryStream(binaryFile), fileName);            
+        }
+
+        [Route("api/excel/plainChart"), HttpPost]
+        public HttpResponseMessage ToPlainExcel(ChartRequest request)
+        {
+            var resultTable = ChartLogic.ExecuteChart(request);
+
+            byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable, QueryUtils.GetNiceName(request.QueryName));
+
+            var fileName = request.ChartScript.ToString() + " " + QueryUtils.GetKey(request.QueryName) + TimeZoneManager.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
+
+            return FilesController.GetHttpReponseMessage(new MemoryStream(binaryFile), fileName);
         }
 
 
