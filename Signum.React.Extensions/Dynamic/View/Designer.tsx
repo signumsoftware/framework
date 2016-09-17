@@ -1,10 +1,10 @@
 ﻿import * as React from 'react'
 import { FormGroup, FormControlStatic, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '../../../../Framework/Signum.React/Scripts/Lines'
-import { ModifiableEntity } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { ModifiableEntity, External } from '../../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { classes, Dic } from '../../../../Framework/Signum.React/Scripts/Globals'
 import * as Finder from '../../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../../Framework/Signum.React/Scripts/FindOptions'
-import { getQueryNiceName, MemberInfo } from '../../../../Framework/Signum.React/Scripts/Reflection'
+import { getQueryNiceName, MemberInfo, PropertyRoute } from '../../../../Framework/Signum.React/Scripts/Reflection'
 import * as Navigator from '../../../../Framework/Signum.React/Scripts/Navigator'
 import { TypeContext, FormGroupStyle } from '../../../../Framework/Signum.React/Scripts/TypeContext'
 import { Expression, ExpressionOrValue, DesignerContext, DesignerNode } from './NodeUtils'
@@ -153,6 +153,7 @@ export class FieldComponent extends React.Component<FieldComponentProps, void> {
         else
             (node as any)[this.props.member] = sender.value;
 
+
         this.props.dn.context.refreshView();
     }
     
@@ -201,15 +202,20 @@ export class DesignFindOptions extends React.Component<DesignFindOptionsProps, v
 export class DynamicViewInspector extends React.Component<{ selectedNode?: DesignerNode<BaseNode> }, void>{
     render() {
 
-        if (!this.props.selectedNode)
+        const sn = this.props.selectedNode;
+
+        if (!sn)
             return <h4>{DynamicViewMessage.SelectANodeFirst.niceToString()}</h4>;
 
-        const error = NodeUtils.validate(this.props.selectedNode);
+        const error = NodeUtils.validate(sn);
 
         return (<div className="form-sm form-horizontal">
-            <h3>{this.props.selectedNode.node.kind}</h3>
+            <h4>
+                {sn.node.kind}
+                {sn.route && <small> ({Finder.getTypeNiceName(sn.route.typeReference())})</small>}
+            </h4>
             {error && <div className="alert alert-danger">{error}</div>}
-            {NodeUtils.renderDesigner(this.props.selectedNode)}
+            {NodeUtils.renderDesigner(sn)}
         </div>);
     }
 }

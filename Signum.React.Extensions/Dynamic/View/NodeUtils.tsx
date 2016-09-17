@@ -67,30 +67,37 @@ export class DesignerNode<N extends BaseNode> {
         res.node = node;
         res.route = this.fixRoute();
         const lbn = node as BaseNode as LineBaseNode;
-        if (lbn.field && res.route) {
-            try {
-                res.route = res.route.addMember({ name: lbn.field, type: LambdaMemberType.Member });
-            } catch (e) {
-                res.route = undefined;
-            }
-        }
+        if (lbn.field && res.route)
+            res.route = res.route.tryAddMember({ name: lbn.field, type: LambdaMemberType.Member });
+
         return res;
     }
 
+    refresh() {
+        if (this.parent == undefined)
+            return this;
+
+        return this.parent.createChild(this.node);
+    }
+
     fixRoute(): PropertyRoute | undefined {
-        if (!this.route)
+        let res = this.route;
+
+        if (!res)
             return undefined;
 
-        let res = this.route;
         const options = registeredNodes[this.node.kind];
         if (options.hasCollection)
-            res = res.addMember({ name: "", type: LambdaMemberType.Indexer });
+            res = res.tryAddMember({ name: "", type: LambdaMemberType.Indexer });
+
+        if (!res)
+            return undefined;
 
         if (options.hasEntity)
         {
             const tr = res.typeReference();
             if (tr.isLite)
-                res = res.addMember({ name: "entity", type: LambdaMemberType.Member });
+                res = res.tryAddMember({ name: "entity", type: LambdaMemberType.Member });
         }
         return res;
     }
@@ -126,7 +133,7 @@ export function render(dn: DesignerNode<BaseNode>, ctx: TypeContext<ModifiableEn
 
         const sn = dn.context.getSelectedNode();
 
-        if (sn && sn.node == dn.node)
+        if (sn && sn.node == dn.node && registeredNodes[sn.node.kind].avoidHighlight != true)
             return (
                 <div style={{ border: "1px solid #337ab7", borderRadius: "2px" }}>
                     {registeredNodes[dn.node.kind].render(dn, ctx)}

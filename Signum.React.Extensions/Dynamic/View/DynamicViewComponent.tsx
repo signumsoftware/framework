@@ -30,7 +30,7 @@ export default class DynamicViewComponent extends React.Component<DynamicViewCom
 
         var context = {
             onClose: this.handleClose,
-            refreshView: () => this.forceUpdate(),
+            refreshView: () => { this.changeState(s => s.selectedNode = s.selectedNode.refresh()); },
             getSelectedNode: () => this.state.isDesignerOpen ? this.state.selectedNode : undefined,
             setSelectedNode: (newNode) => this.changeState(s => s.selectedNode = newNode)
         } as DesignerContext;

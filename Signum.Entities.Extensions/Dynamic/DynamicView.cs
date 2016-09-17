@@ -42,7 +42,7 @@ namespace Signum.Entities.Dynamic
         AddSibling,
         Remove,
         SelectATypeOfComponent,
-        SelectANodeFirst
+        SelectANodeFirst,
     }
 
     public enum DynamicViewValidationMessage
