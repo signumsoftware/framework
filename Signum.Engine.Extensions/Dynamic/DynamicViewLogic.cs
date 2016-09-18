@@ -36,6 +36,12 @@ namespace Signum.Engine.Dynamic
                         e.EntityType,
                     });
 
+
+                new Graph<DynamicViewEntity>.Construct(DynamicViewOperation.Create)
+                {
+                    Construct = (_) => new DynamicViewEntity(),
+                }.Register();
+
                 new Graph<DynamicViewEntity>.ConstructFrom<DynamicViewEntity>(DynamicViewOperation.Clone)
                 {
                     Construct = (e, _) => new DynamicViewEntity()
