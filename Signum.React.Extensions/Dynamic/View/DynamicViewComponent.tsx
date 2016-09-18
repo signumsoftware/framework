@@ -144,19 +144,20 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
         );
     }
 
+
+
+    reload(entity: DynamicViewEntity) {
+        this.changeState(s => s.viewNames = undefined);
+        this.props.onReload(entity);
+    }
+
     handleSave = () => {
 
         this.props.dynamicView.viewContent = JSON.stringify(this.props.rootNode.node);
 
         Operations.API.executeEntity(this.props.dynamicView, DynamicViewOperation.Save)
-            .then(pack => { this.props.onReload(pack.entity); return EntityOperations.notifySuccess(); })
+            .then(pack => { this.reload(pack.entity); return EntityOperations.notifySuccess(); })
             .done();
-    }
-
-
-    reload(entity: DynamicViewEntity) {
-        this.props.onReload(entity);
-        this.changeState(s => s.viewNames = undefined);
     }
 
     handleCreate = () => {
@@ -207,7 +208,7 @@ class DynamicViewDesigner extends React.Component<DynamicViewDesignerProps, { vi
                 <DropdownButton title=" … " id="bg-nested-dropdown" onToggle={this.handleOnToggle} bsSize="sm">
                     {operations[DynamicViewOperation.Create.key] && <MenuItem eventKey="create" onSelect={this.handleCreate}>{operations[DynamicViewOperation.Create.key].niceName}</MenuItem>}
                     {operations[DynamicViewOperation.Clone.key] && !this.props.dynamicView.isNew && <MenuItem eventKey="clone" onSelect={this.handleClone}>{operations[DynamicViewOperation.Clone.key].niceName}</MenuItem>}
-                    {this.state.viewNames && <MenuItem divider={true} />}
+                    {this.state.viewNames && this.state.viewNames.length > 0 && <MenuItem divider={true} />}
                     {this.state.viewNames && this.state.viewNames.map(vn => <MenuItem key={vn}
                         eventKey={"view-" + vn}
                         className={classes("sf-dynamic-view", vn == this.props.dynamicView.viewName && "active")}
