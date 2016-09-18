@@ -31,6 +31,7 @@ namespace Signum.Entities.Dynamic
     [AutoInit]
     public static class DynamicViewOperation
     {
+        public static readonly ConstructSymbol<DynamicViewEntity>.Simple Create;
         public static readonly ConstructSymbol<DynamicViewEntity>.From<DynamicViewEntity> Clone;
         public static readonly ExecuteSymbol<DynamicViewEntity> Save;
         public static readonly DeleteSymbol<DynamicViewEntity> Delete;
@@ -42,7 +43,7 @@ namespace Signum.Entities.Dynamic
         AddSibling,
         Remove,
         SelectATypeOfComponent,
-        SelectANodeFirst,
+        SelectANodeFirst
     }
 
     public enum DynamicViewValidationMessage

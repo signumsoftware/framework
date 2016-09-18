@@ -66,7 +66,7 @@ export class DesignerNode<N extends BaseNode> {
         res.context = this.context;
         res.node = node;
         res.route = this.fixRoute();
-        const lbn = node as BaseNode as LineBaseNode;
+        const lbn = node as LineBaseNode;
         if (lbn.field && res.route)
             res.route = res.route.tryAddMember({ name: lbn.field, type: LambdaMemberType.Member });
 

@@ -26,7 +26,7 @@ export function start(options: { routes: JSX.Element[] }) {
             return new ViewPromise(resolve => require(['../../../Framework/Signum.React/Scripts/Lines/DynamicComponent'], resolve));
 
         return new ViewPromise(resolve => require(['./View/DynamicViewComponent'], resolve))
-            .withProps(getOrCreateDynamicView(mod.Type).then(dv => ({ dynamicView: dv })));
+            .withProps(getOrCreateDynamicView(mod.Type).then(dv => ({ initialDynamicView : dv })));
     });
 }
 
@@ -60,7 +60,8 @@ export namespace API {
         return ajaxGet<DynamicViewEntity | null>({ url });
     }
 
-
-   
+    export function getDynamicViewNames(typeName: string): Promise<string[]> {
+        return ajaxGet<string[]>({ url: `~/api/dynamic/viewNames/${typeName}`  });
+    }
 }
 
