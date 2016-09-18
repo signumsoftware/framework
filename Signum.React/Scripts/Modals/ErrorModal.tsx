@@ -4,9 +4,9 @@ import { Modal, ModalProps, ModalClass, ButtonToolbar } from 'react-bootstrap'
 import * as Finder from '../Finder'
 import { openModal, IModalProps } from '../Modals';
 import * as Navigator from '../Navigator';
-import { classes } from '../Globals';
-import { ServiceError, WebApiHttpError } from '../Services';
-import { SearchMessage, JavascriptMessage, Lite, Entity } from '../Signum.Entities'
+import { classes, Dic } from '../Globals';
+import { ServiceError, WebApiHttpError, ValidationError } from '../Services';
+import { SearchMessage, JavascriptMessage, Lite, Entity, NormalWindowMessage } from '../Signum.Entities'
 import { ExceptionEntity } from '../Signum.Entities.Basics'
 
 require("!style!css!./Modals.css");
@@ -44,15 +44,20 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         const e = this.props.error;
 
         const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
+        const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
         return (
             <Modal onHide={this.handleCloseClicked} show={this.state.show} onExited={this.handleOnExited}>
                 <Modal.Header closeButton={true} className="dialog-header-error">
-                    {this.renderTitle(e, se) }
+                    {se ? this.renderServiceTitle(se) :
+                        ve ? this.renderValidationTitle(ve) :
+                            this.renderTitle(se)}
                 </Modal.Header>
 
                 <Modal.Body>
-                    { this.renderMessage(e, se) }
+                    {se ? this.renderServiceMessage(se) :
+                        ve ? this.renderValidationeMessage(ve) :
+                            this.renderMessage(se)}
 
                     {
                         se && se.httpError.StackTrace &&
@@ -61,8 +66,6 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
                             {this.state.showDetails && <pre>{se.httpError.StackTrace}</pre>}
                         </div>
                     }
-
-
                 </Modal.Body>
 
                 <Modal.Footer>
@@ -73,24 +76,27 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
         );
     }
 
-    renderTitle(e: any, se: ServiceError | undefined) {
-        if (se == undefined || se.httpError.ExceptionType == undefined)
+    renderTitle(e: any) {
             return <h4 className="modal-title text-danger"><span className="glyphicon glyphicon-alert"></span> Error </h4>;
+    }
 
+    renderServiceTitle(se: ServiceError) {
         return (<h4 className="modal-title text-danger">
-            <span className={classes("glyphicon", se.defaultIcon) }></span>&nbsp; <span>{se.httpError.ExceptionType }</span>
+            <span className={classes("glyphicon", se.defaultIcon)}></span>&nbsp; <span>{se.httpError.ExceptionType}</span>
             ({
                 Navigator.isViewable(ExceptionEntity) ?
-                    <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID!) }>{se.httpError.ExceptionID}</a> :
+                    <a href={Navigator.navigateRoute(ExceptionEntity, se.httpError.ExceptionID!)}>{se.httpError.ExceptionID}</a> :
                     <strong>{se.httpError.ExceptionID}</strong>
             })
         </h4>);
     }
 
-    renderMessage(e: any, se: ServiceError | undefined) {
-        if (se == undefined)
-            return <p className="text-danger"> { e.message ? e.message : e }</p>;
 
+    renderValidationTitle(ve: ValidationError) {
+        return <h4 className="modal-title text-danger"><span className="glyphicon glyphicon-alert"></span> {NormalWindowMessage.ThereAreErrors.niceToString()} </h4>;
+    }
+
+    renderServiceMessage(se: ServiceError) {
         return (
             <div>
                 {se.httpError.Message && <p className="text-danger">{se.httpError.Message}</p>}
@@ -98,6 +104,18 @@ export default class ErrorModal extends React.Component<ErrorModalProps, { showD
                 {se.httpError.MessageDetail && <p className="text-danger">{se.httpError.MessageDetail}</p>}
             </div>
         );
+    }
+
+    renderValidationeMessage(ve: ValidationError) {
+        return (
+            <div>
+                {<p className="text-danger">{Dic.getValues(ve.modelState).join("\n")}</p>}
+            </div>
+        );
+    }
+
+    renderMessage(e: any) {
+        return <p className="text-danger"> {e.message ? e.message : e}</p>;
     }
 
     static showError(error: any): Promise<void> {
