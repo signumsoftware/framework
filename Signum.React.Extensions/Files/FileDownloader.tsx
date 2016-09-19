@@ -7,195 +7,40 @@ import * as Constructor from '../../../Framework/Signum.React/Scripts/Constructo
 import * as Finder from '../../../Framework/Signum.React/Scripts/Finder'
 import { FindOptions } from '../../../Framework/Signum.React/Scripts/FindOptions'
 import { TypeContext, StyleContext, StyleOptions, FormGroupStyle } from '../../../Framework/Signum.React/Scripts/TypeContext'
-import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, basicConstruct } from '../../../Framework/Signum.React/Scripts/Reflection'
-import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks} from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
-import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString, } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
+import { PropertyRoute, PropertyRouteType, MemberInfo, getTypeInfo, getTypeInfos, TypeInfo, IsByAll, basicConstruct, getTypeName } from '../../../Framework/Signum.React/Scripts/Reflection'
+import { LineBase, LineBaseProps, FormGroup, FormControlStatic, runTasks } from '../../../Framework/Signum.React/Scripts/Lines/LineBase'
+import { ModifiableEntity, Lite, Entity, EntityControlMessage, JavascriptMessage, toLite, is, liteKey, getToString } from '../../../Framework/Signum.React/Scripts/Signum.Entities'
 import { IFile, IFilePath, FileMessage, FileTypeSymbol, FileEntity, FilePathEntity, EmbeddedFileEntity, EmbeddedFilePathEntity } from './Signum.Entities.Files'
 import Typeahead from '../../../Framework/Signum.React/Scripts/Lines/Typeahead'
 import { EntityBase, EntityBaseProps} from '../../../Framework/Signum.React/Scripts/Lines/EntityBase'
 
 require("!style!css!./Files.css");
 
-export { FileTypeSymbol };
 
-export interface FileLineProps extends EntityBaseProps {
-    ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>;
-    download?: DownloadBehaviour;
-    dragAndDrop?: boolean;
-    dragAndDropMessage?: string;
-    fileType?: FileTypeSymbol;
-    accept?: string;
-    configuration?: FileDownloaderConfiguration<IFile>;
-}
-
-
-export interface FileLineState extends FileLineProps {
-    isLoading?: boolean;
-    isOver?: boolean;
-}
-
-export default class FileLine extends EntityBase<FileLineProps, FileLineState> {
-
-    static defaultProps = {
-        download: DownloadBehaviour.SaveAs,
-        dragAndDrop: true
-    }
-
-    calculateDefaultState(state: FileLineProps) {
-        super.calculateDefaultState(state);
-        state.configuration = FileLine.configurtions[state.type!.name];
-    }
-
-    componentWillMount() {
-
-        if (!this.state.configuration)
-            throw new Error(`No FileLineConfiguration found for '${this.state.type!.name}'`)
-
-        const ctx = this.state.ctx;
-        if (ctx.value && (ctx.value as Lite<IFile & Entity>).EntityType)
-            Navigator.API.fetchAndRemember(ctx.value as Lite<IFile & Entity>)
-                .then(() => this.forceUpdate())
-                .done();
-
-    }
-
-    renderInternal() {
-
-        const s = this.state;
-
-        const hasValue = !!s.ctx.value;
-
-        return (
-            <FormGroup ctx={s.ctx} labelText={s.labelText} labelProps={s.labelHtmlProps} htmlProps={Dic.extend(this.baseHtmlProps(), EntityBase.entityHtmlProps(s.ctx.value), s.formGroupHtmlProps) }>
-                {hasValue ? this.renderFile() : this.renderPlaceholder() }
-            </FormGroup>
-        );
-    }
-
-
-    renderFile() {
-
-        const val = this.state.ctx.value;
-        const entity = (val as Lite<IFile & Entity>).EntityType ?
-            (val as Lite<IFile & Entity>).entity :
-            (val as IFile & Entity);
-
-        return (
-            <div className="input-group">
-                {
-                    entity == undefined ? <span className="form-control file-control">{JavascriptMessage.loading.niceToString() }</span> :
-                        this.state.download == DownloadBehaviour.None || entity.isNew ? <span className="form-control file-control">{entity.fileName}</span> :
-                            this.renderLink(entity)
-                }
-                <span className="input-group-btn">
-                    {this.renderRemoveButton(true) }
-                </span>
-            </div>
-        );
-    }
-
-
-    
-
-
-    handleDragOver = (e: React.DragEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-        this.changeState(s=>s.isOver = true);
-    }
-
-    handleDragLeave = (e: React.DragEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-        this.changeState(s=>s.isOver = false);
-    }
-
-    handleDrop = (e: React.DragEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-        this.changeState(s => {
-            s.isOver = false;
-            s.isLoading = true;
-        });
-        const file = e.dataTransfer.files[0];
-
-        this.uploadFile(file);
-    }
-
-    handleFileChange = (e: React.FormEvent) => {
-        e.preventDefault();
-        this.changeState(s => {
-            s.isOver = false;
-            s.isLoading = true;
-        });
-
-        this.uploadFile((e.target as HTMLInputElement).files![0]);
-    }
-
-    uploadFile(file: File) {
-        const fileReader = new FileReader();
-        fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
-        fileReader.onload = e => {
-            const newEntity = basicConstruct(this.state.type!.name) as ModifiableEntity & IFile;
-            newEntity.fileName = file.name;
-            newEntity.binaryFile = ((e.target as any).result as string).after("base64,");
-
-            if (this.state.fileType)
-                (newEntity as any as IFilePath).fileType = this.state.fileType;
-
-            this.convert(newEntity).then(e => {
-                this.setValue(e);
-                this.changeState(s => s.isLoading = false);
-            }).done();
-        };
-        fileReader.readAsDataURL(file);
-    }
-
-    renderPlaceholder() {
-
-        return (
-            <div className="sf-file-line-new">
-                <input type='file' className='form-control' accept={this.props.accept} onChange={this.handleFileChange}/>
-                {this.state.isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString() }</div> :
-                    (this.state.dragAndDrop && <div className={classes("sf-file-drop", this.state.isOver ? "sf-file-drop-over" : undefined)}
-                        onDragEnter={this.handleDragOver}
-                        onDragOver={this.handleDragOver}
-                        onDragLeave={this.handleDragLeave}
-                        onDrop={this.handleDrop}
-                        >
-                        {this.state.dragAndDropMessage || FileMessage.DragAndDropHere.niceToString() }
-                    </div>)
-                }
-            </div>
-        );
-    }
-
-  
-}
-
-export enum DownloadBehaviour {
-    SaveAs,
-    View,
-    None
-}
+export type DownloadBehaviour = "SaveAs" | "View" | "None";
 
 export interface FileDownloaderProps {
-    ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>;
-    download: DownloadBehaviour;
+    entityOrLite: ModifiableEntity & IFile | Lite<IFile & Entity>;
+    download?: DownloadBehaviour;
     configuration?: FileDownloaderConfiguration<IFile>;
+    htmlProps: React.HTMLAttributes;
 }
 
+export default class FileDownloader extends React.Component<FileDownloaderProps, void> {
 
-export interface FileDownloaderState {
-    configuration?: FileDownloaderConfiguration<IFile>;
-}
-
-export class FileDownloader extends React.Component<FileDownloaderProps, {}>{
     static configurtions: { [typeName: string]: FileDownloaderConfiguration<IFile> } = {};
 
 
     static defaultProps = {
-        download: DownloadBehaviour.SaveAs,
+        download: "SaveAs",
+    }
+
+    componentWillMount() {
+        const entityOrLite = this.props.entityOrLite;
+        if (entityOrLite && (entityOrLite as Lite<IFile & Entity>).EntityType)
+            Navigator.API.fetchAndRemember(entityOrLite as Lite<IFile & Entity>)
+                .then(() => this.forceUpdate())
+                .done();
     }
 
     handleDownloadClick = (e: React.MouseEvent, url: string) => {
@@ -205,16 +50,35 @@ export class FileDownloader extends React.Component<FileDownloaderProps, {}>{
             .done();
     };
 
-    render(entity: IFile) {
+    render() {
 
-        const dl = this.state.configuration!.downloadLink(entity);
+        const entityOrLite = this.props.entityOrLite;
+
+        const entity = (entityOrLite as Lite<IFile & Entity>).EntityType ?
+            (entityOrLite as Lite<IFile & Entity>).entity :
+            (entityOrLite as IFile & Entity);
+
+        if (!entity)
+            return <span {...this.props.htmlProps}>{JavascriptMessage.loading.niceToString()}</span>;
+
+
+        const configuration = this.props.configuration || FileDownloader.configurtions[entity.Type];
+
+        if (!configuration)
+            throw new Error("No configuration registered in FileDownloader.configurations for "); 
+
+        const dl = entity.binaryFile ?
+            { url: "data:application/octet-stream;base64," + entity.binaryFile, requiresToken: false } as DownloadLinkResult :
+            configuration.downloadLink(entity);
+
 
         return (
-            <a className="form-control file-control"
+            <a
                 onClick={dl.requiresToken ? ((e) => this.handleDownloadClick(e, dl.url)) : undefined}
-                download={this.state.download == DownloadBehaviour.View ? undefined : entity.fileName}
-                href={dl.requiresToken ? "#" : dl.url}
-                title={entity.fileName || undefined}>
+                download={this.props.download == "View" ? undefined : entity.fileName }
+                href={dl.requiresToken ? "" : dl.url}
+                title={entity.fileName || undefined}
+                {...this.props.htmlProps}>
                 {entity.fileName}
             </a>
         );
@@ -223,29 +87,29 @@ export class FileDownloader extends React.Component<FileDownloaderProps, {}>{
 }
 
 
-interface FileDownloaderConfiguration<T extends IFile> {
+export interface FileDownloaderConfiguration<T extends IFile> {
     downloadLink: (entity: T) => DownloadLinkResult;
 }
 
-interface DownloadLinkResult {
+export interface DownloadLinkResult {
     url: string;
     requiresToken: boolean;
 }
 
 
-FileLine.configurtions[FileEntity.typeName] = {
+FileDownloader.configurtions[FileEntity.typeName] = {
     downloadLink: e => ({ url: Navigator.currentHistory.createHref("~/api/files/downloadFile/" + e.id.toString()), requiresToken: true })
 } as FileDownloaderConfiguration<FileEntity>;
 
-FileLine.configurtions[FilePathEntity.typeName] = {
+FileDownloader.configurtions[FilePathEntity.typeName] = {
     downloadLink: e => ({ url: Navigator.currentHistory.createHref("~/api/files/downloadFilePath/" + e.id.toString()), requiresToken: true })
 } as FileDownloaderConfiguration<FilePathEntity>;
 
-FileLine.configurtions[EmbeddedFileEntity.typeName] = {
+FileDownloader.configurtions[EmbeddedFileEntity.typeName] = {
     downloadLink: e => ({ url: "data:application/octet-stream;base64," + e.binaryFile, requiresToken: false })
 } as FileDownloaderConfiguration<EmbeddedFileEntity>;
 
-FileLine.configurtions[EmbeddedFilePathEntity.typeName] = {
+FileDownloader.configurtions[EmbeddedFilePathEntity.typeName] = {
     downloadLink: e => ({
         url: Navigator.currentHistory.createHref({
             pathname: "~/api/files/downloadEmbeddedFilePath/" + e.fileType!.key,
