@@ -175,18 +175,18 @@ function typeIsCreable(typeName: string): EntityWhen {
     if (typeInfo == undefined)
         return "IsLine";
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return "Never";
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return "Never";
-        case EntityKind.System: return "Never";
-        case EntityKind.Relational: return "Never";
-        case EntityKind.String: return "IsSearch";
-        case EntityKind.Shared: return "Always";
-        case EntityKind.Main: return "IsSearch";
-        case EntityKind.Part: return "IsLine";
-        case EntityKind.SharedPart: return "IsLine";
+        case "SystemString": return "Never";
+        case "System": return "Never";
+        case "Relational": return "Never";
+        case "String": return "IsSearch";
+        case "Shared": return "Always";
+        case "Main": return "IsSearch";
+        case "Part": return "IsLine";
+        case "SharedPart": return "IsLine";
         default: return "Never";
     }
 }
@@ -216,18 +216,18 @@ function typeIsReadOnly(typeName: string): boolean {
     if (typeInfo == undefined)
         return false;
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return true;
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return true;
-        case EntityKind.System: return true;
-        case EntityKind.Relational: return true;
-        case EntityKind.String: return false;
-        case EntityKind.Shared: return false;
-        case EntityKind.Main: return false;
-        case EntityKind.Part: return false;
-        case EntityKind.SharedPart: return false;
+        case "SystemString": return true;
+        case "System": return true;
+        case "Relational": return true;
+        case "String": return false;
+        case "Shared": return false;
+        case "Main": return false;
+        case "Part": return false;
+        case "SharedPart": return false;
         default: return false;
     }
 }
@@ -254,18 +254,18 @@ function typeIsFindable(typeName: string) {
     if (typeInfo == undefined)
         return false;
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return true;
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return true;
-        case EntityKind.System: return true;
-        case EntityKind.Relational: return false;
-        case EntityKind.String: return true;
-        case EntityKind.Shared: return true;
-        case EntityKind.Main: return true;
-        case EntityKind.Part: return false;
-        case EntityKind.SharedPart: return true;
+        case "SystemString": return true;
+        case "System": return true;
+        case "Relational": return false;
+        case "String": return true;
+        case "Shared": return true;
+        case "Main": return true;
+        case "Part": return false;
+        case "SharedPart": return true;
         default: return false;
     }
 }
@@ -301,18 +301,18 @@ function typeIsViewable(typeName: string): boolean {
     if (typeInfo == undefined)
         return true;
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return false;
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return false;
-        case EntityKind.System: return true;
-        case EntityKind.Relational: return false;
-        case EntityKind.String: return false;
-        case EntityKind.Shared: return true;
-        case EntityKind.Main: return true;
-        case EntityKind.Part: return true;
-        case EntityKind.SharedPart: return true;
+        case "SystemString": return false;
+        case "System": return true;
+        case "Relational": return false;
+        case "String": return false;
+        case "Shared": return true;
+        case "Main": return true;
+        case "Part": return true;
+        case "SharedPart": return true;
         default: return true;
     }
 }
@@ -343,18 +343,18 @@ function typeIsNavigable(typeName: string): EntityWhen {
     if (typeInfo == undefined)
         return "Never";
 
-    if (typeInfo.kind == KindOfType.Enum)
+    if (typeInfo.kind == "Enum")
         return "Never";
 
     switch (typeInfo.entityKind) {
-        case EntityKind.SystemString: return "Never";
-        case EntityKind.System: return "Always";
-        case EntityKind.Relational: return "Never";
-        case EntityKind.String: return "IsSearch";
-        case EntityKind.Shared: return "Always";
-        case EntityKind.Main: return "Always";
-        case EntityKind.Part: return "Always";
-        case EntityKind.SharedPart: return "Always";
+        case "SystemString": return "Never";
+        case "System": return "Always";
+        case "Relational": return "Never";
+        case "String": return "IsSearch";
+        case "Shared": return "Always";
+        case "Main": return "Always";
+        case "Part": return "Always";
+        case "SharedPart": return "Always";
         default: return "Never";
     }
 }
@@ -705,7 +705,7 @@ export function tryConvert(value: any, type: TypeReference): Promise<any> | unde
         return undefined;
     }
 
-    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == KindOfType.Entity) {
+    if (getTypeInfo(type.name) && getTypeInfo(type.name).kind == "Entity") {
 
         if (isLite(value))
             return API.fetchAndForget(value);

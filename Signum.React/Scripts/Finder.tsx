@@ -278,7 +278,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription)
         if (qd.columns[defaultOrder]) {
             fo.orderOptions = [{
                 columnName: defaultOrder,
-                orderType: tis.some(a => a.entityData == EntityData.Transactional) ? "Descending" as OrderType : "Ascending" as OrderType
+                orderType: tis.some(a => a.entityData == "Transactional") ? "Descending" as OrderType : "Ascending" as OrderType
             }];
         }
     }
