@@ -67,7 +67,7 @@ export class DesignerNode<N extends BaseNode> {
         const lbn = node as BaseNode as LineBaseNode;
         if (lbn.field)
             lbn.field.split(".").forEach(p =>
-                res.route = res.route.addMember({ name: p, type: LambdaMemberType.Member })
+                res.route = res.route.addMember({ name: p, type: "Member" })
             );
         return res;
     }
@@ -76,13 +76,13 @@ export class DesignerNode<N extends BaseNode> {
         let res = this.route;
         const options = registeredNodes[this.node.kind];
         if (options.hasCollection)
-            res = res.addMember({ name: "", type: LambdaMemberType.Indexer });
+            res = res.addMember({ name: "", type: "Indexer" });
 
         if (options.hasEntity)
         {
             const tr = res.typeReference();
             if (tr.isLite)
-                res = res.addMember({ name: "entity", type: LambdaMemberType.Member });
+                res = res.addMember({ name: "entity", type: "Member" });
         }
         return res;
     }

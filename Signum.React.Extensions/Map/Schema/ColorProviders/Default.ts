@@ -14,29 +14,29 @@ export default function getDefaultProviders(info: SchemaMapInfo): ClientColorPro
     };
 
 
-    const f: { [ek: number]: string } = {};
+    const f: { [ek: string]: string } = {};
 
-    f[EntityKind.SystemString] = "#8c564b";
-    f[EntityKind.System] = "#7f7f7f";
-    f[EntityKind.Relational] = "#17becf";
-    f[EntityKind.String] = "#e377c2";
-    f[EntityKind.Shared] = "#2ca02c";
-    f[EntityKind.Main] = "#d62728";
-    f[EntityKind.Part] = "#ff7f0e";
-    f[EntityKind.SharedPart] = "#bcbd22";
+    f["SystemString"] = "#8c564b";
+    f["System"] = "#7f7f7f";
+    f["Relational"] = "#17becf";
+    f["String"] = "#e377c2";
+    f["Shared"] = "#2ca02c";
+    f["Main"] = "#d62728";
+    f["Part"] = "#ff7f0e";
+    f["SharedPart"] = "#bcbd22";
 
     const entityKind: ClientColorProvider = {
         name: "entityKind",
         getFill: t => f[t.entityKind],
-        getTooltip: t => EntityKind[t.entityKind]
+        getTooltip: t => t.entityKind
     };
 
 
     const entityData: ClientColorProvider = {
         name: "entityData",
-        getFill: t => t.entityData == EntityData.Master ? "#2ca02c" :
-            t.entityData == EntityData.Transactional ? "#d62728" : "black",
-        getTooltip: t => EntityData[t.entityData]
+        getFill: t => t.entityData == "Master" ? "#2ca02c" :
+            t.entityData == "Transactional" ? "#d62728" : "black",
+        getTooltip: t => t.entityData
     };
 
     const rowsColor = colorScaleSqr(info.tables.map(a => a.rows).max());

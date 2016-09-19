@@ -109,7 +109,7 @@ export function onOperationAuthorized(oi: OperationInfo) {
 
 export function taskAuthorizeProperties(lineBase: LineBase<LineBaseProps, LineBaseProps>, state: LineBaseProps) {
     if (state.ctx.propertyRoute &&
-        state.ctx.propertyRoute.propertyRouteType == PropertyRouteType.Field) {
+        state.ctx.propertyRoute.propertyRouteType == "Field") {
 
         const member = state.ctx.propertyRoute.member;
 

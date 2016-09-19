@@ -485,7 +485,7 @@ export namespace NodeConstructor {
         const ti = tis.firstOrNull();
 
         if (tr.isCollection) {
-            if (tr.isEmbedded || ti!.entityKind == EntityKind.Part || ti!.entityKind == EntityKind.SharedPart)
+            if (tr.isEmbedded || ti!.entityKind == "Part" || ti!.entityKind == "SharedPart")
                 return { kind: "EntityRepeater", field, children: [] } as EntityRepeaterNode;
             else if (ti!.isLowPopulation)
                 return { kind: "EntityCheckboxList", field, children: [] } as EntityCheckboxListNode;
@@ -497,10 +497,10 @@ export namespace NodeConstructor {
             return { kind: "EntityLine", field, children: [] } as EntityLineNode;
 
         if (ti) {
-            if (ti.kind == KindOfType.Enum)
+            if (ti.kind == "Enum")
                 return { kind: "ValueLine", field } as ValueLineNode;
 
-            if (ti.entityKind == EntityKind.Part || ti.entityKind == EntityKind.SharedPart)
+            if (ti.entityKind == "Part" || ti.entityKind == "SharedPart")
                 return { kind: "EntityDetail", field, children: [] } as EntityDetailNode;
 
             if (ti.isLowPopulation)
