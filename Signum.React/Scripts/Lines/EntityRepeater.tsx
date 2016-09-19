@@ -15,7 +15,7 @@ import { EntityListBase, EntityListBaseProps } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
-    createAsLink?: boolean;
+    createAsLink?: boolean | ((er: EntityRepeater) => React.ReactElement<any>);
 }
 
 export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRepeaterProps> {
@@ -30,7 +30,7 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
 
         const buttons = (
             <span className="pull-right">
-                {!this.state.createAsLink && this.renderCreateButton(false) }
+                {this.state.createAsLink == false && this.renderCreateButton(false) }
                 {this.renderFindButton(false) }
             </span>
         );
@@ -59,11 +59,12 @@ export class EntityRepeater extends EntityListBase<EntityRepeaterProps, EntityRe
                     }
                     {
                         this.state.createAsLink && this.state.create && !readOnly &&
-                        <a title={EntityControlMessage.Create.niceToString() }
-                            className="sf-line-button sf-create"
-                            onClick={this.handleCreateClick}>
-                            <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString() }
-                        </a>
+                            (typeof this.state.createAsLink == "function" ? this.state.createAsLink(this) :
+                            <a title={EntityControlMessage.Create.niceToString()}
+                                className="sf-line-button sf-create"
+                                onClick={this.handleCreateClick}>
+                                <span className="glyphicon glyphicon-plus" style={{ marginRight: "5px" }}/>{EntityControlMessage.Create.niceToString()}
+                            </a> )
                     }
                 </div>
             </fieldset>
