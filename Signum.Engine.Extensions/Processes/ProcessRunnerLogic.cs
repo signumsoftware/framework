@@ -237,7 +237,7 @@ namespace Signum.Engine.Processes
                                                 executingProcess.TakeForThisMachine();
 
                                                 using (ExecutionContext.SuppressFlow())
-                                                    Task.Factory.StartNew(() =>
+                                                    Task.Run(() =>
                                                     {
                                                         try
                                                         {
