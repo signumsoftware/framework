@@ -879,6 +879,14 @@ export class PropertyRoute {
         }
     }
 
+    tryAddMember(member: LambdaMember): PropertyRoute | undefined {
+        try {
+            return this.addMember(member);
+        } catch (e) {
+            return undefined;
+        }
+    }
+
     addMember(member: LambdaMember): PropertyRoute {
 
         if (member.type == "Member") {
