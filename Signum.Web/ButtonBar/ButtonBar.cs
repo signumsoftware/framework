@@ -6,7 +6,8 @@ using Signum.Utilities;
 using System.Web.Mvc;
 using System.Web;
 using Signum.Entities;
- 
+using Signum.Entities.Reflection;
+
 namespace Signum.Web
 {
     public class EntityButtonContext
@@ -41,9 +42,14 @@ namespace Signum.Web
 
             links.AddRange(globalButtons.SelectMany(a => a(ctx, entity) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
 
-            List<Delegate> list = entityButtons.TryGetC(entity.GetType());
-            if (list != null)
-                links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(ctx, entity)) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
+            var types = entity.GetType().GetParentUntil(typeof(Entity));
+
+            foreach (var type in types)
+            {
+                List<Delegate> list = entityButtons.TryGetC(type);
+                if (list != null)
+                    links.AddRange(list.SelectMany(a => ((ToolBarButton[])a.DynamicInvoke(ctx, entity)) ?? Enumerable.Empty<ToolBarButton>()).NotNull());
+            }
 
             return links.OrderBy(a => a.Order).ToList();
         }

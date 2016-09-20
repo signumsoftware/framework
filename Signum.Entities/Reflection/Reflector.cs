@@ -507,5 +507,23 @@ namespace Signum.Entities.Reflection
 
             return str.Length;
         }
+
+
+        public static List<Type> GetParentUntil(this Type child, Type parent, List<Type>list= null)
+        {
+            if (list == null)
+                list = new List<Type>();
+
+            list.Add(child);
+            if (child == parent)
+                return list;
+
+            var bt = child.BaseType;
+            if (bt == null)
+                return new List<Type>();
+
+            return GetParentUntil(bt, parent, list);
+        }
+
     }
 }
