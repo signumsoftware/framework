@@ -57,9 +57,9 @@ export function isFindable(queryName: PseudoType | QueryKey): boolean {
     return isFindableEvent.every(f=> f(queryKey));
 }
 
-export function find(findOptions: FindOptions): Promise<Lite<Entity>>;
-export function find<T extends Entity>(type: Type<T>): Promise<Lite<T>>;
-export function find(obj: FindOptions | Type<any>): Promise<Lite<Entity>> {
+export function find(findOptions: FindOptions): Promise<Lite<Entity> | undefined>;
+export function find<T extends Entity>(type: Type<T>): Promise<Lite<T> | undefined>;
+export function find(obj: FindOptions | Type<any>): Promise<Lite<Entity> | undefined> {
 
     const fo = (obj as FindOptions).queryName ? obj as FindOptions :
         { queryName: obj as Type<any> } as FindOptions;
@@ -71,9 +71,9 @@ export function find(obj: FindOptions | Type<any>): Promise<Lite<Entity>> {
     });
 }
 
-export function findMany(findOptions: FindOptions): Promise<Lite<Entity>[]>;
-export function findMany<T extends Entity>(type: Type<T>): Promise<Lite<T>[]>;
-export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Entity>[]> {
+export function findMany(findOptions: FindOptions): Promise<Lite<Entity>[] | undefined>;
+export function findMany<T extends Entity>(type: Type<T>): Promise<Lite<T>[] | undefined>;
+export function findMany(findOptions: FindOptions | Type<any>): Promise<Lite<Entity>[] | undefined> {
 
     const fo = (findOptions as FindOptions).queryName ? findOptions as FindOptions :
         { queryName: findOptions as Type<any> } as FindOptions;

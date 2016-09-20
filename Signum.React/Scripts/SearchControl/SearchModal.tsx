@@ -90,17 +90,17 @@ export default class SearchModal extends React.Component<SearchModalProps, { sho
         );
     }
 
-    static open(findOptions: FindOptions, title?: string): Promise<Lite<Entity>> {
+    static open(findOptions: FindOptions, title?: string): Promise<Lite<Entity> | undefined> {
 
         return openModal<Lite<Entity>[]>(<SearchModal
             findOptions={findOptions}
             findMode={FindMode.Find}
             isMany={false}
-            title={title || getQueryNiceName(findOptions.queryName) } />)
+            title={title || getQueryNiceName(findOptions.queryName)} />)
             .then(a => a ? a[0] : undefined);
     }
 
-    static openMany(findOptions: FindOptions, title?: string): Promise<Lite<Entity>[]> {
+    static openMany(findOptions: FindOptions, title?: string): Promise<Lite<Entity>[] | undefined> {
 
         return openModal<Lite<Entity>[]>(<SearchModal findOptions={findOptions}
             findMode={FindMode.Find}
